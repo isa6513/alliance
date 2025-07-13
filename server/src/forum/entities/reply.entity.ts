@@ -7,12 +7,13 @@ import {
   ManyToOne,
   JoinColumn,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '../../user/user.entity';
 import { Post } from './post.entity';
 import { Notification } from '../../notifs/entities/notification.entity';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 @Entity()
 export class Reply {
@@ -51,6 +52,23 @@ export class Reply {
   @UpdateDateColumn()
   @ApiProperty()
   updatedAt: Date;
+
+  @ManyToOne(() => Reply, (reply) => reply.children, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  @ApiProperty({ type: () => Reply, required: false })
+  parent: Reply | null;
+
+  @Column({ nullable: true })
+  @IsOptional()
+  @ApiPropertyOptional()
+  parentId?: number;
+
+  @OneToMany(() => Reply, (reply) => reply.parent)
+  @ApiProperty({ type: () => [Reply], required: false })
+  children: Reply[];
 
   @OneToOne(() => Notification, {
     onDelete: 'CASCADE',

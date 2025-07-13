@@ -34,7 +34,7 @@ const StripeStyleFormInput: React.FC<FormInputProps> = ({
         text-[15px]  transition-all duration-200 text-black placeholder-[#222]
         ${
           disabled
-            ? "bg-pagebg text-stone-500 cursor-not-allowed"
+            ? "bg-white text-stone-500 cursor-not-allowed"
             : "hover:border-gray-400"
         } 
         ${error ? "focus:border-red-500" : "focus:border-blue-500"}`}

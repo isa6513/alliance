@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router";
-import { PostDto, CreateReplyDto, ReplyDto } from "@alliance/shared/client";
+import { PostDto, CreateReplyDto } from "@alliance/shared/client";
 import { useAuth } from "../../lib/AuthContext";
 import { formatDistanceToNow } from "date-fns";
-import Card from "../../components/system/Card";
+import ReplyForm from "../../components/forum/ReplyForm";
+import ReplyComponent from "../../components/forum/ReplyComponent";
 import {
   forumCreateReply,
   forumFindOnePost,
@@ -15,6 +16,7 @@ const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
   const [post, setPost] = useState<PostDto | null>(null);
   const [replyContent, setReplyContent] = useState("");
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,30 +57,25 @@ const PostDetailPage: React.FC = () => {
       const replyDto: CreateReplyDto = {
         content: replyContent,
         postId: Number(postId),
+        parentId: replyingTo ?? undefined,
       };
+
+      console.log("replyDto", replyDto);
 
       const response = await forumCreateReply({
         body: replyDto,
       });
 
-      // Update post with new reply
-      if (post && response.data) {
-        console.log("new reply data", response.data);
-        const newReply: ReplyDto = response.data;
-        const newReplyI: ReplyDto = {
-          ...newReply,
-          author: newReply.author,
-          postId: newReply.postId,
-        };
-
-        setPost({
-          ...post,
-          replies: [...(post.replies || []), newReplyI],
-          updatedAt: new Date().toISOString(),
+      // Refresh the post to get updated reply hierarchy
+      if (response.data) {
+        const refreshedPost = await forumFindOnePost({
+          path: { id: postId },
         });
+        setPost(refreshedPost.data ?? null);
       }
 
       setReplyContent("");
+      setReplyingTo(null);
       setError(null);
     } catch (err) {
       console.error("Error posting reply:", err);
@@ -107,7 +104,7 @@ const PostDetailPage: React.FC = () => {
   };
 
   const handleDeleteReply = async (replyId: number) => {
-    if (!post) {
+    if (!post || !postId) {
       return;
     }
 
@@ -117,11 +114,11 @@ const PostDetailPage: React.FC = () => {
           path: { id: replyId.toString() },
         });
 
-        // Update post with reply removed
-        setPost({
-          ...post,
-          replies: (post.replies || []).filter((reply) => reply.id !== replyId),
+        // Refresh the post to get updated reply hierarchy
+        const refreshedPost = await forumFindOnePost({
+          path: { id: postId },
         });
+        setPost(refreshedPost.data ?? null);
       } catch (err) {
         console.error("Error deleting reply:", err);
         setError("Failed to delete reply");
@@ -225,66 +222,34 @@ const PostDetailPage: React.FC = () => {
       </div>
 
       {post.replies.length > 0 ? (
-        <>
-          <h2 className="text-xl font-semibold mb-4">Replies</h2>
-          <div className="space-y-4 mb-8">
-            {post.replies.map((reply) => (
-              <Card key={reply.id} className="border-l-4 border-gray-300">
-                <div className="p-4">
-                  <div className="mb-4 whitespace-pre-wrap">
-                    {reply.content}
-                  </div>
-
-                  <div className="flex justify-between text-sm text-gray-500">
-                    <div>
-                      Reply by {reply.author?.name || "Unknown user"}
-                      <span className="ml-2">
-                        {formatDistanceToNow(new Date(reply.createdAt), {
-                          addSuffix: true,
-                        })}
-                      </span>
-                    </div>
-
-                    {user && reply.author.email === user.email && (
-                      <button
-                        onClick={() => handleDeleteReply(reply.id)}
-                        className="text-red-600 hover:underline"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </>
+        <div className="space-y-4 mb-8">
+          {post.replies.map((reply) => (
+            <ReplyComponent
+              key={reply.id}
+              reply={reply}
+              user={user}
+              replyingTo={replyingTo}
+              setReplyingTo={setReplyingTo}
+              replyContent={replyContent}
+              setReplyContent={setReplyContent}
+              handleSubmitReply={handleSubmitReply}
+              handleDeleteReply={handleDeleteReply}
+              isSubmitting={isSubmitting}
+            />
+          ))}
+        </div>
       ) : null}
 
-      {user ? (
-        <div className="bg-gray-50 p-6 rounded-lg">
-          <h3 className="text-lg font-medium mb-4">Post a Reply</h3>
-          <form onSubmit={handleSubmitReply}>
-            <textarea
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows={4}
-              value={replyContent}
-              onChange={(e) => setReplyContent(e.target.value)}
-              placeholder="Write your reply here..."
-              required
-            />
-            <div className="mt-3 flex justify-end">
-              <button
-                type="submit"
-                disabled={isSubmitting || !replyContent.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50"
-              >
-                {isSubmitting ? "Posting..." : "Post Reply"}
-              </button>
-            </div>
-          </form>
-        </div>
-      ) : (
+      {user && !replyingTo ? (
+        <ReplyForm
+          parentId={null}
+          replyContent={replyContent}
+          setReplyContent={setReplyContent}
+          onSubmit={handleSubmitReply}
+          isSubmitting={isSubmitting}
+          setReplyingTo={setReplyingTo}
+        />
+      ) : !user ? (
         <div className="text-center py-6 bg-gray-50 rounded-lg">
           <p className="text-gray-600">
             Please{" "}
@@ -294,7 +259,7 @@ const PostDetailPage: React.FC = () => {
             to post a reply.
           </p>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

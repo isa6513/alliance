@@ -42,7 +42,7 @@ const ProfileEditPage: React.FC = () => {
         if (!response.data) {
           return;
         }
-        setName(response.data.displayName || "");
+        setName(user.name);
         setBio(response.data.profileDescription || "");
         setAvatarUrl(response.data.profilePicture || null);
 
@@ -145,7 +145,7 @@ const ProfileEditPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-pagebg pt-20 px-8 md:px-16 flex items-center justify-center">
+      <div className="min-h-screen bg-page pt-20 px-8 md:px-16 flex items-center justify-center">
         <p className="text-stone-500">Loading profile…</p>
       </div>
     );
@@ -153,7 +153,7 @@ const ProfileEditPage: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-pagebg pt-20 px-8 md:px-16 flex items-center justify-center">
+      <div className="min-h-screen bg-page pt-20 px-8 md:px-16 flex items-center justify-center">
         <Card style={CardStyle.White} className="p-8 text-center space-y-4">
           <p>You must be logged in to edit your profile.</p>
           <Button onClick={() => navigate("/login")}>Log in</Button>
@@ -223,7 +223,7 @@ const ProfileEditPage: React.FC = () => {
           </div> */}
       </div>
     </div>
-    // <div className="min-h-screen bg-pagebg pt-20 px-4 md:px-0">
+    // <div className="min-h-screen bg-page pt-20 px-4 md:px-0">
     //   <div className="max-w-2xl mx-auto space-y-6">
     //     <Card style={CardStyle.White} className="p-8 space-y-6">
     //       <h1 className="text-2xl font-semibold text-center">Edit Profile</h1>

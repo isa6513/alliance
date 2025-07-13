@@ -53,17 +53,64 @@ export class ForumService {
   async findOnePost(id: number): Promise<Post> {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['author', 'action', 'replies', 'replies.author'],
+      relations: ['author', 'action'],
     });
 
     if (!post) {
       throw new NotFoundException(`Post with ID "${id}" not found`);
     }
 
-    // Sort replies by creation date
-    post.replies?.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    // Load all replies for this post manually to ensure we get all levels
+    const allReplies = await this.replyRepository.find({
+      where: { postId: id },
+      relations: ['author'],
+      order: { createdAt: 'ASC' },
+    });
+
+    // Organize replies hierarchically and sort
+    if (allReplies && allReplies.length > 0) {
+      post.replies = this.organizeRepliesHierarchy(allReplies);
+    } else {
+      post.replies = [];
+    }
 
     return post;
+  }
+
+  private organizeRepliesHierarchy(replies: Reply[]): Reply[] {
+    // Create a map for quick lookup
+    const replyMap = new Map<number, Reply>();
+    const topLevelReplies: Reply[] = [];
+
+    // Initialize all replies with empty children arrays
+    replies.forEach((reply) => {
+      reply.children = [];
+      replyMap.set(reply.id, reply);
+    });
+
+    // Organize into hierarchy
+    replies.forEach((reply) => {
+      if (reply.parentId === null || reply.parentId === undefined) {
+        topLevelReplies.push(reply);
+      } else {
+        const parent = replyMap.get(reply.parentId);
+        if (parent) {
+          parent.children.push(reply);
+        }
+      }
+    });
+
+    // Sort all levels by creation date
+    const sortReplies = (repliesList: Reply[]): Reply[] => {
+      return repliesList
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+        .map((reply) => ({
+          ...reply,
+          children: sortReplies(reply.children || []),
+        }));
+    };
+
+    return sortReplies(topLevelReplies);
   }
 
   async updatePost(
@@ -106,6 +153,21 @@ export class ForumService {
       );
     }
 
+    // Validate parent reply if provided
+    let parentReply: Reply | null = null;
+    if (createReplyDto.parentId) {
+      parentReply = await this.replyRepository.findOne({
+        where: { id: createReplyDto.parentId, postId: createReplyDto.postId },
+        relations: ['author'],
+      });
+
+      if (!parentReply) {
+        throw new NotFoundException(
+          `Parent reply with ID "${createReplyDto.parentId}" not found`,
+        );
+      }
+    }
+
     const reply = this.replyRepository.create({
       ...createReplyDto,
       authorId: userId,
@@ -115,36 +177,49 @@ export class ForumService {
       updatedAt: new Date(),
     });
 
-    const postAuthor = await this.userRepository.findOne({
-      where: { id: post.authorId },
+    const replyAuthor = await this.userRepository.findOne({
+      where: { id: userId },
     });
-    if (!postAuthor) {
-      throw new NotFoundException(
-        `Post author with ID "${post.authorId}" not found`,
-      );
+    if (!replyAuthor) {
+      throw new NotFoundException(`Reply author with ID "${userId}" not found`);
     }
 
-    if (postAuthor.id !== userId) {
-      const replyAuthor = await this.userRepository.findOne({
-        where: { id: userId },
-      });
-      if (!replyAuthor) {
-        throw new NotFoundException(
-          `Reply author with ID "${userId}" not found`,
-        );
-      }
+    // Create notifications
+    const notifications: Notification[] = [];
 
-      // notify post author
-      const notif = this.notifRepository.create({
+    // Notify post author if different from reply author
+    if (post.authorId !== userId) {
+      const postNotif = this.notifRepository.create({
         user: post.author,
         message: `${replyAuthor.name} replied to your forum post`,
         category: NotificationType.ForumReply,
         webAppLocation: `/forum/post/${post.id}`,
-        mobileAppLocation: `/forum/post/${post.id}`, //TODO: mobile forum route,
+        mobileAppLocation: `/forum/post/${post.id}`,
       });
-      await this.notifRepository.save(notif);
-      reply.notification = notif;
+      notifications.push(postNotif);
     }
+
+    // Notify parent reply author if this is a nested reply and different from current user
+    if (
+      parentReply &&
+      parentReply.authorId !== userId &&
+      parentReply.authorId !== post.authorId
+    ) {
+      const parentNotif = this.notifRepository.create({
+        user: parentReply.author,
+        message: `${replyAuthor.name} replied to your comment`,
+        category: NotificationType.ForumReply,
+        webAppLocation: `/forum/post/${post.id}`,
+        mobileAppLocation: `/forum/post/${post.id}`,
+      });
+      notifications.push(parentNotif);
+    }
+
+    if (notifications.length > 0) {
+      await this.notifRepository.save(notifications);
+      reply.notification = notifications[0]; // Associate with first notification for backward compatibility
+    }
+
     await this.replyRepository.save(reply);
 
     const loadedReply = await this.replyRepository.findOne({

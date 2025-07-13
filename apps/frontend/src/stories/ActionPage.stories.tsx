@@ -29,6 +29,7 @@ const meta = {
             dateCommitted: "2021-01-01",
             dateCompleted: "2021-01-01",
             deadline: "2021-01-01",
+            actionId: 1,
           } satisfies UserActionDto);
         }),
       ],

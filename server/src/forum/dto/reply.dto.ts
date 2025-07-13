@@ -7,13 +7,21 @@ export class ReplyDto extends PickType(Reply, [
   'id',
   'content',
   'postId',
+  'parentId',
   'createdAt',
   'updatedAt',
 ]) {
   @ApiProperty({ type: UserDto })
   author: UserDto;
+
+  @ApiProperty({ type: () => [ReplyDto], required: false })
+  children?: ReplyDto[];
 }
 
-export class CreateReplyDto extends PickType(Reply, ['content', 'postId']) {}
+export class CreateReplyDto extends PickType(Reply, [
+  'content',
+  'postId',
+  'parentId',
+]) {}
 
 export class UpdateReplyDto extends PartialType(CreateReplyDto) {}

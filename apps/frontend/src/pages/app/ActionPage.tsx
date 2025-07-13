@@ -238,7 +238,7 @@ export default function ActionPage() {
             {action && <ActionActivityList actionId={action.id} />}
           </div>
         }
-        coloredRight={false}
+        bg="bg-white"
         border={false}
       />
     </>

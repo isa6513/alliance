@@ -34,6 +34,8 @@ const SettingsPage: React.FC = () => {
     navigate("/login");
   }, [logout, navigate]);
 
+  console.log(user);
+
   const handleCitySelect = useCallback((city: CitySearchDto) => {
     setSelectedCityId(city.id);
   }, []);
@@ -88,7 +90,7 @@ const SettingsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-pagebg pt-20 px-8 md:px-16">
+      <div className="min-h-screen bg-page pt-20 px-8 md:px-16">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-2xl mb-8">Account</h1>
           <Card style={CardStyle.White} className="p-8">
@@ -105,7 +107,7 @@ const SettingsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-pagebg pt-20 px-8 md:px-16">
+    <div className="min-h-screen bg-page pt-20 px-8 md:px-16">
       <div className="max-w-4xl mx-auto">
         <Card style={CardStyle.White} className="p-8 mb-6 relative gap-y-4">
           <div className="flex justify-between items-center mb-8">

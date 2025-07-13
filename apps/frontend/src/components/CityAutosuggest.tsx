@@ -148,7 +148,7 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
         }}
         onFocus={() => {
           fetchGeolocation();
-          query.length >= minLength && results.length && setOpen(true);
+          if (query.length >= minLength && results.length) setOpen(true);
         }}
         onKeyDown={handleKeyDown}
         aria-autocomplete="list"

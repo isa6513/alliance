@@ -852,7 +852,7 @@ const DatabaseViewer: React.FC = () => {
                                 return (
                                   <td
                                     key={cellIndex}
-                                    className={`whitespace-nowrap text-sm text-gray-900 max-w-[300px] overflow-x-clip ${
+                                    className={`whitespace-nowrap text-sm text-gray-900 max-w-[300px] overflow-x-clip border-r border-gray-200 ${
                                       isEditable ? "hover:bg-gray-50" : ""
                                     }r
                                     ${

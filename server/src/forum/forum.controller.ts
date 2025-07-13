@@ -90,6 +90,7 @@ export class ForumController {
     @Body() createReplyDto: CreateReplyDto,
     @ReqUser() user: JwtPayload,
   ): Promise<ReplyDto> {
+    console.log('createReplyDto', createReplyDto);
     return this.forumService.createReply(createReplyDto, user.sub);
   }
 

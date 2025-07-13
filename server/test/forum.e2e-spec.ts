@@ -309,5 +309,203 @@ describe('Forum (e2e)', () => {
         })
         .expect(404);
     });
+
+    it('should create a nested reply', async () => {
+      // Create a parent reply
+      const parentResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/replies')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          content: 'This is a parent reply',
+          postId: testPostId,
+        })
+        .expect(201);
+
+      const parentReplyId = parentResponse.body.id;
+
+      // Create a nested reply
+      const childResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/replies')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          content: 'This is a nested reply',
+          postId: testPostId,
+          parentId: parentReplyId,
+        })
+        .expect(201);
+
+      expect(childResponse.body.content).toBe('This is a nested reply');
+      expect(childResponse.body.postId).toBe(testPostId);
+      expect(childResponse.body.parentId).toBe(parentReplyId);
+      expect(childResponse.body.authorId).toBe(ctx.testUserId);
+    });
+
+    it('should organize replies hierarchically when fetching post', async () => {
+      // Create parent reply
+      const parentResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/replies')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          content: 'Parent reply',
+          postId: testPostId,
+        })
+        .expect(201);
+
+      const parentReplyId = parentResponse.body.id;
+
+      // Create child replies
+      const child1Response = await request(ctx.app.getHttpServer())
+        .post('/forum/replies')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          content: 'First child reply',
+          postId: testPostId,
+          parentId: parentReplyId,
+        })
+        .expect(201);
+
+      const child2Response = await request(ctx.app.getHttpServer())
+        .post('/forum/replies')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          content: 'Second child reply',
+          postId: testPostId,
+          parentId: parentReplyId,
+        })
+        .expect(201);
+
+      // Create another top-level reply
+      await request(ctx.app.getHttpServer())
+        .post('/forum/replies')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          content: 'Another top-level reply',
+          postId: testPostId,
+        })
+        .expect(201);
+
+      // Fetch the post with replies
+      const postResponse = await request(ctx.app.getHttpServer())
+        .get(`/forum/posts/${testPostId}`)
+        .expect(200);
+
+      expect(postResponse.body.replies).toBeDefined();
+      expect(Array.isArray(postResponse.body.replies)).toBe(true);
+
+      // Should have 2 top-level replies
+      const topLevelReplies = postResponse.body.replies;
+      expect(topLevelReplies.length).toBe(2);
+
+      // Find the parent reply
+      const parentReply = topLevelReplies.find(
+        (reply) => reply.id === parentReplyId,
+      );
+      expect(parentReply).toBeDefined();
+      expect(parentReply.content).toBe('Parent reply');
+      expect(parentReply.children).toBeDefined();
+      expect(Array.isArray(parentReply.children)).toBe(true);
+      expect(parentReply.children.length).toBe(2);
+
+      // Check child replies are properly nested
+      const childIds = parentReply.children.map((child) => child.id);
+      expect(childIds).toContain(child1Response.body.id);
+      expect(childIds).toContain(child2Response.body.id);
+
+      // Check that children have correct parentId
+      parentReply.children.forEach((child) => {
+        expect(child.parentId).toBe(parentReplyId);
+      });
+    });
+
+    it('should fail to create nested reply with invalid parentId', async () => {
+      await request(ctx.app.getHttpServer())
+        .post('/forum/replies')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          content: 'This should fail',
+          postId: testPostId,
+          parentId: 99999, // Non-existent parent
+        })
+        .expect(404);
+    });
+
+    it('should fail to create nested reply with parentId from different post', async () => {
+      // Create another post
+      const anotherPostResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          title: 'Another Test Post',
+          content: 'This is another test post',
+        })
+        .expect(201);
+
+      const anotherPostId = anotherPostResponse.body.id;
+
+      // Create a reply on the other post
+      const otherPostReplyResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/replies')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          content: 'Reply on other post',
+          postId: anotherPostId,
+        })
+        .expect(201);
+
+      const otherPostReplyId = otherPostReplyResponse.body.id;
+
+      // Try to create a nested reply using parentId from different post
+      await request(ctx.app.getHttpServer())
+        .post('/forum/replies')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          content: 'This should fail',
+          postId: testPostId,
+          parentId: otherPostReplyId, // Parent from different post
+        })
+        .expect(404);
+    });
+
+    it('should delete nested replies when parent is deleted', async () => {
+      // Create parent reply
+      const parentResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/replies')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          content: 'Parent reply to delete',
+          postId: testPostId,
+        })
+        .expect(201);
+
+      const parentReplyId = parentResponse.body.id;
+
+      // Create child reply
+      const childResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/replies')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          content: 'Child reply',
+          postId: testPostId,
+          parentId: parentReplyId,
+        })
+        .expect(201);
+
+      const childReplyId = childResponse.body.id;
+
+      // Delete parent reply
+      await request(ctx.app.getHttpServer())
+        .delete(`/forum/replies/${parentReplyId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+
+      // Fetch post to verify both parent and child are gone
+      const postResponse = await request(ctx.app.getHttpServer())
+        .get(`/forum/posts/${testPostId}`)
+        .expect(200);
+
+      const replyIds = postResponse.body.replies.map((reply) => reply.id);
+      expect(replyIds).not.toContain(parentReplyId);
+      expect(replyIds).not.toContain(childReplyId);
+    });
   });
 });

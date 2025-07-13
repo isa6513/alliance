@@ -190,9 +190,32 @@ const CellEditor: React.FC<CellEditorProps> = ({
             }}
           />
         );
-
-      case "string":
       case "uuid":
+      case "string":
+        if (editValue.length > 100) {
+          return (
+            <textarea
+              {...commonProps}
+              rows={5}
+              className="bg-white w-full z-30"
+              value={formatValueForInput(editValue)}
+              onChange={(e) =>
+                setEditValue(parseValueFromInput(e.target.value))
+              }
+            />
+          );
+        } else {
+          return (
+            <input
+              {...commonProps}
+              type="text"
+              value={formatValueForInput(editValue)}
+              onChange={(e) =>
+                setEditValue(parseValueFromInput(e.target.value))
+              }
+            />
+          );
+        }
       default:
         return (
           <input
@@ -206,7 +229,7 @@ const CellEditor: React.FC<CellEditorProps> = ({
   };
 
   return (
-    <div className="absolute top-0">
+    <div className="absolute top-0 w-full z-10">
       {renderInput()}
       <div className="absolute -bottom-6 left-0 text-xs text-gray-700 bg-white">
         Press Enter to save, Esc to cancel

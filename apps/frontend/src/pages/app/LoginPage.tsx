@@ -74,7 +74,7 @@ const LoginPage: React.FC = () => {
   const showRegisterLink = isFeatureEnabled(Features.PublicSignup);
 
   return (
-    <div className="min-h-screen flex flex-col bg-pagebg">
+    <div className="min-h-screen flex flex-col bg-page">
       <div className="flex flex-col flex-grow items-center justify-center ">
         <div className="w-full max-w-md px-8">
           {message && (

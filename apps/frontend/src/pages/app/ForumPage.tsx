@@ -5,26 +5,20 @@ import { useAuth } from "../../lib/AuthContext";
 import { forumFindAllPosts } from "@alliance/shared/client";
 import Button, { ButtonColor } from "../../components/system/Button";
 import ForumListPost from "../../components/ForumListPost";
+import TwoColumnSplit from "../../components/system/TwoColumnSplit";
 
 const ForumPage: React.FC = () => {
   const [posts, setPosts] = useState<PostDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        setIsLoading(true);
         const response = await forumFindAllPosts();
         setPosts(response.data ?? []);
-        setError(null);
       } catch (err) {
         console.error("Error fetching forum posts:", err);
-        setError("Failed to load forum posts");
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -40,44 +34,31 @@ const ForumPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-pagebg items-center">
-      <div className="px-4 py-5 flex flex-col items-center w-[calc(min(800px,100%))] gap-y-3">
-        <div className="flex py-4 flex-row justify-between items-center w-full">
-          <h2 className="text-xl text-left h-fit">Recent Posts</h2>
-          {isAuthenticated && (
-            <Button onClick={handleCreatePost} color={ButtonColor.Blue}>
-              Create Post
-            </Button>
-          )}
-        </div>
-
-        {isLoading ? (
-          <div className="flex justify-center py-4">
-            <div className="loader">Loading...</div>
-          </div>
-        ) : error ? (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-sm">
-            {error}
-          </div>
-        ) : posts.length === 0 ? (
-          <div className="text-center py-4 text-gray-500 text-sm">
-            <p>No forum posts yet. Be the first to start a discussion!</p>
-          </div>
-        ) : (
+    <TwoColumnSplit
+      left={
+        <div className="flex flex-col p-3">
           <div className="w-full space-y-2">
-            {posts.map((post, index) => (
+            {posts.map((post) => (
               <ForumListPost
                 key={post.id}
                 post={post}
                 handleViewPost={handleViewPost}
-                first={index === 0}
-                last={index === posts.length - 1}
               />
             ))}
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      }
+      border={false}
+      right={
+        <div className="flex flex-col p-3 items-start">
+          {isAuthenticated && (
+            <Button onClick={handleCreatePost} color={ButtonColor.Blue}>
+              New Thread
+            </Button>
+          )}
+        </div>
+      }
+    />
   );
 };
 

@@ -47,7 +47,7 @@ const FormInput: React.FC<FormInputProps> = ({
         text-[11pt]  transition-all duration-200 
         ${
           disabled
-            ? "bg-pagebg text-stone-500 cursor-not-allowed"
+            ? "bg-page text-stone-500 cursor-not-allowed"
             : "hover:border-gray-400"
         } 
         ${error ? "focus:border-red-500" : "focus:border-cyan-500"}`}
