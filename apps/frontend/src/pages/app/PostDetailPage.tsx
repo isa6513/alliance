@@ -15,7 +15,7 @@ import Card, { CardStyle } from "../../components/system/Card";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [post, setPost] = useState<PostDto | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
@@ -56,10 +56,15 @@ const PostDetailPage: React.FC = () => {
   // Handle highlighted reply from URL parameters
   useEffect(() => {
     const replyId = searchParams.get("replyId");
-    if (replyId) {
+    if (replyId && post) {
       const replyIdNumber = parseInt(replyId, 10);
       if (!isNaN(replyIdNumber)) {
         setHighlightedReplyId(replyIdNumber);
+
+        // Remove the replyId parameter from URL immediately to prevent re-highlighting
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete("replyId");
+        setSearchParams(newSearchParams, { replace: true });
 
         // Scroll to the reply after a short delay to ensure it's rendered
         setTimeout(() => {
@@ -77,10 +82,10 @@ const PostDetailPage: React.FC = () => {
         // Remove highlight after 15 seconds
         setTimeout(() => {
           setHighlightedReplyId(null);
-        }, 5000);
+        }, 15000);
       }
     }
-  }, [searchParams, post]);
+  }, [searchParams, post, setSearchParams]);
 
   const handleSubmitReply = async (e: React.FormEvent) => {
     e.preventDefault();
