@@ -15,6 +15,8 @@ interface ReplyComponentProps {
   handleSubmitReply: (e: React.FormEvent) => void;
   handleDeleteReply: (id: number) => void;
   isSubmitting: boolean;
+  newlyAddedReplies: Set<number>;
+  highlightedReplyId: number | null;
 }
 
 const ReplyComponent = ({
@@ -28,18 +30,27 @@ const ReplyComponent = ({
   handleSubmitReply,
   handleDeleteReply,
   isSubmitting,
+  newlyAddedReplies,
+  highlightedReplyId,
 }: ReplyComponentProps) => {
   const maxDepth = 10;
   const isNested = depth > 0;
   const canNest = depth < maxDepth;
   const isReplyingToThis = replyingTo === reply.id;
   const hasChildren = reply.children && reply.children.length > 0;
+  const isNewlyAdded = newlyAddedReplies.has(reply.id);
+  const isHighlighted = highlightedReplyId === reply.id;
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className={`${isNested && "ml-6 mt-3"}`}>
-      <Card key={reply.id}>
+    <div className={`${isNested && "ml-6 mt-3"}`} id={`reply-${reply.id}`}>
+      <Card
+        key={reply.id}
+        className={`transition-all duration-1000 ${
+          isNewlyAdded ? "border-1 !border-green-600/80 bg-green-50" : ""
+        } ${isHighlighted ? "border-1 !border-blue-500 !bg-blue-50" : ""}`}
+      >
         <div className="flex items-start gap-2">
           {/* Collapse/Expand Arrow */}
           {hasChildren && (
@@ -142,6 +153,8 @@ const ReplyComponent = ({
               handleSubmitReply={handleSubmitReply}
               handleDeleteReply={handleDeleteReply}
               isSubmitting={isSubmitting}
+              newlyAddedReplies={newlyAddedReplies}
+              highlightedReplyId={highlightedReplyId}
             />
           ))}
         </div>

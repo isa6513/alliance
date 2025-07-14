@@ -187,14 +187,17 @@ export class ForumService {
     // Create notifications
     const notifications: Notification[] = [];
 
+    // Save the reply first to get the ID
+    await this.replyRepository.save(reply);
+
     // Notify post author if different from reply author
     if (post.authorId !== userId) {
       const postNotif = this.notifRepository.create({
         user: post.author,
         message: `${replyAuthor.name} replied to your forum post`,
         category: NotificationType.ForumReply,
-        webAppLocation: `/forum/post/${post.id}`,
-        mobileAppLocation: `/forum/post/${post.id}`,
+        webAppLocation: `/forum/post/${post.id}?replyId=${reply.id}`,
+        mobileAppLocation: `/forum/post/${post.id}?replyId=${reply.id}`,
       });
       notifications.push(postNotif);
     }
@@ -209,8 +212,8 @@ export class ForumService {
         user: parentReply.author,
         message: `${replyAuthor.name} replied to your comment`,
         category: NotificationType.ForumReply,
-        webAppLocation: `/forum/post/${post.id}`,
-        mobileAppLocation: `/forum/post/${post.id}`,
+        webAppLocation: `/forum/post/${post.id}?replyId=${reply.id}`,
+        mobileAppLocation: `/forum/post/${post.id}?replyId=${reply.id}`,
       });
       notifications.push(parentNotif);
     }
@@ -219,8 +222,6 @@ export class ForumService {
       await this.notifRepository.save(notifications);
       reply.notification = notifications[0]; // Associate with first notification for backward compatibility
     }
-
-    await this.replyRepository.save(reply);
 
     const loadedReply = await this.replyRepository.findOne({
       where: { id: reply.id },

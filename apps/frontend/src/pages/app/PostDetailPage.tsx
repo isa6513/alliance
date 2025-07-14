@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router";
 import { PostDto, CreateReplyDto } from "@alliance/shared/client";
 import { useAuth } from "../../lib/AuthContext";
 import { formatDistanceToNow } from "date-fns";
@@ -11,15 +11,23 @@ import {
   forumRemovePost,
   forumRemoveReply,
 } from "@alliance/shared/client";
+import Card, { CardStyle } from "../../components/system/Card";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const [post, setPost] = useState<PostDto | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [newlyAddedReplies, setNewlyAddedReplies] = useState<Set<number>>(
+    new Set()
+  );
+  const [highlightedReplyId, setHighlightedReplyId] = useState<number | null>(
+    null
+  );
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -45,6 +53,35 @@ const PostDetailPage: React.FC = () => {
     fetchPost();
   }, [postId]);
 
+  // Handle highlighted reply from URL parameters
+  useEffect(() => {
+    const replyId = searchParams.get("replyId");
+    if (replyId) {
+      const replyIdNumber = parseInt(replyId, 10);
+      if (!isNaN(replyIdNumber)) {
+        setHighlightedReplyId(replyIdNumber);
+
+        // Scroll to the reply after a short delay to ensure it's rendered
+        setTimeout(() => {
+          const replyElement = document.getElementById(
+            `reply-${replyIdNumber}`
+          );
+          if (replyElement) {
+            replyElement.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        }, 500);
+
+        // Remove highlight after 15 seconds
+        setTimeout(() => {
+          setHighlightedReplyId(null);
+        }, 5000);
+      }
+    }
+  }, [searchParams, post]);
+
   const handleSubmitReply = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -68,6 +105,20 @@ const PostDetailPage: React.FC = () => {
 
       // Refresh the post to get updated reply hierarchy
       if (response.data) {
+        const newReplyId = response.data.id;
+
+        // Add to newly added replies set
+        setNewlyAddedReplies((prev) => new Set(prev).add(newReplyId));
+
+        // Remove from newly added set after 10 seconds
+        setTimeout(() => {
+          setNewlyAddedReplies((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(newReplyId);
+            return newSet;
+          });
+        }, 10000);
+
         const refreshedPost = await forumFindOnePost({
           path: { id: postId },
         });
@@ -165,101 +216,105 @@ const PostDetailPage: React.FC = () => {
   console.log(post.replies);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <Link to="/forum" className="text-blue-600 hover:underline">
-          &larr; Back
-        </Link>
-      </div>
+    <div className="w-full min-h-screen bg-page">
+      <div className="container mx-auto px-4 py-8 ">
+        <div className="mb-6">
+          <Link to="/forum" className="text-blue-600 hover:underline">
+            &larr; Back
+          </Link>
+        </div>
 
-      {/* Post */}
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-semibold">{post.title}</h1>
-          {post.author.email === user?.email && (
-            <div className="space-x-2">
+        {/* Post */}
+        <Card className="p-6 mb-5" style={CardStyle.White}>
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-semibold">{post.title}</h1>
+            {post.author.email === user?.email && (
+              <div className="space-x-2">
+                <Link
+                  to={`/forum/edit/${post.id}`}
+                  className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                >
+                  Edit
+                </Link>
+                <span
+                  onClick={handleDeletePost}
+                  className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition cursor-pointer"
+                >
+                  Delete
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="text-sm text-gray-500">
+            <span>
+              By{" "}
+              <a href={`/user/${post.author.id}`} className="font-semibold">
+                {post.author.name}
+              </a>
+            </span>
+            <span className="ml-4">
+              {formatDistanceToNow(new Date(post.createdAt), {
+                addSuffix: true,
+              })}
+            </span>
+          </div>
+
+          {post.action && (
+            <div className="mb-4">
               <Link
-                to={`/forum/edit/${post.id}`}
-                className="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                to={`/actions/${post.action.id}`}
+                className="inline-block bg-blue-50 text-blue-600 px-2 py-1 rounded-lg text-sm"
               >
-                Edit
+                yeah eyah
               </Link>
-              <button
-                onClick={handleDeletePost}
-                className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition cursor-pointer"
-              >
-                Delete
-              </button>
             </div>
           )}
-        </div>
-        <div className="text-sm text-gray-500">
-          <span>
-            By{" "}
-            <a href={`/user/${post.author.id}`} className="font-semibold">
-              {post.author.name}
-            </a>
-          </span>
-          <span className="ml-4">
-            {formatDistanceToNow(new Date(post.createdAt), {
-              addSuffix: true,
-            })}
-          </span>
-        </div>
 
-        {post.action && (
-          <div className="mb-4">
-            <Link
-              to={`/actions/${post.action.id}`}
-              className="inline-block bg-blue-50 text-blue-600 px-2 py-1 rounded-lg text-sm"
-            >
-              yeah eyah
-            </Link>
+          <div className="my-8 whitespace-pre-wrap text-lg">{post.content}</div>
+        </Card>
+
+        {post.replies.length > 0 ? (
+          <div className="space-y-2 mb-8">
+            {post.replies.map((reply) => (
+              <ReplyComponent
+                key={reply.id}
+                reply={reply}
+                user={user}
+                replyingTo={replyingTo}
+                setReplyingTo={setReplyingTo}
+                replyContent={replyContent}
+                setReplyContent={setReplyContent}
+                handleSubmitReply={handleSubmitReply}
+                handleDeleteReply={handleDeleteReply}
+                isSubmitting={isSubmitting}
+                newlyAddedReplies={newlyAddedReplies}
+                highlightedReplyId={highlightedReplyId}
+              />
+            ))}
           </div>
-        )}
+        ) : null}
 
-        <div className="my-8 whitespace-pre-wrap text-lg">{post.content}</div>
+        {user && !replyingTo ? (
+          <ReplyForm
+            parentId={null}
+            replyContent={replyContent}
+            setReplyContent={setReplyContent}
+            onSubmit={handleSubmitReply}
+            isSubmitting={isSubmitting}
+            setReplyingTo={setReplyingTo}
+          />
+        ) : !user ? (
+          <div className="text-center py-6 bg-gray-50 rounded-lg">
+            <p className="text-gray-600">
+              Please{" "}
+              <Link to="/login" className="text-blue-600 hover:underline">
+                log in
+              </Link>{" "}
+              to post a reply.
+            </p>
+          </div>
+        ) : null}
       </div>
-
-      {post.replies.length > 0 ? (
-        <div className="space-y-4 mb-8">
-          {post.replies.map((reply) => (
-            <ReplyComponent
-              key={reply.id}
-              reply={reply}
-              user={user}
-              replyingTo={replyingTo}
-              setReplyingTo={setReplyingTo}
-              replyContent={replyContent}
-              setReplyContent={setReplyContent}
-              handleSubmitReply={handleSubmitReply}
-              handleDeleteReply={handleDeleteReply}
-              isSubmitting={isSubmitting}
-            />
-          ))}
-        </div>
-      ) : null}
-
-      {user && !replyingTo ? (
-        <ReplyForm
-          parentId={null}
-          replyContent={replyContent}
-          setReplyContent={setReplyContent}
-          onSubmit={handleSubmitReply}
-          isSubmitting={isSubmitting}
-          setReplyingTo={setReplyingTo}
-        />
-      ) : !user ? (
-        <div className="text-center py-6 bg-gray-50 rounded-lg">
-          <p className="text-gray-600">
-            Please{" "}
-            <Link to="/login" className="text-blue-600 hover:underline">
-              log in
-            </Link>{" "}
-            to post a reply.
-          </p>
-        </div>
-      ) : null}
     </div>
   );
 };

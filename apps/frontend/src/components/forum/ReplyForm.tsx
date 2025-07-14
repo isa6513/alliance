@@ -19,7 +19,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
   isSubmitting,
   setReplyingTo,
 }: ReplyFormProps) => (
-  <div className="bg-gray-50 p-4 rounded-lg mt-3">
+  <div className="bg-gray-200 p-4 rounded-lg mt-3">
     <form onSubmit={onSubmit}>
       <textarea
         className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-transparent border-none"

@@ -47,7 +47,7 @@ const NavbarHorizontal: React.FC = () => {
               key={link}
               className="py-3"
             >
-              <p className="pt-1 whitespace-nowrap">{link}</p>
+              <p className="whitespace-nowrap">{link}</p>
             </Link>
           )
         )}

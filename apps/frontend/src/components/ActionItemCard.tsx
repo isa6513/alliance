@@ -22,7 +22,6 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   className,
   joinedCount,
   completedCount,
-  showDescription = true,
   userRelation,
 }) => {
   const navigate = useNavigate();
