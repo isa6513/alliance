@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import Card from "../system/Card";
 import { ReplyDto, UserDto } from "@alliance/shared/client";
@@ -33,50 +33,89 @@ const ReplyComponent = ({
   const isNested = depth > 0;
   const canNest = depth < maxDepth;
   const isReplyingToThis = replyingTo === reply.id;
+  const hasChildren = reply.children && reply.children.length > 0;
+
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
     <div className={`${isNested && "ml-6 mt-3"}`}>
       <Card key={reply.id}>
-        <div className="mb-1 whitespace-pre-wrap">{reply.content}</div>
-
-        <div className="flex justify-between items-center text-sm text-gray-500">
-          <div className="gap-x-2 flex">
-            {reply.author?.name !== undefined && (
-              <p>Reply by {reply.author?.name}</p>
-            )}
-            <span>
-              {formatDistanceToNow(new Date(reply.createdAt), {
-                addSuffix: true,
-              })}
-            </span>
-          </div>
-
-          <div className="flex space-x-2">
-            {user && canNest && (
-              <button
-                onClick={() => {
-                  setReplyingTo(isReplyingToThis ? null : reply.id);
-                  if (!isReplyingToThis) {
-                    setReplyContent("");
-                  }
-                }}
-                className="text-blue-600 hover:underline"
+        <div className="flex items-start gap-2">
+          {/* Collapse/Expand Arrow */}
+          {hasChildren && (
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="flex-shrink-0 mt-1 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+              aria-label={isCollapsed ? "Expand replies" : "Collapse replies"}
+            >
+              <svg
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  isCollapsed ? "-rotate-90" : "rotate-0"
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                {!isReplyingToThis && "Reply"}
-              </button>
-            )}
-            {user && reply.author.email === user.email && (
-              <button
-                onClick={() => handleDeleteReply(reply.id)}
-                className="text-red-600 hover:underline"
-              >
-                Delete
-              </button>
-            )}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+          )}
+
+          {/* Reply Content */}
+          <div className="flex-1 min-w-0">
+            <div className="mb-1 whitespace-pre-wrap">{reply.content}</div>
+
+            <div className="flex justify-between items-center text-sm text-gray-500">
+              <div className="gap-x-2 flex">
+                {reply.author?.name !== undefined && (
+                  <p>Reply by {reply.author?.name}</p>
+                )}
+                <span>
+                  {formatDistanceToNow(new Date(reply.createdAt), {
+                    addSuffix: true,
+                  })}
+                </span>
+                {hasChildren && isCollapsed && reply.children !== undefined && (
+                  <span className="text-xs bg-gray-200 px-2 py-1 rounded">
+                    {reply.children.length}{" "}
+                    {reply.children.length === 1 ? "reply" : "replies"} hidden
+                  </span>
+                )}
+              </div>
+
+              <div className="flex space-x-2">
+                {user && canNest && (
+                  <button
+                    onClick={() => {
+                      setReplyingTo(isReplyingToThis ? null : reply.id);
+                      if (!isReplyingToThis) {
+                        setReplyContent("");
+                      }
+                    }}
+                    className="text-black hover:underline"
+                  >
+                    {!isReplyingToThis && "Reply"}
+                  </button>
+                )}
+                {user && reply.author.email === user.email && (
+                  <button
+                    onClick={() => handleDeleteReply(reply.id)}
+                    className="text-red-600 hover:underline"
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </Card>
-      {user && isReplyingToThis && (
+      {user && isReplyingToThis && !isCollapsed && (
         <ReplyForm
           parentId={reply.id}
           onCancel={() => setReplyingTo(null)}
@@ -88,7 +127,7 @@ const ReplyComponent = ({
         />
       )}
 
-      {reply.children && reply.children.length > 0 && (
+      {hasChildren && !isCollapsed && reply.children !== undefined && (
         <div className="mt-2">
           {reply.children.map((childReply) => (
             <ReplyComponent

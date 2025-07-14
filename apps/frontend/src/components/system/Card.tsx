@@ -47,7 +47,7 @@ const Card: React.FC<CardProps> = ({
         styleClasses[cardStyle]
       } gap-y-2 rounded p-4 border ${className} ${
         onClick
-          ? "cursor-pointer hover:border-black transition-[border] duration-100"
+          ? "cursor-pointer hover:border-[#555] transition-[border] duration-100"
           : ""
       } bg-cover bg-center`}
       ref={ref}

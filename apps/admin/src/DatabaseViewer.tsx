@@ -855,13 +855,7 @@ const DatabaseViewer: React.FC = () => {
                                     className={`whitespace-nowrap text-sm text-gray-900 max-w-[300px] overflow-x-clip border-r border-gray-200 ${
                                       isEditable ? "hover:bg-gray-50" : ""
                                     }r
-                                    ${
-                                      editingCell &&
-                                      editingCell.rowIndex === rowIndex &&
-                                      editingCell.columnIndex === cellIndex
-                                        ? "px-4 py-2"
-                                        : "px-6 py-4"
-                                    }`}
+                                    px-5 py-3`}
                                     onClick={() =>
                                       isEditable
                                         ? handleCellClick(

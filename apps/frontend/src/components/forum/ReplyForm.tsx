@@ -27,9 +27,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
         value={replyContent}
         onChange={(e) => setReplyContent(e.target.value)}
         placeholder={
-          parentId
-            ? "Write your reply to this comment..."
-            : "Write your reply here..."
+          parentId ? "Write your reply to this comment..." : "Add a comment..."
         }
         required
         autoFocus
