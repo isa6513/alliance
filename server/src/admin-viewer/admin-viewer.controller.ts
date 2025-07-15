@@ -1,10 +1,31 @@
-import { Controller, Get, Put, Param, Query, Body, UseGuards, ValidationPipe, UsePipes } from '@nestjs/common';
-import { ApiTags, ApiOkResponse, ApiParam, ApiQuery, ApiBadRequestResponse, ApiNotFoundResponse, ApiBody } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Put,
+  Param,
+  Query,
+  Body,
+  UseGuards,
+  ValidationPipe,
+  UsePipes,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOkResponse,
+  ApiParam,
+  ApiQuery,
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiBody,
+} from '@nestjs/swagger';
 import { AdminViewerService } from './admin-viewer.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { TableListDto } from './dto/table-list.dto';
 import { TableDataDto, TableDataQueryDto } from './dto/table-data.dto';
-import { UpdateRecordDto, UpdateRecordResponseDto } from './dto/update-record.dto';
+import {
+  UpdateRecordDto,
+  UpdateRecordResponseDto,
+} from './dto/update-record.dto';
 
 @ApiTags('admin-viewer')
 @Controller('admin-viewer')
@@ -28,7 +49,13 @@ export class AdminViewerController {
   @ApiOkResponse({ type: TableDataDto })
   @ApiBadRequestResponse({ description: 'Invalid query parameters' })
   @ApiNotFoundResponse({ description: 'Table not found' })
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidUnknownValues: true,
+    }),
+  )
   getTableData(
     @Param('tableName') tableName: string,
     @Query() query: TableDataQueryDto,
@@ -40,9 +67,17 @@ export class AdminViewerController {
   @ApiParam({ name: 'tableName', description: 'Name of the database table' })
   @ApiBody({ type: UpdateRecordDto })
   @ApiOkResponse({ type: UpdateRecordResponseDto })
-  @ApiBadRequestResponse({ description: 'Invalid update data or validation failed' })
+  @ApiBadRequestResponse({
+    description: 'Invalid update data or validation failed',
+  })
   @ApiNotFoundResponse({ description: 'Table or record not found' })
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidUnknownValues: true,
+    }),
+  )
   updateRecord(
     @Param('tableName') tableName: string,
     @Body() updateData: UpdateRecordDto,

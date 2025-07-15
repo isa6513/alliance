@@ -142,24 +142,24 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse()
   async logout(@Res({ passthrough: true }) res: Response) {
     this.authService.clearAuthCookies(res);
-    return { success: true };
   }
 
   @Public()
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse()
   async forgotPassword(@Body() body: ForgotPasswordDto) {
     await this.authService.forgotPassword(body.email);
-    return { success: true };
   }
 
   @Public()
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse()
   async resetPassword(@Body() body: ResetPasswordDto) {
     await this.authService.resetPassword(body.token, body.password);
-    return { success: true };
   }
 }

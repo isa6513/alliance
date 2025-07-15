@@ -57,6 +57,7 @@ export class ActionsController {
 
   @Post('join/:id')
   @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: UserActionDto })
   join(@Request() req: JwtRequest, @Param('id') id: string) {
     if (!req.user) {
       throw new UnauthorizedException('User not found');
@@ -66,6 +67,7 @@ export class ActionsController {
 
   @Post('complete/:id')
   @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: UserActionDto })
   complete(@Request() req: JwtRequest, @Param('id') id: string) {
     if (!req.user) {
       throw new UnauthorizedException('User not found');
@@ -272,6 +274,7 @@ export class ActionsController {
 
   @Patch(':id')
   @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionDto })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateActionDto: UpdateActionDto,
@@ -281,6 +284,7 @@ export class ActionsController {
 
   @Delete(':id')
   @UseGuards(AdminGuard)
+  @ApiOkResponse()
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.actionsService.remove(id);
   }
@@ -308,12 +312,14 @@ export class ActionsController {
 
   @Post('clearDb')
   @UseGuards(AdminGuard)
+  @ApiOkResponse()
   clearDb() {
     return this.actionsService.clearDb();
   }
 
   @Post('setTestRelations')
   @UseGuards(AdminGuard)
+  @ApiOkResponse()
   setTestRelations(@Request() req: JwtRequest) {
     if (!req.user) {
       throw new UnauthorizedException('User not found');

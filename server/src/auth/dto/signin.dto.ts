@@ -1,4 +1,4 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { User } from '../../user/user.entity';
 
 export type TokenMode = 'cookie' | 'header';
@@ -12,9 +12,9 @@ export class SignInResponseDto {
   @ApiProperty()
   isAdmin: boolean;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   access_token?: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   refresh_token?: string;
 }

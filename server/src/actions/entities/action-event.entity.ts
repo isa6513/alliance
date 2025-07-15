@@ -7,8 +7,9 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Action } from './action.entity';
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { Allow, IsDefined, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export enum NotificationType {
   All = 'all',
@@ -32,6 +33,7 @@ export enum ActionStatus {
 export class ActionEvent {
   @PrimaryGeneratedColumn()
   @ApiProperty({ description: 'Unique identifier for the action event' })
+  @Allow()
   id: number;
 
   @IsNotEmpty()
@@ -41,7 +43,7 @@ export class ActionEvent {
 
   @Column()
   @ApiProperty({ description: 'secondary text' })
-  @IsOptional()
+  @Allow()
   description: string;
 
   @Column({ type: 'enum', enum: ActionStatus, default: ActionStatus.Draft })
@@ -49,6 +51,7 @@ export class ActionEvent {
   @ApiProperty({
     description: 'New status of the action after the event',
     enum: ActionStatus,
+    enumName: 'ActionStatus',
   })
   newStatus: ActionStatus;
 
@@ -57,16 +60,20 @@ export class ActionEvent {
   @ApiProperty({
     description: 'Notification type for the event',
     enum: NotificationType,
+    enumName: 'NotificationType',
   })
   sendNotifsTo: NotificationType;
 
   @Column()
   @ApiProperty({ description: 'time of the event (for display)' })
   @IsNotEmpty()
+  @Type(() => Date)
   date: Date;
 
   @UpdateDateColumn()
   @ApiProperty({ description: 'Timestamp when the event was last updated' })
+  @Type(() => Date)
+  @Allow()
   updatedAt: Date;
 
   @Column({ default: false })
@@ -85,5 +92,8 @@ export class ActionEvent {
     description: 'The action associated with this event',
     type: () => Action,
   })
+  @IsDefined()
+  @Allow()
+  @Type(() => Action)
   action: Action;
 }

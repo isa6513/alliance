@@ -38,7 +38,7 @@ export class Friend {
   addressee: User;
 
   @Column({ type: 'enum', enum: FriendStatus, default: FriendStatus.None })
-  @ApiProperty({ enum: FriendStatus })
+  @ApiProperty({ enum: FriendStatus, enumName: 'FriendStatus' })
   status: FriendStatus;
 
   @CreateDateColumn()

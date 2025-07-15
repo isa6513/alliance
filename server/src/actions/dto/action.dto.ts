@@ -1,4 +1,10 @@
-import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  OmitType,
+  PartialType,
+  PickType,
+} from '@nestjs/swagger';
 import { Action } from '../entities/action.entity';
 import { UserAction } from '../entities/user-action.entity';
 import { ActionEvent, ActionStatus } from '../entities/action-event.entity';
@@ -50,7 +56,7 @@ export class ActionDto extends OmitType(Action, [
   @ApiProperty()
   usersCompleted: number;
 
-  @ApiProperty({ type: [ActionEventDto] })
+  @ApiProperty({ type: [ActionEventDto], isArray: true })
   events: ActionEventDto[];
 
   @ApiProperty({ enum: ActionStatus, enumName: 'ActionStatus' })
@@ -76,7 +82,7 @@ export class CreateActionDto extends OmitType(ActionDto, [
 ]) {}
 
 export class ActionWithRelationDto extends ActionDto {
-  @ApiProperty({ type: UserActionDto })
+  @ApiPropertyOptional({ type: UserActionDto })
   relation?: Omit<UserActionDto, 'action'> | null;
 }
 

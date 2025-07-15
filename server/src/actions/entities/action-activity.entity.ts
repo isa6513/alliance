@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Action } from './action.entity';
 import { User } from '../../user/user.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum ActionActivityType {
   USER_JOINED = 'user_joined',
@@ -25,6 +25,7 @@ export class ActionActivity {
   @ApiProperty({
     description: 'Type of action activity',
     enum: ActionActivityType,
+    enumName: 'ActionActivityType',
   })
   type: ActionActivityType;
 
@@ -53,6 +54,6 @@ export class ActionActivity {
 
   // just for donation-based actions
   @Column({ nullable: true })
-  @ApiProperty()
+  @ApiPropertyOptional()
   dollar_amount?: number;
 }

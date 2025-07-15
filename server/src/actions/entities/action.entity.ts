@@ -8,8 +8,8 @@ import {
 } from 'typeorm';
 import { UserAction, UserActionRelation } from './user-action.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { Expose, Type } from 'class-transformer';
+import { Allow, IsArray, IsNotEmpty, IsOptional } from 'class-validator';
 import { ActionEvent, ActionStatus } from './action-event.entity';
 
 export enum ActionTaskType {
@@ -22,6 +22,7 @@ export enum ActionTaskType {
 export class Action {
   @PrimaryGeneratedColumn()
   @ApiProperty({ description: 'Unique identifier for the action' })
+  @Allow()
   id: number;
 
   @Column()
@@ -35,9 +36,9 @@ export class Action {
   category: string;
 
   @Column({ nullable: true })
-  @ApiProperty({ description: 'Image URL for the action', nullable: true })
+  @ApiPropertyOptional({ description: 'Image URL for the action' })
   @IsOptional()
-  image: string;
+  image?: string;
 
   @Column({ nullable: true })
   @ApiPropertyOptional({
@@ -78,9 +79,9 @@ export class Action {
   shortDescription: string;
 
   @Column({ nullable: true })
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsOptional()
-  timeEstimate: string;
+  timeEstimate?: string;
 
   @Column({
     type: 'enum',
@@ -90,30 +91,43 @@ export class Action {
   @ApiProperty({
     description: 'Type of the action',
     enum: ActionTaskType,
+    enumName: 'ActionTaskType',
   })
   @IsNotEmpty()
   type: ActionTaskType;
 
   @CreateDateColumn()
   @ApiProperty({ description: 'Timestamp when the action was created' })
+  @Allow()
+  @Type(() => Date)
   createdAt: Date;
 
   @UpdateDateColumn()
   @ApiProperty({ description: 'Timestamp when the action was last updated' })
+  @Allow()
+  @Type(() => Date)
   updatedAt: Date;
 
   @OneToMany(() => UserAction, (userAction) => userAction.action)
   @ApiProperty({
     description: 'Relations between users and the action',
     type: () => [UserAction],
+    isArray: true,
   })
+  @Allow()
+  @IsArray()
+  @Type(() => UserAction)
   userRelations: UserAction[];
 
   @OneToMany(() => ActionEvent, (event) => event.action)
   @ApiProperty({
     description: 'Events associated with the action',
     type: () => [ActionEvent],
+    isArray: true,
   })
+  @Allow()
+  @IsArray()
+  @Type(() => ActionEvent)
   events: ActionEvent[];
 
   @Expose()

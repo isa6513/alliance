@@ -3,6 +3,7 @@ import { User } from '../src/user/user.entity';
 import { Repository } from 'typeorm';
 import { AuthTokens } from '../src/auth/dto/authtokens.dto';
 import { createTestApp, TestContext } from './e2e-test-utils';
+import { SignUpDto } from 'src/auth/dto/sign-up.dto';
 
 describe('Auth (e2e)', () => {
   let userRepository: Repository<User>;
@@ -27,7 +28,8 @@ describe('Auth (e2e)', () => {
         email: 'newusertest@test.com',
         password: 'password',
         name: 'Test User',
-      })
+        mode: 'header',
+      } satisfies SignUpDto)
       .expect(201);
   });
 

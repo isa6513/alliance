@@ -29,7 +29,7 @@ export class MinimalUserDto extends PickType(UserDto, [
 ]) {}
 
 export class FriendStatusDto {
-  @ApiProperty({ enum: FriendStatus, nullable: true })
+  @ApiProperty({ enum: FriendStatus, nullable: true, enumName: 'FriendStatus' })
   status: FriendStatus;
 }
 

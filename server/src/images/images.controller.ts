@@ -25,7 +25,6 @@ import {
 } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
 import { ApiBody, ApiOkResponse, ApiProperty } from '@nestjs/swagger';
-import { ImageResponseDto } from './dto/image-response.dto';
 
 const allowedTypes = [
   'image/png',
@@ -40,7 +39,6 @@ class UploadImageDto {
   image: Express.Multer.File;
 }
 
-@ApiOkResponse({ type: ImageResponseDto })
 @Controller('images')
 export class ImagesController {
   constructor(
@@ -105,6 +103,7 @@ export class ImagesController {
   }
 
   @Delete(':id')
+  @ApiOkResponse()
   async deleteImage(@Param('id') id: number) {
     const img = await this.imagesService.getImage(id);
     if (!img) throw new NotFoundException();

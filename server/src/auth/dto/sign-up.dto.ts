@@ -1,5 +1,12 @@
-import { IsDefined, IsNotEmpty, IsEmail, IsOptional } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsDefined,
+  IsNotEmpty,
+  IsEmail,
+  IsOptional,
+  IsEnum,
+  Allow,
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TokenMode } from './signin.dto';
 
 export class SignUpDto {
@@ -19,10 +26,12 @@ export class SignUpDto {
   @ApiProperty()
   readonly password: string;
 
-  @ApiProperty({ enum: ['cookie', 'header'] })
+  @Allow()
+  @IsEnum(['cookie', 'header'])
+  @ApiProperty({ enum: ['cookie', 'header'], enumName: 'TokenMode' })
   mode: TokenMode;
 
   @IsOptional()
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional()
   readonly referralCode?: string;
 }
