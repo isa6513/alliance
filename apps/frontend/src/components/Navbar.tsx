@@ -3,7 +3,7 @@ import NavbarVertical from "./NavbarVertical";
 import NavbarHorizontal from "./NavbarHorizontal";
 
 export enum NavbarPage {
-  Dashboard = "Dashboard",
+  Dashboard = "Home",
   CurrentActions = "Actions",
   Announcements = "Announcements",
   Forum = "Forum",

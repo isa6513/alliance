@@ -20,7 +20,7 @@ const ForumListPost = ({ post, handleViewPost }: ForumListPostProps) => {
   return (
     <Card
       key={post.id}
-      className={`w-full mb-0 my-[4px] rounded-sm`}
+      className={`w-full mb-0 rounded-sm`}
       onClick={() => handleViewPost(post.id)}
       style={CardStyle.White}
     >

@@ -223,60 +223,65 @@ const PostDetailPage: React.FC = () => {
   return (
     <div className="w-full min-h-screen bg-page">
       <div className="container mx-auto px-4 py-8 ">
-        <div className="mb-6">
-          <Link to="/forum" className="text-blue-600 hover:underline">
-            &larr; Back
-          </Link>
-        </div>
-
         {/* Post */}
-        <Card className="p-6 mb-5" style={CardStyle.White}>
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-semibold">{post.title}</h1>
-            {post.author.email === user?.email && (
-              <div className="space-x-2">
+        <div className="relative">
+          <Link
+            to="/forum"
+            className="absolute -left-10 top-6 text-blue z-10 text-lg"
+            title="Back to Forum"
+          >
+            &larr;
+          </Link>
+          <Card className="p-6 mb-5" style={CardStyle.White}>
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-semibold">{post.title}</h1>
+              {post.author.email === user?.email && (
+                <div className="space-x-2">
+                  <Link
+                    to={`/forum/edit/${post.id}`}
+                    className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                  >
+                    Edit
+                  </Link>
+                  <span
+                    onClick={handleDeletePost}
+                    className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition cursor-pointer"
+                  >
+                    Delete
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="text-sm text-gray-500">
+              <span>
+                By{" "}
+                <a href={`/user/${post.author.id}`} className="font-semibold">
+                  {post.author.name}
+                </a>
+              </span>
+              <span className="ml-4">
+                {formatDistanceToNow(new Date(post.createdAt), {
+                  addSuffix: true,
+                })}
+              </span>
+            </div>
+
+            {post.action && (
+              <div className="mb-4">
                 <Link
-                  to={`/forum/edit/${post.id}`}
-                  className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                  to={`/actions/${post.action.id}`}
+                  className="inline-block bg-blue-50 text-blue-600 px-2 py-1 rounded-lg text-sm"
                 >
-                  Edit
+                  yeah eyah
                 </Link>
-                <span
-                  onClick={handleDeletePost}
-                  className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition cursor-pointer"
-                >
-                  Delete
-                </span>
               </div>
             )}
-          </div>
-          <div className="text-sm text-gray-500">
-            <span>
-              By{" "}
-              <a href={`/user/${post.author.id}`} className="font-semibold">
-                {post.author.name}
-              </a>
-            </span>
-            <span className="ml-4">
-              {formatDistanceToNow(new Date(post.createdAt), {
-                addSuffix: true,
-              })}
-            </span>
-          </div>
 
-          {post.action && (
-            <div className="mb-4">
-              <Link
-                to={`/actions/${post.action.id}`}
-                className="inline-block bg-blue-50 text-blue-600 px-2 py-1 rounded-lg text-sm"
-              >
-                yeah eyah
-              </Link>
+            <div className="my-8 whitespace-pre-wrap text-lg">
+              {post.content}
             </div>
-          )}
-
-          <div className="my-8 whitespace-pre-wrap text-lg">{post.content}</div>
-        </Card>
+          </Card>
+        </div>
 
         {post.replies.length > 0 ? (
           <div className="space-y-2 mb-8">

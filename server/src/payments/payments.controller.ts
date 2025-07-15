@@ -9,6 +9,7 @@ import {
   UnauthorizedException,
   RawBody,
   Request,
+  Get,
 } from '@nestjs/common';
 import Stripe from 'stripe';
 import { PaymentsService } from './payments.service';
@@ -161,5 +162,20 @@ export class PaymentsController {
     } else {
       console.log('No endpoint secret set');
     }
+  }
+
+  @Get('payment-methods')
+  async paymentMethods(@Request() req: JwtRequest) {
+    const customer = await this.paymentsService.getOrCreateCustomer(
+      req.user.sub,
+      req.user.email,
+    );
+    if (!customer) {
+      throw new UnauthorizedException('Customer not found');
+    }
+    const paymentMethods = await this.stripe.customers.listPaymentMethods(
+      customer.id,
+    );
+    return paymentMethods.data;
   }
 }

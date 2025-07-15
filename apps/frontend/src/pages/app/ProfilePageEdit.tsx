@@ -163,64 +163,66 @@ const ProfileEditPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-[800px] mx-auto space-y-2">
-      <div className="w-full h-[100px]"></div>
-      <div className="px-8 relative space-y-2 border-stone-300 border rounded mx-2">
-        <div className="relative w-fit">
-          <ProfileImage
-            src={
-              avatarFile ? URL.createObjectURL(avatarFile) : avatarUrl ?? null
-            }
-            className="mt-[-55px]"
-          />
-          <label className="cursor-pointer text-blue-600 underline text-sm absolute -top-5">
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatarChange}
+    <div className="min-h-screen bg-page w-full">
+      <div className="max-w-[800px] mx-auto space-y-2">
+        <div className="w-full h-[100px]"></div>
+        <div className="px-8 relative space-y-2 border-stone-300 border rounded mx-2 bg-white">
+          <div className="relative w-fit">
+            <ProfileImage
+              src={
+                avatarFile ? URL.createObjectURL(avatarFile) : avatarUrl ?? null
+              }
+              className="mt-[-55px]"
             />
-            Change photo
-          </label>
-        </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full border-none focus:outline-none text-[22pt] font-bold font-berlingske"
+            <label className="cursor-pointer text-blue-600 underline text-sm absolute -top-5">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+              Change photo
+            </label>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full border-none focus:outline-none text-[22pt] font-bold"
+            />
+          </div>
+          {/* stats row */}
+          <div className="flex flex-row gap-5 cursor-pointer">
+            <p>
+              <b>{completedActions.length} </b>
+              actions completed
+            </p>
+            <p>
+              <b>{forumPosts.length} </b>
+              forum posts
+            </p>
+            <p>
+              <b>{friends.length} </b>
+              Friends
+            </p>
+          </div>
+          <textarea
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            rows={6}
+            className="w-full border border-stone-300 focus:outline-none p-2 -ml-2 mt-2"
           />
-        </div>
-        {/* stats row */}
-        <div className="flex flex-row gap-5 cursor-pointer">
-          <p>
-            <b>{completedActions.length} </b>
-            actions completed
-          </p>
-          <p>
-            <b>{forumPosts.length} </b>
-            forum posts
-          </p>
-          <p>
-            <b>{friends.length} </b>
-            Friends
-          </p>
-        </div>
-        <textarea
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          rows={6}
-          className="w-full border border-stone-300 focus:outline-none p-2 -ml-2 mt-2"
-        />
-        {/* button row */}
-        <div className="absolute right-0 top-0 space-x-3 flex flex-row p-5">
-          <Button color={ButtonColor.Blue} onClick={handleSave} className="">
-            Save
-          </Button>
-        </div>
-        {/* <div className="absolute -left-20 top-0 p-5">
+          {/* button row */}
+          <div className="absolute right-0 top-0 space-x-3 flex flex-row p-5">
+            <Button color={ButtonColor.Blue} onClick={handleSave} className="">
+              Save
+            </Button>
+          </div>
+          {/* <div className="absolute -left-20 top-0 p-5">
           <BackButton />
           </div> */}
+        </div>
       </div>
     </div>
     // <div className="min-h-screen bg-page pt-20 px-4 md:px-0">

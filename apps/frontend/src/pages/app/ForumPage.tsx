@@ -36,16 +36,14 @@ const ForumPage: React.FC = () => {
   return (
     <TwoColumnSplit
       left={
-        <div className="flex flex-col p-3">
-          <div className="w-full space-y-2">
-            {posts.map((post) => (
-              <ForumListPost
-                key={post.id}
-                post={post}
-                handleViewPost={handleViewPost}
-              />
-            ))}
-          </div>
+        <div className="w-full gap-y-2 flex flex-col p-3">
+          {posts.map((post) => (
+            <ForumListPost
+              key={post.id}
+              post={post}
+              handleViewPost={handleViewPost}
+            />
+          ))}
         </div>
       }
       border={false}

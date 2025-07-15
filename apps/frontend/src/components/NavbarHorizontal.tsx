@@ -5,12 +5,14 @@ import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../lib/config";
 import NotificationsIcon from "./NotificationsIcon";
 import { useAuth } from "../lib/AuthContext";
+
 const NavbarHorizontal: React.FC = () => {
   const activeLinks = isFeatureEnabled(Features.Forum)
     ? links
     : links.filter((link) => link !== NavbarPage.Forum);
 
   const { isAuthenticated, user } = useAuth();
+
   if (!isAuthenticated) {
     return null;
   }
@@ -19,6 +21,11 @@ const NavbarHorizontal: React.FC = () => {
   if (user?.id) {
     profileUrl = `/user/${user.id}`;
   }
+
+  const currentLocation: NavbarPage | null =
+    activeLinks.find(
+      (link) => destinations[link] === window.location.pathname
+    ) || (window.location.pathname === profileUrl ? NavbarPage.Profile : null);
 
   return (
     <div
@@ -47,7 +54,13 @@ const NavbarHorizontal: React.FC = () => {
               key={link}
               className="py-3"
             >
-              <p className="whitespace-nowrap">{link}</p>
+              <p
+                className={`whitespace-nowrap ${
+                  currentLocation === link ? "underline" : ""
+                }`}
+              >
+                {link}
+              </p>
             </Link>
           )
         )}

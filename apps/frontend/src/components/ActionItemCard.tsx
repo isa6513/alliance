@@ -26,8 +26,6 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  console.log(joinedCount, completedCount);
-
   const goToActionPage = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
