@@ -38,7 +38,7 @@ const NavbarHorizontal: React.FC = () => {
           alliance
         </h1>
       </Link> */}
-      <div className="flex flex-row gap-x-10 px-10">
+      <div className="flex flex-row gap-x-5 px-10 sm:gap-x-10">
         {activeLinks.map((link) =>
           link === NavbarPage.Platform ? (
             <DropdownLink

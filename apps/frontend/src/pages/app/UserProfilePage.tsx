@@ -247,7 +247,7 @@ const UserProfilePage: React.FC = () => {
               </div>
             )}
             {selectedTab === ProfileTabs.Forum && (
-              <div className="space-y-2">
+              <div className="flex flex-col gap-y-1">
                 {forumPosts.length === 0 && (
                   <p className="text-center text-stone-500">
                     No forum posts yet

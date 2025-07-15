@@ -20,9 +20,9 @@ const ActionsListPage = ({ matches }: RouteMatches) => {
   return (
     <div className="flex flex-col min-h-screen bg-page items-center">
       <div className="px-4 py-5 flex flex-col items-center w-[calc(min(650px,100%))] gap-y-3">
-        <div className="flex py-8 flex-row justify-center items-center w-[90%] gap-x-4">
+        <div className="flex py-8 flex-row justify-center items-center w-full gap-x-4">
           <p className="text-lg text-left h-fit">Filter:</p>
-          <div className="flex flex-row gap-x-2 items-center">
+          <div className="flex flex-row gap-2 items-center flex-wrap ">
             {Object.values(FilterMode).map((mode) => (
               <Button
                 key={mode}
