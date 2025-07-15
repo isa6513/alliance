@@ -14,10 +14,16 @@ import {
 import Stripe from 'stripe';
 import { PaymentsService } from './payments.service';
 import { JwtRequest } from 'src/auth/guards/auth.guard';
-import { ApiBody, ApiOkResponse, ApiProperty } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiProperty,
+  ApiPropertyOptional,
+} from '@nestjs/swagger';
 import { AuthOptionalGuard } from 'src/auth/guards/authoptional.guard';
 import { CreatePartialProfileDto } from './dto/partial-profile.dto';
 import { IsNotEmpty } from 'class-validator';
+import { PaymentMethodDto } from './dto/payment-method.dto';
 
 class CreatePaymentIntentDto {
   @ApiProperty()
@@ -29,13 +35,13 @@ class ClientSecretDto {
   @ApiProperty()
   clientSecret: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   userToken?: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   savedPaymentMethodId?: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   savedPaymentMethodLast4?: string;
 }
 
@@ -126,12 +132,14 @@ export class PaymentsController {
   }
 
   @Post('set-partial-profile')
+  @ApiOkResponse()
   async setPartialProfile(@Body() body: CreatePartialProfileDto) {
     console.log('setting partial profile', body);
     return this.paymentsService.updatePaymentUserDataToken(body.id, body);
   }
 
   @Post('webhook')
+  @ApiOkResponse()
   async webhook(@RawBody() event: string, @Req() request: Request) {
     let parsedEvent: Stripe.Event;
     if (process.env.STRIPE_ENDPOINT_SECRET) {
@@ -165,7 +173,10 @@ export class PaymentsController {
   }
 
   @Get('payment-methods')
-  async paymentMethods(@Request() req: JwtRequest) {
+  @ApiOkResponse({ type: [PaymentMethodDto] })
+  async paymentMethods(
+    @Request() req: JwtRequest,
+  ): Promise<PaymentMethodDto[]> {
     const customer = await this.paymentsService.getOrCreateCustomer(
       req.user.sub,
       req.user.email,
@@ -176,6 +187,13 @@ export class PaymentsController {
     const paymentMethods = await this.stripe.customers.listPaymentMethods(
       customer.id,
     );
-    return paymentMethods.data;
+    const paymentMethodDtos = paymentMethods.data.map((paymentMethod) => {
+      return {
+        id: paymentMethod.id,
+        type: paymentMethod.type,
+        card: paymentMethod.card,
+      };
+    });
+    return paymentMethodDtos;
   }
 }
