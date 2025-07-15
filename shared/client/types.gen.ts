@@ -8,15 +8,17 @@ export type SignInDto = {
 
 export type SignInResponseDto = {
     isAdmin: boolean;
-    access_token: string;
-    refresh_token: string;
+    access_token?: string;
+    refresh_token?: string;
 };
+
+export type TokenMode = 'cookie' | 'header';
 
 export type SignUpDto = {
     name: string;
     email: string;
     password: string;
-    mode: 'cookie' | 'header';
+    mode: TokenMode;
     referralCode?: string;
 };
 
@@ -87,8 +89,10 @@ export type City = {
     longitude: number;
 };
 
+export type FriendStatus = 'pending' | 'accepted' | 'declined' | 'none';
+
 export type FriendStatusDto = {
-    status: 'pending' | 'accepted' | 'declined' | 'none';
+    status: FriendStatus | null;
 };
 
 export type UserActionDto = {
@@ -100,40 +104,14 @@ export type UserActionDto = {
 };
 
 /**
+ * Type of the action
+ */
+export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
+
+/**
  * Number of users who have joined the action
  */
 export type ActionStatus = 'draft' | 'upcoming' | 'gathering_commitments' | 'commitments_reached' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
-
-export type ActionEventDto = {
-    /**
-     * Unique identifier for the action event
-     */
-    id: number;
-    /**
-     * Title of the event
-     */
-    title: string;
-    /**
-     * secondary text
-     */
-    description: string;
-    /**
-     * New status of the action after the event
-     */
-    newStatus: 'draft' | 'upcoming' | 'gathering_commitments' | 'commitments_reached' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
-    /**
-     * Notification type for the event
-     */
-    sendNotifsTo: 'all' | 'joined' | 'none';
-    /**
-     * time of the event (for display)
-     */
-    date: string;
-    /**
-     * Indicates whether the event should be shown in the timeline
-     */
-    showInTimeline: boolean;
-};
 
 export type ActionDto = {
     /**
@@ -151,7 +129,7 @@ export type ActionDto = {
     /**
      * Image URL for the action
      */
-    image: string | null;
+    image?: string;
     /**
      * Number of commitments needed to start the action
      */
@@ -176,11 +154,11 @@ export type ActionDto = {
      * Short description shown in cards
      */
     shortDescription: string;
-    timeEstimate: string;
+    timeEstimate?: string;
     /**
      * Type of the action
      */
-    type: 'Funding' | 'Activity' | 'Ongoing';
+    type: ActionTaskType;
     /**
      * Number of users who have joined the action
      */
@@ -193,7 +171,7 @@ export type ActionDto = {
      * Number of users who have completed the action
      */
     usersCompleted: number;
-    events: Array<ActionEventDto>;
+    events: Array<Array<unknown>>;
 };
 
 export type LatLonDto = {
@@ -201,12 +179,17 @@ export type LatLonDto = {
     longitude: number;
 };
 
+/**
+ * Type of action activity
+ */
+export type ActionActivityType = 'user_joined' | 'user_completed';
+
 export type ActionActivityDto = {
     id: number;
     /**
      * Type of action activity
      */
-    type: 'user_joined' | 'user_completed';
+    type: ActionActivityType;
     createdAt: string;
     user: ProfileDto;
 };
@@ -223,7 +206,7 @@ export type CreateActionDto = {
     /**
      * Image URL for the action
      */
-    image: string | null;
+    image?: string;
     /**
      * Number of commitments needed to start the action
      */
@@ -248,11 +231,11 @@ export type CreateActionDto = {
      * Short description shown in cards
      */
     shortDescription: string;
-    timeEstimate: string;
+    timeEstimate?: string;
     /**
      * Type of the action
      */
-    type: 'Funding' | 'Activity' | 'Ongoing';
+    type: ActionTaskType;
 };
 
 export type UpdateActionDto = {
@@ -267,7 +250,7 @@ export type UpdateActionDto = {
     /**
      * Image URL for the action
      */
-    image?: string | null;
+    image?: string;
     /**
      * Number of commitments needed to start the action
      */
@@ -296,8 +279,13 @@ export type UpdateActionDto = {
     /**
      * Type of the action
      */
-    type?: 'Funding' | 'Activity' | 'Ongoing';
+    type?: ActionTaskType;
 };
+
+/**
+ * Notification type for the event
+ */
+export type NotificationType = 'all' | 'joined' | 'none';
 
 export type CreateActionEventDto = {
     /**
@@ -311,11 +299,11 @@ export type CreateActionEventDto = {
     /**
      * New status of the action after the event
      */
-    newStatus: 'draft' | 'upcoming' | 'gathering_commitments' | 'commitments_reached' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
+    newStatus: ActionStatus;
     /**
      * Notification type for the event
      */
-    sendNotifsTo: 'all' | 'joined' | 'none';
+    sendNotifsTo: NotificationType;
     /**
      * time of the event (for display)
      */
@@ -350,11 +338,6 @@ export type UpdateCommuniqueDto = {
 
 export type ReadResultDto = {
     read: boolean;
-};
-
-export type ImageResponseDto = {
-    id: number;
-    key: string;
 };
 
 export type UploadImageDto = {
@@ -398,7 +381,7 @@ export type PostDto = {
     updatedAt: string;
     action?: ActionDto;
     author: MinimalUserDto;
-    replies: Array<ReplyDto>;
+    replies: Array<Array<ReplyDto>>;
 };
 
 export type UpdatePostDto = {
@@ -444,9 +427,9 @@ export type CreatePaymentIntentDto = {
 
 export type ClientSecretDto = {
     clientSecret: string;
-    userToken: string;
-    savedPaymentMethodId: string;
-    savedPaymentMethodLast4: string;
+    userToken?: string;
+    savedPaymentMethodId?: string;
+    savedPaymentMethodLast4?: string;
 };
 
 export type CreatePartialProfileDto = {
@@ -454,6 +437,14 @@ export type CreatePartialProfileDto = {
     firstName: string;
     lastName: string;
     email: string;
+};
+
+export type PaymentMethodDto = {
+    id: string;
+    type: string;
+    card?: {
+        [key: string]: unknown;
+    };
 };
 
 export type TableMetadataDto = {
@@ -571,8 +562,10 @@ export type AppHealthCheckData = {
 };
 
 export type AppHealthCheckResponses = {
-    200: unknown;
+    200: string;
 };
+
+export type AppHealthCheckResponse = AppHealthCheckResponses[keyof AppHealthCheckResponses];
 
 export type AuthLoginData = {
     body: SignInDto;
@@ -930,8 +923,10 @@ export type ActionsJoinData = {
 };
 
 export type ActionsJoinResponses = {
-    201: unknown;
+    200: UserActionDto;
 };
+
+export type ActionsJoinResponse = ActionsJoinResponses[keyof ActionsJoinResponses];
 
 export type ActionsCompleteData = {
     body?: never;
@@ -943,8 +938,10 @@ export type ActionsCompleteData = {
 };
 
 export type ActionsCompleteResponses = {
-    201: unknown;
+    200: UserActionDto;
 };
+
+export type ActionsCompleteResponse = ActionsCompleteResponses[keyof ActionsCompleteResponses];
 
 export type ActionsMyStatusData = {
     body?: never;
@@ -1126,8 +1123,10 @@ export type ActionsUpdateData = {
 };
 
 export type ActionsUpdateResponses = {
-    200: unknown;
+    200: ActionDto;
 };
+
+export type ActionsUpdateResponse = ActionsUpdateResponses[keyof ActionsUpdateResponses];
 
 export type ActionsCreateData = {
     body: CreateActionDto;
@@ -1180,7 +1179,7 @@ export type ActionsClearDbData = {
 };
 
 export type ActionsClearDbResponses = {
-    201: unknown;
+    200: unknown;
 };
 
 export type ActionsSetTestRelationsData = {
@@ -1191,7 +1190,7 @@ export type ActionsSetTestRelationsData = {
 };
 
 export type ActionsSetTestRelationsResponses = {
-    201: unknown;
+    200: unknown;
 };
 
 export type CommuniquesFindAllData = {
@@ -1560,7 +1559,7 @@ export type PaymentsSetPartialProfileData = {
 };
 
 export type PaymentsSetPartialProfileResponses = {
-    201: unknown;
+    200: unknown;
 };
 
 export type PaymentsWebhookData = {
@@ -1571,7 +1570,7 @@ export type PaymentsWebhookData = {
 };
 
 export type PaymentsWebhookResponses = {
-    201: unknown;
+    200: unknown;
 };
 
 export type PaymentsPaymentMethodsData = {
@@ -1582,8 +1581,10 @@ export type PaymentsPaymentMethodsData = {
 };
 
 export type PaymentsPaymentMethodsResponses = {
-    200: unknown;
+    200: Array<PaymentMethodDto>;
 };
+
+export type PaymentsPaymentMethodsResponse = PaymentsPaymentMethodsResponses[keyof PaymentsPaymentMethodsResponses];
 
 export type AdminViewerGetTablesData = {
     body?: never;

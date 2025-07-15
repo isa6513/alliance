@@ -255,7 +255,10 @@ const PostDetailPage: React.FC = () => {
             <div className="text-sm text-gray-500">
               <span>
                 By{" "}
-                <a href={`/user/${post.author.id}`} className="font-semibold">
+                <a
+                  href={`/user/${post.author.id}`}
+                  className="font-semibold hover:underline"
+                >
                   {post.author.name}
                 </a>
               </span>

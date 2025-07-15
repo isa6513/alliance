@@ -5,7 +5,6 @@ import { authMe, authRegister, SignUpDto } from "@alliance/shared/client";
 import SignupForm from "../../components/SignupForm";
 import { isFeatureEnabled } from "../../lib/config";
 import { Features } from "@alliance/shared/lib/features";
-import CornerDecorations from "../../components/CornerDecorations";
 
 const SignupPage: React.FC = () => {
   const navigate = useNavigate();
@@ -76,15 +75,13 @@ const SignupPage: React.FC = () => {
             </Card>
           )}
 
-          <CornerDecorations>
-            <Card className="p-8 relative" style={CardStyle.White}>
-              <SignupForm
-                onSubmit={handleSubmit}
-                loading={loading}
-                referralCode={referralCode}
-              />
-            </Card>
-          </CornerDecorations>
+          <Card className="p-8 relative" style={CardStyle.White}>
+            <SignupForm
+              onSubmit={handleSubmit}
+              loading={loading}
+              referralCode={referralCode}
+            />
+          </Card>
           <div className="mt-6 text-center">
             <p className="text-[11pt] text-zinc-600">
               Already have an account?{" "}

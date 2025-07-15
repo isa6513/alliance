@@ -3,6 +3,7 @@ export interface TwoColumnSplitProps {
   right: React.ReactNode;
   coloredLeft?: boolean;
   coloredRight?: boolean;
+  collapseRight?: boolean;
   bg?: string;
   border?: boolean;
 }
@@ -12,6 +13,7 @@ const TwoColumnSplit = ({
   right,
   coloredLeft = false,
   coloredRight = false,
+  collapseRight = true,
   border = true,
   bg = "bg-page",
 }: TwoColumnSplitProps) => {
@@ -23,16 +25,16 @@ const TwoColumnSplit = ({
         }`}
       >
         <div
-          className={`flex flex-col flex-2 ${
+          className={`flex flex-col flex-1 ${
             border ? "sm:border-r border-stone-300" : ""
           } items-stretch ${coloredLeft ? "bg-agreen" : ""}`}
         >
           {left}
         </div>
         <div
-          className={`flex-col items-stretch flex-1 max-w-[350px] h-full ${
+          className={`flex-col items-stretch max-w-[350px] h-full ${
             coloredRight ? "bg-[#eee]" : ""
-          } min-h-[calc(100vh-49px)] hidden sm:flex`}
+          } min-h-[calc(100vh-49px)] ${collapseRight ? "hidden sm:flex" : ""}`}
         >
           {right}
         </div>

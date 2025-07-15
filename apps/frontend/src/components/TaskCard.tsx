@@ -133,7 +133,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         </div>
       )}
       {state === TaskCardState.Confirming && (
-        <div className="absolute top-0 left-0 bottom-0 right-0 bg-white flex justify-center items-center">
+        <div className="absolute top-0 left-0 bottom-0 right-0 bg-white flex justify-center items-center rounded-xl">
           <div className="bg-white p-4 rounded-md">
             <p className="mb-4 font-medium">
               This will charge {formattedDonationAmount} to your card on file
@@ -141,10 +141,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
             </p>
             <div className="flex flex-row gap-x-2">
               <Button color={ButtonColor.Blue} onClick={handleConfirmComplete}>
-                Yes!
+                Yes
               </Button>
               <Button color={ButtonColor.Light} onClick={handleCancelConfirm}>
-                Go back
+                Back
               </Button>
             </div>
           </div>

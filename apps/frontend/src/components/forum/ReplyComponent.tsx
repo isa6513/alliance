@@ -84,7 +84,15 @@ const ReplyComponent = ({
             <div className="flex justify-between items-center text-sm text-gray-500">
               <div className="gap-x-2 flex">
                 {reply.author?.name !== undefined && (
-                  <p>Reply by {reply.author?.name}</p>
+                  <p>
+                    Reply by{" "}
+                    <a
+                      href={`/user/${reply.author.id}`}
+                      className="hover:underline"
+                    >
+                      {reply.author?.name}
+                    </a>
+                  </p>
                 )}
                 <span>
                   {formatDistanceToNow(new Date(reply.createdAt), {

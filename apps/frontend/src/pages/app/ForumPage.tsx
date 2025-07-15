@@ -36,7 +36,7 @@ const ForumPage: React.FC = () => {
   return (
     <TwoColumnSplit
       left={
-        <div className="w-full gap-y-2 flex flex-col p-3">
+        <div className="gap-y-2 flex flex-col p-3">
           {posts.map((post) => (
             <ForumListPost
               key={post.id}
@@ -47,8 +47,9 @@ const ForumPage: React.FC = () => {
         </div>
       }
       border={false}
+      collapseRight={false}
       right={
-        <div className="flex flex-col p-3 items-start">
+        <div className="flex flex-col p-3 items-end w-fit">
           {isAuthenticated && (
             <Button onClick={handleCreatePost} color={ButtonColor.Blue}>
               New Thread

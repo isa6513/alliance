@@ -11,7 +11,6 @@ import {
 } from "@alliance/shared/client";
 import { isFeatureEnabled } from "../../lib/config";
 import { Features } from "@alliance/shared/lib/features";
-import CornerDecorations from "../../components/CornerDecorations";
 
 const LoginPage: React.FC = () => {
   const location = useLocation();
@@ -100,46 +99,44 @@ const LoginPage: React.FC = () => {
               )}
             </Card>
           )}
-          <CornerDecorations>
-            <Card className="p-8 z-10 relative" style={CardStyle.White}>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <FormInput
-                    label="Email Address"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="your@email.com"
-                    required
-                    name="email"
-                    autoComplete="email"
-                  />
-                </div>
-                <div>
-                  <FormInput
-                    label="Password"
-                    type="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    autoComplete="current-password"
-                    required
-                    name="password"
-                  />
-                </div>
+          <Card className="p-8 z-10 relative" style={CardStyle.White}>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <FormInput
+                  label="Email Address"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="your@email.com"
+                  required
+                  name="email"
+                  autoComplete="email"
+                />
+              </div>
+              <div>
+                <FormInput
+                  label="Password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  autoComplete="current-password"
+                  required
+                  name="password"
+                />
+              </div>
 
-                <div className="pt-2">
-                  <Button
-                    color={ButtonColor.Stone}
-                    className="w-full flex justify-center text-center py-3 pb-2"
-                    type="submit"
-                    disabled={loading}
-                  >
-                    Log In
-                  </Button>
-                </div>
-              </form>
-            </Card>
-          </CornerDecorations>
+              <div className="pt-2">
+                <Button
+                  color={ButtonColor.Stone}
+                  className="w-full flex justify-center text-center py-3 pb-2"
+                  type="submit"
+                  disabled={loading}
+                >
+                  Log In
+                </Button>
+              </div>
+            </form>
+          </Card>
           {showRegisterLink && (
             <div className="mt-6 text-center">
               <p className="text-[11pt] text-zinc-600">

@@ -10,8 +10,6 @@ const HomePage = ({ matches }: RouteMatches) => {
     return <div>Error loading actions</div>;
   }
 
-  console.log(relations);
-
   const todoActions = actions.filter(
     (action) =>
       relations.get(action.id) === "joined" && action.status === "member_action"
@@ -19,9 +17,8 @@ const HomePage = ({ matches }: RouteMatches) => {
 
   const newActions = actions.filter(
     (action) =>
-      !relations.get(action.id) ||
-      (relations.get(action.id) === "none" &&
-        action.status === "gathering_commitments")
+      (!relations.get(action.id) || relations.get(action.id) === "none") &&
+      action.status === "gathering_commitments"
   );
 
   const committedActions = actions.filter(
