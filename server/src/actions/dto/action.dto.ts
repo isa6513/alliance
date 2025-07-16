@@ -56,7 +56,7 @@ export class ActionDto extends OmitType(Action, [
   @ApiProperty()
   usersCompleted: number;
 
-  @ApiProperty({ type: [ActionEventDto], isArray: true })
+  @ApiProperty({ type: ActionEventDto, isArray: true })
   events: ActionEventDto[];
 
   @ApiProperty({ enum: ActionStatus, enumName: 'ActionStatus' })

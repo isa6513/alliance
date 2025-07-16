@@ -168,18 +168,20 @@ export class ActionsService {
     this.eventEmitter.emit('action.delta', { actionId, delta: +1 });
 
     const action = await this.findOne(actionId);
-
+    const user = await this.userService.findOne(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     // Create activity record for user joining
     const activity = this.actionActivityRepository.create({
       type: ActionActivityType.USER_JOINED,
       actionId: actionId,
       userId: userId,
       action: action,
+      user: user,
     });
     const savedActivity = await this.actionActivityRepository.save(activity);
 
-    // Emit activity event for real-time updates
-    const user = await this.userService.findOne(userId);
     if (user) {
       const activityDto = new ActionActivityDto(savedActivity);
       this.eventEmitter.emit('action.activity', {
@@ -203,6 +205,10 @@ export class ActionsService {
     );
 
     const action = await this.findOne(actionId);
+    const user = await this.userService.findOne(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
     // Create activity record for user completing
     const activity = this.actionActivityRepository.create({
@@ -210,11 +216,10 @@ export class ActionsService {
       actionId,
       userId,
       action: action,
+      user: user,
     });
     const savedActivity = await this.actionActivityRepository.save(activity);
 
-    // Emit activity event for real-time updates
-    const user = await this.userService.findOne(userId);
     if (user) {
       const activityDto = new ActionActivityDto(savedActivity);
       this.eventEmitter.emit('action.activity', {

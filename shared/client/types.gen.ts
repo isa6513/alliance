@@ -115,6 +115,42 @@ export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
  */
 export type ActionStatus = 'draft' | 'upcoming' | 'gathering_commitments' | 'commitments_reached' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
 
+/**
+ * Notification type for the event
+ */
+export type NotificationType = 'all' | 'joined' | 'none';
+
+export type ActionEventDto = {
+    /**
+     * Unique identifier for the action event
+     */
+    id: number;
+    /**
+     * Title of the event
+     */
+    title: string;
+    /**
+     * secondary text
+     */
+    description: string;
+    /**
+     * New status of the action after the event
+     */
+    newStatus: ActionStatus;
+    /**
+     * Notification type for the event
+     */
+    sendNotifsTo: NotificationType;
+    /**
+     * time of the event (for display)
+     */
+    date: string;
+    /**
+     * Indicates whether the event should be shown in the timeline
+     */
+    showInTimeline: boolean;
+};
+
 export type ActionDto = {
     /**
      * Unique identifier for the action
@@ -173,7 +209,7 @@ export type ActionDto = {
      * Number of users who have completed the action
      */
     usersCompleted: number;
-    events: Array<Array<unknown>>;
+    events: Array<ActionEventDto>;
 };
 
 export type LatLonDto = {
@@ -285,11 +321,6 @@ export type UpdateActionDto = {
      */
     type?: ActionTaskType;
 };
-
-/**
- * Notification type for the event
- */
-export type NotificationType = 'all' | 'joined' | 'none';
 
 export type CreateActionEventDto = {
     /**

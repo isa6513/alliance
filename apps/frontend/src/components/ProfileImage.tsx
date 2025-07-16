@@ -1,3 +1,5 @@
+import userImage from "../assets/icons8-user-80.png";
+
 const ProfileImage = ({
   src,
   className,
@@ -9,15 +11,11 @@ const ProfileImage = ({
     <div
       className={`rounded overflow-hidden bg-white flex items-center justify-center ${className} w-29 h-29`}
     >
-      {src ? (
-        <img
-          src={src}
-          alt="Profile"
-          className="object-cover rounded w-full h-full"
-        />
-      ) : (
-        <div className=" bg-stone-300 rounded" />
-      )}
+      <img
+        src={src ?? userImage}
+        alt="Profile"
+        className="object-cover rounded w-full h-full"
+      />
     </div>
   );
 };

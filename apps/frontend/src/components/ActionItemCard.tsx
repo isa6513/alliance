@@ -7,7 +7,10 @@ import Button, { ButtonColor } from "./system/Button";
 import checkMark from "../assets/noun-check-mark-2181.svg";
 
 export interface ActionItemCardProps
-  extends Pick<ActionDto, "name" | "shortDescription" | "category" | "id"> {
+  extends Pick<
+    ActionDto,
+    "name" | "shortDescription" | "category" | "id" | "status"
+  > {
   className?: string;
   joinedCount?: number;
   completedCount?: number;
@@ -20,6 +23,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   id,
   shortDescription,
   className,
+  status,
   joinedCount,
   completedCount,
   userRelation,
@@ -48,15 +52,16 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
           </div>
           <div>
             <div className="w-24 flex flex-col gap-y-2">
-              {userRelation === "none" && (
-                <Button
-                  color={ButtonColor.Transparent}
-                  onClick={goToActionPage}
-                  className="w-full text-sm rounded-md text-white font-medium bg-cardbutton hover:brightness-90 font-regular"
-                >
-                  Commit
-                </Button>
-              )}
+              {userRelation === "none" &&
+                status === "gathering_commitments" && (
+                  <Button
+                    color={ButtonColor.Transparent}
+                    onClick={goToActionPage}
+                    className="w-full text-sm rounded-md text-white font-medium bg-cardbutton hover:brightness-90 font-regular"
+                  >
+                    Commit
+                  </Button>
+                )}
             </div>
           </div>
         </div>
