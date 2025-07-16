@@ -29,7 +29,7 @@ export class ActionActivity {
   })
   type: ActionActivityType;
 
-  @ManyToOne(() => Action, { eager: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => Action, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'actionId' })
   action: Action;
 
@@ -37,7 +37,7 @@ export class ActionActivity {
   @ApiProperty()
   actionId: number;
 
-  @ManyToOne(() => User, { eager: true })
+  @ManyToOne(() => User, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 

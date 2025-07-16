@@ -242,6 +242,13 @@ export class ActionsController {
     return html;
   }
 
+  @Get('friendActivity')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [ActionActivityDto] })
+  async friendActivity(@Request() req: JwtRequest) {
+    return this.actionsService.friendActivity(req.user?.sub);
+  }
+
   @Get(':id')
   @UseGuards(AuthOptionalGuard)
   @ApiOkResponse({ type: ActionDto })
@@ -291,9 +298,6 @@ export class ActionsController {
 
   @Get('completed/:id')
   @ApiOkResponse({ type: [ActionDto] })
-  @ApiOperation({
-    summary: 'Get all completed actions for a user',
-  })
   async findCompletedForUser(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ActionDto[]> {

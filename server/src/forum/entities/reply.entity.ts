@@ -13,12 +13,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '../../user/user.entity';
 import { Post } from './post.entity';
 import { Notification } from '../../notifs/entities/notification.entity';
-import { IsNotEmpty, IsOptional } from 'class-validator';
-
+import { Allow, IsNotEmpty, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 @Entity()
 export class Reply {
   @PrimaryGeneratedColumn()
   @ApiProperty()
+  @Allow()
   id: number;
 
   @Column('text')
@@ -29,15 +30,20 @@ export class Reply {
   @ManyToOne(() => User)
   @JoinColumn()
   @ApiProperty()
+  @Allow()
+  @Type(() => User)
   author: User;
 
   @Column()
   @ApiProperty()
+  @Allow()
   authorId: number;
 
   @ManyToOne(() => Post, (post) => post.replies, { onDelete: 'CASCADE' })
   @JoinColumn()
   @ApiProperty({ type: () => Post })
+  @Allow()
+  @Type(() => Post)
   post: Post;
 
   @Column()
@@ -47,10 +53,14 @@ export class Reply {
 
   @CreateDateColumn()
   @ApiProperty()
+  @Allow()
+  @Type(() => Date)
   createdAt: Date;
 
   @UpdateDateColumn()
   @ApiProperty()
+  @Allow()
+  @Type(() => Date)
   updatedAt: Date;
 
   @ManyToOne(() => Reply, (reply) => reply.children, {
@@ -59,6 +69,8 @@ export class Reply {
   })
   @JoinColumn()
   @ApiProperty({ type: () => Reply, required: false })
+  @Allow()
+  @IsOptional()
   parent: Reply | null;
 
   @Column({ nullable: true })
@@ -67,12 +79,16 @@ export class Reply {
   parentId?: number;
 
   @OneToMany(() => Reply, (reply) => reply.parent)
-  @ApiProperty({ type: () => [Reply], required: false })
+  @ApiProperty({ type: () => Reply, required: false, isArray: true })
+  @Allow()
+  @Type(() => Reply)
   children: Reply[];
 
   @OneToOne(() => Notification, {
     onDelete: 'CASCADE',
   })
   @JoinColumn()
+  @Allow()
+  @Type(() => Notification)
   notification: Notification;
 }

@@ -223,15 +223,13 @@ const AdminPanel: React.FC = () => {
               >
                 Database Viewer
               </button>
-              {import.meta.env.MODE === "development" && (
-                <button
-                  onClick={() => setShowPopulateConfirm(true)}
-                  disabled={isPopulating}
-                  className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium"
-                >
-                  {isPopulating ? "Populating..." : "Populate Test Data"}
-                </button>
-              )}
+              <button
+                onClick={() => setShowPopulateConfirm(true)}
+                disabled={isPopulating}
+                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium"
+              >
+                {isPopulating ? "Populating..." : "Populate Test Data"}
+              </button>
               <button
                 className="w-full bg-stone-600 hover:bg-stone-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                 onClick={logout}

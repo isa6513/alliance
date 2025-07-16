@@ -126,6 +126,7 @@
 html {
   overflow-x: hidden;
   font-size: 15px;
+  background-color: var(--color-page);
 }
 
 h1 {

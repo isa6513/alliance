@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import {
   actionsFindAll,
   actionsMyActionRelations,
+  forumFindAllPosts,
+  PostDto,
   UserActionDto,
 } from "@alliance/shared/client";
 import { ActionDto } from "@alliance/shared/client";
@@ -22,12 +24,14 @@ export interface RouteMatches {
 export interface LoaderData {
   actions: ActionDto[];
   relations: Map<number, UserActionDto["status"]>;
+  posts: PostDto[];
 }
 
 export async function clientLoader({}: Route.LoaderArgs): Promise<LoaderData> {
-  const [actions, relations] = await Promise.all([
+  const [actions, relations, posts] = await Promise.all([
     actionsFindAll(),
     actionsMyActionRelations(),
+    forumFindAllPosts(),
   ]);
 
   const relationList = relations.data ?? [];
@@ -39,6 +43,7 @@ export async function clientLoader({}: Route.LoaderArgs): Promise<LoaderData> {
   return {
     actions: actions.data ?? [],
     relations: actionToRelationMap,
+    posts: posts.data ?? [],
   };
 }
 

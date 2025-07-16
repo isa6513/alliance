@@ -103,4 +103,18 @@ export class ActionActivityDto extends PickType(ActionActivity, [
 ]) {
   @ApiProperty({ type: () => ProfileDto })
   user: ProfileDto;
+
+  @ApiProperty()
+  actionId: number;
+
+  @ApiProperty()
+  actionName: string;
+
+  constructor(actionActivity: ActionActivity) {
+    super();
+    Object.assign(this, actionActivity);
+    this.actionId = actionActivity.action.id;
+    this.actionName = actionActivity.action.name;
+    this.user = new ProfileDto(actionActivity.user);
+  }
 }

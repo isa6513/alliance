@@ -36,7 +36,10 @@ export class UserAction {
     enum: UserActionRelation,
     default: UserActionRelation.none,
   })
-  @ApiProperty({ enum: Object.keys(UserActionRelation) })
+  @ApiProperty({
+    enum: UserActionRelation,
+    enumName: 'UserActionRelation',
+  })
   status: UserActionRelation;
 
   @CreateDateColumn()

@@ -26,7 +26,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Observable } from 'rxjs';
 import { from } from 'rxjs';
 import { instanceToPlain } from 'class-transformer';
-import { ProfileDto } from 'src/user/user.dto';
 
 @Injectable()
 export class ActionsService {
@@ -168,22 +167,21 @@ export class ActionsService {
     );
     this.eventEmitter.emit('action.delta', { actionId, delta: +1 });
 
+    const action = await this.findOne(actionId);
+
     // Create activity record for user joining
     const activity = this.actionActivityRepository.create({
       type: ActionActivityType.USER_JOINED,
       actionId: actionId,
       userId: userId,
+      action: action,
     });
     const savedActivity = await this.actionActivityRepository.save(activity);
 
     // Emit activity event for real-time updates
     const user = await this.userService.findOne(userId);
     if (user) {
-      const activityDto = new ActionActivityDto();
-      activityDto.id = savedActivity.id;
-      activityDto.type = savedActivity.type;
-      activityDto.createdAt = savedActivity.createdAt;
-      activityDto.user = new ProfileDto(user);
+      const activityDto = new ActionActivityDto(savedActivity);
       this.eventEmitter.emit('action.activity', {
         actionId,
         activity: activityDto,
@@ -204,22 +202,21 @@ export class ActionsService {
       UserActionRelation.completed,
     );
 
+    const action = await this.findOne(actionId);
+
     // Create activity record for user completing
     const activity = this.actionActivityRepository.create({
       type: ActionActivityType.USER_COMPLETED,
       actionId,
       userId,
+      action: action,
     });
     const savedActivity = await this.actionActivityRepository.save(activity);
 
     // Emit activity event for real-time updates
     const user = await this.userService.findOne(userId);
     if (user) {
-      const activityDto = new ActionActivityDto();
-      activityDto.id = savedActivity.id;
-      activityDto.type = savedActivity.type;
-      activityDto.createdAt = savedActivity.createdAt;
-      activityDto.user = new ProfileDto(user);
+      const activityDto = new ActionActivityDto(savedActivity);
       this.eventEmitter.emit('action.activity', {
         actionId,
         activity: activityDto,
@@ -335,26 +332,16 @@ export class ActionsService {
       relations: ['user'],
       order: { createdAt: 'DESC' },
     });
-    return activities.map((activity) => ({
-      ...activity,
-      user: new ProfileDto(activity.user),
-    }));
+    return activities.map((activity) => new ActionActivityDto(activity));
   }
 
-  async getActivityFeed(
-    limit: number = 50,
-  ): Promise<(ActionActivityDto & { actionId: number; actionName: string })[]> {
+  async getActivityFeed(limit: number = 50): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
       relations: ['user', 'action'],
       order: { createdAt: 'DESC' },
       take: limit,
     });
-    return activities.map((activity) => ({
-      ...activity,
-      user: new ProfileDto(activity.user),
-      actionId: activity.actionId,
-      actionName: activity.action.name,
-    }));
+    return activities.map((activity) => new ActionActivityDto(activity));
   }
 
   async checkAndProcessAutomaticTransitions(actionId: number) {
@@ -450,5 +437,21 @@ export class ActionsService {
       (ua) => ua.action.status !== ActionStatus.Draft,
     );
     return userActions.map((ua) => new UserActionDto(ua));
+  }
+
+  async friendActivity(userId: number): Promise<ActionActivityDto[]> {
+    const user = await this.userService.findOne(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const friends = user.friends;
+    const friendActivities = await this.actionActivityRepository.find({
+      where: {
+        user: { id: In(friends.map((f) => f.id)) },
+      },
+      relations: ['user', 'action'],
+      order: { createdAt: 'DESC' },
+    });
+    return friendActivities.map((activity) => new ActionActivityDto(activity));
   }
 }

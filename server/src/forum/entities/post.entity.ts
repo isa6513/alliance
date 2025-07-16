@@ -12,11 +12,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../user/user.entity';
 import { Action } from '../../actions/entities/action.entity';
 import { Reply } from './reply.entity';
-import { IsNotEmpty } from 'class-validator';
+import { Allow, IsNotEmpty } from 'class-validator';
+import { Type } from 'class-transformer';
+
 @Entity()
 export class Post {
   @PrimaryGeneratedColumn()
   @ApiProperty()
+  @Allow()
   id: number;
 
   @Column()
@@ -32,30 +35,42 @@ export class Post {
   @ManyToOne(() => User)
   @JoinColumn()
   @ApiProperty()
+  @Allow()
+  @Type(() => User)
   author: User;
 
   @Column()
   @ApiProperty()
+  @Allow()
   authorId: number;
 
   @ManyToOne(() => Action, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn()
   @ApiProperty({ required: false, type: () => Action })
+  @Allow()
+  @Type(() => Action)
   action: Action;
 
   @Column({ nullable: true })
   @ApiProperty({ required: false })
+  @Allow()
   actionId: number;
 
   @OneToMany(() => Reply, (reply) => reply.post)
-  @ApiProperty({ type: [Reply] })
+  @ApiProperty({ type: Reply, isArray: true })
+  @Allow()
+  @Type(() => Reply)
   replies: Reply[];
 
   @CreateDateColumn()
   @ApiProperty()
+  @Allow()
+  @Type(() => Date)
   createdAt: Date;
 
   @UpdateDateColumn()
   @ApiProperty()
+  @Allow()
+  @Type(() => Date)
   updatedAt: Date;
 }

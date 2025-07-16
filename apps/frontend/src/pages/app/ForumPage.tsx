@@ -29,20 +29,12 @@ const ForumPage: React.FC = () => {
     navigate("/forum/edit/new");
   };
 
-  const handleViewPost = (postId: number) => {
-    navigate(`/forum/post/${postId}`);
-  };
-
   return (
     <TwoColumnSplit
       left={
         <div className="gap-y-2 flex flex-col p-3">
           {posts.map((post) => (
-            <ForumListPost
-              key={post.id}
-              post={post}
-              handleViewPost={handleViewPost}
-            />
+            <ForumListPost key={post.id} post={post} />
           ))}
         </div>
       }

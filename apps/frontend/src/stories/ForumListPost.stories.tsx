@@ -37,11 +37,7 @@ export const ManyPosts: Story = {
     return (
       <div className="flex flex-col min-w-[800px]">
         {Array.from({ length: 10 }).map((_, index) => (
-          <ForumListPost
-            key={index}
-            post={samplePost}
-            handleViewPost={() => {}}
-          />
+          <ForumListPost key={index} post={samplePost} />
         ))}
       </div>
     );
@@ -57,7 +53,6 @@ const meta = {
   },
   args: {
     post: samplePost,
-    handleViewPost: () => {},
   },
 } satisfies Meta<typeof ForumListPost>;
 

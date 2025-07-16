@@ -15,7 +15,6 @@ const ActivityFeedPage = () => {
   const [liveActivities, setLiveActivities] = useState<FeedActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const {
-    isConnected,
     subscribeToFeed,
     unsubscribeFromFeed,
     onFeedActivity,

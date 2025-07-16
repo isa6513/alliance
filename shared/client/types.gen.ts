@@ -95,8 +95,10 @@ export type FriendStatusDto = {
     status: FriendStatus | null;
 };
 
+export type UserActionRelation = 'completed' | 'joined' | 'seen' | 'declined' | 'none';
+
 export type UserActionDto = {
-    status: 'completed' | 'joined' | 'seen' | 'declined' | 'none';
+    status: UserActionRelation;
     dateCommitted: string;
     dateCompleted: string;
     deadline: string;
@@ -192,6 +194,8 @@ export type ActionActivityDto = {
     type: ActionActivityType;
     createdAt: string;
     user: ProfileDto;
+    actionId: number;
+    actionName: string;
 };
 
 export type CreateActionDto = {
@@ -381,7 +385,7 @@ export type PostDto = {
     updatedAt: string;
     action?: ActionDto;
     author: MinimalUserDto;
-    replies: Array<Array<ReplyDto>>;
+    replies: Array<ReplyDto>;
 };
 
 export type UpdatePostDto = {
@@ -1080,6 +1084,19 @@ export type ActionsOpengraphResponses = {
 };
 
 export type ActionsOpengraphResponse = ActionsOpengraphResponses[keyof ActionsOpengraphResponses];
+
+export type ActionsFriendActivityData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/friendActivity';
+};
+
+export type ActionsFriendActivityResponses = {
+    200: Array<ActionActivityDto>;
+};
+
+export type ActionsFriendActivityResponse = ActionsFriendActivityResponses[keyof ActionsFriendActivityResponses];
 
 export type ActionsRemoveData = {
     body?: never;

@@ -6,10 +6,9 @@ import { useNavigate } from "react-router";
 
 export interface ForumListPostProps {
   post: PostDto;
-  handleViewPost: (id: number) => void;
 }
 
-const ForumListPost = ({ post, handleViewPost }: ForumListPostProps) => {
+const ForumListPost = ({ post }: ForumListPostProps) => {
   const navigate = useNavigate();
 
   const authorClick = (e: React.MouseEvent) => {
@@ -20,15 +19,15 @@ const ForumListPost = ({ post, handleViewPost }: ForumListPostProps) => {
   return (
     <Card
       key={post.id}
-      className={`w-full mb-0 rounded-sm`}
-      onClick={() => handleViewPost(post.id)}
+      className={`w-full mb-0 rounded-sm !gap-y-1`}
+      onClick={() => navigate(`/forum/post/${post.id}`)}
       style={CardStyle.White}
     >
-      <div className="flex flex-row justify-between gap-3">
-        <p className="text-md font-medium">{post.title}</p>
+      <div className="flex flex-row justify-between gap-2">
+        <p className="font-medium text-base">{post.title}</p>
         {post.action?.category && <Badge>{post.action.category}</Badge>}
       </div>
-      <div className="flex justify-between text-xs text-gray-500 mt-2">
+      <div className="flex justify-between text-xs text-gray-500">
         <div className="flex flex-row gap-x-2">
           <p onClick={authorClick} className="hover:underline">
             {post.author?.name || "Unknown user"}

@@ -254,13 +254,7 @@ const UserProfilePage: React.FC = () => {
                   </p>
                 )}
                 {forumPosts?.map((post: PostDto) => (
-                  <ForumListPost
-                    post={post}
-                    key={post.id}
-                    handleViewPost={() => {
-                      navigate(`/forum/post/${post.id}`);
-                    }}
-                  />
+                  <ForumListPost post={post} key={post.id} />
                 ))}
               </div>
             )}

@@ -1,10 +1,26 @@
-import { actionsComplete } from "@alliance/shared/client";
+import {
+  ActionActivityDto,
+  actionsComplete,
+  actionsFriendActivity,
+} from "@alliance/shared/client";
 import { getLoadedActionData, RouteMatches } from "../../applayout";
 import TaskCard from "../../components/TaskCard";
 import ActionItemCard from "../../components/ActionItemCard";
+import Card from "../../components/system/Card";
+import ForumListPost from "../../components/ForumListPost";
+import { useEffect, useState } from "react";
+import ActivityFeedItem from "../../components/ActivityFeedItem";
 
 const HomePage = ({ matches }: RouteMatches) => {
-  const { actions, relations } = getLoadedActionData(matches);
+  const { actions, relations, posts } = getLoadedActionData(matches);
+
+  const [friendActivity, setFriendActivity] = useState<ActionActivityDto[]>([]);
+
+  useEffect(() => {
+    actionsFriendActivity().then((resp) => {
+      setFriendActivity(resp.data ?? []);
+    });
+  }, []);
 
   if (!actions) {
     return <div>Error loading actions</div>;
@@ -35,66 +51,84 @@ const HomePage = ({ matches }: RouteMatches) => {
 
   return (
     <div className="flex flex-col w-full h-full items-center bg-page min-h-screen">
-      <div className="flex flex-col py-16 max-w-[728px] md:min-w-[600px] gap-y-5 overflow-y-auto px-3">
-        <div className="flex flex-col gap-y-8">
-          {todoActions.length > 0 && (
-            <div className="flex flex-col gap-y-4">
-              <div className="flex flex-row items-center gap-x-2">
-                <p className="font-semibold text-sm text-zinc-500">
-                  Awaiting Completion
-                </p>
-                <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full">
-                  {todoActions.slice(0, 2).length}
-                </span>
+      <div className="flex flex-row">
+        <div className="flex flex-col py-16 max-w-[728px] md:min-w-[600px] gap-y-5 overflow-y-auto px-3">
+          <div className="flex flex-col gap-y-8">
+            {todoActions.length > 0 && (
+              <div className="flex flex-col gap-y-4">
+                <div className="flex flex-row items-center gap-x-2">
+                  <p className="font-semibold text-sm text-zinc-800">
+                    Awaiting Completion
+                  </p>
+                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full">
+                    {todoActions.slice(0, 2).length}
+                  </span>
+                </div>
+                {todoActions.slice(0, 2).map((action) => (
+                  <TaskCard
+                    key={action.id}
+                    action={action}
+                    onComplete={handleTaskComplete}
+                  />
+                ))}
               </div>
-              {todoActions.slice(0, 2).map((action) => (
-                <TaskCard
-                  key={action.id}
-                  action={action}
-                  onComplete={handleTaskComplete}
-                />
-              ))}
-            </div>
-          )}
-          {newActions.length > 0 && (
-            <div className="flex flex-col gap-y-4">
-              <div className="flex flex-row items-center gap-x-2">
-                <p className="font-semibold text-sm text-zinc-500">
-                  Awaiting Commitment
-                </p>
-                <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full">
-                  {newActions.length}
-                </span>
+            )}
+            {newActions.length > 0 && (
+              <div className="flex flex-col gap-y-4">
+                <div className="flex flex-row items-center gap-x-2">
+                  <p className="font-semibold text-sm text-zinc-800">
+                    Awaiting Commitment
+                  </p>
+                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full">
+                    {newActions.length}
+                  </span>
+                </div>
+                {newActions.map((action) => (
+                  <ActionItemCard
+                    key={action.id}
+                    {...action}
+                    showDescription={true}
+                  />
+                ))}
               </div>
-              {newActions.map((action) => (
-                <ActionItemCard
-                  key={action.id}
-                  {...action}
-                  showDescription={true}
-                />
-              ))}
-            </div>
-          )}
-          {committedActions.length > 0 && (
-            <div className="flex flex-col gap-y-4">
-              <div className="flex flex-row items-center gap-x-2">
-                <p className="font-semibold text-sm text-zinc-500">
-                  Still gathering commitments
-                </p>
-                <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full">
-                  {committedActions.length}
-                </span>
+            )}
+            {committedActions.length > 0 && (
+              <div className="flex flex-col gap-y-4">
+                <div className="flex flex-row items-center gap-x-2">
+                  <p className="font-semibold text-sm text-zinc-500">
+                    Still gathering commitments
+                  </p>
+                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full">
+                    {committedActions.length}
+                  </span>
+                </div>
+                {committedActions.map((action) => (
+                  <ActionItemCard
+                    key={action.id}
+                    {...action}
+                    showDescription={false}
+                  />
+                ))}
               </div>
-              {committedActions.map((action) => (
-                <ActionItemCard
-                  key={action.id}
-                  {...action}
-                  showDescription={false}
-                />
+            )}
+            {/* <InviteMemberCard /> */}
+          </div>
+        </div>
+        <div className="flex flex-col py-16 gap-y-5 overflow-y-auto px-3 items-stretch min-w-[300px]">
+          <div className="flex flex-col gap-y-3">
+            <Card>
+              <p className="font-semibold text-zinc-800">New Forum Posts</p>
+              {posts.slice(0, 3).map((post) => (
+                <ForumListPost key={post.id} post={post} />
               ))}
-            </div>
-          )}
-          {/* <InviteMemberCard /> */}
+            </Card>
+            <Card>
+              <p className="font-semibold text-zinc-800">Friends</p>
+              {friendActivity.map((activity) => (
+                <ActivityFeedItem key={activity.id} activity={activity} />
+              ))}
+            </Card>
+          </div>
         </div>
       </div>
     </div>
