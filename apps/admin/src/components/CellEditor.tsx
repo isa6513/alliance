@@ -232,7 +232,7 @@ const CellEditor: React.FC<CellEditorProps> = ({
     <div className="absolute top-0 w-full z-10">
       {renderInput()}
       <div className="absolute -bottom-6 left-0 text-xs text-gray-700 bg-white">
-        Press Enter to save, Esc to cancel
+        Enter to save, Esc to cancel
       </div>
     </div>
   );

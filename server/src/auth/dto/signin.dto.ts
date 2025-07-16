@@ -1,10 +1,12 @@
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { User } from '../../user/user.entity';
-
+import { IsDefined, IsEnum } from 'class-validator';
 export type TokenMode = 'cookie' | 'header';
 
 export class SignInDto extends PickType(User, ['email', 'password']) {
   @ApiProperty({ enum: ['cookie', 'header'] })
+  @IsDefined()
+  @IsEnum(['cookie', 'header'])
   mode: TokenMode;
 }
 
