@@ -246,7 +246,7 @@ export class ActionsController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [ActionActivityDto] })
   async friendActivity(@Request() req: JwtRequest) {
-    return this.actionsService.friendActivity(req.user?.sub);
+    return this.actionsService.friendActivity(req.user.sub);
   }
 
   @Get(':id')

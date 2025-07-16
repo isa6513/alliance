@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
 import { useAuth } from "../../../lib/AuthContext";
@@ -15,6 +14,13 @@ import {
   FilterMode,
   filterActions,
 } from "../../../../../shared/lib/actionUtils";
+import {
+  Button,
+  Card,
+  colors,
+  ButtonColor,
+  CardStyle,
+} from "../../../components/design-system";
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -57,54 +63,21 @@ export default function HomeScreen() {
         <Text style={styles.welcomeTitle}>Welcome to Alliance</Text>
         {user && <Text style={styles.welcomeSubtitle}>Hello, {user.name}</Text>}
       </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Latest Updates</Text>
-        <Text style={styles.infoText}>
-          This is your home screen where you can see the latest updates and
-          activities.
-        </Text>
-      </View>
-
-      <View style={styles.actionsContainer}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actionButtonsRow}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Events</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Forum</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Resources</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
       <View style={styles.actionsListContainer}>
         <View style={styles.actionsTitleRow}>
           <Text style={styles.sectionTitle}>Actions</Text>
         </View>
         <View style={styles.filterRow}>
           {Object.values(FilterMode).map((mode) => (
-            <TouchableOpacity
+            <Button
               key={mode}
-              style={[
-                styles.filterButton,
-                filterMode === mode && styles.filterButtonActive,
-              ]}
+              title={mode}
               onPress={() => setFilterMode(mode)}
-            >
-              <Text
-                style={
-                  filterMode === mode
-                    ? styles.filterTextActive
-                    : styles.filterText
-                }
-              >
-                {mode}
-              </Text>
-            </TouchableOpacity>
+              color={
+                filterMode === mode ? ButtonColor.Stone : ButtonColor.Outline
+              }
+              style={styles.filterButton}
+            />
           ))}
         </View>
         {loading ? (
@@ -128,7 +101,7 @@ export default function HomeScreen() {
         )}
       </View>
 
-      <View style={styles.statsCard}>
+      <Card cardStyle={CardStyle.White} style={styles.statsCard}>
         <Text style={styles.statsTitle}>Your Activity</Text>
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
@@ -144,7 +117,7 @@ export default function HomeScreen() {
             <Text style={styles.statLabel}>Events</Text>
           </View>
         </View>
-      </View>
+      </Card>
     </ScrollView>
   );
 }
@@ -152,7 +125,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.page,
   },
   header: {
     paddingHorizontal: 20,
@@ -162,35 +135,28 @@ const styles = StyleSheet.create({
   welcomeTitle: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#333",
+    color: colors.text.primary,
     marginBottom: 6,
   },
   welcomeSubtitle: {
     fontSize: 18,
-    color: "#666",
+    color: colors.text.tertiary,
     marginBottom: 8,
   },
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
     margin: 16,
     marginTop: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    padding: 20,
   },
   cardTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#333",
+    color: colors.text.primary,
     marginBottom: 12,
   },
   infoText: {
     fontSize: 16,
-    color: "#666",
+    color: colors.text.tertiary,
     lineHeight: 22,
   },
   actionsContainer: {
@@ -201,26 +167,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: colors.text.primary,
     marginBottom: 12,
     paddingHorizontal: 4,
   },
   actionButtonsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    gap: 8,
   },
   actionButton: {
-    backgroundColor: "#0D1B2A",
-    borderRadius: 8,
-    padding: 14,
     flex: 1,
-    marginHorizontal: 4,
-    alignItems: "center",
-  },
-  actionButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 14,
   },
   actionsListContainer: {
     paddingHorizontal: 16,
@@ -237,60 +194,40 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 12,
+    gap: 4,
   },
   filterButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: "#eee",
-    marginHorizontal: 2,
-  },
-  filterButtonActive: {
-    backgroundColor: "#0D1B2A",
-  },
-  filterText: {
-    color: "#333",
-    fontWeight: "500",
-  },
-  filterTextActive: {
-    color: "#fff",
-    fontWeight: "700",
+    flex: 1,
+    padding: 12,
   },
   viewAllText: {
     fontSize: 14,
-    color: "#0D1B2A",
+    color: colors.primary,
     fontWeight: "600",
   },
   loader: {
     marginVertical: 20,
   },
   errorText: {
-    color: "#FF3B30",
+    color: colors.error,
     textAlign: "center",
     padding: 16,
   },
   noActionsText: {
-    color: "#666",
+    color: colors.text.tertiary,
     fontSize: 16,
     textAlign: "center",
     padding: 20,
   },
   statsCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
     margin: 16,
     marginTop: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    padding: 20,
   },
   statsTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: colors.text.primary,
     marginBottom: 16,
   },
   statsRow: {
@@ -304,11 +241,11 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#0D1B2A",
+    color: colors.primary,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: "#666",
+    color: colors.text.tertiary,
   },
 });

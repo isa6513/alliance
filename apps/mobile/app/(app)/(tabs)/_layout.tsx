@@ -19,6 +19,16 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="forum"
+          options={{
+            headerShown: false,
+            title: "Forum",
+            tabBarIcon: ({ color }) => (
+              <FontAwesome size={28} name="comments" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="profile"
           options={{
             headerShown: false,

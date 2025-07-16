@@ -1,17 +1,17 @@
-import { ActionActivityDto } from "@alliance/shared/client";
 import Card, { CardStyle } from "./system/Card";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router";
+import { ActionActivityDto } from "@alliance/shared/client";
+
 export interface ActivityFeedItemProps {
-  activity: FeedActivity;
+  activity: ActionActivityDto;
+  showTime?: boolean;
 }
 
-export interface FeedActivity extends ActionActivityDto {
-  actionId: number;
-  actionName?: string;
-}
-
-const ActivityFeedItem = ({ activity }: ActivityFeedItemProps) => {
+const ActivityFeedItem = ({
+  activity,
+  showTime = true,
+}: ActivityFeedItemProps) => {
   const navigate = useNavigate();
   const verb = activity.type === "user_joined" ? "joined" : "completed";
   return (
@@ -24,15 +24,20 @@ const ActivityFeedItem = ({ activity }: ActivityFeedItemProps) => {
         }}
       >
         <p className="text-black">
-          {`${activity.user.displayName}`}
+          <a
+            className="hover:underline font-medium"
+            href={`/user/${activity.user.id}`}
+          >{`${activity.user.displayName}`}</a>
           <span className="text-gray-600"> {verb}</span>
-          <span className="font-semibold"> {activity.actionName}</span>
+          <span className="font-medium"> {activity.actionName}</span>
         </p>
-        <p className="text-gray-500 text-right text-nowrap">
-          {formatDistanceToNow(new Date(activity.createdAt), {
-            addSuffix: true,
-          })}{" "}
-        </p>
+        {showTime && (
+          <p className="text-gray-500 text-right text-nowrap">
+            {formatDistanceToNow(new Date(activity.createdAt), {
+              addSuffix: true,
+            })}{" "}
+          </p>
+        )}
       </Card>
     </div>
   );

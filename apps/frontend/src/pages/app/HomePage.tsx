@@ -114,7 +114,7 @@ const HomePage = ({ matches }: RouteMatches) => {
             {/* <InviteMemberCard /> */}
           </div>
         </div>
-        <div className="flex flex-col py-16 gap-y-5 overflow-y-auto px-3 items-stretch min-w-[300px]">
+        <div className="flex flex-col py-16 gap-y-5 overflow-y-auto px-3 items-stretch w-[350px]">
           <div className="flex flex-col gap-y-3">
             <Card>
               <p className="font-semibold text-zinc-800">New Forum Posts</p>
@@ -125,7 +125,11 @@ const HomePage = ({ matches }: RouteMatches) => {
             <Card>
               <p className="font-semibold text-zinc-800">Friends</p>
               {friendActivity.map((activity) => (
-                <ActivityFeedItem key={activity.id} activity={activity} />
+                <ActivityFeedItem
+                  key={activity.id}
+                  activity={activity}
+                  showTime={false}
+                />
               ))}
             </Card>
           </div>

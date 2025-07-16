@@ -78,7 +78,7 @@ const NotificationsIcon = () => {
     >
       <p className="text-sm">{unreadCount}</p>
       {isOpen && (
-        <div className="absolute top-8 shadow-lg/5 right-0 bg-white rounded border border-zinc-200 p-4 min-w-[370px] space-y-2">
+        <div className="absolute top-8 shadow-lg/5 right-0 bg-white rounded border border-zinc-200 p-4 min-w-[370px] space-y-2 max-h-[500px] overflow-y-auto">
           {notifications.length === 0 && (
             <p className="text-zinc-500">No notifications</p>
           )}

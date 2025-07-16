@@ -13,6 +13,7 @@ import {
 import { Stack, Link, useRouter } from "expo-router";
 import { useAuth } from "../../lib/AuthContext";
 import { authStyles } from "../../lib/style/authStyles";
+import { colors, Input } from "../../components/design-system";
 
 const LoginScreen = () => {
   const router = useRouter();
@@ -60,9 +61,9 @@ const LoginScreen = () => {
 
           <View style={authStyles.inputContainer}>
             <Text style={authStyles.label}>Email</Text>
-            <TextInput
-              style={authStyles.input}
+            <Input
               placeholder="your@email.com"
+              placeholderTextColor={colors.text.tertiary}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -73,9 +74,9 @@ const LoginScreen = () => {
 
           <View style={authStyles.inputContainer}>
             <Text style={authStyles.label}>Password</Text>
-            <TextInput
-              style={authStyles.input}
+            <Input
               placeholder="Your password"
+              placeholderTextColor={colors.text.tertiary}
               value={password}
               onChangeText={setPassword}
               secureTextEntry

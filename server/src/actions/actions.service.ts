@@ -445,11 +445,14 @@ export class ActionsService {
   }
 
   async friendActivity(userId: number): Promise<ActionActivityDto[]> {
-    const user = await this.userService.findOne(userId);
+    const user = await this.userService.findOne(userId, [
+      'sentFriendRequests',
+      'receivedFriendRequests',
+    ]);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const friends = user.friends;
+    const friends = await this.userService.findFriends(userId);
     const friendActivities = await this.actionActivityRepository.find({
       where: {
         user: { id: In(friends.map((f) => f.id)) },

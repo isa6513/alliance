@@ -18,12 +18,10 @@ export default function ActionCard({ action, onPress }: ActionCardProps) {
         </View>
       </View>
       <Text style={styles.description} numberOfLines={2}>
-        {action.description}
+        {action.shortDescription}
       </Text>
       <View style={styles.footer}>
-        <Text style={styles.statusText}>
-          {action.status === "active" ? "Ongoing" : action.status}
-        </Text>
+        <Text style={styles.statusText}>{action.status}</Text>
         <View style={styles.detailsButton}>
           <Text style={styles.detailsText}>Details</Text>
           <FontAwesome

@@ -86,10 +86,10 @@ export class UserService {
     return this.userRepository.find();
   }
 
-  findOne(id: number): Promise<User | null> {
+  findOne(id: number, relations?: string[]): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },
-      relations: ['city'],
+      relations: ['city', ...(relations ?? [])],
     });
   }
 

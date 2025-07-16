@@ -10,7 +10,6 @@ import {
   authLogout,
   authMe,
   authRefreshTokens,
-  ProfileDto,
   UserDto,
 } from "../../../shared/client";
 import { useRouter } from "expo-router";
@@ -18,7 +17,7 @@ import { client } from "@alliance/shared/client/client.gen";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: ProfileDto | undefined;
+  user: UserDto | undefined;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
