@@ -21,7 +21,7 @@ type ButtonProps = React.PropsWithChildren & {
 
 export enum ButtonColor {
   Stone = "bg-[#444] text-white hover:bg-[#333]",
-  Green = "bg-[#5d9c2d] text-white",
+  Green = "bg-[#5d9c2d] text-white hover:bg-[#4d8c1d]",
   Red = "bg-red-100 !text-red-500",
   Light = "bg-stone-200",
   Blue = "bg-[#318dde] text-white",

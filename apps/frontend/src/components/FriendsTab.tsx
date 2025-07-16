@@ -228,7 +228,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
                 {receivedRequests.map((request) => (
                   <div
                     key={request.email}
-                    className="flex items-center p-3 border rounded-lg"
+                    className="flex items-center p-3 border border-gray-300 rounded-lg"
                   >
                     <UserBubble className="w-12 h-12 mr-4" />
                     <div className="flex-grow">
@@ -273,7 +273,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
                 {sentRequests.map((request) => (
                   <div
                     key={request.email}
-                    className="flex items-center p-3 border rounded-lg"
+                    className="flex items-center p-3 border border-gray-300 rounded-lg"
                   >
                     <UserBubble className="w-12 h-12 mr-4" />
                     <div className="flex-grow">

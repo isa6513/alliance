@@ -172,6 +172,7 @@ export class UserService {
         user: addressee,
         category: NotificationType.FriendRequest,
         message: `${requester.name} wants to be friends`,
+        webAppLocation: '/settings',
       });
 
       rel = this.friendRepository.create({

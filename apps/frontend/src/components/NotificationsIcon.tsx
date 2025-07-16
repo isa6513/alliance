@@ -28,7 +28,13 @@ const NotificationsIcon = () => {
     notifsFindAll().then(
       ({ data: notifications }: { data: NotificationDto[] | undefined }) => {
         if (notifications) {
-          setNotifications(notifications);
+          setNotifications(
+            notifications.sort(
+              (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+            )
+          );
           setUnreadCount(
             notifications.filter((notification) => !notification.read).length
           );
@@ -44,14 +50,13 @@ const NotificationsIcon = () => {
   const handleNotifClick = useCallback(
     (id: number, webAppLocation: string | null) => () => {
       notifsSetRead({ path: { id } });
-      setNotifications(
-        notifications.map((notification) => ({
-          ...notification,
-          read: notification.id === id ? true : notification.read,
-        }))
-      );
+      const newNotifications = notifications.map((notification) => ({
+        ...notification,
+        read: notification.id === id ? true : notification.read,
+      }));
+      setNotifications(newNotifications);
       setUnreadCount(
-        notifications.filter((notification) => !notification.read).length
+        newNotifications.filter((notification) => !notification.read).length
       );
       navigate(
         webAppLocation
