@@ -816,7 +816,7 @@ export type UserListReceivedRequestsData = {
 };
 
 export type UserListReceivedRequestsResponses = {
-    200: Array<UserDto>;
+    200: Array<ProfileDto>;
 };
 
 export type UserListReceivedRequestsResponse = UserListReceivedRequestsResponses[keyof UserListReceivedRequestsResponses];
@@ -829,7 +829,7 @@ export type UserListSentRequestsData = {
 };
 
 export type UserListSentRequestsResponses = {
-    200: Array<UserDto>;
+    200: Array<ProfileDto>;
 };
 
 export type UserListSentRequestsResponse = UserListSentRequestsResponses[keyof UserListSentRequestsResponses];
@@ -878,7 +878,7 @@ export type UserListFriendsData = {
 };
 
 export type UserListFriendsResponses = {
-    200: Array<UserDto>;
+    200: Array<ProfileDto>;
 };
 
 export type UserListFriendsResponse = UserListFriendsResponses[keyof UserListFriendsResponses];

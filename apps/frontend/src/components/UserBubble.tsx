@@ -5,13 +5,14 @@ interface UserBubbleProps extends PropsWithChildren {
   className?: string;
   clipped?: boolean;
   bgColor?: string;
+  image?: string;
 }
 
 const UserBubble: React.FC<UserBubbleProps> = ({
-  children,
   className,
   clipped = false,
-}) => {
+  image,
+}: UserBubbleProps) => {
   return (
     <div
       className={`border rounded-full bg-gray-200 overflow-hidden ${
@@ -19,9 +20,9 @@ const UserBubble: React.FC<UserBubbleProps> = ({
       } ${className}`}
     >
       <img
-        src={userImage}
+        src={image ?? userImage}
         alt="user"
-        className="w-[40px] h-[40px]  mt-1"
+        className="w-full h-full object-cover"
         style={{ boxSizing: "border-box" }}
       />
     </div>

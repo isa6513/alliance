@@ -7,7 +7,6 @@ import {
   userFindOne,
   userRequestFriend,
   userListFriends,
-  UserDto,
   userMyFriendRelationship,
   FriendStatusDto,
   ProfileDto,
@@ -18,8 +17,6 @@ import {
   ActionDto,
 } from "@alliance/shared/client";
 import ProfileImage from "../../components/ProfileImage";
-import testImg from "../../assets/fakebgimage.png";
-// import dots from "../../assets/dots.svg";
 import UserActivityCard from "../../components/UserActivityCard";
 import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
@@ -43,7 +40,7 @@ const UserProfilePage: React.FC = () => {
 
   const [completedActions, setCompletedActions] = useState<ActionDto[]>([]);
   const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
-  const [friends, setFriends] = useState<UserDto[]>([]);
+  const [friends, setFriends] = useState<ProfileDto[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,7 +53,7 @@ const UserProfilePage: React.FC = () => {
         const { data: userData } = await userFindOne({
           path: { id: userId },
         });
-        if (userData) {
+        if (userData && userData.displayName) {
           setProfileUser(userData);
         }
         console.log(userData?.id, user?.id);
@@ -139,6 +136,8 @@ const UserProfilePage: React.FC = () => {
       </div>
     );
   }
+
+  console.log(profileUser);
 
   if (!profileUser) {
     return (
@@ -259,21 +258,24 @@ const UserProfilePage: React.FC = () => {
               </div>
             )}
             {selectedTab === ProfileTabs.Friends && (
-              <div className="space-2 flex flex-row flex-wrap gap-2 justify-center">
+              <Card className="justify-center">
                 {friends.length === 0 && (
                   <p className="text-center text-stone-500">No friends yet</p>
                 )}
-                {friends?.map((friend: UserDto) => (
+                {friends?.map((friend: ProfileDto) => (
                   <div
-                    className="flex flex-row gap-2 items-center cursor-pointer hover:bg-stone-100 rounded-md p-3 px-5 w-fit"
+                    className="flex flex-row gap-2 items-center cursor-pointer hover:bg-stone-200 rounded-md p-3 px-5 w-fit"
                     onClick={() => navigate(`/user/${friend.id}`)}
                     key={friend.id}
                   >
-                    <ProfileImage src={testImg} className="!w-10 !h-10" />
-                    <p>{friend.name}</p>
+                    <ProfileImage
+                      src={friend.profilePicture}
+                      className="!w-10 !h-10"
+                    />
+                    <p>{friend.displayName}</p>
                   </div>
                 ))}
-              </div>
+              </Card>
             )}
           </div>
         </div>

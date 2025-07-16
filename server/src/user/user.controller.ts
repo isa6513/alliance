@@ -24,7 +24,6 @@ import {
   OnboardingDto,
   ProfileDto,
   UpdateProfileDto,
-  UserDto,
   userToDto,
 } from './user.dto';
 import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
@@ -138,16 +137,18 @@ export class UserController {
   @Get('friends/requests/received')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Requests other users sent to me (pending)' })
-  @ApiOkResponse({ type: [UserDto] })
-  async listReceivedRequests(@Request() req: JwtRequest): Promise<UserDto[]> {
+  @ApiOkResponse({ type: [ProfileDto] })
+  async listReceivedRequests(
+    @Request() req: JwtRequest,
+  ): Promise<ProfileDto[]> {
     return this.userService.findPendingRequests(req.user.sub, 'received');
   }
 
   @Get('friends/requests/sent')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Requests I sent that are still pending' })
-  @ApiOkResponse({ type: [UserDto] })
-  async listSentRequests(@Request() req: JwtRequest): Promise<UserDto[]> {
+  @ApiOkResponse({ type: [ProfileDto] })
+  async listSentRequests(@Request() req: JwtRequest): Promise<ProfileDto[]> {
     return this.userService.findPendingRequests(req.user.sub, 'sent');
   }
 
@@ -188,11 +189,11 @@ export class UserController {
 
   @Get('listfriends/:id')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: [UserDto] })
+  @ApiOkResponse({ type: [ProfileDto] })
   async listFriends(
     @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<UserDto[]> {
+  ): Promise<ProfileDto[]> {
     if (!req.user) {
       throw new UnauthorizedException('User not found');
     }

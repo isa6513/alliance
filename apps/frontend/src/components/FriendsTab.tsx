@@ -10,8 +10,9 @@ import {
   userAcceptFriendRequest,
   userDeclineFriendRequest,
   userRemoveFriend,
-  UserDto,
+  ProfileDto,
 } from "@alliance/shared/client";
+import ProfileImage from "./ProfileImage";
 
 interface FriendsTabProps {
   userId: number;
@@ -20,9 +21,9 @@ interface FriendsTabProps {
 const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [friends, setFriends] = useState<UserDto[]>([]);
-  const [receivedRequests, setReceivedRequests] = useState<UserDto[]>([]);
-  const [sentRequests, setSentRequests] = useState<UserDto[]>([]);
+  const [friends, setFriends] = useState<ProfileDto[]>([]);
+  const [receivedRequests, setReceivedRequests] = useState<ProfileDto[]>([]);
+  const [sentRequests, setSentRequests] = useState<ProfileDto[]>([]);
   const [activeTab, setActiveTab] = useState<"friends" | "received" | "sent">(
     "friends"
   );
@@ -192,9 +193,12 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
                     className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-gray-500"
                     onClick={() => navigate(`/user/${friend.id}`)}
                   >
-                    <UserBubble className="w-12 h-12 mr-4" />
+                    <ProfileImage
+                      className="!w-12 !h-12 mr-4"
+                      src={friend.profilePicture}
+                    />
                     <div className="flex-grow">
-                      <p className="font-medium">{friend.name}</p>
+                      <p className="font-medium">{friend.displayName}</p>
                       <p className="text-stone-500 text-sm">{friend.email}</p>
                     </div>
                     <Button
@@ -230,9 +234,12 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
                     key={request.email}
                     className="flex items-center p-3 border border-gray-300 rounded-lg"
                   >
-                    <UserBubble className="w-12 h-12 mr-4" />
+                    <ProfileImage
+                      src={request.profilePicture}
+                      className="!w-12 !h-12 mr-4"
+                    />
                     <div className="flex-grow">
-                      <p className="font-medium">{request.name}</p>
+                      <p className="font-medium">{request.displayName}</p>
                       <p className="text-stone-500 text-sm">{request.email}</p>
                     </div>
                     <div className="flex space-x-2">
@@ -277,7 +284,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
                   >
                     <UserBubble className="w-12 h-12 mr-4" />
                     <div className="flex-grow">
-                      <p className="font-medium">{request.name}</p>
+                      <p className="font-medium">{request.displayName}</p>
                       <p className="text-stone-500 text-sm">{request.email}</p>
                     </div>
                     <Button

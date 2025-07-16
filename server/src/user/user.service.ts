@@ -8,7 +8,12 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserActionRelation } from '../actions/entities/user-action.entity';
 import { Friend, FriendStatus } from './friend.entity';
-import { OnboardingDto, UpdateProfileDto, UserDto } from './user.dto';
+import {
+  OnboardingDto,
+  ProfileDto,
+  UpdateProfileDto,
+  UserDto,
+} from './user.dto';
 import { City } from 'src/geo/city.entity';
 import {
   NotificationType,
@@ -229,8 +234,7 @@ export class UserService {
       .execute();
   }
 
-  /** Return accepted friends as `UserDto[]`. */
-  async findFriends(userId: number): Promise<UserDto[]> {
+  async findFriends(userId: number): Promise<ProfileDto[]> {
     const rels = await this.friendRepository.find({
       where: [
         { requester: { id: userId }, status: FriendStatus.Accepted },
@@ -243,7 +247,7 @@ export class UserService {
       r.requester.id === userId ? r.addressee : r.requester,
     );
 
-    return others;
+    return others.map((o) => new ProfileDto(o));
   }
 
   /**
@@ -265,11 +269,10 @@ export class UserService {
     await this.friendRepository.save(rel);
   }
 
-  /** Pending sent / received requests as `UserDto[]`. */
   async findPendingRequests(
     userId: number,
     direction: 'sent' | 'received',
-  ): Promise<UserDto[]> {
+  ): Promise<ProfileDto[]> {
     const rels =
       direction === 'sent'
         ? await this.friendRepository.find({
@@ -285,7 +288,7 @@ export class UserService {
         ? rels.map((r) => r.addressee)
         : rels.map((r) => r.requester);
 
-    return users;
+    return users.map((u) => new ProfileDto(u));
   }
 
   async getRelationshipStatus(
