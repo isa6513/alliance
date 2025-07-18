@@ -54,11 +54,12 @@ const HomePage = ({ matches }: RouteMatches) => {
       <div className="flex flex-row">
         <div className="flex flex-col py-16 max-w-[728px] md:min-w-[600px] gap-y-5 overflow-y-auto px-3">
           <div className="flex flex-col gap-y-8">
+            <p className="text-2xl font-medium">My tasks</p>
             {todoActions.length > 0 && (
               <div className="flex flex-col gap-y-4">
                 <div className="flex flex-row items-center gap-x-2">
-                  <p className="font-semibold text-sm text-zinc-800">
-                    Awaiting Completion
+                  <p className="font-medium text-zinc-800">
+                    Awaiting completion
                   </p>
                   <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full">
                     {todoActions.slice(0, 2).length}
@@ -76,8 +77,8 @@ const HomePage = ({ matches }: RouteMatches) => {
             {newActions.length > 0 && (
               <div className="flex flex-col gap-y-4">
                 <div className="flex flex-row items-center gap-x-2">
-                  <p className="font-semibold text-sm text-zinc-800">
-                    Awaiting Commitment
+                  <p className="font-medium text-zinc-800">
+                    Awaiting commitment
                   </p>
                   <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full">
                     {newActions.length}
@@ -95,7 +96,7 @@ const HomePage = ({ matches }: RouteMatches) => {
             {committedActions.length > 0 && (
               <div className="flex flex-col gap-y-4">
                 <div className="flex flex-row items-center gap-x-2">
-                  <p className="font-semibold text-sm text-zinc-500">
+                  <p className="font-medium text-zinc-800">
                     Still gathering commitments
                   </p>
                   <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full">
@@ -117,13 +118,20 @@ const HomePage = ({ matches }: RouteMatches) => {
         <div className="flex flex-col py-16 gap-y-5 overflow-y-auto px-3 items-stretch w-[350px]">
           <div className="flex flex-col gap-y-3">
             <Card>
-              <p className="font-semibold text-zinc-800">New Forum Posts</p>
+              <p className="font-semibold text-zinc-800">Forum activity</p>
+              {posts.length === 0 && (
+                <p className="text-zinc-400">No forum activity yet</p>
+              )}
+
               {posts.slice(0, 3).map((post) => (
                 <ForumListPost key={post.id} post={post} />
               ))}
             </Card>
             <Card>
               <p className="font-semibold text-zinc-800">Friends</p>
+              {friendActivity.length === 0 && (
+                <p className="text-zinc-400">No friend activity yet</p>
+              )}
               {friendActivity.map((activity) => (
                 <ActivityFeedItem
                   key={activity.id}

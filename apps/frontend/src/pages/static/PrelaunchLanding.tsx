@@ -51,7 +51,7 @@ const PrelaunchLandingPage: React.FC = () => {
         ></div>
         <div className="absolute top-0 left-0 right-0 bottom-0 bg-linear-to-t from-black to-transparent opacity-50"></div>
 
-        <h2 className="w-[90%] max-w-[750px] fixed bottom-8 md:bottom-25 text-white !text-3xl md:!text-7xl font-semibold font-sabon">
+        <h2 className="w-[90%] max-w-[750px] fixed bottom-8 md:bottom-20 text-white !text-3xl md:!text-7xl font-semibold font-sabon">
           Humanity acting as one for a conscionable world.
         </h2>
 

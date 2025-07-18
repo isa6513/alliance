@@ -170,18 +170,20 @@ const UserProfilePage: React.FC = () => {
             <div className="flex flex-row gap-5 cursor-pointer">
               <p onClick={() => setSelectedTab(ProfileTabs.Activity)}>
                 <b>{completedActions.length} </b>
-                actions completed
+                <span className="text-zinc-500">actions completed</span>
               </p>
               <p onClick={() => setSelectedTab(ProfileTabs.Forum)}>
                 <b>{forumPosts.length} </b>
-                forum posts
+                <span className="text-zinc-500">forum posts</span>
               </p>
               <p onClick={() => setSelectedTab(ProfileTabs.Friends)}>
                 <b>{friends.length} </b>
-                friends
+                <span className="text-zinc-500">friends</span>
               </p>
             </div>
-            <p className="my-6">{profileUser.profileDescription}</p>
+            {profileUser.profileDescription && (
+              <p className="mt-6">{profileUser.profileDescription}</p>
+            )}
             {/* button row */}
             <div className="absolute right-0 top-0 space-x-3 flex flex-row p-5">
               {isAuthenticated && !isMe && (
