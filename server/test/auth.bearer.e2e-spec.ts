@@ -17,7 +17,7 @@ describe('Auth (e2e)', () => {
   it('returns 401 for invalid login', () => {
     return request(ctx.app.getHttpServer())
       .post('/auth/login')
-      .send({ email: 'baduser@test.com', password: 'password' })
+      .send({ email: 'baduser@test.com', password: 'password', mode: 'header' })
       .expect(401);
   });
 

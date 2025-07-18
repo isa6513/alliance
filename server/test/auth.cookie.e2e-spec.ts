@@ -18,7 +18,7 @@ describe('Auth via Http-Only cookies (e2e)', () => {
   it('rejects invalid login', () => {
     return ctx.agent
       .post('/auth/login')
-      .send({ email: 'nobody@test.com', password: 'password' })
+      .send({ email: 'nobody@test.com', password: 'password', mode: 'cookie' })
       .expect(401);
   });
 
