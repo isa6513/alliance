@@ -112,10 +112,10 @@
 @theme {
   --color-hgreen: #3f5640;
   --color-agreen: #c4d8bf;
-  --color-cardbutton: #333;
+  --color-cardbutton: #3ba337;
   --color-bgreen: rgb(143, 190, 111);
   --color-blue: #318dde;
-  --color-page: #fbfbfb;
+  --color-page: #fcfcfc;
   --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.03), 0 2px 4px -2px rgb(0 0 0 / 0.05);
 }
 

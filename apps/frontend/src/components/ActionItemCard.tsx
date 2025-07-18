@@ -40,11 +40,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      <Card
-        className="block shadow"
-        style={CardStyle.White}
-        onClick={goToActionPage}
-      >
+      <Card className="block " style={CardStyle.White} onClick={goToActionPage}>
         <div className="flex flex-row items-start gap-x-8">
           <div className="flex-1 flex flex-col">
             <p className="font-medium text-black">{name}</p>

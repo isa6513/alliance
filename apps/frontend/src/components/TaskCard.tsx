@@ -95,7 +95,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   return (
     <Card
       style={CardStyle.White}
-      className={` transition-all shadow duration-500 w-full relative
+      className={` transition-all duration-500 w-full relative
          ${state === TaskCardState.Minified ? "pb-4" : ""}
           ${state === TaskCardState.Closed ? "py-0 border-0" : ""}`}
       closed={state === TaskCardState.Closed}
