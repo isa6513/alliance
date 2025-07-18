@@ -55,11 +55,13 @@ const NavbarHorizontal: React.FC = () => {
                   link === NavbarPage.Profile ? profileUrl : destinations[link]
                 }
                 key={link}
-                className="py-3"
+                className={`py-4 ${
+                  currentLocation === link ? "border-b-2 border-cardbutton" : ""
+                }`}
               >
                 <p
                   className={`whitespace-nowrap ${
-                    currentLocation === link ? "underline" : ""
+                    currentLocation === link ? "" : ""
                   }`}
                 >
                   {link}
