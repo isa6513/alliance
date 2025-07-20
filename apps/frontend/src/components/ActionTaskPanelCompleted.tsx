@@ -8,8 +8,8 @@ export interface ActionTaskPanelCompletedProps {
 const ActionTaskPanelCompleted = () => {
   return (
     <Card style={CardStyle.Green}>
-      <p className="font-bold pt-1">
-        We&apos;ve recieved your contribution! Thanks for helping.
+      <p className="">
+        You&apos;ve completed this action! Thank you for your help.
       </p>
     </Card>
   );

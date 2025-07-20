@@ -1,4 +1,5 @@
 import ActionCardUserCount from "./ActionCardUserCount";
+import CompletedBar from "./CompletedBar";
 
 export interface UsersCompletedBarProps {
   usersCompleted: number;
@@ -13,12 +14,7 @@ const UsersCompletedBar: React.FC<UsersCompletedBarProps> = ({
   return (
     <div className="flex flex-col flex-1 relative items-end">
       <ActionCardUserCount joined={totalUsers} completed={usersCompleted} />
-      <div className="w-full h-3 bg-zinc-100 rounded-[3px] mt-1">
-        <div
-          className="h-3 bg-green-600 rounded-[3px]"
-          style={{ width: `${percentage}%` }}
-        ></div>
-      </div>
+      <CompletedBar percentage={percentage} />
     </div>
   );
 };

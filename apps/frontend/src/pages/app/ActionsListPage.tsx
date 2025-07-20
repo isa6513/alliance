@@ -19,15 +19,15 @@ const ActionsListPage = ({ matches }: RouteMatches) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-page items-center">
-      <div className="px-4 py-5 flex flex-col items-center w-[calc(min(650px,100%))] gap-y-3">
-        <div className="flex py-8 flex-row justify-center items-center w-full gap-x-4">
+      <div className="px-4 py-12 flex flex-col items-center w-[calc(min(650px,100%))] gap-y-6">
+        <div className="flex flex-row justify-center items-center w-full gap-x-4">
           <p className="text-lg text-left h-fit">Filter:</p>
           <div className="flex flex-row gap-2 items-center flex-wrap ">
             {Object.values(FilterMode).map((mode) => (
               <Button
                 key={mode}
                 color={
-                  filterMode === mode ? ButtonColor.Blue : ButtonColor.White
+                  filterMode === mode ? ButtonColor.Black : ButtonColor.White
                 }
                 onClick={() => setFilterMode(mode)}
                 className="text-nowrap"
@@ -38,20 +38,22 @@ const ActionsListPage = ({ matches }: RouteMatches) => {
           </div>
         </div>
 
-        {filteredActions.map((action) => (
-          <ActionItemCard
-            key={action.id}
-            {...action}
-            className="w-full"
-            joinedCount={liveCounts[action.id] ?? action.usersJoined}
-            completedCount={
-              action.status === "member_action"
-                ? action.usersCompleted
-                : undefined
-            }
-            userRelation={relations.get(action.id) ?? "none"}
-          />
-        ))}
+        <div className="flex flex-col gap-y-2 w-full">
+          {filteredActions.map((action) => (
+            <ActionItemCard
+              key={action.id}
+              {...action}
+              className="w-full"
+              joinedCount={liveCounts[action.id] ?? action.usersJoined}
+              completedCount={
+                action.status === "member_action"
+                  ? action.usersCompleted
+                  : undefined
+              }
+              userRelation={relations.get(action.id) ?? "none"}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

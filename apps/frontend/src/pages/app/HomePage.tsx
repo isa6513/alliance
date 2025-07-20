@@ -118,7 +118,7 @@ const HomePage = ({ matches }: RouteMatches) => {
         <div className="flex flex-col py-16 gap-y-5 overflow-y-auto px-3 items-stretch w-[350px]">
           <div className="flex flex-col gap-y-3">
             <Card>
-              <p className="font-semibold text-zinc-800">Forum activity</p>
+              <p className="font-semibold">Forum activity</p>
               {posts.length === 0 && (
                 <p className="text-zinc-400">No forum activity yet</p>
               )}
@@ -128,7 +128,7 @@ const HomePage = ({ matches }: RouteMatches) => {
               ))}
             </Card>
             <Card>
-              <p className="font-semibold text-zinc-800">Friends</p>
+              <p className="font-semibold">Friends</p>
               {friendActivity.length === 0 && (
                 <p className="text-zinc-400">No friend activity yet</p>
               )}

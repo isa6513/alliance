@@ -23,6 +23,7 @@ import ActionForumPosts from "../../components/ActionForumPosts";
 import TwoColumnSplit from "../../components/system/TwoColumnSplit";
 import { Features } from "@alliance/shared/lib/features";
 import ActionEventsPanel from "../../components/ActionEventsPanel";
+import CompletedBar from "../../components/CompletedBar";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/ActionPage";
 import { useAuth } from "../../lib/AuthContext";
 import { ParentContext as ActionTaskPanelParentContext } from "../../components/ActionTaskPanel";
@@ -32,9 +33,9 @@ import { testActions } from "../../stories/testData";
 
 const actionStatusDescriptions: Record<ActionDto["status"], string> = {
   gathering_commitments: "Collecting commitments",
-  commitments_reached: "Commitments reached",
-  member_action: "Member action",
-  resolution: "Resolution",
+  commitments_reached: "Sufficient commitments reached",
+  member_action: "Members are now taking action",
+  resolution: "Pending office resolution",
   completed: "Completed",
   failed: "Failed",
   abandoned: "Abandoned",
@@ -160,12 +161,7 @@ export default function ActionPage() {
           <div className="flex flex-col gap-y-3">
             {action !== undefined && (
               <div>
-                <h1>
-                  {action.name}
-                  <span className="text-gray-800 text-[15px] bg-gray-100 rounded-lg p-2 px-3 align-middle mx-3 text-nowrap">
-                    {actionStatusDescriptions[action.status]}
-                  </span>
-                </h1>
+                <h1 className="font-sabon">{action.name}</h1>
                 {/* <p className="text-zinc-700 mt-3">{action.shortDescription}</p> */}
               </div>
             )}
@@ -192,7 +188,11 @@ export default function ActionPage() {
             } satisfies ActionTaskPanelParentContext
           }
         />
-        <ReactMarkdown>{action?.body}</ReactMarkdown>
+        <div className="my-2">
+          <ReactMarkdown>{action?.body}</ReactMarkdown>
+        </div>
+
+        <hr className="border-zinc-200" />
 
         {isFeatureEnabled(Features.Forum) && <ActionForumPosts actionId={id} />}
       </div>
@@ -208,22 +208,57 @@ export default function ActionPage() {
         left={mainContent}
         right={
           <div className="flex flex-col gap-y-4 p-6 py-10">
-            <Card
-              style={CardStyle.White}
-              className="items-center gap-y-5 aspect-square justify-center"
-            >
-              <div className="w-[180px] self-center">
-                <Globe
-                  people={liveUserCount ?? (action?.usersJoined || 0)}
-                  colored
-                  locations={action?.locations || []}
-                />
-                <p className="text-center !pt-5 text-[11pt]">
-                  {(liveUserCount ?? action?.usersJoined)?.toLocaleString() ||
-                    0}{" "}
-                  people committed
-                </p>
+            <Card style={CardStyle.White} className="">
+              <div className="p-2">
+                <p className="text-lg font-semibold">Status</p>
+                {action && (
+                  <div className="mt-1">
+                    <p>{actionStatusDescriptions[action.status]}</p>
+
+                    {action.status === "gathering_commitments" ||
+                    action.status === "commitments_reached" ? (
+                      <div className="mt-4">
+                        <CompletedBar
+                          percentage={
+                            ((liveUserCount ?? action.usersJoined) /
+                              (action.commitmentThreshold ?? 1)) *
+                            100
+                          }
+                        />
+                        <p className="mt-4 text-green-600 text-sm">
+                          {(
+                            liveUserCount ?? action.usersJoined
+                          )?.toLocaleString() || 0}{" "}
+                          commitments made
+                        </p>
+                        <p className="text-zinc-400 text-sm">
+                          {(action.commitmentThreshold ?? 0).toLocaleString()}{" "}
+                          commitments needed
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="mt-4">
+                        <CompletedBar
+                          percentage={
+                            ((action.usersCompleted ?? 0) /
+                              (action.usersJoined ?? 1)) *
+                            100
+                          }
+                        />
+                        <p className="mt-4 text-green-600 text-sm">
+                          {(action.usersCompleted ?? 0).toLocaleString()}{" "}
+                          members completed
+                        </p>
+                        <p className="text-zinc-400 text-sm">
+                          {(action.usersJoined ?? 0).toLocaleString()} members
+                          committed
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
+
               {/* <div className="w-full border-t border-gray-300" />
             <UserBubbleRow />
             <p className="text-center pt-2 text-[11pt]">
