@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { formatDistanceToNow } from "date-fns";
 import { ActionActivityDto } from "@alliance/shared/client";
 import { actionsGetActionActivities } from "@alliance/shared/client";
 import { CardStyle } from "./system/Card";
 import Card from "./system/Card";
 import { useActionActivity } from "../lib/useActionActivityWebSocket";
+import { formatTime } from "../lib/utils";
 
 interface ActionActivityListProps {
   actionId: number;
@@ -107,7 +107,7 @@ const ActionActivityList = ({ actionId }: ActionActivityListProps) => {
                   {formatActivityMessage(activity)}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {formatDistanceToNow(new Date(activity.createdAt), {
+                  {formatTime(new Date(activity.createdAt), {
                     addSuffix: true,
                   })}
                 </p>

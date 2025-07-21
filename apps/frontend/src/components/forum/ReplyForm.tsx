@@ -1,4 +1,5 @@
 import React from "react";
+import Button, { ButtonColor } from "../system/Button";
 
 interface ReplyFormProps {
   parentId?: number | null;
@@ -33,24 +34,26 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
         autoFocus
       />
       <div className="mt-3 flex justify-end space-x-2">
-        <button
+        <Button
           type="button"
+          color={ButtonColor.Grey}
           onClick={() => {
             setReplyingTo(null);
             setReplyContent("");
             onCancel?.();
           }}
-          className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
+          className="bg-gray-300"
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
+          color={ButtonColor.Black}
           disabled={isSubmitting || !replyContent.trim()}
-          className="px-4 py-2 bg-blue text-white rounded hover:bg-blue-700 transition disabled:opacity-50"
+          className="transition disabled:opacity-50"
         >
           {isSubmitting ? "Posting..." : "Post Reply"}
-        </button>
+        </Button>
       </div>
     </form>
   </div>

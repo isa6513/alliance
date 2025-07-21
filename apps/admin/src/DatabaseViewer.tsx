@@ -794,11 +794,6 @@ const DatabaseViewer: React.FC = () => {
                                     → {column.relationTarget}
                                   </span>
                                 )}
-                                {column.enumValues && (
-                                  <div className="text-xs mt-1">
-                                    {column.enumValues.join(", ")}
-                                  </div>
-                                )}
                               </div>
                             </th>
                           ))}

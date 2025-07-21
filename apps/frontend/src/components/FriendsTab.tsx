@@ -208,7 +208,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
                       }}
                       color={ButtonColor.Red}
                       disabled={processingIds[friend.email]}
-                      className="text-sm"
+                      className="text-sm bg-transparent hover:!text-red-700"
                     >
                       {processingIds[friend.email]
                         ? "Removing..."

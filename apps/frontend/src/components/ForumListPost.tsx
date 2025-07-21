@@ -1,8 +1,7 @@
-import { formatDistanceToNow } from "date-fns";
 import Card, { CardStyle } from "./system/Card";
 import { PostDto } from "@alliance/shared/client";
-import Badge from "./system/Badge";
 import { useNavigate } from "react-router";
+import { formatTime } from "../lib/utils";
 
 export interface ForumListPostProps {
   post: PostDto;
@@ -26,7 +25,6 @@ const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
     >
       <div className="flex flex-row justify-between gap-2">
         <p className="font-medium text-base">{post.title}</p>
-        {post.action?.category && <Badge>{post.action.category}</Badge>}
       </div>
       <div className="flex justify-between text-xs text-gray-500">
         <div className="flex flex-row gap-x-2">
@@ -45,7 +43,7 @@ const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
         <div className="flex space-x-3">
           <span>{post.replies?.length || 0} replies</span>
           <span>
-            {formatDistanceToNow(new Date(post.updatedAt), {
+            {formatTime(new Date(post.updatedAt), {
               addSuffix: true,
             })}
           </span>

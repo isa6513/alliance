@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router";
 import { PostDto, CreateReplyDto } from "@alliance/shared/client";
 import { useAuth } from "../../lib/AuthContext";
-import { formatDistanceToNow } from "date-fns";
 import ReplyForm from "../../components/forum/ReplyForm";
 import ReplyComponent from "../../components/forum/ReplyComponent";
 import {
@@ -12,6 +11,7 @@ import {
   forumRemoveReply,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "../../components/system/Card";
+import { formatTime } from "../../lib/utils";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
@@ -263,7 +263,7 @@ const PostDetailPage: React.FC = () => {
                 </a>
               </span>
               <span className="ml-4">
-                {formatDistanceToNow(new Date(post.createdAt), {
+                {formatTime(new Date(post.createdAt), {
                   addSuffix: true,
                 })}
               </span>

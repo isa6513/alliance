@@ -1,6 +1,7 @@
 // Tremor Raw cx [v0.0.0]
 
 import clsx, { type ClassValue } from "clsx";
+import { formatDistanceToNow } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
 export function cx(...args: ClassValue[]) {
@@ -37,3 +38,9 @@ export const hasErrorInput = [
   // ring color
   "ring-red-200 dark:ring-red-700/30",
 ];
+
+export const formatTime = (time: Date, { addSuffix = true }) => {
+  return formatDistanceToNow(time, {
+    addSuffix,
+  }).replace("about ", "");
+};
