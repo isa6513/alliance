@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router";
 import {
   CreatePostDto,
   ActionDto,
@@ -13,21 +13,27 @@ import {
   forumFindOnePost,
   forumUpdatePost,
 } from "@alliance/shared/client";
+import Button, { ButtonColor } from "../../components/system/Button";
 
 type FormMode = "create" | "edit";
 
 const PostFormPage: React.FC = () => {
   const { postId } = useParams<{ postId: string }>();
+  const [searchParams] = useSearchParams();
   const mode: FormMode = postId === "new" ? "create" : "edit";
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [actionId, setActionId] = useState<number | undefined>(undefined);
+
   const [actions, setActions] = useState<ActionDto[]>([]);
   const [isLoading, setIsLoading] = useState(mode === "edit");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [actionId, setActionId] = useState<number | undefined>(
+    searchParams.get("actionId")
+      ? Number(searchParams.get("actionId"))
+      : undefined
+  );
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -80,7 +86,7 @@ const PostFormPage: React.FC = () => {
       const postData: CreatePostDto = {
         title,
         content,
-        actionId,
+        actionId: actionId,
       };
 
       let response: { data: PostDto | undefined };
@@ -128,7 +134,7 @@ const PostFormPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <Link to="/forum" className="text-blue-600 hover:underline">
+        <Link to="/forum" className="text-blue hover:underline">
           &larr; Back to Forum
         </Link>
       </div>
@@ -213,23 +219,18 @@ const PostFormPage: React.FC = () => {
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Link
-                to="/forum"
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition"
-              >
-                Cancel
-              </Link>
-              <button
+              <Button onClick={() => navigate("/forum")}>Cancel</Button>
+              <Button
                 type="submit"
+                color={ButtonColor.Black}
                 disabled={isSubmitting || !title.trim() || !content.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50"
               >
                 {isSubmitting
                   ? "Saving..."
                   : mode === "create"
                   ? "Create Post"
                   : "Save Changes"}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

@@ -51,8 +51,8 @@ const ActionForumPosts: React.FC<ActionForumPostsProps> = ({
         <h2 className="font-semibold text-xl">Discussion</h2>
         <div>
           {isAuthenticated && (
-            <Button onClick={handleCreatePost} className="mr-4">
-              Start Discussion
+            <Button onClick={handleCreatePost}>
+              {posts.length === 0 ? "Start Discussion" : "Create Post"}
             </Button>
           )}
         </div>
