@@ -12,6 +12,7 @@ import {
 import { useAuth } from "./AuthContext";
 import ActionDashboard from "./ActionDashboard";
 import ActionProgressBar from "./components/ActionProgressBar";
+import ActionTimeline from "./components/ActionTimeline";
 import ConfirmDialog from "./components/ConfirmDialog";
 import { testActions } from "./testData";
 
@@ -29,6 +30,7 @@ const AdminPanel: React.FC = () => {
   // Get current view state from URL params
   const selectedActionId = searchParams.get("action");
   const isCreatingNew = searchParams.get("new") === "true";
+  const viewMode = searchParams.get("view") || "list"; // "list" or "timeline"
 
   // Only check admin status after loading is complete and we have a user
   useEffect(() => {
@@ -90,6 +92,19 @@ const AdminPanel: React.FC = () => {
   const handleDatabaseViewer = useCallback(() => {
     navigate("/database");
   }, [navigate]);
+
+  const handleViewModeChange = useCallback(
+    (mode: string) => {
+      const params = new URLSearchParams(searchParams);
+      if (mode === "list") {
+        params.delete("view");
+      } else {
+        params.set("view", mode);
+      }
+      setSearchParams(params);
+    },
+    [searchParams, setSearchParams]
+  );
 
   const handlePopulateTestData = useCallback(async () => {
     setIsPopulating(true);
@@ -162,11 +177,35 @@ const AdminPanel: React.FC = () => {
               />
             </div>
           ) : (
-            // Show Actions List
+            // Show Actions List or Timeline
             <>
-              <h1 className="text-[#111] text-[14pt] font-extrabold">
-                Actions List
-              </h1>
+              <div className="flex justify-between items-center">
+                <h1 className="text-[#111] text-[14pt] font-extrabold">
+                  Actions
+                </h1>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleViewModeChange("list")}
+                    className={`px-3 py-1 rounded text-sm font-medium ${
+                      viewMode === "list"
+                        ? "bg-[#4678ed] text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
+                    List
+                  </button>
+                  <button
+                    onClick={() => handleViewModeChange("timeline")}
+                    className={`px-3 py-1 rounded text-sm font-medium ${
+                      viewMode === "timeline"
+                        ? "bg-[#4678ed] text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
+                    Timeline
+                  </button>
+                </div>
+              </div>
 
               {actionsLoading ? (
                 <p>Loading actions...</p>
@@ -174,6 +213,10 @@ const AdminPanel: React.FC = () => {
                 <p className="text-red-500">{error}</p>
               ) : actions.length === 0 ? (
                 <p>No actions found.</p>
+              ) : viewMode === "timeline" ? (
+                <div className="flex-1 overflow-hidden h-full">
+                  <ActionTimeline actions={actions} className="h-full" />
+                </div>
               ) : (
                 <div className="space-y-3 flex-1 overflow-y-auto">
                   {actions.map((action) => (
