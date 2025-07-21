@@ -57,8 +57,8 @@ const ReplyComponent = ({
   // Truncate content to first line when collapsed
   const getDisplayContent = (content: string, collapsed: boolean) => {
     if (!collapsed) return content;
-    const firstLine = content.split('\n')[0];
-    return content.includes('\n') ? `${firstLine} ...` : firstLine;
+    const firstLine = content.split("\n")[0];
+    return content.includes("\n") ? `${firstLine} ...` : firstLine;
   };
 
   // For top-level replies only, render the entire thread in a card
@@ -91,9 +91,9 @@ const ReplyComponent = ({
         )}
 
         <div
-          className={`${
-            isHighlighted ? "border border-blue-500 bg-blue-50 rounded-lg" : ""
-          } transition-all duration-1000`}
+          className={`border-transparent ${
+            isHighlighted ? "border !border-blue-500 bg-blue-50" : ""
+          } duration-1000 rounded-lg`}
         >
           <Card
             key={reply.id}
@@ -106,7 +106,11 @@ const ReplyComponent = ({
               <div className="flex items-start gap-2">
                 {/* Reply Content */}
                 <div className="flex-1 min-w-0">
-                  <div className={`mb-1 whitespace-pre-wrap ${isCollapsed ? 'text-gray-500' : ''}`}>
+                  <div
+                    className={`mb-1 whitespace-pre-wrap ${
+                      isCollapsed ? "text-gray-500" : ""
+                    }`}
+                  >
                     {getDisplayContent(reply.content, isCollapsed)}
                   </div>
 
@@ -236,13 +240,13 @@ const ReplyComponent = ({
   return (
     <div>
       <div
-        className={`${indentClass} ${
-          isHighlighted ? "border border-blue-500 bg-blue-50 rounded p-2" : ""
+        className={`${indentClass} rounded border-transparent ${
+          isHighlighted ? "border !border-blue-500 bg-blue-50" : ""
         } ${
           isNewlyAdded
             ? "border-l-2 border-green-600/80 bg-green-50/30 pl-3"
             : ""
-        } transition-all duration-1000`}
+        } duration-1000`}
         id={`reply-${reply.id}`}
       >
         <div className="flex items-start gap-2">
