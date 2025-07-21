@@ -83,7 +83,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
       <Button
         color={ButtonColor.Transparent}
         onClick={action.type === "Funding" ? givePressed : goToActionPage}
-        className="w-full font-medium text-sm rounded-md bg-cardbutton hover:brightness-90 text-white font-regular"
+        className="w-full font-medium text-sm rounded bg-cardbutton hover:brightness-90 text-white font-regular"
       >
         {text}
       </Button>
@@ -115,7 +115,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
           <Button
             color={ButtonColor.Transparent}
             onClick={goToActionPage}
-            className="w-full text-sm rounded-md hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
+            className="w-full text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
           >
             Details
           </Button>

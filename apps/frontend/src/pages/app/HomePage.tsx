@@ -54,7 +54,7 @@ const HomePage = ({ matches }: RouteMatches) => {
       <div className="flex flex-row">
         <div className="flex flex-col py-16 max-w-[728px] md:min-w-[600px] gap-y-5 overflow-y-auto px-3">
           <div className="flex flex-col gap-y-8">
-            <p className="font-font text-2xl">My tasks</p>
+            <p className="font-font text-2xl">Your tasks</p>
             {todoActions.length > 0 && (
               <div className="flex flex-col gap-y-4">
                 <div className="flex flex-row items-center gap-x-2">
@@ -65,13 +65,15 @@ const HomePage = ({ matches }: RouteMatches) => {
                     {todoActions.slice(0, 2).length}
                   </span>
                 </div>
-                {todoActions.slice(0, 2).map((action) => (
-                  <TaskCard
-                    key={action.id}
-                    action={action}
-                    onComplete={handleTaskComplete}
-                  />
-                ))}
+                <div className="flex flex-col gap-y-2 w-full">
+                  {todoActions.slice(0, 2).map((action) => (
+                    <TaskCard
+                      key={action.id}
+                      action={action}
+                      onComplete={handleTaskComplete}
+                    />
+                  ))}
+                </div>
               </div>
             )}
             {newActions.length > 0 && (
@@ -84,13 +86,15 @@ const HomePage = ({ matches }: RouteMatches) => {
                     {newActions.length}
                   </span>
                 </div>
-                {newActions.map((action) => (
-                  <ActionItemCard
-                    key={action.id}
-                    {...action}
-                    showDescription={true}
-                  />
-                ))}
+                <div className="flex flex-col gap-y-2 w-full">
+                  {newActions.map((action) => (
+                    <ActionItemCard
+                      key={action.id}
+                      {...action}
+                      showDescription={true}
+                    />
+                  ))}
+                </div>
               </div>
             )}
             {committedActions.length > 0 && (
@@ -103,13 +107,15 @@ const HomePage = ({ matches }: RouteMatches) => {
                     {committedActions.length}
                   </span>
                 </div>
-                {committedActions.map((action) => (
-                  <ActionItemCard
-                    key={action.id}
-                    {...action}
-                    showDescription={false}
-                  />
-                ))}
+                <div className="flex flex-col gap-y-2 w-full">
+                  {committedActions.map((action) => (
+                    <ActionItemCard
+                      key={action.id}
+                      {...action}
+                      showDescription={false}
+                    />
+                  ))}
+                </div>
               </div>
             )}
             {/* <InviteMemberCard /> */}

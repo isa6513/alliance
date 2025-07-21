@@ -207,7 +207,7 @@ export default function ActionPage() {
         left={mainContent}
         right={
           <div className="flex flex-col gap-y-4 p-6">
-            <Card style={CardStyle.White} className="">
+            <Card style={CardStyle.White}>
               <div className="p-2">
                 <p className="text-lg font-semibold">Status</p>
                 {action && (

@@ -53,7 +53,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
                   <Button
                     color={ButtonColor.Transparent}
                     onClick={goToActionPage}
-                    className="w-full text-sm rounded-md text-white font-medium bg-cardbutton hover:brightness-90 font-regular"
+                    className="w-full text-sm rounded text-white font-medium bg-cardbutton hover:brightness-90 font-regular"
                   >
                     Commit
                   </Button>

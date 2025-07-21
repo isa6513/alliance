@@ -43,7 +43,7 @@ const ForumPage: React.FC = () => {
       right={
         <div className="flex flex-col p-3 items-end w-fit">
           {isAuthenticated && (
-            <Button onClick={handleCreatePost} color={ButtonColor.Blue}>
+            <Button onClick={handleCreatePost} color={ButtonColor.Black}>
               New Thread
             </Button>
           )}
