@@ -216,7 +216,7 @@ export class UserService {
         user: rel.requester,
         category: NotificationType.FriendRequestAccepted,
         message: `${rel.addressee.name} accepted your friend request`,
-        webAppLocation: '/profile',
+        webAppLocation: `/user/${rel.addressee.id}`,
       });
     }
     return this.friendRepository.save(rel);

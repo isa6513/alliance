@@ -280,9 +280,7 @@ const PostDetailPage: React.FC = () => {
               </div>
             )}
 
-            <div className="my-8 whitespace-pre-wrap text-lg">
-              {post.content}
-            </div>
+            <div className="my-8 whitespace-pre-wrap">{post.content}</div>
           </Card>
         </div>
 
