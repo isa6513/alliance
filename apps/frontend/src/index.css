@@ -1,18 +1,19 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: "Font";
-  src: url("/assets/fonts/font.woff2") format("woff2");
+  font-family: "Adobe Clean Serif";
+  src: url("/assets/fonts/AdobeCleanSerif-Regular.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Adobe Clean Serif";
+  src: url("/assets/fonts/AdobeCleanSerif-Bold.otf") format("opentype");
+  font-weight: bold;
 }
 
 @font-face {
   font-family: "Berlingske";
   src: url("/assets/fonts/BerlingskeSerif-Blk.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "ITC";
-  src: url("/assets/fonts/ITCAvantGardePro-Bk.otf") format("opentype");
 }
 
 @font-face {
@@ -38,12 +39,6 @@
 @font-face {
   font-family: "Bueno";
   src: url("/assets/fonts/bueno-regular.ttf") format("truetype");
-}
-
-@font-face {
-  font-family: "ITC";
-  src: url("/assets/fonts/ITCAvantGardePro-Md.otf") format("opentype");
-  font-weight: bold;
 }
 
 @font-face {
@@ -112,10 +107,11 @@
 @theme {
   --color-hgreen: #3f5640;
   --color-agreen: #c4d8bf;
-  --color-cardbutton: #3ba337;
   --color-bgreen: rgb(143, 190, 111);
   --color-blue: #318dde;
   --color-page: #fcfcfc;
+  --color-greentext: #5d9c2d;
+  --color-green: #62a124;
   --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.03), 0 2px 4px -2px rgb(0 0 0 / 0.05);
 }
 
@@ -147,6 +143,10 @@ span,
 label,
 button {
   font-family: "IBM Plex Sans", sans-serif;
+}
+
+.font-adobe {
+  font-family: "Adobe Clean Serif", sans-serif;
 }
 
 img {
@@ -181,10 +181,6 @@ img {
   font-family: "Roboto";
 }
 
-.font-itc {
-  font-family: "ITC";
-}
-
 .font-toledo {
   font-family: "Toledo";
 }
@@ -195,9 +191,6 @@ img {
 
 .font-public {
   font-family: "Public";
-}
-.font-font {
-  font-family: "Font";
 }
 
 .goob {

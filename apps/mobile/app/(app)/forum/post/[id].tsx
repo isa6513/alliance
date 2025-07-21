@@ -60,8 +60,7 @@ export default function PostDetailScreen() {
       if (response.error || !response.data) {
         throw new Error("Failed to fetch post");
       }
-      
-      
+
       setPost(response.data);
       setError(null);
     } catch (err) {
@@ -84,7 +83,6 @@ export default function PostDetailScreen() {
 
   const handleReply = async () => {
     if (!post || !replyContent.trim() || !user) return;
-
 
     setSubmittingReply(true);
     try {
@@ -138,14 +136,14 @@ export default function PostDetailScreen() {
   };
 
   const confirmDeleteReply = (replyId: number) => {
-    Alert.alert(
-      "Delete Reply",
-      "Are you sure you want to delete this reply?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: () => handleDeleteReply(replyId) },
-      ]
-    );
+    Alert.alert("Delete Reply", "Are you sure you want to delete this reply?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => handleDeleteReply(replyId),
+      },
+    ]);
   };
 
   const handleDeleteReply = async (replyId: number) => {
@@ -194,7 +192,9 @@ export default function PostDetailScreen() {
     return replies.map((reply) => ({
       ...reply,
       depth,
-      children: reply.children ? buildReplyTree(reply.children, depth + 1) : undefined,
+      children: reply.children
+        ? buildReplyTree(reply.children, depth + 1)
+        : undefined,
     }));
   };
 
@@ -202,8 +202,6 @@ export default function PostDetailScreen() {
     const isEditing = editingReply === reply.id;
     const isAuthor = user?.id === reply.author.id;
     const maxDepth = 10;
-    
-    
 
     return (
       <View key={reply.id}>
@@ -268,7 +266,9 @@ export default function PostDetailScreen() {
                       style={[styles.replyActionButton, styles.deleteButton]}
                       onPress={() => confirmDeleteReply(reply.id)}
                     >
-                      <Text style={[styles.replyActionText, styles.deleteText]}>Delete</Text>
+                      <Text style={[styles.replyActionText, styles.deleteText]}>
+                        Delete
+                      </Text>
                     </TouchableOpacity>
                   </>
                 )}
@@ -303,7 +303,12 @@ export default function PostDetailScreen() {
                 onPress={handleReply}
                 disabled={!replyContent.trim() || submittingReply}
               >
-                <Text style={[styles.inlineReplyButtonText, styles.inlineReplySubmitText]}>
+                <Text
+                  style={[
+                    styles.inlineReplyButtonText,
+                    styles.inlineReplySubmitText,
+                  ]}
+                >
                   {submittingReply ? "Submitting..." : "Reply"}
                 </Text>
               </TouchableOpacity>
@@ -312,7 +317,7 @@ export default function PostDetailScreen() {
         )}
 
         {reply.children?.map((child) => renderReply(child))}
-        
+
         {/* Horizontal separator */}
         <View style={styles.replySeparator} />
       </View>

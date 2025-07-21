@@ -81,9 +81,9 @@ const TaskCard: React.FC<TaskCardProps> = ({
         : "See steps";
     return (
       <Button
-        color={ButtonColor.Transparent}
+        color={ButtonColor.Green}
         onClick={action.type === "Funding" ? givePressed : goToActionPage}
-        className="w-full font-medium text-sm rounded bg-cardbutton hover:brightness-90 text-white font-regular"
+        className="w-full"
       >
         {text}
       </Button>

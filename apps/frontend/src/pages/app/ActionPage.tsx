@@ -160,7 +160,7 @@ export default function ActionPage() {
           <div className="flex flex-col gap-y-3">
             {action !== undefined && (
               <div>
-                <h1 className="font-font">{action.name}</h1>
+                <h1 className="font-adobe">{action.name}</h1>
                 {/* <p className="text-zinc-700 mt-3">{action.shortDescription}</p> */}
               </div>
             )}
@@ -244,7 +244,7 @@ export default function ActionPage() {
                             100
                           }
                         />
-                        <p className="mt-4 text-green-600 text-sm">
+                        <p className="mt-4 text-greentext text-sm">
                           {(action.usersCompleted ?? 0).toLocaleString()}{" "}
                           members completed
                         </p>

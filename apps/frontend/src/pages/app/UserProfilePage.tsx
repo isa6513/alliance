@@ -137,8 +137,6 @@ const UserProfilePage: React.FC = () => {
     );
   }
 
-  console.log(profileUser);
-
   if (!profileUser) {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">

@@ -15,7 +15,7 @@ const ActivityFeedItem = ({
   card = true,
 }: ActivityFeedItemProps) => {
   const navigate = useNavigate();
-  const verb = activity.type === "user_joined" ? "joined" : "completed";
+  const verb = activity.type === "user_joined" ? "committed to" : "completed";
 
   if (card) {
     return (
@@ -53,8 +53,10 @@ const ActivityFeedItem = ({
             className="hover:underline"
             href={`/user/${activity.user.id}`}
           >{`${activity.user.displayName}`}</a>
-          <span className="text-blue font-medium"> {verb}</span>
-          <span> {activity.actionName}</span>
+          <span className="text-blue font-medium"> {verb} </span>
+          <a className="hover:underline" href={`/actions/${activity.actionId}`}>
+            {activity.actionName}
+          </a>
         </p>
         {showTime && (
           <p className="text-gray-500 text-right text-nowrap">

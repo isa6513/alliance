@@ -94,11 +94,13 @@ const ActionActivityList = ({ actionId }: ActionActivityListProps) => {
           {displayedActivities.map((activity) => (
             <div key={activity.id} className="flex items-start space-x-3">
               <div className="flex-shrink-0">
-                {activity.type === "user_joined" ? (
-                  <div className="w-2 h-2 bg-bgreen rounded-full mt-2"></div>
-                ) : (
-                  <div className="w-2 h-2 bg-[#318dde] rounded-full mt-2"></div>
-                )}
+                <div
+                  className={`w-2 h-2 rounded-full mt-[9px] ${
+                    activity.type === "user_joined"
+                      ? "bg-bgreen"
+                      : "bg-[#318dde]"
+                  }`}
+                ></div>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-gray-900">

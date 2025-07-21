@@ -76,9 +76,9 @@ const Timeline: React.FC<TimelineProps> = ({
             {/* timeline dot */}
             <div
               style={{ ...dotBaseStyle }}
-              className="border-3 border-white flex items-center justify-center bg-[#318dde] mt-[20px]"
+              className="border-3 border-white relative bg-[#318dde] mt-[20px]"
             >
-              <div className="w-2 h-2 bg-white rounded-full" />
+              <div className="w-2 h-2 bg-white rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
             </div>
             {/* content */}
             <div className="pl-4">{child}</div>

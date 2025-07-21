@@ -16,6 +16,7 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => (
               <FontAwesome size={28} name="home" color={color} />
             ),
+            tabBarShowLabel: false,
           }}
         />
         <Tabs.Screen
@@ -26,6 +27,7 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => (
               <FontAwesome size={28} name="comments" color={color} />
             ),
+            tabBarShowLabel: false,
           }}
         />
         <Tabs.Screen
@@ -36,6 +38,7 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => (
               <FontAwesome size={28} name="user" color={color} />
             ),
+            tabBarShowLabel: false,
           }}
         />
       </Tabs>

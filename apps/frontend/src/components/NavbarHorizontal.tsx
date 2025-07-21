@@ -56,7 +56,7 @@ const NavbarHorizontal: React.FC = () => {
                 }
                 key={link}
                 className={`py-4 ${
-                  currentLocation === link ? "border-b-2 border-cardbutton" : ""
+                  currentLocation === link ? "border-b-2 border-green" : ""
                 }`}
               >
                 <p

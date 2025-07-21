@@ -51,9 +51,9 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
               {userRelation === "none" &&
                 status === "gathering_commitments" && (
                   <Button
-                    color={ButtonColor.Transparent}
+                    color={ButtonColor.Green}
                     onClick={goToActionPage}
-                    className="w-full text-sm rounded text-white font-medium bg-cardbutton hover:brightness-90 font-regular"
+                    className="w-full"
                   >
                     Commit
                   </Button>

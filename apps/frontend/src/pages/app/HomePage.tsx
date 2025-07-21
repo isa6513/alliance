@@ -54,7 +54,7 @@ const HomePage = ({ matches }: RouteMatches) => {
       <div className="flex flex-row">
         <div className="flex flex-col py-16 max-w-[728px] md:min-w-[600px] gap-y-5 overflow-y-auto px-3">
           <div className="flex flex-col gap-y-8">
-            <p className="font-font text-2xl">Your tasks</p>
+            <p className="font-adobe text-3xl">Your tasks</p>
             {todoActions.length > 0 && (
               <div className="flex flex-col gap-y-4">
                 <div className="flex flex-row items-center gap-x-2">

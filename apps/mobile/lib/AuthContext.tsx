@@ -142,8 +142,6 @@ export const AuthProvider: React.FC<
       }
 
       console.log("saving tokens");
-      console.log("access token: ", response.data.access_token);
-      console.log("refresh token: ", response.data.refresh_token);
 
       client.setConfig({
         headers: {
@@ -151,11 +149,6 @@ export const AuthProvider: React.FC<
         },
       });
 
-      console.log(
-        "saving tokens: ",
-        response.data.access_token,
-        response.data.refresh_token
-      );
       if (response.data.access_token && response.data.refresh_token) {
         await saveTokens(
           response.data.access_token,

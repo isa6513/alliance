@@ -51,14 +51,11 @@ const LoginScreen = () => {
     >
       <Stack.Screen
         options={{
-          title: "Log In",
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <ScrollView contentContainerStyle={authStyles.scrollContent}>
         <View style={authStyles.formContainer}>
-          <Text style={authStyles.title}>Log In</Text>
-
           <View style={authStyles.inputContainer}>
             <Text style={authStyles.label}>Email</Text>
             <Input
