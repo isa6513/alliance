@@ -7,7 +7,6 @@ import {
   useParams,
 } from "react-router";
 import Card, { CardStyle } from "../../components/system/Card";
-import Globe from "../../components/Globe";
 import {
   actionsComplete,
   actionsFindOne,
@@ -161,7 +160,7 @@ export default function ActionPage() {
           <div className="flex flex-col gap-y-3">
             {action !== undefined && (
               <div>
-                <h1 className="font-sabon">{action.name}</h1>
+                <h1 className="font-font">{action.name}</h1>
                 {/* <p className="text-zinc-700 mt-3">{action.shortDescription}</p> */}
               </div>
             )}
