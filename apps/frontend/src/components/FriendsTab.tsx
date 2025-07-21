@@ -178,7 +178,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
         </button>
       </div>
 
-      <Card style={CardStyle.White} className="p-6 border-none">
+      <div className="pb-5">
         {activeTab === "friends" && (
           <>
             {friends.length === 0 ? (
@@ -302,7 +302,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
             )}
           </>
         )}
-      </Card>
+      </div>
     </>
   );
 };

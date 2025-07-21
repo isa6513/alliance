@@ -20,7 +20,7 @@ const TwoColumnSplit = ({
   return (
     <div className={bg}>
       <div
-        className={`flex flex-row min-h-[calc(100vh-49px)] w-full h-full justify-center max-w-[1100px] mx-auto py-10 ${
+        className={`flex flex-row w-full h-full justify-center max-w-[1100px] mx-auto py-10 ${
           coloredRight ? "bg-agreen" : ""
         }`}
       >
@@ -34,7 +34,7 @@ const TwoColumnSplit = ({
         <div
           className={`flex-col items-stretch max-w-[350px] h-full ${
             coloredRight ? "bg-[#eee]" : ""
-          } min-h-[calc(100vh-49px)] ${collapseRight ? "hidden sm:flex" : ""}`}
+          } ${collapseRight ? "hidden sm:flex" : ""}`}
         >
           {right}
         </div>

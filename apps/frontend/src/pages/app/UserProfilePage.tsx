@@ -126,7 +126,7 @@ const UserProfilePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-page pt-20 px-8 md:px-16">
+      <div className="bg-page pt-20 px-8 md:px-16">
         <div className="max-w-4xl mx-auto">
           <div className="w-full h-[900px]"></div>
           <Card style={CardStyle.White} className="p-8">
@@ -141,7 +141,7 @@ const UserProfilePage: React.FC = () => {
 
   if (!profileUser) {
     return (
-      <div className="min-h-screen bg-page pt-20 px-8 md:px-16">
+      <div className="bg-page pt-20 px-8 md:px-16">
         <div className="max-w-4xl mx-auto">
           <Card style={CardStyle.White} className="p-8">
             <p className="text-center text-stone-500">User not found</p>
@@ -152,7 +152,7 @@ const UserProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="bg-page min-h-screen">
+    <div className="bg-page">
       <div className="max-w-[800px] mx-auto">
         <div className="mx-2 space-y-2">
           <div className="w-full h-[100px]"></div>

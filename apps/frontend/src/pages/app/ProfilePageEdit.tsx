@@ -12,10 +12,10 @@ import {
   UpdateProfileDto,
   forumFindPostsByUser,
   userListFriends,
-  UserDto,
   PostDto,
   actionsFindCompletedForUser,
   ActionDto,
+  ProfileDto,
 } from "@alliance/shared/client";
 
 const ProfileEditPage: React.FC = () => {
@@ -32,7 +32,7 @@ const ProfileEditPage: React.FC = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [completedActions, setCompletedActions] = useState<ActionDto[]>([]);
   const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
-  const [friends, setFriends] = useState<UserDto[]>([]);
+  const [friends, setFriends] = useState<ProfileDto[]>([]);
 
   /** initialise local state from user profile once available */
   useEffect(() => {
@@ -145,7 +145,7 @@ const ProfileEditPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-page pt-20 px-8 md:px-16 flex items-center justify-center">
+      <div className="bg-page pt-20 px-8 md:px-16 flex items-center justify-center">
         <p className="text-stone-500">Loading profile…</p>
       </div>
     );
@@ -153,7 +153,7 @@ const ProfileEditPage: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-page pt-20 px-8 md:px-16 flex items-center justify-center">
+      <div className="bg-page pt-20 px-8 md:px-16 flex items-center justify-center">
         <Card style={CardStyle.White} className="p-8 text-center space-y-4">
           <p>You must be logged in to edit your profile.</p>
           <Button onClick={() => navigate("/login")}>Log in</Button>
@@ -163,7 +163,7 @@ const ProfileEditPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-page w-full">
+    <div className="bg-page w-full">
       <div className="max-w-[800px] mx-auto space-y-2">
         <div className="w-full h-[100px]"></div>
         <div className="px-8 relative space-y-2 border-stone-300 border rounded mx-2 bg-white">
