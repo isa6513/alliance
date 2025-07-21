@@ -4,15 +4,13 @@ import {
   actionsGetActivityFeed,
 } from "@alliance/shared/client";
 import { useActionActivityWebSocket } from "../../lib/useActionActivityWebSocket";
-import ActivityFeedItem, {
-  FeedActivity,
-} from "../../components/ActivityFeedItem";
+import ActivityFeedItem from "../../components/ActivityFeedItem";
 
 const ActivityFeedPage = () => {
-  const [initialActivities, setInitialActivities] = useState<FeedActivity[]>(
-    []
-  );
-  const [liveActivities, setLiveActivities] = useState<FeedActivity[]>([]);
+  const [initialActivities, setInitialActivities] = useState<
+    ActionActivityDto[]
+  >([]);
+  const [liveActivities, setLiveActivities] = useState<ActionActivityDto[]>([]);
   const [loading, setLoading] = useState(true);
   const {
     subscribeToFeed,
@@ -29,7 +27,7 @@ const ActivityFeedPage = () => {
           query: { limit: "50" },
         });
         if (response.data) {
-          setInitialActivities(response.data as FeedActivity[]);
+          setInitialActivities(response.data as ActionActivityDto[]);
         }
       } catch (err) {
         console.error("Error fetching initial activities:", err);
@@ -45,12 +43,7 @@ const ActivityFeedPage = () => {
       actionId: number;
       activity: ActionActivityDto;
     }) => {
-      const newActivity: FeedActivity = {
-        ...event.activity,
-        actionId: event.actionId,
-      };
-
-      setLiveActivities((prev) => [newActivity, ...prev]);
+      setLiveActivities((prev) => [event.activity, ...prev]);
     };
 
     onFeedActivity(handleFeedActivity);

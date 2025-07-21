@@ -19,7 +19,7 @@ const ForumListPost = ({ post }: ForumListPostProps) => {
   return (
     <Card
       key={post.id}
-      className={`w-full mb-0 rounded-sm !gap-y-1`}
+      className={`w-full mb-0 !gap-y-1`}
       onClick={() => navigate(`/forum/post/${post.id}`)}
       style={CardStyle.White}
     >

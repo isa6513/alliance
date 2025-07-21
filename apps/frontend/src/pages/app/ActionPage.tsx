@@ -150,7 +150,7 @@ export default function ActionPage() {
 
   const mainContent = useMemo(
     () => (
-      <div className="flex flex-col gap-y-3 flex-2 p-10 px-5">
+      <div className="flex flex-col gap-y-3 flex-2 px-5">
         {action?.image && (
           <img
             src={getImageSource(action.image)}
@@ -207,7 +207,7 @@ export default function ActionPage() {
       <TwoColumnSplit
         left={mainContent}
         right={
-          <div className="flex flex-col gap-y-4 p-6 py-10">
+          <div className="flex flex-col gap-y-4 p-6">
             <Card style={CardStyle.White} className="">
               <div className="p-2">
                 <p className="text-lg font-semibold">Status</p>

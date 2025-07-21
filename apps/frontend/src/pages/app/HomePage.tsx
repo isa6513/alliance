@@ -128,7 +128,7 @@ const HomePage = ({ matches }: RouteMatches) => {
               ))}
             </Card>
             <Card>
-              <p className="font-semibold">Friends</p>
+              <p className="font-semibold mb-1">What your friends are up to</p>
               {friendActivity.length === 0 && (
                 <p className="text-zinc-400">No friend activity yet</p>
               )}
@@ -137,6 +137,7 @@ const HomePage = ({ matches }: RouteMatches) => {
                   key={activity.id}
                   activity={activity}
                   showTime={false}
+                  card={false}
                 />
               ))}
             </Card>

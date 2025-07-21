@@ -128,7 +128,7 @@ const LoginPage: React.FC = () => {
               <div className="pt-2">
                 <Button
                   color={ButtonColor.Stone}
-                  className="w-full flex justify-center text-center py-3 pb-2"
+                  className="w-full flex justify-center text-center py-3"
                   type="submit"
                   disabled={loading}
                 >

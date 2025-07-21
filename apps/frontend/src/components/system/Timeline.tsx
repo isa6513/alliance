@@ -42,7 +42,7 @@ const Timeline: React.FC<TimelineProps> = ({
       backgroundColor: lineColor,
       top: halfDot,
       bottom: bottomElementRef.current
-        ? bottomElementRef.current.clientHeight - halfDot
+        ? bottomElementRef.current.clientHeight - 2 * halfDot
         : 0,
     });
   }, [bottomElementRef, lineWidth, lineColor, halfDot]);
