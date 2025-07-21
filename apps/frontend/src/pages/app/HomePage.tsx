@@ -130,7 +130,7 @@ const HomePage = ({ matches }: RouteMatches) => {
               )}
 
               {posts.slice(0, 3).map((post) => (
-                <ForumListPost key={post.id} post={post} />
+                <ForumListPost key={post.id} post={post} showAction={false} />
               ))}
             </Card>
             <Card>

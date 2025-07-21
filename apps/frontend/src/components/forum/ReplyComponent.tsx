@@ -4,6 +4,28 @@ import Card from "../system/Card";
 import { ReplyDto, UserDto } from "@alliance/shared/client";
 import ReplyForm from "./ReplyForm";
 
+const countAllReplies = (replies: ReplyDto[]): number => {
+  let count = 0;
+  for (const reply of replies) {
+    count += 1;
+    if (reply.children && reply.children.length > 0) {
+      count += countAllReplies(reply.children);
+    }
+  }
+  return count;
+};
+
+const getDisplayContent = (content: string, collapsed: boolean) => {
+  if (!collapsed) return content;
+  const firstLine = content.split("\n")[0];
+  return content.includes("\n") ? `${firstLine} ...` : firstLine;
+};
+
+const getIndentClass = (level: number) => {
+  const indent = Math.min(level * 8, 32);
+  return indent > 0 ? `ml-${indent}` : "";
+};
+
 interface ReplyComponentProps {
   reply: ReplyDto;
   depth?: number;
@@ -18,6 +40,95 @@ interface ReplyComponentProps {
   newlyAddedReplies: Set<number>;
   highlightedReplyId: number | null;
 }
+
+interface ReplyContentProps
+  extends Pick<
+    ReplyComponentProps,
+    "reply" | "user" | "setReplyingTo" | "setReplyContent" | "handleDeleteReply"
+  > {
+  canNest: boolean;
+  isReplyingToThis: boolean;
+  hasChildren: boolean;
+  isCollapsed?: boolean;
+}
+
+const ReplyContent: React.FC<ReplyContentProps> = ({
+  reply,
+  user,
+  canNest,
+  isReplyingToThis,
+  hasChildren,
+  isCollapsed = false,
+  setReplyingTo,
+  setReplyContent,
+  handleDeleteReply,
+}) => {
+  return (
+    <div className="flex items-start gap-2">
+      <div className="flex-1 min-w-0">
+        <div
+          className={`mb-1 whitespace-pre-wrap ${
+            isCollapsed && reply.content.includes("\n") ? "text-gray-500" : ""
+          }`}
+        >
+          {getDisplayContent(reply.content, isCollapsed)}
+        </div>
+
+        <div className="flex justify-between items-center text-sm text-gray-500">
+          <div className="gap-x-2 flex">
+            {reply.author?.name !== undefined && (
+              <p>
+                Reply by{" "}
+                <a
+                  href={`/user/${reply.author.id}`}
+                  className="hover:underline"
+                >
+                  {reply.author?.name}
+                </a>
+              </p>
+            )}
+            <span>
+              {formatDistanceToNow(new Date(reply.createdAt), {
+                addSuffix: true,
+              })}
+            </span>
+            {hasChildren && isCollapsed && reply.children !== undefined && (
+              <span className="text-xs bg-gray-200 px-2 py-1 rounded">
+                {countAllReplies(reply.children)}{" "}
+                {countAllReplies(reply.children) === 1 ? "reply" : "replies"}{" "}
+                hidden
+              </span>
+            )}
+          </div>
+
+          <div className="flex space-x-2">
+            {user && canNest && (
+              <button
+                onClick={() => {
+                  setReplyingTo(isReplyingToThis ? null : reply.id);
+                  if (!isReplyingToThis) {
+                    setReplyContent("");
+                  }
+                }}
+                className="text-black hover:underline"
+              >
+                {!isReplyingToThis && "Reply"}
+              </button>
+            )}
+            {user && reply.author.email === user.email && (
+              <button
+                onClick={() => handleDeleteReply(reply.id)}
+                className="text-red-600 hover:underline"
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ReplyComponent = ({
   reply,
@@ -36,30 +147,19 @@ const ReplyComponent = ({
   const maxDepth = 10;
   const canNest = depth < maxDepth;
   const isReplyingToThis = replyingTo === reply.id;
-  const hasChildren = reply.children && reply.children.length > 0;
+  const hasChildren = reply.children ? reply.children.length > 0 : false;
   const isNewlyAdded = newlyAddedReplies.has(reply.id);
   const isHighlighted = highlightedReplyId === reply.id;
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Count all nested replies recursively
-  const countAllReplies = (replies: ReplyDto[]): number => {
-    let count = 0;
-    for (const reply of replies) {
-      count += 1; // Count this reply
-      if (reply.children && reply.children.length > 0) {
-        count += countAllReplies(reply.children); // Count all children recursively
-      }
-    }
-    return count;
-  };
-
-  // Truncate content to first line when collapsed
-  const getDisplayContent = (content: string, collapsed: boolean) => {
-    if (!collapsed) return content;
-    const firstLine = content.split("\n")[0];
-    return content.includes("\n") ? `${firstLine} ...` : firstLine;
-  };
+  // Common styling classes
+  const highlightClass = isHighlighted ? "border-l !border-blue-500" : "";
+  const newReplyClass = isNewlyAdded
+    ? depth === 0
+      ? "border-1 !border-green-600/80 bg-green-50"
+      : "border-l-2 border-green-600/80 bg-green-50/30 pl-3"
+    : "";
 
   // For top-level replies only, render the entire thread in a card
   if (depth === 0) {
@@ -91,86 +191,26 @@ const ReplyComponent = ({
         )}
 
         <div
-          className={`border-transparent ${
-            isHighlighted ? "border !border-blue-500 bg-blue-50" : ""
-          } duration-1000 rounded-lg`}
+          className={`border-transparent ${highlightClass} duration-1000 rounded-lg`}
         >
           <Card
             key={reply.id}
-            className={`transition-all duration-1000 ${
-              isNewlyAdded ? "border-1 !border-green-600/80 bg-green-50" : ""
-            } ${isHighlighted ? "!border-transparent !bg-transparent" : ""}`}
+            className={`transition-all duration-1000 ${newReplyClass} ${
+              isHighlighted ? "!border-transparent !bg-transparent" : ""
+            }`}
           >
-            {/* Top-level reply content */}
             <div id={`reply-${reply.id}`}>
-              <div className="flex items-start gap-2">
-                {/* Reply Content */}
-                <div className="flex-1 min-w-0">
-                  <div
-                    className={`mb-1 whitespace-pre-wrap ${
-                      isCollapsed ? "text-gray-500" : ""
-                    }`}
-                  >
-                    {getDisplayContent(reply.content, isCollapsed)}
-                  </div>
-
-                  <div className="flex justify-between items-center text-sm text-gray-500">
-                    <div className="gap-x-2 flex">
-                      {reply.author?.name !== undefined && (
-                        <p>
-                          Reply by{" "}
-                          <a
-                            href={`/user/${reply.author.id}`}
-                            className="hover:underline"
-                          >
-                            {reply.author?.name}
-                          </a>
-                        </p>
-                      )}
-                      <span>
-                        {formatDistanceToNow(new Date(reply.createdAt), {
-                          addSuffix: true,
-                        })}
-                      </span>
-                      {hasChildren &&
-                        isCollapsed &&
-                        reply.children !== undefined && (
-                          <span className="text-xs bg-gray-200 px-2 py-1 rounded">
-                            {countAllReplies(reply.children)}{" "}
-                            {countAllReplies(reply.children) === 1
-                              ? "reply"
-                              : "replies"}{" "}
-                            hidden
-                          </span>
-                        )}
-                    </div>
-
-                    <div className="flex space-x-2">
-                      {user && canNest && (
-                        <button
-                          onClick={() => {
-                            setReplyingTo(isReplyingToThis ? null : reply.id);
-                            if (!isReplyingToThis) {
-                              setReplyContent("");
-                            }
-                          }}
-                          className="text-black hover:underline"
-                        >
-                          {!isReplyingToThis && "Reply"}
-                        </button>
-                      )}
-                      {user && reply.author.email === user.email && (
-                        <button
-                          onClick={() => handleDeleteReply(reply.id)}
-                          className="text-red-600 hover:underline"
-                        >
-                          Delete
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <ReplyContent
+                reply={reply}
+                user={user}
+                canNest={canNest}
+                isReplyingToThis={isReplyingToThis}
+                hasChildren={hasChildren}
+                isCollapsed={isCollapsed}
+                setReplyingTo={setReplyingTo}
+                setReplyContent={setReplyContent}
+                handleDeleteReply={handleDeleteReply}
+              />
             </div>
 
             {/* Render nested replies within the same card */}
@@ -178,7 +218,6 @@ const ReplyComponent = ({
               <div>
                 {reply.children.map((childReply) => (
                   <div key={childReply.id}>
-                    {/* Horizontal divider line - full width */}
                     <div className="border-t border-gray-200 -mx-4 my-4"></div>
                     <div>
                       <ReplyComponent
@@ -220,86 +259,24 @@ const ReplyComponent = ({
   }
 
   // For nested replies (depth > 0), render with proper indentation
-  const getIndentClass = (level: number) => {
-    switch (level) {
-      case 1:
-        return "ml-8";
-      case 2:
-        return "ml-16";
-      case 3:
-        return "ml-24";
-      case 4:
-        return "ml-32";
-      default:
-        return level > 4 ? "ml-32" : "";
-    }
-  };
-
   const indentClass = getIndentClass(depth);
 
   return (
     <div>
       <div
-        className={`${indentClass} rounded border-transparent ${
-          isHighlighted ? "border !border-blue-500 bg-blue-50" : ""
-        } ${
-          isNewlyAdded
-            ? "border-l-2 border-green-600/80 bg-green-50/30 pl-3"
-            : ""
-        } duration-1000`}
+        className={`${indentClass} rounded border-transparent ${highlightClass} ${newReplyClass} duration-1000`}
         id={`reply-${reply.id}`}
       >
-        <div className="flex items-start gap-2">
-          {/* Reply Content */}
-          <div className="flex-1 min-w-0">
-            <div className="mb-1 whitespace-pre-wrap">{reply.content}</div>
-
-            <div className="flex justify-between items-center text-sm text-gray-500">
-              <div className="gap-x-2 flex">
-                {reply.author?.name !== undefined && (
-                  <p>
-                    Reply by{" "}
-                    <a
-                      href={`/user/${reply.author.id}`}
-                      className="hover:underline"
-                    >
-                      {reply.author?.name}
-                    </a>
-                  </p>
-                )}
-                <span>
-                  {formatDistanceToNow(new Date(reply.createdAt), {
-                    addSuffix: true,
-                  })}
-                </span>
-              </div>
-
-              <div className="flex space-x-2">
-                {user && canNest && (
-                  <button
-                    onClick={() => {
-                      setReplyingTo(isReplyingToThis ? null : reply.id);
-                      if (!isReplyingToThis) {
-                        setReplyContent("");
-                      }
-                    }}
-                    className="text-black hover:underline"
-                  >
-                    {!isReplyingToThis && "Reply"}
-                  </button>
-                )}
-                {user && reply.author.email === user.email && (
-                  <button
-                    onClick={() => handleDeleteReply(reply.id)}
-                    className="text-red-600 hover:underline"
-                  >
-                    Delete
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ReplyContent
+          reply={reply}
+          user={user}
+          canNest={canNest}
+          isReplyingToThis={isReplyingToThis}
+          hasChildren={hasChildren}
+          setReplyingTo={setReplyingTo}
+          setReplyContent={setReplyContent}
+          handleDeleteReply={handleDeleteReply}
+        />
       </div>
 
       {/* Reply form for nested reply */}

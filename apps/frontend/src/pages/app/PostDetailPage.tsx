@@ -267,18 +267,17 @@ const PostDetailPage: React.FC = () => {
                   addSuffix: true,
                 })}
               </span>
+              {post.action && (
+                <span className="ml-4">
+                  <Link
+                    to={`/actions/${post.action.id}`}
+                    className="inline-block bg-blue-50 text-blue-600 hover:bg-blue-100 px-2 py-1 rounded-lg text-sm"
+                  >
+                    {post.action.name}
+                  </Link>
+                </span>
+              )}
             </div>
-
-            {post.action && (
-              <div className="mb-4">
-                <Link
-                  to={`/actions/${post.action.id}`}
-                  className="inline-block bg-blue-50 text-blue-600 px-2 py-1 rounded-lg text-sm"
-                >
-                  yeah eyah
-                </Link>
-              </div>
-            )}
 
             <div className="my-8 whitespace-pre-wrap">{post.content}</div>
           </Card>

@@ -118,7 +118,7 @@ const ActionActivityList = ({ actionId }: ActionActivityListProps) => {
         {hasMore && !showAll && (
           <button
             onClick={() => setShowAll(true)}
-            className="text-[#318dde] hover:text-blue-800 text-sm font-medium cursor-pointer"
+            className="text-[#318dde] hover:text-blue-800 text-sm font-medium"
           >
             See all ({allActivities.length})
           </button>

@@ -6,9 +6,10 @@ import { useNavigate } from "react-router";
 
 export interface ForumListPostProps {
   post: PostDto;
+  showAction?: boolean;
 }
 
-const ForumListPost = ({ post }: ForumListPostProps) => {
+const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
   const navigate = useNavigate();
 
   const authorClick = (e: React.MouseEvent) => {
@@ -32,7 +33,7 @@ const ForumListPost = ({ post }: ForumListPostProps) => {
           <p onClick={authorClick} className="hover:underline">
             {post.author?.name || "Unknown user"}
           </p>
-          {post.action?.name && (
+          {post.action?.name !== undefined && showAction && (
             <a
               href={`/action/${post.action.id}`}
               className="text-blue ml-1 hover:underline"

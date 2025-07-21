@@ -2,10 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { PostDto } from "@alliance/shared/client";
 import { useAuth } from "../lib/AuthContext";
-import { formatDistanceToNow } from "date-fns";
-import Card from "./system/Card";
 import Button from "./system/Button";
 import { forumFindPostsByAction } from "@alliance/shared/client";
+import ForumListPost from "./ForumListPost";
 
 interface ActionForumPostsProps {
   actionId: string | undefined;
@@ -42,10 +41,6 @@ const ActionForumPosts: React.FC<ActionForumPostsProps> = ({
     navigate(`/forum/edit/new?actionId=${actionId}`);
   };
 
-  const handleViewPost = (postId: number) => {
-    navigate(`/forum/post/${postId}`);
-  };
-
   if (error) {
     return <div className="text-red-500 text-sm py-2">{error}</div>;
   }
@@ -70,29 +65,7 @@ const ActionForumPosts: React.FC<ActionForumPostsProps> = ({
       ) : (
         <div className="space-y-3">
           {posts.slice(0, 3).map((post) => (
-            <Card
-              key={post.id}
-              className="cursor-pointer transition"
-              onClick={() => handleViewPost(post.id)}
-            >
-              <div className="p-3">
-                <h3 className="font-medium">{post.title}</h3>
-                <div className="text-gray-600 text-sm line-clamp-2 mt-1">
-                  {post.content}
-                </div>
-                <div className="flex justify-between text-xs text-gray-500 mt-2">
-                  <span>By {post.author?.name || "Unknown user"}</span>
-                  <div className="flex space-x-3">
-                    <span>{post.replies?.length || 0} replies</span>
-                    <span>
-                      {formatDistanceToNow(new Date(post.updatedAt), {
-                        addSuffix: true,
-                      })}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Card>
+            <ForumListPost key={post.id} post={post} showAction={false} />
           ))}
 
           {posts.length > 3 && (

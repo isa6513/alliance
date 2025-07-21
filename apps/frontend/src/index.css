@@ -225,3 +225,8 @@ img {
 .p-AccordionButtonContent {
   display: none !important;
 }
+
+a,
+button {
+  cursor: pointer;
+}

@@ -50,7 +50,7 @@ const Button: React.FC<ButtonProps> = ({
       className={`px-4 py-2 text-sm font-medium w-fit h-fit rounded flex items-center justify-center ${
         disabled
           ? "opacity-50 cursor-not-allowed"
-          : "cursor-pointer hover:bg-${ButtonColorClasses[color]}-100"
+          : "hover:bg-${ButtonColorClasses[color]}-100"
       } ${color} ${
         color === ButtonColor.Light ? "!text-stone-800" : ""
       } ${className} `}
