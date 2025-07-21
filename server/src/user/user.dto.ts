@@ -19,6 +19,7 @@ export class UserDto extends PickType(User, [
   'anonymous',
 ]) {
   @ApiPropertyOptional()
+  @IsOptional()
   cityId?: number;
 }
 

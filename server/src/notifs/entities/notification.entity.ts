@@ -28,8 +28,8 @@ export class Notification {
   })
   user: User;
 
-  @Column()
-  @ApiProperty()
+  @Column({ type: 'enum', enum: NotificationType })
+  @ApiProperty({ enum: NotificationType, enumName: 'NotificationType' })
   category: NotificationType;
 
   @Column()
@@ -47,6 +47,10 @@ export class Notification {
   @Column({ default: false })
   @ApiProperty()
   read: boolean;
+
+  @Column({ default: false })
+  @ApiProperty()
+  cleared: boolean;
 
   @CreateDateColumn()
   @ApiProperty()

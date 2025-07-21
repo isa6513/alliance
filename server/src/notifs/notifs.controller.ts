@@ -29,4 +29,18 @@ export class NotifsController {
   setRead(@Param('id', ParseIntPipe) id: number, @Request() req: JwtRequest) {
     return this.notifsService.setRead(id, req.user.sub);
   }
+
+  @Post('read-all')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  setReadAll(@Request() req: JwtRequest) {
+    return this.notifsService.setReadAll(req.user.sub);
+  }
+
+  @Post('clear')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  clear(@Request() req: JwtRequest) {
+    return this.notifsService.clear(req.user.sub);
+  }
 }

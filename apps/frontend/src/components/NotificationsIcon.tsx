@@ -1,7 +1,9 @@
 import {
   NotificationDto,
+  notifsClear,
   notifsFindAll,
   notifsSetRead,
+  notifsSetReadAll,
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
@@ -67,6 +69,27 @@ const NotificationsIcon = () => {
     [navigate, notifications]
   );
 
+  const handleMarkAllAsRead = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      notifsSetReadAll();
+      setNotifications(
+        notifications.map((notification) => ({
+          ...notification,
+          read: true,
+        }))
+      );
+      setUnreadCount(0);
+    },
+    [notifications]
+  );
+
+  const handleClearAll = useCallback(() => {
+    notifsClear();
+    setNotifications([]);
+    setUnreadCount(0);
+  }, []);
+
   return (
     <div
       className={`${
@@ -78,7 +101,15 @@ const NotificationsIcon = () => {
     >
       <p className="text-sm">{unreadCount}</p>
       {isOpen && (
-        <div className="absolute top-8 shadow-lg/5 right-0 bg-white rounded border border-zinc-200 p-4 min-w-[370px] space-y-2 max-h-[500px] overflow-y-auto">
+        <div className="absolute top-8 shadow-lg/5 right-0 bg-white rounded border border-zinc-200 p-4 min-w-[370px] space-y-2 max-h-[500px] overflow-y-auto cursor-default">
+          <div className="flex flex-row border-b border-zinc-200 justify-end gap-x-8 pb-2">
+            <a className="text-zinc-800" onClick={handleMarkAllAsRead}>
+              Mark all as read
+            </a>
+            <a className="text-zinc-800" onClick={handleClearAll}>
+              Clear
+            </a>
+          </div>
           {notifications.length === 0 && (
             <p className="text-zinc-500">No notifications</p>
           )}
@@ -89,7 +120,7 @@ const NotificationsIcon = () => {
                 notification.id,
                 notification.webAppLocation
               )}
-              className={`text-black hover:bg-zinc-100 p-2 rounded-md flex gap-x-4 items-center ${
+              className={`text-black hover:bg-zinc-100 p-2 rounded-md flex cursor-pointer flex-col ${
                 !notification.read ? "bg-red-50" : ""
               }`}
             >

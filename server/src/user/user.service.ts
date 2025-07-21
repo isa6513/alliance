@@ -8,12 +8,7 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserActionRelation } from '../actions/entities/user-action.entity';
 import { Friend, FriendStatus } from './friend.entity';
-import {
-  OnboardingDto,
-  ProfileDto,
-  UpdateProfileDto,
-  UserDto,
-} from './user.dto';
+import { OnboardingDto, ProfileDto, UpdateProfileDto } from './user.dto';
 import { City } from 'src/geo/city.entity';
 import {
   NotificationType,

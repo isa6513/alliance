@@ -14,11 +14,12 @@ import {
 import { UserAction } from '../actions/entities/user-action.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Communique } from '../communiques/entities/communique.entity';
-import { IsNotEmpty } from 'class-validator';
+import { Allow, IsNotEmpty, IsOptional } from 'class-validator';
 import { FriendStatus } from './friend.entity';
 import { Friend } from './friend.entity';
 import { Notification } from '../notifs/entities/notification.entity';
 import { City } from 'src/geo/city.entity';
+import { Type } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -120,26 +121,33 @@ export class User {
 
   @Column({ nullable: true, unique: true })
   @ApiProperty({ nullable: true })
+  @Allow()
   stripeCustomerId: string;
 
   @Column({ default: false })
   @ApiProperty()
+  @Allow()
   isNotSignedUpPartialProfile: boolean;
 
   // -- onboarding info --
 
   @ManyToOne(() => City, { nullable: true })
+  @IsOptional()
+  @Type(() => City)
   city?: City;
 
   @Column({ nullable: true })
   @ApiProperty({ nullable: true })
+  @Allow()
   over18: boolean;
 
   @Column({ default: false })
   @ApiProperty()
+  @Allow()
   onboardingComplete: boolean;
 
   @Column({ default: false })
   @ApiProperty()
+  @Allow()
   anonymous: boolean;
 }

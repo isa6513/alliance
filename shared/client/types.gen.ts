@@ -439,7 +439,7 @@ export type UpdateReplyDto = {
 
 export type NotificationDto = {
     id: number;
-    category: string;
+    category: NotificationType;
     message: string;
     webAppLocation: string | null;
     mobileAppLocation: string | null;
@@ -1544,6 +1544,28 @@ export type NotifsSetReadData = {
 };
 
 export type NotifsSetReadResponses = {
+    200: unknown;
+};
+
+export type NotifsSetReadAllData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/notifs/read-all';
+};
+
+export type NotifsSetReadAllResponses = {
+    200: unknown;
+};
+
+export type NotifsClearData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/notifs/clear';
+};
+
+export type NotifsClearResponses = {
     200: unknown;
 };
 
