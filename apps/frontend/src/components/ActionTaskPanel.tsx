@@ -52,7 +52,7 @@ const ActionTaskPanel = ({ matches }: { matches: { data: unknown }[] }) => {
       return (
         <Card style={CardStyle.Green}>
           <p>
-            <b>Joined </b>- We&apos;ll notify you when it&apos;s time to act.
+            <b>Committed </b>- We&apos;ll notify you when it&apos;s time to act.
           </p>
         </Card>
       );

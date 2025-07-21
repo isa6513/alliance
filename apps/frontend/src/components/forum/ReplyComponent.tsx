@@ -50,6 +50,7 @@ interface ReplyContentProps
   isReplyingToThis: boolean;
   hasChildren: boolean;
   isCollapsed?: boolean;
+  isHighlighted: boolean;
 }
 
 const ReplyContent: React.FC<ReplyContentProps> = ({
@@ -59,12 +60,17 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
   isReplyingToThis,
   hasChildren,
   isCollapsed = false,
+  isHighlighted,
   setReplyingTo,
   setReplyContent,
   handleDeleteReply,
 }) => {
   return (
-    <div className="flex items-start gap-2">
+    <div className="flex items-start gap-2 relative">
+      {/* Blue highlight indicator */}
+      {isHighlighted && (
+        <div className="absolute -left-4 top-0 bottom-0 w-[3px] bg-blue-500 rounded transition-all duration-1000" />
+      )}
       <div className="flex-1 min-w-0">
         <div
           className={`mb-1 whitespace-pre-wrap ${
@@ -75,10 +81,10 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         </div>
 
         <div className="flex justify-between items-center text-sm text-gray-500">
-          <div className="gap-x-2 flex">
+          <div className="gap-x-4 flex">
             {reply.author?.name !== undefined && (
               <p>
-                Reply by{" "}
+                By{" "}
                 <a
                   href={`/user/${reply.author.id}`}
                   className="hover:underline"
@@ -110,7 +116,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                     setReplyContent("");
                   }
                 }}
-                className="text-black hover:underline"
+                className="text-gray-700 hover:underline"
               >
                 {!isReplyingToThis && "Reply"}
               </button>
@@ -154,7 +160,6 @@ const ReplyComponent = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Common styling classes
-  const highlightClass = isHighlighted ? "border-l !border-blue-500" : "";
   const newReplyClass = isNewlyAdded
     ? depth === 0
       ? "border-1 !border-green-600/80 bg-green-50"
@@ -190,14 +195,10 @@ const ReplyComponent = ({
           </button>
         )}
 
-        <div
-          className={`border-transparent ${highlightClass} duration-1000 rounded-lg`}
-        >
+        <div className="border-transparent duration-1000 rounded-lg">
           <Card
             key={reply.id}
-            className={`transition-all duration-1000 ${newReplyClass} ${
-              isHighlighted ? "!border-transparent !bg-transparent" : ""
-            }`}
+            className={`transition-all duration-1000 ${newReplyClass}`}
           >
             <div id={`reply-${reply.id}`}>
               <ReplyContent
@@ -207,6 +208,7 @@ const ReplyComponent = ({
                 isReplyingToThis={isReplyingToThis}
                 hasChildren={hasChildren}
                 isCollapsed={isCollapsed}
+                isHighlighted={isHighlighted}
                 setReplyingTo={setReplyingTo}
                 setReplyContent={setReplyContent}
                 handleDeleteReply={handleDeleteReply}
@@ -264,7 +266,7 @@ const ReplyComponent = ({
   return (
     <div>
       <div
-        className={`${indentClass} rounded border-transparent ${highlightClass} ${newReplyClass} duration-1000`}
+        className={`${indentClass} rounded border-transparent ${newReplyClass} duration-1000`}
         id={`reply-${reply.id}`}
       >
         <ReplyContent
@@ -273,6 +275,7 @@ const ReplyComponent = ({
           canNest={canNest}
           isReplyingToThis={isReplyingToThis}
           hasChildren={hasChildren}
+          isHighlighted={isHighlighted}
           setReplyingTo={setReplyingTo}
           setReplyContent={setReplyContent}
           handleDeleteReply={handleDeleteReply}
