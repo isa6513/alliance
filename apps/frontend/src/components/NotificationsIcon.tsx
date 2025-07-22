@@ -103,10 +103,10 @@ const NotificationsIcon = () => {
       {isOpen && (
         <div className="absolute top-8 shadow-lg/5 right-0 bg-white rounded border border-zinc-200 p-4 min-w-[370px] space-y-2 max-h-[500px] overflow-y-auto cursor-default">
           <div className="flex flex-row border-b border-zinc-200 justify-end gap-x-8 pb-2">
-            <a className="text-zinc-800" onClick={handleMarkAllAsRead}>
+            <a className="text-black" onClick={handleMarkAllAsRead}>
               Mark all as read
             </a>
-            <a className="text-zinc-800" onClick={handleClearAll}>
+            <a className="text-black" onClick={handleClearAll}>
               Clear
             </a>
           </div>

@@ -18,6 +18,7 @@ export interface CardProps extends PropsWithChildren {
   bgImage?: string;
   closed?: boolean;
   ref?: React.RefObject<HTMLDivElement | null>;
+  flex?: boolean;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -28,6 +29,7 @@ const Card: React.FC<CardProps> = ({
   bgImage,
   closed,
   ref,
+  flex = true,
 }: CardProps) => {
   const cardStyle = style ?? CardStyle.White;
 
@@ -45,7 +47,7 @@ const Card: React.FC<CardProps> = ({
 
   return (
     <div
-      className={`flex flex-col ${
+      className={`${flex ? "flex flex-col" : ""} ${
         styleClasses[cardStyle]
       } gap-y-2 rounded p-4 border ${className} ${
         onClick

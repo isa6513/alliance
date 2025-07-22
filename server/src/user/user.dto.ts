@@ -35,7 +35,6 @@ export class FriendStatusDto {
 }
 
 export class ProfileDto extends PickType(User, [
-  'email',
   'admin',
   'id',
   'profilePicture',

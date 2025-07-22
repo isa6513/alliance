@@ -22,7 +22,7 @@ const FriendRequestButton = ({
       <Button
         color={ButtonColor.Blue}
         onClick={handleSendFriendRequest}
-        className="rounded-full pl-3"
+        className="pl-2"
       >
         <img src={icons8Plus} alt="send" className="invert w-6 h-6" />
         <span>Send Friend Request</span>
@@ -31,11 +31,7 @@ const FriendRequestButton = ({
   }
   if (friendStatus === "pending") {
     return (
-      <Button
-        color={ButtonColor.Light}
-        onClick={handleSendFriendRequest}
-        className="rounded-full"
-      >
+      <Button color={ButtonColor.Light} onClick={handleSendFriendRequest}>
         <span>Request sent!</span>
       </Button>
     );

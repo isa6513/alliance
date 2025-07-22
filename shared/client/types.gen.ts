@@ -48,7 +48,6 @@ export type ResetPasswordDto = {
 
 export type ProfileDto = {
     id: number;
-    email: string;
     admin: boolean;
     profilePicture: string | null;
     profileDescription: string | null;

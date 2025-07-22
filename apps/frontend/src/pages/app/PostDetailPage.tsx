@@ -224,9 +224,8 @@ const PostDetailPage: React.FC = () => {
   console.log(post.replies);
 
   return (
-    <div className="w-full min-h-screen bg-page">
+    <div className="w-full bg-page">
       <div className="container mx-auto px-4 py-8 ">
-        {/* Post */}
         <div className="relative">
           <Link
             to="/forum"
@@ -235,8 +234,8 @@ const PostDetailPage: React.FC = () => {
           >
             &larr;
           </Link>
-          <Card className="p-6 mb-5" style={CardStyle.White}>
-            <div className="flex justify-between items-center">
+          <Card className="p-6 mb-3" style={CardStyle.White}>
+            <div className="flex justify-between items-start">
               <h1 className="text-2xl font-semibold">{post.title}</h1>
               {post.author.email === user?.email && (
                 <div className="space-x-2">
@@ -287,7 +286,7 @@ const PostDetailPage: React.FC = () => {
         </div>
 
         {post.replies.length > 0 ? (
-          <div className="space-y-2 mb-8">
+          <div className="space-y-3 mb-8">
             {post.replies
               .filter((reply) => !reply.deleted || reply.children?.length)
               .map((reply) => (

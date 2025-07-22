@@ -27,7 +27,7 @@ const getDisplayContent = (
         This reply has been deleted
       </div>
     );
-  if (!collapsed) return content;
+  if (!collapsed) return <div className={`${sharedClasses}`}>{content}</div>;
   const firstLine = content.split("\n")[0];
   return content.includes("\n") ? (
     <div className={`${sharedClasses} text-gray-500`}>{firstLine} ...</div>
@@ -202,7 +202,8 @@ const ReplyComponent = ({
         <div className="border-transparent duration-1000 rounded-lg">
           <Card
             key={reply.id}
-            className={`transition-all duration-1000 ${newReplyClass}`}
+            className={`!display-block transition-all duration-1000 ${newReplyClass}`}
+            flex={false}
           >
             <div id={`reply-${reply.id}`}>
               <ReplyContent
