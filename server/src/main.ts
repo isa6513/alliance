@@ -56,7 +56,9 @@ async function bootstrap() {
   validateEnv();
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
   app.use(cookieParser());
   //   app.enableCors();
   app.enableCors({
@@ -86,7 +88,7 @@ async function bootstrap() {
     });
   }
 
-  await app.listen(process.env.PORT ?? 3005, '0.0.0.0');
+  await app.listen(3005, '0.0.0.0');
 }
 
 void bootstrap();
