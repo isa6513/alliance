@@ -33,7 +33,7 @@ const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
           </p>
           {post.action?.name !== undefined && showAction && (
             <a
-              href={`/action/${post.action.id}`}
+              href={`/actions/${post.action.id}`}
               className="text-blue ml-1 hover:underline"
             >
               {post.action.name}

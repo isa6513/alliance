@@ -170,6 +170,8 @@ const ReplyComponent = ({
       : "border-l-2 border-green-600/80 bg-green-50/30 pl-3"
     : "";
 
+  if (reply.deleted && !reply.children?.length) return null;
+
   // For top-level replies only, render the entire thread in a card
   if (depth === 0) {
     return (
