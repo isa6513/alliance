@@ -72,8 +72,6 @@ export class AdminViewerGateway
     }
     this.subscriptions.get(tableName)!.add(client.id);
 
-    this.logger.log(`Client ${client.id} subscribed to table: ${tableName}`);
-
     return { status: 'subscribed', tableName };
   }
 
@@ -90,10 +88,6 @@ export class AdminViewerGateway
         this.subscriptions.delete(tableName);
       }
     }
-
-    this.logger.log(
-      `Client ${client.id} unsubscribed from table: ${tableName}`,
-    );
 
     return { status: 'unsubscribed', tableName };
   }
