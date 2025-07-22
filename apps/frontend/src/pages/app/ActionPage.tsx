@@ -156,8 +156,8 @@ export default function ActionPage() {
             className="w-full h-auto rounded-md border border-gray-300 max-h-[200px] object-cover"
           />
         )}
-        <div className="flex flex-row justify-between items-start my-3">
-          <div className="flex flex-col gap-y-3">
+        <div className="flex flex-row justify-between items-start mt-5 mb-2">
+          <div className="flex flex-col gap-y-3 border-b w-full border-gray-300 pb-2">
             {action !== undefined && (
               <div>
                 <h1 className="font-adobe">{action.name}</h1>

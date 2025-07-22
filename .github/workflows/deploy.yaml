@@ -360,7 +360,7 @@ jobs:
 
             cd ~/
             rm -rf nest-backend-deploy-backup || true
-            mv nest-backend nest-backend-deploy-backup
+            cp -r nest-backend nest-backend-deploy-backup
 
             export DB_HOST=${{ secrets.RDS_HOSTNAME }}
             export DB_PORT=${{ secrets.RDS_PORT }}
@@ -397,6 +397,7 @@ jobs:
             unzip -o ~/nest-build.zip -d ~/nest-backend
 
             cd ~/nest-backend
+            npm install --omit=dev
 
             npm run migration:run
 

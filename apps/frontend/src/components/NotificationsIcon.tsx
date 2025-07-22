@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import { useNavigate } from "react-router";
 import { formatDate } from "date-fns";
+import Button, { ButtonColor } from "./system/Button";
 
 function getWebAppLocation(webAppLocation: string) {
   if (webAppLocation.startsWith("/")) {
@@ -70,7 +71,7 @@ const NotificationsIcon = () => {
   );
 
   const handleMarkAllAsRead = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>) => {
+    (e: React.MouseEvent) => {
       e.preventDefault();
       notifsSetReadAll();
       setNotifications(
@@ -103,12 +104,15 @@ const NotificationsIcon = () => {
       {isOpen && (
         <div className="absolute top-8 shadow-lg/5 right-0 bg-white rounded border border-zinc-200 p-4 min-w-[370px] space-y-2 max-h-[500px] overflow-y-auto cursor-default">
           <div className="flex flex-row border-b border-zinc-200 justify-end gap-x-8 pb-2">
-            <a className="text-black" onClick={handleMarkAllAsRead}>
+            <Button
+              color={ButtonColor.Transparent}
+              onClick={handleMarkAllAsRead}
+            >
               Mark all as read
-            </a>
-            <a className="text-black" onClick={handleClearAll}>
+            </Button>
+            <Button color={ButtonColor.Transparent} onClick={handleClearAll}>
               Clear
-            </a>
+            </Button>
           </div>
           {notifications.length === 0 && (
             <p className="text-zinc-500">No notifications</p>
