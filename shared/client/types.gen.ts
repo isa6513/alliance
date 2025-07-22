@@ -399,6 +399,7 @@ export type ReplyDto = {
     id: number;
     content: string;
     postId: number;
+    deleted: boolean;
     createdAt: string;
     updatedAt: string;
     parentId?: number;
@@ -1493,7 +1494,7 @@ export type ForumCreateReplyResponses = {
 
 export type ForumCreateReplyResponse = ForumCreateReplyResponses[keyof ForumCreateReplyResponses];
 
-export type ForumRemoveReplyData = {
+export type ForumDeleteReplyData = {
     body?: never;
     path: {
         id: string;
@@ -1502,7 +1503,7 @@ export type ForumRemoveReplyData = {
     url: '/forum/replies/{id}';
 };
 
-export type ForumRemoveReplyResponses = {
+export type ForumDeleteReplyResponses = {
     200: unknown;
 };
 

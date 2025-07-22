@@ -109,7 +109,7 @@ export class ForumController {
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Delete a reply' })
   @ApiOkResponse()
-  removeReply(@Param('id') id: string, @ReqUser() user: JwtPayload) {
-    return this.forumService.removeReply(+id, user.sub);
+  deleteReply(@Param('id') id: string, @ReqUser() user: JwtPayload) {
+    return this.forumService.deleteReply(+id, user.sub);
   }
 }

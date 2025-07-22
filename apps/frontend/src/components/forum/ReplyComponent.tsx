@@ -15,15 +15,25 @@ const countAllReplies = (replies: ReplyDto[]): number => {
   return count;
 };
 
-const getDisplayContent = (content: string, collapsed: boolean) => {
+const getDisplayContent = (
+  content: string,
+  collapsed: boolean,
+  deleted: boolean
+): React.ReactNode => {
+  const sharedClasses = "mb-1 whitespace-pre-wrap";
+  if (deleted)
+    return (
+      <div className={`${sharedClasses} text-gray-400 text-sm`}>
+        This reply has been deleted
+      </div>
+    );
   if (!collapsed) return content;
   const firstLine = content.split("\n")[0];
-  return content.includes("\n") ? `${firstLine} ...` : firstLine;
-};
-
-const getIndentClass = (level: number) => {
-  const indent = Math.min(level * 8, 32);
-  return indent > 0 ? `ml-${indent}` : "";
+  return content.includes("\n") ? (
+    <div className={`${sharedClasses} text-gray-500`}>{firstLine} ...</div>
+  ) : (
+    <div className={`${sharedClasses}`}>{firstLine}</div>
+  );
 };
 
 interface ReplyComponentProps {
@@ -72,13 +82,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         <div className="absolute -left-4 top-0 bottom-0 w-[3px] bg-blue-500 rounded transition-all duration-1000" />
       )}
       <div className="flex-1 min-w-0">
-        <div
-          className={`mb-1 whitespace-pre-wrap ${
-            isCollapsed && reply.content.includes("\n") ? "text-gray-500" : ""
-          }`}
-        >
-          {getDisplayContent(reply.content, isCollapsed)}
-        </div>
+        {getDisplayContent(reply.content, isCollapsed, reply.deleted)}
 
         <div className="flex justify-between items-center text-sm text-gray-500">
           <div className="gap-x-4 flex">
@@ -116,12 +120,12 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                     setReplyContent("");
                   }
                 }}
-                className="text-gray-700 hover:underline"
+                className="text-gray-800 hover:underline"
               >
                 {!isReplyingToThis && "Reply"}
               </button>
             )}
-            {user && reply.author.email === user.email && (
+            {user && reply.author.email === user.email && !reply.deleted && (
               <button
                 onClick={() => handleDeleteReply(reply.id)}
                 className="text-red-600 hover:underline"
@@ -260,14 +264,16 @@ const ReplyComponent = ({
     );
   }
 
-  // For nested replies (depth > 0), render with proper indentation
-  const indentClass = getIndentClass(depth);
+  const indentStyle = {
+    marginLeft: `${depth * 30}px`,
+  };
 
   return (
     <div>
       <div
-        className={`${indentClass} rounded border-transparent ${newReplyClass} duration-1000`}
+        className={`rounded border-transparent ${newReplyClass} duration-1000`}
         id={`reply-${reply.id}`}
+        style={indentStyle}
       >
         <ReplyContent
           reply={reply}
@@ -284,7 +290,7 @@ const ReplyComponent = ({
 
       {/* Reply form for nested reply */}
       {user && isReplyingToThis && (
-        <div className={`mt-2 ${indentClass}`}>
+        <div className={`mt-2`} style={indentStyle}>
           <ReplyForm
             parentId={reply.id}
             onCancel={() => setReplyingTo(null)}

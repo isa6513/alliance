@@ -1,4 +1,9 @@
-import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  PartialType,
+  PickType,
+} from '@nestjs/swagger';
 import { Reply } from '../entities/reply.entity';
 import { UserDto } from '../../user/user.dto';
 
@@ -10,11 +15,12 @@ export class ReplyDto extends PickType(Reply, [
   'parentId',
   'createdAt',
   'updatedAt',
+  'deleted',
 ]) {
   @ApiProperty({ type: UserDto })
   author: UserDto;
 
-  @ApiProperty({ type: () => [ReplyDto], required: false })
+  @ApiPropertyOptional({ type: () => ReplyDto, isArray: true })
   children?: ReplyDto[];
 }
 

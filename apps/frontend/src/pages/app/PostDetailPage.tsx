@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router";
-import { PostDto, CreateReplyDto } from "@alliance/shared/client";
+import {
+  PostDto,
+  CreateReplyDto,
+  forumDeleteReply,
+} from "@alliance/shared/client";
 import { useAuth } from "../../lib/AuthContext";
 import ReplyForm from "../../components/forum/ReplyForm";
 import ReplyComponent from "../../components/forum/ReplyComponent";
@@ -8,7 +12,6 @@ import {
   forumCreateReply,
   forumFindOnePost,
   forumRemovePost,
-  forumRemoveReply,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "../../components/system/Card";
 import { formatTime } from "../../lib/utils";
@@ -166,7 +169,7 @@ const PostDetailPage: React.FC = () => {
 
     if (window.confirm("Are you sure you want to delete this reply?")) {
       try {
-        await forumRemoveReply({
+        await forumDeleteReply({
           path: { id: replyId.toString() },
         });
 

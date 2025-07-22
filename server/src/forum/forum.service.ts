@@ -267,7 +267,7 @@ export class ForumService {
     return updatedReply;
   }
 
-  async removeReply(id: number, userId: number): Promise<void> {
+  async deleteReply(id: number, userId: number): Promise<void> {
     const reply = await this.replyRepository.findOne({
       where: { id },
     });
@@ -280,7 +280,7 @@ export class ForumService {
       throw new NotFoundException('You can only delete your own replies');
     }
 
-    await this.replyRepository.delete(id);
+    await this.replyRepository.update(id, { deleted: true });
   }
 
   async findPostsByUser(userId: number): Promise<Post[]> {

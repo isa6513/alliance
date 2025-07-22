@@ -51,6 +51,11 @@ export class Reply {
   @IsNotEmpty()
   postId: number;
 
+  @Column({ default: false })
+  @ApiProperty()
+  @Allow()
+  deleted: boolean;
+
   @CreateDateColumn()
   @ApiProperty()
   @Allow()
