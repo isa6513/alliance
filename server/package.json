@@ -57,7 +57,7 @@
     "stripe": "^18.0.0",
     "ts-auto-mock": "^3.7.4",
     "ttypescript": "^1.5.15",
-    "typeorm": "^0.3.22"
+    "typeorm": "^0.3.25"
   },
   "devDependencies": {
     "@darraghor/eslint-plugin-nestjs-typed": "^6.7.0",

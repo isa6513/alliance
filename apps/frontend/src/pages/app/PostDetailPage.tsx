@@ -288,22 +288,24 @@ const PostDetailPage: React.FC = () => {
 
         {post.replies.length > 0 ? (
           <div className="space-y-2 mb-8">
-            {post.replies.map((reply) => (
-              <ReplyComponent
-                key={reply.id}
-                reply={reply}
-                user={user}
-                replyingTo={replyingTo}
-                setReplyingTo={setReplyingTo}
-                replyContent={replyContent}
-                setReplyContent={setReplyContent}
-                handleSubmitReply={handleSubmitReply}
-                handleDeleteReply={handleDeleteReply}
-                isSubmitting={isSubmitting}
-                newlyAddedReplies={newlyAddedReplies}
-                highlightedReplyId={highlightedReplyId}
-              />
-            ))}
+            {post.replies
+              .filter((reply) => !reply.deleted || reply.children?.length)
+              .map((reply) => (
+                <ReplyComponent
+                  key={reply.id}
+                  reply={reply}
+                  user={user}
+                  replyingTo={replyingTo}
+                  setReplyingTo={setReplyingTo}
+                  replyContent={replyContent}
+                  setReplyContent={setReplyContent}
+                  handleSubmitReply={handleSubmitReply}
+                  handleDeleteReply={handleDeleteReply}
+                  isSubmitting={isSubmitting}
+                  newlyAddedReplies={newlyAddedReplies}
+                  highlightedReplyId={highlightedReplyId}
+                />
+              ))}
           </div>
         ) : null}
 

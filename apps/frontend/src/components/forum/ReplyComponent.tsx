@@ -170,8 +170,6 @@ const ReplyComponent = ({
       : "border-l-2 border-green-600/80 bg-green-50/30 pl-3"
     : "";
 
-  if (reply.deleted && !reply.children?.length) return null;
-
   // For top-level replies only, render the entire thread in a card
   if (depth === 0) {
     return (
@@ -224,27 +222,32 @@ const ReplyComponent = ({
             {/* Render nested replies within the same card */}
             {hasChildren && !isCollapsed && reply.children !== undefined && (
               <div>
-                {reply.children.map((childReply) => (
-                  <div key={childReply.id}>
-                    <div className="border-t border-gray-200 -mx-4 my-4"></div>
-                    <div>
-                      <ReplyComponent
-                        reply={childReply}
-                        depth={1}
-                        user={user}
-                        replyingTo={replyingTo}
-                        setReplyingTo={setReplyingTo}
-                        replyContent={replyContent}
-                        setReplyContent={setReplyContent}
-                        handleSubmitReply={handleSubmitReply}
-                        handleDeleteReply={handleDeleteReply}
-                        isSubmitting={isSubmitting}
-                        newlyAddedReplies={newlyAddedReplies}
-                        highlightedReplyId={highlightedReplyId}
-                      />
+                {reply.children
+                  .filter(
+                    (childReply) =>
+                      !childReply.deleted || childReply.children?.length
+                  )
+                  .map((childReply) => (
+                    <div key={childReply.id}>
+                      <div className="border-t border-gray-200 -mx-4 my-4"></div>
+                      <div>
+                        <ReplyComponent
+                          reply={childReply}
+                          depth={1}
+                          user={user}
+                          replyingTo={replyingTo}
+                          setReplyingTo={setReplyingTo}
+                          replyContent={replyContent}
+                          setReplyContent={setReplyContent}
+                          handleSubmitReply={handleSubmitReply}
+                          handleDeleteReply={handleDeleteReply}
+                          isSubmitting={isSubmitting}
+                          newlyAddedReplies={newlyAddedReplies}
+                          highlightedReplyId={highlightedReplyId}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </Card>

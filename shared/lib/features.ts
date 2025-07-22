@@ -4,7 +4,7 @@ export enum Features {
 }
 
 export const PROD_FLAGS: Record<Features, boolean> = {
-  [Features.Forum]: false,
+  [Features.Forum]: true,
   [Features.PublicSignup]: false,
 };
 
