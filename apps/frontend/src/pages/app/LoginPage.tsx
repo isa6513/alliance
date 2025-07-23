@@ -1,14 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import Card, { CardStyle } from "../../components/system/Card";
 import Button, { ButtonColor } from "../../components/system/Button";
 import FormInput from "../../components/system/FormInput";
 import { useAuth } from "../../lib/AuthContext";
-import {
-  appHealthCheck,
-  authForgotPassword,
-  SignInDto,
-} from "@alliance/shared/client";
+import { authForgotPassword, SignInDto } from "@alliance/shared/client";
 import { isFeatureEnabled } from "../../lib/config";
 import { Features } from "@alliance/shared/lib/features";
 
@@ -67,18 +63,6 @@ const LoginPage: React.FC = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    const checkHealth = async () => {
-      try {
-        const health = await appHealthCheck();
-        console.log("appHealthCheck", health);
-      } catch {
-        setError("no server connection");
-      }
-    };
-    checkHealth();
-  }, []);
 
   const handleForgotPasswordClick = async () => {
     setError(null);

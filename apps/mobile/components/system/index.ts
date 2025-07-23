@@ -7,6 +7,7 @@ export { default as StatusIndicator, StatusType } from "./StatusIndicator";
 export { default as ProgressBar, ProgressBarColor } from "./ProgressBar";
 export { default as Avatar, AvatarSize } from "./Avatar";
 export { default as Divider, DividerOrientation } from "./Divider";
+export { default as Text, TextStyle } from "./Text";
 
 // Re-export colors for convenience
 export { colors } from "../../lib/style/colors";

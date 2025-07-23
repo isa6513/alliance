@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
-  TextInput,
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
@@ -13,7 +11,14 @@ import {
 import { Stack, Link, useRouter } from "expo-router";
 import { useAuth } from "../../lib/AuthContext";
 import { authStyles } from "../../lib/style/authStyles";
-import { colors, Input } from "../../components/design-system";
+import {
+  Button,
+  ButtonColor,
+  colors,
+  Input,
+  Text,
+  TextStyle,
+} from "../../components/system";
 
 const LoginScreen = () => {
   const router = useRouter();
@@ -82,17 +87,17 @@ const LoginScreen = () => {
             />
           </View>
 
-          <TouchableOpacity
-            style={authStyles.primaryButton}
+          <Button
             onPress={handleLogin}
             disabled={isSubmitting || isLoading}
+            color={ButtonColor.Black}
           >
             {isSubmitting || isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={authStyles.primaryButtonText}>Log In</Text>
+              <Text style={{ color: "white" }}>Log In</Text>
             )}
-          </TouchableOpacity>
+          </Button>
 
           <View style={authStyles.linkContainer}>
             <Text style={authStyles.linkText}>Don&apos;t have an account?</Text>

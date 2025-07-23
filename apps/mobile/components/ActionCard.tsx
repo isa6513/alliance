@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
 import { ActionDto } from "../../../shared/client";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
 
 interface ActionCardProps {
   action: ActionDto;
@@ -24,8 +25,8 @@ export default function ActionCard({ action, onPress }: ActionCardProps) {
         <Text style={styles.statusText}>{action.status}</Text>
         <View style={styles.detailsButton}>
           <Text style={styles.detailsText}>Details</Text>
-          <FontAwesome
-            name="chevron-right"
+          <FontAwesomeIcon
+            icon={faChevronRight}
             size={12}
             color="#0D1B2A"
             style={styles.icon}

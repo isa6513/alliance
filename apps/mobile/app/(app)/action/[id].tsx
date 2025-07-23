@@ -17,8 +17,9 @@ import {
   actionsJoin,
   actionsMyStatus,
 } from "../../../../../shared/client";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { getImageSource } from "../../../lib/config";
+import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 
 export default function ActionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -37,7 +38,7 @@ export default function ActionDetailScreen() {
 
       // Fetch action details
       const actionResponse = await actionsFindOne({
-        path: { id },
+        path: { id: parseInt(id) },
       });
 
       if (actionResponse.error || !actionResponse.data) {
@@ -153,23 +154,15 @@ export default function ActionDetailScreen() {
 
           {userStatus === "joined" && (
             <View style={styles.joinedMessage}>
-              <FontAwesome name="check-circle" size={20} color="#4CAF50" />
+              <FontAwesomeIcon icon={faCheckCircle} size={20} color="#4CAF50" />
               <Text style={styles.joinedText}>
                 You&apos;ve committed to this action
               </Text>
             </View>
           )}
 
-          {userStatus === "none" && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Why Join?</Text>
-              <Text style={styles.sectionText}>{action.whyJoin}</Text>
-            </View>
-          )}
-
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>What you can do</Text>
-            <Text style={styles.sectionText}>{action.description}</Text>
+            <Text style={styles.sectionText}>{action.body}</Text>
           </View>
 
           <View style={styles.section}>

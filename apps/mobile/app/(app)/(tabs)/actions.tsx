@@ -1,4 +1,10 @@
-import { View, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import { useAuth } from "../../../lib/AuthContext";
 import { useEffect, useMemo, useState } from "react";
 import { ActionDto, actionsFindAll } from "../../../../../shared/client";
@@ -14,10 +20,9 @@ import {
   colors,
   ButtonColor,
   CardStyle,
-  Text,
 } from "../../../components/system";
 
-export default function HomeScreen() {
+export default function ActionsScreen() {
   const { user } = useAuth();
   const [actions, setActions] = useState<ActionDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -54,7 +59,6 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>Your Tasks</Text>
       <View style={styles.actionsListContainer}>
         <View style={styles.actionsTitleRow}>
           <Text style={styles.sectionTitle}>Actions</Text>
@@ -63,14 +67,13 @@ export default function HomeScreen() {
           {Object.values(FilterMode).map((mode) => (
             <Button
               key={mode}
+              title={mode}
               onPress={() => setFilterMode(mode)}
               color={
-                filterMode === mode ? ButtonColor.Black : ButtonColor.Outline
+                filterMode === mode ? ButtonColor.Stone : ButtonColor.Outline
               }
               style={styles.filterButton}
-            >
-              {mode}
-            </Button>
+            />
           ))}
         </View>
         {loading ? (

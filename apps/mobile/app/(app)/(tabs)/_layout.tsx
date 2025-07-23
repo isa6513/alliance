@@ -1,8 +1,13 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
 import { View } from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faHome } from "@fortawesome/free-solid-svg-icons/faHome";
+import { faList } from "@fortawesome/free-solid-svg-icons/faList";
+import { faComments } from "@fortawesome/free-solid-svg-icons/faComments";
+import { faUser } from "@fortawesome/free-solid-svg-icons/faUser";
 
 export default function TabLayout() {
+  const iconSize = 24;
   return (
     <View
       style={{ position: "absolute", top: 40, left: 0, right: 0, bottom: 0 }}
@@ -14,7 +19,18 @@ export default function TabLayout() {
             headerShown: false,
             title: "Home",
             tabBarIcon: ({ color }) => (
-              <FontAwesome size={28} name="home" color={color} />
+              <FontAwesomeIcon size={iconSize} icon={faHome} color={color} />
+            ),
+            tabBarShowLabel: false,
+          }}
+        />
+        <Tabs.Screen
+          name="actions"
+          options={{
+            headerShown: false,
+            title: "Actions",
+            tabBarIcon: ({ color }) => (
+              <FontAwesomeIcon size={iconSize} icon={faList} color={color} />
             ),
             tabBarShowLabel: false,
           }}
@@ -25,7 +41,11 @@ export default function TabLayout() {
             headerShown: false,
             title: "Forum",
             tabBarIcon: ({ color }) => (
-              <FontAwesome size={28} name="comments" color={color} />
+              <FontAwesomeIcon
+                size={iconSize}
+                icon={faComments}
+                color={color}
+              />
             ),
             tabBarShowLabel: false,
           }}
@@ -36,7 +56,7 @@ export default function TabLayout() {
             headerShown: false,
             title: "Profile",
             tabBarIcon: ({ color }) => (
-              <FontAwesome size={28} name="user" color={color} />
+              <FontAwesomeIcon size={iconSize} icon={faUser} color={color} />
             ),
             tabBarShowLabel: false,
           }}

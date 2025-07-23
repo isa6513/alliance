@@ -19,8 +19,13 @@ import {
   CardStyle,
   ButtonColor,
   BadgeColor,
-} from "../../../components/design-system";
-import { FontAwesome } from "@expo/vector-icons";
+} from "../../../components/system";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faComment,
+  faChevronRight,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function ForumScreen() {
   const { user } = useAuth();
@@ -152,8 +157,8 @@ export default function ForumScreen() {
 
                 <View style={styles.postStats}>
                   <View style={styles.statItem}>
-                    <FontAwesome
-                      name="comment"
+                    <FontAwesomeIcon
+                      icon={faComment}
                       size={12}
                       color={colors.text.tertiary}
                     />
@@ -161,8 +166,8 @@ export default function ForumScreen() {
                       {post.replies?.length || 0}
                     </Text>
                   </View>
-                  <FontAwesome
-                    name="chevron-right"
+                  <FontAwesomeIcon
+                    icon={faChevronRight}
                     size={12}
                     color={colors.text.tertiary}
                   />
@@ -179,7 +184,7 @@ export default function ForumScreen() {
           onPress={navigateToCreatePost}
           activeOpacity={0.8}
         >
-          <FontAwesome name="plus" size={18} color="#fff" />
+          <FontAwesomeIcon icon={faPlus} size={18} color="#fff" />
         </TouchableOpacity>
       )}
     </View>

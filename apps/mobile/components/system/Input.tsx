@@ -7,6 +7,7 @@ import {
   TextInputProps,
   ViewStyle,
   TextStyle,
+  Platform,
 } from "react-native";
 
 interface InputProps extends TextInputProps {
@@ -33,28 +34,27 @@ export default function Input({
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
 
-  const inputContainerStyle = [
-    styles.inputContainer,
-    isFocused && styles.focusedContainer,
-    error && styles.errorContainer,
-  ];
-
-  const inputTextStyle = [styles.input, error && styles.errorInput, inputStyle];
+  // Single source of truth for border color
+  const borderColor = error ? "#ef4444" : isFocused ? "#318dde" : "#d1d5db";
 
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View style={containerStyle}>
       {label && (
         <Text style={[styles.label, labelStyle]}>
           {label}
           {required && <Text style={styles.required}> *</Text>}
         </Text>
       )}
-      <View style={inputContainerStyle}>
+      <View style={[styles.inputContainer, { borderColor }]}>
         <TextInput
-          style={inputTextStyle}
+          style={[styles.input, inputStyle]}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholderTextColor="#9ca3af"
+          underlineColorAndroid="transparent" // <-- removes Android underline
+          {...(Platform.OS === "web" && {
+            style: [{ outlineStyle: undefined }, styles.input, inputStyle],
+          })}
           {...textInputProps}
         />
       </View>
@@ -67,9 +67,6 @@ export default function Input({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-  },
   label: {
     fontSize: 14,
     fontWeight: "500",
@@ -81,29 +78,16 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     borderWidth: 1,
-    borderColor: "#d1d5db",
     borderRadius: 8,
     backgroundColor: "#fff",
     paddingHorizontal: 12,
-    paddingVertical: 0,
     minHeight: 44,
-  },
-  focusedContainer: {
-    borderColor: "#318dde",
-    borderWidth: 2,
-  },
-  errorContainer: {
-    borderColor: "#ef4444",
-    borderWidth: 2,
   },
   input: {
     fontSize: 16,
     color: "#374151",
     paddingVertical: 12,
     fontFamily: "System",
-  },
-  errorInput: {
-    color: "#374151",
   },
   errorText: {
     fontSize: 12,

@@ -8,7 +8,17 @@ import {
   Alert,
 } from "react-native";
 import { useAuth } from "../../../lib/AuthContext";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faUser,
+  faBell,
+  faLock,
+  faCog,
+  faLanguage,
+  faQuestionCircle,
+  faInfoCircle,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
@@ -58,36 +68,51 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Account</Text>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesome
-            name="user"
+          <FontAwesomeIcon
+            icon={faUser}
             size={20}
             color="#0D1B2A"
             style={styles.menuIcon}
           />
           <Text style={styles.menuText}>Edit Profile</Text>
-          <FontAwesome name="chevron-right" size={16} color="#666" />
+          <FontAwesomeIcon
+            icon={faChevronRight}
+            size={16}
+            color="#666"
+            style={styles.menuIcon}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesome
-            name="bell"
+          <FontAwesomeIcon
+            icon={faBell}
             size={20}
             color="#0D1B2A"
             style={styles.menuIcon}
           />
           <Text style={styles.menuText}>Notifications</Text>
-          <FontAwesome name="chevron-right" size={16} color="#666" />
+          <FontAwesomeIcon
+            icon={faChevronRight}
+            size={16}
+            color="#666"
+            style={styles.menuIcon}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesome
-            name="lock"
+          <FontAwesomeIcon
+            icon={faLock}
             size={20}
             color="#0D1B2A"
             style={styles.menuIcon}
           />
           <Text style={styles.menuText}>Privacy</Text>
-          <FontAwesome name="chevron-right" size={16} color="#666" />
+          <FontAwesomeIcon
+            icon={faChevronRight}
+            size={16}
+            color="#666"
+            style={styles.menuIcon}
+          />
         </TouchableOpacity>
       </View>
 
@@ -95,25 +120,35 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Preferences</Text>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesome
-            name="cog"
+          <FontAwesomeIcon
+            icon={faCog}
             size={20}
             color="#0D1B2A"
             style={styles.menuIcon}
           />
           <Text style={styles.menuText}>Settings</Text>
-          <FontAwesome name="chevron-right" size={16} color="#666" />
+          <FontAwesomeIcon
+            icon={faChevronRight}
+            size={16}
+            color="#666"
+            style={styles.menuIcon}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesome
-            name="language"
+          <FontAwesomeIcon
+            icon={faLanguage}
             size={20}
             color="#0D1B2A"
             style={styles.menuIcon}
           />
           <Text style={styles.menuText}>Language</Text>
-          <FontAwesome name="chevron-right" size={16} color="#666" />
+          <FontAwesomeIcon
+            icon={faChevronRight}
+            size={16}
+            color="#666"
+            style={styles.menuIcon}
+          />
         </TouchableOpacity>
       </View>
 
@@ -121,25 +156,35 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Support</Text>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesome
-            name="question-circle"
+          <FontAwesomeIcon
+            icon={faQuestionCircle}
             size={20}
             color="#0D1B2A"
             style={styles.menuIcon}
           />
           <Text style={styles.menuText}>Help & Support</Text>
-          <FontAwesome name="chevron-right" size={16} color="#666" />
+          <FontAwesomeIcon
+            icon={faChevronRight}
+            size={16}
+            color="#666"
+            style={styles.menuIcon}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesome
-            name="info-circle"
+          <FontAwesomeIcon
+            icon={faInfoCircle}
             size={20}
             color="#0D1B2A"
             style={styles.menuIcon}
           />
           <Text style={styles.menuText}>About</Text>
-          <FontAwesome name="chevron-right" size={16} color="#666" />
+          <FontAwesomeIcon
+            icon={faChevronRight}
+            size={16}
+            color="#666"
+            style={styles.menuIcon}
+          />
         </TouchableOpacity>
       </View>
 

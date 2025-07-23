@@ -15,6 +15,12 @@ export const authStyles = StyleSheet.create({
   formContainer: {
     borderRadius: 10,
     padding: 20,
+    maxWidth: 500,
+    width: "100%",
+    flex: 1,
+    marginHorizontal: "auto",
+    justifyContent: "center",
+    flexGrow: 1,
   },
   title: {
     fontSize: 24,
@@ -37,29 +43,8 @@ export const authStyles = StyleSheet.create({
   inputContainer: {
     marginBottom: 16,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
   inputError: {
     borderColor: colors.error,
-  },
-
-  // Buttons
-  primaryButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    padding: 14,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  primaryButtonText: {
-    color: colors.background,
-    fontSize: 16,
-    fontWeight: "600",
   },
 
   // Navigation links

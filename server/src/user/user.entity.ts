@@ -1,3 +1,5 @@
+/* eslint-disable @darraghor/nestjs-typed/all-properties-have-explicit-defined */
+/* eslint-disable @darraghor/nestjs-typed/all-properties-are-whitelisted */
 import * as bcrypt from 'bcryptjs';
 import {
   Entity,

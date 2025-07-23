@@ -1,15 +1,13 @@
 import React from "react";
 import {
   TouchableOpacity,
-  Text,
   StyleSheet,
   ViewStyle,
-  TextStyle,
   ActivityIndicator,
 } from "react-native";
 
 export enum ButtonColor {
-  Stone = "stone",
+  Black = "black",
   Green = "green",
   Blue = "blue",
   Red = "red",
@@ -24,25 +22,23 @@ export enum ButtonSize {
 }
 
 interface ButtonProps {
-  title: string;
   onPress: () => void;
   color?: ButtonColor;
   size?: ButtonSize;
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
-  textStyle?: TextStyle;
+  children?: React.ReactNode;
 }
 
 export default function Button({
-  title,
   onPress,
-  color = ButtonColor.Stone,
+  color = ButtonColor.Black,
   size = ButtonSize.Medium,
   disabled = false,
   loading = false,
   style,
-  textStyle,
+  children,
 }: ButtonProps) {
   const containerStyle = [
     styles.base,
@@ -50,14 +46,6 @@ export default function Button({
     styles[`${size}Container`],
     disabled && styles.disabledContainer,
     style,
-  ];
-
-  const titleStyle = [
-    styles.text,
-    styles[`${color}Text`],
-    styles[`${size}Text`],
-    disabled && styles.disabledText,
-    textStyle,
   ];
 
   return (
@@ -73,7 +61,7 @@ export default function Button({
           color={color === ButtonColor.Outline ? "#444" : "#fff"}
         />
       ) : (
-        <Text style={titleStyle}>{title}</Text>
+        children
       )}
     </TouchableOpacity>
   );
@@ -86,6 +74,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 8,
     fontWeight: "500",
+    fontFamily: "IBMPlexSans-Regular",
+    textAlign: "center",
   },
 
   // Size variants
@@ -106,8 +96,9 @@ const styles = StyleSheet.create({
   },
 
   // Color variants - containers
-  stoneContainer: {
-    backgroundColor: "#444",
+  blackContainer: {
+    backgroundColor: "#333",
+    color: "white",
   },
   greenContainer: {
     backgroundColor: "#5d9c2d",
@@ -129,40 +120,20 @@ const styles = StyleSheet.create({
 
   // Text styles
   text: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "500",
     textAlign: "center",
   },
 
   // Size-specific text
   smallText: {
-    fontSize: 12,
+    fontSize: 10,
   },
   mediumText: {
-    fontSize: 13,
+    fontSize: 14,
   },
   largeText: {
-    fontSize: 16,
-  },
-
-  // Color-specific text
-  stoneText: {
-    color: "#fff",
-  },
-  greenText: {
-    color: "#fff",
-  },
-  blueText: {
-    color: "#fff",
-  },
-  redText: {
-    color: "#fff",
-  },
-  lightText: {
-    color: "#444",
-  },
-  outlineText: {
-    color: "#444",
+    fontSize: 18,
   },
 
   // Disabled states

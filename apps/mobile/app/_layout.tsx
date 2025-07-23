@@ -6,9 +6,12 @@ import { client } from "@alliance/shared/client/client.gen";
 import WebTokenStore from "../lib/ExpoWebTokenStore";
 import SecureStorage from "../lib/SecureStorage";
 import { getApiUrl } from "../lib/config";
-
+import { useFonts } from "expo-font";
 // Root layout that provides auth context
 export default function RootLayout() {
+  useFonts({
+    "IBMPlexSans-Regular": require("../assets/fonts/IBMPlexSans-Regular.ttf"),
+  });
   useEffect(() => {
     client.setConfig({
       baseUrl: getApiUrl(),

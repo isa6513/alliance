@@ -57,7 +57,6 @@ export async function clientLoader() {
   });
 
   const revalidateCallback = () => {
-    console.log("revalidatingg");
     localStorage.setItem("revalidate", "true");
   };
 

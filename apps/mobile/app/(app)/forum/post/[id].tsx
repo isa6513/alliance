@@ -16,7 +16,7 @@ import {
   forumFindOnePost,
   forumCreateReply,
   forumUpdateReply,
-  forumRemoveReply,
+  forumDeleteReply,
 } from "../../../../../../shared/client";
 import {
   Card,
@@ -27,7 +27,7 @@ import {
   CardStyle,
   ButtonColor,
   BadgeColor,
-} from "../../../../components/design-system";
+} from "../../../../components/system";
 import { useAuth } from "../../../../lib/AuthContext";
 
 interface ReplyWithDepth extends ReplyDto {
@@ -148,7 +148,7 @@ export default function PostDetailScreen() {
 
   const handleDeleteReply = async (replyId: number) => {
     try {
-      const response = await forumRemoveReply({
+      const response = await forumDeleteReply({
         path: {
           id: replyId.toString(),
         },
