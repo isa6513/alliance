@@ -36,18 +36,34 @@ export class ForumService {
   }
 
   async findAllPosts(): Promise<Post[]> {
-    return this.postRepository.find({
-      relations: ['author', 'action'],
-      order: { updatedAt: 'DESC' },
-    });
+    return this.postRepository
+      .find({
+        relations: ['author', 'action', 'replies'],
+        order: { updatedAt: 'DESC' },
+      })
+      .then((posts) =>
+        posts.map((post) => ({
+          ...post,
+          replies: [],
+          replyCount: post.replies.length,
+        })),
+      );
   }
 
   async findPostsByAction(actionId: number): Promise<Post[]> {
-    return this.postRepository.find({
-      where: { actionId },
-      relations: ['author', 'action'],
-      order: { updatedAt: 'DESC' },
-    });
+    return this.postRepository
+      .find({
+        where: { actionId },
+        relations: ['author', 'action', 'replies'],
+        order: { updatedAt: 'DESC' },
+      })
+      .then((posts) =>
+        posts.map((post) => ({
+          ...post,
+          replies: [],
+          replyCount: post.replies.length,
+        })),
+      );
   }
 
   async findOnePost(id: number): Promise<Post> {

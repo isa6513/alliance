@@ -416,6 +416,7 @@ export type PostDto = {
     updatedAt: string;
     action?: ActionDto;
     author: MinimalUserDto;
+    replyCount?: number;
     replies: Array<ReplyDto>;
 };
 

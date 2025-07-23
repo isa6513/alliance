@@ -8,13 +8,7 @@ import {
   FilterMode,
   filterActions,
 } from "../../../../../shared/lib/actionUtils";
-import {
-  Card,
-  colors,
-  CardStyle,
-  Text,
-  TextStyle,
-} from "../../../components/system";
+import { colors, Text, TextStyle } from "../../../components/system";
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -55,9 +49,6 @@ export default function HomeScreen() {
     <ScrollView style={styles.container}>
       <Text type={TextStyle.Header}>Your Tasks</Text>
       <View style={styles.actionsListContainer}>
-        <View style={styles.actionsTitleRow}>
-          <Text style={styles.sectionTitle}>Actions</Text>
-        </View>
         {loading ? (
           <ActivityIndicator
             size="large"
@@ -78,24 +69,6 @@ export default function HomeScreen() {
           ))
         )}
       </View>
-
-      <Card cardStyle={CardStyle.White} style={styles.statsCard}>
-        <Text style={styles.statsTitle}>Your Activity</Text>
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Actions Joined</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Forum Posts</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Events</Text>
-          </View>
-        </View>
-      </Card>
     </ScrollView>
   );
 }
@@ -103,7 +76,9 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: 16,
     backgroundColor: colors.page,
+    paddingTop: 24,
   },
   header: {
     paddingHorizontal: 20,
@@ -158,7 +133,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   actionsListContainer: {
-    paddingHorizontal: 16,
     marginTop: 24,
     marginBottom: 16,
   },

@@ -5,14 +5,32 @@ import { faHome } from "@fortawesome/free-solid-svg-icons/faHome";
 import { faList } from "@fortawesome/free-solid-svg-icons/faList";
 import { faComments } from "@fortawesome/free-solid-svg-icons/faComments";
 import { faUser } from "@fortawesome/free-solid-svg-icons/faUser";
+import { colors } from "../../../lib/style/colors";
 
 export default function TabLayout() {
   const iconSize = 24;
   return (
     <View
-      style={{ position: "absolute", top: 40, left: 0, right: 0, bottom: 0 }}
+      style={{
+        position: "absolute",
+        backgroundColor: colors.page,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingTop: 40,
+      }}
     >
-      <Tabs>
+      <Tabs
+        screenOptions={{
+          tabBarStyle: {
+            backgroundColor: "white",
+            paddingTop: 10,
+          },
+          tabBarInactiveTintColor: "#aaa",
+          tabBarActiveTintColor: colors.green,
+        }}
+      >
         <Tabs.Screen
           name="index"
           options={{

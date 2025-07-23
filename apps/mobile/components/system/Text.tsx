@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: "IBMPlexSans-Medium",
     color: colors.text.primary,
   },
   primary: {

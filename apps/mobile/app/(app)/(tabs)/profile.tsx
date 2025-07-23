@@ -19,6 +19,7 @@ import {
   faInfoCircle,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
+import { colors } from "../../../components/system";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
@@ -198,7 +199,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.page,
   },
   header: {
     backgroundColor: "#fff",

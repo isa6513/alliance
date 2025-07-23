@@ -1,10 +1,9 @@
 // Define color constants for easy theming - aligned with frontend design system
 export const colors = {
-  // Alliance brand colors
-  hgreen: "#3f5640", // Header/dark green
-  agreen: "#c4d8bf", // Light green accent
-  bgreen: "#8fbe6f", // Medium green (rgb(143, 190, 111))
-  blue: "#318dde", // Primary blue
+  hgreen: "#3f5640",
+  green: "#62a124",
+  bgreen: "#8fbe6f",
+  blue: "#318dde",
   white: "#fff",
 
   // Primary colors
@@ -13,7 +12,7 @@ export const colors = {
 
   // Text colors
   text: {
-    primary: "#333",
+    primary: "#111",
     secondary: "#444",
     tertiary: "#666",
     light: "#9ca3af",
@@ -21,7 +20,7 @@ export const colors = {
 
   // Background colors
   background: "#fff",
-  page: "#f8f8f8",
+  page: "#fcfcfc",
 
   // UI colors
   border: "#d6d3d1",

@@ -43,7 +43,9 @@ const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
           )}
         </div>
         <div className="flex space-x-3">
-          <span>{post.replies?.length || 0} replies</span>
+          {post.replyCount !== undefined && (
+            <span>{post.replyCount} replies</span>
+          )}
           <span>
             {formatTime(new Date(post.updatedAt), {
               addSuffix: true,

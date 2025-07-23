@@ -110,18 +110,6 @@ export default function ForumScreen() {
               style={styles.retryButton}
             />
           </Card>
-        ) : posts.length === 0 ? (
-          <Card cardStyle={CardStyle.Grey} style={styles.emptyCard}>
-            <Text style={styles.emptyText}>No forum posts yet</Text>
-            {user && (
-              <Button
-                title="Create First Post"
-                onPress={navigateToCreatePost}
-                color={ButtonColor.Green}
-                style={styles.createFirstButton}
-              />
-            )}
-          </Card>
         ) : (
           posts.map((post) => (
             <Card
@@ -202,7 +190,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingTop: 20,
-    paddingBottom: 100, // Add space for floating button
+    paddingBottom: 100,
   },
   floatingButton: {
     position: "absolute",
@@ -218,9 +206,9 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 3,
     },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.15,
     shadowRadius: 6,
   },
   loader: {

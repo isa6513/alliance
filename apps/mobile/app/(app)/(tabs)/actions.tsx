@@ -19,7 +19,6 @@ import {
 } from "../../../components/system";
 
 export default function ActionsScreen() {
-  const { user } = useAuth();
   const [actions, setActions] = useState<ActionDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

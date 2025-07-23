@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
-  TextInput,
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
@@ -13,6 +11,7 @@ import {
 import { Stack, Link, useRouter } from "expo-router";
 import { authRegister } from "@alliance/shared/client";
 import { authStyles } from "../../lib/style/authStyles";
+import { Button, Input, Text } from "../../components/system";
 
 const SignupScreen = () => {
   const router = useRouter();
@@ -110,11 +109,7 @@ const SignupScreen = () => {
 
           <View style={authStyles.inputContainer}>
             <Text style={authStyles.label}>Full Name</Text>
-            <TextInput
-              style={[
-                authStyles.input,
-                errors.name ? authStyles.inputError : null,
-              ]}
+            <Input
               placeholder="John Doe"
               value={name}
               onChangeText={(text) => {
@@ -130,11 +125,7 @@ const SignupScreen = () => {
 
           <View style={authStyles.inputContainer}>
             <Text style={authStyles.label}>Email</Text>
-            <TextInput
-              style={[
-                authStyles.input,
-                errors.email ? authStyles.inputError : null,
-              ]}
+            <Input
               placeholder="your@email.com"
               value={email}
               onChangeText={(text) => {
@@ -152,11 +143,7 @@ const SignupScreen = () => {
 
           <View style={authStyles.inputContainer}>
             <Text style={authStyles.label}>Password</Text>
-            <TextInput
-              style={[
-                authStyles.input,
-                errors.password ? authStyles.inputError : null,
-              ]}
+            <Input
               placeholder="Minimum 8 characters"
               value={password}
               onChangeText={(text) => {
@@ -172,17 +159,13 @@ const SignupScreen = () => {
             ) : null}
           </View>
 
-          <TouchableOpacity
-            style={authStyles.primaryButton}
-            onPress={handleSignup}
-            disabled={isSubmitting}
-          >
+          <Button onPress={handleSignup} disabled={isSubmitting}>
             {isSubmitting ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={authStyles.primaryButtonText}>Create Account</Text>
+              <Text style={{ color: "white" }}>Create Account</Text>
             )}
-          </TouchableOpacity>
+          </Button>
 
           <View style={authStyles.linkContainer}>
             <Text style={authStyles.linkText}>Already have an account?</Text>

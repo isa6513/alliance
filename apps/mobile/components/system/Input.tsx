@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
   },
   input: {
-    fontSize: 16,
+    fontSize: 15,
     color: "#374151",
     paddingVertical: 12,
     fontFamily: "System",

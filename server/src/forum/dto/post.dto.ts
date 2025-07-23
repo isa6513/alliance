@@ -26,6 +26,9 @@ export class PostDto extends PickType(Post, [
   @ApiProperty({ type: MinimalUserDto })
   author: MinimalUserDto;
 
+  @ApiPropertyOptional({ type: Number })
+  replyCount?: number;
+
   @ApiProperty({ type: () => ReplyDto, isArray: true })
   replies: ReplyDto[];
 }

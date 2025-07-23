@@ -1,5 +1,4 @@
 import { prod_api_url } from "@alliance/shared/lib/config";
-import localhost from "react-native-localhost";
 
 export const getApiUrl = (): string => {
   const addr = "192.168.4.151";
