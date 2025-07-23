@@ -16,6 +16,11 @@ const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
     navigate(`/user/${post.author?.id}`);
   };
 
+  const actionClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/actions/${post.action?.id}`);
+  };
+
   return (
     <Card
       key={post.id}
@@ -32,10 +37,7 @@ const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
             {post.author?.name || "Unknown user"}
           </p>
           {post.action?.name !== undefined && showAction && (
-            <a
-              href={`/actions/${post.action.id}`}
-              className="text-blue ml-1 hover:underline"
-            >
+            <a onClick={actionClick} className="text-blue ml-1 hover:underline">
               {post.action.name}
             </a>
           )}
