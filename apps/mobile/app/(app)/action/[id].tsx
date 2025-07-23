@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -20,7 +19,10 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { getImageSource } from "../../../lib/config";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
-
+import Markdown from "react-native-markdown-display";
+import { colors } from "../../../lib/style/colors";
+import { Button, ButtonColor } from "../../../components/system";
+import Text, { TextStyle } from "../../../components/system/Text";
 export default function ActionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [action, setAction] = useState<ActionDto | null>(null);
@@ -136,13 +138,6 @@ export default function ActionDetailScreen() {
             </View>
           </View>
 
-          <View style={styles.statsCard}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{action.usersJoined || 0}</Text>
-              <Text style={styles.statLabel}>people committed</Text>
-            </View>
-          </View>
-
           {userStatus === "none" && (
             <TouchableOpacity
               style={styles.joinButton}
@@ -161,29 +156,27 @@ export default function ActionDetailScreen() {
             </View>
           )}
 
-          <View style={styles.section}>
-            <Text style={styles.sectionText}>{action.body}</Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Status</Text>
-            <Text style={styles.sectionText}>
-              This action is currently {action.status.toLowerCase()}
-            </Text>
-          </View>
-
-          {/* This would be where forum posts related to this action would appear */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Discussion</Text>
-            <Text style={styles.sectionText}>
-              Join the conversation about this action.
-            </Text>
-            <TouchableOpacity style={styles.forumButton}>
-              <Text style={styles.forumButtonText}>View Forum</Text>
-            </TouchableOpacity>
-          </View>
+          <Markdown
+            style={{
+              body: {
+                fontFamily: "IBMPlexSans-Regular",
+                fontSize: 15,
+              },
+            }}
+          >
+            {action.body}
+          </Markdown>
         </View>
       </ScrollView>
+      {userStatus === "none" && action.status === "gathering_commitments" && (
+        <Button
+          color={ButtonColor.Green}
+          onPress={handleJoinAction}
+          style={styles.joinButton}
+        >
+          <Text type={TextStyle.Label}>Commit</Text>
+        </Button>
+      )}
     </>
   );
 }
@@ -191,7 +184,7 @@ export default function ActionDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.white,
   },
   loadingContainer: {
     flex: 1,
@@ -223,6 +216,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
+    paddingBottom: 100,
   },
   header: {
     marginBottom: 16,
@@ -245,18 +239,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#333",
   },
-  statsCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    marginVertical: 16,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
   statItem: {
     alignItems: "center",
   },
@@ -271,11 +253,11 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   joinButton: {
-    backgroundColor: "#0D1B2A",
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginVertical: 16,
+    position: "absolute",
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    bottom: 32,
+    right: 32,
   },
   joinButtonText: {
     color: "#fff",

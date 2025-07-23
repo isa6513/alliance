@@ -31,7 +31,7 @@ export default function ProfileScreen() {
         style: "cancel",
       },
       {
-        text: "Logout",
+        text: "Log out",
         style: "destructive",
         onPress: () => logout(),
       },
@@ -190,7 +190,7 @@ export default function ProfileScreen() {
       </View>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Logout</Text>
+        <Text style={styles.logoutButtonText}>Log out</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   section: {
     backgroundColor: "#fff",
     marginTop: 24,
-    paddingVertical: 8,
+    paddingVertical: 2,
     paddingHorizontal: 16,
     borderTopWidth: 1,
     borderBottomWidth: 1,
@@ -269,8 +269,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 12,
     paddingHorizontal: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderTopWidth: 1,
+    borderTopColor: "#f0f0f0",
   },
   menuIcon: {
     marginRight: 12,

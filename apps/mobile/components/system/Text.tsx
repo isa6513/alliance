@@ -59,5 +59,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     color: colors.white,
+    fontFamily: "IBMPlexSans-Medium",
   },
 });

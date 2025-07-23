@@ -95,7 +95,7 @@ const LoginScreen = () => {
             {isSubmitting || isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={{ color: "white" }}>Log In</Text>
+              <Text type={TextStyle.Label}>Log In</Text>
             )}
           </Button>
 
