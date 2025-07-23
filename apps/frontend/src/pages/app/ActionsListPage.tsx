@@ -50,7 +50,7 @@ const ActionsListPage = () => {
                   ? action.usersCompleted
                   : undefined
               }
-              userRelation={relations.get(action.id) ?? "none"}
+              userRelation={relations?.get(action.id) ?? undefined}
             />
           ))}
         </div>

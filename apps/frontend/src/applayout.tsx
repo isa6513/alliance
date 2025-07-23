@@ -15,7 +15,6 @@ import {
   UserActionDto,
 } from "@alliance/shared/client";
 import { ActionDto } from "@alliance/shared/client";
-import { Route } from "../.react-router/types/src/+types/applayout";
 
 export interface RouteMatch {
   data: unknown;
@@ -28,12 +27,13 @@ export interface RouteMatches {
 
 export interface LoaderData {
   actions: ActionDto[];
-  relations: Map<number, UserActionDto["status"]>;
+  relations: Map<number, UserActionDto["status"]> | undefined;
   posts: PostDto[];
+  authRefreshNeeded: boolean;
   revalidate: () => void;
 }
 
-export async function clientLoader({}: Route.LoaderArgs): Promise<LoaderData> {
+export async function clientLoader() {
   localStorage.setItem("revalidate", "false");
 
   const [actions, relations, posts] = await Promise.all([
@@ -41,6 +41,14 @@ export async function clientLoader({}: Route.LoaderArgs): Promise<LoaderData> {
     actionsMyActionRelations(),
     forumFindAllPosts(),
   ]);
+
+  let authRefreshNeeded = false;
+  if (
+    relations.error &&
+    (relations.error as { statusCode: number }).statusCode === 401
+  ) {
+    authRefreshNeeded = true;
+  }
 
   const relationList = relations.data ?? [];
   const actionToRelationMap = new Map<number, UserActionDto["status"]>();
@@ -55,9 +63,10 @@ export async function clientLoader({}: Route.LoaderArgs): Promise<LoaderData> {
 
   return {
     actions: actions.data ?? [],
-    relations: actionToRelationMap,
+    relations: relations.data !== undefined ? actionToRelationMap : undefined,
     posts: posts.data ?? [],
     revalidate: revalidateCallback,
+    authRefreshNeeded,
   };
 }
 

@@ -22,8 +22,12 @@ const HomePage = () => {
     });
   }, []);
 
-  if (!actions) {
-    return <div>Error loading actions</div>;
+  if (!relations) {
+    return (
+      <div className="text-zinc-400 w-full h-80 flex items-center justify-center">
+        Failed to load user data.
+      </div>
+    );
   }
 
   const todoActions = actions.filter(

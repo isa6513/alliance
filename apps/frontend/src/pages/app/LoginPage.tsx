@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import Card, { CardStyle } from "../../components/system/Card";
 import Button, { ButtonColor } from "../../components/system/Button";
 import FormInput from "../../components/system/FormInput";
@@ -23,9 +23,25 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [searchParams] = useSearchParams();
   const [message, setMessage] = useState<string | null>(
     location.state?.message || null
   );
+  const navigate = useNavigate();
+
+  const returnUrl = useMemo((): string | undefined => {
+    // 1. Query param ?returnTo=/foo/bar
+    const qp = searchParams.get("returnTo");
+    if (qp && qp.startsWith("/")) return qp;
+
+    // 2. State passed by a redirect: navigate("/login", { state: { from: location.pathname }})
+    const fromState = (location.state as { from: string })?.from;
+    if (typeof fromState === "string" && fromState.startsWith("/")) {
+      return fromState;
+    }
+
+    return undefined;
+  }, [searchParams, location.state]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -41,6 +57,9 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       await login(formData.email, formData.password);
+      if (returnUrl) {
+        navigate(returnUrl);
+      }
     } catch {
       setError("Authentication failed.");
       setMessage(null);
