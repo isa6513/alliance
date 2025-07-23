@@ -10,6 +10,7 @@ import { useAuth } from "../lib/AuthContext";
 import { useNavigate } from "react-router";
 import { formatDate } from "date-fns";
 import Button, { ButtonColor } from "./system/Button";
+import notifBell from "../assets/notif-bell.svg";
 
 function getWebAppLocation(webAppLocation: string) {
   if (webAppLocation.startsWith("/")) {
@@ -97,10 +98,13 @@ const NotificationsIcon = () => {
         unreadCount > 0
           ? "bg-red-500 text-white"
           : "bg-white text-zinc-600 border-1 border-zinc-500"
-      } w-7 h-7 rounded-full flex items-center justify-center cursor-pointer`}
+      } w-11 h-7 rounded-full flex items-center justify-center cursor-pointer`}
       onClick={toggle}
     >
-      <p className="text-sm">{unreadCount}</p>
+      <div className="flex items-center gap-x-0.5">
+        <img src={notifBell} alt="Notifications" className="w-4 h-4" />
+        <p className="text-sm">{unreadCount}</p>
+      </div>
       {isOpen && (
         <div className="absolute top-8 shadow-lg/5 right-0 bg-white rounded border border-zinc-200 p-4 min-w-[370px] space-y-2 max-h-[500px] overflow-y-auto cursor-default">
           <div className="flex flex-row border-b border-zinc-200 justify-end gap-x-8 pb-2">
