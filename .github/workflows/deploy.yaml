@@ -396,8 +396,10 @@ jobs:
             mkdir -p ~/nest-backend
             unzip -o ~/nest-build.zip -d ~/nest-backend
 
+            cp -r ~/nest-backend-deploy-backup/node_modules ~/nest-backend
+
             cd ~/nest-backend
-            npm install --production
+            npm install --omit=dev
 
             npm run migration:run
 
