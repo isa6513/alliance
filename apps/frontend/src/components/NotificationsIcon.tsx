@@ -106,7 +106,7 @@ const NotificationsIcon = () => {
           src={notifBell}
           alt="Notifications"
           className="w-4 h-4"
-          style={unreadCount > 0 ? { filter: "invert(1)" } : { opacity: 0.8 }}
+          style={unreadCount > 0 ? { filter: "invert(1)" } : { opacity: 0.6 }}
         />
         <p className="text-sm">{unreadCount}</p>
       </div>
@@ -137,7 +137,7 @@ const NotificationsIcon = () => {
                 !notification.read ? "bg-red-50" : ""
               }`}
             >
-              <p className="text-gray-500 text-xs border-r border-zinc-200 pr-2">
+              <p className="text-gray-500 text-xs">
                 {formatDate(notification.updatedAt, "MM/dd/yyyy")}
               </p>
               {notification.message}

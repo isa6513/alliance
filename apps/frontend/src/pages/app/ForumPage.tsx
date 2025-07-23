@@ -1,9 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../lib/AuthContext";
-import Button, { ButtonColor } from "../../components/system/Button";
 import ForumListPost from "../../components/ForumListPost";
-import TwoColumnSplit from "../../components/system/TwoColumnSplit";
 import { useAppLoaderData } from "../../applayout";
 
 const ForumPage: React.FC = () => {
@@ -17,26 +15,21 @@ const ForumPage: React.FC = () => {
   };
 
   return (
-    <TwoColumnSplit
-      left={
-        <div className="gap-y-2 flex flex-col p-3">
-          {posts.map((post) => (
-            <ForumListPost key={post.id} post={post} />
-          ))}
-        </div>
-      }
-      border={false}
-      collapseRight={false}
-      right={
-        <div className="flex flex-col p-3 items-end w-fit">
-          {isAuthenticated && (
-            <Button onClick={handleCreatePost} color={ButtonColor.Black}>
-              New Thread
-            </Button>
-          )}
-        </div>
-      }
-    />
+    <div className="flex flex-col max-w-[800px] mx-auto p-3 pt-8">
+      <div className="gap-y-2 flex flex-col">
+        {isAuthenticated && (
+          <div
+            onClick={handleCreatePost}
+            className="text-gray-500 text-sm hover:bg-zinc-100 p-4 rounded-md flex cursor-pointer flex-col border border-zinc-200"
+          >
+            Create a new thread...
+          </div>
+        )}
+        {posts.map((post) => (
+          <ForumListPost key={post.id} post={post} />
+        ))}
+      </div>
+    </div>
   );
 };
 
