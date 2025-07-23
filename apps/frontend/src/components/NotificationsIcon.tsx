@@ -97,12 +97,17 @@ const NotificationsIcon = () => {
       className={`${
         unreadCount > 0
           ? "bg-red-500 text-white"
-          : "bg-white text-zinc-600 border-1 border-zinc-500"
+          : "bg-white text-zinc-600 border-1 border-zinc-200"
       } w-11 h-7 rounded-full flex items-center justify-center cursor-pointer`}
       onClick={toggle}
     >
       <div className="flex items-center gap-x-0.5">
-        <img src={notifBell} alt="Notifications" className="w-4 h-4" />
+        <img
+          src={notifBell}
+          alt="Notifications"
+          className="w-4 h-4"
+          style={unreadCount > 0 ? { filter: "invert(1)" } : { opacity: 0.8 }}
+        />
         <p className="text-sm">{unreadCount}</p>
       </div>
       {isOpen && (

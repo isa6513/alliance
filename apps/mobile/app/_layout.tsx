@@ -11,6 +11,7 @@ import { useFonts } from "expo-font";
 export default function RootLayout() {
   useFonts({
     "IBMPlexSans-Regular": require("../assets/fonts/IBMPlexSans-Regular.ttf"),
+    "IBMPlexSans-Bold": require("../assets/fonts/IBMPlexSans-Bold.ttf"),
   });
   useEffect(() => {
     client.setConfig({

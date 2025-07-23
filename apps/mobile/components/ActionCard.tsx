@@ -1,9 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { ActionDto } from "../../../shared/client";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
-
+import Text, { TextStyle } from "./system/Text";
+import { Card } from "./system";
 interface ActionCardProps {
   action: ActionDto;
   onPress: () => void;
@@ -11,9 +12,9 @@ interface ActionCardProps {
 
 export default function ActionCard({ action, onPress }: ActionCardProps) {
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <Card style={styles.container} onPress={onPress}>
       <View style={styles.header}>
-        <Text style={styles.title}>{action.name}</Text>
+        <Text type={TextStyle.Bold}>{action.name}</Text>
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{action.category}</Text>
         </View>
@@ -22,7 +23,6 @@ export default function ActionCard({ action, onPress }: ActionCardProps) {
         {action.shortDescription}
       </Text>
       <View style={styles.footer}>
-        <Text style={styles.statusText}>{action.status}</Text>
         <View style={styles.detailsButton}>
           <Text style={styles.detailsText}>Details</Text>
           <FontAwesomeIcon
@@ -33,33 +33,20 @@ export default function ActionCard({ action, onPress }: ActionCardProps) {
           />
         </View>
       </View>
-    </TouchableOpacity>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#0D1B2A",
-    flex: 1,
+    marginBottom: 2,
   },
   badge: {
     backgroundColor: "#E0E0E0",
@@ -84,10 +71,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 4,
-  },
-  statusText: {
-    fontSize: 13,
-    color: "#555",
   },
   detailsButton: {
     flexDirection: "row",

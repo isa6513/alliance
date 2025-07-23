@@ -5,6 +5,7 @@ export const colors = {
   agreen: "#c4d8bf", // Light green accent
   bgreen: "#8fbe6f", // Medium green (rgb(143, 190, 111))
   blue: "#318dde", // Primary blue
+  white: "#fff",
 
   // Primary colors
   primary: "#333333", // Dark primary

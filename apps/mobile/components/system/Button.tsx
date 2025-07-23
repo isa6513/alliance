@@ -5,6 +5,7 @@ import {
   ViewStyle,
   ActivityIndicator,
 } from "react-native";
+import Text, { TextStyle } from "./Text";
 
 export enum ButtonColor {
   Black = "black",
@@ -29,6 +30,7 @@ interface ButtonProps {
   loading?: boolean;
   style?: ViewStyle;
   children?: React.ReactNode;
+  title?: string;
 }
 
 export default function Button({
@@ -39,6 +41,7 @@ export default function Button({
   loading = false,
   style,
   children,
+  title,
 }: ButtonProps) {
   const containerStyle = [
     styles.base,
@@ -60,8 +63,10 @@ export default function Button({
           size="small"
           color={color === ButtonColor.Outline ? "#444" : "#fff"}
         />
-      ) : (
+      ) : children ? (
         children
+      ) : (
+        <Text type={TextStyle.Label}>{title}</Text>
       )}
     </TouchableOpacity>
   );

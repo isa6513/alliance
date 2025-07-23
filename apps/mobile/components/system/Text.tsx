@@ -8,7 +8,9 @@ import { colors } from "../../lib/style/colors";
 export enum TextStyle {
   Header = "header",
   Primary = "primary",
+  Bold = "bold",
   Secondary = "secondary",
+  Label = "label",
 }
 
 interface TextProps extends RNTextProps {
@@ -41,11 +43,21 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
   },
   primary: {
-    fontSize: 12,
+    fontSize: 14,
+    color: colors.text.primary,
+  },
+  bold: {
+    fontSize: 14,
+    fontWeight: "bold",
+    fontFamily: "IBMPlexSans-Bold",
     color: colors.text.primary,
   },
   secondary: {
     fontSize: 14,
     color: colors.text.secondary,
+  },
+  label: {
+    fontSize: 14,
+    color: colors.white,
   },
 });

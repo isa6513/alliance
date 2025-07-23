@@ -1,10 +1,4 @@
-import {
-  Text,
-  View,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-} from "react-native";
+import { View, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { useAuth } from "../../../lib/AuthContext";
 import { useEffect, useMemo, useState } from "react";
 import { ActionDto, actionsFindAll } from "../../../../../shared/client";
@@ -20,6 +14,8 @@ import {
   colors,
   ButtonColor,
   CardStyle,
+  Text,
+  TextStyle,
 } from "../../../components/system";
 
 export default function ActionsScreen() {
@@ -67,13 +63,19 @@ export default function ActionsScreen() {
           {Object.values(FilterMode).map((mode) => (
             <Button
               key={mode}
-              title={mode}
               onPress={() => setFilterMode(mode)}
               color={
-                filterMode === mode ? ButtonColor.Stone : ButtonColor.Outline
+                filterMode === mode ? ButtonColor.Black : ButtonColor.Outline
               }
               style={styles.filterButton}
-            />
+            >
+              <Text
+                type={TextStyle.Label}
+                style={{ color: filterMode === mode ? "white" : "black" }}
+              >
+                {mode}
+              </Text>
+            </Button>
           ))}
         </View>
         {loading ? (

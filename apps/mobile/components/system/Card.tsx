@@ -24,7 +24,6 @@ interface CardProps {
   cardStyle?: CardStyle;
   onPress?: () => void;
   backgroundImage?: ImageSourcePropType;
-  shadow?: boolean;
   borderRadius?: number;
   padding?: number;
 }
@@ -35,23 +34,27 @@ export default function Card({
   cardStyle = CardStyle.White,
   onPress,
   backgroundImage,
-  shadow = true,
   borderRadius = 12,
   padding = 16,
 }: CardProps) {
   const containerStyle = [
     styles.base,
     styles[`${cardStyle}Container`],
-    shadow && styles.shadow,
     { borderRadius, padding },
     style,
   ];
 
   const CardComponent = onPress ? TouchableOpacity : View;
 
-  const cardContent = <CardComponent style={containerStyle} onPress={onPress} activeOpacity={0.95}>
-    {children}
-  </CardComponent>;
+  const cardContent = (
+    <CardComponent
+      style={containerStyle}
+      onPress={onPress}
+      activeOpacity={0.95}
+    >
+      {children}
+    </CardComponent>
+  );
 
   if (backgroundImage && cardStyle === CardStyle.Image) {
     return (
@@ -73,12 +76,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
   },
-  
+
   // Card style variants
   whiteContainer: {
     backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#f1f5f9",
+    borderColor: "#ececec",
   },
   outlineContainer: {
     backgroundColor: "transparent",
@@ -107,17 +110,5 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     backgroundColor: "transparent",
-  },
-  
-  // Shadow
-  shadow: {
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
   },
 });

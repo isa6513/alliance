@@ -9,12 +9,11 @@ import {
   filterActions,
 } from "../../../../../shared/lib/actionUtils";
 import {
-  Button,
   Card,
   colors,
-  ButtonColor,
   CardStyle,
   Text,
+  TextStyle,
 } from "../../../components/system";
 
 export default function HomeScreen() {
@@ -54,24 +53,10 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>Your Tasks</Text>
+      <Text type={TextStyle.Header}>Your Tasks</Text>
       <View style={styles.actionsListContainer}>
         <View style={styles.actionsTitleRow}>
           <Text style={styles.sectionTitle}>Actions</Text>
-        </View>
-        <View style={styles.filterRow}>
-          {Object.values(FilterMode).map((mode) => (
-            <Button
-              key={mode}
-              onPress={() => setFilterMode(mode)}
-              color={
-                filterMode === mode ? ButtonColor.Black : ButtonColor.Outline
-              }
-              style={styles.filterButton}
-            >
-              {mode}
-            </Button>
-          ))}
         </View>
         {loading ? (
           <ActivityIndicator
