@@ -3,10 +3,10 @@ import ActionItemCard from "../../components/ActionItemCard";
 import Button, { ButtonColor } from "../../components/system/Button";
 import { FilterMode, filterActions } from "@alliance/shared/lib/actionUtils";
 import { useActionCounts } from "../../lib/useActionWebSocket";
-import { getLoadedActionData, RouteMatches } from "../../applayout";
+import { useAppLoaderData } from "../../applayout";
 
-const ActionsListPage = ({ matches }: RouteMatches) => {
-  const { actions, relations } = getLoadedActionData(matches);
+const ActionsListPage = () => {
+  const { actions, relations } = useAppLoaderData();
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
   const actionIds = useMemo(() => actions.map((a) => a.id), [actions]);

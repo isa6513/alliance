@@ -90,8 +90,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
     );
   }, [action, formattedDonationAmount, goToActionPage, givePressed]);
 
-  console.log(action);
-
   return (
     <Card
       style={CardStyle.White}

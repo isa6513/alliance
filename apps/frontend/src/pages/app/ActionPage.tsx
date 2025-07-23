@@ -29,6 +29,7 @@ import { ParentContext as ActionTaskPanelParentContext } from "../../components/
 import ActionActivityList from "../../components/ActionActivityList";
 import ReactMarkdown from "react-markdown";
 import { testActions } from "../../stories/testData";
+import { useAppLoaderData } from "../../applayout";
 
 const actionStatusDescriptions: Record<ActionDto["status"], string> = {
   gathering_commitments: "Collecting commitments",
@@ -103,6 +104,7 @@ export default function ActionPage() {
 
   const actionId = action?.id || 0;
   const liveUserCount = useActionCount(actionId);
+  const { revalidate } = useAppLoaderData();
 
   useEffect(() => {
     if (isAuthenticated && id) {
@@ -126,7 +128,8 @@ export default function ActionPage() {
     actionsComplete({
       path: { id },
     });
-  }, [id]);
+    revalidate();
+  }, [id, revalidate]);
 
   const onJoinAction = useCallback(async () => {
     if (!id) return;
@@ -144,8 +147,10 @@ export default function ActionPage() {
     } catch (err) {
       console.error("Error joining action:", err);
       setError("Failed to join this action. Please try again later.");
+    } finally {
+      revalidate();
     }
-  }, [id]);
+  }, [id, revalidate]);
 
   const mainContent = useMemo(
     () => (

@@ -1,29 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router";
-import { PostDto } from "@alliance/shared/client";
 import { useAuth } from "../../lib/AuthContext";
-import { forumFindAllPosts } from "@alliance/shared/client";
 import Button, { ButtonColor } from "../../components/system/Button";
 import ForumListPost from "../../components/ForumListPost";
 import TwoColumnSplit from "../../components/system/TwoColumnSplit";
+import { useAppLoaderData } from "../../applayout";
 
 const ForumPage: React.FC = () => {
-  const [posts, setPosts] = useState<PostDto[]>([]);
+  const { posts } = useAppLoaderData();
+
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await forumFindAllPosts();
-        setPosts(response.data ?? []);
-      } catch (err) {
-        console.error("Error fetching forum posts:", err);
-      }
-    };
-
-    fetchPosts();
-  }, []);
 
   const handleCreatePost = () => {
     navigate("/forum/edit/new");

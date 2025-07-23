@@ -14,7 +14,7 @@ import {
   forumUpdatePost,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "../../components/system/Button";
-
+import { useAppLoaderData } from "../../applayout";
 type FormMode = "create" | "edit";
 
 const PostFormPage: React.FC = () => {
@@ -36,6 +36,7 @@ const PostFormPage: React.FC = () => {
   );
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { revalidate } = useAppLoaderData();
 
   useEffect(() => {
     // Redirect if not authenticated
@@ -106,6 +107,8 @@ const PostFormPage: React.FC = () => {
           body: postData,
         });
       }
+      console.log("revalidating");
+      revalidate();
 
       if (response.data) {
         navigate(`/forum/post/${response.data.id}`);
@@ -219,7 +222,12 @@ const PostFormPage: React.FC = () => {
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button onClick={() => navigate("/forum")}>Cancel</Button>
+              <Button
+                onClick={() => navigate("/forum")}
+                color={ButtonColor.Light}
+              >
+                Cancel
+              </Button>
               <Button
                 type="submit"
                 color={ButtonColor.Black}

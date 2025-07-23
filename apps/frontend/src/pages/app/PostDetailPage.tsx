@@ -82,7 +82,6 @@ const PostDetailPage: React.FC = () => {
           }
         }, 500);
 
-        // Remove highlight after 15 seconds
         setTimeout(() => {
           setHighlightedReplyId(null);
         }, 5000);

@@ -3,7 +3,7 @@ import {
   actionsComplete,
   actionsFriendActivity,
 } from "@alliance/shared/client";
-import { getLoadedActionData, RouteMatches } from "../../applayout";
+import { useAppLoaderData } from "../../applayout";
 import TaskCard from "../../components/TaskCard";
 import ActionItemCard from "../../components/ActionItemCard";
 import Card from "../../components/system/Card";
@@ -11,8 +11,8 @@ import ForumListPost from "../../components/ForumListPost";
 import { useEffect, useState } from "react";
 import ActivityFeedItem from "../../components/ActivityFeedItem";
 
-const HomePage = ({ matches }: RouteMatches) => {
-  const { actions, relations, posts } = getLoadedActionData(matches);
+const HomePage = () => {
+  const { actions, relations, posts } = useAppLoaderData();
 
   const [friendActivity, setFriendActivity] = useState<ActionActivityDto[]>([]);
 
@@ -51,8 +51,8 @@ const HomePage = ({ matches }: RouteMatches) => {
 
   return (
     <div className="flex flex-col w-full h-full items-center bg-page">
-      <div className="flex flex-row">
-        <div className="flex flex-col py-16 max-w-[728px] md:min-w-[600px] gap-y-5 overflow-y-auto px-3">
+      <div className="flex flex-row px-6 gap-x-3">
+        <div className="flex flex-col py-16 max-w-[728px] md:min-w-[300px] gap-y-5 overflow-y-auto ">
           <div className="flex flex-col gap-y-8">
             <p className="font-adobe text-3xl">Your tasks</p>
             {todoActions.length > 0 && (
@@ -121,7 +121,7 @@ const HomePage = ({ matches }: RouteMatches) => {
             {/* <InviteMemberCard /> */}
           </div>
         </div>
-        <div className="flex flex-col py-16 gap-y-5 overflow-y-auto px-3 items-stretch w-[350px]">
+        <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch w-[350px]">
           <div className="flex flex-col gap-y-3">
             <Card>
               <p className="font-semibold mb-1">Forum activity</p>

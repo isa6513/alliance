@@ -1,4 +1,9 @@
-import { Navigate, Outlet } from "react-router";
+import {
+  Navigate,
+  Outlet,
+  ShouldRevalidateFunctionArgs,
+  useRouteLoaderData,
+} from "react-router";
 import { useAuth } from "./lib/AuthContext";
 import NavbarHorizontal from "./components/NavbarHorizontal";
 import { useEffect, useState } from "react";
@@ -25,9 +30,12 @@ export interface LoaderData {
   actions: ActionDto[];
   relations: Map<number, UserActionDto["status"]>;
   posts: PostDto[];
+  revalidate: () => void;
 }
 
 export async function clientLoader({}: Route.LoaderArgs): Promise<LoaderData> {
+  localStorage.setItem("revalidate", "false");
+
   const [actions, relations, posts] = await Promise.all([
     actionsFindAll(),
     actionsMyActionRelations(),
@@ -40,19 +48,25 @@ export async function clientLoader({}: Route.LoaderArgs): Promise<LoaderData> {
     actionToRelationMap.set(relation.actionId, relation.status);
   });
 
+  const revalidateCallback = () => {
+    console.log("revalidatingg");
+    localStorage.setItem("revalidate", "true");
+  };
+
   return {
     actions: actions.data ?? [],
     relations: actionToRelationMap,
     posts: posts.data ?? [],
+    revalidate: revalidateCallback,
   };
 }
 
-export function getLoadedActionData(
-  matches: RouteMatch[]
-): Awaited<ReturnType<typeof clientLoader>> {
-  const actions = matches.filter((x) => x.id === "applayout")[0]!
-    .data as Awaited<ReturnType<typeof clientLoader>>;
-  return actions;
+export function useAppLoaderData(): Awaited<ReturnType<typeof clientLoader>> {
+  const data = useRouteLoaderData<typeof clientLoader>("applayout");
+  if (!data) {
+    throw new Error("No data - applayout loader not found");
+  }
+  return data;
 }
 
 export default function AppLayout() {
@@ -84,4 +98,8 @@ export default function AppLayout() {
       <Outlet />
     </>
   );
+}
+
+export function shouldRevalidate({}: ShouldRevalidateFunctionArgs) {
+  return localStorage.getItem("revalidate") === "true";
 }
