@@ -156,14 +156,40 @@ const AdminPanel: React.FC = () => {
 
   return (
     <div className="flex flex-row min-h-screen h-fitcontent flex-nowrap bg-pagebg bg-[#fcfcfc]">
-      <div className="flex flex-row py-12 justify-center w-full gap-x-6 px-3">
-        <div className="flex flex-col border-r border-gray-300 pr-6 w-[800px] gap-y-5 min-h-0">
-          <div className="flex justify-between items-center">
-            <h1 className="text-[#111] text-[14pt] font-bold">
-              Alliance Admin
-            </h1>
-          </div>
-
+      <div className="flex flex-col gap-y-5 w-[320px] p-3 bg-[#f4f4f4] min-w-[320px] sticky">
+        <h1 className="text-[#111] text-[14pt] font-bold p-3 pb-0">
+          Alliance Admin
+        </h1>
+        <div className="flex flex-col gap-y-2 px-2">
+          <button
+            onClick={handleCreateAction}
+            className="w-full bg-stone-800 hover:bg-stone-900 text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
+            Create New Action
+          </button>
+          <button
+            onClick={handleDatabaseViewer}
+            className="w-full bg-blue-100 hover:bg-blue-200 border border-blue-400 text-black px-4 py-2 rounded-md text-sm font-medium"
+          >
+            Database Viewer
+          </button>
+          <button
+            onClick={() => setShowPopulateConfirm(true)}
+            disabled={isPopulating}
+            className="w-full bg-green-100 hover:bg-green-200 border border-green-400 text-black px-4 py-2 rounded-md text-sm font-medium"
+          >
+            {isPopulating ? "Populating..." : "Populate Test Data"}
+          </button>
+          <button
+            className="w-full bg-stone-800 hover:bg-stone-900 text-white px-4 py-2 rounded-md text-sm font-medium"
+            onClick={logout}
+          >
+            Log out
+          </button>
+        </div>
+      </div>
+      <div className="flex-1 overflow-y-scroll max-h-screen">
+        <div className="flex flex-col gap-y-5 min-h-0 p-5 max-w-[calc(100vw-320px)] flex-1 h-fit">
           {selectedActionId || isCreatingNew ? (
             // Show Action Dashboard
             <div className="flex-1 min-h-0">
@@ -223,11 +249,11 @@ const AdminPanel: React.FC = () => {
                     <Card key={action.name} style={CardStyle.White}>
                       <div
                         onClick={() => handleEditAction(action.id)}
-                        className="cursor-pointer"
+                        className="cursor-pointer relative"
                       >
-                        <div className="flex justify-between mb-2 items-center">
+                        <div className="flex justify-between mb-2 ">
                           <h2 className="font-bold text-sm">{action.name}</h2>
-                          <span className="p-2 px-3 ml-2 bg-zinc-50 text-zinc-800 font-medium text-xs rounded-sm text-nowrap border-zinc-200 border">
+                          <span className="absolute p-2 right-0 top-0 bg-zinc-50 text-zinc-800 font-medium text-xs rounded-sm text-nowrap border-zinc-200 border">
                             {action.status}
                           </span>
                         </div>
@@ -250,104 +276,6 @@ const AdminPanel: React.FC = () => {
               )}
             </>
           )}
-        </div>
-        <div className="flex flex-col gap-y-5 w-[320px]">
-          <Card style={CardStyle.White}>
-            <div className="flex flex-col gap-y-3 mt-4">
-              <button
-                onClick={handleCreateAction}
-                className="w-full bg-stone-600 hover:bg-stone-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Create New Action
-              </button>
-              <button
-                onClick={handleDatabaseViewer}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Database Viewer
-              </button>
-              <button
-                onClick={() => setShowPopulateConfirm(true)}
-                disabled={isPopulating}
-                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                {isPopulating ? "Populating..." : "Populate Test Data"}
-              </button>
-              <button
-                className="w-full bg-stone-600 hover:bg-stone-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                onClick={logout}
-              >
-                Log out
-              </button>
-            </div>
-          </Card>
-          <Card style={CardStyle.White}>
-            <h1 className="font-bold pb-0">Status Overview</h1>
-            <div className="mt-2 space-y-2">
-              <div className="flex justify-between">
-                <span>Total Actions</span>
-                <span className="font-medium">{actions.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Draft</span>
-                <span className="font-medium">
-                  {actions.filter((a) => a.status === "draft").length}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Upcoming</span>
-                <span className="font-medium">
-                  {actions.filter((a) => a.status === "upcoming").length}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Gathering Commitments</span>
-                <span className="font-medium ">
-                  {
-                    actions.filter((a) => a.status === "gathering_commitments")
-                      .length
-                  }
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Commitments Reached</span>
-                <span className="font-medium ">
-                  {
-                    actions.filter((a) => a.status === "commitments_reached")
-                      .length
-                  }
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Member Action</span>
-                <span className="font-medium ">
-                  {actions.filter((a) => a.status === "member_action").length}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Resolution</span>
-                <span className="font-medium ">
-                  {actions.filter((a) => a.status === "resolution").length}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Completed</span>
-                <span className="font-medium ">
-                  {actions.filter((a) => a.status === "completed").length}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Failed/Abandoned</span>
-                <span className="font-medium ">
-                  {
-                    actions.filter((a) =>
-                      ["failed", "abandoned"].includes(a.status)
-                    ).length
-                  }
-                </span>
-              </div>
-            </div>
-          </Card>
         </div>
       </div>
 
