@@ -39,7 +39,7 @@ const NavbarHorizontal: React.FC = () => {
           alliance
         </h1>
       </Link> */}
-        <div className="flex flex-row gap-x-5 px-10 sm:gap-x-10">
+        <div className="flex flex-row gap-x-1 px-10 sm:gap-x-6">
           {activeLinks.map((link) =>
             link === NavbarPage.Platform ? (
               <DropdownLink
@@ -55,8 +55,10 @@ const NavbarHorizontal: React.FC = () => {
                   link === NavbarPage.Profile ? profileUrl : destinations[link]
                 }
                 key={link}
-                className={`py-4 ${
-                  currentLocation === link ? "border-b-2 border-green" : ""
+                className={`py-4 px-2 border-b-2 ${
+                  currentLocation === link
+                    ? " border-green-3"
+                    : "border-transparent"
                 }`}
               >
                 <p

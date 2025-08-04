@@ -97,7 +97,7 @@ const ActionActivityList = ({ actionId }: ActionActivityListProps) => {
                 <div
                   className={`w-2 h-2 rounded-full mt-[9px] ${
                     activity.type === "user_joined"
-                      ? "bg-bgreen"
+                      ? "bg-green-2"
                       : "bg-[#318dde]"
                   }`}
                 ></div>

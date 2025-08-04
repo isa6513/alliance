@@ -81,6 +81,13 @@ export async function loader({
   return { ...action.data, locations: locations.data || [] };
 }
 
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "test this out" },
+    { name: "description", content: "it might work well idk" },
+  ];
+}
+
 export default function ActionPage() {
   const { id: idParam } = useParams();
 
@@ -162,7 +169,7 @@ export default function ActionPage() {
           />
         )}
         <div className="flex flex-row justify-between items-start mt-5 mb-2">
-          <div className="flex flex-col gap-y-3 border-b w-full border-gray-300 pb-2">
+          <div className="flex flex-col gap-y-3">
             {action !== undefined && (
               <div>
                 <h1 className="font-adobe">{action.name}</h1>
@@ -229,7 +236,7 @@ export default function ActionPage() {
                             100
                           }
                         />
-                        <p className="mt-4 text-green-600 text-sm">
+                        <p className="mt-4 text-green-3 text-sm font-weight-450">
                           {(
                             liveUserCount ?? action.usersJoined
                           )?.toLocaleString() || 0}{" "}
@@ -249,7 +256,7 @@ export default function ActionPage() {
                             100
                           }
                         />
-                        <p className="mt-4 text-greentext text-sm">
+                        <p className="mt-4 text-green-3 text-sm font-weight-450">
                           {(action.usersCompleted ?? 0).toLocaleString()}{" "}
                           members completed
                         </p>

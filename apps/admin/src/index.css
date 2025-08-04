@@ -7,16 +7,16 @@ body {
 }
 
 @font-face {
-    font-family: 'Berkeley';
-    src: url('/assets/BerkeleyMonoTrial-Regular') format('opentype');
-  }
+  font-family: "IBM Plex Sans";
+  src: url("IBMPlexSans-VariableFont_wdth,wght.ttf") format("truetype");
+}
 
-p {
-  font-family: 'Berkeley', sans-serif;
+* {
+  font-family: "IBM Plex Sans", sans-serif;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 

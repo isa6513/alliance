@@ -144,8 +144,8 @@ const PostFormPage: React.FC = () => {
 
       <Card>
         <div className="p-6">
-          <h1 className="text-2xl font-semibold mb-6">
-            {mode === "create" ? "Create New Post" : "Edit Post"}
+          <h1 className="!text-xl font-semibold mb-6">
+            {mode === "create" ? "New Thread" : "Edit Thread"}
           </h1>
 
           {error && (
@@ -158,7 +158,7 @@ const PostFormPage: React.FC = () => {
             <div className="mb-4">
               <label
                 htmlFor="title"
-                className="block text-gray-700 font-medium mb-2"
+                className="block text-zinc-700 font-medium mb-2"
               >
                 Title
               </label>
@@ -167,8 +167,8 @@ const PostFormPage: React.FC = () => {
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter post title"
+                className="w-full p-3 border border-zinc-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="Enter title"
                 required
               />
             </div>
@@ -176,7 +176,7 @@ const PostFormPage: React.FC = () => {
             <div className="mb-4">
               <label
                 htmlFor="content"
-                className="block text-gray-700 font-medium mb-2"
+                className="block text-zinc-700 font-medium mb-2"
               >
                 Content
               </label>
@@ -184,7 +184,7 @@ const PostFormPage: React.FC = () => {
                 id="content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border border-zinc-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="Write your post content here..."
                 rows={10}
                 required
@@ -194,7 +194,7 @@ const PostFormPage: React.FC = () => {
             <div className="mb-6">
               <label
                 htmlFor="actionId"
-                className="block text-gray-700 font-medium mb-2"
+                className="block text-zinc-700 font-medium mb-2 "
               >
                 Associated Action (Optional)
               </label>
@@ -206,7 +206,7 @@ const PostFormPage: React.FC = () => {
                     e.target.value ? Number(e.target.value) : undefined
                   )
                 }
-                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border border-zinc-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value="">None</option>
                 {actions.map((action) => (

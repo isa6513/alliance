@@ -105,18 +105,26 @@
 }
 
 @theme {
-  --color-hgreen: #3f5640;
-  --color-agreen: #c4d8bf;
-  --color-bgreen: rgb(143, 190, 111);
+  --color-green-1: hsl(95, 48%, 86%);
+  --color-green-2: hsl(95, 38%, 59%);
+  --color-green-3: hsl(95, 48%, 46%);
   --color-blue: #318dde;
   --color-page: #fcfcfc;
-  --color-greentext: #48a005;
+  --color-greentext: hsl(95, 38%, 46%);
   --color-green: #62a124;
   --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.03), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --color-gray-1: #fcfcfc;
+  --color-gray-2: #d6d6d6;
+  --color-gray-3: #777;
+  --color-gray-4: #404040;
 }
 
 .none {
   background-color: rgb(57, 125, 208);
+}
+
+.font-weight-450 {
+  font-weight: 450;
 }
 
 html {

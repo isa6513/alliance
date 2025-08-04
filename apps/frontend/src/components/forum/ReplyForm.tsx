@@ -34,18 +34,20 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
         autoFocus
       />
       <div className="mt-3 flex justify-end space-x-2">
-        <Button
-          type="button"
-          color={ButtonColor.Grey}
-          onClick={() => {
-            setReplyingTo(null);
-            setReplyContent("");
-            onCancel?.();
-          }}
-          className="bg-gray-300"
-        >
-          Cancel
-        </Button>
+        {parentId && (
+          <Button
+            type="button"
+            color={ButtonColor.Grey}
+            onClick={() => {
+              setReplyingTo(null);
+              setReplyContent("");
+              onCancel?.();
+            }}
+            className="bg-gray-300"
+          >
+            Cancel
+          </Button>
+        )}
         <Button
           type="submit"
           color={ButtonColor.Black}

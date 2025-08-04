@@ -153,7 +153,7 @@ const UserProfilePage: React.FC = () => {
     <div className="max-w-[800px] mx-auto">
       <div className="mx-2 space-y-2">
         <div className="w-full h-[100px]"></div>
-        <div className="px-8 relative space-y-2 border-stone-300 border rounded pb-8 bg-white">
+        <Card className="px-8 relative space-y-2 pb-8">
           <ProfileImage
             src={profileUser.profilePicture ? profileUser.profilePicture : null}
             className="mt-[-55px]"
@@ -215,7 +215,7 @@ const UserProfilePage: React.FC = () => {
             isMe={isMe}
             referredCount={referredCount}
           /> */}
-        </div>
+        </Card>
         <div className="flex flex-row w-full justify-evenly">
           {[ProfileTabs.Activity, ProfileTabs.Forum].map((tab) => (
             <div

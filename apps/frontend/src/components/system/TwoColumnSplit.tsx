@@ -21,13 +21,13 @@ const TwoColumnSplit = ({
     <div className={bg}>
       <div
         className={`flex flex-row w-full h-full justify-center max-w-[1100px] mx-auto py-10 ${
-          coloredRight ? "bg-agreen" : ""
+          coloredRight ? "bg-green-1" : ""
         }`}
       >
         <div
           className={`flex flex-col flex-1 ${
             border ? "sm:border-r border-stone-300" : ""
-          } items-stretch ${coloredLeft ? "bg-agreen" : ""}`}
+          } items-stretch ${coloredLeft ? "bg-green-1" : ""}`}
         >
           {left}
         </div>

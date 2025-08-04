@@ -16,6 +16,8 @@ const HomePage = () => {
 
   const [friendActivity, setFriendActivity] = useState<ActionActivityDto[]>([]);
 
+  const { revalidate } = useAppLoaderData();
+
   useEffect(() => {
     actionsFriendActivity().then((resp) => {
       setFriendActivity(resp.data ?? []);
@@ -23,6 +25,7 @@ const HomePage = () => {
   }, []);
 
   if (!relations) {
+    revalidate();
     return (
       <div className="text-zinc-400 w-full h-80 flex items-center justify-center">
         Failed to load user data.
@@ -107,7 +110,7 @@ const HomePage = () => {
                   <p className="font-medium text-zinc-800">
                     Still gathering commitments
                   </p>
-                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full">
+                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full mt-[1px]">
                     {committedActions.length}
                   </span>
                 </div>
@@ -116,6 +119,7 @@ const HomePage = () => {
                     <ActionItemCard
                       key={action.id}
                       {...action}
+                      userRelation={relations.get(action.id)}
                       showDescription={false}
                     />
                   ))}

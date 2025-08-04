@@ -62,7 +62,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
           </div>
         </div>
 
-        <div className="absolute bottom-5 right-6">
+        <div className="absolute bottom-5 right-5">
           <div className="flex flex-row justify-between items-start mr-0 gap-x-2">
             {userRelation === "joined" && (
               <img

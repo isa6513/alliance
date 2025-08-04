@@ -106,7 +106,7 @@ const NotificationsIcon = () => {
           src={notifBell}
           alt="Notifications"
           className="w-4 h-4"
-          style={unreadCount > 0 ? { filter: "invert(1)" } : { opacity: 0.6 }}
+          style={unreadCount > 0 ? { filter: "invert(1)" } : { opacity: 0.7 }}
         />
         <p className="text-sm">{unreadCount}</p>
       </div>

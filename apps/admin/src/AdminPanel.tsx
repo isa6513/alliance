@@ -155,7 +155,7 @@ const AdminPanel: React.FC = () => {
   }, [loadActions]);
 
   return (
-    <div className="flex flex-row min-h-screen h-fitcontent flex-nowrap bg-pagebg">
+    <div className="flex flex-row min-h-screen h-fitcontent flex-nowrap bg-pagebg bg-[#fcfcfc]">
       <div className="flex flex-row py-12 justify-center w-full gap-x-6 px-3">
         <div className="flex flex-col border-r border-gray-300 pr-6 w-[800px] gap-y-5 min-h-0">
           <div className="flex justify-between items-center">
@@ -220,14 +220,14 @@ const AdminPanel: React.FC = () => {
               ) : (
                 <div className="space-y-3 flex-1 overflow-y-auto">
                   {actions.map((action) => (
-                    <Card key={action.name} style={CardStyle.Outline}>
+                    <Card key={action.name} style={CardStyle.White}>
                       <div
                         onClick={() => handleEditAction(action.id)}
                         className="cursor-pointer"
                       >
-                        <div className="flex justify-between mb-2 items-start">
+                        <div className="flex justify-between mb-2 items-center">
                           <h2 className="font-bold text-sm">{action.name}</h2>
-                          <span className="p-2 px-3 ml-2 bg-gray-200 text-gray-800 text-xs rounded-full text-nowrap">
+                          <span className="p-2 px-3 ml-2 bg-zinc-50 text-zinc-800 font-medium text-xs rounded-sm text-nowrap border-zinc-200 border">
                             {action.status}
                           </span>
                         </div>
