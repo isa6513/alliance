@@ -16,6 +16,7 @@ import {
   imagesUploadImage,
 } from "@alliance/shared/client";
 import { getApiUrl } from "./config";
+import { useSearchParams } from "react-router-dom";
 
 // Status color mapping
 const getStatusColor = (status: ActionDto["status"]) => {
@@ -90,7 +91,19 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<Tab>("overview");
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [activeTab, setActiveTab] = useState<Tab>(
+    (searchParams.get("tab") as Tab) || "overview"
+  );
+
+  useEffect(() => {
+    setSearchParams((prev) => {
+      prev.set("tab", activeTab);
+      return prev;
+    });
+  }, [activeTab, setSearchParams, searchParams]);
 
   const [form, setForm] = useState<CreateActionDto>({
     name: "",
@@ -619,7 +632,89 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
 
             {activeTab === "events" && action && (
               <div className="space-y-4">
-                {/* Add New Event */}
+                <Card style={CardStyle.White}>
+                  <h2 className="text-lg font-semibold mb-4">All Events</h2>
+                  <div className="space-y-3">
+                    {action.events && action.events.length > 0 ? (
+                      action.events
+                        .sort(
+                          (a, b) =>
+                            new Date(b.date).getTime() -
+                            new Date(a.date).getTime()
+                        )
+                        .map((event) => (
+                          <div
+                            key={event.id}
+                            className="border border-gray-200 rounded-lg p-3"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-medium text-gray-900 text-sm">
+                                {event.title}
+                              </h3>
+                              <span
+                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                  event.newStatus
+                                )}`}
+                              >
+                                {formatStatus(event.newStatus)}
+                              </span>
+                            </div>
+
+                            {event.description && (
+                              <p className="text-sm text-gray-600 mb-2">
+                                {event.description}
+                              </p>
+                            )}
+
+                            <div className="text-xs text-gray-500 space-y-1">
+                              <div>
+                                Date: {new Date(event.date).toLocaleString()}
+                              </div>
+                              <div>
+                                Notifications: {event.sendNotifsTo} | Timeline:{" "}
+                                {event.showInTimeline ? "Visible" : "Hidden"}
+                              </div>
+                            </div>
+
+                            <div className="pt-2 mt-2 border-t border-gray-100">
+                              <button
+                                onClick={() =>
+                                  window.open(
+                                    `/database?table=action_event&id=${event.id}`,
+                                    "_blank"
+                                  )
+                                }
+                                className="inline-flex items-center px-2 py-1 border border-gray-300 text-xs leading-4 font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                              >
+                                <svg
+                                  className="w-3 h-3 mr-1"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={2}
+                                >
+                                  <ellipse
+                                    cx="12"
+                                    cy="5"
+                                    rx="9"
+                                    ry="3"
+                                  ></ellipse>
+                                  <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"></path>
+                                  <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"></path>
+                                </svg>
+                                Edit in Database
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                    ) : (
+                      <div className="text-sm text-gray-500 text-center py-4">
+                        No events created yet. Add an event to change the action
+                        status.
+                      </div>
+                    )}
+                  </div>
+                </Card>
                 <Card style={CardStyle.White}>
                   <h2 className="text-lg font-semibold mb-4">Add New Event</h2>
                   <form onSubmit={handleAddEvent} className="space-y-4">
@@ -750,91 +845,6 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
                       {creatingEvent ? "Adding Event..." : "Add Event"}
                     </button>
                   </form>
-                </Card>
-
-                {/* All Events List */}
-                <Card style={CardStyle.White}>
-                  <h2 className="text-lg font-semibold mb-4">All Events</h2>
-                  <div className="space-y-3">
-                    {action.events && action.events.length > 0 ? (
-                      action.events
-                        .sort(
-                          (a, b) =>
-                            new Date(b.date).getTime() -
-                            new Date(a.date).getTime()
-                        )
-                        .map((event) => (
-                          <div
-                            key={event.id}
-                            className="border border-gray-200 rounded-lg p-3"
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <h3 className="font-medium text-gray-900 text-sm">
-                                {event.title}
-                              </h3>
-                              <span
-                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                                  event.newStatus
-                                )}`}
-                              >
-                                {formatStatus(event.newStatus)}
-                              </span>
-                            </div>
-
-                            {event.description && (
-                              <p className="text-sm text-gray-600 mb-2">
-                                {event.description}
-                              </p>
-                            )}
-
-                            <div className="text-xs text-gray-500 space-y-1">
-                              <div>
-                                Date: {new Date(event.date).toLocaleString()}
-                              </div>
-                              <div>
-                                Notifications: {event.sendNotifsTo} | Timeline:{" "}
-                                {event.showInTimeline ? "Visible" : "Hidden"}
-                              </div>
-                            </div>
-
-                            <div className="pt-2 mt-2 border-t border-gray-100">
-                              <button
-                                onClick={() =>
-                                  window.open(
-                                    `/database?table=action_event&id=${event.id}`,
-                                    "_blank"
-                                  )
-                                }
-                                className="inline-flex items-center px-2 py-1 border border-gray-300 text-xs leading-4 font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                              >
-                                <svg
-                                  className="w-3 h-3 mr-1"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth={2}
-                                >
-                                  <ellipse
-                                    cx="12"
-                                    cy="5"
-                                    rx="9"
-                                    ry="3"
-                                  ></ellipse>
-                                  <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"></path>
-                                  <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"></path>
-                                </svg>
-                                Edit in Database
-                              </button>
-                            </div>
-                          </div>
-                        ))
-                    ) : (
-                      <div className="text-sm text-gray-500 text-center py-4">
-                        No events created yet. Add an event to change the action
-                        status.
-                      </div>
-                    )}
-                  </div>
                 </Card>
               </div>
             )}

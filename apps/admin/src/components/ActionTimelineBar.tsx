@@ -4,6 +4,7 @@ import {
   ActionStatus,
   ActionEventDto,
 } from "@alliance/shared/client";
+import { useNavigate } from "react-router-dom";
 
 interface PhaseSegment {
   status: ActionStatus;
@@ -133,6 +134,8 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
     };
   };
 
+  const navigate = useNavigate();
+
   return (
     <div
       className="absolute border-b border-gray-100 hover:bg-gray-50"
@@ -222,6 +225,9 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
             } (${phase.startDate.toLocaleDateString()} - ${phase.endDate.toLocaleDateString()})${
               shouldFade ? " - Uncertain future" : ""
             }`}
+            onClick={() => {
+              navigate(`/?action=${action.id}&tab=events`);
+            }}
           >
             {stickyLabel && (
               <div

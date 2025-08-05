@@ -159,8 +159,10 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
         // Use precise timing for centering
         const millisecondsPerDay = 24 * 60 * 60 * 1000;
         const pixelsPerMillisecond = pixelsPerDay / millisecondsPerDay;
-        const millisecondsSinceStart = currentDate.getTime() - globalStartDate.getTime();
-        const currentTimePosition = millisecondsSinceStart * pixelsPerMillisecond;
+        const millisecondsSinceStart =
+          currentDate.getTime() - globalStartDate.getTime();
+        const currentTimePosition =
+          millisecondsSinceStart * pixelsPerMillisecond;
         const containerWidth = scrollContainerRef.current.clientWidth;
         const targetScrollLeft = currentTimePosition - containerWidth / 2;
 
@@ -181,7 +183,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
     <div
       className={`bg-white rounded-lg shadow flex flex-col ${className || ""}`}
     >
-      <div className="p-6 pr-0 flex-shrink-0">
+      <div className="flex-shrink-0">
         {/* Gantt chart area with frozen action names */}
         <div className="flex flex-1 min-h-0">
           {/* Fixed action names column */}
@@ -208,10 +210,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
                     {action.name}
                   </div>
                   <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span>
-                      {phases.length} phase{phases.length !== 1 ? "s" : ""} •
-                      ID: {action.id}
-                    </span>
+                    <span>{action.status}</span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -316,14 +315,18 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
                 ) {
                   // Use precise timing for current time indicator
                   const millisecondsPerDay = 24 * 60 * 60 * 1000;
-                  const pixelsPerMillisecond = pixelsPerDay / millisecondsPerDay;
-                  const millisecondsSinceStart = currentDate.getTime() - globalStartDate.getTime();
-                  
+                  const pixelsPerMillisecond =
+                    pixelsPerDay / millisecondsPerDay;
+                  const millisecondsSinceStart =
+                    currentDate.getTime() - globalStartDate.getTime();
+
                   return (
                     <div
                       className="absolute bg-red-500 pointer-events-none z-30"
                       style={{
-                        left: `${millisecondsSinceStart * pixelsPerMillisecond}px`,
+                        left: `${
+                          millisecondsSinceStart * pixelsPerMillisecond
+                        }px`,
                         width: "2px",
                         top: "60px",
                         height: `${timelineData.length * 64}px`,

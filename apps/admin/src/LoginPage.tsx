@@ -48,7 +48,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-pagebg">
+    <div className="min-h-screen flex flex-col bg-page">
       <div className="flex flex-col flex-grow items-center justify-center font-avenir">
         <div className="w-full max-w-md px-8">
           {error && (
@@ -59,7 +59,7 @@ const LoginPage: React.FC = () => {
             </div>
           )}
 
-          <div className="p-8 bg-white rounded-md">
+          <div className="p-8 bg-white rounded-md border border-zinc-300">
             {checkingServer ? (
               <div className="text-center py-6">
                 <p className="text-gray-600">Checking server status...</p>
@@ -68,7 +68,7 @@ const LoginPage: React.FC = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <input
-                    className="w-full rounded-md border border-gray-300 p-2"
+                    className="w-full rounded-md border border-gray-300 p-3"
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
@@ -80,7 +80,7 @@ const LoginPage: React.FC = () => {
                 </div>
                 <div>
                   <input
-                    className="w-full rounded-md border border-gray-300 p-2"
+                    className="w-full rounded-md border border-gray-300 p-3"
                     type="password"
                     value={formData.password}
                     onChange={handleChange}
@@ -93,7 +93,7 @@ const LoginPage: React.FC = () => {
 
                 <div className="pt-2">
                   <button
-                    className="w-full flex justify-center text-center py-3"
+                    className="w-full flex justify-center text-center py-2 bg-stone-800 text-white rounded-md font-medium"
                     type="submit"
                     disabled={loading}
                   >

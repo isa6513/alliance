@@ -36,22 +36,6 @@ const ActionForm: React.FC<ActionFormProps> = ({
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">
-          {isNew ? "Create New Action" : "Action Details"}
-        </h2>
-        {!isNew && onDelete && (
-          <button
-            type="button"
-            onClick={onDelete}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-            disabled={saving}
-          >
-            Delete Action
-          </button>
-        )}
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label
@@ -193,10 +177,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
       )}
 
       <div>
-        <label
-          htmlFor="body"
-          className="block font-medium text-gray-700 mb-1"
-        >
+        <label htmlFor="body" className="block font-medium text-gray-700 mb-1">
           Body
         </label>
         <textarea
@@ -228,7 +209,10 @@ const ActionForm: React.FC<ActionFormProps> = ({
 
       {form.type !== "Funding" && (
         <div>
-          <label htmlFor="taskContents" className="block font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="taskContents"
+            className="block font-medium text-gray-700 mb-1"
+          >
             Task Contents
           </label>
           <textarea
@@ -292,6 +276,16 @@ const ActionForm: React.FC<ActionFormProps> = ({
             disabled={saving}
           >
             Cancel
+          </button>
+        )}
+        {!isNew && onDelete && (
+          <button
+            type="button"
+            onClick={onDelete}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            disabled={saving}
+          >
+            Delete Action
           </button>
         )}
         <button

@@ -156,32 +156,52 @@ const AdminPanel: React.FC = () => {
 
   return (
     <div className="flex flex-row min-h-screen h-fitcontent flex-nowrap bg-pagebg bg-[#fcfcfc]">
-      <div className="flex flex-col gap-y-5 w-[320px] p-3 bg-[#f4f4f4] min-w-[320px] sticky">
-        <h1 className="text-[#111] text-[14pt] font-bold p-3 pb-0">
-          Alliance Admin
-        </h1>
-        <div className="flex flex-col gap-y-2 px-2">
+      <div className="overflow-y-auto max-h-screen overflow-x-hidden flex flex-col justify-between bg-[#f4f4f4]">
+        <div className="flex flex-col gap-y-3 w-[320px] min-w-[320px] sticky p-5 py-6">
+          <h1 className="text-black text-[14pt] font-bold pb-0">
+            Alliance Admin
+          </h1>
+          <p className="font-bold">Tools</p>
+          <div className="flex flex-col gap-y-2">
+            <button
+              onClick={handleDatabaseViewer}
+              className="w-full bg-blue-100 hover:bg-blue-200 border border-blue-400 text-black px-4 py-2 rounded-md text-sm font-medium"
+            >
+              Database Viewer
+            </button>
+            <button
+              onClick={() => setShowPopulateConfirm(true)}
+              disabled={isPopulating}
+              className="w-full bg-green-1 hover:bg-green-2/50 border border-green-3 text-black px-4 py-2 rounded-md text-sm font-medium"
+            >
+              {isPopulating ? "Populating..." : "Populate Test Data"}
+            </button>
+          </div>
+          <div className="flex flex-row justify-between items-center mt-3">
+            <p className="font-bold">Current Actions</p>
+            <button
+              onClick={handleCreateAction}
+              className="bg-green-3 hover:bg-green-2 text-white px-3 py-1 rounded-md text-sm font-medium"
+            >
+              Create
+            </button>
+          </div>
+          <div className="flex flex-col gap-y-2">
+            {actions.map((action) => (
+              <div
+                key={action.id}
+                onClick={() => handleEditAction(action.id)}
+                className="cursor-pointer hover:bg-stone-200 p-2 rounded-md"
+              >
+                <p className="text-sm">{action.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-row justify-between items-center p-3 px-5">
+          <p className="text-sm text-gray-800">{user?.email}</p>
           <button
-            onClick={handleCreateAction}
-            className="w-full bg-stone-800 hover:bg-stone-900 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            Create New Action
-          </button>
-          <button
-            onClick={handleDatabaseViewer}
-            className="w-full bg-blue-100 hover:bg-blue-200 border border-blue-400 text-black px-4 py-2 rounded-md text-sm font-medium"
-          >
-            Database Viewer
-          </button>
-          <button
-            onClick={() => setShowPopulateConfirm(true)}
-            disabled={isPopulating}
-            className="w-full bg-green-100 hover:bg-green-200 border border-green-400 text-black px-4 py-2 rounded-md text-sm font-medium"
-          >
-            {isPopulating ? "Populating..." : "Populate Test Data"}
-          </button>
-          <button
-            className="w-full bg-stone-800 hover:bg-stone-900 text-white px-4 py-2 rounded-md text-sm font-medium"
+            className="bg-zinc-200 hover:bg-zinc-300 border border-zinc-300 text-[#222] px-3 py-1 rounded-md text-sm font-medium"
             onClick={logout}
           >
             Log out
@@ -203,7 +223,6 @@ const AdminPanel: React.FC = () => {
               />
             </div>
           ) : (
-            // Show Actions List or Timeline
             <>
               <div className="flex justify-between items-center">
                 <h1 className="text-[#111] text-[14pt] font-extrabold">
