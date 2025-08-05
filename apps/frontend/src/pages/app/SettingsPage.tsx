@@ -110,7 +110,7 @@ const SettingsPage: React.FC = () => {
     <div className="bg-page pt-20 px-8 md:px-16">
       <div className="max-w-4xl mx-auto">
         <Card style={CardStyle.White} className="p-8 mb-6 relative gap-y-4">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex justify-between mb-8">
             <div className="gap-x-2">
               <h1 className="text-2xl">Account</h1>
               <AdminOnly>

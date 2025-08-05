@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ActionDto,
   ActionStatus,
@@ -79,41 +79,8 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
     const estimatedTextWidth = labelText.length * 6;
 
     // For small bars, be more flexible with space requirements
-    let displayText = labelText;
-    let labelWidth = Math.max(estimatedTextWidth + 8, 40);
-
-    // If the full text won't fit, try abbreviations
-    if (labelWidth > visibleWidth - 8) {
-      // Try common abbreviations for long status names
-      const abbreviations: Record<string, string> = {
-        "Gathering Commitments": "Gathering",
-        "Commitments Reached": "Reached",
-        "Member Action": "Action",
-        Resolution: "Resolution",
-        Completed: "Done",
-        Failed: "Failed",
-        Abandoned: "Abandoned",
-        Draft: "Draft",
-        Upcoming: "Soon",
-      };
-
-      if (abbreviations[labelText]) {
-        displayText = abbreviations[labelText];
-        labelWidth = displayText.length * 6 + 8;
-      }
-
-      // If still too long, use first letter + "..."
-      if (labelWidth > visibleWidth - 8 && visibleWidth >= 40) {
-        displayText = labelText.charAt(0) + "...";
-        labelWidth = 30;
-      }
-
-      // If extremely small space, just show first few characters
-      if (labelWidth > visibleWidth - 8 && visibleWidth >= 35) {
-        displayText = labelText.substring(0, 2) + "..";
-        labelWidth = 28;
-      }
-    }
+    const displayText = labelText;
+    const labelWidth = Math.max(estimatedTextWidth + 8, 40);
 
     // Position label as far left as possible within visible area
     const labelPosition = visibleLeft - barLeft + 4; // 4px padding from left edge
@@ -135,6 +102,8 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
   };
 
   const navigate = useNavigate();
+
+  const [hovered, setHovered] = useState<boolean>(false);
 
   return (
     <div
@@ -238,10 +207,18 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
                   top: 0,
                   height: "40px",
                 }}
+                onMouseEnter={(e) => {
+                  e.stopPropagation();
+                  setHovered(true);
+                }}
+                onMouseLeave={(e) => {
+                  e.stopPropagation();
+                  setHovered(false);
+                }}
               >
                 <span
                   className={`w-full whitespace-nowrap ${
-                    stickyLabel.shouldTruncate ? "truncate" : ""
+                    hovered ? `z-100 !bg-red-500` : "z-0"
                   }`}
                 >
                   {stickyLabel.text}

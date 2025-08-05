@@ -282,7 +282,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
           <button
             type="button"
             onClick={onDelete}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            className="px-4 py-2 bg-red-200 text-red-700 border border-red-400 rounded-md hover:bg-red-300/70 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             disabled={saving}
           >
             Delete Action
@@ -290,7 +290,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         )}
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="px-4 py-2 bg-blue-200 text-blue-700 border border-blue-400 rounded-md hover:bg-blue-300/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           disabled={saving || uploadingImage}
         >
           {saving || uploadingImage

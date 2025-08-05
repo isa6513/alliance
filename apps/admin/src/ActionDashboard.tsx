@@ -421,19 +421,17 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
 
       {isNew ? (
         // New Action Creation Form
-        <Card style={CardStyle.White}>
-          <ActionForm
-            form={form}
-            onInputChange={handleInputChange}
-            onImageChange={handleImageChange}
-            onSubmit={handleSubmit}
-            saving={saving}
-            uploadingImage={uploadingImage}
-            imagePreview={imagePreview}
-            isNew={true}
-            onCancel={onCancel}
-          />
-        </Card>
+        <ActionForm
+          form={form}
+          onInputChange={handleInputChange}
+          onImageChange={handleImageChange}
+          onSubmit={handleSubmit}
+          saving={saving}
+          uploadingImage={uploadingImage}
+          imagePreview={imagePreview}
+          isNew={true}
+          onCancel={onCancel}
+        />
       ) : (
         // Existing Action Dashboard
         <div className="space-y-4 flex-1 min-h-0">
@@ -453,6 +451,16 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
                   {tab.label}
                 </button>
               ))}
+              <a
+                href={
+                  window.location.origin.includes("localhost")
+                    ? `http://localhost:5173/actions/${action?.id}`
+                    : `https://worldalliance.org/actions/${action?.id}`
+                }
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${"border-transparent text-blue-500 hover:text-blue-600 hover:border-blue-300"}`}
+              >
+                View Action Page →
+              </a>
             </nav>
           </div>
 

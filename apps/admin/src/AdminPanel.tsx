@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Card, { CardStyle } from "./Card";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ActionDto,
   actionsFindAllWithDrafts,
@@ -89,10 +89,6 @@ const AdminPanel: React.FC = () => {
     loadActions(); // Refresh the list
   }, [setSearchParams, loadActions]);
 
-  const handleDatabaseViewer = useCallback(() => {
-    navigate("/database");
-  }, [navigate]);
-
   const handleViewModeChange = useCallback(
     (mode: string) => {
       const params = new URLSearchParams(searchParams);
@@ -163,16 +159,22 @@ const AdminPanel: React.FC = () => {
           </h1>
           <p className="font-bold">Tools</p>
           <div className="flex flex-col gap-y-2">
-            <button
-              onClick={handleDatabaseViewer}
-              className="w-full bg-blue-100 hover:bg-blue-200 border border-blue-400 text-black px-4 py-2 rounded-md text-sm font-medium"
+            <Link
+              to="/database"
+              className="w-full bg-blue-100 text-center hover:bg-blue-200/60 border border-blue-400 text-black px-4 py-2 rounded-md text-sm font-medium"
             >
               Database Viewer
+            </Link>
+            <button
+              onClick={() => handleViewModeChange("users")}
+              className="w-full bg-gray-100 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm font-medium"
+            >
+              Users
             </button>
             <button
               onClick={() => setShowPopulateConfirm(true)}
               disabled={isPopulating}
-              className="w-full bg-green-1 hover:bg-green-2/50 border border-green-3 text-black px-4 py-2 rounded-md text-sm font-medium"
+              className="w-full bg-gray-100 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm font-medium"
             >
               {isPopulating ? "Populating..." : "Populate Test Data"}
             </button>
