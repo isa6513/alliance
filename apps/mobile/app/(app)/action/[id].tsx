@@ -18,7 +18,10 @@ import {
 } from "../../../../../shared/client";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { getImageSource } from "../../../lib/config";
-import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheckCircle,
+  faChevronLeft,
+} from "@fortawesome/free-solid-svg-icons";
 import Markdown from "react-native-markdown-display";
 import { colors } from "../../../lib/style/colors";
 import { Button, ButtonColor } from "../../../components/system";
@@ -117,8 +120,7 @@ export default function ActionDetailScreen() {
     <>
       <Stack.Screen
         options={{
-          title: action.name,
-          headerBackTitle: "Actions",
+          headerShown: false,
         }}
       />
       <ScrollView style={styles.container}>
@@ -132,6 +134,9 @@ export default function ActionDetailScreen() {
 
         <View style={styles.contentContainer}>
           <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()}>
+              <FontAwesomeIcon icon={faChevronLeft} size={20} color="#0D1B2A" />
+            </TouchableOpacity>
             <Text style={styles.title}>{action.name}</Text>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{action.category}</Text>
@@ -220,12 +225,14 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
   title: {
     fontSize: 24,
     fontWeight: "700",
     color: "#0D1B2A",
-    marginBottom: 8,
   },
   badge: {
     backgroundColor: "#E0E0E0",

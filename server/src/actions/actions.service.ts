@@ -15,7 +15,7 @@ import {
   NotificationType,
   ActionStatus,
 } from './entities/action-event.entity';
-import { In, Repository } from 'typeorm';
+import { ILike, In, Like, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { UserAction, UserActionRelation } from './entities/user-action.entity';
 import {
@@ -461,5 +461,12 @@ export class ActionsService {
       order: { createdAt: 'DESC' },
     });
     return friendActivities.map((activity) => new ActionActivityDto(activity));
+  }
+
+  async findByName(name: string): Promise<Action[]> {
+    const actions = await this.actionRepository.find({
+      where: { name: ILike(`%${name}%`) },
+    });
+    return actions;
   }
 }

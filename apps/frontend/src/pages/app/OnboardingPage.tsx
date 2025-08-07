@@ -15,7 +15,7 @@ const OnboardingPage: React.FC = () => {
   const handleSubmit = async () => {
     const response = await userOnboarding({
       body: {
-        cityId: city,
+        cityId: city ?? undefined,
         over18: isOver18,
         anonymous: anonymous ?? false,
       },

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Card, { CardStyle } from "./Card";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ActionDto,
   actionsFindAllWithDrafts,
@@ -15,6 +15,7 @@ import ActionProgressBar from "./components/ActionProgressBar";
 import ActionTimeline from "./components/ActionTimeline";
 import ConfirmDialog from "./components/ConfirmDialog";
 import { testActions } from "./testData";
+import UserList from "./components/UserList";
 
 const AdminPanel: React.FC = () => {
   const [actions, setActions] = useState<ActionDto[]>([]);
@@ -22,7 +23,6 @@ const AdminPanel: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showPopulateConfirm, setShowPopulateConfirm] = useState(false);
   const [isPopulating, setIsPopulating] = useState(false);
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const { logout, user, loading: authLoading } = useAuth();
@@ -226,10 +226,7 @@ const AdminPanel: React.FC = () => {
             </div>
           ) : (
             <>
-              <div className="flex justify-between items-center">
-                <h1 className="text-[#111] text-[14pt] font-extrabold">
-                  Actions
-                </h1>
+              <div className="flex justify-end items-center">
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleViewModeChange("list")}
@@ -264,8 +261,13 @@ const AdminPanel: React.FC = () => {
                 <div className="flex-1 overflow-hidden h-full">
                   <ActionTimeline actions={actions} className="h-full" />
                 </div>
+              ) : viewMode === "users" ? (
+                <div className="flex-1 overflow-hidden h-full">
+                  <UserList />
+                </div>
               ) : (
                 <div className="space-y-3 flex-1 overflow-y-auto">
+                  <p className="font-bold ml-2">Actions</p>
                   {actions.map((action) => (
                     <Card key={action.name} style={CardStyle.White}>
                       <div

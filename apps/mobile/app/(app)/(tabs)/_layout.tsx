@@ -25,6 +25,7 @@ export default function TabLayout() {
         screenOptions={{
           tabBarStyle: {
             backgroundColor: "white",
+            height: 70,
             paddingTop: 10,
           },
           tabBarInactiveTintColor: "#aaa",

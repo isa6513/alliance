@@ -1,16 +1,17 @@
-import { ActionWithRelationDto } from "@alliance/shared/client";
 import { CardStyle } from "./system/Card";
 import Card from "./system/Card";
 import Badge from "./system/Badge";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router";
 import { useCallback } from "react";
+import { ActionDto, UserActionDto } from "@alliance/shared/client";
 
 interface UserActivityCardProps {
-  action: ActionWithRelationDto;
+  action: ActionDto;
+  relation: UserActionDto;
 }
 
-const UserActivityCard = ({ action }: UserActivityCardProps) => {
+const UserActivityCard = ({ action, relation }: UserActivityCardProps) => {
   const navigate = useNavigate();
 
   const handleClick = useCallback(() => {
@@ -18,7 +19,7 @@ const UserActivityCard = ({ action }: UserActivityCardProps) => {
   }, [action.id, navigate]);
 
   const timeSinceCompleted = formatDistanceToNow(
-    new Date(action.relation.dateCompleted),
+    new Date(relation.dateCompleted),
     {
       addSuffix: true,
     }
@@ -33,9 +34,9 @@ const UserActivityCard = ({ action }: UserActivityCardProps) => {
       >
         <div className="flex items-center justify-start w-[100%] space-x-3">
           <Badge className="!bg-[#5d9c2d] text-white">
-            Completed {action.relation.dateCompleted ? timeSinceCompleted : ""}
+            Completed {relation.dateCompleted ? timeSinceCompleted : ""}
           </Badge>
-          <p className="font-bold">{action.name}</p>
+          <p className="font-medium">{action.name}</p>
         </div>
         <div className="flex items-center justify-between ">
           <p>{action.shortDescription}</p>

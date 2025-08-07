@@ -48,7 +48,6 @@ export class ActionsController {
     private readonly eventEmitter: EventEmitter2,
     private userService: UserService,
   ) {
-    /* ONE listener no matter how many clients */
     this.delta$ = fromEvent<{ actionId: number; delta: number }>(
       this.eventEmitter,
       'action.delta',

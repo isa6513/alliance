@@ -1,21 +1,6 @@
 import { CitySearchDto, geoSearchCity } from "@alliance/shared/client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
-/**
- * <CityAutosuggest /> — lightweight, headless, fully‑typed city picker.
- *
- * Props
- * ────────────────────────────────────────────────────────────────────────────
- * • onSelect(city)     – required callback fired when user picks a suggestion.
- * • value              – controlled value (optional).
- * • placeholder        – input placeholder (default "Search a city …").
- * • minLength          – minimum chars before querying (default 2).
- * • debounceMs         – debounce delay in ms (default 300).
- * • className          – wrapper class name for custom styling.
- * • endpoint           – geoSearchCity endpoint path (default "/api/geo/city").
- *
- */
-
 export interface CityAutosuggestProps {
   value?: string;
   onSelect(city: CitySearchDto): void;
@@ -58,7 +43,6 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
     setGeoFetched(true);
   }, [geoFetched]);
 
-  // ─────────────────────────────────── helpers ──────────────────────────────
   const fetchCities = useCallback(
     async (name: string) => {
       if (name.length < minLength) {

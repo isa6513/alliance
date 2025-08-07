@@ -1,21 +1,22 @@
 import { View, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
-import { useAuth } from "../../../lib/AuthContext";
-import { useEffect, useMemo, useState } from "react";
-import { ActionDto, actionsFindAll } from "../../../../../shared/client";
+import { useEffect, useState } from "react";
+import {
+  ActionDto,
+  actionsFindAll,
+  actionsMyActionRelations,
+  UserActionDto,
+} from "../../../../../shared/client";
 import ActionCard from "../../../components/ActionCard";
 import { router } from "expo-router";
-import {
-  FilterMode,
-  filterActions,
-} from "../../../../../shared/lib/actionUtils";
 import { colors, Text, TextStyle } from "../../../components/system";
 
 export default function HomeScreen() {
-  const { user } = useAuth();
   const [actions, setActions] = useState<ActionDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
+  const [relations, setRelations] = useState<
+    Map<number, UserActionDto["status"]>
+  >(new Map());
 
   useEffect(() => {
     const fetchActions = async () => {
@@ -25,6 +26,15 @@ export default function HomeScreen() {
           throw new Error("Failed to fetch actions");
         }
         setActions(response.data || []);
+
+        const relations = await actionsMyActionRelations();
+        const relationList = relations.data ?? [];
+        const actionToRelationMap = new Map<number, UserActionDto["status"]>();
+        relationList.forEach((relation) => {
+          actionToRelationMap.set(relation.actionId, relation.status);
+        });
+        setRelations(actionToRelationMap);
+
         setLoading(false);
       } catch (err) {
         setError("Failed to load actions");
@@ -36,9 +46,21 @@ export default function HomeScreen() {
     fetchActions();
   }, []);
 
-  const filteredActions = useMemo(
-    () => filterActions(actions, filterMode),
-    [actions, filterMode]
+  const todoActions = actions.filter(
+    (action) =>
+      relations.get(action.id) === "joined" && action.status === "member_action"
+  );
+
+  const newActions = actions.filter(
+    (action) =>
+      (!relations.get(action.id) || relations.get(action.id) === "none") &&
+      action.status === "gathering_commitments"
+  );
+
+  const committedActions = actions.filter(
+    (action) =>
+      relations.get(action.id) === "joined" &&
+      action.status === "gathering_commitments"
   );
 
   const navigateToAction = (actionId: number) => {
@@ -57,16 +79,18 @@ export default function HomeScreen() {
           />
         ) : error ? (
           <Text style={styles.errorText}>{error}</Text>
-        ) : filteredActions.length === 0 ? (
+        ) : todoActions.length === 0 ? (
           <Text style={styles.noActionsText}>No actions available</Text>
         ) : (
-          filteredActions.map((action) => (
-            <ActionCard
-              key={action.id}
-              action={action}
-              onPress={() => navigateToAction(action.id)}
-            />
-          ))
+          <View>
+            {todoActions.map((action) => (
+              <ActionCard
+                key={action.id}
+                action={action}
+                onPress={() => navigateToAction(action.id)}
+              />
+            ))}
+          </View>
         )}
       </View>
     </ScrollView>

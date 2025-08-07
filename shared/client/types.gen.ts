@@ -94,6 +94,22 @@ export type FriendStatusDto = {
     status: FriendStatus | null;
 };
 
+export type User = {
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+    admin: boolean;
+    profilePicture: string | null;
+    profileDescription: string | null;
+    referralCode: string | null;
+    stripeCustomerId: string | null;
+    isNotSignedUpPartialProfile: boolean;
+    over18: boolean | null;
+    onboardingComplete: boolean;
+    anonymous: boolean;
+};
+
 export type UserActionRelation = 'completed' | 'joined' | 'seen' | 'declined' | 'none';
 
 export type UserActionDto = {
@@ -590,6 +606,17 @@ export type UpdateRecordResponseDto = {
     };
 };
 
+export type SearchItemType = 'user' | 'action' | 'post';
+
+export type SearchItemDto = {
+    id: string;
+    name: string;
+    date?: string;
+    image?: string;
+    webAppLocation?: string;
+    type: SearchItemType;
+};
+
 export type AppHealthCheckData = {
     body?: never;
     path?: never;
@@ -929,6 +956,19 @@ export type UserCountReferredResponses = {
 };
 
 export type UserCountReferredResponse = UserCountReferredResponses[keyof UserCountReferredResponses];
+
+export type UserListData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/list';
+};
+
+export type UserListResponses = {
+    200: Array<User>;
+};
+
+export type UserListResponse = UserListResponses[keyof UserListResponses];
 
 export type UserFindOneData = {
     body?: never;
@@ -1595,8 +1635,10 @@ export type GeoLoadCountryDataData = {
 };
 
 export type GeoLoadCountryDataResponses = {
-    200: unknown;
+    200: Array<City>;
 };
+
+export type GeoLoadCountryDataResponse = GeoLoadCountryDataResponses[keyof GeoLoadCountryDataResponses];
 
 export type GeoLoadCityDataData = {
     body?: never;
@@ -1748,6 +1790,21 @@ export type AdminViewerUpdateRecordResponses = {
 };
 
 export type AdminViewerUpdateRecordResponse = AdminViewerUpdateRecordResponses[keyof AdminViewerUpdateRecordResponses];
+
+export type SearchAllData = {
+    body?: never;
+    path?: never;
+    query: {
+        query: string;
+    };
+    url: '/search/all';
+};
+
+export type SearchAllResponses = {
+    200: Array<SearchItemDto>;
+};
+
+export type SearchAllResponse = SearchAllResponses[keyof SearchAllResponses];
 
 export type ClientOptions = {
     baseUrl: string;

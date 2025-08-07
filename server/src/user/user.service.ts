@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserActionRelation } from '../actions/entities/user-action.entity';
 import { Friend, FriendStatus } from './friend.entity';
@@ -364,5 +364,12 @@ export class UserService {
       password: Math.random().toString(36).substring(2, 15), //TODO: they have to reset this but maybe do something better
       isNotSignedUpPartialProfile: true,
     });
+  }
+
+  async findByUsername(query: string): Promise<User[]> {
+    const users = await this.userRepository.find({
+      where: { name: ILike(`%${query}%`) },
+    });
+    return users;
   }
 }

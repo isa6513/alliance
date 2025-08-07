@@ -11,5 +11,6 @@ import { User } from '../user/user.entity';
   imports: [TypeOrmModule.forFeature([Post, Reply, Notification, User])],
   controllers: [ForumController],
   providers: [ForumService],
+  exports: [ForumService],
 })
 export class ForumModule {}

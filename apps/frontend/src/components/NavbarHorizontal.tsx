@@ -5,6 +5,8 @@ import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../lib/config";
 import NotificationsIcon from "./NotificationsIcon";
 import { useAuth } from "../lib/AuthContext";
+import SearchBar from "./SearchBar";
+import logo from "../assets/hand.png";
 
 const NavbarHorizontal: React.FC = () => {
   const activeLinks = isFeatureEnabled(Features.Forum)
@@ -32,14 +34,17 @@ const NavbarHorizontal: React.FC = () => {
       <div
         className="
       flex flex-row border-stone-300 border-b bg-white
-    w-screen text-left space-x-10 items-center pl-10 fixed justify-center z-10"
+    w-screen text-left items-center fixed px-7 z-10 justify-between gap-x-5"
       >
-        {/* <Link to="/">
-        <h1 className="font-bold font-berlingske !text-[16pt] cursor-pointer">
-          alliance
-        </h1>
-      </Link> */}
-        <div className="flex flex-row gap-x-1 px-10 sm:gap-x-6">
+        <div className="flex flex-row gap-x-3 sm:gap-x-8 items-center">
+          <Link to="/" className="shrink-0 hidden sm:block">
+            <img
+              src={logo}
+              alt="logo"
+              className="w-8 h-8"
+              style={{ transform: "scaleX(-1) rotate(5deg)" }}
+            />
+          </Link>
           {activeLinks.map((link) =>
             link === NavbarPage.Platform ? (
               <DropdownLink
@@ -55,7 +60,7 @@ const NavbarHorizontal: React.FC = () => {
                   link === NavbarPage.Profile ? profileUrl : destinations[link]
                 }
                 key={link}
-                className={`py-4 px-2 border-b-2 ${
+                className={`py-4 border-b-2 ${
                   currentLocation === link
                     ? " border-green-3"
                     : "border-transparent"
@@ -72,7 +77,8 @@ const NavbarHorizontal: React.FC = () => {
             )
           )}
         </div>
-        <div className="absolute right-10">
+        <div className="flex flex-row gap-x-5 items-center flex-1 justify-end">
+          <SearchBar />
           <NotificationsIcon />
         </div>
       </div>

@@ -30,6 +30,8 @@ import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
 import { FriendStatus } from './friend.entity';
 import { City } from 'src/geo/city.entity';
 import { PrefillUserDto } from './prefill-user.dto';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { User } from './user.entity';
 
 @Controller('user')
 export class UserController {
@@ -206,6 +208,13 @@ export class UserController {
   @ApiOperation({ summary: 'Count the number of friends a user has referred' })
   async countReferred(@Param('id', ParseIntPipe) id: number): Promise<number> {
     return this.userService.countReferred(id);
+  }
+
+  @Get('list')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [User] })
+  async list(): Promise<User[]> {
+    return this.userService.findAll();
   }
 
   @Get(':id')

@@ -20,6 +20,7 @@ import { connectionOptions } from './datasources/dataSource';
 import { PaymentsModule } from './payments/payments.module';
 import { AdminViewerModule } from './admin-viewer/admin-viewer.module';
 import { S3Module } from './s3/s3.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { S3Module } from './s3/s3.module';
     MailModule,
     PaymentsModule,
     AdminViewerModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [],

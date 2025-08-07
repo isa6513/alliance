@@ -200,7 +200,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
               className="overflow-y-auto"
               style={{ height: `${timelineData.length * 64}px` }}
             >
-              {timelineData.map(({ action, phases }) => (
+              {timelineData.map(({ action }) => (
                 <div
                   key={action.id}
                   className="border-b border-gray-100 py-3 pr-4 flex flex-col justify-center bg-white"

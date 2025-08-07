@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
 import { CreateReplyDto, ReplyDto, UpdateReplyDto } from './dto/reply.dto';
 import { Post } from './entities/post.entity';
@@ -303,6 +303,12 @@ export class ForumService {
     return this.postRepository.find({
       where: { authorId: userId },
       relations: ['author', 'action'],
+    });
+  }
+
+  async findPostsByTitle(title: string): Promise<Post[]> {
+    return this.postRepository.find({
+      where: { title: ILike(`%${title}%`) },
     });
   }
 }
