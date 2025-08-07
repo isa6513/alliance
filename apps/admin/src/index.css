@@ -12,7 +12,7 @@ html {
 
 @font-face {
   font-family: "IBM Plex Sans";
-  src: url("IBMPlexSans-VariableFont_wdth,wght.ttf") format("truetype");
+  src: url("/IBMPlexSans-VariableFont_wdth,wght.ttf") format("truetype");
 }
 
 * {
