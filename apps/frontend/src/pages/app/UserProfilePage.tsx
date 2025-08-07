@@ -15,16 +15,31 @@ import {
   forumFindPostsByUser,
   userRemoveFriend,
   ActionDto,
+  actionsActionRelations,
+  UserActionDto,
 } from "@alliance/shared/client";
 import ProfileImage from "../../components/ProfileImage";
 import UserActivityCard from "../../components/UserActivityCard";
 import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
+import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
 
 enum ProfileTabs {
   Activity = "Activity",
   Forum = "Posts",
   Friends = "Friends",
+}
+
+export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  console.error(error);
+  return (
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-100px)]">
+      <div>
+        <span className="font-bold pb-2 text-red-500">Error</span>
+        <p>Failed to load user profile</p>
+      </div>
+    </div>
+  );
 }
 
 const UserProfilePage: React.FC = () => {
@@ -41,6 +56,9 @@ const UserProfilePage: React.FC = () => {
   const [completedActions, setCompletedActions] = useState<ActionDto[]>([]);
   const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
   const [friends, setFriends] = useState<ProfileDto[]>([]);
+  const [actionRelations, setActionRelations] = useState<
+    Map<number, UserActionDto>
+  >(new Map());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,7 +74,6 @@ const UserProfilePage: React.FC = () => {
         if (userData && userData.displayName) {
           setProfileUser(userData);
         }
-        console.log(userData?.id, user?.id);
         setIsMe(userData?.id === user?.id);
 
         const { data: friendsData } = await userListFriends({
@@ -69,6 +86,17 @@ const UserProfilePage: React.FC = () => {
           path: { id: userId },
         });
         setFriendStatus(friendStatusData?.status ?? "none");
+
+        const { data: actionRelationsData } = await actionsActionRelations({
+          path: { id: userId },
+        });
+        if (actionRelationsData) {
+          const relationMap = new Map<number, UserActionDto>();
+          actionRelationsData?.forEach((relation) => {
+            relationMap.set(relation.actionId, relation);
+          });
+          setActionRelations(relationMap);
+        }
 
         const { data: forumPostsData } = await forumFindPostsByUser({
           path: { id: userId },
@@ -238,7 +266,11 @@ const UserProfilePage: React.FC = () => {
                 </p>
               )}
               {completedActions?.map((action) => (
-                <UserActivityCard action={action} key={action.id} />
+                <UserActivityCard
+                  action={action}
+                  key={action.id}
+                  relation={actionRelations.get(action.id)}
+                />
               ))}
             </div>
           )}

@@ -106,7 +106,14 @@ export class ActionsController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [UserActionDto] })
   async myActionRelations(@Request() req: JwtRequest) {
-    return this.actionsService.findMyActionRelations(req.user?.sub);
+    return this.actionsService.findActionRelations(req.user?.sub);
+  }
+
+  @Get('actionRelations/:id')
+  @Public()
+  @ApiOkResponse({ type: [UserActionDto] })
+  async actionRelations(@Param('id', ParseIntPipe) id: number) {
+    return this.actionsService.findActionRelations(id);
   }
 
   @Get('userlocations/:id')

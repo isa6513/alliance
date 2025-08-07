@@ -8,7 +8,7 @@ import { ActionDto, UserActionDto } from "@alliance/shared/client";
 
 interface UserActivityCardProps {
   action: ActionDto;
-  relation: UserActionDto;
+  relation: UserActionDto | undefined;
 }
 
 const UserActivityCard = ({ action, relation }: UserActivityCardProps) => {
@@ -18,12 +18,13 @@ const UserActivityCard = ({ action, relation }: UserActivityCardProps) => {
     navigate(`/actions/${action.id}`);
   }, [action.id, navigate]);
 
-  const timeSinceCompleted = formatDistanceToNow(
-    new Date(relation.dateCompleted),
-    {
-      addSuffix: true,
-    }
-  );
+  const timeSinceCompleted = relation
+    ? formatDistanceToNow(new Date(relation.dateCompleted), {
+        addSuffix: true,
+      })
+    : "";
+
+  console.log(relation);
 
   return (
     <div className="flex flex-row justify-stretch items-center space-x-4">
@@ -34,7 +35,7 @@ const UserActivityCard = ({ action, relation }: UserActivityCardProps) => {
       >
         <div className="flex items-center justify-start w-[100%] space-x-3">
           <Badge className="!bg-[#5d9c2d] text-white">
-            Completed {relation.dateCompleted ? timeSinceCompleted : ""}
+            Completed {relation?.dateCompleted ? timeSinceCompleted : ""}
           </Badge>
           <p className="font-medium">{action.name}</p>
         </div>

@@ -430,7 +430,7 @@ export class ActionsService {
     }
   }
 
-  async findMyActionRelations(userId: number): Promise<UserActionDto[]> {
+  async findActionRelations(userId: number): Promise<UserActionDto[]> {
     let userActions = await this.userActionRepository.find({
       where: {
         user: { id: userId },

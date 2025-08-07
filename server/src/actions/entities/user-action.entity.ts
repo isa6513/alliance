@@ -3,7 +3,7 @@ import { CreateDateColumn, Entity, Unique, UpdateDateColumn } from 'typeorm';
 import { User } from '../../user/user.entity';
 import { Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Action } from './action.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum UserActionRelation {
   completed = 'completed',
@@ -48,13 +48,13 @@ export class UserAction {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ApiProperty()
+  @ApiPropertyOptional({ type: Date })
   @Column({ nullable: true })
-  dateCommitted: Date;
+  dateCommitted?: Date;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @Column({ nullable: true })
-  dateCompleted: Date;
+  dateCompleted?: Date;
 
   @ApiProperty()
   @Column({ nullable: true })

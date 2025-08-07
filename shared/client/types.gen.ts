@@ -1060,6 +1060,21 @@ export type ActionsMyActionRelationsResponses = {
 
 export type ActionsMyActionRelationsResponse = ActionsMyActionRelationsResponses[keyof ActionsMyActionRelationsResponses];
 
+export type ActionsActionRelationsData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/actionRelations/{id}';
+};
+
+export type ActionsActionRelationsResponses = {
+    200: Array<UserActionDto>;
+};
+
+export type ActionsActionRelationsResponse = ActionsActionRelationsResponses[keyof ActionsActionRelationsResponses];
+
 export type ActionsUserLocationsData = {
     body?: never;
     path: {
