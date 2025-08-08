@@ -113,21 +113,18 @@ const PostDetailPage: React.FC = () => {
         body: replyDto,
       });
 
-      // Refresh the post to get updated reply hierarchy
       if (response.data) {
         const newReplyId = response.data.id;
 
-        // Add to newly added replies set
         setNewlyAddedReplies((prev) => new Set(prev).add(newReplyId));
 
-        // Remove from newly added set after 10 seconds
         setTimeout(() => {
           setNewlyAddedReplies((prev) => {
             const newSet = new Set(prev);
             newSet.delete(newReplyId);
             return newSet;
           });
-        }, 10000);
+        }, 3000);
 
         const refreshedPost = await forumFindOnePost({
           path: { id: postId },

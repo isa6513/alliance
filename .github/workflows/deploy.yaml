@@ -397,7 +397,7 @@ jobs:
             unzip -o ~/nest-build.zip -d ~/nest-backend
 
             cd ~/nest-backend
-            NODE_OPTIONS=--max_old_space_size=1000 npm install --production
+            NODE_OPTIONS=--max_old_space_size=800 npm install --omit=dev --max_old_space_size=800
 
             npm run migration:run
 
