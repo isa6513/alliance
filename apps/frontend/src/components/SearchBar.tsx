@@ -2,6 +2,7 @@ import {
   searchAll,
   SearchItemDto,
   SearchItemType,
+  searchSaveSelected,
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
@@ -14,15 +15,16 @@ const SearchBar = () => {
   const [items, setItems] = useState<SearchItemDto[]>([]);
   const [itemsByCategory, setItemsByCategory] = useState<
     Record<SearchItemType, SearchItemDto[]>
-  >({ user: [], action: [], post: [] });
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-  const categories: SearchItemType[] = ["user", "action", "post"];
+  >({ user: [], action: [], post: [], recent: [] });
+  const [selectedItem, setSelectedItem] = useState<SearchItemDto | null>(null);
+  const categories: SearchItemType[] = ["recent", "user", "action", "post"];
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const categoryNames: Record<SearchItemType, string> = {
     user: "Users",
     action: "Actions",
     post: "Posts",
+    recent: "Recent Searches",
   };
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,20 +35,24 @@ const SearchBar = () => {
   const fetchItems = useCallback(async () => {
     const res = await searchAll({ query: { query: search } });
     if (res.data) {
-      const itemsByCategory = res.data.reduce(
-        (acc, item) => {
-          acc[item.type] = [...(acc[item.type] || []), item];
-          return acc;
-        },
-        { user: [], action: [], post: [] } as Record<
-          SearchItemType,
-          SearchItemDto[]
-        >
-      );
+      const itemsByCategory: Record<SearchItemType, SearchItemDto[]> =
+        search.length > 0
+          ? res.data.reduce(
+              (acc, item) => {
+                acc[item.type] = [...(acc[item.type] || []), item];
+                return acc;
+              },
+              { user: [], action: [], post: [], recent: [] } as Record<
+                SearchItemType,
+                SearchItemDto[]
+              >
+            )
+          : { user: [], action: [], post: [], recent: res.data };
 
       console.log(itemsByCategory);
 
       const itemsInOrder = [
+        ...itemsByCategory.recent,
         ...itemsByCategory.user,
         ...itemsByCategory.action,
         ...itemsByCategory.post,
@@ -56,9 +62,9 @@ const SearchBar = () => {
       setItemsByCategory(itemsByCategory);
 
       if (itemsInOrder.length > 0) {
-        setSelectedItemId(itemsInOrder[0].id);
+        setSelectedItem(itemsInOrder[0]);
       } else {
-        setSelectedItemId(null);
+        setSelectedItem(null);
       }
     }
   }, [search]);
@@ -77,20 +83,22 @@ const SearchBar = () => {
   const close = useCallback(() => {
     setOpen(false);
     setSearch("");
-    setSelectedItemId(null);
+    setSelectedItem(null);
   }, []);
 
-  const handleItemClick = useCallback(
+  const divRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleChooseItem = useCallback(
     (item: SearchItemDto) => {
-      if (item.webAppLocation) {
-        navigate(item.webAppLocation);
-        close();
-      }
+      console.log("saving item", item);
+      searchSaveSelected({ body: item });
+      inputRef.current?.blur();
+      navigate(item.webAppLocation);
+      close();
     },
     [navigate, close]
   );
-
-  const divRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.addEventListener("click", (event) => {
@@ -103,25 +111,19 @@ const SearchBar = () => {
     };
   }, []);
 
-  const handleSubmit = useCallback(() => {
-    if (selectedItemId) {
-      handleItemClick(items.find((item) => item.id === selectedItemId)!);
-    }
-  }, [selectedItemId, handleItemClick, items]);
-
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        handleSubmit();
+      if (e.key === "Enter" && selectedItem) {
+        handleChooseItem(selectedItem);
       }
       if (e.key === "Escape") {
         close();
       }
       if (e.key === "ArrowUp") {
-        if (selectedItemId) {
-          const index = items.findIndex((item) => item.id === selectedItemId);
+        if (selectedItem) {
+          const index = items.findIndex((item) => item.id === selectedItem.id);
           if (index > 0) {
-            setSelectedItemId(items[index - 1].id);
+            setSelectedItem(items[index - 1]);
             itemRefs.current[items[index - 1].id]?.scrollIntoView({
               behavior: "smooth",
               block: "nearest",
@@ -131,10 +133,10 @@ const SearchBar = () => {
         e.preventDefault();
       }
       if (e.key === "ArrowDown") {
-        if (selectedItemId) {
-          const index = items.findIndex((item) => item.id === selectedItemId);
+        if (selectedItem) {
+          const index = items.findIndex((item) => item.id === selectedItem.id);
           if (index < items.length - 1) {
-            setSelectedItemId(items[index + 1].id);
+            setSelectedItem(items[index + 1]);
             itemRefs.current[items[index + 1].id]?.scrollIntoView({
               behavior: "smooth",
               block: "nearest",
@@ -144,8 +146,27 @@ const SearchBar = () => {
         e.preventDefault();
       }
     },
-    [handleSubmit, close, selectedItemId, items]
+    [close, selectedItem, items, handleChooseItem]
   );
+
+  const handleGlobalKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      console.log("global key down", e.key, e.ctrlKey);
+      if (e.key === "k" && e.metaKey) {
+        setOpen(true);
+        inputRef.current?.focus();
+        setSelectedItem(items[0]);
+      }
+    },
+    [items]
+  );
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleGlobalKeyDown);
+    };
+  }, [open, handleGlobalKeyDown]);
 
   return (
     <div
@@ -160,6 +181,7 @@ const SearchBar = () => {
         onChange={onChange}
         onFocus={() => setOpen(true)}
         onKeyDown={handleKeyDown}
+        ref={inputRef}
       />
       {open && items.length > 0 && (
         <div className="w-full bg-zinc-100 -mt-[3px] pt-[7px] shrink-0 rounded-b-md p-2 flex flex-col max-h-[min(calc(100vh-50px),400px)] overflow-y-auto">
@@ -171,12 +193,12 @@ const SearchBar = () => {
               {itemsByCategory[category]?.map((item) => (
                 <div
                   key={item.id}
-                  onClick={() => handleItemClick(item)}
+                  onClick={() => handleChooseItem(item)}
                   ref={(el) => {
                     itemRefs.current[item.id] = el;
                   }}
                   className={`text-black hover:bg-zinc-200 p-3 rounded-md flex flex-row justify-start cursor-pointer items-center ${
-                    selectedItemId === item.id ? "bg-zinc-200" : ""
+                    selectedItem?.id === item.id ? "bg-zinc-200" : ""
                   }`}
                 >
                   {item.image && (

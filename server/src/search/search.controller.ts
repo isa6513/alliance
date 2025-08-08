@@ -1,4 +1,12 @@
-import { Controller, Get, Query, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { SearchService } from './search.service';
 import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
@@ -16,5 +24,15 @@ export class SearchController {
     @Request() req: JwtRequest,
   ): Promise<SearchItemDto[]> {
     return this.searchService.search(query, req.user.sub);
+  }
+
+  @Post('selected')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async saveSelected(
+    @Body() body: SearchItemDto,
+    @Request() req: JwtRequest,
+  ): Promise<void> {
+    return this.searchService.saveSelected(body, req.user.sub);
   }
 }

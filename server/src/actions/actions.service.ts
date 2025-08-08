@@ -15,7 +15,7 @@ import {
   NotificationType,
   ActionStatus,
 } from './entities/action-event.entity';
-import { ILike, In, Not, Repository } from 'typeorm';
+import { ILike, In, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { UserAction, UserActionRelation } from './entities/user-action.entity';
 import {

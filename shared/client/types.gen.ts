@@ -606,14 +606,14 @@ export type UpdateRecordResponseDto = {
     };
 };
 
-export type SearchItemType = 'user' | 'action' | 'post';
+export type SearchItemType = 'user' | 'action' | 'post' | 'recent';
 
 export type SearchItemDto = {
     id: string;
     name: string;
     date?: string;
     image?: string;
-    webAppLocation?: string;
+    webAppLocation: string;
     secondaryData?: Array<Array<unknown>>;
     type: SearchItemType;
 };
@@ -1821,6 +1821,17 @@ export type SearchAllResponses = {
 };
 
 export type SearchAllResponse = SearchAllResponses[keyof SearchAllResponses];
+
+export type SearchSaveSelectedData = {
+    body: SearchItemDto;
+    path?: never;
+    query?: never;
+    url: '/search/selected';
+};
+
+export type SearchSaveSelectedResponses = {
+    200: unknown;
+};
 
 export type ClientOptions = {
     baseUrl: string;
