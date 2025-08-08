@@ -155,7 +155,7 @@ const SearchBar = () => {
       <input
         type="text"
         placeholder="Search"
-        className="w-full bg-zinc-100 p-2 px-3 rounded-md focus:outline-none"
+        className="w-full bg-zinc-100 p-2 px-3 rounded-lg focus:outline-none"
         value={search}
         onChange={onChange}
         onFocus={() => setOpen(true)}
@@ -165,7 +165,7 @@ const SearchBar = () => {
         <div className="w-full bg-zinc-100 -mt-[3px] pt-[7px] shrink-0 rounded-b-md p-2 flex flex-col max-h-[min(calc(100vh-50px),400px)] overflow-y-auto">
           {categoriesWithItems.map((category) => (
             <div key={category} className=" w-full">
-              <p className="text-black text-sm font-medium pl-3 pt-3 w-full border-t border-zinc-200">
+              <p className="text-black text-sm font-medium pl-3 pt-3 pb-1 w-full border-t border-zinc-200">
                 {categoryNames[category]}
               </p>
               {itemsByCategory[category]?.map((item) => (

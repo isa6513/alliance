@@ -32,7 +32,7 @@ import { testActions } from "../../stories/testData";
 import { useAppLoaderData } from "../../applayout";
 
 const actionStatusDescriptions: Record<ActionDto["status"], string> = {
-  gathering_commitments: "Collecting commitments",
+  gathering_commitments: "Gathering commitments",
   commitments_reached: "Sufficient commitments reached",
   member_action: "Members are now taking action",
   resolution: "Pending office resolution",

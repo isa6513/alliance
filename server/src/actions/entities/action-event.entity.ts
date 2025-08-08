@@ -29,6 +29,18 @@ export enum ActionStatus {
   Abandoned = 'abandoned', // process aborted
 }
 
+export const readableActionStatus: Record<ActionStatus, string> = {
+  [ActionStatus.Draft]: 'Draft',
+  [ActionStatus.Upcoming]: 'Upcoming',
+  [ActionStatus.GatheringCommitments]: 'Gathering commitments',
+  [ActionStatus.CommitmentsReached]: 'Commitments reached',
+  [ActionStatus.MemberAction]: 'Members taking action',
+  [ActionStatus.Resolution]: 'Resolution ongoing',
+  [ActionStatus.Completed]: 'Completed',
+  [ActionStatus.Failed]: 'Failed',
+  [ActionStatus.Abandoned]: 'Abandoned',
+};
+
 @Entity()
 export class ActionEvent {
   @PrimaryGeneratedColumn()

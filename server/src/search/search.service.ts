@@ -8,6 +8,7 @@ import { Action } from 'src/actions/entities/action.entity';
 import { Post } from 'src/forum/entities/post.entity';
 import { actionUrl, postUrl, profileUrl } from './approutes';
 import { formatDistanceToNow } from 'date-fns';
+import { readableActionStatus } from 'src/actions/entities/action-event.entity';
 
 @Injectable()
 export class SearchService {
@@ -64,6 +65,7 @@ export class SearchService {
       name: action.name,
       type: SearchItemType.Action,
       webAppLocation: actionUrl(action.id),
+      secondaryData: [readableActionStatus[action.status]],
     };
   }
   postToSearchItem(post: Post): SearchItemDto {

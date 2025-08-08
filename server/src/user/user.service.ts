@@ -368,7 +368,11 @@ export class UserService {
 
   async findByUsername(query: string): Promise<User[]> {
     const users = await this.userRepository.find({
-      where: { name: ILike(`%${query}%`) },
+      where: {
+        name: ILike(`%${query}%`),
+        anonymous: false,
+        isNotSignedUpPartialProfile: false,
+      },
     });
     return users;
   }
