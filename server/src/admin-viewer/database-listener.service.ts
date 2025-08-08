@@ -48,8 +48,6 @@ export class DatabaseListenerService
     const tableName = event.metadata.tableName;
     const entityId = event.entityId;
 
-    console.log(`Database delete detected in table: ${tableName}`);
-
     this.eventEmitter.emit('database.delete', {
       tableName,
       entityId,

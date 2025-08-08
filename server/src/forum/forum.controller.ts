@@ -27,51 +27,65 @@ export class ForumController {
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Create a new forum post' })
   @ApiOkResponse({ type: PostDto })
-  createPost(
+  async createPost(
     @Body() createPostDto: CreatePostDto,
     @ReqUser() user: JwtPayload,
   ): Promise<PostDto> {
-    return this.forumService.createPost(createPostDto, user.sub);
+    console.log('createPostDto', createPostDto);
+    console.log(await this.forumService.createPost(createPostDto, user.sub));
+    return new PostDto(
+      await this.forumService.createPost(createPostDto, user.sub),
+    );
   }
 
   @Get('posts')
   @ApiOperation({ summary: 'Get all forum posts' })
   @ApiOkResponse({ type: [PostDto] })
   findAllPosts(): Promise<PostDto[]> {
-    return this.forumService.findAllPosts();
+    return this.forumService
+      .findAllPosts()
+      .then((posts) => posts.map((post) => new PostDto(post)));
   }
 
   @Get('posts/action/:actionId')
   @ApiOperation({ summary: 'Get posts for a specific action' })
   @ApiOkResponse({ type: [PostDto] })
-  findPostsByAction(@Param('actionId') actionId: string): Promise<PostDto[]> {
-    return this.forumService.findPostsByAction(+actionId);
+  async findPostsByAction(
+    @Param('actionId') actionId: string,
+  ): Promise<PostDto[]> {
+    return this.forumService
+      .findPostsByAction(+actionId)
+      .then((posts) => posts.map((post) => new PostDto(post)));
   }
 
   @Get('posts/:id')
   @ApiOperation({ summary: 'Get a specific post with its replies' })
   @ApiOkResponse({ type: PostDto })
-  findOnePost(@Param('id') id: string): Promise<PostDto> {
-    return this.forumService.findOnePost(+id);
+  async findOnePost(@Param('id') id: string): Promise<PostDto> {
+    return new PostDto(await this.forumService.findOnePost(+id));
   }
 
   @Get('posts/user/:id')
   @ApiOperation({ summary: 'Get all posts by a specific user' })
   @ApiOkResponse({ type: [PostDto] })
   findPostsByUser(@Param('id', ParseIntPipe) id: number): Promise<PostDto[]> {
-    return this.forumService.findPostsByUser(id);
+    return this.forumService
+      .findPostsByUser(id)
+      .then((posts) => posts.map((post) => new PostDto(post)));
   }
 
   @Patch('posts/:id')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Update a post' })
   @ApiOkResponse({ type: PostDto })
-  updatePost(
+  async updatePost(
     @Param('id') id: string,
     @Body() updatePostDto: UpdatePostDto,
     @ReqUser() user: JwtPayload,
   ): Promise<PostDto> {
-    return this.forumService.updatePost(+id, updatePostDto, user.sub);
+    return new PostDto(
+      await this.forumService.updatePost(+id, updatePostDto, user.sub),
+    );
   }
 
   @Delete('posts/:id')

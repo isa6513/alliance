@@ -29,9 +29,13 @@ export class ForumService {
     createPostDto: CreatePostDto,
     userId: number,
   ): Promise<Post> {
+    const user = await this.userRepository.findOneOrFail({
+      where: { id: userId },
+    });
     const post = this.postRepository.create({
       ...createPostDto,
-      authorId: userId,
+      author: user,
+      authorId: user.id,
     });
     return this.postRepository.save(post);
   }

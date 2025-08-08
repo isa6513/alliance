@@ -161,6 +161,13 @@ const SearchBar = () => {
     [items]
   );
 
+  const handleFocus = useCallback(() => {
+    setOpen(true);
+    if (items.length > 0 && !selectedItem) {
+      setSelectedItem(items[0]);
+    }
+  }, [items, selectedItem]);
+
   useEffect(() => {
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => {
@@ -179,7 +186,7 @@ const SearchBar = () => {
         className="w-full bg-zinc-100 p-2 px-3 rounded-lg focus:outline-none"
         value={search}
         onChange={onChange}
-        onFocus={() => setOpen(true)}
+        onFocus={handleFocus}
         onKeyDown={handleKeyDown}
         ref={inputRef}
       />

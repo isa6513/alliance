@@ -144,7 +144,7 @@ const PostDetailPage: React.FC = () => {
   };
 
   const handleDeletePost = async () => {
-    if (!post || post.author.email !== user?.email) {
+    if (!post || post.author.id !== user?.id) {
       return;
     }
 
@@ -237,7 +237,7 @@ const PostDetailPage: React.FC = () => {
           <Card className="p-6 mb-3" style={CardStyle.White}>
             <div className="flex justify-between items-start">
               <h1 className="text-2xl font-semibold">{post.title}</h1>
-              {post.author.email === user?.email && (
+              {post.author.id === user?.id && (
                 <div className="space-x-2">
                   <Link
                     to={`/forum/edit/${post.id}`}
@@ -261,7 +261,7 @@ const PostDetailPage: React.FC = () => {
                   href={`/user/${post.author.id}`}
                   className="font-semibold hover:underline"
                 >
-                  {post.author.name}
+                  {post.author.displayName}
                 </a>
               </span>
               <span className="ml-4">

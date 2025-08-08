@@ -5,7 +5,7 @@ import {
   PickType,
 } from '@nestjs/swagger';
 import { Post } from '../entities/post.entity';
-import { MinimalUserDto } from '../../user/user.dto';
+import { ProfileDto } from '../../user/user.dto';
 import { ReplyDto } from './reply.dto';
 import { ActionDto } from 'src/actions/dto/action.dto';
 
@@ -23,14 +23,20 @@ export class PostDto extends PickType(Post, [
   @ApiPropertyOptional({ type: () => ActionDto })
   action: ActionDto | undefined;
 
-  @ApiProperty({ type: MinimalUserDto })
-  author: MinimalUserDto;
+  @ApiProperty({ type: ProfileDto })
+  author: ProfileDto;
 
   @ApiPropertyOptional({ type: Number })
   replyCount?: number;
 
   @ApiProperty({ type: () => ReplyDto, isArray: true })
   replies: ReplyDto[];
+
+  constructor(post: Post) {
+    super();
+    Object.assign(this, post);
+    this.author = new ProfileDto(post.author);
+  }
 }
 
 export class CreatePostDto extends PickType(Post, [

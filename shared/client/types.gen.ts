@@ -404,12 +404,6 @@ export type CreatePostDto = {
     actionId?: number;
 };
 
-export type MinimalUserDto = {
-    id: number;
-    name: string;
-    email: string;
-};
-
 export type ReplyDto = {
     id: number;
     content: string;
@@ -431,7 +425,7 @@ export type PostDto = {
     createdAt: string;
     updatedAt: string;
     action?: ActionDto;
-    author: MinimalUserDto;
+    author: ProfileDto;
     replyCount?: number;
     replies: Array<ReplyDto>;
 };

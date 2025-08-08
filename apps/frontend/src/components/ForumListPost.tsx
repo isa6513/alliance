@@ -34,7 +34,7 @@ const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
       <div className="flex justify-between text-xs text-gray-500">
         <div className="flex flex-row gap-x-2">
           <p onClick={authorClick} className="hover:underline">
-            {post.author?.name || "Unknown user"}
+            {post.author?.displayName || "Unknown user"}
           </p>
           {post.action?.name !== undefined && showAction && (
             <a onClick={actionClick} className="text-blue ml-1 hover:underline">

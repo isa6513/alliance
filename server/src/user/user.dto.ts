@@ -23,12 +23,6 @@ export class UserDto extends PickType(User, [
   cityId?: number;
 }
 
-export class MinimalUserDto extends PickType(UserDto, [
-  'id',
-  'name',
-  'email',
-]) {}
-
 export class FriendStatusDto {
   @ApiProperty({ enum: FriendStatus, nullable: true, enumName: 'FriendStatus' })
   status: FriendStatus;
@@ -48,6 +42,7 @@ export class ProfileDto extends PickType(User, [
       User,
       | 'id'
       | 'name'
+      | 'admin'
       | 'email'
       | 'anonymous'
       | 'profilePicture'
@@ -55,7 +50,10 @@ export class ProfileDto extends PickType(User, [
     >,
   ) {
     super();
-    Object.assign(this, user);
+    this.id = user.id;
+    this.profilePicture = user.profilePicture;
+    this.profileDescription = user.profileDescription;
+    this.admin = user.admin;
     if (user.anonymous) {
       this.displayName = 'Someone';
     } else {
