@@ -254,17 +254,23 @@ const PostDetailPage: React.FC = () => {
                 </div>
               )}
             </div>
-            <div className="text-sm text-gray-500">
+            <div className=" flex flex-row gap-x-2 items-center">
+              {post.author.profilePicture && (
+                <img
+                  src={post.author.profilePicture}
+                  alt={post.author.displayName}
+                  className="aspect-square h-8 rounded-md object-cover"
+                />
+              )}
               <span>
-                By{" "}
                 <a
                   href={`/user/${post.author.id}`}
-                  className="font-semibold hover:underline"
+                  className="hover:underline text-black"
                 >
                   {post.author.displayName}
                 </a>
               </span>
-              <span className="ml-4">
+              <span className="ml-4 text-zinc-500">
                 {formatTime(new Date(post.createdAt), {
                   addSuffix: true,
                 })}

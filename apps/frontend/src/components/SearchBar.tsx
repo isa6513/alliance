@@ -212,7 +212,7 @@ const SearchBar = () => {
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="aspect-square h-8 rounded-full object-cover mr-2"
+                      className="aspect-square h-8 rounded-md object-cover mr-2"
                     />
                   )}
                   <div className="flex flex-col">

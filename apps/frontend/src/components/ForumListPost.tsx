@@ -32,9 +32,16 @@ const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
         <p className="font-medium text-base">{post.title}</p>
       </div>
       <div className="flex justify-between text-xs text-gray-500">
-        <div className="flex flex-row gap-x-2">
+        <div className="flex flex-row gap-x-2 items-center">
+          {post.author.profilePicture && (
+            <img
+              src={post.author.profilePicture}
+              alt={post.author.displayName}
+              className="aspect-square h-6 rounded-md object-cover"
+            />
+          )}
           <p onClick={authorClick} className="hover:underline">
-            {post.author?.displayName || "Unknown user"}
+            {post.author.displayName}
           </p>
           {post.action?.name !== undefined && showAction && (
             <a onClick={actionClick} className="text-blue ml-1 hover:underline">
