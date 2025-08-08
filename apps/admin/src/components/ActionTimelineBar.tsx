@@ -137,7 +137,7 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
         );
 
         // Shared background color
-        const barColor = "#8ad3e6"; // gray-100
+        const barColor = "#ddd"; // gray-100
 
         // Check if this is the last phase and if it extends beyond current time
         const isLastPhase = phaseIndex === phases.length - 1;
@@ -172,8 +172,11 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
             background: `linear-gradient(to right, ${barColor} 0%, ${barColor} ${fadeStartPercent}%, rgba(243, 244, 246, 0.3) ${fadeEndPercent}%, rgba(243, 244, 246, 0.1) 100%)`,
           };
         } else {
+          console.log(phase.status);
+
           backgroundStyle = {
-            backgroundColor: barColor,
+            backgroundColor:
+              phase.status === "completed" ? "transparent" : barColor,
           };
         }
 
@@ -191,9 +194,7 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
             }}
             title={`${action.name}: ${
               STATUS_LABELS[phase.status]
-            } (${phase.startDate.toLocaleDateString()} - ${phase.endDate.toLocaleDateString()})${
-              shouldFade ? " - Uncertain future" : ""
-            }`}
+            } (${phase.startDate.toLocaleDateString()} - ${phase.endDate.toLocaleDateString()})`}
             onClick={() => {
               navigate(`/?action=${action.id}&tab=events`);
             }}
@@ -217,9 +218,14 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
                 }}
               >
                 <span
-                  className={`w-full whitespace-nowrap ${
-                    hovered ? `z-100 !bg-red-500` : "z-0"
+                  className={`w-full whitespace-nowrap fixed user-select-none ${
+                    hovered ? `z-100 ` : "z-0"
                   }`}
+                  style={
+                    {
+                      // transform: `translateX(${barLeft}px)`,
+                    }
+                  }
                 >
                   {stickyLabel.text}
                 </span>

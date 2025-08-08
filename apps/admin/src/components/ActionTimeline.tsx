@@ -322,7 +322,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
 
                   return (
                     <div
-                      className="absolute bg-red-500 pointer-events-none z-30"
+                      className="absolute bg-zinc-600 pointer-events-none z-30"
                       style={{
                         left: `${
                           millisecondsSinceStart * pixelsPerMillisecond
@@ -333,7 +333,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
                       }}
                       title={`Now - ${currentDate.toLocaleString()}`}
                     >
-                      <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-red-500 rotate-45"></div>
+                      <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-inherit rotate-45"></div>
                     </div>
                   );
                 }
