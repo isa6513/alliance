@@ -18,11 +18,12 @@ const UserActivityCard = ({ action, relation }: UserActivityCardProps) => {
     navigate(`/actions/${action.id}`);
   }, [action.id, navigate]);
 
-  const timeSinceCompleted = relation
-    ? formatDistanceToNow(new Date(relation.dateCompleted), {
-        addSuffix: true,
-      })
-    : "";
+  const timeSinceCompleted =
+    relation && relation.dateCompleted
+      ? formatDistanceToNow(new Date(relation.dateCompleted), {
+          addSuffix: true,
+        })
+      : "";
 
   console.log(relation);
 

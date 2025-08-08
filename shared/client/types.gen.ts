@@ -114,8 +114,8 @@ export type UserActionRelation = 'completed' | 'joined' | 'seen' | 'declined' | 
 
 export type UserActionDto = {
     status: UserActionRelation;
-    dateCommitted: string;
-    dateCompleted: string;
+    dateCommitted?: string;
+    dateCompleted?: string;
     deadline: string;
     actionId: number;
 };
@@ -614,6 +614,7 @@ export type SearchItemDto = {
     date?: string;
     image?: string;
     webAppLocation?: string;
+    secondaryData?: Array<Array<unknown>>;
     type: SearchItemType;
 };
 

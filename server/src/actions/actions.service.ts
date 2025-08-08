@@ -15,7 +15,7 @@ import {
   NotificationType,
   ActionStatus,
 } from './entities/action-event.entity';
-import { ILike, In, Like, Repository } from 'typeorm';
+import { ILike, In, Not, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { UserAction, UserActionRelation } from './entities/user-action.entity';
 import {
@@ -466,7 +466,8 @@ export class ActionsService {
   async findByName(name: string): Promise<Action[]> {
     const actions = await this.actionRepository.find({
       where: { name: ILike(`%${name}%`) },
+      relations: ['events'],
     });
-    return actions;
+    return actions.filter((action) => action.status !== ActionStatus.Draft);
   }
 }

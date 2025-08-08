@@ -73,4 +73,9 @@ export class Post {
   @Allow()
   @Type(() => Date)
   updatedAt: Date;
+
+  @Column({ default: false })
+  @ApiProperty()
+  @Allow()
+  deleted: boolean;
 }

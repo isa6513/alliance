@@ -10,6 +10,7 @@ import {
   NotificationType,
 } from '../notifs/entities/notification.entity';
 import { User } from '../user/user.entity';
+import { replyUrl } from 'src/search/approutes';
 
 @Injectable()
 export class ForumService {
@@ -38,6 +39,7 @@ export class ForumService {
   async findAllPosts(): Promise<Post[]> {
     return this.postRepository
       .find({
+        where: { deleted: false },
         relations: ['author', 'action', 'replies'],
         order: { updatedAt: 'DESC' },
       })
@@ -53,7 +55,7 @@ export class ForumService {
   async findPostsByAction(actionId: number): Promise<Post[]> {
     return this.postRepository
       .find({
-        where: { actionId },
+        where: { actionId, deleted: false },
         relations: ['author', 'action', 'replies'],
         order: { updatedAt: 'DESC' },
       })
@@ -72,7 +74,7 @@ export class ForumService {
       relations: ['author', 'action'],
     });
 
-    if (!post) {
+    if (!post || post.deleted) {
       throw new NotFoundException(`Post with ID "${id}" not found`);
     }
 
@@ -151,7 +153,7 @@ export class ForumService {
       throw new NotFoundException('You can only delete your own posts');
     }
 
-    await this.postRepository.delete(id);
+    await this.postRepository.update(id, { deleted: true });
   }
 
   async createReply(
@@ -163,7 +165,7 @@ export class ForumService {
       relations: ['author'],
     });
 
-    if (!post) {
+    if (!post || post.deleted) {
       throw new NotFoundException(
         `Post with ID "${createReplyDto.postId}" not found`,
       );
@@ -212,8 +214,8 @@ export class ForumService {
         user: post.author,
         message: `${replyAuthor.name} replied to your forum post`,
         category: NotificationType.ForumReply,
-        webAppLocation: `/forum/post/${post.id}?replyId=${reply.id}`,
-        mobileAppLocation: `/forum/post/${post.id}?replyId=${reply.id}`,
+        webAppLocation: replyUrl(post.id, reply.id),
+        mobileAppLocation: replyUrl(post.id, reply.id),
       });
       notifications.push(postNotif);
     }
@@ -228,8 +230,8 @@ export class ForumService {
         user: parentReply.author,
         message: `${replyAuthor.name} replied to your comment`,
         category: NotificationType.ForumReply,
-        webAppLocation: `/forum/post/${post.id}?replyId=${reply.id}`,
-        mobileAppLocation: `/forum/post/${post.id}?replyId=${reply.id}`,
+        webAppLocation: replyUrl(post.id, reply.id),
+        mobileAppLocation: replyUrl(post.id, reply.id),
       });
       notifications.push(parentNotif);
     }
@@ -308,7 +310,7 @@ export class ForumService {
 
   async findPostsByTitle(title: string): Promise<Post[]> {
     return this.postRepository.find({
-      where: { title: ILike(`%${title}%`) },
+      where: { title: ILike(`%${title}%`), deleted: false },
     });
   }
 }

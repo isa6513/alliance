@@ -15,6 +15,7 @@ import {
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "../../components/system/Card";
 import { formatTime } from "../../lib/utils";
+import { useAppLoaderData } from "../../applayout";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
@@ -33,6 +34,8 @@ const PostDetailPage: React.FC = () => {
   );
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const { revalidate } = useAppLoaderData();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -153,6 +156,7 @@ const PostDetailPage: React.FC = () => {
         await forumRemovePost({
           path: { id: post.id.toString() },
         });
+        revalidate();
         navigate("/forum");
       } catch (err) {
         console.error("Error deleting post:", err);

@@ -6,6 +6,8 @@ import { SearchItemDto, SearchItemType } from './searchitem.dto';
 import { User } from 'src/user/user.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { Post } from 'src/forum/entities/post.entity';
+import { actionUrl, postUrl, profileUrl } from './approutes';
+import { formatDistanceToNow } from 'date-fns';
 
 @Injectable()
 export class SearchService {
@@ -21,9 +23,14 @@ export class SearchService {
     const users = query.length
       ? await this.usersService.findByUsername(query)
       : [];
-    const userItems = users
-      .slice(0, maxItemsPerType)
-      .map((user) => this.userToSearchItem(user));
+    const friends = await this.usersService.findFriends(userId);
+    const userItems = users.slice(0, maxItemsPerType).map((user) =>
+      this.userToSearchItem(
+        user,
+        friends.some((f) => f.id === user.id),
+        user.id === userId,
+      ),
+    );
 
     const actions = query.length
       ? await this.actionsService.findByName(query)
@@ -41,13 +48,14 @@ export class SearchService {
     return [...userItems, ...actionItems, ...postItems];
   }
 
-  userToSearchItem(user: User): SearchItemDto {
+  userToSearchItem(user: User, friends: boolean, self: boolean): SearchItemDto {
     return {
       id: 'user' + user.id,
       name: user.name,
       type: SearchItemType.User,
-      webAppLocation: `/user/${user.id}`,
+      webAppLocation: profileUrl(user.id),
       image: user.profilePicture,
+      secondaryData: friends ? ['Friend'] : self ? ['This is you!'] : [],
     };
   }
   actionToSearchItem(action: Action): SearchItemDto {
@@ -55,7 +63,7 @@ export class SearchService {
       id: 'action' + action.id,
       name: action.name,
       type: SearchItemType.Action,
-      webAppLocation: `/actions/${action.id}`,
+      webAppLocation: actionUrl(action.id),
     };
   }
   postToSearchItem(post: Post): SearchItemDto {
@@ -63,7 +71,8 @@ export class SearchService {
       id: 'post' + post.id,
       name: post.title,
       type: SearchItemType.Post,
-      webAppLocation: `/forum/post/${post.id}`,
+      webAppLocation: postUrl(post.id),
+      secondaryData: [formatDistanceToNow(post.createdAt, { addSuffix: true })],
     };
   }
 }

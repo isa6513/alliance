@@ -82,7 +82,6 @@ const SearchBar = () => {
 
   const handleItemClick = useCallback(
     (item: SearchItemDto) => {
-      console.log(item);
       if (item.webAppLocation) {
         navigate(item.webAppLocation);
         close();
@@ -187,7 +186,14 @@ const SearchBar = () => {
                       className="aspect-square h-8 rounded-full object-cover mr-2"
                     />
                   )}
-                  <span className="py-1">{item.name}</span>
+                  <div className="flex flex-col">
+                    <span>{item.name}</span>
+                    {item.secondaryData && (
+                      <span className="text-xs text-zinc-500">
+                        {item.secondaryData.join(", ")}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

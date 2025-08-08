@@ -22,6 +22,9 @@ export class SearchItemDto {
   @ApiPropertyOptional()
   webAppLocation?: string;
 
+  @ApiPropertyOptional({ type: [String], isArray: true })
+  secondaryData?: string[];
+
   @ApiProperty({
     enum: SearchItemType,
     enumName: 'SearchItemType',
