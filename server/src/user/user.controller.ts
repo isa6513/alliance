@@ -51,18 +51,10 @@ export class UserController {
 
   @Post('onboarding')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: ProfileDto })
+  @ApiOkResponse()
   @ApiUnauthorizedResponse()
-  async onboarding(
-    @Request() req: JwtRequest,
-    @Body() body: OnboardingDto,
-  ): Promise<ProfileDto> {
+  async onboarding(@Request() req: JwtRequest, @Body() body: OnboardingDto) {
     await this.userService.onboarding(req.user.sub, body);
-    const profile = await this.userService.findOne(req.user.sub);
-    if (!profile) {
-      throw new NotFoundException('User not found');
-    }
-    return new ProfileDto(profile);
   }
 
   @Post('update')

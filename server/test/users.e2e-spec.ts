@@ -78,7 +78,6 @@ describe('Users (e2e)', () => {
       .set('Authorization', `Bearer ${userAToken}`);
 
     expect(res.status).toBe(201);
-    expect(res.body.onboardingComplete).toBe(true);
 
     // Verify the user was updated in the database
     const updatedUser = await userRepo.findOne({

@@ -143,14 +143,18 @@ const SettingsPage: React.FC = () => {
             />
           </div>
 
-          <FormInput
-            label="Email Address"
-            name="email"
-            type="email"
-            value={user.email || ""}
-            onChange={() => {}}
-            disabled
-          />
+          <div>
+            <p className="mb-1">
+              Email <i className="text-gray-500">(Not shown)</i>
+            </p>
+            <FormInput
+              name="email"
+              type="email"
+              value={user.email || ""}
+              onChange={() => {}}
+              disabled
+            />
+          </div>
 
           <div>
             <label className="block font-medium mb-2">Location</label>

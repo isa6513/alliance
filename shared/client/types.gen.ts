@@ -767,10 +767,8 @@ export type UserOnboardingErrors = {
 };
 
 export type UserOnboardingResponses = {
-    200: ProfileDto;
+    200: unknown;
 };
-
-export type UserOnboardingResponse = UserOnboardingResponses[keyof UserOnboardingResponses];
 
 export type UserUpdateData = {
     body: UpdateProfileDto;
