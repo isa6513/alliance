@@ -15,11 +15,14 @@ const MarkdownWrapper: React.FC<MarkdownWrapperProps> = ({
       <ReactMarkdown
         components={{
           h1: ({ ...props }) => (
-            <h1 className="!font-semibold font-hanken !text-xl" {...props} />
+            <h1
+              className="!font-semibold !text-2xl md:!text-3xl !mt-6"
+              {...props}
+            />
           ),
           h2: ({ ...props }) => (
             <h2
-              className="!font-bold font-hanken text-xl md:text-2xl !mt-6"
+              className="!font-semibold text-xl md:text-2xl !mt-6"
               {...props}
             />
           ),

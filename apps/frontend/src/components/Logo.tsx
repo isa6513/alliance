@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import godImage from "../assets/god.png";
+import godImage from "../assets/planet-earth.png";
 import { useNavigate } from "react-router";
 
 interface LogoProps {
