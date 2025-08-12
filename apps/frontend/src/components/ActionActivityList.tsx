@@ -1,10 +1,18 @@
-import { useCallback, useEffect, useState } from "react";
-import { ActionActivityDto } from "@alliance/shared/client";
+import { useEffect, useState } from "react";
+import {
+  ActionActivityDto,
+  actionsLikeActivity,
+  actionsUnlikeActivity,
+} from "@alliance/shared/client";
 import { actionsGetActionActivities } from "@alliance/shared/client";
 import { CardStyle } from "./system/Card";
 import Card from "./system/Card";
 import { useActionActivity } from "../lib/useActionActivityWebSocket";
 import { formatTime } from "../lib/utils";
+import { useNavigate } from "react-router";
+import { formatActivityMessage } from "./ActionActivityDetail";
+import heart from "../assets/icons8-heart-90.png";
+import { useAuth } from "../lib/AuthContext";
 
 interface ActionActivityListProps {
   actionId: number;
@@ -17,6 +25,7 @@ const ActionActivityList = ({ actionId }: ActionActivityListProps) => {
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
   const { activities: liveActivities } = useActionActivity(actionId);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -50,17 +59,7 @@ const ActionActivityList = ({ actionId }: ActionActivityListProps) => {
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
-  const formatActivityMessage = useCallback((activity: ActionActivityDto) => {
-    const userName = activity.user.displayName || "Someone";
-    switch (activity.type) {
-      case "user_joined":
-        return `${userName} joined.`;
-      case "user_completed":
-        return `${userName} completed this action`;
-      default:
-        return "Unknown activity";
-    }
-  }, []);
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -76,6 +75,45 @@ const ActionActivityList = ({ actionId }: ActionActivityListProps) => {
     );
   }
 
+  const handleLike = async (activity: ActionActivityDto) => {
+    if (!user) {
+      return;
+    }
+    if (activity.likes.some((like) => like.id === user.id)) {
+      const response = await actionsUnlikeActivity({
+        path: { id: activity.id },
+      });
+      if (response.response.ok) {
+        setInitialActivities(
+          initialActivities.map((a) =>
+            a.id === activity.id
+              ? {
+                  ...a,
+                  likes: a.likes.filter((like) => like.id !== user.id),
+                }
+              : a
+          )
+        );
+      }
+    } else {
+      const response = await actionsLikeActivity({
+        path: { id: activity.id },
+      });
+      if (response.response.ok) {
+        setInitialActivities(
+          initialActivities.map((a) =>
+            a.id === activity.id
+              ? {
+                  ...a,
+                  likes: response.data?.likes || [],
+                }
+              : a
+          )
+        );
+      }
+    }
+  };
+
   if (!allActivities.length) {
     return null;
   }
@@ -90,9 +128,17 @@ const ActionActivityList = ({ actionId }: ActionActivityListProps) => {
     <Card style={CardStyle.White} className="p-7">
       <div className="space-y-3 w-full">
         <h3 className="text-lg font-bold">Recent Activity</h3>
-        <div className="space-y-2">
+        <div>
           {displayedActivities.map((activity) => (
-            <div key={activity.id} className="flex items-start space-x-3">
+            <div
+              key={activity.id}
+              className="flex items-start space-x-3  cursor-pointer hover:bg-gray-100 rounded-md p-2"
+              onClick={() => {
+                navigate(
+                  `/actions/${activity.actionId}/activity/${activity.id}`
+                );
+              }}
+            >
               <div className="flex-shrink-0">
                 <div
                   className={`w-2 h-2 rounded-full mt-[9px] ${
@@ -103,19 +149,39 @@ const ActionActivityList = ({ actionId }: ActionActivityListProps) => {
                 ></div>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex flex-row gap-x-2">
-                  {activity.user.profilePicture && (
+                <div className="flex flex-row justify-between items-center">
+                  <div className="flex flex-row gap-x-2">
+                    {activity.user.profilePicture !== null && (
+                      <img
+                        src={activity.user.profilePicture}
+                        alt={activity.user.displayName}
+                        className="w-6 h-6 rounded-md object-cover"
+                      />
+                    )}
+                    <p className="text-gray-900">
+                      {formatActivityMessage(activity)}
+                    </p>
+                  </div>
+                  <div className="flex flex-row gap-x-1 items-center">
+                    <p className="text-xs text-gray-500">
+                      {activity.likes.length}
+                    </p>
                     <img
-                      src={activity.user.profilePicture}
-                      alt={activity.user.displayName}
-                      className="w-6 h-6 rounded-md object-cover"
+                      src={heart}
+                      alt="Like"
+                      className={`w-4 h-4 ${
+                        activity.likes.some((like) => like.id === user?.id)
+                          ? "opacity-60"
+                          : "opacity-20"
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLike(activity);
+                      }}
                     />
-                  )}
-                  <p className="text-gray-900">
-                    {formatActivityMessage(activity)}
-                  </p>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 pt-1">
                   {formatTime(new Date(activity.createdAt), {
                     addSuffix: true,
                   })}

@@ -9,6 +9,7 @@ import { User } from '../user/user.entity';
 import { UserAction } from './entities/user-action.entity';
 import { ActionEvent } from './entities/action-event.entity';
 import { ActionActivity } from './entities/action-activity.entity';
+import { ActionActivityComment } from './entities/action-activity-comment.entity';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ActionActivity } from './entities/action-activity.entity';
     TypeOrmModule.forFeature([UserAction]),
     TypeOrmModule.forFeature([ActionEvent]),
     TypeOrmModule.forFeature([ActionActivity]),
+    TypeOrmModule.forFeature([ActionActivityComment]),
     UserModule,
   ],
   controllers: [ActionsController],

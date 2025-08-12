@@ -10,6 +10,7 @@ import { UserAction } from '../entities/user-action.entity';
 import { ActionEvent, ActionStatus } from '../entities/action-event.entity';
 import { ActionActivity } from '../entities/action-activity.entity';
 import { ProfileDto } from 'src/user/user.dto';
+import { ActionActivityComment } from '../entities/action-activity-comment.entity';
 
 export class UserActionDto extends PickType(UserAction, [
   'status',
@@ -100,6 +101,9 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   'id',
   'type',
   'createdAt',
+  'description',
+  'attachments',
+  'comments',
 ]) {
   @ApiProperty({ type: () => ProfileDto })
   user: ProfileDto;
@@ -110,11 +114,45 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   @ApiProperty()
   actionName: string;
 
+  @ApiProperty({ type: () => ProfileDto, isArray: true })
+  likes: ProfileDto[];
+
   constructor(actionActivity: ActionActivity) {
     super();
     Object.assign(this, actionActivity);
     this.actionId = actionActivity.action.id;
     this.actionName = actionActivity.action.name;
     this.user = new ProfileDto(actionActivity.user);
+    this.likes = actionActivity.likes.map((like) => new ProfileDto(like));
   }
+}
+
+export class ActionActivityCommentDto extends PickType(ActionActivityComment, [
+  'id',
+  'content',
+  'parent',
+  'children',
+]) {
+  @ApiProperty({ type: () => ProfileDto })
+  author: ProfileDto;
+
+  @ApiProperty({ type: () => ProfileDto, isArray: true })
+  likes: ProfileDto[];
+
+  constructor(actionActivityComment: ActionActivityComment) {
+    super();
+    Object.assign(this, actionActivityComment);
+    this.author = new ProfileDto(actionActivityComment.author);
+    this.likes = actionActivityComment.likes.map(
+      (like) => new ProfileDto(like),
+    );
+  }
+}
+
+export class CreateActionActivityCommentDto {
+  @ApiProperty()
+  content: string;
+
+  @ApiPropertyOptional({ type: Number })
+  parentId?: number;
 }

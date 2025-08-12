@@ -23,6 +23,8 @@ import {
   LatLonDto,
   CreateActionEventDto,
   ActionActivityDto,
+  ActionActivityCommentDto,
+  CreateActionActivityCommentDto,
 } from './dto/action.dto';
 import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -135,6 +137,13 @@ export class ActionsController {
   ): Promise<ActionActivityDto[]> {
     const limitNum = limit ? parseInt(limit) : 50;
     return this.actionsService.getActivityFeed(limitNum);
+  }
+
+  @Get('activities/:id')
+  @Public()
+  @ApiOkResponse({ type: ActionActivityDto })
+  async getActivity(@Param('id', ParseIntPipe) id: number) {
+    return this.actionsService.getActivity(id);
   }
 
   @Get(':id/activities')
@@ -335,5 +344,36 @@ export class ActionsController {
       throw new UnauthorizedException('User not found');
     }
     return this.actionsService.setTestRelations(req.user.sub);
+  }
+
+  @Post('likeActivity/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ActionActivityDto })
+  likeActivity(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: JwtRequest,
+  ): Promise<ActionActivityDto> {
+    return this.actionsService.likeActivity(id, req.user.sub);
+  }
+
+  @Post('unlikeActivity/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ActionActivityDto })
+  unlikeActivity(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: JwtRequest,
+  ): Promise<ActionActivityDto> {
+    return this.actionsService.likeActivity(id, req.user.sub, true);
+  }
+
+  @Post('addActivityComment/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ActionActivityCommentDto })
+  addActivityComment(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() commentDto: CreateActionActivityCommentDto,
+    @Request() req: JwtRequest,
+  ): Promise<ActionActivityCommentDto> {
+    return this.actionsService.addActivityComment(id, commentDto, req.user.sub);
   }
 }

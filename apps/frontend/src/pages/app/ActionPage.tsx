@@ -5,6 +5,7 @@ import {
   Outlet,
   useLoaderData,
   useParams,
+  useRouteLoaderData,
 } from "react-router";
 import Card, { CardStyle } from "../../components/system/Card";
 import {
@@ -25,7 +26,7 @@ import { useAuth } from "../../lib/AuthContext";
 import { TaskPanelContext } from "../../components/ActionTaskPanel";
 import ActionActivityList from "../../components/ActionActivityList";
 import { testActions } from "../../stories/testData";
-import { useAppLoaderData } from "../../applayout";
+import { clientLoader, useAppLoaderData } from "../../applayout";
 
 const actionStatusDescriptions: Record<ActionDto["status"], string> = {
   gathering_commitments: "Gathering commitments",
@@ -161,7 +162,6 @@ export default function ActionPage() {
         <Outlet
           context={
             {
-              action,
               userRelation,
               handleCompleteAction,
               handleJoinAction: onJoinAction,
@@ -240,4 +240,12 @@ export default function ActionPage() {
       border={false}
     />
   );
+}
+
+export function useActionLoaderData() {
+  const action = useRouteLoaderData<typeof loader>("pages/app/ActionPage"); //TODO: why is this based on file path
+  if (!action) {
+    throw new Error("No data - applayout loader not found");
+  }
+  return action;
 }

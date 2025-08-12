@@ -1,14 +1,10 @@
-import { ActionDto, UserActionDto } from "@alliance/shared/client";
+import { UserActionDto } from "@alliance/shared/client";
 import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
 import { StripeWrapper } from "./StripeWrapper";
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
-import {
-  isRouteErrorResponse,
-  useOutletContext,
-  useRouteLoaderData,
-} from "react-router";
+import { isRouteErrorResponse, useOutletContext } from "react-router";
 import Card, { CardStyle } from "./system/Card";
-import { loader as actionLoader } from "../pages/app/ActionPage";
+import { useActionLoaderData } from "../pages/app/ActionPage";
 import { Route } from "../../.react-router/types/src/components/+types/ActionTaskPanel";
 import ActionCommitButton from "./ActionCommitButton";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
@@ -33,7 +29,6 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 export type TaskPanelContext = {
   handleCompleteAction: () => void;
   handleJoinAction: () => void;
-  action?: ActionDto;
   userRelation: UserActionDto["status"] | null;
 };
 
@@ -41,9 +36,7 @@ const ActionTaskPanel = () => {
   const { handleCompleteAction, handleJoinAction, userRelation } =
     useOutletContext<TaskPanelContext>();
 
-  const action = useRouteLoaderData<typeof actionLoader>(
-    "pages/app/ActionPage" //TODO: why is this based on file path
-  );
+  const action = useActionLoaderData();
 
   if (!action) {
     return null;

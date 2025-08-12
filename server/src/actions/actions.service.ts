@@ -7,6 +7,8 @@ import {
   CreateActionEventDto,
   ActionActivityDto,
   UserActionDto,
+  ActionActivityCommentDto,
+  CreateActionActivityCommentDto,
 } from './dto/action.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Action } from './entities/action.entity';
@@ -26,6 +28,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Observable } from 'rxjs';
 import { from } from 'rxjs';
 import { instanceToPlain } from 'class-transformer';
+import { ActionActivityComment } from './entities/action-activity-comment.entity';
 
 @Injectable()
 export class ActionsService {
@@ -38,6 +41,8 @@ export class ActionsService {
     private readonly userActionRepository: Repository<UserAction>,
     @InjectRepository(ActionActivity)
     private readonly actionActivityRepository: Repository<ActionActivity>,
+    @InjectRepository(ActionActivityComment)
+    private readonly actionActivityCommentRepository: Repository<ActionActivityComment>,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
   ) {}
@@ -469,5 +474,79 @@ export class ActionsService {
       relations: ['events'],
     });
     return actions.filter((action) => action.status !== ActionStatus.Draft);
+  }
+
+  async getActivity(id: number): Promise<ActionActivityDto> {
+    const activity = await this.actionActivityRepository.findOne({
+      where: { id },
+      relations: ['user', 'action', 'comments', 'comments.author'],
+    });
+    if (!activity) {
+      throw new NotFoundException('Activity not found');
+    }
+    return new ActionActivityDto(activity);
+  }
+
+  async likeActivity(id: number, userId: number, unlike = false) {
+    const activity = await this.actionActivityRepository.findOne({
+      where: { id },
+      relations: ['user', 'action', 'comments', 'comments.author', 'likes'],
+    });
+    if (!activity) {
+      throw new NotFoundException('Activity not found');
+    }
+    const user = await this.userService.findOne(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const qb = this.actionActivityRepository
+      .createQueryBuilder()
+      .relation(ActionActivity, 'likes')
+      .of(activity);
+
+    if (unlike) {
+      await qb.remove(user);
+    } else {
+      if (!activity.likes.some((like) => like.id === user.id)) {
+        await qb.add(user);
+      }
+    }
+
+    const updatedActivity = await this.actionActivityRepository.findOne({
+      where: { id },
+      relations: ['likes'],
+    });
+    if (!updatedActivity) {
+      throw new NotFoundException('Activity not found');
+    }
+
+    return new ActionActivityDto(updatedActivity);
+  }
+
+  async addActivityComment(
+    id: number,
+    commentDto: CreateActionActivityCommentDto,
+    userId: number,
+  ): Promise<ActionActivityCommentDto> {
+    const activity = await this.actionActivityRepository.findOne({
+      where: { id },
+      relations: ['user', 'action', 'comments', 'comments.author'],
+    });
+    if (!activity) {
+      throw new NotFoundException('Activity not found');
+    }
+    const user = await this.userService.findOne(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const comment = this.actionActivityCommentRepository.create({
+      ...commentDto,
+      activity,
+      author: user,
+    });
+    const savedComment =
+      await this.actionActivityCommentRepository.save(comment);
+    return new ActionActivityCommentDto(savedComment);
   }
 }

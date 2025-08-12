@@ -237,16 +237,45 @@ export type LatLonDto = {
  */
 export type ActionActivityType = 'user_joined' | 'user_completed';
 
+export type ActionActivity = {
+    id: number;
+    /**
+     * Type of action activity
+     */
+    type: ActionActivityType;
+    actionId: number;
+    comments: Array<Array<ActionActivityComment>>;
+    userId: number;
+    createdAt: string;
+    dollar_amount?: number;
+    description?: string;
+    attachments?: Array<string>;
+};
+
+export type ActionActivityComment = {
+    id: number;
+    activity: ActionActivity;
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+    children: Array<ActionActivityComment>;
+    parent?: ActionActivityComment | null;
+};
+
 export type ActionActivityDto = {
     id: number;
     /**
      * Type of action activity
      */
     type: ActionActivityType;
+    comments: Array<Array<ActionActivityComment>>;
     createdAt: string;
+    description?: string;
+    attachments?: Array<string>;
     user: ProfileDto;
     actionId: number;
     actionName: string;
+    likes: Array<ProfileDto>;
 };
 
 export type CreateActionDto = {
@@ -362,6 +391,20 @@ export type CreateActionEventDto = {
      * Indicates whether the event should be shown in the timeline
      */
     showInTimeline: boolean;
+};
+
+export type CreateActionActivityCommentDto = {
+    content: string;
+    parentId?: number;
+};
+
+export type ActionActivityCommentDto = {
+    id: number;
+    content: string;
+    children: Array<ActionActivityComment>;
+    parent?: ActionActivityComment | null;
+    author: ProfileDto;
+    likes: Array<ProfileDto>;
 };
 
 export type CreateCommuniqueDto = {
@@ -1098,6 +1141,21 @@ export type ActionsGetActivityFeedResponses = {
 
 export type ActionsGetActivityFeedResponse = ActionsGetActivityFeedResponses[keyof ActionsGetActivityFeedResponses];
 
+export type ActionsGetActivityData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/activities/{id}';
+};
+
+export type ActionsGetActivityResponses = {
+    200: ActionActivityDto;
+};
+
+export type ActionsGetActivityResponse = ActionsGetActivityResponses[keyof ActionsGetActivityResponses];
+
 export type ActionsGetActionActivitiesData = {
     body?: never;
     path: {
@@ -1289,6 +1347,51 @@ export type ActionsSetTestRelationsData = {
 export type ActionsSetTestRelationsResponses = {
     200: unknown;
 };
+
+export type ActionsLikeActivityData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/likeActivity/{id}';
+};
+
+export type ActionsLikeActivityResponses = {
+    200: ActionActivityDto;
+};
+
+export type ActionsLikeActivityResponse = ActionsLikeActivityResponses[keyof ActionsLikeActivityResponses];
+
+export type ActionsUnlikeActivityData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/unlikeActivity/{id}';
+};
+
+export type ActionsUnlikeActivityResponses = {
+    200: ActionActivityDto;
+};
+
+export type ActionsUnlikeActivityResponse = ActionsUnlikeActivityResponses[keyof ActionsUnlikeActivityResponses];
+
+export type ActionsAddActivityCommentData = {
+    body: CreateActionActivityCommentDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/addActivityComment/{id}';
+};
+
+export type ActionsAddActivityCommentResponses = {
+    200: ActionActivityCommentDto;
+};
+
+export type ActionsAddActivityCommentResponse = ActionsAddActivityCommentResponses[keyof ActionsAddActivityCommentResponses];
 
 export type CommuniquesFindAllData = {
     body?: never;
