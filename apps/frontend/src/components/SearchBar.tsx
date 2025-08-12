@@ -49,8 +49,6 @@ const SearchBar = () => {
             )
           : { user: [], action: [], post: [], recent: res.data };
 
-      console.log(itemsByCategory);
-
       const itemsInOrder = [
         ...itemsByCategory.recent,
         ...itemsByCategory.user,
@@ -91,7 +89,6 @@ const SearchBar = () => {
 
   const handleChooseItem = useCallback(
     (item: SearchItemDto) => {
-      console.log("saving item", item);
       searchSaveSelected({ body: item });
       inputRef.current?.blur();
       navigate(item.webAppLocation);

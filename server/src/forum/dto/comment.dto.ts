@@ -13,6 +13,7 @@ export class CommentDto extends PickType(Comment, [
   'content',
   'parentObjectId',
   'parentId',
+  'parentObjectType',
   'createdAt',
   'updatedAt',
   'deleted',
@@ -28,6 +29,7 @@ export class CreateCommentDto extends PickType(Comment, [
   'content',
   'parentObjectId',
   'parentId',
+  'parentObjectType',
 ]) {}
 
 export class UpdateCommentDto extends PartialType(CreateCommentDto) {}

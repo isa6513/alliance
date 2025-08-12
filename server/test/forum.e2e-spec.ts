@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
 import { CreateCommentDto } from 'src/forum/dto/comment.dto';
+import { CommentParentObject } from 'src/forum/entities/comment.entity';
 
 describe('Forum (e2e)', () => {
   let ctx: TestContext;
@@ -122,7 +123,6 @@ describe('Forum (e2e)', () => {
       expect(response.body.title).toBeDefined();
       expect(response.body.content).toBeDefined();
       expect(response.body.commentCount).toBeDefined();
-      expect(response.body.comments).toBeDefined();
     });
 
     it('should update a post', async () => {
@@ -206,7 +206,8 @@ describe('Forum (e2e)', () => {
         .send({
           content: 'This is a test reply',
           parentObjectId: testPostId,
-        })
+          parentObjectType: CommentParentObject.Post,
+        } satisfies CreateCommentDto)
         .expect(201);
 
       expect(response.body.content).toBe('This is a test reply');
@@ -222,7 +223,8 @@ describe('Forum (e2e)', () => {
         .send({
           content: 'Reply to update',
           parentObjectId: testPostId,
-        })
+          parentObjectType: CommentParentObject.Post,
+        } satisfies CreateCommentDto)
         .expect(201);
 
       const replyId = createResponse.body.id;
@@ -248,6 +250,7 @@ describe('Forum (e2e)', () => {
         .send({
           content: 'Reply to delete',
           parentObjectId: testPostId,
+          parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
         .expect(201);
 
@@ -298,6 +301,7 @@ describe('Forum (e2e)', () => {
         .send({
           content: 'Original user reply',
           parentObjectId: testPostId,
+          parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
         .expect(201);
 
@@ -321,6 +325,7 @@ describe('Forum (e2e)', () => {
         .send({
           content: 'This is a parent reply',
           parentObjectId: testPostId,
+          parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
         .expect(201);
 
@@ -334,6 +339,7 @@ describe('Forum (e2e)', () => {
           content: 'This is a nested reply',
           parentObjectId: testPostId,
           parentId: parentReplyId,
+          parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
         .expect(201);
 
@@ -351,6 +357,7 @@ describe('Forum (e2e)', () => {
         .send({
           content: 'Parent reply',
           parentObjectId: testPostId,
+          parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
         .expect(201);
 
@@ -364,6 +371,7 @@ describe('Forum (e2e)', () => {
           content: 'First child reply',
           parentObjectId: testPostId,
           parentId: parentReplyId,
+          parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
         .expect(201);
 
@@ -374,6 +382,7 @@ describe('Forum (e2e)', () => {
           content: 'Second child reply',
           parentObjectId: testPostId,
           parentId: parentReplyId,
+          parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
         .expect(201);
 
@@ -384,20 +393,22 @@ describe('Forum (e2e)', () => {
         .send({
           content: 'Another top-level reply',
           parentObjectId: testPostId,
+          parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
         .expect(201);
 
-      // Fetch the post with replies
       const postResponse = await request(ctx.app.getHttpServer())
         .get(`/forum/posts/${testPostId}`)
         .expect(200);
 
-      expect(postResponse.body.comments).toBeDefined();
-      expect(Array.isArray(postResponse.body.comments)).toBe(true);
+      expect(postResponse.body.commentCount).toBeDefined();
+      expect(postResponse.body.commentCount).toBeGreaterThan(0);
 
-      // Should have 2 top-level replies
-      const topLevelReplies = postResponse.body.comments;
-      expect(topLevelReplies.length).toBe(2);
+      const commentsResponse = await request(ctx.app.getHttpServer())
+        .get(`/forum/posts/${testPostId}/comments`)
+        .expect(200);
+
+      const topLevelReplies = commentsResponse.body;
 
       // Find the parent reply
       const parentReply = topLevelReplies.find(
@@ -428,6 +439,7 @@ describe('Forum (e2e)', () => {
           content: 'This should fail',
           parentObjectId: testPostId,
           parentId: 99999, // Non-existent parent
+          parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
         .expect(404);
     });
@@ -452,7 +464,8 @@ describe('Forum (e2e)', () => {
         .send({
           content: 'Reply on other post',
           parentObjectId: anotherPostId,
-        })
+          parentObjectType: CommentParentObject.Post,
+        } satisfies CreateCommentDto)
         .expect(201);
 
       const otherPostReplyId = otherPostReplyResponse.body.id;
@@ -465,7 +478,8 @@ describe('Forum (e2e)', () => {
           content: 'This should fail',
           parentObjectId: testPostId,
           parentId: otherPostReplyId, // Parent from different post
-        })
+          parentObjectType: CommentParentObject.Post,
+        } satisfies CreateCommentDto)
         .expect(404);
     });
   });

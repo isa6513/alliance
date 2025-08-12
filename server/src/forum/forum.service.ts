@@ -54,8 +54,8 @@ export class ForumService {
       .then((posts) => {
         return Promise.all(
           posts.map(async (post) => {
-            const comments = await this.findCommentsForPost(post.id);
-            return new PostDto(post, comments);
+            const commentCount = await this.countCommentsForPost(post.id);
+            return new PostDto(post, commentCount);
           }),
         );
       });
@@ -118,12 +118,26 @@ export class ForumService {
       order: { createdAt: 'ASC' },
     });
 
-    return allComments.length > 0
-      ? this.organizeRepliesHierarchy(allComments)
-      : [];
+    return this.organizeRepliesHierarchy(allComments);
+  }
+
+  async findCommentsForActivity(activityId: number): Promise<Comment[]> {
+    const allComments = await this.commentRepository.find({
+      where: {
+        parentObjectId: activityId,
+        parentObjectType: CommentParentObject.Activity,
+      },
+      relations: ['author'],
+      order: { createdAt: 'ASC' },
+    });
+
+    return this.organizeRepliesHierarchy(allComments);
   }
 
   private organizeRepliesHierarchy(replies: Comment[]): Comment[] {
+    if (replies.length === 0) {
+      return [];
+    }
     // Create a map for quick lookup
     const replyMap = new Map<number, Comment>();
     const topLevelReplies: Comment[] = [];
@@ -188,17 +202,6 @@ export class ForumService {
     createCommentDto: CreateCommentDto,
     userId: number,
   ): Promise<CommentDto> {
-    const post = await this.postRepository.findOne({
-      where: { id: createCommentDto.parentObjectId },
-      relations: ['author'],
-    });
-
-    if (!post || post.deleted) {
-      throw new NotFoundException(
-        `Post with ID "${createCommentDto.parentObjectId}" not found`,
-      );
-    }
-
     // Validate parent reply if provided
     let parentReply: Comment | null = null;
     if (createCommentDto.parentId) {
@@ -206,7 +209,6 @@ export class ForumService {
         where: {
           id: createCommentDto.parentId,
           parentObjectId: createCommentDto.parentObjectId,
-          parentObjectType: CommentParentObject.Post,
         },
         relations: ['author'],
       });
@@ -221,7 +223,6 @@ export class ForumService {
     const reply = this.commentRepository.create({
       ...createCommentDto,
       authorId: userId,
-      parentObjectType: CommentParentObject.Post,
     });
 
     await this.postRepository.update(createCommentDto.parentObjectId, {
@@ -241,38 +242,51 @@ export class ForumService {
     // Save the reply first to get the ID
     await this.commentRepository.save(reply);
 
-    // Notify post author if different from reply author
-    if (post.authorId !== userId) {
-      const postNotif = this.notifRepository.create({
-        user: post.author,
-        message: `${replyAuthor.name} replied to your forum post`,
-        category: NotificationType.ForumReply,
-        webAppLocation: replyUrl(post.id, reply.id),
-        mobileAppLocation: replyUrl(post.id, reply.id),
+    if (createCommentDto.parentObjectType === CommentParentObject.Post) {
+      const post = await this.postRepository.findOne({
+        where: { id: createCommentDto.parentObjectId },
+        relations: ['author'],
       });
-      notifications.push(postNotif);
-    }
 
-    // Notify parent reply author if this is a nested reply and different from current user
-    if (
-      parentReply &&
-      parentReply.authorId !== userId &&
-      parentReply.authorId !== post.authorId
-    ) {
-      const parentNotif = this.notifRepository.create({
-        user: parentReply.author,
-        message: `${replyAuthor.name} replied to your comment`,
-        category: NotificationType.ForumReply,
-        webAppLocation: replyUrl(post.id, reply.id),
-        mobileAppLocation: replyUrl(post.id, reply.id),
-      });
-      notifications.push(parentNotif);
-    }
+      if (!post || post.deleted) {
+        throw new NotFoundException(
+          `Post with ID "${createCommentDto.parentObjectId}" not found`,
+        );
+      }
 
-    if (notifications.length > 0) {
-      await this.notifRepository.save(notifications);
-      reply.notification = notifications[0]; // Associate with first notification for backward compatibility
-    }
+      // Notify post author if different from reply author
+      if (post.authorId !== userId) {
+        const postNotif = this.notifRepository.create({
+          user: post.author,
+          message: `${replyAuthor.name} replied to your forum post`,
+          category: NotificationType.ForumReply,
+          webAppLocation: replyUrl(post.id, reply.id),
+          mobileAppLocation: replyUrl(post.id, reply.id),
+        });
+        notifications.push(postNotif);
+      }
+
+      // Notify parent reply author if this is a nested reply and different from current user
+      if (
+        parentReply &&
+        parentReply.authorId !== userId &&
+        parentReply.authorId !== post.authorId
+      ) {
+        const parentNotif = this.notifRepository.create({
+          user: parentReply.author,
+          message: `${replyAuthor.name} replied to your comment`,
+          category: NotificationType.ForumReply,
+          webAppLocation: replyUrl(post.id, reply.id),
+          mobileAppLocation: replyUrl(post.id, reply.id),
+        });
+        notifications.push(parentNotif);
+      }
+
+      if (notifications.length > 0) {
+        await this.notifRepository.save(notifications);
+        reply.notification = notifications[0]; // Associate with first notification for backward compatibility
+      }
+    } //TODO: add notification for activity
 
     const loadedReply = await this.commentRepository.findOne({
       where: { id: reply.id },
@@ -349,7 +363,7 @@ export class ForumService {
 
   async findPostWithComments(id: number): Promise<PostDto> {
     const post = await this.findOnePost(id);
-    const comments = await this.findCommentsForPost(id);
-    return new PostDto(post, comments);
+    const commentCount = await this.countCommentsForPost(id);
+    return new PostDto(post, commentCount);
   }
 }

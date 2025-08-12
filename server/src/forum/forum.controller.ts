@@ -61,6 +61,22 @@ export class ForumController {
     return this.forumService.findPostWithComments(+id);
   }
 
+  @Get('posts/:id/comments')
+  @ApiOperation({ summary: 'Get all comments for a specific post' })
+  @ApiOkResponse({ type: [CommentDto] })
+  async findCommentsForPost(@Param('id') id: string): Promise<CommentDto[]> {
+    return this.forumService.findCommentsForPost(+id);
+  }
+
+  @Get('activity/:id/comments')
+  @ApiOperation({ summary: 'Get all comments for a specific activity' })
+  @ApiOkResponse({ type: [CommentDto] })
+  async findCommentsForActivity(
+    @Param('id') id: string,
+  ): Promise<CommentDto[]> {
+    return this.forumService.findCommentsForActivity(+id);
+  }
+
   @Get('posts/user/:id')
   @ApiOperation({ summary: 'Get all posts by a specific user' })
   @ApiOkResponse({ type: [PostDto] })

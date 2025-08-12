@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router";
 import { formatTime } from "../lib/utils";
 import { ActionActivityDto, actionsGetActivity } from "@alliance/shared/client";
 import { useEffect, useState } from "react";
+import Comments from "./Comments";
 
 export function formatActivityMessage(activity: ActionActivityDto) {
   const userName = activity.user.displayName || "Someone";
@@ -119,6 +120,7 @@ const ActionActivityDetail = () => {
                 />
               ))}
           </div>
+          <Comments objectId={activity.id} type={"activity"} />
         </>
       )}
     </div>

@@ -6,7 +6,6 @@ import {
 } from '@nestjs/swagger';
 import { Post } from '../entities/post.entity';
 import { ProfileDto } from '../../user/user.dto';
-import { CommentDto } from './comment.dto';
 import { ActionDto } from 'src/actions/dto/action.dto';
 
 // return object for get requests
@@ -26,18 +25,14 @@ export class PostDto extends PickType(Post, [
   @ApiProperty({ type: ProfileDto })
   author: ProfileDto;
 
-  @ApiProperty({ type: Number })
-  commentCount: number;
+  @ApiPropertyOptional({ type: Number })
+  commentCount?: number;
 
-  @ApiProperty({ type: () => CommentDto, isArray: true })
-  comments: CommentDto[];
-
-  constructor(post: Post, comments: CommentDto[] = []) {
+  constructor(post: Post, commentCount?: number) {
     super();
     Object.assign(this, post);
     this.author = new ProfileDto(post.author);
-    this.commentCount = comments.length;
-    this.comments = comments;
+    this.commentCount = commentCount;
   }
 }
 

@@ -237,6 +237,21 @@ export type LatLonDto = {
  */
 export type ActionActivityType = 'user_joined' | 'user_completed';
 
+export type CommentParentObject = 'post' | 'action' | 'activity';
+
+export type CommentDto = {
+    id: number;
+    content: string;
+    parentObjectType: CommentParentObject;
+    parentObjectId: number;
+    deleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+    parentId?: number;
+    author: UserDto;
+    children?: Array<CommentDto>;
+};
+
 export type ActionActivityDto = {
     id: number;
     /**
@@ -250,6 +265,7 @@ export type ActionActivityDto = {
     actionId: number;
     actionName: string;
     likes: Array<ProfileDto>;
+    comments: Array<CommentDto>;
 };
 
 export type CreateActionDto = {
@@ -369,20 +385,9 @@ export type CreateActionEventDto = {
 
 export type CreateCommentDto = {
     content: string;
+    parentObjectType: CommentParentObject;
     parentObjectId: number;
     parentId?: number;
-};
-
-export type CommentDto = {
-    id: number;
-    content: string;
-    parentObjectId: number;
-    deleted: boolean;
-    createdAt: string;
-    updatedAt: string;
-    parentId?: number;
-    author: UserDto;
-    children?: Array<CommentDto>;
 };
 
 export type CreateCommuniqueDto = {
@@ -435,8 +440,7 @@ export type PostDto = {
     updatedAt: string;
     action?: ActionDto;
     author: ProfileDto;
-    commentCount: number;
-    comments: Array<CommentDto>;
+    commentCount?: number;
 };
 
 export type UpdatePostDto = {
@@ -447,6 +451,7 @@ export type UpdatePostDto = {
 
 export type UpdateCommentDto = {
     content?: string;
+    parentObjectType?: CommentParentObject;
     parentObjectId?: number;
     parentId?: number;
 };
@@ -1576,6 +1581,36 @@ export type ForumUpdatePostResponses = {
 };
 
 export type ForumUpdatePostResponse = ForumUpdatePostResponses[keyof ForumUpdatePostResponses];
+
+export type ForumFindCommentsForPostData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/forum/posts/{id}/comments';
+};
+
+export type ForumFindCommentsForPostResponses = {
+    200: Array<CommentDto>;
+};
+
+export type ForumFindCommentsForPostResponse = ForumFindCommentsForPostResponses[keyof ForumFindCommentsForPostResponses];
+
+export type ForumFindCommentsForActivityData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/forum/activity/{id}/comments';
+};
+
+export type ForumFindCommentsForActivityResponses = {
+    200: Array<CommentDto>;
+};
+
+export type ForumFindCommentsForActivityResponse = ForumFindCommentsForActivityResponses[keyof ForumFindCommentsForActivityResponses];
 
 export type ForumFindPostsByUserData = {
     body?: never;

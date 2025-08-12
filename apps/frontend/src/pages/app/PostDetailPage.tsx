@@ -1,37 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useNavigate, useSearchParams } from "react-router";
-import {
-  PostDto,
-  CreateCommentDto,
-  forumDeleteComment,
-} from "@alliance/shared/client";
+import { useParams, Link, useNavigate } from "react-router";
+import { PostDto } from "@alliance/shared/client";
 import { useAuth } from "../../lib/AuthContext";
-import ReplyForm from "../../components/forum/ReplyForm";
-import ReplyComponent from "../../components/forum/ReplyComponent";
-import {
-  forumCreateComment,
-  forumFindOnePost,
-  forumRemovePost,
-} from "@alliance/shared/client";
+import { forumFindOnePost, forumRemovePost } from "@alliance/shared/client";
 import Card, { CardStyle } from "../../components/system/Card";
 import { formatTime } from "../../lib/utils";
 import { useAppLoaderData } from "../../applayout";
+import Comments from "../../components/Comments";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
-  const [searchParams, setSearchParams] = useSearchParams();
   const [post, setPost] = useState<PostDto | null>(null);
-  const [replyContent, setReplyContent] = useState("");
-  const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [newlyAddedReplies, setNewlyAddedReplies] = useState<Set<number>>(
-    new Set()
-  );
-  const [highlightedReplyId, setHighlightedReplyId] = useState<number | null>(
-    null
-  );
+
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -59,88 +41,6 @@ const PostDetailPage: React.FC = () => {
     fetchPost();
   }, [postId]);
 
-  // Handle highlighted reply from URL parameters
-  useEffect(() => {
-    const replyId = searchParams.get("replyId");
-    if (replyId && post) {
-      const replyIdNumber = parseInt(replyId, 10);
-      if (!isNaN(replyIdNumber)) {
-        setHighlightedReplyId(replyIdNumber);
-
-        // Remove the replyId parameter from URL immediately to prevent re-highlighting
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.delete("replyId");
-        setSearchParams(newSearchParams, { replace: true });
-
-        // Scroll to the reply after a short delay to ensure it's rendered
-        setTimeout(() => {
-          const replyElement = document.getElementById(
-            `reply-${replyIdNumber}`
-          );
-          if (replyElement) {
-            replyElement.scrollIntoView({
-              behavior: "smooth",
-              block: "center",
-            });
-          }
-        }, 500);
-
-        setTimeout(() => {
-          setHighlightedReplyId(null);
-        }, 5000);
-      }
-    }
-  }, [searchParams, post, setSearchParams]);
-
-  const handleSubmitReply = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!postId) {
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const commentDto: CreateCommentDto = {
-        content: replyContent,
-        parentObjectId: Number(postId),
-        parentId: replyingTo ?? undefined,
-      };
-
-      const response = await forumCreateComment({
-        body: commentDto,
-      });
-
-      if (response.data) {
-        const newReplyId = response.data.id;
-
-        setNewlyAddedReplies((prev) => new Set(prev).add(newReplyId));
-
-        setTimeout(() => {
-          setNewlyAddedReplies((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(newReplyId);
-            return newSet;
-          });
-        }, 3000);
-
-        const refreshedPost = await forumFindOnePost({
-          path: { id: postId },
-        });
-        setPost(refreshedPost.data ?? null);
-      }
-
-      setReplyContent("");
-      setReplyingTo(null);
-      setError(null);
-    } catch (err) {
-      console.error("Error posting reply:", err);
-      setError("Failed to submit reply");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const handleDeletePost = async () => {
     if (!post || post.author.id !== user?.id) {
       return;
@@ -156,29 +56,6 @@ const PostDetailPage: React.FC = () => {
       } catch (err) {
         console.error("Error deleting post:", err);
         setError("Failed to delete post");
-      }
-    }
-  };
-
-  const handleDeleteReply = async (replyId: number) => {
-    if (!post || !postId) {
-      return;
-    }
-
-    if (window.confirm("Are you sure you want to delete this reply?")) {
-      try {
-        await forumDeleteComment({
-          path: { id: replyId.toString() },
-        });
-
-        // Refresh the post to get updated reply hierarchy
-        const refreshedPost = await forumFindOnePost({
-          path: { id: postId },
-        });
-        setPost(refreshedPost.data ?? null);
-      } catch (err) {
-        console.error("Error deleting reply:", err);
-        setError("Failed to delete reply");
       }
     }
   };
@@ -287,49 +164,7 @@ const PostDetailPage: React.FC = () => {
           </Card>
         </div>
 
-        {post.comments.length > 0 ? (
-          <div className="space-y-3 mb-8">
-            {post.comments
-              .filter((comment) => !comment.deleted || comment.children?.length)
-              .map((reply) => (
-                <ReplyComponent
-                  key={reply.id}
-                  reply={reply}
-                  user={user}
-                  replyingTo={replyingTo}
-                  setReplyingTo={setReplyingTo}
-                  replyContent={replyContent}
-                  setReplyContent={setReplyContent}
-                  handleSubmitReply={handleSubmitReply}
-                  handleDeleteReply={handleDeleteReply}
-                  isSubmitting={isSubmitting}
-                  newlyAddedReplies={newlyAddedReplies}
-                  highlightedReplyId={highlightedReplyId}
-                />
-              ))}
-          </div>
-        ) : null}
-
-        {user && !replyingTo ? (
-          <ReplyForm
-            parentId={null}
-            replyContent={replyContent}
-            setReplyContent={setReplyContent}
-            onSubmit={handleSubmitReply}
-            isSubmitting={isSubmitting}
-            setReplyingTo={setReplyingTo}
-          />
-        ) : !user ? (
-          <div className="text-center py-6 bg-gray-50 rounded-lg">
-            <p className="text-gray-600">
-              Please{" "}
-              <Link to="/login" className="text-blue-600 hover:underline">
-                log in
-              </Link>{" "}
-              to post a reply.
-            </p>
-          </div>
-        ) : null}
+        <Comments objectId={post.id} type={"post"} />
       </div>
     </div>
   );
