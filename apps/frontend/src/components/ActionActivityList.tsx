@@ -103,9 +103,18 @@ const ActionActivityList = ({ actionId }: ActionActivityListProps) => {
                 ></div>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-gray-900">
-                  {formatActivityMessage(activity)}
-                </p>
+                <div className="flex flex-row gap-x-2">
+                  {activity.user.profilePicture && (
+                    <img
+                      src={activity.user.profilePicture}
+                      alt={activity.user.displayName}
+                      className="w-6 h-6 rounded-md object-cover"
+                    />
+                  )}
+                  <p className="text-gray-900">
+                    {formatActivityMessage(activity)}
+                  </p>
+                </div>
                 <p className="text-xs text-gray-500">
                   {formatTime(new Date(activity.createdAt), {
                     addSuffix: true,

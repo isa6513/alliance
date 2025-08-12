@@ -2,7 +2,11 @@ import { ActionDto, UserActionDto } from "@alliance/shared/client";
 import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
 import { StripeWrapper } from "./StripeWrapper";
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
-import { isRouteErrorResponse, useOutletContext } from "react-router";
+import {
+  isRouteErrorResponse,
+  useOutletContext,
+  useRouteLoaderData,
+} from "react-router";
 import Card, { CardStyle } from "./system/Card";
 import { loader as actionLoader } from "../pages/app/ActionPage";
 import { Route } from "../../.react-router/types/src/components/+types/ActionTaskPanel";
@@ -26,18 +30,20 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   );
 }
 
-export type ParentContext = {
+export type TaskPanelContext = {
   handleCompleteAction: () => void;
   handleJoinAction: () => void;
   action?: ActionDto;
   userRelation: UserActionDto["status"] | null;
 };
 
-const ActionTaskPanel = ({ matches }: { matches: { data: unknown }[] }) => {
+const ActionTaskPanel = () => {
   const { handleCompleteAction, handleJoinAction, userRelation } =
-    useOutletContext<ParentContext>();
+    useOutletContext<TaskPanelContext>();
 
-  const action = matches[3]!.data as Awaited<ReturnType<typeof actionLoader>>; //TODO: rrv7 type safety best practices?
+  const action = useRouteLoaderData<typeof actionLoader>(
+    "pages/app/ActionPage" //TODO: why is this based on file path
+  );
 
   if (!action) {
     return null;

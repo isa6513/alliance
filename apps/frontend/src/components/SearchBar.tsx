@@ -151,7 +151,6 @@ const SearchBar = () => {
 
   const handleGlobalKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      console.log("global key down", e.key, e.ctrlKey);
       if (e.key === "k" && e.metaKey) {
         setOpen(true);
         inputRef.current?.focus();
@@ -169,7 +168,7 @@ const SearchBar = () => {
   }, [items, selectedItem]);
 
   useEffect(() => {
-    window.addEventListener("keydown", handleGlobalKeyDown);
+    window.addEventListener("keydown", handleGlobalKeyDown); //TODO: dont add a new listener each time items changes?
     return () => {
       window.removeEventListener("keydown", handleGlobalKeyDown);
     };

@@ -16,18 +16,14 @@ import {
   LatLonDto,
 } from "@alliance/shared/client";
 import { ActionDto, UserActionDto } from "@alliance/shared/client";
-import { getImageSource, isFeatureEnabled } from "../../lib/config";
 import { useActionCount } from "../../lib/useActionWebSocket";
-import ActionForumPosts from "../../components/ActionForumPosts";
 import TwoColumnSplit from "../../components/system/TwoColumnSplit";
-import { Features } from "@alliance/shared/lib/features";
 import ActionEventsPanel from "../../components/ActionEventsPanel";
 import CompletedBar from "../../components/CompletedBar";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/ActionPage";
 import { useAuth } from "../../lib/AuthContext";
-import { ParentContext as ActionTaskPanelParentContext } from "../../components/ActionTaskPanel";
+import { TaskPanelContext } from "../../components/ActionTaskPanel";
 import ActionActivityList from "../../components/ActionActivityList";
-import ReactMarkdown from "react-markdown";
 import { testActions } from "../../stories/testData";
 import { useAppLoaderData } from "../../applayout";
 
@@ -105,8 +101,6 @@ export default function ActionPage() {
   }, [loaderData]);
   const id = idParam || String(action?.id);
 
-  const [error, setError] = useState<string | null>(null);
-
   const [userRelation, setUserRelation] = useState<
     UserActionDto["status"] | null
   >(null);
@@ -125,7 +119,6 @@ export default function ActionPage() {
         console.log("response", response);
         if (response.error) {
           console.error("Failed to fetch user status", response.error);
-          setError("Failed to fetch user status");
         }
         if (response.data) {
           setUserRelation(response.data.status);
@@ -157,67 +150,25 @@ export default function ActionPage() {
       }
     } catch (err) {
       console.error("Error joining action:", err);
-      setError("Failed to join this action. Please try again later.");
     } finally {
       revalidate();
     }
   }, [id, revalidate]);
 
-  const mainContent = useMemo(
-    () => (
-      <div className="flex flex-col gap-y-3 flex-2 px-5 pl-10">
-        {action?.image && (
-          <img
-            src={getImageSource(action.image)}
-            className="w-full h-auto rounded-md border border-gray-300 max-h-[200px] object-cover"
-          />
-        )}
-        <div className="flex flex-row justify-between items-start mt-5 mb-2">
-          <div className="flex flex-col gap-y-3">
-            {action !== undefined && (
-              <div>
-                <h1 className="font-adobe">{action.name}</h1>
-                {/* <p className="text-zinc-700 mt-3">{action.shortDescription}</p> */}
-              </div>
-            )}
-          </div>
-        </div>
-        {error && <div className="text-red-500">{error}</div>}
-        {/* {userRelation === "joined" && <PokePanel />} */}
-        {/* {userRelation === "none" && (
-          <Card style={CardStyle.Grey} className="mb-5">
-            <h2>Why Join?</h2>
-            <p>
-              {action?.whyJoin ||
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
-            </p>
-          </Card>
-        )} */}
+  return (
+    <TwoColumnSplit
+      left={
         <Outlet
           context={
             {
-              handleCompleteAction,
               action,
               userRelation,
+              handleCompleteAction,
               handleJoinAction: onJoinAction,
-            } satisfies ActionTaskPanelParentContext
+            } satisfies TaskPanelContext
           }
         />
-        <div className="my-2">
-          <ReactMarkdown>{action?.body}</ReactMarkdown>
-        </div>
-
-        <hr className="border-zinc-200" />
-
-        {isFeatureEnabled(Features.Forum) && <ActionForumPosts actionId={id} />}
-      </div>
-    ),
-    [action, userRelation, id, onJoinAction, error, handleCompleteAction]
-  );
-
-  return (
-    <TwoColumnSplit
-      left={mainContent}
+      }
       right={
         <div className="flex flex-col gap-y-4 p-6 pt-2">
           <Card style={CardStyle.White}>

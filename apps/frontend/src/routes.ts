@@ -18,7 +18,10 @@ export default [
       ...prefix("/actions", [
         route("/", "pages/app/ActionsListPage.tsx"),
         route(":id", "pages/app/ActionPage.tsx", [
-          index("components/ActionTaskPanel.tsx"),
+          layout("components/ActionContents.tsx", [
+            index("components/ActionTaskPanel.tsx"),
+          ]),
+          route("activity/:activityId", "components/ActionActivityDetail.tsx"),
         ]),
       ]),
       ...prefix("/announcements", [
@@ -38,6 +41,7 @@ export default [
       layout("authonly.tsx", [
         route("/home", "pages/app/HomePage.tsx"),
         route("/settings", "pages/app/SettingsPage.tsx"),
+        route("/commit", "pages/app/CommitActionPage.tsx"),
       ]),
     ]),
     layout("loggedoutonly.tsx", [

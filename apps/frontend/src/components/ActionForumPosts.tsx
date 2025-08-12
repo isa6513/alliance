@@ -7,7 +7,7 @@ import { forumFindPostsByAction } from "@alliance/shared/client";
 import ForumListPost from "./ForumListPost";
 
 interface ActionForumPostsProps {
-  actionId: string | undefined;
+  actionId: number;
 }
 
 const ActionForumPosts: React.FC<ActionForumPostsProps> = ({
@@ -24,7 +24,7 @@ const ActionForumPosts: React.FC<ActionForumPostsProps> = ({
 
       try {
         const response = await forumFindPostsByAction({
-          path: { actionId },
+          path: { actionId: actionId.toString() },
         });
         setPosts(response.data ?? []);
         setError(null);

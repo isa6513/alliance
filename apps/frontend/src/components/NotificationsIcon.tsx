@@ -111,7 +111,10 @@ const NotificationsIcon = () => {
         <p className="text-sm">{unreadCount}</p>
       </div>
       {isOpen && (
-        <div className="absolute top-8 shadow-lg/5 right-0 bg-white rounded border border-zinc-200 p-4 min-w-[370px] space-y-2 max-h-[500px] overflow-y-auto cursor-default">
+        <div
+          className="absolute top-[calc(100%-10px)] shadow-lg/5 right-5 bg-white rounded border border-zinc-200 p-4 min-w-[370px] space-y-2 max-h-[500px] overflow-y-auto cursor-default"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex flex-row border-b border-zinc-200 justify-end gap-x-8 pb-2">
             <Button
               color={ButtonColor.Transparent}
