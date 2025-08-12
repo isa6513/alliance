@@ -11,12 +11,12 @@ import {
 } from '@nestjs/common';
 import { ForumService } from './forum.service';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
-import { CreateReplyDto, UpdateReplyDto } from './dto/reply.dto';
+import { CreateCommentDto, UpdateCommentDto } from './dto/reply.dto';
 import { AuthGuard, JwtPayload } from '../auth/guards/auth.guard';
 import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 import { ReqUser } from '../auth/user.decorator';
 import { PostDto } from './dto/post.dto';
-import { ReplyDto } from './dto/reply.dto';
+import { CommentDto } from './dto/reply.dto';
 
 @ApiTags('forum')
 @Controller('forum')
@@ -31,8 +31,6 @@ export class ForumController {
     @Body() createPostDto: CreatePostDto,
     @ReqUser() user: JwtPayload,
   ): Promise<PostDto> {
-    console.log('createPostDto', createPostDto);
-    console.log(await this.forumService.createPost(createPostDto, user.sub));
     return new PostDto(
       await this.forumService.createPost(createPostDto, user.sub),
     );
@@ -59,10 +57,10 @@ export class ForumController {
   }
 
   @Get('posts/:id')
-  @ApiOperation({ summary: 'Get a specific post with its replies' })
+  @ApiOperation({ summary: 'Get a specific post with its comments' })
   @ApiOkResponse({ type: PostDto })
   async findOnePost(@Param('id') id: string): Promise<PostDto> {
-    return new PostDto(await this.forumService.findOnePost(+id));
+    return this.forumService.findPostWithComments(+id);
   }
 
   @Get('posts/user/:id')
@@ -96,34 +94,34 @@ export class ForumController {
     return this.forumService.removePost(+id, user.sub);
   }
 
-  @Post('replies')
+  @Post('comments')
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Create a new reply to a post' })
-  @ApiOkResponse({ type: ReplyDto })
-  async createReply(
-    @Body() createReplyDto: CreateReplyDto,
+  @ApiOperation({ summary: 'Create a new comment on a post' })
+  @ApiOkResponse({ type: CommentDto })
+  async createComment(
+    @Body() createReplyDto: CreateCommentDto,
     @ReqUser() user: JwtPayload,
-  ): Promise<ReplyDto> {
-    return this.forumService.createReply(createReplyDto, user.sub);
+  ): Promise<CommentDto> {
+    return this.forumService.createComment(createReplyDto, user.sub);
   }
 
-  @Patch('replies/:id')
+  @Patch('comments/:id')
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Update a reply' })
-  @ApiOkResponse({ type: ReplyDto })
-  updateReply(
+  @ApiOperation({ summary: 'Update a comment' })
+  @ApiOkResponse({ type: CommentDto })
+  updateComment(
     @Param('id') id: string,
-    @Body() updateReplyDto: UpdateReplyDto,
+    @Body() updateCommentDto: UpdateCommentDto,
     @ReqUser() user: JwtPayload,
-  ): Promise<ReplyDto> {
-    return this.forumService.updateReply(+id, updateReplyDto, user.sub);
+  ): Promise<CommentDto> {
+    return this.forumService.updateComment(+id, updateCommentDto, user.sub);
   }
 
-  @Delete('replies/:id')
+  @Delete('comments/:id')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Delete a reply' })
   @ApiOkResponse()
-  deleteReply(@Param('id') id: string, @ReqUser() user: JwtPayload) {
+  deleteComment(@Param('id') id: string, @ReqUser() user: JwtPayload) {
     return this.forumService.deleteReply(+id, user.sub);
   }
 }

@@ -9,7 +9,7 @@ import { User } from '../user/user.entity';
 import { UserAction } from './entities/user-action.entity';
 import { ActionEvent } from './entities/action-event.entity';
 import { ActionActivity } from './entities/action-activity.entity';
-import { ActionActivityComment } from './entities/action-activity-comment.entity';
+import { Comment } from 'src/forum/entities/comment.entity';
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ import { ActionActivityComment } from './entities/action-activity-comment.entity
     TypeOrmModule.forFeature([UserAction]),
     TypeOrmModule.forFeature([ActionEvent]),
     TypeOrmModule.forFeature([ActionActivity]),
-    TypeOrmModule.forFeature([ActionActivityComment]),
+    TypeOrmModule.forFeature([Comment]),
     UserModule,
   ],
   controllers: [ActionsController],

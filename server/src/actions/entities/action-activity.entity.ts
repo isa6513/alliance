@@ -5,14 +5,12 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
-  OneToMany,
   ManyToMany,
   JoinTable,
 } from 'typeorm';
 import { Action } from './action.entity';
 import { User } from '../../user/user.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ActionActivityComment } from './action-activity-comment.entity';
 
 export enum ActionActivityType {
   USER_JOINED = 'user_joined',
@@ -44,14 +42,6 @@ export class ActionActivity {
   @ManyToOne(() => User, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
-
-  @OneToMany(() => ActionActivityComment, (comment) => comment.activity)
-  @ApiProperty({
-    description: 'Comments associated with the action activity',
-    type: () => [ActionActivityComment],
-    isArray: true,
-  })
-  comments: ActionActivityComment[];
 
   @Column()
   @ApiProperty()

@@ -7,8 +7,6 @@ import {
   CreateActionEventDto,
   ActionActivityDto,
   UserActionDto,
-  ActionActivityCommentDto,
-  CreateActionActivityCommentDto,
 } from './dto/action.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Action } from './entities/action.entity';
@@ -28,7 +26,11 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Observable } from 'rxjs';
 import { from } from 'rxjs';
 import { instanceToPlain } from 'class-transformer';
-import { ActionActivityComment } from './entities/action-activity-comment.entity';
+import {
+  Comment,
+  CommentParentObject,
+} from 'src/forum/entities/comment.entity';
+import { CommentDto, CreateCommentDto } from 'src/forum/dto/reply.dto';
 
 @Injectable()
 export class ActionsService {
@@ -41,8 +43,8 @@ export class ActionsService {
     private readonly userActionRepository: Repository<UserAction>,
     @InjectRepository(ActionActivity)
     private readonly actionActivityRepository: Repository<ActionActivity>,
-    @InjectRepository(ActionActivityComment)
-    private readonly actionActivityCommentRepository: Repository<ActionActivityComment>,
+    @InjectRepository(Comment)
+    private readonly commentRepository: Repository<Comment>,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
   ) {}
@@ -526,9 +528,9 @@ export class ActionsService {
 
   async addActivityComment(
     id: number,
-    commentDto: CreateActionActivityCommentDto,
+    commentDto: CreateCommentDto,
     userId: number,
-  ): Promise<ActionActivityCommentDto> {
+  ): Promise<CommentDto> {
     const activity = await this.actionActivityRepository.findOne({
       where: { id },
       relations: ['user', 'action', 'comments', 'comments.author'],
@@ -540,13 +542,14 @@ export class ActionsService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const comment = this.actionActivityCommentRepository.create({
+    const comment = this.commentRepository.create({
       ...commentDto,
-      activity,
+      parentObjectType: CommentParentObject.Activity,
+      parentObjectId: id,
       author: user,
+      authorId: user.id,
     });
-    const savedComment =
-      await this.actionActivityCommentRepository.save(comment);
-    return new ActionActivityCommentDto(savedComment);
+    const savedComment = await this.commentRepository.save(comment);
+    return new CommentDto(savedComment);
   }
 }

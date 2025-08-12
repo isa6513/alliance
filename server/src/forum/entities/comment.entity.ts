@@ -8,15 +8,23 @@ import {
   JoinColumn,
   OneToOne,
   OneToMany,
+  JoinTable,
+  ManyToMany,
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '../../user/user.entity';
-import { Post } from './post.entity';
 import { Notification } from '../../notifs/entities/notification.entity';
 import { Allow, IsNotEmpty, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
+
+export enum CommentParentObject {
+  Post = 'post',
+  Action = 'action',
+  Activity = 'activity',
+}
+
 @Entity()
-export class Reply {
+export class Comment {
   @PrimaryGeneratedColumn()
   @ApiProperty()
   @Allow()
@@ -39,17 +47,18 @@ export class Reply {
   @Allow()
   authorId: number;
 
-  @ManyToOne(() => Post, (post) => post.replies, { onDelete: 'CASCADE' })
-  @JoinColumn()
-  @ApiProperty({ type: () => Post })
+  @Column({ type: 'enum', enum: CommentParentObject })
+  @ApiProperty({
+    enum: CommentParentObject,
+    enumName: 'CommentParentObject',
+  })
   @Allow()
-  @Type(() => Post)
-  post: Post;
+  parentObjectType: CommentParentObject;
 
   @Column()
   @ApiProperty()
   @IsNotEmpty()
-  postId: number;
+  parentObjectId: number;
 
   @Column({ default: false })
   @ApiProperty()
@@ -68,26 +77,26 @@ export class Reply {
   @Type(() => Date)
   updatedAt: Date;
 
-  @ManyToOne(() => Reply, (reply) => reply.children, {
+  @ManyToOne(() => Comment, (comment) => comment.children, {
     nullable: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  @ApiProperty({ type: () => Reply, required: false })
+  @ApiProperty({ type: () => Comment, required: false })
   @Allow()
   @IsOptional()
-  parent: Reply | null;
+  parent: Comment | null;
 
   @Column({ nullable: true })
   @IsOptional()
   @ApiPropertyOptional()
   parentId?: number;
 
-  @OneToMany(() => Reply, (reply) => reply.parent)
-  @ApiProperty({ type: () => Reply, required: false, isArray: true })
+  @OneToMany(() => Comment, (comment) => comment.parent)
+  @ApiProperty({ type: () => Comment, required: false, isArray: true })
   @Allow()
-  @Type(() => Reply)
-  children: Reply[];
+  @Type(() => Comment)
+  children: Comment[];
 
   @OneToOne(() => Notification, {
     onDelete: 'CASCADE',
@@ -96,4 +105,10 @@ export class Reply {
   @Allow()
   @Type(() => Notification)
   notification: Notification;
+
+  @ManyToMany(() => User, { onDelete: 'CASCADE', eager: true })
+  @JoinTable()
+  @Allow()
+  @Type(() => User)
+  likes: User[];
 }

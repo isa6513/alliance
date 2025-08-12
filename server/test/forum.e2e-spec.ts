@@ -6,6 +6,7 @@ import { ForumModule } from '../src/forum/forum.module';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
+import { CreateCommentDto } from 'src/forum/dto/reply.dto';
 
 describe('Forum (e2e)', () => {
   let ctx: TestContext;
@@ -120,7 +121,8 @@ describe('Forum (e2e)', () => {
       expect(response.body.id).toBe(postId);
       expect(response.body.title).toBeDefined();
       expect(response.body.content).toBeDefined();
-      expect(response.body.replies).toBeDefined();
+      expect(response.body.commentCount).toBeDefined();
+      expect(response.body.comments).toBeDefined();
     });
 
     it('should update a post', async () => {
@@ -199,27 +201,27 @@ describe('Forum (e2e)', () => {
 
     it('should create a reply', async () => {
       const response = await request(ctx.app.getHttpServer())
-        .post('/forum/replies')
+        .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'This is a test reply',
-          postId: testPostId,
+          parentObjectId: testPostId,
         })
         .expect(201);
 
       expect(response.body.content).toBe('This is a test reply');
-      expect(response.body.postId).toBe(testPostId);
+      expect(response.body.parentObjectId).toBe(testPostId);
       expect(response.body.authorId).toBe(ctx.testUserId);
     });
 
     it('should update a reply', async () => {
       // Create a reply to update
       const createResponse = await request(ctx.app.getHttpServer())
-        .post('/forum/replies')
+        .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'Reply to update',
-          postId: testPostId,
+          parentObjectId: testPostId,
         })
         .expect(201);
 
@@ -227,7 +229,7 @@ describe('Forum (e2e)', () => {
 
       // Update the reply
       const response = await request(ctx.app.getHttpServer())
-        .patch(`/forum/replies/${replyId}`)
+        .patch(`/forum/comments/${replyId}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'Updated reply',
@@ -241,25 +243,25 @@ describe('Forum (e2e)', () => {
     it('should delete a reply', async () => {
       // Create a reply to delete
       const createResponse = await request(ctx.app.getHttpServer())
-        .post('/forum/replies')
+        .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'Reply to delete',
-          postId: testPostId,
-        })
+          parentObjectId: testPostId,
+        } satisfies CreateCommentDto)
         .expect(201);
 
       const replyId = createResponse.body.id;
 
       // Delete the reply
       await request(ctx.app.getHttpServer())
-        .delete(`/forum/replies/${replyId}`)
+        .delete(`/forum/comments/${replyId}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .expect(200);
 
       // Verify reply is deleted by trying to update it (should fail)
       const reply = await request(ctx.app.getHttpServer())
-        .patch(`/forum/replies/${replyId}`)
+        .patch(`/forum/comments/${replyId}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'This should fail',
@@ -291,19 +293,19 @@ describe('Forum (e2e)', () => {
 
       // Create a reply as the first user
       const createResponse = await request(ctx.app.getHttpServer())
-        .post('/forum/replies')
+        .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'Original user reply',
-          postId: testPostId,
-        })
+          parentObjectId: testPostId,
+        } satisfies CreateCommentDto)
         .expect(201);
 
       const replyId = createResponse.body.id;
 
       // Try to update the reply as another user
       await request(ctx.app.getHttpServer())
-        .patch(`/forum/replies/${replyId}`)
+        .patch(`/forum/comments/${replyId}`)
         .set('Authorization', `Bearer ${anotherToken}`)
         .send({
           content: 'This should fail',
@@ -314,29 +316,29 @@ describe('Forum (e2e)', () => {
     it('should create a nested reply', async () => {
       // Create a parent reply
       const parentResponse = await request(ctx.app.getHttpServer())
-        .post('/forum/replies')
+        .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'This is a parent reply',
-          postId: testPostId,
-        })
+          parentObjectId: testPostId,
+        } satisfies CreateCommentDto)
         .expect(201);
 
       const parentReplyId = parentResponse.body.id;
 
       // Create a nested reply
       const childResponse = await request(ctx.app.getHttpServer())
-        .post('/forum/replies')
+        .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'This is a nested reply',
-          postId: testPostId,
+          parentObjectId: testPostId,
           parentId: parentReplyId,
-        })
+        } satisfies CreateCommentDto)
         .expect(201);
 
       expect(childResponse.body.content).toBe('This is a nested reply');
-      expect(childResponse.body.postId).toBe(testPostId);
+      expect(childResponse.body.parentObjectId).toBe(testPostId);
       expect(childResponse.body.parentId).toBe(parentReplyId);
       expect(childResponse.body.authorId).toBe(ctx.testUserId);
     });
@@ -344,45 +346,45 @@ describe('Forum (e2e)', () => {
     it('should organize replies hierarchically when fetching post', async () => {
       // Create parent reply
       const parentResponse = await request(ctx.app.getHttpServer())
-        .post('/forum/replies')
+        .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'Parent reply',
-          postId: testPostId,
-        })
+          parentObjectId: testPostId,
+        } satisfies CreateCommentDto)
         .expect(201);
 
       const parentReplyId = parentResponse.body.id;
 
       // Create child replies
       const child1Response = await request(ctx.app.getHttpServer())
-        .post('/forum/replies')
+        .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'First child reply',
-          postId: testPostId,
+          parentObjectId: testPostId,
           parentId: parentReplyId,
-        })
+        } satisfies CreateCommentDto)
         .expect(201);
 
       const child2Response = await request(ctx.app.getHttpServer())
-        .post('/forum/replies')
+        .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'Second child reply',
-          postId: testPostId,
+          parentObjectId: testPostId,
           parentId: parentReplyId,
-        })
+        } satisfies CreateCommentDto)
         .expect(201);
 
       // Create another top-level reply
       await request(ctx.app.getHttpServer())
-        .post('/forum/replies')
+        .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'Another top-level reply',
-          postId: testPostId,
-        })
+          parentObjectId: testPostId,
+        } satisfies CreateCommentDto)
         .expect(201);
 
       // Fetch the post with replies
@@ -390,11 +392,11 @@ describe('Forum (e2e)', () => {
         .get(`/forum/posts/${testPostId}`)
         .expect(200);
 
-      expect(postResponse.body.replies).toBeDefined();
-      expect(Array.isArray(postResponse.body.replies)).toBe(true);
+      expect(postResponse.body.comments).toBeDefined();
+      expect(Array.isArray(postResponse.body.comments)).toBe(true);
 
       // Should have 2 top-level replies
-      const topLevelReplies = postResponse.body.replies;
+      const topLevelReplies = postResponse.body.comments;
       expect(topLevelReplies.length).toBe(2);
 
       // Find the parent reply
@@ -420,13 +422,13 @@ describe('Forum (e2e)', () => {
 
     it('should fail to create nested reply with invalid parentId', async () => {
       await request(ctx.app.getHttpServer())
-        .post('/forum/replies')
+        .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'This should fail',
-          postId: testPostId,
+          parentObjectId: testPostId,
           parentId: 99999, // Non-existent parent
-        })
+        } satisfies CreateCommentDto)
         .expect(404);
     });
 
@@ -445,11 +447,11 @@ describe('Forum (e2e)', () => {
 
       // Create a reply on the other post
       const otherPostReplyResponse = await request(ctx.app.getHttpServer())
-        .post('/forum/replies')
+        .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'Reply on other post',
-          postId: anotherPostId,
+          parentObjectId: anotherPostId,
         })
         .expect(201);
 
@@ -457,11 +459,11 @@ describe('Forum (e2e)', () => {
 
       // Try to create a nested reply using parentId from different post
       await request(ctx.app.getHttpServer())
-        .post('/forum/replies')
+        .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           content: 'This should fail',
-          postId: testPostId,
+          parentObjectId: testPostId,
           parentId: otherPostReplyId, // Parent from different post
         })
         .expect(404);

@@ -4,14 +4,14 @@ import {
   PartialType,
   PickType,
 } from '@nestjs/swagger';
-import { Reply } from '../entities/reply.entity';
+import { Comment } from '../entities/comment.entity';
 import { UserDto } from '../../user/user.dto';
 
 // return object for get requests
-export class ReplyDto extends PickType(Reply, [
+export class CommentDto extends PickType(Comment, [
   'id',
   'content',
-  'postId',
+  'parentObjectId',
   'parentId',
   'createdAt',
   'updatedAt',
@@ -20,14 +20,14 @@ export class ReplyDto extends PickType(Reply, [
   @ApiProperty({ type: UserDto })
   author: UserDto;
 
-  @ApiPropertyOptional({ type: () => ReplyDto, isArray: true })
-  children?: ReplyDto[];
+  @ApiPropertyOptional({ type: () => CommentDto, isArray: true })
+  children?: CommentDto[];
 }
 
-export class CreateReplyDto extends PickType(Reply, [
+export class CreateCommentDto extends PickType(Comment, [
   'content',
-  'postId',
+  'parentObjectId',
   'parentId',
 ]) {}
 
-export class UpdateReplyDto extends PartialType(CreateReplyDto) {}
+export class UpdateCommentDto extends PartialType(CreateCommentDto) {}

@@ -23,8 +23,6 @@ import {
   LatLonDto,
   CreateActionEventDto,
   ActionActivityDto,
-  ActionActivityCommentDto,
-  CreateActionActivityCommentDto,
 } from './dto/action.dto';
 import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -41,6 +39,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AuthOptionalGuard } from 'src/auth/guards/authoptional.guard';
 import { UserService } from 'src/user/user.service';
 import { ActionStatus } from './entities/action-event.entity';
+import { CommentDto, CreateCommentDto } from 'src/forum/dto/reply.dto';
 
 @Controller('actions')
 export class ActionsController {
@@ -368,12 +367,12 @@ export class ActionsController {
 
   @Post('addActivityComment/:id')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: ActionActivityCommentDto })
+  @ApiOkResponse({ type: CommentDto })
   addActivityComment(
     @Param('id', ParseIntPipe) id: number,
-    @Body() commentDto: CreateActionActivityCommentDto,
+    @Body() commentDto: CreateCommentDto,
     @Request() req: JwtRequest,
-  ): Promise<ActionActivityCommentDto> {
+  ): Promise<CommentDto> {
     return this.actionsService.addActivityComment(id, commentDto, req.user.sub);
   }
 }

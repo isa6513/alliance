@@ -6,12 +6,10 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../user/user.entity';
 import { Action } from '../../actions/entities/action.entity';
-import { Reply } from './reply.entity';
 import { Allow, IsNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -55,12 +53,6 @@ export class Post {
   @ApiProperty({ required: false })
   @Allow()
   actionId: number;
-
-  @OneToMany(() => Reply, (reply) => reply.post)
-  @ApiProperty({ type: Reply, isArray: true })
-  @Allow()
-  @Type(() => Reply)
-  replies: Reply[];
 
   @CreateDateColumn()
   @ApiProperty()

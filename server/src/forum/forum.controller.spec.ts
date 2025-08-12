@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ForumController } from './forum.controller';
 import { ForumService } from './forum.service';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
-import { CreateReplyDto, UpdateReplyDto } from './dto/reply.dto';
+import { CreateCommentDto, UpdateCommentDto } from './dto/reply.dto';
 import { Post } from './entities/post.entity';
-import { Reply } from './entities/reply.entity';
+import { Comment } from './entities/comment.entity';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload, JWTTokenType } from '../auth/guards/auth.guard';
 
@@ -154,11 +154,11 @@ describe('ForumController', () => {
   describe('createReply', () => {
     it('should create a reply', async () => {
       const userId = 1;
-      const createReplyDto: CreateReplyDto = {
+      const createReplyDto: CreateCommentDto = {
         content: 'Test reply',
         postId: 1,
       };
-      const reply: Partial<Reply> = {
+      const reply: Partial<Comment> = {
         id: 1,
         ...createReplyDto,
         authorId: userId,
@@ -169,7 +169,7 @@ describe('ForumController', () => {
         tokenType: JWTTokenType.access,
       };
 
-      jest.spyOn(service, 'createReply').mockResolvedValue(reply as Reply);
+      jest.spyOn(service, 'createReply').mockResolvedValue(reply as Comment);
 
       const result = await controller.createReply(createReplyDto, userPayload);
 
@@ -182,15 +182,15 @@ describe('ForumController', () => {
     it('should update a reply', async () => {
       const replyId = '1';
       const userId = 1;
-      const updateReplyDto: UpdateReplyDto = {
+      const updateReplyDto: UpdateCommentDto = {
         content: 'Updated reply',
       };
-      const reply: Partial<Reply> = {
+      const reply: Partial<Comment> = {
         id: 1,
         content: 'Updated reply',
       };
 
-      jest.spyOn(service, 'updateReply').mockResolvedValue(reply as Reply);
+      jest.spyOn(service, 'updateReply').mockResolvedValue(reply as Comment);
 
       const result = await controller.updateReply(replyId, updateReplyDto, {
         sub: userId,

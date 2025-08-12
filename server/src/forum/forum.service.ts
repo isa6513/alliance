@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
-import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
-import { CreateReplyDto, ReplyDto, UpdateReplyDto } from './dto/reply.dto';
+import { CreatePostDto, PostDto, UpdatePostDto } from './dto/post.dto';
+import {
+  CreateCommentDto,
+  CommentDto,
+  UpdateCommentDto,
+} from './dto/reply.dto';
 import { Post } from './entities/post.entity';
-import { Reply } from './entities/reply.entity';
+import { Comment, CommentParentObject } from './entities/comment.entity';
 import {
   Notification,
   NotificationType,
@@ -17,8 +21,8 @@ export class ForumService {
   constructor(
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
-    @InjectRepository(Reply)
-    private replyRepository: Repository<Reply>,
+    @InjectRepository(Comment)
+    private commentRepository: Repository<Comment>,
     @InjectRepository(Notification)
     private notifRepository: Repository<Notification>,
     @InjectRepository(User)
@@ -44,32 +48,50 @@ export class ForumService {
     return this.postRepository
       .find({
         where: { deleted: false },
-        relations: ['author', 'action', 'replies'],
+        relations: ['author', 'action'],
         order: { updatedAt: 'DESC' },
       })
-      .then((posts) =>
-        posts.map((post) => ({
-          ...post,
-          replies: [],
-          replyCount: post.replies.length,
-        })),
-      );
+      .then((posts) => {
+        return Promise.all(
+          posts.map(async (post) => ({
+            ...post,
+            commentCount: await this.countCommentsForPost(post.id),
+          })),
+        );
+      });
+  }
+
+  async countCommentsForPost(postId: number): Promise<number> {
+    return this.commentRepository.count({
+      where: {
+        parentObjectId: postId,
+        parentObjectType: CommentParentObject.Post,
+      },
+    });
   }
 
   async findPostsByAction(actionId: number): Promise<Post[]> {
-    return this.postRepository
-      .find({
-        where: { actionId, deleted: false },
-        relations: ['author', 'action', 'replies'],
-        order: { updatedAt: 'DESC' },
-      })
-      .then((posts) =>
-        posts.map((post) => ({
+    const posts = await this.postRepository.find({
+      where: { actionId, deleted: false },
+      relations: ['author', 'action'],
+      order: { updatedAt: 'DESC' },
+    });
+    const postsWithComments = await Promise.all(
+      posts.map(async (post) => {
+        const comments = await this.commentRepository.find({
+          where: {
+            parentObjectId: post.id,
+            parentObjectType: CommentParentObject.Post,
+          },
+        });
+        return {
           ...post,
           replies: [],
-          replyCount: post.replies.length,
-        })),
-      );
+          replyCount: comments.length,
+        };
+      }),
+    );
+    return postsWithComments;
   }
 
   async findOnePost(id: number): Promise<Post> {
@@ -82,27 +104,28 @@ export class ForumService {
       throw new NotFoundException(`Post with ID "${id}" not found`);
     }
 
-    // Load all replies for this post manually to ensure we get all levels
-    const allReplies = await this.replyRepository.find({
-      where: { postId: id },
+    return post;
+  }
+
+  async findCommentsForPost(postId: number): Promise<Comment[]> {
+    const allComments = await this.commentRepository.find({
+      where: {
+        parentObjectId: postId,
+        parentObjectType: CommentParentObject.Post,
+      },
       relations: ['author'],
       order: { createdAt: 'ASC' },
     });
 
-    // Organize replies hierarchically and sort
-    if (allReplies && allReplies.length > 0) {
-      post.replies = this.organizeRepliesHierarchy(allReplies);
-    } else {
-      post.replies = [];
-    }
-
-    return post;
+    return allComments.length > 0
+      ? this.organizeRepliesHierarchy(allComments)
+      : [];
   }
 
-  private organizeRepliesHierarchy(replies: Reply[]): Reply[] {
+  private organizeRepliesHierarchy(replies: Comment[]): Comment[] {
     // Create a map for quick lookup
-    const replyMap = new Map<number, Reply>();
-    const topLevelReplies: Reply[] = [];
+    const replyMap = new Map<number, Comment>();
+    const topLevelReplies: Comment[] = [];
 
     // Initialize all replies with empty children arrays
     replies.forEach((reply) => {
@@ -123,7 +146,7 @@ export class ForumService {
     });
 
     // Sort all levels by creation date
-    const sortReplies = (repliesList: Reply[]): Reply[] => {
+    const sortReplies = (repliesList: Comment[]): Comment[] => {
       return repliesList
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
         .map((reply) => ({
@@ -160,42 +183,47 @@ export class ForumService {
     await this.postRepository.update(id, { deleted: true });
   }
 
-  async createReply(
-    createReplyDto: CreateReplyDto,
+  async createComment(
+    createCommentDto: CreateCommentDto,
     userId: number,
-  ): Promise<ReplyDto> {
+  ): Promise<CommentDto> {
     const post = await this.postRepository.findOne({
-      where: { id: createReplyDto.postId },
+      where: { id: createCommentDto.parentObjectId },
       relations: ['author'],
     });
 
     if (!post || post.deleted) {
       throw new NotFoundException(
-        `Post with ID "${createReplyDto.postId}" not found`,
+        `Post with ID "${createCommentDto.parentObjectId}" not found`,
       );
     }
 
     // Validate parent reply if provided
-    let parentReply: Reply | null = null;
-    if (createReplyDto.parentId) {
-      parentReply = await this.replyRepository.findOne({
-        where: { id: createReplyDto.parentId, postId: createReplyDto.postId },
+    let parentReply: Comment | null = null;
+    if (createCommentDto.parentId) {
+      parentReply = await this.commentRepository.findOne({
+        where: {
+          id: createCommentDto.parentId,
+          parentObjectId: createCommentDto.parentObjectId,
+          parentObjectType: CommentParentObject.Post,
+        },
         relations: ['author'],
       });
 
       if (!parentReply) {
         throw new NotFoundException(
-          `Parent reply with ID "${createReplyDto.parentId}" not found`,
+          `Parent reply with ID "${createCommentDto.parentId}" not found`,
         );
       }
     }
 
-    const reply = this.replyRepository.create({
-      ...createReplyDto,
+    const reply = this.commentRepository.create({
+      ...createCommentDto,
       authorId: userId,
+      parentObjectType: CommentParentObject.Post,
     });
 
-    await this.postRepository.update(createReplyDto.postId, {
+    await this.postRepository.update(createCommentDto.parentObjectId, {
       updatedAt: new Date(),
     });
 
@@ -210,7 +238,7 @@ export class ForumService {
     const notifications: Notification[] = [];
 
     // Save the reply first to get the ID
-    await this.replyRepository.save(reply);
+    await this.commentRepository.save(reply);
 
     // Notify post author if different from reply author
     if (post.authorId !== userId) {
@@ -245,9 +273,9 @@ export class ForumService {
       reply.notification = notifications[0]; // Associate with first notification for backward compatibility
     }
 
-    const loadedReply = await this.replyRepository.findOne({
+    const loadedReply = await this.commentRepository.findOne({
       where: { id: reply.id },
-      relations: ['author', 'post'],
+      relations: ['author'],
     });
     if (!loadedReply) {
       throw new NotFoundException(`Reply with ID "${reply.id}" not found`);
@@ -256,14 +284,14 @@ export class ForumService {
     return loadedReply;
   }
 
-  async updateReply(
+  async updateComment(
     id: number,
-    updateReplyDto: UpdateReplyDto,
+    updateCommentDto: UpdateCommentDto,
     userId: number,
-  ): Promise<Reply> {
-    const reply = await this.replyRepository.findOne({
+  ): Promise<Comment> {
+    const reply = await this.commentRepository.findOne({
       where: { id },
-      relations: ['post'],
+      relations: ['author'],
     });
 
     if (!reply) {
@@ -274,10 +302,10 @@ export class ForumService {
       throw new NotFoundException('You can only edit your own replies');
     }
 
-    await this.replyRepository.update(id, updateReplyDto);
-    const updatedReply = await this.replyRepository.findOne({
+    await this.commentRepository.update(id, updateCommentDto);
+    const updatedReply = await this.commentRepository.findOne({
       where: { id },
-      relations: ['author', 'post'],
+      relations: ['author'],
     });
 
     if (!updatedReply) {
@@ -290,7 +318,7 @@ export class ForumService {
   }
 
   async deleteReply(id: number, userId: number): Promise<void> {
-    const reply = await this.replyRepository.findOne({
+    const reply = await this.commentRepository.findOne({
       where: { id },
     });
 
@@ -302,7 +330,7 @@ export class ForumService {
       throw new NotFoundException('You can only delete your own replies');
     }
 
-    await this.replyRepository.update(id, { deleted: true });
+    await this.commentRepository.update(id, { deleted: true });
   }
 
   async findPostsByUser(userId: number): Promise<Post[]> {
@@ -316,5 +344,11 @@ export class ForumService {
     return this.postRepository.find({
       where: { title: ILike(`%${title}%`), deleted: false },
     });
+  }
+
+  async findPostWithComments(id: number): Promise<PostDto> {
+    const post = await this.findOnePost(id);
+    const comments = await this.findCommentsForPost(id);
+    return new PostDto(post, comments);
   }
 }
