@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router";
 import {
   PostDto,
-  CreateReplyDto,
-  forumDeleteReply,
+  CreateCommentDto,
+  forumDeleteComment,
 } from "@alliance/shared/client";
 import { useAuth } from "../../lib/AuthContext";
 import ReplyForm from "../../components/forum/ReplyForm";
 import ReplyComponent from "../../components/forum/ReplyComponent";
 import {
-  forumCreateReply,
+  forumCreateComment,
   forumFindOnePost,
   forumRemovePost,
 } from "@alliance/shared/client";
@@ -101,16 +101,14 @@ const PostDetailPage: React.FC = () => {
 
     try {
       setIsSubmitting(true);
-      const replyDto: CreateReplyDto = {
+      const commentDto: CreateCommentDto = {
         content: replyContent,
-        postId: Number(postId),
+        parentObjectId: Number(postId),
         parentId: replyingTo ?? undefined,
       };
 
-      console.log("replyDto", replyDto);
-
-      const response = await forumCreateReply({
-        body: replyDto,
+      const response = await forumCreateComment({
+        body: commentDto,
       });
 
       if (response.data) {
@@ -169,7 +167,7 @@ const PostDetailPage: React.FC = () => {
 
     if (window.confirm("Are you sure you want to delete this reply?")) {
       try {
-        await forumDeleteReply({
+        await forumDeleteComment({
           path: { id: replyId.toString() },
         });
 
@@ -220,8 +218,6 @@ const PostDetailPage: React.FC = () => {
       </div>
     );
   }
-
-  console.log(post.replies);
 
   return (
     <div className="w-full bg-page">
@@ -291,10 +287,10 @@ const PostDetailPage: React.FC = () => {
           </Card>
         </div>
 
-        {post.replies.length > 0 ? (
+        {post.comments.length > 0 ? (
           <div className="space-y-3 mb-8">
-            {post.replies
-              .filter((reply) => !reply.deleted || reply.children?.length)
+            {post.comments
+              .filter((comment) => !comment.deleted || comment.children?.length)
               .map((reply) => (
                 <ReplyComponent
                   key={reply.id}

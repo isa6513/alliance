@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ForumController } from './forum.controller';
 import { ForumService } from './forum.service';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
-import { CreateCommentDto, UpdateCommentDto } from './dto/reply.dto';
+import { CreateCommentDto, UpdateCommentDto } from './dto/comment.dto';
 import { Post } from './entities/post.entity';
 import { Comment } from './entities/comment.entity';
 import { JwtService } from '@nestjs/jwt';

@@ -8,7 +8,7 @@ import { User } from '../user/user.entity';
 import { ObjectLiteral, Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { CreatePostDto } from './dto/post.dto';
-import { CreateCommentDto } from './dto/reply.dto';
+import { CreateCommentDto } from './dto/comment.dto';
 
 type MockRepository<T extends ObjectLiteral> = Partial<
   Record<keyof Repository<T>, jest.Mock>

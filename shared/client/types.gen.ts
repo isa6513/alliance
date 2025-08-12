@@ -237,38 +237,12 @@ export type LatLonDto = {
  */
 export type ActionActivityType = 'user_joined' | 'user_completed';
 
-export type ActionActivity = {
-    id: number;
-    /**
-     * Type of action activity
-     */
-    type: ActionActivityType;
-    actionId: number;
-    comments: Array<Array<ActionActivityComment>>;
-    userId: number;
-    createdAt: string;
-    dollar_amount?: number;
-    description?: string;
-    attachments?: Array<string>;
-};
-
-export type ActionActivityComment = {
-    id: number;
-    activity: ActionActivity;
-    content: string;
-    createdAt: string;
-    updatedAt: string;
-    children: Array<ActionActivityComment>;
-    parent?: ActionActivityComment | null;
-};
-
 export type ActionActivityDto = {
     id: number;
     /**
      * Type of action activity
      */
     type: ActionActivityType;
-    comments: Array<Array<ActionActivityComment>>;
     createdAt: string;
     description?: string;
     attachments?: Array<string>;
@@ -393,18 +367,22 @@ export type CreateActionEventDto = {
     showInTimeline: boolean;
 };
 
-export type CreateActionActivityCommentDto = {
+export type CreateCommentDto = {
     content: string;
+    parentObjectId: number;
     parentId?: number;
 };
 
-export type ActionActivityCommentDto = {
+export type CommentDto = {
     id: number;
     content: string;
-    children: Array<ActionActivityComment>;
-    parent?: ActionActivityComment | null;
-    author: ProfileDto;
-    likes: Array<ProfileDto>;
+    parentObjectId: number;
+    deleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+    parentId?: number;
+    author: UserDto;
+    children?: Array<CommentDto>;
 };
 
 export type CreateCommuniqueDto = {
@@ -447,18 +425,6 @@ export type CreatePostDto = {
     actionId?: number;
 };
 
-export type ReplyDto = {
-    id: number;
-    content: string;
-    postId: number;
-    deleted: boolean;
-    createdAt: string;
-    updatedAt: string;
-    parentId?: number;
-    author: UserDto;
-    children?: Array<ReplyDto>;
-};
-
 export type PostDto = {
     id: number;
     title: string;
@@ -469,8 +435,8 @@ export type PostDto = {
     updatedAt: string;
     action?: ActionDto;
     author: ProfileDto;
-    replyCount?: number;
-    replies: Array<ReplyDto>;
+    commentCount: number;
+    comments: Array<CommentDto>;
 };
 
 export type UpdatePostDto = {
@@ -479,15 +445,9 @@ export type UpdatePostDto = {
     actionId?: number;
 };
 
-export type CreateReplyDto = {
-    content: string;
-    postId: number;
-    parentId?: number;
-};
-
-export type UpdateReplyDto = {
+export type UpdateCommentDto = {
     content?: string;
-    postId?: number;
+    parentObjectId?: number;
     parentId?: number;
 };
 
@@ -1379,7 +1339,7 @@ export type ActionsUnlikeActivityResponses = {
 export type ActionsUnlikeActivityResponse = ActionsUnlikeActivityResponses[keyof ActionsUnlikeActivityResponses];
 
 export type ActionsAddActivityCommentData = {
-    body: CreateActionActivityCommentDto;
+    body: CreateCommentDto;
     path: {
         id: number;
     };
@@ -1388,7 +1348,7 @@ export type ActionsAddActivityCommentData = {
 };
 
 export type ActionsAddActivityCommentResponses = {
-    200: ActionActivityCommentDto;
+    200: CommentDto;
 };
 
 export type ActionsAddActivityCommentResponse = ActionsAddActivityCommentResponses[keyof ActionsAddActivityCommentResponses];
@@ -1632,46 +1592,46 @@ export type ForumFindPostsByUserResponses = {
 
 export type ForumFindPostsByUserResponse = ForumFindPostsByUserResponses[keyof ForumFindPostsByUserResponses];
 
-export type ForumCreateReplyData = {
-    body: CreateReplyDto;
+export type ForumCreateCommentData = {
+    body: CreateCommentDto;
     path?: never;
     query?: never;
-    url: '/forum/replies';
+    url: '/forum/comments';
 };
 
-export type ForumCreateReplyResponses = {
-    200: ReplyDto;
+export type ForumCreateCommentResponses = {
+    200: CommentDto;
 };
 
-export type ForumCreateReplyResponse = ForumCreateReplyResponses[keyof ForumCreateReplyResponses];
+export type ForumCreateCommentResponse = ForumCreateCommentResponses[keyof ForumCreateCommentResponses];
 
-export type ForumDeleteReplyData = {
+export type ForumDeleteCommentData = {
     body?: never;
     path: {
         id: string;
     };
     query?: never;
-    url: '/forum/replies/{id}';
+    url: '/forum/comments/{id}';
 };
 
-export type ForumDeleteReplyResponses = {
+export type ForumDeleteCommentResponses = {
     200: unknown;
 };
 
-export type ForumUpdateReplyData = {
-    body: UpdateReplyDto;
+export type ForumUpdateCommentData = {
+    body: UpdateCommentDto;
     path: {
         id: string;
     };
     query?: never;
-    url: '/forum/replies/{id}';
+    url: '/forum/comments/{id}';
 };
 
-export type ForumUpdateReplyResponses = {
-    200: ReplyDto;
+export type ForumUpdateCommentResponses = {
+    200: CommentDto;
 };
 
-export type ForumUpdateReplyResponse = ForumUpdateReplyResponses[keyof ForumUpdateReplyResponses];
+export type ForumUpdateCommentResponse = ForumUpdateCommentResponses[keyof ForumUpdateCommentResponses];
 
 export type NotifsFindAllData = {
     body?: never;

@@ -50,8 +50,8 @@ const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
           )}
         </div>
         <div className="flex space-x-3">
-          {post.replyCount !== undefined && (
-            <span>{post.replyCount} replies</span>
+          {post.commentCount !== undefined && (
+            <span>{post.commentCount} replies</span>
           )}
           <span>
             {formatTime(new Date(post.updatedAt), {

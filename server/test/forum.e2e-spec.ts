@@ -6,7 +6,7 @@ import { ForumModule } from '../src/forum/forum.module';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
-import { CreateCommentDto } from 'src/forum/dto/reply.dto';
+import { CreateCommentDto } from 'src/forum/dto/comment.dto';
 
 describe('Forum (e2e)', () => {
   let ctx: TestContext;

@@ -30,7 +30,7 @@ import {
   Comment,
   CommentParentObject,
 } from 'src/forum/entities/comment.entity';
-import { CommentDto, CreateCommentDto } from 'src/forum/dto/reply.dto';
+import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
 
 @Injectable()
 export class ActionsService {
@@ -481,18 +481,25 @@ export class ActionsService {
   async getActivity(id: number): Promise<ActionActivityDto> {
     const activity = await this.actionActivityRepository.findOne({
       where: { id },
-      relations: ['user', 'action', 'comments', 'comments.author'],
+      relations: ['user', 'action', 'likes'],
     });
     if (!activity) {
       throw new NotFoundException('Activity not found');
     }
-    return new ActionActivityDto(activity);
+    const comments = await this.commentRepository.find({
+      where: {
+        parentObjectType: CommentParentObject.Activity,
+        parentObjectId: id,
+      },
+      relations: ['author'],
+    });
+    return new ActionActivityDto(activity, comments);
   }
 
   async likeActivity(id: number, userId: number, unlike = false) {
     const activity = await this.actionActivityRepository.findOne({
       where: { id },
-      relations: ['user', 'action', 'comments', 'comments.author', 'likes'],
+      relations: ['user', 'action', 'likes'],
     });
     if (!activity) {
       throw new NotFoundException('Activity not found');
@@ -531,13 +538,6 @@ export class ActionsService {
     commentDto: CreateCommentDto,
     userId: number,
   ): Promise<CommentDto> {
-    const activity = await this.actionActivityRepository.findOne({
-      where: { id },
-      relations: ['user', 'action', 'comments', 'comments.author'],
-    });
-    if (!activity) {
-      throw new NotFoundException('Activity not found');
-    }
     const user = await this.userService.findOne(userId);
     if (!user) {
       throw new NotFoundException('User not found');

@@ -6,7 +6,7 @@ import {
   CreateCommentDto,
   CommentDto,
   UpdateCommentDto,
-} from './dto/reply.dto';
+} from './dto/comment.dto';
 import { Post } from './entities/post.entity';
 import { Comment, CommentParentObject } from './entities/comment.entity';
 import {
@@ -44,8 +44,8 @@ export class ForumService {
     return this.postRepository.save(post);
   }
 
-  async findAllPosts(): Promise<Post[]> {
-    return this.postRepository
+  async findAllPosts(): Promise<PostDto[]> {
+    const posts = await this.postRepository
       .find({
         where: { deleted: false },
         relations: ['author', 'action'],
@@ -53,12 +53,13 @@ export class ForumService {
       })
       .then((posts) => {
         return Promise.all(
-          posts.map(async (post) => ({
-            ...post,
-            commentCount: await this.countCommentsForPost(post.id),
-          })),
+          posts.map(async (post) => {
+            const comments = await this.findCommentsForPost(post.id);
+            return new PostDto(post, comments);
+          }),
         );
       });
+    return posts;
   }
 
   async countCommentsForPost(postId: number): Promise<number> {

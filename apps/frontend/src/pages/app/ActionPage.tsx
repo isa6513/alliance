@@ -26,7 +26,7 @@ import { useAuth } from "../../lib/AuthContext";
 import { TaskPanelContext } from "../../components/ActionTaskPanel";
 import ActionActivityList from "../../components/ActionActivityList";
 import { testActions } from "../../stories/testData";
-import { clientLoader, useAppLoaderData } from "../../applayout";
+import { useAppLoaderData } from "../../applayout";
 
 const actionStatusDescriptions: Record<ActionDto["status"], string> = {
   gathering_commitments: "Gathering commitments",

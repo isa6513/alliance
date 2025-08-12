@@ -6,7 +6,7 @@ import {
 } from '@nestjs/swagger';
 import { Post } from '../entities/post.entity';
 import { ProfileDto } from '../../user/user.dto';
-import { CommentDto } from './reply.dto';
+import { CommentDto } from './comment.dto';
 import { ActionDto } from 'src/actions/dto/action.dto';
 
 // return object for get requests
@@ -36,8 +36,8 @@ export class PostDto extends PickType(Post, [
     super();
     Object.assign(this, post);
     this.author = new ProfileDto(post.author);
+    this.commentCount = comments.length;
     this.comments = comments;
-    this.commentCount = this.comments.length;
   }
 }
 

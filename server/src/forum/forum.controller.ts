@@ -11,12 +11,12 @@ import {
 } from '@nestjs/common';
 import { ForumService } from './forum.service';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
-import { CreateCommentDto, UpdateCommentDto } from './dto/reply.dto';
+import { CreateCommentDto, UpdateCommentDto } from './dto/comment.dto';
 import { AuthGuard, JwtPayload } from '../auth/guards/auth.guard';
 import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 import { ReqUser } from '../auth/user.decorator';
 import { PostDto } from './dto/post.dto';
-import { CommentDto } from './dto/reply.dto';
+import { CommentDto } from './dto/comment.dto';
 
 @ApiTags('forum')
 @Controller('forum')
@@ -40,9 +40,7 @@ export class ForumController {
   @ApiOperation({ summary: 'Get all forum posts' })
   @ApiOkResponse({ type: [PostDto] })
   findAllPosts(): Promise<PostDto[]> {
-    return this.forumService
-      .findAllPosts()
-      .then((posts) => posts.map((post) => new PostDto(post)));
+    return this.forumService.findAllPosts();
   }
 
   @Get('posts/action/:actionId')

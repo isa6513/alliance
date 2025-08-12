@@ -39,7 +39,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AuthOptionalGuard } from 'src/auth/guards/authoptional.guard';
 import { UserService } from 'src/user/user.service';
 import { ActionStatus } from './entities/action-event.entity';
-import { CommentDto, CreateCommentDto } from 'src/forum/dto/reply.dto';
+import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
 
 @Controller('actions')
 export class ActionsController {

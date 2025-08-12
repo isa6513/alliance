@@ -10,6 +10,7 @@ import { UserAction } from '../entities/user-action.entity';
 import { ActionEvent, ActionStatus } from '../entities/action-event.entity';
 import { ActionActivity } from '../entities/action-activity.entity';
 import { ProfileDto } from 'src/user/user.dto';
+import { CommentDto } from 'src/forum/dto/comment.dto';
 
 export class UserActionDto extends PickType(UserAction, [
   'status',
@@ -115,7 +116,10 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   @ApiProperty({ type: () => ProfileDto, isArray: true })
   likes: ProfileDto[];
 
-  constructor(actionActivity: ActionActivity) {
+  @ApiProperty({ type: () => CommentDto, isArray: true })
+  comments: CommentDto[];
+
+  constructor(actionActivity: ActionActivity, comments: CommentDto[] = []) {
     super();
     Object.assign(this, actionActivity);
     this.actionId = actionActivity.action.id;
@@ -125,5 +129,6 @@ export class ActionActivityDto extends PickType(ActionActivity, [
       actionActivity.likes !== undefined
         ? actionActivity.likes.map((like) => new ProfileDto(like))
         : [];
+    this.comments = comments;
   }
 }
