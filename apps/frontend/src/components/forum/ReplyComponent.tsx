@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import Card from "../system/Card";
-import { ReplyDto, UserDto } from "@alliance/shared/client";
+import { CommentDto, UserDto } from "@alliance/shared/client";
 import ReplyForm from "./ReplyForm";
 
-const countAllReplies = (replies: ReplyDto[]): number => {
+const countAllReplies = (replies: CommentDto[]): number => {
   let count = 0;
   for (const reply of replies) {
     count += 1;
@@ -37,7 +37,7 @@ const getDisplayContent = (
 };
 
 interface ReplyComponentProps {
-  reply: ReplyDto;
+  reply: CommentDto;
   depth?: number;
   user?: UserDto;
   replyingTo: number | null;
@@ -296,7 +296,7 @@ const ReplyComponent = ({
 
       {/* Reply form for nested reply */}
       {user && isReplyingToThis && (
-        <div className={`mt-2`} style={indentStyle}>
+        <div style={indentStyle}>
           <ReplyForm
             parentId={reply.id}
             onCancel={() => setReplyingTo(null)}

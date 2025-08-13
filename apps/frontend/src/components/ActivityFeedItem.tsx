@@ -2,20 +2,29 @@ import Card, { CardStyle } from "./system/Card";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router";
 import { ActionActivityDto } from "@alliance/shared/client";
+import { formatTime } from "../lib/utils";
+import { formatActivityMessage } from "./ActionActivityDetail";
+import heart from "../assets/icons8-heart-90.png";
+import { useAuth } from "../lib/AuthContext";
 
 export interface ActivityFeedItemProps {
   activity: ActionActivityDto;
   showTime?: boolean;
   card?: boolean;
+  showAction: boolean;
+  handleLike: (activity: ActionActivityDto) => void;
 }
 
 const ActivityFeedItem = ({
   activity,
   showTime = true,
   card = true,
+  showAction,
+  handleLike,
 }: ActivityFeedItemProps) => {
   const navigate = useNavigate();
   const verb = activity.type === "user_joined" ? "committed to" : "completed";
+  const { user } = useAuth();
 
   if (card) {
     return (
@@ -47,24 +56,53 @@ const ActivityFeedItem = ({
     );
   } else {
     return (
-      <div className="border-gray-200 border-t pt-3">
-        <p className="text-black">
-          <a
-            className="hover:underline"
-            href={`/user/${activity.user.id}`}
-          >{`${activity.user.displayName}`}</a>
-          <span className="text-blue font-medium"> {verb} </span>
-          <a className="hover:underline" href={`/actions/${activity.actionId}`}>
-            {activity.actionName}
-          </a>
-        </p>
-        {showTime && (
-          <p className="text-gray-500 text-right text-nowrap">
-            {formatDistanceToNow(new Date(activity.createdAt), {
-              addSuffix: true,
-            })}{" "}
-          </p>
-        )}
+      <div
+        key={activity.id}
+        className="flex items-start space-x-3 cursor-pointer hover:bg-gray-100 rounded-md p-3 border-t border-gray-200"
+        onClick={() => {
+          navigate(`/actions/${activity.actionId}/activity/${activity.id}`);
+        }}
+      >
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-row justify-between items-center">
+            <div className="flex flex-row gap-x-2">
+              <p className="text-gray-900">
+                {activity.user.profilePicture !== null && (
+                  <img
+                    src={activity.user.profilePicture}
+                    alt={activity.user.displayName}
+                    className="w-6 h-6 rounded-md object-cover inline-block mr-2"
+                  />
+                )}
+                {formatActivityMessage(activity, showAction)}
+              </p>
+            </div>
+            <div className="flex flex-row gap-x-1 items-center"></div>
+          </div>
+          <div className="flex flex-row gap-x-1 items-center pt-1 justify-between">
+            <p className="text-sm text-gray-500">
+              {formatTime(new Date(activity.createdAt), {
+                addSuffix: true,
+              })}
+            </p>
+            <div className="flex flex-row gap-x-1 items-center">
+              <p className="text-sm text-gray-500">{activity.likes.length}</p>
+              <img
+                src={heart}
+                alt="Like"
+                className={`w-4 h-4 ${
+                  activity.likes.some((like) => like.id === user?.id)
+                    ? "opacity-60"
+                    : "opacity-20  hover:opacity-40"
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLike(activity);
+                }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

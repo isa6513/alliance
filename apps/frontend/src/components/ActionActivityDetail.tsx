@@ -3,19 +3,25 @@ import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useNavigate, useParams, useOutletContext } from "react-router";
 import { formatTime } from "../lib/utils";
 import { ActionActivityDto } from "@alliance/shared/client";
-import { useEffect, useState } from "react";
 import Comments from "./Comments";
 import heart from "../assets/icons8-heart-90.png";
 import { useAuth } from "../lib/AuthContext";
 import { TaskPanelContext } from "./ActionTaskPanel";
 
-export function formatActivityMessage(activity: ActionActivityDto) {
+export function formatActivityMessage(
+  activity: ActionActivityDto,
+  showAction: boolean = false
+) {
   const userName = activity.user.displayName || "Someone";
   switch (activity.type) {
     case "user_joined":
-      return `${userName} joined`;
+      return showAction
+        ? `${userName} joined ${activity.actionName}`
+        : `${userName} joined`;
     case "user_completed":
-      return `${userName} completed this action`;
+      return showAction
+        ? `${userName} completed ${activity.actionName}`
+        : `${userName} completed this action`;
     default:
       return "Unknown activity";
   }
@@ -51,10 +57,11 @@ const ActionActivityDetail = () => {
   const params = useParams();
   const activityId = parseInt(params.activityId!);
   const { user } = useAuth();
-  const { activities, handleLikeActivity, setActivities } = useOutletContext<TaskPanelContext>();
-  
+  const { activities, handleLikeActivity } =
+    useOutletContext<TaskPanelContext>();
+
   // Find the activity from the shared state
-  const activity = activities.find(a => a.id === activityId) || null;
+  const activity = activities.find((a) => a.id === activityId) || null;
 
   const handleLike = async () => {
     if (!user || !activity) {
@@ -87,9 +94,7 @@ const ActionActivityDetail = () => {
                   className="w-8 h-8 rounded-md object-cover"
                 />
               )}
-              <p className="font-semibold text-lg">
-                {formatActivityMessage(activity)}
-              </p>
+              <p className="font-bold">{formatActivityMessage(activity)}</p>
             </div>
             <p className="text-gray-500 text-sm">
               {formatTime(new Date(activity?.createdAt), {
@@ -118,7 +123,10 @@ const ActionActivityDetail = () => {
                     isLiked ? "opacity-80" : "opacity-30"
                   } hover:opacity-50`}
                 />
-                <span className="text-sm font-medium">{activity.likes.length} {activity.likes.length === 1 ? 'like' : 'likes'}</span>
+                <span className="text-sm font-medium">
+                  {activity.likes.length}{" "}
+                  {activity.likes.length === 1 ? "like" : "likes"}
+                </span>
               </button>
               {activity.likes
                 .filter((like) => like.profilePicture !== null)

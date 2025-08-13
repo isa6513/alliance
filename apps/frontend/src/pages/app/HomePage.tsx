@@ -2,14 +2,17 @@ import {
   ActionActivityDto,
   actionsComplete,
   actionsFriendActivity,
+  actionsLikeActivity,
+  actionsUnlikeActivity,
 } from "@alliance/shared/client";
 import { useAppLoaderData } from "../../applayout";
 import TaskCard from "../../components/TaskCard";
 import ActionItemCard from "../../components/ActionItemCard";
 import Card from "../../components/system/Card";
 import ForumListPost from "../../components/ForumListPost";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ActivityFeedItem from "../../components/ActivityFeedItem";
+import { useAuth } from "../../lib/AuthContext";
 
 const HomePage = () => {
   const { actions, relations, posts } = useAppLoaderData();
@@ -23,6 +26,54 @@ const HomePage = () => {
       setFriendActivity(resp.data ?? []);
     });
   }, []);
+
+  const { user } = useAuth();
+
+  const handleLikeActivity = useCallback(
+    async (activityId: number) => {
+      if (!user) return;
+
+      const activity = friendActivity.find((a) => a.id === activityId);
+      if (!activity) return;
+
+      const isLiked = activity.likes.some((like) => like.id === user.id);
+
+      if (isLiked) {
+        const response = await actionsUnlikeActivity({
+          path: { id: activityId },
+        });
+        if (response.response.ok) {
+          setFriendActivity((prev) =>
+            prev.map((a) =>
+              a.id === activityId
+                ? {
+                    ...a,
+                    likes: a.likes.filter((like) => like.id !== user.id),
+                  }
+                : a
+            )
+          );
+        }
+      } else {
+        const response = await actionsLikeActivity({
+          path: { id: activityId },
+        });
+        if (response.response.ok && response.data) {
+          setFriendActivity((prev) =>
+            prev.map((a) =>
+              a.id === activityId
+                ? {
+                    ...a,
+                    likes: response.data.likes || [],
+                  }
+                : a
+            )
+          );
+        }
+      }
+    },
+    [user, friendActivity]
+  );
 
   if (!relations) {
     revalidate();
@@ -141,8 +192,8 @@ const HomePage = () => {
                 <ForumListPost key={post.id} post={post} showAction={false} />
               ))}
             </Card>
-            <Card>
-              <p className="font-semibold mb-1">What your friends are up to</p>
+            <Card className="!gap-y-0">
+              <p className="font-semibold mb-3">What your friends are up to</p>
               {friendActivity.length === 0 && (
                 <p className="text-zinc-400">No friend activity yet</p>
               )}
@@ -152,6 +203,8 @@ const HomePage = () => {
                   activity={activity}
                   showTime={false}
                   card={false}
+                  showAction={true}
+                  handleLike={() => handleLikeActivity(activity.id)}
                 />
               ))}
             </Card>
