@@ -132,3 +132,8 @@ export class ActionActivityDto extends PickType(ActionActivity, [
     this.comments = comments;
   }
 }
+
+export class UpdateActionActivityDto extends PickType(ActionActivityDto, [
+  'description',
+  'attachments',
+]) {}

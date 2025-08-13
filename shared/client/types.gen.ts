@@ -390,6 +390,11 @@ export type CreateCommentDto = {
     parentId?: number;
 };
 
+export type UpdateActionActivityDto = {
+    description?: string;
+    attachments?: Array<string>;
+};
+
 export type CreateCommuniqueDto = {
     title: string;
     bodyText: string;
@@ -1357,6 +1362,21 @@ export type ActionsAddActivityCommentResponses = {
 };
 
 export type ActionsAddActivityCommentResponse = ActionsAddActivityCommentResponses[keyof ActionsAddActivityCommentResponses];
+
+export type ActionsUpdateActivityData = {
+    body: UpdateActionActivityDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/updateActivity/{id}';
+};
+
+export type ActionsUpdateActivityResponses = {
+    200: ActionActivityDto;
+};
+
+export type ActionsUpdateActivityResponse = ActionsUpdateActivityResponses[keyof ActionsUpdateActivityResponses];
 
 export type CommuniquesFindAllData = {
     body?: never;

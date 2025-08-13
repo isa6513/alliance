@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ActionDto,
   CreateActionDto,
@@ -7,6 +11,7 @@ import {
   CreateActionEventDto,
   ActionActivityDto,
   UserActionDto,
+  UpdateActionActivityDto,
 } from './dto/action.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Action } from './entities/action.entity';
@@ -551,5 +556,23 @@ export class ActionsService {
     });
     const savedComment = await this.commentRepository.save(comment);
     return new CommentDto(savedComment);
+  }
+
+  async updateActivity(
+    id: number,
+    updateActivityDto: UpdateActionActivityDto,
+    userId: number,
+  ): Promise<ActionActivityDto> {
+    const activity = await this.actionActivityRepository.findOne({
+      where: { id },
+    });
+    if (!activity) {
+      throw new NotFoundException('Activity not found');
+    }
+    if (activity.userId !== userId) {
+      throw new ForbiddenException('You are not the owner of this activity');
+    }
+    await this.actionActivityRepository.update(id, updateActivityDto);
+    return this.getActivity(id);
   }
 }

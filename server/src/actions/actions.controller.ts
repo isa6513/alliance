@@ -23,6 +23,7 @@ import {
   LatLonDto,
   CreateActionEventDto,
   ActionActivityDto,
+  UpdateActionActivityDto,
 } from './dto/action.dto';
 import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -374,5 +375,16 @@ export class ActionsController {
     @Request() req: JwtRequest,
   ): Promise<CommentDto> {
     return this.actionsService.addActivityComment(id, commentDto, req.user.sub);
+  }
+
+  @Post('updateActivity/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ActionActivityDto })
+  updateActivity(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() commentDto: UpdateActionActivityDto,
+    @Request() req: JwtRequest,
+  ): Promise<ActionActivityDto> {
+    return this.actionsService.updateActivity(id, commentDto, req.user.sub);
   }
 }

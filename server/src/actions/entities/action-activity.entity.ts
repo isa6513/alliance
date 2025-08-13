@@ -11,6 +11,7 @@ import {
 import { Action } from './action.entity';
 import { User } from '../../user/user.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Allow } from 'class-validator';
 
 export enum ActionActivityType {
   USER_JOINED = 'user_joined',
@@ -61,10 +62,12 @@ export class ActionActivity {
 
   @Column({ nullable: true })
   @ApiPropertyOptional()
+  @Allow()
   description?: string;
 
   @Column({ type: 'jsonb', default: [] })
   @ApiPropertyOptional({ type: String, isArray: true })
+  @Allow()
   attachments?: string[];
 
   @ManyToMany(() => User, { onDelete: 'CASCADE', eager: true })

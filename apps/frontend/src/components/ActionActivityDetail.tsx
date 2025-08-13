@@ -2,11 +2,16 @@ import { useActionLoaderData } from "../pages/app/ActionPage";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useNavigate, useParams, useOutletContext } from "react-router";
 import { formatTime } from "../lib/utils";
-import { ActionActivityDto } from "@alliance/shared/client";
+import {
+  ActionActivityDto,
+  actionsUpdateActivity,
+} from "@alliance/shared/client";
 import Comments from "./Comments";
 import heart from "../assets/icons8-heart-90.png";
 import { useAuth } from "../lib/AuthContext";
 import { TaskPanelContext } from "./ActionTaskPanel";
+import Button, { ButtonColor } from "./system/Button";
+import { useEffect, useState } from "react";
 
 export function formatActivityMessage(
   activity: ActionActivityDto,
@@ -57,7 +62,7 @@ const ActionActivityDetail = () => {
   const params = useParams();
   const activityId = parseInt(params.activityId!);
   const { user } = useAuth();
-  const { activities, handleLikeActivity } =
+  const { activities, handleLikeActivity, setActivities } =
     useOutletContext<TaskPanelContext>();
 
   // Find the activity from the shared state
@@ -72,84 +77,165 @@ const ActionActivityDetail = () => {
 
   const isLiked = activity?.likes.some((like) => like.id === user?.id) || false;
 
+  const isOwner = activity?.user.id === user?.id;
+  const [editing, setEditing] = useState(false);
+  const [activityDescription, setActivityDescription] = useState(
+    activity?.description || ""
+  );
+
+  useEffect(() => {
+    setActivityDescription(activity?.description || "");
+  }, [activity]);
+
+  const checkForEscape = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      setEditing(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user || !activity) {
+      return;
+    }
+    const resp = await actionsUpdateActivity({
+      path: {
+        id: activity.id,
+      },
+      body: {
+        description: activityDescription,
+      },
+    });
+    if (resp.error) {
+      console.error(resp.error);
+      return;
+    }
+    const newActivity = resp.data!;
+    setActivities(
+      activities.map((a) => (a.id === activity.id ? newActivity : a))
+    );
+    setActivityDescription(newActivity.description || "");
+
+    setEditing(false);
+  };
+
   return (
-    <div className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5">
-      <h1 className="font-adobe w-full">{action.name}</h1>
+    <>
       <div
-        className="flex flex-row gap-x-3 items-center cursor-pointer border-b border-gray-300 pb-3 hover:underline"
-        onClick={() => {
-          navigate(`/actions/${action.id}`);
-        }}
+        className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5"
+        onKeyDown={checkForEscape}
       >
-        <img src={chevronLeft} className="w-4 h-4 rotate-90" />
-        <p className="">Back to action</p>
-      </div>
-      {activity !== null && (
-        <>
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex flex-row items-center gap-x-2">
-              {activity.user.profilePicture !== null && (
-                <img
-                  src={activity.user.profilePicture}
-                  className="w-8 h-8 rounded-md object-cover"
-                />
-              )}
-              <p className="font-bold">{formatActivityMessage(activity)}</p>
-            </div>
-            <p className="text-gray-500 text-sm">
-              {formatTime(new Date(activity?.createdAt), {
-                addSuffix: true,
-              })}
-            </p>
-          </div>
-          <p className="text-gray-500">{activity.description}</p>
-          {activity.attachments?.map((attachment) => (
-            <img
-              key={attachment}
-              src={attachment}
-              className="w-full h-auto rounded-md object-cover"
-            />
-          ))}
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex flex-row items-center gap-x-2">
-              <button
-                onClick={handleLike}
-                className="flex items-center gap-x-2 hover:bg-gray-100 rounded-md px-3 py-1.5 transition-colors cursor-pointer"
-              >
-                <img
-                  src={heart}
-                  alt="Like"
-                  className={`w-5 h-5 transition-opacity ${
-                    isLiked ? "opacity-80" : "opacity-30"
-                  } hover:opacity-50`}
-                />
-                <span className="text-sm font-medium">
-                  {activity.likes.length}{" "}
-                  {activity.likes.length === 1 ? "like" : "likes"}
-                </span>
-              </button>
-              {activity.likes
-                .filter((like) => like.profilePicture !== null)
-                .slice(0, 5)
-                .map((like) => (
+        <h1 className="font-adobe w-full">{action.name}</h1>
+        <div
+          className="flex flex-row gap-x-3 items-center cursor-pointer border-b border-gray-300 pb-3 hover:underline"
+          onClick={() => {
+            navigate(`/actions/${action.id}`);
+          }}
+        >
+          <img src={chevronLeft} className="w-4 h-4 rotate-90" />
+          <p className="">Back to action</p>
+        </div>
+        {activity !== null && (
+          <>
+            <div className="flex flex-row items-center justify-between">
+              <div className="flex flex-row items-center gap-x-2">
+                {activity.user.profilePicture !== null && (
                   <img
-                    key={like.id}
-                    src={like.profilePicture!}
-                    className="w-6 h-6 rounded-md object-cover"
-                    title={like.displayName}
+                    src={activity.user.profilePicture}
+                    className="w-8 h-8 rounded-md object-cover"
                   />
-                ))}
-              {activity.likes.length > 5 && (
-                <span className="text-sm text-gray-500">
-                  +{activity.likes.length - 5} more
-                </span>
-              )}
+                )}
+                <p className="font-bold">{formatActivityMessage(activity)}</p>
+                {isOwner && (
+                  <Button
+                    color={ButtonColor.Light}
+                    onClick={() => {
+                      setEditing(true);
+                    }}
+                  >
+                    Add details
+                  </Button>
+                )}
+              </div>
+              <p className="text-gray-500 text-sm">
+                {formatTime(new Date(activity?.createdAt), {
+                  addSuffix: true,
+                })}
+              </p>
+            </div>
+            <p>{activity.description}</p>
+            {activity.attachments?.map((attachment) => (
+              <img
+                key={attachment}
+                src={attachment}
+                className="w-full h-auto rounded-md object-cover"
+              />
+            ))}
+            <div className="flex flex-row items-center justify-between">
+              <div className="flex flex-row items-center gap-x-2">
+                <button
+                  onClick={handleLike}
+                  className="flex items-center gap-x-2 hover:bg-gray-100 rounded-md px-3 py-1.5 transition-colors cursor-pointer"
+                >
+                  <img
+                    src={heart}
+                    alt="Like"
+                    className={`w-5 h-5 transition-opacity ${
+                      isLiked ? "opacity-80" : "opacity-30"
+                    } hover:opacity-50`}
+                  />
+                  <span className="text-sm font-medium">
+                    {activity.likes.length}{" "}
+                    {activity.likes.length === 1 ? "like" : "likes"}
+                  </span>
+                </button>
+                {activity.likes
+                  .filter((like) => like.profilePicture !== null)
+                  .slice(0, 5)
+                  .map((like) => (
+                    <img
+                      key={like.id}
+                      src={like.profilePicture!}
+                      className="w-6 h-6 rounded-md object-cover"
+                      title={like.displayName}
+                    />
+                  ))}
+                {activity.likes.length > 5 && (
+                  <span className="text-sm text-gray-500">
+                    +{activity.likes.length - 5} more
+                  </span>
+                )}
+              </div>
+            </div>
+            <Comments objectId={activity.id} type={"activity"} />
+          </>
+        )}
+      </div>
+      {editing && (
+        <div className="fixed top-0 left-0 w-full h-full bg-black/20 z-50 flex items-center justify-center">
+          <div className="bg-white shadow-lg p-6 rounded-lg flex flex-col gap-y-3">
+            <p className="font-medium">
+              Add any details you want to share about this activity
+            </p>
+            <textarea
+              className="w-full h-24 border border-gray-300 rounded-md p-2"
+              value={activityDescription}
+              onChange={(e) => setActivityDescription(e.target.value)}
+            />
+            <div className="flex flex-row gap-x-2">
+              <Button
+                color={ButtonColor.Light}
+                onClick={() => setEditing(false)}
+              >
+                Cancel
+              </Button>
+              <Button color={ButtonColor.Blue} onClick={handleSave}>
+                Save
+              </Button>
             </div>
           </div>
-          <Comments objectId={activity.id} type={"activity"} />
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 };
 
