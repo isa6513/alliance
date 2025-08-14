@@ -97,24 +97,6 @@ export default function ActionsScreen() {
           ))
         )}
       </View>
-
-      <Card cardStyle={CardStyle.White} style={styles.statsCard}>
-        <Text style={styles.statsTitle}>Your Activity</Text>
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Actions Joined</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Forum Posts</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Events</Text>
-          </View>
-        </View>
-      </Card>
     </ScrollView>
   );
 }

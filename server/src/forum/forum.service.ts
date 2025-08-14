@@ -14,8 +14,9 @@ import {
   NotificationType,
 } from '../notifs/entities/notification.entity';
 import { User } from '../user/user.entity';
-import { replyUrl } from 'src/search/approutes';
+import { activityReplyUrl, replyUrl } from 'src/search/approutes';
 import { ProfileDto } from 'src/user/user.dto';
+import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 
 @Injectable()
 export class ForumService {
@@ -28,6 +29,8 @@ export class ForumService {
     private notifRepository: Repository<Notification>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(ActionActivity)
+    private actionActivityRepository: Repository<ActionActivity>,
   ) {}
 
   async createPost(
@@ -315,7 +318,68 @@ export class ForumService {
         await this.notifRepository.save(notifications);
         comment.notification = notifications[0]; // Associate with first notification for backward compatibility
       }
-    } //TODO: add notification for activity
+    } else if (comment.parentObjectType === CommentParentObject.Activity) {
+      const activity = await this.actionActivityRepository.findOne({
+        where: { id: comment.parentObjectId },
+        relations: ['user'],
+      });
+      if (!activity) {
+        throw new NotFoundException(
+          `Activity with ID "${comment.parentObjectId}" not found`,
+        );
+      }
+
+      const authorProfile = new ProfileDto(comment.author);
+      if (activity.userId !== comment.authorId) {
+        const appUrl = activityReplyUrl(
+          activity.actionId,
+          activity.id,
+          comment.id,
+        );
+        const activityNotif = this.notifRepository.create({
+          user: activity.user,
+          message: `${authorProfile.displayName} replied to your action activity`,
+          category: NotificationType.ForumReply,
+          webAppLocation: appUrl,
+          mobileAppLocation: appUrl,
+        });
+        notifications.push(activityNotif);
+      }
+
+      // Handle parent comment notifications for activities
+      let parentReply: Comment | null = null;
+      if (comment.parentId) {
+        parentReply = await this.commentRepository.findOne({
+          where: { id: comment.parentId },
+          relations: ['author'],
+        });
+      }
+
+      // Notify parent reply author if this is a nested reply and different from comment author and activity owner
+      if (
+        parentReply &&
+        parentReply.authorId !== comment.authorId &&
+        parentReply.authorId !== activity.userId
+      ) {
+        const appUrl = activityReplyUrl(
+          activity.actionId,
+          activity.id,
+          comment.id,
+        );
+        const parentNotif = this.notifRepository.create({
+          user: parentReply.author,
+          message: `${authorProfile.displayName} replied to your comment`,
+          category: NotificationType.ForumReply,
+          webAppLocation: appUrl,
+          mobileAppLocation: appUrl,
+        });
+        notifications.push(parentNotif);
+      }
+
+      if (notifications.length > 0) {
+        await this.notifRepository.save(notifications);
+      }
+    }
   }
 
   async updateComment(

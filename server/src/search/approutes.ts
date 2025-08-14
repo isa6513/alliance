@@ -13,3 +13,11 @@ export function postUrl(postId: number) {
 export function replyUrl(postId: number, replyId: number) {
   return `/forum/post/${postId}?replyId=${replyId}`;
 }
+
+export function activityReplyUrl(
+  actionId: number,
+  activityId: number,
+  replyId: number,
+) {
+  return `/actions/${actionId}/activity/${activityId}?replyId=${replyId}`;
+}
