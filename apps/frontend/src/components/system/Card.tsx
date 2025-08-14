@@ -38,9 +38,9 @@ const Card: React.FC<CardProps> = ({
       "bg-white border-gray-2 transition-[border] duration-100 border-box rounded-md",
     [CardStyle.Alert]: "bg-sky-100 border-sky-300",
     [CardStyle.Outline]: "bg-transparent border-gray-300",
-    [CardStyle.Grey]: "bg-stone-200/75 border-gray-300 border-[1.5px]",
-    [CardStyle.LightGrey]: "bg-page border-gray-300",
-    [CardStyle.Black]: "bg-black border-gray-300 text-white",
+    [CardStyle.Grey]: "bg-zinc-100 border-zinc-200 border-[1.5px]",
+    [CardStyle.LightGrey]: "bg-page border-zinc-300",
+    [CardStyle.Black]: "bg-black border-zinc-300 text-white",
     [CardStyle.Image]: "bg-transparent border-none",
     [CardStyle.Green]: "bg-green-1 border-green-2 rounded-lg",
   };

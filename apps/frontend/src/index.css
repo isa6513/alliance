@@ -236,6 +236,11 @@ img {
   display: none !important;
 }
 
+.text-link {
+  color: theme("colors.greentext");
+  text-decoration: underline;
+}
+
 a,
 button {
   cursor: pointer;

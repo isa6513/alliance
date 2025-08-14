@@ -28,15 +28,15 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
     <div
       className={`
       flex flex-col sm:flex-row md:gap-y-4 ${absolute ? "absolute" : "relative"}
-      w-screen justify-between items-center py-4 md:py-6 px-24 top-0 left-0 z-10 text-[14pt] transition-[padding,background-color] duration-300 ${
+      w-screen justify-between items-center py-4 md:py-5 px-24 top-0 left-0 z-10 text-[14pt] transition-[padding,background-color] duration-300 ${
         transparent
           ? "bg-transparent text-white"
-          : "bg-white text-black border-b md:border-none border-zinc-200"
+          : "bg-zinc-800 text-white border-b md:border-none border-zinc-200"
       }`}
       ref={ref}
     >
       <h1
-        className="font-bold font-berlingske !text-[18pt] md:!text-[24pt] cursor-pointer text-nowrap"
+        className="font-bold font-berlingske !text-[18pt] md:!text-[20pt] cursor-pointer text-nowrap"
         onClick={() => {
           navigate("/");
         }}
