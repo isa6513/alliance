@@ -240,7 +240,12 @@ export class ForumService {
     // Save the reply first to get the ID
     await this.commentRepository.save(reply);
 
-    this.sendNotifsForNewComment(reply);
+    const replyWithAuthor = await this.commentRepository.findOne({
+      where: { id: reply.id },
+      relations: ['author'],
+    });
+
+    this.sendNotifsForNewComment(replyWithAuthor!);
 
     const loadedReply = await this.commentRepository.findOne({
       where: { id: reply.id },
