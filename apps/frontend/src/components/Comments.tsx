@@ -150,6 +150,9 @@ const Comments = ({ objectId, type, compact }: CommentsProps) => {
       {error && <div className="text-red-500">{error}</div>}
       {comments && comments.length > 0 ? (
         <div className="space-y-3 mb-8">
+          {compact && comments.length > 0 && (
+            <p className="font-medium">Comments</p>
+          )}
           {comments
             .filter((comment) => !comment.deleted || comment.children?.length)
             .map((reply) => (

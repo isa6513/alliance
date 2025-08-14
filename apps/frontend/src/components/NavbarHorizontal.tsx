@@ -6,7 +6,7 @@ import { isFeatureEnabled } from "../lib/config";
 import NotificationsIcon from "./NotificationsIcon";
 import { useAuth } from "../lib/AuthContext";
 import SearchBar from "./SearchBar";
-import logo from "../assets/hand.png";
+import logo from "../assets/planet-earth.png";
 
 const NavbarHorizontal: React.FC = () => {
   const activeLinks = isFeatureEnabled(Features.Forum)
@@ -38,12 +38,7 @@ const NavbarHorizontal: React.FC = () => {
       >
         <div className="flex flex-row gap-x-1 sm:gap-x-4 lg:gap-x-8 items-center">
           <Link to="/" className="shrink-0 hidden sm:block">
-            <img
-              src={logo}
-              alt="logo"
-              className="w-8 h-8"
-              style={{ transform: "scaleX(-1) rotate(5deg)" }}
-            />
+            <img src={logo} alt="logo" className="w-7 h-7" />
           </Link>
           {activeLinks.map((link) =>
             link === NavbarPage.Platform ? (

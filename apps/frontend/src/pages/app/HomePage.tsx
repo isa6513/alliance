@@ -1,79 +1,20 @@
-import {
-  ActionActivityDto,
-  actionsComplete,
-  actionsFriendActivity,
-  actionsLikeActivity,
-  actionsUnlikeActivity,
-} from "@alliance/shared/client";
+import { actionsComplete } from "@alliance/shared/client";
 import { useAppLoaderData } from "../../applayout";
 import TaskCard from "../../components/TaskCard";
 import ActionItemCard from "../../components/ActionItemCard";
 import Card from "../../components/system/Card";
 import ForumListPost from "../../components/ForumListPost";
-import { useCallback, useEffect, useState } from "react";
 import ActivityFeedItem from "../../components/ActivityFeedItem";
-import { useAuth } from "../../lib/AuthContext";
+import useActivities, { ActivityList } from "./useActivities";
 
 const HomePage = () => {
   const { actions, relations, posts } = useAppLoaderData();
 
-  const [friendActivity, setFriendActivity] = useState<ActionActivityDto[]>([]);
-
   const { revalidate } = useAppLoaderData();
 
-  useEffect(() => {
-    actionsFriendActivity().then((resp) => {
-      setFriendActivity(resp.data ?? []);
-    });
-  }, []);
-
-  const { user } = useAuth();
-
-  const handleLikeActivity = useCallback(
-    async (activityId: number) => {
-      if (!user) return;
-
-      const activity = friendActivity.find((a) => a.id === activityId);
-      if (!activity) return;
-
-      const isLiked = activity.likes.some((like) => like.id === user.id);
-
-      if (isLiked) {
-        const response = await actionsUnlikeActivity({
-          path: { id: activityId },
-        });
-        if (response.response.ok) {
-          setFriendActivity((prev) =>
-            prev.map((a) =>
-              a.id === activityId
-                ? {
-                    ...a,
-                    likes: a.likes.filter((like) => like.id !== user.id),
-                  }
-                : a
-            )
-          );
-        }
-      } else {
-        const response = await actionsLikeActivity({
-          path: { id: activityId },
-        });
-        if (response.response.ok && response.data) {
-          setFriendActivity((prev) =>
-            prev.map((a) =>
-              a.id === activityId
-                ? {
-                    ...a,
-                    likes: response.data.likes || [],
-                  }
-                : a
-            )
-          );
-        }
-      }
-    },
-    [user, friendActivity]
-  );
+  const { activities: friendActivities, handleLikeActivity } = useActivities({
+    list: ActivityList.Friends,
+  });
 
   if (!relations) {
     revalidate();
@@ -194,10 +135,10 @@ const HomePage = () => {
             </Card>
             <Card className="!gap-y-0">
               <p className="font-semibold mb-3">What your friends are up to</p>
-              {friendActivity.length === 0 && (
+              {friendActivities.length === 0 && (
                 <p className="text-zinc-400">No friend activity yet</p>
               )}
-              {friendActivity.map((activity) => (
+              {friendActivities.map((activity) => (
                 <ActivityFeedItem
                   key={activity.id}
                   activity={activity}

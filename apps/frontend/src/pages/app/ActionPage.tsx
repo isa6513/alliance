@@ -15,14 +15,9 @@ import {
   actionsMyStatus,
   actionsUserLocations,
   LatLonDto,
-  actionsGetActionActivities,
-  actionsLikeActivity,
-  actionsUnlikeActivity,
-  ActionActivityDto,
 } from "@alliance/shared/client";
 import { ActionDto, UserActionDto } from "@alliance/shared/client";
 import { useActionCount } from "../../lib/useActionWebSocket";
-import { useActionActivity } from "../../lib/useActionActivityWebSocket";
 import TwoColumnSplit from "../../components/system/TwoColumnSplit";
 import ActionEventsPanel from "../../components/ActionEventsPanel";
 import CompletedBar from "../../components/CompletedBar";
@@ -32,6 +27,7 @@ import { TaskPanelContext } from "../../components/ActionTaskPanel";
 import ActionActivityList from "../../components/ActionActivityList";
 import { testActions } from "../../stories/testData";
 import { useAppLoaderData } from "../../applayout";
+import useActivities, { ActivityList } from "./useActivities";
 
 const actionStatusDescriptions: Record<ActionDto["status"], string> = {
   gathering_commitments: "Gathering commitments",
@@ -110,52 +106,18 @@ export default function ActionPage() {
   const [userRelation, setUserRelation] = useState<
     UserActionDto["status"] | null
   >(null);
-  const [activities, setActivities] = useState<ActionActivityDto[]>([]);
-  const [activitiesLoading, setActivitiesLoading] = useState(true);
 
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const actionId = action?.id || 0;
   const liveUserCount = useActionCount(actionId);
   const { revalidate } = useAppLoaderData();
-  const { activities: liveActivities } = useActionActivity(actionId);
+  //   const { activities: liveActivities } = useActionActivity(actionId);
 
-  // Fetch initial activities
-  useEffect(() => {
-    const fetchActivities = async () => {
-      if (!actionId) return;
-      try {
-        setActivitiesLoading(true);
-        const response = await actionsGetActionActivities({
-          path: { id: actionId },
-        });
-        if (response.data) {
-          setActivities(response.data);
-        }
-      } catch (err) {
-        console.error("Error fetching activities:", err);
-      } finally {
-        setActivitiesLoading(false);
-      }
-    };
-
-    fetchActivities();
-  }, [actionId]);
-
-  // Update activities when new websocket activities arrive
-  useEffect(() => {
-    if (liveActivities.length > 0) {
-      setActivities(prev => {
-        const newActivities = [...liveActivities, ...prev];
-        // Remove duplicates based on id
-        const uniqueActivities = newActivities.filter(
-          (activity, index, self) =>
-            self.findIndex((a) => a.id === activity.id) === index
-        );
-        return uniqueActivities;
-      });
-    }
-  }, [liveActivities]);
+  const { activities, handleLikeActivity, setActivities } = useActivities({
+    list: ActivityList.Action,
+    objectId: actionId,
+  });
 
   useEffect(() => {
     if (isAuthenticated && id) {
@@ -200,49 +162,6 @@ export default function ActionPage() {
       revalidate();
     }
   }, [id, revalidate]);
-
-  const handleLikeActivity = useCallback(async (activityId: number) => {
-    if (!user) return;
-    
-    const activity = activities.find(a => a.id === activityId);
-    if (!activity) return;
-
-    const isLiked = activity.likes.some((like) => like.id === user.id);
-    
-    if (isLiked) {
-      const response = await actionsUnlikeActivity({
-        path: { id: activityId },
-      });
-      if (response.response.ok) {
-        setActivities(prev => 
-          prev.map(a =>
-            a.id === activityId
-              ? {
-                  ...a,
-                  likes: a.likes.filter((like) => like.id !== user.id),
-                }
-              : a
-          )
-        );
-      }
-    } else {
-      const response = await actionsLikeActivity({
-        path: { id: activityId },
-      });
-      if (response.response.ok && response.data) {
-        setActivities(prev =>
-          prev.map(a =>
-            a.id === activityId
-              ? {
-                  ...a,
-                  likes: response.data.likes || [],
-                }
-              : a
-          )
-        );
-      }
-    }
-  }, [user, activities]);
 
   return (
     <TwoColumnSplit
@@ -325,10 +244,10 @@ export default function ActionPage() {
             </Card>
           )}
           {action && (
-            <ActionActivityList 
-              actionId={action.id} 
+            <ActionActivityList
+              actionId={action.id}
               activities={activities}
-              loading={activitiesLoading}
+              loading={false}
               onLikeActivity={handleLikeActivity}
               setActivities={setActivities}
             />

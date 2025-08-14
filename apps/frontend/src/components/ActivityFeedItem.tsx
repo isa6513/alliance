@@ -4,8 +4,8 @@ import { useNavigate } from "react-router";
 import { ActionActivityDto } from "@alliance/shared/client";
 import { formatTime } from "../lib/utils";
 import { formatActivityMessage } from "./ActionActivityDetail";
-import heart from "../assets/icons8-heart-90.png";
 import { useAuth } from "../lib/AuthContext";
+import ActivityLikeButton from "./ActivityLikeButton";
 
 export interface ActivityFeedItemProps {
   activity: ActionActivityDto;
@@ -85,22 +85,11 @@ const ActivityFeedItem = ({
                 addSuffix: true,
               })}
             </p>
-            <div className="flex flex-row gap-x-1 items-center">
-              <p className="text-sm text-gray-500">{activity.likes.length}</p>
-              <img
-                src={heart}
-                alt="Like"
-                className={`w-4 h-4 ${
-                  activity.likes.some((like) => like.id === user?.id)
-                    ? "opacity-60"
-                    : "opacity-20  hover:opacity-40"
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleLike(activity);
-                }}
-              />
-            </div>
+            <ActivityLikeButton
+              liked={activity.likes.some((like) => like.id === user?.id)}
+              likes={activity.likes.length}
+              handleLike={() => handleLike(activity)}
+            />
           </div>
         </div>
       </div>

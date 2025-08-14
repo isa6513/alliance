@@ -6,13 +6,20 @@ import { useNavigate } from "react-router";
 import { useCallback } from "react";
 import { ActionActivityDto, UserActionDto } from "@alliance/shared/client";
 import Comments from "./Comments";
+import ActivityLikeButton from "./ActivityLikeButton";
+import { useAuth } from "../lib/AuthContext";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;
   relation: UserActionDto | undefined;
+  handleLike: (activityId: number) => void;
 }
 
-const UserActivityCard = ({ activity, relation }: UserActivityCardProps) => {
+const UserActivityCard = ({
+  activity,
+  relation,
+  handleLike,
+}: UserActivityCardProps) => {
   const navigate = useNavigate();
 
   const handleClick = useCallback(() => {
@@ -26,7 +33,7 @@ const UserActivityCard = ({ activity, relation }: UserActivityCardProps) => {
         })
       : "";
 
-  console.log(relation);
+  const { user } = useAuth();
 
   return (
     <div className="flex flex-row justify-stretch items-center space-x-4">
@@ -46,11 +53,16 @@ const UserActivityCard = ({ activity, relation }: UserActivityCardProps) => {
               {activity.action.name}
             </p>
           </div>
+          <ActivityLikeButton
+            liked={activity.likes.some((like) => like.id === user?.id)}
+            likes={activity.likes.length}
+            handleLike={() => handleLike(activity.id)}
+            className="mr-2"
+          />
         </div>
         <div className="flex items-center justify-between ">
           <p>{activity.description}</p>
         </div>
-        <p className="font-medium">Comments</p>
         <Comments objectId={activity.id} type="activity" compact />
       </Card>
     </div>

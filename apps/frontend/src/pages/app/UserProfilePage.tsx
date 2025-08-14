@@ -10,19 +10,18 @@ import {
   userMyFriendRelationship,
   FriendStatusDto,
   ProfileDto,
-  actionsFindCompletedForUser,
   PostDto,
   forumFindPostsByUser,
   userRemoveFriend,
   actionsActionRelations,
   UserActionDto,
-  ActionActivityDto,
 } from "@alliance/shared/client";
 import ProfileImage from "../../components/ProfileImage";
 import UserActivityCard from "../../components/UserActivityCard";
 import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
+import useActivities, { ActivityList } from "./useActivities";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -53,14 +52,16 @@ const UserProfilePage: React.FC = () => {
   const [isMe, setIsMe] = useState(false);
   const [selectedTab, setSelectedTab] = useState(ProfileTabs.Activity);
 
-  const [completedActions, setCompletedActions] = useState<ActionActivityDto[]>(
-    []
-  );
   const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
   const [friends, setFriends] = useState<ProfileDto[]>([]);
   const [actionRelations, setActionRelations] = useState<
     Map<number, UserActionDto>
   >(new Map());
+
+  const { activities: completedActions, handleLikeActivity } = useActivities({
+    list: ActivityList.User,
+    objectId: parseInt(id!),
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -121,17 +122,6 @@ const UserProfilePage: React.FC = () => {
   // reset tab on user change
   useEffect(() => {
     setSelectedTab(ProfileTabs.Activity);
-  }, [id]);
-
-  useEffect(() => {
-    if (!id) return;
-    actionsFindCompletedForUser({ path: { id: parseInt(id) } }).then(
-      (response) => {
-        if (response.data) {
-          setCompletedActions(response.data);
-        }
-      }
-    );
   }, [id]);
 
   const handleSendFriendRequest = async () => {
@@ -272,6 +262,7 @@ const UserProfilePage: React.FC = () => {
                   activity={activity}
                   key={activity.id}
                   relation={actionRelations.get(activity.actionId)}
+                  handleLike={handleLikeActivity}
                 />
               ))}
             </div>
