@@ -3,6 +3,7 @@ import { formatDistanceToNow } from "date-fns";
 import Card from "../system/Card";
 import { CommentDto, UserDto } from "@alliance/shared/client";
 import ReplyForm from "./ReplyForm";
+import AppMarkdownWrapper from "../AppMarkdownWrapper";
 
 const countAllReplies = (replies: CommentDto[]): number => {
   let count = 0;
@@ -27,7 +28,7 @@ const getDisplayContent = (
         This reply has been deleted
       </div>
     );
-  if (!collapsed) return <div className={`${sharedClasses}`}>{content}</div>;
+  if (!collapsed) return <AppMarkdownWrapper markdownContent={content} />;
   const firstLine = content.split("\n")[0];
   return content.includes("\n") ? (
     <div className={`${sharedClasses} text-gray-500`}>{firstLine} ...</div>

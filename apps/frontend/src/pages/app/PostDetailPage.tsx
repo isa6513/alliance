@@ -7,6 +7,7 @@ import Card, { CardStyle } from "../../components/system/Card";
 import { formatTime } from "../../lib/utils";
 import { useAppLoaderData } from "../../applayout";
 import Comments from "../../components/Comments";
+import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
@@ -160,7 +161,9 @@ const PostDetailPage: React.FC = () => {
               )}
             </div>
 
-            <div className="my-8 whitespace-pre-wrap">{post.content}</div>
+            <div className="mt-4">
+              <AppMarkdownWrapper markdownContent={post.content} />
+            </div>
           </Card>
         </div>
 
