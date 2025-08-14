@@ -263,6 +263,7 @@ export type ActionActivityDto = {
     attachments?: Array<string>;
     user: ProfileDto;
     actionId: number;
+    action: ActionDto;
     actionName: string;
     likes: Array<ProfileDto>;
     comments: Array<CommentDto>;
@@ -1276,7 +1277,7 @@ export type ActionsFindCompletedForUserData = {
 };
 
 export type ActionsFindCompletedForUserResponses = {
-    200: Array<ActionDto>;
+    200: Array<ActionActivityDto>;
 };
 
 export type ActionsFindCompletedForUserResponse = ActionsFindCompletedForUserResponses[keyof ActionsFindCompletedForUserResponses];

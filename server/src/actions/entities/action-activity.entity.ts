@@ -11,7 +11,8 @@ import {
 import { Action } from './action.entity';
 import { User } from '../../user/user.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Allow } from 'class-validator';
+import { Allow, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export enum ActionActivityType {
   USER_JOINED = 'user_joined',
@@ -21,6 +22,7 @@ export enum ActionActivityType {
 @Entity()
 export class ActionActivity {
   @PrimaryGeneratedColumn()
+  @Allow()
   @ApiProperty()
   id: number;
 
@@ -30,47 +32,61 @@ export class ActionActivity {
     enum: ActionActivityType,
     enumName: 'ActionActivityType',
   })
+  @Allow()
   type: ActionActivityType;
 
   @ManyToOne(() => Action, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'actionId' })
+  @Allow()
+  @Type(() => Action)
   action: Action;
 
   @Column()
   @ApiProperty()
+  @Allow()
   actionId: number;
 
   @ManyToOne(() => User, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
+  @Allow()
+  @Type(() => User)
   user: User;
 
   @Column()
+  @Allow()
   @ApiProperty()
   userId: number;
 
   @CreateDateColumn()
+  @Allow()
+  @Type(() => Date)
   @ApiProperty()
   createdAt: Date;
 
   @Column({ type: 'text', nullable: true })
+  @IsOptional()
   metadata?: string;
 
   // just for donation-based actions
   @Column({ nullable: true })
   @ApiPropertyOptional()
+  @IsOptional()
   dollar_amount?: number;
 
   @Column({ nullable: true })
   @ApiPropertyOptional()
-  @Allow()
+  @IsOptional()
   description?: string;
 
   @Column({ type: 'jsonb', default: [] })
   @ApiPropertyOptional({ type: String, isArray: true })
-  @Allow()
+  @IsOptional()
   attachments?: string[];
 
   @ManyToMany(() => User, { onDelete: 'CASCADE', eager: true })
   @JoinTable()
+  @Allow()
+  @ApiProperty({ type: () => User, isArray: true })
+  @Type(() => User)
   likes: User[];
 }

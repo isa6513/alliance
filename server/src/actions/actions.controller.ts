@@ -312,10 +312,10 @@ export class ActionsController {
   }
 
   @Get('completed/:id')
-  @ApiOkResponse({ type: [ActionDto] })
+  @ApiOkResponse({ type: [ActionActivityDto] })
   async findCompletedForUser(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ActionDto[]> {
+  ): Promise<ActionActivityDto[]> {
     return this.actionsService.findCompletedForUser(+id);
   }
 

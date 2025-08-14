@@ -49,6 +49,7 @@ interface ReplyComponentProps {
   isSubmitting: boolean;
   newlyAddedReplies: Set<number>;
   highlightedReplyId: number | null;
+  compact?: boolean;
 }
 
 interface ReplyContentProps
@@ -153,6 +154,7 @@ const ReplyComponent = ({
   isSubmitting,
   newlyAddedReplies,
   highlightedReplyId,
+  compact,
 }: ReplyComponentProps) => {
   const maxDepth = 10;
   const canNest = depth < maxDepth;
@@ -178,7 +180,9 @@ const ReplyComponent = ({
         {hasChildren && (
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="absolute -left-6 top-6 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer z-10"
+            className={`absolute  top-6 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer z-10 ${
+              compact ? "left-0" : "-left-6"
+            }`}
             aria-label={isCollapsed ? "Expand replies" : "Collapse replies"}
           >
             <svg
@@ -199,10 +203,16 @@ const ReplyComponent = ({
           </button>
         )}
 
-        <div className="border-transparent duration-1000 rounded-lg">
+        <div
+          className={`border-transparent duration-1000 rounded-lg ${
+            compact ? "pl-6" : ""
+          }`}
+        >
           <Card
             key={reply.id}
-            className={`!display-block transition-all duration-1000 ${newReplyClass}`}
+            className={`!display-block transition-all duration-1000 ${newReplyClass} ${
+              compact && "!p-1 !border-none"
+            }`}
             flex={false}
           >
             <div id={`reply-${reply.id}`}>

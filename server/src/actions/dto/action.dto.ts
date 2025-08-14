@@ -110,6 +110,9 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   @ApiProperty()
   actionId: number;
 
+  @ApiProperty({ type: () => ActionDto })
+  action: ActionDto;
+
   @ApiProperty()
   actionName: string;
 
@@ -123,6 +126,7 @@ export class ActionActivityDto extends PickType(ActionActivity, [
     super();
     Object.assign(this, actionActivity);
     this.actionId = actionActivity.action.id;
+    this.action = new ActionDto(actionActivity.action);
     this.actionName = actionActivity.action.name;
     this.user = new ProfileDto(actionActivity.user);
     this.likes =

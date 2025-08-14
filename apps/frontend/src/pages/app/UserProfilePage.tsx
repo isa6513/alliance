@@ -14,9 +14,9 @@ import {
   PostDto,
   forumFindPostsByUser,
   userRemoveFriend,
-  ActionDto,
   actionsActionRelations,
   UserActionDto,
+  ActionActivityDto,
 } from "@alliance/shared/client";
 import ProfileImage from "../../components/ProfileImage";
 import UserActivityCard from "../../components/UserActivityCard";
@@ -25,7 +25,7 @@ import FriendRequestButton from "../../components/FriendRequestButton";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
 
 enum ProfileTabs {
-  Activity = "Activity",
+  Activity = "Actions",
   Forum = "Posts",
   Friends = "Friends",
 }
@@ -53,7 +53,9 @@ const UserProfilePage: React.FC = () => {
   const [isMe, setIsMe] = useState(false);
   const [selectedTab, setSelectedTab] = useState(ProfileTabs.Activity);
 
-  const [completedActions, setCompletedActions] = useState<ActionDto[]>([]);
+  const [completedActions, setCompletedActions] = useState<ActionActivityDto[]>(
+    []
+  );
   const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
   const [friends, setFriends] = useState<ProfileDto[]>([]);
   const [actionRelations, setActionRelations] = useState<
@@ -265,11 +267,11 @@ const UserProfilePage: React.FC = () => {
                   No actions completed yet
                 </p>
               )}
-              {completedActions?.map((action) => (
+              {completedActions?.map((activity) => (
                 <UserActivityCard
-                  action={action}
-                  key={action.id}
-                  relation={actionRelations.get(action.id)}
+                  activity={activity}
+                  key={activity.id}
+                  relation={actionRelations.get(activity.actionId)}
                 />
               ))}
             </div>

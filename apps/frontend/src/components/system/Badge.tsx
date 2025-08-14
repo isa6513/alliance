@@ -2,14 +2,23 @@ import { PropsWithChildren } from "react";
 
 interface BadgeProps extends PropsWithChildren {
   className?: string;
+  size?: "sm" | "lg";
 }
 
-const Badge: React.FC<BadgeProps> = ({ children, className }: BadgeProps) => {
+const Badge: React.FC<BadgeProps> = ({
+  children,
+  className,
+  size = "sm",
+}: BadgeProps) => {
   return (
     <div
       className={`${
         className ?? ""
-      } px-3 py-1 self-start text-xs font-semibold whitespace-nowrap rounded-sm flex items-center justify-center bg-stone-200 text-gray-800 `}
+      } self-start font-semibold whitespace-nowrap flex items-center justify-center bg-stone-200 text-gray-800 ${
+        size === "sm"
+          ? "text-xs py-1 px-3 rounded-sm"
+          : "py-2 px-3 text-sm rounded-md"
+      }`}
     >
       {children}
     </div>

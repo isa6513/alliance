@@ -307,18 +307,12 @@ export class ActionsService {
     return map;
   }
 
-  async findCompletedForUser(userId: number): Promise<ActionDto[]> {
-    const userActions = await this.userActionRepository.find({
-      where: { user: { id: userId }, status: UserActionRelation.completed },
-      relations: ['action', 'user'],
+  async findCompletedForUser(userId: number): Promise<ActionActivityDto[]> {
+    const activities = await this.actionActivityRepository.find({
+      where: { userId, type: ActionActivityType.USER_COMPLETED },
+      relations: ['action'],
     });
-    return userActions.map((ua) => ({
-      ...ua.action,
-      relation: ua,
-      usersJoined: ua.action.usersJoined,
-      usersCompleted: ua.action.usersCompleted,
-      status: ua.action.status,
-    }));
+    return activities.map((activity) => new ActionActivityDto(activity));
   }
 
   async userCoordinatesForAction(actionId: number): Promise<LatLonDto[]> {

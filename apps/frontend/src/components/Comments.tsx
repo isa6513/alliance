@@ -16,9 +16,10 @@ import { useAuth } from "../lib/AuthContext";
 export interface CommentsProps {
   objectId: number;
   type: CommentParentObject;
+  compact?: boolean;
 }
 
-const Comments = ({ objectId, type }: CommentsProps) => {
+const Comments = ({ objectId, type, compact }: CommentsProps) => {
   const [replyContent, setReplyContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -165,6 +166,7 @@ const Comments = ({ objectId, type }: CommentsProps) => {
                 isSubmitting={isSubmitting}
                 newlyAddedReplies={newlyAddedReplies}
                 highlightedReplyId={highlightedReplyId}
+                compact={compact}
               />
             ))}
         </div>
@@ -178,6 +180,7 @@ const Comments = ({ objectId, type }: CommentsProps) => {
           onSubmit={handleSubmitReply}
           isSubmitting={isSubmitting}
           setReplyingTo={setReplyingTo}
+          compact={compact}
         />
       ) : !user ? (
         <div className="text-center py-6 bg-gray-50 rounded-lg">

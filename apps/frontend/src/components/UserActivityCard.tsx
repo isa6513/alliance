@@ -4,19 +4,20 @@ import Badge from "./system/Badge";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router";
 import { useCallback } from "react";
-import { ActionDto, UserActionDto } from "@alliance/shared/client";
+import { ActionActivityDto, UserActionDto } from "@alliance/shared/client";
+import Comments from "./Comments";
 
 interface UserActivityCardProps {
-  action: ActionDto;
+  activity: ActionActivityDto;
   relation: UserActionDto | undefined;
 }
 
-const UserActivityCard = ({ action, relation }: UserActivityCardProps) => {
+const UserActivityCard = ({ activity, relation }: UserActivityCardProps) => {
   const navigate = useNavigate();
 
   const handleClick = useCallback(() => {
-    navigate(`/actions/${action.id}`);
-  }, [action.id, navigate]);
+    navigate(`/actions/${activity.actionId}/activity/${activity.id}`);
+  }, [activity.actionId, activity.id, navigate]);
 
   const timeSinceCompleted =
     relation && relation.dateCompleted
@@ -32,17 +33,25 @@ const UserActivityCard = ({ action, relation }: UserActivityCardProps) => {
       <Card
         className="block bg-page text-[11pt]  flex-1 border-b"
         style={CardStyle.White}
-        onClick={handleClick}
       >
-        <div className="flex items-center justify-start w-[100%] space-x-3">
-          <Badge className="!bg-[#5d9c2d] text-white">
-            Completed {relation?.dateCompleted ? timeSinceCompleted : ""}
-          </Badge>
-          <p className="font-medium">{action.name}</p>
+        <div className="flex flex-row justify-between">
+          <div className="flex items-center justify-start w-[100%] space-x-3">
+            <Badge className="!bg-green text-white" size="lg">
+              Completed {relation?.dateCompleted ? timeSinceCompleted : ""}
+            </Badge>
+            <p
+              className="font-medium cursor-pointer hover:underline"
+              onClick={handleClick}
+            >
+              {activity.action.name}
+            </p>
+          </div>
         </div>
         <div className="flex items-center justify-between ">
-          <p>{action.shortDescription}</p>
+          <p>{activity.description}</p>
         </div>
+        <p className="font-medium">Comments</p>
+        <Comments objectId={activity.id} type="activity" compact />
       </Card>
     </div>
   );
