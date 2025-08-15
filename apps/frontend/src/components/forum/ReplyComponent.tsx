@@ -278,7 +278,7 @@ const ReplyComponent = ({
     } else {
       // Default implementation using forumUpdateComment
       try {
-        const response = await forumUpdateComment({
+        await forumUpdateComment({
           path: { id: id.toString() },
           body: { content },
         });

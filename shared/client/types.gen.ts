@@ -110,20 +110,30 @@ export type User = {
     anonymous: boolean;
 };
 
-export type UserActionRelation = 'completed' | 'joined' | 'seen' | 'declined' | 'none';
-
-export type UserActionDto = {
-    status: UserActionRelation;
-    dateCommitted?: string;
-    dateCompleted?: string;
-    deadline: string;
-    actionId: number;
-};
+/**
+ * Type of action activity
+ */
+export type ActionActivityType = 'user_joined' | 'user_completed';
 
 /**
  * Type of the action
  */
 export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
+
+export type ActionActivity = {
+    id: number;
+    /**
+     * Type of action activity
+     */
+    type: ActionActivityType;
+    actionId: number;
+    userId: number;
+    createdAt: string;
+    dollar_amount?: number;
+    description?: string;
+    attachments?: Array<string>;
+    likes: Array<User>;
+};
 
 /**
  * Number of users who have joined the action
@@ -216,6 +226,7 @@ export type ActionDto = {
      * Number of users who have joined the action
      */
     usersJoined: number;
+    activities: Array<Array<ActionActivity>>;
     /**
      * Number of users who have joined the action
      */
@@ -226,16 +237,6 @@ export type ActionDto = {
     usersCompleted: number;
     events: Array<ActionEventDto>;
 };
-
-export type LatLonDto = {
-    latitude: number;
-    longitude: number;
-};
-
-/**
- * Type of action activity
- */
-export type ActionActivityType = 'user_joined' | 'user_completed';
 
 export type CommentParentObject = 'post' | 'action' | 'activity';
 
@@ -267,6 +268,25 @@ export type ActionActivityDto = {
     actionName: string;
     likes: Array<ProfileDto>;
     comments: Array<CommentDto>;
+};
+
+export type UserActionRelation = 'joined' | 'completed' | 'none';
+
+export type UserActionRelationDto = {
+    relation: UserActionRelation;
+};
+
+export type _Map = {
+    [key: string]: unknown;
+};
+
+export type ActionRelationsDto = {
+    relations: _Map;
+};
+
+export type LatLonDto = {
+    latitude: number;
+    longitude: number;
 };
 
 export type CreateActionDto = {
@@ -1019,7 +1039,7 @@ export type ActionsJoinData = {
 };
 
 export type ActionsJoinResponses = {
-    200: UserActionDto;
+    200: ActionActivityDto;
 };
 
 export type ActionsJoinResponse = ActionsJoinResponses[keyof ActionsJoinResponses];
@@ -1034,7 +1054,7 @@ export type ActionsCompleteData = {
 };
 
 export type ActionsCompleteResponses = {
-    200: UserActionDto;
+    200: ActionActivityDto;
 };
 
 export type ActionsCompleteResponse = ActionsCompleteResponses[keyof ActionsCompleteResponses];
@@ -1049,7 +1069,7 @@ export type ActionsMyStatusData = {
 };
 
 export type ActionsMyStatusResponses = {
-    200: UserActionDto;
+    200: UserActionRelationDto;
 };
 
 export type ActionsMyStatusResponse = ActionsMyStatusResponses[keyof ActionsMyStatusResponses];
@@ -1067,6 +1087,19 @@ export type ActionsFindAllResponses = {
 
 export type ActionsFindAllResponse = ActionsFindAllResponses[keyof ActionsFindAllResponses];
 
+export type ActionsMyActivityData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/myActivity';
+};
+
+export type ActionsMyActivityResponses = {
+    200: Array<ActionActivityDto>;
+};
+
+export type ActionsMyActivityResponse = ActionsMyActivityResponses[keyof ActionsMyActivityResponses];
+
 export type ActionsMyActionRelationsData = {
     body?: never;
     path?: never;
@@ -1075,25 +1108,10 @@ export type ActionsMyActionRelationsData = {
 };
 
 export type ActionsMyActionRelationsResponses = {
-    200: Array<UserActionDto>;
+    200: ActionRelationsDto;
 };
 
 export type ActionsMyActionRelationsResponse = ActionsMyActionRelationsResponses[keyof ActionsMyActionRelationsResponses];
-
-export type ActionsActionRelationsData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/actions/actionRelations/{id}';
-};
-
-export type ActionsActionRelationsResponses = {
-    200: Array<UserActionDto>;
-};
-
-export type ActionsActionRelationsResponse = ActionsActionRelationsResponses[keyof ActionsActionRelationsResponses];
 
 export type ActionsUserLocationsData = {
     body?: never;

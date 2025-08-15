@@ -13,7 +13,6 @@ import {
   ManyToMany,
   ManyToOne,
 } from 'typeorm';
-import { UserAction } from '../actions/entities/user-action.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Communique } from '../communiques/entities/communique.entity';
 import { Allow, IsNotEmpty, IsOptional } from 'class-validator';
@@ -22,6 +21,7 @@ import { Friend } from './friend.entity';
 import { Notification } from '../notifs/entities/notification.entity';
 import { City } from 'src/geo/city.entity';
 import { Type } from 'class-transformer';
+import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 
 @Entity()
 export class User {
@@ -65,8 +65,8 @@ export class User {
   @ManyToMany(() => Communique, (communique) => communique.usersRead)
   communiquesRead: Communique[];
 
-  @OneToMany(() => UserAction, (userAction) => userAction.user)
-  actionRelations: UserAction[];
+  @OneToMany(() => ActionActivity, (activity) => activity.user)
+  activities: ActionActivity[];
 
   @OneToMany(() => Friend, (friend) => friend.requester)
   sentFriendRequests: Friend[];

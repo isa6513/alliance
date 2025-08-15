@@ -4,7 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Action } from '../actions/entities/action.entity';
 import { IsUserAlreadyExist } from './validators/user-already-exists.validator';
-import { UserAction } from '../actions/entities/user-action.entity';
 import { Communique } from '../communiques/entities/communique.entity';
 import { UserController } from './user.controller';
 import { Friend } from './friend.entity';
@@ -12,12 +11,13 @@ import { City } from '../geo/city.entity';
 import { Notification } from '../notifs/entities/notification.entity';
 import { PrefillUser } from './prefill-user.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { ActionActivity } from '../actions/entities/action-activity.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     TypeOrmModule.forFeature([Action]),
-    TypeOrmModule.forFeature([UserAction]),
+    TypeOrmModule.forFeature([ActionActivity]),
     TypeOrmModule.forFeature([Communique]),
     TypeOrmModule.forFeature([Friend]),
     TypeOrmModule.forFeature([City]),

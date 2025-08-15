@@ -9,10 +9,10 @@ import NavbarHorizontal from "./components/NavbarHorizontal";
 import { useEffect, useState } from "react";
 import {
   actionsFindAll,
-  actionsMyActionRelations,
+  actionsMyActivity,
   forumFindAllPosts,
   PostDto,
-  UserActionDto,
+  UserActionRelation,
   userMyProfile,
 } from "@alliance/shared/client";
 import { ActionDto } from "@alliance/shared/client";
@@ -28,7 +28,7 @@ export interface RouteMatches {
 
 export interface LoaderData {
   actions: ActionDto[];
-  relations: Map<number, UserActionDto["status"]> | undefined;
+  relations: Map<number, UserActionRelation> | undefined;
   posts: PostDto[];
   authRefreshNeeded: boolean;
   revalidate: () => void;
@@ -37,26 +37,29 @@ export interface LoaderData {
 export async function clientLoader() {
   localStorage.setItem("revalidate", "false");
 
-  const [actions, relations, posts, profile] = await Promise.all([
+  const [actions, activities, posts, profile] = await Promise.all([
     actionsFindAll(),
-    actionsMyActionRelations(),
+    actionsMyActivity(),
     forumFindAllPosts(),
     userMyProfile(),
   ]);
-  console.log(profile);
+  console.log(activities);
 
   let authRefreshNeeded = false;
   if (
-    relations.error &&
-    (relations.error as { statusCode: number }).statusCode === 401
+    activities.error &&
+    (activities.error as { statusCode: number }).statusCode === 401
   ) {
     authRefreshNeeded = true;
   }
 
-  const relationList = relations.data ?? [];
-  const actionToRelationMap = new Map<number, UserActionDto["status"]>();
-  relationList.forEach((relation) => {
-    actionToRelationMap.set(relation.actionId, relation.status);
+  const activityList = activities.data ?? [];
+  const actionToRelationMap = new Map<number, UserActionRelation>();
+  activityList.forEach((activity) => {
+    actionToRelationMap.set(
+      activity.actionId,
+      activity.type === "user_joined" ? "joined" : "completed"
+    );
   });
 
   const revalidateCallback = () => {
@@ -65,7 +68,7 @@ export async function clientLoader() {
 
   return {
     actions: actions.data ?? [],
-    relations: relations.data !== undefined ? actionToRelationMap : undefined,
+    relations: actionToRelationMap,
     posts: posts.data ?? [],
     revalidate: revalidateCallback,
     authRefreshNeeded,

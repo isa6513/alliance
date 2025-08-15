@@ -13,8 +13,6 @@ import {
   PostDto,
   forumFindPostsByUser,
   userRemoveFriend,
-  actionsActionRelations,
-  UserActionDto,
 } from "@alliance/shared/client";
 import ProfileImage from "../../components/ProfileImage";
 import UserActivityCard from "../../components/UserActivityCard";
@@ -59,9 +57,6 @@ const UserProfilePage: React.FC = () => {
 
   const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
   const [friends, setFriends] = useState<ProfileDto[]>([]);
-  const [actionRelations, setActionRelations] = useState<
-    Map<number, UserActionDto>
-  >(new Map());
 
   const { activities: completedActions, handleLikeActivity } = useActivities({
     list: ActivityList.User,
@@ -91,17 +86,6 @@ const UserProfilePage: React.FC = () => {
           path: { id: userId },
         });
         setFriendStatus(friendStatusData?.status ?? "none");
-
-        const { data: actionRelationsData } = await actionsActionRelations({
-          path: { id: userId },
-        });
-        if (actionRelationsData) {
-          const relationMap = new Map<number, UserActionDto>();
-          actionRelationsData?.forEach((relation) => {
-            relationMap.set(relation.actionId, relation);
-          });
-          setActionRelations(relationMap);
-        }
 
         const { data: forumPostsData } = await forumFindPostsByUser({
           path: { id: userId },
@@ -251,7 +235,7 @@ const UserProfilePage: React.FC = () => {
         </div>
         <div className="py-3">
           {selectedTab === ProfileTabs.Activity && (
-            <div className="space-y-2">
+            <div className="space-y-4">
               {completedActions.length === 0 && (
                 <p className="text-center text-stone-500">
                   No actions completed yet
@@ -261,7 +245,6 @@ const UserProfilePage: React.FC = () => {
                 <UserActivityCard
                   activity={activity}
                   key={activity.id}
-                  relation={actionRelations.get(activity.actionId)}
                   handleLike={handleLikeActivity}
                 />
               ))}

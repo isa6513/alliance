@@ -1,32 +1,10 @@
-import {
-  ApiProperty,
-  ApiPropertyOptional,
-  OmitType,
-  PartialType,
-  PickType,
-} from '@nestjs/swagger';
+import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { Action } from '../entities/action.entity';
-import { UserAction } from '../entities/user-action.entity';
 import { ActionEvent, ActionStatus } from '../entities/action-event.entity';
 import { ActionActivity } from '../entities/action-activity.entity';
 import { ProfileDto } from 'src/user/user.dto';
 import { CommentDto } from 'src/forum/dto/comment.dto';
-
-export class UserActionDto extends PickType(UserAction, [
-  'status',
-  'deadline',
-  'dateCommitted',
-  'dateCompleted',
-]) {
-  @ApiProperty({ type: Number })
-  actionId: number;
-
-  constructor(userAction: UserAction) {
-    super();
-    Object.assign(this, userAction);
-    this.actionId = userAction.action.id;
-  }
-}
+import { UserActionRelation } from '../actions.service';
 
 export class ActionEventDto extends PickType(ActionEvent, [
   'id',
@@ -48,7 +26,6 @@ export class CreateActionEventDto extends OmitType(ActionEventDto, ['id']) {}
 export class ActionDto extends OmitType(Action, [
   'createdAt',
   'updatedAt',
-  'userRelations',
   'events',
 ]) {
   @ApiProperty()
@@ -78,14 +55,10 @@ export class CreateActionDto extends OmitType(ActionDto, [
   'id',
   'usersJoined',
   'events',
+  'activities',
   'usersCompleted',
   'status',
 ]) {}
-
-export class ActionWithRelationDto extends ActionDto {
-  @ApiPropertyOptional({ type: UserActionDto })
-  relation?: Omit<UserActionDto, 'action'> | null;
-}
 
 export class UpdateActionDto extends PartialType(CreateActionDto) {}
 
@@ -141,3 +114,8 @@ export class UpdateActionActivityDto extends PickType(ActionActivityDto, [
   'description',
   'attachments',
 ]) {}
+
+export class ActionRelationsDto {
+  @ApiProperty({ type: () => Map<number, UserActionRelation> })
+  relations: Map<number, UserActionRelation>;
+}

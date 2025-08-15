@@ -6,7 +6,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { User } from './user.entity';
-import { UserActionRelation } from '../actions/entities/user-action.entity';
 import { Friend, FriendStatus } from './friend.entity';
 import { OnboardingDto, ProfileDto, UpdateProfileDto } from './user.dto';
 import { City } from 'src/geo/city.entity';
@@ -94,20 +93,6 @@ export class UserService {
 
   async findOneByReferralCode(referralCode: string): Promise<User | null> {
     return this.userRepository.findOneBy({ referralCode });
-  }
-
-  async getActionRelation(
-    id: number,
-    actionId: number,
-  ): Promise<UserActionRelation> {
-    const user = await this.userRepository.findOne({
-      where: { id },
-    });
-
-    const relation: UserActionRelation =
-      user?.actionRelations.find((relation) => relation.action.id === actionId)
-        ?.status ?? UserActionRelation.none;
-    return relation;
   }
 
   async remove(id: number): Promise<void> {

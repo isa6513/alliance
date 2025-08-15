@@ -6,11 +6,11 @@ import {
   OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
-import { UserAction, UserActionRelation } from './user-action.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { Allow, IsArray, IsNotEmpty, IsOptional } from 'class-validator';
 import { ActionEvent, ActionStatus } from './action-event.entity';
+import { ActionActivity, ActionActivityType } from './action-activity.entity';
 
 export enum ActionTaskType {
   Funding = 'Funding', //giving money to a particular cause
@@ -108,17 +108,6 @@ export class Action {
   @Type(() => Date)
   updatedAt: Date;
 
-  @OneToMany(() => UserAction, (userAction) => userAction.action)
-  @ApiProperty({
-    description: 'Relations between users and the action',
-    type: () => [UserAction],
-    isArray: true,
-  })
-  @Allow()
-  @IsArray()
-  @Type(() => UserAction)
-  userRelations: UserAction[];
-
   @OneToMany(() => ActionEvent, (event) => event.action)
   @ApiProperty({
     description: 'Events associated with the action',
@@ -136,13 +125,22 @@ export class Action {
   })
   get usersJoined(): number {
     return (
-      this.userRelations?.filter(
-        (ur) =>
-          ur.status === UserActionRelation.joined ||
-          ur.status === UserActionRelation.completed,
+      this.activities?.filter(
+        (activity) => activity.type === ActionActivityType.USER_JOINED,
       ).length || 0
     );
   }
+
+  @OneToMany(() => ActionActivity, (activity) => activity.action)
+  @ApiProperty({
+    description: 'Activities associated with the action',
+    type: () => [ActionActivity],
+    isArray: true,
+  })
+  @Allow()
+  @IsArray()
+  @Type(() => ActionActivity)
+  activities: ActionActivity[];
 
   @Expose()
   @ApiProperty({
@@ -168,8 +166,8 @@ export class Action {
   })
   get usersCompleted(): number {
     return (
-      this.userRelations?.filter(
-        (ur) => ur.status === UserActionRelation.completed,
+      this.activities?.filter(
+        (activity) => activity.type === ActionActivityType.USER_COMPLETED,
       ).length || 0
     );
   }

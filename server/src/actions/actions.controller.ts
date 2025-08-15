@@ -14,12 +14,11 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { ActionsService } from './actions.service';
+import { ActionsService, UserActionRelationDto } from './actions.service';
 import {
   ActionDto,
   CreateActionDto,
   UpdateActionDto,
-  UserActionDto,
   LatLonDto,
   CreateActionEventDto,
   ActionActivityDto,
@@ -58,7 +57,7 @@ export class ActionsController {
 
   @Post('join/:id')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: UserActionDto })
+  @ApiOkResponse({ type: ActionActivityDto })
   join(@Request() req: JwtRequest, @Param('id') id: string) {
     if (!req.user) {
       throw new UnauthorizedException('User not found');
@@ -68,7 +67,7 @@ export class ActionsController {
 
   @Post('complete/:id')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: UserActionDto })
+  @ApiOkResponse({ type: ActionActivityDto })
   complete(@Request() req: JwtRequest, @Param('id') id: string) {
     if (!req.user) {
       throw new UnauthorizedException('User not found');
@@ -78,22 +77,25 @@ export class ActionsController {
 
   @Get('myStatus/:id')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: UserActionDto })
+  @ApiOkResponse({ type: UserActionRelationDto })
   @ApiOperation({
     summary: "Get the authenticated user's relation to a single action",
   })
   async myStatus(
     @Request() req: JwtRequest,
     @Param('id') id: string,
-  ): Promise<UserActionDto | null> {
+  ): Promise<UserActionRelationDto> {
     if (!req.user) {
       throw new UnauthorizedException('User not found');
     }
-    const userAction = await this.actionsService.getActionRelation(
+    const relation = await this.actionsService.getActionRelation(
       +id,
       req.user.sub,
     );
-    return userAction ? new UserActionDto(userAction) : null;
+    if (!relation) {
+      throw new NotFoundException('User action not found');
+    }
+    return { relation: relation };
   }
 
   //doesn't include drafts
@@ -104,18 +106,11 @@ export class ActionsController {
     return this.actionsService.findPublic();
   }
 
-  @Get('myActionRelations')
+  @Get('myActivity')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: [UserActionDto] })
-  async myActionRelations(@Request() req: JwtRequest) {
-    return this.actionsService.findActionRelations(req.user?.sub);
-  }
-
-  @Get('actionRelations/:id')
-  @Public()
-  @ApiOkResponse({ type: [UserActionDto] })
-  async actionRelations(@Param('id', ParseIntPipe) id: number) {
-    return this.actionsService.findActionRelations(id);
+  @ApiOkResponse({ type: [ActionActivityDto] })
+  async myActivity(@Request() req: JwtRequest) {
+    return this.actionsService.getActivityForUser(req.user?.sub);
   }
 
   @Get('userlocations/:id')

@@ -6,13 +6,14 @@ import {
   CreateActionEventDto,
 } from '../src/actions/dto/action.dto';
 import { createTestApp, TestContext } from './e2e-test-utils';
-import { UserActionRelation } from '../src/actions/entities/user-action.entity';
 import { Repository } from 'typeorm';
 import {
   ActionEvent,
   ActionStatus,
   NotificationType,
 } from '../src/actions/entities/action-event.entity';
+import { UserActionRelation } from 'src/actions/actions.service';
+import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
 
 describe('Actions (e2e)', () => {
   let ctx: TestContext;
@@ -135,16 +136,16 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       expect(res2.status).toBe(200);
-      expect(res2.body.status).toBe(UserActionRelation.joined);
+      expect(res2.body.relation).toBe(UserActionRelation.Joined);
     });
 
-    it('user can see their relation to all actions', async () => {
+    it('user can see their action activities', async () => {
       const res = await request(ctx.app.getHttpServer())
-        .get('/actions/myActionRelations')
+        .get('/actions/myActivity')
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       expect(res.status).toBe(200);
-      expect(res.body[0].status).toBe(UserActionRelation.joined);
+      expect(res.body[0].type).toBe(ActionActivityType.USER_JOINED);
     });
 
     it('can fetch all actions with status', async () => {
@@ -545,14 +546,6 @@ describe('Actions (e2e)', () => {
       .send(incompleteEvent);
 
     expect(res.status).toBe(400);
-  });
-
-  it('myActionRelations returns actions with user relation', async () => {
-    const res = await request(ctx.app.getHttpServer())
-      .get('/actions/myActionRelations')
-      .set('Authorization', `Bearer ${ctx.accessToken}`);
-
-    expect(res.status).toBe(200);
   });
 
   describe('Automatic State Transitions', () => {

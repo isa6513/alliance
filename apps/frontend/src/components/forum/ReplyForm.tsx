@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Button, { ButtonColor } from "../system/Button";
 
 interface ReplyFormProps {
-  parentId?: number | null;
+  parentId: number | null;
   onCancel?: () => void;
   replyContent: string;
   setReplyContent: (content: string) => void;
@@ -43,6 +43,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
               : "Add a comment..."
           }
           required
+          autoFocus={parentId !== null}
           onFocus={() => {
             setExpanded(true);
           }}

@@ -10,7 +10,6 @@ import {
   LatLonDto,
   CreateActionEventDto,
   ActionActivityDto,
-  UserActionDto,
   UpdateActionActivityDto,
 } from './dto/action.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,7 +21,6 @@ import {
 } from './entities/action-event.entity';
 import { ILike, In, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
-import { UserAction, UserActionRelation } from './entities/user-action.entity';
 import {
   ActionActivity,
   ActionActivityType,
@@ -36,6 +34,18 @@ import {
   CommentParentObject,
 } from 'src/forum/entities/comment.entity';
 import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
+import { ApiProperty } from '@nestjs/swagger';
+
+export enum UserActionRelation {
+  Joined = 'joined',
+  Completed = 'completed',
+  None = 'none',
+}
+
+export class UserActionRelationDto {
+  @ApiProperty({ enum: UserActionRelation, enumName: 'UserActionRelation' })
+  relation: UserActionRelation;
+}
 
 @Injectable()
 export class ActionsService {
@@ -44,8 +54,6 @@ export class ActionsService {
     private actionRepository: Repository<Action>,
     @InjectRepository(ActionEvent)
     private readonly actionEventRepository: Repository<ActionEvent>,
-    @InjectRepository(UserAction)
-    private readonly userActionRepository: Repository<UserAction>,
     @InjectRepository(ActionActivity)
     private readonly actionActivityRepository: Repository<ActionActivity>,
     @InjectRepository(Comment)
@@ -62,7 +70,7 @@ export class ActionsService {
   findAll(): Promise<ActionDto[]> {
     return this.actionRepository
       .find({
-        relations: ['userRelations', 'events'],
+        relations: ['events'],
       })
       .then((actions) => {
         return actions.map((action) => this.entityToDto(action));
@@ -81,7 +89,7 @@ export class ActionsService {
   findPublic(): Promise<ActionDto[]> {
     return this.actionRepository
       .find({
-        relations: ['userRelations', 'events'],
+        relations: ['events', 'activities'],
       })
       .then((actions) => {
         return actions
@@ -93,7 +101,7 @@ export class ActionsService {
   async findOne(id: number): Promise<Action> {
     const action = await this.actionRepository.findOne({
       where: { id },
-      relations: ['userRelations', 'events'],
+      relations: ['events', 'activities'],
     });
     if (!action) {
       throw new NotFoundException('Action not found');
@@ -101,92 +109,47 @@ export class ActionsService {
     return instanceToPlain(action) as Action;
   }
 
-  async setActionRelation(
-    actionId: number,
-    userId: number,
-    status: UserActionRelation,
-  ): Promise<UserAction> {
-    const action = await this.findOne(actionId);
-    const user = await this.userService.findOne(userId);
-    if (!action || !user) {
-      throw new NotFoundException('Action or user not found');
-    }
-    let userAction = await this.userActionRepository.findOne({
-      where: { user: { id: userId }, action: { id: actionId } },
-      relations: ['user', 'action'],
-    });
-
-    if (!userAction) {
-      userAction = this.userActionRepository.create({
-        user,
-        action,
-        status,
-      });
-    } else {
-      userAction.status = status;
-    }
-
-    try {
-      return await this.userActionRepository.save(userAction);
-    } catch (error) {
-      if (
-        //TODO
-        error.code === '23505' &&
-        error.constraint === 'UQ_649286366665d12427427df5439'
-      ) {
-        const existingUserAction = await this.userActionRepository.findOne({
-          where: { user: { id: userId }, action: { id: actionId } },
-          relations: ['user', 'action'],
-        });
-        if (existingUserAction) {
-          existingUserAction.status = status;
-          return await this.userActionRepository.save(existingUserAction);
-        }
-      }
-      throw error;
-    }
-  }
-
   async getActionRelation(
     actionId: number,
     userId: number,
-  ): Promise<UserAction | null> {
-    let userAction = await this.userActionRepository.findOne({
+  ): Promise<UserActionRelation | null> {
+    const activities = await this.actionActivityRepository.find({
       where: { action: { id: actionId }, user: { id: userId } },
     });
-    if (!userAction) {
-      console.log('no userAction found, setting to none');
-      userAction = await this.setActionRelation(
-        actionId,
-        userId,
-        UserActionRelation.none,
-      );
+    if (
+      activities.some(
+        (activity) => activity.type === ActionActivityType.USER_COMPLETED,
+      )
+    ) {
+      return UserActionRelation.Completed;
     }
-    return userAction;
+    if (
+      activities.some(
+        (activity) => activity.type === ActionActivityType.USER_JOINED,
+      )
+    ) {
+      return UserActionRelation.Joined;
+    }
+    return UserActionRelation.None;
   }
 
-  async joinAction(actionId: number, userId: number): Promise<UserAction> {
-    const default_days = 3;
-
-    const relation = await this.setActionRelation(
-      actionId,
-      userId,
-      UserActionRelation.joined,
-    );
-    relation.dateCommitted = new Date();
-    relation.deadline = new Date(
-      Date.now() + 1000 * 60 * 60 * 24 * default_days,
-    );
-    this.eventEmitter.emit('action.delta', { actionId, delta: +1 });
+  async createActionActivity(
+    actionId: number,
+    userId: number,
+    type: ActionActivityType,
+  ): Promise<ActionActivityDto> {
+    if (type === ActionActivityType.USER_JOINED) {
+      this.eventEmitter.emit('action.delta', { actionId, delta: +1 });
+    }
 
     const action = await this.findOne(actionId);
     const user = await this.userService.findOne(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    // Create activity record for user joining
+
     const activity = this.actionActivityRepository.create({
-      type: ActionActivityType.USER_JOINED,
+      type: type,
       actionId: actionId,
       userId: userId,
       action: action,
@@ -194,55 +157,37 @@ export class ActionsService {
     });
     const savedActivity = await this.actionActivityRepository.save(activity);
 
-    if (user) {
-      const activityDto = new ActionActivityDto(savedActivity);
-      this.eventEmitter.emit('action.activity', {
-        actionId,
-        activity: activityDto,
-      });
-    }
-
-    const result = await this.userActionRepository.save(relation);
+    const activityDto = new ActionActivityDto(savedActivity);
+    this.eventEmitter.emit('action.activity', {
+      actionId,
+      activity: activityDto,
+    });
 
     await this.checkAndProcessAutomaticTransitions(actionId);
 
-    return result;
+    return activityDto;
   }
 
-  async completeAction(actionId: number, userId: number): Promise<UserAction> {
-    const relation = await this.setActionRelation(
+  async joinAction(
+    actionId: number,
+    userId: number,
+  ): Promise<ActionActivityDto> {
+    return this.createActionActivity(
       actionId,
       userId,
-      UserActionRelation.completed,
+      ActionActivityType.USER_JOINED,
     );
+  }
 
-    const action = await this.findOne(actionId);
-    const user = await this.userService.findOne(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    // Create activity record for user completing
-    const activity = this.actionActivityRepository.create({
-      type: ActionActivityType.USER_COMPLETED,
+  async completeAction(
+    actionId: number,
+    userId: number,
+  ): Promise<ActionActivityDto> {
+    return this.createActionActivity(
       actionId,
       userId,
-      action: action,
-      user: user,
-    });
-    const savedActivity = await this.actionActivityRepository.save(activity);
-
-    if (user) {
-      const activityDto = new ActionActivityDto(savedActivity);
-      this.eventEmitter.emit('action.activity', {
-        actionId,
-        activity: activityDto,
-      });
-    }
-
-    await this.checkAndProcessAutomaticTransitions(actionId);
-
-    return relation;
+      ActionActivityType.USER_COMPLETED,
+    );
   }
 
   async update(
@@ -278,10 +223,10 @@ export class ActionsService {
 
   countCommitted(actionId: number): Observable<number> {
     return from(
-      this.userActionRepository.count({
+      this.actionActivityRepository.count({
         where: {
           action: { id: actionId },
-          status: In(['joined', 'completed']),
+          type: ActionActivityType.USER_JOINED,
         },
       }),
     );
@@ -290,13 +235,13 @@ export class ActionsService {
   async countCommittedBulk(ids: number[]): Promise<Record<number, number>> {
     if (!ids.length) return {};
 
-    const rows = await this.userActionRepository
+    const rows = await this.actionActivityRepository
       .createQueryBuilder('ua')
       .select('ua.actionId', 'id')
       .addSelect('COUNT(*)', 'count')
       .where('ua.actionId IN (:...ids)', { ids })
-      .andWhere('ua.status IN (:...statuses)', {
-        statuses: ['joined', 'completed'],
+      .andWhere('ua.type IN (:...types)', {
+        types: [ActionActivityType.USER_JOINED],
       })
       .groupBy('ua.actionId')
       .getRawMany<{ id: string; count: string }>();
@@ -316,24 +261,21 @@ export class ActionsService {
   }
 
   async userCoordinatesForAction(actionId: number): Promise<LatLonDto[]> {
-    const userActions = await this.userActionRepository.find({
+    const joinActivities = await this.actionActivityRepository.find({
       where: {
         action: { id: actionId },
-        status: In([UserActionRelation.joined, UserActionRelation.completed]),
+        type: ActionActivityType.USER_JOINED,
       },
       relations: ['user', 'user.city'],
     });
-    return userActions
+    return joinActivities
       .filter(
-        (
-          ua,
-        ): ua is typeof ua & {
-          user: { city: NonNullable<typeof ua.user.city> };
-        } => ua.user.city !== null,
+        (activity) =>
+          activity.user.city !== null && activity.user.city !== undefined,
       )
-      .map((ua) => ({
-        latitude: ua.user.city.latitude,
-        longitude: ua.user.city.longitude,
+      .map((activity) => ({
+        latitude: activity.user.city!.latitude,
+        longitude: activity.user.city!.longitude,
       }));
   }
 
@@ -420,34 +362,33 @@ export class ActionsService {
     }
     // Clear in order to respect foreign key constraints
     await this.actionActivityRepository.delete({});
-    await this.userActionRepository.delete({});
     await this.actionEventRepository.delete({});
     await this.actionRepository.delete({});
   }
 
   async setTestRelations(id: number) {
     const actions = await this.actionRepository.find({
-      relations: ['userRelations', 'events'],
+      relations: ['events'],
     });
     for (const action of actions) {
       if (action.status === ActionStatus.MemberAction) {
-        await this.setActionRelation(action.id, id, UserActionRelation.joined);
+        await this.createActionActivity(
+          action.id,
+          id,
+          ActionActivityType.USER_JOINED,
+        );
       }
     }
   }
 
-  async findActionRelations(userId: number): Promise<UserActionDto[]> {
-    let userActions = await this.userActionRepository.find({
+  async getActivityForUser(userId: number): Promise<ActionActivityDto[]> {
+    const activities = await this.actionActivityRepository.find({
       where: {
         user: { id: userId },
-        status: In(['joined', 'completed']),
       },
-      relations: ['action', 'user', 'action.events'],
+      relations: ['action', 'user', 'likes'],
     });
-    userActions = userActions.filter(
-      (ua) => ua.action.status !== ActionStatus.Draft,
-    );
-    return userActions.map((ua) => new UserActionDto(ua));
+    return activities.map((activity) => new ActionActivityDto(activity));
   }
 
   async friendActivity(userId: number): Promise<ActionActivityDto[]> {

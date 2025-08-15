@@ -15,8 +15,9 @@ import {
   actionsMyStatus,
   actionsUserLocations,
   LatLonDto,
+  UserActionRelation,
 } from "@alliance/shared/client";
-import { ActionDto, UserActionDto } from "@alliance/shared/client";
+import { ActionDto } from "@alliance/shared/client";
 import { useActionCount } from "../../lib/useActionWebSocket";
 import TwoColumnSplit from "../../components/system/TwoColumnSplit";
 import ActionEventsPanel from "../../components/ActionEventsPanel";
@@ -103,9 +104,9 @@ export default function ActionPage() {
   }, [loaderData]);
   const id = idParam || String(action?.id);
 
-  const [userRelation, setUserRelation] = useState<
-    UserActionDto["status"] | null
-  >(null);
+  const [userRelation, setUserRelation] = useState<UserActionRelation | null>(
+    null
+  );
 
   const { isAuthenticated } = useAuth();
 
@@ -129,7 +130,7 @@ export default function ActionPage() {
           console.error("Failed to fetch user status", response.error);
         }
         if (response.data) {
-          setUserRelation(response.data.status);
+          setUserRelation(response.data.relation);
         }
       });
     }

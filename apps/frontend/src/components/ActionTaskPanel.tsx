@@ -1,4 +1,4 @@
-import { UserActionDto, ActionActivityDto } from "@alliance/shared/client";
+import { ActionActivityDto, UserActionRelation } from "@alliance/shared/client";
 import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
 import { StripeWrapper } from "./StripeWrapper";
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
@@ -29,7 +29,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 export type TaskPanelContext = {
   handleCompleteAction: () => void;
   handleJoinAction: () => void;
-  userRelation: UserActionDto["status"] | null;
+  userRelation: UserActionRelation | null;
   activities: ActionActivityDto[];
   handleLikeActivity: (activityId: number) => Promise<void>;
   setActivities: React.Dispatch<React.SetStateAction<ActionActivityDto[]>>;
