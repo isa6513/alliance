@@ -31,7 +31,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
     >
       <form onSubmit={onSubmit}>
         <textarea
-          className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-transparent border-none ${
+          className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-transparent border-none ${
             expanded ? "" : "resize-none"
           }`}
           rows={expanded ? 3 : 1}

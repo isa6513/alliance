@@ -49,7 +49,7 @@ const ActivityLikeButton = ({
           strokeWidth={2.5}
         ></path>
       </svg>
-      <p className="text-sm text-zinc-800">{likes}</p>
+      {likes > 0 && <p className="text-sm text-zinc-800">{likes}</p>}
     </div>
   );
 };

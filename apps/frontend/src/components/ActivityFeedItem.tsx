@@ -58,14 +58,14 @@ const ActivityFeedItem = ({
     return (
       <div
         key={activity.id}
-        className="flex items-start space-x-3 cursor-pointer hover:bg-gray-100 rounded-md p-3 border-t border-gray-200"
+        className="flex items-start space-x-3 rounded-md p-3 border-t border-gray-200"
         onClick={() => {
           navigate(`/actions/${activity.actionId}/activity/${activity.id}`);
         }}
       >
         <div className="flex-1 min-w-0">
           <div className="flex flex-row justify-between items-center">
-            <div className="flex flex-row gap-x-2">
+            <div className="flex flex-row gap-x-2 hover:underline cursor-pointer">
               <p className="text-gray-900">
                 {activity.user.profilePicture !== null && (
                   <img
