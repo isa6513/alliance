@@ -10,29 +10,22 @@ import {
   userUpdate,
   userFindMe,
   UpdateProfileDto,
-  forumFindPostsByUser,
-  userListFriends,
-  PostDto,
-  actionsFindCompletedForUser,
-  ActionDto,
-  ProfileDto,
 } from "@alliance/shared/client";
+import { useAppLoaderData } from "../../applayout";
 
 const ProfileEditPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Loading state to avoid flicker while we wait for auth context to resolve
-  const [loading, setLoading] = useState(true);
+  const { profile } = useAppLoaderData();
 
   // Editable form state
-  const [name, setName] = useState<string>("");
-  const [bio, setBio] = useState<string>("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [name, setName] = useState<string>(user?.name ?? "");
+  const [bio, setBio] = useState<string>(profile?.profileDescription ?? "");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(
+    profile?.profilePicture ?? null
+  );
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [completedActions, setCompletedActions] = useState<ActionDto[]>([]);
-  const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
-  const [friends, setFriends] = useState<ProfileDto[]>([]);
 
   /** initialise local state from user profile once available */
   useEffect(() => {
@@ -45,30 +38,7 @@ const ProfileEditPage: React.FC = () => {
         setName(user.name);
         setBio(response.data.profileDescription || "");
         setAvatarUrl(response.data.profilePicture || null);
-
-        const { data: friendsData } = await userListFriends({
-          path: { id: user.id },
-        });
-        if (friendsData) {
-          setFriends(friendsData);
-        }
-
-        const { data: forumPostsData } = await forumFindPostsByUser({
-          path: { id: user.id },
-        });
-        if (forumPostsData) {
-          setForumPosts(forumPostsData);
-        }
-
-        actionsFindCompletedForUser({ path: { id: user.id } }).then(
-          (response) => {
-            if (response.data) {
-              setCompletedActions(response.data);
-            }
-          }
-        );
       }
-      setLoading(false);
     }
     if (user) {
       setName(user.name); //prefill data from auth
@@ -143,14 +113,6 @@ const ProfileEditPage: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="bg-page pt-20 px-8 md:px-16 flex items-center justify-center">
-        <p className="text-stone-500">Loading profile…</p>
-      </div>
-    );
-  }
-
   if (!user) {
     return (
       <div className="bg-page pt-20 px-8 md:px-16 flex items-center justify-center">
@@ -166,7 +128,7 @@ const ProfileEditPage: React.FC = () => {
     <div className="bg-page w-full">
       <div className="max-w-[800px] mx-auto space-y-2">
         <div className="w-full h-[100px]"></div>
-        <div className="px-8 relative space-y-2 border-stone-300 border rounded mx-2 bg-white">
+        <div className="px-8 relative space-y-2 border-stone-300 border py-4 rounded mx-2 bg-white">
           <div className="relative w-fit">
             <ProfileImage
               src={
@@ -184,26 +146,26 @@ const ProfileEditPage: React.FC = () => {
               Change photo
             </label>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 py-2">
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border-none focus:outline-none text-[22pt] font-bold"
+              className="w-full border-none focus:outline-none !text-[30px] font-bold"
             />
           </div>
           {/* stats row */}
           <div className="flex flex-row gap-5 cursor-pointer">
-            <p>
-              <b>{completedActions.length} </b>
+            <p className="text-zinc-500">
+              <b className="text-zinc-900">n </b>
               actions completed
             </p>
-            <p>
-              <b>{forumPosts.length} </b>
+            <p className="text-zinc-500">
+              <b className="text-zinc-900">n </b>
               forum posts
             </p>
-            <p>
-              <b>{friends.length} </b>
+            <p className="text-zinc-500">
+              <b className="text-zinc-900">n </b>
               Friends
             </p>
           </div>
