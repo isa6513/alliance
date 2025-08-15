@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import Card from "../system/Card";
-import { CommentDto, UserDto } from "@alliance/shared/client";
+import {
+  CommentDto,
+  UserDto,
+  forumUpdateComment,
+} from "@alliance/shared/client";
 import ReplyForm from "./ReplyForm";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
 
@@ -51,6 +55,7 @@ interface ReplyComponentProps {
   newlyAddedReplies: Set<number>;
   highlightedReplyId: number | null;
   compact?: boolean;
+  onUpdateReply?: (id: number, content: string) => void;
 }
 
 interface ReplyContentProps
@@ -63,6 +68,7 @@ interface ReplyContentProps
   hasChildren: boolean;
   isCollapsed?: boolean;
   isHighlighted: boolean;
+  onUpdateReply: (id: number, content: string) => void;
 }
 
 const ReplyContent: React.FC<ReplyContentProps> = ({
@@ -76,7 +82,58 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
   setReplyingTo,
   setReplyContent,
   handleDeleteReply,
+  onUpdateReply,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(reply.content);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showDropdown]);
+
+  const handleSaveEdit = async () => {
+    if (editContent.trim() === reply.content.trim()) {
+      setIsEditing(false);
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await onUpdateReply(reply.id, editContent.trim());
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Failed to update reply:", error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditContent(reply.content);
+    setIsEditing(false);
+  };
+
+  const handleStartEdit = () => {
+    setEditContent(reply.content);
+    setIsEditing(true);
+    setShowDropdown(false);
+  };
   return (
     <div className="flex items-start gap-2 relative">
       {/* Blue highlight indicator */}
@@ -84,59 +141,116 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         <div className="absolute -left-4 top-0 bottom-0 w-[3px] bg-blue-500 rounded transition-all duration-1000" />
       )}
       <div className="flex-1 min-w-0">
-        {getDisplayContent(reply.content, isCollapsed, reply.deleted)}
+        {!isEditing &&
+          getDisplayContent(reply.content, isCollapsed, reply.deleted)}
 
-        <div className="flex justify-between items-center text-sm text-gray-500">
-          <div className="gap-x-4 flex">
-            {reply.author?.name !== undefined && (
-              <p>
-                By{" "}
-                <a
-                  href={`/user/${reply.author.id}`}
-                  className="hover:underline"
-                >
-                  {reply.author?.name}
-                </a>
-              </p>
-            )}
-            <span>
-              {formatDistanceToNow(new Date(reply.createdAt), {
-                addSuffix: true,
-              })}
-            </span>
-            {hasChildren && isCollapsed && reply.children !== undefined && (
-              <span className="text-xs bg-gray-200 px-2 py-1 rounded">
-                {countAllReplies(reply.children)}{" "}
-                {countAllReplies(reply.children) === 1 ? "reply" : "replies"}{" "}
-                hidden
+        {isEditing ? (
+          <div className="">
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows={3}
+              disabled={isUpdating}
+            />
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={handleSaveEdit}
+                disabled={isUpdating || !editContent.trim()}
+                className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isUpdating ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                disabled={isUpdating}
+                className="px-3 py-1 bg-gray-300 text-gray-700 text-sm rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-between items-center text-sm text-gray-500">
+            <div className="gap-x-4 flex">
+              {reply.author?.name !== undefined && (
+                <p>
+                  By{" "}
+                  <a
+                    href={`/user/${reply.author.id}`}
+                    className="hover:underline"
+                  >
+                    {reply.author?.name}
+                  </a>
+                </p>
+              )}
+              <span>
+                {formatDistanceToNow(new Date(reply.createdAt), {
+                  addSuffix: true,
+                })}
               </span>
-            )}
-          </div>
+              {hasChildren && isCollapsed && reply.children !== undefined && (
+                <span className="text-xs bg-gray-200 px-2 py-1 rounded">
+                  {countAllReplies(reply.children)}{" "}
+                  {countAllReplies(reply.children) === 1 ? "reply" : "replies"}{" "}
+                  hidden
+                </span>
+              )}
+            </div>
 
-          <div className="flex space-x-2">
-            {user && canNest && (
-              <button
-                onClick={() => {
-                  setReplyingTo(isReplyingToThis ? null : reply.id);
-                  if (!isReplyingToThis) {
-                    setReplyContent("");
-                  }
-                }}
-                className="text-gray-800 hover:underline"
-              >
-                {!isReplyingToThis && "Reply"}
-              </button>
-            )}
-            {user && reply.author.email === user.email && !reply.deleted && (
-              <button
-                onClick={() => handleDeleteReply(reply.id)}
-                className="text-red-600 hover:underline"
-              >
-                Delete
-              </button>
-            )}
+            <div className="flex space-x-2">
+              {user && canNest && (
+                <button
+                  onClick={() => {
+                    setReplyingTo(isReplyingToThis ? null : reply.id);
+                    if (!isReplyingToThis) {
+                      setReplyContent("");
+                    }
+                  }}
+                  className="text-gray-800 hover:underline"
+                >
+                  {!isReplyingToThis && "Reply"}
+                </button>
+              )}
+              {user && reply.author.email === user.email && !reply.deleted && (
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className="text-gray-500 hover:text-gray-700 p-1"
+                    aria-label="More options"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                    </svg>
+                  </button>
+                  {showDropdown && (
+                    <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                      <button
+                        onClick={handleStartEdit}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleDeleteReply(reply.id);
+                          setShowDropdown(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -156,7 +270,26 @@ const ReplyComponent = ({
   newlyAddedReplies,
   highlightedReplyId,
   compact,
+  onUpdateReply,
 }: ReplyComponentProps) => {
+  const handleUpdateReply = async (id: number, content: string) => {
+    if (onUpdateReply) {
+      await onUpdateReply(id, content);
+    } else {
+      // Default implementation using forumUpdateComment
+      try {
+        const response = await forumUpdateComment({
+          path: { id: id.toString() },
+          body: { content },
+        });
+        // Update the reply content in place
+        reply.content = content;
+      } catch (error) {
+        console.error("Failed to update comment:", error);
+        throw error;
+      }
+    }
+  };
   const maxDepth = 10;
   const canNest = depth < maxDepth;
   const isReplyingToThis = replyingTo === reply.id;
@@ -228,6 +361,7 @@ const ReplyComponent = ({
                 setReplyingTo={setReplyingTo}
                 setReplyContent={setReplyContent}
                 handleDeleteReply={handleDeleteReply}
+                onUpdateReply={handleUpdateReply}
               />
             </div>
 
@@ -256,6 +390,7 @@ const ReplyComponent = ({
                           isSubmitting={isSubmitting}
                           newlyAddedReplies={newlyAddedReplies}
                           highlightedReplyId={highlightedReplyId}
+                          onUpdateReply={handleUpdateReply}
                         />
                       </div>
                     </div>
@@ -302,6 +437,7 @@ const ReplyComponent = ({
           setReplyingTo={setReplyingTo}
           setReplyContent={setReplyContent}
           handleDeleteReply={handleDeleteReply}
+          onUpdateReply={handleUpdateReply}
         />
       </div>
 
@@ -339,6 +475,7 @@ const ReplyComponent = ({
                 isSubmitting={isSubmitting}
                 newlyAddedReplies={newlyAddedReplies}
                 highlightedReplyId={highlightedReplyId}
+                onUpdateReply={handleUpdateReply}
               />
             </div>
           ))}

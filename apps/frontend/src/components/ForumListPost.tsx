@@ -31,7 +31,7 @@ const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
       <div className="flex flex-row justify-between gap-2">
         <p className="font-medium text-base">{post.title}</p>
       </div>
-      <div className="flex justify-between text-xs text-gray-500">
+      <div className="flex justify-between text-sm text-gray-500">
         <div className="flex flex-row gap-x-2 items-center">
           {post.author.profilePicture && (
             <img
