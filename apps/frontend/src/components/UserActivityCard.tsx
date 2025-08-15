@@ -33,8 +33,8 @@ const UserActivityCard = ({ activity, handleLike }: UserActivityCardProps) => {
         className="block bg-page text-[11pt]  flex-1 border-b"
         style={CardStyle.White}
       >
-        <div className="flex flex-row justify-between">
-          <div className="flex items-center justify-start w-[100%] space-x-3">
+        <div className="flex flex-row justify-between items-start">
+          <div className="flex flex-col justify-start w-[100%] space-y-3">
             <Badge className="!bg-green text-white" size="lg">
               Completed {timeSinceCompleted}
             </Badge>
