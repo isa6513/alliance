@@ -22,6 +22,7 @@ import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
 import useActivities, { ActivityList } from "./useActivities";
+import { useAppLoaderData } from "../../applayout";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -44,12 +45,16 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 const UserProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user, isAuthenticated } = useAuth();
+  const isMe = id === user?.id.toString();
+
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [profileUser, setProfileUser] = useState<ProfileDto | null>(null);
+  const { profile: myProfile } = useAppLoaderData();
+  const [profileUser, setProfileUser] = useState<ProfileDto | null>(
+    isMe ? myProfile : null
+  );
   const [friendStatus, setFriendStatus] =
     useState<FriendStatusDto["status"]>("none");
-  const [isMe, setIsMe] = useState(false);
+
   const [selectedTab, setSelectedTab] = useState(ProfileTabs.Activity);
 
   const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
@@ -65,7 +70,6 @@ const UserProfilePage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
         if (!id) return;
 
@@ -77,8 +81,6 @@ const UserProfilePage: React.FC = () => {
         if (userData && userData.displayName) {
           setProfileUser(userData);
         }
-        setIsMe(userData?.id === user?.id);
-
         const { data: friendsData } = await userListFriends({
           path: { id: userId },
         });
@@ -109,8 +111,6 @@ const UserProfilePage: React.FC = () => {
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -144,7 +144,7 @@ const UserProfilePage: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (!profileUser) {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
         <div className="max-w-4xl mx-auto">

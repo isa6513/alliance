@@ -209,6 +209,17 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('myprofile')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ProfileDto })
+  async myProfile(@Request() req: JwtRequest): Promise<ProfileDto | null> {
+    const user = await this.userService.findOne(req.user.sub);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return new ProfileDto(user);
+  }
+
   @Get(':id')
   @Public()
   @ApiOkResponse({ type: ProfileDto })

@@ -13,6 +13,7 @@ import {
   forumFindAllPosts,
   PostDto,
   UserActionDto,
+  userMyProfile,
 } from "@alliance/shared/client";
 import { ActionDto } from "@alliance/shared/client";
 
@@ -36,11 +37,13 @@ export interface LoaderData {
 export async function clientLoader() {
   localStorage.setItem("revalidate", "false");
 
-  const [actions, relations, posts] = await Promise.all([
+  const [actions, relations, posts, profile] = await Promise.all([
     actionsFindAll(),
     actionsMyActionRelations(),
     forumFindAllPosts(),
+    userMyProfile(),
   ]);
+  console.log(profile);
 
   let authRefreshNeeded = false;
   if (
@@ -66,6 +69,7 @@ export async function clientLoader() {
     posts: posts.data ?? [],
     revalidate: revalidateCallback,
     authRefreshNeeded,
+    profile: profile.data ?? null,
   };
 }
 

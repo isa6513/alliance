@@ -14,8 +14,6 @@ const ForumPage: React.FC = () => {
     navigate("/forum/edit/new");
   };
 
-  console.log(posts);
-
   return (
     <div className="flex flex-col max-w-[800px] mx-auto p-3 pt-8">
       <div className="gap-y-2 flex flex-col">

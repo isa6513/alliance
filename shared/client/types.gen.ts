@@ -977,6 +977,19 @@ export type UserListResponses = {
 
 export type UserListResponse = UserListResponses[keyof UserListResponses];
 
+export type UserMyProfileData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/myprofile';
+};
+
+export type UserMyProfileResponses = {
+    200: ProfileDto;
+};
+
+export type UserMyProfileResponse = UserMyProfileResponses[keyof UserMyProfileResponses];
+
 export type UserFindOneData = {
     body?: never;
     path: {
