@@ -818,7 +818,7 @@ const DatabaseViewer: React.FC = () => {
                           // Use primary key if available, otherwise use page and row index for uniqueness
                           const uniqueKey =
                             rowPrimaryKey !== null
-                              ? `${selectedTable}-${rowPrimaryKey}`
+                              ? `${selectedTable}-${rowPrimaryKey}-row${rowIndex}`
                               : `${selectedTable}-page${query.page}-row${rowIndex}`;
 
                           return (
