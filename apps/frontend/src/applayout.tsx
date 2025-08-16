@@ -11,6 +11,7 @@ import {
   ActionActivityDto,
   actionsFindAll,
   actionsMyActivity,
+  authRefreshTokens,
   forumFindAllPosts,
   PostDto,
   ProfileDto,
@@ -32,8 +33,7 @@ export interface LoaderData {
   actions: ActionDto[];
   relations?: Map<number, UserActionRelation>;
   activities?: Map<number, ActivitiesForAction>;
-  posts?: PostDto[];
-  authRefreshNeeded: boolean;
+  posts: PostDto[];
   profile: ProfileDto | null;
   revalidate: () => void;
 }
@@ -45,21 +45,27 @@ export interface ActivitiesForAction {
 
 export async function clientLoader() {
   localStorage.setItem("revalidate", "false");
+  console.log("clientLoader");
 
-  const [actions, activities, posts, profile] = await Promise.all([
+  let [actions, activities, posts, profile] = await Promise.all([
     actionsFindAll(),
     actionsMyActivity(),
     forumFindAllPosts(),
     userMyProfile(),
   ]);
-  console.log(activities);
 
-  let authRefreshNeeded = false;
   if (
-    activities.error &&
-    (activities.error as { statusCode: number }).statusCode === 401
+    profile.error &&
+    (profile.error as { statusCode: number }).statusCode === 401
   ) {
-    authRefreshNeeded = true;
+    console.log("refreshing tokens");
+    await authRefreshTokens();
+    [actions, activities, posts, profile] = await Promise.all([
+      actionsFindAll(),
+      actionsMyActivity(),
+      forumFindAllPosts(),
+      userMyProfile(),
+    ]);
   }
 
   const activityList = activities.data ?? [];
@@ -94,9 +100,8 @@ export async function clientLoader() {
     actions: actions.data ?? [],
     relations: actionToRelationMap,
     activities: activitiesForAction,
-    posts: posts.data,
+    posts: posts.data ?? [],
     revalidate: revalidateCallback,
-    authRefreshNeeded,
     profile: profile.data ?? null,
   } satisfies LoaderData;
 }

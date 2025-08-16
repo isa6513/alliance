@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../lib/AuthContext";
 import ForumListPost from "../../components/ForumListPost";
@@ -10,9 +10,9 @@ const ForumPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const handleCreatePost = () => {
+  const handleCreatePost = useCallback(() => {
     navigate("/forum/edit/new");
-  };
+  }, [navigate]);
 
   return (
     <div className="flex flex-col max-w-[800px] mx-auto p-3 pt-8">

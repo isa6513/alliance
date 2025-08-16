@@ -83,23 +83,23 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
                 : `You completed ${formatTime(new Date(activity.createdAt), {
                     addSuffix: true,
                   })}`}
-              {activity.likes.length > 0 && (
-                <div className="flex flex-row items-center gap-x-2">
-                  <p className="text-zinc-600">
-                    {`${activity.likes.length} ${
-                      activity.likes.length === 1 ? "person" : "people"
-                    } liked your commitment`}
-                  </p>
-                  {activity.likes.slice(0, 5).map((like) => (
-                    <ProfileImage
-                      key={like.id}
-                      src={like.profilePicture!}
-                      size="small"
-                    />
-                  ))}
-                </div>
-              )}
             </p>
+            {activity.likes.length > 0 && (
+              <div className="flex flex-row items-center gap-x-2">
+                <p className="text-zinc-600">
+                  {`${activity.likes.length} ${
+                    activity.likes.length === 1 ? "person" : "people"
+                  } liked your commitment`}
+                </p>
+                {activity.likes.slice(0, 5).map((like) => (
+                  <ProfileImage
+                    key={like.id}
+                    src={like.profilePicture!}
+                    size="small"
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
