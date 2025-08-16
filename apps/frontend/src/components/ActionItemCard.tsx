@@ -1,10 +1,16 @@
 import React, { useCallback } from "react";
 import Card, { CardStyle } from "./system/Card";
 import { useNavigate } from "react-router";
-import { ActionDto, UserActionDto } from "@alliance/shared/client/types.gen";
+import {
+  ActionActivityDto,
+  ActionDto,
+  UserActionRelation,
+} from "@alliance/shared/client/types.gen";
 import ActionCardUserCount from "./ActionCardUserCount";
 import Button, { ButtonColor } from "./system/Button";
 import checkMark from "../assets/noun-check-mark-2181.svg";
+import { formatTime } from "../lib/utils";
+import ProfileImage from "./ProfileImage";
 
 export interface ActionItemCardProps
   extends Pick<
@@ -15,7 +21,8 @@ export interface ActionItemCardProps
   joinedCount?: number;
   completedCount?: number;
   showDescription?: boolean;
-  userRelation?: UserActionDto["status"];
+  userRelation?: UserActionRelation;
+  activity?: ActionActivityDto;
 }
 
 const ActionItemCard: React.FC<ActionItemCardProps> = ({
@@ -27,6 +34,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   joinedCount,
   completedCount,
   userRelation,
+  activity,
 }) => {
   const navigate = useNavigate();
 
@@ -40,11 +48,15 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      <Card className="block " style={CardStyle.White} onClick={goToActionPage}>
+      <Card
+        className="block overflow-hidden"
+        style={CardStyle.White}
+        onClick={goToActionPage}
+      >
         <div className="flex flex-row items-start gap-x-8">
           <div className="flex-1 flex flex-col">
             <p className="font-medium text-black">{name}</p>
-            <p className="text-zinc-400">{shortDescription}</p>
+            <p className="text-zinc-500">{shortDescription}</p>
           </div>
           <div>
             <div className="w-24 flex flex-col gap-y-2">
@@ -61,10 +73,39 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
             </div>
           </div>
         </div>
+        {activity && (
+          <div className="flex flex-col border-t border-zinc-300 gap-y-2  -mx-4 -mb-4 p-4 bg-zinc-100">
+            <p className="text-black">
+              {activity.type === "user_joined"
+                ? `You joined ${formatTime(new Date(activity.createdAt), {
+                    addSuffix: true,
+                  })}`
+                : `You completed ${formatTime(new Date(activity.createdAt), {
+                    addSuffix: true,
+                  })}`}
+              {activity.likes.length > 0 && (
+                <div className="flex flex-row items-center gap-x-2">
+                  <p className="text-zinc-600">
+                    {`${activity.likes.length} ${
+                      activity.likes.length === 1 ? "person" : "people"
+                    } liked your commitment`}
+                  </p>
+                  {activity.likes.slice(0, 5).map((like) => (
+                    <ProfileImage
+                      key={like.id}
+                      src={like.profilePicture!}
+                      size="small"
+                    />
+                  ))}
+                </div>
+              )}
+            </p>
+          </div>
+        )}
 
         <div className="absolute bottom-5 right-5">
           <div className="flex flex-row justify-between items-start mr-0 gap-x-2">
-            {userRelation === "joined" && (
+            {userRelation === "joined" && !activity && (
               <img
                 src={checkMark}
                 alt="check mark"

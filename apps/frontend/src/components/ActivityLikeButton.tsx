@@ -5,6 +5,7 @@ interface ActivityLikeButtonProps {
   likes: number;
   handleLike: () => void;
   className?: string;
+  labelText?: boolean;
 }
 
 const ActivityLikeButton = ({
@@ -12,6 +13,7 @@ const ActivityLikeButton = ({
   likes,
   handleLike,
   className,
+  labelText = false,
 }: ActivityLikeButtonProps) => {
   const [scaled, setScaled] = useState(false);
   useEffect(() => {
@@ -50,6 +52,11 @@ const ActivityLikeButton = ({
         ></path>
       </svg>
       {likes > 0 && <p className="text-sm text-zinc-800">{likes}</p>}
+      {labelText && (
+        <p className="text-sm text-zinc-800">
+          {likes === 1 ? "Like" : "Likes"}
+        </p>
+      )}
     </div>
   );
 };

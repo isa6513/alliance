@@ -8,7 +8,7 @@ import ActivityFeedItem from "../../components/ActivityFeedItem";
 import useActivities, { ActivityList } from "./useActivities";
 
 const HomePage = () => {
-  const { actions, relations, posts } = useAppLoaderData();
+  const { actions, relations, posts, activities } = useAppLoaderData();
 
   const { revalidate } = useAppLoaderData();
 
@@ -32,7 +32,7 @@ const HomePage = () => {
 
   const newActions = actions.filter(
     (action) =>
-      (!relations.get(action.id) || relations.get(action.id) === "none") &&
+      relations.get(action.id) === "none" &&
       action.status === "gathering_commitments"
   );
 
@@ -113,6 +113,7 @@ const HomePage = () => {
                       {...action}
                       userRelation={relations.get(action.id)}
                       showDescription={false}
+                      activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
                     />
                   ))}
                 </div>
@@ -125,11 +126,11 @@ const HomePage = () => {
           <div className="flex flex-col gap-y-3">
             <Card>
               <p className="font-semibold mb-1">Forum activity</p>
-              {posts.length === 0 && (
+              {posts?.length === 0 && (
                 <p className="text-zinc-400">No forum activity yet</p>
               )}
 
-              {posts.slice(0, 3).map((post) => (
+              {posts?.slice(0, 3).map((post) => (
                 <ForumListPost key={post.id} post={post} showAction={false} />
               ))}
             </Card>

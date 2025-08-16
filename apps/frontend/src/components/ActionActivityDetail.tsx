@@ -12,6 +12,9 @@ import { useAuth } from "../lib/AuthContext";
 import { TaskPanelContext } from "./ActionTaskPanel";
 import Button, { ButtonColor } from "./system/Button";
 import { useEffect, useState } from "react";
+import ProfileImage from "./ProfileImage";
+import ActivityLikeButton from "./ActivityLikeButton";
+import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
 
 export function formatActivityMessage(
   activity: ActionActivityDto,
@@ -137,11 +140,11 @@ const ActionActivityDetail = () => {
         {activity !== null && (
           <>
             <div className="flex flex-row items-center justify-between">
-              <div className="flex flex-row items-center gap-x-2">
+              <div className="flex flex-row items-center gap-x-4">
                 {activity.user.profilePicture !== null && (
-                  <img
+                  <ProfileImage
                     src={activity.user.profilePicture}
-                    className="w-8 h-8 rounded-md object-cover"
+                    size="medium"
                   />
                 )}
                 <p className="font-bold">{formatActivityMessage(activity)}</p>
@@ -171,40 +174,12 @@ const ActionActivityDetail = () => {
               />
             ))}
             <div className="flex flex-row items-center justify-between">
-              <div className="flex flex-row items-center gap-x-2">
-                <button
-                  onClick={handleLike}
-                  className="flex items-center gap-x-2 hover:bg-gray-100 rounded-md px-3 py-1.5 transition-colors cursor-pointer"
-                >
-                  <img
-                    src={heart}
-                    alt="Like"
-                    className={`w-5 h-5 transition-opacity ${
-                      isLiked ? "opacity-80" : "opacity-30"
-                    } hover:opacity-50`}
-                  />
-                  <span className="text-sm font-medium">
-                    {activity.likes.length}{" "}
-                    {activity.likes.length === 1 ? "like" : "likes"}
-                  </span>
-                </button>
-                {activity.likes
-                  .filter((like) => like.profilePicture !== null)
-                  .slice(0, 5)
-                  .map((like) => (
-                    <img
-                      key={like.id}
-                      src={like.profilePicture!}
-                      className="w-6 h-6 rounded-md object-cover"
-                      title={like.displayName}
-                    />
-                  ))}
-                {activity.likes.length > 5 && (
-                  <span className="text-sm text-gray-500">
-                    +{activity.likes.length - 5} more
-                  </span>
-                )}
-              </div>
+              <ActivityLikesButtonRow
+                isLiked={isLiked}
+                likes={activity.likes}
+                handleLike={handleLike}
+                labelText={true}
+              />
             </div>
             <Comments objectId={activity.id} type={"activity"} />
           </>

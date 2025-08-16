@@ -10,6 +10,7 @@ interface ReplyFormProps {
   isSubmitting: boolean;
   setReplyingTo: (id: number | null) => void;
   compact?: boolean;
+  className?: string;
 }
 
 const ReplyForm: React.FC<ReplyFormProps> = ({
@@ -21,11 +22,12 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
   isSubmitting,
   setReplyingTo,
   compact,
+  className,
 }: ReplyFormProps) => {
   const [expanded, setExpanded] = useState(!compact);
   return (
     <div
-      className={` rounded-lg ${parentId ? "mt-0" : "mt-3"} ${
+      className={` rounded-lg ${className} ${parentId ? "mt-0" : "mt-3"} ${
         compact ? "p-2 bg-gray-100/80" : "p-4 bg-gray-200"
       }`}
     >

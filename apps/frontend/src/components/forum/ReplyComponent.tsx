@@ -344,9 +344,9 @@ const ReplyComponent = ({
         >
           <Card
             key={reply.id}
-            className={`!display-block transition-all duration-1000 ${newReplyClass} ${
+            className={`!display-block transition-colors duration-1000 ${newReplyClass} ${
               compact && "!p-1 !border-none"
-            }`}
+            } ${user && isReplyingToThis && !isCollapsed && "rounded-b-none"}`}
             flex={false}
           >
             <div id={`reply-${reply.id}`}>
@@ -410,6 +410,7 @@ const ReplyComponent = ({
             onSubmit={handleSubmitReply}
             isSubmitting={isSubmitting}
             setReplyingTo={setReplyingTo}
+            className="rounded-t-none"
           />
         )}
       </div>

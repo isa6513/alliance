@@ -8,10 +8,12 @@ import { useAuth } from "./lib/AuthContext";
 import NavbarHorizontal from "./components/NavbarHorizontal";
 import { useEffect, useState } from "react";
 import {
+  ActionActivityDto,
   actionsFindAll,
   actionsMyActivity,
   forumFindAllPosts,
   PostDto,
+  ProfileDto,
   UserActionRelation,
   userMyProfile,
 } from "@alliance/shared/client";
@@ -28,10 +30,17 @@ export interface RouteMatches {
 
 export interface LoaderData {
   actions: ActionDto[];
-  relations: Map<number, UserActionRelation> | undefined;
-  posts: PostDto[];
+  relations?: Map<number, UserActionRelation>;
+  activities?: Map<number, ActivitiesForAction>;
+  posts?: PostDto[];
   authRefreshNeeded: boolean;
+  profile: ProfileDto | null;
   revalidate: () => void;
+}
+
+export interface ActivitiesForAction {
+  join: ActionActivityDto | null;
+  completion: ActionActivityDto | null;
 }
 
 export async function clientLoader() {
@@ -62,21 +71,37 @@ export async function clientLoader() {
     );
   });
 
-  const revalidateCallback = () => {
+  const activitiesForAction = new Map<number, ActivitiesForAction>();
+  activityList.forEach((activity) => {
+    if (!activitiesForAction.has(activity.actionId)) {
+      activitiesForAction.set(activity.actionId, {
+        join: null,
+        completion: null,
+      });
+    }
+    if (activity.type === "user_joined") {
+      activitiesForAction.get(activity.actionId)!.join = activity;
+    } else if (activity.type === "user_completed") {
+      activitiesForAction.get(activity.actionId)!.completion = activity;
+    }
+  });
+
+  const revalidateCallback: () => void = () => {
     localStorage.setItem("revalidate", "true");
   };
 
   return {
     actions: actions.data ?? [],
     relations: actionToRelationMap,
-    posts: posts.data ?? [],
+    activities: activitiesForAction,
+    posts: posts.data,
     revalidate: revalidateCallback,
     authRefreshNeeded,
     profile: profile.data ?? null,
-  };
+  } satisfies LoaderData;
 }
 
-export function useAppLoaderData(): Awaited<ReturnType<typeof clientLoader>> {
+export function useAppLoaderData(): LoaderData {
   const data = useRouteLoaderData<typeof clientLoader>("applayout");
   if (!data) {
     throw new Error("No data - applayout loader not found");

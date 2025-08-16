@@ -37,7 +37,10 @@ const NavbarHorizontal: React.FC = () => {
     w-screen text-left items-center fixed px-7 z-10 justify-between gap-x-5"
       >
         <div className="flex flex-row gap-x-1 sm:gap-x-4 lg:gap-x-8 items-center">
-          <Link to="/" className="shrink-0 hidden sm:block">
+          <Link
+            to={destinations[NavbarPage.Dashboard]}
+            className="shrink-0 hidden sm:block"
+          >
             <img src={logo} alt="logo" className="w-7 h-7" />
           </Link>
           {activeLinks.map((link) =>
