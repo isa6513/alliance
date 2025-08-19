@@ -14,7 +14,7 @@ import {
   forumUpdatePost,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "../../components/system/Button";
-import { useAppLoaderData } from "../../applayout";
+import { setRevalidate } from "../../applayout";
 type FormMode = "create" | "edit";
 
 const PostFormPage: React.FC = () => {
@@ -36,7 +36,6 @@ const PostFormPage: React.FC = () => {
   );
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const { revalidate } = useAppLoaderData();
 
   useEffect(() => {
     // Redirect if not authenticated
@@ -108,7 +107,7 @@ const PostFormPage: React.FC = () => {
         });
       }
       console.log("revalidating");
-      revalidate();
+      setRevalidate();
 
       if (response.data) {
         navigate(`/forum/post/${response.data.id}`);

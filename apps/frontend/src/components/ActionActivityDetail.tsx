@@ -7,13 +7,11 @@ import {
   actionsUpdateActivity,
 } from "@alliance/shared/client";
 import Comments from "./Comments";
-import heart from "../assets/icons8-heart-90.png";
 import { useAuth } from "../lib/AuthContext";
 import { TaskPanelContext } from "./ActionTaskPanel";
 import Button, { ButtonColor } from "./system/Button";
 import { useEffect, useState } from "react";
 import ProfileImage from "./ProfileImage";
-import ActivityLikeButton from "./ActivityLikeButton";
 import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
 
 export function formatActivityMessage(

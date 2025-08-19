@@ -17,6 +17,7 @@ import {
 } from "@alliance/shared/client";
 
 import { testAuthUser } from "../stories/testData";
+import { setRevalidate } from "../applayout";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -47,6 +48,9 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
         } catch {
           try {
             await authRefreshTokens();
+
+            setRevalidate();
+
             const { data } = await authMe();
             if (!cancelled) setUser(data);
           } catch {

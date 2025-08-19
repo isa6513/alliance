@@ -35,7 +35,6 @@ export interface LoaderData {
   activities?: Map<number, ActivitiesForAction>;
   posts: PostDto[];
   profile: ProfileDto | null;
-  revalidate: () => void;
 }
 
 export interface ActivitiesForAction {
@@ -43,8 +42,10 @@ export interface ActivitiesForAction {
   completion: ActionActivityDto | null;
 }
 
+const revalidateKey = "revalidate";
+
 export async function clientLoader() {
-  localStorage.setItem("revalidate", "false");
+  localStorage.setItem(revalidateKey, "false");
   console.log("clientLoader");
 
   let [actions, activities, posts, profile] = await Promise.all([
@@ -92,16 +93,11 @@ export async function clientLoader() {
     }
   });
 
-  const revalidateCallback: () => void = () => {
-    localStorage.setItem("revalidate", "true");
-  };
-
   return {
     actions: actions.data ?? [],
     relations: actionToRelationMap,
     activities: activitiesForAction,
     posts: posts.data ?? [],
-    revalidate: revalidateCallback,
     profile: profile.data ?? null,
   } satisfies LoaderData;
 }
@@ -145,6 +141,10 @@ export default function AppLayout() {
   );
 }
 
+export function setRevalidate() {
+  localStorage.setItem(revalidateKey, "true");
+}
+
 export function shouldRevalidate({}: ShouldRevalidateFunctionArgs) {
-  return localStorage.getItem("revalidate") === "true";
+  return localStorage.getItem(revalidateKey) === "true";
 }

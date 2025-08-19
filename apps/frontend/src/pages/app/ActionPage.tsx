@@ -27,7 +27,7 @@ import { useAuth } from "../../lib/AuthContext";
 import { TaskPanelContext } from "../../components/ActionTaskPanel";
 import ActionActivityList from "../../components/ActionActivityList";
 import { testActions } from "../../stories/testData";
-import { useAppLoaderData } from "../../applayout";
+import { setRevalidate } from "../../applayout";
 import useActivities, { ActivityList } from "./useActivities";
 
 const actionStatusDescriptions: Record<ActionDto["status"], string> = {
@@ -112,7 +112,6 @@ export default function ActionPage() {
 
   const actionId = action?.id || 0;
   const liveUserCount = useActionCount(actionId);
-  const { revalidate } = useAppLoaderData();
   //   const { activities: liveActivities } = useActionActivity(actionId);
 
   const { activities, handleLikeActivity, setActivities } = useActivities({
@@ -141,8 +140,8 @@ export default function ActionPage() {
     actionsComplete({
       path: { id },
     });
-    revalidate();
-  }, [id, revalidate]);
+    setRevalidate();
+  }, [id]);
 
   const onJoinAction = useCallback(async () => {
     if (!id) return;
@@ -160,9 +159,9 @@ export default function ActionPage() {
     } catch (err) {
       console.error("Error joining action:", err);
     } finally {
-      revalidate();
+      setRevalidate();
     }
-  }, [id, revalidate]);
+  }, [id]);
 
   return (
     <TwoColumnSplit

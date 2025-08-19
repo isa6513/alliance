@@ -1,23 +1,24 @@
 import { actionsComplete } from "@alliance/shared/client";
-import { useAppLoaderData } from "../../applayout";
+import { setRevalidate, useAppLoaderData } from "../../applayout";
 import TaskCard from "../../components/TaskCard";
 import ActionItemCard from "../../components/ActionItemCard";
 import Card from "../../components/system/Card";
 import ForumListPost from "../../components/ForumListPost";
 import ActivityFeedItem from "../../components/ActivityFeedItem";
 import useActivities, { ActivityList } from "./useActivities";
+import { isFeatureEnabled } from "../../lib/config";
+import { Features } from "@alliance/shared/lib/features";
+import SingleActionCard from "../../components/SingleActionCard";
 
 const HomePage = () => {
   const { actions, relations, posts, activities } = useAppLoaderData();
-
-  const { revalidate } = useAppLoaderData();
 
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
   });
 
   if (!relations) {
-    revalidate();
+    setRevalidate();
     return (
       <div className="text-zinc-400 w-full h-80 flex items-center justify-center">
         Failed to load user data.
@@ -47,6 +48,54 @@ const HomePage = () => {
       window.location.reload();
     });
   };
+
+  if (isFeatureEnabled(Features.SingleAction)) {
+    return (
+      <div className="flex flex-col w-full h-full items-center bg-page">
+        <div className="flex flex-row px-6 gap-x-3 w-full">
+          <div className="flex flex-col py-20 gap-y-5 overflow-y-auto mx-auto flex-1 max-w-[850px]">
+            <SingleActionCard
+              action={actions[0]}
+              relations={relations.get(actions[0].id) ?? "none"}
+              activity={activities?.get(actions[0].id)?.join ?? null}
+            />
+          </div>
+          <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch w-[350px]">
+            <div className="flex flex-col gap-y-3">
+              <Card>
+                <p className="font-semibold mb-1">Forum activity</p>
+                {posts?.length === 0 && (
+                  <p className="text-zinc-400">No forum activity yet</p>
+                )}
+
+                {posts?.slice(0, 3).map((post) => (
+                  <ForumListPost key={post.id} post={post} showAction={false} />
+                ))}
+              </Card>
+              <Card className="!gap-y-0">
+                <p className="font-semibold mb-3">
+                  What your friends are up to
+                </p>
+                {friendActivities.length === 0 && (
+                  <p className="text-zinc-400">No friend activity yet</p>
+                )}
+                {friendActivities.map((activity) => (
+                  <ActivityFeedItem
+                    key={activity.id}
+                    activity={activity}
+                    showTime={false}
+                    card={false}
+                    showAction={true}
+                    handleLike={() => handleLikeActivity(activity.id)}
+                  />
+                ))}
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full h-full items-center bg-page">
