@@ -159,7 +159,7 @@ const UserProfilePage: React.FC = () => {
         <div className="w-full h-[100px]"></div>
         <Card className="px-8 relative space-y-2 pb-8">
           <ProfileImage
-            src={profileUser.profilePicture ? profileUser.profilePicture : null}
+            pfp={profileUser.profilePicture}
             className="mt-[-55px]"
           />
           <div className="flex gap-2">
@@ -272,7 +272,7 @@ const UserProfilePage: React.FC = () => {
                   key={friend.id}
                 >
                   <ProfileImage
-                    src={friend.profilePicture}
+                    pfp={friend.profilePicture}
                     className="!w-10 !h-10"
                   />
                   <p>{friend.displayName}</p>

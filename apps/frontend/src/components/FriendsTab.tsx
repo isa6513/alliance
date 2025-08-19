@@ -190,7 +190,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
                   >
                     <ProfileImage
                       className="!w-12 !h-12 mr-4"
-                      src={friend.profilePicture}
+                      pfp={friend.profilePicture}
                     />
                     <div className="flex-grow">
                       <p className="font-medium">{friend.displayName}</p>
@@ -229,7 +229,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
                     className="flex items-center p-3 border border-gray-300 rounded-lg"
                   >
                     <ProfileImage
-                      src={request.profilePicture}
+                      pfp={request.profilePicture}
                       className="!w-12 !h-12 mr-4"
                     />
                     <div className="flex-grow">
@@ -274,7 +274,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
                     className="flex items-center p-3 border border-gray-300 rounded-lg"
                   >
                     <ProfileImage
-                      src={request.profilePicture}
+                      pfp={request.profilePicture}
                       className="!w-12 !h-12 mr-4"
                     />
                     <div className="flex-grow">

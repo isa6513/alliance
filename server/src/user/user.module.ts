@@ -12,6 +12,7 @@ import { Notification } from '../notifs/entities/notification.entity';
 import { PrefillUser } from './prefill-user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ActionActivity } from '../actions/entities/action-activity.entity';
+import { ImagesModule } from 'src/images/images.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ActionActivity } from '../actions/entities/action-activity.entity';
     TypeOrmModule.forFeature([Notification]),
     TypeOrmModule.forFeature([PrefillUser]),
     JwtModule,
+    ImagesModule,
   ],
   controllers: [UserController],
   providers: [UserService, IsUserAlreadyExist],

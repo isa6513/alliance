@@ -6,6 +6,7 @@ import { formatTime } from "../lib/utils";
 import { formatActivityMessage } from "./ActionActivityDetail";
 import { useAuth } from "../lib/AuthContext";
 import ActivityLikeButton from "./ActivityLikeButton";
+import ProfileImage from "./ProfileImage";
 
 export interface ActivityFeedItemProps {
   activity: ActionActivityDto;
@@ -68,10 +69,9 @@ const ActivityFeedItem = ({
             <div className="flex flex-row gap-x-2 hover:underline cursor-pointer">
               <p className="text-gray-900">
                 {activity.user.profilePicture !== null && (
-                  <img
-                    src={activity.user.profilePicture}
-                    alt={activity.user.displayName}
-                    className="w-6 h-6 rounded-md object-cover inline-block mr-2"
+                  <ProfileImage
+                    pfp={activity.user.profilePicture}
+                    size="small"
                   />
                 )}
                 {formatActivityMessage(activity, showAction)}

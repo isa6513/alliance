@@ -16,6 +16,7 @@ import {
 import { PrefillUser } from './prefill-user.entity';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
 import { JwtService } from '@nestjs/jwt';
+import { ImagesService } from 'src/images/images.service';
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -36,6 +37,7 @@ export class UserService {
     @InjectRepository(Friend)
     private readonly friendRepository: Repository<Friend>,
     private readonly jwtService: JwtService,
+    private readonly imagesService: ImagesService,
   ) {}
 
   async create(data: Partial<User>): Promise<User> {
@@ -62,9 +64,24 @@ export class UserService {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { cityId, ...updateData } = data;
+    const { cityId, profilePicture, ...updateData } = data;
 
-    Object.assign(user, updateData);
+    console.log('profilePicture input data', profilePicture?.length);
+
+    if (profilePicture) {
+      const key = profilePicture
+        ? await this.imagesService.processAndUploadImage(profilePicture)
+        : undefined;
+
+      const updateDataWithPfp = {
+        ...updateData,
+        profilePicture: key,
+      };
+
+      Object.assign(user, updateDataWithPfp);
+    } else {
+      Object.assign(user, updateData);
+    }
 
     return this.userRepository.save(user);
   }

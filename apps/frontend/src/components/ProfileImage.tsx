@@ -1,11 +1,12 @@
 import userImage from "../assets/icons8-user-80.png";
+import { getImageSource } from "../lib/config";
 
 const ProfileImage = ({
-  src,
+  pfp,
   className,
   size = "large",
 }: {
-  src: string | null;
+  pfp: string | null;
   className?: string;
   size?: "small" | "medium" | "large";
 }) => {
@@ -15,15 +16,11 @@ const ProfileImage = ({
     large: "w-29 h-29",
   };
   return (
-    <div
-      className={`rounded overflow-hidden bg-white flex items-center justify-center ${className} ${sizeClass[size]}`}
-    >
-      <img
-        src={src ?? userImage}
-        alt="Profile"
-        className="object-cover rounded w-full h-full"
-      />
-    </div>
+    <img
+      src={!!pfp ? getImageSource(pfp) : userImage}
+      alt="Profile"
+      className={`object-cover rounded ${className} ${sizeClass[size]}`}
+    />
   );
 };
 

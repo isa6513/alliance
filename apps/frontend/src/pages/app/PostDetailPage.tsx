@@ -8,6 +8,7 @@ import { formatTime } from "../../lib/utils";
 import Comments from "../../components/Comments";
 import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
 import { setRevalidate } from "../../applayout";
+import ProfileImage from "../../components/ProfileImage";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
@@ -128,11 +129,7 @@ const PostDetailPage: React.FC = () => {
             </div>
             <div className=" flex flex-row gap-x-2 items-center">
               {post.author.profilePicture && (
-                <img
-                  src={post.author.profilePicture}
-                  alt={post.author.displayName}
-                  className="aspect-square h-8 rounded-md object-cover"
-                />
+                <ProfileImage pfp={post.author.profilePicture} size="small" />
               )}
               <span>
                 <a

@@ -435,7 +435,7 @@ export type ReadResultDto = {
 };
 
 export type UploadImageDto = {
-    image: Blob | File;
+    file: Blob | File;
 };
 
 export type StreamableFile = {

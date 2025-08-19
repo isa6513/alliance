@@ -193,8 +193,23 @@ resource "aws_s3_bucket" "assets" {
   }
 }
 
+resource "aws_s3_bucket" "dev_assets" {
+  bucket        = "alliance-assets-dev-${random_id.bucket_suffix.hex}"
+  force_destroy = true
+  tags = {
+    Name        = "alliance-dev-assets"
+    Environment = "dev"
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "assets" {
   bucket                  = aws_s3_bucket.assets.id
+  block_public_policy     = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_public_access_block" "dev_assets" {
+  bucket                  = aws_s3_bucket.dev_assets.id
   block_public_policy     = true
   restrict_public_buckets = true
 }
@@ -233,7 +248,9 @@ resource "aws_iam_role_policy" "ec2_s3_policy" {
       Effect   = "Allow"
       Resource = [
         aws_s3_bucket.assets.arn,
-        "${aws_s3_bucket.assets.arn}/*"
+        "${aws_s3_bucket.assets.arn}/*",
+        aws_s3_bucket.dev_assets.arn,
+        "${aws_s3_bucket.dev_assets.arn}/*"
       ]
     }]
   })

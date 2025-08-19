@@ -3,15 +3,14 @@ import { useNavigate } from "react-router";
 import Card, { CardStyle } from "../../components/system/Card";
 import Button, { ButtonColor } from "../../components/system/Button";
 import { useAuth } from "../../lib/AuthContext";
-import ProfileImage from "../../components/ProfileImage";
 
 import {
-  imagesUploadImage,
   userUpdate,
   userFindMe,
   UpdateProfileDto,
 } from "@alliance/shared/client";
 import { useAppLoaderData } from "../../applayout";
+import { getImageSource } from "../../lib/config";
 
 const ProfileEditPage: React.FC = () => {
   const { user } = useAuth();
@@ -82,24 +81,24 @@ const ProfileEditPage: React.FC = () => {
     if (!user) return;
 
     try {
-      let uploadedFile: string | undefined = undefined;
+      //   let uploadedFile: string | undefined = undefined;
 
-      if (avatarFile) {
-        const response = await imagesUploadImage({
-          body: { image: avatarFile },
-        });
-        console.log("got image upload response");
-        if (response.data) {
-          uploadedFile = response.data;
-        }
-      }
+      //   if (avatarFile) {
+      //     const response = await imagesUploadImage({
+      //       body: { file: await avatarFile.text() },
+      //     });
+      //     console.log("got image upload response");
+      //     if (response.data) {
+      //       uploadedFile = response.data;
+      //     }
+      //   }
 
       console.log("handleSave 3");
 
       const payload: UpdateProfileDto = {
         name,
         profileDescription: bio,
-        profilePicture: uploadedFile ?? avatarUrl ?? undefined,
+        profilePicture: avatarUrl ?? undefined,
       };
       const response = await userUpdate({
         body: payload,
@@ -130,11 +129,15 @@ const ProfileEditPage: React.FC = () => {
         <div className="w-full h-[100px]"></div>
         <div className="px-8 relative space-y-2 border-stone-300 border py-4 rounded mx-2 bg-white">
           <div className="relative w-fit">
-            <ProfileImage
+            <img
               src={
-                avatarFile ? URL.createObjectURL(avatarFile) : avatarUrl ?? null
+                avatarFile
+                  ? URL.createObjectURL(avatarFile)
+                  : avatarUrl
+                  ? getImageSource(avatarUrl)
+                  : undefined
               }
-              className="mt-[-55px]"
+              className="mt-[-55px] w-29 h-29 rounded-md object-cover"
             />
             <label className="cursor-pointer text-blue-600 underline text-sm absolute -top-5">
               <input

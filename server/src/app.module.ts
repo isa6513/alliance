@@ -21,6 +21,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { AdminViewerModule } from './admin-viewer/admin-viewer.module';
 import { S3Module } from './s3/s3.module';
 import { SearchModule } from './search/search.module';
+import * as multer from 'multer';
 
 @Module({
   imports: [
@@ -46,7 +47,9 @@ import { SearchModule } from './search/search.module';
       },
     }),
     S3Module,
-    MulterModule.register({}),
+    MulterModule.register({
+      storage: multer.memoryStorage(),
+    }),
     EventEmitterModule.forRoot(),
     AuthModule,
     UserModule,

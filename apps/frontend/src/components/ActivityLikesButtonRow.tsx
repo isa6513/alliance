@@ -23,7 +23,7 @@ const ActivityLikesButtonRow = ({
         labelText={labelText}
       />
       {likes.slice(0, 5).map((like) => (
-        <ProfileImage key={like.id} src={like.profilePicture!} size="small" />
+        <ProfileImage key={like.id} pfp={like.profilePicture!} size="small" />
       ))}
       {likes.length > 5 && (
         <span className="text-sm text-zinc-500">+{likes.length - 5} more</span>

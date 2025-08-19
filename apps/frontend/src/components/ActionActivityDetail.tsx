@@ -141,7 +141,7 @@ const ActionActivityDetail = () => {
               <div className="flex flex-row items-center gap-x-4">
                 {activity.user.profilePicture !== null && (
                   <ProfileImage
-                    src={activity.user.profilePicture}
+                    pfp={activity.user.profilePicture}
                     size="medium"
                   />
                 )}

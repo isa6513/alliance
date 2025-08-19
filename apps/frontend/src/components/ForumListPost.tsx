@@ -2,6 +2,7 @@ import Card, { CardStyle } from "./system/Card";
 import { PostDto } from "@alliance/shared/client";
 import { useNavigate } from "react-router";
 import { formatTime } from "../lib/utils";
+import ProfileImage from "./ProfileImage";
 
 export interface ForumListPostProps {
   post: PostDto;
@@ -33,13 +34,7 @@ const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
       </div>
       <div className="flex justify-between text-sm text-gray-500">
         <div className="flex flex-row gap-x-2 items-center">
-          {post.author.profilePicture && (
-            <img
-              src={post.author.profilePicture}
-              alt={post.author.displayName}
-              className="aspect-square h-6 rounded-md object-cover"
-            />
-          )}
+          <ProfileImage pfp={post.author.profilePicture} size="small" />
           <p onClick={authorClick} className="hover:underline">
             {post.author.displayName}
           </p>

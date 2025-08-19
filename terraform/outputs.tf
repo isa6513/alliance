@@ -30,6 +30,11 @@ output "assets_bucket_name" {
   value       = aws_s3_bucket.assets.bucket
 }
 
+output "dev_assets_bucket_name" {
+  description = "S3 bucket used for static assets and uploads"
+  value       = aws_s3_bucket.dev_assets.bucket
+}
+
 output "dev_access_key_id" {
   value = aws_iam_access_key.dev.id
   sensitive   = true

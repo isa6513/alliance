@@ -94,7 +94,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
                 {activity.likes.slice(0, 5).map((like) => (
                   <ProfileImage
                     key={like.id}
-                    src={like.profilePicture!}
+                    pfp={like.profilePicture!}
                     size="small"
                   />
                 ))}
