@@ -30,15 +30,15 @@ export class AuthService {
     res.cookie(AuthService.ACCESS_COOKIE, access, {
       httpOnly: true,
       secure,
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 1000 * 60 * 15, // 15 min
     });
     if (refresh) {
       res.cookie(AuthService.REFRESH_COOKIE, refresh, {
         httpOnly: true,
         secure,
-        sameSite: 'strict',
-        path: '/auth/refresh',
+        sameSite: 'lax',
+        path: '/',
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       });
     }
@@ -46,7 +46,7 @@ export class AuthService {
 
   clearAuthCookies(res: Response) {
     res.clearCookie(AuthService.ACCESS_COOKIE);
-    res.clearCookie(AuthService.REFRESH_COOKIE, { path: '/auth/refresh' });
+    res.clearCookie(AuthService.REFRESH_COOKIE);
   }
 
   async register(signUp: SignUpDto): Promise<User> {
