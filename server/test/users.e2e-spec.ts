@@ -47,7 +47,6 @@ describe('Users (e2e)', () => {
       .send({
         name: 'Friend A',
         profileDescription: 'Friend A',
-        profilePicture: 'Friend A',
       })
       .set('Authorization', `Bearer ${userAToken}`);
 

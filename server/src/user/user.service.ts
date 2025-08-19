@@ -66,7 +66,7 @@ export class UserService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { cityId, profilePicture, ...updateData } = data;
 
-    console.log('profilePicture input data', profilePicture?.length);
+    console.log('profilePicture input data', profilePicture);
 
     if (profilePicture) {
       const key = profilePicture
