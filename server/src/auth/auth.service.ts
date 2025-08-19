@@ -30,14 +30,14 @@ export class AuthService {
     res.cookie(AuthService.ACCESS_COOKIE, access, {
       httpOnly: true,
       secure,
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: 1000 * 60 * 15, // 15 min
     });
     if (refresh) {
       res.cookie(AuthService.REFRESH_COOKIE, refresh, {
         httpOnly: true,
         secure,
-        sameSite: 'lax',
+        sameSite: 'strict',
         path: '/',
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       });
