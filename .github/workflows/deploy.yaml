@@ -377,7 +377,7 @@ jobs:
             export SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
             export STRIPE_ENDPOINT_SECRET=${{ secrets.STRIPE_ENDPOINT_SECRET }}
             export STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}
-            export ASSETS_BUCKET_NAME=${{ secrets.ASSETS_BUCKET_NAME }}
+            export ASSETS_BUCKET=${{ secrets.ASSETS_BUCKET_NAME }}
 
             rollback () {
               echo "Deployment failed - rolling back"
