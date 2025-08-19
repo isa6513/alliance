@@ -1,24 +1,23 @@
 import {
-  Navigate,
   Outlet,
   ShouldRevalidateFunctionArgs,
+  useNavigate,
   useRouteLoaderData,
 } from "react-router";
 import { useAuth } from "./lib/AuthContext";
 import NavbarHorizontal from "./components/NavbarHorizontal";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   ActionActivityDto,
+  ActionDto,
   actionsFindAll,
   actionsMyActivity,
-  authRefreshTokens,
   forumFindAllPosts,
   PostDto,
   ProfileDto,
   UserActionRelation,
   userMyProfile,
 } from "@alliance/shared/client";
-import { ActionDto } from "@alliance/shared/client";
 
 export interface RouteMatch {
   data: unknown;
@@ -48,26 +47,12 @@ export async function clientLoader() {
   localStorage.setItem(revalidateKey, "false");
   console.log("clientLoader");
 
-  let [actions, activities, posts, profile] = await Promise.all([
+  const [actions, activities, posts, profile] = await Promise.all([
     actionsFindAll(),
     actionsMyActivity(),
     forumFindAllPosts(),
     userMyProfile(),
   ]);
-
-  if (
-    profile.error &&
-    (profile.error as { statusCode: number }).statusCode === 401
-  ) {
-    console.log("refreshing tokens");
-    await authRefreshTokens();
-    [actions, activities, posts, profile] = await Promise.all([
-      actionsFindAll(),
-      actionsMyActivity(),
-      forumFindAllPosts(),
-      userMyProfile(),
-    ]);
-  }
 
   const activityList = activities.data ?? [];
   const actionToRelationMap = new Map<number, UserActionRelation>();
@@ -110,10 +95,18 @@ export function useAppLoaderData(): LoaderData {
   return data;
 }
 
+export function HydrateFallback() {
+  return (
+    <div className="flex h-screen w-screen items-center justify-center">
+      <p>Loading alliance data...</p>
+    </div>
+  );
+}
+
 export default function AppLayout() {
   const { isAuthenticated, loading } = useAuth();
 
-  const [shouldGoToLogin, setShouldGoToLogin] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -125,17 +118,13 @@ export default function AppLayout() {
       localStorage.getItem("was-logged-in") === "true" &&
       !loading
     ) {
-      setShouldGoToLogin(true);
+      navigate("/login");
     }
 
     window.addEventListener("auth:unauthorized", () => {
-      authRefreshTokens();
+      navigate("/login");
     });
-  }, [isAuthenticated, loading]);
-
-  if (shouldGoToLogin) {
-    return <Navigate to="/login" />;
-  }
+  }, [isAuthenticated, loading, navigate]);
 
   return (
     <>

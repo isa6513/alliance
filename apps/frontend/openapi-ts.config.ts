@@ -2,11 +2,11 @@ import { defineConfig } from "@hey-api/openapi-ts";
 
 export default defineConfig({
   input: "http://localhost:3005/openapi.yaml",
-  output: "./client",
+  output: "./src/client",
   plugins: [
     {
       name: "@hey-api/client-fetch",
-      runtimeConfigPath: "./lib/hey-api.ts",
+      runtimeConfigPath: "./src/hey-api.ts",
     },
   ],
 });

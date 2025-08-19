@@ -8,3 +8,14 @@ export const getWebSocketUrl = (mode: string): string => {
     return base_url;
   }
 };
+
+export const getApiUrl = (): string => {
+  if (
+    (import.meta as unknown as { env: { MODE: string } }).env.MODE ===
+    "development"
+  ) {
+    return "http://localhost:3005";
+  } else {
+    return prod_api_url;
+  }
+};

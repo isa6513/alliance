@@ -3,10 +3,10 @@ import { useParams, useNavigate } from "react-router";
 import { communiquesFindOne, communiquesRead } from "@alliance/shared/client";
 import { CommuniqueDto } from "@alliance/shared/client";
 import ReactMarkdown from "react-markdown";
-import { getApiUrl } from "../../lib/config";
 import { AdminOnly } from "../../lib/AdminOnly";
 import Button, { ButtonColor } from "../../components/system/Button";
 import { useAuth } from "../../lib/AuthContext";
+import { getImageSource } from "../../lib/config";
 
 const AnnouncementPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -135,7 +135,7 @@ const AnnouncementPage: React.FC = () => {
           {announcement.headerImage && (
             <div className="w-full mb-6">
               <img
-                src={`${getApiUrl()}/images/${announcement.headerImage}`}
+                src={getImageSource(announcement.headerImage)}
                 alt={announcement.title}
                 className="w-full h-auto rounded-md object-cover max-h-[200px] border border-gray-300"
               />

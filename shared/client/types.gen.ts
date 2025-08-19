@@ -276,14 +276,6 @@ export type UserActionRelationDto = {
     relation: UserActionRelation;
 };
 
-export type _Map = {
-    [key: string]: unknown;
-};
-
-export type ActionRelationsDto = {
-    relations: _Map;
-};
-
 export type LatLonDto = {
     latitude: number;
     longitude: number;
@@ -1099,19 +1091,6 @@ export type ActionsMyActivityResponses = {
 };
 
 export type ActionsMyActivityResponse = ActionsMyActivityResponses[keyof ActionsMyActivityResponses];
-
-export type ActionsMyActionRelationsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/actions/myActionRelations';
-};
-
-export type ActionsMyActionRelationsResponses = {
-    200: ActionRelationsDto;
-};
-
-export type ActionsMyActionRelationsResponse = ActionsMyActionRelationsResponses[keyof ActionsMyActionRelationsResponses];
 
 export type ActionsUserLocationsData = {
     body?: never;

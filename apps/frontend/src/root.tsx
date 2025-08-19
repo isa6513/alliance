@@ -6,24 +6,10 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-import { getApiUrl } from "./lib/config";
-import { client } from "@alliance/shared/client/client.gen";
 import { AuthProvider } from "./lib/AuthContext";
 import { PostHogProvider } from "posthog-js/react";
 import { PostHogConfig } from "posthog-js";
 import { Route } from "../.react-router/types/src/+types/root";
-
-client.setConfig({
-  baseUrl: getApiUrl(),
-  credentials: "include",
-});
-
-client.interceptors.response.use(async (res) => {
-  if (res.status === 401) {
-    window.dispatchEvent(new CustomEvent("auth:unauthorized"));
-  }
-  return res;
-});
 
 const options: Partial<PostHogConfig> = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
