@@ -52,7 +52,7 @@ const ActivityLikeButton = ({
         ></path>
       </svg>
       {likes > 0 && <p className="text-sm text-zinc-800">{likes}</p>}
-      {labelText && (
+      {labelText && likes > 0 && (
         <p className="text-sm text-zinc-800">
           {likes === 1 ? "Like" : "Likes"}
         </p>

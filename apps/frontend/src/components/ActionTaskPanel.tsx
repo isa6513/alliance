@@ -8,6 +8,7 @@ import { useActionLoaderData } from "../pages/app/ActionPage";
 import { Route } from "../../.react-router/types/src/components/+types/ActionTaskPanel";
 import ActionCommitButton from "./ActionCommitButton";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
+import { useAuth } from "../lib/AuthContext";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
@@ -41,6 +42,8 @@ const ActionTaskPanel = () => {
 
   const action = useActionLoaderData();
 
+  const { isAuthenticated } = useAuth();
+
   if (!action) {
     return null;
   }
@@ -59,6 +62,9 @@ const ActionTaskPanel = () => {
         </Card>
       );
     } else {
+      if (!isAuthenticated) {
+        return null;
+      }
       return (
         <Card
           style={CardStyle.White}

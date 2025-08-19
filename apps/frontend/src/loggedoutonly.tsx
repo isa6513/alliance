@@ -1,11 +1,5 @@
-import { Navigate, Outlet } from "react-router";
-import { useAuth } from "./lib/AuthContext";
+import { Outlet } from "react-router";
 
-export default function AuthOnlyLayout() {
-  const { isAuthenticated } = useAuth();
-  if (isAuthenticated) {
-    return <Navigate to="/home" />;
-  }
-
+export default function LoggedOutOnlyLayout() {
   return <Outlet />;
 }

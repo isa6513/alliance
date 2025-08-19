@@ -17,7 +17,12 @@ export const createClientConfig: CreateClientConfig = (config) => {
     const inputreq = input as Request;
     const res = await originalFetch(new Request(input));
 
-    if (res.status !== 401 || inputreq.url.includes("auth/refresh")) return res;
+    if (
+      res.status !== 401 ||
+      inputreq.url.includes("auth/refresh") ||
+      window.location.pathname.includes("/login")
+    )
+      return res;
 
     const refreshRes = await authRefreshTokens();
 

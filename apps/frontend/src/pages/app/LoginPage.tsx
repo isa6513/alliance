@@ -26,8 +26,7 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   const returnUrl = useMemo((): string | undefined => {
-    // 1. Query param ?returnTo=/foo/bar
-    const qp = searchParams.get("returnTo");
+    const qp = searchParams.get("redirect");
     if (qp && qp.startsWith("/")) return qp;
 
     // 2. State passed by a redirect: navigate("/login", { state: { from: location.pathname }})

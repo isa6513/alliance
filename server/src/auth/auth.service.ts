@@ -30,6 +30,7 @@ export class AuthService {
     res.cookie(AuthService.ACCESS_COOKIE, access, {
       httpOnly: true,
       secure,
+      path: '/',
       sameSite: 'strict',
       maxAge: 1000 * 60 * 15, // 15 min
     });
@@ -39,14 +40,14 @@ export class AuthService {
         secure,
         sameSite: 'strict',
         path: '/',
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        maxAge: 1000 * 60 * 60 * 24 * 14, // 14 days
       });
     }
   }
 
   clearAuthCookies(res: Response) {
-    res.clearCookie(AuthService.ACCESS_COOKIE);
-    res.clearCookie(AuthService.REFRESH_COOKIE);
+    res.clearCookie(AuthService.ACCESS_COOKIE, { path: '/' });
+    res.clearCookie(AuthService.REFRESH_COOKIE, { path: '/' });
   }
 
   async register(signUp: SignUpDto): Promise<User> {
@@ -110,7 +111,7 @@ export class AuthService {
       tokenType: JWTTokenType.refresh,
     };
     const token = await this.jwtService.signAsync(payload, {
-      expiresIn: '7d',
+      expiresIn: '14d',
       secret: process.env.JWT_REFRESH_SECRET,
     });
     return token;
@@ -122,7 +123,7 @@ export class AuthService {
       email: user.email,
       tokenType: JWTTokenType.access,
     };
-    return this.jwtService.signAsync(payload, { expiresIn: '15s' });
+    return this.jwtService.signAsync(payload, { expiresIn: '15m' });
   }
 
   async refreshAccessToken(userId: number): Promise<string> {

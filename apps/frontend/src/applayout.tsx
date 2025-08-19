@@ -2,6 +2,7 @@ import {
   Outlet,
   ShouldRevalidateFunctionArgs,
   useNavigate,
+  useNavigation,
   useRouteLoaderData,
 } from "react-router";
 import { useAuth } from "./lib/AuthContext";
@@ -103,28 +104,47 @@ export function HydrateFallback() {
   );
 }
 
+const authOnlyRoutes = ["/home", "/settings", "/profile", "/onboarding"];
+
 export default function AppLayout() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, logout } = useAuth();
 
   const navigate = useNavigate();
+  const navigation = useNavigation();
+
+  const isNavigating = Boolean(navigation.location);
 
   useEffect(() => {
     if (isAuthenticated) {
       localStorage.setItem("was-logged-in", "true");
     }
     // prevent user from going into "logged out mode" if their session expires
-    if (
-      !isAuthenticated &&
-      localStorage.getItem("was-logged-in") === "true" &&
-      !loading
-    ) {
-      navigate("/login");
-    }
+    // if (
+    //   !isAuthenticated &&
+    //   localStorage.getItem("was-logged-in") === "true" &&
+    //   !loading
+    // ) {
+    //   navigate("/login?redirect=" + window.location.pathname);
+    // }
+    const wasLoggedIn = localStorage.getItem("was-logged-in") === "true";
 
-    window.addEventListener("auth:unauthorized", () => {
-      navigate("/login");
-    });
-  }, [isAuthenticated, loading, navigate]);
+    const handleUnauthorized = () => {
+      if (
+        !window.location.pathname.includes("/login") &&
+        !isNavigating &&
+        (authOnlyRoutes.includes(window.location.pathname) || wasLoggedIn)
+      ) {
+        console.log("unauthorized, logging out");
+        logout();
+        navigate("/login?redirect=" + window.location.pathname);
+      }
+    };
+
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+    return () => {
+      window.removeEventListener("auth:unauthorized", handleUnauthorized);
+    };
+  }, [isAuthenticated, loading, navigate, isNavigating, logout]);
 
   return (
     <>
