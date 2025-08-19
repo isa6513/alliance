@@ -18,6 +18,13 @@ client.setConfig({
   credentials: "include",
 });
 
+client.interceptors.response.use(async (res) => {
+  if (res.status === 401) {
+    window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+  }
+  return res;
+});
+
 const options: Partial<PostHogConfig> = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
   defaults: "2025-05-24",

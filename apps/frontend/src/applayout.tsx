@@ -127,6 +127,10 @@ export default function AppLayout() {
     ) {
       setShouldGoToLogin(true);
     }
+
+    window.addEventListener("auth:unauthorized", () => {
+      authRefreshTokens();
+    });
   }, [isAuthenticated, loading]);
 
   if (shouldGoToLogin) {
