@@ -1,16 +1,16 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import Card, { CardStyle } from "../../components/system/Card";
 import Button, { ButtonColor } from "../../components/system/Button";
 import FormInput from "../../components/system/FormInput";
 import { useAuth } from "../../lib/AuthContext";
-import { authForgotPassword, SignInDto } from "@alliance/shared/client";
+import { authForgotPassword, authMe, SignInDto } from "@alliance/shared/client";
 import { isFeatureEnabled } from "../../lib/config";
 import { Features } from "@alliance/shared/lib/features";
 
 const LoginPage: React.FC = () => {
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState<SignInDto>({
     email: "",
     password: "",
@@ -25,18 +25,19 @@ const LoginPage: React.FC = () => {
   );
   const navigate = useNavigate();
 
-  const returnUrl = useMemo((): string | undefined => {
+  const returnUrl = useMemo((): string => {
     const qp = searchParams.get("redirect");
     if (qp && qp.startsWith("/")) return qp;
+    return "/home";
+  }, [searchParams]);
 
-    // 2. State passed by a redirect: navigate("/login", { state: { from: location.pathname }})
-    const fromState = (location.state as { from: string })?.from;
-    if (typeof fromState === "string" && fromState.startsWith("/")) {
-      return fromState;
-    }
-
-    return undefined;
-  }, [searchParams, location.state]);
+  useEffect(() => {
+    authMe().then((res) => {
+      if (res.response.ok) {
+        navigate(returnUrl);
+      }
+    });
+  }, [isAuthenticated, returnUrl, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
