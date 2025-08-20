@@ -3,6 +3,7 @@ import { PropsWithChildren } from "react";
 export enum CardStyle {
   White = "white",
   Outline = "outline",
+  GreenOutline = "green-outline",
   Alert = "alert",
   Grey = "grey",
   LightGrey = "light-grey",
@@ -43,6 +44,7 @@ const Card: React.FC<CardProps> = ({
     [CardStyle.Black]: "bg-black border-zinc-300 text-white",
     [CardStyle.Image]: "bg-transparent border-none",
     [CardStyle.Green]: "bg-green-1 border-green-2 rounded-lg",
+    [CardStyle.GreenOutline]: "border-green-2 bg-green-1/20",
   };
 
   return (

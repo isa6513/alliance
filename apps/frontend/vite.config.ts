@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import path from "node:path";
+import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 import tailwindcss from "@tailwindcss/vite";
@@ -12,7 +13,19 @@ const isStorybook =
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [!isStorybook && reactRouter(), tailwindcss()],
-  optimizeDeps: { exclude: ["@alliance/shared"] },
+  optimizeDeps: {
+    exclude: ["@alliance/shared"],
+    esbuildOptions: {
+      define: {
+        global: "globalThis",
+      },
+      plugins: [
+        NodeGlobalsPolyfillPlugin({
+          buffer: true,
+        }),
+      ],
+    },
+  },
   server: {
     watch: {
       usePolling: true,

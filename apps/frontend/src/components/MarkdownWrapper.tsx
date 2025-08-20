@@ -31,6 +31,9 @@ const MarkdownWrapper: React.FC<MarkdownWrapperProps> = ({
           p: ({ ...props }) => (
             <p className="text-lg md:text-xl my-4" {...props} />
           ),
+          strong: ({ ...props }) => (
+            <strong className="font-semibold" {...props} />
+          ),
           ol: ({ ...props }) => (
             <ol
               className="text-lg md:text-xl list-decimal list-inside my-4 pl-4"

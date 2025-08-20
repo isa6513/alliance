@@ -22,6 +22,9 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
             <Link to="/guide" className="text-lg">
               Guide
             </Link>
+            <Link to="/actions/list" className="text-lg">
+              Actions
+            </Link>
 
             {/* <div className="flex flex-col gap-2">
               <p className="font-bold text-gray-800">Platform</p>

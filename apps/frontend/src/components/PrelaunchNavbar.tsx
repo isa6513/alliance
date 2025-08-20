@@ -3,13 +3,19 @@ import { Link, useNavigate } from "react-router";
 enum NavbarPage {
   People = "People",
   Guide = "Guide",
+  Actions = "Actions",
 }
 
-const links: NavbarPage[] = [NavbarPage.People, NavbarPage.Guide];
+const links: NavbarPage[] = [
+  NavbarPage.People,
+  NavbarPage.Guide,
+  NavbarPage.Actions,
+];
 
 const destinations: Record<NavbarPage, string> = {
   [NavbarPage.People]: "/people",
   [NavbarPage.Guide]: "/guide",
+  [NavbarPage.Actions]: "/actions/list",
 };
 
 interface PrelaunchNavbarProps {
@@ -31,7 +37,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
       w-screen justify-between items-center py-4 md:py-5 px-24 top-0 left-0 z-10 text-[14pt] transition-[padding,background-color] duration-300 ${
         transparent
           ? "bg-transparent text-white"
-          : "bg-zinc-800 text-white border-b md:border-none border-zinc-200"
+          : "text-black bg-white border-b md:border-none border-zinc-200"
       }`}
       ref={ref}
     >
@@ -43,7 +49,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
       >
         THE ALLIANCE
       </h1>
-      <div className="flex flex-row items-center gap-x-10">
+      <div className="flex flex-row items-center gap-x-10 text-lg">
         {links.map((link) => (
           // link == NavbarPage.Guide ? (
           //   <Link to={destinations[link]} key={link}>

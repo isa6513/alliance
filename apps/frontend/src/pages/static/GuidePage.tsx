@@ -3,7 +3,6 @@ import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import MarkdownWrapper from "../../components/MarkdownWrapper";
 import ExampleActionCategoryCard from "../../components/ExampleActionCategoryCard";
-import Markdown from "react-markdown";
 import Card, { CardStyle } from "../../components/system/Card";
 
 const GuidePage: React.FC = () => {
@@ -55,11 +54,11 @@ const GuidePage: React.FC = () => {
           </div>
         </aside>
         <div className="flex flex-col max-w-3xl">
-          <div className="mx-auto w-full md:mb-8">
+          <div className="mx-auto w-full mb-4 md:mb-8">
             <h2 className="font-adobe !font-semibold !text-4xl md:!text-6xl">
               Guide to the Alliance
             </h2>
-            <p className="text-md md:text-lg mt-2">
+            <p className="text-md md:text-base text-zinc-500 mt-2">
               Information about the Alliance in recommended reading order. If
               you think you are likely to become a member, you do not need to
               read everything—we will walk you through the information when you
@@ -67,10 +66,14 @@ const GuidePage: React.FC = () => {
             </p>
           </div>
 
-          <Card className="md:mb-4" style={CardStyle.Green}>
+          <Card className="md:mb-2" style={CardStyle.GreenOutline}>
             <p>
               This guide was developed and approved by 25 founding members of
-              the Alliance.
+              the Alliance. Learn more about the process{" "}
+              <a href="/actions/list/early-governance" className="underline">
+                here
+              </a>
+              .
             </p>
           </Card>
 
@@ -82,7 +85,7 @@ Humanity faces many crises which are unlikely to be resolved by business as usua
 
 Large-scale change will require that people work together reliably and strategically.
 
-The Alliance aims to give its members, and ultimately a significant proportion of humanity, the ability to make deliberate, large-scale change. It uses data, expertise, and democratic input so that its members can take effective collective action at scale.
+The Alliance is group that aims to give its members, and ultimately a significant proportion of humanity, the ability to make deliberate, large-scale change. It uses data, expertise, and democratic input so that its members can take effective collective action at scale.
 
 While this project is highly ambitious, we believe it is the right time to undertake it seriously and carefully.
 
@@ -205,17 +208,15 @@ We accept our decision-making process will inevitably contain imperfections and 
 # What does it mean to be a member?
 
 ## Dependability
-Alliance members are individuals that have committed to cooperate with one another to build a better future for all.
+Alliance members are individuals that have committed to cooperate with one another to build a better future for all. Our common goal is not to create a future that is perfect from the perspective of every member, but to create a future that members agree is significantly better than the future that would occur otherwise.
 
 **The Alliance will not work unless members reliably take the actions assigned to them, even in the face of uncertainty, disagreement, or inconvenience.**
 
-The power of cooperation does not stem from attaining some idealistic harmony: it comes from working through issues, rain or shine, in order to reach a common goal. When members make commitments and don’t follow through, others are forced to compensate, trust degrades, and projects slowly stagnate.
+The power of cooperation does not stem from attaining some idealistic harmony: it comes from working through issues, rain or shine, in order to reach a common goal. When members aren’t reliable, others are forced to compensate, trust degrades, and projects slowly stagnate.
 
-Members promise to abide by a democratic process, rather than decide individually whether or not to participate in every action. Similarly, a democratic society depends on citizens following every law, not only the laws they agree with.
+Members promise to abide by a *democratic process that decides actions* rather than decide individually whether or not to participate in every action. Similarly, a democratic society depends on citizens following every law, not only the laws they agree with.
 
-Governance procedures ensure that members approve of the overall goals and direction of the Alliance. However, it is impossible to create a future that is perfect from the perspective of every individual. Our common goal is rather to create a future that members agree is significantly better than the future that would occur otherwise.
-
-We recognize the risks associated with collective decision-making. Our approach is to start small: we are building a group that voluntarily joins a collective process, and we put limits on the total amount of time and money that are collectively allocated.
+We recognize the risks associated with collective decision-making. Our approach is to start small: we put limits on the total amount of time and money that are collectively allocated, and our governance procedures ensure that members approve of the overall goals and direction of the Alliance.
 
 ## Terms
 The following constitutes the basic promise that members make to one another:

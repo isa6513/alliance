@@ -17,10 +17,15 @@ const PeoplePage: React.FC = () => {
             id="people"
             markdownContent="
 
-The Strategic Office is currently composed of:
+The Alliance is composed of a full-time Strategic Office and a body of members.
+
+## Strategic Office
 - [Mark Xu](https://markxu.com/)
 - [Sidney Hough](https://sidney.com/)
 - [Casey Manning](https://caseymanning.github.io/)
+
+## Members
+We have 25 anonymous members who are participating in early experiments.
 
 "
           />
