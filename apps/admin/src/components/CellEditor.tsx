@@ -192,7 +192,7 @@ const CellEditor: React.FC<CellEditorProps> = ({
         );
       case "uuid":
       case "string":
-        if (editValue.length > 100) {
+        if (editValue && editValue.length > 100) {
           return (
             <textarea
               {...commonProps}

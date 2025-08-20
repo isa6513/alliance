@@ -110,6 +110,10 @@ export type User = {
     anonymous: boolean;
 };
 
+export type StreamableFile = {
+    [key: string]: unknown;
+};
+
 /**
  * Type of action activity
  */
@@ -434,14 +438,6 @@ export type ReadResultDto = {
     read: boolean;
 };
 
-export type UploadImageDto = {
-    file: Blob | File;
-};
-
-export type StreamableFile = {
-    [key: string]: unknown;
-};
-
 export type CreatePostDto = {
     title: string;
     content: string;
@@ -624,6 +620,36 @@ export type UpdateRecordResponseDto = {
     updatedRecord?: {
         [key: string]: unknown;
     };
+};
+
+export type DeleteRecordsDto = {
+    /**
+     * Array of primary key values for records to delete
+     */
+    primaryKeyValues: Array<string>;
+};
+
+export type DeleteRecordsResponseDto = {
+    /**
+     * Whether the deletion was successful
+     */
+    success: boolean;
+    /**
+     * Descriptive message about the operation
+     */
+    message: string;
+    /**
+     * Number of records deleted
+     */
+    deletedCount: number;
+    /**
+     * Array of primary key values that were successfully deleted
+     */
+    deletedIds: Array<string>;
+    /**
+     * Array of primary key values that failed to delete
+     */
+    failedIds?: Array<string>;
 };
 
 export type SearchItemType = 'user' | 'action' | 'post' | 'recent';
@@ -1020,6 +1046,34 @@ export type UserFindOneResponses = {
 };
 
 export type UserFindOneResponse = UserFindOneResponses[keyof UserFindOneResponses];
+
+export type ImagesGetImageData = {
+    body?: never;
+    path: {
+        key: string;
+    };
+    query?: never;
+    url: '/images/{key}';
+};
+
+export type ImagesGetImageResponses = {
+    200: StreamableFile;
+};
+
+export type ImagesGetImageResponse = ImagesGetImageResponses[keyof ImagesGetImageResponses];
+
+export type ImagesDeleteImageData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/images/{id}';
+};
+
+export type ImagesDeleteImageResponses = {
+    200: unknown;
+};
 
 export type ActionsJoinData = {
     body?: never;
@@ -1488,47 +1542,6 @@ export type CommuniquesReadResponses = {
     200: unknown;
 };
 
-export type ImagesUploadImageData = {
-    body: UploadImageDto;
-    path?: never;
-    query?: never;
-    url: '/images/upload';
-};
-
-export type ImagesUploadImageResponses = {
-    200: string;
-};
-
-export type ImagesUploadImageResponse = ImagesUploadImageResponses[keyof ImagesUploadImageResponses];
-
-export type ImagesGetImageData = {
-    body?: never;
-    path: {
-        key: string;
-    };
-    query?: never;
-    url: '/images/{key}';
-};
-
-export type ImagesGetImageResponses = {
-    200: StreamableFile;
-};
-
-export type ImagesGetImageResponse = ImagesGetImageResponses[keyof ImagesGetImageResponses];
-
-export type ImagesDeleteImageData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/images/{id}';
-};
-
-export type ImagesDeleteImageResponses = {
-    200: unknown;
-};
-
 export type ForumFindAllPostsData = {
     body?: never;
     path?: never;
@@ -1898,6 +1911,35 @@ export type AdminViewerGetTableDataResponses = {
 };
 
 export type AdminViewerGetTableDataResponse = AdminViewerGetTableDataResponses[keyof AdminViewerGetTableDataResponses];
+
+export type AdminViewerDeleteRecordsData = {
+    body: DeleteRecordsDto;
+    path: {
+        /**
+         * Name of the database table
+         */
+        tableName: string;
+    };
+    query?: never;
+    url: '/admin-viewer/tables/{tableName}/records';
+};
+
+export type AdminViewerDeleteRecordsErrors = {
+    /**
+     * Invalid delete data or validation failed
+     */
+    400: unknown;
+    /**
+     * Table not found
+     */
+    404: unknown;
+};
+
+export type AdminViewerDeleteRecordsResponses = {
+    200: DeleteRecordsResponseDto;
+};
+
+export type AdminViewerDeleteRecordsResponse = AdminViewerDeleteRecordsResponses[keyof AdminViewerDeleteRecordsResponses];
 
 export type AdminViewerUpdateRecordData = {
     body: UpdateRecordDto;

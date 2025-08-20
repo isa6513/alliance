@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Put,
+  Delete,
   Param,
   Query,
   Body,
@@ -26,6 +27,10 @@ import {
   UpdateRecordDto,
   UpdateRecordResponseDto,
 } from './dto/update-record.dto';
+import {
+  DeleteRecordsDto,
+  DeleteRecordsResponseDto,
+} from './dto/delete-records.dto';
 
 @ApiTags('admin-viewer')
 @Controller('admin-viewer')
@@ -83,5 +88,27 @@ export class AdminViewerController {
     @Body() updateData: UpdateRecordDto,
   ): Promise<UpdateRecordResponseDto> {
     return this.adminViewerService.updateRecord(tableName, updateData);
+  }
+
+  @Delete('tables/:tableName/records')
+  @ApiParam({ name: 'tableName', description: 'Name of the database table' })
+  @ApiBody({ type: DeleteRecordsDto })
+  @ApiOkResponse({ type: DeleteRecordsResponseDto })
+  @ApiBadRequestResponse({
+    description: 'Invalid delete data or validation failed',
+  })
+  @ApiNotFoundResponse({ description: 'Table not found' })
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidUnknownValues: true,
+    }),
+  )
+  deleteRecords(
+    @Param('tableName') tableName: string,
+    @Body() deleteData: DeleteRecordsDto,
+  ): Promise<DeleteRecordsResponseDto> {
+    return this.adminViewerService.deleteRecords(tableName, deleteData);
   }
 }

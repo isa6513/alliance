@@ -6,6 +6,7 @@ import { TableDataDto, TableDataQueryDto } from './dto/table-data.dto';
 import { ColumnMetadataDto } from './dto/column-metadata.dto';
 import { ColumnDataType } from './dto/column-type.enum';
 import { UpdateRecordDto, UpdateRecordResponseDto } from './dto/update-record.dto';
+import { DeleteRecordsDto, DeleteRecordsResponseDto } from './dto/delete-records.dto';
 
 @Injectable()
 export class AdminViewerService {
@@ -256,6 +257,102 @@ export class AdminViewerService {
       }
       
       throw new Error(`Failed to update record: ${error.message}`);
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async deleteRecords(
+    tableName: string,
+    deleteData: DeleteRecordsDto,
+  ): Promise<DeleteRecordsResponseDto> {
+    const metadata = this.dataSource.entityMetadatas.find(
+      (m) => m.tableName === tableName,
+    );
+
+    if (!metadata) {
+      throw new NotFoundException(`Table ${tableName} not found`);
+    }
+
+    const primaryKeyColumn = metadata.primaryColumns[0];
+    
+    if (!primaryKeyColumn) {
+      throw new NotFoundException(`No primary key found for table ${tableName}`);
+    }
+
+    if (!deleteData.primaryKeyValues || deleteData.primaryKeyValues.length === 0) {
+      return {
+        success: false,
+        message: 'No records specified for deletion',
+        deletedCount: 0,
+        deletedIds: [],
+      };
+    }
+
+    console.log('Delete request for table:', tableName);
+    console.log('Primary key values:', deleteData.primaryKeyValues);
+    console.log('Primary key column:', primaryKeyColumn.databaseName);
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    
+    try {
+      // Start transaction
+      await queryRunner.startTransaction();
+
+      // First, verify which records exist
+      const placeholders = deleteData.primaryKeyValues.map((_, index) => `$${index + 1}`).join(', ');
+      const selectQuery = `SELECT "${primaryKeyColumn.databaseName}" FROM "${tableName}" WHERE "${primaryKeyColumn.databaseName}" IN (${placeholders})`;
+      
+      const existingRecords = await queryRunner.query(selectQuery, deleteData.primaryKeyValues);
+      const existingIds = existingRecords.map(record => record[primaryKeyColumn.databaseName]);
+
+      if (existingIds.length === 0) {
+        await queryRunner.rollbackTransaction();
+        return {
+          success: false,
+          message: 'No matching records found to delete',
+          deletedCount: 0,
+          deletedIds: [],
+          failedIds: deleteData.primaryKeyValues,
+        };
+      }
+
+      // Delete the records
+      const deleteQuery = `DELETE FROM "${tableName}" WHERE "${primaryKeyColumn.databaseName}" IN (${placeholders}) RETURNING "${primaryKeyColumn.databaseName}"`;
+      const result = await queryRunner.query(deleteQuery, deleteData.primaryKeyValues);
+      
+      // The result is an array where the first element is the actual records, second is row count
+      const deletedRecords = Array.isArray(result[0]) ? result[0] : result;
+      const deletedIds = deletedRecords.map(record => record[primaryKeyColumn.databaseName]);
+
+      console.log('Delete query result:', result);
+      console.log('Deleted records:', deletedRecords);
+      console.log('Deleted IDs:', deletedIds);
+
+      // Find failed IDs (requested but not deleted)
+      const failedIds = deleteData.primaryKeyValues.filter(id => 
+        !deletedIds.some(deletedId => String(deletedId) === String(id))
+      );
+
+      // Commit transaction
+      await queryRunner.commitTransaction();
+
+      return {
+        success: true,
+        message: `Successfully deleted ${deletedIds.length} record${deletedIds.length === 1 ? '' : 's'}`,
+        deletedCount: deletedIds.length,
+        deletedIds,
+        failedIds: failedIds.length > 0 ? failedIds : undefined,
+      };
+    } catch (error) {
+      // Rollback transaction on error
+      await queryRunner.rollbackTransaction();
+      
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      
+      throw new Error(`Failed to delete records: ${error.message}`);
     } finally {
       await queryRunner.release();
     }

@@ -14,6 +14,7 @@ import {
   adminViewerGetTableData,
   adminViewerGetTables,
   adminViewerUpdateRecord,
+  adminViewerDeleteRecords,
 } from "@alliance/shared/client";
 
 interface TableDataQueryDto {
@@ -54,6 +55,13 @@ const DatabaseViewer: React.FC = () => {
     columnName: string;
     newValue: any;
     originalValue: any;
+  } | null>(null);
+  const [selectedRows, setSelectedRows] = useState<Set<string | number>>(
+    new Set()
+  );
+  const [pendingDelete, setPendingDelete] = useState<{
+    tableName: string;
+    primaryKeyValues: (string | number)[];
   } | null>(null);
 
   // WebSocket connection for live updates
@@ -381,10 +389,107 @@ const DatabaseViewer: React.FC = () => {
     setPendingUpdate(null);
   };
 
+  const handleSelectRow = (
+    primaryKeyValue: string | number,
+    checked: boolean
+  ) => {
+    setSelectedRows((prev) => {
+      const newSelection = new Set(prev);
+      if (checked) {
+        newSelection.add(primaryKeyValue);
+      } else {
+        newSelection.delete(primaryKeyValue);
+      }
+      return newSelection;
+    });
+  };
+
+  const handleSelectAllRows = (checked: boolean) => {
+    if (!tableData) return;
+
+    setSelectedRows((prev) => {
+      const newSelection = new Set(prev);
+
+      if (checked) {
+        // Add all visible rows to selection
+        tableData.rows.forEach((row) => {
+          const primaryKeyValue = getRowPrimaryKey(row, tableData.columns);
+          if (primaryKeyValue !== null) {
+            newSelection.add(primaryKeyValue);
+          }
+        });
+      } else {
+        // Remove all visible rows from selection
+        tableData.rows.forEach((row) => {
+          const primaryKeyValue = getRowPrimaryKey(row, tableData.columns);
+          if (primaryKeyValue !== null) {
+            newSelection.delete(primaryKeyValue);
+          }
+        });
+      }
+
+      return newSelection;
+    });
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedRows.size === 0 || !selectedTable) return;
+
+    setPendingDelete({
+      tableName: selectedTable,
+      primaryKeyValues: Array.from(selectedRows),
+    });
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+
+    console.log("Deleting records:", {
+      tableName: pendingDelete.tableName,
+      primaryKeyValues: pendingDelete.primaryKeyValues,
+      stringified: pendingDelete.primaryKeyValues.map((value) => String(value)),
+    });
+
+    try {
+      const response = await adminViewerDeleteRecords({
+        path: { tableName: pendingDelete.tableName },
+        body: {
+          primaryKeyValues: pendingDelete.primaryKeyValues.map((value) =>
+            String(value)
+          ),
+        },
+      });
+
+      if (response.data?.success) {
+        // Clear selected rows
+        setSelectedRows(new Set());
+        // Refresh table data to show the deletions
+        loadTableData();
+        alert(`Successfully deleted ${response.data.deletedCount} record(s)`);
+      } else {
+        alert(`Delete failed: ${response.data?.message || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Delete failed:", error);
+      alert(
+        `Delete failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setPendingDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setPendingDelete(null);
+  };
+
   // Clear table data when changing tables to avoid showing stale data
   useEffect(() => {
     setSearchInput("");
     setNewRows(new Set()); // Clear new row highlights
+    setSelectedRows(new Set()); // Clear selected rows
     setQuery((prev) => ({
       ...prev,
       search: undefined,
@@ -411,12 +516,17 @@ const DatabaseViewer: React.FC = () => {
   }, [selectedTable, isConnected, subscribeToTable, unsubscribeFromTable]);
 
   // Helper function to get the primary key value for a row
-  const getRowPrimaryKey = (row: unknown[], columns: ColumnMetadataDto[]) => {
+  const getRowPrimaryKey = (
+    row: unknown[],
+    columns: ColumnMetadataDto[]
+  ): string | number | null => {
     const primaryKeyColumn = columns.find((col) => col.isPrimary);
     if (!primaryKeyColumn) return null;
 
     const primaryKeyIndex = columns.findIndex((col) => col.isPrimary);
-    return primaryKeyIndex >= 0 ? row[primaryKeyIndex] : null;
+    return primaryKeyIndex >= 0
+      ? (row[primaryKeyIndex] as string | number | null)
+      : null;
   };
 
   const formatCellValue = (
@@ -717,6 +827,30 @@ const DatabaseViewer: React.FC = () => {
                   )}
                 </div>
                 <div className="flex items-center space-x-4">
+                  {selectedRows.size > 0 && (
+                    <button
+                      onClick={handleDeleteSelected}
+                      className="px-4 py-2 bg-red-100 text-black border border-red-500 rounded-md hover:bg-red-300 focus:ring-2 focus:ring-red-500 flex items-center space-x-2"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                      <span>
+                        Delete {selectedRows.size} row
+                        {selectedRows.size === 1 ? "" : "s"}
+                      </span>
+                    </button>
+                  )}
                   <div className="relative">
                     <input
                       type="text"
@@ -757,6 +891,45 @@ const DatabaseViewer: React.FC = () => {
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50 sticky top-0 z-10">
                         <tr>
+                          <th className="px-6 py-3 text-left">
+                            <input
+                              type="checkbox"
+                              checked={
+                                tableData.rows.length > 0 &&
+                                tableData.rows.every((row) => {
+                                  const primaryKeyValue = getRowPrimaryKey(
+                                    row,
+                                    tableData.columns
+                                  );
+                                  return (
+                                    primaryKeyValue !== null &&
+                                    selectedRows.has(primaryKeyValue)
+                                  );
+                                })
+                              }
+                              ref={(el) => {
+                                if (el) {
+                                  const isIndeterminate =
+                                    selectedRows.size > 0 &&
+                                    !tableData.rows.every((row) => {
+                                      const primaryKeyValue = getRowPrimaryKey(
+                                        row,
+                                        tableData.columns
+                                      );
+                                      return (
+                                        primaryKeyValue !== null &&
+                                        selectedRows.has(primaryKeyValue)
+                                      );
+                                    });
+                                  el.indeterminate = isIndeterminate;
+                                }
+                              }}
+                              onChange={(e) =>
+                                handleSelectAllRows(e.target.checked)
+                              }
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                          </th>
                           {tableData.columns.map((column, columnIndex) => (
                             <th
                               key={`${column.name}-${columnIndex}`}
@@ -838,6 +1011,21 @@ const DatabaseViewer: React.FC = () => {
                                   : ""
                               }`}
                             >
+                              <td className="px-6 py-3">
+                                {rowPrimaryKey !== null && (
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedRows.has(rowPrimaryKey)}
+                                    onChange={(e) =>
+                                      handleSelectRow(
+                                        rowPrimaryKey,
+                                        e.target.checked
+                                      )
+                                    }
+                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                  />
+                                )}
+                              </td>
                               {row.map((cell, cellIndex) => {
                                 const column = tableData.columns[cellIndex];
                                 const isEditable =
@@ -973,6 +1161,25 @@ const DatabaseViewer: React.FC = () => {
         cancelText="Cancel"
         onConfirm={confirmUpdate}
         onCancel={cancelUpdate}
+        isLoading={false}
+      />
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        title="Confirm Delete"
+        message={
+          pendingDelete
+            ? `Are you sure you want to delete ${
+                pendingDelete.primaryKeyValues.length
+              } record${
+                pendingDelete.primaryKeyValues.length === 1 ? "" : "s"
+              }? This action cannot be undone.`
+            : ""
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
         isLoading={false}
       />
     </div>

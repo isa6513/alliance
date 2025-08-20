@@ -13,7 +13,6 @@ import {
   actionsRemove,
   actionsUpdate,
   actionsAddEvent,
-  imagesUploadImage,
 } from "@alliance/shared/client";
 import { getApiUrl } from "./config";
 import { useSearchParams } from "react-router-dom";
@@ -234,29 +233,29 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
     }
   };
 
-  const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return null;
+  //   const uploadImage = async (): Promise<string | null> => {
+  //     if (!imageFile) return null;
 
-    try {
-      setUploadingImage(true);
-      setError(null);
+  //     try {
+  //       setUploadingImage(true);
+  //       setError(null);
 
-      const response = await imagesUploadImage({
-        body: { image: imageFile },
-      });
+  //       const response = await imagesUploadImage({
+  //         body: { image: imageFile },
+  //       });
 
-      if (!response.data) {
-        throw new Error("Failed to upload image");
-      }
-      return response.data;
-    } catch (err) {
-      console.error("Error uploading image:", err);
-      setError("Failed to upload image. Please try again.");
-      return null;
-    } finally {
-      setUploadingImage(false);
-    }
-  };
+  //       if (!response.data) {
+  //         throw new Error("Failed to upload image");
+  //       }
+  //       return response.data;
+  //     } catch (err) {
+  //       console.error("Error uploading image:", err);
+  //       setError("Failed to upload image. Please try again.");
+  //       return null;
+  //     } finally {
+  //       setUploadingImage(false);
+  //     }
+  //   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -264,17 +263,17 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
     setError(null);
 
     try {
-      let imageFilename = null;
-      if (imageFile) {
-        imageFilename = await uploadImage();
-        if (!imageFilename) {
-          throw new Error("Failed to upload image");
-        }
-      }
+      //   const imageFilename = null;
+      //   if (imageFile) {
+      //     imageFilename = await uploadImage();
+      //     if (!imageFilename) {
+      //       throw new Error("Failed to upload image");
+      //     }
+      //   }
 
       const formData = {
         ...form,
-        ...(imageFilename && { image: imageFilename }),
+        // ...(imageFilename && { image: imageFilename }),
       };
 
       if (isNew) {
