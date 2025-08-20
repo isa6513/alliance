@@ -159,7 +159,6 @@ export class AuthService {
       payload = this.jwtService.verify<PWResetJwtPayload>(token, {
         secret: process.env.JWT_SECRET,
       });
-      console.log('payload', payload);
     } catch (error) {
       console.log('password reset jwt verification error: ', error);
       throw new UnauthorizedException();

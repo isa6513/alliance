@@ -39,7 +39,7 @@ export class ImagesService {
   async deleteImage(id: number): Promise<boolean> {
     console.log('Deleting image with id:', id);
     const image = await this.getImage(id);
-    console.log('Image:', image);
+
     if (!image) {
       console.log('Image not found');
       return false;
@@ -51,16 +51,12 @@ export class ImagesService {
   }
 
   async processAndUploadImage(image: string): Promise<string> {
-    console.log('imgBuffer', image.substring(0, 100));
     const spliced = image.substring(image.indexOf(',') + 1);
     const imgBuffer = Buffer.from(spliced, 'base64');
-    console.log('imgBuffer', imgBuffer.length);
     const processed = await sharp(imgBuffer)
       .resize({ width: 200 })
       .webp({ effort: 3 })
       .toBuffer();
-
-    console.log('processed buffer: ', processed.length);
 
     const key = `${Date.now()}.webp`;
 
