@@ -33,11 +33,10 @@ export async function loader({ params }: { params: { slug: string } }) {
 }
 
 export function meta({ data }: { data: Awaited<ReturnType<typeof loader>> }) {
-  console.log(data);
   return [{ title: data.frontmatter.title ?? "Alliance" }];
 }
 
-const PublicActionPage: React.FC = () => {
+const ProgressPostPage: React.FC = () => {
   const { content, frontmatter } = useLoaderData<typeof loader>();
 
   return (
@@ -66,4 +65,4 @@ const PublicActionPage: React.FC = () => {
   );
 };
 
-export default PublicActionPage;
+export default ProgressPostPage;

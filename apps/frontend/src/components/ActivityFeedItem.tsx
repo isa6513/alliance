@@ -67,15 +67,17 @@ const ActivityFeedItem = ({
         <div className="flex-1 min-w-0">
           <div className="flex flex-row justify-between items-center">
             <div className="flex flex-row gap-x-2 hover:underline cursor-pointer">
-              <p className="text-gray-900">
+              <div>
                 {activity.user.profilePicture !== null && (
                   <ProfileImage
                     pfp={activity.user.profilePicture}
                     size="small"
                   />
                 )}
-                {formatActivityMessage(activity, showAction)}
-              </p>
+                <span className="text-gray-900 ml-2">
+                  {formatActivityMessage(activity, showAction)}
+                </span>
+              </div>
             </div>
             <div className="flex flex-row gap-x-1 items-center"></div>
           </div>

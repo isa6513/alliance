@@ -19,7 +19,7 @@ const ProfileImage = ({
     <img
       src={!!pfp ? getImageSource(pfp) : userImage}
       alt="Profile"
-      className={`object-cover rounded ${className} ${sizeClass[size]}`}
+      className={`object-cover rounded ${className} ${sizeClass[size]} inline`}
     />
   );
 };

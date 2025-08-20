@@ -3,19 +3,19 @@ import { Link, useNavigate } from "react-router";
 enum NavbarPage {
   People = "People",
   Guide = "Guide",
-  Actions = "Actions",
+  Progress = "Progress",
 }
 
 const links: NavbarPage[] = [
   NavbarPage.People,
   NavbarPage.Guide,
-  NavbarPage.Actions,
+  NavbarPage.Progress,
 ];
 
 const destinations: Record<NavbarPage, string> = {
   [NavbarPage.People]: "/people",
   [NavbarPage.Guide]: "/guide",
-  [NavbarPage.Actions]: "/actions/list",
+  [NavbarPage.Progress]: "/progress",
 };
 
 interface PrelaunchNavbarProps {

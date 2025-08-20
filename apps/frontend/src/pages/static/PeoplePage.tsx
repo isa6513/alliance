@@ -1,5 +1,4 @@
 import React from "react";
-import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import MarkdownWrapper from "../../components/MarkdownWrapper";
 

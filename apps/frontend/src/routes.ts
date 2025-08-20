@@ -13,8 +13,8 @@ export default [
     route("/issues", "pages/app/IssuesListPage.tsx"),
     route("/people", "pages/static/PeoplePage.tsx"),
     route("/guide", "pages/static/GuidePage.tsx"),
-    route("/actions/list", "pages/static/PublicActionListPage.tsx"),
-    route("/actions/list/:slug", "pages/static/PublicActionPage.tsx"),
+    route("/progress", "pages/static/ProgressListPage.tsx"),
+    route("/progress/:slug", "pages/static/ProgressPostPage.tsx"),
 
     layout("applayout.tsx", [
       ...prefix("/actions", [

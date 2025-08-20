@@ -24,7 +24,7 @@ export async function loader() {
   return posts;
 }
 
-const PublicActionListPage: React.FC = () => {
+const ProgressListPage: React.FC = () => {
   const posts = useLoaderData<typeof loader>();
 
   return (
@@ -33,11 +33,11 @@ const PublicActionListPage: React.FC = () => {
       <div className="flex-1 container mx-auto pt-16 md:pt-28 pb-56 flex flex-col px-5">
         <div className="mx-auto w-full max-w-3xl flex flex-col gap-4 md:gap-6">
           <h2 className="font-adobe !font-semibold !text-4xl md:!text-6xl">
-            Actions
+            Progress
           </h2>
           <div className="flex flex-col gap-y-4">
             {posts.map((post) => (
-              <Link to={`/actions/list/${post.slug}`} key={post.slug}>
+              <Link to={`/progress/${post.slug}`} key={post.slug}>
                 <Card
                   style={CardStyle.Outline}
                   className="hover:border-zinc-400 transition-all duration-100"
@@ -73,4 +73,4 @@ const PublicActionListPage: React.FC = () => {
   );
 };
 
-export default PublicActionListPage;
+export default ProgressListPage;

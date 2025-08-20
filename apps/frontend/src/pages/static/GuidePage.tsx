@@ -70,7 +70,7 @@ const GuidePage: React.FC = () => {
             <p>
               This guide was developed and approved by 25 founding members of
               the Alliance. Learn more about the process{" "}
-              <a href="/actions/list/early-governance" className="underline">
+              <a href="/progress/early-governance" className="underline">
                 here
               </a>
               .
