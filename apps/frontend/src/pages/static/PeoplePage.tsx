@@ -25,13 +25,12 @@ The Alliance is composed of a full-time Strategic Office and a body of members.
 - [Casey Manning](https://caseymanning.github.io/)
 
 ## Members
-We have 25 anonymous members who are participating in early experiments.
+We have 25 members who are participating in early experiments.
 
 "
           />
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

@@ -1,8 +1,8 @@
 import React from "react";
-import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import matter from "gray-matter";
 import Card, { CardStyle } from "../../components/system/Card";
+import { Link } from "react-router";
 
 const PublicActionListPage: React.FC = () => {
   const posts = Object.entries(
@@ -30,8 +30,11 @@ const PublicActionListPage: React.FC = () => {
           </h2>
           <div className="flex flex-col gap-y-4">
             {posts.map((post) => (
-              <a href={`/actions/list/${post.slug}`} key={post.slug}>
-                <Card style={CardStyle.Outline}>
+              <Link to={`/actions/list/${post.slug}`} key={post.slug}>
+                <Card
+                  style={CardStyle.Outline}
+                  className="hover:border-zinc-400 transition-all duration-100"
+                >
                   <div className="p-0.5">
                     <div className="flex justify-between">
                       <p className="text-base md:text-xl">
@@ -54,12 +57,11 @@ const PublicActionListPage: React.FC = () => {
                     </p>
                   </div>
                 </Card>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };
