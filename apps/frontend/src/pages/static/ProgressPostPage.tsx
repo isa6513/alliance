@@ -8,7 +8,8 @@ import MarkdownWrapper from "../../components/MarkdownWrapper";
 export async function loader({ params }: { params: { slug: string } }) {
   const { slug } = params;
   const postFiles = import.meta.glob("/src/action-posts/*.md", {
-    as: "raw",
+    query: "?raw",
+    import: "default",
   });
 
   const post = Object.entries(postFiles).find(([path]) => {

@@ -57,6 +57,11 @@ export async function clientLoader() {
 
   const activityList = activities.data ?? [];
   const actionToRelationMap = new Map<number, UserActionRelation>();
+  if (activities.data) {
+    for (const action of actions.data ?? []) {
+      actionToRelationMap.set(action.id, "none");
+    }
+  }
   activityList.forEach((activity) => {
     actionToRelationMap.set(
       activity.actionId,
