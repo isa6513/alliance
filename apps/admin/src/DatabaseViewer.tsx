@@ -219,7 +219,6 @@ const DatabaseViewer: React.FC = () => {
       setLoading(true);
       const response = await adminViewerGetTables();
       if (response.data) {
-        console.log("response.data", response.data);
         setTables(response.data.tables);
       }
     } catch (error) {
@@ -444,12 +443,6 @@ const DatabaseViewer: React.FC = () => {
   const confirmDelete = async () => {
     if (!pendingDelete) return;
 
-    console.log("Deleting records:", {
-      tableName: pendingDelete.tableName,
-      primaryKeyValues: pendingDelete.primaryKeyValues,
-      stringified: pendingDelete.primaryKeyValues.map((value) => String(value)),
-    });
-
     try {
       const response = await adminViewerDeleteRecords({
         path: { tableName: pendingDelete.tableName },
@@ -461,9 +454,7 @@ const DatabaseViewer: React.FC = () => {
       });
 
       if (response.data?.success) {
-        // Clear selected rows
         setSelectedRows(new Set());
-        // Refresh table data to show the deletions
         loadTableData();
         alert(`Successfully deleted ${response.data.deletedCount} record(s)`);
       } else {

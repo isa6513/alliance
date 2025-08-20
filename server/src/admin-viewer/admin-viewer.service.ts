@@ -5,8 +5,14 @@ import { TableListDto, TableMetadataDto } from './dto/table-list.dto';
 import { TableDataDto, TableDataQueryDto } from './dto/table-data.dto';
 import { ColumnMetadataDto } from './dto/column-metadata.dto';
 import { ColumnDataType } from './dto/column-type.enum';
-import { UpdateRecordDto, UpdateRecordResponseDto } from './dto/update-record.dto';
-import { DeleteRecordsDto, DeleteRecordsResponseDto } from './dto/delete-records.dto';
+import {
+  UpdateRecordDto,
+  UpdateRecordResponseDto,
+} from './dto/update-record.dto';
+import {
+  DeleteRecordsDto,
+  DeleteRecordsResponseDto,
+} from './dto/delete-records.dto';
 
 @Injectable()
 export class AdminViewerService {
@@ -164,13 +170,15 @@ export class AdminViewerService {
 
     const columns = this.getColumnMetadata(metadata);
     const primaryKeyColumn = metadata.primaryColumns[0];
-    
+
     if (!primaryKeyColumn) {
-      throw new NotFoundException(`No primary key found for table ${tableName}`);
+      throw new NotFoundException(
+        `No primary key found for table ${tableName}`,
+      );
     }
 
     const queryRunner = this.dataSource.createQueryRunner();
-    
+
     try {
       // Start transaction
       await queryRunner.startTransaction();
@@ -182,7 +190,9 @@ export class AdminViewerService {
       );
 
       if (!existingRecord || existingRecord.length === 0) {
-        throw new NotFoundException(`Record with ID ${updateData.primaryKeyValue} not found in table ${tableName}`);
+        throw new NotFoundException(
+          `Record with ID ${updateData.primaryKeyValue} not found in table ${tableName}`,
+        );
       }
 
       // Validate and sanitize the updates
@@ -193,10 +203,12 @@ export class AdminViewerService {
 
       for (const [columnName, value] of Object.entries(updateData.updates)) {
         // Find column metadata
-        const columnMeta = columns.find(col => col.name === columnName);
-        
+        const columnMeta = columns.find((col) => col.name === columnName);
+
         if (!columnMeta) {
-          throw new Error(`Column ${columnName} not found in table ${tableName}`);
+          throw new Error(
+            `Column ${columnName} not found in table ${tableName}`,
+          );
         }
 
         // Skip primary key updates
@@ -211,7 +223,7 @@ export class AdminViewerService {
 
         // Validate and convert value based on data type
         const convertedValue = this.convertValueForDatabase(value, columnMeta);
-        
+
         if (convertedValue !== undefined) {
           updateColumns.push(`"${columnName}" = $${paramIndex}`);
           updateValues.push(convertedValue);
@@ -239,7 +251,7 @@ export class AdminViewerService {
       `;
 
       const result = await queryRunner.query(updateQuery, updateValues);
-      
+
       // Commit transaction
       await queryRunner.commitTransaction();
 
@@ -251,11 +263,11 @@ export class AdminViewerService {
     } catch (error) {
       // Rollback transaction on error
       await queryRunner.rollbackTransaction();
-      
+
       if (error instanceof NotFoundException) {
         throw error;
       }
-      
+
       throw new Error(`Failed to update record: ${error.message}`);
     } finally {
       await queryRunner.release();
@@ -275,12 +287,17 @@ export class AdminViewerService {
     }
 
     const primaryKeyColumn = metadata.primaryColumns[0];
-    
+
     if (!primaryKeyColumn) {
-      throw new NotFoundException(`No primary key found for table ${tableName}`);
+      throw new NotFoundException(
+        `No primary key found for table ${tableName}`,
+      );
     }
 
-    if (!deleteData.primaryKeyValues || deleteData.primaryKeyValues.length === 0) {
+    if (
+      !deleteData.primaryKeyValues ||
+      deleteData.primaryKeyValues.length === 0
+    ) {
       return {
         success: false,
         message: 'No records specified for deletion',
@@ -294,17 +311,24 @@ export class AdminViewerService {
     console.log('Primary key column:', primaryKeyColumn.databaseName);
 
     const queryRunner = this.dataSource.createQueryRunner();
-    
+
     try {
       // Start transaction
       await queryRunner.startTransaction();
 
       // First, verify which records exist
-      const placeholders = deleteData.primaryKeyValues.map((_, index) => `$${index + 1}`).join(', ');
+      const placeholders = deleteData.primaryKeyValues
+        .map((_, index) => `$${index + 1}`)
+        .join(', ');
       const selectQuery = `SELECT "${primaryKeyColumn.databaseName}" FROM "${tableName}" WHERE "${primaryKeyColumn.databaseName}" IN (${placeholders})`;
-      
-      const existingRecords = await queryRunner.query(selectQuery, deleteData.primaryKeyValues);
-      const existingIds = existingRecords.map(record => record[primaryKeyColumn.databaseName]);
+
+      const existingRecords = await queryRunner.query(
+        selectQuery,
+        deleteData.primaryKeyValues,
+      );
+      const existingIds = existingRecords.map(
+        (record) => record[primaryKeyColumn.databaseName],
+      );
 
       if (existingIds.length === 0) {
         await queryRunner.rollbackTransaction();
@@ -319,19 +343,20 @@ export class AdminViewerService {
 
       // Delete the records
       const deleteQuery = `DELETE FROM "${tableName}" WHERE "${primaryKeyColumn.databaseName}" IN (${placeholders}) RETURNING "${primaryKeyColumn.databaseName}"`;
-      const result = await queryRunner.query(deleteQuery, deleteData.primaryKeyValues);
-      
+      const result = await queryRunner.query(
+        deleteQuery,
+        deleteData.primaryKeyValues,
+      );
+
       // The result is an array where the first element is the actual records, second is row count
       const deletedRecords = Array.isArray(result[0]) ? result[0] : result;
-      const deletedIds = deletedRecords.map(record => record[primaryKeyColumn.databaseName]);
+      const deletedIds = deletedRecords.map(
+        (record) => record[primaryKeyColumn.databaseName],
+      );
 
-      console.log('Delete query result:', result);
-      console.log('Deleted records:', deletedRecords);
-      console.log('Deleted IDs:', deletedIds);
-
-      // Find failed IDs (requested but not deleted)
-      const failedIds = deleteData.primaryKeyValues.filter(id => 
-        !deletedIds.some(deletedId => String(deletedId) === String(id))
+      const failedIds = deleteData.primaryKeyValues.filter(
+        (id) =>
+          !deletedIds.some((deletedId) => String(deletedId) === String(id)),
       );
 
       // Commit transaction
@@ -347,18 +372,21 @@ export class AdminViewerService {
     } catch (error) {
       // Rollback transaction on error
       await queryRunner.rollbackTransaction();
-      
+
       if (error instanceof NotFoundException) {
         throw error;
       }
-      
+
       throw new Error(`Failed to delete records: ${error.message}`);
     } finally {
       await queryRunner.release();
     }
   }
 
-  private convertValueForDatabase(value: any, columnMeta: ColumnMetadataDto): any {
+  private convertValueForDatabase(
+    value: any,
+    columnMeta: ColumnMetadataDto,
+  ): any {
     // Handle null values
     if (value === null || value === undefined || value === '') {
       return columnMeta.isNullable ? null : undefined;
@@ -401,7 +429,9 @@ export class AdminViewerService {
       case ColumnDataType.ENUM:
         // Validate enum value
         if (columnMeta.enumValues && !columnMeta.enumValues.includes(value)) {
-          throw new Error(`Invalid enum value "${value}" for column ${columnMeta.name}. Valid values: ${columnMeta.enumValues.join(', ')}`);
+          throw new Error(
+            `Invalid enum value "${value}" for column ${columnMeta.name}. Valid values: ${columnMeta.enumValues.join(', ')}`,
+          );
         }
         return String(value);
 
