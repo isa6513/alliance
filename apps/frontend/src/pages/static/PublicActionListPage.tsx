@@ -3,22 +3,29 @@ import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import matter from "gray-matter";
 import Card, { CardStyle } from "../../components/system/Card";
 import { Link } from "react-router";
+import { useLoaderData } from "react-router";
+
+export async function loader() {
+  const postFiles = import.meta.glob("/src/action-posts/*.md", {
+    as: "raw",
+  });
+
+  const posts = await Promise.all(
+    Object.entries(postFiles).map(async ([path, data]) => {
+      const { content, data: frontmatter } = matter(await data());
+      return {
+        slug: path.split("/").pop()?.replace(".md", "") ?? "",
+        frontmatter,
+        content,
+      };
+    })
+  );
+
+  return posts;
+}
 
 const PublicActionListPage: React.FC = () => {
-  const posts = Object.entries(
-    import.meta.glob("/src/action-posts/*.md", {
-      eager: true,
-      as: "raw",
-    })
-  ).map(([path, data]) => {
-    const { content, data: frontmatter } = matter(data);
-
-    return {
-      slug: path.split("/").pop()?.replace(".md", "") ?? "",
-      frontmatter,
-      content,
-    };
-  });
+  const posts = useLoaderData<typeof loader>();
 
   return (
     <div className="min-h-screen flex flex-col bg-white">

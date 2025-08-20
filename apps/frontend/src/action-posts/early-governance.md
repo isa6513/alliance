@@ -4,7 +4,7 @@ date: "2025-08-19"
 members: 25
 ---
 
-Our first collective action was to establish the founding principles and initial governance procedures for the Alliance.
+Our first collective action was to establish the founding principles and initial governance procedures for the Alliance, which are summarized in our [guide](/guide).
 
 ## Goal
 
@@ -23,6 +23,6 @@ Certain premises, such as our vision, are unlikely to change; others, such as th
 ## What we saw and learned
 
 1. Some members initially joined with the understanding that they could contribute in a flexible manner. However, through discussions and clearer communication, we believe there is now a shared understanding—at least in principle—of the importance of consistent and reliable participation for the success of the Alliance.
-2. It is important to emphasize the low initial time commitment and our general respect for members’ time.
+2. It is important to emphasize the low initial time commitment and general respect for members’ time.
 3. It is important to emphasize upfront that actions will be straightforward to-do items, and members will not need to take initiative if they do not want to do so.
 4. While this exercise was originally intended to produce a set of hard guarantees, members often also found our own beliefs and expectations helpful; for instance, members were made more comfortable by a list of example actions.
