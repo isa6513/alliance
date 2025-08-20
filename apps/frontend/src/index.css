@@ -153,6 +153,7 @@ ol,
 ul,
 span,
 label,
+input,
 button {
   font-family: "IBM Plex Sans", sans-serif;
 }

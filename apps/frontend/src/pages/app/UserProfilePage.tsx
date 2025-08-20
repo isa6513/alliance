@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import Card, { CardStyle } from "../../components/system/Card";
 import Button, { ButtonColor } from "../../components/system/Button";
@@ -13,6 +13,8 @@ import {
   PostDto,
   forumFindPostsByUser,
   userRemoveFriend,
+  userUpdate,
+  UpdateProfileDto,
 } from "@alliance/shared/client";
 import ProfileImage from "../../components/ProfileImage";
 import UserActivityCard from "../../components/UserActivityCard";
@@ -21,6 +23,7 @@ import FriendRequestButton from "../../components/FriendRequestButton";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
 import useActivities, { ActivityList } from "./useActivities";
 import { useAppLoaderData } from "../../applayout";
+import { getImageSource } from "../../lib/config";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -54,9 +57,20 @@ const UserProfilePage: React.FC = () => {
     useState<FriendStatusDto["status"]>("none");
 
   const [selectedTab, setSelectedTab] = useState(ProfileTabs.Activity);
+  const [isEditing, setIsEditing] = useState(false);
 
   const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
   const [friends, setFriends] = useState<ProfileDto[]>([]);
+
+  // Edit mode state
+  const [editName, setEditName] = useState<string>(user?.name ?? "");
+  const [editBio, setEditBio] = useState<string>(
+    myProfile?.profileDescription ?? ""
+  );
+  const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(
+    myProfile?.profilePicture ?? null
+  );
+  const [editAvatarFile, setEditAvatarFile] = useState<File | null>(null);
 
   const { activities: completedActions, handleLikeActivity } = useActivities({
     list: ActivityList.User,
@@ -75,6 +89,11 @@ const UserProfilePage: React.FC = () => {
         });
         if (userData && userData.displayName) {
           setProfileUser(userData);
+          if (isMe) {
+            setEditName(userData.displayName);
+            setEditBio(userData.profileDescription || "");
+            setEditAvatarUrl(userData.profilePicture || null);
+          }
         }
         const { data: friendsData } = await userListFriends({
           path: { id: userId },
@@ -101,14 +120,15 @@ const UserProfilePage: React.FC = () => {
     if (id) {
       fetchData();
     }
-  }, [id, user]);
+  }, [id, user, isMe]);
 
-  // reset tab on user change
+  // reset tab and edit mode on user change
   useEffect(() => {
     setSelectedTab(ProfileTabs.Activity);
+    setIsEditing(false);
   }, [id]);
 
-  const handleSendFriendRequest = async () => {
+  const handleSendFriendRequest = useCallback(async () => {
     if (!id || !user) return;
     try {
       await userRequestFriend({ path: { targetUserId: parseInt(id) } });
@@ -116,9 +136,9 @@ const UserProfilePage: React.FC = () => {
     } catch (error) {
       console.error("Error sending friend request:", error);
     }
-  };
+  }, [id, user]);
 
-  const handleRemoveFriend = async () => {
+  const handleRemoveFriend = useCallback(async () => {
     if (!id || !user) return;
     try {
       await userRemoveFriend({ path: { targetUserId: parseInt(id) } });
@@ -126,6 +146,59 @@ const UserProfilePage: React.FC = () => {
     } catch (error) {
       console.error("Error removing friend:", error);
     }
+  }, [id, user]);
+
+  const handleAvatarChange: React.ChangeEventHandler<HTMLInputElement> = (
+    e
+  ) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+
+    if (!file.type.startsWith("image/")) {
+      return;
+    }
+
+    setEditAvatarFile(file);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setEditAvatarUrl(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+
+    try {
+      const payload: UpdateProfileDto = {
+        name: editName,
+        profileDescription: editBio,
+        profilePicture: editAvatarUrl ?? undefined,
+      };
+      const response = await userUpdate({
+        body: payload,
+      });
+
+      if (response.data) {
+        setProfileUser(response.data);
+        setIsEditing(false);
+      }
+    } catch (err: unknown) {
+      console.error(err);
+    }
+  };
+
+  const handleCancel = () => {
+    if (profileUser) {
+      setEditName(profileUser.displayName || "");
+      setEditBio(profileUser.profileDescription || "");
+      setEditAvatarUrl(profileUser.profilePicture || null);
+      setEditAvatarFile(null);
+    }
+    setIsEditing(false);
   };
 
   if (!profileUser) {
@@ -158,12 +231,47 @@ const UserProfilePage: React.FC = () => {
       <div className="mx-2 space-y-2">
         <div className="w-full h-[100px]"></div>
         <Card className="px-8 relative space-y-2 pb-8">
-          <ProfileImage
-            pfp={profileUser.profilePicture}
-            className="mt-[-55px]"
-          />
+          {isEditing ? (
+            <div className="relative w-fit">
+              <img
+                src={
+                  editAvatarFile
+                    ? URL.createObjectURL(editAvatarFile)
+                    : editAvatarUrl
+                    ? getImageSource(editAvatarUrl)
+                    : undefined
+                }
+                className="mt-[-55px] w-29 h-29 rounded-md object-cover"
+              />
+              <div className="absolute w-29 h-29 top-[-55px] bg-black/30 rounded-md opacity-0 hover:opacity-100 transition-opacity duration-100">
+                <label className="cursor-pointer text-white underline text-sm absolute m-auto text-center w-full h-full flex items-center justify-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden w-full h-full"
+                    onChange={handleAvatarChange}
+                  />
+                  <p className="text-center">Change photo</p>
+                </label>
+              </div>
+            </div>
+          ) : (
+            <ProfileImage
+              pfp={profileUser.profilePicture}
+              className="mt-[-55px]"
+            />
+          )}
           <div className="flex gap-2">
-            <h1>{profileUser.displayName}</h1>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="w-full border-none focus:outline-none !text-[30px] font-bold"
+              />
+            ) : (
+              <h1>{profileUser.displayName}</h1>
+            )}
           </div>
           {/* stats row */}
           <div className="flex flex-row gap-5 cursor-pointer">
@@ -180,8 +288,18 @@ const UserProfilePage: React.FC = () => {
               <span className="text-zinc-500">friends</span>
             </p>
           </div>
-          {profileUser.profileDescription && (
-            <p className="mt-6">{profileUser.profileDescription}</p>
+          {isEditing ? (
+            <textarea
+              value={editBio}
+              onChange={(e) => setEditBio(e.target.value)}
+              rows={6}
+              className="w-full border border-stone-300 focus:outline-none p-2 -ml-2 mt-4"
+              placeholder="Write something about yourself..."
+            />
+          ) : (
+            profileUser.profileDescription && (
+              <p className="mt-6">{profileUser.profileDescription}</p>
+            )
           )}
           {/* button row */}
           <div className="absolute right-0 top-0 space-x-3 flex flex-row p-5">
@@ -202,13 +320,25 @@ const UserProfilePage: React.FC = () => {
               </>
             )}
             {isMe && (
-              <Button
-                color={ButtonColor.Light}
-                className=""
-                onClick={() => navigate(`/editprofile`)}
-              >
-                Edit Profile
-              </Button>
+              <div className="space-x-3 flex">
+                {isEditing ? (
+                  <>
+                    <Button color={ButtonColor.Light} onClick={handleCancel}>
+                      Cancel
+                    </Button>
+                    <Button color={ButtonColor.Blue} onClick={handleSave}>
+                      Save
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    color={ButtonColor.Light}
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Edit Profile
+                  </Button>
+                )}
+              </div>
             )}
           </div>
           {/* <div className="absolute -left-20 top-0 p-5">

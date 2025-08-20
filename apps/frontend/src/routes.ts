@@ -33,7 +33,6 @@ export default [
       route("/issues/:id", "pages/app/IssuePage.tsx"),
       route("/profile", "pages/app/ProfileRedirect.tsx"),
       route("/feed", "pages/app/ActivityFeedPage.tsx"),
-      route("/editprofile", "pages/app/ProfilePageEdit.tsx"),
       route("/user/:id", "pages/app/UserProfilePage.tsx"),
 
       route("forum", "pages/app/ForumPage.tsx"),
