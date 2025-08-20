@@ -62,6 +62,14 @@ export class PaymentsService {
     return customer;
   }
 
+  async getSavedPaymentForCustomer(
+    customerId: string,
+  ): Promise<Stripe.PaymentMethod | undefined> {
+    const paymentMethods =
+      await this.stripe.customers.listPaymentMethods(customerId);
+    return paymentMethods.data.find((method) => method.type === 'card');
+  }
+
   async createPaymentUserDataToken(): Promise<string> {
     let token = await this.paymentUserDataTokenRepository.create();
     token = await this.paymentUserDataTokenRepository.save(token);
