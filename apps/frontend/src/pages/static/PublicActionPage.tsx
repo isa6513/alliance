@@ -1,39 +1,44 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import matter from "gray-matter";
-import { useParams } from "react-router";
+import { useLoaderData } from "react-router";
 import MarkdownWrapper from "../../components/MarkdownWrapper";
 
-const PublicActionPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const [content, setContent] = React.useState<string>("");
-  const [frontmatter, setFrontmatter] = React.useState<any>({});
+export async function loader({ params }: { params: { slug: string } }) {
+  const { slug } = params;
+  const postFiles = import.meta.glob("/src/action-posts/*.md", {
+    as: "raw",
+  });
 
-  useEffect(() => {
-    const getPost = async () => {
-      const postFiles = import.meta.glob("/src/action-posts/*.md", {
-        as: "raw",
-      });
+  const post = Object.entries(postFiles).find(([path]) => {
+    const postSlug = path.split("/").pop()?.replace(".md", "") ?? "";
+    return postSlug === slug;
+  });
 
-      const post = Object.entries(postFiles).find(([path]) => {
-        const postSlug = path.split("/").pop()?.replace(".md", "") ?? "";
-        return postSlug === slug;
-      });
-
-      if (!post) {
-        setFrontmatter({ title: "Post not found" });
-      } else {
-        const data = await post[1]();
-        const { content, data: frontmatter } = matter(data);
-
-        setContent(content);
-        setFrontmatter(frontmatter);
-      }
+  if (!post) {
+    return {
+      content: "Post not found",
+      frontmatter: { title: "Post not found" },
     };
+  } else {
+    const data = await post[1]();
+    const { content, data: frontmatter } = matter(data);
 
-    getPost();
-  }, [slug]);
+    return {
+      content,
+      frontmatter,
+    };
+  }
+}
+
+export function meta({ data }: { data: Awaited<ReturnType<typeof loader>> }) {
+  console.log(data);
+  return [{ title: data.frontmatter.title ?? "Alliance" }];
+}
+
+const PublicActionPage: React.FC = () => {
+  const { content, frontmatter } = useLoaderData<typeof loader>();
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
