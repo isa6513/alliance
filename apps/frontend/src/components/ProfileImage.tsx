@@ -1,4 +1,4 @@
-import userImage from "../assets/icons8-user-80.png";
+import userImage from "../assets/noun-user-icon.svg";
 import { getImageSource } from "../lib/config";
 
 const ProfileImage = ({
@@ -19,7 +19,9 @@ const ProfileImage = ({
     <img
       src={!!pfp ? getImageSource(pfp) : userImage}
       alt="Profile"
-      className={`object-cover rounded ${className} ${sizeClass[size]} inline`}
+      className={`object-cover bg-white inline rounded ${className} ${
+        sizeClass[size]
+      } ${!pfp ? "border border-zinc-300" : ""}`}
     />
   );
 };

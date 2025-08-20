@@ -164,99 +164,101 @@ export default function ActionPage() {
   }, [id]);
 
   return (
-    <TwoColumnSplit
-      left={
-        <Outlet
-          context={
-            {
-              userRelation,
-              handleCompleteAction,
-              handleJoinAction: onJoinAction,
-              activities,
-              handleLikeActivity,
-              setActivities,
-            } satisfies TaskPanelContext
-          }
-        />
-      }
-      right={
-        <div className="flex flex-col gap-y-4 p-6 pt-2">
-          <Card style={CardStyle.White}>
-            <div className="p-2">
-              <p className="text-lg font-semibold">Status</p>
-              {action && (
-                <div className="mt-1">
-                  <p>{actionStatusDescriptions[action.status]}</p>
+    <div className="w-full h-full bg-white">
+      <TwoColumnSplit
+        left={
+          <Outlet
+            context={
+              {
+                userRelation,
+                handleCompleteAction,
+                handleJoinAction: onJoinAction,
+                activities,
+                handleLikeActivity,
+                setActivities,
+              } satisfies TaskPanelContext
+            }
+          />
+        }
+        right={
+          <div className="flex flex-col gap-y-4 p-6 pt-2">
+            <Card style={CardStyle.White}>
+              <div className="p-2">
+                <p className="text-lg font-semibold">Status</p>
+                {action && (
+                  <div className="mt-1">
+                    <p>{actionStatusDescriptions[action.status]}</p>
 
-                  {action.status === "gathering_commitments" ||
-                  action.status === "commitments_reached" ? (
-                    <div className="mt-4">
-                      <CompletedBar
-                        percentage={
-                          ((liveUserCount ?? action.usersJoined) /
-                            (action.commitmentThreshold ?? 1)) *
-                          100
-                        }
-                      />
-                      <p className="mt-4 text-green-3 text-sm font-weight-450">
-                        {(
-                          liveUserCount ?? action.usersJoined
-                        )?.toLocaleString() || 0}{" "}
-                        commitments made
-                      </p>
-                      <p className="text-zinc-400 text-sm">
-                        {(action.commitmentThreshold ?? 0).toLocaleString()}{" "}
-                        commitments needed
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="mt-4">
-                      <CompletedBar
-                        percentage={
-                          ((action.usersCompleted ?? 0) /
-                            (action.usersJoined ?? 1)) *
-                          100
-                        }
-                      />
-                      <p className="mt-4 text-green-3 text-sm font-weight-450">
-                        {(action.usersCompleted ?? 0).toLocaleString()} members
-                        completed
-                      </p>
-                      <p className="text-zinc-400 text-sm">
-                        {(action.usersJoined ?? 0).toLocaleString()} members
-                        committed
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                    {action.status === "gathering_commitments" ||
+                    action.status === "commitments_reached" ? (
+                      <div className="mt-4">
+                        <CompletedBar
+                          percentage={
+                            ((liveUserCount ?? action.usersJoined) /
+                              (action.commitmentThreshold ?? 1)) *
+                            100
+                          }
+                        />
+                        <p className="mt-4 text-green-3 text-sm font-weight-450">
+                          {(
+                            liveUserCount ?? action.usersJoined
+                          )?.toLocaleString() || 0}{" "}
+                          commitments made
+                        </p>
+                        <p className="text-zinc-400 text-sm">
+                          {(action.commitmentThreshold ?? 0).toLocaleString()}{" "}
+                          commitments needed
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="mt-4">
+                        <CompletedBar
+                          percentage={
+                            ((action.usersCompleted ?? 0) /
+                              (action.usersJoined ?? 1)) *
+                            100
+                          }
+                        />
+                        <p className="mt-4 text-green-3 text-sm font-weight-450">
+                          {(action.usersCompleted ?? 0).toLocaleString()}{" "}
+                          members completed
+                        </p>
+                        <p className="text-zinc-400 text-sm">
+                          {(action.usersJoined ?? 0).toLocaleString()} members
+                          committed
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
-            {/* <div className="w-full border-t border-gray-300" />
+              {/* <div className="w-full border-t border-gray-300" />
             <UserBubbleRow />
             <p className="text-center pt-2 text-[11pt]">
               <b>6 friends</b> already joined this action!
             </p> */}
-          </Card>
-          {action !== undefined && (
-            <Card style={CardStyle.White}>
-              <ActionEventsPanel events={action.events} />
             </Card>
-          )}
-          {action && (
-            <ActionActivityList
-              actionId={action.id}
-              activities={activities}
-              loading={false}
-              onLikeActivity={handleLikeActivity}
-              setActivities={setActivities}
-            />
-          )}
-        </div>
-      }
-      bg="bg-white"
-      border={false}
-    />
+            {action !== undefined && (
+              <Card style={CardStyle.White}>
+                <ActionEventsPanel events={action.events} />
+              </Card>
+            )}
+            {action && (
+              <ActionActivityList
+                actionId={action.id}
+                activities={activities}
+                loading={false}
+                onLikeActivity={handleLikeActivity}
+                setActivities={setActivities}
+              />
+            )}
+          </div>
+        }
+        bg="bg-white"
+        border={false}
+      />
+    </div>
   );
 }
 

@@ -26,7 +26,7 @@ const ActivityLikeButton = ({
   }, [liked]);
   return (
     <div
-      className="flex flex-row gap-x-1 items-center border border-zinc-200 rounded-md px-3 p-2 hover:bg-zinc-100 cursor-pointer transition-colors duration-100"
+      className="flex flex-row gap-x-1 items-center border border-zinc-200 rounded-md px-2 py-1.5 hover:bg-zinc-100 cursor-pointer transition-colors duration-100"
       onClick={(e) => {
         e.stopPropagation();
         handleLike();

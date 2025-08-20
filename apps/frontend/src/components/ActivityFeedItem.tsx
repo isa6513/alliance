@@ -59,7 +59,7 @@ const ActivityFeedItem = ({
     return (
       <div
         key={activity.id}
-        className="flex items-start space-x-3 rounded-md p-3 border-t border-gray-200"
+        className="flex items-start space-x-3 rounded-md border-gray-200"
         onClick={() => {
           navigate(`/actions/${activity.actionId}/activity/${activity.id}`);
         }}
@@ -72,9 +72,10 @@ const ActivityFeedItem = ({
                   <ProfileImage
                     pfp={activity.user.profilePicture}
                     size="small"
+                    className="mr-2"
                   />
                 )}
-                <span className="text-gray-900 ml-2">
+                <span className="text-gray-900">
                   {formatActivityMessage(activity, showAction)}
                 </span>
               </div>

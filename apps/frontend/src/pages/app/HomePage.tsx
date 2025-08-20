@@ -79,16 +79,18 @@ const HomePage = () => {
                 {friendActivities.length === 0 && (
                   <p className="text-zinc-400">No friend activity yet</p>
                 )}
-                {friendActivities.map((activity) => (
-                  <ActivityFeedItem
-                    key={activity.id}
-                    activity={activity}
-                    showTime={false}
-                    card={false}
-                    showAction={true}
-                    handleLike={() => handleLikeActivity(activity.id)}
-                  />
-                ))}
+                <div className="flex flex-col gap-y-2 bg-red-100">
+                  {friendActivities.map((activity) => (
+                    <ActivityFeedItem
+                      key={activity.id}
+                      activity={activity}
+                      showTime={false}
+                      card={false}
+                      showAction={true}
+                      handleLike={() => handleLikeActivity(activity.id)}
+                    />
+                  ))}
+                </div>
               </Card>
             </div>
           </div>
@@ -188,16 +190,18 @@ const HomePage = () => {
               {friendActivities.length === 0 && (
                 <p className="text-zinc-400">No friend activity yet</p>
               )}
-              {friendActivities.map((activity) => (
-                <ActivityFeedItem
-                  key={activity.id}
-                  activity={activity}
-                  showTime={false}
-                  card={false}
-                  showAction={true}
-                  handleLike={() => handleLikeActivity(activity.id)}
-                />
-              ))}
+              <div className="flex flex-col divide-y *:py-3 -my-3">
+                {friendActivities.map((activity) => (
+                  <ActivityFeedItem
+                    key={activity.id}
+                    activity={activity}
+                    showTime={false}
+                    card={false}
+                    showAction={true}
+                    handleLike={() => handleLikeActivity(activity.id)}
+                  />
+                ))}
+              </div>
             </Card>
           </div>
         </div>

@@ -60,8 +60,8 @@ const ActionActivityList = ({
   return (
     <Card style={CardStyle.White} className="p-7">
       <div className="space-y-3 w-full">
-        <h3 className="text-lg font-bold">Recent Activity</h3>
-        <div>
+        <h3 className="text-lg font-semibold">Recent Activity</h3>
+        <div className="flex flex-col divide-y *:py-3 -my-3">
           {displayedActivities.map((activity) => (
             <ActivityFeedItem
               key={activity.id}

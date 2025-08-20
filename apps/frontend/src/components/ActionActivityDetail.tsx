@@ -22,8 +22,8 @@ export function formatActivityMessage(
   switch (activity.type) {
     case "user_joined":
       return showAction
-        ? `${userName} joined ${activity.actionName}`
-        : `${userName} joined`;
+        ? `${userName} committed to ${activity.actionName}`
+        : `${userName} committed to this action`;
     case "user_completed":
       return showAction
         ? `${userName} completed ${activity.actionName}`
