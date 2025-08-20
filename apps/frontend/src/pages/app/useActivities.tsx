@@ -98,10 +98,19 @@ const useActivities = ({ list, objectId }: UseActivitiesProps) => {
     [user, activities]
   );
 
+  const updateActivity = useCallback((updatedActivity: ActionActivityDto) => {
+    setActivities((prev) =>
+      prev.map((a) =>
+        a.id === updatedActivity.id ? updatedActivity : a
+      )
+    );
+  }, []);
+
   return {
     activities,
     handleLikeActivity,
     setActivities,
+    updateActivity,
   };
 };
 

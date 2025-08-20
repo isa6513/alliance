@@ -83,48 +83,52 @@ const ActionActivityDetail = () => {
   const [activityDescription, setActivityDescription] = useState(
     activity?.description || ""
   );
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setActivityDescription(activity?.description || "");
   }, [activity]);
 
-  const checkForEscape = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
+  const handleSave = async () => {
+    if (!user || !activity || isSaving) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const resp = await actionsUpdateActivity({
+        path: {
+          id: activity.id,
+        },
+        body: {
+          description: activityDescription,
+        },
+      });
+      if (resp.error) {
+        console.error(resp.error);
+        return;
+      }
+      const newActivity = resp.data!;
+      setActivities(
+        activities.map((a) => (a.id === activity.id ? newActivity : a))
+      );
+      setActivityDescription(newActivity.description || "");
       setEditing(false);
+    } catch (error) {
+      console.error("Error updating activity:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleSave = async () => {
-    if (!user || !activity) {
-      return;
-    }
-    const resp = await actionsUpdateActivity({
-      path: {
-        id: activity.id,
-      },
-      body: {
-        description: activityDescription,
-      },
-    });
-    if (resp.error) {
-      console.error(resp.error);
-      return;
-    }
-    const newActivity = resp.data!;
-    setActivities(
-      activities.map((a) => (a.id === activity.id ? newActivity : a))
-    );
-    setActivityDescription(newActivity.description || "");
-
+  const handleCancel = () => {
+    setActivityDescription(activity?.description || "");
     setEditing(false);
   };
 
   return (
     <>
-      <div
-        className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5"
-        onKeyDown={checkForEscape}
-      >
+      <div className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5">
         <h1 className="font-adobe w-full">{action.name}</h1>
         <div
           className="flex flex-row gap-x-3 items-center cursor-pointer border-b border-gray-300 pb-3 hover:underline"
@@ -146,15 +150,13 @@ const ActionActivityDetail = () => {
                   />
                 )}
                 <p className="font-bold">{formatActivityMessage(activity)}</p>
-                {isOwner && (
-                  <Button
-                    color={ButtonColor.Light}
-                    onClick={() => {
-                      setEditing(true);
-                    }}
+                {isOwner && !editing && (
+                  <button
+                    onClick={() => setEditing(true)}
+                    className="text-blue-600 hover:text-blue-800 text-sm underline"
                   >
-                    Add details
-                  </Button>
+                    {activity.description ? "Edit details" : "Add details"}
+                  </button>
                 )}
               </div>
               <p className="text-gray-500 text-sm">
@@ -163,7 +165,41 @@ const ActionActivityDetail = () => {
                 })}
               </p>
             </div>
-            <p>{activity.description}</p>
+            {editing ? (
+              <div className="space-y-2">
+                <textarea
+                  value={activityDescription}
+                  onChange={(e) => setActivityDescription(e.target.value)}
+                  placeholder="Add any details you want to share about this activity..."
+                  className="w-full border border-stone-300 focus:outline-none p-2 rounded"
+                  rows={4}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      handleCancel();
+                    }
+                  }}
+                />
+                <div className="flex space-x-2">
+                  <Button
+                    color={ButtonColor.Light}
+                    onClick={handleCancel}
+                    className="text-xs py-1 px-2"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    color={ButtonColor.Blue}
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="text-xs py-1 px-2"
+                  >
+                    {isSaving ? "Saving..." : "Save"}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              activity.description && <p>{activity.description}</p>
+            )}
             {activity.attachments?.map((attachment) => (
               <img
                 key={attachment}
@@ -183,31 +219,6 @@ const ActionActivityDetail = () => {
           </>
         )}
       </div>
-      {editing && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/20 z-50 flex items-center justify-center">
-          <div className="bg-white shadow-lg p-6 rounded-lg flex flex-col gap-y-3">
-            <p className="font-medium">
-              Add any details you want to share about this activity
-            </p>
-            <textarea
-              className="w-full h-24 border border-gray-300 rounded-md p-2"
-              value={activityDescription}
-              onChange={(e) => setActivityDescription(e.target.value)}
-            />
-            <div className="flex flex-row gap-x-2">
-              <Button
-                color={ButtonColor.Light}
-                onClick={() => setEditing(false)}
-              >
-                Cancel
-              </Button>
-              <Button color={ButtonColor.Blue} onClick={handleSave}>
-                Save
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };

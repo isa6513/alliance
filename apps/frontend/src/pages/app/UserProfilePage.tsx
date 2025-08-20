@@ -71,8 +71,10 @@ const UserProfilePage: React.FC = () => {
     myProfile?.profilePicture ?? null
   );
   const [editAvatarFile, setEditAvatarFile] = useState<File | null>(null);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
-  const { activities: completedActions, handleLikeActivity } = useActivities({
+  const { activities: completedActions, handleLikeActivity, updateActivity } = useActivities({
     list: ActivityList.User,
     objectId: parseInt(id!),
   });
@@ -154,7 +156,18 @@ const UserProfilePage: React.FC = () => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
 
+    setImageUploadError(null);
+
     if (!file.type.startsWith("image/")) {
+      setImageUploadError("Please select a valid image file.");
+      return;
+    }
+
+    const maxSizeInBytes = 5 * 1024 * 1024;
+    if (file.size > maxSizeInBytes) {
+      setImageUploadError(
+        "Image size must be less than 5MB. Please choose a smaller image."
+      );
       return;
     }
 
@@ -170,8 +183,9 @@ const UserProfilePage: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!user || isSavingProfile) return;
 
+    setIsSavingProfile(true);
     try {
       const payload: UpdateProfileDto = {
         name: editName,
@@ -188,6 +202,8 @@ const UserProfilePage: React.FC = () => {
       }
     } catch (err: unknown) {
       console.error(err);
+    } finally {
+      setIsSavingProfile(false);
     }
   };
 
@@ -198,6 +214,7 @@ const UserProfilePage: React.FC = () => {
       setEditAvatarUrl(profileUser.profilePicture || null);
       setEditAvatarFile(null);
     }
+    setImageUploadError(null);
     setIsEditing(false);
   };
 
@@ -254,6 +271,9 @@ const UserProfilePage: React.FC = () => {
                   <p className="text-center">Change photo</p>
                 </label>
               </div>
+              {imageUploadError && (
+                <p className="text-red-500 text-sm mt-2">{imageUploadError}</p>
+              )}
             </div>
           ) : (
             <ProfileImage
@@ -326,8 +346,12 @@ const UserProfilePage: React.FC = () => {
                     <Button color={ButtonColor.Light} onClick={handleCancel}>
                       Cancel
                     </Button>
-                    <Button color={ButtonColor.Blue} onClick={handleSave}>
-                      Save
+                    <Button 
+                      color={ButtonColor.Blue} 
+                      onClick={handleSave}
+                      disabled={isSavingProfile}
+                    >
+                      {isSavingProfile ? "Saving..." : "Save"}
                     </Button>
                   </>
                 ) : (
@@ -376,6 +400,8 @@ const UserProfilePage: React.FC = () => {
                   activity={activity}
                   key={activity.id}
                   handleLike={handleLikeActivity}
+                  onActivityUpdate={updateActivity}
+                  canEdit={isMe}
                 />
               ))}
             </div>
