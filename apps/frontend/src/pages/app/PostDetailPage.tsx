@@ -110,7 +110,7 @@ const PostDetailPage: React.FC = () => {
           </Link>
           <Card className="p-6 mb-3" style={CardStyle.White}>
             <div className="flex justify-between items-start">
-              <div className="flex flex-row gap-x-2 items-center justify-between w-full">
+              <div className="flex flex-row gap-x-2 items-center justify-between w-full -mt-2">
                 <h1 className="font-adobe !text-2xl font-semibold">
                   {post.title}
                 </h1>

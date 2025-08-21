@@ -141,32 +141,104 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
     setShowDropdown(false);
   };
   return (
-    <div className="flex items-start gap-2 relative">
+    <div className="flex gap-3 relative">
       {/* Blue highlight indicator */}
       {isHighlighted && (
         <div className="absolute -left-4 top-0 bottom-0 w-[3px] bg-blue-500 rounded transition-all duration-1000" />
       )}
-      <ProfileImage
-        pfp={reply.author.profilePicture}
-        size="medium"
-        className="mr-1 mt-1"
-      />
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-start">
+
+      {/* Profile picture column */}
+      <div className="flex-shrink-0 mt-1">
+        <ProfileImage pfp={reply.author.profilePicture} size="medium" />
+      </div>
+
+      {/* Content column */}
+      <div className="flex-1 -mt-1">
+        {/* Top row: User name and date with pin icon in top right */}
+        <div className="flex justify-between items-center ">
+          <div className="flex items-center gap-3 text-sm text-gray-500">
+            <a
+              href={`/user/${reply.author.id}`}
+              className="hover:underline text-black font-medium"
+            >
+              {reply.author.displayName}
+            </a>
+            <span className="text-gray-400 text-sm">
+              {formatDistanceToNow(new Date(reply.createdAt), {
+                addSuffix: true,
+              })}
+            </span>
+            {hasChildren && isCollapsed && reply.children !== undefined && (
+              <span className="text-xs bg-gray-200 px-2 py-1 rounded">
+                {countAllReplies(reply.children)}{" "}
+                {countAllReplies(reply.children) === 1 ? "reply" : "replies"}{" "}
+                hidden
+              </span>
+            )}
+          </div>
+          {reply.pinned && <PinnedIcon size="small" />}
+        </div>
+
+        {/* Middle section: Reply content */}
+        <div className="mb-3">
           {!isEditing &&
             getDisplayContent(reply.content, isCollapsed, reply.deleted)}
-          <div className="ml-1 flex items-center">
-            <CommentLikeButton
-              liked={reply.likes.some((like) => like.id === user?.id)}
-              likes={reply.likes.length}
-              handleLike={() =>
-                onLikeReply(
-                  reply.id,
-                  reply.likes.some((like) => like.id === user?.id)
-                )
-              }
+        </div>
+
+        {isEditing ? (
+          <div className="">
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows={3}
+              disabled={isUpdating}
             />
-            {reply.pinned && <PinnedIcon size="small" />}
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={handleSaveEdit}
+                disabled={isUpdating || !editContent.trim()}
+                className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isUpdating ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                disabled={isUpdating}
+                className="px-3 py-1 bg-gray-300 text-gray-700 text-sm rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Bottom row: Likes, reply button, and 3 dots dropdown */
+          <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center gap-3">
+              <CommentLikeButton
+                liked={reply.likes.some((like) => like.id === user?.id)}
+                likes={reply.likes.length}
+                handleLike={() =>
+                  onLikeReply(
+                    reply.id,
+                    reply.likes.some((like) => like.id === user?.id)
+                  )
+                }
+              />
+              {user && canNest && (
+                <button
+                  onClick={() => {
+                    setReplyingTo(isReplyingToThis ? null : reply.id);
+                    if (!isReplyingToThis) {
+                      setReplyContent("");
+                    }
+                  }}
+                  className="text-gray-600 hover:text-gray-800 hover:underline"
+                >
+                  {!isReplyingToThis && "Reply"}
+                </button>
+              )}
+            </div>
             {user &&
               !isEditing &&
               reply.author.id === user.id &&
@@ -174,7 +246,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setShowDropdown(!showDropdown)}
-                    className="text-gray-500 hover:text-gray-700 p-1 pr-0"
+                    className="text-gray-500 hover:text-gray-700 p-1"
                     aria-label="More options"
                   >
                     <svg
@@ -206,68 +278,6 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                   )}
                 </div>
               )}
-          </div>
-        </div>
-        {isEditing ? (
-          <div className="">
-            <textarea
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              rows={3}
-              disabled={isUpdating}
-            />
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={handleSaveEdit}
-                disabled={isUpdating || !editContent.trim()}
-                className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isUpdating ? "Saving..." : "Save"}
-              </button>
-              <button
-                onClick={handleCancelEdit}
-                disabled={isUpdating}
-                className="px-3 py-1 bg-gray-300 text-gray-700 text-sm rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-2 flex justify-between items-center text-sm text-gray-500">
-            <div className="gap-x-4 flex">
-              <a href={`/user/${reply.author.id}`} className="hover:underline">
-                {reply.author.displayName}
-              </a>
-              <span>
-                {formatDistanceToNow(new Date(reply.createdAt), {
-                  addSuffix: true,
-                })}
-              </span>
-              {hasChildren && isCollapsed && reply.children !== undefined && (
-                <span className="text-xs bg-gray-200 px-2 py-1 rounded">
-                  {countAllReplies(reply.children)}{" "}
-                  {countAllReplies(reply.children) === 1 ? "reply" : "replies"}{" "}
-                  hidden
-                </span>
-              )}
-            </div>
-            <div className="flex space-x-2">
-              {user && canNest && (
-                <button
-                  onClick={() => {
-                    setReplyingTo(isReplyingToThis ? null : reply.id);
-                    if (!isReplyingToThis) {
-                      setReplyContent("");
-                    }
-                  }}
-                  className="text-gray-800 hover:underline"
-                >
-                  {!isReplyingToThis && "Reply"}
-                </button>
-              )}
-            </div>
           </div>
         )}
       </div>
