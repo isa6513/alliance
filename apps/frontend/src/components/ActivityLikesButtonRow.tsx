@@ -24,7 +24,13 @@ const ActivityLikesButtonRow = ({
       />
       <div className="flex flex-row items-center gap-x-1">
         {likes.slice(0, 5).map((like) => (
-          <ProfileImage key={like.id} pfp={like.profilePicture!} size="small" />
+          <a
+            href={`/user/${like.id}`}
+            key={like.id}
+            className="flex items-center"
+          >
+            <ProfileImage pfp={like.profilePicture!} size="small" />
+          </a>
         ))}
         {likes.length > 5 && (
           <span className="text-sm text-zinc-500">

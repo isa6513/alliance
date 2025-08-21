@@ -110,17 +110,17 @@ const ActionActivityDetail = () => {
       <div className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5">
         <h1 className="font-adobe w-full">{action.name}</h1>
         <div
-          className="flex flex-row gap-x-3 items-center cursor-pointer border-b border-gray-300 pb-3 hover:underline"
+          className="flex flex-row gap-x-2 items-center cursor-pointer hover:bg-zinc-50 self-start px-2 py-1 rounded border border-zinc-200"
           onClick={() => {
             navigate(`/actions/${action.id}`);
           }}
         >
-          <img src={chevronLeft} className="w-4 h-4 rotate-90" />
+          <img src={chevronLeft} className="w-3 h-3 rotate-90" />
           <p className="">Back to action</p>
         </div>
         {activity !== null && (
           <>
-            <div className="flex flex-row items-center justify-between">
+            <div className="mt-4 flex flex-row items-center justify-between">
               <div className="flex flex-row items-center gap-x-4">
                 {activity.user.profilePicture !== null && (
                   <ProfileImage
@@ -128,11 +128,13 @@ const ActionActivityDetail = () => {
                     size="medium"
                   />
                 )}
-                <FormattedActionActivityMessage activity={activity} />
+                <p className="font-semibold">
+                  <FormattedActionActivityMessage activity={activity} />
+                </p>
                 {isOwner && !editing && (
                   <button
                     onClick={() => setEditing(true)}
-                    className="text-blue-600 hover:text-blue-800 text-sm underline"
+                    className="text-green text-sm underline"
                   >
                     {activity.description ? "Edit details" : "Add details"}
                   </button>

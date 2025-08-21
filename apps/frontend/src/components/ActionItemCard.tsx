@@ -7,10 +7,10 @@ import {
   UserActionRelation,
 } from "@alliance/shared/client/types.gen";
 import ActionCardUserCount from "./ActionCardUserCount";
+import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
 import Button, { ButtonColor } from "./system/Button";
 import checkMark from "../assets/noun-check-mark-2181.svg";
 import { formatTime } from "../lib/utils";
-import ProfileImage from "./ProfileImage";
 
 export interface ActionItemCardProps
   extends Pick<
@@ -74,8 +74,8 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
           </div>
         </div>
         {activity && (
-          <div className="mt-4 flex flex-col border-t border-zinc-300 gap-y-2 -mx-4 -mb-4 p-4 bg-zinc-50">
-            <p className="text-zinc-600 text-sm">
+          <div className="mt-4 flex flex-col border-t border-zinc-300 gap-y-2 -mx-4 -mb-4 p-4 bg-zinc-50 text-sm">
+            <p className="text-zinc-600">
               {activity.type === "user_joined"
                 ? `You committed ${formatTime(new Date(activity.createdAt), {
                     addSuffix: true,
@@ -85,20 +85,12 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
                   })}`}
             </p>
             {activity.likes.length > 0 && (
-              <div className="flex flex-row items-center gap-x-2">
-                <p className="text-zinc-600">
-                  {`${activity.likes.length} ${
-                    activity.likes.length === 1 ? "person" : "people"
-                  } liked your commitment`}
-                </p>
-                {activity.likes.slice(0, 5).map((like) => (
-                  <ProfileImage
-                    key={like.id}
-                    pfp={like.profilePicture!}
-                    size="small"
-                  />
-                ))}
-              </div>
+              <ActivityLikesButtonRow
+                isLiked={false}
+                likes={activity.likes}
+                handleLike={() => {}}
+                labelText={true}
+              />
             )}
           </div>
         )}

@@ -174,14 +174,14 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
             </div>
           </div>
         ) : (
-          <div className="flex justify-between items-center text-sm text-gray-500">
+          <div className="mt-2 flex justify-between items-center text-sm text-gray-500">
             <div className="gap-x-4 flex">
               {reply.author.displayName !== undefined && (
                 <p>
                   <ProfileImage
                     pfp={reply.author.profilePicture}
                     size="small"
-                    className="mr-1"
+                    className="mr-2"
                   />
                   <a
                     href={`/user/${reply.author.id}`}
