@@ -10,6 +10,7 @@ import ReplyForm from "./ReplyForm";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import ProfileImage from "../ProfileImage";
 import PinnedIcon from "../PinnedIcon";
+import CommentLikeButton from "../CommentLikeButton";
 
 const countAllReplies = (replies: CommentDto[]): number => {
   let count = 0;
@@ -57,7 +58,8 @@ interface ReplyComponentProps {
   newlyAddedReplies: Set<number>;
   highlightedReplyId: number | null;
   compact?: boolean;
-  onUpdateReply?: (id: number, content: string) => void;
+  onUpdateReply: (id: number, content: string) => void;
+  onLikeReply: (id: number, unlike?: boolean) => void;
 }
 
 interface ReplyContentProps
@@ -71,6 +73,7 @@ interface ReplyContentProps
   isCollapsed?: boolean;
   isHighlighted: boolean;
   onUpdateReply: (id: number, content: string) => void;
+  onLikeReply: (id: number, unlike?: boolean) => void;
 }
 
 const ReplyContent: React.FC<ReplyContentProps> = ({
@@ -85,6 +88,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
   setReplyContent,
   handleDeleteReply,
   onUpdateReply,
+  onLikeReply,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(reply.content);
@@ -152,6 +156,16 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
           {!isEditing &&
             getDisplayContent(reply.content, isCollapsed, reply.deleted)}
           <div className="ml-1 flex items-center">
+            <CommentLikeButton
+              liked={reply.likes.some((like) => like.id === user?.id)}
+              likes={reply.likes.length}
+              handleLike={() =>
+                onLikeReply(
+                  reply.id,
+                  reply.likes.some((like) => like.id === user?.id)
+                )
+              }
+            />
             {reply.pinned && <PinnedIcon size="small" />}
             {user &&
               !isEditing &&
@@ -276,6 +290,7 @@ const ReplyComponent = ({
   highlightedReplyId,
   compact,
   onUpdateReply,
+  onLikeReply,
 }: ReplyComponentProps) => {
   const handleUpdateReply = async (id: number, content: string) => {
     if (onUpdateReply) {
@@ -366,6 +381,7 @@ const ReplyComponent = ({
                 setReplyContent={setReplyContent}
                 handleDeleteReply={handleDeleteReply}
                 onUpdateReply={handleUpdateReply}
+                onLikeReply={onLikeReply}
               />
             </div>
 
@@ -395,6 +411,7 @@ const ReplyComponent = ({
                           newlyAddedReplies={newlyAddedReplies}
                           highlightedReplyId={highlightedReplyId}
                           onUpdateReply={onUpdateReply}
+                          onLikeReply={onLikeReply}
                         />
                       </div>
                     </div>
@@ -443,6 +460,7 @@ const ReplyComponent = ({
           setReplyContent={setReplyContent}
           handleDeleteReply={handleDeleteReply}
           onUpdateReply={handleUpdateReply}
+          onLikeReply={onLikeReply}
         />
       </div>
 
@@ -481,6 +499,7 @@ const ReplyComponent = ({
                 newlyAddedReplies={newlyAddedReplies}
                 highlightedReplyId={highlightedReplyId}
                 onUpdateReply={onUpdateReply}
+                onLikeReply={onLikeReply}
               />
             </div>
           ))}

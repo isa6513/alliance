@@ -432,6 +432,40 @@ export class ForumService {
     return updatedReply;
   }
 
+  async likeComment(id: number, userId: number, unlike = false) {
+    const comment = await this.commentRepository.findOne({
+      where: { id },
+      relations: ['likes', 'author'],
+    });
+
+    if (!comment) {
+      throw new NotFoundException(`Comment with ID "${id}" not found`);
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID "${userId}" not found`);
+    }
+
+    if (unlike) {
+      if (!comment.likes.some((like) => like.id === userId)) {
+        throw new NotFoundException(`You have not liked this comment`);
+      }
+
+      comment.likes = comment.likes.filter((like) => like.id !== userId);
+    } else {
+      if (comment.likes.some((like) => like.id === userId)) {
+        throw new NotFoundException(`You have already liked this comment`);
+      }
+
+      comment.likes.push(user);
+    }
+    await this.commentRepository.save(comment);
+  }
+
   async deleteReply(id: number, userId: number): Promise<void> {
     const reply = await this.commentRepository.findOne({
       where: { id },

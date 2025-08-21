@@ -130,7 +130,7 @@ const HomePage = () => {
               <div className="flex flex-col gap-y-4">
                 <div className="flex flex-row items-center gap-x-2">
                   <p className="font-medium text-zinc-800">
-                    Awaiting commitment
+                    Awaiting your commitment
                   </p>
                   <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full">
                     {newActions.length}

@@ -18,6 +18,7 @@ import {
 
 import { testAuthUser } from "../stories/testData";
 import { setRevalidate } from "../applayout";
+import posthog from "posthog-js";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -33,6 +34,16 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
   ({ children }: React.PropsWithChildren) => {
     const [user, setUser] = useState<UserDto | undefined>();
     const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      if (user && import.meta.env.PROD) {
+        console.log("identifying user");
+        posthog.identify(user.id.toString(), {
+          email: user.email,
+          name: user.name,
+        });
+      }
+    }, [user]);
 
     useEffect(() => {
       let cancelled = false;

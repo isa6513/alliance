@@ -25,6 +25,9 @@ export class CommentDto extends PickType(Comment, [
   @ApiPropertyOptional({ type: () => CommentDto, isArray: true })
   children?: CommentDto[];
 
+  @ApiProperty({ type: () => ProfileDto, isArray: true })
+  likes: ProfileDto[];
+
   constructor(comment: Comment) {
     super();
     Object.assign(this, comment);
@@ -32,6 +35,7 @@ export class CommentDto extends PickType(Comment, [
       ? comment.children.map((child) => new CommentDto(child))
       : undefined;
     this.author = new ProfileDto(comment.author);
+    this.likes = comment.likes.map((like) => new ProfileDto(like));
   }
 }
 

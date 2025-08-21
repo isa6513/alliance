@@ -7,6 +7,8 @@ import {
   forumFindCommentsForAction,
   forumFindCommentsForActivity,
   forumFindCommentsForPost,
+  forumLikeComment,
+  forumUnlikeComment,
   forumUpdateComment,
 } from "@alliance/shared/client";
 import ReplyComponent from "./forum/ReplyComponent";
@@ -157,32 +159,47 @@ const Comments = ({ objectId, type, compact }: CommentsProps) => {
         path: { id: replyId.toString() },
         body: { content },
       });
-      
+
       // Update the comment in the local state to trigger re-render
-      setComments(prevComments => {
+      setComments((prevComments) => {
         if (!prevComments) return null;
-        
-        const updateCommentRecursively = (comments: CommentDto[]): CommentDto[] => {
-          return comments.map(comment => {
+
+        const updateCommentRecursively = (
+          comments: CommentDto[]
+        ): CommentDto[] => {
+          return comments.map((comment) => {
             if (comment.id === replyId) {
               return { ...comment, content };
             }
             if (comment.children) {
               return {
                 ...comment,
-                children: updateCommentRecursively(comment.children)
+                children: updateCommentRecursively(comment.children),
               };
             }
             return comment;
           });
         };
-        
+
         return updateCommentRecursively(prevComments);
       });
     } catch (error) {
       console.error("Failed to update comment:", error);
       throw error;
     }
+  };
+
+  const handleLikeReply = async (replyId: number, unlike = false) => {
+    if (unlike) {
+      await forumUnlikeComment({
+        path: { id: replyId.toString() },
+      });
+    } else {
+      await forumLikeComment({
+        path: { id: replyId.toString() },
+      });
+    }
+    fetchComments();
   };
 
   return (
@@ -211,6 +228,7 @@ const Comments = ({ objectId, type, compact }: CommentsProps) => {
                 highlightedReplyId={highlightedReplyId}
                 compact={compact}
                 onUpdateReply={handleUpdateReply}
+                onLikeReply={handleLikeReply}
               />
             ))}
         </div>

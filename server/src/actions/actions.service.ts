@@ -70,7 +70,7 @@ export class ActionsService {
   findAll(): Promise<ActionDto[]> {
     return this.actionRepository
       .find({
-        relations: ['events'],
+        relations: ['events', 'activities'],
       })
       .then((actions) => {
         return actions.map((action) => this.entityToDto(action));

@@ -256,6 +256,7 @@ export type CommentDto = {
     pinned: boolean;
     author: ProfileDto;
     children?: Array<CommentDto>;
+    likes: Array<ProfileDto>;
 };
 
 export type ActionActivityDto = {
@@ -1729,6 +1730,36 @@ export type ForumUpdateCommentResponses = {
 };
 
 export type ForumUpdateCommentResponse = ForumUpdateCommentResponses[keyof ForumUpdateCommentResponses];
+
+export type ForumLikeCommentData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/forum/comments/{id}/like';
+};
+
+export type ForumLikeCommentResponses = {
+    200: CommentDto;
+};
+
+export type ForumLikeCommentResponse = ForumLikeCommentResponses[keyof ForumLikeCommentResponses];
+
+export type ForumUnlikeCommentData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/forum/comments/{id}/unlike';
+};
+
+export type ForumUnlikeCommentResponses = {
+    200: CommentDto;
+};
+
+export type ForumUnlikeCommentResponse = ForumUnlikeCommentResponses[keyof ForumUnlikeCommentResponses];
 
 export type NotifsFindAllData = {
     body?: never;

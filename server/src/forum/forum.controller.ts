@@ -146,6 +146,28 @@ export class ForumController {
     );
   }
 
+  @Post('comments/:id/like')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Like a comment' })
+  @ApiOkResponse({ type: CommentDto })
+  async likeComment(
+    @Param('id') id: string,
+    @ReqUser() user: JwtPayload,
+  ): Promise<void> {
+    await this.forumService.likeComment(+id, user.sub);
+  }
+
+  @Post('comments/:id/unlike')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Unlike a comment' })
+  @ApiOkResponse({ type: CommentDto })
+  async unlikeComment(
+    @Param('id') id: string,
+    @ReqUser() user: JwtPayload,
+  ): Promise<void> {
+    await this.forumService.likeComment(+id, user.sub, true);
+  }
+
   @Delete('comments/:id')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Delete a reply' })
