@@ -27,7 +27,9 @@ export class CommentDto extends PickType(Comment, [
   constructor(comment: Comment) {
     super();
     Object.assign(this, comment);
-    this.children = comment.children.map((child) => new CommentDto(child));
+    this.children = comment.children
+      ? comment.children.map((child) => new CommentDto(child))
+      : undefined;
     this.author = new ProfileDto(comment.author);
   }
 }
