@@ -21,7 +21,7 @@ const ForumPage: React.FC = () => {
   });
 
   return (
-    <div className="flex flex-col max-w-[800px] mx-auto p-3 pt-8">
+    <div className="flex flex-col max-w-4xl mx-auto p-3 pt-12">
       <div className="gap-y-2 flex flex-col">
         {isAuthenticated && (
           <div

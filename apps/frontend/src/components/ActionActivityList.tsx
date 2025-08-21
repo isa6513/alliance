@@ -68,7 +68,7 @@ const ActionActivityList = ({
               activity={activity}
               showTime={false}
               card={false}
-              showAction={true}
+              showAction={false}
               handleLike={handleLike}
             />
           ))}

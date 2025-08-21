@@ -3,7 +3,6 @@ import { PostDto } from "@alliance/shared/client";
 import { useNavigate } from "react-router";
 import { formatTime } from "../lib/utils";
 import ProfileImage from "./ProfileImage";
-import pinIcon from "../assets/noun-pin-2995482.svg";
 import PinnedIcon from "./PinnedIcon";
 
 export interface ForumListPostProps {

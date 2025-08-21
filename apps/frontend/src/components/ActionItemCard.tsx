@@ -74,10 +74,10 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
           </div>
         </div>
         {activity && (
-          <div className="flex flex-col border-t border-zinc-300 gap-y-2  -mx-4 -mb-4 p-4 bg-zinc-100">
-            <p className="text-black">
+          <div className="mt-4 flex flex-col border-t border-zinc-300 gap-y-2 -mx-4 -mb-4 p-4 bg-zinc-50">
+            <p className="text-zinc-600 text-sm">
               {activity.type === "user_joined"
-                ? `You joined ${formatTime(new Date(activity.createdAt), {
+                ? `You committed ${formatTime(new Date(activity.createdAt), {
                     addSuffix: true,
                   })}`
                 : `You completed ${formatTime(new Date(activity.createdAt), {

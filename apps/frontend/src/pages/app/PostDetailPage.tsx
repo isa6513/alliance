@@ -99,7 +99,7 @@ const PostDetailPage: React.FC = () => {
 
   return (
     <div className="w-full bg-page">
-      <div className="container mx-auto px-4 py-8 ">
+      <div className="container max-w-4xl mx-auto px-4 py-8 ">
         <div className="relative">
           <Link
             to="/forum"
@@ -111,27 +111,29 @@ const PostDetailPage: React.FC = () => {
           <Card className="p-6 mb-3" style={CardStyle.White}>
             <div className="flex justify-between items-start">
               <div className="flex flex-row gap-x-2 items-center justify-between w-full">
-                <h1 className="text-2xl font-semibold">{post.title}</h1>
+                <h1 className="font-adobe !text-2xl font-semibold">
+                  {post.title}
+                </h1>
                 {post.pinned && <PinnedIcon size="large" />}
               </div>
               {post.author.id === user?.id && (
                 <div className="space-x-2">
                   <Link
                     to={`/forum/edit/${post.id}`}
-                    className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                    className="px-4 py-2 text-sm bg-zinc-100 text-gray-700 rounded hover:bg-zinc-200"
                   >
                     Edit
                   </Link>
                   <span
                     onClick={handleDeletePost}
-                    className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition cursor-pointer"
+                    className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 cursor-pointer"
                   >
                     Delete
                   </span>
                 </div>
               )}
             </div>
-            <div className=" flex flex-row gap-x-2 items-center">
+            <div className="flex flex-row gap-x-4 items-center">
               {post.author.profilePicture && (
                 <ProfileImage pfp={post.author.profilePicture} size="small" />
               )}
@@ -143,16 +145,16 @@ const PostDetailPage: React.FC = () => {
                   {post.author.displayName}
                 </a>
               </span>
-              <span className="ml-4 text-zinc-500">
+              <span className="text-zinc-500">
                 {formatTime(new Date(post.createdAt), {
                   addSuffix: true,
                 })}
               </span>
               {post.action && (
-                <span className="ml-4">
+                <span className="">
                   <Link
                     to={`/actions/${post.action.id}`}
-                    className="inline-block bg-blue-50 text-blue-600 hover:bg-blue-100 px-2 py-1 rounded-lg text-sm"
+                    className="inline-block bg-green-1/20 text-green hover:bg-green-1/40 px-3 py-1 rounded-lg text-sm"
                   >
                     {post.action.name}
                   </Link>

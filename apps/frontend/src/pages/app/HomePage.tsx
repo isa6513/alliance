@@ -181,9 +181,11 @@ const HomePage = () => {
                 <p className="text-zinc-400">No forum activity yet</p>
               )}
 
-              {posts?.slice(0, 3).map((post) => (
-                <ForumListPost key={post.id} post={post} showAction={false} />
-              ))}
+              <div className="flex flex-col gap-y-2 mt-2">
+                {posts?.slice(0, 3).map((post) => (
+                  <ForumListPost key={post.id} post={post} showAction={false} />
+                ))}
+              </div>
             </Card>
             <Card className="!gap-y-0">
               <p className="font-semibold mb-3">What your friends are up to</p>

@@ -2,10 +2,7 @@ import { useActionLoaderData } from "../pages/app/ActionPage";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useNavigate, useParams, useOutletContext } from "react-router";
 import { formatTime } from "../lib/utils";
-import {
-  ActionActivityDto,
-  actionsUpdateActivity,
-} from "@alliance/shared/client";
+import { actionsUpdateActivity } from "@alliance/shared/client";
 import Comments from "./Comments";
 import { useAuth } from "../lib/AuthContext";
 import { TaskPanelContext } from "./ActionTaskPanel";
@@ -13,25 +10,7 @@ import Button, { ButtonColor } from "./system/Button";
 import { useEffect, useState } from "react";
 import ProfileImage from "./ProfileImage";
 import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
-
-export function formatActivityMessage(
-  activity: ActionActivityDto,
-  showAction: boolean = false
-) {
-  const userName = activity.user.displayName || "Someone";
-  switch (activity.type) {
-    case "user_joined":
-      return showAction
-        ? `${userName} committed to ${activity.actionName}`
-        : `${userName} committed to this action`;
-    case "user_completed":
-      return showAction
-        ? `${userName} completed ${activity.actionName}`
-        : `${userName} completed this action`;
-    default:
-      return "Unknown activity";
-  }
-}
+import FormattedActionActivityMessage from "./FormattedActionActivityMessage";
 
 export function ErrorBoundary(error: unknown) {
   console.error(error);
@@ -149,7 +128,7 @@ const ActionActivityDetail = () => {
                     size="medium"
                   />
                 )}
-                <p className="font-bold">{formatActivityMessage(activity)}</p>
+                <FormattedActionActivityMessage activity={activity} />
                 {isOwner && !editing && (
                   <button
                     onClick={() => setEditing(true)}

@@ -28,7 +28,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
   return (
     <div
       className={` rounded-lg ${className} ${parentId ? "mt-0" : "mt-3"} ${
-        compact ? "p-2 bg-gray-100/80" : "p-4 bg-gray-200"
+        compact ? "p-2 bg-zinc-100/80" : "p-4 bg-zinc-100"
       }`}
     >
       <form onSubmit={onSubmit}>

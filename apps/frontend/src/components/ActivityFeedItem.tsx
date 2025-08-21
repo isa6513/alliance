@@ -3,9 +3,9 @@ import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router";
 import { ActionActivityDto } from "@alliance/shared/client";
 import { formatTime } from "../lib/utils";
-import { formatActivityMessage } from "./ActionActivityDetail";
 import { useAuth } from "../lib/AuthContext";
 import ActivityLikeButton from "./ActivityLikeButton";
+import FormattedActionActivityMessage from "./FormattedActionActivityMessage";
 import ProfileImage from "./ProfileImage";
 
 export interface ActivityFeedItemProps {
@@ -75,9 +75,11 @@ const ActivityFeedItem = ({
                     className="mr-2"
                   />
                 )}
-                <span className="text-gray-900">
-                  {formatActivityMessage(activity, showAction)}
-                </span>
+
+                <FormattedActionActivityMessage
+                  activity={activity}
+                  showAction={showAction}
+                />
               </div>
             </div>
             <div className="flex flex-row gap-x-1 items-center"></div>

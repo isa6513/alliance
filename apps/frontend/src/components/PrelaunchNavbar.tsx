@@ -4,18 +4,21 @@ enum NavbarPage {
   People = "People",
   Guide = "Guide",
   Progress = "Progress",
+  LogIn = "Log In",
 }
 
 const links: NavbarPage[] = [
   NavbarPage.People,
   NavbarPage.Guide,
   NavbarPage.Progress,
+  NavbarPage.LogIn,
 ];
 
 const destinations: Record<NavbarPage, string> = {
   [NavbarPage.People]: "/people",
   [NavbarPage.Guide]: "/guide",
   [NavbarPage.Progress]: "/progress",
+  [NavbarPage.LogIn]: "/login",
 };
 
 interface PrelaunchNavbarProps {
