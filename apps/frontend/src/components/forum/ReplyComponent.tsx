@@ -9,6 +9,7 @@ import {
 import ReplyForm from "./ReplyForm";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import ProfileImage from "../ProfileImage";
+import PinnedIcon from "../PinnedIcon";
 
 const countAllReplies = (replies: CommentDto[]): number => {
   let count = 0;
@@ -143,13 +144,16 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
       )}
       <ProfileImage
         pfp={reply.author.profilePicture}
-        size="small"
-        className="mr-1"
+        size="medium"
+        className="mr-1 mt-1"
       />
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
           {!isEditing &&
             getDisplayContent(reply.content, isCollapsed, reply.deleted)}
+          <div className="ml-1">
+            {reply.pinned && <PinnedIcon size="small" />}
+          </div>
           {user &&
             !isEditing &&
             reply.author.id === user.id &&

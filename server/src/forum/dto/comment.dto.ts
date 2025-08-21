@@ -17,6 +17,7 @@ export class CommentDto extends PickType(Comment, [
   'createdAt',
   'updatedAt',
   'deleted',
+  'pinned',
 ]) {
   @ApiProperty({ type: ProfileDto })
   author: ProfileDto;

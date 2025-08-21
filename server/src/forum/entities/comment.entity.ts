@@ -106,6 +106,11 @@ export class Comment {
   @Type(() => Notification)
   notification: Notification;
 
+  @Column({ default: false })
+  @ApiProperty()
+  @Allow()
+  pinned: boolean;
+
   @ManyToMany(() => User, { onDelete: 'CASCADE', eager: true })
   @JoinTable()
   @Allow()

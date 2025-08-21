@@ -12,7 +12,7 @@ const ProfileImage = ({
 }) => {
   const sizeClass = {
     small: "w-6 h-6",
-    medium: "w-10 h-10",
+    medium: "w-8 h-8",
     large: "w-29 h-29",
   };
   return (

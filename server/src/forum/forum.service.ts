@@ -180,7 +180,11 @@ export class ForumService {
     // Sort all levels by creation date
     const sortReplies = (repliesList: Comment[]): Comment[] => {
       return repliesList
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+        .sort(
+          (a, b) =>
+            (a.pinned ? 0 : 1) - (b.pinned ? 0 : 1) ||
+            a.createdAt.getTime() - b.createdAt.getTime(),
+        )
         .map((reply) => ({
           ...reply,
           children: sortReplies(reply.children || []),

@@ -253,6 +253,7 @@ export type CommentDto = {
     createdAt: string;
     updatedAt: string;
     parentId?: number;
+    pinned: boolean;
     author: ProfileDto;
     children?: Array<CommentDto>;
 };

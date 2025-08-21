@@ -12,7 +12,6 @@ import { ApiProperty } from '@nestjs/swagger';
 export enum NotificationType {
   ActionEvent = 'action_event',
   ForumReply = 'forum_reply',
-  ActionInvite = 'action_invite',
   FriendRequest = 'friend_request',
   FriendRequestAccepted = 'friend_request_accepted',
 }
