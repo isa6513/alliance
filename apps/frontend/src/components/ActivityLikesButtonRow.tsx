@@ -4,7 +4,7 @@ import ProfileImage from "./ProfileImage";
 
 interface ActivityLikesButtonRowProps {
   isLiked: boolean;
-  handleLike: () => void;
+  handleLike: (() => void) | null;
   labelText?: boolean;
   likes: ProfileDto[];
 }

@@ -29,7 +29,7 @@ export enum ButtonColor {
   Transparent = "bg-transparent hover:bg-gray-100 text-black",
   Grey = "bg-gray-200 !text-black",
   Outline = "border border-gray-2 text-black",
-  White = "border border-gray-2 text-black bg-white",
+  White = "border border-gray-2 text-black bg-white hover:bg-gray-50",
   Black = "bg-gray-4 text-white",
 }
 

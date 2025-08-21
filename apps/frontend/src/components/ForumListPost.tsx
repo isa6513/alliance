@@ -41,7 +41,10 @@ const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
             {post.author.displayName}
           </p>
           {post.action?.name !== undefined && showAction && (
-            <a onClick={actionClick} className="text-blue ml-1 hover:underline">
+            <a
+              onClick={actionClick}
+              className="inline-block bg-green-1/20 text-green hover:bg-green-1/40 px-3 py-1 rounded-lg text-sm"
+            >
               {post.action.name}
             </a>
           )}

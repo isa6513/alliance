@@ -151,14 +151,12 @@ const PostDetailPage: React.FC = () => {
                 })}
               </span>
               {post.action && (
-                <span className="">
-                  <Link
-                    to={`/actions/${post.action.id}`}
-                    className="inline-block bg-green-1/20 text-green hover:bg-green-1/40 px-3 py-1 rounded-lg text-sm"
-                  >
-                    {post.action.name}
-                  </Link>
-                </span>
+                <Link
+                  to={`/actions/${post.action.id}`}
+                  className="inline-block bg-green-1/20 text-green hover:bg-green-1/40 px-3 py-1 rounded-lg text-sm"
+                >
+                  {post.action.name}
+                </Link>
               )}
             </div>
 

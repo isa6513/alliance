@@ -294,7 +294,7 @@ const UserProfilePage: React.FC = () => {
                 className="w-full border-none focus:outline-none !text-[30px] font-bold"
               />
             ) : (
-              <h1>{profileUser.displayName}</h1>
+              <h1 className="font-adobe">{profileUser.displayName}</h1>
             )}
           </div>
           {/* stats row */}
@@ -347,7 +347,7 @@ const UserProfilePage: React.FC = () => {
               <div className="space-x-3 flex">
                 {isEditing ? (
                   <>
-                    <Button color={ButtonColor.Light} onClick={handleCancel}>
+                    <Button color={ButtonColor.White} onClick={handleCancel}>
                       Cancel
                     </Button>
                     <Button
@@ -360,7 +360,7 @@ const UserProfilePage: React.FC = () => {
                   </>
                 ) : (
                   <Button
-                    color={ButtonColor.Light}
+                    color={ButtonColor.White}
                     onClick={() => setIsEditing(true)}
                   >
                     Edit Profile

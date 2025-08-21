@@ -74,8 +74,8 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
           </div>
         </div>
         {activity && (
-          <div className="mt-4 flex flex-col border-t border-zinc-300 gap-y-2 -mx-4 -mb-4 p-4 bg-zinc-50 text-sm">
-            <p className="text-zinc-600">
+          <div className="mt-4 flex flex-row border-t border-zinc-300 gap-y-2 -mx-4 -mb-4 p-4 bg-zinc-50 text-sm items-center justify-between">
+            <p className="text-zinc-600 flex-shrink-0">
               {activity.type === "user_joined"
                 ? `You committed ${formatTime(new Date(activity.createdAt), {
                     addSuffix: true,
@@ -84,14 +84,16 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
                     addSuffix: true,
                   })}`}
             </p>
-            {activity.likes.length > 0 && (
-              <ActivityLikesButtonRow
-                isLiked={false}
-                likes={activity.likes}
-                handleLike={() => {}}
-                labelText={true}
-              />
-            )}
+            <div className="">
+              {activity.likes.length > 0 && (
+                <ActivityLikesButtonRow
+                  isLiked={false}
+                  likes={activity.likes}
+                  handleLike={null}
+                  labelText={true}
+                />
+              )}
+            </div>
           </div>
         )}
 
