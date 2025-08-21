@@ -1,12 +1,12 @@
-import { Link } from "react-router";
-import { destinations, links, NavbarPage, platformSublinks } from "./Navbar";
-import DropdownLink from "./DropdownLink";
 import { Features } from "@alliance/shared/lib/features";
-import { isFeatureEnabled } from "../lib/config";
-import NotificationsIcon from "./NotificationsIcon";
-import { useAuth } from "../lib/AuthContext";
-import SearchBar from "./SearchBar";
+import { Link } from "react-router";
 import logo from "../assets/planet-earth.png";
+import { useAuth } from "../lib/AuthContext";
+import { isFeatureEnabled } from "../lib/config";
+import DropdownLink from "./DropdownLink";
+import { destinations, links, NavbarPage, platformSublinks } from "./Navbar";
+import NotificationsIcon from "./NotificationsIcon";
+import SearchBar from "./SearchBar";
 
 const NavbarHorizontal: React.FC = () => {
   const activeLinks = isFeatureEnabled(Features.Forum)
@@ -41,7 +41,13 @@ const NavbarHorizontal: React.FC = () => {
             to={destinations[NavbarPage.Dashboard]}
             className="shrink-0 hidden sm:block"
           >
-            <img src={logo} alt="logo" className="w-7 h-7" />
+            <img
+              src={logo}
+              alt="logo"
+              className={`w-7 h-7 ${
+                import.meta.env.MODE === "development" ? "grayscale invert" : ""
+              }`}
+            />
           </Link>
           {activeLinks.map((link) =>
             link === NavbarPage.Platform ? (
