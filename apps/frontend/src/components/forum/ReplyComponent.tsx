@@ -151,48 +151,48 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         <div className="flex justify-between items-start">
           {!isEditing &&
             getDisplayContent(reply.content, isCollapsed, reply.deleted)}
-          <div className="ml-1">
+          <div className="ml-1 flex items-center">
             {reply.pinned && <PinnedIcon size="small" />}
-          </div>
-          {user &&
-            !isEditing &&
-            reply.author.id === user.id &&
-            !reply.deleted && (
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setShowDropdown(!showDropdown)}
-                  className="text-gray-500 hover:text-gray-700 p-1 pr-0"
-                  aria-label="More options"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+            {user &&
+              !isEditing &&
+              reply.author.id === user.id &&
+              !reply.deleted && (
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className="text-gray-500 hover:text-gray-700 p-1 pr-0"
+                    aria-label="More options"
                   >
-                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                  </svg>
-                </button>
-                {showDropdown && (
-                  <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-                    <button
-                      onClick={handleStartEdit}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    <svg
+                      className="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
                     >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => {
-                        handleDeleteReply(reply.id);
-                        setShowDropdown(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                    </svg>
+                  </button>
+                  {showDropdown && (
+                    <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                      <button
+                        onClick={handleStartEdit}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleDeleteReply(reply.id);
+                          setShowDropdown(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+          </div>
         </div>
         {isEditing ? (
           <div className="">
