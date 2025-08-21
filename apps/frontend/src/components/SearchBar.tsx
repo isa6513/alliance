@@ -6,6 +6,7 @@ import {
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import ProfileImage from "./ProfileImage";
 
 const SearchBar = () => {
   const [search, setSearch] = useState("");
@@ -204,13 +205,20 @@ const SearchBar = () => {
                     selectedItem?.id === item.id ? "bg-zinc-200" : ""
                   }`}
                 >
-                  {item.image && (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="aspect-square h-8 rounded-md object-cover mr-2"
-                    />
-                  )}
+                  {item.image !== undefined &&
+                    (item.type === "user" ? (
+                      <ProfileImage
+                        pfp={item.image}
+                        size="small"
+                        className="mr-2"
+                      />
+                    ) : (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="aspect-square h-8 rounded-md object-cover mr-2"
+                      />
+                    ))}
                   <div className="flex flex-col">
                     <span>{item.name}</span>
                     {item.secondaryData && (

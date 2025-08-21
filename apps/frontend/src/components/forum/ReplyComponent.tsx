@@ -130,6 +130,8 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
     setIsEditing(false);
   };
 
+  console.log(reply.author);
+
   const handleStartEdit = () => {
     setEditContent(reply.content);
     setIsEditing(true);
