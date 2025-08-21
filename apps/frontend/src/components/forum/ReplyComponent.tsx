@@ -281,14 +281,13 @@ const ReplyComponent = ({
     if (onUpdateReply) {
       await onUpdateReply(id, content);
     } else {
-      // Default implementation using forumUpdateComment
       try {
         await forumUpdateComment({
           path: { id: id.toString() },
           body: { content },
         });
-        // Update the reply content in place
-        reply.content = content;
+        // Note: We don't update reply.content directly as it won't trigger re-render
+        // The parent component should handle state updates
       } catch (error) {
         console.error("Failed to update comment:", error);
         throw error;
@@ -395,7 +394,7 @@ const ReplyComponent = ({
                           isSubmitting={isSubmitting}
                           newlyAddedReplies={newlyAddedReplies}
                           highlightedReplyId={highlightedReplyId}
-                          onUpdateReply={handleUpdateReply}
+                          onUpdateReply={onUpdateReply}
                         />
                       </div>
                     </div>
@@ -481,7 +480,7 @@ const ReplyComponent = ({
                 isSubmitting={isSubmitting}
                 newlyAddedReplies={newlyAddedReplies}
                 highlightedReplyId={highlightedReplyId}
-                onUpdateReply={handleUpdateReply}
+                onUpdateReply={onUpdateReply}
               />
             </div>
           ))}

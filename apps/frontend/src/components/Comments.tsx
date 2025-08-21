@@ -7,6 +7,7 @@ import {
   forumFindCommentsForAction,
   forumFindCommentsForActivity,
   forumFindCommentsForPost,
+  forumUpdateComment,
 } from "@alliance/shared/client";
 import ReplyComponent from "./forum/ReplyComponent";
 import ReplyForm from "./forum/ReplyForm";
@@ -150,6 +151,40 @@ const Comments = ({ objectId, type, compact }: CommentsProps) => {
     }
   };
 
+  const handleUpdateReply = async (replyId: number, content: string) => {
+    try {
+      await forumUpdateComment({
+        path: { id: replyId.toString() },
+        body: { content },
+      });
+      
+      // Update the comment in the local state to trigger re-render
+      setComments(prevComments => {
+        if (!prevComments) return null;
+        
+        const updateCommentRecursively = (comments: CommentDto[]): CommentDto[] => {
+          return comments.map(comment => {
+            if (comment.id === replyId) {
+              return { ...comment, content };
+            }
+            if (comment.children) {
+              return {
+                ...comment,
+                children: updateCommentRecursively(comment.children)
+              };
+            }
+            return comment;
+          });
+        };
+        
+        return updateCommentRecursively(prevComments);
+      });
+    } catch (error) {
+      console.error("Failed to update comment:", error);
+      throw error;
+    }
+  };
+
   return (
     <div>
       {error && <div className="text-red-500">{error}</div>}
@@ -175,6 +210,7 @@ const Comments = ({ objectId, type, compact }: CommentsProps) => {
                 newlyAddedReplies={newlyAddedReplies}
                 highlightedReplyId={highlightedReplyId}
                 compact={compact}
+                onUpdateReply={handleUpdateReply}
               />
             ))}
         </div>
