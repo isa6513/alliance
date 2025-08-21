@@ -6,14 +6,15 @@ import {
   HttpStatus,
   UseGuards,
   Req,
-  UnauthorizedException,
   RawBody,
   Request,
   Get,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import Stripe from 'stripe';
 import { PaymentsService } from './payments.service';
-import { JwtRequest } from 'src/auth/guards/auth.guard';
+import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
 import {
   ApiBody,
   ApiOkResponse,
@@ -79,19 +80,9 @@ export class PaymentsController {
       token = await this.paymentsService.createPaymentUserDataToken();
     }
 
-    let paymentMethod: Stripe.PaymentMethod | undefined;
-    if (customer) {
-      const paymentMethods = await this.stripe.customers.listPaymentMethods(
-        customer.id,
-      );
-      if (
-        paymentMethods.data.length > 0 &&
-        paymentMethods.data[0].type === 'card'
-      ) {
-        //TODO: support multiple payment methods
-        paymentMethod = paymentMethods.data[0];
-      }
-    }
+    const paymentMethod = customer
+      ? await this.paymentsService.getSavedPaymentForCustomer(customer)
+      : undefined;
 
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: 500,
@@ -152,9 +143,7 @@ export class PaymentsController {
         );
       } catch (err) {
         console.log(`Webhook signature verification failed.`, err.message);
-        throw new UnauthorizedException(
-          'Webhook signature verification failed',
-        );
+        throw new BadRequestException('Webhook signature verification failed');
       }
 
       switch (parsedEvent.type) {
@@ -172,28 +161,45 @@ export class PaymentsController {
     }
   }
 
-  @Get('payment-methods')
-  @ApiOkResponse({ type: [PaymentMethodDto] })
-  async paymentMethods(
-    @Request() req: JwtRequest,
-  ): Promise<PaymentMethodDto[]> {
+  @Get('payment-method')
+  @ApiOkResponse({ type: PaymentMethodDto })
+  @UseGuards(AuthGuard)
+  async paymentMethod(@Request() req: JwtRequest): Promise<PaymentMethodDto> {
     const customer = await this.paymentsService.getOrCreateCustomer(
       req.user.sub,
       req.user.email,
     );
     if (!customer) {
-      throw new UnauthorizedException('Customer not found');
+      throw new NotFoundException('Customer not found');
     }
-    const paymentMethods = await this.stripe.customers.listPaymentMethods(
-      customer.id,
+    const paymentMethod =
+      await this.paymentsService.getSavedPaymentForCustomer(customer);
+    if (!paymentMethod || !paymentMethod.card) {
+      throw new NotFoundException('Payment method not found');
+    }
+    return {
+      id: paymentMethod.id,
+      type: paymentMethod.type,
+      ...paymentMethod.card,
+    };
+  }
+
+  @Post('clear-payment-method')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async clearPaymentMethods(@Request() req: JwtRequest) {
+    const customer = await this.paymentsService.getOrCreateCustomer(
+      req.user.sub,
+      req.user.email,
     );
-    const paymentMethodDtos = paymentMethods.data.map((paymentMethod) => {
-      return {
-        id: paymentMethod.id,
-        type: paymentMethod.type,
-        card: paymentMethod.card,
-      };
-    });
-    return paymentMethodDtos;
+    if (!customer) {
+      throw new NotFoundException('Customer not found');
+    }
+    const paymentMethod =
+      await this.paymentsService.getSavedPaymentForCustomer(customer);
+    if (!paymentMethod) {
+      throw new NotFoundException('Payment method not found');
+    }
+    await this.stripe.paymentMethods.detach(paymentMethod.id);
   }
 }

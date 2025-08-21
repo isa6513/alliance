@@ -63,11 +63,22 @@ export class PaymentsService {
   }
 
   async getSavedPaymentForCustomer(
-    customerId: string,
+    customer: Stripe.Customer,
   ): Promise<Stripe.PaymentMethod | undefined> {
-    const paymentMethods =
-      await this.stripe.customers.listPaymentMethods(customerId);
-    return paymentMethods.data.find((method) => method.type === 'card');
+    let paymentMethod: Stripe.PaymentMethod | undefined;
+    if (customer) {
+      const paymentMethods = await this.stripe.customers.listPaymentMethods(
+        customer.id,
+      );
+      if (
+        paymentMethods.data.length > 0 &&
+        paymentMethods.data[0].type === 'card'
+      ) {
+        //TODO: support multiple payment methods
+        paymentMethod = paymentMethods.data[0];
+      }
+    }
+    return paymentMethod;
   }
 
   async createPaymentUserDataToken(): Promise<string> {

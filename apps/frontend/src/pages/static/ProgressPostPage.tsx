@@ -8,8 +8,7 @@ import MarkdownWrapper from "../../components/MarkdownWrapper";
 export async function loader({ params }: { params: { slug: string } }) {
   const { slug } = params;
   const postFiles = import.meta.glob("/src/action-posts/*.md", {
-    query: "?raw",
-    import: "default",
+    as: "raw",
   });
 
   const post = Object.entries(postFiles).find(([path]) => {
@@ -34,6 +33,7 @@ export async function loader({ params }: { params: { slug: string } }) {
 }
 
 export function meta({ data }: { data: Awaited<ReturnType<typeof loader>> }) {
+  console.log(data);
   return [{ title: data.frontmatter.title ?? "Alliance" }];
 }
 

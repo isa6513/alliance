@@ -16,13 +16,13 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
             <p className="text-2xl font-berlingske uppercase">The Alliance</p>
           </div>
           <div className="flex flex-row gap-6 md:gap-10 text-base">
-            <Link to="/people" className="text-lg">
+            <Link to="/people" className="text-lg hover:underline">
               People
             </Link>
-            <Link to="/guide" className="text-lg">
+            <Link to="/guide" className="text-lg hover:underline">
               Guide
             </Link>
-            <Link to="/progress" className="text-lg">
+            <Link to="/progress" className="text-lg hover:underline">
               Progress
             </Link>
 

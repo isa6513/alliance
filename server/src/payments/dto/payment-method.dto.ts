@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class PaymentMethodDto {
   @ApiProperty()
@@ -7,11 +7,15 @@ export class PaymentMethodDto {
   @ApiProperty()
   type: string;
 
-  @ApiPropertyOptional()
-  card?: {
-    brand: string;
-    last4: string;
-    exp_month: number;
-    exp_year: number;
-  };
+  @ApiProperty()
+  brand: string;
+
+  @ApiProperty()
+  last4: string;
+
+  @ApiProperty()
+  exp_month: number;
+
+  @ApiProperty()
+  exp_year: number;
 }

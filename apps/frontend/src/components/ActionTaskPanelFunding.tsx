@@ -92,7 +92,7 @@ const ActionTaskPanelFunding = ({
     [stripe, elements, isAuthenticated, token]
   );
 
-  const titleText = "Join this action by giving $5";
+  const titleText = "Complete action by giving $5";
 
   const handleContributeClicked = useCallback(async () => {
     if (!savedPaymentMethod) {

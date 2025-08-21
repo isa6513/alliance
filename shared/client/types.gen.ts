@@ -510,9 +510,10 @@ export type CreatePartialProfileDto = {
 export type PaymentMethodDto = {
     id: string;
     type: string;
-    card?: {
-        [key: string]: unknown;
-    };
+    brand: string;
+    last4: string;
+    exp_month: number;
+    exp_year: number;
 };
 
 export type TableMetadataDto = {
@@ -1836,18 +1837,29 @@ export type PaymentsWebhookResponses = {
     200: unknown;
 };
 
-export type PaymentsPaymentMethodsData = {
+export type PaymentsPaymentMethodData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/payments/payment-methods';
+    url: '/payments/payment-method';
 };
 
-export type PaymentsPaymentMethodsResponses = {
-    200: Array<PaymentMethodDto>;
+export type PaymentsPaymentMethodResponses = {
+    200: PaymentMethodDto;
 };
 
-export type PaymentsPaymentMethodsResponse = PaymentsPaymentMethodsResponses[keyof PaymentsPaymentMethodsResponses];
+export type PaymentsPaymentMethodResponse = PaymentsPaymentMethodResponses[keyof PaymentsPaymentMethodResponses];
+
+export type PaymentsClearPaymentMethodsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/payments/clear-payment-method';
+};
+
+export type PaymentsClearPaymentMethodsResponses = {
+    200: unknown;
+};
 
 export type AdminViewerGetTablesData = {
     body?: never;

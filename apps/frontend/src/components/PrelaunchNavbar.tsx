@@ -64,8 +64,12 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
           //     </p>
           //   </Link>
           // ) : (
-          <Link to={destinations[link]} key={link}>
-            <p className="hover:underline whitespace-nowrap">{link}</p>
+          <Link
+            to={destinations[link]}
+            key={link}
+            className="hover:underline whitespace-nowrap"
+          >
+            {link}
           </Link>
         ))}
       </div>

@@ -11,6 +11,9 @@ import {
   CitySearchDto,
   userMyLocation,
   userUpdate,
+  PaymentMethodDto,
+  paymentsPaymentMethod,
+  paymentsClearPaymentMethods,
 } from "@alliance/shared/client";
 import { useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
@@ -26,6 +29,11 @@ const SettingsPage: React.FC = () => {
 
   const [originalCityId, setOriginalCityId] = useState<number | null>(null);
   const [originalAnonymous, setOriginalAnonymous] = useState<boolean>(false);
+
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodDto | null>(
+    null
+  );
+  const [loadingPaymentMethod, setLoadingPaymentMethod] = useState(false);
 
   const navigate = useNavigate();
 
@@ -43,6 +51,29 @@ const SettingsPage: React.FC = () => {
   // Check if there are any changes from original values
   const hasChanges =
     selectedCityId !== originalCityId || anonymous !== originalAnonymous;
+
+  const loadPaymentMethod = useCallback(async () => {
+    try {
+      const response = await paymentsPaymentMethod();
+      if (response.data) {
+        setPaymentMethod(response.data);
+      }
+    } catch {}
+  }, []);
+
+  const handleClearPaymentMethod = useCallback(async () => {
+    setLoadingPaymentMethod(true);
+    try {
+      const clear = await paymentsClearPaymentMethods();
+      if (clear.response.ok) {
+        setPaymentMethod(null);
+      }
+    } catch (error) {
+      console.error("Failed to clear payment method:", error);
+    } finally {
+      setLoadingPaymentMethod(false);
+    }
+  }, []);
 
   const handleSave = useCallback(async () => {
     setSaving(true);
@@ -77,6 +108,7 @@ const SettingsPage: React.FC = () => {
       setLoading(false);
       setAnonymous(user.anonymous || false);
       setOriginalAnonymous(user.anonymous || false);
+      loadPaymentMethod();
     }
     userMyLocation().then((location) => {
       console.log(location);
@@ -86,7 +118,7 @@ const SettingsPage: React.FC = () => {
         setOriginalCityId(location.data.id);
       }
     });
-  }, [user]);
+  }, [user, loadPaymentMethod]);
 
   if (loading) {
     return (
@@ -198,6 +230,54 @@ const SettingsPage: React.FC = () => {
             </div>
           )}
         </Card>
+
+        {paymentMethod !== null && (
+          <Card style={CardStyle.White} className="p-8 mb-6">
+            <h2 className="text-lg mb-6 -mt-2">Payment Methods</h2>
+            <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center justify-center p-2 h-5 bg-blue-500 text-white text-xs font-semibold rounded">
+                  {paymentMethod.brand?.toUpperCase() || "CARD"}
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">
+                    •••• •••• •••• {paymentMethod.last4}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Expires{" "}
+                    {paymentMethod.exp_month?.toString().padStart(2, "0")}/
+                    {paymentMethod.exp_year}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleClearPaymentMethod}
+                disabled={loadingPaymentMethod}
+                className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                title="Remove payment method"
+              >
+                {loadingPaymentMethod ? (
+                  <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                ) : (
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </Card>
+        )}
+
         <FriendsTab userId={user.id} />
       </div>
     </div>
