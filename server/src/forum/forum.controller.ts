@@ -65,7 +65,9 @@ export class ForumController {
   @ApiOperation({ summary: 'Get all comments for a specific post' })
   @ApiOkResponse({ type: [CommentDto] })
   async findCommentsForPost(@Param('id') id: string): Promise<CommentDto[]> {
-    return this.forumService.findCommentsForPost(+id);
+    return this.forumService
+      .findCommentsForPost(+id)
+      .then((comments) => comments.map((comment) => new CommentDto(comment)));
   }
 
   @Get('activity/:id/comments')
@@ -74,7 +76,18 @@ export class ForumController {
   async findCommentsForActivity(
     @Param('id') id: string,
   ): Promise<CommentDto[]> {
-    return this.forumService.findCommentsForActivity(+id);
+    return this.forumService
+      .findCommentsForActivity(+id)
+      .then((comments) => comments.map((comment) => new CommentDto(comment)));
+  }
+
+  @Get('actions/:id/comments')
+  @ApiOperation({ summary: 'Get all comments for a specific action' })
+  @ApiOkResponse({ type: [CommentDto] })
+  async findCommentsForAction(@Param('id') id: string): Promise<CommentDto[]> {
+    return this.forumService
+      .findCommentsForAction(+id)
+      .then((comments) => comments.map((comment) => new CommentDto(comment)));
   }
 
   @Get('posts/user/:id')
@@ -123,12 +136,14 @@ export class ForumController {
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Update a comment' })
   @ApiOkResponse({ type: CommentDto })
-  updateComment(
+  async updateComment(
     @Param('id') id: string,
     @Body() updateCommentDto: UpdateCommentDto,
     @ReqUser() user: JwtPayload,
   ): Promise<CommentDto> {
-    return this.forumService.updateComment(+id, updateCommentDto, user.sub);
+    return new CommentDto(
+      await this.forumService.updateComment(+id, updateCommentDto, user.sub),
+    );
   }
 
   @Delete('comments/:id')

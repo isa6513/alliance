@@ -25,6 +25,7 @@ const PostFormPage: React.FC = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [actions, setActions] = useState<ActionDto[]>([]);
   const [isLoading, setIsLoading] = useState(mode === "edit");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -190,7 +191,7 @@ const PostFormPage: React.FC = () => {
               />
             </div>
 
-            <div className="mb-6">
+            {/* <div className="mb-6">
               <label
                 htmlFor="actionId"
                 className="block text-zinc-700 font-medium mb-2 "
@@ -218,7 +219,7 @@ const PostFormPage: React.FC = () => {
                 Associating your post with an action will make it visible on
                 that action&apos;s page.
               </p>
-            </div>
+            </div> */}
 
             <div className="flex justify-end space-x-3">
               <Button

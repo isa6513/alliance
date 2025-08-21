@@ -433,7 +433,8 @@ export class ActionsService {
       },
       relations: ['author'],
     });
-    return new ActionActivityDto(activity, comments);
+    const commentsDto = comments.map((comment) => new CommentDto(comment));
+    return new ActionActivityDto(activity, commentsDto);
   }
 
   async likeActivity(id: number, userId: number, unlike = false) {

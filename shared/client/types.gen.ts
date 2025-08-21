@@ -253,7 +253,7 @@ export type CommentDto = {
     createdAt: string;
     updatedAt: string;
     parentId?: number;
-    author: UserDto;
+    author: ProfileDto;
     children?: Array<CommentDto>;
 };
 
@@ -1657,6 +1657,21 @@ export type ForumFindCommentsForActivityResponses = {
 };
 
 export type ForumFindCommentsForActivityResponse = ForumFindCommentsForActivityResponses[keyof ForumFindCommentsForActivityResponses];
+
+export type ForumFindCommentsForActionData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/forum/actions/{id}/comments';
+};
+
+export type ForumFindCommentsForActionResponses = {
+    200: Array<CommentDto>;
+};
+
+export type ForumFindCommentsForActionResponse = ForumFindCommentsForActionResponses[keyof ForumFindCommentsForActionResponses];
 
 export type ForumFindPostsByUserData = {
     body?: never;

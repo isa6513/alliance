@@ -5,7 +5,7 @@ import {
   PickType,
 } from '@nestjs/swagger';
 import { Comment } from '../entities/comment.entity';
-import { UserDto } from '../../user/user.dto';
+import { ProfileDto } from 'src/user/user.dto';
 
 // return object for get requests
 export class CommentDto extends PickType(Comment, [
@@ -18,11 +18,17 @@ export class CommentDto extends PickType(Comment, [
   'updatedAt',
   'deleted',
 ]) {
-  @ApiProperty({ type: UserDto })
-  author: UserDto;
+  @ApiProperty({ type: ProfileDto })
+  author: ProfileDto;
 
   @ApiPropertyOptional({ type: () => CommentDto, isArray: true })
   children?: CommentDto[];
+
+  constructor(comment: Comment) {
+    super();
+    Object.assign(this, comment);
+    this.author = new ProfileDto(comment.author);
+  }
 }
 
 export class CreateCommentDto extends PickType(Comment, [

@@ -4,6 +4,7 @@ import {
   CreateCommentDto,
   forumCreateComment,
   forumDeleteComment,
+  forumFindCommentsForAction,
   forumFindCommentsForActivity,
   forumFindCommentsForPost,
 } from "@alliance/shared/client";
@@ -41,8 +42,12 @@ const Comments = ({ objectId, type, compact }: CommentsProps) => {
       response = await forumFindCommentsForPost({
         path: { id: objectId.toString() },
       });
-    } else {
+    } else if (type === "activity") {
       response = await forumFindCommentsForActivity({
+        path: { id: objectId.toString() },
+      });
+    } else {
+      response = await forumFindCommentsForAction({
         path: { id: objectId.toString() },
       });
     }

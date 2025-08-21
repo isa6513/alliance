@@ -1,10 +1,9 @@
 import { Outlet, useOutletContext } from "react-router";
 import { TaskPanelContext } from "./ActionTaskPanel";
-import { Features } from "@alliance/shared/lib/features";
-import ActionForumPosts from "./ActionForumPosts";
-import { getImageSource, isFeatureEnabled } from "../lib/config";
+import { getImageSource } from "../lib/config";
 import ReactMarkdown from "react-markdown";
 import { useActionLoaderData } from "../pages/app/ActionPage";
+import Comments from "./Comments";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();
@@ -35,9 +34,7 @@ const ActionContents = () => {
 
       <hr className="border-zinc-200" />
 
-      {isFeatureEnabled(Features.Forum) && (
-        <ActionForumPosts actionId={action.id} />
-      )}
+      <Comments objectId={action.id} type={"action"} />
     </div>
   );
 };

@@ -138,6 +138,19 @@ export class ForumService {
     return this.organizeRepliesHierarchy(allComments);
   }
 
+  async findCommentsForAction(actionId: number): Promise<Comment[]> {
+    const allComments = await this.commentRepository.find({
+      where: {
+        parentObjectId: actionId,
+        parentObjectType: CommentParentObject.Action,
+      },
+      relations: ['author'],
+      order: { createdAt: 'ASC' },
+    });
+
+    return this.organizeRepliesHierarchy(allComments);
+  }
+
   private organizeRepliesHierarchy(replies: Comment[]): Comment[] {
     if (replies.length === 0) {
       return [];
@@ -258,7 +271,7 @@ export class ForumService {
       throw new NotFoundException(`Reply with ID "${reply.id}" not found`);
     }
 
-    return loadedReply;
+    return new CommentDto(loadedReply);
   }
 
   async sendNotifsForNewComment(comment: Comment): Promise<void> {

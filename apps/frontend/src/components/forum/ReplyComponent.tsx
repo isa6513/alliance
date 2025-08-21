@@ -8,6 +8,7 @@ import {
 } from "@alliance/shared/client";
 import ReplyForm from "./ReplyForm";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
+import ProfileImage from "../ProfileImage";
 
 const countAllReplies = (replies: CommentDto[]): number => {
   let count = 0;
@@ -173,14 +174,18 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         ) : (
           <div className="flex justify-between items-center text-sm text-gray-500">
             <div className="gap-x-4 flex">
-              {reply.author?.name !== undefined && (
+              {reply.author.displayName !== undefined && (
                 <p>
-                  By{" "}
+                  <ProfileImage
+                    pfp={reply.author.profilePicture}
+                    size="small"
+                    className="mr-1"
+                  />
                   <a
                     href={`/user/${reply.author.id}`}
                     className="hover:underline"
                   >
-                    {reply.author?.name}
+                    {reply.author.displayName}
                   </a>
                 </p>
               )}
@@ -212,7 +217,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                   {!isReplyingToThis && "Reply"}
                 </button>
               )}
-              {user && reply.author.email === user.email && !reply.deleted && (
+              {user && reply.author.id === user.id && !reply.deleted && (
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setShowDropdown(!showDropdown)}
