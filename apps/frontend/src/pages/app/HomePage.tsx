@@ -4,7 +4,7 @@ import TaskCard from "../../components/TaskCard";
 import ActionItemCard from "../../components/ActionItemCard";
 import Card from "../../components/system/Card";
 import ForumListPost from "../../components/ForumListPost";
-import ActivityFeedItem from "../../components/ActivityFeedItem";
+import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import useActivities, { ActivityList } from "./useActivities";
 import { isFeatureEnabled } from "../../lib/config";
 import { Features } from "@alliance/shared/lib/features";
@@ -69,7 +69,12 @@ const HomePage = () => {
                 )}
 
                 {posts?.slice(0, 3).map((post) => (
-                  <ForumListPost key={post.id} post={post} showAction={false} />
+                  <ForumListPost
+                    key={post.id}
+                    post={post}
+                    card={false}
+                    showAction={false}
+                  />
                 ))}
               </Card>
               <Card className="!gap-y-0">
@@ -79,9 +84,9 @@ const HomePage = () => {
                 {friendActivities.length === 0 && (
                   <p className="text-zinc-400">No friend activity yet</p>
                 )}
-                <div className="flex flex-col gap-y-2 bg-red-100">
+                <div className="flex flex-col gap-y-2 ">
                   {friendActivities.map((activity) => (
-                    <ActivityFeedItem
+                    <ActionActivityFeedItem
                       key={activity.id}
                       activity={activity}
                       showTime={false}
@@ -176,25 +181,30 @@ const HomePage = () => {
         <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch w-[350px]">
           <div className="flex flex-col gap-y-3">
             <Card>
-              <p className="font-semibold mb-1">Forum activity</p>
+              <p className="font-semibold mb-3">Forum activity</p>
               {posts?.length === 0 && (
                 <p className="text-zinc-400">No forum activity yet</p>
               )}
 
-              <div className="flex flex-col gap-y-2 mt-2">
+              <div className="flex flex-col divide-y *:py-3 -my-3">
                 {posts?.slice(0, 3).map((post) => (
-                  <ForumListPost key={post.id} post={post} showAction={false} />
+                  <ForumListPost
+                    key={post.id}
+                    post={post}
+                    card={false}
+                    showAction={false}
+                  />
                 ))}
               </div>
             </Card>
-            <Card className="!gap-y-0">
+            <Card>
               <p className="font-semibold mb-3">What your friends are up to</p>
               {friendActivities.length === 0 && (
                 <p className="text-zinc-400">No friend activity yet</p>
               )}
               <div className="flex flex-col divide-y *:py-3 -my-3">
                 {friendActivities.map((activity) => (
-                  <ActivityFeedItem
+                  <ActionActivityFeedItem
                     key={activity.id}
                     activity={activity}
                     showTime={false}

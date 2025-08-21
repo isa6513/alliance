@@ -1,16 +1,15 @@
-import { useActionLoaderData } from "../pages/app/ActionPage";
-import chevronLeft from "../assets/icons8-expand-arrow-96.png";
-import { useNavigate, useParams, useOutletContext } from "react-router";
-import { formatTime } from "../lib/utils";
 import { actionsUpdateActivity } from "@alliance/shared/client";
-import Comments from "./Comments";
-import { useAuth } from "../lib/AuthContext";
-import { TaskPanelContext } from "./ActionTaskPanel";
-import Button, { ButtonColor } from "./system/Button";
 import { useEffect, useState } from "react";
-import ProfileImage from "./ProfileImage";
+import { useNavigate, useOutletContext, useParams } from "react-router";
+import chevronLeft from "../assets/icons8-expand-arrow-96.png";
+import { useAuth } from "../lib/AuthContext";
+import { formatTime } from "../lib/utils";
+import { useActionLoaderData } from "../pages/app/ActionPage";
+import { TaskPanelContext } from "./ActionTaskPanel";
 import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
-import FormattedActionActivityMessage from "./FormattedActionActivityMessage";
+import Comments from "./Comments";
+import ProfileImage from "./ProfileImage";
+import Button, { ButtonColor } from "./system/Button";
 
 export function ErrorBoundary(error: unknown) {
   console.error(error);
@@ -47,6 +46,7 @@ const ActionActivityDetail = () => {
 
   // Find the activity from the shared state
   const activity = activities.find((a) => a.id === activityId) || null;
+  const verb = activity?.type === "user_joined" ? "committed to" : "completed";
 
   const handleLike = async () => {
     if (!user || !activity) {
@@ -129,7 +129,7 @@ const ActionActivityDetail = () => {
                   />
                 )}
                 <p className="font-semibold">
-                  <FormattedActionActivityMessage activity={activity} />
+                  {activity.user.displayName} {verb} this action
                 </p>
                 {isOwner && !editing && (
                   <button

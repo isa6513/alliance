@@ -9,7 +9,7 @@ import Comments from "../../components/Comments";
 import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
 import { setRevalidate } from "../../applayout";
 import ProfileImage from "../../components/ProfileImage";
-import PinnedIcon from "../../components/PinnedIcon";
+import PinnedIcon from "../../components/icons/PinnedIcon";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();

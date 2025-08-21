@@ -1,3 +1,13 @@
+import {
+  ActionDto,
+  actionsComplete,
+  actionsFindOne,
+  actionsJoin,
+  actionsMyStatus,
+  actionsUserLocations,
+  LatLonDto,
+  UserActionRelation,
+} from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   data,
@@ -7,28 +17,31 @@ import {
   useParams,
   useRouteLoaderData,
 } from "react-router";
-import Card, { CardStyle } from "../../components/system/Card";
-import {
-  actionsComplete,
-  actionsFindOne,
-  actionsJoin,
-  actionsMyStatus,
-  actionsUserLocations,
-  LatLonDto,
-  UserActionRelation,
-} from "@alliance/shared/client";
-import { ActionDto } from "@alliance/shared/client";
-import { useActionCount } from "../../lib/useActionWebSocket";
-import TwoColumnSplit from "../../components/system/TwoColumnSplit";
-import ActionEventsPanel from "../../components/ActionEventsPanel";
-import CompletedBar from "../../components/CompletedBar";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/ActionPage";
-import { useAuth } from "../../lib/AuthContext";
-import { TaskPanelContext } from "../../components/ActionTaskPanel";
-import ActionActivityList from "../../components/ActionActivityList";
-import { testActions } from "../../stories/testData";
 import { setRevalidate } from "../../applayout";
+import ActionActivityList from "../../components/ActionActivityList";
+import ActionEventsPanel from "../../components/ActionEventsPanel";
+import { TaskPanelContext } from "../../components/ActionTaskPanel";
+import CompletedBar from "../../components/CompletedBar";
+import StatusIcon from "../../components/icons/StatusIcon";
+import Card, { CardStyle } from "../../components/system/Card";
+import TwoColumnSplit from "../../components/system/TwoColumnSplit";
+import { useAuth } from "../../lib/AuthContext";
+import { useActionCount } from "../../lib/useActionWebSocket";
+import { testActions } from "../../stories/testData";
 import useActivities, { ActivityList } from "./useActivities";
+
+const actionStatusColors: Record<ActionDto["status"], string> = {
+  gathering_commitments: "bg-yellow-50 text-yellow-600 border-yellow-600",
+  commitments_reached: "bg-green/10 text-green border-green",
+  member_action: "bg-blue-50 text-blue-600 border-blue-600",
+  resolution: "blue-500",
+  completed: "gray-500",
+  failed: "red-500",
+  abandoned: "yellow-500",
+  draft: "gray-500",
+  upcoming: "blue-500",
+};
 
 const actionStatusDescriptions: Record<ActionDto["status"], string> = {
   gathering_commitments: "Gathering commitments",
@@ -183,55 +196,65 @@ export default function ActionPage() {
         right={
           <div className="flex flex-col gap-y-4 p-6 pt-2">
             <Card style={CardStyle.White}>
-              <div className="p-2">
-                <p className="text-lg font-semibold">Status</p>
-                {action && (
-                  <div className="mt-1">
+              <p className="text-base font-semibold">Status</p>
+              {action && (
+                <div className="mt-1">
+                  <div
+                    className={`px-3 py-1 flex flex-row items-center border ${
+                      actionStatusColors[action.status]
+                    } rounded-lg`}
+                  >
+                    {/* <img
+                      src={actionStatusIcons[action.status]}
+                      alt="Action Status Icon"
+                      className="inline w-4 h-4 mr-1"
+                    /> */}
+                    <StatusIcon status={action.status} size="small" />
                     <p>{actionStatusDescriptions[action.status]}</p>
-
-                    {action.status === "gathering_commitments" ||
-                    action.status === "commitments_reached" ? (
-                      <div className="mt-4">
-                        <CompletedBar
-                          percentage={
-                            ((liveUserCount ?? action.usersJoined) /
-                              (action.commitmentThreshold ?? 1)) *
-                            100
-                          }
-                        />
-                        <p className="mt-4 text-green-3 text-sm font-weight-450">
-                          {(
-                            liveUserCount ?? action.usersJoined
-                          )?.toLocaleString() || 0}{" "}
-                          commitments made
-                        </p>
-                        <p className="text-zinc-400 text-sm">
-                          {(action.commitmentThreshold ?? 0).toLocaleString()}{" "}
-                          commitments needed
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="mt-4">
-                        <CompletedBar
-                          percentage={
-                            ((action.usersCompleted ?? 0) /
-                              (action.usersJoined ?? 1)) *
-                            100
-                          }
-                        />
-                        <p className="mt-4 text-green-3 text-sm font-weight-450">
-                          {(action.usersCompleted ?? 0).toLocaleString()}{" "}
-                          members completed
-                        </p>
-                        <p className="text-zinc-400 text-sm">
-                          {(action.usersJoined ?? 0).toLocaleString()} members
-                          committed
-                        </p>
-                      </div>
-                    )}
                   </div>
-                )}
-              </div>
+
+                  {action.status === "gathering_commitments" ||
+                  action.status === "commitments_reached" ? (
+                    <div className="mt-4">
+                      <CompletedBar
+                        percentage={
+                          ((liveUserCount ?? action.usersJoined) /
+                            (action.commitmentThreshold ?? 1)) *
+                          100
+                        }
+                      />
+                      <p className="mt-4 text-green-3 text-sm font-weight-450">
+                        {(
+                          liveUserCount ?? action.usersJoined
+                        )?.toLocaleString() || 0}{" "}
+                        commitments made
+                      </p>
+                      <p className="text-zinc-400 text-sm">
+                        {(action.commitmentThreshold ?? 0).toLocaleString()}{" "}
+                        commitments needed
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mt-4">
+                      <CompletedBar
+                        percentage={
+                          ((action.usersCompleted ?? 0) /
+                            (action.usersJoined ?? 1)) *
+                          100
+                        }
+                      />
+                      <p className="mt-4 text-green-3 text-sm font-weight-450">
+                        {(action.usersCompleted ?? 0).toLocaleString()} members
+                        completed
+                      </p>
+                      <p className="text-zinc-400 text-sm">
+                        {(action.usersJoined ?? 0).toLocaleString()} members
+                        committed
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* <div className="w-full border-t border-gray-300" />
             <UserBubbleRow />

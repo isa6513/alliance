@@ -4,7 +4,7 @@ import {
   actionsGetActivityFeed,
 } from "@alliance/shared/client";
 import { useActionActivityWebSocket } from "../../lib/useActionActivityWebSocket";
-import ActivityFeedItem from "../../components/ActivityFeedItem";
+import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 
 const ActivityFeedPage = () => {
   const [initialActivities, setInitialActivities] = useState<
@@ -77,7 +77,7 @@ const ActivityFeedPage = () => {
     <div className="max-w-4xl mx-auto p-6">
       <div className="space-y-4 w-full flex flex-col justify-stretch">
         {allActivities.map((activity) => (
-          <ActivityFeedItem
+          <ActionActivityFeedItem
             key={activity.id}
             activity={activity}
             showAction={true}

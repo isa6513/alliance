@@ -1,10 +1,10 @@
 import React, {
-  ReactNode,
   CSSProperties,
-  useRef,
+  ReactNode,
   useEffect,
-  useState,
   useMemo,
+  useRef,
+  useState,
 } from "react";
 
 interface TimelineProps {
@@ -18,9 +18,9 @@ interface TimelineProps {
 
 const Timeline: React.FC<TimelineProps> = ({
   children,
-  lineWidth = 2,
+  lineWidth = 1.5,
   dotSize = 20,
-  lineColor = "#CBD5E0", // gray-300
+  lineColor = "#d4d4d8", // zinc-300
   className,
 }) => {
   const halfDot = useMemo(() => dotSize / 2 - 0.5, [dotSize]);
@@ -76,7 +76,9 @@ const Timeline: React.FC<TimelineProps> = ({
             {/* timeline dot */}
             <div
               style={{ ...dotBaseStyle }}
-              className="border-3 border-white relative bg-[#318dde] mt-[20px]"
+              className={`border-3 border-white relative ${
+                index === 0 ? "bg-green" : "bg-zinc-300"
+              } mt-[20px]`}
             >
               <div className="w-2 h-2 bg-white rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
             </div>

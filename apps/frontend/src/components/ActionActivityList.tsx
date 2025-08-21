@@ -3,7 +3,7 @@ import { ActionActivityDto } from "@alliance/shared/client";
 import { CardStyle } from "./system/Card";
 import Card from "./system/Card";
 import { useAuth } from "../lib/AuthContext";
-import ActivityFeedItem from "./ActivityFeedItem";
+import ActionActivityFeedItem from "./ActionActivityFeedItem";
 
 interface ActionActivityListProps {
   actionId: number;
@@ -58,12 +58,12 @@ const ActionActivityList = ({
   const hasMore = allActivities.length > defaultMaxActivities;
 
   return (
-    <Card style={CardStyle.White} className="p-7">
+    <Card style={CardStyle.White}>
       <div className="space-y-3 w-full">
-        <h3 className="text-lg font-semibold">Recent Activity</h3>
+        <h3 className="text-base font-semibold">Recent Activity</h3>
         <div className="flex flex-col divide-y *:py-3 -my-3">
           {displayedActivities.map((activity) => (
-            <ActivityFeedItem
+            <ActionActivityFeedItem
               key={activity.id}
               activity={activity}
               showTime={false}

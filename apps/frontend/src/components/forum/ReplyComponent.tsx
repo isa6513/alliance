@@ -1,16 +1,16 @@
-import React, { useState, useRef, useEffect } from "react";
-import { formatDistanceToNow } from "date-fns";
-import Card from "../system/Card";
 import {
   CommentDto,
   UserDto,
   forumUpdateComment,
 } from "@alliance/shared/client";
-import ReplyForm from "./ReplyForm";
+import { formatDistanceToNow } from "date-fns";
+import React, { useEffect, useRef, useState } from "react";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
-import ProfileImage from "../ProfileImage";
-import PinnedIcon from "../PinnedIcon";
 import CommentLikeButton from "../CommentLikeButton";
+import ProfileImage from "../ProfileImage";
+import PinnedIcon from "../icons/PinnedIcon";
+import Card from "../system/Card";
+import ReplyForm from "./ReplyForm";
 
 const countAllReplies = (replies: CommentDto[]): number => {
   let count = 0;
