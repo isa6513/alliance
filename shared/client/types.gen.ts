@@ -501,6 +501,7 @@ export type ClientSecretDto = {
     userToken?: string;
     savedPaymentMethodId?: string;
     savedPaymentMethodLast4?: string;
+    amount?: number;
 };
 
 export type CreatePartialProfileDto = {

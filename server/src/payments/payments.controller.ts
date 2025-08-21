@@ -25,6 +25,7 @@ import { AuthOptionalGuard } from 'src/auth/guards/authoptional.guard';
 import { CreatePartialProfileDto } from './dto/partial-profile.dto';
 import { IsNotEmpty } from 'class-validator';
 import { PaymentMethodDto } from './dto/payment-method.dto';
+import { ActionsService } from 'src/actions/actions.service';
 
 class CreatePaymentIntentDto {
   @ApiProperty()
@@ -44,13 +45,19 @@ class ClientSecretDto {
 
   @ApiPropertyOptional()
   savedPaymentMethodLast4?: string;
+
+  @ApiPropertyOptional()
+  amount?: number;
 }
 
 @Controller('payments')
 export class PaymentsController {
   private readonly stripe: Stripe;
 
-  constructor(private readonly paymentsService: PaymentsService) {
+  constructor(
+    private readonly paymentsService: PaymentsService,
+    private readonly actionsService: ActionsService,
+  ) {
     if (!process.env.STRIPE_API_KEY) {
       throw new Error('STRIPE_API_KEY must be set');
     }
@@ -80,12 +87,16 @@ export class PaymentsController {
       token = await this.paymentsService.createPaymentUserDataToken();
     }
 
+    const amount = await this.actionsService.getPaymentAmountForAction(
+      body.actionId,
+    );
+
     const paymentMethod = customer
       ? await this.paymentsService.getSavedPaymentForCustomer(customer)
       : undefined;
 
     const paymentIntent = await this.stripe.paymentIntents.create({
-      amount: 500,
+      amount: amount,
       currency: 'usd',
       automatic_payment_methods: {
         enabled: false,
@@ -114,6 +125,7 @@ export class PaymentsController {
     }
     return {
       clientSecret: paymentIntent.client_secret,
+      amount,
       userToken: token,
       ...(paymentMethod && {
         savedPaymentMethodId: paymentMethod.id,

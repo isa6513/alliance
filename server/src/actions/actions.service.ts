@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -13,7 +14,7 @@ import {
   UpdateActionActivityDto,
 } from './dto/action.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Action } from './entities/action.entity';
+import { Action, ActionTaskType } from './entities/action.entity';
 import {
   ActionEvent,
   NotificationType,
@@ -510,5 +511,16 @@ export class ActionsService {
     }
     await this.actionActivityRepository.update(id, updateActivityDto);
     return this.getActivity(id);
+  }
+
+  async getPaymentAmountForAction(id: number): Promise<number> {
+    const action = await this.findOne(id);
+    if (action.type !== ActionTaskType.Funding) {
+      throw new BadRequestException('Action is not a funding action');
+    }
+    if (!action.donationAmount) {
+      throw new BadRequestException('Action has no funding amount');
+    }
+    return action.donationAmount;
   }
 }

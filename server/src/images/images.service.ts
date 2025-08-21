@@ -54,7 +54,7 @@ export class ImagesService {
     const spliced = image.substring(image.indexOf(',') + 1);
     const imgBuffer = Buffer.from(spliced, 'base64');
     const processed = await sharp(imgBuffer)
-      .resize({ width: 200 })
+      .resize({ width: 400 })
       .webp({ effort: 3 })
       .toBuffer();
 

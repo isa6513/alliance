@@ -24,6 +24,7 @@ import { Route } from "../../../.react-router/types/src/pages/app/+types/UserPro
 import useActivities, { ActivityList } from "./useActivities";
 import { useAppLoaderData } from "../../applayout";
 import { getImageSource } from "../../lib/config";
+import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -291,7 +292,7 @@ const UserProfilePage: React.FC = () => {
                 type="text"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                className="w-full border-none focus:outline-none !text-[30px] font-bold"
+                className="w-full border-none focus:outline-none !text-[30px] font-bold font-adobe"
               />
             ) : (
               <h1 className="font-adobe">{profileUser.displayName}</h1>
@@ -301,15 +302,21 @@ const UserProfilePage: React.FC = () => {
           <div className="flex flex-row gap-5 cursor-pointer">
             <p onClick={() => setSelectedTab(ProfileTabs.Activity)}>
               <b>{completedActions.length} </b>
-              <span className="text-zinc-500">actions completed</span>
+              <span className="text-zinc-500">
+                action{completedActions.length === 1 ? "" : "s"} completed
+              </span>
             </p>
             <p onClick={() => setSelectedTab(ProfileTabs.Forum)}>
               <b>{forumPosts.length} </b>
-              <span className="text-zinc-500">posts</span>
+              <span className="text-zinc-500">
+                post{forumPosts.length === 1 ? "" : "s"}
+              </span>
             </p>
             <p onClick={() => setSelectedTab(ProfileTabs.Friends)}>
               <b>{friends.length} </b>
-              <span className="text-zinc-500">friends</span>
+              <span className="text-zinc-500">
+                friend{friends.length === 1 ? "" : "s"}
+              </span>
             </p>
           </div>
           {isEditing ? (
@@ -322,7 +329,9 @@ const UserProfilePage: React.FC = () => {
             />
           ) : (
             profileUser.profileDescription && (
-              <p className="mt-6">{profileUser.profileDescription}</p>
+              <AppMarkdownWrapper
+                markdownContent={profileUser.profileDescription}
+              />
             )
           )}
           {/* button row */}
@@ -347,7 +356,7 @@ const UserProfilePage: React.FC = () => {
               <div className="space-x-3 flex">
                 {isEditing ? (
                   <>
-                    <Button color={ButtonColor.White} onClick={handleCancel}>
+                    <Button color={ButtonColor.Light} onClick={handleCancel}>
                       Cancel
                     </Button>
                     <Button
@@ -360,7 +369,7 @@ const UserProfilePage: React.FC = () => {
                   </>
                 ) : (
                   <Button
-                    color={ButtonColor.White}
+                    color={ButtonColor.Light}
                     onClick={() => setIsEditing(true)}
                   >
                     Edit Profile

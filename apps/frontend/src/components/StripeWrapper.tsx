@@ -16,9 +16,10 @@ export interface PaymentMethodData {
 }
 
 export interface StripeWrapperContextType {
-  token: string | undefined;
-  savedPaymentMethod: PaymentMethodData | undefined;
-  clientSecret: string | undefined;
+  token?: string;
+  savedPaymentMethod?: PaymentMethodData;
+  clientSecret?: string;
+  amount?: number;
 }
 
 const StripeWrapperContext = createContext<
@@ -32,6 +33,7 @@ export interface StripeWrapperProps extends React.PropsWithChildren {
 export const StripeWrapper = ({ children, actionId }: StripeWrapperProps) => {
   const [clientSecret, setClientSecret] = useState<string | undefined>();
   const [token, setToken] = useState<string | undefined>();
+  const [amount, setAmount] = useState<number | undefined>();
   const [savedPaymentMethod, setSavedPaymentMethod] = useState<
     PaymentMethodData | undefined
   >();
@@ -48,11 +50,12 @@ export const StripeWrapper = ({ children, actionId }: StripeWrapperProps) => {
         throw new Error("No client secret");
       }
       setClientSecret(res.data.clientSecret);
+      setAmount(res.data.amount);
       if (res.data.userToken) {
         const token: string = res.data.userToken;
         setToken(token);
       }
-      if (res.data.savedPaymentMethodId) {
+      if (res.data.savedPaymentMethodId && res.data.savedPaymentMethodLast4) {
         setSavedPaymentMethod({
           stripeId: res.data.savedPaymentMethodId,
           last4: res.data.savedPaymentMethodLast4,
@@ -66,8 +69,9 @@ export const StripeWrapper = ({ children, actionId }: StripeWrapperProps) => {
       token,
       savedPaymentMethod,
       clientSecret,
+      amount,
     }),
-    [token, savedPaymentMethod, clientSecret]
+    [token, savedPaymentMethod, clientSecret, amount]
   );
 
   //   if (!clientSecret) {

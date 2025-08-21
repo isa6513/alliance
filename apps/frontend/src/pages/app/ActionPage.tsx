@@ -177,7 +177,7 @@ export default function ActionPage() {
   }, [id]);
 
   return (
-    <div className="w-full h-full bg-white">
+    <div className="w-full h-full bg-white min-h-[calc(100vh-50px)]">
       <TwoColumnSplit
         left={
           <Outlet

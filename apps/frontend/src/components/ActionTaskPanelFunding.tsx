@@ -33,7 +33,10 @@ const ActionTaskPanelFunding = ({
   const [expanded, setExpanded] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { token, savedPaymentMethod, clientSecret } = usePaymentIntentData();
+  const { token, savedPaymentMethod, clientSecret, amount } =
+    usePaymentIntentData();
+
+  console.log("amount", amount);
 
   console.log("token", token);
 
@@ -92,7 +95,13 @@ const ActionTaskPanelFunding = ({
     [stripe, elements, isAuthenticated, token]
   );
 
-  const titleText = "Complete action by giving $5";
+  const formatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
+
+  const amtText = amount ? formatter.format(amount / 100) : "unknown";
+  const titleText = `Complete action by giving ${amtText}`;
 
   const handleContributeClicked = useCallback(async () => {
     if (!savedPaymentMethod) {
@@ -128,7 +137,7 @@ const ActionTaskPanelFunding = ({
         className="flex flex-row justify-between items-center"
       >
         <div>
-          <h2 className="font-bold">{titleText}</h2>
+          <h2 className="font-bold !text-xl ml-1">{titleText}</h2>
           {savedPaymentMethod?.last4 && (
             <p className="text-sm text-gray-500">
               Paying immediately with your saved card ending in
@@ -151,7 +160,7 @@ const ActionTaskPanelFunding = ({
   return (
     <Card style={CardStyle.White} className="!px-[1px] !py-4">
       <h2 className="z-20 px-5 bg-white">{titleText}</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="mt-2">
         {!isAuthenticated ? (
           <div className="flex flex-col bg-white -mb-10 z-20 mx-4 gap-2">
             <div className="z-2 flex gap-4 mt-1 w-full">

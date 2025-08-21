@@ -180,7 +180,7 @@ const SearchBar = () => {
       <input
         type="text"
         placeholder="Search"
-        className="w-full bg-zinc-100 p-2 px-3 rounded-lg focus:outline-none"
+        className="w-full bg-zinc-100 p-2 px-4 rounded-lg focus:outline-none"
         value={search}
         onChange={onChange}
         onFocus={handleFocus}
