@@ -74,7 +74,11 @@ const UserProfilePage: React.FC = () => {
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
-  const { activities: completedActions, handleLikeActivity, updateActivity } = useActivities({
+  const {
+    activities: completedActions,
+    handleLikeActivity,
+    updateActivity,
+  } = useActivities({
     list: ActivityList.User,
     objectId: parseInt(id!),
   });
@@ -281,7 +285,7 @@ const UserProfilePage: React.FC = () => {
               className="mt-[-55px]"
             />
           )}
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-3">
             {isEditing ? (
               <input
                 type="text"
@@ -346,8 +350,8 @@ const UserProfilePage: React.FC = () => {
                     <Button color={ButtonColor.Light} onClick={handleCancel}>
                       Cancel
                     </Button>
-                    <Button 
-                      color={ButtonColor.Blue} 
+                    <Button
+                      color={ButtonColor.Blue}
                       onClick={handleSave}
                       disabled={isSavingProfile}
                     >

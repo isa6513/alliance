@@ -14,24 +14,24 @@ const FormattedActionActivityMessage = ({
   switch (activity.type) {
     case "user_joined":
       return showAction ? (
-        <p>
+        <span>
           {userName} committed to{" "}
           <span className="text-green">{activity.actionName}</span>
-        </p>
+        </span>
       ) : (
-        <p>{userName} committed to this action</p>
+        <span>{userName} committed to this action</span>
       );
     case "user_completed":
       return showAction ? (
-        <p>
+        <span>
           {userName} completed{" "}
           <span className="text-green">{activity.actionName}</span>
-        </p>
+        </span>
       ) : (
-        <p>{userName} completed this action</p>
+        <span>{userName} completed this action</span>
       );
     default:
-      return <p>Unknown activity</p>;
+      return <span>Unknown activity</span>;
   }
 };
 

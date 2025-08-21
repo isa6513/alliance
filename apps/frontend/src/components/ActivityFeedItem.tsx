@@ -68,13 +68,11 @@ const ActivityFeedItem = ({
           <div className="flex flex-row justify-between items-center">
             <div className="flex flex-row gap-x-2 hover:underline cursor-pointer">
               <div>
-                {activity.user.profilePicture !== null && (
-                  <ProfileImage
-                    pfp={activity.user.profilePicture}
-                    size="small"
-                    className="mr-2"
-                  />
-                )}
+                <ProfileImage
+                  pfp={activity.user.profilePicture}
+                  size="small"
+                  className="mr-2"
+                />
 
                 <FormattedActionActivityMessage
                   activity={activity}
