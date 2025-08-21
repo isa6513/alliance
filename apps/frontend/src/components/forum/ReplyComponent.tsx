@@ -155,7 +155,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
       {/* Content column */}
       <div className="flex-1 -mt-1">
         {/* Top row: User name and date with pin icon in top right */}
-        <div className="flex justify-between items-center ">
+        <div className="flex justify-between items-center overflow-visible h-7">
           <div className="flex items-center gap-3 text-sm text-gray-500">
             <a
               href={`/user/${reply.author.id}`}
@@ -163,7 +163,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
             >
               {reply.author.displayName}
             </a>
-            <span className="text-gray-400 text-sm">
+            <span className="text-zinc-500 text-sm">
               {formatDistanceToNow(new Date(reply.createdAt), {
                 addSuffix: true,
               })}
@@ -180,7 +180,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         </div>
 
         {/* Middle section: Reply content */}
-        <div className="mb-3">
+        <div className="mb-2">
           {!isEditing &&
             getDisplayContent(reply.content, isCollapsed, reply.deleted)}
         </div>
