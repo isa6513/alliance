@@ -130,8 +130,6 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
     setIsEditing(false);
   };
 
-  console.log(reply.author);
-
   const handleStartEdit = () => {
     setEditContent(reply.content);
     setIsEditing(true);
@@ -143,6 +141,11 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
       {isHighlighted && (
         <div className="absolute -left-4 top-0 bottom-0 w-[3px] bg-blue-500 rounded transition-all duration-1000" />
       )}
+      <ProfileImage
+        pfp={reply.author.profilePicture}
+        size="small"
+        className="mr-1"
+      />
       <div className="flex-1 min-w-0">
         {!isEditing &&
           getDisplayContent(reply.content, isCollapsed, reply.deleted)}
@@ -176,21 +179,9 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         ) : (
           <div className="mt-2 flex justify-between items-center text-sm text-gray-500">
             <div className="gap-x-4 flex">
-              {reply.author.displayName !== undefined && (
-                <p>
-                  <ProfileImage
-                    pfp={reply.author.profilePicture}
-                    size="small"
-                    className="mr-2"
-                  />
-                  <a
-                    href={`/user/${reply.author.id}`}
-                    className="hover:underline"
-                  >
-                    {reply.author.displayName}
-                  </a>
-                </p>
-              )}
+              <a href={`/user/${reply.author.id}`} className="hover:underline">
+                {reply.author.displayName}
+              </a>
               <span>
                 {formatDistanceToNow(new Date(reply.createdAt), {
                   addSuffix: true,

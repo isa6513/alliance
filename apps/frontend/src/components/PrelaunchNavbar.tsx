@@ -54,23 +54,10 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
       </h1>
       <div className="flex flex-row items-center gap-x-10 text-lg">
         {links.map((link) => (
-          // link == NavbarPage.Guide ? (
-          //   <Link to={destinations[link]} key={link}>
-          //     <p
-          //       className={`${
-          //         transparent
-          //           ? " hover:bg-white hover:text-black"
-          //           : " hover:bg-white hover:text-black"
-          //       } rounded-md py-1 px-4 whitespace-nowrap `}
-          //     >
-          //       {link}
-          //     </p>
-          //   </Link>
-          // ) : (
           <Link
             to={destinations[link]}
             key={link}
-            className="hover:underline whitespace-nowrap"
+            className="hover:underline whitespace-nowrap font-ibm"
           >
             {link}
           </Link>
