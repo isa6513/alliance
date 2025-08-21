@@ -9,6 +9,7 @@ import Comments from "../../components/Comments";
 import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
 import { setRevalidate } from "../../applayout";
 import ProfileImage from "../../components/ProfileImage";
+import PinnedIcon from "../../components/PinnedIcon";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
@@ -109,7 +110,10 @@ const PostDetailPage: React.FC = () => {
           </Link>
           <Card className="p-6 mb-3" style={CardStyle.White}>
             <div className="flex justify-between items-start">
-              <h1 className="text-2xl font-semibold">{post.title}</h1>
+              <div className="flex flex-row gap-x-2 items-center justify-between w-full">
+                <h1 className="text-2xl font-semibold">{post.title}</h1>
+                {post.pinned && <PinnedIcon size="large" />}
+              </div>
               {post.author.id === user?.id && (
                 <div className="space-x-2">
                   <Link

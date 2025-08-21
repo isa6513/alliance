@@ -60,6 +60,11 @@ export class Post {
   @Type(() => Date)
   createdAt: Date;
 
+  @Column({ default: false })
+  @ApiProperty()
+  @Allow()
+  pinned: boolean;
+
   @UpdateDateColumn()
   @ApiProperty()
   @Allow()

@@ -3,6 +3,8 @@ import { PostDto } from "@alliance/shared/client";
 import { useNavigate } from "react-router";
 import { formatTime } from "../lib/utils";
 import ProfileImage from "./ProfileImage";
+import pinIcon from "../assets/noun-pin-2995482.svg";
+import PinnedIcon from "./PinnedIcon";
 
 export interface ForumListPostProps {
   post: PostDto;
@@ -31,6 +33,7 @@ const ForumListPost = ({ post, showAction = true }: ForumListPostProps) => {
     >
       <div className="flex flex-row justify-between gap-2">
         <p className="font-medium text-base">{post.title}</p>
+        {post.pinned && <PinnedIcon size="small" />}
       </div>
       <div className="flex justify-between text-sm text-gray-500">
         <div className="flex flex-row gap-x-2 items-center">

@@ -14,6 +14,12 @@ const ForumPage: React.FC = () => {
     navigate("/forum/edit/new");
   }, [navigate]);
 
+  const sorted = posts.sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return 0;
+  });
+
   return (
     <div className="flex flex-col max-w-[800px] mx-auto p-3 pt-8">
       <div className="gap-y-2 flex flex-col">
@@ -25,7 +31,7 @@ const ForumPage: React.FC = () => {
             Create a new thread...
           </div>
         )}
-        {posts.map((post) => (
+        {sorted.map((post) => (
           <ForumListPost key={post.id} post={post} />
         ))}
       </div>

@@ -451,6 +451,7 @@ export type PostDto = {
     authorId: number;
     actionId?: number;
     createdAt: string;
+    pinned: boolean;
     updatedAt: string;
     action?: ActionDto;
     author: ProfileDto;

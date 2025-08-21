@@ -17,6 +17,7 @@ export class PostDto extends PickType(Post, [
   'authorId',
   'createdAt',
   'updatedAt',
+  'pinned',
 ]) {
   //redefine to use compacted dto types
   @ApiPropertyOptional({ type: () => ActionDto })
