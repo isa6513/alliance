@@ -104,7 +104,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   return (
     <div>
       <Card
-        style={CardStyle.WhiteFlatBottom}
+        style={commitActivity ? CardStyle.WhiteFlatBottom : CardStyle.White}
         className={` transition-all duration-500 w-full relative
          ${state === TaskCardState.Minified ? "pb-4" : ""}
           ${state === TaskCardState.Closed ? "py-0 border-0" : ""}`}
