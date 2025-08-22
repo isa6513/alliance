@@ -5,8 +5,6 @@ import { CardStyle } from "./system/Card";
 import { ActionDto } from "@alliance/shared/client";
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import { useActionCount } from "../lib/useActionWebSocket";
-import { formatTime } from "../lib/utils";
-import Comments from "./Comments";
 import CompletedBar from "./CompletedBar";
 import Button, { ButtonColor } from "./system/Button";
 import Card from "./system/Card";
@@ -104,7 +102,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   return (
     <div>
       <Card
-        style={commitActivity ? CardStyle.WhiteFlatBottom : CardStyle.White}
+        style={CardStyle.White}
         className={` transition-all duration-500 w-full relative
          ${state === TaskCardState.Minified ? "pb-4" : ""}
           ${state === TaskCardState.Closed ? "py-0 border-0" : ""}`}
@@ -113,7 +111,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         <div className="flex flex-row items-start gap-x-8">
           <div className="flex-1 flex flex-col">
             <p className="font-medium text-black">{action.name}</p>
-            <p className="text-zinc-400">{action.shortDescription}</p>
+            <p className="text-zinc-500">{action.shortDescription}</p>
             {/* {action.type === "Funding" && <Badge>$5</Badge>}
           {action.type === "Activity" && !!action.timeEstimate && (
             <Badge>takes {action.timeEstimate}</Badge>
@@ -168,7 +166,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         )}
 
         {action.commitmentThreshold && (
-          <div className="mt-4">
+          <div className="mt-6">
             <div className="flex flex-row items-center justify-between w-full gap-x-2">
               <p className="text-zinc-500 text-base mb-1">
                 {liveUserCount ?? 0} / {action.usersJoined} completed
@@ -192,7 +190,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         )}
       </Card>
 
-      {commitActivity && (
+      {/* {commitActivity && (
         <div className="flex flex-col border-x border-b rounded-b-md border-zinc-300 bg-zinc-50 p-4">
           <div className="flex flex-row gap-y-2 bg-zinc-50 text-sm items-center gap-x-4">
             <p className="text-zinc-600 flex-1">
@@ -228,7 +226,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
             </div>
           )}
         </div>
-      )}
+      )} */}
     </div>
   );
 };

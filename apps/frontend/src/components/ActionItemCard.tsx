@@ -5,8 +5,6 @@ import {
 } from "@alliance/shared/client/types.gen";
 import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router";
-import { formatTime } from "../lib/utils";
-import Comments from "./Comments";
 import CompletedBar from "./CompletedBar";
 import Button, { ButtonColor } from "./system/Button";
 import Card, { CardStyle } from "./system/Card";
@@ -54,7 +52,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
     <div className={`relative ${className}`}>
       <Card
         className="block overflow-hidden"
-        style={activity ? CardStyle.WhiteFlatBottom : CardStyle.White}
+        style={CardStyle.White}
         onClick={goToActionPage}
       >
         <div className="flex flex-row items-start gap-x-8">
@@ -99,7 +97,8 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
           </div>
         )}
       </Card>
-      {activity && (
+
+      {/* {activity && (
         <div className="flex flex-col border-x border-b rounded-b-md border-zinc-300 bg-zinc-50 p-4">
           <div className="flex flex-row gap-y-2 bg-zinc-50 text-sm items-center gap-x-4">
             <p className="text-zinc-600 flex-1">
@@ -125,7 +124,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
             </div>
           )}
         </div>
-      )}
+      )} */}
     </div>
   );
 };
