@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { ActionActivityDto } from "@alliance/shared/client";
-import { CardStyle } from "./system/Card";
-import Card from "./system/Card";
+import { useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import ActionActivityFeedItem from "./ActionActivityFeedItem";
+import Card, { CardStyle } from "./system/Card";
 
 interface ActionActivityListProps {
   actionId: number;
@@ -21,8 +20,7 @@ const ActionActivityList = ({
   const [showAll, setShowAll] = useState(false);
   const { user } = useAuth();
 
-  // Sort activities by creation date
-  const allActivities = [...activities].sort(
+  const allActivities = activities.sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 

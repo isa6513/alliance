@@ -84,7 +84,6 @@ const ForumListPost = ({
             }
           )}`}
           user={post.author}
-          titleIsLink={false}
         />
       </div>
     );

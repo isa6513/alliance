@@ -5,7 +5,6 @@ export interface ActivityFeedItem {
   title: string;
   content: string;
   user: ProfileDto;
-  titleIsLink?: boolean;
   titleLink?: string;
   showTitle?: boolean;
 }
@@ -14,7 +13,6 @@ const ActivityFeedItem = ({
   title,
   content,
   user,
-  titleIsLink = true,
   titleLink,
   showTitle = true,
 }: ActivityFeedItem) => {
@@ -23,25 +21,19 @@ const ActivityFeedItem = ({
       <a href={`/user/${user.id}`} className="flex-shrink-0">
         <ProfileImage pfp={user.profilePicture} size="small" />
       </a>
-      <div className="text-sm">
+      <div className="">
         {showTitle && (
           <>
-            {titleIsLink ? (
-              <>
-                {titleLink ? (
-                  <a href={titleLink} className="text-green hover:underline">
-                    {title}
-                  </a>
-                ) : (
-                  <p className="text-green hover:underline">{title}</p>
-                )}
-              </>
+            {titleLink ? (
+              <a href={titleLink} className="text-green hover:underline">
+                {title}
+              </a>
             ) : (
               <p className="text-black">{title}</p>
             )}
           </>
         )}
-        <p className="text-zinc-500">{content}</p>
+        <p className="text-zinc-500 text-sm">{content}</p>
       </div>
     </div>
   );

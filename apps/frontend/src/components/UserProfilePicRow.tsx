@@ -2,11 +2,19 @@ import { ProfileDto } from "@alliance/shared/client";
 import ProfileImage from "./ProfileImage";
 
 const UserProfilePicRow = ({ users }: { users: ProfileDto[] }) => {
+  console.log(users);
+  const unique = users.filter(function (item, pos, self) {
+    return self.findIndex((t) => t.id === item.id) === pos;
+  });
+  console.log(unique);
   return (
     <div className="flex flex-row items-center gap-x-1">
-      {users.slice(0, 5).map((user) => (
+      {unique.slice(0, 5).map((user) => (
         <a
           href={`/user/${user.id}`}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
           key={user.id}
           className="flex items-center"
         >
