@@ -18,12 +18,12 @@ interface TimelineProps {
 
 const Timeline: React.FC<TimelineProps> = ({
   children,
-  lineWidth = 1.5,
-  dotSize = 20,
+  lineWidth = 2,
+  dotSize = 15,
   lineColor = "#d4d4d8", // zinc-300
   className,
 }) => {
-  const halfDot = useMemo(() => dotSize / 2 - 0.5, [dotSize]);
+  const halfDot = useMemo(() => dotSize / 2 + 3, [dotSize]);
 
   const bottomElementRef = useRef<HTMLLIElement>(null);
 
@@ -53,7 +53,7 @@ const Timeline: React.FC<TimelineProps> = ({
     aspectRatio: 1,
     borderRadius: "50%",
     position: "absolute",
-    left: "-10px",
+    left: `-${dotSize / 2}px`,
     top: 0,
     bottom: 0,
   };
@@ -76,12 +76,10 @@ const Timeline: React.FC<TimelineProps> = ({
             {/* timeline dot */}
             <div
               style={{ ...dotBaseStyle }}
-              className={`border-3 border-white relative ${
-                index === 0 ? "bg-green" : "bg-zinc-300"
-              } mt-[20px]`}
-            >
-              <div className="w-2 h-2 bg-white rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-            </div>
+              className={`border-3 relative ${
+                index === 0 ? "border-green" : "border-zinc-300"
+              } mt-[20px] flex items-center justify-center bg-white`}
+            ></div>
             {/* content */}
             <div className="pl-4">{child}</div>
           </li>

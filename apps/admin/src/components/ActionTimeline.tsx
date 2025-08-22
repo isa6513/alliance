@@ -1,15 +1,15 @@
-import React, {
-  useMemo,
-  useState,
-  useCallback,
-  useEffect,
-  useRef,
-} from "react";
 import {
   ActionDto,
   ActionEventDto,
   ActionStatus,
 } from "@alliance/shared/client";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import ActionTimelineBar from "./ActionTimelineBar";
 
 interface ActionTimelineProps {
@@ -333,7 +333,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
                       }}
                       title={`Now - ${currentDate.toLocaleString()}`}
                     >
-                      <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-inherit rotate-45"></div>
+                      <div className="absolute left-1/2 transform -translate-x-1/2 w-2 h-2 bg-inherit rotate-45"></div>
                     </div>
                   );
                 }

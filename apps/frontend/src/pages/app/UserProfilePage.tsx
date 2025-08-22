@@ -265,7 +265,7 @@ const UserProfilePage: React.FC = () => {
                 }
                 className="mt-[-55px] w-29 h-29 rounded-md object-cover"
               />
-              <div className="absolute w-29 h-29 top-[-55px] bg-zinc-50 border border-dashed border-zinc-300 rounded-md hover:bg-zinc-100 transition-opacity duration-100">
+              <div className="absolute w-29 h-29 top-[-55px] bg-zinc-50/50 border border-dashed border-zinc-300 rounded-md hover:bg-zinc-100 transition-colors duration-100">
                 <label className="cursor-pointer text-zinc-400 underline text-sm absolute m-auto text-center w-full h-full flex items-center justify-center">
                   <input
                     type="file"

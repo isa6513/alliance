@@ -69,11 +69,7 @@ const ActionActivityFeedItem = ({
               })}`}
               user={activity.user}
               showTitle={showAction}
-              titleLink={
-                activity.type === "user_joined"
-                  ? `/actions/${activity.actionId}`
-                  : undefined
-              }
+              titleLink={`/actions/${activity.actionId}`}
             />
           </div>
 
