@@ -51,6 +51,7 @@ class SocketIoAdapter extends IoAdapter {
 
 async function bootstrap() {
   let client: PostHog | null = null;
+
   if (process.env.NODE_ENV === 'production') {
     client = new PostHog(process.env.POSTHOG_KEY!, {
       host: 'https://us.i.posthog.com',
@@ -70,7 +71,6 @@ async function bootstrap() {
     new ValidationPipe({ whitelist: true, forbidUnknownValues: true }),
   );
   app.use(cookieParser());
-  //   app.enableCors();
   app.enableCors({
     origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

@@ -18,8 +18,7 @@ export class PosthogExceptionFilter implements ExceptionFilter {
     const status =
       exception instanceof HttpException ? exception.getStatus() : 500;
 
-    this.posthog.capture({
-      distinctId: 'server',
+    this.posthog.captureException(exception, 'server', {
       event: '$exception',
       properties: {
         message:
