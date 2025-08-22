@@ -28,11 +28,9 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   id,
   shortDescription,
   className,
-  status,
   joinedCount,
   neededCount,
   friendCommitmentActivities = [],
-  userRelation,
   activity,
 }) => {
   const navigate = useNavigate();

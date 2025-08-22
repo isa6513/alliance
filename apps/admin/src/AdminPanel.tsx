@@ -1,21 +1,21 @@
-import React, { useCallback, useEffect, useState } from "react";
-import Card, { CardStyle } from "./Card";
-import { Link, useSearchParams } from "react-router-dom";
 import {
   ActionDto,
-  actionsFindAllWithDrafts,
-  actionsCreate,
   actionsAddEvent,
   actionsClearDb,
+  actionsCreate,
+  actionsFindAllWithDrafts,
   actionsSetTestRelations,
 } from "@alliance/shared/client";
-import { useAuth } from "./AuthContext";
+import React, { useCallback, useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import ActionDashboard from "./ActionDashboard";
+import { useAuth } from "./AuthContext";
+import Card, { CardStyle } from "./Card";
 import ActionProgressBar from "./components/ActionProgressBar";
 import ActionTimeline from "./components/ActionTimeline";
 import ConfirmDialog from "./components/ConfirmDialog";
-import { testActions } from "./testData";
 import UserList from "./components/UserList";
+import { testActions } from "./testData";
 
 const AdminPanel: React.FC = () => {
   const [actions, setActions] = useState<ActionDto[]>([]);
@@ -97,6 +97,10 @@ const AdminPanel: React.FC = () => {
       } else {
         params.set("view", mode);
       }
+      if (mode === "users") {
+        params.delete("tab");
+        params.delete("action");
+      }
       setSearchParams(params);
     },
     [searchParams, setSearchParams]
@@ -164,6 +168,12 @@ const AdminPanel: React.FC = () => {
               className="w-full bg-blue-100 text-center hover:bg-blue-200/60 border border-blue-400 text-black px-4 py-2 rounded-md text-sm font-medium"
             >
               Database Viewer
+            </Link>
+            <Link
+              to="/form-builder"
+              className="w-full bg-green-100 text-center hover:bg-green-200/60 border border-green-400 text-black px-4 py-2 rounded-md text-sm font-medium"
+            >
+              Form Builder
             </Link>
             <button
               onClick={() => handleViewModeChange("users")}

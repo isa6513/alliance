@@ -1,28 +1,27 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ActionsModule } from './actions/actions.module';
-import { UserService } from './user/user.service';
-import { CommuniquesModule } from './communiques/communiques.module';
-import { ImagesModule } from './images/images.module';
-import { MulterModule } from '@nestjs/platform-express';
-import { ForumModule } from './forum/forum.module';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { NotifsModule } from './notifs/notifs.module';
-import { GeoModule } from './geo/geo.module';
-import { MailModule } from './mail/mail.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
-import { connectionOptions } from './datasources/dataSource';
-import { PaymentsModule } from './payments/payments.module';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { MulterModule } from '@nestjs/platform-express';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import * as multer from 'multer';
+import { ActionsModule } from './actions/actions.module';
 import { AdminViewerModule } from './admin-viewer/admin-viewer.module';
+import { AppController } from './app.controller';
+import { AuthModule } from './auth/auth.module';
+import { connectionOptions } from './datasources/dataSource';
+import { ForumModule } from './forum/forum.module';
+import { GeoModule } from './geo/geo.module';
+import { ImagesModule } from './images/images.module';
+import { MailModule } from './mail/mail.module';
+import { NotifsModule } from './notifs/notifs.module';
+import { PaymentsModule } from './payments/payments.module';
 import { S3Module } from './s3/s3.module';
 import { SearchModule } from './search/search.module';
 import { TasksModule } from './tasks/tasks.module';
-import * as multer from 'multer';
+import { UserModule } from './user/user.module';
+import { UserService } from './user/user.service';
 
 @Module({
   imports: [
@@ -56,7 +55,6 @@ import * as multer from 'multer';
     UserModule,
     TypeOrmModule.forRoot(connectionOptions()),
     ActionsModule,
-    CommuniquesModule,
     ImagesModule,
     ForumModule,
     NotifsModule,

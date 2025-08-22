@@ -1,27 +1,25 @@
 /* eslint-disable @darraghor/nestjs-typed/all-properties-have-explicit-defined */
 /* eslint-disable @darraghor/nestjs-typed/all-properties-are-whitelisted */
+import { ApiProperty } from '@nestjs/swagger';
 import * as bcrypt from 'bcryptjs';
+import { Type } from 'class-transformer';
+import { Allow, IsNotEmpty, IsOptional } from 'class-validator';
+import { ActionActivity } from 'src/actions/entities/action-activity.entity';
+import { City } from 'src/geo/city.entity';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   BeforeInsert,
   BeforeUpdate,
-  OneToMany,
-  ManyToMany,
+  Column,
+  CreateDateColumn,
+  Entity,
   ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
-import { Communique } from '../communiques/entities/communique.entity';
-import { Allow, IsNotEmpty, IsOptional } from 'class-validator';
-import { FriendStatus } from './friend.entity';
-import { Friend } from './friend.entity';
 import { Notification } from '../notifs/entities/notification.entity';
-import { City } from 'src/geo/city.entity';
-import { Type } from 'class-transformer';
-import { ActionActivity } from 'src/actions/entities/action-activity.entity';
+import { Friend, FriendStatus } from './friend.entity';
 
 @Entity()
 export class User {
@@ -61,9 +59,6 @@ export class User {
   @Column({ nullable: true })
   @ApiProperty({ nullable: true })
   profileDescription: string;
-
-  @ManyToMany(() => Communique, (communique) => communique.usersRead)
-  communiquesRead: Communique[];
 
   @OneToMany(() => ActionActivity, (activity) => activity.user)
   activities: ActionActivity[];
@@ -152,4 +147,7 @@ export class User {
   @ApiProperty()
   @Allow()
   anonymous: boolean;
+
+  @OneToMany(() => FormResponse, (response) => response.user)
+  formResponses: FormResponse[];
 }

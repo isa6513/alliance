@@ -6,6 +6,7 @@ import DatabaseViewer from "./DatabaseViewer";
 import { getApiUrl } from "./config";
 import { client } from "@alliance/shared/client/client.gen";
 import AdminPanel from "./AdminPanel";
+import { FormBuilderTest } from "./FormBuilderTest";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -61,6 +62,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <DatabaseViewer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/form-builder"
+          element={
+            <ProtectedRoute>
+              <FormBuilderTest />
             </ProtectedRoute>
           }
         />

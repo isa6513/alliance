@@ -1,10 +1,10 @@
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
-import { Action } from '../entities/action.entity';
-import { ActionEvent, ActionStatus } from '../entities/action-event.entity';
-import { ActionActivity } from '../entities/action-activity.entity';
-import { ProfileDto } from 'src/user/user.dto';
 import { CommentDto } from 'src/forum/dto/comment.dto';
+import { ProfileDto } from 'src/user/user.dto';
 import { UserActionRelation } from '../actions.service';
+import { ActionActivity } from '../entities/action-activity.entity';
+import { ActionEvent, ActionStatus } from '../entities/action-event.entity';
+import { Action } from '../entities/action.entity';
 
 export class ActionEventDto extends PickType(ActionEvent, [
   'id',
@@ -58,6 +58,8 @@ export class CreateActionDto extends OmitType(ActionDto, [
   'activities',
   'usersCompleted',
   'status',
+  'events',
+  'taskForm',
 ]) {}
 
 export class UpdateActionDto extends PartialType(CreateActionDto) {}

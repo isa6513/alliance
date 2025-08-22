@@ -26,10 +26,6 @@ export default [
           route("activity/:activityId", "components/ActionActivityDetail.tsx"),
         ]),
       ]),
-      ...prefix("/announcements", [
-        route("/", "pages/app/AnnouncementListPage.tsx"),
-        route(":id", "pages/app/AnnouncementPage.tsx"),
-      ]),
       route("/issues/:id", "pages/app/IssuePage.tsx"),
       route("/profile", "pages/app/ProfileRedirect.tsx"),
       route("/feed", "pages/app/ActivityFeedPage.tsx"),

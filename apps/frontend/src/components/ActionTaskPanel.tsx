@@ -1,14 +1,15 @@
 import { ActionActivityDto, UserActionRelation } from "@alliance/shared/client";
-import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
-import { StripeWrapper } from "./StripeWrapper";
-import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
-import Card, { CardStyle } from "./system/Card";
-import { useActionLoaderData } from "../pages/app/ActionPage";
 import { Route } from "../../.react-router/types/src/components/+types/ActionTaskPanel";
+import { useAuth } from "../lib/AuthContext";
+import { useActionLoaderData } from "../pages/app/ActionPage";
 import ActionCommitButton from "./ActionCommitButton";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
-import { useAuth } from "../lib/AuthContext";
+import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
+import ActionTaskPanelForm from "./ActionTaskPanelForm";
+import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
+import { StripeWrapper } from "./StripeWrapper";
+import Card, { CardStyle } from "./system/Card";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
@@ -89,7 +90,15 @@ const ActionTaskPanel = () => {
         </StripeWrapper>
       );
     }
-    if (action.type === "Activity" || action.type === "Ongoing") {
+    if (action.type === "Activity" && action.taskForm) {
+      return (
+        <ActionTaskPanelForm
+          actionTaskForm={action.taskForm}
+          onCompleteAction={handleCompleteAction}
+        />
+      );
+    }
+    if (action.type === "Ongoing") {
       return (
         <ActionTaskPanelActivity
           action={action}

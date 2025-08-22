@@ -124,6 +124,16 @@ export type ActionActivityType = 'user_joined' | 'user_completed';
  */
 export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
 
+export type Form = {
+    id: number;
+    title: string;
+    schema: {
+        [key: string]: unknown;
+    };
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type ActionActivity = {
     id: number;
     /**
@@ -226,6 +236,10 @@ export type ActionDto = {
      * Type of the action
      */
     type: ActionTaskType;
+    /**
+     * Form associated with the action
+     */
+    taskForm?: Form;
     /**
      * Number of users who have joined the action
      */
@@ -412,32 +426,6 @@ export type CreateCommentDto = {
 export type UpdateActionActivityDto = {
     description?: string;
     attachments?: Array<string>;
-};
-
-export type CreateCommuniqueDto = {
-    title: string;
-    bodyText: string;
-    headerImage: string | null;
-    dateCreated: string;
-};
-
-export type CommuniqueDto = {
-    id: number;
-    title: string;
-    bodyText: string;
-    headerImage: string | null;
-    dateCreated: string;
-};
-
-export type UpdateCommuniqueDto = {
-    title?: string;
-    bodyText?: string;
-    headerImage?: string | null;
-    dateCreated?: string;
-};
-
-export type ReadResultDto = {
-    read: boolean;
 };
 
 export type CreatePostDto = {
@@ -669,6 +657,25 @@ export type SearchItemDto = {
     type: SearchItemType;
 };
 
+export type SubmitFormDto = {
+    [key: string]: unknown;
+};
+
+export type CreateFormDto = {
+    title: string;
+    schema: {
+        [key: string]: unknown;
+    };
+};
+
+export type FormDto = {
+    id: number;
+    title: string;
+    schema: {
+        [key: string]: unknown;
+    };
+};
+
 export type AppHealthCheckData = {
     body?: never;
     path?: never;
@@ -681,6 +688,19 @@ export type AppHealthCheckResponses = {
 };
 
 export type AppHealthCheckResponse = AppHealthCheckResponses[keyof AppHealthCheckResponses];
+
+export type AppTestErrorData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/test-error';
+};
+
+export type AppTestErrorResponses = {
+    200: string;
+};
+
+export type AppTestErrorResponse = AppTestErrorResponses[keyof AppTestErrorResponses];
 
 export type AuthLoginData = {
     body: SignInDto;
@@ -1448,105 +1468,6 @@ export type ActionsUpdateActivityResponses = {
 
 export type ActionsUpdateActivityResponse = ActionsUpdateActivityResponses[keyof ActionsUpdateActivityResponses];
 
-export type CommuniquesFindAllData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/communiques';
-};
-
-export type CommuniquesFindAllResponses = {
-    200: Array<CommuniqueDto>;
-};
-
-export type CommuniquesFindAllResponse = CommuniquesFindAllResponses[keyof CommuniquesFindAllResponses];
-
-export type CommuniquesCreateData = {
-    body: CreateCommuniqueDto;
-    path?: never;
-    query?: never;
-    url: '/communiques';
-};
-
-export type CommuniquesCreateResponses = {
-    201: CreateCommuniqueDto;
-};
-
-export type CommuniquesCreateResponse = CommuniquesCreateResponses[keyof CommuniquesCreateResponses];
-
-export type CommuniquesRemoveData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/communiques/{id}';
-};
-
-export type CommuniquesRemoveResponses = {
-    200: boolean;
-};
-
-export type CommuniquesRemoveResponse = CommuniquesRemoveResponses[keyof CommuniquesRemoveResponses];
-
-export type CommuniquesFindOneData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/communiques/{id}';
-};
-
-export type CommuniquesFindOneResponses = {
-    200: CommuniqueDto;
-};
-
-export type CommuniquesFindOneResponse = CommuniquesFindOneResponses[keyof CommuniquesFindOneResponses];
-
-export type CommuniquesUpdateData = {
-    body: UpdateCommuniqueDto;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/communiques/{id}';
-};
-
-export type CommuniquesUpdateResponses = {
-    200: CommuniqueDto;
-};
-
-export type CommuniquesUpdateResponse = CommuniquesUpdateResponses[keyof CommuniquesUpdateResponses];
-
-export type CommuniquesGetReadData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/communiques/{id}/read';
-};
-
-export type CommuniquesGetReadResponses = {
-    200: ReadResultDto;
-};
-
-export type CommuniquesGetReadResponse = CommuniquesGetReadResponses[keyof CommuniquesGetReadResponses];
-
-export type CommuniquesReadData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/communiques/{id}/read';
-};
-
-export type CommuniquesReadResponses = {
-    200: unknown;
-};
-
 export type ForumFindAllPostsData = {
     body?: never;
     path?: never;
@@ -2054,6 +1975,58 @@ export type SearchSaveSelectedData = {
 };
 
 export type SearchSaveSelectedResponses = {
+    200: unknown;
+};
+
+export type TasksSubmitFormData = {
+    body: SubmitFormDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/tasks/submitForm/{id}';
+};
+
+export type TasksSubmitFormResponses = {
+    200: unknown;
+};
+
+export type TasksCreateFormData = {
+    body: CreateFormDto;
+    path?: never;
+    query?: never;
+    url: '/tasks/createForm';
+};
+
+export type TasksCreateFormResponses = {
+    200: unknown;
+};
+
+export type TasksGetFormData = {
+    body?: never;
+    path: {
+        formId: string;
+    };
+    query?: never;
+    url: '/tasks/{formId}';
+};
+
+export type TasksGetFormResponses = {
+    200: FormDto;
+};
+
+export type TasksGetFormResponse = TasksGetFormResponses[keyof TasksGetFormResponses];
+
+export type TasksUpdateFormData = {
+    body: CreateFormDto;
+    path: {
+        formId: string;
+    };
+    query?: never;
+    url: '/tasks/updateForm/{formId}';
+};
+
+export type TasksUpdateFormResponses = {
     200: unknown;
 };
 

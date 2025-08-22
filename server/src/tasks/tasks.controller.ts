@@ -1,7 +1,54 @@
-import { Controller } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiOkResponse } from '@nestjs/swagger';
+import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
+import { CreateFormDto, FormDto, SubmitFormDto } from './form.dto';
 import { TasksService } from './tasks.service';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
+
+  @Post('submitForm/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async submitForm(
+    @Request() req: JwtRequest,
+    @Param('id') id: string,
+    @Body() body: SubmitFormDto,
+  ) {
+    return this.tasksService.submitForm(+id, req.user.sub, body);
+  }
+
+  @Post('createForm')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async createForm(@Body() body: CreateFormDto) {
+    return this.tasksService.createForm(body);
+  }
+
+  @Get(':formId')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: FormDto })
+  async getForm(@Param('formId') formId: string) {
+    return this.tasksService.getForm(+formId);
+  }
+
+  @Put('updateForm/:formId')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async updateForm(
+    @Param('formId') formId: string,
+    @Body() body: CreateFormDto,
+  ) {
+    return this.tasksService.updateForm(+formId, body);
+  }
 }

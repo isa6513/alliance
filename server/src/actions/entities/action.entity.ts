@@ -1,16 +1,18 @@
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  OneToMany,
-  UpdateDateColumn,
-} from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { Allow, IsArray, IsNotEmpty, IsOptional } from 'class-validator';
-import { ActionEvent, ActionStatus } from './action-event.entity';
+import { Form } from 'src/tasks/entities/form.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { ActionActivity, ActionActivityType } from './action-activity.entity';
+import { ActionEvent, ActionStatus } from './action-event.entity';
 
 export enum ActionTaskType {
   Funding = 'Funding', //giving money to a particular cause
@@ -95,6 +97,12 @@ export class Action {
   })
   @IsNotEmpty()
   type: ActionTaskType;
+
+  @OneToOne(() => Form, { nullable: true })
+  @ApiPropertyOptional({ description: 'Form associated with the action' })
+  @IsOptional()
+  @Type(() => Form)
+  taskForm?: Form;
 
   @CreateDateColumn()
   @ApiProperty({ description: 'Timestamp when the action was created' })
