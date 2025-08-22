@@ -1,13 +1,4 @@
 // AuthProvider.tsx
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  memo,
-} from "react";
 import {
   authLogin,
   authLogout,
@@ -15,10 +6,19 @@ import {
   authRefreshTokens,
   UserDto,
 } from "@alliance/shared/client";
+import React, {
+  createContext,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-import { testAuthUser } from "../stories/testData";
-import { setRevalidate } from "../applayout";
 import posthog from "posthog-js";
+import { setRevalidate } from "../applayout";
+import { testAuthUser } from "../stories/testData";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -37,7 +37,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
 
     useEffect(() => {
       if (user && import.meta.env.PROD) {
-        console.log("identifying user");
         posthog.identify(user.id.toString(), {
           email: user.email,
           name: user.name,

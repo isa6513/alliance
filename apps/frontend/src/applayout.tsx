@@ -1,14 +1,4 @@
 import {
-  Outlet,
-  ShouldRevalidateFunctionArgs,
-  useNavigate,
-  useNavigation,
-  useRouteLoaderData,
-} from "react-router";
-import { useAuth } from "./lib/AuthContext";
-import NavbarHorizontal from "./components/NavbarHorizontal";
-import { useEffect } from "react";
-import {
   ActionActivityDto,
   ActionDto,
   actionsFindAll,
@@ -19,6 +9,16 @@ import {
   UserActionRelation,
   userMyProfile,
 } from "@alliance/shared/client";
+import { useEffect } from "react";
+import {
+  Outlet,
+  ShouldRevalidateFunctionArgs,
+  useNavigate,
+  useNavigation,
+  useRouteLoaderData,
+} from "react-router";
+import NavbarHorizontal from "./components/NavbarHorizontal";
+import { useAuth } from "./lib/AuthContext";
 
 export interface RouteMatch {
   data: unknown;
@@ -62,11 +62,19 @@ export async function clientLoader() {
       actionToRelationMap.set(action.id, "none");
     }
   }
-  activityList.forEach((activity) => {
-    actionToRelationMap.set(
-      activity.actionId,
-      activity.type === "user_joined" ? "joined" : "completed"
-    );
+  const completionActivities = activityList.filter(
+    (activity) => activity.type === "user_completed"
+  );
+  const joinActivities = activityList.filter(
+    (activity) => activity.type === "user_joined"
+  );
+
+  joinActivities.forEach((activity) => {
+    actionToRelationMap.set(activity.actionId, "joined");
+  });
+
+  completionActivities.forEach((activity) => {
+    actionToRelationMap.set(activity.actionId, "completed");
   });
 
   const activitiesForAction = new Map<number, ActivitiesForAction>();
