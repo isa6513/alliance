@@ -1,13 +1,15 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { useContainer } from 'class-validator';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
-import * as bodyParser from 'body-parser';
+import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as bodyParser from 'body-parser';
+import { useContainer } from 'class-validator';
+import * as cookieParser from 'cookie-parser';
+import { PostHog, setupExpressErrorHandler } from 'posthog-node';
 import { ServerOptions } from 'socket.io';
+import { AppModule } from './app.module';
+import { PosthogExceptionFilter } from './posthog.filter';
 
 function validateEnv() {
   const requiredVars = [
@@ -48,6 +50,14 @@ class SocketIoAdapter extends IoAdapter {
 }
 
 async function bootstrap() {
+  let client: PostHog | null = null;
+  if (process.env.NODE_ENV === 'production') {
+    client = new PostHog(process.env.POSTHOG_KEY!, {
+      host: 'https://us.i.posthog.com',
+      enableExceptionAutocapture: true,
+    });
+  }
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
     bodyParser: false,
@@ -86,6 +96,11 @@ async function bootstrap() {
     SwaggerModule.setup('openapi', app, documentFactory, {
       yamlDocumentUrl: '/openapi.yaml',
     });
+  }
+
+  if (client) {
+    app.useGlobalFilters(new PosthogExceptionFilter(client));
+    setupExpressErrorHandler(client, app);
   }
 
   await app.listen(3005, '0.0.0.0');

@@ -378,6 +378,7 @@ jobs:
             export STRIPE_ENDPOINT_SECRET=${{ secrets.STRIPE_ENDPOINT_SECRET }}
             export STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}
             export ASSETS_BUCKET=${{ secrets.ASSETS_BUCKET_NAME }}
+            export POSTHOG_KEY=${{ secrets.POSTHOG_KEY }}
 
             rollback () {
               echo "Deployment failed - rolling back"
