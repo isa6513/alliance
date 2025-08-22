@@ -5,12 +5,12 @@ import {
   notifsSetRead,
   notifsSetReadAll,
 } from "@alliance/shared/client";
-import { useCallback, useEffect, useState } from "react";
-import { useAuth } from "../lib/AuthContext";
-import { useNavigate } from "react-router";
 import { formatDate } from "date-fns";
-import Button, { ButtonColor } from "./system/Button";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import notifBell from "../assets/notif-bell.svg";
+import { useAuth } from "../lib/AuthContext";
+import Button, { ButtonColor } from "./system/Button";
 
 function getWebAppLocation(webAppLocation: string) {
   if (webAppLocation.startsWith("/")) {
@@ -18,6 +18,24 @@ function getWebAppLocation(webAppLocation: string) {
   }
   return "/" + webAppLocation;
 }
+
+const useOutsideClick = (onClickOutside: () => void) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        onClickOutside();
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [ref, onClickOutside]);
+
+  return ref;
+};
 
 const NotificationsIcon = () => {
   const [notifications, setNotifications] = useState<NotificationDto[]>([]);
@@ -92,14 +110,17 @@ const NotificationsIcon = () => {
     setUnreadCount(0);
   }, []);
 
+  const ref = useOutsideClick(() => setIsOpen(false));
+
   return (
     <div
       className={`${
         unreadCount > 0
           ? "bg-red-500 text-white"
           : "bg-white text-zinc-600 border-1 border-zinc-200"
-      } w-11 h-7 rounded-full flex items-center justify-center cursor-pointer`}
+      } w-12 h-8 rounded-full flex items-center justify-center cursor-pointer`}
       onClick={toggle}
+      ref={ref}
     >
       <div className="flex items-center gap-x-0.5">
         <img

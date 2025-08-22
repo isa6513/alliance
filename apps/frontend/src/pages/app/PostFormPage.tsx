@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link, useSearchParams } from "react-router";
 import {
-  CreatePostDto,
   ActionDto,
+  CreatePostDto,
   PostDto,
   actionsFindAll,
-} from "@alliance/shared/client";
-import { useAuth } from "../../lib/AuthContext";
-import Card from "../../components/system/Card";
-import {
   forumCreatePost,
   forumFindOnePost,
   forumUpdatePost,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "../../components/system/Button";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { setRevalidate } from "../../applayout";
+import Button, { ButtonColor } from "../../components/system/Button";
+import Card from "../../components/system/Card";
+import { useAuth } from "../../lib/AuthContext";
 type FormMode = "create" | "edit";
 
 const PostFormPage: React.FC = () => {
@@ -135,7 +133,7 @@ const PostFormPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container max-w-4xl mx-auto px-4 py-8 mt-4">
       <div className="mb-6">
         <Link to="/forum" className="text-blue hover:underline">
           &larr; Back to Forum
@@ -143,7 +141,7 @@ const PostFormPage: React.FC = () => {
       </div>
 
       <Card>
-        <div className="p-6">
+        <div className="p-2">
           <h1 className="!text-xl font-semibold mb-6">
             {mode === "create" ? "New Thread" : "Edit Thread"}
           </h1>

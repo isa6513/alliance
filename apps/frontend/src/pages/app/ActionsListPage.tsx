@@ -1,9 +1,9 @@
+import { FilterMode, filterActions } from "@alliance/shared/lib/actionUtils";
 import { useMemo, useState } from "react";
+import { useAppLoaderData } from "../../applayout";
 import ActionItemCard from "../../components/ActionItemCard";
 import Button, { ButtonColor } from "../../components/system/Button";
-import { FilterMode, filterActions } from "@alliance/shared/lib/actionUtils";
 import { useActionCounts } from "../../lib/useActionWebSocket";
-import { useAppLoaderData } from "../../applayout";
 
 const ActionsListPage = () => {
   const { actions, relations } = useAppLoaderData();
@@ -44,12 +44,12 @@ const ActionsListPage = () => {
               key={action.id}
               {...action}
               className="w-full"
-              joinedCount={liveCounts[action.id] ?? action.usersJoined}
-              completedCount={
-                action.status === "member_action"
-                  ? action.usersCompleted
-                  : undefined
-              }
+              // joinedCount={liveCounts[action.id] ?? action.usersJoined}
+              // neededCount={
+              //   action.status === "member_action"
+              //     ? action.usersCompleted
+              //     : undefined
+              // }
               userRelation={relations?.get(action.id) ?? undefined}
             />
           ))}

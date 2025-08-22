@@ -1,30 +1,30 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
-import Card, { CardStyle } from "../../components/system/Card";
-import Button, { ButtonColor } from "../../components/system/Button";
-import { useAuth } from "../../lib/AuthContext";
 import {
+  FriendStatusDto,
+  PostDto,
+  ProfileDto,
+  UpdateProfileDto,
+  forumFindPostsByUser,
   userFindOne,
-  userRequestFriend,
   userListFriends,
   userMyFriendRelationship,
-  FriendStatusDto,
-  ProfileDto,
-  PostDto,
-  forumFindPostsByUser,
   userRemoveFriend,
+  userRequestFriend,
   userUpdate,
-  UpdateProfileDto,
 } from "@alliance/shared/client";
-import ProfileImage from "../../components/ProfileImage";
-import UserActivityCard from "../../components/UserActivityCard";
+import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
+import { useAppLoaderData } from "../../applayout";
+import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
 import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
-import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
-import useActivities, { ActivityList } from "./useActivities";
-import { useAppLoaderData } from "../../applayout";
+import ProfileImage from "../../components/ProfileImage";
+import Button, { ButtonColor } from "../../components/system/Button";
+import Card, { CardStyle } from "../../components/system/Card";
+import UserActivityCard from "../../components/UserActivityCard";
+import { useAuth } from "../../lib/AuthContext";
 import { getImageSource } from "../../lib/config";
-import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
+import useActivities, { ActivityList } from "./useActivities";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -252,7 +252,7 @@ const UserProfilePage: React.FC = () => {
     <div className="max-w-[800px] mx-auto">
       <div className="mx-2 space-y-2">
         <div className="w-full h-[100px]"></div>
-        <Card className="px-8 relative space-y-2 pb-8">
+        <Card className="px-8 relative gap-y-2 pb-8">
           {isEditing ? (
             <div className="relative w-fit">
               <img
@@ -265,8 +265,8 @@ const UserProfilePage: React.FC = () => {
                 }
                 className="mt-[-55px] w-29 h-29 rounded-md object-cover"
               />
-              <div className="absolute w-29 h-29 top-[-55px] bg-black/30 rounded-md opacity-0 hover:opacity-100 transition-opacity duration-100">
-                <label className="cursor-pointer text-white underline text-sm absolute m-auto text-center w-full h-full flex items-center justify-center">
+              <div className="absolute w-29 h-29 top-[-55px] bg-zinc-50 border border-dashed border-zinc-300 rounded-md hover:bg-zinc-100 transition-opacity duration-100">
+                <label className="cursor-pointer text-zinc-400 underline text-sm absolute m-auto text-center w-full h-full flex items-center justify-center">
                   <input
                     type="file"
                     accept="image/*"

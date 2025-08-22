@@ -6,7 +6,6 @@ import {
 import React, { useCallback } from "react";
 import { useNavigate } from "react-router";
 import CompletedBar from "./CompletedBar";
-import Button, { ButtonColor } from "./system/Button";
 import Card, { CardStyle } from "./system/Card";
 import UserProfilePicRow from "./UserProfilePicRow";
 
@@ -60,7 +59,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
             <p className="font-medium text-black">{name}</p>
             <p className="text-zinc-500">{shortDescription}</p>
           </div>
-          <div>
+          {/* <div>
             <div className="w-24 flex flex-col gap-y-2">
               {userRelation === "none" &&
                 status === "gathering_commitments" && (
@@ -73,7 +72,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
                   </Button>
                 )}
             </div>
-          </div>
+          </div> */}
         </div>
         {activity && joinedCount && neededCount && (
           <div className="mt-6">

@@ -41,7 +41,7 @@ const ForumListPost = ({
           <p className="font-medium text-base">{post.title}</p>
           {post.pinned && <PinnedIcon size="small" />}
         </div>
-        <div className="flex justify-between text-sm text-gray-500">
+        <div className="flex justify-between items-end text-sm text-gray-500">
           <div className="flex flex-row gap-x-2 items-center">
             <ProfileImage pfp={post.author.profilePicture} size="small" />
             <p onClick={authorClick} className="hover:underline">

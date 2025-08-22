@@ -1,22 +1,22 @@
-import React, { useEffect, useState, useCallback } from "react";
-import Card, { CardStyle } from "../../components/system/Card";
-import Button, { ButtonColor } from "../../components/system/Button";
-import { useAuth } from "../../lib/AuthContext";
-import FormInput from "../../components/system/FormInput";
-import { AdminOnly } from "../../lib/AdminOnly";
-import Badge from "../../components/system/Badge";
-import FriendsTab from "../../components/FriendsTab";
 import {
   City,
   CitySearchDto,
+  PaymentMethodDto,
+  paymentsClearPaymentMethods,
+  paymentsPaymentMethod,
   userMyLocation,
   userUpdate,
-  PaymentMethodDto,
-  paymentsPaymentMethod,
-  paymentsClearPaymentMethods,
 } from "@alliance/shared/client";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
+import FriendsTab from "../../components/FriendsTab";
+import Badge from "../../components/system/Badge";
+import Button, { ButtonColor } from "../../components/system/Button";
+import Card, { CardStyle } from "../../components/system/Card";
+import FormInput from "../../components/system/FormInput";
+import { AdminOnly } from "../../lib/AdminOnly";
+import { useAuth } from "../../lib/AuthContext";
 
 const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -142,9 +142,9 @@ const SettingsPage: React.FC = () => {
     <div className="bg-page pt-20 px-8 md:px-16">
       <div className="max-w-4xl mx-auto">
         <Card style={CardStyle.White} className="p-8 mb-6 relative gap-y-4">
-          <div className="flex justify-between mb-8">
+          <div className="flex justify-between mb-2">
             <div className="gap-x-2">
-              <h1 className="text-2xl">Account</h1>
+              <h1 className="text-2xl font-adobe">Account</h1>
               <AdminOnly>
                 <Badge className="!bg-yellow-600 text-white">Admin</Badge>
               </AdminOnly>
@@ -201,7 +201,7 @@ const SettingsPage: React.FC = () => {
             <div className="flex flex-row gap-x-2">
               <Button
                 color={
-                  anonymous === true ? ButtonColor.Blue : ButtonColor.Light
+                  anonymous === true ? ButtonColor.Black : ButtonColor.Light
                 }
                 onClick={() => setAnonymous(true)}
               >
@@ -209,7 +209,7 @@ const SettingsPage: React.FC = () => {
               </Button>
               <Button
                 color={
-                  anonymous === false ? ButtonColor.Blue : ButtonColor.Light
+                  anonymous === false ? ButtonColor.Black : ButtonColor.Light
                 }
                 onClick={() => setAnonymous(false)}
               >
