@@ -9,7 +9,7 @@ import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import CommentLikeButton from "../CommentLikeButton";
 import ProfileImage from "../ProfileImage";
 import PinnedIcon from "../icons/PinnedIcon";
-import Card from "../system/Card";
+import Card, { CardStyle } from "../system/Card";
 import ReplyForm from "./ReplyForm";
 
 const countAllReplies = (replies: CommentDto[]): number => {
@@ -60,6 +60,7 @@ interface ReplyComponentProps {
   compact?: boolean;
   onUpdateReply: (id: number, content: string) => void;
   onLikeReply: (id: number, unlike?: boolean) => void;
+  homeStyle?: boolean;
 }
 
 interface ReplyContentProps
@@ -301,6 +302,7 @@ const ReplyComponent = ({
   compact,
   onUpdateReply,
   onLikeReply,
+  homeStyle = false,
 }: ReplyComponentProps) => {
   const handleUpdateReply = async (id: number, content: string) => {
     if (onUpdateReply) {
@@ -377,6 +379,7 @@ const ReplyComponent = ({
               compact && "!p-1 !border-none"
             } ${user && isReplyingToThis && !isCollapsed && "rounded-b-none"}`}
             flex={false}
+            style={homeStyle ? CardStyle.Transparent : CardStyle.White}
           >
             <div id={`reply-${reply.id}`}>
               <ReplyContent

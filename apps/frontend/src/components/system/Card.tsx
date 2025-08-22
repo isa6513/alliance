@@ -11,6 +11,7 @@ export enum CardStyle {
   Black = "black",
   Image = "image",
   Green = "green",
+  Transparent = "transparent",
 }
 
 export interface CardProps extends PropsWithChildren {
@@ -48,6 +49,8 @@ const Card: React.FC<CardProps> = ({
     [CardStyle.Image]: "bg-transparent border-none",
     [CardStyle.Green]: "bg-green-1 border-green-2 rounded-lg",
     [CardStyle.GreenOutline]: "border-green-2 bg-green-1/20",
+    [CardStyle.Transparent]:
+      "bg-transparent border-gray-2 hover:border border-box rounded-md",
   };
 
   return (

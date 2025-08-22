@@ -220,7 +220,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
           </div>
           {toggleComments && (
             <div className="mt-2">
-              <Comments objectId={commitActivity.id} type={"activity"} />
+              <Comments
+                objectId={commitActivity.id}
+                type={"activity"}
+                homeStyle
+              />
             </div>
           )}
         </div>

@@ -11,19 +11,20 @@ import {
   forumUnlikeComment,
   forumUpdateComment,
 } from "@alliance/shared/client";
-import ReplyComponent from "./forum/ReplyComponent";
-import ReplyForm from "./forum/ReplyForm";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { useAuth } from "../lib/AuthContext";
+import ReplyComponent from "./forum/ReplyComponent";
+import ReplyForm from "./forum/ReplyForm";
 
 export interface CommentsProps {
   objectId: number;
   type: CommentParentObject;
   compact?: boolean;
+  homeStyle?: boolean; // minimal version for homepage
 }
 
-const Comments = ({ objectId, type, compact }: CommentsProps) => {
+const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
   const [replyContent, setReplyContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -206,7 +207,7 @@ const Comments = ({ objectId, type, compact }: CommentsProps) => {
     <div>
       {error && <div className="text-red-500">{error}</div>}
       {comments && comments.length > 0 ? (
-        <div className="space-y-3 mb-8">
+        <div className="space-y-3 mb-3">
           {compact && comments.length > 0 && (
             <p className="font-medium">Comments</p>
           )}
@@ -229,6 +230,7 @@ const Comments = ({ objectId, type, compact }: CommentsProps) => {
                 compact={compact}
                 onUpdateReply={handleUpdateReply}
                 onLikeReply={handleLikeReply}
+                homeStyle={homeStyle}
               />
             ))}
         </div>

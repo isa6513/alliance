@@ -121,7 +121,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
           </div>
           {toggleComments && (
             <div className="mt-2">
-              <Comments objectId={activity.id} type={"activity"} />
+              <Comments objectId={activity.id} type={"activity"} homeStyle />
             </div>
           )}
         </div>
