@@ -3,6 +3,8 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
+  NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { PostHog } from 'posthog-node';
@@ -17,6 +19,13 @@ export class PosthogExceptionFilter implements ExceptionFilter {
 
     const status =
       exception instanceof HttpException ? exception.getStatus() : 500;
+
+    if (
+      exception instanceof NotFoundException ||
+      exception instanceof UnauthorizedException //TODO: figure out actual filtering desired here
+    ) {
+      throw exception;
+    }
 
     this.posthog.captureException(exception, 'server', {
       event: '$exception',

@@ -21,6 +21,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { AdminViewerModule } from './admin-viewer/admin-viewer.module';
 import { S3Module } from './s3/s3.module';
 import { SearchModule } from './search/search.module';
+import { TasksModule } from './tasks/tasks.module';
 import * as multer from 'multer';
 
 @Module({
@@ -64,6 +65,7 @@ import * as multer from 'multer';
     PaymentsModule,
     AdminViewerModule,
     SearchModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [],

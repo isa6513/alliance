@@ -458,6 +458,19 @@ jobs:
           echo "Checking API health..."
           curl --fail --silent --show-error https://${{vars.DOMAIN_NAME}}/api/ > /dev/null
           echo "API health ok"
+  notify-on-failure:
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack failure message
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "text": ":x: Deploy failed on ${{ github.ref }} (<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>)"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   # build-mobile-app:
   #   runs-on: ubuntu-latest
