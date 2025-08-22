@@ -3,7 +3,7 @@ import {
   ActionDto,
   UserActionRelation,
 } from "@alliance/shared/client/types.gen";
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { useNavigate } from "react-router";
 import CompletedBar from "./CompletedBar";
 import Button, { ButtonColor } from "./system/Button";
@@ -46,7 +46,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
     [navigate, id]
   );
 
-  const [toggleComments, setToggleComments] = useState(false);
+  // const [toggleComments, setToggleComments] = useState(false);
 
   return (
     <div className={`relative ${className}`}>

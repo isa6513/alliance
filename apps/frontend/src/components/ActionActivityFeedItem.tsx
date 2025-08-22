@@ -1,9 +1,9 @@
-import { useNavigate } from "react-router";
-import { formatTime } from "../lib/utils";
 import { ActionActivityDto } from "@alliance/shared/client";
+import { useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
-import ActivityLikeButton from "./ActivityLikeButton";
+import { formatTime } from "../lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
+import ActivityLikeButton from "./ActivityLikeButton";
 
 export interface ActionActivityFeedItemProps {
   activity: ActionActivityDto;
@@ -46,12 +46,19 @@ const ActionActivityFeedItem = ({
     return (
       <div
         key={activity.id}
-        className="rounded-md border-gray-200"
+        className={`rounded-md border-gray-200 ${
+          activity.type === "user_joined" ? "cursor-default" : "cursor-pointer"
+        }`}
         onClick={() => {
+          // no detail pages for commitments right now
+          if (activity.type === "user_joined") {
+            return;
+          }
+
           navigate(`/actions/${activity.actionId}/activity/${activity.id}`);
         }}
       >
-        <div className="flex flex-row gap-x-3 cursor-pointer items-start">
+        <div className="flex flex-row gap-x-3 items-start">
           <div className="flex-1">
             <ActivityFeedItem
               title={activity.actionName}
@@ -62,6 +69,11 @@ const ActionActivityFeedItem = ({
               })}`}
               user={activity.user}
               showTitle={showAction}
+              titleLink={
+                activity.type === "user_joined"
+                  ? `/actions/${activity.actionId}`
+                  : `/actions/${activity.actionId}`
+              }
             />
           </div>
 
