@@ -1,14 +1,14 @@
 import { actionsComplete } from "@alliance/shared/client";
-import { setRevalidate, useAppLoaderData } from "../../applayout";
-import TaskCard from "../../components/TaskCard";
-import ActionItemCard from "../../components/ActionItemCard";
-import Card from "../../components/system/Card";
-import ForumListPost from "../../components/ForumListPost";
-import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
-import useActivities, { ActivityList } from "./useActivities";
-import { isFeatureEnabled } from "../../lib/config";
 import { Features } from "@alliance/shared/lib/features";
+import { setRevalidate, useAppLoaderData } from "../../applayout";
+import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
+import ActionItemCard from "../../components/ActionItemCard";
+import ForumListPost from "../../components/ForumListPost";
 import SingleActionCard from "../../components/SingleActionCard";
+import Card from "../../components/system/Card";
+import TaskCard from "../../components/TaskCard";
+import { isFeatureEnabled } from "../../lib/config";
+import useActivities, { ActivityList } from "./useActivities";
 
 const HomePage = () => {
   const { actions, relations, posts, activities } = useAppLoaderData();
@@ -125,6 +125,14 @@ const HomePage = () => {
                     <TaskCard
                       key={action.id}
                       action={action}
+                      friendCompletionActivities={friendActivities.filter(
+                        (activity) =>
+                          activity.actionId === action.id &&
+                          activity.type === "user_completed"
+                      )}
+                      commitActivity={
+                        activities?.get(action.id)?.join ?? undefined
+                      }
                       onComplete={handleTaskComplete}
                     />
                   ))}
@@ -167,6 +175,13 @@ const HomePage = () => {
                     <ActionItemCard
                       key={action.id}
                       {...action}
+                      joinedCount={action.usersJoined}
+                      neededCount={action.commitmentThreshold}
+                      friendCommitmentActivities={friendActivities.filter(
+                        (activity) =>
+                          activity.actionId === action.id &&
+                          activity.type === "user_joined"
+                      )}
                       userRelation={relations.get(action.id)}
                       showDescription={false}
                       activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists

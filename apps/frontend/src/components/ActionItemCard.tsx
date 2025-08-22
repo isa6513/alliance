@@ -1,16 +1,16 @@
-import React, { useCallback } from "react";
-import Card, { CardStyle } from "./system/Card";
-import { useNavigate } from "react-router";
 import {
   ActionActivityDto,
   ActionDto,
   UserActionRelation,
 } from "@alliance/shared/client/types.gen";
-import ActionCardUserCount from "./ActionCardUserCount";
-import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
-import Button, { ButtonColor } from "./system/Button";
-import checkMark from "../assets/noun-check-mark-2181.svg";
+import React, { useCallback, useState } from "react";
+import { useNavigate } from "react-router";
 import { formatTime } from "../lib/utils";
+import Comments from "./Comments";
+import CompletedBar from "./CompletedBar";
+import Button, { ButtonColor } from "./system/Button";
+import Card, { CardStyle } from "./system/Card";
+import UserProfilePicRow from "./UserProfilePicRow";
 
 export interface ActionItemCardProps
   extends Pick<
@@ -19,7 +19,8 @@ export interface ActionItemCardProps
   > {
   className?: string;
   joinedCount?: number;
-  completedCount?: number;
+  neededCount?: number;
+  friendCommitmentActivities?: ActionActivityDto[];
   showDescription?: boolean;
   userRelation?: UserActionRelation;
   activity?: ActionActivityDto;
@@ -32,7 +33,8 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   className,
   status,
   joinedCount,
-  completedCount,
+  neededCount,
+  friendCommitmentActivities = [],
   userRelation,
   activity,
 }) => {
@@ -46,11 +48,13 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
     [navigate, id]
   );
 
+  const [toggleComments, setToggleComments] = useState(false);
+
   return (
     <div className={`relative ${className}`}>
       <Card
         className="block overflow-hidden"
-        style={CardStyle.White}
+        style={CardStyle.WhiteFlatBottom}
         onClick={goToActionPage}
       >
         <div className="flex flex-row items-start gap-x-8">
@@ -73,9 +77,32 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
             </div>
           </div>
         </div>
-        {activity && (
-          <div className="mt-4 flex flex-row border-t border-zinc-300 gap-y-2 -mx-4 -mb-4 p-4 bg-zinc-50 text-sm items-center justify-between">
-            <p className="text-zinc-600 flex-shrink-0">
+        {activity && joinedCount && neededCount && (
+          <div className="mt-6">
+            <div className="flex flex-row items-center justify-between w-full gap-x-2">
+              <p className="text-zinc-500 text-base mb-0.5">
+                {joinedCount} / {neededCount} committed
+                {friendCommitmentActivities.length > 0 && (
+                  <>
+                    , including {friendCommitmentActivities.length} friend
+                    {friendCommitmentActivities.length === 1 ? "" : "s"}
+                  </>
+                )}
+              </p>
+              <UserProfilePicRow
+                users={friendCommitmentActivities.map(
+                  (activity) => activity.user
+                )}
+              />
+            </div>
+            <CompletedBar percentage={(joinedCount / neededCount) * 100} />
+          </div>
+        )}
+      </Card>
+      {activity && (
+        <div className="flex flex-col border-x border-b rounded-b-md border-zinc-300 bg-zinc-50 p-4">
+          <div className="flex flex-row gap-y-2 bg-zinc-50 text-sm items-center gap-x-4">
+            <p className="text-zinc-600 flex-1">
               {activity.type === "user_joined"
                 ? `You committed ${formatTime(new Date(activity.createdAt), {
                     addSuffix: true,
@@ -84,38 +111,21 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
                     addSuffix: true,
                   })}`}
             </p>
-            <div className="">
-              {activity.likes.length > 0 && (
-                <ActivityLikesButtonRow
-                  isLiked={false}
-                  likes={activity.likes}
-                  handleLike={null}
-                  labelText={true}
-                />
-              )}
+            <p className="text-zinc-600">{activity.likes.length} likes</p>
+            <p
+              className="text-zinc-600 cursor-pointer"
+              onClick={() => setToggleComments(!toggleComments)}
+            >
+              Reply
+            </p>
+          </div>
+          {toggleComments && (
+            <div className="mt-2">
+              <Comments objectId={activity.id} type={"activity"} />
             </div>
-          </div>
-        )}
-
-        <div className="absolute bottom-5 right-5">
-          <div className="flex flex-row justify-between items-start mr-0 gap-x-2">
-            {userRelation === "joined" && !activity && (
-              <img
-                src={checkMark}
-                alt="check mark"
-                className="w-[13px] h-[13px] opacity-40 mt-[2px]"
-                title="You've committed to this"
-              />
-            )}
-            {joinedCount !== undefined && (
-              <ActionCardUserCount
-                joined={joinedCount}
-                completed={completedCount}
-              />
-            )}
-          </div>
+          )}
         </div>
-      </Card>
+      )}
     </div>
   );
 };
