@@ -1,8 +1,8 @@
-import { Outlet, useOutletContext } from "react-router";
-import { TaskPanelContext } from "./ActionTaskPanel";
-import { getImageSource } from "../lib/config";
 import ReactMarkdown from "react-markdown";
+import { Outlet, useOutletContext } from "react-router";
+import { getImageSource } from "../lib/config";
 import { useActionLoaderData } from "../pages/app/ActionPage";
+import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
 
 const ActionContents = () => {

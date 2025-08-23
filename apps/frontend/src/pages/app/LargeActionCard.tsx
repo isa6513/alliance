@@ -12,7 +12,7 @@ import { useActionCount } from "../../lib/useActionWebSocket";
 
 export interface LargeActionCardProps {
   action: ActionDto;
-  userRelation: UserActionRelation | null;
+  userRelation: Extract<UserActionRelation, "joined" | "none">;
   friendActivities: ActionActivityDto[];
   onComplete: (actionId: number) => void;
   onJoin: (actionId: number) => void;

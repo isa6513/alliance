@@ -1,8 +1,9 @@
 import { ActionActivityDto, UserActionRelation } from "@alliance/shared/client";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
-import { Route } from "../../.react-router/types/src/components/+types/RoutedActionTaskPanel";
+import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
 import { useActionLoaderData } from "../pages/app/ActionPage";
 import ActionTaskPanel from "./ActionTaskPanel";
+import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import Card from "./system/Card";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
@@ -31,10 +32,18 @@ export type TaskPanelContext = {
   setActivities: React.Dispatch<React.SetStateAction<ActionActivityDto[]>>;
 };
 
-const RoutedActionTaskPanel = () => {
+const ActionPageTaskPanel = () => {
   const { handleCompleteAction, handleJoinAction, userRelation } =
     useOutletContext<TaskPanelContext>();
   const action = useActionLoaderData();
+
+  if (!userRelation) {
+    return null;
+  }
+
+  if (userRelation === "completed") {
+    return <ActionTaskPanelCompleted />;
+  }
 
   return (
     <ActionTaskPanel
@@ -46,4 +55,4 @@ const RoutedActionTaskPanel = () => {
   );
 };
 
-export default RoutedActionTaskPanel;
+export default ActionPageTaskPanel;

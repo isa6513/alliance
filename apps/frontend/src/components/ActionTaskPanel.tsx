@@ -5,14 +5,13 @@ import ActionTaskPanelForm from "./ActionTaskPanelForm";
 
 import ActionCommitButton from "./ActionCommitButton";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
-import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
 import { StripeWrapper } from "./StripeWrapper";
 import Card, { CardStyle } from "./system/Card";
 
 interface ActionTaskPanelProps {
   action: ActionDto;
-  userRelation: UserActionRelation | null;
+  userRelation: Extract<UserActionRelation, "joined" | "none">;
   handleCompleteAction: () => void;
   handleJoinAction: () => void;
 }
@@ -24,14 +23,6 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   handleJoinAction,
 }: ActionTaskPanelProps) => {
   const { isAuthenticated } = useAuth();
-
-  if (!action) {
-    return null;
-  }
-
-  if (userRelation === "completed") {
-    return <ActionTaskPanelCompleted />;
-  }
 
   if (action.status === "gathering_commitments") {
     if (userRelation === "joined") {
@@ -80,7 +71,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       );
     }
     if (action.type === "Activity" && !action.taskFormId) {
-      return <p>This is terrible</p>;
+      return <p>Couldn&apos;t load action contents</p>;
     }
     if (action.type === "Ongoing") {
       return (

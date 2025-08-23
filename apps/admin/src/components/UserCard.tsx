@@ -1,7 +1,7 @@
 import { User } from "@alliance/shared/client";
-import Card from "../Card";
-import { CardStyle } from "../Card";
+import { getApiUrl } from "@alliance/shared/lib/config";
 import { useNavigate } from "react-router-dom";
+import Card, { CardStyle } from "../Card";
 
 const UserCard = ({ user }: { user: User }) => {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ const UserCard = ({ user }: { user: User }) => {
     >
       {user.profilePicture && (
         <img
-          src={user.profilePicture}
+          src={`${getApiUrl()}/images/${user.profilePicture}`}
           alt={user.name}
           className="w-10 h-10 rounded-sm object-cover"
         />

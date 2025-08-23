@@ -5,7 +5,7 @@ import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
 import { formatTime } from "../lib/utils";
 import { useActionLoaderData } from "../pages/app/ActionPage";
-import { TaskPanelContext } from "./ActionTaskPanel";
+import { TaskPanelContext } from "./ActionPageTaskPanel";
 import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
 import Comments from "./Comments";
 import ProfileImage from "./ProfileImage";

@@ -40,11 +40,7 @@ const HomePage = () => {
       action.status === "gathering_commitments"
   );
 
-  const getNewCurrentTask = () => {
-    return newActions.shift() || todoActions.shift() || null;
-  };
-
-  const currentTask = getNewCurrentTask();
+  const currentTask = newActions.shift() || todoActions.shift() || null;
 
   const handleTaskComplete = (actionId: number) => {
     actionsComplete({ path: { id: actionId.toString() } }).then(() => {
@@ -64,10 +60,12 @@ const HomePage = () => {
         <div className="flex flex-col py-16 max-w-[728px] md:min-w-[300px] gap-y-5 overflow-y-auto ">
           <div className="flex flex-col gap-y-6">
             <p className="font-adobe text-3xl font-semibold">Current task</p>
-            {currentTask && (
+            {currentTask && relations.get(currentTask.id) && (
               <LargeActionCard
                 action={currentTask}
-                userRelation={relations.get(currentTask.id) ?? null}
+                userRelation={
+                  relations.get(currentTask.id) as "joined" | "none"
+                }
                 friendActivities={[]}
                 onComplete={handleTaskComplete}
                 onJoin={handleTaskJoin}

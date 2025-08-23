@@ -21,8 +21,8 @@ import { Route } from "../../../.react-router/types/src/pages/app/+types/ActionP
 import { setRevalidate } from "../../applayout";
 import ActionActivityList from "../../components/ActionActivityList";
 import ActionEventsPanel from "../../components/ActionEventsPanel";
+import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
 import CompletedBar from "../../components/CompletedBar";
-import { TaskPanelContext } from "../../components/RoutedActionTaskPanel";
 import Card, { CardStyle } from "../../components/system/Card";
 import TwoColumnSplit from "../../components/system/TwoColumnSplit";
 import { useAuth } from "../../lib/AuthContext";
