@@ -44,11 +44,17 @@ interface FormBuilderProps {
   onSave?: (schema: FormSchema<string, string>) => void;
   initialSchema?: FormSchema<string, string>;
   actionId?: number;
+  formId?: string;
 }
 
-export function FormBuilder({ onSave, initialSchema }: FormBuilderProps) {
+export function FormBuilder({
+  onSave,
+  initialSchema,
+  formId: propFormId,
+}: FormBuilderProps) {
   const [searchParams] = useSearchParams();
-  const formId = searchParams.get("id");
+  const urlFormId = searchParams.get("id");
+  const formId = propFormId || urlFormId;
 
   const [schema, setSchema] = useState<FormSchema<string, string>>(
     initialSchema || {
@@ -91,7 +97,7 @@ export function FormBuilder({ onSave, initialSchema }: FormBuilderProps) {
       setIsLoading(true);
       setLoadError(null);
 
-      tasksGetForm({ path: { formId } })
+      tasksGetForm({ path: { id: parseInt(formId) } })
         .then((response) => {
           if (response.data) {
             // Convert the form entity back to FormSchema
@@ -648,7 +654,7 @@ export function FormBuilder({ onSave, initialSchema }: FormBuilderProps) {
   };
 
   return (
-    <div className="flex h-[calc(100vh-150px)] bg-gray-50">
+    <div className="flex h-[calc(100vh-40px)] bg-gray-50">
       {!isPreviewMode && (
         <ElementSelect
           onAddField={addField}

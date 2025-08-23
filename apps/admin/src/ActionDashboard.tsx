@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
-import Card, { CardStyle } from "./Card";
-import ActionForm from "./components/ActionForm";
 import {
-  CreateActionDto,
   ActionDto,
-  CreateActionEventDto,
-  ActionStatus,
-} from "@alliance/shared/client";
-import {
+  actionsAddEvent,
   actionsCreate,
   actionsFindOne,
   actionsRemove,
+  ActionStatus,
   actionsUpdate,
-  actionsAddEvent,
+  CreateActionDto,
+  CreateActionEventDto,
+  FormDto,
+  tasksListForms,
 } from "@alliance/shared/client";
-import { getApiUrl } from "./config";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import Card, { CardStyle } from "./Card";
+import ActionForm from "./components/ActionForm";
+import { getApiUrl } from "./config";
 
 // Status color mapping
 const getStatusColor = (status: ActionDto["status"]) => {
@@ -90,6 +90,8 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState<boolean>(false);
+  const [availableForms, setAvailableForms] = useState<FormDto[]>([]);
+  const [formsLoading, setFormsLoading] = useState<boolean>(true);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -104,7 +106,24 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
     });
   }, [activeTab, setSearchParams, searchParams]);
 
-  const [form, setForm] = useState<CreateActionDto>({
+  // Load available forms on component mount
+  useEffect(() => {
+    const loadForms = async () => {
+      try {
+        const response = await tasksListForms();
+        if (response.data) {
+          setAvailableForms(response.data);
+        }
+        setFormsLoading(false);
+      } catch (err) {
+        console.error("Failed to load forms:", err);
+        setFormsLoading(false);
+      }
+    };
+    loadForms();
+  }, []);
+
+  const [form, setForm] = useState<CreateActionDto & { taskFormId?: number }>({
     name: "",
     category: "",
     image: "",
@@ -112,6 +131,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
     timeEstimate: "",
     shortDescription: "",
     type: "Activity",
+    taskFormId: undefined,
   });
 
   // Event creation form state
@@ -137,6 +157,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
         timeEstimate: "",
         shortDescription: "",
         type: "Activity",
+        taskFormId: undefined,
       });
       setImageFile(null);
       setImagePreview(null);
@@ -161,6 +182,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
         setAction(actionData);
         setForm({
           ...actionData,
+          taskFormId: actionData.taskFormId,
         });
 
         setLoading(false);
@@ -284,6 +306,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
         if (!newAction) {
           throw new Error("Failed to create action");
         }
+
         if (onActionCreated) {
           onActionCreated(newAction);
         }
@@ -430,6 +453,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
           imagePreview={imagePreview}
           isNew={true}
           onCancel={onCancel}
+          availableForms={availableForms}
         />
       ) : (
         // Existing Action Dashboard
@@ -633,6 +657,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
                   isNew={false}
                   onDelete={handleDelete}
                   baseUrl={baseUrl}
+                  availableForms={availableForms}
                 />
               </Card>
             )}

@@ -21,13 +21,17 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
     setFormData((prev) => ({ ...prev, [fieldId]: value }));
   };
 
-  const handleNext = () => {
+  const handleNext = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!isLastPage) {
       setCurrentPageIndex((prev) => prev + 1);
     }
   };
 
-  const handlePrevious = () => {
+  const handlePrevious = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!isFirstPage) {
       setCurrentPageIndex((prev) => prev - 1);
     }
@@ -35,8 +39,11 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSubmit) {
-      onSubmit({ responses: formData });
+    e.stopPropagation();
+    if (!isLastPage) {
+      setCurrentPageIndex((prev) => prev + 1);
+    } else if (onSubmit) {
+      onSubmit({ answers: formData });
     }
   };
 
@@ -389,33 +396,12 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
   return (
     <div className="max-w-2xl mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Form Header */}
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">{schema.title}</h1>
-          {schema.description && (
-            <p className="mt-2 text-gray-600">{schema.description}</p>
-          )}
-        </div>
-
-        {/* Page Header */}
-        {schema.pages.length > 1 && (
-          <div className="border-b border-gray-200 pb-4">
-            <h2 className="text-lg font-medium text-gray-900">
-              {currentPage.title}
-            </h2>
-            {currentPage.description && (
-              <p className="mt-1 text-gray-600">{currentPage.description}</p>
-            )}
-          </div>
-        )}
-
         {/* Page Content */}
         <div className="space-y-4">
           {currentPage.fields.map((element, index) =>
             renderElement(element, index)
           )}
         </div>
-
         {/* Navigation */}
         <div className="flex justify-between items-center pt-6 border-t border-gray-200">
           <div>
@@ -441,18 +427,21 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
               <button
                 type="button"
                 onClick={handleNext}
-                className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md font-medium"
+                className="px-4 py-2 text-black bg-blue-100 hover:bg-blue-100 rounded-md border-1 border-blue-500"
               >
                 Next
               </button>
-            ) : (
+            ) : onSubmit ? (
               <button
                 type="submit"
-                className="px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded-md font-medium"
-                disabled={!onSubmit}
+                className="px-4 py-2 text-black bg-green-50 hover:bg-green-100 rounded-md border-1 border-green-500"
               >
                 {schema.submit?.label || "Submit"}
               </button>
+            ) : (
+              <div className="px-4 py-2 text-gray-500 bg-gray-200 rounded-md font-medium cursor-not-allowed">
+                {schema.submit?.label || "Submit"} (Preview Mode)
+              </div>
             )}
           </div>
         </div>

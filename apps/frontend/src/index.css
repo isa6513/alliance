@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../../../shared/forms/";
 
 @font-face {
   font-family: "Adobe Clean Serif";
@@ -164,6 +165,11 @@ button {
 
 img {
   user-select: none;
+}
+
+input,
+select {
+  background-color: white;
 }
 
 .font-hanken {

@@ -5,6 +5,8 @@ import {
   actionsCreate,
   actionsFindAllWithDrafts,
   actionsSetTestRelations,
+  FormDto,
+  tasksListForms,
 } from "@alliance/shared/client";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -14,12 +16,15 @@ import Card, { CardStyle } from "./Card";
 import ActionProgressBar from "./components/ActionProgressBar";
 import ActionTimeline from "./components/ActionTimeline";
 import ConfirmDialog from "./components/ConfirmDialog";
+import { FormBuilder } from "./components/FormBuilder";
 import UserList from "./components/UserList";
 import { testActions } from "./testData";
 
 const AdminPanel: React.FC = () => {
   const [actions, setActions] = useState<ActionDto[]>([]);
   const [actionsLoading, setActionsLoading] = useState<boolean>(true);
+  const [forms, setForms] = useState<FormDto[]>([]);
+  const [formsLoading, setFormsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showPopulateConfirm, setShowPopulateConfirm] = useState(false);
   const [isPopulating, setIsPopulating] = useState(false);
@@ -30,7 +35,9 @@ const AdminPanel: React.FC = () => {
   // Get current view state from URL params
   const selectedActionId = searchParams.get("action");
   const isCreatingNew = searchParams.get("new") === "true";
-  const viewMode = searchParams.get("view") || "list"; // "list" or "timeline"
+  const selectedFormId = searchParams.get("form");
+  const isCreatingNewForm = searchParams.get("newForm") === "true";
+  const viewMode = searchParams.get("view") || "list"; // "list", "timeline", "forms"
 
   // Only check admin status after loading is complete and we have a user
   useEffect(() => {
@@ -53,9 +60,24 @@ const AdminPanel: React.FC = () => {
     }
   }, []);
 
+  const loadForms = useCallback(async () => {
+    try {
+      const response = await tasksListForms();
+      if (response.data) {
+        setForms(response.data);
+      }
+      setFormsLoading(false);
+    } catch (err) {
+      setError("Failed to load forms");
+      setFormsLoading(false);
+      console.error(err);
+    }
+  }, []);
+
   useEffect(() => {
     loadActions();
-  }, [loadActions]);
+    loadForms();
+  }, [loadActions, loadForms]);
 
   const handleCreateAction = useCallback(() => {
     setSearchParams({ new: "true" });
@@ -89,6 +111,21 @@ const AdminPanel: React.FC = () => {
     loadActions(); // Refresh the list
   }, [setSearchParams, loadActions]);
 
+  const handleCreateForm = useCallback(() => {
+    setSearchParams({ newForm: "true", view: "forms" });
+  }, [setSearchParams]);
+
+  const handleEditForm = useCallback(
+    (id: number) => {
+      setSearchParams({ form: id.toString(), view: "forms" });
+    },
+    [setSearchParams]
+  );
+
+  const handleFormSaved = useCallback(() => {
+    loadForms(); // Refresh the forms list
+  }, [loadForms]);
+
   const handleViewModeChange = useCallback(
     (mode: string) => {
       const params = new URLSearchParams(searchParams);
@@ -100,6 +137,12 @@ const AdminPanel: React.FC = () => {
       if (mode === "users") {
         params.delete("tab");
         params.delete("action");
+        params.delete("form");
+        params.delete("newForm");
+      }
+      if (mode === "forms") {
+        params.delete("action");
+        params.delete("new");
       }
       setSearchParams(params);
     },
@@ -169,12 +212,12 @@ const AdminPanel: React.FC = () => {
             >
               Database Viewer
             </Link>
-            <Link
-              to="/form-builder"
-              className="w-full bg-green-100 text-center hover:bg-green-200/60 border border-green-400 text-black px-4 py-2 rounded-md text-sm font-medium"
+            <button
+              onClick={() => handleViewModeChange("forms")}
+              className="w-full bg-green-100 hover:bg-green-200/60 border border-green-400 text-black px-4 py-2 rounded-md text-sm font-medium"
             >
-              Form Builder
-            </Link>
+              Forms
+            </button>
             <button
               onClick={() => handleViewModeChange("users")}
               className="w-full bg-gray-100 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm font-medium"
@@ -234,34 +277,121 @@ const AdminPanel: React.FC = () => {
                 onCancel={handleBackToList}
               />
             </div>
+          ) : selectedFormId || isCreatingNewForm ? (
+            // Show Form Builder
+            <FormBuilder
+              onSave={handleFormSaved}
+              actionId={93}
+              formId={selectedFormId || undefined}
+              key={selectedFormId || "new"}
+            />
           ) : (
             <>
-              <div className="flex justify-end items-center">
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleViewModeChange("list")}
-                    className={`px-3 py-1 rounded text-sm font-medium ${
-                      viewMode === "list"
-                        ? "bg-[#4678ed] text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
-                  >
-                    List
-                  </button>
-                  <button
-                    onClick={() => handleViewModeChange("timeline")}
-                    className={`px-3 py-1 rounded text-sm font-medium ${
-                      viewMode === "timeline"
-                        ? "bg-[#4678ed] text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
-                  >
-                    Timeline
-                  </button>
+              {viewMode !== "forms" && viewMode !== "users" && (
+                <div className="flex justify-end items-center">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleViewModeChange("list")}
+                      className={`px-3 py-1 rounded text-sm font-medium ${
+                        viewMode === "list"
+                          ? "bg-[#4678ed] text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                    >
+                      List
+                    </button>
+                    <button
+                      onClick={() => handleViewModeChange("timeline")}
+                      className={`px-3 py-1 rounded text-sm font-medium ${
+                        viewMode === "timeline"
+                          ? "bg-[#4678ed] text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                    >
+                      Timeline
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {actionsLoading ? (
+              {viewMode === "forms" ? (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      Forms
+                    </h2>
+                    <button
+                      onClick={handleCreateForm}
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium"
+                    >
+                      Create New Form
+                    </button>
+                  </div>
+
+                  {formsLoading ? (
+                    <p>Loading forms...</p>
+                  ) : forms.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 mb-4">No forms found.</p>
+                      <button
+                        onClick={handleCreateForm}
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium"
+                      >
+                        Create Your First Form
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 flex-1 overflow-y-auto">
+                      {forms.map((form) => (
+                        <Card key={form.id} style={CardStyle.White}>
+                          <div
+                            onClick={() => handleEditForm(form.id)}
+                            className="cursor-pointer"
+                          >
+                            <div className="flex justify-between mb-2">
+                              <h3 className="font-bold text-sm">
+                                {form.title || `Form ${form.id}`}
+                              </h3>
+                              <span className="text-xs text-gray-500">
+                                ID: {form.id}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-600">
+                              {form.schema.pages?.length || 0} page
+                              {(form.schema.pages?.length || 0) !== 1
+                                ? "s"
+                                : ""}{" "}
+                              •
+                              {form.schema.pages?.reduce(
+                                (total: number, page: any) =>
+                                  total + (page.fields?.length || 0),
+                                0
+                              ) || 0}{" "}
+                              field
+                              {(form.pages?.reduce(
+                                (total: number, page: any) =>
+                                  total + (page.fields?.length || 0),
+                                0
+                              ) || 0) !== 1
+                                ? "s"
+                                : ""}
+                            </p>
+                            {form.description && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                {form.description}
+                              </p>
+                            )}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : viewMode === "users" ? (
+                <div className="flex-1 overflow-hidden h-full">
+                  <UserList />
+                </div>
+              ) : actionsLoading ? (
                 <p>Loading actions...</p>
               ) : error ? (
                 <p className="text-red-500">{error}</p>
@@ -270,10 +400,6 @@ const AdminPanel: React.FC = () => {
               ) : viewMode === "timeline" ? (
                 <div className="flex-1 overflow-hidden h-full">
                   <ActionTimeline actions={actions} className="h-full" />
-                </div>
-              ) : viewMode === "users" ? (
-                <div className="flex-1 overflow-hidden h-full">
-                  <UserList />
                 </div>
               ) : (
                 <div className="space-y-3 flex-1 overflow-y-auto">

@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Request,
@@ -22,7 +23,7 @@ export class TasksController {
   @ApiOkResponse()
   async submitForm(
     @Request() req: JwtRequest,
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: SubmitFormDto,
   ) {
     return this.tasksService.submitForm(+id, req.user.sub, body);
@@ -35,11 +36,18 @@ export class TasksController {
     return this.tasksService.createForm(body);
   }
 
-  @Get(':formId')
+  @Get('listForms')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [FormDto] })
+  async listForms(): Promise<FormDto[]> {
+    return this.tasksService.listForms();
+  }
+
+  @Get(':id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: FormDto })
-  async getForm(@Param('formId') formId: string) {
-    return this.tasksService.getForm(+formId);
+  async getForm(@Param('id', ParseIntPipe) id: number) {
+    return this.tasksService.getForm(id);
   }
 
   @Put('updateForm/:formId')

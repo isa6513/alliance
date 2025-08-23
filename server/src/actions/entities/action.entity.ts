@@ -7,7 +7,6 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -98,11 +97,11 @@ export class Action {
   @IsNotEmpty()
   type: ActionTaskType;
 
-  @OneToOne(() => Form, { nullable: true })
+  @Column({ nullable: true })
   @ApiPropertyOptional({ description: 'Form associated with the action' })
   @IsOptional()
   @Type(() => Form)
-  taskForm?: Form;
+  taskFormId?: number;
 
   @CreateDateColumn()
   @ApiProperty({ description: 'Timestamp when the action was created' })

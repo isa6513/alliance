@@ -90,10 +90,11 @@ const ActionTaskPanel = () => {
         </StripeWrapper>
       );
     }
-    if (action.type === "Activity" && action.taskForm) {
+    console.log("action.taskFormId", action.taskFormId);
+    if (action.type === "Activity" && action.taskFormId) {
       return (
         <ActionTaskPanelForm
-          actionTaskForm={action.taskForm}
+          taskFormId={action.taskFormId}
           onCompleteAction={handleCompleteAction}
         />
       );

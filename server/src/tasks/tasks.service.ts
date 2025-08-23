@@ -4,7 +4,7 @@ import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
-import { CreateFormDto, SubmitFormDto } from './form.dto';
+import { CreateFormDto, FormDto, SubmitFormDto } from './form.dto';
 
 @Injectable()
 export class TasksService {
@@ -28,7 +28,10 @@ export class TasksService {
     return form;
   }
 
-  async updateForm(formId: number, updateFormDto: CreateFormDto): Promise<Form> {
+  async updateForm(
+    formId: number,
+    updateFormDto: CreateFormDto,
+  ): Promise<Form> {
     const form = await this.getForm(formId);
     Object.assign(form, updateFormDto);
     return this.formRepository.save(form);
@@ -54,5 +57,17 @@ export class TasksService {
       user,
     });
     return this.formResponseRepository.save(formResponse);
+  }
+
+  async listForms(): Promise<FormDto[]> {
+    const forms = await this.formRepository.find();
+    return forms.map(
+      (form) =>
+        ({
+          id: form.id,
+          title: form.title,
+          schema: form.schema,
+        }) satisfies FormDto,
+    );
   }
 }

@@ -1,8 +1,8 @@
 import React, { useRef } from "react";
-import { CreateActionDto } from "@alliance/shared/client";
+import { CreateActionDto, FormDto } from "@alliance/shared/client";
 
 interface ActionFormProps {
-  form: CreateActionDto;
+  form: CreateActionDto & { taskFormId?: number };
   onInputChange: (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -17,6 +17,7 @@ interface ActionFormProps {
   onCancel?: () => void;
   onDelete?: () => void;
   baseUrl?: string;
+  availableForms?: FormDto[];
 }
 
 const ActionForm: React.FC<ActionFormProps> = ({
@@ -31,6 +32,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
   onCancel,
   onDelete,
   baseUrl,
+  availableForms = [],
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -173,6 +175,35 @@ const ActionForm: React.FC<ActionFormProps> = ({
             placeholder="Number of commitments needed"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+        </div>
+      )}
+
+      {/* Task Form Selection for Activity type actions */}
+      {form.type === "Activity" && (
+        <div>
+          <label
+            htmlFor="taskFormId"
+            className="block font-medium text-gray-700 mb-1"
+          >
+            Task Form
+          </label>
+          <select
+            id="taskFormId"
+            name="taskFormId"
+            value={form.taskFormId || ""}
+            onChange={onInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">No form required</option>
+            {availableForms.map((formOption) => (
+              <option key={formOption.id} value={formOption.id}>
+                {formOption.title || `Form ${formOption.id}`}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Optional form that users must complete when finishing this activity
+          </p>
         </div>
       )}
 

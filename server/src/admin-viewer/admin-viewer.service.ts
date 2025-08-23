@@ -2,18 +2,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityMetadata } from 'typeorm';
-import { TableListDto, TableMetadataDto } from './dto/table-list.dto';
-import { TableDataDto, TableDataQueryDto } from './dto/table-data.dto';
 import { ColumnMetadataDto } from './dto/column-metadata.dto';
 import { ColumnDataType } from './dto/column-type.enum';
-import {
-  UpdateRecordDto,
-  UpdateRecordResponseDto,
-} from './dto/update-record.dto';
 import {
   DeleteRecordsDto,
   DeleteRecordsResponseDto,
 } from './dto/delete-records.dto';
+import { TableDataDto, TableDataQueryDto } from './dto/table-data.dto';
+import { TableListDto, TableMetadataDto } from './dto/table-list.dto';
+import {
+  UpdateRecordDto,
+  UpdateRecordResponseDto,
+} from './dto/update-record.dto';
 
 @Injectable()
 export class AdminViewerService {
@@ -306,10 +306,6 @@ export class AdminViewerService {
         deletedIds: [],
       };
     }
-
-    console.log('Delete request for table:', tableName);
-    console.log('Primary key values:', deleteData.primaryKeyValues);
-    console.log('Primary key column:', primaryKeyColumn.databaseName);
 
     const queryRunner = this.dataSource.createQueryRunner();
 

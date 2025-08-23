@@ -59,7 +59,6 @@ export class CreateActionDto extends OmitType(ActionDto, [
   'usersCompleted',
   'status',
   'events',
-  'taskForm',
 ]) {}
 
 export class UpdateActionDto extends PartialType(CreateActionDto) {}

@@ -65,14 +65,6 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/form-builder"
-          element={
-            <ProtectedRoute>
-              <FormBuilderTest />
-            </ProtectedRoute>
-          }
-        />
       </Routes>
     </>
   );

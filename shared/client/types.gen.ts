@@ -124,16 +124,6 @@ export type ActionActivityType = 'user_joined' | 'user_completed';
  */
 export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
 
-export type Form = {
-    id: number;
-    title: string;
-    schema: {
-        [key: string]: unknown;
-    };
-    createdAt: string;
-    updatedAt: string;
-};
-
 export type ActionActivity = {
     id: number;
     /**
@@ -239,7 +229,7 @@ export type ActionDto = {
     /**
      * Form associated with the action
      */
-    taskForm?: Form;
+    taskFormId?: number;
     /**
      * Number of users who have joined the action
      */
@@ -343,6 +333,10 @@ export type CreateActionDto = {
      * Type of the action
      */
     type: ActionTaskType;
+    /**
+     * Form associated with the action
+     */
+    taskFormId?: number;
 };
 
 export type UpdateActionDto = {
@@ -387,6 +381,10 @@ export type UpdateActionDto = {
      * Type of the action
      */
     type?: ActionTaskType;
+    /**
+     * Form associated with the action
+     */
+    taskFormId?: number;
 };
 
 export type CreateActionEventDto = {
@@ -658,7 +656,9 @@ export type SearchItemDto = {
 };
 
 export type SubmitFormDto = {
-    [key: string]: unknown;
+    answers: {
+        [key: string]: unknown;
+    };
 };
 
 export type CreateFormDto = {
@@ -1981,7 +1981,7 @@ export type SearchSaveSelectedResponses = {
 export type TasksSubmitFormData = {
     body: SubmitFormDto;
     path: {
-        id: string;
+        id: number;
     };
     query?: never;
     url: '/tasks/submitForm/{id}';
@@ -2002,13 +2002,26 @@ export type TasksCreateFormResponses = {
     200: unknown;
 };
 
+export type TasksListFormsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/tasks/listForms';
+};
+
+export type TasksListFormsResponses = {
+    200: Array<FormDto>;
+};
+
+export type TasksListFormsResponse = TasksListFormsResponses[keyof TasksListFormsResponses];
+
 export type TasksGetFormData = {
     body?: never;
     path: {
-        formId: string;
+        id: number;
     };
     query?: never;
-    url: '/tasks/{formId}';
+    url: '/tasks/{id}';
 };
 
 export type TasksGetFormResponses = {
