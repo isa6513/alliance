@@ -29,7 +29,7 @@ export class FormResponse {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   answers: Record<string, any>;
 
-  @ManyToOne(() => User, (u) => u.formResponses, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User)
   @IsDefined()
   @Type(() => User)
   user: User;

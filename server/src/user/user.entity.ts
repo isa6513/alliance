@@ -6,7 +6,6 @@ import { Type } from 'class-transformer';
 import { Allow, IsNotEmpty, IsOptional } from 'class-validator';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { City } from 'src/geo/city.entity';
-import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import {
   BeforeInsert,
   BeforeUpdate,
@@ -147,7 +146,4 @@ export class User {
   @ApiProperty()
   @Allow()
   anonymous: boolean;
-
-  @OneToMany(() => FormResponse, (response) => response.user)
-  formResponses: FormResponse[];
 }

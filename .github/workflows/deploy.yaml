@@ -468,7 +468,7 @@ jobs:
       - verify-deployment
       - verify-https
       - verify-api
-    if: ${{ always() }}
+    if: always()
     steps:
       - name: Post webhook if any upstream failed/cancelled
         if: ${{ contains(join(needs.*.result, ','), 'failure') || contains(join(needs.*.result, ','), 'cancelled') }}
