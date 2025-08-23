@@ -1,48 +1,28 @@
-import { ActionActivityDto, UserActionRelation } from "@alliance/shared/client";
-import { isRouteErrorResponse, useOutletContext } from "react-router";
-import { Route } from "../../.react-router/types/src/components/+types/ActionTaskPanel";
 import { useAuth } from "../lib/AuthContext";
-import { useActionLoaderData } from "../pages/app/ActionPage";
+
+import { ActionDto, UserActionRelation } from "@alliance/shared/client";
+import ActionTaskPanelForm from "./ActionTaskPanelForm";
+
 import ActionCommitButton from "./ActionCommitButton";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
-import ActionTaskPanelForm from "./ActionTaskPanelForm";
 import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
 import { StripeWrapper } from "./StripeWrapper";
 import Card, { CardStyle } from "./system/Card";
 
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  console.error(error);
-  let errorText: string | undefined = undefined;
-  if (isRouteErrorResponse(error)) {
-    errorText = error.statusText;
-  } else if (error instanceof Error) {
-    errorText = error.name;
-  }
-  return (
-    <Card>
-      <p className="text-red-500 text-center">
-        Error loading task: {errorText}
-      </p>
-    </Card>
-  );
-}
-
-export type TaskPanelContext = {
+interface ActionTaskPanelProps {
+  action: ActionDto;
+  userRelation: UserActionRelation | null;
   handleCompleteAction: () => void;
   handleJoinAction: () => void;
-  userRelation: UserActionRelation | null;
-  activities: ActionActivityDto[];
-  handleLikeActivity: (activityId: number) => Promise<void>;
-  setActivities: React.Dispatch<React.SetStateAction<ActionActivityDto[]>>;
-};
+}
 
-const ActionTaskPanel = () => {
-  const { handleCompleteAction, handleJoinAction, userRelation } =
-    useOutletContext<TaskPanelContext>();
-
-  const action = useActionLoaderData();
-
+const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
+  action,
+  userRelation,
+  handleCompleteAction,
+  handleJoinAction,
+}: ActionTaskPanelProps) => {
   const { isAuthenticated } = useAuth();
 
   if (!action) {

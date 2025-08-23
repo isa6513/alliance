@@ -1,13 +1,13 @@
-import { actionsComplete } from "@alliance/shared/client";
+import { actionsComplete, actionsJoin } from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
 import { setRevalidate, useAppLoaderData } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
-import ActionItemCard from "../../components/ActionItemCard";
 import ForumListPost from "../../components/ForumListPost";
 import SingleActionCard from "../../components/SingleActionCard";
 import Card from "../../components/system/Card";
-import TaskCard from "../../components/TaskCard";
 import { isFeatureEnabled } from "../../lib/config";
+import LargeActionCard from "./LargeActionCard";
+import SmallActionCard from "./SmallActionCard";
 import useActivities, { ActivityList } from "./useActivities";
 
 const HomePage = () => {
@@ -43,8 +43,20 @@ const HomePage = () => {
       action.status === "gathering_commitments"
   );
 
+  const getNewCurrentTask = () => {
+    return newActions.shift() || todoActions.shift() || null;
+  };
+
+  const currentTask = getNewCurrentTask();
+
   const handleTaskComplete = (actionId: number) => {
     actionsComplete({ path: { id: actionId.toString() } }).then(() => {
+      window.location.reload();
+    });
+  };
+
+  const handleTaskJoin = (actionId: number) => {
+    actionsJoin({ path: { id: actionId.toString() } }).then(() => {
       window.location.reload();
     });
   };
@@ -108,88 +120,71 @@ const HomePage = () => {
     <div className="flex flex-col w-full h-full items-center bg-page">
       <div className="flex flex-row px-6 gap-x-3">
         <div className="flex flex-col py-16 max-w-[728px] md:min-w-[300px] gap-y-5 overflow-y-auto ">
-          <div className="flex flex-col gap-y-8">
-            <p className="font-adobe text-3xl">Your tasks</p>
-            {todoActions.length > 0 && (
-              <div className="flex flex-col gap-y-4">
-                <div className="flex flex-row items-center gap-x-2">
-                  <p className="font-medium text-zinc-800">
-                    Awaiting completion
-                  </p>
-                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full">
-                    {todoActions.slice(0, 2).length}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-y-2 w-full">
-                  {todoActions.slice(0, 2).map((action) => (
-                    <TaskCard
-                      key={action.id}
-                      action={action}
-                      friendCompletionActivities={friendActivities.filter(
-                        (activity) =>
-                          activity.actionId === action.id &&
-                          activity.type === "user_completed"
-                      )}
-                      commitActivity={
-                        activities?.get(action.id)?.join ?? undefined
-                      }
-                      onComplete={handleTaskComplete}
-                    />
-                  ))}
-                </div>
-              </div>
+          <div className="flex flex-col gap-y-6">
+            <p className="font-adobe text-3xl font-semibold">Current task</p>
+            {currentTask && (
+              <LargeActionCard
+                action={currentTask}
+                userRelation={relations.get(currentTask.id) ?? null}
+                friendActivities={[]}
+                onComplete={handleTaskComplete}
+                onJoin={handleTaskJoin}
+              />
             )}
-            {newActions.length > 0 && (
-              <div className="flex flex-col gap-y-4">
-                <div className="flex flex-row items-center gap-x-2">
-                  <p className="font-medium text-zinc-800">
-                    Awaiting your commitment
-                  </p>
-                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full">
-                    {newActions.length}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-y-2 w-full">
-                  {newActions.map((action) => (
-                    <ActionItemCard
-                      key={action.id}
-                      {...action}
-                      showDescription={true}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-            {committedActions.length > 0 && (
-              <div className="flex flex-col gap-y-4">
-                <div className="flex flex-row items-center gap-x-2">
-                  <p className="font-medium text-zinc-800">
-                    Still gathering commitments
-                  </p>
-                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-500 bg-zinc-200 rounded-full mt-[1px]">
-                    {committedActions.length}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-y-2 w-full">
-                  {committedActions.map((action) => (
-                    <ActionItemCard
-                      key={action.id}
-                      {...action}
-                      joinedCount={action.usersJoined}
-                      neededCount={action.commitmentThreshold}
-                      friendCommitmentActivities={friendActivities.filter(
-                        (activity) =>
-                          activity.actionId === action.id &&
-                          activity.type === "user_joined"
-                      )}
-                      userRelation={relations.get(action.id)}
-                      showDescription={false}
-                      activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
+            <p className="mt-4 font-adobe text-3xl font-semibold">Up next</p>
+            <div className="flex flex-col gap-y-2 w-full">
+              {todoActions.slice(0, 2).map((action) => (
+                // <TaskCard
+                //   key={action.id}
+                //   action={action}
+                //   friendCompletionActivities={friendActivities.filter(
+                //     (activity) =>
+                //       activity.actionId === action.id &&
+                //       activity.type === "user_completed"
+                //   )}
+                //   commitActivity={activities?.get(action.id)?.join ?? undefined}
+                //   onComplete={handleTaskComplete}
+                // />
+                <SmallActionCard
+                  key={action.id}
+                  {...action}
+                  showDescription={true}
+                  friendActivities={friendActivities.filter(
+                    (activity) =>
+                      activity.actionId === action.id &&
+                      activity.type === "user_completed"
+                  )}
+                  joinedCount={action.usersCompleted}
+                  neededCount={action.usersJoined}
+                  userRelation={relations.get(action.id)}
+                />
+              ))}
+              {newActions.map((action) => (
+                <SmallActionCard
+                  key={action.id}
+                  {...action}
+                  showDescription={true}
+                  userRelation={relations.get(action.id)}
+                />
+              ))}
+              {committedActions.map((action) => (
+                <SmallActionCard
+                  key={action.id}
+                  {...action}
+                  joinedCount={action.usersJoined}
+                  neededCount={action.commitmentThreshold}
+                  friendActivities={friendActivities.filter(
+                    (activity) =>
+                      activity.actionId === action.id &&
+                      activity.type === "user_joined"
+                  )}
+                  userRelation={relations.get(action.id)}
+                  showDescription={false}
+                  activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
+                />
+              ))}
+            </div>
+
             {/* <InviteMemberCard /> */}
           </div>
         </div>

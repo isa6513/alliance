@@ -21,7 +21,7 @@ export default [
         route("/", "pages/app/ActionsListPage.tsx"),
         route(":id", "pages/app/ActionPage.tsx", [
           layout("components/ActionContents.tsx", [
-            index("components/ActionTaskPanel.tsx"),
+            index("components/RoutedActionTaskPanel.tsx"),
           ]),
           route("activity/:activityId", "components/ActionActivityDetail.tsx"),
         ]),
