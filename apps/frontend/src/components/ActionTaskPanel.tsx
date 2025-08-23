@@ -79,6 +79,9 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         />
       );
     }
+    if (action.type === "Activity" && !action.taskFormId) {
+      return <p>This is terrible</p>;
+    }
     if (action.type === "Ongoing") {
       return (
         <ActionTaskPanelActivity
