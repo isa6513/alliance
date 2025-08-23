@@ -40,6 +40,12 @@ const HomePage = () => {
       action.status === "gathering_commitments"
   );
 
+  const commitmentsReachedActions = actions.filter(
+    (action) =>
+      relations.get(action.id) === "joined" &&
+      action.status === "commitments_reached"
+  );
+
   const currentTask = newActions.shift() || todoActions.shift() || null;
 
   const handleTaskComplete = (actionId: number) => {
@@ -108,6 +114,22 @@ const HomePage = () => {
                 />
               ))}
               {committedActions.map((action) => (
+                <SmallActionCard
+                  key={action.id}
+                  {...action}
+                  joinedCount={action.usersJoined}
+                  neededCount={action.commitmentThreshold}
+                  friendActivities={friendActivities.filter(
+                    (activity) =>
+                      activity.actionId === action.id &&
+                      activity.type === "user_joined"
+                  )}
+                  userRelation={relations.get(action.id)}
+                  showDescription={false}
+                  activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
+                />
+              ))}
+              {commitmentsReachedActions.map((action) => (
                 <SmallActionCard
                   key={action.id}
                   {...action}

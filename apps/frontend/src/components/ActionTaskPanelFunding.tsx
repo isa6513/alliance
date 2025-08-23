@@ -30,7 +30,6 @@ const ActionTaskPanelFunding = ({
   );
   const { isAuthenticated } = useAuth();
 
-  const [expanded, setExpanded] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { token, savedPaymentMethod, clientSecret, amount } =
@@ -104,10 +103,6 @@ const ActionTaskPanelFunding = ({
   const titleText = `Complete action by giving ${amtText}`;
 
   const handleContributeClicked = useCallback(async () => {
-    if (!savedPaymentMethod) {
-      setExpanded(true);
-      return;
-    }
     setLoading(true);
     if (!stripe || !elements || !clientSecret) {
       return;
@@ -130,80 +125,69 @@ const ActionTaskPanelFunding = ({
     return <ActionTaskPanelCompleted />;
   }
 
-  if (!expanded) {
-    return (
-      <Card
-        style={CardStyle.White}
-        className="flex flex-row justify-between items-center pl-6"
-      >
-        <div>
-          <p className="!text-lg !font-medium">{titleText}</p>
-          {savedPaymentMethod?.last4 && (
-            <p className="text-sm text-gray-500">
-              Paying immediately with your saved card ending in
-              {" " + savedPaymentMethod.last4} •
-              <a href="/settings" className="text-blue-500">
-                {" "}
-                Manage
-              </a>
-            </p>
-          )}
-        </div>
-
-        <Button onClick={handleContributeClicked} disabled={loading}>
-          {loading ? "Processing..." : "Contribute"}
-        </Button>
-      </Card>
-    );
-  }
-
   return (
-    <Card style={CardStyle.White} className="!px-[1px] !py-4">
-      <h2 className="z-20 px-5 bg-white">{titleText}</h2>
-      <form onSubmit={handleSubmit} className="mt-2">
-        {!isAuthenticated ? (
-          <div className="flex flex-col bg-white -mb-10 z-20 mx-4 gap-2">
-            <div className="z-2 flex gap-4 mt-1 w-full">
-              <StripeStyleFormInput
-                name="firstName"
-                placeholder="First Name"
-                type="text"
-              />
-              <StripeStyleFormInput
-                name="lastName"
-                placeholder="Last Name"
-                type="text"
-              />
-            </div>
-            <div className="z-2 flex gap-4 mt-1 w-full bg-white">
-              <StripeStyleFormInput
-                name="email"
-                placeholder="Email Address"
-                type="email"
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white -mb-12"></div>
-        )}
-        <PaymentElement />
-        <div className="flex flex-row justify-end items-center pl-5">
-          {!isAuthenticated && (
-            <p className="text-sm text-gray-500 flex-1">
-              We&apos;ll send you an email with instructions for setting up your
-              account after.
-            </p>
-          )}
-          <Button
-            type="submit"
-            disabled={!stripe || !elements}
-            className="justify-self-end mx-[15px] my-0 mt-1 rounded-md !py-3 !px-4"
-          >
-            Confirm payment
+    <Card style={CardStyle.White} className="!px-[2px] !py-4">
+      <p className="z-20 px-5 bg-white font-medium text-lg mb-1">{titleText}</p>
+      {savedPaymentMethod?.last4 ? (
+        <div className="flex flex-col gap-y-2 px-5">
+          <p className="text-sm text-gray-500 mb-2">
+            Paying with your saved card ending in
+            {" " + savedPaymentMethod.last4} •
+            <a href="/settings" className="text-blue-500">
+              {" "}
+              Manage
+            </a>
+          </p>
+          <Button onClick={handleContributeClicked} disabled={loading}>
+            {loading ? "Processing..." : "Contribute"}
           </Button>
         </div>
-        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-      </form>
+      ) : (
+        <form onSubmit={handleSubmit} className="mt-2">
+          {!isAuthenticated ? (
+            <div className="flex flex-col bg-white -mb-10 z-20 mx-4 gap-2">
+              <div className="z-2 flex gap-4 mt-1 w-full">
+                <StripeStyleFormInput
+                  name="firstName"
+                  placeholder="First Name"
+                  type="text"
+                />
+                <StripeStyleFormInput
+                  name="lastName"
+                  placeholder="Last Name"
+                  type="text"
+                />
+              </div>
+              <div className="z-2 flex gap-4 mt-1 w-full bg-white">
+                <StripeStyleFormInput
+                  name="email"
+                  placeholder="Email Address"
+                  type="email"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white -mb-12"></div>
+          )}
+          <PaymentElement />
+          <div className="flex flex-row justify-end items-center pl-5">
+            {!isAuthenticated && (
+              <p className="text-sm text-gray-500 flex-1">
+                We&apos;ll send you an email with instructions for setting up
+                your account after.
+              </p>
+            )}
+            <Button
+              type="submit"
+              disabled={!stripe || !elements}
+              className="justify-self-end mx-[15px] my-0 mt-1 rounded-md !py-3 !px-4"
+            >
+              Confirm Payment
+            </Button>
+          </div>
+          {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+        </form>
+      )}
     </Card>
   );
 };

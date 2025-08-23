@@ -41,12 +41,11 @@ const ActionTaskPanelForm = ({
     }
   };
   return (
-    <Card style={CardStyle.LightGrey}>
+    <Card style={CardStyle.White}>
       <div className="flex flex-col gap-y-2">
-        <p className="text-zinc-500 text-sm mb-1">
-          This action is awaiting your completion.
+        <p className="font-medium text-lg mb-1">
+          Complete this action by following these steps
         </p>
-        <hr className="border-zinc-200" />
         <div>
           {form && (
             <FormRenderer form={form.schema} onSubmit={handleSubmitForm} />

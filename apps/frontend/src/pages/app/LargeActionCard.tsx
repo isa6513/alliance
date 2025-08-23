@@ -109,7 +109,10 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             <div>
               <div className="flex flex-row items-center justify-between w-full gap-x-2">
                 <p className="text-zinc-500 text-base mb-1">
-                  {liveUserCount ?? 0} / {action.usersJoined} completed
+                  {liveUserCount ?? 0} / {action.usersJoined}{" "}
+                  {action.status === "gathering_commitments"
+                    ? "committed"
+                    : "completed"}
                   {friendActivities.length > 0 && (
                     <>
                       , including {friendActivities.length} friend
@@ -127,7 +130,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             </div>
           )}
         </div>
-        <div className="mt-6 ">
+        <div className="mt-4">
           <ActionTaskPanel
             action={action}
             userRelation={userRelation}

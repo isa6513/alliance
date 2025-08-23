@@ -15,7 +15,7 @@ const actionStatusColors: Record<ActionDto["status"], string> = {
 
 const actionStatusDescriptions: Record<ActionDto["status"], string> = {
   gathering_commitments: "Gathering commitments",
-  commitments_reached: "Sufficient commitments reached",
+  commitments_reached: "Pending office launch",
   member_action: "Members are now taking action",
   resolution: "Pending office resolution",
   completed: "Completed",

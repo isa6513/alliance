@@ -1,7 +1,7 @@
-import ReactMarkdown from "react-markdown";
-import Button, { ButtonColor } from "./system/Button";
-import Card, { CardStyle } from "./system/Card";
 import { ActionDto } from "@alliance/shared/client";
+import ReactMarkdown from "react-markdown";
+import Button from "./system/Button";
+import Card, { CardStyle } from "./system/Card";
 
 interface ActionTaskPanelActivityProps {
   action: ActionDto;
@@ -13,20 +13,17 @@ const ActionTaskPanelActivity = ({
   onCompleteAction,
 }: ActionTaskPanelActivityProps) => {
   return (
-    <Card style={CardStyle.LightGrey}>
+    <Card style={CardStyle.White}>
       <div className="flex flex-col gap-y-2">
-        <p className="text-zinc-500 text-sm mb-1">
-          This action is awaiting your completion.
+        <p className="font-medium text-lg mb-1">
+          Complete this action by following these steps
         </p>
-        <hr className="border-zinc-200" />
-        <div className="my-2">
+        <div className="">
           <p className="text-lg font-semibold">Steps</p>
           <ReactMarkdown>{action.taskContents}</ReactMarkdown>
         </div>
         <div className="flex justify-end">
-          <Button color={ButtonColor.Green} onClick={onCompleteAction}>
-            Mark Complete
-          </Button>
+          <Button onClick={onCompleteAction}>Mark Complete</Button>
         </div>
       </div>
     </Card>

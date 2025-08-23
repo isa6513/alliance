@@ -42,7 +42,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
           style={CardStyle.White}
           className="flex-row items-center gap-x-2 justify-between"
         >
-          <span>Ready to join?</span>
+          <span>Commit to participate in this action</span>
           <ActionCommitButton
             committed={false}
             isAuthenticated={true}
