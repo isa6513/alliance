@@ -88,8 +88,84 @@ export function FormBuilder({
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(
+    null
+  );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<
+    Array<{ id: string; name: string; type: "field" | "block" }>
+  >([]);
 
   const currentPage = schema.pages[selectedPageIndex];
+
+  // Available elements for search
+  const availableElements = [
+    { id: "text", name: "Text Field", type: "field" as const },
+    { id: "textarea", name: "Textarea Field", type: "field" as const },
+    { id: "email", name: "Email Field", type: "field" as const },
+    { id: "number", name: "Number Field", type: "field" as const },
+    { id: "checkbox", name: "Checkbox Field", type: "field" as const },
+    { id: "radio", name: "Radio Field", type: "field" as const },
+    { id: "select", name: "Select Field", type: "field" as const },
+    { id: "multiselect", name: "Multi-select Field", type: "field" as const },
+    { id: "date", name: "Date Field", type: "field" as const },
+    { id: "file", name: "File Field", type: "field" as const },
+    { id: "header", name: "Header Block", type: "block" as const },
+    { id: "text-block", name: "Text Block", type: "block" as const },
+    { id: "label", name: "Label Block", type: "block" as const },
+    { id: "divider", name: "Divider Block", type: "block" as const },
+    { id: "spacer", name: "Spacer Block", type: "block" as const },
+    { id: "html", name: "HTML Block", type: "block" as const },
+    { id: "image", name: "Image Block", type: "block" as const },
+  ];
+
+  // Search functionality
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const filtered = availableElements.filter((element) =>
+        element.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSearchResults(filtered);
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
+
+  const handleSearchSelect = (
+    element: (typeof availableElements)[0],
+    insertIndex: number
+  ) => {
+    if (element.type === "field") {
+      addField(element.id as FieldKind, insertIndex);
+    } else {
+      // Map text-block back to text for DisplayKind
+      const blockKind = element.id === "text-block" ? "text" : element.id;
+      addDisplayBlock(blockKind as DisplayKind, insertIndex);
+    }
+    setActiveSearchIndex(null);
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent, insertIndex: number) => {
+    if (e.key === "Escape") {
+      setActiveSearchIndex(null);
+      setSearchQuery("");
+      setSearchResults([]);
+    } else if (e.key === "Enter" && searchResults.length > 0) {
+      e.preventDefault();
+      handleSearchSelect(searchResults[0], insertIndex);
+    }
+  };
+
+  // Click outside handler
+  const handleClickOutside = (e: React.MouseEvent) => {
+    if (activeSearchIndex !== null) {
+      setActiveSearchIndex(null);
+      setSearchQuery("");
+      setSearchResults([]);
+    }
+  };
 
   // Load form data when formId changes
   useEffect(() => {
@@ -119,7 +195,7 @@ export function FormBuilder({
     }
   }, [formId, initialSchema]);
 
-  const addField = (kind: FieldKind) => {
+  const addField = (kind: FieldKind, insertIndex?: number) => {
     const fieldId = `field-${Date.now()}`;
     let newField: AnyField<string>;
 
@@ -212,17 +288,19 @@ export function FormBuilder({
         return;
     }
 
+    const targetIndex = insertIndex ?? currentPage.fields.length;
+    const newFields = [...currentPage.fields];
+    newFields.splice(targetIndex, 0, newField);
+
     updateSchema({
       ...schema,
       pages: schema.pages.map((page, idx) =>
-        idx === selectedPageIndex
-          ? { ...page, fields: [...page.fields, newField] }
-          : page
+        idx === selectedPageIndex ? { ...page, fields: newFields } : page
       ),
     });
   };
 
-  const addDisplayBlock = (kind: DisplayKind) => {
+  const addDisplayBlock = (kind: DisplayKind, insertIndex?: number) => {
     const blockId = `block-${Date.now()}`;
     let newBlock: DisplayBlock<string>;
 
@@ -271,12 +349,14 @@ export function FormBuilder({
         return;
     }
 
+    const targetIndex = insertIndex ?? currentPage.fields.length;
+    const newFields = [...currentPage.fields];
+    newFields.splice(targetIndex, 0, newBlock);
+
     updateSchema({
       ...schema,
       pages: schema.pages.map((page, idx) =>
-        idx === selectedPageIndex
-          ? { ...page, fields: [...page.fields, newBlock] }
-          : page
+        idx === selectedPageIndex ? { ...page, fields: newFields } : page
       ),
     });
   };
@@ -441,6 +521,75 @@ export function FormBuilder({
     setDraggedItem(null);
     setDragOverIndex(null);
     setDropPosition(null);
+  };
+
+  // Inline search component - small hover target
+  const InlineSearch = ({ insertIndex }: { insertIndex: number }) => {
+    const isActive = activeSearchIndex === insertIndex;
+
+    if (isActive) {
+      return (
+        <div className="relative my-2">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => handleSearchKeyDown(e, insertIndex)}
+              placeholder="Type to search for elements (text, header, divider...)"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+              autoFocus
+              onClick={(e) => e.stopPropagation()}
+            />
+            {searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto z-10">
+                {searchResults.map((element, index) => (
+                  <button
+                    key={`${element.type}-${element.id}`}
+                    onClick={() => handleSearchSelect(element, insertIndex)}
+                    className="w-full text-left px-3 py-2 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none first:rounded-t-md last:rounded-b-md"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-900">
+                        {element.name}
+                      </span>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          element.type === "field"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-green-100 text-green-800"
+                        }`}
+                      >
+                        {element.type === "field" ? "Field" : "Block"}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Larger hover target - only visible on hover, no spacing when not hovering
+    return (
+      <div className="relative group">
+        {/* Larger invisible hover area */}
+        <div className="w-full h-6 absolute -top-3 left-0 z-10"></div>
+
+        {/* Visible button on hover - positioned absolutely to not affect layout */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none group-hover:pointer-events-auto pb-4">
+          <button
+            onClick={() => setActiveSearchIndex(insertIndex)}
+            className="pb-[1px] w-8 h-8 bg-white border border-blue-500 hover:bg-blue-200 text-blue-500 rounded-full shadow-lg flex items-center justify-center text-sm font-bold transition-colors"
+            title="Add element here"
+          >
+            +
+          </button>
+        </div>
+      </div>
+    );
   };
 
   const renderField = (
@@ -684,11 +833,7 @@ export function FormBuilder({
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setIsPreviewMode(!isPreviewMode)}
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  isPreviewMode
-                    ? "bg-gray-600 hover:bg-gray-700 text-white"
-                    : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium ${"bg-gray-100 hover:bg-gray-200 text-gray-700"}`}
               >
                 {isPreviewMode ? "Edit Form" : "Preview Form"}
               </button>
@@ -777,7 +922,10 @@ export function FormBuilder({
           {isPreviewMode ? (
             <FormRenderer form={schema} onSubmit={null} />
           ) : (
-            <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <div
+              className="max-w-2xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8"
+              onClick={handleClickOutside}
+            >
               <div className="mb-6">
                 <input
                   type="text"
@@ -803,9 +951,26 @@ export function FormBuilder({
               </div>
 
               <div className="space-y-4">
-                {currentPage.fields.map((field, index) =>
-                  renderField(field, index)
+                {/* Search bar at the beginning if no fields */}
+                {currentPage.fields.length === 0 && (
+                  <InlineSearch insertIndex={0} />
                 )}
+
+                {currentPage.fields.map((field, index) => (
+                  <div key={field.id || index}>
+                    {/* Search bar before each element (except first) */}
+                    {index > 0 && <InlineSearch insertIndex={index} />}
+                    {/* First element gets search at beginning */}
+                    {index === 0 && <InlineSearch insertIndex={0} />}
+
+                    {renderField(field, index)}
+
+                    {/* Search bar after last element */}
+                    {index === currentPage.fields.length - 1 && (
+                      <InlineSearch insertIndex={index + 1} />
+                    )}
+                  </div>
+                ))}
 
                 {/* Drop zone at the end of the list */}
                 {draggedItem && currentPage.fields.length > 0 && (

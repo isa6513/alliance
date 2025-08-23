@@ -1,19 +1,29 @@
-import type { SelectField } from "@alliance/shared/lib/formschema";
-import type { BaseFieldProps } from "./types";
+import type { SelectField } from "@alliance/shared/forms/formschema";
 import { FieldWrapper } from "./FieldWrapper";
+import type { BaseFieldProps } from "./types";
 
-export function EditableSelectField({ field, onUpdate, onRemove, onDragStart, onDragEnd, isDragging }: BaseFieldProps<SelectField<string, string>>) {
+export function EditableSelectField({
+  field,
+  onUpdate,
+  onRemove,
+  onDragStart,
+  onDragEnd,
+  isDragging,
+}: BaseFieldProps<SelectField<string, string>>) {
   const addOption = () => {
     const newOption = {
       label: `Option ${(field.options?.length || 0) + 1}`,
-      value: `option${(field.options?.length || 0) + 1}`
+      value: `option${(field.options?.length || 0) + 1}`,
     };
     onUpdate({
-      options: [...(field.options || []), newOption]
+      options: [...(field.options || []), newOption],
     });
   };
 
-  const updateOption = (index: number, updates: { label?: string; value?: string }) => {
+  const updateOption = (
+    index: number,
+    updates: { label?: string; value?: string }
+  ) => {
     const updatedOptions = [...(field.options || [])];
     updatedOptions[index] = { ...updatedOptions[index], ...updates };
     onUpdate({ options: updatedOptions });
@@ -25,7 +35,12 @@ export function EditableSelectField({ field, onUpdate, onRemove, onDragStart, on
   };
 
   return (
-    <FieldWrapper onRemove={onRemove} onDragStart={onDragStart} onDragEnd={onDragEnd} isDragging={isDragging}>
+    <FieldWrapper
+      onRemove={onRemove}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      isDragging={isDragging}
+    >
       <div className="space-y-3">
         {/* Field Configuration */}
         <div className="bg-gray-50 p-3 rounded-md space-y-2">
@@ -41,7 +56,7 @@ export function EditableSelectField({ field, onUpdate, onRemove, onDragStart, on
               placeholder="Enter field label"
             />
           </div>
-          
+
           <div>
             <label className="flex items-center text-xs text-gray-700">
               <input
@@ -73,14 +88,18 @@ export function EditableSelectField({ field, onUpdate, onRemove, onDragStart, on
                   <input
                     type="text"
                     value={option.label}
-                    onChange={(e) => updateOption(index, { label: e.target.value })}
+                    onChange={(e) =>
+                      updateOption(index, { label: e.target.value })
+                    }
                     className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     placeholder="Option label"
                   />
                   <input
                     type="text"
                     value={option.value}
-                    onChange={(e) => updateOption(index, { value: e.target.value })}
+                    onChange={(e) =>
+                      updateOption(index, { value: e.target.value })
+                    }
                     className="w-20 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     placeholder="Value"
                   />
@@ -114,7 +133,9 @@ export function EditableSelectField({ field, onUpdate, onRemove, onDragStart, on
             ))}
           </select>
           {(!field.options || field.options.length === 0) && (
-            <p className="text-xs text-gray-500 mt-1 italic">No options added yet</p>
+            <p className="text-xs text-gray-500 mt-1 italic">
+              No options added yet
+            </p>
           )}
         </div>
       </div>

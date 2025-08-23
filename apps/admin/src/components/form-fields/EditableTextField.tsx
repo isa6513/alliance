@@ -1,10 +1,22 @@
-import type { TextField } from "@alliance/shared/lib/formschema";
-import type { BaseFieldProps } from "./types";
+import type { TextField } from "@alliance/shared/forms/formschema";
 import { FieldWrapper } from "./FieldWrapper";
+import type { BaseFieldProps } from "./types";
 
-export function EditableTextField({ field, onUpdate, onRemove, onDragStart, onDragEnd, isDragging }: BaseFieldProps<TextField<string>>) {
+export function EditableTextField({
+  field,
+  onUpdate,
+  onRemove,
+  onDragStart,
+  onDragEnd,
+  isDragging,
+}: BaseFieldProps<TextField<string>>) {
   return (
-    <FieldWrapper onRemove={onRemove} onDragStart={onDragStart} onDragEnd={onDragEnd} isDragging={isDragging}>
+    <FieldWrapper
+      onRemove={onRemove}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      isDragging={isDragging}
+    >
       <div className="space-y-3">
         {/* Field Configuration */}
         <div className="bg-gray-50 p-3 rounded-md space-y-2">
@@ -20,7 +32,7 @@ export function EditableTextField({ field, onUpdate, onRemove, onDragStart, onDr
               placeholder="Enter field label"
             />
           </div>
-          
+
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">
               Placeholder Text
@@ -33,7 +45,7 @@ export function EditableTextField({ field, onUpdate, onRemove, onDragStart, onDr
               placeholder="Enter placeholder text"
             />
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <label className="flex items-center text-xs text-gray-700">
               <input
@@ -44,13 +56,19 @@ export function EditableTextField({ field, onUpdate, onRemove, onDragStart, onDr
               />
               Required
             </label>
-            
+
             <div className="flex items-center space-x-2">
               <label className="text-xs text-gray-700">Max Length:</label>
               <input
                 type="number"
                 value={field.maxLength || ""}
-                onChange={(e) => onUpdate({ maxLength: e.target.value ? parseInt(e.target.value) : undefined })}
+                onChange={(e) =>
+                  onUpdate({
+                    maxLength: e.target.value
+                      ? parseInt(e.target.value)
+                      : undefined,
+                  })
+                }
                 className="w-16 px-1 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                 min="0"
               />

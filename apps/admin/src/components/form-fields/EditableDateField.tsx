@@ -1,10 +1,22 @@
-import type { DateField } from "@alliance/shared/lib/formschema";
-import type { BaseFieldProps } from "./types";
+import type { DateField } from "@alliance/shared/forms/formschema";
 import { FieldWrapper } from "./FieldWrapper";
+import type { BaseFieldProps } from "./types";
 
-export function EditableDateField({ field, onUpdate, onRemove, onDragStart, onDragEnd, isDragging }: BaseFieldProps<DateField<string>>) {
+export function EditableDateField({
+  field,
+  onUpdate,
+  onRemove,
+  onDragStart,
+  onDragEnd,
+  isDragging,
+}: BaseFieldProps<DateField<string>>) {
   return (
-    <FieldWrapper onRemove={onRemove} onDragStart={onDragStart} onDragEnd={onDragEnd} isDragging={isDragging}>
+    <FieldWrapper
+      onRemove={onRemove}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      isDragging={isDragging}
+    >
       <div className="space-y-3">
         {/* Field Configuration */}
         <div className="bg-gray-50 p-3 rounded-md space-y-2">
@@ -20,7 +32,7 @@ export function EditableDateField({ field, onUpdate, onRemove, onDragStart, onDr
               placeholder="Enter field label"
             />
           </div>
-          
+
           <div>
             <label className="flex items-center text-xs text-gray-700">
               <input

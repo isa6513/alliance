@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { FormDto, SubmitFormDto } from "../client";
 import type { DisplayBlock } from "./display-blocks";
@@ -12,7 +13,7 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [formData, setFormData] = useState<Record<string, any>>({});
 
-  const schema = form as FormSchema<string, string>;
+  const schema = form as unknown as FormSchema<string, string>;
   const currentPage = schema.pages[currentPageIndex];
   const isLastPage = currentPageIndex === schema.pages.length - 1;
   const isFirstPage = currentPageIndex === 0;

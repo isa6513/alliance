@@ -1,10 +1,22 @@
-import type { CheckboxField } from "@alliance/shared/lib/formschema";
-import type { BaseFieldProps } from "./types";
+import type { CheckboxField } from "@alliance/shared/forms/formschema";
 import { FieldWrapper } from "./FieldWrapper";
+import type { BaseFieldProps } from "./types";
 
-export function EditableCheckboxField({ field, onUpdate, onRemove, onDragStart, onDragEnd, isDragging }: BaseFieldProps<CheckboxField<string>>) {
+export function EditableCheckboxField({
+  field,
+  onUpdate,
+  onRemove,
+  onDragStart,
+  onDragEnd,
+  isDragging,
+}: BaseFieldProps<CheckboxField<string>>) {
   return (
-    <FieldWrapper onRemove={onRemove} onDragStart={onDragStart} onDragEnd={onDragEnd} isDragging={isDragging}>
+    <FieldWrapper
+      onRemove={onRemove}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      isDragging={isDragging}
+    >
       <div className="space-y-3">
         {/* Field Configuration */}
         <div className="bg-gray-50 p-3 rounded-md space-y-2">
@@ -20,7 +32,7 @@ export function EditableCheckboxField({ field, onUpdate, onRemove, onDragStart, 
               placeholder="Enter checkbox label"
             />
           </div>
-          
+
           <div>
             <label className="flex items-center text-xs text-gray-700">
               <input

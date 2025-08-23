@@ -1,4 +1,4 @@
-import type { FileField } from "@alliance/shared/lib/formschema";
+import type { FileField } from "@alliance/shared/forms/formschema";
 import { FieldWrapper } from "./FieldWrapper";
 import type { BaseFieldProps } from "./types";
 
@@ -11,7 +11,12 @@ export function EditableFileField({
   isDragging,
 }: BaseFieldProps<FileField<string>>) {
   return (
-    <FieldWrapper onRemove={onRemove} onDragStart={onDragStart} onDragEnd={onDragEnd} isDragging={isDragging}>
+    <FieldWrapper
+      onRemove={onRemove}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      isDragging={isDragging}
+    >
       <div className="space-y-3">
         {/* Field Configuration */}
         <div className="bg-gray-50 p-3 rounded-md space-y-2">

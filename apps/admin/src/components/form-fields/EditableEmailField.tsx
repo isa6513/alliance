@@ -1,10 +1,22 @@
-import type { EmailField } from "@alliance/shared/lib/formschema";
-import type { BaseFieldProps } from "./types";
+import type { EmailField } from "@alliance/shared/forms/formschema";
 import { FieldWrapper } from "./FieldWrapper";
+import type { BaseFieldProps } from "./types";
 
-export function EditableEmailField({ field, onUpdate, onRemove, onDragStart, onDragEnd, isDragging }: BaseFieldProps<EmailField<string>>) {
+export function EditableEmailField({
+  field,
+  onUpdate,
+  onRemove,
+  onDragStart,
+  onDragEnd,
+  isDragging,
+}: BaseFieldProps<EmailField<string>>) {
   return (
-    <FieldWrapper onRemove={onRemove} onDragStart={onDragStart} onDragEnd={onDragEnd} isDragging={isDragging}>
+    <FieldWrapper
+      onRemove={onRemove}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      isDragging={isDragging}
+    >
       <div className="space-y-3">
         {/* Field Configuration */}
         <div className="bg-gray-50 p-3 rounded-md space-y-2">
@@ -20,7 +32,7 @@ export function EditableEmailField({ field, onUpdate, onRemove, onDragStart, onD
               placeholder="Enter field label"
             />
           </div>
-          
+
           <div>
             <label className="flex items-center text-xs text-gray-700">
               <input
