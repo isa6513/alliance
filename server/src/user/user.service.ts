@@ -3,20 +3,20 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
-import { User } from './user.entity';
-import { Friend, FriendStatus } from './friend.entity';
-import { OnboardingDto, ProfileDto, UpdateProfileDto } from './user.dto';
-import { City } from 'src/geo/city.entity';
-import {
-  NotificationType,
-  Notification,
-} from 'src/notifs/entities/notification.entity';
-import { PrefillUser } from './prefill-user.entity';
-import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { City } from 'src/geo/city.entity';
 import { ImagesService } from 'src/images/images.service';
+import {
+  Notification,
+  NotificationType,
+} from 'src/notifs/entities/notification.entity';
+import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
+import { ILike, Repository } from 'typeorm';
+import { Friend, FriendStatus } from './friend.entity';
+import { PrefillUser } from './prefill-user.entity';
+import { OnboardingDto, ProfileDto, UpdateProfileDto } from './user.dto';
+import { User } from './user.entity';
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -356,6 +356,14 @@ export class UserService {
 
   async setStripeCustomerId(userId: number, stripeCustomerId: string) {
     await this.userRepository.update(userId, { stripeCustomerId });
+  }
+
+  async findActiveUsers(): Promise<User[]> {
+    return this.userRepository.find({
+      where: {
+        isNotSignedUpPartialProfile: false,
+      },
+    });
   }
 
   async createPartialProfile(

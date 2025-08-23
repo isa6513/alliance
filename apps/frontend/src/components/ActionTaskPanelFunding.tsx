@@ -1,18 +1,18 @@
 import { paymentsSetPartialProfile } from "@alliance/shared/client";
-import Card, { CardStyle } from "./system/Card";
 import {
   PaymentElement,
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import Button from "./system/Button";
+import { PaymentIntent } from "@stripe/stripe-js";
 import { useCallback, useState } from "react";
-import { usePaymentStatus } from "./PaymentStatus";
-import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import { useAuth } from "../lib/AuthContext";
+import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
+import { usePaymentStatus } from "./PaymentStatus";
 import StripeStyleFormInput from "./StripeStyleFormInput";
 import { usePaymentIntentData } from "./StripeWrapper";
-import { PaymentIntent } from "@stripe/stripe-js";
+import Button from "./system/Button";
+import Card, { CardStyle } from "./system/Card";
 
 export interface ActionTaskPanelFundingProps {
   onPaymentSuccess: () => unknown;
@@ -134,10 +134,10 @@ const ActionTaskPanelFunding = ({
     return (
       <Card
         style={CardStyle.White}
-        className="flex flex-row justify-between items-center"
+        className="flex flex-row justify-between items-center pl-6"
       >
         <div>
-          <h2 className="font-bold !text-xl ml-1">{titleText}</h2>
+          <p className="!text-lg !font-medium">{titleText}</p>
           {savedPaymentMethod?.last4 && (
             <p className="text-sm text-gray-500">
               Paying immediately with your saved card ending in

@@ -471,7 +471,7 @@ jobs:
     if: always()
     steps:
       - name: Post webhook if any upstream failed/cancelled
-        if: ${{ contains(join(needs.*.result, ','), 'failure') || contains(join(needs.*.result, ','), 'cancelled') }}
+        if: ${{ contains(join(needs.*.result, ','), 'failure') || contains(join(needs.*.result, ','), 'skipped') }}
         run: |
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"❌ Workflow *${{ github.workflow }}* failed (one or more jobs). <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Open run>\"}" \
