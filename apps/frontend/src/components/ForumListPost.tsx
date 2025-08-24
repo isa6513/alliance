@@ -37,9 +37,9 @@ const ForumListPost = ({
         onClick={() => navigate(`/forum/post/${post.id}`)}
         style={CardStyle.White}
       >
-        <div className="flex flex-row justify-between gap-2">
-          <p className="font-medium text-base">{post.title}</p>
+        <div className="flex flex-row gap-1">
           {post.pinned && <PinnedIcon size="small" />}
+          <p className="font-medium text-base">{post.title}</p>
         </div>
         <div className="flex justify-between items-end text-sm text-gray-500">
           <div className="flex flex-row gap-x-2 items-center">
