@@ -75,6 +75,11 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
     onJoin(action.id);
   };
 
+  const threshold =
+    action.status === "gathering_commitments"
+      ? action.commitmentThreshold ?? 10
+      : action.usersJoined;
+
   return (
     <div>
       <Card
@@ -106,55 +111,26 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
           </div>
         </div>
         <div className="mt-6">
-          {action.status === "member_action" && (
-            <div>
-              <div className="flex flex-row items-center justify-between w-full gap-x-2">
-                <p className="text-zinc-500 text-base mb-1">
-                  {liveUserCount ?? 0} / {action.usersJoined}{" "}
-                  {action.status === "gathering_commitments"
-                    ? "committed"
-                    : "completed"}
-                  {friendActivities.length > 0 && (
-                    <>
-                      , including {friendActivities.length} friend
-                      {friendActivities.length === 1 ? "" : "s"}
-                    </>
-                  )}
-                </p>
-                <UserProfilePicRow
-                  users={friendActivities.map((activity) => activity.user)}
-                />
-              </div>
-              <CompletedBar
-                percentage={(liveUserCount ?? 0 / action.usersJoined) * 100}
+          <div>
+            <div className="flex flex-row items-center justify-between w-full gap-x-2">
+              <p className="text-zinc-500 text-base mb-1">
+                {liveUserCount ?? 0} / {threshold}{" "}
+                {action.status === "gathering_commitments"
+                  ? "committed"
+                  : "completed"}
+                {friendActivities.length > 0 && (
+                  <>
+                    , including {friendActivities.length} friend
+                    {friendActivities.length === 1 ? "" : "s"}
+                  </>
+                )}
+              </p>
+              <UserProfilePicRow
+                users={friendActivities.map((activity) => activity.user)}
               />
             </div>
-          )}
-          {action.status === "gathering_commitments" &&
-            action.commitmentThreshold && (
-              <div>
-                <div className="flex flex-row items-center justify-between w-full gap-x-2">
-                  <p className="text-zinc-500 text-base mb-1">
-                    {liveUserCount ?? 0} / {action.commitmentThreshold}{" "}
-                    commitments
-                    {friendActivities.length > 0 && (
-                      <>
-                        , including {friendActivities.length} friend
-                        {friendActivities.length === 1 ? "" : "s"}
-                      </>
-                    )}
-                  </p>
-                  <UserProfilePicRow
-                    users={friendActivities.map((activity) => activity.user)}
-                  />
-                </div>
-                <CompletedBar
-                  percentage={
-                    (liveUserCount ?? 0 / action.commitmentThreshold) * 100
-                  }
-                />
-              </div>
-            )}
+            <CompletedBar percentage={(liveUserCount ?? 0 / threshold) * 100} />
+          </div>
         </div>
         <div className="mt-4">
           <ActionTaskPanel

@@ -1,5 +1,6 @@
 import { actionsComplete, actionsJoin } from "@alliance/shared/client";
-import { useAppLoaderData } from "../../applayout";
+import { useNavigate } from "react-router";
+import { setRevalidate, useAppLoaderData } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
 import Card from "../../components/system/Card";
@@ -8,6 +9,7 @@ import SmallActionCard from "./SmallActionCard";
 import useActivities, { ActivityList } from "./useActivities";
 
 const HomePage = () => {
+  const navigate = useNavigate();
   const { actions, posts, activities } = useAppLoaderData();
 
   const { activities: friendActivities, handleLikeActivity } = useActivities({
@@ -31,21 +33,22 @@ const HomePage = () => {
 
   const commitmentsReachedActions = actions.filter(
     (action) =>
-      relations.get(action.id) === "joined" &&
-      action.status === "commitments_reached"
+      action.relation === "joined" && action.status === "commitments_reached"
   );
 
   const currentTask = newActions.shift() || todoActions.shift() || null;
 
   const handleTaskComplete = (actionId: number) => {
     actionsComplete({ path: { id: actionId.toString() } }).then(() => {
-      window.location.reload();
+      setRevalidate();
+      navigate(window.location.pathname);
     });
   };
 
   const handleTaskJoin = (actionId: number) => {
     actionsJoin({ path: { id: actionId.toString() } }).then(() => {
-      window.location.reload();
+      setRevalidate();
+      navigate(window.location.pathname);
     });
   };
 
@@ -124,7 +127,6 @@ const HomePage = () => {
                       activity.actionId === action.id &&
                       activity.type === "user_joined"
                   )}
-                  userRelation={relations.get(action.id)}
                   showDescription={false}
                   activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
                 />

@@ -35,8 +35,6 @@ export class SmsService implements OnModuleInit {
       keySecret,
       ...(region && { smsRegion: region }),
     });
-
-    this.sendSms('+16502728685', 'hi hi');
   }
 
   async sendSms(to: string, body: string) {
