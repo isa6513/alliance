@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router";
+import { useAuth } from "../lib/AuthContext";
 
 enum NavbarPage {
   People = "People",
@@ -14,13 +15,6 @@ const links: NavbarPage[] = [
   NavbarPage.LogIn,
 ];
 
-const destinations: Record<NavbarPage, string> = {
-  [NavbarPage.People]: "/people",
-  [NavbarPage.Guide]: "/guide",
-  [NavbarPage.Progress]: "/progress",
-  [NavbarPage.LogIn]: "/login",
-};
-
 interface PrelaunchNavbarProps {
   transparent?: boolean;
   absolute?: boolean;
@@ -32,7 +26,16 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
   absolute = true,
   ref,
 }: PrelaunchNavbarProps) => {
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  const destinations: Record<NavbarPage, string> = {
+    [NavbarPage.People]: "/people",
+    [NavbarPage.Guide]: "/guide",
+    [NavbarPage.Progress]: "/progress",
+    [NavbarPage.LogIn]: isAuthenticated ? "/home" : "/login",
+  };
+
   return (
     <div
       className={`
