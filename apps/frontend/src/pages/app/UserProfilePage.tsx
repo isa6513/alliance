@@ -402,7 +402,7 @@ const UserProfilePage: React.FC = () => {
         </div>
         <div className="py-3">
           {selectedTab === ProfileTabs.Activity && (
-            <div className="space-y-4">
+            <div className="space-y-2">
               {completedActions.length === 0 && (
                 <p className="text-center text-stone-500">
                   No actions completed yet

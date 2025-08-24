@@ -1,7 +1,7 @@
 const PinnedIcon = ({ size = "small" }: { size?: "small" | "large" }) => {
   const sizeClass = {
     small: "w-6 h-6",
-    large: "w-12 h-12",
+    large: "w-8 h-8",
   };
 
   return (

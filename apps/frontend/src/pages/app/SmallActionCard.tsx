@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { ActionWithRelation } from "../../applayout";
 import CompletedBar from "../../components/CompletedBar";
 import Card, { CardStyle } from "../../components/system/Card";
+import Tag, { TagStyle } from "../../components/Tag";
 import UserProfilePicRow from "../../components/UserProfilePicRow";
 
 export interface SmallActionCardProps
@@ -69,24 +70,24 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
         <div className="flex flex-row items-start gap-x-8">
           <div className="flex-1 flex flex-col">
             {waitingOnCompletion && (
-              <div className="px-2 py-1 bg-blue-400/20 self-start rounded-md text-sm text-blue-600 mb-2">
+              <Tag style={TagStyle.Blue} className="mb-2">
                 Needs your completion
-              </div>
+              </Tag>
             )}
             {waitingOnCommitment && (
-              <div className="px-2 py-1 bg-yellow-400/20 self-start rounded-md text-sm text-yellow-600 mb-2">
+              <Tag style={TagStyle.Yellow} className="mb-2">
                 Needs your commitment
-              </div>
+              </Tag>
             )}
             {waitingForOffice && (
-              <div className="px-2 py-1 bg-zinc-400/20 self-start rounded-md text-sm text-zinc-500 mb-2">
+              <Tag style={TagStyle.Grey} className="mb-2">
                 Needs office to launch
-              </div>
+              </Tag>
             )}
             {waitingOnOthers && (
-              <div className="px-2 py-1 bg-zinc-400/20 self-start rounded-md text-sm text-zinc-500 mb-2">
+              <Tag style={TagStyle.Grey} className="mb-2">
                 Needs commitments from others
-              </div>
+              </Tag>
             )}
 
             <p className="font-medium text-black">{name}</p>

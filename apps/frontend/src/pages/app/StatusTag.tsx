@@ -1,16 +1,17 @@
 import { ActionDto } from "@alliance/shared/client";
 import StatusIcon from "../../components/icons/StatusIcon";
+import Tag, { TagStyle } from "../../components/Tag";
 
-const actionStatusColors: Record<ActionDto["status"], string> = {
-  gathering_commitments: "bg-yellow-50 text-yellow-600 border-yellow-600",
-  commitments_reached: "bg-green/10 text-green border-green",
-  member_action: "bg-blue-50 text-blue-600 border-blue-600",
-  resolution: "blue-500",
-  completed: "gray-500",
-  failed: "red-500",
-  abandoned: "yellow-500",
-  draft: "gray-500",
-  upcoming: "blue-500",
+const actionStatusStyles: Record<ActionDto["status"], TagStyle> = {
+  gathering_commitments: TagStyle.Yellow,
+  commitments_reached: TagStyle.Green,
+  member_action: TagStyle.Blue,
+  resolution: TagStyle.Blue,
+  completed: TagStyle.Green,
+  failed: TagStyle.Grey,
+  abandoned: TagStyle.Grey,
+  draft: TagStyle.Grey,
+  upcoming: TagStyle.Grey,
 };
 
 const actionStatusDescriptions: Record<ActionDto["status"], string> = {
@@ -32,12 +33,17 @@ interface StatusTagProps {
 
 const StatusTag = ({ status }: StatusTagProps) => {
   return (
-    <div
-      className={`px-3 py-1 flex flex-row items-center border ${actionStatusColors[status]} rounded-lg`}
+    // <div
+    //   className={`px-3 py-1 flex flex-row items-center border ${actionStatusStyles[status]} rounded-lg`}
+    // >
+    <Tag
+      style={actionStatusStyles[status]}
+      size="large"
+      className="flex flex-row items-center"
     >
       <StatusIcon status={status} size="small" />
       <p>{actionStatusDescriptions[status]}</p>
-    </div>
+    </Tag>
   );
 };
 

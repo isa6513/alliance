@@ -3,7 +3,8 @@ import { useNavigate } from "react-router";
 import { setRevalidate, useAppLoaderData } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
-import Card from "../../components/system/Card";
+import CheckIcon from "../../components/icons/CheckIcon";
+import Card, { CardStyle } from "../../components/system/Card";
 import LargeActionCard from "./LargeActionCard";
 import SmallActionCard from "./SmallActionCard";
 import useActivities, { ActivityList } from "./useActivities";
@@ -54,11 +55,12 @@ const HomePage = () => {
 
   return (
     <div className="flex flex-col w-full h-full items-center bg-page">
-      <div className="flex flex-row px-6 gap-x-3">
+      <div className="flex flex-row px-6 gap-x-4">
+        <div className="md:w-[175px]"></div>
         <div className="flex flex-col py-16 max-w-[728px] md:min-w-[300px] gap-y-5 overflow-y-auto ">
           <div className="flex flex-col gap-y-6">
             <p className="font-adobe text-3xl font-semibold">Current task</p>
-            {currentTask && currentTask.relation && (
+            {currentTask && currentTask.relation ? (
               <LargeActionCard
                 action={currentTask}
                 userRelation={currentTask.relation as "joined" | "none"}
@@ -66,77 +68,96 @@ const HomePage = () => {
                 onComplete={handleTaskComplete}
                 onJoin={handleTaskJoin}
               />
+            ) : (
+              <Card style={CardStyle.White}>
+                <div className="px-2 py-24 flex flex-col items-center gap-y-4">
+                  <CheckIcon size="large" />
+                  <p className="text-center text-zinc-500 text-xl">
+                    Nothing to do right now!
+                  </p>
+                </div>
+              </Card>
             )}
-            <p className="mt-4 font-adobe text-3xl font-semibold">Up next</p>
-            <div className="flex flex-col gap-y-2 w-full">
-              {todoActions.slice(0, 2).map((action) => (
-                // <TaskCard
-                //   key={action.id}
-                //   action={action}
-                //   friendCompletionActivities={friendActivities.filter(
-                //     (activity) =>
-                //       activity.actionId === action.id &&
-                //       activity.type === "user_completed"
-                //   )}
-                //   commitActivity={activities?.get(action.id)?.join ?? undefined}
-                //   onComplete={handleTaskComplete}
-                // />
-                <SmallActionCard
-                  key={action.id}
-                  {...action}
-                  showDescription={true}
-                  friendActivities={friendActivities.filter(
-                    (activity) =>
-                      activity.actionId === action.id &&
-                      activity.type === "user_completed"
-                  )}
-                  joinedCount={action.usersCompleted}
-                  neededCount={action.usersJoined}
-                />
-              ))}
-              {newActions.map((action) => (
-                <SmallActionCard
-                  key={action.id}
-                  {...action}
-                  showDescription={true}
-                />
-              ))}
-              {committedActions.map((action) => (
-                <SmallActionCard
-                  key={action.id}
-                  {...action}
-                  joinedCount={action.usersJoined}
-                  neededCount={action.commitmentThreshold}
-                  friendActivities={friendActivities.filter(
-                    (activity) =>
-                      activity.actionId === action.id &&
-                      activity.type === "user_joined"
-                  )}
-                  showDescription={false}
-                  activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
-                />
-              ))}
-              {commitmentsReachedActions.map((action) => (
-                <SmallActionCard
-                  key={action.id}
-                  {...action}
-                  joinedCount={action.usersJoined}
-                  neededCount={action.commitmentThreshold}
-                  friendActivities={friendActivities.filter(
-                    (activity) =>
-                      activity.actionId === action.id &&
-                      activity.type === "user_joined"
-                  )}
-                  showDescription={false}
-                  activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
-                />
-              ))}
-            </div>
+
+            {(todoActions.length > 0 ||
+              newActions.length > 0 ||
+              committedActions.length > 0 ||
+              commitmentsReachedActions.length > 0) && (
+              <>
+                <p className="mt-4 font-adobe text-3xl font-semibold">
+                  Up next
+                </p>
+                <div className="flex flex-col gap-y-2 w-full">
+                  {todoActions.slice(0, 2).map((action) => (
+                    // <TaskCard
+                    //   key={action.id}
+                    //   action={action}
+                    //   friendCompletionActivities={friendActivities.filter(
+                    //     (activity) =>
+                    //       activity.actionId === action.id &&
+                    //       activity.type === "user_completed"
+                    //   )}
+                    //   commitActivity={activities?.get(action.id)?.join ?? undefined}
+                    //   onComplete={handleTaskComplete}
+                    // />
+                    <SmallActionCard
+                      key={action.id}
+                      {...action}
+                      showDescription={true}
+                      friendActivities={friendActivities.filter(
+                        (activity) =>
+                          activity.actionId === action.id &&
+                          activity.type === "user_completed"
+                      )}
+                      joinedCount={action.usersCompleted}
+                      neededCount={action.usersJoined}
+                    />
+                  ))}
+                  {newActions.map((action) => (
+                    <SmallActionCard
+                      key={action.id}
+                      {...action}
+                      showDescription={true}
+                    />
+                  ))}
+                  {committedActions.map((action) => (
+                    <SmallActionCard
+                      key={action.id}
+                      {...action}
+                      joinedCount={action.usersJoined}
+                      neededCount={action.commitmentThreshold}
+                      friendActivities={friendActivities.filter(
+                        (activity) =>
+                          activity.actionId === action.id &&
+                          activity.type === "user_joined"
+                      )}
+                      showDescription={false}
+                      activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
+                    />
+                  ))}
+                  {commitmentsReachedActions.map((action) => (
+                    <SmallActionCard
+                      key={action.id}
+                      {...action}
+                      joinedCount={action.usersJoined}
+                      neededCount={action.commitmentThreshold}
+                      friendActivities={friendActivities.filter(
+                        (activity) =>
+                          activity.actionId === action.id &&
+                          activity.type === "user_joined"
+                      )}
+                      showDescription={false}
+                      activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
+                    />
+                  ))}
+                </div>
+              </>
+            )}
 
             {/* <InviteMemberCard /> */}
           </div>
         </div>
-        <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch w-[350px]">
+        <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch w-[375px]">
           <div className="flex flex-col gap-y-3">
             <Card>
               <p className="font-semibold mb-3">Forum activity</p>

@@ -145,7 +145,7 @@ const FormRenderer = ({
                 required={field.required}
                 className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm text-zinc-700">
                 {field.label}
                 {field.required && <span className="text-red-500 ml-1">*</span>}
               </span>

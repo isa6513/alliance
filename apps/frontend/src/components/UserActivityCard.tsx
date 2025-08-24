@@ -1,17 +1,16 @@
-import { CardStyle } from "./system/Card";
-import Card from "./system/Card";
-import Badge from "./system/Badge";
-import { formatDistanceToNow } from "date-fns";
-import { useNavigate } from "react-router";
-import { useCallback, useState } from "react";
 import {
   ActionActivityDto,
   actionsUpdateActivity,
 } from "@alliance/shared/client";
-import Comments from "./Comments";
-import ActivityLikeButton from "./ActivityLikeButton";
+import { formatDistanceToNow } from "date-fns";
+import { useCallback, useState } from "react";
+import { useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
+import ActivityLikeButton from "./ActivityLikeButton";
+import Comments from "./Comments";
 import Button, { ButtonColor } from "./system/Button";
+import Card, { CardStyle } from "./system/Card";
+import Tag, { TagStyle } from "./Tag";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;
@@ -82,14 +81,12 @@ const UserActivityCard = ({
   return (
     <div className="flex flex-row justify-stretch items-center space-x-4">
       <Card
-        className="block bg-page text-[11pt]  flex-1 border-b"
+        className="block bg-page text-[11pt] flex-1 border-b"
         style={CardStyle.White}
       >
         <div className="flex flex-row justify-between items-start">
           <div className="flex flex-col justify-start w-[100%] space-y-3">
-            <Badge className="!bg-green text-white" size="lg">
-              Completed {timeSinceCompleted}
-            </Badge>
+            <Tag style={TagStyle.Blue}>Completed {timeSinceCompleted}</Tag>
             <p
               className="font-medium cursor-pointer hover:underline"
               onClick={handleClick}

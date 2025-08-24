@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router";
-import { PostDto } from "@alliance/shared/client";
-import { useAuth } from "../../lib/AuthContext";
-import { forumFindOnePost, forumRemovePost } from "@alliance/shared/client";
-import Card, { CardStyle } from "../../components/system/Card";
-import { formatTime } from "../../lib/utils";
-import Comments from "../../components/Comments";
-import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
+import {
+  forumFindOnePost,
+  forumRemovePost,
+  PostDto,
+} from "@alliance/shared/client";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
 import { setRevalidate } from "../../applayout";
+import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
+import Comments from "../../components/Comments";
 import ProfileImage from "../../components/ProfileImage";
 import PinnedIcon from "../../components/icons/PinnedIcon";
+import Card, { CardStyle } from "../../components/system/Card";
+import { useAuth } from "../../lib/AuthContext";
+import { formatTime } from "../../lib/utils";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
@@ -108,13 +111,11 @@ const PostDetailPage: React.FC = () => {
           >
             &larr;
           </Link>
-          <Card className="p-6 mb-3" style={CardStyle.White}>
+          <Card className="py-6 px-5 mb-3" style={CardStyle.White}>
             <div className="flex justify-between items-start">
-              <div className="flex flex-row gap-x-2 items-center justify-between w-full -mt-2">
-                <h1 className="font-adobe !text-2xl font-semibold">
-                  {post.title}
-                </h1>
+              <div className="flex flex-row gap-x-1 items-center w-full -mt-2">
                 {post.pinned && <PinnedIcon size="large" />}
+                <h1 className="!text-xl !font-medium">{post.title}</h1>
               </div>
               {post.author.id === user?.id && (
                 <div className="space-x-2">
@@ -133,10 +134,8 @@ const PostDetailPage: React.FC = () => {
                 </div>
               )}
             </div>
-            <div className="flex flex-row gap-x-4 items-center">
-              {post.author.profilePicture && (
-                <ProfileImage pfp={post.author.profilePicture} size="small" />
-              )}
+            <div className="flex flex-row gap-x-2 mt-1 items-center !text-sm">
+              <ProfileImage pfp={post.author.profilePicture} size="small" />
               <span>
                 <a
                   href={`/user/${post.author.id}`}
