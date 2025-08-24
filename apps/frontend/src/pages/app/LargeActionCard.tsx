@@ -71,6 +71,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   };
 
   const handleJoinAction = () => {
+    console.log("join action", action.id);
     onJoin(action.id);
   };
 
@@ -105,7 +106,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
           </div>
         </div>
         <div className="mt-6">
-          {action.commitmentThreshold && (
+          {action.status === "member_action" && (
             <div>
               <div className="flex flex-row items-center justify-between w-full gap-x-2">
                 <p className="text-zinc-500 text-base mb-1">
@@ -129,6 +130,31 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
               />
             </div>
           )}
+          {action.status === "gathering_commitments" &&
+            action.commitmentThreshold && (
+              <div>
+                <div className="flex flex-row items-center justify-between w-full gap-x-2">
+                  <p className="text-zinc-500 text-base mb-1">
+                    {liveUserCount ?? 0} / {action.commitmentThreshold}{" "}
+                    commitments
+                    {friendActivities.length > 0 && (
+                      <>
+                        , including {friendActivities.length} friend
+                        {friendActivities.length === 1 ? "" : "s"}
+                      </>
+                    )}
+                  </p>
+                  <UserProfilePicRow
+                    users={friendActivities.map((activity) => activity.user)}
+                  />
+                </div>
+                <CompletedBar
+                  percentage={
+                    (liveUserCount ?? 0 / action.commitmentThreshold) * 100
+                  }
+                />
+              </div>
+            )}
         </div>
         <div className="mt-4">
           <ActionTaskPanel

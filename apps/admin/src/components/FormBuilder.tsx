@@ -17,6 +17,7 @@ import type {
 } from "@alliance/shared/forms/formschema";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import AppMarkdownWrapper from "./AppMarkdownWrapper";
 import {
   EditableDividerBlock,
   EditableHeaderBlock,
@@ -920,7 +921,13 @@ export function FormBuilder({
 
         <div className="flex-1 p-6 overflow-y-auto min-h-0">
           {isPreviewMode ? (
-            <FormRenderer form={schema} onSubmit={null} />
+            <FormRenderer
+              form={schema}
+              onSubmit={null}
+              markdownRenderer={(text) => (
+                <AppMarkdownWrapper markdownContent={text} />
+              )}
+            />
           ) : (
             <div
               className="max-w-2xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8"

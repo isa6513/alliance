@@ -1,5 +1,5 @@
 import { actionsComplete, actionsJoin } from "@alliance/shared/client";
-import { setRevalidate, useAppLoaderData } from "../../applayout";
+import { useAppLoaderData } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
 import Card from "../../components/system/Card";
@@ -8,36 +8,25 @@ import SmallActionCard from "./SmallActionCard";
 import useActivities, { ActivityList } from "./useActivities";
 
 const HomePage = () => {
-  const { actions, relations, posts, activities } = useAppLoaderData();
+  const { actions, posts, activities } = useAppLoaderData();
 
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
   });
 
-  if (!relations) {
-    setRevalidate();
-    return (
-      <div className="text-zinc-400 w-full h-80 flex items-center justify-center">
-        Failed to load user data.
-      </div>
-    );
-  }
-
   const todoActions = actions.filter(
     (action) =>
-      relations.get(action.id) === "joined" && action.status === "member_action"
+      action.relation === "joined" && action.status === "member_action"
   );
 
   const newActions = actions.filter(
     (action) =>
-      relations.get(action.id) === "none" &&
-      action.status === "gathering_commitments"
+      action.relation === "none" && action.status === "gathering_commitments"
   );
 
   const committedActions = actions.filter(
     (action) =>
-      relations.get(action.id) === "joined" &&
-      action.status === "gathering_commitments"
+      action.relation === "joined" && action.status === "gathering_commitments"
   );
 
   const commitmentsReachedActions = actions.filter(
@@ -66,12 +55,10 @@ const HomePage = () => {
         <div className="flex flex-col py-16 max-w-[728px] md:min-w-[300px] gap-y-5 overflow-y-auto ">
           <div className="flex flex-col gap-y-6">
             <p className="font-adobe text-3xl font-semibold">Current task</p>
-            {currentTask && relations.get(currentTask.id) && (
+            {currentTask && currentTask.relation && (
               <LargeActionCard
                 action={currentTask}
-                userRelation={
-                  relations.get(currentTask.id) as "joined" | "none"
-                }
+                userRelation={currentTask.relation as "joined" | "none"}
                 friendActivities={[]}
                 onComplete={handleTaskComplete}
                 onJoin={handleTaskJoin}
@@ -102,7 +89,6 @@ const HomePage = () => {
                   )}
                   joinedCount={action.usersCompleted}
                   neededCount={action.usersJoined}
-                  userRelation={relations.get(action.id)}
                 />
               ))}
               {newActions.map((action) => (
@@ -110,7 +96,6 @@ const HomePage = () => {
                   key={action.id}
                   {...action}
                   showDescription={true}
-                  userRelation={relations.get(action.id)}
                 />
               ))}
               {committedActions.map((action) => (
@@ -124,7 +109,6 @@ const HomePage = () => {
                       activity.actionId === action.id &&
                       activity.type === "user_joined"
                   )}
-                  userRelation={relations.get(action.id)}
                   showDescription={false}
                   activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
                 />

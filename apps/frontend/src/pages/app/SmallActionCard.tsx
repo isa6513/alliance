@@ -1,25 +1,21 @@
-import {
-  ActionActivityDto,
-  ActionDto,
-  UserActionRelation,
-} from "@alliance/shared/client/types.gen";
+import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import React, { useCallback } from "react";
 import { useNavigate } from "react-router";
+import { ActionWithRelation } from "../../applayout";
 import CompletedBar from "../../components/CompletedBar";
 import Card, { CardStyle } from "../../components/system/Card";
 import UserProfilePicRow from "../../components/UserProfilePicRow";
 
 export interface SmallActionCardProps
   extends Pick<
-    ActionDto,
-    "name" | "shortDescription" | "category" | "id" | "status"
+    ActionWithRelation,
+    "name" | "shortDescription" | "category" | "id" | "status" | "relation"
   > {
   className?: string;
   joinedCount?: number;
   neededCount?: number;
   friendActivities?: ActionActivityDto[];
   showDescription?: boolean;
-  userRelation?: UserActionRelation;
   activity?: ActionActivityDto;
 }
 
@@ -32,7 +28,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
   joinedCount,
   neededCount,
   friendActivities = [],
-  userRelation,
+  relation,
   activity,
 }) => {
   const navigate = useNavigate();
@@ -46,16 +42,16 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
   );
 
   const waitingOnCompletion =
-    status === "member_action" && userRelation === "joined";
+    status === "member_action" && relation === "joined";
 
   const waitingOnCommitment =
-    status === "gathering_commitments" && userRelation === "none";
+    status === "gathering_commitments" && relation === "none";
 
   const waitingForOffice =
-    status === "commitments_reached" && userRelation === "joined";
+    status === "commitments_reached" && relation === "joined";
 
   const waitingOnOthers =
-    status === "gathering_commitments" && userRelation === "joined";
+    status === "gathering_commitments" && relation === "joined";
 
   // const [toggleComments, setToggleComments] = useState(false);
 

@@ -7,9 +7,14 @@ import type { AnyField, FormSchema } from "./formschema";
 interface FormRendererProps {
   form: FormDto["schema"];
   onSubmit: ((data: SubmitFormDto) => void) | null; //null for admin preview
+  markdownRenderer: (text: string) => React.ReactNode;
 }
 
-const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
+const FormRenderer = ({
+  form,
+  onSubmit,
+  markdownRenderer,
+}: FormRendererProps) => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [formData, setFormData] = useState<Record<string, any>>({});
 
@@ -300,8 +305,8 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
         return (
           <div key={index} className="text-gray-900">
             {(block as any).markdown ? (
-              <div className="prose prose-sm max-w-none whitespace-pre-wrap">
-                {(block as any).text}
+              <div className="prose prose-sm max-w-none">
+                {markdownRenderer((block as any).text)}
               </div>
             ) : (
               <p className="whitespace-pre-wrap">{(block as any).text}</p>

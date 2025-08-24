@@ -6,6 +6,7 @@ import {
 } from "@alliance/shared/client";
 import FormRenderer from "@alliance/shared/forms/FormRenderer";
 import { useEffect, useState } from "react";
+import AppMarkdownWrapper from "./AppMarkdownWrapper";
 import Card, { CardStyle } from "./system/Card";
 
 interface ActionTaskPanelActivityProps {
@@ -48,7 +49,13 @@ const ActionTaskPanelForm = ({
         </p>
         <div>
           {form && (
-            <FormRenderer form={form.schema} onSubmit={handleSubmitForm} />
+            <FormRenderer
+              form={form.schema}
+              onSubmit={handleSubmitForm}
+              markdownRenderer={(text) => (
+                <AppMarkdownWrapper markdownContent={text} />
+              )}
+            />
           )}
         </div>
       </div>

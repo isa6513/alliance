@@ -42,6 +42,7 @@ __metadata:
     globals: "npm:^16.0.0"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
+    react-markdown: "npm:^10.1.0"
     react-router-dom: "npm:^7.5.3"
     tailwindcss: "npm:^4.1.4"
     typescript: "npm:~5.7.2"

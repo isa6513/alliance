@@ -29,8 +29,12 @@ export interface RouteMatches {
   matches: RouteMatch[];
 }
 
+export type ActionWithRelation = ActionDto & {
+  relation: UserActionRelation | undefined;
+};
+
 export interface LoaderData {
-  actions: ActionDto[];
+  actions: ActionWithRelation[];
   relations?: Map<number, UserActionRelation>;
   activities?: Map<number, ActivitiesForAction>;
   posts: PostDto[];
@@ -92,8 +96,13 @@ export async function clientLoader() {
     }
   });
 
+  const actionsWithRelation = actions.data?.map((action) => ({
+    ...action,
+    relation: actionToRelationMap.get(action.id),
+  }));
+
   return {
-    actions: actions.data ?? [],
+    actions: actionsWithRelation ?? [],
     relations: actionToRelationMap,
     activities: activitiesForAction,
     posts: posts.data ?? [],
