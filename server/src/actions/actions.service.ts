@@ -216,43 +216,11 @@ export class ActionsService {
     // re-fetch action from database to get the updated events
     const newAction = await this.findOne(actionId);
 
-    await this.maybeSendNotifsForAction(newAction);
-
     return new ActionDto(newAction);
   }
 
   async remove(id: number) {
     await this.actionRepository.delete(id);
-  }
-
-  async maybeSendNotifsForAction(action: Action) {
-    for (const event of action.events) {
-      if (event.newStatus !== action.status) {
-        continue;
-      }
-      if (event.newStatus === ActionStatus.GatheringCommitments) {
-        await this.notifsService.sendCommitmentNotifs(
-          event,
-          action,
-          await this.userService.findActiveUsers(),
-        );
-      }
-      if (event.newStatus === ActionStatus.MemberAction) {
-        await this.notifsService.sendMemberActionNotifs(
-          event,
-          action,
-          await this.actionActivityRepository
-            .find({
-              where: {
-                actionId: action.id,
-                type: ActionActivityType.USER_JOINED,
-              },
-              relations: ['user'],
-            })
-            .then((activities) => activities.map((activity) => activity.user)),
-        );
-      }
-    }
   }
 
   countCommitted(actionId: number): Observable<number> {

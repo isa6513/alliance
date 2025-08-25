@@ -28,6 +28,16 @@ export class MailService {
     subject: string,
     context: ISendMailOptions['context'],
   ): Promise<Mail> {
+    if (process.env.NODE_ENV === 'test') {
+      return {
+        id: 0,
+        sentMessageId: 'test',
+        to: recipient,
+        status: EmailStatus.Sent,
+        emailType: emailType,
+        createdAt: new Date(),
+      };
+    }
     const mail = await this.mailRepository.create({
       to: recipient,
       emailType: emailType,
