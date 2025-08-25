@@ -75,6 +75,7 @@ interface ReplyContentProps
   isHighlighted: boolean;
   onUpdateReply: (id: number, content: string) => void;
   onLikeReply: (id: number, unlike?: boolean) => void;
+  compact?: boolean;
 }
 
 const ReplyContent: React.FC<ReplyContentProps> = ({
@@ -90,6 +91,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
   handleDeleteReply,
   onUpdateReply,
   onLikeReply,
+  compact = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(reply.content);
@@ -150,7 +152,10 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
 
       {/* Profile picture column */}
       <div className="flex-shrink-0 mt-1">
-        <ProfileImage pfp={reply.author.profilePicture} size="medium" />
+        <ProfileImage
+          pfp={reply.author.profilePicture}
+          size={compact ? "small" : "medium"}
+        />
       </div>
 
       {/* Content column */}
@@ -342,7 +347,7 @@ const ReplyComponent = ({
     return (
       <div className="relative">
         {/* Collapse/Expand Arrow - absolutely positioned to the left of the card */}
-        {hasChildren && (
+        {hasChildren && !compact && (
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className={`absolute  top-6 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer z-10 ${
@@ -368,11 +373,7 @@ const ReplyComponent = ({
           </button>
         )}
 
-        <div
-          className={`border-transparent duration-1000 rounded-lg ${
-            compact ? "pl-6" : ""
-          }`}
-        >
+        <div className={`border-transparent duration-1000 rounded-lg`}>
           <Card
             key={reply.id}
             className={`!display-block transition-colors duration-1000 ${newReplyClass} ${
@@ -395,6 +396,7 @@ const ReplyComponent = ({
                 handleDeleteReply={handleDeleteReply}
                 onUpdateReply={handleUpdateReply}
                 onLikeReply={onLikeReply}
+                compact={compact}
               />
             </div>
 
@@ -408,7 +410,11 @@ const ReplyComponent = ({
                   )
                   .map((childReply) => (
                     <div key={childReply.id}>
-                      <div className="border-t border-gray-200 -mx-4 my-4"></div>
+                      <div
+                        className={`${
+                          compact ? "" : "border-t border-gray-200"
+                        } -mx-4 my-4`}
+                      ></div>
                       <div>
                         <ReplyComponent
                           reply={childReply}

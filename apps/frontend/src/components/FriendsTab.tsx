@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router";
-import Card, { CardStyle } from "./system/Card";
-import Button, { ButtonColor } from "./system/Button";
 import {
+  ProfileDto,
+  userAcceptFriendRequest,
+  userDeclineFriendRequest,
   userListFriends,
   userListReceivedRequests,
   userListSentRequests,
-  userAcceptFriendRequest,
-  userDeclineFriendRequest,
   userRemoveFriend,
-  ProfileDto,
 } from "@alliance/shared/client";
+import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import ProfileImage from "./ProfileImage";
+import Button, { ButtonColor } from "./system/Button";
+import Card, { CardStyle } from "./system/Card";
 
 interface FriendsTabProps {
   userId: number;
@@ -173,7 +173,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
         </button>
       </div>
 
-      <div className="pb-5">
+      <div className="pb-8">
         {activeTab === "friends" && (
           <>
             {friends.length === 0 ? (
@@ -181,7 +181,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
                 You don&apos;t have any friends yet.
               </p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {friends.map((friend) => (
                   <div
                     key={friend.id}
@@ -222,7 +222,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
                 No pending friend requests.
               </p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {receivedRequests.map((request) => (
                   <div
                     key={request.id}
@@ -267,7 +267,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
                 You haven&apos;t sent any friend requests.
               </p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {sentRequests.map((request) => (
                   <div
                     key={request.id}

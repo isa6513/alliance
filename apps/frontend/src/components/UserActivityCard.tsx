@@ -2,15 +2,15 @@ import {
   ActionActivityDto,
   actionsUpdateActivity,
 } from "@alliance/shared/client";
-import { formatDistanceToNow } from "date-fns";
 import { useCallback, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
+import { formatTime } from "../lib/utils";
 import ActivityLikeButton from "./ActivityLikeButton";
 import Comments from "./Comments";
+import ProfileImage from "./ProfileImage";
 import Button, { ButtonColor } from "./system/Button";
 import Card, { CardStyle } from "./system/Card";
-import Tag, { TagStyle } from "./Tag";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;
@@ -26,7 +26,7 @@ const UserActivityCard = ({
   canEdit = false,
 }: UserActivityCardProps) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user: self } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editDescription, setEditDescription] = useState(
     activity.description || ""
@@ -37,7 +37,7 @@ const UserActivityCard = ({
     navigate(`/actions/${activity.actionId}/activity/${activity.id}`);
   }, [activity.actionId, activity.id, navigate]);
 
-  const timeSinceCompleted = formatDistanceToNow(new Date(activity.createdAt), {
+  const timeSinceCompleted = formatTime(new Date(activity.createdAt), {
     addSuffix: true,
   });
 
@@ -47,7 +47,7 @@ const UserActivityCard = ({
   }, [activity.description]);
 
   const handleSave = useCallback(async () => {
-    if (!user || isSaving) return;
+    if (!self || isSaving) return;
 
     setIsSaving(true);
     try {
@@ -71,7 +71,7 @@ const UserActivityCard = ({
     } finally {
       setIsSaving(false);
     }
-  }, [user, activity.id, editDescription, onActivityUpdate, isSaving]);
+  }, [self, activity.id, editDescription, onActivityUpdate, isSaving]);
 
   const handleCancel = useCallback(() => {
     setEditDescription(activity.description || "");
@@ -84,19 +84,59 @@ const UserActivityCard = ({
         className="block bg-page text-[11pt] flex-1 border-b"
         style={CardStyle.White}
       >
-        <div className="flex flex-row justify-between items-start">
-          <div className="flex flex-col justify-start w-[100%] space-y-3">
-            <Tag style={TagStyle.Blue}>Completed {timeSinceCompleted}</Tag>
-            <p
-              className="font-medium cursor-pointer hover:underline"
-              onClick={handleClick}
-            >
-              {activity.action.name}
-            </p>
+        <div className="flex flex-row gap-x-2 items-center">
+          <div className="flex-shrink-0">
+            <Link to={`/user/${activity.user.id}`}>
+              <ProfileImage pfp={activity.user.profilePicture} size="medium" />
+            </Link>
           </div>
-          <div className="flex items-center space-x-2">
+          <p className="text-zinc-600">{activity.user.displayName}</p>
+          <p className="text-zinc-500">completed {timeSinceCompleted}</p>
+        </div>
+        <div className="flex flex-row justify-between mt-2">
+          <div className="flex flex-col space-y-3">
+            <div>
+              <p
+                className="font-medium text-lg cursor-pointer hover:underline"
+                onClick={handleClick}
+              >
+                {activity.action.name}
+              </p>
+              {isEditing ? (
+                <div className="flex-1 space-y-2">
+                  <textarea
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    placeholder="Add a description..."
+                    className="w-full border border-stone-300 rounded p-2 text-sm resize-none"
+                    rows={2}
+                  />
+                  <div className="flex space-x-2">
+                    <Button
+                      color={ButtonColor.Light}
+                      onClick={handleCancel}
+                      className="text-xs py-1 px-2"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      color={ButtonColor.Blue}
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="text-xs py-1 px-2"
+                    >
+                      {isSaving ? "Saving..." : "Save"}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                activity.description && <p>{activity.description}</p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center space-x-2 self-end">
             <ActivityLikeButton
-              liked={activity.likes.some((like) => like.id === user?.id)}
+              liked={activity.likes.some((like) => like.id === self?.id)}
               likes={activity.likes.length}
               handleLike={() => handleLike(activity.id)}
             />
@@ -122,41 +162,10 @@ const UserActivityCard = ({
             )}
           </div>
         </div>
-        {isEditing ? (
-          <div className="flex-1 space-y-2">
-            <textarea
-              value={editDescription}
-              onChange={(e) => setEditDescription(e.target.value)}
-              placeholder="Add a description..."
-              className="w-full border border-stone-300 rounded p-2 text-sm resize-none"
-              rows={2}
-            />
-            <div className="flex space-x-2">
-              <Button
-                color={ButtonColor.Light}
-                onClick={handleCancel}
-                className="text-xs py-1 px-2"
-              >
-                Cancel
-              </Button>
-              <Button
-                color={ButtonColor.Blue}
-                onClick={handleSave}
-                disabled={isSaving}
-                className="text-xs py-1 px-2"
-              >
-                {isSaving ? "Saving..." : "Save"}
-              </Button>
-            </div>
-          </div>
-        ) : (
-          activity.description && (
-            <div className="flex items-center justify-between">
-              <p className="flex-1">{activity.description}</p>
-            </div>
-          )
-        )}
-        <Comments objectId={activity.id} type="activity" compact />
+
+        <div className="mt-2">
+          <Comments objectId={activity.id} type="activity" compact />
+        </div>
       </Card>
     </div>
   );
