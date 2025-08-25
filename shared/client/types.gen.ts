@@ -26,10 +26,17 @@ export type AccessToken = {
     access_token: string;
 };
 
+export type NotificationChannel = 'text' | 'email' | 'push';
+
+export type NotificationPreference = 'all' | 'digest' | 'none';
+
 export type UserDto = {
     id: number;
     name: string;
     email: string;
+    primaryNotificationChannel: NotificationChannel;
+    socialNotifsPreference: NotificationPreference;
+    turnedOffAllNotifs: boolean;
     admin: boolean;
     referralCode: string | null;
     onboardingComplete: boolean;
@@ -64,6 +71,12 @@ export type UpdateProfileDto = {
     id?: number;
     name?: string;
     email?: string;
+    phoneNumber?: string;
+    phoneNumberVerified?: boolean;
+    emailVerified?: boolean;
+    primaryNotificationChannel?: NotificationChannel;
+    socialNotifsPreference?: NotificationPreference;
+    turnedOffAllNotifs?: boolean;
     password?: string;
     admin?: boolean;
     profilePicture?: string | null;
@@ -98,6 +111,12 @@ export type User = {
     id: number;
     name: string;
     email: string;
+    phoneNumber?: string;
+    phoneNumberVerified: boolean;
+    emailVerified: boolean;
+    primaryNotificationChannel: NotificationChannel;
+    socialNotifsPreference: NotificationPreference;
+    turnedOffAllNotifs: boolean;
     password: string;
     admin: boolean;
     profilePicture: string | null;
@@ -426,6 +445,17 @@ export type UpdateActionActivityDto = {
     attachments?: Array<string>;
 };
 
+export type NotificationDto = {
+    id: number;
+    category: NotificationType;
+    message: string;
+    webAppLocation: string | null;
+    mobileAppLocation: string | null;
+    read: boolean;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type CreatePostDto = {
     title: string;
     content: string;
@@ -457,17 +487,6 @@ export type UpdateCommentDto = {
     parentObjectType?: CommentParentObject;
     parentObjectId?: number;
     parentId?: number;
-};
-
-export type NotificationDto = {
-    id: number;
-    category: NotificationType;
-    message: string;
-    webAppLocation: string | null;
-    mobileAppLocation: string | null;
-    read: boolean;
-    createdAt: string;
-    updatedAt: string;
 };
 
 export type CitySearchDto = {
@@ -1468,6 +1487,54 @@ export type ActionsUpdateActivityResponses = {
 
 export type ActionsUpdateActivityResponse = ActionsUpdateActivityResponses[keyof ActionsUpdateActivityResponses];
 
+export type NotifsFindAllData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/notifs';
+};
+
+export type NotifsFindAllResponses = {
+    200: Array<NotificationDto>;
+};
+
+export type NotifsFindAllResponse = NotifsFindAllResponses[keyof NotifsFindAllResponses];
+
+export type NotifsSetReadData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/notifs/read/{id}';
+};
+
+export type NotifsSetReadResponses = {
+    200: unknown;
+};
+
+export type NotifsSetReadAllData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/notifs/read-all';
+};
+
+export type NotifsSetReadAllResponses = {
+    200: unknown;
+};
+
+export type NotifsClearData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/notifs/clear';
+};
+
+export type NotifsClearResponses = {
+    200: unknown;
+};
+
 export type ForumFindAllPostsData = {
     body?: never;
     path?: never;
@@ -1682,54 +1749,6 @@ export type ForumUnlikeCommentResponses = {
 };
 
 export type ForumUnlikeCommentResponse = ForumUnlikeCommentResponses[keyof ForumUnlikeCommentResponses];
-
-export type NotifsFindAllData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/notifs';
-};
-
-export type NotifsFindAllResponses = {
-    200: Array<NotificationDto>;
-};
-
-export type NotifsFindAllResponse = NotifsFindAllResponses[keyof NotifsFindAllResponses];
-
-export type NotifsSetReadData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/notifs/read/{id}';
-};
-
-export type NotifsSetReadResponses = {
-    200: unknown;
-};
-
-export type NotifsSetReadAllData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/notifs/read-all';
-};
-
-export type NotifsSetReadAllResponses = {
-    200: unknown;
-};
-
-export type NotifsClearData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/notifs/clear';
-};
-
-export type NotifsClearResponses = {
-    200: unknown;
-};
 
 export type GeoSearchCityData = {
     body?: never;

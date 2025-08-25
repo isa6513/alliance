@@ -22,16 +22,12 @@ export class ActionEventNotifWorker {
     private readonly dataSource: DataSource,
     @InjectRepository(ActionEvent)
     private readonly eventRepo: Repository<ActionEvent>,
-    @InjectRepository(Action) private readonly actionRepo: Repository<Action>,
-    @InjectRepository(ActionActivity)
-    private readonly activityRepo: Repository<ActionActivity>,
     private readonly notifsService: NotifsService,
     private readonly userService: UserService,
   ) {}
 
   @Cron('* * * * *')
   async dispatchDueNotifs() {
-    return;
     if (
       process.env.NODE_ENV === 'development' &&
       !process.env.SEND_DEV_NOTIFS
@@ -41,9 +37,6 @@ export class ActionEventNotifWorker {
 
     const now = new Date();
 
-    console.log('dispatchDueNotifs');
-
-    // Find a small batch of due, unsent events
     const due = await this.eventRepo
       .createQueryBuilder('event')
       .leftJoinAndSelect('event.action', 'action')
@@ -51,18 +44,16 @@ export class ActionEventNotifWorker {
       .andWhere('event.date <= :now', { now })
       .andWhere('event.notifsSentAt IS NULL')
       .orderBy('event.date', 'ASC')
-      .limit(50)
+      .limit(2)
       .getMany();
 
     for (const event of due) {
-      console.log('processing event', event.id);
       await this.processOne(event.id);
     }
   }
 
   private async processOne(eventId: number) {
     await this.dataSource.transaction(async (manager) => {
-      // Lock the row so only one worker instance processes it
       const event = await manager
         .createQueryBuilder(ActionEvent, 'event')
         .where('event.id = :id', { id: eventId })
@@ -72,13 +63,11 @@ export class ActionEventNotifWorker {
 
       if (!event) return;
 
-      // Double-check due + unsent under the lock
       if (
         event.notifsSentAt ||
         event.date > new Date() ||
         event.sendNotifsTo === NotificationType.None
       ) {
-        console.log('returning due to notifsSentAt or date or sendNotifsTo');
         return;
       }
 
@@ -102,6 +91,8 @@ export class ActionEventNotifWorker {
         const users = activities.map((a) => a.user);
         await this.notifsService.sendMemberActionNotifs(event, action, users);
       }
+
+      console.log('notifs sent for event', event.id);
 
       event.notifsSentAt = new Date();
       await manager.getRepository(ActionEvent).save(event);

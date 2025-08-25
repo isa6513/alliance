@@ -9,16 +9,6 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { Public } from './public.decorator';
-import { SignUpDto } from './dto/sign-up.dto';
-import {
-  AuthGuard,
-  extractRefreshTokenFromCookie,
-  JwtRequest,
-} from './guards/auth.guard';
-import { TokenMode, SignInDto, SignInResponseDto } from './dto/signin.dto';
-import { RefreshTokenGuard } from './guards/refresh.guard';
 import {
   ApiBearerAuth,
   ApiCookieAuth,
@@ -26,10 +16,20 @@ import {
   ApiResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AccessToken } from './dto/authtokens.dto';
 import { Response } from 'express';
 import { UserDto } from '../user/user.dto';
+import { AuthService } from './auth.service';
+import { AccessToken } from './dto/authtokens.dto';
 import ForgotPasswordDto, { ResetPasswordDto } from './dto/forgotpassword.dto';
+import { SignUpDto } from './dto/sign-up.dto';
+import { SignInDto, SignInResponseDto, TokenMode } from './dto/signin.dto';
+import {
+  AuthGuard,
+  extractRefreshTokenFromCookie,
+  JwtRequest,
+} from './guards/auth.guard';
+import { RefreshTokenGuard } from './guards/refresh.guard';
+import { Public } from './public.decorator';
 
 @ApiBearerAuth()
 @ApiCookieAuth()
@@ -135,6 +135,9 @@ export class AuthController {
       admin: profile.admin,
       id: profile.id,
       onboardingComplete: profile.onboardingComplete,
+      primaryNotificationChannel: profile.primaryNotificationChannel,
+      socialNotifsPreference: profile.socialNotifsPreference,
+      turnedOffAllNotifs: profile.turnedOffAllNotifs,
       referralCode: profile.referralCode,
       anonymous: profile.anonymous,
     };

@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ActionEvent } from 'src/actions/entities/action-event.entity';
 import { Action } from 'src/actions/entities/action.entity';
+import { EmailStatus, Mail } from 'src/mail/mail.entity';
 import { MailService } from 'src/mail/mail.service';
 import { actionUrl } from 'src/search/approutes';
 import { SmsService } from 'src/sms/sms.service';
@@ -82,12 +83,13 @@ export class NotifsService {
     );
   }
 
-  async sendCommitmentNotifs(
+  async sendActionNotifsToUsers(
     event: ActionEvent,
     action: Action,
     users: User[],
+    sendMail: (user: User, action: Action) => Promise<Mail>,
+    smsContent: (user: User, action: Action) => string,
   ) {
-    console.log('sendCommitmentNotifs:', users.length);
     for (const user of users) {
       if (
         await this.actionEventNotifsRepository.findOne({
@@ -107,32 +109,46 @@ export class NotifsService {
       notif.sent = false;
       if (this.shouldEmailUser(user)) {
         notif.channel = NotificationChannel.Email;
-        //TODO: do this async?
-        // console.log('sending email to', user.email);
-        // const result = await this.mailService.sendCommitmentEmail(
-        //   user.email,
-        //   user.name,
-        //   action.name,
-        //   actionUrl(action.id, true),
-        // );
-        // notif.mail = result;
-        // if (result.status === EmailStatus.Sent) {
-        //   notif.sent = true;
-        // }
-        console.log(notif.sent);
-      } else if (this.shouldTextUser(user)) {
+        const result = await sendMail(user, action);
+        notif.mail = result;
+        if (result.status === EmailStatus.Sent) {
+          notif.sent = true;
+        }
+      } else if (this.shouldTextUser(user) && process.env.SMS_ENABLED !== '0') {
         const result = await this.smsService.sendSms(
           user.phoneNumber!,
-          `New action to join: ${action.name}. ${actionUrl(action.id, true)}`,
+          smsContent(user, action),
         );
         if (result) {
           notif.sent = true;
         }
         notif.channel = NotificationChannel.Text;
+      } else {
+        //TODO: pushes
       }
       await this.actionEventNotifsRepository.save(notif);
     }
-    console.log('sendCommitmentNotifs done');
+  }
+
+  async sendCommitmentNotifs(
+    event: ActionEvent,
+    action: Action,
+    users: User[],
+  ) {
+    await this.sendActionNotifsToUsers(
+      event,
+      action,
+      users,
+      (user, action) =>
+        this.mailService.sendCommitmentEmail(
+          user.email,
+          user.name,
+          action.name,
+          actionUrl(action.id, true),
+        ),
+      (user, action) =>
+        `New action to join: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
+    );
   }
 
   async sendMemberActionNotifs(
@@ -140,15 +156,19 @@ export class NotifsService {
     action: Action,
     users: User[],
   ) {
-    for (const user of users) {
-      if (this.shouldEmailUser(user)) {
-        await this.mailService.sendMemberActionEmail(
+    await this.sendActionNotifsToUsers(
+      event,
+      action,
+      users,
+      (user, action) =>
+        this.mailService.sendMemberActionEmail(
           user.email,
           user.name,
           action.name,
           actionUrl(action.id, true),
-        );
-      }
-    }
+        ),
+      (user, action) =>
+        `New member action: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
+    );
   }
 }

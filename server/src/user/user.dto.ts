@@ -5,9 +5,9 @@ import {
   PartialType,
   PickType,
 } from '@nestjs/swagger';
-import { User } from './user.entity';
-import { FriendStatus } from './friend.entity';
 import { IsOptional } from 'class-validator';
+import { FriendStatus } from './friend.entity';
+import { User } from './user.entity';
 
 export class UserDto extends PickType(User, [
   'name',
@@ -15,6 +15,9 @@ export class UserDto extends PickType(User, [
   'admin',
   'id',
   'onboardingComplete',
+  'primaryNotificationChannel',
+  'socialNotifsPreference',
+  'turnedOffAllNotifs',
   'referralCode',
   'anonymous',
 ]) {
