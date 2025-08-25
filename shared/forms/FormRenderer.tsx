@@ -190,9 +190,11 @@ const FormRenderer = ({
               value={value}
               onChange={(e) => updateField(field.id, e.target.value)}
               required={field.required}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent has-[option.placeholder:checked]:text-gray-400"
             >
-              <option value="">Select an option</option>
+              <option value="" className="placeholder" selected disabled>
+                Select an option
+              </option>
               {(field as any).options.map((option: any, optIndex: number) => (
                 <option key={optIndex} value={option.value}>
                   {option.label}

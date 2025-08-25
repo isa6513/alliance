@@ -1,4 +1,5 @@
 import { ProfileDto } from "@alliance/shared/client";
+import { Link } from "react-router";
 import ProfileImage from "./ProfileImage";
 
 export interface ActivityFeedItem {
@@ -18,16 +19,18 @@ const ActivityFeedItem = ({
 }: ActivityFeedItem) => {
   return (
     <div className="flex flex-row gap-x-2">
-      <a href={`/user/${user.id}`} className="flex-shrink-0">
-        <ProfileImage pfp={user.profilePicture} size="small" />
-      </a>
+      <div className="flex-shrink-0">
+        <Link to={`/user/${user.id}`}>
+          <ProfileImage pfp={user.profilePicture} size="small" />
+        </Link>
+      </div>
       <div className="">
         {showTitle && (
           <>
             {titleLink ? (
-              <a href={titleLink} className="text-green hover:underline">
+              <Link to={titleLink} className="text-green hover:underline">
                 {title}
-              </a>
+              </Link>
             ) : (
               <p className="text-black">{title}</p>
             )}

@@ -5,9 +5,9 @@ import {
   actionsCreate,
   actionsFindAllWithDrafts,
   actionsSetTestRelations,
-  FormDto,
   tasksListForms,
 } from "@alliance/shared/client";
+import { FormSchema, Page } from "@alliance/shared/forms/formschema";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import ActionDashboard from "./ActionDashboard";
@@ -20,10 +20,17 @@ import { FormBuilder } from "./components/FormBuilder";
 import UserList from "./components/UserList";
 import { testActions } from "./testData";
 
+export interface Form {
+  id: number;
+  title: string;
+  schema: FormSchema<string, string>;
+  pages: Page<string>[];
+}
+
 const AdminPanel: React.FC = () => {
   const [actions, setActions] = useState<ActionDto[]>([]);
   const [actionsLoading, setActionsLoading] = useState<boolean>(true);
-  const [forms, setForms] = useState<FormDto[]>([]);
+  const [forms, setForms] = useState<Form[]>([]);
   const [formsLoading, setFormsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showPopulateConfirm, setShowPopulateConfirm] = useState(false);
@@ -64,7 +71,7 @@ const AdminPanel: React.FC = () => {
     try {
       const response = await tasksListForms();
       if (response.data) {
-        setForms(response.data);
+        setForms(response.data as unknown as Form[]);
       }
       setFormsLoading(false);
     } catch (err) {
@@ -333,12 +340,6 @@ const AdminPanel: React.FC = () => {
                   ) : forms.length === 0 ? (
                     <div className="text-center py-12">
                       <p className="text-gray-500 mb-4">No forms found.</p>
-                      <button
-                        onClick={handleCreateForm}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium"
-                      >
-                        Create Your First Form
-                      </button>
                     </div>
                   ) : (
                     <div className="space-y-3 flex-1 overflow-y-auto">
@@ -363,24 +364,19 @@ const AdminPanel: React.FC = () => {
                                 : ""}{" "}
                               •
                               {form.schema.pages?.reduce(
-                                (total: number, page: any) =>
+                                (total: number, page) =>
                                   total + (page.fields?.length || 0),
                                 0
                               ) || 0}{" "}
                               field
                               {(form.pages?.reduce(
-                                (total: number, page: any) =>
+                                (total: number, page) =>
                                   total + (page.fields?.length || 0),
                                 0
                               ) || 0) !== 1
                                 ? "s"
                                 : ""}
                             </p>
-                            {form.description && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                {form.description}
-                              </p>
-                            )}
                           </div>
                         </Card>
                       ))}

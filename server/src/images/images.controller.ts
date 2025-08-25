@@ -1,23 +1,23 @@
 import {
-  Controller,
-  Delete,
-  Get,
-  NotFoundException,
-  Res,
-  StreamableFile,
-  Param,
-  Inject,
-} from '@nestjs/common';
-import { ImagesService } from './images.service';
-import { basename } from 'path';
-import { Response } from 'express';
-import {
   DeleteObjectCommand,
   GetObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { Readable } from 'stream';
+import {
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  NotFoundException,
+  Param,
+  Res,
+  StreamableFile,
+} from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
+import { Response } from 'express';
+import { basename } from 'path';
+import { Readable } from 'stream';
+import { ImagesService } from './images.service';
 
 @Controller('images')
 export class ImagesController {

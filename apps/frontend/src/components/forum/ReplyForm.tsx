@@ -77,7 +77,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
               disabled={isSubmitting || !replyContent.trim()}
               className="transition disabled:opacity-50"
             >
-              {isSubmitting ? "Posting..." : "Post Reply"}
+              {isSubmitting ? "Posting..." : "Post Comment"}
             </Button>
           </div>
         )}
