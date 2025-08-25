@@ -1,13 +1,13 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
+  Entity,
   ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../user/user.entity';
-import { ApiProperty } from '@nestjs/swagger';
 
 export enum NotificationType {
   ActionEvent = 'action_event',

@@ -14,6 +14,7 @@ export function ElementSelect({
     "text",
     "textarea",
     "email",
+    "phone",
     "number",
     "checkbox",
     "radio",

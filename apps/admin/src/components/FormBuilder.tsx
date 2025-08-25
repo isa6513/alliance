@@ -35,6 +35,7 @@ import {
   EditableFileField,
   EditableMultiSelectField,
   EditableNumberField,
+  EditablePhoneField,
   EditableRadioField,
   EditableSelectField,
   EditableTextField,
@@ -104,6 +105,7 @@ export function FormBuilder({
     { id: "text", name: "Text Field", type: "field" as const },
     { id: "textarea", name: "Textarea Field", type: "field" as const },
     { id: "email", name: "Email Field", type: "field" as const },
+    { id: "phone", name: "Phone Field", type: "field" as const },
     { id: "number", name: "Number Field", type: "field" as const },
     { id: "checkbox", name: "Checkbox Field", type: "field" as const },
     { id: "radio", name: "Radio Field", type: "field" as const },
@@ -224,6 +226,15 @@ export function FormBuilder({
           kind: "email",
           label: "Email Field",
           required: false,
+        };
+        break;
+      case "phone":
+        newField = {
+          id: fieldId,
+          kind: "phone",
+          label: "Phone Field",
+          required: false,
+          placeholder: "Enter phone number",
         };
         break;
       case "number":
@@ -678,6 +689,13 @@ export function FormBuilder({
                   case "email":
                     return (
                       <EditableEmailField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "phone":
+                    return (
+                      <EditablePhoneField
                         field={formField as any}
                         {...commonProps}
                       />

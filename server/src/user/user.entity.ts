@@ -1,9 +1,15 @@
 /* eslint-disable @darraghor/nestjs-typed/all-properties-have-explicit-defined */
 /* eslint-disable @darraghor/nestjs-typed/all-properties-are-whitelisted */
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import * as bcrypt from 'bcryptjs';
 import { Type } from 'class-transformer';
-import { Allow, IsNotEmpty, IsOptional } from 'class-validator';
+import {
+  Allow,
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+} from 'class-validator';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { City } from 'src/geo/city.entity';
 import {
@@ -20,6 +26,18 @@ import {
 import { Notification } from '../notifs/entities/notification.entity';
 import { Friend, FriendStatus } from './friend.entity';
 
+export enum NotificationChannel {
+  Text = 'text',
+  Email = 'email',
+  Push = 'push',
+}
+
+export enum NotificationPreference {
+  All = 'all',
+  Digest = 'digest',
+  None = 'none',
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -34,7 +52,51 @@ export class User {
   @Column({ unique: true })
   @ApiProperty()
   @IsNotEmpty()
+  @IsEmail()
   email: string;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  @IsOptional()
+  phoneNumber?: string;
+
+  @Column({ default: false })
+  @ApiProperty()
+  phoneNumberVerified: boolean;
+
+  @Column({ default: false })
+  @ApiProperty()
+  emailVerified: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: NotificationChannel,
+    default: NotificationChannel.Email,
+  })
+  @ApiProperty({
+    enum: NotificationChannel,
+    enumName: 'NotificationChannel',
+  })
+  @IsOptional()
+  @IsEnum(NotificationChannel)
+  primaryNotificationChannel: NotificationChannel;
+
+  @Column({
+    type: 'enum',
+    enum: NotificationPreference,
+    default: NotificationPreference.All,
+  })
+  @ApiProperty({
+    enum: NotificationPreference,
+    enumName: 'NotificationPreference',
+  })
+  @IsOptional()
+  @IsEnum(NotificationPreference)
+  socialNotifsPreference: NotificationPreference;
+
+  @Column({ default: false })
+  @ApiProperty()
+  turnedOffAllNotifs: boolean;
 
   @Column()
   @ApiProperty()

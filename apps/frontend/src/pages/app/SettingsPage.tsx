@@ -124,7 +124,7 @@ const SettingsPage: React.FC = () => {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl mb-8">Account</h1>
+          <h2 className="!text-3xl mb-2">Account</h2>
           <Card style={CardStyle.White} className="p-8">
             <p className="text-center text-stone-500">
               Loading your account information...
@@ -144,7 +144,7 @@ const SettingsPage: React.FC = () => {
         <Card style={CardStyle.White} className="p-8 mb-6 relative gap-y-4">
           <div className="flex justify-between mb-2">
             <div className="gap-x-2">
-              <h1 className="text-2xl font-adobe">Account</h1>
+              <h2 className="!text-3xl mb-2">Account</h2>
               <AdminOnly>
                 <Badge className="!bg-yellow-600 text-white">Admin</Badge>
               </AdminOnly>
@@ -229,6 +229,9 @@ const SettingsPage: React.FC = () => {
               </Button>
             </div>
           )}
+        </Card>
+        <Card style={CardStyle.White} className="p-8 mb-6">
+          <h2 className="text-lg mb-6 -mt-2">Notifications</h2>
         </Card>
 
         {paymentMethod !== null && (

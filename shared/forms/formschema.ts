@@ -8,6 +8,7 @@ export type FieldKind =
   | "textarea"
   | "email"
   | "number"
+  | "phone"
   | "checkbox"
   | "radio"
   | "select"
@@ -62,6 +63,10 @@ export type TextareaField<TId extends string> = BaseField<
 };
 
 export type EmailField<TId extends string> = BaseField<"email", TId, string>;
+export type PhoneField<TId extends string> = BaseField<"phone", TId, string> & {
+  placeholder?: string;
+  pattern?: string;
+};
 export type NumberField<TId extends string> = BaseField<
   "number",
   TId,
@@ -106,6 +111,7 @@ export type AnyField<TId extends string = string> =
   | TextField<TId>
   | TextareaField<TId>
   | EmailField<TId>
+  | PhoneField<TId>
   | NumberField<TId>
   | CheckboxField<TId>
   | RadioField<TId, string>

@@ -1,6 +1,7 @@
 export { EditableTextField } from './EditableTextField';
 export { EditableTextareaField } from './EditableTextareaField';
 export { EditableEmailField } from './EditableEmailField';
+export { EditablePhoneField } from './EditablePhoneField';
 export { EditableNumberField } from './EditableNumberField';
 export { EditableCheckboxField } from './EditableCheckboxField';
 export { EditableRadioField } from './EditableRadioField';

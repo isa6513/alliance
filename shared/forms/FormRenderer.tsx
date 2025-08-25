@@ -111,6 +111,29 @@ const FormRenderer = ({
           </div>
         );
 
+      case "phone":
+        return (
+          <div key={index} className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              {field.label}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </label>
+            <input
+              type="tel"
+              value={value}
+              onChange={(e) => {
+                // Only allow digits, +, spaces, dashes, and parentheses
+                const sanitized = e.target.value.replace(/[^0-9+\s\-()]/g, "");
+                updateField(field.id, sanitized);
+              }}
+              required={field.required}
+              pattern={(field as any).pattern}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder={(field as any).placeholder || "Enter phone number"}
+            />
+          </div>
+        );
+
       case "number":
         return (
           <div key={index} className="space-y-1">

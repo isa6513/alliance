@@ -1,21 +1,21 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { Allow, IsNotEmpty, IsOptional } from 'class-validator';
 import {
   Column,
-  Entity,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
+  Entity,
   JoinColumn,
-  OneToOne,
-  OneToMany,
   JoinTable,
   ManyToMany,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { User } from '../../user/user.entity';
 import { Notification } from '../../notifs/entities/notification.entity';
-import { Allow, IsNotEmpty, IsOptional } from 'class-validator';
-import { Type } from 'class-transformer';
+import { User } from '../../user/user.entity';
 
 export enum CommentParentObject {
   Post = 'post',

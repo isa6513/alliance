@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
 import { CreateFormDto, FormDto, SubmitFormDto } from './form.dto';
+import { FormSchema } from './schema';
 
 @Injectable()
 export class TasksService {
@@ -50,13 +51,58 @@ export class TasksService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    const phoneNumber = await this.extractPhoneNumber(
+      form,
+      submitFormDto.answers,
+    );
+    if (phoneNumber) {
+      //TODO: non hacky version of this
+      user.phoneNumber = phoneNumber;
+      await this.userService.update(user.id, user);
+    }
+
     const formResponse = this.formResponseRepository.create({
       ...submitFormDto,
       form,
       formId,
       user,
     });
+
     return this.formResponseRepository.save(formResponse);
+  }
+
+  async extractPhoneNumber(
+    form: Form,
+    answers: Record<string, string>,
+  ): Promise<string | null> {
+    const schema = form.schema as unknown as FormSchema<string, string>;
+
+    const phoneNumbers: { fieldId: string; label: string; value: string }[] =
+      [];
+
+    for (const page of schema.pages) {
+      if (page.fields) {
+        for (const field of page.fields) {
+          if (field.kind === 'phone' && answers[field.id]) {
+            phoneNumbers.push({
+              fieldId: field.id,
+              label: field.label,
+              value: answers[field.id],
+            });
+          }
+        }
+      }
+    }
+
+    if (phoneNumbers.length > 0) {
+      console.log(`📞 Phone numbers submitted for form "${form.title}":`);
+      phoneNumbers.forEach((phone) => {
+        console.log(` - ${phone.label}: ${phone.value}`);
+      });
+      return phoneNumbers[0].value;
+    }
+    return null;
   }
 
   async listForms(): Promise<FormDto[]> {

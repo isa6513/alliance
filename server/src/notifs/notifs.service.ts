@@ -4,8 +4,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Notification } from './entities/notification.entity';
 import { Repository } from 'typeorm';
+import { Notification } from './entities/notification.entity';
 
 @Injectable()
 export class NotifsService {
