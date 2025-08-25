@@ -1,12 +1,20 @@
 import { Module } from '@nestjs/common';
-import { NotifsService } from './notifs.service';
-import { NotifsController } from './notifs.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MailModule } from 'src/mail/mail.module';
+import { SmsModule } from 'src/sms/sms.module';
+import { ActionEventNotif } from './entities/action-event-notif.entity';
 import { Notification } from './entities/notification.entity';
+import { NotifsController } from './notifs.controller';
+import { NotifsService } from './notifs.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Notification])],
+  imports: [
+    TypeOrmModule.forFeature([Notification, ActionEventNotif]),
+    MailModule,
+    SmsModule,
+  ],
   controllers: [NotifsController],
   providers: [NotifsService],
+  exports: [NotifsService],
 })
 export class NotifsModule {}

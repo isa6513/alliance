@@ -12,6 +12,8 @@ import {
 } from 'class-validator';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { City } from 'src/geo/city.entity';
+import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
+import { NotificationChannel } from 'src/notifs/notifchannel';
 import {
   BeforeInsert,
   BeforeUpdate,
@@ -25,12 +27,6 @@ import {
 } from 'typeorm';
 import { Notification } from '../notifs/entities/notification.entity';
 import { Friend, FriendStatus } from './friend.entity';
-
-export enum NotificationChannel {
-  Text = 'text',
-  Email = 'email',
-  Push = 'push',
-}
 
 export enum NotificationPreference {
   All = 'all',
@@ -208,4 +204,7 @@ export class User {
   @ApiProperty()
   @Allow()
   anonymous: boolean;
+
+  @OneToMany(() => ActionEventNotif, (notif) => notif.user)
+  actionEventNotifs: ActionEventNotif[];
 }

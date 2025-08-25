@@ -2,8 +2,9 @@ export function profileUrl(userId: number) {
   return `/user/${userId}`;
 }
 
-export function actionUrl(actionId: number) {
-  return `/actions/${actionId}`;
+export function actionUrl(actionId: number, full = false) {
+  const path = `/actions/${actionId}`;
+  return full ? `${process.env.APP_URL}${path}` : path;
 }
 
 export function postUrl(postId: number) {

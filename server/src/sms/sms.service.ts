@@ -6,7 +6,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { SinchClient } from '@sinch/sdk-core';
-import { SendSMSRequestData } from '@sinch/sms/dist/models';
+import { SendSMSRequestData, SendSMSResponse } from '@sinch/sms/dist/models';
 
 @Injectable()
 export class SmsService implements OnModuleInit {
@@ -16,14 +16,14 @@ export class SmsService implements OnModuleInit {
   private readonly logger = new Logger(SmsService.name);
 
   onModuleInit() {
-    if (!process.env.SINCH_NUMBER) {
-      throw new Error('SINCH_NUMBER is not set');
+    if (process.env.NODE_ENV === 'test') {
+      return;
     }
+
     const projectId = process.env.SINCH_PROJECT_ID;
     const keyId = process.env.SINCH_KEY_ID;
     const keySecret = process.env.SINCH_KEY_SECRET;
-    this.sinchNumber = process.env.SINCH_NUMBER;
-    const region = process.env.SINCH_REGION; // Optional region
+    this.sinchNumber = process.env.SINCH_NUMBER!;
 
     if (!projectId || !keyId || !keySecret || !this.sinchNumber) {
       throw new Error('Sinch configuration is incomplete. Check .env file.');
@@ -33,11 +33,12 @@ export class SmsService implements OnModuleInit {
       projectId,
       keyId,
       keySecret,
-      ...(region && { smsRegion: region }),
+      smsRegion: 'us',
     });
   }
 
-  async sendSms(to: string, body: string) {
+  async sendSms(to: string, body: string): Promise<SendSMSResponse | null> {
+    console.log('sendSms', to, body);
     if (!this.sinchClient) {
       // This case should ideally be prevented by the OnModuleInit check, but added for safety.
       this.logger.error('Sinch Client accessed before initialization.');
@@ -73,6 +74,7 @@ export class SmsService implements OnModuleInit {
     try {
       const response =
         await this.sinchClient.sms.batches.send(sendBatchRequest);
+      console.log(response);
       this.logger.log(`SMS sent successfully. Batch ID: ${response.id}`);
       return response;
     } catch (error) {
@@ -82,7 +84,6 @@ export class SmsService implements OnModuleInit {
       );
 
       // Example: Inspecting potential Sinch SDK error structure
-      let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
       let message = `Sinch API error: ${error.message}`;
 
       // NOTE: The exact structure of the error object from the SDK might vary.
@@ -92,19 +93,16 @@ export class SmsService implements OnModuleInit {
       const httpStatusCode = error?.response?.status; // Underlying HTTP status if available
 
       if (httpStatusCode === 401) {
-        statusCode = HttpStatus.UNAUTHORIZED;
         message = 'Sinch authentication failed. Check API credentials.';
       } else if (
         httpStatusCode === 400 ||
         (sinchErrorCode && sinchErrorCode.toString().startsWith('40'))
       ) {
-        // Example mapping for Bad Request
-        statusCode = HttpStatus.BAD_REQUEST;
         message = `Sinch Bad Request: ${sinchErrorMessage || error.message}`;
-      } // Add more specific mappings based on Sinch error codes (e.g., 403 Forbidden, 503 Service Unavailable)
+      }
 
-      // Re-throw as HttpException for NestJS to handle correctly in the controller layer
-      throw new HttpException(message, statusCode);
+      this.logger.error(message);
     }
+    return null;
   }
 }

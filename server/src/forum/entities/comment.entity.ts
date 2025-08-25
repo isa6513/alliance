@@ -35,7 +35,7 @@ export class Comment {
   @IsNotEmpty()
   content: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn()
   @ApiProperty()
   @Allow()

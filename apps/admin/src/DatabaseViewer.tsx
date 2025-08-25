@@ -454,6 +454,28 @@ const DatabaseViewer: React.FC = () => {
       });
 
       if (response.data?.success) {
+        // Clear the selected row if it was one of the deleted rows
+        if (selectedRow && 
+            selectedRow.tableName === pendingDelete.tableName &&
+            pendingDelete.primaryKeyValues.some(deletedId => 
+              String(deletedId) === String(selectedRow.rowId)
+            )) {
+          setSelectedRow(null);
+          // Clear the search query that was filtering for this row
+          setSearchInput("");
+          setQuery((prev) => ({
+            ...prev,
+            search: undefined,
+            page: 1,
+          }));
+          // Also clear the URL parameter
+          setSearchParams((prev) => {
+            const newParams = new URLSearchParams(prev);
+            newParams.delete("id");
+            return newParams;
+          });
+        }
+        
         setSelectedRows(new Set());
         loadTableData();
         alert(`Successfully deleted ${response.data.deletedCount} record(s)`);

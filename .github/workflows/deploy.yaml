@@ -384,6 +384,7 @@ jobs:
             export SINCH_KEY_SECRET=${{ secrets.SINCH_KEY_SECRET }}
             export SINCH_NUMBER=${{ secrets.SINCH_NUMBER }}
             export SINCH_REGION=${{ secrets.SINCH_REGION }}
+            export APP_URL=https://${{vars.DOMAIN_NAME}}
 
             rollback () {
               echo "Deployment failed - rolling back"

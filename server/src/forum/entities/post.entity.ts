@@ -1,17 +1,17 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { Allow, IsNotEmpty } from 'class-validator';
 import {
   Column,
-  Entity,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
+  Entity,
   JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../user/user.entity';
 import { Action } from '../../actions/entities/action.entity';
-import { Allow, IsNotEmpty } from 'class-validator';
-import { Type } from 'class-transformer';
+import { User } from '../../user/user.entity';
 
 @Entity()
 export class Post {
@@ -30,7 +30,7 @@ export class Post {
   @IsNotEmpty()
   content: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn()
   @ApiProperty()
   @Allow()

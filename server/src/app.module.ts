@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MulterModule } from '@nestjs/platform-express';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as multer from 'multer';
 import { ActionsModule } from './actions/actions.module';
@@ -55,6 +56,7 @@ import { UserService } from './user/user.service';
     AuthModule,
     UserModule,
     TypeOrmModule.forRoot(connectionOptions()),
+    ScheduleModule.forRoot(),
     ActionsModule,
     ImagesModule,
     ForumModule,
@@ -66,7 +68,6 @@ import { UserService } from './user/user.service';
     AdminViewerModule,
     SearchModule,
     TasksModule,
-    SmsModule,
   ],
   controllers: [AppController],
   providers: [],

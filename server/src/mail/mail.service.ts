@@ -1,9 +1,8 @@
 import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
-import { SentMessageInfo } from 'nodemailer';
-import { EmailStatus, EmailType, Mail } from './mail.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { EmailStatus, EmailType, Mail } from './mail.entity';
 
 @Injectable()
 export class MailService {
@@ -19,6 +18,8 @@ export class MailService {
     [EmailType.Verification]: '',
     [EmailType.Other]: '',
     [EmailType.PartialSignup]: 'partial-signup',
+    [EmailType.Commitment]: 'commitment',
+    [EmailType.MemberAction]: 'memberaction',
   };
 
   async sendMail(
@@ -26,49 +27,42 @@ export class MailService {
     emailType: EmailType,
     subject: string,
     context: ISendMailOptions['context'],
-  ): Promise<void> {
+  ): Promise<Mail> {
     const mail = await this.mailRepository.create({
       to: recipient,
       emailType: emailType,
       status: EmailStatus.Pending,
     });
 
-    this.mailerService
-      .sendMail({
-        to: recipient,
-        from: 'no-reply@worldalliance.org',
-        subject: subject,
-        headers: {
-          'o:tag': emailType,
-        },
-        template:
-          __dirname + `/../../mail/templates/${this.templates[emailType]}`,
-        context,
-      })
-      .then((e: SentMessageInfo) => {
-        const accepted = e.accepted as string[];
-        const messageId = e.messageId as string;
+    const e = await this.mailerService.sendMail({
+      to: recipient,
+      from: 'no-reply@worldalliance.org',
+      subject: subject,
+      headers: {
+        'o:tag': emailType,
+      },
+      template:
+        __dirname + `/../../mail/templates/${this.templates[emailType]}`,
+      context,
+    });
 
-        if (accepted.length > 0) {
-          mail.status = EmailStatus.Sent;
-        } else {
-          mail.status = EmailStatus.Failed;
-        }
-        mail.sentMessageId = messageId || null;
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
-        this.mailRepository.save(mail);
-      });
+    const accepted = e.accepted as string[];
+    const messageId = e.messageId as string;
+
+    if (accepted.length > 0) {
+      mail.status = EmailStatus.Sent;
+    } else {
+      mail.status = EmailStatus.Failed;
+    }
+    mail.sentMessageId = messageId || null;
+    return this.mailRepository.save(mail);
   }
 
   public async sendWelcomeEmail(
     recipient: string,
     name: string,
-  ): Promise<void> {
-    await this.sendMail(
+  ): Promise<Mail> {
+    return this.sendMail(
       recipient,
       EmailType.Welcome,
       'Welcome to the Alliance',
@@ -86,9 +80,9 @@ export class MailService {
     email: string,
     name: string,
     resetToken: string,
-  ): Promise<void> {
+  ): Promise<Mail> {
     const url = this.getPasswordResetUrl(resetToken);
-    await this.sendMail(
+    return this.sendMail(
       email,
       EmailType.PasswordReset,
       'a link to reset your password',
@@ -103,15 +97,51 @@ export class MailService {
     email: string,
     name: string,
     resetToken: string,
-  ): Promise<void> {
+  ): Promise<Mail> {
     const url = this.getPasswordResetUrl(resetToken);
-    await this.sendMail(
+    return this.sendMail(
       email,
       EmailType.PartialSignup,
       'Thanks for helping out! Want to do more?',
       {
         name,
         email,
+        url,
+      },
+    );
+  }
+
+  public async sendCommitmentEmail(
+    email: string,
+    name: string,
+    actionName: string,
+    url: string,
+  ): Promise<Mail> {
+    return this.sendMail(
+      email,
+      EmailType.Commitment,
+      'New Action: ' + actionName,
+      {
+        name,
+        actionName,
+        url,
+      },
+    );
+  }
+
+  public async sendMemberActionEmail(
+    email: string,
+    name: string,
+    actionName: string,
+    url: string,
+  ): Promise<Mail> {
+    return this.sendMail(
+      email,
+      EmailType.MemberAction,
+      'Ready to complete: ' + actionName,
+      {
+        name,
+        actionName,
         url,
       },
     );

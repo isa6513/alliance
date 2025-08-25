@@ -14,6 +14,7 @@ import {
   Comment,
   CommentParentObject,
 } from 'src/forum/entities/comment.entity';
+import { NotifsService } from 'src/notifs/notifs.service';
 import { ILike, In, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import {
@@ -58,6 +59,7 @@ export class ActionsService {
     private readonly actionActivityRepository: Repository<ActionActivity>,
     @InjectRepository(Comment)
     private readonly commentRepository: Repository<Comment>,
+    private readonly notifsService: NotifsService,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
   ) {}
@@ -229,21 +231,28 @@ export class ActionsService {
         continue;
       }
       if (event.newStatus === ActionStatus.GatheringCommitments) {
-        await this.sendCommitmentNotifs(event, action);
+        await this.notifsService.sendCommitmentNotifs(
+          event,
+          action,
+          await this.userService.findActiveUsers(),
+        );
       }
       if (event.newStatus === ActionStatus.MemberAction) {
-        await this.sendMemberActionNotifs(event, action);
+        await this.notifsService.sendMemberActionNotifs(
+          event,
+          action,
+          await this.actionActivityRepository
+            .find({
+              where: {
+                actionId: action.id,
+                type: ActionActivityType.USER_JOINED,
+              },
+              relations: ['user'],
+            })
+            .then((activities) => activities.map((activity) => activity.user)),
+        );
       }
     }
-  }
-
-  async sendCommitmentNotifs(event: ActionEvent, action: Action) {
-    const users = await this.userService.findActiveUsers();
-  }
-  async sendMemberActionNotifs(event: ActionEvent, action: Action) {
-    const users = await this.actionActivityRepository.find({
-      where: { actionId: action.id, type: ActionActivityType.USER_JOINED },
-    });
   }
 
   countCommitted(actionId: number): Observable<number> {

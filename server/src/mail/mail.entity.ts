@@ -11,6 +11,8 @@ export enum EmailType {
   PartialSignup = 'partial_signup',
   Welcome = 'welcome',
   Other = 'other',
+  Commitment = 'commitment',
+  MemberAction = 'memberaction',
 }
 
 export enum EmailStatus {

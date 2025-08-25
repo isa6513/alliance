@@ -1,24 +1,28 @@
 import {
-  Controller,
-  Get,
-  Param,
-  Request,
-  ParseIntPipe,
-  UseGuards,
-  UnauthorizedException,
-  Post,
-  Patch,
-  Delete,
   Body,
+  Controller,
+  Delete,
+  Get,
   NotFoundException,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Request,
+  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiOperation,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { City } from 'src/geo/city.entity';
+import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
 import { Public } from '../auth/public.decorator';
-import { UserService } from './user.service';
+import { FriendStatus } from './friend.entity';
+import { PrefillUserDto } from './prefill-user.dto';
 import {
   FriendStatusDto,
   OnboardingDto,
@@ -26,12 +30,8 @@ import {
   UpdateProfileDto,
   userToDto,
 } from './user.dto';
-import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
-import { FriendStatus } from './friend.entity';
-import { City } from 'src/geo/city.entity';
-import { PrefillUserDto } from './prefill-user.dto';
-import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { User } from './user.entity';
+import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {

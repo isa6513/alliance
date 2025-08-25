@@ -1,15 +1,17 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  UpdateDateColumn,
-  JoinColumn,
-} from 'typeorm';
-import { Action } from './action.entity';
-import { Allow, IsDefined, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { Allow, IsDefined, IsNotEmpty, IsOptional } from 'class-validator';
+import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Action } from './action.entity';
 
 export enum NotificationType {
   All = 'all',
@@ -103,9 +105,30 @@ export class ActionEvent {
   @ApiProperty({
     description: 'The action associated with this event',
     type: () => Action,
+    nullable: false,
   })
   @IsDefined()
   @Allow()
   @Type(() => Action)
   action: Action;
+
+  @OneToMany(() => ActionEventNotif, (notification) => notification.actionEvent)
+  @ApiProperty({
+    description: 'The notifications associated with this event',
+    type: () => [ActionEventNotif],
+    isArray: true,
+  })
+  @IsDefined()
+  @Allow()
+  @Type(() => ActionEventNotif)
+  notifications: ActionEventNotif[];
+
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiProperty({
+    description: 'When notifications for this event were sent (idempotency)',
+    nullable: true,
+  })
+  @Type(() => Date)
+  @IsOptional()
+  notifsSentAt: Date | null;
 }
