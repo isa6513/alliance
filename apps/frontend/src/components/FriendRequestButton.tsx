@@ -1,8 +1,6 @@
 import { FriendStatusDto } from "@alliance/shared/client";
-import Button from "./system/Button";
-import icons8Plus from "../assets/icons8-plus.svg";
-import { ButtonColor } from "./system/Button";
 import { useState } from "react";
+import Button, { ButtonColor } from "./system/Button";
 
 interface FriendRequestButtonProps {
   friendStatus: FriendStatusDto["status"];
@@ -20,11 +18,10 @@ const FriendRequestButton = ({
   if (friendStatus === "none") {
     return (
       <Button
-        color={ButtonColor.Blue}
+        color={ButtonColor.BlueOutline}
         onClick={handleSendFriendRequest}
-        className="pl-2"
+        className=""
       >
-        <img src={icons8Plus} alt="send" className="invert w-6 h-6" />
         <span>Send Friend Request</span>
       </Button>
     );
@@ -38,7 +35,7 @@ const FriendRequestButton = ({
   }
   return (
     <Button
-      color={isHovered ? ButtonColor.Red : ButtonColor.Green}
+      color={isHovered ? ButtonColor.RedOutline : ButtonColor.GreenOutLine}
       onClick={handleRemoveFriend}
       className={`min-w-36`}
       onMouseEnter={() => setIsHovered(true)}

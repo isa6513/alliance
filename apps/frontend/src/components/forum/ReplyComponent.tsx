@@ -431,6 +431,7 @@ const ReplyComponent = ({
                           highlightedReplyId={highlightedReplyId}
                           onUpdateReply={onUpdateReply}
                           onLikeReply={onLikeReply}
+                          compact={compact}
                         />
                       </div>
                     </div>
@@ -451,6 +452,7 @@ const ReplyComponent = ({
             isSubmitting={isSubmitting}
             setReplyingTo={setReplyingTo}
             className="rounded-t-none"
+            compact={compact}
           />
         )}
       </div>
@@ -480,6 +482,7 @@ const ReplyComponent = ({
           handleDeleteReply={handleDeleteReply}
           onUpdateReply={handleUpdateReply}
           onLikeReply={onLikeReply}
+          compact={compact}
         />
       </div>
 
@@ -494,6 +497,7 @@ const ReplyComponent = ({
             onSubmit={handleSubmitReply}
             isSubmitting={isSubmitting}
             setReplyingTo={setReplyingTo}
+            compact={compact}
           />
         </div>
       )}
@@ -519,6 +523,7 @@ const ReplyComponent = ({
                 highlightedReplyId={highlightedReplyId}
                 onUpdateReply={onUpdateReply}
                 onLikeReply={onLikeReply}
+                compact={compact}
               />
             </div>
           ))}

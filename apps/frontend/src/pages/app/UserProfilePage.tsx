@@ -434,19 +434,18 @@ const UserProfilePage: React.FC = () => {
               {friends.length === 0 && (
                 <p className="text-center text-stone-500">No friends yet</p>
               )}
-              {friends?.map((friend: ProfileDto) => (
-                <div
-                  className="flex flex-row gap-2 items-center cursor-pointer hover:bg-stone-200 rounded-md p-3 px-5 w-fit"
-                  onClick={() => navigate(`/user/${friend.id}`)}
-                  key={friend.id}
-                >
-                  <ProfileImage
-                    pfp={friend.profilePicture}
-                    className="!w-10 !h-10"
-                  />
-                  <p>{friend.displayName}</p>
-                </div>
-              ))}
+              <div className="flex flex-col gap-y-2">
+                {friends?.map((friend: ProfileDto) => (
+                  <div
+                    className="flex flex-row w-full gap-2 items-center cursor-pointer hover:bg-zinc-50 rounded-md w-fit"
+                    onClick={() => navigate(`/user/${friend.id}`)}
+                    key={friend.id}
+                  >
+                    <ProfileImage pfp={friend.profilePicture} size="medium" />
+                    <p className="text-zinc-500">{friend.displayName}</p>
+                  </div>
+                ))}
+              </div>
             </Card>
           )}
         </div>
