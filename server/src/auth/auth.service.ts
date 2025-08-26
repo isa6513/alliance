@@ -3,15 +3,15 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PWResetJwtPayload, UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../user/user.entity';
-import { SignUpDto } from './dto/sign-up.dto';
-import { JWTTokenType, JwtPayload } from './guards/auth.guard';
-import { SignInResponseDto } from './dto/signin.dto';
 import { Response } from 'express';
-import { AuthTokens } from './dto/authtokens.dto';
 import { MailService } from '../mail/mail.service';
+import { User } from '../user/user.entity';
+import { PWResetJwtPayload, UserService } from '../user/user.service';
+import { AuthTokens } from './dto/authtokens.dto';
+import { SignUpDto } from './dto/sign-up.dto';
+import { SignInResponseDto } from './dto/signin.dto';
+import { JWTTokenType, JwtPayload } from './guards/auth.guard';
 
 @Injectable()
 export class AuthService {
@@ -24,22 +24,27 @@ export class AuthService {
   public static ACCESS_COOKIE = 'access_token';
   public static REFRESH_COOKIE = 'refresh_token';
 
-  setAuthCookies(res: Response, access: string, refresh?: string) {
-    const secure = process.env.NODE_ENV === 'production';
+  setAuthCookies(
+    res: Response,
+    access: string,
+    refresh?: string,
+    admin?: boolean,
+  ) {
+    const prod = process.env.NODE_ENV === 'production';
 
     res.cookie(AuthService.ACCESS_COOKIE, access, {
       httpOnly: true,
-      secure,
-      path: '/',
+      secure: prod,
+      path: prod ? (admin ? '/adminapi' : '/api') : '/',
       sameSite: 'strict',
       maxAge: 1000 * 60 * 15, // 15 min
     });
     if (refresh) {
       res.cookie(AuthService.REFRESH_COOKIE, refresh, {
         httpOnly: true,
-        secure,
+        secure: prod,
         sameSite: 'strict',
-        path: '/',
+        path: prod ? (admin ? '/adminapi' : '/api') : '/',
         maxAge: 1000 * 60 * 60 * 24 * 14, // 14 days
       });
     }
