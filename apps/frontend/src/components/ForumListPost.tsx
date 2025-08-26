@@ -77,12 +77,9 @@ const ForumListPost = ({
       >
         <ActivityFeedItem
           title={post.title}
-          content={`${post.author.displayName} posted ${formatTime(
-            new Date(post.updatedAt),
-            {
-              addSuffix: true,
-            }
-          )}`}
+          content={`posted ${formatTime(new Date(post.updatedAt), {
+            addSuffix: true,
+          })}`}
           user={post.author}
         />
       </div>

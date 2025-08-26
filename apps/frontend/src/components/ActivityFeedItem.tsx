@@ -28,15 +28,20 @@ const ActivityFeedItem = ({
         {showTitle && (
           <>
             {titleLink ? (
-              <Link to={titleLink} className="text-green hover:underline">
+              <Link
+                to={titleLink}
+                className="text-green text-sm hover:underline"
+              >
                 {title}
               </Link>
             ) : (
-              <p className="text-black">{title}</p>
+              <p className="text-sm text-black">{title}</p>
             )}
           </>
         )}
-        <p className="text-zinc-500 text-sm">{content}</p>
+        <p className="text-zinc-500 text-sm">
+          <span className="text-zinc-700">{user.displayName}</span> {content}
+        </p>
       </div>
     </div>
   );

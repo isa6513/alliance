@@ -62,11 +62,12 @@ const ActionActivityFeedItem = ({
           <div className="flex-1">
             <ActivityFeedItem
               title={activity.actionName}
-              content={`${
-                activity.user.displayName
-              } ${verb} this action ${formatTime(new Date(activity.createdAt), {
-                addSuffix: true,
-              })}`}
+              content={`${verb} this action ${formatTime(
+                new Date(activity.createdAt),
+                {
+                  addSuffix: true,
+                }
+              )}`}
               user={activity.user}
               showTitle={showAction}
               titleLink={`/actions/${activity.actionId}`}

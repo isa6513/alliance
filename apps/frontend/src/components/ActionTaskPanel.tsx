@@ -38,17 +38,11 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         return null;
       }
       return (
-        <Card
-          style={CardStyle.White}
-          className="flex-row items-center gap-x-2 justify-between"
-        >
-          <span>Commit to participate in this action</span>
-          <ActionCommitButton
-            committed={false}
-            isAuthenticated={true}
-            onCommit={handleJoinAction}
-          />
-        </Card>
+        <ActionCommitButton
+          committed={false}
+          isAuthenticated={true}
+          onCommit={handleJoinAction}
+        />
       );
     }
   }

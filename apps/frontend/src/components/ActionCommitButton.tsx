@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import Button from "./system/Button";
-import Card from "./system/Card";
-import SignupForm from "./SignupForm";
 import { authRegister, SignUpDto } from "@alliance/shared/client";
+import { useCallback, useEffect, useRef, useState } from "react";
+import SignupForm from "./SignupForm";
+import Button, { ButtonColor } from "./system/Button";
+import Card from "./system/Card";
 
 export interface ActionCommitButtonProps {
   committed: boolean;
@@ -74,9 +74,16 @@ const ActionCommitButton = ({
       <Button
         onClick={handleClick}
         disabled={committed}
-        className={`${committed ? "!bg-[#008000]" : ""}`}
+        color={ButtonColor.Black}
+        className={`${
+          committed ? "!bg-[#008000]" : ""
+        } w-full !py-3 !text-base`}
       >
-        {committed ? "Joined" : isAuthenticated ? "Commit" : "Join this action"}
+        {committed
+          ? "Participation confirmed"
+          : isAuthenticated
+          ? "Confirm participation"
+          : "Participate in this action"}
       </Button>
       {panelOpen && (
         <Card

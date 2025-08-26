@@ -60,33 +60,29 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
     <div className={`relative ${className}`}>
       <Card
         className="block overflow-hidden"
-        style={
-          waitingOnOthers || waitingForOffice
-            ? CardStyle.LightGrey
-            : CardStyle.White
-        }
+        style={CardStyle.Transparent}
         onClick={goToActionPage}
       >
         <div className="flex flex-row items-start gap-x-8">
           <div className="flex-1 flex flex-col">
             {waitingOnCompletion && (
-              <Tag style={TagStyle.Blue} className="mb-2">
+              <Tag style={TagStyle.GreyOutline} className="mb-2">
                 Needs your completion
               </Tag>
             )}
             {waitingOnCommitment && (
-              <Tag style={TagStyle.Yellow} className="mb-2">
-                Needs your commitment
+              <Tag style={TagStyle.GreyOutline} className="mb-2">
+                Gathering commitments
               </Tag>
             )}
             {waitingForOffice && (
-              <Tag style={TagStyle.Grey} className="mb-2">
-                Needs office to launch
+              <Tag style={TagStyle.GreyOutline} className="mb-2">
+                Waiting on office to launch
               </Tag>
             )}
             {waitingOnOthers && (
-              <Tag style={TagStyle.Grey} className="mb-2">
-                Needs commitments from others
+              <Tag style={TagStyle.GreyOutline} className="mb-2">
+                Waiting on commitments from others
               </Tag>
             )}
 

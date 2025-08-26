@@ -2,7 +2,7 @@ import { PropsWithChildren } from "react";
 
 export enum CardStyle {
   White = "white",
-  WhiteFlatBottom = "white-flat-bottom",
+  WhiteSolid = "white-solid",
   Outline = "outline",
   GreenOutline = "green-outline",
   Alert = "alert",
@@ -39,8 +39,7 @@ const Card: React.FC<CardProps> = ({
   const styleClasses = {
     [CardStyle.White]:
       "bg-white border-gray-2 hover:border border-box rounded-md",
-    [CardStyle.WhiteFlatBottom]:
-      "bg-white border-gray-2  border-box rounded-t-md",
+    [CardStyle.WhiteSolid]: "bg-white border-none rounded-lg",
     [CardStyle.Alert]: "bg-sky-100 border-sky-300",
     [CardStyle.Outline]: "bg-transparent border-gray-300",
     [CardStyle.Grey]: "bg-zinc-100 border-zinc-200 border-[1.5px]",
