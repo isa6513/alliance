@@ -103,24 +103,6 @@ const Sidebar: React.FC = () => {
               ))
             )}
           </div>
-
-          <div className="flex flex-row justify-between items-center mt-3">
-            <p className="font-bold">Views</p>
-          </div>
-          <div className="flex flex-col gap-y-2">
-            <Link
-              to="/"
-              className="text-sm hover:bg-stone-200 p-2 rounded-md block"
-            >
-              Actions List
-            </Link>
-            <Link
-              to="/timeline"
-              className="text-sm hover:bg-stone-200 p-2 rounded-md block"
-            >
-              Timeline
-            </Link>
-          </div>
         </div>
         <div className="flex flex-row justify-between items-center p-3 px-5">
           <p className="text-sm text-gray-800">{user?.email}</p>

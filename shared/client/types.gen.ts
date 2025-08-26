@@ -693,6 +693,7 @@ export type FormDto = {
     schema: {
         [key: string]: unknown;
     };
+    usedInAction?: string;
 };
 
 export type AppHealthCheckData = {
@@ -2033,6 +2034,19 @@ export type TasksListFormsResponses = {
 };
 
 export type TasksListFormsResponse = TasksListFormsResponses[keyof TasksListFormsResponses];
+
+export type TasksDeleteFormData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/{id}';
+};
+
+export type TasksDeleteFormResponses = {
+    200: unknown;
+};
 
 export type TasksGetFormData = {
     body?: never;

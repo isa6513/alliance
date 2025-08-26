@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Action } from 'src/actions/entities/action.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Form } from './entities/form.entity';
@@ -14,6 +15,8 @@ export class TasksService {
     private formRepository: Repository<Form>,
     @InjectRepository(FormResponse)
     private formResponseRepository: Repository<FormResponse>,
+    @InjectRepository(Action)
+    private actionRepository: Repository<Action>,
     private userService: UserService,
   ) {}
 
@@ -107,13 +110,25 @@ export class TasksService {
 
   async listForms(): Promise<FormDto[]> {
     const forms = await this.formRepository.find();
-    return forms.map(
-      (form) =>
-        ({
-          id: form.id,
-          title: form.title,
-          schema: form.schema,
-        }) satisfies FormDto,
+    return Promise.all(
+      forms.map(
+        async (form) =>
+          ({
+            id: form.id,
+            title: form.title,
+            schema: form.schema,
+            usedInAction: (
+              await this.actionRepository.findOne({
+                where: { taskFormId: form.id },
+              })
+            )?.name,
+          }) satisfies FormDto,
+      ),
     );
+  }
+
+  async deleteForm(formId: number): Promise<void> {
+    const form = await this.getForm(formId);
+    await this.formRepository.remove(form);
   }
 }

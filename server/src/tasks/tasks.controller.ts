@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -58,5 +59,12 @@ export class TasksController {
     @Body() body: CreateFormDto,
   ) {
     return this.tasksService.updateForm(+formId, body);
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async deleteForm(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.tasksService.deleteForm(id);
   }
 }

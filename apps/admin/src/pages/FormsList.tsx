@@ -1,15 +1,17 @@
-import { tasksListForms } from "@alliance/shared/client";
+import {
+  FormDto,
+  tasksDeleteForm,
+  tasksListForms,
+} from "@alliance/shared/client";
 import { FormSchema, Page } from "@alliance/shared/forms/formschema";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-export interface Form {
-  id: number;
-  title: string;
+export type Form = Pick<FormDto, "id" | "title" | "usedInAction"> & {
   schema: FormSchema<string, string>;
   pages: Page<string>[];
-}
+};
 
 const FormsList: React.FC = () => {
   const [forms, setForms] = useState<Form[]>([]);
@@ -30,6 +32,22 @@ const FormsList: React.FC = () => {
       console.error(err);
     }
   }, []);
+
+  const handleDeleteForm = useCallback(
+    async (id: number) => {
+      if (confirm("Are you sure you want to delete this form?")) {
+        try {
+          await tasksDeleteForm({ path: { id } });
+          // Reload forms after successful deletion
+          loadForms();
+        } catch (err) {
+          console.error("Failed to delete form:", err);
+          alert("Failed to delete form. Please try again.");
+        }
+      }
+    },
+    [loadForms]
+  );
 
   useEffect(() => {
     loadForms();
@@ -78,23 +96,43 @@ const FormsList: React.FC = () => {
                   <h3 className="font-bold text-sm">
                     {form.title || `Form ${form.id}`}
                   </h3>
-                  <span className="text-xs text-gray-500">ID: {form.id}</span>
+                  <div>
+                    <span className="text-xs text-zinc-600">ID: {form.id}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteForm(form.id);
+                      }}
+                      className="ml-2 p-1 text-zinc-600 hover:text-red-500 rounded pt-0 -mt-2"
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-600">
-                  {form.schema.pages?.length || 0} page
-                  {(form.schema.pages?.length || 0) !== 1 ? "s" : ""} •{" "}
-                  {form.schema.pages?.reduce(
-                    (total: number, page) => total + (page.fields?.length || 0),
-                    0
-                  ) || 0}{" "}
-                  field
-                  {(form.pages?.reduce(
-                    (total: number, page) => total + (page.fields?.length || 0),
-                    0
-                  ) || 0) !== 1
-                    ? "s"
-                    : ""}
-                </p>
+                <div className="flex flex-row justify-between">
+                  {form.usedInAction && (
+                    <span className="text-sm text-green -mt-[1px]">
+                      Linked in action: {form.usedInAction}
+                    </span>
+                  )}
+                  <p className="text-sm text-zinc-600">
+                    {form.schema.pages?.length || 0} page
+                    {(form.schema.pages?.length || 0) !== 1 ? "s" : ""} •{" "}
+                    {form.schema.pages?.reduce(
+                      (total: number, page) =>
+                        total + (page.fields?.length || 0),
+                      0
+                    ) || 0}{" "}
+                    field
+                    {(form.pages?.reduce(
+                      (total: number, page) =>
+                        total + (page.fields?.length || 0),
+                      0
+                    ) || 0) !== 1
+                      ? "s"
+                      : ""}
+                  </p>
+                </div>
               </div>
             </Card>
           ))}
