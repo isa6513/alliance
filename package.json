@@ -7,7 +7,8 @@
     "apps/frontend",
     "apps/admin",
     "apps/mobile",
-    "shared"
+    "shared",
+    "packages/ui"
   ],
   "scripts": {
     "frontend:dev": "yarn workspace @alliance/frontend dev",
@@ -23,6 +24,8 @@
   },
   "packageManager": "yarn@4.9.1",
   "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "socket.io-client": "^4.8.1"
   }
 }

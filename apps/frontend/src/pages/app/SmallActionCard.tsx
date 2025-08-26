@@ -60,7 +60,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
     <div className={`relative ${className}`}>
       <Card
         className="block overflow-hidden"
-        style={CardStyle.Transparent}
+        style={CardStyle.White}
         onClick={goToActionPage}
       >
         <div className="flex flex-row items-start gap-x-8">

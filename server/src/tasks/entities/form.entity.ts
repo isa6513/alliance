@@ -1,7 +1,7 @@
 // src/forms/form.entity.ts
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { Allow, IsArray } from 'class-validator';
+import { Allow, IsArray, IsDefined } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
@@ -21,13 +21,13 @@ export class Form {
 
   @Column({ type: 'text' })
   @ApiProperty()
-  @Allow()
+  @IsDefined()
   title: string;
 
   /** The JSON schema/DSL you render on the client */
   @Column({ type: 'jsonb' })
   @ApiProperty()
-  @Allow()
+  @IsDefined()
   @Type(() => Object)
   schema!: Record<string, unknown>;
 

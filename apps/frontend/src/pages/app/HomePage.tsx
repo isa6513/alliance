@@ -54,11 +54,11 @@ const HomePage = () => {
   };
 
   return (
-    <div className="flex flex-col w-full h-full items-center bg-zinc-100 min-h-[calc(100vh-50px)]">
+    <div className="flex flex-col w-full h-full items-center bg-page min-h-[calc(100vh-50px)]">
       <div className="flex flex-row px-6 md:gap-x-6">
         <div className="hidden md:flex md:w-[200px]"></div>
-        <div className="flex flex-col py-16 max-w-[728px] md:min-w-[300px] gap-y-5 overflow-y-auto ">
-          <div className="flex flex-col gap-y-6">
+        <div className="flex flex-col py-16 max-w-[728px] md:min-w-[300px] gap-y-5 overflow-y-auto !overflow-visible">
+          <div className="flex flex-col gap-y-6 ">
             <p className="font-adobe text-3xl font-semibold">Current task</p>
             {currentTask && currentTask.relation ? (
               <LargeActionCard
@@ -159,7 +159,7 @@ const HomePage = () => {
         </div>
         <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch w-[375px]">
           <div className="flex flex-col gap-y-3">
-            <Card style={CardStyle.Transparent}>
+            <Card style={CardStyle.White}>
               <p className="font-semibold mb-3">Forum activity</p>
               {posts?.length === 0 && (
                 <p className="text-zinc-400">No forum activity yet</p>
@@ -178,7 +178,7 @@ const HomePage = () => {
                 </div>
               )}
             </Card>
-            <Card style={CardStyle.Transparent}>
+            <Card style={CardStyle.White}>
               <p className="font-semibold mb-3">What your friends are up to</p>
               {friendActivities.length === 0 && (
                 <p className="text-zinc-400">No friend activity yet</p>
