@@ -124,7 +124,7 @@ jobs:
         working-directory: ./
 
       - name: Zip Build Output
-        run: zip -r admin-build.zip dist
+        run: zip -r admin-build.zip build/client
         working-directory: ./apps/admin
 
       - name: Upload Artifact
