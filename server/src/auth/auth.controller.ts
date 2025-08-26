@@ -68,7 +68,7 @@ export class AuthController {
     const { access_token, refresh_token, isAdmin } =
       await this.authService.login(signInDto.email, signInDto.password, true);
 
-    this.authService.setAuthCookies(res, access_token, refresh_token);
+    this.authService.setAuthCookies(res, access_token, refresh_token, true);
     if (signInDto.mode === 'header') {
       return { access_token, refresh_token, isAdmin };
     }
