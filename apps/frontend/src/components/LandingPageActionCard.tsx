@@ -1,5 +1,5 @@
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React from "react";
-import Card, { CardStyle } from "./system/Card";
 
 interface LandingPageActionCardProps {
   title: string;

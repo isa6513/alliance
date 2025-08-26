@@ -1,9 +1,9 @@
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React from "react";
-import Footer from "../../components/Footer";
-import PrelaunchNavbar from "../../components/PrelaunchNavbar";
-import MarkdownWrapper from "../../components/MarkdownWrapper";
 import ExampleActionCategoryCard from "../../components/ExampleActionCategoryCard";
-import Card, { CardStyle } from "../../components/system/Card";
+import Footer from "../../components/Footer";
+import MarkdownWrapper from "../../components/MarkdownWrapper";
+import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 
 const GuidePage: React.FC = () => {
   return (

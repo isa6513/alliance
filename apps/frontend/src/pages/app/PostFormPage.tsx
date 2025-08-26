@@ -7,11 +7,11 @@ import {
   forumFindOnePost,
   forumUpdatePost,
 } from "@alliance/shared/client";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Card from "@alliance/shared/ui/Card";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { setRevalidate } from "../../applayout";
-import Button, { ButtonColor } from "../../components/system/Button";
-import Card from "../../components/system/Card";
 import { useAuth } from "../../lib/AuthContext";
 type FormMode = "create" | "edit";
 

@@ -3,11 +3,11 @@ import { useNavigate } from "react-router";
 
 import { ActionDto, UserActionRelation } from "@alliance/shared/client";
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ActionTaskPanel from "../../components/ActionTaskPanel";
 import CompletedBar from "../../components/CompletedBar";
 import ClockIcon from "../../components/icons/ClockIcon";
-import Button, { ButtonColor } from "../../components/system/Button";
-import Card, { CardStyle } from "../../components/system/Card";
 import UserProfilePicRow from "../../components/UserProfilePicRow";
 import { useActionCount } from "../../lib/useActionWebSocket";
 

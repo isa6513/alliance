@@ -1,8 +1,8 @@
 import { authRegister, SignUpDto } from "@alliance/shared/client";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Card from "@alliance/shared/ui/Card";
 import { useCallback, useEffect, useRef, useState } from "react";
 import SignupForm from "./SignupForm";
-import Button, { ButtonColor } from "./system/Button";
-import Card from "./system/Card";
 
 export interface ActionCommitButtonProps {
   committed: boolean;

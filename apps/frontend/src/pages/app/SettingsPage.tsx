@@ -8,13 +8,13 @@ import {
   userMyLocation,
   userUpdate,
 } from "@alliance/shared/client";
+import Badge from "@alliance/shared/ui/Badge";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
 import FriendsTab from "../../components/FriendsTab";
-import Badge from "../../components/system/Badge";
-import Button, { ButtonColor } from "../../components/system/Button";
-import Card, { CardStyle } from "../../components/system/Card";
 import FormInput from "../../components/system/FormInput";
 import { AdminOnly } from "../../lib/AdminOnly";
 import { useAuth } from "../../lib/AuthContext";

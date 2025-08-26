@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@source "../../../shared/forms/";
+@source "../../../shared/";
 
 @font-face {
   font-family: "Adobe Clean Serif";

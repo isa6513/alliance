@@ -1,10 +1,10 @@
 import { actionsComplete, actionsJoin } from "@alliance/shared/client";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useNavigate } from "react-router";
 import { setRevalidate, useAppLoaderData } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
 import CheckIcon from "../../components/icons/CheckIcon";
-import Card, { CardStyle } from "../../components/system/Card";
 import LargeActionCard from "./LargeActionCard";
 import SmallActionCard from "./SmallActionCard";
 import useActivities, { ActivityList } from "./useActivities";

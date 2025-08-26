@@ -1,9 +1,9 @@
-import React from "react";
-import Card from "./system/Card";
 import { CommuniqueDto } from "@alliance/shared/client";
+import Card from "@alliance/shared/ui/Card";
+import React from "react";
 import { useNavigate } from "react-router";
-import test_image from "../stories/test_image.jpg";
 import { getImageSource } from "../lib/config";
+import test_image from "../stories/test_image.jpg";
 import StatusIndicator, { Status } from "./StatusIndicator";
 
 export interface AnnouncementCardProps {

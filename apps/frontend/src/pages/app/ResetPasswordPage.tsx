@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react";
-import { ButtonColor } from "../../components/system/Button";
-import FormInput from "../../components/system/FormInput";
-import Button from "../../components/system/Button";
 import { authResetPassword } from "@alliance/shared/client";
-import { CardStyle } from "../../components/system/Card";
-import Card from "../../components/system/Card";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import FormInput from "../../components/system/FormInput";
 
 const ResetPasswordPage = () => {
   const [token, setToken] = useState<string | null>(null);

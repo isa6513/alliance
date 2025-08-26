@@ -1,6 +1,6 @@
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback } from "react";
 import { useNavigate } from "react-router";
-import Card, { CardStyle } from "./system/Card";
 import bgImage from "../assets/fakebgimage.png";
 
 export interface IssueCardProps {

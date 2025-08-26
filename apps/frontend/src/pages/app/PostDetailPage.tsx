@@ -3,14 +3,14 @@ import {
   forumRemovePost,
   PostDto,
 } from "@alliance/shared/client";
+import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { setRevalidate } from "../../applayout";
-import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
 import Comments from "../../components/Comments";
 import ProfileImage from "../../components/ProfileImage";
 import PinnedIcon from "../../components/icons/PinnedIcon";
-import Card, { CardStyle } from "../../components/system/Card";
 import { useAuth } from "../../lib/AuthContext";
 import { formatTime } from "../../lib/utils";
 

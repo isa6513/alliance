@@ -1,4 +1,5 @@
 import { actionsUpdateActivity } from "@alliance/shared/client";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
@@ -9,7 +10,6 @@ import { TaskPanelContext } from "./ActionPageTaskPanel";
 import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
 import Comments from "./Comments";
 import ProfileImage from "./ProfileImage";
-import Button, { ButtonColor } from "./system/Button";
 
 export function ErrorBoundary(error: unknown) {
   console.error(error);

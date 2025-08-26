@@ -1,5 +1,5 @@
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import React, { useState } from "react";
-import Button, { ButtonColor } from "../system/Button";
 
 interface ReplyFormProps {
   parentId: number | null;

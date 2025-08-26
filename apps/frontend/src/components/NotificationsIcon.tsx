@@ -5,12 +5,12 @@ import {
   notifsSetRead,
   notifsSetReadAll,
 } from "@alliance/shared/client";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { formatDate } from "date-fns";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import notifBell from "../assets/notif-bell.svg";
 import { useAuth } from "../lib/AuthContext";
-import Button, { ButtonColor } from "./system/Button";
 
 function getWebAppLocation(webAppLocation: string) {
   if (webAppLocation.startsWith("/")) {

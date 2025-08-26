@@ -1,5 +1,5 @@
 import { ActionDto } from "@alliance/shared/client";
-import Card, { CardStyle } from "./system/Card";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 
 export interface ActionTaskPanelCompletedProps {
   action: ActionDto;

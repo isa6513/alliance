@@ -1,10 +1,10 @@
 import { ActionActivityDto, UserActionRelation } from "@alliance/shared/client";
+import Card from "@alliance/shared/ui/Card";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
 import { useActionLoaderData } from "../pages/app/ActionPage";
 import ActionTaskPanel from "./ActionTaskPanel";
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
-import Card from "./system/Card";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);

@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@source "../../../shared/forms/";
+@source "../../../shared/";
 
 body {
   margin: 0;

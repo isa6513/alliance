@@ -1,20 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { FormDto, SubmitFormDto } from "../client";
+import AppMarkdownWrapper from "../ui/AppMarkdownWrapper";
+import Button, { ButtonColor } from "../ui/Button";
 import type { DisplayBlock } from "./display-blocks";
 import type { AnyField, FormSchema } from "./formschema";
 
 interface FormRendererProps {
   form: FormDto["schema"];
   onSubmit: ((data: SubmitFormDto) => void) | null; //null for admin preview
-  markdownRenderer: (text: string) => React.ReactNode;
 }
 
-const FormRenderer = ({
-  form,
-  onSubmit,
-  markdownRenderer,
-}: FormRendererProps) => {
+const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [formData, setFormData] = useState<Record<string, any>>({});
 
@@ -168,7 +165,7 @@ const FormRenderer = ({
                 required={field.required}
                 className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <span className="text-sm text-zinc-700">
+              <span className="text-zinc-700">
                 {field.label}
                 {field.required && <span className="text-red-500 ml-1">*</span>}
               </span>
@@ -331,7 +328,7 @@ const FormRenderer = ({
           <div key={index} className="text-gray-900">
             {(block as any).markdown ? (
               <div className="prose prose-sm max-w-none">
-                {markdownRenderer((block as any).text)}
+                <AppMarkdownWrapper markdownContent={(block as any).text} />
               </div>
             ) : (
               <p className="whitespace-pre-wrap">{(block as any).text}</p>
@@ -434,45 +431,50 @@ const FormRenderer = ({
           )}
         </div>
         {/* Navigation */}
-        <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+        <div className="flex justify-between items-center pt-6 border-t border-gray-200 gap-x-3">
           <div>
             {schema.pages.length > 1 && (
-              <span className="text-sm text-gray-500">
-                Page {currentPageIndex + 1} of {schema.pages.length}
-              </span>
+              <div>
+                <span className="text-sm text-gray-500">
+                  Page {currentPageIndex + 1} of {schema.pages.length}
+                </span>
+              </div>
             )}
           </div>
 
-          <div className="flex space-x-3">
+          <div className="flex flex-1 space-x-3">
             {!isFirstPage && (
-              <button
+              <Button
+                color={ButtonColor.Light}
                 type="button"
                 onClick={handlePrevious}
-                className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md font-medium"
+                className=""
               >
                 Previous
-              </button>
+              </Button>
             )}
 
             {!isLastPage ? (
-              <button
+              <Button
+                color={ButtonColor.Blue}
                 type="button"
                 onClick={handleNext}
-                className="px-4 py-2 text-black bg-blue-100 hover:bg-blue-100 rounded-md border-1 border-blue-500"
+                className=""
               >
                 Next
-              </button>
+              </Button>
             ) : onSubmit ? (
-              <button
-                type="submit"
-                className="px-4 py-2 text-black bg-green-50 hover:bg-green-100 rounded-md border-1 border-green-500"
-              >
+              <Button type="submit" className="">
                 {schema.submit?.label || "Submit"}
-              </button>
+              </Button>
             ) : (
-              <div className="px-4 py-2 text-gray-500 bg-gray-200 rounded-md font-medium cursor-not-allowed">
+              <Button
+                color={ButtonColor.Grey}
+                className="!cursor-not-allowed"
+                onClick={() => {}}
+              >
                 {schema.submit?.label || "Submit"} (Preview Mode)
-              </div>
+              </Button>
             )}
           </div>
         </div>

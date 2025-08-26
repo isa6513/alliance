@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { forumFindPostsByAction, PostDto } from "@alliance/shared/client";
+import Button from "@alliance/shared/ui/Button";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { PostDto } from "@alliance/shared/client";
 import { useAuth } from "../lib/AuthContext";
-import Button from "./system/Button";
-import { forumFindPostsByAction } from "@alliance/shared/client";
 import ForumListPost from "./ForumListPost";
 
 interface ActionForumPostsProps {

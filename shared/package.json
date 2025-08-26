@@ -7,7 +7,8 @@
   "packageManager": "yarn@4.9.1",
   "peerDependencies": {
     "react": "*",
-    "react-dom": "*"
+    "react-dom": "*",
+    "react-markdown": "*"
   },
   "dependencies": {
     "@hey-api/client-fetch": "^0.10.0"

@@ -1,8 +1,8 @@
-import Card from "./system/Card";
-import { useAuth } from "../lib/AuthContext";
-import Button from "./system/Button";
-import { useCallback } from "react";
 import { Features } from "@alliance/shared/lib/features";
+import Button from "@alliance/shared/ui/Button";
+import Card from "@alliance/shared/ui/Card";
+import { useCallback } from "react";
+import { useAuth } from "../lib/AuthContext";
 import { isFeatureEnabled } from "../lib/config";
 
 const InviteMemberCard = () => {

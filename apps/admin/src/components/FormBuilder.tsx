@@ -15,9 +15,8 @@ import type {
   FormSchema,
   Page,
 } from "@alliance/shared/forms/formschema";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import AppMarkdownWrapper from "./AppMarkdownWrapper";
 import {
   EditableDividerBlock,
   EditableHeaderBlock,
@@ -101,26 +100,29 @@ export function FormBuilder({
   const currentPage = schema.pages[selectedPageIndex];
 
   // Available elements for search
-  const availableElements = [
-    { id: "text", name: "Text Field", type: "field" as const },
-    { id: "textarea", name: "Textarea Field", type: "field" as const },
-    { id: "email", name: "Email Field", type: "field" as const },
-    { id: "phone", name: "Phone Field", type: "field" as const },
-    { id: "number", name: "Number Field", type: "field" as const },
-    { id: "checkbox", name: "Checkbox Field", type: "field" as const },
-    { id: "radio", name: "Radio Field", type: "field" as const },
-    { id: "select", name: "Select Field", type: "field" as const },
-    { id: "multiselect", name: "Multi-select Field", type: "field" as const },
-    { id: "date", name: "Date Field", type: "field" as const },
-    { id: "file", name: "File Field", type: "field" as const },
-    { id: "header", name: "Header Block", type: "block" as const },
-    { id: "text-block", name: "Text Block", type: "block" as const },
-    { id: "label", name: "Label Block", type: "block" as const },
-    { id: "divider", name: "Divider Block", type: "block" as const },
-    { id: "spacer", name: "Spacer Block", type: "block" as const },
-    { id: "html", name: "HTML Block", type: "block" as const },
-    { id: "image", name: "Image Block", type: "block" as const },
-  ];
+  const availableElements = useMemo(
+    () => [
+      { id: "text", name: "Text Field", type: "field" as const },
+      { id: "textarea", name: "Textarea Field", type: "field" as const },
+      { id: "email", name: "Email Field", type: "field" as const },
+      { id: "phone", name: "Phone Field", type: "field" as const },
+      { id: "number", name: "Number Field", type: "field" as const },
+      { id: "checkbox", name: "Checkbox Field", type: "field" as const },
+      { id: "radio", name: "Radio Field", type: "field" as const },
+      { id: "select", name: "Select Field", type: "field" as const },
+      { id: "multiselect", name: "Multi-select Field", type: "field" as const },
+      { id: "date", name: "Date Field", type: "field" as const },
+      { id: "file", name: "File Field", type: "field" as const },
+      { id: "header", name: "Header Block", type: "block" as const },
+      { id: "text-block", name: "Text Block", type: "block" as const },
+      { id: "label", name: "Label Block", type: "block" as const },
+      { id: "divider", name: "Divider Block", type: "block" as const },
+      { id: "spacer", name: "Spacer Block", type: "block" as const },
+      { id: "html", name: "HTML Block", type: "block" as const },
+      { id: "image", name: "Image Block", type: "block" as const },
+    ],
+    []
+  );
 
   // Search functionality
   useEffect(() => {
@@ -132,7 +134,7 @@ export function FormBuilder({
     } else {
       setSearchResults([]);
     }
-  }, [searchQuery]);
+  }, [searchQuery, availableElements]);
 
   const handleSearchSelect = (
     element: (typeof availableElements)[0],
@@ -162,7 +164,7 @@ export function FormBuilder({
   };
 
   // Click outside handler
-  const handleClickOutside = (e: React.MouseEvent) => {
+  const handleClickOutside = () => {
     if (activeSearchIndex !== null) {
       setActiveSearchIndex(null);
       setSearchQuery("");
@@ -555,7 +557,7 @@ export function FormBuilder({
             />
             {searchResults.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto z-10">
-                {searchResults.map((element, index) => (
+                {searchResults.map((element) => (
                   <button
                     key={`${element.type}-${element.id}`}
                     onClick={() => handleSearchSelect(element, insertIndex)}
@@ -939,13 +941,7 @@ export function FormBuilder({
 
         <div className="flex-1 p-6 overflow-y-auto min-h-0">
           {isPreviewMode ? (
-            <FormRenderer
-              form={schema}
-              onSubmit={null}
-              markdownRenderer={(text) => (
-                <AppMarkdownWrapper markdownContent={text} />
-              )}
-            />
+            <FormRenderer form={schema} onSubmit={null} />
           ) : (
             <div
               className="max-w-2xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8"

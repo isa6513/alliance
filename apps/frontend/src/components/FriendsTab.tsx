@@ -7,11 +7,11 @@ import {
   userListSentRequests,
   userRemoveFriend,
 } from "@alliance/shared/client";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import ProfileImage from "./ProfileImage";
-import Button, { ButtonColor } from "./system/Button";
-import Card, { CardStyle } from "./system/Card";
 
 interface FriendsTabProps {
   userId: number;

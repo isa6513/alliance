@@ -1,9 +1,9 @@
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback } from "react";
 import { useNavigate } from "react-router";
 import { ActionWithRelation } from "../../applayout";
 import CompletedBar from "../../components/CompletedBar";
-import Card, { CardStyle } from "../../components/system/Card";
 import Tag, { TagStyle } from "../../components/Tag";
 import UserProfilePicRow from "../../components/UserProfilePicRow";
 

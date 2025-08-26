@@ -1,13 +1,13 @@
+import { CardStyle } from "@alliance/shared/ui/Card";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { CardStyle } from "./system/Card";
 
 import { ActionDto } from "@alliance/shared/client";
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Card from "@alliance/shared/ui/Card";
 import { useActionCount } from "../lib/useActionWebSocket";
 import CompletedBar from "./CompletedBar";
-import Button, { ButtonColor } from "./system/Button";
-import Card from "./system/Card";
 import UserProfilePicRow from "./UserProfilePicRow";
 
 export interface TaskCardProps {

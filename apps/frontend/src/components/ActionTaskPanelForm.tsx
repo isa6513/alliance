@@ -4,10 +4,9 @@ import {
   tasksGetForm,
   tasksSubmitForm,
 } from "@alliance/shared/client";
+import FormRenderer from "@alliance/shared/forms/FormRenderer";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useEffect, useState } from "react";
-import AppMarkdownWrapper from "./AppMarkdownWrapper";
-import Card, { CardStyle } from "./system/Card";
-import TempFormRenderer from "./TempFormRenderer";
 
 interface ActionTaskPanelActivityProps {
   taskFormId: number;
@@ -47,13 +46,7 @@ const ActionTaskPanelForm = ({
         <p className="font-medium text-lg mb-1">Steps</p>
         <div>
           {form && (
-            <TempFormRenderer
-              form={form.schema}
-              onSubmit={handleSubmitForm}
-              markdownRenderer={(text) => (
-                <AppMarkdownWrapper markdownContent={text} />
-              )}
-            />
+            <FormRenderer form={form.schema} onSubmit={handleSubmitForm} />
           )}
         </div>
       </div>

@@ -3,10 +3,10 @@ import {
   ActionDto,
   UserActionRelation,
 } from "@alliance/shared/client/types.gen";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback } from "react";
 import { useNavigate } from "react-router";
 import CompletedBar from "./CompletedBar";
-import Card, { CardStyle } from "./system/Card";
 import UserProfilePicRow from "./UserProfilePicRow";
 
 export interface ActionItemCardProps

@@ -1,4 +1,6 @@
 import { paymentsSetPartialProfile } from "@alliance/shared/client";
+import Button from "@alliance/shared/ui/Button";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import {
   PaymentElement,
   useElements,
@@ -11,8 +13,6 @@ import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import { usePaymentStatus } from "./PaymentStatus";
 import StripeStyleFormInput from "./StripeStyleFormInput";
 import { usePaymentIntentData } from "./StripeWrapper";
-import Button from "./system/Button";
-import Card, { CardStyle } from "./system/Card";
 
 export interface ActionTaskPanelFundingProps {
   onPaymentSuccess: () => unknown;

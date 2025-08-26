@@ -1,5 +1,5 @@
-import Card, { CardStyle } from "./system/Card";
-import Button, { ButtonColor } from "./system/Button";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 
 const PokePanel = () => {
   return (

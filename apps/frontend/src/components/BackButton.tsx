@@ -1,4 +1,4 @@
-import Button, { ButtonColor } from "./system/Button";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useNavigate } from "react-router";
 import backArrow from "../../assets/icons8-expand-arrow-96.png";
 

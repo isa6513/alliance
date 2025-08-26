@@ -1,5 +1,5 @@
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { Meta, StoryObj } from "@storybook/react";
-import Card, { CardStyle } from "../components/system/Card";
 import testImage from "./test_image.jpg";
 
 export const AllCards: Story = {

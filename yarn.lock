@@ -5744,6 +5744,7 @@ __metadata:
     eslint: "npm:^9.28.0"
     react: "npm:^19.1.1"
     react-dom: "npm:^19.1.1"
+    react-markdown: "npm:^10.1.0"
     socket.io-client: "npm:^4.8.1"
     typescript: "npm:^5.8.3"
     typescript-eslint: "npm:^8.33.0"

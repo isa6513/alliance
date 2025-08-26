@@ -3,13 +3,13 @@ import {
   UserDto,
   forumUpdateComment,
 } from "@alliance/shared/client";
+import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { formatDistanceToNow } from "date-fns";
 import React, { useEffect, useRef, useState } from "react";
-import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import CommentLikeButton from "../CommentLikeButton";
 import ProfileImage from "../ProfileImage";
 import PinnedIcon from "../icons/PinnedIcon";
-import Card, { CardStyle } from "../system/Card";
 import ReplyForm from "./ReplyForm";
 
 const countAllReplies = (replies: CommentDto[]): number => {

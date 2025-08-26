@@ -8,6 +8,7 @@ import {
   LatLonDto,
   UserActionRelation,
 } from "@alliance/shared/client";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   data,
@@ -23,7 +24,6 @@ import ActionActivityList from "../../components/ActionActivityList";
 import ActionEventsPanel from "../../components/ActionEventsPanel";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
 import CompletedBar from "../../components/CompletedBar";
-import Card, { CardStyle } from "../../components/system/Card";
 import TwoColumnSplit from "../../components/system/TwoColumnSplit";
 import { useAuth } from "../../lib/AuthContext";
 import { useActionCount } from "../../lib/useActionWebSocket";

@@ -1,8 +1,8 @@
 import { FilterMode, filterActions } from "@alliance/shared/lib/actionUtils";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useMemo, useState } from "react";
 import { useAppLoaderData } from "../../applayout";
 import ActionItemCard from "../../components/ActionItemCard";
-import Button, { ButtonColor } from "../../components/system/Button";
 import { useActionCounts } from "../../lib/useActionWebSocket";
 
 const ActionsListPage = () => {

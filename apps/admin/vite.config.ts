@@ -1,6 +1,9 @@
-import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import path from "node:path";
+import { defineConfig } from "vite";
+
+const monorepoRoot = path.resolve(__dirname, "..", "..");
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -8,6 +11,12 @@ export default defineConfig({
   optimizeDeps: { exclude: ["@alliance/shared"] },
   resolve: {
     preserveSymlinks: true,
+    alias: [
+      {
+        find: "@alliance/shared",
+        replacement: path.resolve(monorepoRoot, "shared"),
+      },
+    ],
   },
   server: {
     proxy: {

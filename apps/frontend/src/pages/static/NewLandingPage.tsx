@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 // import HighResGlobe from "../../components/HighResGlobe";
-import PlatformUIDemoCard from "../../components/PlatformUIDemoCard";
-import NewNavbar from "../../components/NewNavbar";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import Footer from "../../components/Footer";
 import LineHeader from "../../components/LineHeader";
-import Card, { CardStyle } from "../../components/system/Card";
+import NewNavbar from "../../components/NewNavbar";
+import PlatformUIDemoCard from "../../components/PlatformUIDemoCard";
 
 const NewLandingPage: React.FC = () => {
   const size = 2 * Math.min(window.innerWidth, window.innerHeight);

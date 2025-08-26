@@ -1,7 +1,7 @@
 import { ActionDto } from "@alliance/shared/client";
+import Button from "@alliance/shared/ui/Button";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ReactMarkdown from "react-markdown";
-import Button from "./system/Button";
-import Card, { CardStyle } from "./system/Card";
 
 interface ActionTaskPanelActivityProps {
   action: ActionDto;

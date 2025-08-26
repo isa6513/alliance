@@ -1,8 +1,8 @@
 import { CitySearchDto, userOnboarding } from "@alliance/shared/client";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
-import Button, { ButtonColor } from "../../components/system/Button";
 
 const OnboardingPage: React.FC = () => {
   const [isOver18, setIsOver18] = useState<boolean | null>(null);

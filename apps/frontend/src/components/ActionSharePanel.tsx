@@ -1,8 +1,8 @@
 import { ActionDto } from "@alliance/shared/client";
-import Card, { CardStyle } from "./system/Card";
-import Button from "./system/Button";
-import FormInput from "./system/FormInput";
+import Button from "@alliance/shared/ui/Button";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useEffect, useState } from "react";
+import FormInput from "./system/FormInput";
 
 export interface ActionSharePanelProps {
   action: ActionDto;

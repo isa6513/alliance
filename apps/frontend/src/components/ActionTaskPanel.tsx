@@ -3,11 +3,11 @@ import { useAuth } from "../lib/AuthContext";
 import { ActionDto, UserActionRelation } from "@alliance/shared/client";
 import ActionTaskPanelForm from "./ActionTaskPanelForm";
 
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ActionCommitButton from "./ActionCommitButton";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
 import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
 import { StripeWrapper } from "./StripeWrapper";
-import Card, { CardStyle } from "./system/Card";
 
 interface ActionTaskPanelProps {
   action: ActionDto;

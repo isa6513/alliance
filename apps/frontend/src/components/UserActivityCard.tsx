@@ -2,6 +2,8 @@ import {
   ActionActivityDto,
   actionsUpdateActivity,
 } from "@alliance/shared/client";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
@@ -9,8 +11,6 @@ import { formatTime } from "../lib/utils";
 import ActivityLikeButton from "./ActivityLikeButton";
 import Comments from "./Comments";
 import ProfileImage from "./ProfileImage";
-import Button, { ButtonColor } from "./system/Button";
-import Card, { CardStyle } from "./system/Card";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;

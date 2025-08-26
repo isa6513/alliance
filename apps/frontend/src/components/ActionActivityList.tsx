@@ -1,8 +1,8 @@
 import { ActionActivityDto } from "@alliance/shared/client";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import ActionActivityFeedItem from "./ActionActivityFeedItem";
-import Card, { CardStyle } from "./system/Card";
 
 interface ActionActivityListProps {
   actionId: number;

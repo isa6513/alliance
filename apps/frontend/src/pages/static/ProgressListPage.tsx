@@ -1,9 +1,8 @@
-import React from "react";
-import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import matter from "gray-matter";
-import Card, { CardStyle } from "../../components/system/Card";
-import { Link } from "react-router";
-import { useLoaderData } from "react-router";
+import React from "react";
+import { Link, useLoaderData } from "react-router";
+import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 
 export async function loader() {
   const postFiles = import.meta.glob("/src/action-posts/*.md", {

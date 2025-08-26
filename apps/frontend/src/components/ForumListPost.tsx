@@ -1,10 +1,10 @@
 import { PostDto } from "@alliance/shared/client";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useNavigate } from "react-router";
 import { formatTime } from "../lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
 import ProfileImage from "./ProfileImage";
 import PinnedIcon from "./icons/PinnedIcon";
-import Card, { CardStyle } from "./system/Card";
 
 export interface ForumListPostProps {
   post: PostDto;

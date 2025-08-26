@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link, useSearchParams } from "react-router";
-import Card, { CardStyle } from "../../components/system/Card";
 import { authMe, authRegister, SignUpDto } from "@alliance/shared/client";
+import { Features } from "@alliance/shared/lib/features";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import SignupForm from "../../components/SignupForm";
 import { isFeatureEnabled } from "../../lib/config";
-import { Features } from "@alliance/shared/lib/features";
 
 const SignupPage: React.FC = () => {
   const navigate = useNavigate();
