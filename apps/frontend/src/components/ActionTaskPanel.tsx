@@ -24,12 +24,18 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
 }: ActionTaskPanelProps) => {
   const { isAuthenticated } = useAuth();
 
-  if (action.status === "gathering_commitments") {
+  if (
+    action.status === "gathering_commitments" ||
+    action.status === "commitments_reached"
+  ) {
     if (userRelation === "joined") {
       return (
         <Card style={CardStyle.Green}>
           <p>
-            <b>Committed </b>- We&apos;ll notify you when it&apos;s time to act.
+            <span className="font-medium">
+              You&apos;ve committed to participate.
+            </span>{" "}
+            We&apos;ll notify you when it&apos;s time to act.
           </p>
         </Card>
       );

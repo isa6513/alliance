@@ -77,12 +77,12 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
             )}
             {waitingForOffice && (
               <Tag style={TagStyle.GreyOutline} className="mb-2">
-                Waiting on office to launch
+                Waiting for office to launch
               </Tag>
             )}
             {waitingOnOthers && (
               <Tag style={TagStyle.GreyOutline} className="mb-2">
-                Waiting on commitments from others
+                Waiting for commitments from others
               </Tag>
             )}
 
@@ -107,7 +107,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
                 users={friendActivities.map((activity) => activity.user)}
               />
             </div>
-            <CompletedBar percentage={(joinedCount / neededCount) * 100} />
+            <CompletedBar percentage={(joinedCount / neededCount) * 100} dark />
           </div>
         )}
       </Card>
