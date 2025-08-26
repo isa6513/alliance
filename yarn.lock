@@ -188,6 +188,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-dom: "*"
+    react-markdown: "*"
   languageName: unknown
   linkType: soft
 
