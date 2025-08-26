@@ -7,8 +7,7 @@
     "apps/frontend",
     "apps/admin",
     "apps/mobile",
-    "shared",
-    "packages/ui"
+    "shared"
   ],
   "scripts": {
     "frontend:dev": "yarn workspace @alliance/frontend dev",
