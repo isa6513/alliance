@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
 import { CreateActionDto, FormDto } from "@alliance/shared/client";
+import React, { useRef } from "react";
 
 interface ActionFormProps {
   form: CreateActionDto & { taskFormId?: number };
@@ -101,10 +101,10 @@ const ActionForm: React.FC<ActionFormProps> = ({
             htmlFor="timeEstimate"
             className="block font-medium text-gray-700 mb-1"
           >
-            Time Estimate
+            Time Estimate (minutes)
           </label>
           <input
-            type="text"
+            type="number"
             id="timeEstimate"
             name="timeEstimate"
             value={form.timeEstimate}
