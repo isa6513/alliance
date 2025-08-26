@@ -1,10 +1,10 @@
-import React, { useState } from "react";
 import {
   ActionDto,
-  ActionStatus,
   ActionEventDto,
+  ActionStatus,
 } from "@alliance/shared/client";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router";
 
 interface PhaseSegment {
   status: ActionStatus;

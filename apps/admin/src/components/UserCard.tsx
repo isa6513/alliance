@@ -1,7 +1,7 @@
 import { User } from "@alliance/shared/client";
 import { getApiUrl } from "@alliance/shared/lib/config";
-import { useNavigate } from "react-router-dom";
-import Card, { CardStyle } from "../Card";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import { useNavigate } from "react-router";
 
 const UserCard = ({ user }: { user: User }) => {
   const navigate = useNavigate();

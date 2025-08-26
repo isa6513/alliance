@@ -30,24 +30,56 @@ __metadata:
   dependencies:
     "@alliance/shared": "workspace:*"
     "@eslint/js": "npm:^9.22.0"
-    "@hey-api/client-fetch": "npm:^0.10.0"
+    "@hey-api/client-fetch": "npm:^0.12.0"
     "@hey-api/openapi-ts": "npm:^0.67.3"
+    "@react-router/dev": "npm:^7.6.2"
+    "@react-router/express": "npm:^7.6.2"
+    "@react-router/node": "npm:^7.6.2"
+    "@react-router/serve": "npm:^7.6.2"
+    "@remixicon/react": "npm:^4.6.0"
+    "@storybook/addon-essentials": "npm:^8.6.12"
+    "@storybook/addon-interactions": "npm:^8.6.12"
+    "@storybook/blocks": "npm:^8.6.12"
+    "@storybook/react-vite": "npm:^8.6.12"
+    "@storybook/test": "npm:^8.6.12"
     "@tailwindcss/vite": "npm:^4.1.4"
+    "@types/compression": "npm:^1"
+    "@types/express": "npm:^5"
+    "@types/morgan": "npm:^1"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@vitejs/plugin-react": "npm:^4.3.4"
-    eslint: "npm:^9.22.0"
+    autoprefixer: "npm:^10.4.21"
+    classnames: "npm:^2.5.1"
+    clsx: "npm:^2.1.1"
+    compression: "npm:^1.8.0"
+    date-fns: "npm:^4.1.0"
+    eslint: "npm:^9.28.0"
+    eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^5.2.0"
     eslint-plugin-react-refresh: "npm:^0.4.19"
-    globals: "npm:^16.0.0"
+    eslint-plugin-storybook: "npm:^0.12.0"
+    eslint-plugin-unused-imports: "npm:^4.1.4"
+    express: "npm:^5.1.0"
+    globals: "npm:^16.2.0"
+    install: "npm:^0.13.0"
+    isbot: "npm:^5"
+    morgan: "npm:^1.10.0"
+    pm2: "npm:^6.0.6"
+    postcss: "npm:^8.5.3"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
     react-markdown: "npm:^10.1.0"
-    react-router-dom: "npm:^7.5.3"
+    react-router: "npm:^7.6.2"
+    recharts: "npm:^2.15.3"
+    socket.io-client: "npm:^4.8.1"
+    tailwind-merge: "npm:^3.3.0"
+    tailwind-variants: "npm:^1.0.0"
     tailwindcss: "npm:^4.1.4"
     typescript: "npm:~5.7.2"
-    typescript-eslint: "npm:^8.26.1"
+    typescript-eslint: "npm:^8.33.0"
     vite: "npm:^6.3.1"
+    web-vitals: "npm:^4.2.4"
   languageName: unknown
   linkType: soft
 
@@ -9104,7 +9136,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^9.22.0, eslint@npm:^9.24.0, eslint@npm:^9.25.0, eslint@npm:^9.28.0":
+"eslint@npm:^9.24.0, eslint@npm:^9.25.0, eslint@npm:^9.28.0":
   version: 9.28.0
   resolution: "eslint@npm:9.28.0"
   dependencies:
@@ -15479,34 +15511,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^7.5.3":
-  version: 7.6.1
-  resolution: "react-router-dom@npm:7.6.1"
-  dependencies:
-    react-router: "npm:7.6.1"
-  peerDependencies:
-    react: ">=18"
-    react-dom: ">=18"
-  checksum: 10c0/9d448d82d73c18475c8e3e2f93cf9dd16ca0488379e295f5a949aa849aaf770eb6257d48f2aef2c62ac1635e8ccddd0fa53173c2479525305eb656936f330812
-  languageName: node
-  linkType: hard
-
-"react-router@npm:7.6.1":
-  version: 7.6.1
-  resolution: "react-router@npm:7.6.1"
-  dependencies:
-    cookie: "npm:^1.0.1"
-    set-cookie-parser: "npm:^2.6.0"
-  peerDependencies:
-    react: ">=18"
-    react-dom: ">=18"
-  peerDependenciesMeta:
-    react-dom:
-      optional: true
-  checksum: 10c0/9968dcccc6695671cb216a74a756d717f47d5b8613869be72764966c2dc252ce12aa91a5f74838776b78d65a2297d7d5455c26a3ed78a380897905383b30c7d8
-  languageName: node
-  linkType: hard
-
 "react-router@npm:^7.6.2":
   version: 7.6.2
   resolution: "react-router@npm:7.6.2"
@@ -17826,7 +17830,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript-eslint@npm:^8.26.1, typescript-eslint@npm:^8.33.0":
+"typescript-eslint@npm:^8.33.0":
   version: 8.33.0
   resolution: "typescript-eslint@npm:8.33.0"
   dependencies:

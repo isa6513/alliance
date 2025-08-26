@@ -16,7 +16,7 @@ import type {
   Page,
 } from "@alliance/shared/forms/formschema";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 import {
   EditableDividerBlock,
   EditableHeaderBlock,
@@ -871,7 +871,7 @@ export function FormBuilder({
                 disabled={isSaving || isLoading}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white rounded-md text-sm font-medium"
               >
-                {isSaving ? "Saving..." : formId ? "Update Form" : "Save Form"}
+                {isSaving ? "Saving..." : "Save Form"}
               </button>
             </div>
           </div>
