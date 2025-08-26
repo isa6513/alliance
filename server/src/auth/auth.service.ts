@@ -24,18 +24,13 @@ export class AuthService {
   public static ACCESS_COOKIE = 'access_token';
   public static REFRESH_COOKIE = 'refresh_token';
 
-  setAuthCookies(
-    res: Response,
-    access: string,
-    refresh?: string,
-    admin?: boolean,
-  ) {
+  setAuthCookies(res: Response, access: string, refresh?: string) {
     const prod = process.env.NODE_ENV === 'production';
 
     res.cookie(AuthService.ACCESS_COOKIE, access, {
       httpOnly: true,
       secure: prod,
-      path: prod ? (admin ? '/adminapi' : '/api') : '/',
+      path: '/',
       sameSite: 'strict',
       maxAge: 1000 * 60 * 15, // 15 min
     });
@@ -44,7 +39,7 @@ export class AuthService {
         httpOnly: true,
         secure: prod,
         sameSite: 'strict',
-        path: prod ? (admin ? '/adminapi' : '/api') : '/',
+        path: '/',
         maxAge: 1000 * 60 * 60 * 24 * 14, // 14 days
       });
     }
