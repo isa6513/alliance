@@ -12,8 +12,8 @@ import {
   tasksListForms,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router";
+import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import ActionForm from "../components/ActionForm";
 import { getApiUrl } from "../lib/config";
 
@@ -64,25 +64,12 @@ const statusOptions: Record<ActionStatus, string> = {
   abandoned: "Abandoned",
 };
 
-interface ActionDashboardProps {
-  actionId: string;
-  isNew?: boolean;
-  onActionCreated?: (action: ActionDto) => void;
-  onActionUpdated?: (action: ActionDto) => void;
-  onActionDeleted?: () => void;
-  onCancel?: () => void;
-}
-
 type Tab = "overview" | "details" | "events";
 
-const ActionDashboard: React.FC<ActionDashboardProps> = ({
-  actionId,
-  isNew = false,
-  onActionCreated,
-  onActionUpdated,
-  onActionDeleted,
-  onCancel,
-}) => {
+const ActionDashboard: React.FC = () => {
+  const { actionId } = useParams<{ actionId: string }>();
+  const navigate = useNavigate();
+  const isNew = actionId === "new";
   const [action, setAction] = useState<ActionDto | null>(null);
   const [loading, setLoading] = useState<boolean>(!isNew);
   const [saving, setSaving] = useState<boolean>(false);
@@ -166,7 +153,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
   }, [isNew]);
 
   useEffect(() => {
-    if (isNew) {
+    if (isNew || !actionId) {
       return;
     }
 
@@ -195,6 +182,25 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
 
     loadAction();
   }, [actionId, isNew]);
+
+  const handleActionCreated = useCallback(
+    (action: ActionDto) => {
+      navigate(`/actions/${action.id}`);
+    },
+    [navigate]
+  );
+
+  const handleActionUpdated = useCallback(() => {
+    // Stay on current page, action data will refresh
+  }, []);
+
+  const handleActionDeleted = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
+
+  const handleCancel = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -307,10 +313,8 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
           throw new Error("Failed to create action");
         }
 
-        if (onActionCreated) {
-          onActionCreated(newAction);
-        }
-      } else {
+        handleActionCreated(newAction);
+      } else if (actionId) {
         const response = await actionsUpdate({
           path: { id: parseInt(actionId) },
           body: formData,
@@ -325,9 +329,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
         });
         if (reloadResponse.data) {
           setAction(reloadResponse.data);
-          if (onActionUpdated) {
-            onActionUpdated(reloadResponse.data);
-          }
+          handleActionUpdated();
         }
       }
       setSaving(false);
@@ -350,6 +352,8 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
         date: new Date(eventForm.date).toISOString(),
       };
 
+      if (!actionId) return;
+
       const response = await actionsAddEvent({
         path: { id: parseInt(actionId) },
         body: eventData,
@@ -357,9 +361,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
 
       if (response.data) {
         setAction(response.data);
-        if (onActionUpdated) {
-          onActionUpdated(response.data);
-        }
+        handleActionUpdated();
         // Reset form
         setEventForm({
           title: "",
@@ -381,7 +383,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
   };
 
   const handleDelete = async () => {
-    if (isNew) return;
+    if (isNew || !actionId) return;
 
     if (
       window.confirm(
@@ -396,9 +398,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
         if (response.error) {
           throw new Error("Failed to delete action");
         }
-        if (onActionDeleted) {
-          onActionDeleted();
-        }
+        handleActionDeleted();
       } catch (err) {
         setError("Failed to delete action");
         setLoading(false);
@@ -425,14 +425,12 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
         <h1 className="text-[#111] text-[16pt] font-bold">
           {isNew ? "Create New Action" : `Action: ${action?.name}`}
         </h1>
-        {onCancel && (
-          <button
-            onClick={onCancel}
-            className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 text-nowrap"
-          >
-            ← Back
-          </button>
-        )}
+        <button
+          onClick={handleCancel}
+          className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 text-nowrap"
+        >
+          ← Back
+        </button>
       </div>
 
       {error && (
@@ -452,7 +450,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
           uploadingImage={uploadingImage}
           imagePreview={imagePreview}
           isNew={true}
-          onCancel={onCancel}
+          onCancel={handleCancel}
           availableForms={availableForms}
         />
       ) : (
@@ -465,7 +463,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  className={`py-2 px-1 border-b-2 text-sm ${
                     activeTab === tab.key
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -496,7 +494,7 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
                   <h2 className="text-lg font-semibold mb-0">
                     Current Status:{" "}
                     <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full cursor-pointer text-[14px] font-medium ${getStatusColor(
+                      className={`inline-flex items-center px-3 py-1 rounded-full cursor-pointer text-[14px] font-normal ${getStatusColor(
                         action.status
                       )}`}
                       onClick={() => {
@@ -611,11 +609,9 @@ const ActionDashboard: React.FC<ActionDashboardProps> = ({
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="text-sm">
-                                <span className="font-medium">
-                                  {event.title}
-                                </span>
+                                <span className="">{event.title}</span>
                                 <span
-                                  className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(
+                                  className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs ${getStatusColor(
                                     event.newStatus
                                   )}`}
                                 >
