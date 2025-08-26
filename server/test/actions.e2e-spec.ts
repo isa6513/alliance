@@ -1,19 +1,19 @@
+import { UserActionRelation } from 'src/actions/actions.service';
+import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
 import * as request from 'supertest';
-import { Action, ActionTaskType } from '../src/actions/entities/action.entity';
+import { Repository } from 'typeorm';
 import {
-  CreateActionDto,
   ActionEventDto,
+  CreateActionDto,
   CreateActionEventDto,
 } from '../src/actions/dto/action.dto';
-import { createTestApp, TestContext } from './e2e-test-utils';
-import { Repository } from 'typeorm';
 import {
   ActionEvent,
   ActionStatus,
   NotificationType,
 } from '../src/actions/entities/action-event.entity';
-import { UserActionRelation } from 'src/actions/actions.service';
-import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
+import { Action, ActionTaskType } from '../src/actions/entities/action.entity';
+import { createTestApp, TestContext } from './e2e-test-utils';
 
 describe('Actions (e2e)', () => {
   let ctx: TestContext;
@@ -66,7 +66,7 @@ describe('Actions (e2e)', () => {
         body: 'Do something important',
         category: 'category',
         image: '',
-        timeEstimate: '1h',
+        timeEstimate: 5,
         shortDescription: 'Do something important',
         taskContents: 'Do something important',
         type: ActionTaskType.Activity,

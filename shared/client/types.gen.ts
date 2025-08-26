@@ -240,7 +240,10 @@ export type ActionDto = {
      * Short description shown in cards
      */
     shortDescription: string;
-    timeEstimate?: string;
+    /**
+     * Time estimate in minutes
+     */
+    timeEstimate?: number;
     /**
      * Type of the action
      */
@@ -347,7 +350,10 @@ export type CreateActionDto = {
      * Short description shown in cards
      */
     shortDescription: string;
-    timeEstimate?: string;
+    /**
+     * Time estimate in minutes
+     */
+    timeEstimate?: number;
     /**
      * Type of the action
      */
@@ -395,7 +401,10 @@ export type UpdateActionDto = {
      * Short description shown in cards
      */
     shortDescription?: string;
-    timeEstimate?: string;
+    /**
+     * Time estimate in minutes
+     */
+    timeEstimate?: number;
     /**
      * Type of the action
      */

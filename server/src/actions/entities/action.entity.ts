@@ -80,9 +80,9 @@ export class Action {
   shortDescription: string;
 
   @Column({ nullable: true })
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'Time estimate in minutes' })
   @IsOptional()
-  timeEstimate?: string;
+  timeEstimate?: number;
 
   @Column({
     type: 'enum',

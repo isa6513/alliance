@@ -29,11 +29,10 @@ This is our chance to take direct action against environmental destruction. Ever
     shortDescription:
       "Gold mining companies are expressing interest in a highly biodiverse area. We can outpace them by purchasing the land.",
     type: "Funding",
-    image: null,
     commitmentThreshold: 100,
     donationThreshold: 50000,
     donationAmount: 2500,
-    timeEstimate: "5 min",
+    timeEstimate: 5,
   },
   // Funding Action 2
   {
@@ -64,17 +63,15 @@ Join us in lighting up education across Kenya.`,
     shortDescription:
       "Rural schools in Kenya lack electricity. Help us install solar panels to power education.",
     type: "Funding",
-    image: null,
     commitmentThreshold: 75,
     donationThreshold: 30000,
     donationAmount: 1500,
-    timeEstimate: "3 min",
+    timeEstimate: 3,
   },
   // Activity Action 1
   {
     name: "Make Target end stocking of Coca-Cola single-use plastic bottles",
     category: "Climate Change",
-    image: null,
     body: `Target the Problem at Its Source
 
 ## The Issue
@@ -122,14 +119,13 @@ After your call, return to this page and mark the action as complete. Your parti
 - Thank them for their time
 
 Together, we can create the pressure needed for real change.`,
-    timeEstimate: "15 min",
+    timeEstimate: 15,
     commitmentThreshold: 1000,
   },
   // Activity Action 2
   {
     name: "Demand your representative support the Green New Deal",
     category: "Climate Policy",
-    image: null,
     body: `Transform Our Energy Future
 
 ## The Green New Deal
@@ -188,14 +184,13 @@ Leave a clear message with your name, city, and request. Staff members track con
 - Organize neighbors to make calls together
 
 Your representative works for you. Make sure they know where you stand.`,
-    timeEstimate: "10 min",
+    timeEstimate: 10,
     commitmentThreshold: 500,
   },
   // Ongoing Action 1
   {
     name: "Stop buying from Coca-Cola",
     category: "Climate Change",
-    image: null,
     body: `Hit Them Where It Hurts: Their Profits
 
 ## The Coca-Cola Problem
@@ -255,7 +250,6 @@ Every purchase is a vote for the kind of world you want to live in.`,
 - Research and share Coca-Cola's environmental impact
 - Attend local events promoting sustainable alternatives
 `,
-    timeEstimate: "Ongoing",
     commitmentThreshold: 250,
   },
   // Ongoing Action 2
@@ -305,7 +299,6 @@ Your commitment to public transit is an investment in a sustainable future.`,
     shortDescription:
       "Reduce your carbon footprint by using public transportation for daily commutes.",
     type: "Ongoing",
-    image: null,
     taskContents: `## Your Ongoing Transit Commitment
 
 ### Getting Started
@@ -357,7 +350,6 @@ Your commitment to public transit is an investment in a sustainable future.`,
 - **Create connections:** Meet neighbors and build community
 
 Your ongoing commitment to public transit is a daily vote for sustainable cities and a healthier planet.`,
-    timeEstimate: "Ongoing",
     commitmentThreshold: 150,
   },
 ];

@@ -1,7 +1,6 @@
 import {
   ActionActivityDto,
   ActionDto,
-  ActionWithRelationDto,
   PostDto,
   ProfileDto,
   UserDto,
@@ -15,14 +14,9 @@ export const testActions: ActionDto[] = [
     id: 1,
     image: "",
     status: "gathering_commitments",
-    timeEstimate: "5 min",
+    timeEstimate: 5,
     usersJoined: 234,
-    myRelation: {
-      status: "joined",
-      deadline: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-      dateCommitted: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-      dateCompleted: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    },
+    activities: [],
     shortDescription:
       "Gold mining companies are expressing interest in a highly biodiverse, unprotected area. We can outpace these companies by purchasing the land from the current owner, Susie.",
     type: "Funding",
@@ -55,14 +49,9 @@ export const testActions: ActionDto[] = [
     id: 2,
     image: "",
     status: "gathering_commitments",
-    timeEstimate: "5 min",
+    timeEstimate: 5,
     usersJoined: 234,
-    myRelation: {
-      status: "joined",
-      deadline: new Date().toISOString(),
-      dateCommitted: new Date().toISOString(),
-      dateCompleted: new Date().toISOString(),
-    },
+    activities: [],
     shortDescription:
       "Target has the power to stop millions of plastic bottles from polluting our planet. By applying pressure, we can make them stop stocking Coca-Cola single-use plastic bottles.",
     type: "Activity",
@@ -71,31 +60,9 @@ export const testActions: ActionDto[] = [
   },
 ];
 
-export const testActionsWithRelation: ActionWithRelationDto[] = [
-  {
-    ...testActions[0],
-    relation: {
-      status: "completed",
-      deadline: new Date().toISOString(),
-      dateCommitted: new Date().toISOString(),
-      dateCompleted: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    },
-  },
-  {
-    ...testActions[1],
-    relation: {
-      status: "completed",
-      deadline: new Date().toISOString(),
-      dateCommitted: new Date().toISOString(),
-      dateCompleted: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
-    },
-  },
-];
-
 export const testUser: ProfileDto = {
   id: 1,
   displayName: "First Lastname",
-  email: "first.lastname@example.com",
   admin: false,
   profilePicture: "https://via.placeholder.com/150",
   profileDescription:
@@ -105,7 +72,6 @@ export const testUser: ProfileDto = {
 export const testUser2: ProfileDto = {
   id: 2,
   displayName: "Seconduser Lastname",
-  email: "seconduser.lastname@example.com",
   admin: false,
   profilePicture: "https://via.placeholder.com/150",
   profileDescription:
@@ -175,21 +141,9 @@ export const testTodoActions: ActionDto[] = [
 export const testNotJoinedActions: ActionDto[] = [
   {
     ...testActions[0],
-    myRelation: {
-      status: "none",
-      dateCommitted: "",
-      dateCompleted: "",
-      deadline: "",
-    },
   },
   {
     ...testActions[1],
-    myRelation: {
-      status: "none",
-      dateCommitted: "",
-      dateCompleted: "",
-      deadline: "",
-    },
   },
 ];
 
@@ -276,7 +230,6 @@ export const testActivities: ActionActivityDto[] = [
     createdAt: new Date().toISOString(),
     user: {
       id: 1,
-      email: "jo@example.com",
       admin: false,
       profilePicture: null,
       profileDescription: null,

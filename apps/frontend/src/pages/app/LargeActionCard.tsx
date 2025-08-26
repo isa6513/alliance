@@ -90,14 +90,14 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       closed={state === TaskCardState.Closed}
     >
       <div className="p-2">
-        <div className="flex flex-row items-center gap-x-2 text-base text-zinc-500">
-          <ClockIcon />
-          <p className="text-green">
-            {action.status === "gathering_commitments"
-              ? "1 minute"
-              : action.timeEstimate}
-          </p>
-        </div>
+        {!!action.timeEstimate && (
+          <div className="flex flex-row items-center gap-x-2 text-base text-zinc-500 mb-1">
+            <ClockIcon />
+            <p className="text-green">{`${action.timeEstimate} minute${
+              action.timeEstimate === 1 ? "" : "s"
+            }`}</p>
+          </div>
+        )}
         <div className="flex flex-row items-start gap-x-8">
           <div className="flex-1 flex flex-col">
             <p className="font-medium text-lg text-black">{action.name}</p>
