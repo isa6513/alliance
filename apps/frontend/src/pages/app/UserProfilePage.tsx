@@ -15,11 +15,12 @@ import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
 import { useAppLoaderData } from "../../applayout";
 import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
+import FriendsTab from "../../components/FriendsTab";
 import ProfileImage from "../../components/ProfileImage";
 import UserActivityCard from "../../components/UserActivityCard";
 import { useAuth } from "../../lib/AuthContext";
@@ -49,7 +50,6 @@ const UserProfilePage: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const isMe = id === user?.id.toString();
 
-  const navigate = useNavigate();
   const { profile: myProfile } = useAppLoaderData();
   const [profileUser, setProfileUser] = useState<ProfileDto | null>(
     isMe ? myProfile : null
@@ -431,10 +431,13 @@ const UserProfilePage: React.FC = () => {
           )}
           {selectedTab === ProfileTabs.Friends && (
             <Card className="justify-center">
-              {friends.length === 0 && (
-                <p className="text-center text-stone-500">No friends yet</p>
-              )}
-              <div className="flex flex-col gap-y-2">
+              <div className="px-2">
+                {friends.length === 0 && (
+                  <p className="text-center text-stone-500">No friends yet</p>
+                )}
+                <FriendsTab userId={profileUser.id} isMe={isMe} />
+              </div>
+              {/* <div className="flex flex-col gap-y-2">
                 {friends?.map((friend: ProfileDto) => (
                   <div
                     className="flex flex-row w-full gap-2 items-center cursor-pointer hover:bg-zinc-50 rounded-md w-fit"
@@ -445,7 +448,7 @@ const UserProfilePage: React.FC = () => {
                     <p className="text-zinc-500">{friend.displayName}</p>
                   </div>
                 ))}
-              </div>
+              </div> */}
             </Card>
           )}
         </div>

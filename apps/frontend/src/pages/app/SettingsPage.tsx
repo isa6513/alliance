@@ -1,7 +1,6 @@
 import {
   City,
   CitySearchDto,
-  NotificationChannel,
   PaymentMethodDto,
   paymentsClearPaymentMethods,
   paymentsPaymentMethod,
@@ -14,7 +13,7 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
-import FriendsTab from "../../components/FriendsTab";
+import LargeCheckbox from "../../components/LargeCheckbox";
 import FormInput from "../../components/system/FormInput";
 import { AdminOnly } from "../../lib/AdminOnly";
 import { useAuth } from "../../lib/AuthContext";
@@ -28,21 +27,20 @@ const SettingsPage: React.FC = () => {
   const [selectedCityId, setSelectedCityId] = useState<number | null>(null);
   const [anonymous, setAnonymous] = useState<boolean>(false);
 
-  // Notification preferences
-  const [turnedOffAllNotifs, setTurnedOffAllNotifs] = useState<boolean>(false);
-  const [primaryNotificationChannel, setPrimaryNotificationChannel] =
-    useState<NotificationChannel>("email");
+  const [emailNotifsEnabled, setEmailNotifsEnabled] = useState<boolean>(false);
+  const [pushNotifsEnabled, setPushNotifsEnabled] = useState<boolean>(false);
+  const [textNotifsEnabled, setTextNotifsEnabled] = useState<boolean>(false);
 
   const [originalCityId, setOriginalCityId] = useState<number | null>(null);
   const [originalAnonymous, setOriginalAnonymous] = useState<boolean>(false);
 
   // Original notification preferences
-  const [originalTurnedOffAllNotifs, setOriginalTurnedOffAllNotifs] =
+  const [originalEmailNotifsEnabled, setOriginalEmailNotifsEnabled] =
     useState<boolean>(false);
-  const [
-    originalPrimaryNotificationChannel,
-    setOriginalPrimaryNotificationChannel,
-  ] = useState<NotificationChannel>("email");
+  const [originalPushNotifsEnabled, setOriginalPushNotifsEnabled] =
+    useState<boolean>(false);
+  const [originalTextNotifsEnabled, setOriginalTextNotifsEnabled] =
+    useState<boolean>(false);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodDto | null>(
     null
@@ -66,8 +64,9 @@ const SettingsPage: React.FC = () => {
   const hasChanges =
     selectedCityId !== originalCityId ||
     anonymous !== originalAnonymous ||
-    turnedOffAllNotifs !== originalTurnedOffAllNotifs ||
-    primaryNotificationChannel !== originalPrimaryNotificationChannel;
+    emailNotifsEnabled !== originalEmailNotifsEnabled ||
+    pushNotifsEnabled !== originalPushNotifsEnabled ||
+    textNotifsEnabled !== originalTextNotifsEnabled;
 
   const loadPaymentMethod = useCallback(async () => {
     try {
@@ -99,8 +98,9 @@ const SettingsPage: React.FC = () => {
         body: {
           cityId: selectedCityId || undefined,
           anonymous: anonymous,
-          turnedOffAllNotifs: turnedOffAllNotifs,
-          primaryNotificationChannel: primaryNotificationChannel,
+          emailNotifsEnabled: emailNotifsEnabled,
+          pushNotifsEnabled: pushNotifsEnabled,
+          textNotifsEnabled: textNotifsEnabled,
         },
       });
 
@@ -113,8 +113,9 @@ const SettingsPage: React.FC = () => {
       // Update original values to reflect the saved state
       setOriginalCityId(selectedCityId);
       setOriginalAnonymous(anonymous);
-      setOriginalTurnedOffAllNotifs(turnedOffAllNotifs);
-      setOriginalPrimaryNotificationChannel(primaryNotificationChannel);
+      setOriginalEmailNotifsEnabled(emailNotifsEnabled);
+      setOriginalPushNotifsEnabled(pushNotifsEnabled);
+      setOriginalTextNotifsEnabled(textNotifsEnabled);
     } catch (error) {
       console.error("Failed to save settings:", error);
     } finally {
@@ -123,8 +124,9 @@ const SettingsPage: React.FC = () => {
   }, [
     selectedCityId,
     anonymous,
-    turnedOffAllNotifs,
-    primaryNotificationChannel,
+    emailNotifsEnabled,
+    pushNotifsEnabled,
+    textNotifsEnabled,
   ]);
 
   useEffect(() => {
@@ -133,11 +135,12 @@ const SettingsPage: React.FC = () => {
       setAnonymous(user.anonymous || false);
       setOriginalAnonymous(user.anonymous || false);
 
-      // Initialize notification preferences from user data
-      setTurnedOffAllNotifs(user.turnedOffAllNotifs || false);
-      setOriginalTurnedOffAllNotifs(user.turnedOffAllNotifs || false);
-      setPrimaryNotificationChannel(user.primaryNotificationChannel);
-      setOriginalPrimaryNotificationChannel(user.primaryNotificationChannel);
+      setEmailNotifsEnabled(user.emailNotifsEnabled || false);
+      setOriginalEmailNotifsEnabled(user.emailNotifsEnabled || false);
+      setPushNotifsEnabled(user.pushNotifsEnabled || false);
+      setOriginalPushNotifsEnabled(user.pushNotifsEnabled || false);
+      setTextNotifsEnabled(user.textNotifsEnabled || false);
+      setOriginalTextNotifsEnabled(user.textNotifsEnabled || false);
 
       loadPaymentMethod();
     }
@@ -155,7 +158,7 @@ const SettingsPage: React.FC = () => {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
         <div className="max-w-4xl mx-auto">
-          <h2 className="!text-3xl mb-2">Account</h2>
+          <h1 className="!text-3xl !font-adobe mb-2">Account</h1>
           <Card style={CardStyle.White} className="p-8">
             <p className="text-center text-stone-500">
               Loading your account information...
@@ -175,7 +178,7 @@ const SettingsPage: React.FC = () => {
         <Card style={CardStyle.White} className="p-8 mb-6 relative gap-y-4">
           <div className="flex justify-between mb-2">
             <div className="gap-x-2">
-              <h2 className="!text-3xl mb-2">Account</h2>
+              <h1 className="text-3xl font-adobe mb-2">Account</h1>
               <AdminOnly>
                 <Badge className="!bg-yellow-600 text-white">Admin</Badge>
               </AdminOnly>
@@ -260,125 +263,99 @@ const SettingsPage: React.FC = () => {
               </Button>
             </div>
           )}
-          <h2 className="text-lg mt-6">Notifications</h2>
 
-          <div className="mb-2">
-            <label className="block font-medium mb-2">All Notifications</label>
-            <div className="flex flex-row gap-x-2">
-              <Button
-                color={
-                  turnedOffAllNotifs === false
-                    ? ButtonColor.Black
-                    : ButtonColor.Light
-                }
-                onClick={() => setTurnedOffAllNotifs(false)}
-              >
-                Enabled
-              </Button>
-              <Button
-                color={
-                  turnedOffAllNotifs === true
-                    ? ButtonColor.Black
-                    : ButtonColor.Light
-                }
-                onClick={() => setTurnedOffAllNotifs(true)}
-              >
-                Disabled
-              </Button>
-            </div>
-            {turnedOffAllNotifs && (
-              <p className="text-sm text-gray-500 mt-2">
-                You will not receive any notifications when this is disabled.
-                Please keep this on if you want to participate as an Alliance
-                member!
-              </p>
-            )}
-          </div>
+          <hr className="border-zinc-300 mt-4" />
 
           <div>
-            <label className="block font-medium mb-2">
-              Primary Notification Channel
-            </label>
-            <div className="flex flex-row gap-x-2">
-              <Button
-                color={
-                  primaryNotificationChannel === "email"
-                    ? ButtonColor.Black
-                    : ButtonColor.Light
-                }
-                onClick={() => setPrimaryNotificationChannel("email")}
-                disabled={turnedOffAllNotifs}
-              >
-                Email
-              </Button>
-              <Button
-                color={
-                  primaryNotificationChannel === "text"
-                    ? ButtonColor.Black
-                    : ButtonColor.Light
-                }
-                onClick={() => setPrimaryNotificationChannel("text")}
-                disabled={turnedOffAllNotifs}
-              >
-                Text/SMS
-              </Button>
+            <h2 className="text-lg !font-semibold mb-4">Notifications</h2>
+
+            <div className="mb-4">
+              {!(
+                emailNotifsEnabled ||
+                pushNotifsEnabled ||
+                textNotifsEnabled
+              ) && (
+                <p className="text-sm text-gray-500 mt-2">
+                  You will not receive any notifications when this is disabled.
+                  Please keep this on if you want to participate as an Alliance
+                  member!
+                </p>
+              )}
             </div>
-            {turnedOffAllNotifs && (
-              <p className="text-sm text-gray-500 mt-2">
-                Enable notifications to select a primary channel.
-              </p>
+
+            <div className="flex flex-col gap-y-2">
+              <LargeCheckbox
+                label="Email"
+                checked={emailNotifsEnabled}
+                onChange={(checked) => setEmailNotifsEnabled(checked)}
+              />
+              <LargeCheckbox
+                label="Text/SMS"
+                checked={pushNotifsEnabled}
+                onChange={(checked) => setPushNotifsEnabled(checked)}
+              />
+              <LargeCheckbox
+                label="Push"
+                checked={textNotifsEnabled}
+                onChange={(checked) => setTextNotifsEnabled(checked)}
+              />
+            </div>
+          </div>
+
+          <hr className="border-zinc-300 mt-4" />
+
+          <div>
+            <h2 className="!font-semibold text-lg mb-4">Payment Methods</h2>
+
+            {paymentMethod !== null ? (
+              <>
+                <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center justify-center p-2 h-5 bg-blue-500 text-white text-xs font-semibold rounded">
+                      {paymentMethod.brand?.toUpperCase() || "CARD"}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        •••• •••• •••• {paymentMethod.last4}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Expires{" "}
+                        {paymentMethod.exp_month?.toString().padStart(2, "0")}/
+                        {paymentMethod.exp_year}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleClearPaymentMethod}
+                    disabled={loadingPaymentMethod}
+                    className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                    title="Remove payment method"
+                  >
+                    {loadingPaymentMethod ? (
+                      <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                    ) : (
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <p className="text-zinc-500">No payment methods exist</p>
             )}
           </div>
         </Card>
-
-        {paymentMethod !== null && (
-          <Card style={CardStyle.White} className="p-8 mb-6">
-            <h2 className="text-lg mb-6 -mt-2">Payment Methods</h2>
-            <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center justify-center p-2 h-5 bg-blue-500 text-white text-xs font-semibold rounded">
-                  {paymentMethod.brand?.toUpperCase() || "CARD"}
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">
-                    •••• •••• •••• {paymentMethod.last4}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Expires{" "}
-                    {paymentMethod.exp_month?.toString().padStart(2, "0")}/
-                    {paymentMethod.exp_year}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={handleClearPaymentMethod}
-                disabled={loadingPaymentMethod}
-                className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                title="Remove payment method"
-              >
-                {loadingPaymentMethod ? (
-                  <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-                ) : (
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                )}
-              </button>
-            </div>
-          </Card>
-        )}
-
-        <FriendsTab userId={user.id} />
       </div>
     </div>
   );

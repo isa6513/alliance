@@ -6,7 +6,7 @@ const UserProfilePicRow = ({ users }: { users: ProfileDto[] }) => {
     return self.findIndex((t) => t.id === item.id) === pos;
   });
   return (
-    <div className="flex flex-row items-center gap-x-1">
+    <div className="flex flex-row items-center gap-x-0.5">
       {unique.slice(0, 5).map((user) => (
         <a
           href={`/user/${user.id}`}

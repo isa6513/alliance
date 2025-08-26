@@ -13,7 +13,6 @@ import {
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { City } from 'src/geo/city.entity';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
-import { NotificationChannel } from 'src/notifs/notifchannel';
 import {
   BeforeInsert,
   BeforeUpdate,
@@ -64,18 +63,36 @@ export class User {
   @ApiProperty()
   emailVerified: boolean;
 
+  // @Column({
+  //   type: 'enum',
+  //   enum: NotificationChannel,
+  //   default: NotificationChannel.Email,
+  // })
+  // @ApiProperty({
+  //   enum: NotificationChannel,
+  //   enumName: 'NotificationChannel',
+  // })
+  // @IsOptional()
+  // @IsEnum(NotificationChannel)
+  // primaryNotificationChannel: NotificationChannel;
+
   @Column({
-    type: 'enum',
-    enum: NotificationChannel,
-    default: NotificationChannel.Email,
+    default: true,
   })
-  @ApiProperty({
-    enum: NotificationChannel,
-    enumName: 'NotificationChannel',
+  @ApiProperty()
+  emailNotifsEnabled: boolean;
+
+  @Column({
+    default: true,
   })
-  @IsOptional()
-  @IsEnum(NotificationChannel)
-  primaryNotificationChannel: NotificationChannel;
+  @ApiProperty()
+  textNotifsEnabled: boolean;
+
+  @Column({
+    default: true,
+  })
+  @ApiProperty()
+  pushNotifsEnabled: boolean;
 
   @Column({
     type: 'enum',

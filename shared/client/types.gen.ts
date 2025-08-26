@@ -26,15 +26,15 @@ export type AccessToken = {
     access_token: string;
 };
 
-export type NotificationChannel = 'text' | 'email' | 'push';
-
 export type NotificationPreference = 'all' | 'digest' | 'none';
 
 export type UserDto = {
     id: number;
     name: string;
     email: string;
-    primaryNotificationChannel: NotificationChannel;
+    emailNotifsEnabled: boolean;
+    textNotifsEnabled: boolean;
+    pushNotifsEnabled: boolean;
     socialNotifsPreference: NotificationPreference;
     turnedOffAllNotifs: boolean;
     admin: boolean;
@@ -74,7 +74,9 @@ export type UpdateProfileDto = {
     phoneNumber?: string;
     phoneNumberVerified?: boolean;
     emailVerified?: boolean;
-    primaryNotificationChannel?: NotificationChannel;
+    emailNotifsEnabled?: boolean;
+    textNotifsEnabled?: boolean;
+    pushNotifsEnabled?: boolean;
     socialNotifsPreference?: NotificationPreference;
     turnedOffAllNotifs?: boolean;
     password?: string;
@@ -114,7 +116,9 @@ export type User = {
     phoneNumber?: string;
     phoneNumberVerified: boolean;
     emailVerified: boolean;
-    primaryNotificationChannel: NotificationChannel;
+    emailNotifsEnabled: boolean;
+    textNotifsEnabled: boolean;
+    pushNotifsEnabled: boolean;
     socialNotifsPreference: NotificationPreference;
     turnedOffAllNotifs: boolean;
     password: string;

@@ -431,16 +431,16 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
           )}
         </div>
         {/* Navigation */}
-        <div className="flex justify-between items-center pt-6 border-t border-gray-200 gap-x-3">
-          <div>
-            {schema.pages.length > 1 && (
+        <div className="flex justify-between items-center pt-4 border-t border-gray-200 gap-x-3">
+          {schema.pages.length > 1 && (
+            <div>
               <div>
                 <span className="text-sm text-gray-500">
                   Page {currentPageIndex + 1} of {schema.pages.length}
                 </span>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           <div className="flex flex-1 space-x-3">
             {!isFirstPage && (
@@ -464,7 +464,11 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
                 Next
               </Button>
             ) : onSubmit ? (
-              <Button type="submit" className="">
+              <Button
+                color={ButtonColor.Black}
+                type="submit"
+                className="w-full !py-3 text-base"
+              >
                 {schema.submit?.label || "Submit"}
               </Button>
             ) : (

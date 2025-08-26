@@ -15,9 +15,10 @@ import ProfileImage from "./ProfileImage";
 
 interface FriendsTabProps {
   userId: number;
+  isMe?: boolean;
 }
 
-const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
+const FriendsTab: React.FC<FriendsTabProps> = ({ userId, isMe = false }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [friends, setFriends] = useState<ProfileDto[]>([]);
@@ -138,8 +139,6 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
 
   return (
     <>
-      <h2 className="text-xl mb-4">Friends</h2>
-
       <div className="flex mb-4">
         <button
           className={`px-4 py-2 ${
@@ -151,29 +150,33 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
         >
           Friends ({friends.length})
         </button>
-        <button
-          className={`px-4 py-2 ${
-            activeTab === "received"
-              ? "border-b-2 border-black font-bold"
-              : "text-stone-500"
-          }`}
-          onClick={() => setActiveTab("received")}
-        >
-          Received Requests ({receivedRequests.length})
-        </button>
-        <button
-          className={`px-4 py-2 ${
-            activeTab === "sent"
-              ? "border-b-2 border-black font-bold"
-              : "text-stone-500"
-          }`}
-          onClick={() => setActiveTab("sent")}
-        >
-          Sent Requests ({sentRequests.length})
-        </button>
+        {isMe && (
+          <button
+            className={`px-4 py-2 ${
+              activeTab === "received"
+                ? "border-b-2 border-black font-bold"
+                : "text-stone-500"
+            }`}
+            onClick={() => setActiveTab("received")}
+          >
+            Received Requests ({receivedRequests.length})
+          </button>
+        )}
+        {isMe && (
+          <button
+            className={`px-4 py-2 ${
+              activeTab === "sent"
+                ? "border-b-2 border-black font-bold"
+                : "text-stone-500"
+            }`}
+            onClick={() => setActiveTab("sent")}
+          >
+            Sent Requests ({sentRequests.length})
+          </button>
+        )}
       </div>
 
-      <div className="pb-8">
+      <div className="">
         {activeTab === "friends" && (
           <>
             {friends.length === 0 ? (
@@ -195,19 +198,21 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ userId }) => {
                     <div className="flex-grow">
                       <p className="font-medium">{friend.displayName}</p>
                     </div>
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveFriend(friend.id);
-                      }}
-                      color={ButtonColor.Red}
-                      disabled={processingIds[friend.id]}
-                      className="text-sm bg-transparent hover:!text-red-700"
-                    >
-                      {processingIds[friend.id]
-                        ? "Removing..."
-                        : "Remove friend"}
-                    </Button>
+                    {isMe && (
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveFriend(friend.id);
+                        }}
+                        color={ButtonColor.Red}
+                        disabled={processingIds[friend.id]}
+                        className="text-sm bg-transparent hover:!text-red-700"
+                      >
+                        {processingIds[friend.id]
+                          ? "Removing..."
+                          : "Remove friend"}
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>

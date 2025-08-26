@@ -69,7 +69,7 @@ const HomePage = () => {
                 onJoin={handleTaskJoin}
               />
             ) : (
-              <Card style={CardStyle.White}>
+              <Card style={CardStyle.Transparent}>
                 <div className="px-2 py-24 flex flex-col items-center gap-y-4">
                   <CheckIcon size="large" />
                   <p className="text-center text-zinc-500 text-xl">

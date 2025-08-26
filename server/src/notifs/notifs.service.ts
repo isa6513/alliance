@@ -70,16 +70,11 @@ export class NotifsService {
   }
 
   private shouldEmailUser(user: User) {
-    return (
-      user.primaryNotificationChannel === NotificationChannel.Email &&
-      !user.turnedOffAllNotifs
-    );
+    return user.emailNotifsEnabled && !user.turnedOffAllNotifs;
   }
   private shouldTextUser(user: User) {
     return (
-      user.primaryNotificationChannel === NotificationChannel.Text &&
-      !user.turnedOffAllNotifs &&
-      user.phoneNumber
+      user.textNotifsEnabled && !user.turnedOffAllNotifs && user.phoneNumber
     );
   }
 
