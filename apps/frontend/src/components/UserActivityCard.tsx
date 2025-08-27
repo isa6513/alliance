@@ -92,8 +92,10 @@ const UserActivityCard = ({
               <ProfileImage pfp={activity.user.profilePicture} size="medium" />
             </Link>
           </div>
-          <Link to={`user/${activity.user.id}`}>
-            <p className="text-zinc-600">{activity.user.displayName}</p>
+          <Link to={`/user/${activity.user.id}`}>
+            <p className="text-zinc-600 hover:underline">
+              {activity.user.displayName}
+            </p>
           </Link>
           <p className="text-zinc-500">
             {completed ? "completed" : "committed to"} {timeSinceCompleted}
