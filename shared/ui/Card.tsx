@@ -47,7 +47,7 @@ const Card: React.FC<CardProps> = ({
     [CardStyle.Black]: "bg-black border-zinc-300 text-white",
     [CardStyle.Image]: "bg-transparent border-none",
     [CardStyle.Green]: "bg-green-1 border-green-2 rounded-lg",
-    [CardStyle.GreenOutline]: "border-green-2 bg-green-1/20",
+    [CardStyle.GreenOutline]: "border-green-2 bg-green-1/40 rounded",
     [CardStyle.Transparent]:
       "bg-transparent border-gray-2 hover:border border-box rounded-md",
   };

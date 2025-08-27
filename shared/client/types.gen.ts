@@ -1633,6 +1633,21 @@ export type ForumUpdatePostResponses = {
 
 export type ForumUpdatePostResponse = ForumUpdatePostResponses[keyof ForumUpdatePostResponses];
 
+export type ForumFindLastCommentForPostData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/forum/posts/{id}/last-comment';
+};
+
+export type ForumFindLastCommentForPostResponses = {
+    200: CommentDto;
+};
+
+export type ForumFindLastCommentForPostResponse = ForumFindLastCommentForPostResponses[keyof ForumFindLastCommentForPostResponses];
+
 export type ForumFindCommentsForPostData = {
     body?: never;
     path: {

@@ -29,7 +29,7 @@ const Tag: React.FC<TagProps> = ({
   };
 
   const styleClasses = {
-    [TagStyle.Green]: "px-2 py-1 bg-blue-400/20 self-start text-blue-600",
+    [TagStyle.Green]: "px-2 py-1 bg-green/30 self-start text-black",
     [TagStyle.Blue]: "px-2 py-1 bg-blue-400/20 self-start text-blue-600",
     [TagStyle.Grey]: "px-2 py-1 bg-zinc-400/20 self-start text-zinc-500",
     [TagStyle.Yellow]: "px-2 py-1 bg-yellow-400/20 self-start text-yellow-600",

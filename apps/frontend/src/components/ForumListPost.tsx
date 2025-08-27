@@ -1,5 +1,10 @@
-import { PostDto } from "@alliance/shared/client";
+import {
+  CommentDto,
+  forumFindLastCommentForPost,
+  PostDto,
+} from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { formatTime } from "../lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
@@ -29,6 +34,22 @@ const ForumListPost = ({
     navigate(`/actions/${post.action?.id}`);
   };
 
+  const [lastComment, setLastComment] = useState<CommentDto | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    forumFindLastCommentForPost({
+      path: { id: post.id },
+    }).then((res) => {
+      if (res.data && res.data.author) {
+        setLastComment(res.data);
+        console.log("Last comment fetched:", res.data);
+        return;
+      }
+    });
+  }, [post.id]);
+
   if (card) {
     return (
       <Card
@@ -44,8 +65,18 @@ const ForumListPost = ({
         <div className="flex justify-between items-end text-sm text-gray-500">
           <div className="flex flex-row gap-x-2 items-center">
             <ProfileImage pfp={post.author.profilePicture} size="small" />
-            <p onClick={authorClick} className="hover:underline">
-              {post.author.displayName}
+            <p>
+              <span onClick={authorClick} className="hover:underline">
+                {lastComment
+                  ? lastComment.author.displayName
+                  : post.author.displayName}
+              </span>
+              <span>
+                {lastComment &&
+                  ` replied ${formatTime(new Date(lastComment.createdAt), {
+                    addSuffix: true,
+                  })}`}
+              </span>
             </p>
             {post.action?.name !== undefined && showAction && (
               <a
@@ -58,7 +89,7 @@ const ForumListPost = ({
           </div>
           <div className="flex space-x-3">
             <span>
-              {formatTime(new Date(post.updatedAt), {
+              {formatTime(new Date(post.createdAt), {
                 addSuffix: true,
               })}
             </span>
@@ -77,10 +108,13 @@ const ForumListPost = ({
       >
         <ActivityFeedItem
           title={post.title}
-          content={`posted ${formatTime(new Date(post.updatedAt), {
-            addSuffix: true,
-          })}`}
-          user={post.author}
+          content={`${lastComment ? "replied" : "posted"} ${formatTime(
+            new Date(post.updatedAt),
+            {
+              addSuffix: true,
+            }
+          )}`}
+          user={lastComment ? lastComment.author : post.author}
         />
       </div>
     );

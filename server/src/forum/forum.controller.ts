@@ -1,22 +1,24 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
+  Get,
+  Param,
   ParseIntPipe,
+  Patch,
+  Post,
+  UseGuards,
 } from '@nestjs/common';
-import { ForumService } from './forum.service';
-import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
-import { CreateCommentDto, UpdateCommentDto } from './dto/comment.dto';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard, JwtPayload } from '../auth/guards/auth.guard';
-import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 import { ReqUser } from '../auth/user.decorator';
-import { PostDto } from './dto/post.dto';
-import { CommentDto } from './dto/comment.dto';
+import {
+  CommentDto,
+  CreateCommentDto,
+  UpdateCommentDto,
+} from './dto/comment.dto';
+import { CreatePostDto, PostDto, UpdatePostDto } from './dto/post.dto';
+import { ForumService } from './forum.service';
 
 @ApiTags('forum')
 @Controller('forum')
@@ -59,6 +61,16 @@ export class ForumController {
   @ApiOkResponse({ type: PostDto })
   async findOnePost(@Param('id') id: string): Promise<PostDto> {
     return this.forumService.findPostWithComments(+id);
+  }
+
+  @Get('posts/:id/last-comment')
+  @ApiOperation({ summary: 'Get the last comment for a specific post' })
+  @ApiOkResponse({ type: CommentDto })
+  async findLastCommentForPost(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<CommentDto | null> {
+    const comment = await this.forumService.findLastCommentForPost(id);
+    return comment ? new CommentDto(comment) : null;
   }
 
   @Get('posts/:id/comments')

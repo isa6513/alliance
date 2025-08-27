@@ -1,4 +1,3 @@
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import matter from "gray-matter";
 import React from "react";
 import { Link, useLoaderData } from "react-router";
@@ -37,33 +36,36 @@ const ProgressListPage: React.FC = () => {
           </h2>
           <div className="flex flex-col gap-y-4">
             {posts.map((post) => (
-              <Link to={`/progress/${post.slug}`} key={post.slug}>
-                <Card
-                  style={CardStyle.Outline}
+              <Link to={`/progress/${post.slug}`} key={post.slug} className="">
+                {/* <Card
+                  style={CardStyle.White}
                   className="hover:border-zinc-400 transition-all duration-100"
-                >
-                  <div className="p-0.5">
-                    <div className="flex justify-between">
-                      <p className="text-base md:text-xl">
-                        {post.frontmatter.title}
-                      </p>
-                      <p className="text-sm md:text-base text-green border border-green-2 py-1 px-2 bg-green-1/20 rounded">
-                        {post.frontmatter.members} members
-                      </p>
-                    </div>
-
-                    <p className="text-sm md:text-base text-zinc-500">
-                      {new Date(post.frontmatter.date).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
-                      )}
+                > */}
+                <div className="p-0.5">
+                  <div className="flex justify-between">
+                    <p className="text-base md:text-3xl font-adobe">
+                      {post.frontmatter.title}
                     </p>
+                    <p className="text-sm md:text-base text-green border border-green-2 py-1 px-2 bg-green-1/20 rounded">
+                      {post.frontmatter.members} members
+                    </p>
+                    {/* <Tag style={TagStyle.Green} size="large">
+                      {post.frontmatter.members} members
+                    </Tag> */}
                   </div>
-                </Card>
+
+                  <p className="text-sm md:text-lg text-zinc-500">
+                    {new Date(post.frontmatter.date).toLocaleDateString(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }
+                    )}
+                  </p>
+                </div>
+                {/* </Card> */}
               </Link>
             ))}
           </div>

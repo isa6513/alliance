@@ -125,6 +125,19 @@ export class ForumService {
     return this.organizeRepliesHierarchy(allComments);
   }
 
+  async findLastCommentForPost(postId: number): Promise<Comment | null> {
+    const lastComment = await this.commentRepository.findOne({
+      where: {
+        parentObjectId: postId,
+        parentObjectType: CommentParentObject.Post,
+      },
+      relations: ['author'],
+      order: { createdAt: 'DESC' },
+    });
+
+    return lastComment;
+  }
+
   async findCommentsForActivity(activityId: number): Promise<Comment[]> {
     const allComments = await this.commentRepository.find({
       where: {
