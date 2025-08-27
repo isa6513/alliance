@@ -51,6 +51,16 @@ const formatStatus = (status: string) => {
     .join(" ");
 };
 
+// Helper function to format date for datetime-local input
+const formatDateForInput = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 // Status options for event creation
 const statusOptions: Record<ActionStatus, string> = {
   draft: "Draft",
@@ -138,7 +148,7 @@ const ActionDashboard: React.FC = () => {
     title: "",
     description: "",
     newStatus: "gathering_commitments",
-    date: new Date().toISOString().slice(0, 16),
+    date: formatDateForInput(new Date()),
     showInTimeline: true,
     sendNotifsTo: "all",
   });
@@ -395,7 +405,7 @@ const ActionDashboard: React.FC = () => {
           title: "",
           description: "",
           newStatus: "gathering_commitments",
-          date: new Date().toISOString().slice(0, 16),
+          date: formatDateForInput(new Date()),
           showInTimeline: true,
           sendNotifsTo: "all",
         });
@@ -649,7 +659,17 @@ const ActionDashboard: React.FC = () => {
                                 </span>
                               </div>
                               <div className="text-xs text-gray-500">
-                                {new Date(event.date).toLocaleString()}
+                                {new Date(event.date).toLocaleString(
+                                  undefined,
+                                  {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    timeZoneName: "short",
+                                  }
+                                )}
                               </div>
                               {event.description && (
                                 <div className="text-xs text-gray-600 mt-1">
@@ -696,7 +716,7 @@ const ActionDashboard: React.FC = () => {
                   <div className="mb-4 flex flex-row items-center">
                     <label
                       htmlFor="newStatus"
-                      className="block font-medium text-gray-700 mb-1 min-w-25"
+                      className="block text-black mb-1 min-w-25"
                     >
                       New Status
                     </label>
@@ -737,7 +757,7 @@ const ActionDashboard: React.FC = () => {
                       />
                       <label
                         htmlFor="useCustomName"
-                        className="ml-2 block text-sm font-medium text-gray-700"
+                        className="ml-2 block text-black"
                       >
                         Use custom name
                       </label>
@@ -748,7 +768,7 @@ const ActionDashboard: React.FC = () => {
                         <div>
                           <label
                             htmlFor="eventTitle"
-                            className="block font-medium text-gray-700 mb-1"
+                            className="block text-black mb-1"
                           >
                             Event Title *
                           </label>
@@ -767,7 +787,7 @@ const ActionDashboard: React.FC = () => {
                         <div>
                           <label
                             htmlFor="eventDescription"
-                            className="block font-medium text-gray-700 mb-1"
+                            className="block text-black mb-1"
                           >
                             Description
                           </label>
@@ -794,7 +814,7 @@ const ActionDashboard: React.FC = () => {
                       />
                       <label
                         htmlFor="launchNow"
-                        className="ml-2 block text-sm font-medium text-gray-700"
+                        className="ml-2 block text-black"
                       >
                         Launch now
                       </label>
@@ -804,9 +824,10 @@ const ActionDashboard: React.FC = () => {
                       <div>
                         <label
                           htmlFor="eventDate"
-                          className="block font-medium text-gray-700 mb-1"
+                          className="block text-black mb-1"
                         >
-                          Event Date & Time *
+                          Event Date & Time * (
+                          {Intl.DateTimeFormat().resolvedOptions().timeZone})
                         </label>
                         <input
                           type="datetime-local"
@@ -824,7 +845,7 @@ const ActionDashboard: React.FC = () => {
                       <div>
                         <label
                           htmlFor="sendNotifsTo"
-                          className="block font-medium text-gray-700 mb-1"
+                          className="block text-black mb-1"
                         >
                           Send Notifications To
                         </label>
@@ -835,9 +856,8 @@ const ActionDashboard: React.FC = () => {
                           onChange={handleEventInputChange}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                          <option value="all">All Users</option>
-                          <option value="joined">Joined Users Only</option>
-                          <option value="none">No Notifications</option>
+                          <option value="all">All</option>
+                          <option value="none">None</option>
                         </select>
                       </div>
 
@@ -852,7 +872,7 @@ const ActionDashboard: React.FC = () => {
                         />
                         <label
                           htmlFor="showInTimeline"
-                          className="ml-2 block text-sm text-gray-700"
+                          className="ml-2 block text-black"
                         >
                           Show in public timeline
                         </label>
@@ -968,7 +988,18 @@ const ActionDashboard: React.FC = () => {
 
                             <div className="text-xs text-gray-500 space-y-1">
                               <div>
-                                Date: {new Date(event.date).toLocaleString()}
+                                Date:{" "}
+                                {new Date(event.date).toLocaleString(
+                                  undefined,
+                                  {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    timeZoneName: "short",
+                                  }
+                                )}
                               </div>
                               <div>
                                 Notifications: {event.sendNotifsTo} | Timeline:{" "}
