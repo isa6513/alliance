@@ -20,7 +20,6 @@ Alliance Foundation (“Alliance,” “we,” “our,” or “us”) operates 
 - How do we store your data?
 - Marketing
 - What are your data protection rights?
-- What are cookies?
 - How do we use cookies?
 - What types of cookies do we use?
 - How to manage your cookies
@@ -90,10 +89,6 @@ Our website uses:
 ## How to manage cookies
 
 You can set your browser not to accept cookies, and you can remove cookies from your browser at any time. However, some website features may not function as a result.
-
-## Privacy policies of other websites
-
-The Alliance Platform may contain links to other websites. This privacy policy applies only to our Platform. If you click on a link to another website, you should read their privacy policy.
 
 ## Privacy policies of other websites
 

@@ -16,14 +16,20 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
             <p className="text-2xl font-berlingske uppercase">The Alliance</p>
           </div>
           <div className="flex flex-row gap-6 md:gap-10 text-base">
-            <Link to="/people" className="text-lg hover:underline">
+            <Link to="/people" className=" hover:underline">
               People
             </Link>
-            <Link to="/guide" className="text-lg hover:underline">
+            <Link to="/guide" className=" hover:underline">
               Guide
             </Link>
-            <Link to="/progress" className="text-lg hover:underline">
+            <Link to="/progress" className=" hover:underline">
               Progress
+            </Link>
+            <Link to="/privacypolicy" className=" hover:underline">
+              Privacy
+            </Link>
+            <Link to="/terms" className=" hover:underline">
+              Terms
             </Link>
 
             {/* <div className="flex flex-col gap-2">

@@ -1,6 +1,7 @@
 import React from "react";
-import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import Footer from "../../components/Footer";
 import MarkdownWrapper from "../../components/MarkdownWrapper";
+import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 
 const PeoplePage: React.FC = () => {
   return (
@@ -30,6 +31,7 @@ We have 25 members who are participating in early experiments.
           />
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

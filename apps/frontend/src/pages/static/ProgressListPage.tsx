@@ -2,6 +2,7 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import matter from "gray-matter";
 import React from "react";
 import { Link, useLoaderData } from "react-router";
+import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 
 export async function loader() {
@@ -68,6 +69,7 @@ const ProgressListPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
