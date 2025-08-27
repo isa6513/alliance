@@ -8,8 +8,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { formatTime } from "../lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
-import ProfileImage from "./ProfileImage";
 import PinnedIcon from "./icons/PinnedIcon";
+import ProfileImage from "./ProfileImage";
+import UserDisplayName from "./UserDisplayName";
 
 export interface ForumListPostProps {
   post: PostDto;
@@ -66,10 +67,16 @@ const ForumListPost = ({
           <div className="flex flex-row gap-x-2 items-center">
             <ProfileImage pfp={post.author.profilePicture} size="small" />
             <p>
-              <span onClick={authorClick} className="hover:underline">
-                {lastComment
-                  ? lastComment.author.displayName
-                  : post.author.displayName}
+              <span onClick={authorClick}>
+                <UserDisplayName
+                  staff={
+                    lastComment ? lastComment.author.staff : post.author.staff
+                  }
+                >
+                  {lastComment
+                    ? lastComment.author.displayName
+                    : post.author.displayName}
+                </UserDisplayName>
               </span>
               <span>
                 {lastComment &&

@@ -13,6 +13,7 @@ export class UserDto extends PickType(User, [
   'name',
   'email',
   'admin',
+  'staff',
   'id',
   'onboardingComplete',
   'emailNotifsEnabled',
@@ -35,6 +36,7 @@ export class FriendStatusDto {
 
 export class ProfileDto extends PickType(User, [
   'admin',
+  'staff',
   'id',
   'profilePicture',
   'profileDescription',
@@ -48,6 +50,7 @@ export class ProfileDto extends PickType(User, [
       | 'id'
       | 'name'
       | 'admin'
+      | 'staff'
       | 'email'
       | 'anonymous'
       | 'profilePicture'
@@ -59,6 +62,7 @@ export class ProfileDto extends PickType(User, [
     this.profilePicture = user.profilePicture;
     this.profileDescription = user.profileDescription;
     this.admin = user.admin;
+    this.staff = user.staff;
     if (user.anonymous) {
       this.displayName = 'Someone';
     } else {

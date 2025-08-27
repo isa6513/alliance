@@ -9,6 +9,7 @@ import { formatDistanceToNow } from "date-fns";
 import React, { useEffect, useRef, useState } from "react";
 import CommentLikeButton from "../CommentLikeButton";
 import ProfileImage from "../ProfileImage";
+import UserDisplayName from "../UserDisplayName";
 import PinnedIcon from "../icons/PinnedIcon";
 import ReplyForm from "./ReplyForm";
 
@@ -167,7 +168,9 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
               href={`/user/${reply.author.id}`}
               className="hover:underline text-black font-medium"
             >
-              {reply.author.displayName}
+              <UserDisplayName staff={reply.author.staff}>
+                {reply.author.displayName}
+              </UserDisplayName>
             </a>
             <span className="text-zinc-500 text-sm">
               {formatDistanceToNow(new Date(reply.createdAt), {

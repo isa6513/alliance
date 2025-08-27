@@ -126,6 +126,10 @@ export class User {
   @ApiProperty()
   admin: boolean;
 
+  @Column({ default: false })
+  @ApiProperty()
+  staff: boolean;
+
   @Column({ nullable: true })
   @ApiProperty({ nullable: true })
   profilePicture: string;

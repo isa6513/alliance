@@ -38,6 +38,7 @@ export type UserDto = {
     socialNotifsPreference: NotificationPreference;
     turnedOffAllNotifs: boolean;
     admin: boolean;
+    staff: boolean;
     referralCode: string | null;
     onboardingComplete: boolean;
     anonymous: boolean;
@@ -56,6 +57,7 @@ export type ResetPasswordDto = {
 export type ProfileDto = {
     id: number;
     admin: boolean;
+    staff: boolean;
     profilePicture: string | null;
     profileDescription: string | null;
     displayName: string;
@@ -81,6 +83,7 @@ export type UpdateProfileDto = {
     turnedOffAllNotifs?: boolean;
     password?: string;
     admin?: boolean;
+    staff?: boolean;
     profilePicture?: string | null;
     profileDescription?: string | null;
     referralCode?: string | null;
@@ -123,6 +126,7 @@ export type User = {
     turnedOffAllNotifs: boolean;
     password: string;
     admin: boolean;
+    staff: boolean;
     profilePicture: string | null;
     profileDescription: string | null;
     referralCode: string | null;
@@ -224,10 +228,6 @@ export type ActionDto = {
      * Number of commitments needed to start the action
      */
     commitmentThreshold?: number;
-    /**
-     * Amount of money committed needed to start the action
-     */
-    donationThreshold?: number;
     /**
      * Suggested donation amount (cents)
      */
@@ -335,10 +335,6 @@ export type CreateActionDto = {
      */
     commitmentThreshold?: number;
     /**
-     * Amount of money committed needed to start the action
-     */
-    donationThreshold?: number;
-    /**
      * Suggested donation amount (cents)
      */
     donationAmount?: number;
@@ -385,10 +381,6 @@ export type UpdateActionDto = {
      * Number of commitments needed to start the action
      */
     commitmentThreshold?: number;
-    /**
-     * Amount of money committed needed to start the action
-     */
-    donationThreshold?: number;
     /**
      * Suggested donation amount (cents)
      */

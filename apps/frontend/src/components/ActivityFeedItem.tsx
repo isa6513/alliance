@@ -1,6 +1,7 @@
 import { ProfileDto } from "@alliance/shared/client";
 import { Link } from "react-router";
 import ProfileImage from "./ProfileImage";
+import UserDisplayName from "./UserDisplayName";
 
 export interface ActivityFeedItem {
   title: string;
@@ -37,11 +38,10 @@ const ActivityFeedItem = ({
           </>
         )}
         <p className="text-zinc-500">
-          <Link
-            to={`/user/${user.id}`}
-            className="text-zinc-700 hover:underline"
-          >
-            {user.displayName}
+          <Link to={`/user/${user.id}`} className="text-zinc-700">
+            <UserDisplayName staff={user.staff}>
+              {user.displayName}
+            </UserDisplayName>
           </Link>{" "}
           {content}
         </p>

@@ -133,6 +133,7 @@ export class AuthController {
       email: profile.email,
       name: profile.name,
       admin: profile.admin,
+      staff: profile.staff,
       id: profile.id,
       onboardingComplete: profile.onboardingComplete,
       socialNotifsPreference: profile.socialNotifsPreference,

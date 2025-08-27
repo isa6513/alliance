@@ -10,6 +10,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import { setRevalidate } from "../../applayout";
 import Comments from "../../components/Comments";
 import ProfileImage from "../../components/ProfileImage";
+import UserDisplayName from "../../components/UserDisplayName";
 import PinnedIcon from "../../components/icons/PinnedIcon";
 import { useAuth } from "../../lib/AuthContext";
 import { formatTime } from "../../lib/utils";
@@ -134,16 +135,15 @@ const PostDetailPage: React.FC = () => {
                 </div>
               )}
             </div>
-            <div className="flex flex-row gap-x-2 mt-1 items-center !text-sm">
+            <div className="flex flex-row gap-x-2 mt-1 items-center">
               <Link to={`/user/${post.author.id}`}>
                 <ProfileImage pfp={post.author.profilePicture} size="small" />
               </Link>
               <span>
-                <a
-                  href={`/user/${post.author.id}`}
-                  className="hover:underline text-black"
-                >
-                  {post.author.displayName}
+                <a href={`/user/${post.author.id}`} className="text-black">
+                  <UserDisplayName staff={post.author.staff}>
+                    {post.author.displayName}
+                  </UserDisplayName>
                 </a>
               </span>
               <span className="text-zinc-500">
