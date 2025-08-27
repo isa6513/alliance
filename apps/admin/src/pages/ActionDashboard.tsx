@@ -64,6 +64,18 @@ const statusOptions: Record<ActionStatus, string> = {
   abandoned: "Abandoned",
 };
 
+const defaultEventNames: Record<ActionStatus, string> = {
+  draft: "",
+  gathering_commitments: "Action Launched",
+  commitments_reached: "Commitments Reached",
+  member_action: "Members taking action",
+  resolution: "Awaiting Resolution",
+  completed: "Action Successful",
+  failed: "Action Failed",
+  abandoned: "Action Abandoned",
+  upcoming: "",
+};
+
 type Tab = "overview" | "details" | "events";
 
 const ActionDashboard: React.FC = () => {
@@ -115,7 +127,7 @@ const ActionDashboard: React.FC = () => {
     category: "",
     image: "",
     body: "",
-    timeEstimate: "",
+    timeEstimate: 0,
     shortDescription: "",
     type: "Activity",
     taskFormId: undefined,
@@ -131,7 +143,12 @@ const ActionDashboard: React.FC = () => {
     sendNotifsTo: "all",
   });
 
+  const [useCustomName, setUseCustomName] = useState<boolean>(false);
+  const [launchNow, setLaunchNow] = useState<boolean>(true);
+
   const [creatingEvent, setCreatingEvent] = useState<boolean>(false);
+  const [eventCreatedSuccess, setEventCreatedSuccess] =
+    useState<boolean>(false);
 
   // Reset form when switching to new action mode
   useEffect(() => {
@@ -141,7 +158,7 @@ const ActionDashboard: React.FC = () => {
         category: "",
         image: "",
         body: "",
-        timeEstimate: "",
+        timeEstimate: 0,
         shortDescription: "",
         type: "Activity",
         taskFormId: undefined,
@@ -349,7 +366,13 @@ const ActionDashboard: React.FC = () => {
     try {
       const eventData = {
         ...eventForm,
-        date: new Date(eventForm.date).toISOString(),
+        title: useCustomName
+          ? eventForm.title
+          : defaultEventNames[eventForm.newStatus as ActionStatus],
+        description: useCustomName ? eventForm.description : "",
+        date: launchNow
+          ? new Date().toISOString()
+          : new Date(eventForm.date).toISOString(),
       };
 
       if (!actionId) return;
@@ -362,6 +385,11 @@ const ActionDashboard: React.FC = () => {
       if (response.data) {
         setAction(response.data);
         handleActionUpdated();
+
+        // Show success feedback
+        setEventCreatedSuccess(true);
+        setTimeout(() => setEventCreatedSuccess(false), 3000);
+
         // Reset form
         setEventForm({
           title: "",
@@ -371,6 +399,8 @@ const ActionDashboard: React.FC = () => {
           showInTimeline: true,
           sendNotifsTo: "all",
         });
+        setUseCustomName(false);
+        setLaunchNow(true);
       } else {
         setError("Failed to add event");
       }
@@ -478,6 +508,8 @@ const ActionDashboard: React.FC = () => {
                     ? `http://localhost:5173/actions/${action?.id}`
                     : `https://worldalliance.org/actions/${action?.id}`
                 }
+                target="_blank"
+                rel="noreferrer"
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${"border-transparent text-blue-500 hover:text-blue-600 hover:border-blue-300"}`}
               >
                 View Action Page →
@@ -490,6 +522,30 @@ const ActionDashboard: React.FC = () => {
             {activeTab === "overview" && action && (
               <div className="space-y-4">
                 {/* Current Status */}
+                <div className="flex flex-row gap-x-2">
+                  <button
+                    onClick={() =>
+                      window.open(
+                        `/database?table=action&id=${action.id}`,
+                        "_blank"
+                      )
+                    }
+                    className="inline-flex cursor-pointer items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                    >
+                      <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                      <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"></path>
+                      <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"></path>
+                    </svg>
+                    Edit in Database
+                  </button>
+                </div>
                 <Card style={CardStyle.White}>
                   <h2 className="text-lg font-semibold mb-0">
                     Current Status:{" "}
@@ -504,7 +560,6 @@ const ActionDashboard: React.FC = () => {
                       {formatStatus(action.status)}
                     </span>
                   </h2>
-
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <div className="text-sm text-gray-600">
@@ -540,31 +595,6 @@ const ActionDashboard: React.FC = () => {
                       <div className="text-sm text-gray-600">
                         <strong>Action ID:</strong> {action.id}
                       </div>
-                    </div>
-
-                    <div className="pt-2">
-                      <button
-                        onClick={() =>
-                          window.open(
-                            `/database?table=action&id=${action.id}`,
-                            "_blank"
-                          )
-                        }
-                        className="inline-flex cursor-pointer items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                      >
-                        <svg
-                          className="w-4 h-4 mr-2"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                          viewBox="0 0 24 24"
-                        >
-                          <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                          <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"></path>
-                          <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"></path>
-                        </svg>
-                        Edit in Database
-                      </button>
                     </div>
 
                     {action.image && (
@@ -661,6 +691,248 @@ const ActionDashboard: React.FC = () => {
             {activeTab === "events" && action && (
               <div className="space-y-4">
                 <Card style={CardStyle.White}>
+                  <h2 className="text-lg font-semibold mb-4">Add New Event</h2>
+
+                  <div className="mb-4 flex flex-row items-center">
+                    <label
+                      htmlFor="newStatus"
+                      className="block font-medium text-gray-700 mb-1 min-w-25"
+                    >
+                      New Status
+                    </label>
+                    <select
+                      id="newStatus"
+                      name="newStatus"
+                      value={eventForm.newStatus}
+                      onChange={handleEventInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {Object.entries(statusOptions).map(([key, label]) => (
+                        <option key={key} value={key}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <form onSubmit={handleAddEvent} className="space-y-4">
+                    {!useCustomName && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                        <p className="text-sm text-blue-800">
+                          <strong>Using default title:</strong>{" "}
+                          {defaultEventNames[
+                            eventForm.newStatus as ActionStatus
+                          ] || "No default name for this status"}
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex items-center mb-4">
+                      <input
+                        type="checkbox"
+                        id="useCustomName"
+                        checked={useCustomName}
+                        onChange={(e) => setUseCustomName(e.target.checked)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label
+                        htmlFor="useCustomName"
+                        className="ml-2 block text-sm font-medium text-gray-700"
+                      >
+                        Use custom name
+                      </label>
+                    </div>
+
+                    {useCustomName && (
+                      <>
+                        <div>
+                          <label
+                            htmlFor="eventTitle"
+                            className="block font-medium text-gray-700 mb-1"
+                          >
+                            Event Title *
+                          </label>
+                          <input
+                            type="text"
+                            id="eventTitle"
+                            name="title"
+                            value={eventForm.title}
+                            onChange={handleEventInputChange}
+                            required={useCustomName}
+                            placeholder="e.g., Launch Event, Commitments Reached"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label
+                            htmlFor="eventDescription"
+                            className="block font-medium text-gray-700 mb-1"
+                          >
+                            Description
+                          </label>
+                          <textarea
+                            id="eventDescription"
+                            name="description"
+                            value={eventForm.description}
+                            onChange={handleEventInputChange}
+                            rows={2}
+                            placeholder="Describe what happened or what this event represents"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    <div className="flex items-center mb-4">
+                      <input
+                        type="checkbox"
+                        id="launchNow"
+                        checked={launchNow}
+                        onChange={(e) => setLaunchNow(e.target.checked)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label
+                        htmlFor="launchNow"
+                        className="ml-2 block text-sm font-medium text-gray-700"
+                      >
+                        Launch now
+                      </label>
+                    </div>
+
+                    {!launchNow && (
+                      <div>
+                        <label
+                          htmlFor="eventDate"
+                          className="block font-medium text-gray-700 mb-1"
+                        >
+                          Event Date & Time *
+                        </label>
+                        <input
+                          type="datetime-local"
+                          id="eventDate"
+                          name="date"
+                          value={eventForm.date}
+                          onChange={handleEventInputChange}
+                          required
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label
+                          htmlFor="sendNotifsTo"
+                          className="block font-medium text-gray-700 mb-1"
+                        >
+                          Send Notifications To
+                        </label>
+                        <select
+                          id="sendNotifsTo"
+                          name="sendNotifsTo"
+                          value={eventForm.sendNotifsTo}
+                          onChange={handleEventInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="all">All Users</option>
+                          <option value="joined">Joined Users Only</option>
+                          <option value="none">No Notifications</option>
+                        </select>
+                      </div>
+
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="showInTimeline"
+                          name="showInTimeline"
+                          checked={eventForm.showInTimeline}
+                          onChange={handleEventInputChange}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded ml-10"
+                        />
+                        <label
+                          htmlFor="showInTimeline"
+                          className="ml-2 block text-sm text-gray-700"
+                        >
+                          Show in public timeline
+                        </label>
+                      </div>
+                    </div>
+
+                    {eventCreatedSuccess && (
+                      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 flex items-center">
+                        <svg
+                          className="w-5 h-5 mr-2"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        Event created successfully!
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={creatingEvent}
+                      className={`w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${
+                        creatingEvent
+                          ? "bg-gray-400 text-white cursor-not-allowed"
+                          : eventCreatedSuccess
+                          ? "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
+                          : "bg-[#333] text-white hover:bg-[#444] focus:ring-blue-500"
+                      }`}
+                    >
+                      {creatingEvent ? (
+                        <span className="flex items-center justify-center">
+                          <svg
+                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                          Adding Event...
+                        </span>
+                      ) : eventCreatedSuccess ? (
+                        <span className="flex items-center justify-center">
+                          <svg
+                            className="w-5 h-5 mr-2"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          Event Added!
+                        </span>
+                      ) : (
+                        "Add Event"
+                      )}
+                    </button>
+                  </form>
+                </Card>
+                <Card style={CardStyle.White}>
                   <h2 className="text-lg font-semibold mb-4">All Events</h2>
                   <div className="space-y-3">
                     {action.events && action.events.length > 0 ? (
@@ -742,137 +1014,6 @@ const ActionDashboard: React.FC = () => {
                       </div>
                     )}
                   </div>
-                </Card>
-                <Card style={CardStyle.White}>
-                  <h2 className="text-lg font-semibold mb-4">Add New Event</h2>
-                  <form onSubmit={handleAddEvent} className="space-y-4">
-                    <div>
-                      <label
-                        htmlFor="eventTitle"
-                        className="block font-medium text-gray-700 mb-1"
-                      >
-                        Event Title *
-                      </label>
-                      <input
-                        type="text"
-                        id="eventTitle"
-                        name="title"
-                        value={eventForm.title}
-                        onChange={handleEventInputChange}
-                        required
-                        placeholder="e.g., Launch Event, Commitments Reached"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="eventDescription"
-                        className="block font-medium text-gray-700 mb-1"
-                      >
-                        Description
-                      </label>
-                      <textarea
-                        id="eventDescription"
-                        name="description"
-                        value={eventForm.description}
-                        onChange={handleEventInputChange}
-                        rows={2}
-                        placeholder="Describe what happened or what this event represents"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label
-                          htmlFor="newStatus"
-                          className="block font-medium text-gray-700 mb-1"
-                        >
-                          New Status *
-                        </label>
-                        <select
-                          id="newStatus"
-                          name="newStatus"
-                          value={eventForm.newStatus}
-                          onChange={handleEventInputChange}
-                          required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          {Object.entries(statusOptions).map(([key, label]) => (
-                            <option key={key} value={key}>
-                              {label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="eventDate"
-                          className="block font-medium text-gray-700 mb-1"
-                        >
-                          Event Date & Time *
-                        </label>
-                        <input
-                          type="datetime-local"
-                          id="eventDate"
-                          name="date"
-                          value={eventForm.date}
-                          onChange={handleEventInputChange}
-                          required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label
-                          htmlFor="sendNotifsTo"
-                          className="block font-medium text-gray-700 mb-1"
-                        >
-                          Send Notifications To
-                        </label>
-                        <select
-                          id="sendNotifsTo"
-                          name="sendNotifsTo"
-                          value={eventForm.sendNotifsTo}
-                          onChange={handleEventInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="all">All Users</option>
-                          <option value="joined">Joined Users Only</option>
-                          <option value="none">No Notifications</option>
-                        </select>
-                      </div>
-
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id="showInTimeline"
-                          name="showInTimeline"
-                          checked={eventForm.showInTimeline}
-                          onChange={handleEventInputChange}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded ml-10"
-                        />
-                        <label
-                          htmlFor="showInTimeline"
-                          className="ml-2 block text-sm text-gray-700"
-                        >
-                          Show in public timeline
-                        </label>
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={creatingEvent}
-                      className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
-                    >
-                      {creatingEvent ? "Adding Event..." : "Add Event"}
-                    </button>
-                  </form>
                 </Card>
               </div>
             )}

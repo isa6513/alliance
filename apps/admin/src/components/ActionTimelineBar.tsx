@@ -217,7 +217,7 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
                   setHovered(false);
                 }}
               >
-                <span
+                {/* <span
                   className={`w-full whitespace-nowrap fixed user-select-none ${
                     hovered ? `z-100 ` : "z-0"
                   }`}
@@ -228,7 +228,7 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
                   }
                 >
                   {stickyLabel.text}
-                </span>
+                </span> */}
               </div>
             )}
           </div>

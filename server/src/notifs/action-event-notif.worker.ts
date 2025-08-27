@@ -30,7 +30,7 @@ export class ActionEventNotifWorker {
   async dispatchDueNotifs() {
     if (
       process.env.NODE_ENV === 'development' &&
-      !process.env.SEND_DEV_NOTIFS
+      process.env.SEND_DEV_NOTIFS !== '1'
     ) {
       return;
     }

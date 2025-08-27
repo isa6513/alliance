@@ -48,13 +48,6 @@ export class Action {
   @IsOptional()
   commitmentThreshold?: number;
 
-  @Column({ nullable: true })
-  @ApiPropertyOptional({
-    description: 'Amount of money committed needed to start the action',
-  })
-  @IsOptional()
-  donationThreshold?: number;
-
   @Column({ default: 500, nullable: true })
   @ApiPropertyOptional({
     description: 'Suggested donation amount (cents)',

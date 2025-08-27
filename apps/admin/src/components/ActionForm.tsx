@@ -115,34 +115,14 @@ const ActionForm: React.FC<ActionFormProps> = ({
       </div>
 
       {/* Threshold Settings */}
-      {form.type === "Funding" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label
-              htmlFor="donationThreshold"
-              className="block font-medium text-gray-700 mb-1"
-            >
-              Donation Threshold (cents)
-            </label>
-            <input
-              type="number"
-              id="donationThreshold"
-              name="donationThreshold"
-              value={form.donationThreshold || ""}
-              onChange={onInputChange}
-              min="0"
-              step="0.01"
-              placeholder="Total donations needed"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
+      {form.type === "Funding" && (
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <label
               htmlFor="donationAmount"
               className="block font-medium text-gray-700 mb-1"
             >
-              Suggested Donation (cents)
+              Donation amount (cents)
             </label>
             <input
               type="number"
@@ -157,26 +137,25 @@ const ActionForm: React.FC<ActionFormProps> = ({
             />
           </div>
         </div>
-      ) : (
-        <div>
-          <label
-            htmlFor="commitmentThreshold"
-            className="block font-medium text-gray-700 mb-1"
-          >
-            Commitment Threshold
-          </label>
-          <input
-            type="number"
-            id="commitmentThreshold"
-            name="commitmentThreshold"
-            value={form.commitmentThreshold || ""}
-            onChange={onInputChange}
-            min="1"
-            placeholder="Number of commitments needed"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
       )}
+      <div>
+        <label
+          htmlFor="commitmentThreshold"
+          className="block font-medium text-gray-700 mb-1"
+        >
+          Commitment Threshold
+        </label>
+        <input
+          type="number"
+          id="commitmentThreshold"
+          name="commitmentThreshold"
+          value={form.commitmentThreshold || ""}
+          onChange={onInputChange}
+          min="1"
+          placeholder="Number of commitments needed"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
 
       {/* Task Form Selection for Activity type actions */}
       {form.type === "Activity" && (
@@ -202,7 +181,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Optional form that users must complete when finishing this activity
+            Form to show in task panel for completion
           </p>
         </div>
       )}
@@ -238,7 +217,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         />
       </div>
 
-      {form.type !== "Funding" && (
+      {form.type === "Ongoing" && (
         <div>
           <label
             htmlFor="taskContents"
