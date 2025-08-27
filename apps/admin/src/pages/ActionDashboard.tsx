@@ -712,134 +712,145 @@ const ActionDashboard: React.FC = () => {
               <div className="space-y-4">
                 <Card style={CardStyle.White}>
                   <h2 className="text-lg font-semibold mb-4">Add New Event</h2>
-
-                  <div className="mb-4 flex flex-row items-center">
-                    <label
-                      htmlFor="newStatus"
-                      className="block text-black mb-1 min-w-25"
-                    >
-                      New Status
-                    </label>
-                    <select
-                      id="newStatus"
-                      name="newStatus"
-                      value={eventForm.newStatus}
-                      onChange={handleEventInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      {Object.entries(statusOptions).map(([key, label]) => (
-                        <option key={key} value={key}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
                   <form onSubmit={handleAddEvent} className="space-y-4">
-                    {!useCustomName && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                        <p className="text-sm text-blue-800">
-                          <strong>Using default title:</strong>{" "}
-                          {defaultEventNames[
-                            eventForm.newStatus as ActionStatus
-                          ] || "No default name for this status"}
-                        </p>
-                      </div>
-                    )}
-                    <div className="flex items-center mb-4">
-                      <input
-                        type="checkbox"
-                        id="useCustomName"
-                        checked={useCustomName}
-                        onChange={(e) => setUseCustomName(e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
+                    <div className="mb-4 flex flex-row items-center">
                       <label
-                        htmlFor="useCustomName"
-                        className="ml-2 block text-black"
+                        htmlFor="newStatus"
+                        className="block text-black min-w-25"
                       >
-                        Use custom name
+                        New Status
                       </label>
+                      <select
+                        id="newStatus"
+                        name="newStatus"
+                        value={eventForm.newStatus}
+                        onChange={handleEventInputChange}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {Object.entries(statusOptions).map(([key, label]) => (
+                          <option key={key} value={key}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
-                    {useCustomName && (
-                      <>
+                    <div
+                      className={`${
+                        useCustomName ? "bg-zinc-100" : ""
+                      } p-2 -m-1 rounded-md`}
+                    >
+                      <div className="flex items-center mb-2">
+                        <input
+                          type="checkbox"
+                          id="useCustomName"
+                          checked={useCustomName}
+                          onChange={(e) => setUseCustomName(e.target.checked)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label
+                          htmlFor="useCustomName"
+                          className="ml-2 block text-black"
+                        >
+                          Use custom name
+                        </label>
+                      </div>
+                      {!useCustomName && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                          <p className="text-sm text-blue-800">
+                            <strong>Using default title:</strong>{" "}
+                            {defaultEventNames[
+                              eventForm.newStatus as ActionStatus
+                            ] || "No default name for this status"}
+                          </p>
+                        </div>
+                      )}
+
+                      {useCustomName && (
+                        <>
+                          <div>
+                            <label
+                              htmlFor="eventTitle"
+                              className="block text-black mb-1"
+                            >
+                              Event Title *
+                            </label>
+                            <input
+                              type="text"
+                              id="eventTitle"
+                              name="title"
+                              value={eventForm.title}
+                              onChange={handleEventInputChange}
+                              required={useCustomName}
+                              placeholder="e.g., Launch Event, Commitments Reached"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label
+                              htmlFor="eventDescription"
+                              className="block text-black mb-1"
+                            >
+                              Description
+                            </label>
+                            <textarea
+                              id="eventDescription"
+                              name="description"
+                              value={eventForm.description}
+                              onChange={handleEventInputChange}
+                              rows={2}
+                              placeholder="Describe what happened or what this event represents"
+                              className="bg-white w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <div
+                      className={`${
+                        !launchNow ? "bg-zinc-100" : ""
+                      } p-2 -m-1 rounded-md mt-4`}
+                    >
+                      <div className="flex items-center mb-4">
+                        <input
+                          type="checkbox"
+                          id="launchNow"
+                          checked={launchNow}
+                          onChange={(e) => setLaunchNow(e.target.checked)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label
+                          htmlFor="launchNow"
+                          className="ml-2 block text-black"
+                        >
+                          Launch now
+                        </label>
+                      </div>
+
+                      {!launchNow && (
                         <div>
                           <label
-                            htmlFor="eventTitle"
+                            htmlFor="eventDate"
                             className="block text-black mb-1"
                           >
-                            Event Title *
+                            Event Date & Time * (
+                            {Intl.DateTimeFormat().resolvedOptions().timeZone})
                           </label>
                           <input
-                            type="text"
-                            id="eventTitle"
-                            name="title"
-                            value={eventForm.title}
+                            type="datetime-local"
+                            id="eventDate"
+                            name="date"
+                            value={eventForm.date}
                             onChange={handleEventInputChange}
-                            required={useCustomName}
-                            placeholder="e.g., Launch Event, Commitments Reached"
+                            required
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
-
-                        <div>
-                          <label
-                            htmlFor="eventDescription"
-                            className="block text-black mb-1"
-                          >
-                            Description
-                          </label>
-                          <textarea
-                            id="eventDescription"
-                            name="description"
-                            value={eventForm.description}
-                            onChange={handleEventInputChange}
-                            rows={2}
-                            placeholder="Describe what happened or what this event represents"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                        </div>
-                      </>
-                    )}
-
-                    <div className="flex items-center mb-4">
-                      <input
-                        type="checkbox"
-                        id="launchNow"
-                        checked={launchNow}
-                        onChange={(e) => setLaunchNow(e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label
-                        htmlFor="launchNow"
-                        className="ml-2 block text-black"
-                      >
-                        Launch now
-                      </label>
+                      )}
                     </div>
-
-                    {!launchNow && (
-                      <div>
-                        <label
-                          htmlFor="eventDate"
-                          className="block text-black mb-1"
-                        >
-                          Event Date & Time * (
-                          {Intl.DateTimeFormat().resolvedOptions().timeZone})
-                        </label>
-                        <input
-                          type="datetime-local"
-                          id="eventDate"
-                          name="date"
-                          value={eventForm.date}
-                          onChange={handleEventInputChange}
-                          required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    )}
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -878,23 +889,6 @@ const ActionDashboard: React.FC = () => {
                         </label>
                       </div>
                     </div>
-
-                    {eventCreatedSuccess && (
-                      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 flex items-center">
-                        <svg
-                          className="w-5 h-5 mr-2"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        Event created successfully!
-                      </div>
-                    )}
 
                     <button
                       type="submit"
