@@ -408,7 +408,9 @@ const UserProfilePage: React.FC = () => {
               onClick={() => setSelectedTab(tab)}
               key={tab}
               className={`${
-                selectedTab === tab ? "font-bold underline" : "text-gray-800"
+                selectedTab === tab
+                  ? "font-semibold underline"
+                  : "text-gray-800"
               } flex-1 text-center py-3 pt-4 cursor-pointer hover:underline`}
             >
               <p className="text-md">{tab}</p>
@@ -419,7 +421,7 @@ const UserProfilePage: React.FC = () => {
           {selectedTab === ProfileTabs.Activity && (
             <div className="space-y-2">
               {completedActions.length === 0 && (
-                <p className="text-center text-stone-500">
+                <p className="text-center text-zinc-500">
                   No actions completed yet
                 </p>
               )}
@@ -437,7 +439,7 @@ const UserProfilePage: React.FC = () => {
           {selectedTab === ProfileTabs.Forum && (
             <div className="flex flex-col gap-y-1">
               {forumPosts.length === 0 && (
-                <p className="text-center text-stone-500">No forum posts yet</p>
+                <p className="text-center text-zinc-500">No forum posts yet</p>
               )}
               {forumPosts?.map((post: PostDto) => (
                 <ForumListPost post={post} key={post.id} />

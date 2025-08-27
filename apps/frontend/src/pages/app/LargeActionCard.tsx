@@ -50,12 +50,10 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
 
   useEffect(() => {
     if (state === TaskCardState.Completed) {
+      setState(TaskCardState.Closed);
       setTimeout(() => {
-        setState(TaskCardState.Closed);
-        setTimeout(() => {
-          onComplete(action.id);
-        }, 500);
-      }, 1000);
+        onComplete(action.id);
+      }, 500);
     }
   }, [state, action, onComplete]);
 
@@ -67,9 +65,9 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   //     );
   //   }, [action.myRelation?.deadline]);
 
-  const handleCompleteAction = () => {
-    onComplete(action.id);
-  };
+  // const handleCompleteAction = () => {
+  //   onComplete(action.id);
+  // };
 
   const handleJoinAction = () => {
     console.log("join action", action.id);
@@ -86,7 +84,11 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       style={CardStyle.White}
       className={`shadow-lg transition-all duration-500 !border-green !border-2 w-full relative
          ${state === TaskCardState.Minified ? "pb-4" : ""}
-          ${state === TaskCardState.Closed ? "py-0 border-0" : ""}`}
+          ${
+            state === TaskCardState.Closed
+              ? "opacity-0 scale-95 h-0 py-0 overflow-hidden"
+              : ""
+          }`}
       closed={state === TaskCardState.Closed}
     >
       <div className="p-2">
@@ -145,7 +147,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
           <ActionTaskPanel
             action={action}
             userRelation={userRelation}
-            handleCompleteAction={handleCompleteAction}
+            handleCompleteAction={() => setState(TaskCardState.Completed)}
             handleJoinAction={handleJoinAction}
           />
         </div>
