@@ -252,18 +252,6 @@ const SettingsPage: React.FC = () => {
             </div>
           </div>
 
-          {hasChanges && (
-            <div className="flex flex-row absolute bottom-5 right-5">
-              <Button
-                color={ButtonColor.Green}
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </Button>
-            </div>
-          )}
-
           <hr className="border-zinc-300 mt-4" />
 
           <div>
@@ -352,9 +340,21 @@ const SettingsPage: React.FC = () => {
                 </div>
               </>
             ) : (
-              <p className="text-zinc-500">No payment methods exist</p>
+              <p className="text-zinc-500">No payment methods set up yet</p>
             )}
           </div>
+
+          {hasChanges && (
+            <div className="flex flex-row justify-end w-full">
+              <Button
+                color={ButtonColor.Green}
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          )}
         </Card>
       </div>
     </div>
