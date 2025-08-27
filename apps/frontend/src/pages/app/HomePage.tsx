@@ -179,7 +179,13 @@ const HomePage = () => {
               )}
             </Card>
             <Card style={CardStyle.White}>
-              <p className="font-semibold mb-3">What your friends are up to</p>
+              <div className="flex flex-row justify-between">
+                <p className="font-semibold mb-3">Friend activity</p>
+                <a href="/feed" className="text-link text-sm">
+                  See all
+                </a>
+              </div>
+
               {friendActivities.length === 0 && (
                 <p className="text-zinc-400">No friend activity yet</p>
               )}

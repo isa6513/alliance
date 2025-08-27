@@ -33,6 +33,8 @@ const UserActivityCard = ({
   );
   const [isSaving, setIsSaving] = useState(false);
 
+  const completed = activity.type === "user_completed";
+
   const handleClick = useCallback(() => {
     navigate(`/actions/${activity.actionId}/activity/${activity.id}`);
   }, [activity.actionId, activity.id, navigate]);
@@ -91,7 +93,9 @@ const UserActivityCard = ({
             </Link>
           </div>
           <p className="text-zinc-600">{activity.user.displayName}</p>
-          <p className="text-zinc-500">completed {timeSinceCompleted}</p>
+          <p className="text-zinc-500">
+            {completed ? "completed" : "committed to"} {timeSinceCompleted}
+          </p>
         </div>
         <div className="flex flex-row justify-between mt-2">
           <div className="flex flex-col space-y-3">
@@ -163,9 +167,11 @@ const UserActivityCard = ({
           </div>
         </div>
 
-        <div className="mt-2">
-          <Comments objectId={activity.id} type="activity" compact />
-        </div>
+        {completed && (
+          <div className="mt-2">
+            <Comments objectId={activity.id} type="activity" compact />
+          </div>
+        )}
       </Card>
     </div>
   );

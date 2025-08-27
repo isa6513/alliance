@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
 import {
   ActionActivityDto,
   actionsGetActivityFeed,
+  actionsLikeActivity,
+  actionsUnlikeActivity,
 } from "@alliance/shared/client";
+
+import { useCallback, useEffect, useState } from "react";
+import UserActivityCard from "../../components/UserActivityCard";
+import { useAuth } from "../../lib/AuthContext";
 import { useActionActivityWebSocket } from "../../lib/useActionActivityWebSocket";
-import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 
 const ActivityFeedPage = () => {
   const [initialActivities, setInitialActivities] = useState<
@@ -18,6 +22,8 @@ const ActivityFeedPage = () => {
     onFeedActivity,
     offFeedActivity,
   } = useActionActivityWebSocket();
+
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchInitialActivities = async () => {
@@ -65,6 +71,81 @@ const ActivityFeedPage = () => {
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
+  const handleLikeActivity = useCallback(
+    async (activityId: number) => {
+      if (!user) return;
+
+      const activity = allActivities.find((a) => a.id === activityId);
+      if (!activity) return;
+
+      const isLiked = activity.likes.some((like) => like.id === user.id);
+
+      if (isLiked) {
+        const response = await actionsUnlikeActivity({
+          path: { id: activityId },
+        });
+        if (response.response.ok) {
+          setLiveActivities((prev) =>
+            prev.map((a) =>
+              a.id === activityId
+                ? {
+                    ...a,
+                    likes: a.likes.filter((like) => like.id !== user.id),
+                  }
+                : a
+            )
+          );
+          setInitialActivities((prev) =>
+            prev.map((a) =>
+              a.id === activityId
+                ? {
+                    ...a,
+                    likes: a.likes.filter((like) => like.id !== user.id),
+                  }
+                : a
+            )
+          );
+        }
+      } else {
+        const response = await actionsLikeActivity({
+          path: { id: activityId },
+        });
+        if (response.response.ok && response.data) {
+          setLiveActivities((prev) =>
+            prev.map((a) =>
+              a.id === activityId
+                ? {
+                    ...a,
+                    likes: response.data.likes || [],
+                  }
+                : a
+            )
+          );
+          setInitialActivities((prev) =>
+            prev.map((a) =>
+              a.id === activityId
+                ? {
+                    ...a,
+                    likes: response.data.likes || [],
+                  }
+                : a
+            )
+          );
+        }
+      }
+    },
+    [user, allActivities]
+  );
+
+  const updateActivity = useCallback((updatedActivity: ActionActivityDto) => {
+    setLiveActivities((prev) =>
+      prev.map((a) => (a.id === updatedActivity.id ? updatedActivity : a))
+    );
+    setInitialActivities((prev) =>
+      prev.map((a) => (a.id === updatedActivity.id ? updatedActivity : a))
+    );
+  }, []);
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
@@ -75,13 +156,20 @@ const ActivityFeedPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <div className="space-y-4 w-full flex flex-col justify-stretch">
+      <div className="space-y-2 w-full flex flex-col justify-stretch">
         {allActivities.map((activity) => (
-          <ActionActivityFeedItem
-            key={activity.id}
+          // <ActionActivityFeedItem
+          //   key={activity.id}
+          //   activity={activity}
+          //   showAction={true}
+          //   handleLike={() => handleLikeActivity(activity.id)}
+          // />
+          <UserActivityCard
             activity={activity}
-            showAction={true}
-            handleLike={() => {}} //TODO
+            key={activity.id}
+            handleLike={handleLikeActivity}
+            onActivityUpdate={updateActivity}
+            canEdit={activity.user.id === user?.id}
           />
         ))}
       </div>

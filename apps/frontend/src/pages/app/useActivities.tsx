@@ -48,7 +48,12 @@ const useActivities = ({ list, objectId }: UseActivitiesProps) => {
         break;
     }
     apiCall.then((resp) => {
-      setActivities(resp.data ?? []);
+      const respActivities = (resp.data ?? []).sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      setActivities(respActivities);
     });
   }, [list, objectId]);
 
@@ -100,9 +105,7 @@ const useActivities = ({ list, objectId }: UseActivitiesProps) => {
 
   const updateActivity = useCallback((updatedActivity: ActionActivityDto) => {
     setActivities((prev) =>
-      prev.map((a) =>
-        a.id === updatedActivity.id ? updatedActivity : a
-      )
+      prev.map((a) => (a.id === updatedActivity.id ? updatedActivity : a))
     );
   }, []);
 
