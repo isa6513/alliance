@@ -84,7 +84,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   return (
     <Card
       style={CardStyle.White}
-      className={`shadow-lg transition-all duration-500 w-full relative
+      className={`shadow-lg transition-all duration-500 !border-green !border-2 w-full relative
          ${state === TaskCardState.Minified ? "pb-4" : ""}
           ${state === TaskCardState.Closed ? "py-0 border-0" : ""}`}
       closed={state === TaskCardState.Closed}

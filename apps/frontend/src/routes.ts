@@ -40,6 +40,7 @@ export default [
       route("/home", "pages/app/HomePage.tsx"),
       route("/settings", "pages/app/SettingsPage.tsx"),
       route("/commit", "pages/app/CommitActionPage.tsx"),
+      route("/priorities", "pages/app/PrioritiesPage.tsx"),
     ]),
   ]),
   layout("loggedoutonly.tsx", [

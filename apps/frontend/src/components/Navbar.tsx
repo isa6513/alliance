@@ -1,33 +1,36 @@
 import React from "react";
-import NavbarVertical from "./NavbarVertical";
 import NavbarHorizontal from "./NavbarHorizontal";
+import NavbarVertical from "./NavbarVertical";
 
 export enum NavbarPage {
   Dashboard = "Home",
   CurrentActions = "Actions",
+  Friends = "Friends",
   Announcements = "Announcements",
   Forum = "Forum",
+  Priorities = "Priorities",
   Profile = "Profile",
   Platform = "Platform",
-  Settings = "Settings",
 }
 
 export const links: NavbarPage[] = [
   NavbarPage.Dashboard,
+  NavbarPage.Friends,
   NavbarPage.CurrentActions,
   NavbarPage.Forum,
+  NavbarPage.Priorities,
   NavbarPage.Profile,
-  NavbarPage.Settings,
 ];
 
 export const destinations: Record<NavbarPage, string> = {
   [NavbarPage.Dashboard]: "/home",
   [NavbarPage.CurrentActions]: "/actions",
+  [NavbarPage.Friends]: "/feed",
   [NavbarPage.Announcements]: "/announcements",
   [NavbarPage.Forum]: "/forum",
+  [NavbarPage.Priorities]: "/priorities",
   [NavbarPage.Profile]: "/profile",
   [NavbarPage.Platform]: "/platform",
-  [NavbarPage.Settings]: "/settings",
 };
 
 export const platformSublinks = [

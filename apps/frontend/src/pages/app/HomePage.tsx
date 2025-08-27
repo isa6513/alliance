@@ -1,6 +1,6 @@
 import { actionsComplete, actionsJoin } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { setRevalidate, useAppLoaderData } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
@@ -55,11 +55,28 @@ const HomePage = () => {
 
   return (
     <div className="flex flex-col w-full h-full items-center bg-page min-h-[calc(100vh-50px)]">
-      <div className="flex flex-row px-6 md:gap-x-6">
-        <div className="hidden md:flex md:w-[200px]"></div>
-        <div className="flex flex-col py-16 max-w-[728px] md:min-w-[300px] gap-y-5 overflow-y-auto !overflow-visible">
+      <div className="flex flex-row px-6 md:gap-x-10">
+        <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch w-[350px]">
+          <Card style={CardStyle.White}>
+            <p className="font-semibold text-lg text-zinc-600 mb-2">Bulletin</p>
+            <p className="text-zinc-500 mb-2">
+              Right now, we are focused on organizational improvement and
+              small-scale experiments that test collective action strategies.
+            </p>
+            <p className="text-zinc-500">
+              Learn more about our current{" "}
+              <Link to="/priorities" className="text-link">
+                priorities
+              </Link>
+              .
+            </p>
+          </Card>
+        </div>
+        <div className="flex flex-col py-16 max-w-[750px] md:min-w-[300px] gap-y-5 overflow-y-auto !overflow-visible">
           <div className="flex flex-col gap-y-6 ">
-            <p className="font-adobe text-3xl font-semibold">Current task</p>
+            <p className="font-adobe text-3xl font-semibold">
+              Your current task
+            </p>
             {currentTask && currentTask.relation ? (
               <LargeActionCard
                 action={currentTask}
@@ -157,10 +174,12 @@ const HomePage = () => {
             {/* <InviteMemberCard /> */}
           </div>
         </div>
-        <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch w-[375px]">
+        <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch w-[350px]">
           <div className="flex flex-col gap-y-3">
             <Card style={CardStyle.White}>
-              <p className="font-semibold mb-3">Forum activity</p>
+              <p className="font-semibold text-lg text-zinc-600 mb-3">
+                Forum activity
+              </p>
               {posts?.length === 0 && (
                 <p className="text-zinc-400">No forum activity yet</p>
               )}
@@ -180,7 +199,9 @@ const HomePage = () => {
             </Card>
             <Card style={CardStyle.White}>
               <div className="flex flex-row justify-between">
-                <p className="font-semibold mb-3">Friend activity</p>
+                <p className="font-semibold text-lg text-zinc-600 mb-3">
+                  Friend activity
+                </p>
                 <a href="/feed" className="text-link text-sm">
                   See all
                 </a>

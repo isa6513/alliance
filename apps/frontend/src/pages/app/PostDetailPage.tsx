@@ -135,7 +135,9 @@ const PostDetailPage: React.FC = () => {
               )}
             </div>
             <div className="flex flex-row gap-x-2 mt-1 items-center !text-sm">
-              <ProfileImage pfp={post.author.profilePicture} size="small" />
+              <Link to={`/user/${post.author.id}`}>
+                <ProfileImage pfp={post.author.profilePicture} size="small" />
+              </Link>
               <span>
                 <a
                   href={`/user/${post.author.id}`}

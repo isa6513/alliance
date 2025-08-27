@@ -92,7 +92,9 @@ const UserActivityCard = ({
               <ProfileImage pfp={activity.user.profilePicture} size="medium" />
             </Link>
           </div>
-          <p className="text-zinc-600">{activity.user.displayName}</p>
+          <Link to={`user/${activity.user.id}`}>
+            <p className="text-zinc-600">{activity.user.displayName}</p>
+          </Link>
           <p className="text-zinc-500">
             {completed ? "completed" : "committed to"} {timeSinceCompleted}
           </p>
@@ -101,7 +103,7 @@ const UserActivityCard = ({
           <div className="flex flex-col space-y-3">
             <div>
               <p
-                className="font-medium text-lg cursor-pointer hover:underline"
+                className="text-green text-lg cursor-pointer hover:underline"
                 onClick={handleClick}
               >
                 {activity.action.name}

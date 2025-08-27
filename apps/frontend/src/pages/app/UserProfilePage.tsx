@@ -15,7 +15,7 @@ import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
 import { useAppLoaderData } from "../../applayout";
 import ForumListPost from "../../components/ForumListPost";
@@ -368,12 +368,20 @@ const UserProfilePage: React.FC = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    color={ButtonColor.Light}
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Edit Profile
-                  </Button>
+                  <div className="flex flex-col items-end">
+                    <Button
+                      color={ButtonColor.Light}
+                      onClick={() => setIsEditing(true)}
+                    >
+                      Edit Profile
+                    </Button>
+                    <Link
+                      to={"/settings"}
+                      className="mt-2 text-sm text-zinc-500 underline"
+                    >
+                      Account Settings
+                    </Link>
+                  </div>
                 )}
               </div>
             )}
