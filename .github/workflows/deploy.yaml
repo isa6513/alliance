@@ -276,7 +276,7 @@ jobs:
                 listen 80;
                 server_name admin.${{vars.DOMAIN_NAME}};
 
-                root /home/ec2-user/admin-app/dist;
+                root /home/ec2-user/admin-app/build/client;
                 index index.html;
 
                 location / {
