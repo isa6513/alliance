@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
-import { FormDto, SubmitFormDto } from "../client";
+import { FormDto, SubmitFormDto, imagesUploadImage } from "../client";
+import { getApiUrl } from "../lib/config";
 import AppMarkdownWrapper from "../ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "../ui/Button";
 import type { DisplayBlock } from "./display-blocks";
@@ -14,6 +15,8 @@ interface FormRendererProps {
 const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [uploadingFields, setUploadingFields] = useState<Set<string>>(new Set());
+  const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
 
   const schema = form as unknown as FormSchema<string, string>;
   const currentPage = schema.pages[currentPageIndex];
@@ -22,6 +25,59 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
 
   const updateField = (fieldId: string, value: any) => {
     setFormData((prev) => ({ ...prev, [fieldId]: value }));
+  };
+
+  const handleFileUpload = async (fieldId: string, file: File) => {
+    setUploadingFields(prev => new Set(prev).add(fieldId));
+    setUploadErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[fieldId];
+      return newErrors;
+    });
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        if (typeof reader.result === "string") {
+          try {
+            const { data } = await imagesUploadImage({
+              body: { file: reader.result },
+            });
+            if (data) {
+              updateField(fieldId, data);
+            }
+          } catch (error) {
+            console.error("Failed to upload image:", error);
+            setUploadErrors(prev => ({ ...prev, [fieldId]: "Failed to upload image" }));
+          }
+        }
+        setUploadingFields(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(fieldId);
+          return newSet;
+        });
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error("Failed to read file:", error);
+      setUploadErrors(prev => ({ ...prev, [fieldId]: "Failed to read file" }));
+      setUploadingFields(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(fieldId);
+        return newSet;
+      });
+    }
+  };
+
+  const getImageSource = (src: string): string => {
+    if (!src) return "";
+    
+    if (src.startsWith("http://") || src.startsWith("https://")) {
+      return src;
+    }
+    
+    // Use the shared config to get the API URL and construct the image path
+    return `${getApiUrl()}/images/${src}`;
   };
 
   const handleNext = (e: React.MouseEvent) => {
@@ -277,20 +333,50 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
         );
 
       case "file":
+        const isUploading = uploadingFields.has(field.id);
+        const uploadError = uploadErrors[field.id];
+        const fileValue = formData[field.id];
+        
         return (
-          <div key={index} className="space-y-1">
+          <div key={index} className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
-            <input
-              type="file"
-              onChange={(e) =>
-                updateField(field.id, e.target.files?.[0] || null)
-              }
-              required={field.required}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
+            
+            {/* Show uploaded image preview if it's an image key */}
+            {typeof fileValue === "string" && fileValue && (
+              <div className="mb-2">
+                <img
+                  src={getImageSource(fileValue)}
+                  alt="Uploaded file"
+                  className="max-w-full h-auto max-h-32 rounded border"
+                />
+              </div>
+            )}
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleFileUpload(field.id, file);
+                  }
+                }}
+                required={field.required && !fileValue}
+                disabled={isUploading}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+              />
+              {isUploading && (
+                <span className="text-sm text-blue-600">Uploading...</span>
+              )}
+            </div>
+            
+            {uploadError && (
+              <p className="text-sm text-red-600">{uploadError}</p>
+            )}
           </div>
         );
 
@@ -393,7 +479,7 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
         return (
           <img
             key={index}
-            src={(block as any).src}
+            src={getImageSource((block as any).src)}
             alt={(block as any).alt}
             className="max-w-full h-auto rounded"
             style={{

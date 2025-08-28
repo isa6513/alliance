@@ -1,4 +1,7 @@
 import type { ImageBlock } from "@alliance/shared/forms/display-blocks";
+import { imagesUploadImage } from "@alliance/shared/client";
+import { useState } from "react";
+import { getImageSource } from "../../lib/config";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 
@@ -10,6 +13,51 @@ export function EditableImageBlock({
   onDragEnd,
   isDragging,
 }: BaseDisplayBlockProps<ImageBlock<string>>) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        if (typeof reader.result === "string") {
+          try {
+            const { data } = await imagesUploadImage({
+              body: { file: reader.result },
+            });
+            if (data) {
+              onUpdate({ src: data });
+            }
+          } catch (error) {
+            console.error("Failed to upload image:", error);
+            setUploadError("Failed to upload image");
+          }
+        }
+        setIsUploading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error("Failed to read file:", error);
+      setUploadError("Failed to read file");
+      setIsUploading(false);
+    }
+  };
+
+  const getImageSrc = () => {
+    if (!block.src) return "";
+    
+    if (block.src.startsWith("http://") || block.src.startsWith("https://")) {
+      return block.src;
+    }
+    
+    return getImageSource(block.src);
+  };
   return (
     <DisplayBlockWrapper
       onRemove={onRemove}
@@ -21,7 +69,7 @@ export function EditableImageBlock({
         {/* Image preview/placeholder */}
         {block.src ? (
           <img
-            src={block.src}
+            src={getImageSrc()}
             alt={block.alt}
             className="max-w-full h-auto rounded"
             style={{
@@ -33,26 +81,29 @@ export function EditableImageBlock({
           />
         ) : (
           <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded p-8 text-center">
-            <p className="text-gray-500 text-sm">Enter image URL below</p>
+            <p className="text-gray-500 text-sm">Upload an image below</p>
           </div>
         )}
 
         {/* Compact inline controls */}
-        <div className="space-y-1">
-          <input
-            type="url"
-            value={block.src}
-            onChange={(e) => onUpdate({ src: e.target.value })}
-            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="Image URL"
-          />
-          <input
-            type="text"
-            value={block.alt}
-            onChange={(e) => onUpdate({ alt: e.target.value })}
-            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="Alt text for accessibility"
-          />
+        <div className="space-y-2">
+          {/* File upload */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              disabled={isUploading}
+              className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+            />
+            {isUploading && (
+              <span className="text-xs text-blue-600">Uploading...</span>
+            )}
+          </div>
+          
+          {uploadError && (
+            <p className="text-xs text-red-600">{uploadError}</p>
+          )}
         </div>
       </div>
     </DisplayBlockWrapper>
