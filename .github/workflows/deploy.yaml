@@ -480,7 +480,7 @@ jobs:
         if: ${{ contains(join(needs.*.result, ','), 'failure') || contains(join(needs.*.result, ','), 'skipped') }}
         run: |
           curl -X POST -H 'Content-type: application/json' \
-            --data "{\"text\":\"Deploy failed for: \"${{ github.event.head_commit.message }}\". <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Open run>\"}" \
+            --data "{\"text\":\"Deploy failed for ${{ github.event.head_commit.message }}. <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Open run>\"}" \
             ${{ secrets.SLACK_WEBHOOK_URL }}
   # build-mobile-app:
   #   runs-on: ubuntu-latest
