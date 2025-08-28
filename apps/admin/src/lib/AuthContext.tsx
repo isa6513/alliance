@@ -79,6 +79,7 @@ export const AuthProvider = memo(({ children }: React.PropsWithChildren) => {
       const { data } = await authMe();
       if (data) {
         setUser(data);
+        window.location.href = "/";
       } else {
         throw new Error("Failed to get user data after login");
       }
