@@ -28,7 +28,6 @@ export class AdminGuard implements CanActivate {
       this.extractTokenFromHeader(request);
 
     if (!token) {
-      console.log('no token');
       throw new UnauthorizedException();
     }
     try {

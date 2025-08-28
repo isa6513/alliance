@@ -264,9 +264,9 @@ const SettingsPage: React.FC = () => {
                 textNotifsEnabled
               ) && (
                 <p className="text-sm text-gray-500 mt-2">
-                  You will not receive any notifications when this is disabled.
-                  Please keep this on if you want to participate as an Alliance
-                  member!
+                  You will not receive any notifications. Please keep a
+                  notification channel enabled if you want to participate as an
+                  Alliance member!
                 </p>
               )}
             </div>

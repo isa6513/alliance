@@ -55,6 +55,13 @@ export class Action {
   @IsOptional()
   donationAmount?: number;
 
+  @Column({ default: false })
+  @ApiProperty({
+    description: 'e.g. onboarding',
+  })
+  @IsNotEmpty()
+  commitmentless: boolean;
+
   @Column()
   @ApiProperty({ description: 'markdown page body' })
   @IsNotEmpty()
