@@ -202,9 +202,9 @@ const HomePage = () => {
                 <p className="font-semibold text-lg text-zinc-600 mb-3">
                   Friend activity
                 </p>
-                <a href="/feed" className="text-link text-sm">
+                <Link to="/feed" className="text-link text-sm">
                   See all
-                </a>
+                </Link>
               </div>
 
               {friendActivities.length === 0 && (
