@@ -1,11 +1,11 @@
+import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import * as request from 'supertest';
-import { FriendStatus } from '../src/user/friend.entity';
-import { createTestApp, TestContext } from './e2e-test-utils';
 import { Repository } from 'typeorm';
-import { User } from '../src/user/user.entity';
-import { NotificationType } from 'src/notifs/entities/notification.entity';
 import { City } from '../src/geo/city.entity';
 import { GeoModule } from '../src/geo/geo.module';
+import { FriendStatus } from '../src/user/friend.entity';
+import { User } from '../src/user/user.entity';
+import { createTestApp, TestContext } from './e2e-test-utils';
 
 describe('Users (e2e)', () => {
   let ctx: TestContext;
@@ -160,7 +160,7 @@ describe('Users (e2e)', () => {
 
     expect(notifs.status).toBe(200);
     expect(notifs.body.length).toBe(1);
-    expect(notifs.body[0].category).toBe(NotificationType.FriendRequest);
+    expect(notifs.body[0].category).toBe(NotificationCategory.FriendRequest);
   });
 
   it('User B can accept the friend request', async () => {
@@ -180,7 +180,7 @@ describe('Users (e2e)', () => {
     expect(notifs.status).toBe(200);
     expect(notifs.body.length).toBe(1);
     expect(notifs.body[0].category).toBe(
-      NotificationType.FriendRequestAccepted,
+      NotificationCategory.FriendRequestAccepted,
     );
   });
 
