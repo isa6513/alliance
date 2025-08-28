@@ -75,7 +75,7 @@ const NavbarHorizontal: React.FC = () => {
             )
           )}
         </div>
-        <div className="flex flex-row gap-x-3 items-center flex-1 justify-end">
+        <div className="flex flex-row gap-x-4 items-center flex-1 justify-end">
           <SearchBar />
           <NotificationsIcon />
           <ProfileDropdown />

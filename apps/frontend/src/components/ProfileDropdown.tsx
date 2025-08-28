@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { useAppLoaderData } from "../applayout";
 import { useAuth } from "../lib/AuthContext";
 import ProfileImage from "./ProfileImage";
+import DropdownIcon from "./icons/DropdownIcon";
 
 const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,8 +27,13 @@ const ProfileDropdown = () => {
       onMouseOut={() => setIsOpen(false)}
       className=""
     >
-      <Link to={profileUrl} onClick={() => setIsOpen(false)}>
+      <Link
+        to={profileUrl}
+        onClick={() => setIsOpen(false)}
+        className="flex items-center gap-x-1.5"
+      >
         <ProfileImage pfp={profilePicture} size="large" />
+        <DropdownIcon size="mini" fill="black" />
       </Link>
       {isOpen && (
         <div className="absolute top-[calc(100%-10px)] shadow-lg/5 right-5 bg-white rounded border border-zinc-200 min-w-[150px] max-h-[500px] overflow-y-auto cursor-default flex flex-col *:hover:bg-zinc-100 *:px-4 *:py-2 text-base">
