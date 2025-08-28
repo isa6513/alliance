@@ -65,7 +65,6 @@ const GuidePage: React.FC = () => {
               sign up.
             </p>
           </div>
-
           <Card className="md:mb-2" style={CardStyle.GreenOutline}>
             <p>
               This guide was developed and approved by 25 founding members of
@@ -76,7 +75,6 @@ const GuidePage: React.FC = () => {
               .
             </p>
           </Card>
-
           <MarkdownWrapper
             id="introduction"
             markdownContent="
@@ -106,7 +104,6 @@ As a starting point, we seek to address pressing global crises that affect billi
 
 "
           />
-
           <MarkdownWrapper
             id="structure"
             markdownContent="
@@ -133,7 +130,6 @@ We are capable of working together in many possible arrangements for many purpos
 
 "
           />
-
           <div className="grid grid-cols-2 md:grid-cols-2 gap-4 my-6 w-full max-w-4xl mx-auto">
             <ExampleActionCategoryCard
               title="Collective funding"
@@ -160,7 +156,6 @@ We are capable of working together in many possible arrangements for many purpos
               description="We maintain and improve the Alliance by engaging in deliberations and other processes for feedback."
             />
           </div>
-
           <MarkdownWrapper
             id="priorities"
             markdownContent="
@@ -201,7 +196,6 @@ Need for swift action will preclude that every decision is made with full member
 We accept our decision-making process will inevitably contain imperfections and we will seek to minimize their harm.
 "
           />
-
           <MarkdownWrapper
             id="membership"
             markdownContent="
@@ -210,7 +204,7 @@ We accept our decision-making process will inevitably contain imperfections and 
 ## Dependability
 Alliance members are individuals that have committed to cooperate with one another to build a better future for all. Our common goal is not to create a future that is perfect from the perspective of every member, but to create a future that members agree is significantly better than the future that would occur otherwise.
 
-**The Alliance will not work unless members reliably take the actions assigned to them, even in the face of uncertainty, disagreement, or inconvenience.**
+**The Alliance will not work unless members reliably take the actions assigned to them, even in the face of uncertainty or inconvenience.**
 
 The power of cooperation does not stem from attaining some idealistic harmony: it comes from working through issues, rain or shine, in order to reach a common goal. When members aren’t reliable, others are forced to compensate, trust degrades, and projects slowly stagnate.
 
@@ -220,13 +214,33 @@ We recognize the risks associated with collective decision-making. Our approach 
 
 ## Terms
 The following constitutes the basic promise that members make to one another:
-1. Members will lend a dependable, finite amount of time/resources to the Alliance, which the strategic office can count on in planning future actions.
-2. Members will engage in all actions for which the strategic office deems they are needed. Members will not be required to take an action if they find it either morally unacceptable or they are incapable of fulfillment due to external circumstances (e.g. medical exemption, family emergency, or religious observance).
+"
+          />
 
-Moral unacceptability means that a member believes, after careful thought, that an action would violate their personal morality. It does not mean that the member merely has uncertainty about its effects.
-
+          <Card className="" style={CardStyle.LightGrey}>
+            <p className="text-lg p-2">
+              <ol className="list-decimal list-inside mb-2 flex flex-col gap-y-2">
+                <li>
+                  Members will lend a dependable, finite amount of
+                  time/resources to the Alliance, which the strategic office can
+                  count on in planning future actions.
+                </li>
+                <li>
+                  Members will participate in all actions for which the
+                  strategic office deems they are needed. Members will not be
+                  required to take an action if they find it either immoral or
+                  they are incapable of fulfillment due to external
+                  circumstances(e.g. medical exemption, family emergency, or
+                  religious observance).
+                </li>
+              </ol>
+            </p>
+          </Card>
+          <MarkdownWrapper
+            id="required-investment"
+            markdownContent="
 ## Required investment
-Currently, the strategic office limits the total time required by members to below 1 hour/month.
+Currently, the strategic office limits the total time required by members to below 1 hour/month, broken into 15-minute tasks per week.
 
 If we demonstrate over time that we are effective and trustworthy, then the Alliance can play an increasingly large role in members’ lives and plan increasingly impactful actions.
 
@@ -241,7 +255,6 @@ For example, early members may take part in:
 - Participating in small-scale (<$1/day) donation-pooling experiments.
 "
           />
-
           <MarkdownWrapper
             id="governance"
             markdownContent="

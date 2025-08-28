@@ -1,5 +1,5 @@
 // routes/root.tsx
-import { Navigate, Outlet } from "react-router";
+import { Outlet } from "react-router";
 import { useAuth } from "./lib/AuthContext";
 
 export default function AuthOnlyLayout() {
@@ -9,9 +9,11 @@ export default function AuthOnlyLayout() {
   //     return <Navigate to="/login" />;
   //   }
 
-  if (!loading && isAuthenticated && user?.onboardingComplete === false) {
-    return <Navigate to="/onboarding" />;
-  }
+  // We're doing onboarding as an action now
+
+  // if (!loading && isAuthenticated && user?.onboardingComplete === false) {
+  //   return <Navigate to="/onboarding" />;
+  // }
 
   return <Outlet />;
 }
