@@ -10,7 +10,7 @@ const TermsPage = () => {
 
 Last updated: 2025-08-25
 
-These Terms & Conditions (“Terms”) govern the use of email and SMS/text message notifications (“Messaging Services”) offered by **Alliance Foundation** (“Alliance,” “we,” “our,” or “us”) through **The Alliance Platform** (the “Platform”). By opting in to receive notifications, you agree to these Terms and our [Privacy Policy](/privacypolicy).
+These Terms & Conditions (“Terms”) govern the use of email and SMS/text message notifications (“Messaging Services”) offered by **Alliance Foundation** (“Alliance,” “we,” “our,” or “us”) through the **Alliance Platform** (the “Platform”). By opting in to receive notifications, you agree to these Terms and our [Privacy Policy](/privacypolicy).
 
 ---
 

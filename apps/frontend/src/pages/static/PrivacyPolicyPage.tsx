@@ -10,28 +10,12 @@ const PrivacyPolicyPage = () => {
 
 Last updated: 2025-08-25
 
-Alliance Foundation (“Alliance,” “we,” “our,” or “us”) operates The Alliance Platform (the “Platform”). This privacy policy explains how our organization uses the personal data we collect from you when you use our website and services.
-
-## Topics
-
-- What data do we collect?
-- How do we collect your data?
-- How will we use your data?
-- How do we store your data?
-- Marketing
-- What are your data protection rights?
-- How do we use cookies?
-- What types of cookies do we use?
-- How to manage your cookies
-- Privacy policies of other websites
-- Changes to our privacy policy
-- How to contact us
-- How to contact the appropriate authorities
+Alliance Foundation (“Alliance,” “we,” “our,” or “us”) operates the Alliance Platform (the “Platform”). This privacy policy explains how our organization uses the personal data we collect from you when you use our website and services.
 
 ## What data do we collect?
 
-Alliance Foundation collects the following data:
-- Personal identification information (Name, email address, phone number)
+The Alliance collects the following data:
+- Personal identification information (name, email address, phone number)
 - Account information (username, password, account preferences)
 - Activity data related to your use of the Platform (actions joined, events created, preferences set)
 - Payment information (processed securely through Stripe, never stored directly by us)
@@ -42,8 +26,10 @@ Alliance Foundation collects the following data:
 You directly provide Alliance with most of the data we collect. We collect data and process data when you:
 
 - Register online for an account on the Platform.
+- Fill out your profile information.
 - Opt in to receive SMS or email notifications.
-- Voluntarily complete surveys, feedback forms, or contact us for support.
+- Voluntarily complete surveys or make posts.
+- Contact us for support.
 - Use or view our website via your browser’s cookies.
 
 ## How will we use your data?
@@ -96,13 +82,13 @@ The Alliance Platform may contain links to other websites. This privacy policy a
 
 ## Changes to our privacy policy
 
-Alliance keeps its privacy policy under regular review and places any updates on this web page. This privacy policy was last updated on [Insert Date].
+Alliance keeps its privacy policy under regular review and places any updates on this web page.
 
 ## How to contact us
 
 If you have any questions about Alliance’s privacy policy, the data we hold on you, or you would like to exercise one of your data protection rights, please contact us:
 
-Email: support@worldalliance.org`}
+Email: [support@worldalliance.org](mailto:support@worldalliance.org)`}
       />
     </div>
   );
