@@ -62,7 +62,6 @@ const Card: React.FC<CardProps> = ({
       ref={ref}
       style={{
         backgroundImage: bgImage ? `url(${bgImage})` : undefined,
-        height: closed ? "0px" : "calc-size(auto, size)",
       }}
       onClick={onClick}
     >

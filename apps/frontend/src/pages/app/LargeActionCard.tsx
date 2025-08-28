@@ -19,11 +19,12 @@ export interface LargeActionCardProps {
   onJoin: (actionId: number) => void;
 }
 
-enum TaskCardState {
+enum LargeActionCardState {
   Minified = "minified",
   Default = "default",
   Confirming = "confirming",
   Completed = "completed",
+  Committed = "committed",
   Closed = "closed",
 }
 
@@ -36,7 +37,9 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
 }: LargeActionCardProps) => {
   const navigate = useNavigate();
 
-  const [state, setState] = useState<TaskCardState>(TaskCardState.Default);
+  const [state, setState] = useState<LargeActionCardState>(
+    LargeActionCardState.Default
+  );
 
   const liveUserCount = useActionCount(action.id);
 
@@ -49,13 +52,20 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   );
 
   useEffect(() => {
-    if (state === TaskCardState.Completed) {
-      setState(TaskCardState.Closed);
+    if (state === LargeActionCardState.Completed) {
+      setState(LargeActionCardState.Closed);
       setTimeout(() => {
         onComplete(action.id);
       }, 500);
     }
-  }, [state, action, onComplete]);
+
+    if (state === LargeActionCardState.Committed) {
+      setState(LargeActionCardState.Closed);
+      setTimeout(() => {
+        onJoin(action.id);
+      }, 500);
+    }
+  }, [state, action, onComplete, onJoin]);
 
   //   const timeRemaining = useMemo(() => {
   //     if (!action.myRelation?.deadline) return null;
@@ -65,15 +75,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   //     );
   //   }, [action.myRelation?.deadline]);
 
-  // const handleCompleteAction = () => {
-  //   onComplete(action.id);
-  // };
-
-  const handleJoinAction = () => {
-    console.log("join action", action.id);
-    onJoin(action.id);
-  };
-
   const threshold =
     action.status === "gathering_commitments"
       ? action.commitmentThreshold ?? 10
@@ -82,14 +83,13 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   return (
     <Card
       style={CardStyle.White}
-      className={`shadow-lg transition-all duration-500 !border-green !border-2 w-full relative
-         ${state === TaskCardState.Minified ? "pb-4" : ""}
-          ${
-            state === TaskCardState.Closed
-              ? "opacity-0 scale-95 h-0 py-0 overflow-hidden"
-              : ""
-          }`}
-      closed={state === TaskCardState.Closed}
+      className={`shadow-lg transition-all duration-300 ${
+        state === LargeActionCardState.Closed
+          ? "opacity-0 overflow-hidden"
+          : "opacity-100"
+      } !border-green !border-2 w-full relative
+         ${state === LargeActionCardState.Minified ? "pb-4" : ""}`}
+      closed={state === LargeActionCardState.Closed}
     >
       <div className="p-2">
         {!!action.timeEstimate && (
@@ -147,8 +147,10 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
           <ActionTaskPanel
             action={action}
             userRelation={userRelation}
-            handleCompleteAction={() => setState(TaskCardState.Completed)}
-            handleJoinAction={handleJoinAction}
+            handleCompleteAction={() =>
+              setState(LargeActionCardState.Completed)
+            }
+            handleJoinAction={() => setState(LargeActionCardState.Committed)}
           />
         </div>
       </div>

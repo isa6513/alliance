@@ -2,7 +2,7 @@ import { ActionDto } from "@alliance/shared/client";
 import Tag, { TagStyle } from "../../components/Tag";
 
 const actionStatusStyles: Record<ActionDto["status"], TagStyle> = {
-  gathering_commitments: TagStyle.Grey,
+  gathering_commitments: TagStyle.GreyOutline,
   commitments_reached: TagStyle.Green,
   member_action: TagStyle.GreyOutline,
   resolution: TagStyle.GreyOutline,
