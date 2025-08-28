@@ -450,9 +450,11 @@ export type UpdateActionActivityDto = {
     attachments?: Array<string>;
 };
 
+export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted';
+
 export type NotificationDto = {
     id: number;
-    category: NotificationType;
+    category: NotificationCategory;
     message: string;
     webAppLocation: string | null;
     mobileAppLocation: string | null;

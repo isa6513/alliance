@@ -6,7 +6,7 @@ import { ProfileDto } from 'src/user/user.dto';
 import { ILike, Repository } from 'typeorm';
 import {
   Notification,
-  NotificationType,
+  NotificationCategory,
 } from '../notifs/entities/notification.entity';
 import { User } from '../user/user.entity';
 import {
@@ -313,7 +313,7 @@ export class ForumService {
         const postNotif = this.notifRepository.create({
           user: post.author,
           message: `${authorProfile.displayName} replied to your forum post`,
-          category: NotificationType.ForumReply,
+          category: NotificationCategory.ForumReply,
           webAppLocation: replyUrl(post.id, comment.id),
           mobileAppLocation: replyUrl(post.id, comment.id),
         });
@@ -337,7 +337,7 @@ export class ForumService {
         const parentNotif = this.notifRepository.create({
           user: parentReply.author,
           message: `${authorProfile.displayName} replied to your comment`,
-          category: NotificationType.ForumReply,
+          category: NotificationCategory.ForumReply,
           webAppLocation: replyUrl(post.id, comment.id),
           mobileAppLocation: replyUrl(post.id, comment.id),
         });
@@ -369,7 +369,7 @@ export class ForumService {
         const activityNotif = this.notifRepository.create({
           user: activity.user,
           message: `${authorProfile.displayName} replied to your action activity`,
-          category: NotificationType.ForumReply,
+          category: NotificationCategory.ForumReply,
           webAppLocation: appUrl,
           mobileAppLocation: appUrl,
         });
@@ -399,7 +399,7 @@ export class ForumService {
         const parentNotif = this.notifRepository.create({
           user: parentReply.author,
           message: `${authorProfile.displayName} replied to your comment`,
-          category: NotificationType.ForumReply,
+          category: NotificationCategory.ForumReply,
           webAppLocation: appUrl,
           mobileAppLocation: appUrl,
         });
@@ -499,7 +499,7 @@ export class ForumService {
       await this.notifRepository.update(
         {
           webAppLocation: replyNotificationUrl,
-          category: NotificationType.ForumReply,
+          category: NotificationCategory.ForumReply,
         },
         { cleared: true },
       );

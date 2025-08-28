@@ -16,16 +16,21 @@ import ProfileImage from "./ProfileImage";
 interface FriendsTabProps {
   userId: number;
   isMe?: boolean;
+  originalTab?: "friends" | "received" | "sent";
 }
 
-const FriendsTab: React.FC<FriendsTabProps> = ({ userId, isMe = false }) => {
+const FriendsTab: React.FC<FriendsTabProps> = ({
+  userId,
+  isMe = false,
+  originalTab = "friends",
+}: FriendsTabProps) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [friends, setFriends] = useState<ProfileDto[]>([]);
   const [receivedRequests, setReceivedRequests] = useState<ProfileDto[]>([]);
   const [sentRequests, setSentRequests] = useState<ProfileDto[]>([]);
   const [activeTab, setActiveTab] = useState<"friends" | "received" | "sent">(
-    "friends"
+    originalTab
   );
   const [processingIds, setProcessingIds] = useState<Record<string, boolean>>(
     {}

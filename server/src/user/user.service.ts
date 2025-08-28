@@ -9,7 +9,7 @@ import { City } from 'src/geo/city.entity';
 import { ImagesService } from 'src/images/images.service';
 import {
   Notification,
-  NotificationType,
+  NotificationCategory,
 } from 'src/notifs/entities/notification.entity';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
 import { ILike, Repository } from 'typeorm';
@@ -173,9 +173,9 @@ export class UserService {
     } else {
       const notif = this.notifRepository.create({
         user: addressee,
-        category: NotificationType.FriendRequest,
+        category: NotificationCategory.FriendRequest,
         message: `${requester.name} wants to be friends`,
-        webAppLocation: '/settings',
+        webAppLocation: '/profile',
       });
 
       rel = this.friendRepository.create({
@@ -212,7 +212,7 @@ export class UserService {
       rel.acceptedAt = new Date();
       rel.acceptedNotif = this.notifRepository.create({
         user: rel.requester,
-        category: NotificationType.FriendRequestAccepted,
+        category: NotificationCategory.FriendRequestAccepted,
         message: `${rel.addressee.name} accepted your friend request`,
         webAppLocation: `/user/${rel.addressee.id}`,
       });

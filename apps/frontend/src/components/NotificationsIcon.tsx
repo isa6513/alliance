@@ -80,11 +80,26 @@ const NotificationsIcon = () => {
       setUnreadCount(
         newNotifications.filter((notification) => !notification.read).length
       );
-      navigate(
-        webAppLocation
-          ? getWebAppLocation(webAppLocation)
-          : window.location.pathname
-      );
+
+      const clickedNotif = notifications.find((n) => n.id === id);
+      if (clickedNotif?.category === "friend_request") {
+        navigate(
+          webAppLocation
+            ? getWebAppLocation(webAppLocation)
+            : window.location.pathname,
+          {
+            state: {
+              openFriendRequest: true,
+            },
+          }
+        );
+      } else {
+        navigate(
+          webAppLocation
+            ? getWebAppLocation(webAppLocation)
+            : window.location.pathname
+        );
+      }
     },
     [navigate, notifications]
   );

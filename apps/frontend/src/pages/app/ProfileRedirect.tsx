@@ -1,17 +1,18 @@
-import { useNavigate } from "react-router";
-import { useAuth } from "../../lib/AuthContext";
 import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { useAuth } from "../../lib/AuthContext";
 
 const ProfileRedirectInner = () => {
   const { isAuthenticated, user } = useAuth();
+  const { state } = useLocation();
 
   const navigate = useNavigate();
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      navigate(`/user/${user.id}`);
+      navigate(`/user/${user.id}`, { state });
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, navigate, state]);
 
   return <></>;
 };

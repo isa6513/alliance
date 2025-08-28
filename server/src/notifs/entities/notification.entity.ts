@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { User } from '../../user/user.entity';
 
-export enum NotificationType {
+export enum NotificationCategory {
   ActionEvent = 'action_event',
   ForumReply = 'forum_reply',
   FriendRequest = 'friend_request',
@@ -27,9 +27,9 @@ export class Notification {
   })
   user: User;
 
-  @Column({ type: 'enum', enum: NotificationType })
-  @ApiProperty({ enum: NotificationType, enumName: 'NotificationType' })
-  category: NotificationType;
+  @Column({ type: 'enum', enum: NotificationCategory })
+  @ApiProperty({ enum: NotificationCategory, enumName: 'NotificationCategory' })
+  category: NotificationCategory;
 
   @Column()
   @ApiProperty()

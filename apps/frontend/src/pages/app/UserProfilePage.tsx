@@ -15,7 +15,7 @@ import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useLocation, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
 import { useAppLoaderData } from "../../applayout";
 import ForumListPost from "../../components/ForumListPost";
@@ -50,6 +50,9 @@ const UserProfilePage: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const isMe = id === user?.id.toString();
 
+  const { state } = useLocation();
+  const { openFriendRequest } = state || false;
+
   const { profile: myProfile } = useAppLoaderData();
   const [profileUser, setProfileUser] = useState<ProfileDto | null>(
     isMe ? myProfile : null
@@ -58,6 +61,7 @@ const UserProfilePage: React.FC = () => {
     useState<FriendStatusDto["status"]>("none");
 
   const [selectedTab, setSelectedTab] = useState(ProfileTabs.Activity);
+
   const [isEditing, setIsEditing] = useState(false);
 
   const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
@@ -134,6 +138,12 @@ const UserProfilePage: React.FC = () => {
     setSelectedTab(ProfileTabs.Activity);
     setIsEditing(false);
   }, [id]);
+
+  useEffect(() => {
+    if (openFriendRequest) {
+      setSelectedTab(ProfileTabs.Friends);
+    }
+  }, [openFriendRequest]);
 
   const handleSendFriendRequest = useCallback(async () => {
     if (!id || !user) return;
@@ -452,7 +462,11 @@ const UserProfilePage: React.FC = () => {
                 {friends.length === 0 && (
                   <p className="text-center text-stone-500">No friends yet</p>
                 )}
-                <FriendsTab userId={profileUser.id} isMe={isMe} />
+                <FriendsTab
+                  userId={profileUser.id}
+                  isMe={isMe}
+                  originalTab={openFriendRequest ? "received" : "friends"}
+                />
               </div>
               {/* <div className="flex flex-col gap-y-2">
                 {friends?.map((friend: ProfileDto) => (
