@@ -1,11 +1,11 @@
-import { createTestApp, TestContext } from './e2e-test-utils';
+import { NotifsModule } from 'src/notifs/notifs.module';
+import { User } from 'src/user/user.entity';
+import { Repository } from 'typeorm';
 import {
   Notification,
-  NotificationType,
+  NotificationCategory,
 } from '../src/notifs/entities/notification.entity';
-import { NotifsModule } from 'src/notifs/notifs.module';
-import { Repository } from 'typeorm';
-import { User } from 'src/user/user.entity';
+import { createTestApp, TestContext } from './e2e-test-utils';
 
 describe('Notifications (e2e)', () => {
   let ctx: TestContext;
@@ -30,7 +30,7 @@ describe('Notifications (e2e)', () => {
     const testNotif = notifRepo.create({
       user: testUser,
       message: 'Test notification',
-      category: NotificationType.FriendRequest,
+      category: NotificationCategory.FriendRequest,
       webAppLocation: 'test',
       mobileAppLocation: 'test',
     });
