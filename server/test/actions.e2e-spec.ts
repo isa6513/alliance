@@ -70,6 +70,7 @@ describe('Actions (e2e)', () => {
         shortDescription: 'Do something important',
         taskContents: 'Do something important',
         type: ActionTaskType.Activity,
+        commitmentless: false,
       };
 
       const res = await request(ctx.app.getHttpServer())
