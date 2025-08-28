@@ -8,18 +8,19 @@ const ProfileImage = ({
 }: {
   pfp: string | null;
   className?: string;
-  size?: "small" | "medium" | "large";
+  size?: "mini" | "small" | "medium" | "large";
 }) => {
   const sizeClass = {
-    small: "w-6 h-6",
-    medium: "w-8 h-8",
-    large: "w-29 h-29",
+    mini: "w-4 h-4 rounded-sm",
+    small: "w-6 h-6 rounded",
+    medium: "w-8 h-8 rounded",
+    large: "w-29 h-29 rounded",
   };
   return (
     <img
       src={!!pfp ? getImageSource(pfp) : userImage}
       alt="Profile"
-      className={`object-cover bg-white inline rounded ${className} ${
+      className={`object-cover bg-white inline ${className} ${
         sizeClass[size]
       } ${!pfp ? "border border-zinc-300" : ""}`}
     />

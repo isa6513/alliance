@@ -68,21 +68,12 @@ const ForumListPost = ({
             <ProfileImage pfp={post.author.profilePicture} size="small" />
             <p>
               <span onClick={authorClick}>
-                <UserDisplayName
-                  staff={
-                    lastComment ? lastComment.author.staff : post.author.staff
-                  }
-                >
-                  {lastComment
-                    ? lastComment.author.displayName
-                    : post.author.displayName}
+                <UserDisplayName staff={post.author.staff}>
+                  {post.author.displayName}
                 </UserDisplayName>
-              </span>
-              <span>
-                {lastComment &&
-                  ` replied ${formatTime(new Date(lastComment.createdAt), {
-                    addSuffix: true,
-                  })}`}
+                {` posted ${formatTime(new Date(post.createdAt), {
+                  addSuffix: true,
+                })}`}
               </span>
             </p>
             {post.action?.name !== undefined && showAction && (
@@ -94,13 +85,24 @@ const ForumListPost = ({
               </a>
             )}
           </div>
-          <div className="flex space-x-3">
-            <span>
-              {formatTime(new Date(post.createdAt), {
-                addSuffix: true,
-              })}
-            </span>
-          </div>
+
+          {lastComment && (
+            <div className="flex items-center gap-x-1">
+              <ProfileImage pfp={post.author.profilePicture} size="mini" />
+              <span onClick={authorClick}>
+                <UserDisplayName
+                  staff={
+                    lastComment ? lastComment.author.staff : post.author.staff
+                  }
+                >
+                  {lastComment.author.displayName}
+                </UserDisplayName>
+                {` replied ${formatTime(new Date(lastComment.createdAt), {
+                  addSuffix: true,
+                })}`}
+              </span>
+            </div>
+          )}
         </div>
       </Card>
     );
