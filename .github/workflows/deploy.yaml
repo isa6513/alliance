@@ -1,5 +1,6 @@
 name: Deploy
-
+concurrency:
+  group: ${{ github.workflow }}
 on:
   push:
     branches: [main]
