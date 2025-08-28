@@ -4,20 +4,28 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import {
+  Body,
   Controller,
   Delete,
   Get,
   Inject,
   NotFoundException,
   Param,
+  Post,
   Res,
   StreamableFile,
 } from '@nestjs/common';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import { IsNotEmpty } from 'class-validator';
 import { Response } from 'express';
 import { basename } from 'path';
 import { Readable } from 'stream';
 import { ImagesService } from './images.service';
+
+export class BodyDto {
+  @IsNotEmpty()
+  file: string;
+}
 
 @Controller('images')
 export class ImagesController {
@@ -26,7 +34,7 @@ export class ImagesController {
     @Inject('S3_CLIENT') private readonly s3: S3Client,
   ) {}
 
-  private readonly bucket = process.env.ASSETS_BUCKET!; // TODO: separate dev bucket
+  private readonly bucket = process.env.ASSETS_BUCKET!;
 
   @Get(':key')
   @ApiOkResponse({ type: StreamableFile })
@@ -61,5 +69,20 @@ export class ImagesController {
     );
     await this.imagesService.deleteImage(id);
     return { deleted: true };
+  }
+
+  @Post('/uploadImage')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string' },
+      },
+    },
+  })
+  @ApiOkResponse({ type: String })
+  async uploadImage(@Body() body) {
+    const key = await this.imagesService.uploadImage(body.file);
+    return key;
   }
 }

@@ -1127,6 +1127,21 @@ export type ImagesDeleteImageResponses = {
     200: unknown;
 };
 
+export type ImagesUploadImageData = {
+    body: {
+        file?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/images/uploadImage';
+};
+
+export type ImagesUploadImageResponses = {
+    200: string;
+};
+
+export type ImagesUploadImageResponse = ImagesUploadImageResponses[keyof ImagesUploadImageResponses];
+
 export type ActionsJoinData = {
     body?: never;
     path: {

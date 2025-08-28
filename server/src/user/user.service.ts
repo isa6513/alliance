@@ -69,9 +69,9 @@ export class UserService {
     console.log('profilePicture input data', profilePicture);
 
     if (profilePicture && profilePicture.length > 100) {
-      //TODOL differentiate between file and url
+      //TODO: differentiate between file and url
       const key = profilePicture
-        ? await this.imagesService.processAndUploadImage(profilePicture)
+        ? await this.imagesService.processAndUploadProfileImage(profilePicture)
         : undefined;
 
       const updateDataWithPfp = {

@@ -83,6 +83,15 @@ export function FormBuilder({
   const [dropPosition, setDropPosition] = useState<"before" | "after" | null>(
     null
   );
+
+  // Page drag and drop state
+  const [draggedPageIndex, setDraggedPageIndex] = useState<number | null>(null);
+  const [dragOverPageIndex, setDragOverPageIndex] = useState<number | null>(
+    null
+  );
+  const [pageDropPosition, setPageDropPosition] = useState<
+    "before" | "after" | null
+  >(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -472,6 +481,86 @@ export function FormBuilder({
     setDraggedItem(null);
     setDragOverIndex(null);
     setDropPosition(null);
+  };
+
+  // Page drag handlers
+  const handlePageDragStart = (pageIndex: number) => (e: React.DragEvent) => {
+    setDraggedPageIndex(pageIndex);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handlePageDragEnd = () => {
+    setDraggedPageIndex(null);
+    setDragOverPageIndex(null);
+    setPageDropPosition(null);
+  };
+
+  const handlePageDragOver = (pageIndex: number) => (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+
+    if (draggedPageIndex === null || draggedPageIndex === pageIndex) {
+      return;
+    }
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const midpoint = rect.left + rect.width / 2;
+    const position = e.clientX < midpoint ? "before" : "after";
+
+    setDragOverPageIndex(pageIndex);
+    setPageDropPosition(position);
+  };
+
+  const handlePageDrop = (dropIndex: number) => (e: React.DragEvent) => {
+    e.preventDefault();
+
+    if (draggedPageIndex === null || pageDropPosition === null) {
+      return;
+    }
+
+    // Calculate the actual insertion index
+    let insertionIndex = dropIndex;
+    if (pageDropPosition === "after") {
+      insertionIndex = dropIndex + 1;
+    }
+
+    // Adjust for the fact that we're removing the dragged page first
+    if (draggedPageIndex < insertionIndex) {
+      insertionIndex -= 1;
+    }
+
+    if (draggedPageIndex === insertionIndex) {
+      handlePageDragEnd();
+      return;
+    }
+
+    const newPages = [...schema.pages];
+    const [draggedPage] = newPages.splice(draggedPageIndex, 1);
+    newPages.splice(insertionIndex, 0, draggedPage);
+
+    // Update selected page index if necessary
+    let newSelectedPageIndex = selectedPageIndex;
+    if (selectedPageIndex === draggedPageIndex) {
+      newSelectedPageIndex = insertionIndex;
+    } else if (
+      selectedPageIndex > draggedPageIndex &&
+      selectedPageIndex <= insertionIndex
+    ) {
+      newSelectedPageIndex = selectedPageIndex - 1;
+    } else if (
+      selectedPageIndex < draggedPageIndex &&
+      selectedPageIndex >= insertionIndex
+    ) {
+      newSelectedPageIndex = selectedPageIndex + 1;
+    }
+
+    updateSchema({
+      ...schema,
+      pages: newPages,
+    });
+
+    setSelectedPageIndex(newSelectedPageIndex);
+    handlePageDragEnd();
   };
 
   const handleDragOver = (index: number) => (e: React.DragEvent) => {
@@ -878,35 +967,140 @@ export function FormBuilder({
 
           {/* Page tabs - only show in edit mode */}
           {!isPreviewMode && (
-            <div className="flex space-x-1 mt-4">
-              {schema.pages.map((page, index) => (
-                <div
-                  key={page.id}
-                  className={`flex items-center rounded-md text-sm font-medium ${
-                    selectedPageIndex === index
-                      ? "bg-blue-100 text-blue-700 border border-blue-200"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  <button
-                    onClick={() => setSelectedPageIndex(index)}
-                    className="px-4 py-2 flex-1 text-left"
-                  >
-                    {page.title}
-                  </button>
-                  {schema.pages.length > 1 && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removePage(index);
-                      }}
-                      className="px-2 py-2 text-gray-400 hover:text-red-500"
+            <div
+              className="flex space-x-1 mt-4"
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+
+                if (
+                  draggedPageIndex === null ||
+                  pageDropPosition === null ||
+                  dragOverPageIndex === null
+                ) {
+                  handlePageDragEnd();
+                  return;
+                }
+
+                // Use the last known drop position and target
+                const dropIndex = dragOverPageIndex;
+                let insertionIndex = dropIndex;
+                if (pageDropPosition === "after") {
+                  insertionIndex = dropIndex + 1;
+                }
+
+                if (draggedPageIndex < insertionIndex) {
+                  insertionIndex -= 1;
+                }
+
+                if (draggedPageIndex === insertionIndex) {
+                  handlePageDragEnd();
+                  return;
+                }
+
+                const newPages = [...schema.pages];
+                const [draggedPage] = newPages.splice(draggedPageIndex, 1);
+                newPages.splice(insertionIndex, 0, draggedPage);
+
+                let newSelectedPageIndex = selectedPageIndex;
+                if (selectedPageIndex === draggedPageIndex) {
+                  newSelectedPageIndex = insertionIndex;
+                } else if (
+                  selectedPageIndex > draggedPageIndex &&
+                  selectedPageIndex <= insertionIndex
+                ) {
+                  newSelectedPageIndex = selectedPageIndex - 1;
+                } else if (
+                  selectedPageIndex < draggedPageIndex &&
+                  selectedPageIndex >= insertionIndex
+                ) {
+                  newSelectedPageIndex = selectedPageIndex + 1;
+                }
+
+                updateSchema({
+                  ...schema,
+                  pages: newPages,
+                });
+
+                setSelectedPageIndex(newSelectedPageIndex);
+                handlePageDragEnd();
+              }}
+            >
+              {schema.pages.map((page, index) => {
+                const isDragging = draggedPageIndex === index;
+                const showInsertionBar =
+                  dragOverPageIndex === index &&
+                  pageDropPosition &&
+                  !isDragging;
+
+                return (
+                  <div key={page.id} className="relative">
+                    {/* Insertion bar before */}
+                    {showInsertionBar && pageDropPosition === "before" && (
+                      <div className="absolute -left-0.5 top-0 bottom-0 w-0.5 bg-blue-500 rounded-full z-10">
+                        <div className="absolute -top-1 -left-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+                      </div>
+                    )}
+
+                    <div
+                      draggable
+                      onDragStart={handlePageDragStart(index)}
+                      onDragEnd={handlePageDragEnd}
+                      onDragOver={handlePageDragOver(index)}
+                      onDrop={handlePageDrop(index)}
+                      className={`flex items-center rounded-md text-sm font-medium cursor-move pr-2 transition-all border ${
+                        selectedPageIndex === index
+                          ? "bg-blue-100 text-blue-700 border-blue-200"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-transparent"
+                      } ${isDragging ? "opacity-50 scale-95" : ""}`}
                     >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
+                      {/* Drag handle */}
+                      <div
+                        className="px-2 py-2 text-gray-400 hover:text-gray-600 cursor-move"
+                        title="Drag to reorder"
+                      >
+                        <svg
+                          className="w-3 h-3"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M10 6L6 10l4 4 4-4-4-4zM8 12l2-2 2 2H8z" />
+                          <path d="M7 2a1 1 0 000 2h6a1 1 0 100-2H7zM7 16a1 1 0 100 2h6a1 1 0 100-2H7z" />
+                        </svg>
+                      </div>
+
+                      <button
+                        onClick={() => setSelectedPageIndex(index)}
+                        className="py-2 flex-1 text-left pr-2"
+                      >
+                        {page.title}
+                      </button>
+
+                      {schema.pages.length > 1 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removePage(index);
+                          }}
+                          className="py-2 text-gray-400 hover:text-red-500"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Insertion bar after */}
+                    {showInsertionBar && pageDropPosition === "after" && (
+                      <div className="absolute -right-0.5 top-0 bottom-0 w-0.5 bg-blue-500 rounded-full z-10">
+                        <div className="absolute -top-1 -left-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

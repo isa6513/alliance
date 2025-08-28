@@ -1,20 +1,34 @@
-import type { ImageBlock } from "@alliance/shared/lib/display-blocks";
-import type { BaseDisplayBlockProps } from "./types";
+import type { ImageBlock } from "@alliance/shared/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
+import type { BaseDisplayBlockProps } from "./types";
 
-export function EditableImageBlock({ block, onUpdate, onRemove, onDragStart, onDragEnd, isDragging }: BaseDisplayBlockProps<ImageBlock<string>>) {
+export function EditableImageBlock({
+  block,
+  onUpdate,
+  onRemove,
+  onDragStart,
+  onDragEnd,
+  isDragging,
+}: BaseDisplayBlockProps<ImageBlock<string>>) {
   return (
-    <DisplayBlockWrapper onRemove={onRemove} onDragStart={onDragStart} onDragEnd={onDragEnd} isDragging={isDragging}>
+    <DisplayBlockWrapper
+      onRemove={onRemove}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      isDragging={isDragging}
+    >
       <div className="space-y-2">
         {/* Image preview/placeholder */}
         {block.src ? (
-          <img 
-            src={block.src} 
+          <img
+            src={block.src}
             alt={block.alt}
-            className="max-w-full h-auto rounded border"
-            style={{ 
+            className="max-w-full h-auto rounded"
+            style={{
               maxHeight: "200px",
-              aspectRatio: block.aspectRatio ? block.aspectRatio.toString() : undefined
+              aspectRatio: block.aspectRatio
+                ? block.aspectRatio.toString()
+                : undefined,
             }}
           />
         ) : (
@@ -22,7 +36,7 @@ export function EditableImageBlock({ block, onUpdate, onRemove, onDragStart, onD
             <p className="text-gray-500 text-sm">Enter image URL below</p>
           </div>
         )}
-        
+
         {/* Compact inline controls */}
         <div className="space-y-1">
           <input

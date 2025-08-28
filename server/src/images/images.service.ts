@@ -1,10 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Image } from './entities/image.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FilesService } from './files.service';
-import * as sharp from 'sharp';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as sharp from 'sharp';
+import { Repository } from 'typeorm';
+import { Image } from './entities/image.entity';
+import { FilesService } from './files.service';
 
 @Injectable()
 export class ImagesService {
@@ -50,7 +50,7 @@ export class ImagesService {
     return true;
   }
 
-  async processAndUploadImage(image: string): Promise<string> {
+  async processAndUploadProfileImage(image: string): Promise<string> {
     const spliced = image.substring(image.indexOf(',') + 1);
     const imgBuffer = Buffer.from(spliced, 'base64');
     const processed = await sharp(imgBuffer)
@@ -69,6 +69,23 @@ export class ImagesService {
       }),
     );
 
+    return key;
+  }
+
+  async uploadImage(file: string): Promise<string> {
+    const spliced = file.substring(file.indexOf(',') + 1);
+    const imgBuffer = Buffer.from(spliced, 'base64');
+    const processed = await sharp(imgBuffer).webp({ effort: 3 }).toBuffer();
+
+    const key = `${Date.now()}.webp`;
+    await this.s3.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: processed,
+        ContentType: 'image/webp',
+      }),
+    );
     return key;
   }
 }

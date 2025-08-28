@@ -16,12 +16,10 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
         {error instanceof Error && (
           <p className="text-red-500">{error.message}</p>
         )}
-        {isRouteErrorResponse(error) ? (
+        {isRouteErrorResponse(error) && (
           <p>
             {error.status} {error.statusText}
           </p>
-        ) : (
-          <p>Please try again</p>
         )}
       </div>
     );

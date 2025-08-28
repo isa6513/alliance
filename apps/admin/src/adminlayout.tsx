@@ -102,13 +102,13 @@ export async function clientLoader() {
 }
 
 export function useAppLoaderData(): LoaderData {
-  const data = useRouteLoaderData<typeof clientLoader>("applayout");
+  const data = useRouteLoaderData<typeof clientLoader>("adminlayout");
   if (!data) {
     throw new Error("No data - applayout loader not found");
   }
   return data;
 }
 
-export default function AppLayout() {
+export default function AdminLayout() {
   return <Outlet />;
 }

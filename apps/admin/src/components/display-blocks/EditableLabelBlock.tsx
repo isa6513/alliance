@@ -1,10 +1,22 @@
-import type { LabelBlock } from "@alliance/shared/lib/display-blocks";
-import type { BaseDisplayBlockProps } from "./types";
+import type { LabelBlock } from "@alliance/shared/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
+import type { BaseDisplayBlockProps } from "./types";
 
-export function EditableLabelBlock({ block, onUpdate, onRemove, onDragStart, onDragEnd, isDragging }: BaseDisplayBlockProps<LabelBlock<string>>) {
+export function EditableLabelBlock({
+  block,
+  onUpdate,
+  onRemove,
+  onDragStart,
+  onDragEnd,
+  isDragging,
+}: BaseDisplayBlockProps<LabelBlock<string>>) {
   return (
-    <DisplayBlockWrapper onRemove={onRemove} onDragStart={onDragStart} onDragEnd={onDragEnd} isDragging={isDragging}>
+    <DisplayBlockWrapper
+      onRemove={onRemove}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      isDragging={isDragging}
+    >
       <input
         type="text"
         value={block.text}
