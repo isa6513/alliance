@@ -12,7 +12,7 @@ export const PROD_FLAGS: Record<Features, boolean> = {
 
 export const DEV_FLAGS: Record<Features, boolean> = {
   [Features.Forum]: true,
-  [Features.PublicSignup]: true,
+  [Features.PublicSignup]: false,
   [Features.BugReporting]: true,
 };
 

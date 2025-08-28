@@ -101,11 +101,11 @@ const UserActivityCard = ({
             {completed ? "completed" : "committed to"} {timeSinceCompleted}
           </p>
         </div>
-        <div className="flex flex-row justify-between mt-2">
+        <div className="flex flex-row justify-between items-end">
           <div className="flex flex-col space-y-3">
             <div>
               <p
-                className="text-green text-lg cursor-pointer hover:underline"
+                className="text-green cursor-pointer hover:underline"
                 onClick={handleClick}
               >
                 {activity.action.name}

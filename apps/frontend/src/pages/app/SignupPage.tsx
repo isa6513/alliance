@@ -1,25 +1,18 @@
 import { authMe, authRegister, SignUpDto } from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import React, { useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import SignupForm from "../../components/SignupForm";
 import { isFeatureEnabled } from "../../lib/config";
 
 const SignupPage: React.FC = () => {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [referralCode, setReferralCode] = useState<string | null>(null);
 
-  useEffect(() => {
-    const refParam = searchParams.get("ref");
-    if (refParam) {
-      setReferralCode(refParam);
-    }
-  }, [searchParams]);
+  const referralCode = searchParams.get("ref");
 
   const handleSubmit = async (formData: SignUpDto) => {
     setError(null);
@@ -31,7 +24,7 @@ const SignupPage: React.FC = () => {
         const checkAuth = await authMe();
 
         if (checkAuth.response.ok) {
-          navigate("/home");
+          window.location.href = "/home";
         } else {
           setError("please try again");
         }

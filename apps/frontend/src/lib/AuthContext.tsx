@@ -87,6 +87,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
         console.error("login error", error);
         throw new Error("Login failed");
       }
+      setRevalidate();
 
       const { data } = await authMe();
       setUser(data);
@@ -95,7 +96,9 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
 
     const logout = useCallback(async () => {
       await authLogout();
+      window.location.href = "/login";
       setUser(undefined);
+      setRevalidate();
     }, []);
 
     const value = useMemo<AuthContextType>(

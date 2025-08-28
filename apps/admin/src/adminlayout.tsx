@@ -111,8 +111,11 @@ export function useAppLoaderData(): LoaderData {
 }
 
 export default function AdminLayout() {
-  const { user, isAuthenticated, logout } = useAuth();
-  if (isAuthenticated && user && !user.admin) {
+  const { user, isAuthenticated, logout, loading } = useAuth();
+  if (
+    (isAuthenticated && user && !user.admin) ||
+    (!isAuthenticated && !loading)
+  ) {
     logout();
   }
 
