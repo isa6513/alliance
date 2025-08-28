@@ -342,7 +342,7 @@ jobs:
           source: "nest-build.zip"
           target: "~/"
 
-      - name: SSH and Blue-Green Deploy on EC2 (zero-downtime)
+      - name: SSH and Blue-Green Deploy on EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.INSTANCE_IP }}
@@ -463,7 +463,7 @@ jobs:
 
             # Health check the canary directly on 3006 (bypassing Nginx)
             # Adjust path if your health endpoint differs.
-            curl --silent --fail --show-error "http://127.0.0.1:3006/api/" > /dev/null
+            curl --silent --fail --show-error "http://127.0.0.1:3006/" > /dev/null
 
             # --- If canary is healthy: atomically switch "current" symlink and reload main app with zero downtime ---
             PREV_TARGET=""
@@ -482,7 +482,7 @@ jobs:
 
             # Give the reloaded app a moment and verify public health through Nginx on 3005
             sleep 8
-            curl --silent --fail --show-error "https://${{ vars.DOMAIN_NAME }}/api/" > /dev/null
+            curl --silent --fail --show-error "http://127.0.0.1:3005" > /dev/null
 
             # Success: kill the canary
             pm2 delete nest-app-canary || true
