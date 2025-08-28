@@ -166,7 +166,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
           <div className="flex items-center gap-3 text-sm text-gray-500">
             <a
               href={`/user/${reply.author.id}`}
-              className="hover:underline text-black font-medium"
+              className="text-black font-medium"
             >
               <UserDisplayName staff={reply.author.staff}>
                 {reply.author.displayName}

@@ -7,13 +7,14 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
   staff = false,
 }: React.PropsWithChildren<UserDisplayNameProps>) => {
   return (
-    <span
-      className={`hover:underline ${
-        staff ? "text-amber-500 decoration-amber-500" : ""
-      }`}
-    >
-      {children}
-    </span>
+    <>
+      <span className={`hover:underline`}>{children}</span>
+      {staff && (
+        <span className="ml-1 text-xs bg-amber-500 text-white rounded px-1">
+          Staff
+        </span>
+      )}
+    </>
   );
 };
 
