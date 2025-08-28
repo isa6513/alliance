@@ -9,6 +9,7 @@ import {
   UserActionRelation,
   userMyProfile,
 } from "@alliance/shared/client";
+import { Features } from "@alliance/shared/lib/features";
 import { useEffect } from "react";
 import {
   Outlet,
@@ -17,8 +18,10 @@ import {
   useNavigation,
   useRouteLoaderData,
 } from "react-router";
+import BugReportButton from "./components/BugReportButton";
 import NavbarHorizontal from "./components/NavbarHorizontal";
 import { useAuth } from "./lib/AuthContext";
+import { isFeatureEnabled } from "./lib/config";
 
 export interface RouteMatch {
   data: unknown;
@@ -172,6 +175,7 @@ export default function AppLayout() {
     <>
       {isAuthenticated && <NavbarHorizontal />}
       <Outlet />
+      {isFeatureEnabled(Features.BugReporting) && <BugReportButton />}
     </>
   );
 }

@@ -158,7 +158,6 @@ const ActionsList: React.FC = () => {
                 usersCompleted={action.usersCompleted}
                 commitmentThreshold={action.commitmentThreshold}
                 actionType={action.type}
-                donationThreshold={action.donationThreshold}
                 donationAmount={action.donationAmount}
                 className="mt-2"
               />

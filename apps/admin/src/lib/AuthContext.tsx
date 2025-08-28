@@ -89,6 +89,7 @@ export const AuthProvider = memo(({ children }: React.PropsWithChildren) => {
 
   const logout = useCallback(async () => {
     await authLogout();
+    window.location.href = "/login";
     setUser(undefined);
   }, []);
 

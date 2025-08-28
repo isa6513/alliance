@@ -10,6 +10,7 @@ import {
   userMyProfile,
 } from "@alliance/shared/client";
 import { Outlet, useRouteLoaderData } from "react-router";
+import { useAuth } from "./lib/AuthContext";
 
 export interface RouteMatch {
   data: unknown;
@@ -110,5 +111,10 @@ export function useAppLoaderData(): LoaderData {
 }
 
 export default function AdminLayout() {
+  const { user, isAuthenticated, logout } = useAuth();
+  if (isAuthenticated && !user?.admin) {
+    logout();
+  }
+
   return <Outlet />;
 }

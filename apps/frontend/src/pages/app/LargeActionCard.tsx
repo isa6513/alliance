@@ -87,7 +87,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
         state === LargeActionCardState.Closed
           ? "opacity-0 overflow-hidden"
           : "opacity-100"
-      } !border-green !border-2 w-full relative
+      } !border-green-2 !border-2 w-full relative
          ${state === LargeActionCardState.Minified ? "pb-4" : ""}`}
       closed={state === LargeActionCardState.Closed}
     >

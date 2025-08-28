@@ -1,5 +1,5 @@
-import React from "react";
 import { ActionDto } from "@alliance/shared/client";
+import React from "react";
 
 export interface ActionProgressBarProps {
   status: ActionDto["status"];
@@ -7,7 +7,6 @@ export interface ActionProgressBarProps {
   usersCompleted: number;
   commitmentThreshold?: number;
   actionType?: string;
-  donationThreshold?: number;
   donationAmount?: number;
   className?: string;
 }
@@ -24,14 +23,21 @@ interface ProgressBarProps {
 }
 
 // Reusable wrapper component
-const ProgressBarWrapper: React.FC<ProgressBarWrapperProps> = ({ className, children }) => (
+const ProgressBarWrapper: React.FC<ProgressBarWrapperProps> = ({
+  className,
+  children,
+}) => (
   <div className={`flex flex-col gap-y-1 flex-1 ${className || ""}`}>
     {children}
   </div>
 );
 
 // Reusable progress bar component
-const ProgressBar: React.FC<ProgressBarProps> = ({ percentage, barColor, label }) => (
+const ProgressBar: React.FC<ProgressBarProps> = ({
+  percentage,
+  barColor,
+  label,
+}) => (
   <>
     <div className="w-full h-2 bg-gray-100 rounded-[2px]">
       <div
@@ -49,7 +55,6 @@ const ActionProgressBar: React.FC<ActionProgressBarProps> = ({
   usersCompleted,
   commitmentThreshold,
   actionType,
-  donationThreshold,
   donationAmount,
   className,
 }) => {
@@ -61,8 +66,8 @@ const ActionProgressBar: React.FC<ActionProgressBarProps> = ({
   // Gathering Commitments: Show progress towards commitment threshold
   if (status === "gathering_commitments") {
     if (actionType === "Funding") {
-      const donationGoal = (donationThreshold || 1000) / 100;
       const suggestedAmount = donationAmount || 50;
+      const donationGoal = (usersJoined || 1000) * suggestedAmount;
       const currentAmount = (usersJoined * suggestedAmount) / 100;
       const percentage = (currentAmount / donationGoal) * 100;
       const isComplete = currentAmount >= donationGoal;
@@ -96,9 +101,14 @@ const ActionProgressBar: React.FC<ActionProgressBarProps> = ({
   }
 
   // Completion progress for various statuses
-  const completionStatuses = ["member_action", "commitments_reached", "resolution"];
+  const completionStatuses = [
+    "member_action",
+    "commitments_reached",
+    "resolution",
+  ];
   if (completionStatuses.includes(status)) {
-    const percentage = usersJoined > 0 ? (usersCompleted / usersJoined) * 100 : 0;
+    const percentage =
+      usersJoined > 0 ? (usersCompleted / usersJoined) * 100 : 0;
     const statusColors = {
       member_action: "bg-purple-500",
       commitments_reached: "bg-orange-500",
