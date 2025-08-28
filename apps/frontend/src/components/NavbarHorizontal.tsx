@@ -6,6 +6,7 @@ import { isFeatureEnabled } from "../lib/config";
 import DropdownLink from "./DropdownLink";
 import { destinations, links, NavbarPage, platformSublinks } from "./Navbar";
 import NotificationsIcon from "./NotificationsIcon";
+import ProfileDropdown from "./ProfileDropdown";
 import SearchBar from "./SearchBar";
 
 const NavbarHorizontal: React.FC = () => {
@@ -13,21 +14,16 @@ const NavbarHorizontal: React.FC = () => {
     ? links
     : links.filter((link) => link !== NavbarPage.Forum);
 
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
     return null;
   }
 
-  let profileUrl = "/profile";
-  if (user?.id) {
-    profileUrl = `/user/${user.id}`;
-  }
-
   const currentLocation: NavbarPage | null =
     activeLinks.find(
       (link) => destinations[link] === window.location.pathname
-    ) || (window.location.pathname === profileUrl ? NavbarPage.Profile : null);
+    ) || null;
 
   return (
     <>
@@ -60,9 +56,7 @@ const NavbarHorizontal: React.FC = () => {
               />
             ) : (
               <Link
-                to={
-                  link === NavbarPage.Profile ? profileUrl : destinations[link]
-                }
+                to={destinations[link]}
                 key={link}
                 className={`py-4 px-2 border-b-2 ${
                   currentLocation === link
@@ -81,9 +75,10 @@ const NavbarHorizontal: React.FC = () => {
             )
           )}
         </div>
-        <div className="flex flex-row gap-x-5 items-center flex-1 justify-end">
+        <div className="flex flex-row gap-x-3 items-center flex-1 justify-end">
           <SearchBar />
           <NotificationsIcon />
+          <ProfileDropdown />
         </div>
       </div>
       <div className="h-[45px]"></div>

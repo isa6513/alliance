@@ -9,7 +9,6 @@ export enum NavbarPage {
   Announcements = "Announcements",
   Forum = "Forum",
   Priorities = "Priorities",
-  Profile = "Profile",
   Platform = "Platform",
 }
 
@@ -19,7 +18,6 @@ export const links: NavbarPage[] = [
   NavbarPage.CurrentActions,
   NavbarPage.Forum,
   NavbarPage.Priorities,
-  NavbarPage.Profile,
 ];
 
 export const destinations: Record<NavbarPage, string> = {
@@ -29,7 +27,6 @@ export const destinations: Record<NavbarPage, string> = {
   [NavbarPage.Announcements]: "/announcements",
   [NavbarPage.Forum]: "/forum",
   [NavbarPage.Priorities]: "/priorities",
-  [NavbarPage.Profile]: "/profile",
   [NavbarPage.Platform]: "/platform",
 };
 

@@ -64,7 +64,7 @@ const ForumListPost = ({
           <p className="font-medium text-base">{post.title}</p>
         </div>
         <div className="flex justify-between items-end text-sm text-gray-500">
-          <div className="flex flex-row gap-x-2 items-center">
+          <div className="flex flex-row gap-x-1.5 items-center">
             <ProfileImage pfp={post.author.profilePicture} size="small" />
             <p>
               <span onClick={authorClick}>

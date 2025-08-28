@@ -15,7 +15,7 @@ import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, useLocation, useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
 import { useAppLoaderData } from "../../applayout";
 import ForumListPost from "../../components/ForumListPost";
@@ -294,6 +294,7 @@ const UserProfilePage: React.FC = () => {
           ) : (
             <ProfileImage
               pfp={profileUser.profilePicture}
+              size="huge"
               className="mt-[-55px]"
             />
           )}
@@ -393,12 +394,6 @@ const UserProfilePage: React.FC = () => {
                     >
                       Edit Profile
                     </Button>
-                    <Link
-                      to={"/settings"}
-                      className="mt-2 text-sm text-zinc-500 underline"
-                    >
-                      Account Settings
-                    </Link>
                   </div>
                 )}
               </div>
