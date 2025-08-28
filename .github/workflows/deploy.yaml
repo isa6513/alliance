@@ -491,13 +491,6 @@ jobs:
             # --- Cleanup: keep only the 5 most recent releases ---
             ls -1dt "$RELEASES"/* | tail -n +6 | xargs -r rm -rf
 
-          # --- Rollback on any error in the script above ---
-          # appleboy/ssh-action stops on non-zero; use trap inside the script for deeper rollback:
-          # BUT since we `set -E`, use an ERR trap:
-          # We'll embed it above by wrapping critical block, but for simplicity we use a here-doc function below.
-          script_stop: |
-            # no-op (trap already handles rollback)
-
   verify-deployment:
     needs:
       - deploy-nest-backend
