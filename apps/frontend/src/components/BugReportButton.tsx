@@ -8,7 +8,7 @@ const BugReportButton = () => {
   const [submitted, setSubmitted] = useState(false);
 
   const onSubmit = async () => {
-    const res = posthog.capture("bug-report", {
+    posthog.captureException("bug-report", {
       description,
     });
     setIsOpen(false);
