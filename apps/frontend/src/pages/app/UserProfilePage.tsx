@@ -52,6 +52,7 @@ const UserProfilePage: React.FC = () => {
 
   const { state } = useLocation();
   const { openFriendRequest } = state || false;
+  const { openFriends } = state || false;
 
   const { profile: myProfile } = useAppLoaderData();
   const [profileUser, setProfileUser] = useState<ProfileDto | null>(
@@ -140,10 +141,10 @@ const UserProfilePage: React.FC = () => {
   }, [id]);
 
   useEffect(() => {
-    if (openFriendRequest) {
+    if (openFriendRequest || openFriends) {
       setSelectedTab(ProfileTabs.Friends);
     }
-  }, [openFriendRequest]);
+  }, [openFriendRequest, openFriends]);
 
   const handleSendFriendRequest = useCallback(async () => {
     if (!id || !user) return;

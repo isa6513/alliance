@@ -31,6 +31,12 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
             <Link to="/terms" className=" hover:underline">
               Terms
             </Link>
+            <a
+              href="mailto:support@worldalliance.org"
+              className="hover:underline"
+            >
+              support@worldalliance.org
+            </a>
 
             {/* <div className="flex flex-col gap-2">
               <p className="font-bold text-gray-800">Platform</p>

@@ -93,6 +93,17 @@ const NotificationsIcon = () => {
             },
           }
         );
+      } else if (clickedNotif?.category === "friend_request_accepted") {
+        navigate(
+          webAppLocation
+            ? getWebAppLocation(webAppLocation)
+            : window.location.pathname,
+          {
+            state: {
+              openFriends: true,
+            },
+          }
+        );
       } else {
         navigate(
           webAppLocation
