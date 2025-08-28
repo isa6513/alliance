@@ -33,7 +33,7 @@ const ActivityFeedItem = ({
                 {title}
               </Link>
             ) : (
-              <p className="text-black">{title}</p>
+              <p className="text-zinc-700">{title}</p>
             )}
           </>
         )}

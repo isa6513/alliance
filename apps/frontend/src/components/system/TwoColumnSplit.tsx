@@ -20,7 +20,7 @@ const TwoColumnSplit = ({
   return (
     <div className={bg}>
       <div
-        className={`flex flex-row w-full h-full justify-center max-w-[1100px] mx-auto py-10 ${
+        className={`flex flex-row w-full h-full justify-center max-w-[1150px] mx-auto py-10 ${
           coloredRight ? "bg-green-1" : ""
         }`}
       >

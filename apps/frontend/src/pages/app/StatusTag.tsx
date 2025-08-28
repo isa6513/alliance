@@ -1,17 +1,16 @@
 import { ActionDto } from "@alliance/shared/client";
-import StatusIcon from "../../components/icons/StatusIcon";
 import Tag, { TagStyle } from "../../components/Tag";
 
 const actionStatusStyles: Record<ActionDto["status"], TagStyle> = {
-  gathering_commitments: TagStyle.Yellow,
+  gathering_commitments: TagStyle.Grey,
   commitments_reached: TagStyle.Green,
-  member_action: TagStyle.Blue,
-  resolution: TagStyle.Blue,
+  member_action: TagStyle.GreyOutline,
+  resolution: TagStyle.GreyOutline,
   completed: TagStyle.Green,
-  failed: TagStyle.Grey,
-  abandoned: TagStyle.Grey,
-  draft: TagStyle.Grey,
-  upcoming: TagStyle.Grey,
+  failed: TagStyle.GreyOutline,
+  abandoned: TagStyle.GreyOutline,
+  draft: TagStyle.GreyOutline,
+  upcoming: TagStyle.GreyOutline,
 };
 
 const actionStatusDescriptions: Record<ActionDto["status"], string> = {
@@ -41,7 +40,7 @@ const StatusTag = ({ status }: StatusTagProps) => {
       size="large"
       className="flex flex-row items-center"
     >
-      <StatusIcon status={status} size="small" />
+      {/* <StatusIcon status={status} size="small" /> */}
       <p>{actionStatusDescriptions[status]}</p>
     </Tag>
   );

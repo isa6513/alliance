@@ -13,9 +13,9 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
     <span>
       <div className="flex flex-col gap-x-2">
         <p className="text-zinc-500 text-sm">{time}</p>
-        <p className="font-semibold">{title}</p>
+        <p className="font-medium text-zinc-800">{title}</p>
       </div>
-      <p className="mt-1 text-sm">{description}</p>
+      <p className="mt-1 text-zinc-700">{description}</p>
     </span>
   );
 };

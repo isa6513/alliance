@@ -172,14 +172,14 @@ export default function ActionPage() {
         right={
           <div className="flex flex-col gap-y-4 p-6 pt-2">
             <Card style={CardStyle.White}>
-              <p className="text-base font-semibold">Status</p>
+              <p className="font-semibold text-lg text-zinc-600">Status</p>
               {action && (
                 <div className="mt-1">
                   <StatusTag status={action.status} />
 
                   {action.status === "gathering_commitments" ||
                   action.status === "commitments_reached" ? (
-                    <div className="mt-4">
+                    <div className="mt-8">
                       <CompletedBar
                         percentage={
                           ((liveUserCount ?? action.usersJoined) /
@@ -187,7 +187,7 @@ export default function ActionPage() {
                           100
                         }
                       />
-                      <p className="mt-4 text-green-3 text-sm font-weight-450">
+                      <p className="mt-2 text-green-3 text-sm font-weight-450">
                         {(
                           liveUserCount ?? action.usersJoined
                         )?.toLocaleString() || 0}{" "}
@@ -199,7 +199,7 @@ export default function ActionPage() {
                       </p>
                     </div>
                   ) : (
-                    <div className="mt-4">
+                    <div className="mt-8">
                       <CompletedBar
                         percentage={
                           ((action.usersCompleted ?? 0) /
@@ -207,7 +207,7 @@ export default function ActionPage() {
                           100
                         }
                       />
-                      <p className="mt-4 text-green-3 text-sm font-weight-450">
+                      <p className="mt-2 text-green-3 text-sm font-weight-450">
                         {(action.usersCompleted ?? 0).toLocaleString()} members
                         completed
                       </p>
