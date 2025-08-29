@@ -62,7 +62,7 @@ const ActivityFeedPage = () => {
   }, [subscribeToFeed, unsubscribeFromFeed, onFeedActivity, offFeedActivity]);
 
   // Combine paged activities with live activities, avoiding duplicates
-  const allActivities = [...liveActivities, ...feedActivities]
+  const allActivities = []
     .filter(
       (activity, index, self) =>
         self.findIndex((a) => a.id === activity.id) === index
@@ -177,6 +177,11 @@ const ActivityFeedPage = () => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="space-y-2 w-full flex flex-col justify-stretch">
+        {allActivities.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-screen text-zinc-500">
+            <p className="pb-20">No friend activity yet</p>
+          </div>
+        )}
         {allActivities.map((activity) => (
           <UserActivityCard
             activity={activity}
