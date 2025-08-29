@@ -8,8 +8,10 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ActionTaskPanel from "../../components/ActionTaskPanel";
 import CompletedBar from "../../components/CompletedBar";
 import ClockIcon from "../../components/icons/ClockIcon";
+import DeadlineIcon from "../../components/icons/DeadlineIcon";
 import UserProfilePicRow from "../../components/UserProfilePicRow";
 import { useActionCount } from "../../lib/useActionWebSocket";
+import { formatTime } from "../../lib/utils";
 
 export interface LargeActionCardProps {
   action: ActionDto;
@@ -80,6 +82,8 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       ? action.commitmentThreshold ?? 10
       : action.usersJoined;
 
+  const lastEvent = action.events[action.events.length - 1];
+
   return (
     <Card
       style={CardStyle.White}
@@ -91,14 +95,28 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
          ${state === LargeActionCardState.Minified ? "pb-4" : ""}`}
     >
       <div className="p-2">
-        {!!action.timeEstimate && (
-          <div className="flex flex-row items-center gap-x-2 text-base text-zinc-500 mb-1">
-            <ClockIcon />
-            <p className="text-green">{`${action.timeEstimate} minute${
-              action.timeEstimate === 1 ? "" : "s"
-            }`}</p>
-          </div>
-        )}
+        <div className="flex flex-row gap-x-4 mb-2">
+          {!!action.timeEstimate && (
+            <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
+              <ClockIcon />
+              <p className="text-green">{`${action.timeEstimate} minute${
+                action.timeEstimate === 1 ? "" : "s"
+              }`}</p>
+            </div>
+          )}
+          {!!lastEvent.deadline && (
+            <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
+              <DeadlineIcon fill="#dc2626" />
+              <p className="text-red-600">
+                {`${formatTime(new Date(lastEvent.deadline), {
+                  addSuffix: false,
+                })}`}{" "}
+                left
+              </p>
+            </div>
+          )}
+        </div>
+
         <div className="flex flex-row items-start gap-x-8">
           <div className="flex-1 flex flex-col">
             <p className="font-medium text-lg text-black">{action.name}</p>

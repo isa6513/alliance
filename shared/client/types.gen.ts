@@ -202,6 +202,10 @@ export type ActionEventDto = {
      */
     date: string;
     /**
+     * Deadline for the event
+     */
+    deadline?: string;
+    /**
      * Indicates whether the event should be shown in the timeline
      */
     showInTimeline: boolean;
@@ -436,6 +440,10 @@ export type CreateActionEventDto = {
      * time of the event (for display)
      */
     date: string;
+    /**
+     * Deadline for the event
+     */
+    deadline?: string;
     /**
      * Indicates whether the event should be shown in the timeline
      */

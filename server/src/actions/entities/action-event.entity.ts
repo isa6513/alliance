@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsDefined, IsNotEmpty, IsOptional } from 'class-validator';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
@@ -83,6 +83,14 @@ export class ActionEvent {
   @IsNotEmpty()
   @Type(() => Date)
   date: Date;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional({
+    description: 'Deadline for the event',
+  })
+  @IsOptional()
+  @Type(() => Date)
+  deadline?: Date;
 
   @UpdateDateColumn()
   @ApiProperty({ description: 'Timestamp when the event was last updated' })

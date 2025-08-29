@@ -152,10 +152,12 @@ const ActionDashboard: React.FC = () => {
     date: formatDateForInput(new Date()),
     showInTimeline: true,
     sendNotifsTo: "all",
+    deadline: undefined,
   });
 
   const [useCustomName, setUseCustomName] = useState<boolean>(false);
   const [launchNow, setLaunchNow] = useState<boolean>(true);
+  const [deadlineExists, setDeadlineExists] = useState<boolean>(false);
 
   const [creatingEvent, setCreatingEvent] = useState<boolean>(false);
   const [eventCreatedSuccess, setEventCreatedSuccess] =
@@ -859,6 +861,49 @@ const ActionDashboard: React.FC = () => {
                             id="eventDate"
                             name="date"
                             value={eventForm.date}
+                            onChange={handleEventInputChange}
+                            required
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      className={`${
+                        deadlineExists ? "bg-zinc-100" : ""
+                      } p-2 -m-1 rounded-md`}
+                    >
+                      <div className="flex items-center mb-4">
+                        <input
+                          type="checkbox"
+                          id="deadlineExists"
+                          checked={deadlineExists}
+                          onChange={(e) => setDeadlineExists(e.target.checked)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label
+                          htmlFor="deadlineExists"
+                          className="ml-2 block text-black"
+                        >
+                          Has deadline
+                        </label>
+                      </div>
+
+                      {deadlineExists && (
+                        <div>
+                          <label
+                            htmlFor="deadline"
+                            className="block text-black mb-1"
+                          >
+                            Event Deadline Date & Time * (
+                            {Intl.DateTimeFormat().resolvedOptions().timeZone})
+                          </label>
+                          <input
+                            type="datetime-local"
+                            id="deadline"
+                            name="deadline"
+                            value={eventForm.deadline}
                             onChange={handleEventInputChange}
                             required
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
