@@ -70,7 +70,7 @@ export function FormBuilder({
           fields: [],
         },
       ],
-      submit: { label: "Submit" },
+      submit: { label: "Complete" },
     }
   );
 

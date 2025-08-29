@@ -4,6 +4,7 @@ import { FormDto, SubmitFormDto, imagesUploadImage } from "../client";
 import { getApiUrl } from "../lib/config";
 import AppMarkdownWrapper from "../ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "../ui/Button";
+import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import type { DisplayBlock } from "./display-blocks";
 import type { AnyField, FormSchema } from "./formschema";
 
@@ -345,8 +346,8 @@ const FormRenderer = ({
                 required={field.required}
                 className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <span className="text-zinc-700">
-                {field.label}
+              <span className="text-zinc-700 flex">
+                <FormMarkdownWrapper markdownContent={field.label} />
                 {field.required && <span className="text-red-500 ml-1">*</span>}
               </span>
             </label>
@@ -632,7 +633,7 @@ const FormRenderer = ({
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Page Content */}
         <div className="space-y-4">
@@ -679,7 +680,7 @@ const FormRenderer = ({
                 type="submit"
                 className="w-full !py-3 text-base"
               >
-                {schema.submit?.label || "Submit"}
+                {schema.submit?.label || "Complete"}
               </Button>
             ) : (
               <Button
@@ -687,7 +688,7 @@ const FormRenderer = ({
                 className="!cursor-not-allowed"
                 onClick={() => {}}
               >
-                {schema.submit?.label || "Submit"} (Preview Mode)
+                {schema.submit?.label || "Complete"} (Preview Mode)
               </Button>
             )}
           </div>
