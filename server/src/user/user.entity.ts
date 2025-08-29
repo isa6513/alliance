@@ -150,7 +150,10 @@ export class User {
   @OneToMany(() => Notification, (notification) => notification.user)
   notifications: Notification[];
 
-  @ManyToOne(() => User, (user) => user.referredUsers, { nullable: true })
+  @ManyToOne(() => User, (user) => user.referredUsers, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   referredBy: User | null;
 
   @OneToMany(() => User, (user) => user.referredBy)
