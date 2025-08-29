@@ -27,13 +27,16 @@ const PeoplePage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      const responses = await Promise.all(
+        Object.entries(authorIds).map(async ([name, id]) => {
+          const result = await userFindOne({ path: { id } });
+          const { data: profile } = result;
+          return [name, profile];
+        })
+      );
+
       const authorProfiles = Object.fromEntries(
-        await Promise.all(
-          Object.entries(authorIds).map(async ([name, id]) => [
-            name,
-            await userFindOne({ path: { id } }),
-          ])
-        )
+        responses.map(([name, profile]) => [name, profile])
       );
 
       setAuthorProfiles(authorProfiles);
@@ -63,7 +66,7 @@ const PeoplePage: React.FC = () => {
 
             <div className="flex flex-col gap-y-1 text-lg md:text-xl my-4">
               {Object.entries(authorLinks).map(([name, link]) => (
-                <li key={name} className="list-disc flex items-center gap-x-2">
+                <p key={name} className="flex items-center gap-x-2">
                   <ProfileImage
                     pfp={authorProfiles[name]?.profilePicture ?? null}
                     size="small"
@@ -71,7 +74,7 @@ const PeoplePage: React.FC = () => {
                   <a className="text-link" href={link}>
                     {name}
                   </a>
-                </li>
+                </p>
               ))}
             </div>
 
