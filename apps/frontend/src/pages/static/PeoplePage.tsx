@@ -9,7 +9,7 @@ const PeoplePage: React.FC = () => {
     return {
       "Mark Xu": 10,
       "Sidney Hough": 7,
-      "Casey Manning": 2,
+      "Casey Manning": 15,
     };
   }, []);
 

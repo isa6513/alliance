@@ -36,7 +36,11 @@ const ProgressListPage: React.FC = () => {
           </h2>
           <div className="flex flex-col gap-y-4">
             {posts.map((post) => (
-              <Link to={`/progress/${post.slug}`} key={post.slug} className="">
+              <Link
+                to={`/progress/${post.slug}`}
+                key={post.slug}
+                className="hover:bg-zinc-100 p-3 -m-3 rounded-lg transition-all duration-50"
+              >
                 {/* <Card
                   style={CardStyle.White}
                   className="hover:border-zinc-400 transition-all duration-100"
