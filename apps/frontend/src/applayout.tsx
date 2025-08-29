@@ -124,7 +124,7 @@ export function useAppLoaderData(): LoaderData {
 export function HydrateFallback() {
   return (
     <div className="flex h-screen w-screen items-center justify-center">
-      <p>Loading alliance data...</p>
+      <p>Loading data...</p>
     </div>
   );
 }
