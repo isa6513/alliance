@@ -44,7 +44,9 @@ const useActivities = ({ list, objectId }: UseActivitiesProps) => {
         apiCall = actionsGetActionActivities({ path: { id: objectId } });
         break;
       case ActivityList.Global:
-        apiCall = actionsGetActivityFeed({ query: { limit: "50" } });
+        apiCall = actionsGetActivityFeed({
+          query: { limit: "50", before: new Date().toISOString() },
+        });
         break;
     }
     apiCall.then((resp) => {

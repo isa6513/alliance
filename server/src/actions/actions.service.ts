@@ -15,7 +15,7 @@ import {
   CommentParentObject,
 } from 'src/forum/entities/comment.entity';
 import { NotifsService } from 'src/notifs/notifs.service';
-import { ILike, In, Repository } from 'typeorm';
+import { ILike, In, LessThan, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import {
   ActionActivityDto,
@@ -290,9 +290,13 @@ export class ActionsService {
     return activities.map((activity) => new ActionActivityDto(activity));
   }
 
-  async getActivityFeed(limit: number = 50): Promise<ActionActivityDto[]> {
+  async getActivityFeed(
+    limit: number = 20,
+    before?: Date,
+  ): Promise<ActionActivityDto[]> {
+    const where = before ? { createdAt: LessThan(before) } : {};
     const activities = await this.actionActivityRepository.find({
-      relations: ['user', 'action'],
+      where,
       order: { createdAt: 'DESC' },
       take: limit,
     });

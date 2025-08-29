@@ -130,9 +130,14 @@ export class ActionsController {
   })
   async getActivityFeed(
     @Query('limit') limit?: string,
+    @Query('before') before?: string,
   ): Promise<ActionActivityDto[]> {
-    const limitNum = limit ? parseInt(limit) : 50;
-    return this.actionsService.getActivityFeed(limitNum);
+    const limitNum = limit ? parseInt(limit) : 20;
+    const beforeDate = before ? new Date(before) : undefined;
+    if (before && isNaN(beforeDate!.getTime())) {
+      throw new BadRequestException('Invalid "before" cursor');
+    }
+    return this.actionsService.getActivityFeed(limitNum, beforeDate);
   }
 
   @Get('activities/:id')

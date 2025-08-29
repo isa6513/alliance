@@ -11,11 +11,12 @@ import { useAuth } from "../../lib/AuthContext";
 import { useActionActivityWebSocket } from "../../lib/useActionActivityWebSocket";
 
 const ActivityFeedPage = () => {
-  const [initialActivities, setInitialActivities] = useState<
-    ActionActivityDto[]
-  >([]);
+  const [feedActivities, setFeedActivities] = useState<ActionActivityDto[]>([]);
   const [liveActivities, setLiveActivities] = useState<ActionActivityDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const PAGE_SIZE = 10;
   const {
     subscribeToFeed,
     unsubscribeFromFeed,
@@ -30,11 +31,11 @@ const ActivityFeedPage = () => {
       try {
         setLoading(true);
         const response = await actionsGetActivityFeed({
-          query: { limit: "50" },
+          query: { limit: String(PAGE_SIZE), before: new Date().toISOString() },
         });
-        if (response.data) {
-          setInitialActivities(response.data as ActionActivityDto[]);
-        }
+        const data = (response.data || []) as ActionActivityDto[];
+        setFeedActivities(data);
+        setHasMore(data.length === PAGE_SIZE);
       } catch (err) {
         console.error("Error fetching initial activities:", err);
       } finally {
@@ -60,8 +61,8 @@ const ActivityFeedPage = () => {
     };
   }, [subscribeToFeed, unsubscribeFromFeed, onFeedActivity, offFeedActivity]);
 
-  // Combine initial activities with live activities, avoiding duplicates
-  const allActivities = [...liveActivities, ...initialActivities]
+  // Combine paged activities with live activities, avoiding duplicates
+  const allActivities = [...liveActivities, ...feedActivities]
     .filter(
       (activity, index, self) =>
         self.findIndex((a) => a.id === activity.id) === index
@@ -70,6 +71,25 @@ const ActivityFeedPage = () => {
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
+
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore || feedActivities.length === 0) return;
+    try {
+      setLoadingMore(true);
+      const last = feedActivities[feedActivities.length - 1];
+      const before = last.createdAt;
+      const resp = await actionsGetActivityFeed({
+        query: { limit: String(PAGE_SIZE), before },
+      });
+      const more = (resp.data || []) as ActionActivityDto[];
+      setFeedActivities((prev) => [...prev, ...more]);
+      setHasMore(more.length === PAGE_SIZE);
+    } catch (e) {
+      console.error("Failed to load more feed items", e);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasMore, feedActivities, PAGE_SIZE]);
 
   const handleLikeActivity = useCallback(
     async (activityId: number) => {
@@ -95,7 +115,7 @@ const ActivityFeedPage = () => {
                 : a
             )
           );
-          setInitialActivities((prev) =>
+          setFeedActivities((prev) =>
             prev.map((a) =>
               a.id === activityId
                 ? {
@@ -121,7 +141,7 @@ const ActivityFeedPage = () => {
                 : a
             )
           );
-          setInitialActivities((prev) =>
+          setFeedActivities((prev) =>
             prev.map((a) =>
               a.id === activityId
                 ? {
@@ -141,7 +161,7 @@ const ActivityFeedPage = () => {
     setLiveActivities((prev) =>
       prev.map((a) => (a.id === updatedActivity.id ? updatedActivity : a))
     );
-    setInitialActivities((prev) =>
+    setFeedActivities((prev) =>
       prev.map((a) => (a.id === updatedActivity.id ? updatedActivity : a))
     );
   }, []);
@@ -158,12 +178,6 @@ const ActivityFeedPage = () => {
     <div className="max-w-4xl mx-auto p-6">
       <div className="space-y-2 w-full flex flex-col justify-stretch">
         {allActivities.map((activity) => (
-          // <ActionActivityFeedItem
-          //   key={activity.id}
-          //   activity={activity}
-          //   showAction={true}
-          //   handleLike={() => handleLikeActivity(activity.id)}
-          // />
           <UserActivityCard
             activity={activity}
             key={activity.id}
@@ -172,6 +186,15 @@ const ActivityFeedPage = () => {
             canEdit={activity.user.id === user?.id}
           />
         ))}
+        {hasMore && (
+          <button
+            className="mt-4 self-center px-4 py-2 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-900"
+            onClick={loadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore ? "Loading..." : "Load more"}
+          </button>
+        )}
       </div>
     </div>
   );

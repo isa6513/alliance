@@ -1254,6 +1254,7 @@ export type ActionsGetActivityFeedData = {
     path?: never;
     query: {
         limit: string;
+        before: string;
     };
     url: '/actions/activities/feed';
 };
