@@ -13,11 +13,13 @@ import { useEffect, useState } from "react";
 interface ActionTaskPanelActivityProps {
   taskFormId: number;
   onCompleteAction: () => void;
+  onFormStarted: () => void;
 }
 
 const ActionTaskPanelForm = ({
   taskFormId,
   onCompleteAction,
+  onFormStarted,
 }: ActionTaskPanelActivityProps) => {
   const [form, setForm] = useState<FormDto | null>(null);
   useEffect(() => {
@@ -61,6 +63,7 @@ const ActionTaskPanelForm = ({
               form={form.schema}
               onSubmit={handleSubmitForm}
               persistKey={String(taskFormId)}
+              onFormStarted={onFormStarted}
             />
           )}
         </div>

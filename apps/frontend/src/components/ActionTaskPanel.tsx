@@ -36,6 +36,14 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     });
   }, [action, handleCompleteAction]);
 
+  const handleFormStarted = useCallback(() => {
+    posthog.capture("form_started", {
+      actionId: action.id,
+      actionType: action.type,
+      actionName: action.name,
+    });
+  }, [action]);
+
   if (
     action.status === "gathering_commitments" ||
     action.status === "commitments_reached"
@@ -81,6 +89,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         <ActionTaskPanelForm
           taskFormId={action.taskFormId}
           onCompleteAction={handleCompleteWithTracking}
+          onFormStarted={handleFormStarted}
         />
       );
     }

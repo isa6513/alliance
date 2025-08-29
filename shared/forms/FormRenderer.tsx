@@ -17,6 +17,7 @@ interface FormRendererProps {
    * Use a per-instance id (e.g., taskFormId) to avoid collisions across contexts.
    */
   persistKey?: string | null;
+  onFormStarted?: () => void;
 }
 
 /**
@@ -36,7 +37,12 @@ export function computeFormStorageKey(args: {
   return hasInstance ? `${base}:${String(args.instanceId)}` : base;
 }
 
-const FormRenderer = ({ form, onSubmit, persistKey }: FormRendererProps) => {
+const FormRenderer = ({
+  form,
+  onSubmit,
+  persistKey,
+  onFormStarted,
+}: FormRendererProps) => {
   // Compute schema and a namespaced storage key for persistence (if enabled)
   const schema = form as unknown as FormSchema<string, string>;
   const baseStorageKey = computeFormStorageKey({
@@ -82,16 +88,29 @@ const FormRenderer = ({ form, onSubmit, persistKey }: FormRendererProps) => {
     new Set()
   );
   const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
+  const [hasEmittedStart, setHasEmittedStart] = useState(false);
+
+  const ensureStarted = () => {
+    if (!hasEmittedStart) {
+      try {
+        onFormStarted?.();
+      } finally {
+        setHasEmittedStart(true);
+      }
+    }
+  };
 
   const currentPage = schema.pages[currentPageIndex];
   const isLastPage = currentPageIndex === schema.pages.length - 1;
   const isFirstPage = currentPageIndex === 0;
 
   const updateField = (fieldId: string, value: any) => {
+    ensureStarted();
     setFormData((prev) => ({ ...prev, [fieldId]: value }));
   };
 
   const handleFileUpload = async (fieldId: string, file: File) => {
+    ensureStarted();
     setUploadingFields((prev) => new Set(prev).add(fieldId));
     setUploadErrors((prev) => {
       const newErrors = { ...prev };
@@ -181,25 +200,33 @@ const FormRenderer = ({ form, onSubmit, persistKey }: FormRendererProps) => {
   // Persist progress when enabled
   useEffect(() => {
     if (!persistKey || typeof window === "undefined") return;
-    window.localStorage.setItem(
-      storageKey,
-      JSON.stringify({ formData, currentPageIndex, updatedAt: Date.now() })
-    );
+    try {
+      window.localStorage.setItem(
+        storageKey,
+        JSON.stringify({ formData, currentPageIndex, updatedAt: Date.now() })
+      );
+    } catch {
+      // ignore storage errors (quota, private mode, etc.)
+    }
   }, [formData, currentPageIndex, persistKey, storageKey]);
 
   // If key changes (different form/version/instance), attempt to restore
   useEffect(() => {
     if (!persistKey || typeof window === "undefined") return;
-    const raw = window.localStorage.getItem(storageKey);
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    if (parsed?.formData && typeof parsed.formData === "object") {
-      setFormData(parsed.formData);
-    }
-    if (typeof parsed?.currentPageIndex === "number") {
-      const maxIdx = Math.max(0, (schema.pages?.length || 1) - 1);
-      const idx = Math.min(Math.max(0, parsed.currentPageIndex), maxIdx);
-      setCurrentPageIndex(idx);
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed?.formData && typeof parsed.formData === "object") {
+        setFormData(parsed.formData);
+      }
+      if (typeof parsed?.currentPageIndex === "number") {
+        const maxIdx = Math.max(0, (schema.pages?.length || 1) - 1);
+        const idx = Math.min(Math.max(0, parsed.currentPageIndex), maxIdx);
+        setCurrentPageIndex(idx);
+      }
+    } catch {
+      // ignore invalid JSON or access errors
     }
   }, [persistKey, baseStorageKey]);
 

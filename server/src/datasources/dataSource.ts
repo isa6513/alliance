@@ -1,6 +1,6 @@
+import 'dotenv/config';
 import { DataSource } from 'typeorm';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
-import 'dotenv/config';
 
 export const connectionOptions = (): PostgresConnectionOptions => {
   return process.env.NODE_ENV === 'production'
@@ -29,6 +29,6 @@ export const connectionOptions = (): PostgresConnectionOptions => {
 // verison used for migrations only
 const dataSource = new DataSource({
   ...connectionOptions(),
-  migrations: ['migrations/*{.ts,.js}'],
+  migrations: ['dist/migrations/*{.ts,.js}'],
 });
 export default dataSource;
