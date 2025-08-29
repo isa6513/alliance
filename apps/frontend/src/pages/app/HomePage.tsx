@@ -72,7 +72,7 @@ const HomePage = () => {
             </p>
           </Card>
         </div>
-        <div className="flex flex-col py-16 max-w-[750px] md:min-w-[300px] gap-y-5 overflow-y-auto !overflow-visible">
+        <div className="flex flex-col py-16 max-w-[750px] sm:min-w-[300px] md:min-w-[671px] gap-y-5 overflow-y-auto !overflow-visible">
           <div className="flex flex-col gap-y-6 ">
             <p className="font-adobe text-3xl font-semibold">
               Your current task

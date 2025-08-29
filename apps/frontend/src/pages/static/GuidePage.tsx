@@ -42,6 +42,11 @@ const GuidePage: React.FC = () => {
                   What does it mean to be a member?
                 </a>
               </li>
+              <li className="ml-4">
+                <a href="#contract" className="underline hover:text-greentext">
+                  Contract
+                </a>
+              </li>
               <li>
                 <a
                   href="#governance"
@@ -212,18 +217,34 @@ Members promise to abide by a *democratic process that decides actions* rather t
 
 We recognize the risks associated with collective decision-making. Our approach is to start small: we put limits on the total amount of time and money that are collectively allocated, and our governance procedures ensure that members approve of the overall goals and direction of the Alliance.
 
-## Terms
+## Contract
 The following constitutes the basic promise that members make to one another:
 "
           />
 
-          <Card className="" style={CardStyle.LightGrey}>
-            <p className="text-lg p-2">
+          <Card className="" style={CardStyle.LightGrey} id="#contract">
+            <div className="text-lg p-2">
+              <p className="font-semibold mb-2">Contract of membership</p>
               <ol className="list-decimal list-inside mb-2 flex flex-col gap-y-2">
                 <li>
                   Members will lend a dependable, finite amount of
                   time/resources to the Alliance, which the strategic office can
                   count on in planning future actions.
+                  <ol className="ml-6 list-[lower-roman] list-inside my-2 flex flex-col gap-y-2">
+                    <li>
+                      In this current experimental phase, the total time
+                      required is{" "}
+                      <span className="bg-amber-100">
+                        1 hour/month, broken into 15-minute tasks per week
+                      </span>
+                      .
+                    </li>
+                    <li>
+                      As the Alliance matures, the required time or resources
+                      may increase, but it will do so with ample notice and
+                      democratic input.
+                    </li>
+                  </ol>
                 </li>
                 <li>
                   Members will participate in all actions for which the
@@ -234,15 +255,11 @@ The following constitutes the basic promise that members make to one another:
                   religious observance).
                 </li>
               </ol>
-            </p>
+            </div>
           </Card>
           <MarkdownWrapper
             id="required-investment"
             markdownContent="
-## Required investment
-Currently, the strategic office limits the total time required by members to below 1 hour/month, broken into 15-minute tasks per week.
-
-If we demonstrate over time that we are effective and trustworthy, then the Alliance can play an increasingly large role in members’ lives and plan increasingly impactful actions.
 
 ## Example actions
 Eventually, we will focus on actions that achieve direct impact. Today, we are in a “setup” and “experimental” phase in which we are learning from members and refining the initial shape of the Alliance.

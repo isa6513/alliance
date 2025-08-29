@@ -22,6 +22,7 @@ export interface CardProps extends PropsWithChildren {
   closed?: boolean;
   ref?: React.RefObject<HTMLDivElement | null>;
   flex?: boolean;
+  id?: string;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -33,6 +34,7 @@ const Card: React.FC<CardProps> = ({
   closed,
   ref,
   flex = true,
+  id,
 }: CardProps) => {
   const cardStyle = style ?? CardStyle.White;
 
@@ -54,6 +56,7 @@ const Card: React.FC<CardProps> = ({
 
   return (
     <div
+      id={id || undefined}
       className={`${flex ? "flex flex-col" : ""} ${
         styleClasses[cardStyle]
       }  p-4 border ${className} ${
