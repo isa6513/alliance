@@ -716,10 +716,12 @@ export type FormDto = {
 };
 
 export type FormResponseDto = {
+    id: number;
     formId: number;
     answers: {
         [key: string]: unknown;
     };
+    user: User;
 };
 
 export type AppHealthCheckData = {

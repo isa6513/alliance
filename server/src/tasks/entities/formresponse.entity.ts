@@ -9,6 +9,7 @@ import { Form } from './form.entity';
 @Entity()
 export class FormResponse {
   @PrimaryGeneratedColumn()
+  @ApiProperty()
   @Allow()
   id: number;
 
@@ -29,6 +30,7 @@ export class FormResponse {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   answers: Record<string, any>;
 
+  @ApiProperty({ type: () => User })
   @ManyToOne(() => User)
   @IsDefined()
   @Type(() => User)

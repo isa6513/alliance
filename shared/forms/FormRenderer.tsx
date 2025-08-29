@@ -15,7 +15,9 @@ interface FormRendererProps {
 const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [formData, setFormData] = useState<Record<string, any>>({});
-  const [uploadingFields, setUploadingFields] = useState<Set<string>>(new Set());
+  const [uploadingFields, setUploadingFields] = useState<Set<string>>(
+    new Set()
+  );
   const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
 
   const schema = form as unknown as FormSchema<string, string>;
@@ -28,8 +30,8 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
   };
 
   const handleFileUpload = async (fieldId: string, file: File) => {
-    setUploadingFields(prev => new Set(prev).add(fieldId));
-    setUploadErrors(prev => {
+    setUploadingFields((prev) => new Set(prev).add(fieldId));
+    setUploadErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors[fieldId];
       return newErrors;
@@ -48,10 +50,13 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
             }
           } catch (error) {
             console.error("Failed to upload image:", error);
-            setUploadErrors(prev => ({ ...prev, [fieldId]: "Failed to upload image" }));
+            setUploadErrors((prev) => ({
+              ...prev,
+              [fieldId]: "Failed to upload image",
+            }));
           }
         }
-        setUploadingFields(prev => {
+        setUploadingFields((prev) => {
           const newSet = new Set(prev);
           newSet.delete(fieldId);
           return newSet;
@@ -60,8 +65,11 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
       reader.readAsDataURL(file);
     } catch (error) {
       console.error("Failed to read file:", error);
-      setUploadErrors(prev => ({ ...prev, [fieldId]: "Failed to read file" }));
-      setUploadingFields(prev => {
+      setUploadErrors((prev) => ({
+        ...prev,
+        [fieldId]: "Failed to read file",
+      }));
+      setUploadingFields((prev) => {
         const newSet = new Set(prev);
         newSet.delete(fieldId);
         return newSet;
@@ -71,11 +79,11 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
 
   const getImageSource = (src: string): string => {
     if (!src) return "";
-    
+
     if (src.startsWith("http://") || src.startsWith("https://")) {
       return src;
     }
-    
+
     // Use the shared config to get the API URL and construct the image path
     return `${getApiUrl()}/images/${src}`;
   };
@@ -336,14 +344,14 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
         const isUploading = uploadingFields.has(field.id);
         const uploadError = uploadErrors[field.id];
         const fileValue = formData[field.id];
-        
+
         return (
           <div key={index} className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
-            
+
             {/* Show uploaded image preview if it's an image key */}
             {typeof fileValue === "string" && fileValue && (
               <div className="mb-2">
@@ -354,7 +362,7 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
                 />
               </div>
             )}
-            
+
             <div className="flex items-center space-x-2">
               <input
                 type="file"
@@ -373,7 +381,7 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
                 <span className="text-sm text-blue-600">Uploading...</span>
               )}
             </div>
-            
+
             {uploadError && (
               <p className="text-sm text-red-600">{uploadError}</p>
             )}
@@ -528,7 +536,7 @@ const FormRenderer = ({ form, onSubmit }: FormRendererProps) => {
             </div>
           )}
 
-          <div className="flex flex-1 space-x-3">
+          <div className="flex flex-1 space-x-3 items-center">
             {!isFirstPage && (
               <Button
                 color={ButtonColor.Light}

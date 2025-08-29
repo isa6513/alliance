@@ -1,9 +1,8 @@
 import {
+  FormResponseDto,
   tasksGetForm,
   tasksGetFormResponses,
-  User,
   type FormDto,
-  type TasksGetFormResponsesResponse,
 } from "@alliance/shared/client";
 import type { FormSchema, Page } from "@alliance/shared/forms/formschema";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -15,22 +14,42 @@ type FormWithSchema = Pick<FormDto, "id" | "title"> & {
   pages?: Page<string>[];
 };
 
-// The generated client type may not include id/user; account for it at runtime
-type ResponseItem = (TasksGetFormResponsesResponse extends Array<infer U>
-  ? U
-  : never) & {
-  id?: number;
-  user?: User;
-};
-
 const PAGE_SIZE = 1; // show one response per page (step-through)
+
+// Runtime guard: distinguish answer fields from display blocks
+const ANSWER_FIELD_KINDS = new Set([
+  "text",
+  "textarea",
+  "email",
+  "number",
+  "phone",
+  "checkbox",
+  "radio",
+  "select",
+  "multiselect",
+  "date",
+  "file",
+]);
+
+const isAnswerField = (
+  node: unknown
+): node is { id: string; label: string } => {
+  if (!node || typeof node !== "object") return false;
+  const anyNode = node as any;
+  return (
+    typeof anyNode.kind === "string" &&
+    ANSWER_FIELD_KINDS.has(anyNode.kind) &&
+    typeof anyNode.id === "string" &&
+    typeof anyNode.label === "string"
+  );
+};
 
 const FormResponses: React.FC = () => {
   const { formId } = useParams<{ formId: string }>();
   const navigate = useNavigate();
 
   const [form, setForm] = useState<FormWithSchema | null>(null);
-  const [responses, setResponses] = useState<ResponseItem[]>([]);
+  const [responses, setResponses] = useState<FormResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -52,7 +71,9 @@ const FormResponses: React.FC = () => {
 
       const formData = formRes.data as unknown as FormWithSchema;
       setForm(formData);
-      setResponses((respRes.data ?? []) as unknown as ResponseItem[]);
+      if (respRes.data) {
+        setResponses(respRes.data);
+      }
     } catch (e) {
       console.error(e);
       setError("Failed to load form responses");
@@ -85,7 +106,7 @@ const FormResponses: React.FC = () => {
     };
     schema?.pages?.forEach((p) => {
       p.fields?.forEach((f) => {
-        if (f && typeof f === "object" && "kind" in f && f.id && f.label) {
+        if (isAnswerField(f)) {
           labels[f.id] = f.label;
         }
       });
@@ -93,7 +114,26 @@ const FormResponses: React.FC = () => {
     return labels;
   }, [form]);
 
-  const formatValue = (v: unknown): string => {
+  const orderedFieldIds = useMemo(() => {
+    const ids: string[] = [];
+    const seen = new Set<string>();
+    const schema = form?.schema as unknown as {
+      pages?: Array<{
+        fields?: Array<{ id?: string; label?: string; kind?: string }>;
+      }>;
+    };
+    schema?.pages?.forEach((p) => {
+      p.fields?.forEach((f) => {
+        if (isAnswerField(f) && !seen.has(f.id)) {
+          seen.add(f.id);
+          ids.push(f.id);
+        }
+      });
+    });
+    return ids;
+  }, [form]);
+
+  const formatValue = useCallback((v: unknown): string => {
     if (v == null) return "";
     if (Array.isArray(v)) return v.map((x) => formatValue(x)).join(", ");
     if (typeof v === "object") {
@@ -109,7 +149,64 @@ const FormResponses: React.FC = () => {
       }
     }
     return String(v);
+  }, []);
+
+  const csvEscape = (s: string): string => {
+    const needsQuotes = /[",\n\r]/.test(s);
+    let v = s.replace(/"/g, '""');
+    v = v.replace(/\r?\n/g, " ");
+    return needsQuotes ? `"${v}"` : v;
   };
+
+  const handleExportCsv = useCallback(() => {
+    if (!form) return;
+    const metaHeaders = ["Response ID", "User ID", "User Name"];
+    const used = new Set<string>();
+    const questionHeaders = orderedFieldIds.map((id) => {
+      const base = fieldLabels[id] || id;
+      let name = base;
+      let i = 2;
+      while (used.has(name)) {
+        name = `${base} (${i++})`;
+      }
+      used.add(name);
+      return name;
+    });
+    const headers = [...metaHeaders, ...questionHeaders];
+
+    const rows = responses.map((resp) => {
+      const user = resp?.user ?? {};
+      const userName = [user?.name].filter(Boolean).join(" ");
+      const values = [
+        String(resp.id ?? ""),
+        String(user.id ?? ""),
+        userName,
+        ...orderedFieldIds.map((id) => formatValue(resp.answers?.[id])),
+      ];
+      return values;
+    });
+
+    const csv = [
+      headers.map(csvEscape).join(","),
+      ...rows.map((r) => r.map((c) => csvEscape(String(c ?? ""))).join(",")),
+    ].join("\n");
+
+    const blob = new Blob(["\uFEFF" + csv], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const safeTitle = (form.title || `form-${form.id}`).replace(
+      /[^a-z0-9-_]+/gi,
+      "-"
+    );
+    a.href = url;
+    a.download = `${safeTitle}-responses.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [form, responses, orderedFieldIds, fieldLabels, formatValue]);
 
   return (
     <div className="space-y-4">
@@ -128,6 +225,17 @@ const FormResponses: React.FC = () => {
             className="px-3 py-2 rounded-md text-sm bg-gray-100 hover:bg-gray-200"
           >
             Back to Forms
+          </button>
+          <button
+            onClick={handleExportCsv}
+            disabled={responses.length === 0}
+            className={`px-3 py-2 rounded-md text-sm ${
+              responses.length === 0
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+          >
+            Export CSV
           </button>
           <button
             onClick={loadData}
@@ -149,9 +257,6 @@ const FormResponses: React.FC = () => {
       ) : (
         <>
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-700">
-              Response {startIdx + 1} of {total}
-            </div>
             <div className="flex items-center gap-2">
               <button
                 disabled={page <= 1}
@@ -165,7 +270,7 @@ const FormResponses: React.FC = () => {
                 Previous
               </button>
               <span className="text-sm text-gray-600">
-                Page {page} / {totalPages}
+                Response {page} / {totalPages}
               </span>
               <button
                 disabled={page >= totalPages}
