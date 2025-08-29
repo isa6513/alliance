@@ -1,9 +1,47 @@
-import React from "react";
+import { ProfileDto, userFindOne } from "@alliance/shared/client";
+import React, { useEffect, useMemo, useState } from "react";
 import Footer from "../../components/Footer";
-import MarkdownWrapper from "../../components/MarkdownWrapper";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import ProfileImage from "../../components/ProfileImage";
 
 const PeoplePage: React.FC = () => {
+  const authorIds: Record<string, number> = useMemo(() => {
+    return {
+      "Mark Xu": 10,
+      "Sidney Hough": 7,
+      "Casey Manning": 2,
+    };
+  }, []);
+
+  const authorLinks: Record<string, string> = useMemo(() => {
+    return {
+      "Mark Xu": "https://markxu.com/",
+      "Sidney Hough": "https://sidney.com/",
+      "Casey Manning": "https://caseymanning.github.io/",
+    };
+  }, []);
+
+  const [authorProfiles, setAuthorProfiles] = useState<
+    Record<string, ProfileDto | null>
+  >({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const authorProfiles = Object.fromEntries(
+        await Promise.all(
+          Object.entries(authorIds).map(async ([name, id]) => [
+            name,
+            await userFindOne({ path: { id } }),
+          ])
+        )
+      );
+
+      setAuthorProfiles(authorProfiles);
+    };
+
+    fetchData();
+  }, [authorIds]);
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
@@ -13,22 +51,37 @@ const PeoplePage: React.FC = () => {
             People
           </h2>
 
-          <MarkdownWrapper
-            id="people"
-            markdownContent="
+          <div className="flex flex-col text-xl">
+            <p className="text-lg md:text-xl my-4">
+              The Alliance is composed of a full-time Strategic Office and a
+              body of members.
+            </p>
 
-The Alliance is composed of a full-time Strategic Office and a body of members.
+            <h2 className="!font-semibold text-xl md:text-2xl !mt-2">
+              Strategic Office
+            </h2>
 
-## Strategic Office
-- [Mark Xu](https://markxu.com/)
-- [Sidney Hough](https://sidney.com/)
-- [Casey Manning](https://caseymanning.github.io/)
+            <div className="flex flex-col gap-y-1 text-lg md:text-xl my-4">
+              {Object.entries(authorLinks).map(([name, link]) => (
+                <li key={name} className="list-disc flex items-center gap-x-2">
+                  <ProfileImage
+                    pfp={authorProfiles[name]?.profilePicture ?? null}
+                    size="small"
+                  />
+                  <a className="text-link" href={link}>
+                    {name}
+                  </a>
+                </li>
+              ))}
+            </div>
 
-## Members
-We have 25 members who are participating in early experiments.
-
-"
-          />
+            <h2 className="!font-semibold text-xl md:text-2xl !mt-2">
+              Members
+            </h2>
+            <p className="text-lg md:text-xl my-4">
+              We have 25 members who are participating in early experiments.
+            </p>
+          </div>
         </div>
       </div>
       <Footer />
