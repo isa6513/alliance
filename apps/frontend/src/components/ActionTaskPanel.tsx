@@ -6,6 +6,7 @@ import ActionTaskPanelForm from "./ActionTaskPanelForm";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import posthog from "posthog-js";
 import { useCallback } from "react";
+import { canCompleteAction } from "../pages/app/HomePage";
 import ActionCommitButton from "./ActionCommitButton";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
 import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
@@ -64,7 +65,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     }
   }
 
-  if (action.status === "member_action" && userRelation === "joined") {
+  if (canCompleteAction(action, userRelation)) {
     if (action.type === "Funding") {
       return (
         <StripeWrapper actionId={action.id}>

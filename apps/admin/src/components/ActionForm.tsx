@@ -121,11 +121,12 @@ const ActionForm: React.FC<ActionFormProps> = ({
         type: "select",
         show: (f) => f.type === "Activity",
       },
-      { name: "body", label: "Body", type: "textarea" },
+      { name: "body", label: "Body", type: "textarea", required: true },
       {
         name: "shortDescription",
         label: "Short Description",
         type: "textarea",
+        required: true,
       },
       {
         name: "commitmentless",

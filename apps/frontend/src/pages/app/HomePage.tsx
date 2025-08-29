@@ -1,4 +1,9 @@
-import { actionsComplete, actionsJoin } from "@alliance/shared/client";
+import {
+  ActionDto,
+  actionsComplete,
+  actionsJoin,
+  UserActionRelation,
+} from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { Link, useNavigate } from "react-router";
 import { setRevalidate, useAppLoaderData } from "../../applayout";
@@ -9,6 +14,17 @@ import LargeActionCard from "./LargeActionCard";
 import SmallActionCard from "./SmallActionCard";
 import useActivities, { ActivityList } from "./useActivities";
 
+export function canCompleteAction(
+  action: ActionDto,
+  relation?: UserActionRelation
+) {
+  return (
+    action.status === "member_action" &&
+    (relation === "joined" ||
+      (action.commitmentless && relation !== "completed"))
+  );
+}
+
 const HomePage = () => {
   const navigate = useNavigate();
   const { actions, posts, activities } = useAppLoaderData();
@@ -17,9 +33,8 @@ const HomePage = () => {
     list: ActivityList.Friends,
   });
 
-  const todoActions = actions.filter(
-    (action) =>
-      action.relation === "joined" && action.status === "member_action"
+  const todoActions = actions.filter((action) =>
+    canCompleteAction(action, action.relation)
   );
 
   const newActions = actions.filter(
