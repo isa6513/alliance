@@ -62,7 +62,7 @@ const ActivityFeedPage = () => {
   }, [subscribeToFeed, unsubscribeFromFeed, onFeedActivity, offFeedActivity]);
 
   // Combine paged activities with live activities, avoiding duplicates
-  const allActivities = []
+  const allActivities = [...liveActivities, ...feedActivities]
     .filter(
       (activity, index, self) =>
         self.findIndex((a) => a.id === activity.id) === index
