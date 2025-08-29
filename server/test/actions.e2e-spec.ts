@@ -68,7 +68,6 @@ describe('Actions (e2e)', () => {
         image: '',
         timeEstimate: 5,
         shortDescription: 'Do something important',
-        taskContents: 'Do something important',
         type: ActionTaskType.Activity,
         commitmentless: false,
       };

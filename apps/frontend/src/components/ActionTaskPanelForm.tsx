@@ -4,7 +4,9 @@ import {
   tasksGetForm,
   tasksSubmitForm,
 } from "@alliance/shared/client";
-import FormRenderer from "@alliance/shared/forms/FormRenderer";
+import FormRenderer, {
+  computeFormStorageKey,
+} from "@alliance/shared/forms/FormRenderer";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useEffect, useState } from "react";
 
@@ -37,6 +39,15 @@ const ActionTaskPanelForm = ({
       body: data,
     });
     if (response.response.ok) {
+      if (typeof window !== "undefined" && form) {
+        const storageKey = computeFormStorageKey({
+          slug: form.schema.slug as string,
+          version: form.schema.version as number,
+          instanceId: taskFormId,
+        });
+        window.localStorage.removeItem(storageKey);
+      }
+
       onCompleteAction();
     }
   };
@@ -46,7 +57,11 @@ const ActionTaskPanelForm = ({
         <p className="font-medium text-lg mb-1">Steps</p>
         <div>
           {form && (
-            <FormRenderer form={form.schema} onSubmit={handleSubmitForm} />
+            <FormRenderer
+              form={form.schema}
+              onSubmit={handleSubmitForm}
+              persistKey={String(taskFormId)}
+            />
           )}
         </div>
       </div>

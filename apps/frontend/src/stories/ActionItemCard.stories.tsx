@@ -16,7 +16,6 @@ const meta = {
     category: "Climate Change",
     status: "gathering_commitments",
     joinedCount: 10,
-    completedCount: 5,
     userRelation: "joined",
   },
 } satisfies Meta<typeof ActionItemCard>;
