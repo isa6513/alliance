@@ -19,7 +19,6 @@ export interface CardProps extends PropsWithChildren {
   onClick?: (e: React.MouseEvent) => void;
   style?: CardStyle;
   bgImage?: string;
-  closed?: boolean;
   ref?: React.RefObject<HTMLDivElement | null>;
   flex?: boolean;
   id?: string;
@@ -31,7 +30,6 @@ const Card: React.FC<CardProps> = ({
   onClick,
   style,
   bgImage,
-  closed,
   ref,
   flex = true,
   id,

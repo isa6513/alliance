@@ -56,7 +56,7 @@ const HomePage = () => {
   return (
     <div className="flex flex-col w-full h-full items-center bg-page min-h-[calc(100vh-50px)]">
       <div className="flex flex-row px-6 md:gap-x-10 w-full justify-center">
-        <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch max-w-[350px] flex-1">
+        <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch max-w-[350px] flex-1 min-w-[150px]">
           <Card style={CardStyle.White}>
             <p className="font-semibold text-lg text-zinc-600 mb-2">Bulletin</p>
             <p className="text-zinc-500 mb-2">
@@ -106,17 +106,6 @@ const HomePage = () => {
                 </p>
                 <div className="flex flex-col gap-y-2 w-full">
                   {todoActions.slice(0, 2).map((action) => (
-                    // <TaskCard
-                    //   key={action.id}
-                    //   action={action}
-                    //   friendCompletionActivities={friendActivities.filter(
-                    //     (activity) =>
-                    //       activity.actionId === action.id &&
-                    //       activity.type === "user_completed"
-                    //   )}
-                    //   commitActivity={activities?.get(action.id)?.join ?? undefined}
-                    //   onComplete={handleTaskComplete}
-                    // />
                     <SmallActionCard
                       key={action.id}
                       {...action}

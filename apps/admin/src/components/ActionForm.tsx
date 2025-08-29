@@ -1,5 +1,5 @@
 import { CreateActionDto, FormDto } from "@alliance/shared/client";
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 
 interface ActionFormProps {
   form: CreateActionDto & { taskFormId?: number };
@@ -36,246 +36,343 @@ const ActionForm: React.FC<ActionFormProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Centralized field definitions to make adding/removing fields easier
+  type FieldType =
+    | "text"
+    | "textarea"
+    | "number"
+    | "select"
+    | "file"
+    | "checkbox";
+
+  type FieldDef = {
+    name:
+      | keyof CreateActionDto
+      | "image" // special case for file upload with preview
+      | "taskFormId"; // included explicitly for clarity
+    label: string;
+    type: FieldType;
+    required?: boolean;
+    // Optional conditional display based on current form state
+    show?: (f: ActionFormProps["form"]) => boolean;
+    // Optional helper text
+    helpText?: string;
+    // For selects
+    options?: { value: string | number; label: string }[];
+    // Layout hint: render in two-column grid row if true
+    inGrid?: boolean;
+  };
+
+  const actionTypeOptions = useMemo(
+    () => [
+      { value: "Activity", label: "Activity" },
+      { value: "Funding", label: "Funding" },
+      { value: "Ongoing", label: "Ongoing" },
+    ],
+    []
+  );
+
+  const fieldDefs: FieldDef[] = useMemo(
+    () => [
+      {
+        name: "name",
+        label: "Name *",
+        type: "text",
+        required: true,
+        inGrid: true,
+      },
+      {
+        name: "category",
+        label: "Category *",
+        type: "text",
+        required: true,
+        inGrid: true,
+      },
+      {
+        name: "type",
+        label: "Type",
+        type: "select",
+        required: true,
+        options: actionTypeOptions,
+        inGrid: true,
+      },
+      {
+        name: "timeEstimate",
+        label: "Time Estimate (minutes)",
+        type: "number",
+        inGrid: true,
+      },
+      {
+        name: "donationAmount",
+        label: "Donation amount (cents)",
+        type: "number",
+        show: (f) => f.type === "Funding",
+        helpText: "Suggested amount per person",
+      },
+      {
+        name: "commitmentThreshold",
+        label: "Commitment Threshold",
+        type: "number",
+        helpText: "Number of commitments needed",
+      },
+      {
+        name: "taskFormId",
+        label: "Task Form",
+        type: "select",
+        show: (f) => f.type === "Activity",
+      },
+      { name: "body", label: "Body", type: "textarea" },
+      {
+        name: "shortDescription",
+        label: "Short Description",
+        type: "textarea",
+      },
+      {
+        name: "commitmentless",
+        label: "Commitmentless",
+        type: "checkbox",
+        helpText: "Does not require commitment (e.g., onboarding)",
+      },
+      { name: "image", label: "Image", type: "file" },
+    ],
+    [actionTypeOptions]
+  );
+
   return (
     <form onSubmit={onSubmit} className="space-y-4">
+      {/* Top grid fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label
-            htmlFor="name"
-            className="block font-medium text-gray-700 mb-1"
-          >
-            Name *
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={form.name}
-            onChange={onInputChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="category"
-            className="block font-medium text-gray-700 mb-1"
-          >
-            Category *
-          </label>
-          <input
-            type="text"
-            id="category"
-            name="category"
-            value={form.category}
-            onChange={onInputChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="type"
-            className="block font-medium text-gray-700 mb-1"
-          >
-            Type
-          </label>
-          <select
-            id="type"
-            name="type"
-            value={form.type}
-            onChange={onInputChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="Activity">Activity</option>
-            <option value="Funding">Funding</option>
-            <option value="Ongoing">Ongoing</option>
-          </select>
-        </div>
-
-        <div>
-          <label
-            htmlFor="timeEstimate"
-            className="block font-medium text-gray-700 mb-1"
-          >
-            Time Estimate (minutes)
-          </label>
-          <input
-            type="number"
-            id="timeEstimate"
-            name="timeEstimate"
-            value={form.timeEstimate}
-            onChange={onInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        {fieldDefs
+          .filter((f) => f.inGrid)
+          .filter((f) => (f.show ? f.show(form) : true))
+          .map((f) => (
+            <div key={String(f.name)}>
+              <label
+                htmlFor={String(f.name)}
+                className="block font-medium text-gray-700 mb-1"
+              >
+                {f.label}
+              </label>
+              {f.type === "select" ? (
+                <select
+                  id={String(f.name)}
+                  name={String(f.name)}
+                  value={(form as any)[f.name]}
+                  onChange={onInputChange}
+                  required={f.required}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {f.options?.map((opt) => (
+                    <option key={String(opt.value)} value={String(opt.value)}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type={f.type}
+                  id={String(f.name)}
+                  name={String(f.name)}
+                  value={(form as any)[f.name] ?? ""}
+                  onChange={onInputChange}
+                  required={f.required}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
+            </div>
+          ))}
       </div>
 
-      {/* Threshold Settings */}
-      {form.type === "Funding" && (
-        <div className="grid grid-cols-1 gap-4">
-          <div>
-            <label
-              htmlFor="donationAmount"
-              className="block font-medium text-gray-700 mb-1"
-            >
-              Donation amount (cents)
-            </label>
-            <input
-              type="number"
-              id="donationAmount"
-              name="donationAmount"
-              value={form.donationAmount || ""}
-              onChange={onInputChange}
-              min="0"
-              step="0.01"
-              placeholder="Suggested amount per person"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-      )}
-      <div>
-        <label
-          htmlFor="commitmentThreshold"
-          className="block font-medium text-gray-700 mb-1"
-        >
-          Commitment Threshold
-        </label>
-        <input
-          type="number"
-          id="commitmentThreshold"
-          name="commitmentThreshold"
-          value={form.commitmentThreshold || ""}
-          onChange={onInputChange}
-          min="1"
-          placeholder="Number of commitments needed"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
+      {/* Remaining fields rendered from definitions */}
+      {fieldDefs
+        .filter((f) => !f.inGrid)
+        .filter((f) => (f.show ? f.show(form) : true))
+        .map((f) => {
+          if (f.type === "file") {
+            return (
+              <div key={String(f.name)}>
+                <label
+                  htmlFor={String(f.name)}
+                  className="block font-medium text-gray-700 mb-1"
+                >
+                  {f.label}
+                </label>
+                <input
+                  type="file"
+                  id={String(f.name)}
+                  name={String(f.name)}
+                  accept="image/*"
+                  onChange={onImageChange}
+                  ref={fileInputRef}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
 
-      {/* Task Form Selection for Activity type actions */}
-      {form.type === "Activity" && (
-        <div>
-          <label
-            htmlFor="taskFormId"
-            className="block font-medium text-gray-700 mb-1"
-          >
-            Task Form
-          </label>
-          <select
-            id="taskFormId"
-            name="taskFormId"
-            value={form.taskFormId || ""}
-            onChange={onInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">No form required</option>
-            {availableForms.map((formOption) => (
-              <option key={formOption.id} value={formOption.id}>
-                {formOption.title || `Form ${formOption.id}`}
-              </option>
-            ))}
-          </select>
-          <p className="text-xs text-gray-500 mt-1">
-            Form to show in task panel for completion
-          </p>
-        </div>
-      )}
+                {imagePreview && (
+                  <div className="mt-2">
+                    <p className="text-sm font-medium text-gray-700 mb-1">
+                      {isNew ? "Image Preview:" : "New Image Preview:"}
+                    </p>
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full max-w-md h-auto rounded-md border border-gray-300"
+                    />
+                  </div>
+                )}
 
-      <div>
-        <label htmlFor="body" className="block font-medium text-gray-700 mb-1">
-          Body
-        </label>
-        <textarea
-          id="body"
-          name="body"
-          value={form.body}
-          onChange={onInputChange}
-          rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
+                {!imagePreview && !isNew && form.image && baseUrl && (
+                  <div className="mt-2">
+                    <p className="text-sm font-medium text-gray-700 mb-1">
+                      Current Image:
+                    </p>
+                    <img
+                      src={`${baseUrl}/images/${form.image}`}
+                      alt="Current"
+                      className="w-full max-w-md h-auto rounded-md border border-gray-300"
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          }
 
-      <div>
-        <label
-          htmlFor="shortDescription"
-          className="block font-medium text-gray-700 mb-1"
-        >
-          Short Description
-        </label>
-        <textarea
-          id="shortDescription"
-          name="shortDescription"
-          value={form.shortDescription}
-          onChange={onInputChange}
-          rows={2}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
+          if (f.name === "taskFormId") {
+            return (
+              <div key={String(f.name)}>
+                <label
+                  htmlFor={String(f.name)}
+                  className="block font-medium text-gray-700 mb-1"
+                >
+                  {f.label}
+                </label>
+                <select
+                  id={String(f.name)}
+                  name={String(f.name)}
+                  value={(form as any)[f.name] || ""}
+                  onChange={onInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">No form required</option>
+                  {availableForms.map((formOption) => (
+                    <option key={formOption.id} value={formOption.id}>
+                      {formOption.title || `Form ${formOption.id}`}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Form to show in task panel for completion
+                </p>
+              </div>
+            );
+          }
 
-      {form.type === "Ongoing" && (
-        <div>
-          <label
-            htmlFor="taskContents"
-            className="block font-medium text-gray-700 mb-1"
-          >
-            Task Contents
-          </label>
-          <textarea
-            id="taskContents"
-            name="taskContents"
-            value={form.taskContents || ""}
-            onChange={onInputChange}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-      )}
+          if (f.type === "textarea") {
+            return (
+              <div key={String(f.name)}>
+                <label
+                  htmlFor={String(f.name)}
+                  className="block font-medium text-gray-700 mb-1"
+                >
+                  {f.label}
+                </label>
+                <textarea
+                  id={String(f.name)}
+                  name={String(f.name)}
+                  value={(form as any)[f.name] ?? ""}
+                  onChange={onInputChange}
+                  rows={f.name === "shortDescription" ? 2 : 3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {f.helpText && (
+                  <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>
+                )}
+              </div>
+            );
+          }
 
-      <div>
-        <label htmlFor="image" className="block font-medium text-gray-700 mb-1">
-          Image
-        </label>
-        <input
-          type="file"
-          id="image"
-          name="image"
-          accept="image/*"
-          onChange={onImageChange}
-          ref={fileInputRef}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+          if (f.type === "select") {
+            return (
+              <div key={String(f.name)}>
+                <label
+                  htmlFor={String(f.name)}
+                  className="block font-medium text-gray-700 mb-1"
+                >
+                  {f.label}
+                </label>
+                <select
+                  id={String(f.name)}
+                  name={String(f.name)}
+                  value={(form as any)[f.name] ?? ""}
+                  onChange={onInputChange}
+                  required={f.required}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {f.options?.map((opt) => (
+                    <option key={String(opt.value)} value={String(opt.value)}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                {f.helpText && (
+                  <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>
+                )}
+              </div>
+            );
+          }
 
-        {imagePreview && (
-          <div className="mt-2">
-            <p className="text-sm font-medium text-gray-700 mb-1">
-              {isNew ? "Image Preview:" : "New Image Preview:"}
-            </p>
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="w-full max-w-md h-auto rounded-md border border-gray-300"
-            />
-          </div>
-        )}
+          if (f.type === "checkbox") {
+            return (
+              <div key={String(f.name)}>
+                <div className="flex items-center flex-row gap-x-3">
+                  <label
+                    htmlFor={String(f.name)}
+                    className="block font-medium text-gray-700"
+                  >
+                    {f.label}
+                  </label>
+                  <input
+                    type="checkbox"
+                    id={String(f.name)}
+                    name={String(f.name)}
+                    checked={Boolean(form[f.name])}
+                    onChange={onInputChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                </div>
+                {f.helpText && (
+                  <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>
+                )}
+              </div>
+            );
+          }
 
-        {!imagePreview && !isNew && form.image && baseUrl && (
-          <div className="mt-2">
-            <p className="text-sm font-medium text-gray-700 mb-1">
-              Current Image:
-            </p>
-            <img
-              src={`${baseUrl}/images/${form.image}`}
-              alt="Current"
-              className="w-full max-w-md h-auto rounded-md border border-gray-300"
-            />
-          </div>
-        )}
-      </div>
+          // default to input
+          return (
+            <div key={String(f.name)}>
+              <label
+                htmlFor={String(f.name)}
+                className="block font-medium text-gray-700 mb-1"
+              >
+                {f.label}
+              </label>
+              <input
+                type={f.type}
+                id={String(f.name)}
+                name={String(f.name)}
+                value={(form as any)[f.name] ?? ""}
+                onChange={onInputChange}
+                required={f.required}
+                min={f.name === "commitmentThreshold" ? 1 : undefined}
+                step={f.name === "donationAmount" ? 0.01 : undefined}
+                placeholder={f.helpText}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {f.helpText && (
+                <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>
+              )}
+            </div>
+          );
+        })}
 
       <div className="flex justify-end space-x-3 pt-4">
         {onCancel && (

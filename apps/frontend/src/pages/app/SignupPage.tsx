@@ -1,6 +1,7 @@
 import { authMe, authRegister, SignUpDto } from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import posthog from "posthog-js";
 import React, { useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import SignupForm from "../../components/SignupForm";
@@ -24,6 +25,17 @@ const SignupPage: React.FC = () => {
         const checkAuth = await authMe();
 
         if (checkAuth.response.ok) {
+          const user = checkAuth.data;
+          if (user) {
+            posthog.identify(user.id.toString(), {
+              email: user.email,
+              name: user.name,
+            });
+            posthog.capture("new_user", {
+              email: user.email,
+              name: user.name,
+            });
+          }
           window.location.href = "/home";
         } else {
           setError("please try again");

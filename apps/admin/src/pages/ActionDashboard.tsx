@@ -139,6 +139,7 @@ const ActionDashboard: React.FC = () => {
     body: "",
     timeEstimate: 0,
     shortDescription: "",
+    commitmentless: false,
     type: "Activity",
     taskFormId: undefined,
   });
@@ -170,6 +171,7 @@ const ActionDashboard: React.FC = () => {
         body: "",
         timeEstimate: 0,
         shortDescription: "",
+        commitmentless: false,
         type: "Activity",
         taskFormId: undefined,
       });
@@ -194,8 +196,12 @@ const ActionDashboard: React.FC = () => {
           throw new Error("Action not found");
         }
         setAction(actionData);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { activities, usersCompleted, usersJoined, events, ...formData } =
+          actionData;
+
         setForm({
-          ...actionData,
+          ...formData,
           taskFormId: actionData.taskFormId,
         });
 
@@ -234,7 +240,16 @@ const ActionDashboard: React.FC = () => {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value } = e.target;
+    const target = e.target as HTMLInputElement;
+    const { name, value, type } = target;
+
+    if (type === "checkbox") {
+      setForm((prev) => ({
+        ...prev,
+        [name]: target.checked,
+      }));
+      return;
+    }
 
     // Handle numeric fields
     if (

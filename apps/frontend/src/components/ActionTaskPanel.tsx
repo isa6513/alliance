@@ -4,6 +4,8 @@ import { ActionDto, UserActionRelation } from "@alliance/shared/client";
 import ActionTaskPanelForm from "./ActionTaskPanelForm";
 
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import posthog from "posthog-js";
+import { useCallback } from "react";
 import ActionCommitButton from "./ActionCommitButton";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
 import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
@@ -23,6 +25,15 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   handleJoinAction,
 }: ActionTaskPanelProps) => {
   const { isAuthenticated } = useAuth();
+
+  const handleCompleteWithTracking = useCallback(() => {
+    handleCompleteAction();
+    posthog.capture("action_completed", {
+      actionId: action.id,
+      actionType: action.type,
+      actionName: action.name,
+    });
+  }, [action, handleCompleteAction]);
 
   if (
     action.status === "gathering_commitments" ||
@@ -57,7 +68,9 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     if (action.type === "Funding") {
       return (
         <StripeWrapper actionId={action.id}>
-          <ActionTaskPanelFunding onPaymentSuccess={handleCompleteAction} />
+          <ActionTaskPanelFunding
+            onPaymentSuccess={handleCompleteWithTracking}
+          />
         </StripeWrapper>
       );
     }
@@ -66,7 +79,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       return (
         <ActionTaskPanelForm
           taskFormId={action.taskFormId}
-          onCompleteAction={handleCompleteAction}
+          onCompleteAction={handleCompleteWithTracking}
         />
       );
     }
@@ -77,7 +90,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       return (
         <ActionTaskPanelActivity
           action={action}
-          onCompleteAction={handleCompleteAction}
+          onCompleteAction={handleCompleteWithTracking}
         />
       );
     }

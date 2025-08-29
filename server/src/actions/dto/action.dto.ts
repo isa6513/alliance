@@ -58,6 +58,7 @@ export class CreateActionDto extends OmitType(ActionDto, [
   'activities',
   'usersCompleted',
   'status',
+  'taskContents',
   'events',
 ]) {}
 

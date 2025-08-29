@@ -1,8 +1,8 @@
 import {
   FormDto,
   tasksDeleteForm,
-  tasksListForms,
   tasksGetFormResponses,
+  tasksListForms,
 } from "@alliance/shared/client";
 import { FormSchema, Page } from "@alliance/shared/forms/formschema";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -18,7 +18,9 @@ const FormsList: React.FC = () => {
   const [forms, setForms] = useState<Form[]>([]);
   const [formsLoading, setFormsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [responseCounts, setResponseCounts] = useState<Record<number, number>>({});
+  const [responseCounts, setResponseCounts] = useState<Record<number, number>>(
+    {}
+  );
   const navigate = useNavigate();
 
   const loadForms = useCallback(async () => {
@@ -59,25 +61,21 @@ const FormsList: React.FC = () => {
   useEffect(() => {
     let cancelled = false;
     const fetchCounts = async () => {
-      try {
-        const entries = await Promise.all(
-          forms.map(async (f) => {
-            try {
-              const res = await tasksGetFormResponses({ path: { id: f.id } });
-              return [f.id, (res.data ?? []).length] as const;
-            } catch (e) {
-              console.error("Failed to get responses for form", f.id, e);
-              return [f.id, 0] as const;
-            }
-          })
-        );
-        if (!cancelled) {
-          const map: Record<number, number> = {};
-          for (const [id, count] of entries) map[id] = count;
-          setResponseCounts(map);
-        }
-      } catch (e) {
-        // ignore; counts are optional UI sugar
+      const entries = await Promise.all(
+        forms.map(async (f) => {
+          try {
+            const res = await tasksGetFormResponses({ path: { id: f.id } });
+            return [f.id, (res.data ?? []).length] as const;
+          } catch (e) {
+            console.error("Failed to get responses for form", f.id, e);
+            return [f.id, 0] as const;
+          }
+        })
+      );
+      if (!cancelled) {
+        const map: Record<number, number> = {};
+        for (const [id, count] of entries) map[id] = count;
+        setResponseCounts(map);
       }
     };
     if (forms.length > 0) fetchCounts();

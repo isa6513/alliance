@@ -46,13 +46,13 @@ const Button: React.FC<ButtonProps> = ({
   onMouseEnter,
   onMouseLeave,
 }) => {
-  const color = colorProp ?? ButtonColor.Stone;
+  const color = colorProp ?? ButtonColor.White;
   return (
     <button
       type={type}
       className={`px-4 py-2 text-sm font-medium w-fit h-fit rounded flex items-center justify-center ${
         disabled
-          ? "opacity-50 cursor-not-allowed"
+          ? "opacity-50 !cursor-not-allowed"
           : "hover:bg-${ButtonColorClasses[color]}-100"
       } ${color} ${
         color === ButtonColor.Light ? "!text-stone-800" : ""

@@ -89,7 +89,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
           : "opacity-100"
       } !border-green-2 !border-2 w-full relative
          ${state === LargeActionCardState.Minified ? "pb-4" : ""}`}
-      closed={state === LargeActionCardState.Closed}
     >
       <div className="p-2">
         {!!action.timeEstimate && (

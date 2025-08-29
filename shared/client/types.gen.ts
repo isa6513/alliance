@@ -351,10 +351,6 @@ export type CreateActionDto = {
      */
     body: string;
     /**
-     * markdown contents for activity task card (instructions)
-     */
-    taskContents?: string;
-    /**
      * Short description shown in cards
      */
     shortDescription: string;
@@ -401,10 +397,6 @@ export type UpdateActionDto = {
      * markdown page body
      */
     body?: string;
-    /**
-     * markdown contents for activity task card (instructions)
-     */
-    taskContents?: string;
     /**
      * Short description shown in cards
      */

@@ -5,6 +5,7 @@ import {
   type FormDto,
 } from "@alliance/shared/client";
 import type { FormSchema, Page } from "@alliance/shared/forms/formschema";
+import Button from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -35,7 +36,7 @@ const isAnswerField = (
   node: unknown
 ): node is { id: string; label: string } => {
   if (!node || typeof node !== "object") return false;
-  const anyNode = node as any;
+  const anyNode = node as { kind: string; id: string; label: string };
   return (
     typeof anyNode.kind === "string" &&
     ANSWER_FIELD_KINDS.has(anyNode.kind) &&
@@ -137,8 +138,7 @@ const FormResponses: React.FC = () => {
     if (v == null) return "";
     if (Array.isArray(v)) return v.map((x) => formatValue(x)).join(", ");
     if (typeof v === "object") {
-      // display file object nicely if present
-      const o = v as any;
+      const o = v as { name?: string; key: string };
       if (o && typeof o === "object" && (o.name || o.key)) {
         return o.name || o.key;
       }
@@ -220,29 +220,16 @@ const FormResponses: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
             onClick={() => navigate("/forms")}
             className="px-3 py-2 rounded-md text-sm bg-gray-100 hover:bg-gray-200"
           >
             Back to Forms
-          </button>
-          <button
-            onClick={handleExportCsv}
-            disabled={responses.length === 0}
-            className={`px-3 py-2 rounded-md text-sm ${
-              responses.length === 0
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-            }`}
-          >
+          </Button>
+          <Button onClick={handleExportCsv} disabled={responses.length === 0}>
             Export CSV
-          </button>
-          <button
-            onClick={loadData}
-            className="px-3 py-2 rounded-md text-sm bg-green-600 text-white hover:bg-green-700"
-          >
-            Refresh
-          </button>
+          </Button>
+          <Button onClick={loadData}>Refresh</Button>
         </div>
       </div>
 
@@ -301,7 +288,7 @@ const FormResponses: React.FC = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {Object.entries(resp?.answers ?? {}).map(([key, value]) => (
-                  <div key={key} className="border rounded-md p-3 bg-gray-50">
+                  <div key={key} className=" rounded-md p-3 bg-zinc-100">
                     <div className="text-xs font-medium text-gray-600">
                       {fieldLabels[key] || key}
                     </div>
