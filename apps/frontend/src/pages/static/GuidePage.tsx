@@ -222,9 +222,9 @@ The following constitutes the basic promise that members make to one another:
 "
           />
 
-          <Card className="" style={CardStyle.LightGrey} id="#contract">
+          <Card className="" style={CardStyle.LightGrey} id="contract">
             <div className="text-lg p-2">
-              <p className="font-semibold mb-2">Contract of membership</p>
+              <p className="font-semibold mb-2">Membership contract</p>
               <ol className="list-decimal list-inside mb-2 flex flex-col gap-y-2">
                 <li>
                   Members will lend a dependable, finite amount of
@@ -254,6 +254,16 @@ The following constitutes the basic promise that members make to one another:
                   circumstances(e.g. medical exemption, family emergency, or
                   religious observance).
                 </li>
+                <li>
+                  Members, as defined by those who have a track record of
+                  reliable participation (participate in more than 80% of
+                  actions they are asked to complete), have a say in
+                  Alliance&nbsp;
+                  <a href="#governance" className="text-link">
+                    governance
+                  </a>
+                  .
+                </li>
               </ol>
             </div>
           </Card>
@@ -276,8 +286,6 @@ For example, early members may take part in:
             id="governance"
             markdownContent="
 # Governance
-“Members” are those who have a track record of reliable participation (participate in more than 80% of actions they are asked to complete) and therefore have a say in Alliance governance.
-
 Our governance depends on a periodic “course adjustment” process:
 1. In course adjustment, we will ask members what they think about the direction of the Alliance and whether or not they have any major concerns. We will collect common feedback, respond publicly with our plans to address the feedback, collect more feedback, and continue to iterate until the majority of members are satisfied.
 2. Course adjustment will re-occur once 10 actions have been taken and 3 months have passed since the last course adjustment
