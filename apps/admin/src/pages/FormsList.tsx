@@ -2,6 +2,7 @@ import {
   FormDto,
   tasksDeleteForm,
   tasksListForms,
+  tasksGetFormResponses,
 } from "@alliance/shared/client";
 import { FormSchema, Page } from "@alliance/shared/forms/formschema";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -17,6 +18,7 @@ const FormsList: React.FC = () => {
   const [forms, setForms] = useState<Form[]>([]);
   const [formsLoading, setFormsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [responseCounts, setResponseCounts] = useState<Record<number, number>>({});
   const navigate = useNavigate();
 
   const loadForms = useCallback(async () => {
@@ -52,6 +54,37 @@ const FormsList: React.FC = () => {
   useEffect(() => {
     loadForms();
   }, [loadForms]);
+
+  // After forms load, fetch response counts for each form
+  useEffect(() => {
+    let cancelled = false;
+    const fetchCounts = async () => {
+      try {
+        const entries = await Promise.all(
+          forms.map(async (f) => {
+            try {
+              const res = await tasksGetFormResponses({ path: { id: f.id } });
+              return [f.id, (res.data ?? []).length] as const;
+            } catch (e) {
+              console.error("Failed to get responses for form", f.id, e);
+              return [f.id, 0] as const;
+            }
+          })
+        );
+        if (!cancelled) {
+          const map: Record<number, number> = {};
+          for (const [id, count] of entries) map[id] = count;
+          setResponseCounts(map);
+        }
+      } catch (e) {
+        // ignore; counts are optional UI sugar
+      }
+    };
+    if (forms.length > 0) fetchCounts();
+    return () => {
+      cancelled = true;
+    };
+  }, [forms]);
 
   const handleCreateForm = useCallback(() => {
     navigate("/forms/new");
@@ -109,29 +142,41 @@ const FormsList: React.FC = () => {
                     </button>
                   </div>
                 </div>
-                <div className="flex flex-row justify-between">
+                <div className="flex flex-row justify-between items-center gap-3">
                   {form.usedInAction && (
                     <span className="text-sm text-green -mt-[1px]">
                       Linked in action: {form.usedInAction}
                     </span>
                   )}
-                  <p className="text-sm text-zinc-600">
-                    {form.schema.pages?.length || 0} page
-                    {(form.schema.pages?.length || 0) !== 1 ? "s" : ""} •{" "}
-                    {form.schema.pages?.reduce(
-                      (total: number, page) =>
-                        total + (page.fields?.length || 0),
-                      0
-                    ) || 0}{" "}
-                    field
-                    {(form.pages?.reduce(
-                      (total: number, page) =>
-                        total + (page.fields?.length || 0),
-                      0
-                    ) || 0) !== 1
-                      ? "s"
-                      : ""}
-                  </p>
+                  <div className="flex-1" />
+                  <div className="flex items-center gap-3">
+                    <p className="text-sm text-zinc-600">
+                      {form.schema.pages?.length || 0} page
+                      {(form.schema.pages?.length || 0) !== 1 ? "s" : ""} •{" "}
+                      {form.schema.pages?.reduce(
+                        (total: number, page) =>
+                          total + (page.fields?.length || 0),
+                        0
+                      ) || 0}{" "}
+                      field
+                      {(form.pages?.reduce(
+                        (total: number, page) =>
+                          total + (page.fields?.length || 0),
+                        0
+                      ) || 0) !== 1
+                        ? "s"
+                        : ""}
+                    </p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/forms/${form.id}/responses`);
+                      }}
+                      className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md text-xs font-medium"
+                    >
+                      Responses ({responseCounts[form.id] ?? 0})
+                    </button>
+                  </div>
                 </div>
               </div>
             </Card>

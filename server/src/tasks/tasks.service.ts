@@ -5,7 +5,12 @@ import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
-import { CreateFormDto, FormDto, SubmitFormDto } from './form.dto';
+import {
+  CreateFormDto,
+  FormDto,
+  FormResponseDto,
+  SubmitFormDto,
+} from './form.dto';
 import { FormSchema } from './schema';
 
 @Injectable()
@@ -130,5 +135,13 @@ export class TasksService {
   async deleteForm(formId: number): Promise<void> {
     const form = await this.getForm(formId);
     await this.formRepository.remove(form);
+  }
+
+  async getFormResponses(formId: number): Promise<FormResponseDto[]> {
+    const responses = await this.formResponseRepository.find({
+      where: { formId },
+      relations: ['user'],
+    });
+    return responses;
   }
 }

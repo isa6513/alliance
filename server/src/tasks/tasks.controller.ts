@@ -11,8 +11,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
-import { CreateFormDto, FormDto, SubmitFormDto } from './form.dto';
+import {
+  CreateFormDto,
+  FormDto,
+  FormResponseDto,
+  SubmitFormDto,
+} from './form.dto';
 import { TasksService } from './tasks.service';
 
 @Controller('tasks')
@@ -31,17 +37,24 @@ export class TasksController {
   }
 
   @Post('createForm')
-  @UseGuards(AuthGuard)
+  @UseGuards(AdminGuard)
   @ApiOkResponse()
   async createForm(@Body() body: CreateFormDto) {
     return this.tasksService.createForm(body);
   }
 
   @Get('listForms')
-  @UseGuards(AuthGuard)
+  @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [FormDto] })
   async listForms(): Promise<FormDto[]> {
     return this.tasksService.listForms();
+  }
+
+  @Get('responses/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [FormResponseDto] })
+  async getFormResponses(@Param('id', ParseIntPipe) id: number) {
+    return this.tasksService.getFormResponses(id);
   }
 
   @Get(':id')

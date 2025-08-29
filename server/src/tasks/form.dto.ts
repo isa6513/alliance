@@ -11,3 +11,10 @@ export class FormDto extends PickType(Form, ['id', 'title', 'schema']) {
   @ApiPropertyOptional()
   usedInAction?: string;
 }
+
+export class FormResponseDto extends PickType(FormResponse, [
+  'id',
+  'answers',
+  'formId',
+  'user',
+]) {}
