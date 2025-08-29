@@ -479,8 +479,7 @@ jobs:
               pm2 start   "$ECOSYSTEM" --env production
             fi
 
-            # Give the reloaded app a moment and verify public health through Nginx on 3005
-            sleep 8
+            sleep 15
             curl --silent --fail --show-error "http://127.0.0.1:3005" > /dev/null
 
             # Success: kill the canary
