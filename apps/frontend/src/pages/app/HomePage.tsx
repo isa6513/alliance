@@ -56,7 +56,7 @@ const HomePage = () => {
   return (
     <div className="flex flex-col w-full h-full items-center bg-page min-h-[calc(100vh-50px)]">
       <div className="flex flex-row px-6 md:gap-x-10 w-full justify-center">
-        <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch w-[350px]">
+        <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch max-w-[350px] flex-1">
           <Card style={CardStyle.White}>
             <p className="font-semibold text-lg text-zinc-600 mb-2">Bulletin</p>
             <p className="text-zinc-500 mb-2">
@@ -72,7 +72,7 @@ const HomePage = () => {
             </p>
           </Card>
         </div>
-        <div className="flex flex-col py-16 max-w-[750px] sm:min-w-[300px] gap-y-5 overflow-y-auto !overflow-visible flex-1">
+        <div className="flex flex-col py-16 max-w-[750px] sm:min-w-[300px] gap-y-5 overflow-y-auto !overflow-visible flex-2">
           <div className="flex flex-col gap-y-6 ">
             <p className="font-adobe text-3xl font-semibold">
               Your current task
