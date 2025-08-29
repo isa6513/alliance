@@ -417,7 +417,6 @@ jobs:
                   SINCH_NUMBER: process.env.SINCH_NUMBER,
                   SINCH_REGION: process.env.SINCH_REGION,
                   APP_URL: process.env.APP_URL,
-                  # IMPORTANT: production instance listens on 3005 behind Nginx
                   PORT: 3005
                 }
               }]
