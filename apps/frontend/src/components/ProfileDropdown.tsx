@@ -30,11 +30,18 @@ const ProfileDropdown = () => {
       <Link
         to={profileUrl}
         onClick={() => setIsOpen(false)}
-        className="flex items-center gap-x-1.5"
+        className="hidden md:flex items-center gap-x-1.5"
       >
         <ProfileImage pfp={profilePicture} size="large" />
         <DropdownIcon size="mini" fill="black" />
       </Link>
+      <button
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="md:hidden flex items-center gap-x-1.5"
+      >
+        <ProfileImage pfp={profilePicture} size="large" />
+        <DropdownIcon size="mini" fill="black" />
+      </button>
       {isOpen && (
         <div className="absolute top-[calc(100%-10px)] shadow-lg/5 right-5 bg-white rounded border border-zinc-200 min-w-[150px] max-h-[500px] overflow-y-auto cursor-default flex flex-col *:hover:bg-zinc-100 *:px-4 *:py-2 text-base">
           <Link to={profileUrl} onClick={() => setIsOpen(false)}>

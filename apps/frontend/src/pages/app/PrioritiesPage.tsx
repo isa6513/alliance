@@ -2,7 +2,7 @@ import React from "react";
 
 const PrioritiesPage: React.FC = () => {
   return (
-    <div className="flex flex-col max-w-3xl mx-auto p-3 pt-12">
+    <div className="flex flex-col max-w-3xl mx-auto p-3 pt-16 md:pt-12">
       <div className="gap-y-2 flex flex-col text-lg">
         <p className="font-adobe text-3xl font-semibold">
           Our current priorities

@@ -19,7 +19,7 @@ const ActionsListPage = () => {
 
   return (
     <div className="flex flex-col bg-page items-center">
-      <div className="px-4 py-12 flex flex-col items-center w-[calc(min(650px,100%))] gap-y-6">
+      <div className="px-4 py-16 md:py-12 flex flex-col items-center w-[calc(min(650px,100%))] gap-y-6">
         <div className="flex flex-row justify-center items-center w-full gap-x-4">
           <p className="text-lg text-left h-fit">Filter:</p>
           <div className="flex flex-row gap-2 items-center flex-wrap ">
