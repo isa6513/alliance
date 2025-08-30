@@ -17,6 +17,7 @@ import {
   ApiOperation,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { City } from 'src/geo/city.entity';
 import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
@@ -32,6 +33,12 @@ import {
 } from './user.dto';
 import { User } from './user.entity';
 import { UserService } from './user.service';
+
+class VerifyEmailBody {
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+}
 
 @Controller('user')
 export class UserController {
@@ -228,5 +235,12 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ProfileDto | null> {
     return userToDto(await this.userService.findOne(id));
+  }
+
+  @Post('verifyEmail')
+  @Public()
+  @ApiOkResponse({ type: User })
+  async verifyEmail(@Body() body: VerifyEmailBody) {
+    return this.userService.verifyEmail(body.token);
   }
 }

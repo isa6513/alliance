@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { City } from 'src/geo/city.entity';
+import { Mail } from 'src/mail/mail.entity';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import {
   BeforeInsert,
@@ -19,8 +20,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -231,4 +234,8 @@ export class User {
 
   @OneToMany(() => ActionEventNotif, (notif) => notif.user)
   actionEventNotifs: ActionEventNotif[];
+
+  @OneToOne(() => Mail, { nullable: true })
+  @JoinColumn({ name: 'welcomeMailId' })
+  welcomeMail: Mail | null;
 }

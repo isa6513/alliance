@@ -2,6 +2,7 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ImagesModule } from 'src/images/images.module';
+import { MailModule } from 'src/mail/mail.module';
 import { ActionActivity } from '../actions/entities/action-activity.entity';
 import { Action } from '../actions/entities/action.entity';
 import { City } from '../geo/city.entity';
@@ -24,6 +25,7 @@ import { IsUserAlreadyExist } from './validators/user-already-exists.validator';
     TypeOrmModule.forFeature([PrefillUser]),
     JwtModule,
     ImagesModule,
+    MailModule,
   ],
   controllers: [UserController],
   providers: [UserService, IsUserAlreadyExist],

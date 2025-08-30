@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { City } from 'src/geo/city.entity';
 import { ImagesService } from 'src/images/images.service';
+import { MailService } from 'src/mail/mail.service';
 import {
   Notification,
   NotificationCategory,
@@ -38,6 +39,7 @@ export class UserService {
     private readonly friendRepository: Repository<Friend>,
     private readonly jwtService: JwtService,
     private readonly imagesService: ImagesService,
+    private readonly mailService: MailService,
   ) {}
 
   async create(data: Partial<User>): Promise<User> {
@@ -119,6 +121,34 @@ export class UserService {
 
   async setAdmin(id: number, admin: boolean): Promise<void> {
     await this.userRepository.update(id, { admin });
+  }
+
+  async sendWelcomeEmail(userId: number) {
+    const user = await this.findOneOrFail(userId);
+    const token = await this.getVerifyEmailToken(userId);
+    const mail = await this.mailService.sendWelcomeEmail(
+      user.email,
+      user.name,
+      token,
+    );
+    await this.userRepository.update(userId, { welcomeMail: mail });
+  }
+
+  async verifyEmail(token: string) {
+    const payload = this.jwtService.verify(token, {
+      secret: process.env.JWT_SECRET,
+    });
+    const user = await this.findOneOrFail(payload.sub);
+    user.emailVerified = true;
+    await this.userRepository.save(user);
+  }
+
+  async getVerifyEmailToken(userId: number) {
+    const payload = { sub: userId, type: 'verify-email' };
+    return this.jwtService.sign(payload, {
+      expiresIn: `1d`,
+      secret: process.env.JWT_SECRET,
+    });
   }
 
   async isAdmin(id: number): Promise<boolean> {

@@ -75,6 +75,9 @@ export class AuthService {
     if (referredBy) {
       await this.usersService.makeFriendsAutomated(referredBy.id, user.id);
     }
+
+    this.usersService.sendWelcomeEmail(user.id);
+
     return user;
   }
 

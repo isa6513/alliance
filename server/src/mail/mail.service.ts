@@ -71,6 +71,7 @@ export class MailService {
   public async sendWelcomeEmail(
     recipient: string,
     name: string,
+    verifyToken: string,
   ): Promise<Mail> {
     return this.sendMail(
       recipient,
@@ -78,6 +79,7 @@ export class MailService {
       'Welcome to the Alliance',
       {
         name,
+        url: `https://worldalliance.org/verifyEmail?token=${verifyToken}`,
       },
     );
   }

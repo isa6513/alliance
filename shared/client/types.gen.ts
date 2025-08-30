@@ -137,6 +137,10 @@ export type User = {
     anonymous: boolean;
 };
 
+export type VerifyEmailBody = {
+    [key: string]: unknown;
+};
+
 export type StreamableFile = {
     [key: string]: unknown;
 };
@@ -1119,6 +1123,19 @@ export type UserFindOneResponses = {
 };
 
 export type UserFindOneResponse = UserFindOneResponses[keyof UserFindOneResponses];
+
+export type UserVerifyEmailData = {
+    body: VerifyEmailBody;
+    path?: never;
+    query?: never;
+    url: '/user/verifyEmail';
+};
+
+export type UserVerifyEmailResponses = {
+    200: User;
+};
+
+export type UserVerifyEmailResponse = UserVerifyEmailResponses[keyof UserVerifyEmailResponses];
 
 export type ImagesGetImageData = {
     body?: never;
