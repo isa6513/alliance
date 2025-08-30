@@ -3,8 +3,8 @@ import Tag, { TagStyle } from "../../components/Tag";
 
 const actionStatusStyles: Record<ActionDto["status"], TagStyle> = {
   gathering_commitments: TagStyle.GreyOutline,
-  commitments_reached: TagStyle.Green,
-  member_action: TagStyle.GreyOutline,
+  commitments_reached: TagStyle.GreenOutline,
+  member_action: TagStyle.GreenOutline,
   resolution: TagStyle.GreyOutline,
   completed: TagStyle.Green,
   failed: TagStyle.GreyOutline,
@@ -38,7 +38,7 @@ const StatusTag = ({ status }: StatusTagProps) => {
     <Tag
       style={actionStatusStyles[status]}
       size="large"
-      className="flex flex-row items-center"
+      className="flex flex-row items-center shadow"
     >
       {/* <StatusIcon status={status} size="small" /> */}
       <p>{actionStatusDescriptions[status]}</p>

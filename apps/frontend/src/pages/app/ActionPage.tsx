@@ -170,16 +170,16 @@ export default function ActionPage() {
           />
         }
         right={
-          <div className="flex flex-col gap-y-4 p-6 pt-2">
+          <div className="flex flex-col gap-y-4 pt-2">
             <Card style={CardStyle.White}>
-              <p className="font-semibold text-lg text-zinc-600">Status</p>
+              <p className="font-medium text-base text-black">Status</p>
               {action && (
                 <div className="mt-1">
                   <StatusTag status={action.status} />
 
                   {action.status === "gathering_commitments" ||
                   action.status === "commitments_reached" ? (
-                    <div className="mt-8">
+                    <div className="mt-6">
                       <CompletedBar
                         percentage={
                           ((liveUserCount ?? action.usersJoined) /
@@ -199,7 +199,7 @@ export default function ActionPage() {
                       </p>
                     </div>
                   ) : (
-                    <div className="mt-8">
+                    <div className="mt-6">
                       <CompletedBar
                         percentage={
                           ((action.usersCompleted ?? 0) /

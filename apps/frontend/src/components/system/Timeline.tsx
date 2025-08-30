@@ -19,7 +19,7 @@ interface TimelineProps {
 const Timeline: React.FC<TimelineProps> = ({
   children,
   lineWidth = 2,
-  dotSize = 15,
+  dotSize = 10,
   lineColor = "#d4d4d8", // zinc-300
   className,
 }) => {
@@ -76,8 +76,8 @@ const Timeline: React.FC<TimelineProps> = ({
             {/* timeline dot */}
             <div
               style={{ ...dotBaseStyle }}
-              className={`border-3 relative ${
-                index === 0 ? "border-green" : "border-zinc-300"
+              className={`relative ${
+                index === 0 ? "bg-zinc-700" : "bg-zinc-300"
               } mt-[20px] flex items-center justify-center bg-white`}
             ></div>
             {/* content */}

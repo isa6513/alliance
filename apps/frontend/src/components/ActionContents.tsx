@@ -13,7 +13,7 @@ const ActionContents = () => {
   }
 
   return (
-    <div className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5">
+    <div className="flex flex-col gap-y-3 flex-2 pl-10 pt-5">
       {action?.image && (
         <img
           src={getImageSource(action.image)}

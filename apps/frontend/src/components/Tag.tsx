@@ -6,6 +6,7 @@ export enum TagStyle {
   Grey = "grey",
   Yellow = "yellow",
   GreyOutline = "grey-outline",
+  GreenOutline = "green-outline",
 }
 
 interface TagProps {
@@ -35,6 +36,8 @@ const Tag: React.FC<TagProps> = ({
     [TagStyle.Yellow]: "px-2 py-1 bg-yellow-400/20 self-start text-yellow-600",
     [TagStyle.GreyOutline]:
       "px-2 py-1 border border-zinc-300 self-start text-zinc-500",
+    [TagStyle.GreenOutline]:
+      "px-2 py-1 border border-green self-start text-green",
   };
 
   return (

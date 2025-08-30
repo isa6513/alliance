@@ -10,7 +10,7 @@ export interface ActionEventsPanelProps {
 const ActionEventsPanel = ({ events }: ActionEventsPanelProps) => {
   return (
     <div className="flex flex-col gap-y-3 w-full">
-      <p className="font-semibold text-lg text-zinc-600">Updates</p>
+      <p className="font-medium text-base text-black">Updates</p>
       <Timeline>
         {events
           .slice()

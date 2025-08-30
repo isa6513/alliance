@@ -73,7 +73,7 @@ const HomePage = () => {
       <div className="flex flex-row px-6 md:gap-x-6 lg:gap-x-10 w-full justify-center">
         <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch max-w-[350px] flex-1 min-w-[150px]">
           <Card style={CardStyle.White}>
-            <p className="font-semibold text-lg text-zinc-600 mb-2">Bulletin</p>
+            <p className="font-medium text-base text-black mb-2">Bulletin</p>
             <p className="text-zinc-500 mb-2">
               Right now, we are focused on organizational improvement and
               small-scale experiments that test collective action strategies.
@@ -181,7 +181,7 @@ const HomePage = () => {
         <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch w-[350px]">
           <div className="flex flex-col gap-y-3">
             <Card style={CardStyle.White}>
-              <p className="font-semibold text-lg text-zinc-600 mb-3">
+              <p className="font-medium text-base text-black mb-3">
                 Forum activity
               </p>
               {posts?.length === 0 && (
@@ -203,7 +203,7 @@ const HomePage = () => {
             </Card>
             <Card style={CardStyle.White}>
               <div className="flex flex-row justify-between">
-                <p className="font-semibold text-lg text-zinc-600 mb-3">
+                <p className="font-medium text-base text-black mb-3">
                   Friend activity
                 </p>
                 <Link to="/feed" className="text-link text-sm">
