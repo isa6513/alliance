@@ -79,13 +79,13 @@ export class MailService {
       'Welcome to the Alliance',
       {
         name,
-        url: `https://worldalliance.org/verifyEmail?token=${verifyToken}`,
+        url: `${process.env.APP_URL}/verifyEmail?token=${verifyToken}`,
       },
     );
   }
 
   private getPasswordResetUrl(resetToken: string) {
-    return `https://worldalliance.org/resetpassword?token=${resetToken}`; //todo: domain param
+    return `${process.env.APP_URL}/resetpassword?token=${resetToken}`; //todo: domain param
   }
 
   public async sendPasswordResetEmail(

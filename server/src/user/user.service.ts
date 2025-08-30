@@ -124,6 +124,10 @@ export class UserService {
   }
 
   async sendWelcomeEmail(userId: number) {
+    if (process.env.NODE_ENV === 'test') {
+      return;
+    }
+
     const user = await this.findOneOrFail(userId);
     const token = await this.getVerifyEmailToken(userId);
     const mail = await this.mailService.sendWelcomeEmail(
