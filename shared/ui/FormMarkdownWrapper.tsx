@@ -1,11 +1,11 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 
-interface AppMarkdownWrapperProps {
+interface FormMarkdownWrapper {
   markdownContent: string;
 }
 
-const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
+const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
   markdownContent,
 }) => {
   return (
@@ -29,4 +29,4 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
   );
 };
 
-export default AppMarkdownWrapper;
+export default FormMarkdownWrapper;

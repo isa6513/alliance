@@ -20,7 +20,7 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
         h3: ({ ...props }) => (
           <h3 className="!font-semibold text-lg" {...props} />
         ),
-        p: ({ ...props }) => <p className="" {...props} />,
+        p: ({ ...props }) => <p className="mb-3 last:mb-0" {...props} />,
         ol: ({ ...props }) => <ol {...props} />,
         ul: ({ ...props }) => <ul {...props} />,
         li: ({ ...props }) => <li {...props} />,
