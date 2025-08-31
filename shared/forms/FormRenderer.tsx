@@ -238,7 +238,7 @@ const FormRenderer = ({
       case "text":
         return (
           <div key={index} className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block   text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -256,7 +256,7 @@ const FormRenderer = ({
       case "textarea":
         return (
           <div key={index} className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -274,7 +274,7 @@ const FormRenderer = ({
       case "email":
         return (
           <div key={index} className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -292,7 +292,7 @@ const FormRenderer = ({
       case "phone":
         return (
           <div key={index} className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block   text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -315,7 +315,7 @@ const FormRenderer = ({
       case "number":
         return (
           <div key={index} className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block   text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -357,7 +357,7 @@ const FormRenderer = ({
       case "radio":
         return (
           <div key={index} className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block   text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -373,7 +373,7 @@ const FormRenderer = ({
                     required={field.required}
                     className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                   />
-                  <span className="text-sm text-gray-700">{option.label}</span>
+                  <span className=" text-gray-700">{option.label}</span>
                 </label>
               ))}
             </div>
@@ -383,7 +383,7 @@ const FormRenderer = ({
       case "select":
         return (
           <div key={index} className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block   text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -408,7 +408,7 @@ const FormRenderer = ({
       case "multiselect":
         return (
           <div key={index} className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block   text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -433,7 +433,7 @@ const FormRenderer = ({
                     }}
                     className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <span className="text-sm text-gray-700">{option.label}</span>
+                  <span className=" text-gray-700">{option.label}</span>
                 </label>
               ))}
             </div>
@@ -443,7 +443,7 @@ const FormRenderer = ({
       case "date":
         return (
           <div key={index} className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block   text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -464,7 +464,7 @@ const FormRenderer = ({
 
         return (
           <div key={index} className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block   text-gray-700">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -492,16 +492,14 @@ const FormRenderer = ({
                 }}
                 required={field.required && !fileValue}
                 disabled={isUploading}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file: file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
               />
               {isUploading && (
-                <span className="text-sm text-blue-600">Uploading...</span>
+                <span className=" text-blue-600">Uploading...</span>
               )}
             </div>
 
-            {uploadError && (
-              <p className="text-sm text-red-600">{uploadError}</p>
-            )}
+            {uploadError && <p className=" text-red-600">{uploadError}</p>}
           </div>
         );
 
@@ -528,7 +526,7 @@ const FormRenderer = ({
                 ? "text-lg"
                 : ((block as any).level || 2) === 5
                 ? "text-base"
-                : "text-sm"
+                : ""
             }`,
           },
           (block as any).text
@@ -549,7 +547,7 @@ const FormRenderer = ({
 
       case "label":
         return (
-          <span key={index} className="text-sm font-medium text-gray-700">
+          <span key={index} className="  text-gray-700">
             {(block as any).text}
           </span>
         );
@@ -646,7 +644,7 @@ const FormRenderer = ({
           {schema.pages.length > 1 && (
             <div>
               <div>
-                <span className="text-sm text-gray-500">
+                <span className=" text-gray-500">
                   Page {currentPageIndex + 1} of {schema.pages.length}
                 </span>
               </div>

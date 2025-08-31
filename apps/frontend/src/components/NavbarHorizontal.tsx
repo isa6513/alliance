@@ -29,7 +29,7 @@ const NavbarHorizontal: React.FC = () => {
     <>
       <div
         className="
-      flex flex-col md:flex-row border-zinc-300 border-b bg-page
+      flex flex-col md:flex-row border-zinc-300 border-b bg-white
     w-screen text-left items-center fixed px-7 z-10 justify-between gap-x-5"
       >
         <div className="flex flex-row gap-x-1 sm:gap-x-4 lg:gap-x-8 items-center">
