@@ -10,7 +10,13 @@ import UserProfilePicRow from "../../components/UserProfilePicRow";
 export interface SmallActionCardProps
   extends Pick<
     ActionWithRelation,
-    "name" | "shortDescription" | "category" | "id" | "status" | "relation"
+    | "name"
+    | "shortDescription"
+    | "commitmentless"
+    | "category"
+    | "id"
+    | "status"
+    | "relation"
   > {
   className?: string;
   joinedCount?: number;
@@ -26,6 +32,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
   shortDescription,
   className,
   status,
+  commitmentless,
   joinedCount,
   neededCount,
   friendActivities = [],
@@ -43,7 +50,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
   );
 
   const waitingOnCompletion =
-    status === "member_action" && relation === "joined";
+    status === "member_action" && (relation === "joined" || commitmentless);
 
   const waitingOnCommitment =
     status === "gathering_commitments" && relation === "none";

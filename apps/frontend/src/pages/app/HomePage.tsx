@@ -5,6 +5,7 @@ import {
   UserActionRelation,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { setRevalidate, useAppLoaderData } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
@@ -29,17 +30,21 @@ const HomePage = () => {
   const navigate = useNavigate();
   const { actions, posts, activities } = useAppLoaderData();
 
+  const [currentTask, setCurrentTask] = useState<ActionDto | null>(null);
+
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
   });
 
-  const todoActions = actions.filter((action) =>
-    canCompleteAction(action, action.relation)
+  const [todoActions, setTodoActions] = useState<ActionDto[]>(
+    actions.filter((action) => canCompleteAction(action, action.relation))
   );
 
-  const newActions = actions.filter(
-    (action) =>
-      action.relation === "none" && action.status === "gathering_commitments"
+  const [newActions, setNewActions] = useState<ActionDto[]>(
+    actions.filter(
+      (action) =>
+        action.relation === "none" && action.status === "gathering_commitments"
+    )
   );
 
   const committedActions = actions.filter(
@@ -52,11 +57,30 @@ const HomePage = () => {
       action.relation === "joined" && action.status === "commitments_reached"
   );
 
-  const currentTask = newActions.shift() || todoActions.shift() || null;
+  const getNewTask = () => {
+    if (newActions.length > 0) {
+      const newTask = newActions[0];
+
+      setNewActions((prev) => prev.slice(1));
+      setCurrentTask(newTask);
+    } else if (todoActions.length > 0) {
+      const newTask = todoActions[0];
+
+      setTodoActions((prev) => prev.slice(1));
+      setCurrentTask(newTask);
+    } else {
+      setCurrentTask(null);
+    }
+  };
+
+  useEffect(() => {
+    getNewTask();
+  }, []);
 
   const handleTaskComplete = (actionId: number) => {
     actionsComplete({ path: { id: actionId.toString() } }).then(() => {
       setRevalidate();
+      getNewTask();
       navigate(window.location.pathname);
     });
   };
@@ -64,6 +88,7 @@ const HomePage = () => {
   const handleTaskJoin = (actionId: number) => {
     actionsJoin({ path: { id: actionId.toString() } }).then(() => {
       setRevalidate();
+      getNewTask();
       navigate(window.location.pathname);
     });
   };

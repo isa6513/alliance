@@ -58,6 +58,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       setState(LargeActionCardState.Closed);
       setTimeout(() => {
         onComplete(action.id);
+        setState(LargeActionCardState.Default);
       }, 500);
     }
 
@@ -65,6 +66,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       setState(LargeActionCardState.Closed);
       setTimeout(() => {
         onJoin(action.id);
+        setState(LargeActionCardState.Default);
       }, 500);
     }
   }, [state, action, onComplete, onJoin]);
