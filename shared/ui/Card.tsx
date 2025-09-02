@@ -38,7 +38,7 @@ const Card: React.FC<CardProps> = ({
 
   const styleClasses = {
     [CardStyle.White]:
-      "bg-white border-gray-2 hover:border border-box rounded-md",
+      "bg-white border-gray-2 hover:border border-box rounded-md shadow",
     [CardStyle.WhiteSolid]: "bg-white border-none rounded-lg",
     [CardStyle.Alert]: "bg-sky-100 border-sky-300",
     [CardStyle.Outline]: "bg-transparent border-gray-300",

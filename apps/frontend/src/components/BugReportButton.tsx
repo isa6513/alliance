@@ -28,6 +28,7 @@ const BugReportButton = () => {
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe the issue..."
           />
           <div className="flex justify-between">
             <p
