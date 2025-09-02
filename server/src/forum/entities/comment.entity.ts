@@ -32,7 +32,7 @@ export class Comment {
 
   @Column('text')
   @ApiProperty()
-  @IsNotEmpty()
+  @Allow()
   content: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
@@ -117,4 +117,10 @@ export class Comment {
   @Allow()
   @Type(() => User)
   likes: User[];
+
+  @Column({ type: 'jsonb', default: [] })
+  @ApiPropertyOptional({ type: String, isArray: true })
+  @Allow()
+  @IsOptional()
+  attachments?: string[];
 }

@@ -7,6 +7,7 @@ import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { formatDistanceToNow } from "date-fns";
 import React, { useEffect, useRef, useState } from "react";
+import { getImageSource } from "../../lib/config";
 import CommentLikeButton from "../CommentLikeButton";
 import ProfileImage from "../ProfileImage";
 import UserDisplayName from "../UserDisplayName";
@@ -62,6 +63,8 @@ interface ReplyComponentProps {
   onUpdateReply: (id: number, content: string) => void;
   onLikeReply: (id: number, unlike?: boolean) => void;
   homeStyle?: boolean;
+  attachments: string[];
+  setAttachments: (images: string[]) => void;
 }
 
 interface ReplyContentProps
@@ -99,6 +102,8 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
   const [showDropdown, setShowDropdown] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -144,6 +149,31 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
     setIsEditing(true);
     setShowDropdown(false);
   };
+  const openLightbox = (idx: number) => {
+    setLightboxIndex(idx);
+    setLightboxOpen(true);
+  };
+  const closeLightbox = () => setLightboxOpen(false);
+  const nextImage = () => {
+    if (!reply.attachments || reply.attachments.length === 0) return;
+    setLightboxIndex((i) => (i + 1) % reply.attachments!.length);
+  };
+  const prevImage = () => {
+    if (!reply.attachments || reply.attachments.length === 0) return;
+    setLightboxIndex(
+      (i) => (i - 1 + reply.attachments!.length) % reply.attachments!.length
+    );
+  };
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowRight") nextImage();
+      if (e.key === "ArrowLeft") prevImage();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [lightboxOpen]);
   return (
     <div className="flex gap-3 relative">
       {/* Blue highlight indicator */}
@@ -192,6 +222,23 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         <div className="mb-2">
           {!isEditing &&
             getDisplayContent(reply.content, isCollapsed, reply.deleted)}
+          {!isEditing && reply.attachments && reply.attachments.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {reply.attachments.map((key, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => openLightbox(idx)}
+                  className="focus:outline-none"
+                >
+                  <img
+                    src={getImageSource(key)}
+                    className="w-28 h-28 object-cover rounded"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {isEditing ? (
@@ -290,6 +337,47 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
           </div>
         )}
       </div>
+      {lightboxOpen && reply.attachments && reply.attachments.length > 0 && (
+        <div
+          className="fixed inset-0 z-[1000] bg-black/80 flex items-center justify-center"
+          onClick={closeLightbox}
+        >
+          <div
+            className="relative max-w-5xl w-full px-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={getImageSource(reply.attachments[lightboxIndex])}
+              className="max-h-[80vh] w-auto mx-auto rounded shadow-2xl"
+            />
+            {reply.attachments.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white rounded-full w-10 h-10 flex items-center justify-center"
+                  aria-label="Previous image"
+                >
+                  {"<"}
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white rounded-full w-10 h-10 flex items-center justify-center"
+                  aria-label="Next image"
+                >
+                  {">"}
+                </button>
+              </>
+            )}
+            <button
+              onClick={closeLightbox}
+              className="absolute -right-6 top-4 bg-white/20 hover:bg-white/30 text-black rounded-full w-9 h-9 flex items-center justify-center font-avenir"
+              aria-label="Close"
+            >
+              x
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -311,6 +399,8 @@ const ReplyComponent = ({
   onUpdateReply,
   onLikeReply,
   homeStyle = false,
+  attachments,
+  setAttachments,
 }: ReplyComponentProps) => {
   const handleUpdateReply = async (id: number, content: string) => {
     if (onUpdateReply) {
@@ -435,6 +525,8 @@ const ReplyComponent = ({
                           onUpdateReply={onUpdateReply}
                           onLikeReply={onLikeReply}
                           compact={compact}
+                          attachments={attachments}
+                          setAttachments={setAttachments}
                         />
                       </div>
                     </div>
@@ -456,6 +548,8 @@ const ReplyComponent = ({
             setReplyingTo={setReplyingTo}
             className="rounded-t-none"
             compact={compact}
+            attachments={attachments}
+            setAttachments={setAttachments}
           />
         )}
       </div>
@@ -501,6 +595,8 @@ const ReplyComponent = ({
             isSubmitting={isSubmitting}
             setReplyingTo={setReplyingTo}
             compact={compact}
+            attachments={attachments}
+            setAttachments={setAttachments}
           />
         </div>
       )}
@@ -527,6 +623,8 @@ const ReplyComponent = ({
                 onUpdateReply={onUpdateReply}
                 onLikeReply={onLikeReply}
                 compact={compact}
+                attachments={attachments}
+                setAttachments={setAttachments}
               />
             </div>
           ))}

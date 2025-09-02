@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { activityReplyUrl, replyUrl } from 'src/search/approutes';
@@ -252,6 +256,10 @@ export class ForumService {
           `Parent reply with ID "${createCommentDto.parentId}" not found`,
         );
       }
+    }
+
+    if (!createCommentDto.content && !createCommentDto.attachments) {
+      throw new BadRequestException('Reply cannot be empty');
     }
 
     const reply = this.commentRepository.create({

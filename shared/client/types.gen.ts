@@ -299,6 +299,7 @@ export type CommentDto = {
     author: ProfileDto;
     children?: Array<CommentDto>;
     likes: Array<ProfileDto>;
+    attachments?: Array<string>;
 };
 
 export type ActionActivityDto = {
@@ -459,6 +460,7 @@ export type CreateCommentDto = {
     parentObjectType: CommentParentObject;
     parentObjectId: number;
     parentId?: number;
+    attachments?: Array<string>;
 };
 
 export type UpdateActionActivityDto = {
@@ -510,6 +512,7 @@ export type UpdateCommentDto = {
     parentObjectType?: CommentParentObject;
     parentObjectId?: number;
     parentId?: number;
+    attachments?: Array<string>;
 };
 
 export type CitySearchDto = {

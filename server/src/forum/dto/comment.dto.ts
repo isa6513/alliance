@@ -28,6 +28,9 @@ export class CommentDto extends PickType(Comment, [
   @ApiProperty({ type: () => ProfileDto, isArray: true })
   likes: ProfileDto[];
 
+  @ApiPropertyOptional({ type: String, isArray: true })
+  attachments?: string[];
+
   constructor(comment: Comment) {
     super();
     Object.assign(this, comment);
@@ -36,6 +39,7 @@ export class CommentDto extends PickType(Comment, [
       : undefined;
     this.author = new ProfileDto(comment.author);
     this.likes = comment.likes.map((like) => new ProfileDto(like));
+    this.attachments = comment.attachments ?? [];
   }
 }
 
@@ -44,6 +48,7 @@ export class CreateCommentDto extends PickType(Comment, [
   'parentObjectId',
   'parentId',
   'parentObjectType',
+  'attachments',
 ]) {}
 
 export class UpdateCommentDto extends PartialType(CreateCommentDto) {}

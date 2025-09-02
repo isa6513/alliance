@@ -16,6 +16,7 @@ import { Link, useSearchParams } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ReplyComponent from "./forum/ReplyComponent";
 import ReplyForm from "./forum/ReplyForm";
+import { imagesUploadImage } from "@alliance/shared/client";
 
 export interface CommentsProps {
   objectId: number;
@@ -31,6 +32,7 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
   const [newlyAddedReplies, setNewlyAddedReplies] = useState<Set<number>>(
     new Set()
   );
+  const [lastAddedReplyId, setLastAddedReplyId] = useState<number | null>(null);
   const [highlightedReplyId, setHighlightedReplyId] = useState<number | null>(
     null
   );
@@ -39,6 +41,7 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
 
   const [comments, setComments] = useState<CommentDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [attachments, setAttachments] = useState<string[]>([]);
 
   const fetchComments = useCallback(async () => {
     let response;
@@ -100,11 +103,23 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
 
     try {
       setIsSubmitting(true);
+      // Upload attachments first (if any) to get keys
+      let attachmentKeys: string[] = [];
+      if (attachments.length > 0) {
+        const uploads = await Promise.all(
+          attachments.map(async (fileB64) => {
+            const res = await imagesUploadImage({ body: { file: fileB64 } });
+            return res.data as unknown as string; // API returns key
+          })
+        );
+        attachmentKeys = uploads.filter(Boolean) as string[];
+      }
       const commentDto: CreateCommentDto = {
         content: replyContent,
         parentObjectId: Number(objectId),
         parentId: replyingTo ?? undefined,
         parentObjectType: type,
+        attachments: attachmentKeys,
       };
 
       const response = await forumCreateComment({
@@ -115,6 +130,7 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
         const newReplyId = response.data.id;
 
         setNewlyAddedReplies((prev) => new Set(prev).add(newReplyId));
+        setLastAddedReplyId(newReplyId);
 
         setTimeout(() => {
           setNewlyAddedReplies((prev) => {
@@ -128,6 +144,7 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
       }
 
       setReplyContent("");
+      setAttachments([]);
       setReplyingTo(null);
       setError(null);
     } catch (err) {
@@ -137,6 +154,20 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
       setIsSubmitting(false);
     }
   };
+
+  // After comments refresh, scroll the newly added reply into view
+  useEffect(() => {
+    if (!lastAddedReplyId || !comments) return;
+    // Allow the DOM to paint the new element
+    const timeout = setTimeout(() => {
+      const el = document.getElementById(`reply-${lastAddedReplyId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        setLastAddedReplyId(null);
+      }
+    }, 50);
+    return () => clearTimeout(timeout);
+  }, [comments, lastAddedReplyId]);
 
   const handleDeleteReply = async (replyId: number) => {
     if (window.confirm("Are you sure you want to delete this reply?")) {
@@ -228,6 +259,8 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
                 onUpdateReply={handleUpdateReply}
                 onLikeReply={handleLikeReply}
                 homeStyle={homeStyle}
+                attachments={attachments}
+                setAttachments={setAttachments}
               />
             ))}
         </div>
@@ -242,6 +275,8 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
           isSubmitting={isSubmitting}
           setReplyingTo={setReplyingTo}
           compact={compact}
+          attachments={attachments}
+          setAttachments={setAttachments}
         />
       ) : !user ? (
         <div className="text-center py-6 bg-gray-50 rounded-lg">
