@@ -188,7 +188,7 @@ describe('Actions (e2e)', () => {
 
     it('unauthenticated user cannot access individual draft action', async () => {
       const res = await request(ctx.app.getHttpServer()).get(
-        `/actions/${testDraftAction.id}`,
+        `/actions/slug/${testDraftAction.id}`,
       );
 
       expect(res.status).toBe(404);
@@ -196,7 +196,7 @@ describe('Actions (e2e)', () => {
 
     it('authenticated non-admin user cannot access individual draft action', async () => {
       const res = await request(ctx.app.getHttpServer())
-        .get(`/actions/${testDraftAction.id}`)
+        .get(`/actions/slug/${testDraftAction.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       expect(res.status).toBe(404);
@@ -204,7 +204,7 @@ describe('Actions (e2e)', () => {
 
     it('admin can access individual draft action', async () => {
       const res = await request(ctx.app.getHttpServer())
-        .get(`/actions/${testDraftAction.id}`)
+        .get(`/actions/slug/${testDraftAction.id}`)
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`);
 
       expect(res.status).toBe(200);
@@ -249,7 +249,7 @@ describe('Actions (e2e)', () => {
       });
 
       const res = await request(ctx.app.getHttpServer())
-        .get(`/actions/${action!.id}`)
+        .get(`/actions/slug/${action!.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       expect(res.status).toBe(200);
@@ -268,7 +268,7 @@ describe('Actions (e2e)', () => {
 
         // Use admin token to access draft action
         const res = await request(ctx.app.getHttpServer())
-          .get(`/actions/${newAction.id}`)
+          .get(`/actions/slug/${newAction.id}`)
           .set('Authorization', `Bearer ${ctx.adminAccessToken}`);
 
         expect(res.status).toBe(200);
@@ -290,7 +290,7 @@ describe('Actions (e2e)', () => {
 
         // Verify initial draft status using admin token
         let res = await request(ctx.app.getHttpServer())
-          .get(`/actions/${newAction.id}`)
+          .get(`/actions/slug/${newAction.id}`)
           .set('Authorization', `Bearer ${ctx.adminAccessToken}`);
 
         expect(res.body.status).toBe(ActionStatus.Draft);
@@ -363,7 +363,7 @@ describe('Actions (e2e)', () => {
 
         // Verify by fetching the action
         const getRes = await request(ctx.app.getHttpServer())
-          .get(`/actions/${newAction.id}`)
+          .get(`/actions/slug/${newAction.id}`)
           .set('Authorization', `Bearer ${ctx.accessToken}`);
 
         expect(getRes.body.status).toBe(ActionStatus.MemberAction);
@@ -519,7 +519,7 @@ describe('Actions (e2e)', () => {
 
         // Get final action state
         const res = await request(ctx.app.getHttpServer())
-          .get(`/actions/${newAction.id}`)
+          .get(`/actions/slug/${newAction.id}`)
           .set('Authorization', `Bearer ${ctx.accessToken}`);
 
         expect(res.status).toBe(200);
@@ -576,7 +576,7 @@ describe('Actions (e2e)', () => {
 
       // Verify status is GatheringCommitments
       let res = await request(ctx.app.getHttpServer())
-        .get(`/actions/${newAction.id}`)
+        .get(`/actions/slug/${newAction.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       expect(res.body.status).toBe(ActionStatus.GatheringCommitments);
@@ -588,7 +588,7 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       res = await request(ctx.app.getHttpServer())
-        .get(`/actions/${newAction.id}`)
+        .get(`/actions/slug/${newAction.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       expect(res.body.status).toBe(ActionStatus.GatheringCommitments);
@@ -601,7 +601,7 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`);
 
       res = await request(ctx.app.getHttpServer())
-        .get(`/actions/${newAction.id}`)
+        .get(`/actions/slug/${newAction.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       expect(res.body.status).toBe(ActionStatus.CommitmentsReached);
@@ -656,7 +656,7 @@ describe('Actions (e2e)', () => {
 
       // Verify initial state
       let res = await request(ctx.app.getHttpServer())
-        .get(`/actions/${newAction.id}`)
+        .get(`/actions/slug/${newAction.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       expect(res.body.status).toBe(ActionStatus.MemberAction);
@@ -670,7 +670,7 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       res = await request(ctx.app.getHttpServer())
-        .get(`/actions/${newAction.id}`)
+        .get(`/actions/slug/${newAction.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       expect(res.body.status).toBe(ActionStatus.MemberAction);
@@ -684,7 +684,7 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`);
 
       res = await request(ctx.app.getHttpServer())
-        .get(`/actions/${newAction.id}`)
+        .get(`/actions/slug/${newAction.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       expect(res.body.status).toBe(ActionStatus.Resolution);
@@ -733,7 +733,7 @@ describe('Actions (e2e)', () => {
 
       // Verify no automatic transition occurs with 0 users
       const res = await request(ctx.app.getHttpServer())
-        .get(`/actions/${newAction.id}`)
+        .get(`/actions/slug/${newAction.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       expect(res.body.status).toBe(ActionStatus.MemberAction);
