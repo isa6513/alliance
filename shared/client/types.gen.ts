@@ -1092,6 +1092,19 @@ export type UserListResponses = {
 
 export type UserListResponse = UserListResponses[keyof UserListResponses];
 
+export type UserMembersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/members';
+};
+
+export type UserMembersResponses = {
+    200: Array<ProfileDto>;
+};
+
+export type UserMembersResponse = UserMembersResponses[keyof UserMembersResponses];
+
 export type UserMyProfileData = {
     body?: never;
     path?: never;

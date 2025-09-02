@@ -216,6 +216,15 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('members')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [ProfileDto] })
+  async members(): Promise<ProfileDto[]> {
+    return (await this.userService.findAll()).map(
+      (user) => new ProfileDto(user),
+    );
+  }
+
   @Get('myprofile')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ProfileDto })

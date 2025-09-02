@@ -81,7 +81,7 @@ const NavbarHorizontal: React.FC = () => {
           <ProfileDropdown />
         </div>
       </div>
-      <div className="h-[45px]"></div>
+      <div className="h-[95px] md:h-[55px]"></div>
     </>
   );
 };
