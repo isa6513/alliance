@@ -236,7 +236,7 @@ export class UserController {
     return new ProfileDto(user);
   }
 
-  @Get(':id')
+  @Get('slug/:id')
   @Public()
   @ApiOkResponse({ type: ProfileDto })
   @ApiUnauthorizedResponse()

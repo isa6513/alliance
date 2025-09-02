@@ -20,7 +20,6 @@ const ProfileImage = ({
   return (
     <img
       src={!!pfp ? getImageSource(pfp) : userImage}
-      alt="Profile"
       className={`object-cover bg-white inline ${className} ${
         sizeClass[size]
       } ${!pfp ? "border border-zinc-300" : ""}`}

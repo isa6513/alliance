@@ -7,7 +7,11 @@ import {
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { setRevalidate, useAppLoaderData } from "../../applayout";
+import {
+  ActionWithRelation,
+  setRevalidate,
+  useAppLoaderData,
+} from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
 import CheckIcon from "../../components/icons/CheckIcon";
@@ -30,17 +34,19 @@ const HomePage = () => {
   const navigate = useNavigate();
   const { actions, posts, activities } = useAppLoaderData();
 
-  const [currentTask, setCurrentTask] = useState<ActionDto | null>(null);
+  const [currentTask, setCurrentTask] = useState<ActionWithRelation | null>(
+    null
+  );
 
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
   });
 
-  const [todoActions, setTodoActions] = useState<ActionDto[]>(
+  const [todoActions, setTodoActions] = useState<ActionWithRelation[]>(
     actions.filter((action) => canCompleteAction(action, action.relation))
   );
 
-  const [newActions, setNewActions] = useState<ActionDto[]>(
+  const [newActions, setNewActions] = useState<ActionWithRelation[]>(
     actions.filter(
       (action) =>
         action.relation === "none" && action.status === "gathering_commitments"

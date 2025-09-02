@@ -1124,7 +1124,7 @@ export type UserFindOneData = {
         id: number;
     };
     query?: never;
-    url: '/user/{id}';
+    url: '/user/slug/{id}';
 };
 
 export type UserFindOneErrors = {
@@ -1390,6 +1390,38 @@ export type ActionsFriendActivityResponses = {
 
 export type ActionsFriendActivityResponse = ActionsFriendActivityResponses[keyof ActionsFriendActivityResponses];
 
+export type ActionsFindOneData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/slug/{id}';
+};
+
+export type ActionsFindOneErrors = {
+    401: unknown;
+};
+
+export type ActionsFindOneResponses = {
+    200: ActionDto;
+};
+
+export type ActionsFindOneResponse = ActionsFindOneResponses[keyof ActionsFindOneResponses];
+
+export type ActionsCreateData = {
+    body: CreateActionDto;
+    path?: never;
+    query?: never;
+    url: '/actions/create';
+};
+
+export type ActionsCreateResponses = {
+    200: ActionDto;
+};
+
+export type ActionsCreateResponse = ActionsCreateResponses[keyof ActionsCreateResponses];
+
 export type ActionsRemoveData = {
     body?: never;
     path: {
@@ -1402,25 +1434,6 @@ export type ActionsRemoveData = {
 export type ActionsRemoveResponses = {
     200: unknown;
 };
-
-export type ActionsFindOneData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/actions/{id}';
-};
-
-export type ActionsFindOneErrors = {
-    401: unknown;
-};
-
-export type ActionsFindOneResponses = {
-    200: ActionDto;
-};
-
-export type ActionsFindOneResponse = ActionsFindOneResponses[keyof ActionsFindOneResponses];
 
 export type ActionsUpdateData = {
     body: UpdateActionDto;
@@ -1436,19 +1449,6 @@ export type ActionsUpdateResponses = {
 };
 
 export type ActionsUpdateResponse = ActionsUpdateResponses[keyof ActionsUpdateResponses];
-
-export type ActionsCreateData = {
-    body: CreateActionDto;
-    path?: never;
-    query?: never;
-    url: '/actions/create';
-};
-
-export type ActionsCreateResponses = {
-    200: ActionDto;
-};
-
-export type ActionsCreateResponse = ActionsCreateResponses[keyof ActionsCreateResponses];
 
 export type ActionsFindCompletedForUserData = {
     body?: never;
@@ -2139,26 +2139,13 @@ export type TasksGetFormResponsesResponses = {
 
 export type TasksGetFormResponsesResponse = TasksGetFormResponsesResponses[keyof TasksGetFormResponsesResponses];
 
-export type TasksDeleteFormData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/tasks/{id}';
-};
-
-export type TasksDeleteFormResponses = {
-    200: unknown;
-};
-
 export type TasksGetFormData = {
     body?: never;
     path: {
         id: number;
     };
     query?: never;
-    url: '/tasks/{id}';
+    url: '/tasks/slug/{id}';
 };
 
 export type TasksGetFormResponses = {
@@ -2177,6 +2164,19 @@ export type TasksUpdateFormData = {
 };
 
 export type TasksUpdateFormResponses = {
+    200: unknown;
+};
+
+export type TasksDeleteFormData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/{id}';
+};
+
+export type TasksDeleteFormResponses = {
     200: unknown;
 };
 

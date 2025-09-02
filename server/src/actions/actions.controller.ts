@@ -265,7 +265,7 @@ export class ActionsController {
     return this.actionsService.friendActivity(req.user.sub);
   }
 
-  @Get(':id')
+  @Get('slug/:id')
   @UseGuards(AuthOptionalGuard)
   @ApiOkResponse({ type: ActionDto })
   @ApiUnauthorizedResponse()
