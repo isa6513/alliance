@@ -314,7 +314,7 @@ jobs:
         working-directory: ./server
 
       - name: Zip Build Output
-        run: zip -r nest-build.zip dist package.json package-lock.json
+        run: zip -r nest-build.zip dist package.json package-lock.json migrations
         working-directory: ./server
 
       - name: Upload Artifact
@@ -342,88 +342,27 @@ jobs:
           source: "nest-build.zip"
           target: "~/"
 
-      - name: SSH and Blue-Green Deploy on EC2
+      - name: SSH and Deploy Backend on EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.INSTANCE_IP }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            set -Eeuo pipefail
-
-            # --- Node & PM2 setup ---
-            if ! command -v nvm >/dev/null 2>&1; then
-              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-            fi
+            set -Euo pipefail
+            # Install nvm and Node.js 20
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
             nvm install 20
             nvm use 20
             nvm alias default 20
 
-            npm install -g pm2@latest
+            cd ~/
+            rm -rf nest-backend-deploy-backup || true
+            mv nest-backend nest-backend-deploy-backup
 
-            # --- Directories ---
-            BASE="$HOME/apps/nest"
-            RELEASES="$BASE/releases"
-            CURRENT="$BASE/current"
-            ECOSYSTEM="$BASE/ecosystem.config.js"
-            mkdir -p "$RELEASES"
-
-            TS="$(date +%Y%m%d%H%M%S)"
-            NEW_RELEASE="$RELEASES/$TS"
-            mkdir -p "$NEW_RELEASE"
-
-            # --- Unpack new build into a fresh release dir ---
-            unzip -o "$HOME/nest-build.zip" -d "$NEW_RELEASE"
-
-            # --- Prod deps for the new release only ---
-            cd "$NEW_RELEASE"
-            # If your artifact already contains node_modules, you can skip this npm install.
-            NODE_OPTIONS=--max_old_space_size=800 npm install --omit=dev --max_old_space_size=800
-
-            # --- Env shared across processes (pm2 will inject from env_production) ---
-            # We’ll keep env in the ecosystem file (alternatively, write a .env and load it).
-            cat > "$ECOSYSTEM" <<'EOF'
-            module.exports = {
-              apps: [{
-                name: "nest-app",
-                script: "./current/dist/src/main.js",
-                cwd: process.env.HOME + "/apps/nest",
-                instances: 2,
-                exec_mode: "cluster",
-                max_memory_restart: "600M",
-                env_production: {
-                  NODE_ENV: "production",
-                  DB_HOST: process.env.DB_HOST,
-                  DB_PORT: process.env.DB_PORT,
-                  DB_USERNAME: process.env.DB_USERNAME,
-                  DB_PASSWORD: process.env.DB_PASSWORD,
-                  DB_NAME: "alliance",
-                  JWT_SECRET: process.env.JWT_SECRET,
-                  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
-                  ADMIN_USER: process.env.ADMIN_USER,
-                  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
-                  SMTP_HOST: process.env.SMTP_HOST,
-                  SMTP_USER: process.env.SMTP_USER,
-                  SMTP_PASSWORD: process.env.SMTP_PASSWORD,
-                  STRIPE_ENDPOINT_SECRET: process.env.STRIPE_ENDPOINT_SECRET,
-                  STRIPE_API_KEY: process.env.STRIPE_API_KEY,
-                  ASSETS_BUCKET: process.env.ASSETS_BUCKET,
-                  POSTHOG_KEY: process.env.POSTHOG_KEY,
-                  SINCH_PROJECT_ID: process.env.SINCH_PROJECT_ID,
-                  SINCH_KEY_ID: process.env.SINCH_KEY_ID,
-                  SINCH_KEY_SECRET: process.env.SINCH_KEY_SECRET,
-                  SINCH_NUMBER: process.env.SINCH_NUMBER,
-                  SINCH_REGION: process.env.SINCH_REGION,
-                  APP_URL: process.env.APP_URL,
-                  PORT: 3005
-                }
-              }]
-            }
-            EOF
-
-            # --- Export secrets for this session so pm2 can read them when reloading ---
             export DB_HOST=${{ secrets.RDS_HOSTNAME }}
             export DB_PORT=${{ secrets.RDS_PORT }}
             export DB_USERNAME=${{ secrets.RDS_USERNAME }}
@@ -446,48 +385,38 @@ jobs:
             export SINCH_KEY_SECRET=${{ secrets.SINCH_KEY_SECRET }}
             export SINCH_NUMBER=${{ secrets.SINCH_NUMBER }}
             export SINCH_REGION=${{ secrets.SINCH_REGION }}
-            export APP_URL="https://${{ vars.DOMAIN_NAME }}"
+            export APP_URL=https://${{vars.DOMAIN_NAME}}
 
-            # --- Migrations against the target DB (from the new release) ---
-            # If your migration:run relies on ts-node, ensure dist contains the compiled migrations or adjust the command.
-            npm run migration:run || (echo "Migrations failed"; exit 1)
+            rollback () {
+              echo "Deployment failed - rolling back"
+              cd ~/
+              pm2 delete nest-app || true
+              if [ -d "nest-backend-deploy-backup" ]; then
+                rm -rf nest-backend
+                mv nest-backend-deploy-backup nest-backend
+                cd nest-backend
+                pm2 start dist/main.js --name nest-app || pm2 start dist/src/main.js --name nest-app
+              fi
+              exit 1
+            }
+            trap rollback ERR
 
-            # --- Canary start: run new code on a different port to verify health while old stays up ---
-            # Assumes your app reads PORT from env.
-            pm2 delete nest-app-canary >/dev/null 2>&1 || true
-            PORT=3006 pm2 start "$NEW_RELEASE/dist/src/main.js" --name nest-app-canary --time --update-env
+            mkdir -p ~/nest-backend
+            unzip -o ~/nest-build.zip -d ~/nest-backend
 
-            # Wait for canary to boot
-            sleep 8
+            cd ~/nest-backend
+            NODE_OPTIONS=--max_old_space_size=800 npm install --omit=dev --max_old_space_size=800
 
-            # Health check the canary directly on 3006 (bypassing Nginx)
-            # Adjust path if your health endpoint differs.
-            curl --silent --fail --show-error "http://127.0.0.1:3006/" > /dev/null
+            npm run migration:run
 
-            # --- If canary is healthy: atomically switch "current" symlink and reload main app with zero downtime ---
-            PREV_TARGET=""
-            if [ -L "$CURRENT" ]; then
-              PREV_TARGET="$(readlink "$CURRENT")"
-            fi
-
-            ln -sfn "$NEW_RELEASE" "$CURRENT"
-
-            # If nest-app not started yet (first deploy), start it; otherwise reload for zero-downtime
-            if pm2 describe nest-app >/dev/null 2>&1; then
-              pm2 reload "$ECOSYSTEM" --env production
-            else
-              pm2 start   "$ECOSYSTEM" --env production
-            fi
-
-            sleep 15
-            curl --silent --fail --show-error "http://127.0.0.1:3005" > /dev/null
-
-            # Success: kill the canary
-            pm2 delete nest-app-canary || true
+            npm install -g pm2
+            pm2 delete nest-app || true
+            pm2 start dist/src/main.js --name nest-app
             pm2 save
 
-            # --- Cleanup: keep only the 5 most recent releases ---
-            ls -1dt "$RELEASES"/* | tail -n +6 | xargs -r rm -rf
+            sleep 10
+
+            curl --silent --fail --show-error "https://${{vars.DOMAIN_NAME}}/api/" > /dev/null
 
   verify-deployment:
     needs:

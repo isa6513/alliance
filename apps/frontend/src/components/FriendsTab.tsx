@@ -10,7 +10,7 @@ import {
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link } from "react-router";
 import ProfileImage from "./ProfileImage";
 
 interface FriendsTabProps {
@@ -24,7 +24,6 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
   isMe = false,
   originalTab = "friends",
 }: FriendsTabProps) => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [friends, setFriends] = useState<ProfileDto[]>([]);
   const [receivedRequests, setReceivedRequests] = useState<ProfileDto[]>([]);
@@ -142,6 +141,8 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
     );
   }
 
+  console.log("friends", friends);
+
   return (
     <>
       <div className="flex mb-4">
@@ -191,10 +192,10 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
             ) : (
               <div className="space-y-2">
                 {friends.map((friend) => (
-                  <div
+                  <Link
                     key={friend.id}
                     className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-gray-500"
-                    onClick={() => navigate(`/user/${friend.id}`)}
+                    to={`/user/${friend.id}`}
                   >
                     <ProfileImage
                       className="!w-12 !h-12 mr-4"
@@ -218,7 +219,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
                           : "Remove friend"}
                       </Button>
                     )}
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
