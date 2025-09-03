@@ -4,15 +4,20 @@ import {
   PartialType,
   PickType,
 } from '@nestjs/swagger';
-import { Post } from '../entities/post.entity';
-import { ProfileDto } from '../../user/user.dto';
+import { Type } from 'class-transformer';
+import { IsDefined, ValidateNested } from 'class-validator';
 import { ActionDto } from 'src/actions/dto/action.dto';
+import { ProfileDto } from '../../user/user.dto';
+import { Post } from '../entities/post.entity';
+import {
+  CreateEditableContentDto,
+  EditableContentDto,
+} from './editablecontent.dto';
 
 // return object for get requests
 export class PostDto extends PickType(Post, [
   'id',
   'title',
-  'content',
   'actionId',
   'authorId',
   'createdAt',
@@ -29,18 +34,24 @@ export class PostDto extends PickType(Post, [
   @ApiPropertyOptional({ type: Number })
   commentCount?: number;
 
+  @ApiProperty({ type: () => EditableContentDto })
+  editableContent: EditableContentDto;
+
   constructor(post: Post, commentCount?: number) {
     super();
     Object.assign(this, post);
     this.author = new ProfileDto(post.author);
     this.commentCount = commentCount;
+    this.editableContent = new EditableContentDto(post.editableContent);
   }
 }
 
-export class CreatePostDto extends PickType(Post, [
-  'title',
-  'content',
-  'actionId',
-]) {}
+export class CreatePostDto extends PickType(Post, ['title', 'actionId']) {
+  @ApiProperty({ type: CreateEditableContentDto })
+  @ValidateNested()
+  @Type(() => CreateEditableContentDto)
+  @IsDefined()
+  editableContent: CreateEditableContentDto;
+}
 
 export class UpdatePostDto extends PartialType(CreatePostDto) {}

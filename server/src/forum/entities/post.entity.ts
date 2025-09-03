@@ -1,17 +1,19 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { Allow, IsNotEmpty } from 'class-validator';
+import { Allow, IsNotEmpty, IsOptional } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Action } from '../../actions/entities/action.entity';
 import { User } from '../../user/user.entity';
+import { EditableContent } from './editablecontent.entity';
 
 @Entity()
 export class Post {
@@ -25,10 +27,16 @@ export class Post {
   @IsNotEmpty()
   title: string;
 
-  @Column('text')
-  @ApiProperty()
-  @IsNotEmpty()
-  content: string;
+  @OneToOne(() => EditableContent, {
+    cascade: true,
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  @ApiProperty({ type: () => EditableContent })
+  @Allow()
+  @Type(() => EditableContent)
+  editableContent: EditableContent;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn()
@@ -50,9 +58,10 @@ export class Post {
   action: Action;
 
   @Column({ nullable: true })
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional({ required: false })
+  @IsOptional()
   @Allow()
-  actionId: number;
+  actionId?: number;
 
   @CreateDateColumn()
   @ApiProperty()

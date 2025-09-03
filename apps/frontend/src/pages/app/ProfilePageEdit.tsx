@@ -10,7 +10,6 @@ import {
   userUpdate,
 } from "@alliance/shared/client";
 import { useAppLoaderData } from "../../applayout";
-import { getImageSource } from "../../lib/config";
 
 const ProfileEditPage: React.FC = () => {
   const { user } = useAuth();
@@ -133,9 +132,7 @@ const ProfileEditPage: React.FC = () => {
               src={
                 avatarFile
                   ? URL.createObjectURL(avatarFile)
-                  : avatarUrl
-                  ? getImageSource(avatarUrl)
-                  : undefined
+                  : avatarUrl ?? undefined
               }
               className="mt-[-55px] w-29 h-29 rounded-md object-cover"
             />

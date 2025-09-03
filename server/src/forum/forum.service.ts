@@ -20,6 +20,7 @@ import {
 } from './dto/comment.dto';
 import { CreatePostDto, PostDto, UpdatePostDto } from './dto/post.dto';
 import { Comment, CommentParentObject } from './entities/comment.entity';
+import { EditableContent } from './entities/editablecontent.entity';
 import { Post } from './entities/post.entity';
 
 @Injectable()
@@ -35,6 +36,8 @@ export class ForumService {
     private userRepository: Repository<User>,
     @InjectRepository(ActionActivity)
     private actionActivityRepository: Repository<ActionActivity>,
+    @InjectRepository(EditableContent)
+    private editableContentRepository: Repository<EditableContent>,
   ) {}
 
   async createPost(
@@ -44,10 +47,17 @@ export class ForumService {
     const user = await this.userRepository.findOneOrFail({
       where: { id: userId },
     });
+    const content = this.editableContentRepository.create({
+      body: createPostDto.editableContent.body,
+      attachments: createPostDto.editableContent.attachments ?? [],
+    });
+    await this.editableContentRepository.save(content);
     const post = this.postRepository.create({
-      ...createPostDto,
+      title: createPostDto.title,
+      actionId: createPostDto.actionId,
       author: user,
       authorId: user.id,
+      editableContent: content,
     });
     return this.postRepository.save(post);
   }
@@ -56,7 +66,7 @@ export class ForumService {
     const posts = await this.postRepository
       .find({
         where: { deleted: false },
-        relations: ['author', 'action'],
+        relations: ['author', 'action', 'editableContent'],
         order: { updatedAt: 'DESC' },
       })
       .then((posts) => {
@@ -82,7 +92,7 @@ export class ForumService {
   async findPostsByAction(actionId: number): Promise<Post[]> {
     const posts = await this.postRepository.find({
       where: { actionId, deleted: false },
-      relations: ['author', 'action'],
+      relations: ['author', 'action', 'editableContent'],
       order: { updatedAt: 'DESC' },
     });
     const postsWithComments = await Promise.all(
@@ -106,7 +116,7 @@ export class ForumService {
   async findOnePost(id: number): Promise<Post> {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['author', 'action'],
+      relations: ['author', 'action', 'editableContent'],
     });
 
     if (!post || post.deleted) {
@@ -122,7 +132,7 @@ export class ForumService {
         parentObjectId: postId,
         parentObjectType: CommentParentObject.Post,
       },
-      relations: ['author'],
+      relations: ['author', 'editableContent'],
       order: { createdAt: 'ASC' },
     });
 
@@ -135,7 +145,7 @@ export class ForumService {
         parentObjectId: postId,
         parentObjectType: CommentParentObject.Post,
       },
-      relations: ['author'],
+      relations: ['author', 'editableContent'],
       order: { createdAt: 'DESC' },
     });
 
@@ -148,7 +158,7 @@ export class ForumService {
         parentObjectId: activityId,
         parentObjectType: CommentParentObject.Activity,
       },
-      relations: ['author'],
+      relations: ['author', 'editableContent'],
       order: { createdAt: 'ASC' },
     });
 
@@ -161,7 +171,7 @@ export class ForumService {
         parentObjectId: actionId,
         parentObjectType: CommentParentObject.Action,
       },
-      relations: ['author'],
+      relations: ['author', 'editableContent'],
       order: { createdAt: 'ASC' },
     });
 
@@ -222,7 +232,21 @@ export class ForumService {
       throw new NotFoundException('You can only edit your own posts');
     }
 
-    await this.postRepository.update(id, updatePostDto);
+    await this.postRepository.update(id, {
+      title: updatePostDto.title ?? post.title,
+      actionId: updatePostDto.actionId ?? post.actionId,
+    });
+    if (updatePostDto.editableContent) {
+      const ec = await this.editableContentRepository.findOneBy({
+        id: post.editableContent.id,
+      });
+      if (ec) {
+        ec.body = updatePostDto.editableContent.body ?? ec.body;
+        ec.attachments =
+          updatePostDto.editableContent.attachments ?? ec.attachments;
+        await this.editableContentRepository.save(ec);
+      }
+    }
     return this.findOnePost(id);
   }
 
@@ -258,13 +282,24 @@ export class ForumService {
       }
     }
 
-    if (!createCommentDto.content && !createCommentDto.attachments) {
+    if (
+      !createCommentDto.editableContent.body &&
+      (!createCommentDto.editableContent.attachments ||
+        createCommentDto.editableContent.attachments.length === 0)
+    ) {
       throw new BadRequestException('Reply cannot be empty');
     }
+
+    const content = this.editableContentRepository.create({
+      body: createCommentDto.editableContent.body,
+      attachments: createCommentDto.editableContent.attachments ?? [],
+    });
+    await this.editableContentRepository.save(content);
 
     const reply = this.commentRepository.create({
       ...createCommentDto,
       authorId: userId,
+      editableContent: content,
     });
 
     await this.postRepository.update(createCommentDto.parentObjectId, {
@@ -278,19 +313,18 @@ export class ForumService {
       throw new NotFoundException(`Reply author with ID "${userId}" not found`);
     }
 
-    // Save the reply first to get the ID
     await this.commentRepository.save(reply);
 
     const replyWithAuthor = await this.commentRepository.findOne({
       where: { id: reply.id },
-      relations: ['author'],
+      relations: ['author', 'editableContent'],
     });
 
     this.sendNotifsForNewComment(replyWithAuthor!);
 
     const loadedReply = await this.commentRepository.findOne({
       where: { id: reply.id },
-      relations: ['author'],
+      relations: ['author', 'editableContent'],
     });
     if (!loadedReply) {
       throw new NotFoundException(`Reply with ID "${reply.id}" not found`);
@@ -427,7 +461,7 @@ export class ForumService {
   ): Promise<Comment> {
     const reply = await this.commentRepository.findOne({
       where: { id },
-      relations: ['author'],
+      relations: ['author', 'editableContent'],
     });
 
     if (!reply) {
@@ -438,10 +472,20 @@ export class ForumService {
       throw new NotFoundException('You can only edit your own replies');
     }
 
-    await this.commentRepository.update(id, updateCommentDto);
+    if (updateCommentDto.editableContent) {
+      const ec = await this.editableContentRepository.findOneBy({
+        id: reply.editableContent.id,
+      });
+      if (ec) {
+        ec.body = updateCommentDto.editableContent.body ?? ec.body;
+        ec.attachments =
+          updateCommentDto.editableContent.attachments ?? ec.attachments;
+        await this.editableContentRepository.save(ec);
+      }
+    }
     const updatedReply = await this.commentRepository.findOne({
       where: { id },
-      relations: ['author'],
+      relations: ['author', 'editableContent'],
     });
 
     if (!updatedReply) {
@@ -449,7 +493,6 @@ export class ForumService {
         `Reply with ID "${id}" not found after update`,
       );
     }
-
     return updatedReply;
   }
 

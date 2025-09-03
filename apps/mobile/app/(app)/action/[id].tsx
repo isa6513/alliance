@@ -1,14 +1,20 @@
-import React, { useCallback, useEffect, useState } from "react";
 import {
-  View,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
+  faCheckCircle,
+  faChevronLeft,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { Stack, router, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
   ActivityIndicator,
-  Image,
   Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useLocalSearchParams, Stack, router } from "expo-router";
+import Markdown from "react-native-markdown-display";
 import {
   ActionDto,
   UserActionDto,
@@ -16,16 +22,9 @@ import {
   actionsJoin,
   actionsMyStatus,
 } from "../../../../../shared/client";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { getImageSource } from "../../../lib/config";
-import {
-  faCheckCircle,
-  faChevronLeft,
-} from "@fortawesome/free-solid-svg-icons";
-import Markdown from "react-native-markdown-display";
-import { colors } from "../../../lib/style/colors";
 import { Button, ButtonColor } from "../../../components/system";
 import Text, { TextStyle } from "../../../components/system/Text";
+import { colors } from "../../../lib/style/colors";
 export default function ActionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [action, setAction] = useState<ActionDto | null>(null);
@@ -126,7 +125,7 @@ export default function ActionDetailScreen() {
       <ScrollView style={styles.container}>
         {action.image && (
           <Image
-            source={{ uri: getImageSource(action.image) }}
+            source={{ uri: action.image }}
             style={styles.heroImage}
             resizeMode="cover"
           />

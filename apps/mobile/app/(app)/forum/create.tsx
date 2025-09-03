@@ -85,8 +85,8 @@ export default function CreatePostScreen() {
       const response = await forumCreatePost({
         body: {
           title: title.trim(),
-          content: content.trim(),
           actionId: selectedAction?.id,
+          editableContent: { body: content.trim(), attachments: [] },
         },
       });
 

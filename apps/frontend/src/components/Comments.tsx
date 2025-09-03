@@ -2,6 +2,7 @@ import {
   CommentDto,
   CommentParentObject,
   CreateCommentDto,
+  CreateEditableContentDto,
   forumCreateComment,
   forumDeleteComment,
   forumFindCommentsForAction,
@@ -10,13 +11,13 @@ import {
   forumLikeComment,
   forumUnlikeComment,
   forumUpdateComment,
+  imagesUploadImage,
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ReplyComponent from "./forum/ReplyComponent";
 import ReplyForm from "./forum/ReplyForm";
-import { imagesUploadImage } from "@alliance/shared/client";
 
 export interface CommentsProps {
   objectId: number;
@@ -26,7 +27,8 @@ export interface CommentsProps {
 }
 
 const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
-  const [replyContent, setReplyContent] = useState("");
+  const [editableContent, setEditableContent] =
+    useState<CreateEditableContentDto>({ body: "", attachments: [] });
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newlyAddedReplies, setNewlyAddedReplies] = useState<Set<number>>(
@@ -41,7 +43,7 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
 
   const [comments, setComments] = useState<CommentDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [attachments, setAttachments] = useState<string[]>([]);
+  // attachments are managed inside editableContent
 
   const fetchComments = useCallback(async () => {
     let response;
@@ -98,28 +100,28 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
     }
   }, [searchParams, setSearchParams]);
 
-  const handleSubmitReply = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmitReply = async (contentDto: CreateEditableContentDto) => {
     try {
       setIsSubmitting(true);
       // Upload attachments first (if any) to get keys
       let attachmentKeys: string[] = [];
-      if (attachments.length > 0) {
+      if (contentDto.attachments.length > 0) {
         const uploads = await Promise.all(
-          attachments.map(async (fileB64) => {
-            const res = await imagesUploadImage({ body: { file: fileB64 } });
-            return res.data as unknown as string; // API returns key
+          contentDto.attachments.map(async (fileB64: string) => {
+            if (fileB64.startsWith("data:")) {
+              const res = await imagesUploadImage({ body: { file: fileB64 } });
+              return res.data as unknown as string; // API returns key
+            }
+            return fileB64; // already a key
           })
         );
         attachmentKeys = uploads.filter(Boolean) as string[];
       }
       const commentDto: CreateCommentDto = {
-        content: replyContent,
         parentObjectId: Number(objectId),
         parentId: replyingTo ?? undefined,
         parentObjectType: type,
-        attachments: attachmentKeys,
+        editableContent: { body: contentDto.body, attachments: attachmentKeys },
       };
 
       const response = await forumCreateComment({
@@ -143,8 +145,7 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
         fetchComments();
       }
 
-      setReplyContent("");
-      setAttachments([]);
+      setEditableContent({ body: "", attachments: [] });
       setReplyingTo(null);
       setError(null);
     } catch (err) {
@@ -185,11 +186,14 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
     }
   };
 
-  const handleUpdateReply = async (replyId: number, content: string) => {
+  const handleUpdateReply = async (
+    replyId: number,
+    content: CreateEditableContentDto
+  ) => {
     try {
       await forumUpdateComment({
         path: { id: replyId.toString() },
-        body: { content },
+        body: { editableContent: content },
       });
 
       // Update the comment in the local state to trigger re-render
@@ -201,7 +205,7 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
         ): CommentDto[] => {
           return comments.map((comment) => {
             if (comment.id === replyId) {
-              return { ...comment, content };
+              return { ...comment, editableContent: { ...content, id: -1 } };
             }
             if (comment.children) {
               return {
@@ -248,8 +252,6 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
                 user={user}
                 replyingTo={replyingTo}
                 setReplyingTo={setReplyingTo}
-                replyContent={replyContent}
-                setReplyContent={setReplyContent}
                 handleSubmitReply={handleSubmitReply}
                 handleDeleteReply={handleDeleteReply}
                 isSubmitting={isSubmitting}
@@ -259,8 +261,6 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
                 onUpdateReply={handleUpdateReply}
                 onLikeReply={handleLikeReply}
                 homeStyle={homeStyle}
-                attachments={attachments}
-                setAttachments={setAttachments}
               />
             ))}
         </div>
@@ -269,14 +269,12 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
       {user && !replyingTo ? (
         <ReplyForm
           parentId={null}
-          replyContent={replyContent}
-          setReplyContent={setReplyContent}
+          editableContent={editableContent}
+          setEditableContent={setEditableContent}
           onSubmit={handleSubmitReply}
           isSubmitting={isSubmitting}
           setReplyingTo={setReplyingTo}
           compact={compact}
-          attachments={attachments}
-          setAttachments={setAttachments}
         />
       ) : !user ? (
         <div className="text-center py-6 bg-gray-50 rounded-lg">

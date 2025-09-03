@@ -155,6 +155,17 @@ export type ActionActivityType = 'user_joined' | 'user_completed';
  */
 export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
 
+export type EditableContent = {
+    /**
+     * Markdown or plain text body
+     */
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
+};
+
 export type ActionActivity = {
     id: number;
     /**
@@ -165,8 +176,7 @@ export type ActionActivity = {
     userId: number;
     createdAt: string;
     dollar_amount?: number;
-    description?: string;
-    attachments?: Array<string>;
+    editableContent?: EditableContent;
     likes: Array<User>;
 };
 
@@ -286,9 +296,19 @@ export type ActionDto = {
 
 export type CommentParentObject = 'post' | 'action' | 'activity';
 
+export type EditableContentDto = {
+    /**
+     * Markdown or plain text body
+     */
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
+};
+
 export type CommentDto = {
     id: number;
-    content: string;
     parentObjectType: CommentParentObject;
     parentObjectId: number;
     deleted: boolean;
@@ -299,7 +319,7 @@ export type CommentDto = {
     author: ProfileDto;
     children?: Array<CommentDto>;
     likes: Array<ProfileDto>;
-    attachments?: Array<string>;
+    editableContent: EditableContentDto;
 };
 
 export type ActionActivityDto = {
@@ -309,14 +329,14 @@ export type ActionActivityDto = {
      */
     type: ActionActivityType;
     createdAt: string;
-    description?: string;
-    attachments?: Array<string>;
     user: ProfileDto;
     actionId: number;
     action: ActionDto;
     actionName: string;
     likes: Array<ProfileDto>;
     comments: Array<CommentDto>;
+    description?: string;
+    attachments?: Array<string>;
 };
 
 export type UserActionRelation = 'joined' | 'completed' | 'none';
@@ -456,11 +476,10 @@ export type CreateActionEventDto = {
 };
 
 export type CreateCommentDto = {
-    content: string;
+    editableContent: EditableContent;
     parentObjectType: CommentParentObject;
     parentObjectId: number;
     parentId?: number;
-    attachments?: Array<string>;
 };
 
 export type UpdateActionActivityDto = {
@@ -481,16 +500,26 @@ export type NotificationDto = {
     updatedAt: string;
 };
 
+export type CreateEditableContentDto = {
+    /**
+     * Markdown or plain text body
+     */
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
+};
+
 export type CreatePostDto = {
     title: string;
-    content: string;
     actionId?: number;
+    editableContent: CreateEditableContentDto;
 };
 
 export type PostDto = {
     id: number;
     title: string;
-    content: string;
     authorId: number;
     actionId?: number;
     createdAt: string;
@@ -499,20 +528,20 @@ export type PostDto = {
     action?: ActionDto;
     author: ProfileDto;
     commentCount?: number;
+    editableContent: EditableContentDto;
 };
 
 export type UpdatePostDto = {
     title?: string;
-    content?: string;
     actionId?: number;
+    editableContent?: CreateEditableContentDto;
 };
 
 export type UpdateCommentDto = {
-    content?: string;
+    editableContent?: EditableContent;
     parentObjectType?: CommentParentObject;
     parentObjectId?: number;
     parentId?: number;
-    attachments?: Array<string>;
 };
 
 export type CitySearchDto = {

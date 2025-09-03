@@ -1,18 +1,20 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { Allow, IsOptional } from 'class-validator';
+import { EditableContent } from 'src/forum/entities/editablecontent.entity';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  ManyToOne,
+  Entity,
   JoinColumn,
-  ManyToMany,
   JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Action } from './action.entity';
 import { User } from '../../user/user.entity';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Allow, IsOptional } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Action } from './action.entity';
 
 export enum ActionActivityType {
   USER_JOINED = 'user_joined',
@@ -73,15 +75,17 @@ export class ActionActivity {
   @IsOptional()
   dollar_amount?: number;
 
-  @Column({ nullable: true })
-  @ApiPropertyOptional()
+  @OneToOne(() => EditableContent, {
+    cascade: true,
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  @Allow()
   @IsOptional()
-  description?: string;
-
-  @Column({ type: 'jsonb', default: [] })
-  @ApiPropertyOptional({ type: String, isArray: true })
-  @IsOptional()
-  attachments?: string[];
+  @Type(() => EditableContent)
+  @ApiPropertyOptional({ type: () => EditableContent })
+  editableContent?: EditableContent;
 
   @ManyToMany(() => User, { onDelete: 'CASCADE', eager: true })
   @JoinTable()

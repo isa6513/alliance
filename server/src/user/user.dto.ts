@@ -6,6 +6,7 @@ import {
   PickType,
 } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
+import { getImageSource } from 'src/images/images.service';
 import { FriendStatus } from './friend.entity';
 import { User } from './user.entity';
 
@@ -59,7 +60,6 @@ export class ProfileDto extends PickType(User, [
   ) {
     super();
     this.id = user.id;
-    this.profilePicture = user.profilePicture;
     this.profileDescription = user.profileDescription;
     this.admin = user.admin;
     this.staff = user.staff;
@@ -67,6 +67,9 @@ export class ProfileDto extends PickType(User, [
       this.displayName = 'Someone';
     } else {
       this.displayName = user.name;
+    }
+    if (user.profilePicture) {
+      this.profilePicture = getImageSource(user.profilePicture);
     }
   }
 }

@@ -1,13 +1,13 @@
+import { ActionStatus } from 'src/actions/entities/action-event.entity';
+import { CreateCommentDto, UpdateCommentDto } from 'src/forum/dto/comment.dto';
+import { CommentParentObject } from 'src/forum/entities/comment.entity';
+import { User } from 'src/user/user.entity';
 import * as request from 'supertest';
+import { Repository } from 'typeorm';
 import { Action } from '../src/actions/entities/action.entity';
 import { CreatePostDto } from '../src/forum/dto/post.dto';
-import { createTestApp, TestContext } from './e2e-test-utils';
 import { ForumModule } from '../src/forum/forum.module';
-import { Repository } from 'typeorm';
-import { User } from 'src/user/user.entity';
-import { ActionStatus } from 'src/actions/entities/action-event.entity';
-import { CreateCommentDto } from 'src/forum/dto/comment.dto';
-import { CommentParentObject } from 'src/forum/entities/comment.entity';
+import { createTestApp, TestContext } from './e2e-test-utils';
 
 describe('Forum (e2e)', () => {
   let ctx: TestContext;
@@ -36,12 +36,15 @@ describe('Forum (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           title: 'Test Post',
-          content: 'This is a test post',
-        })
+          editableContent: {
+            body: 'This is a test post',
+            attachments: [],
+          },
+        } satisfies CreatePostDto)
         .expect(201);
 
       expect(response.body.title).toBe('Test Post');
-      expect(response.body.content).toBe('This is a test post');
+      expect(response.body.editableContent.body).toBe('This is a test post');
       expect(response.body.authorId).toBe(ctx.testUserId);
     });
 
@@ -51,9 +54,12 @@ describe('Forum (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           title: 'Test Action Post',
-          content: 'This is a test post for an action',
+          editableContent: {
+            body: 'This is a test post for an action',
+            attachments: [],
+          },
           actionId: testAction.id,
-        })
+        } satisfies CreatePostDto)
         .expect(201);
 
       expect(response.body.title).toBe('Test Action Post');
@@ -66,8 +72,11 @@ describe('Forum (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           title: 'Test Post',
-          content: 'This is a test post',
-        })
+          editableContent: {
+            body: 'This is a test post',
+            attachments: [],
+          },
+        } satisfies CreatePostDto)
         .expect(201);
     };
 
@@ -89,9 +98,12 @@ describe('Forum (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           title: 'Test Post',
-          content: 'This is a test post',
+          editableContent: {
+            body: 'This is a test post',
+            attachments: [],
+          },
           actionId: testAction.id,
-        })
+        } satisfies CreatePostDto)
         .expect(201);
 
       const response = await request(ctx.app.getHttpServer())
@@ -121,7 +133,7 @@ describe('Forum (e2e)', () => {
 
       expect(response.body.id).toBe(postId);
       expect(response.body.title).toBeDefined();
-      expect(response.body.content).toBeDefined();
+      expect(response.body.editableContent).toBeDefined();
       expect(response.body.commentCount).toBeDefined();
     });
 
@@ -132,8 +144,11 @@ describe('Forum (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           title: 'Post to Update',
-          content: 'This post will be updated',
-        })
+          editableContent: {
+            body: 'This post will be updated',
+            attachments: [],
+          },
+        } satisfies CreatePostDto)
         .expect(201);
 
       const postId = createResponse.body.id;
@@ -144,13 +159,18 @@ describe('Forum (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           title: 'Updated Post',
-          content: 'This post has been updated',
-        })
+          editableContent: {
+            body: 'This post has been updated',
+            attachments: [],
+          },
+        } satisfies CreatePostDto)
         .expect(200);
 
       expect(response.body.id).toBe(postId);
       expect(response.body.title).toBe('Updated Post');
-      expect(response.body.content).toBe('This post has been updated');
+      expect(response.body.editableContent.body).toBe(
+        'This post has been updated',
+      );
     });
 
     it('should delete a post', async () => {
@@ -160,8 +180,11 @@ describe('Forum (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           title: 'Post to Delete',
-          content: 'This post will be deleted',
-        })
+          editableContent: {
+            body: 'This post will be deleted',
+            attachments: [],
+          },
+        } satisfies CreatePostDto)
         .expect(201);
 
       const postId = createResponse.body.id;
@@ -185,7 +208,10 @@ describe('Forum (e2e)', () => {
     beforeEach(async () => {
       const testPost: CreatePostDto = {
         title: 'Test Post for Replies',
-        content: 'This post will have replies',
+        editableContent: {
+          body: 'This post will have replies',
+          attachments: [],
+        },
         actionId: testAction.id,
       };
 
@@ -204,13 +230,16 @@ describe('Forum (e2e)', () => {
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'This is a test reply',
+          editableContent: {
+            body: 'This is a test reply',
+            attachments: [],
+          },
           parentObjectId: testPostId,
           parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
         .expect(201);
 
-      expect(response.body.content).toBe('This is a test reply');
+      expect(response.body.editableContent.body).toBe('This is a test reply');
       expect(response.body.parentObjectId).toBe(testPostId);
       expect(response.body.authorId).toBe(ctx.testUserId);
     });
@@ -221,7 +250,10 @@ describe('Forum (e2e)', () => {
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'Reply to update',
+          editableContent: {
+            body: 'Reply to update',
+            attachments: [],
+          },
           parentObjectId: testPostId,
           parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
@@ -234,12 +266,15 @@ describe('Forum (e2e)', () => {
         .patch(`/forum/comments/${replyId}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'Updated reply',
-        })
+          editableContent: {
+            body: 'Updated reply',
+            attachments: [],
+          },
+        } satisfies UpdateCommentDto)
         .expect(200);
 
       expect(response.body.id).toBe(replyId);
-      expect(response.body.content).toBe('Updated reply');
+      expect(response.body.editableContent.body).toBe('Updated reply');
     });
 
     it('should delete a reply', async () => {
@@ -248,7 +283,10 @@ describe('Forum (e2e)', () => {
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'Reply to delete',
+          editableContent: {
+            body: 'Reply to delete',
+            attachments: [],
+          },
           parentObjectId: testPostId,
           parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
@@ -299,7 +337,10 @@ describe('Forum (e2e)', () => {
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'Original user reply',
+          editableContent: {
+            body: 'Original user reply',
+            attachments: [],
+          },
           parentObjectId: testPostId,
           parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
@@ -323,7 +364,10 @@ describe('Forum (e2e)', () => {
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'This is a parent reply',
+          editableContent: {
+            body: 'This is a parent reply',
+            attachments: [],
+          },
           parentObjectId: testPostId,
           parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
@@ -336,14 +380,19 @@ describe('Forum (e2e)', () => {
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'This is a nested reply',
+          editableContent: {
+            body: 'This is a nested reply',
+            attachments: [],
+          },
           parentObjectId: testPostId,
           parentId: parentReplyId,
           parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
         .expect(201);
 
-      expect(childResponse.body.content).toBe('This is a nested reply');
+      expect(childResponse.body.editableContent.body).toBe(
+        'This is a nested reply',
+      );
       expect(childResponse.body.parentObjectId).toBe(testPostId);
       expect(childResponse.body.parentId).toBe(parentReplyId);
       expect(childResponse.body.authorId).toBe(ctx.testUserId);
@@ -355,7 +404,10 @@ describe('Forum (e2e)', () => {
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'Parent reply',
+          editableContent: {
+            body: 'Parent reply',
+            attachments: [],
+          },
           parentObjectId: testPostId,
           parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
@@ -368,7 +420,10 @@ describe('Forum (e2e)', () => {
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'First child reply',
+          editableContent: {
+            body: 'First child reply',
+            attachments: [],
+          },
           parentObjectId: testPostId,
           parentId: parentReplyId,
           parentObjectType: CommentParentObject.Post,
@@ -379,7 +434,10 @@ describe('Forum (e2e)', () => {
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'Second child reply',
+          editableContent: {
+            body: 'Second child reply',
+            attachments: [],
+          },
           parentObjectId: testPostId,
           parentId: parentReplyId,
           parentObjectType: CommentParentObject.Post,
@@ -391,7 +449,10 @@ describe('Forum (e2e)', () => {
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'Another top-level reply',
+          editableContent: {
+            body: 'Another top-level reply',
+            attachments: [],
+          },
           parentObjectId: testPostId,
           parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
@@ -415,7 +476,7 @@ describe('Forum (e2e)', () => {
         (reply) => reply.id === parentReplyId,
       );
       expect(parentReply).toBeDefined();
-      expect(parentReply.content).toBe('Parent reply');
+      expect(parentReply.editableContent.body).toBe('Parent reply');
       expect(parentReply.children).toBeDefined();
       expect(Array.isArray(parentReply.children)).toBe(true);
       expect(parentReply.children.length).toBe(2);
@@ -436,7 +497,10 @@ describe('Forum (e2e)', () => {
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'This should fail',
+          editableContent: {
+            body: 'This should fail',
+            attachments: [],
+          },
           parentObjectId: testPostId,
           parentId: 99999, // Non-existent parent
           parentObjectType: CommentParentObject.Post,
@@ -451,8 +515,11 @@ describe('Forum (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           title: 'Another Test Post',
-          content: 'This is another test post',
-        })
+          editableContent: {
+            body: 'This is another test post',
+            attachments: [],
+          },
+        } satisfies CreatePostDto)
         .expect(201);
 
       const anotherPostId = anotherPostResponse.body.id;
@@ -462,7 +529,10 @@ describe('Forum (e2e)', () => {
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'Reply on other post',
+          editableContent: {
+            body: 'Reply on other post',
+            attachments: [],
+          },
           parentObjectId: anotherPostId,
           parentObjectType: CommentParentObject.Post,
         } satisfies CreateCommentDto)
@@ -475,7 +545,10 @@ describe('Forum (e2e)', () => {
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
-          content: 'This should fail',
+          editableContent: {
+            body: 'This should fail',
+            attachments: [],
+          },
           parentObjectId: testPostId,
           parentId: otherPostReplyId, // Parent from different post
           parentObjectType: CommentParentObject.Post,

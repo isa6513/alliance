@@ -3,7 +3,6 @@ import {
   forumRemovePost,
   PostDto,
 } from "@alliance/shared/client";
-import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
@@ -11,6 +10,7 @@ import { setRevalidate } from "../../applayout";
 import Comments from "../../components/Comments";
 import ProfileImage from "../../components/ProfileImage";
 import UserDisplayName from "../../components/UserDisplayName";
+import EditableContentRenderer from "../../components/forum/EditableContentRenderer";
 import PinnedIcon from "../../components/icons/PinnedIcon";
 import { useAuth } from "../../lib/AuthContext";
 import { formatTime } from "../../lib/utils";
@@ -107,7 +107,7 @@ const PostDetailPage: React.FC = () => {
         <div className="relative">
           <Link
             to="/forum"
-            className="absolute -left-10 top-6 text-blue z-10 text-lg"
+            className="absolute -left-10 top-6 text-blue text-lg"
             title="Back to Forum"
           >
             &larr;
@@ -162,7 +162,7 @@ const PostDetailPage: React.FC = () => {
             </div>
 
             <div className="mt-4">
-              <AppMarkdownWrapper markdownContent={post.content} />
+              <EditableContentRenderer content={post.editableContent} />
             </div>
           </Card>
         </div>

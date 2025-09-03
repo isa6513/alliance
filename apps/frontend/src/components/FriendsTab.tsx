@@ -141,8 +141,6 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
     );
   }
 
-  console.log("friends", friends);
-
   return (
     <>
       <div className="flex mb-4">

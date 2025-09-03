@@ -1,17 +1,19 @@
 import {
   CommentDto,
+  CreateEditableContentDto,
   UserDto,
   forumUpdateComment,
+  imagesUploadImage,
 } from "@alliance/shared/client";
-import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { formatDistanceToNow } from "date-fns";
 import React, { useEffect, useRef, useState } from "react";
-import { getImageSource } from "../../lib/config";
 import CommentLikeButton from "../CommentLikeButton";
 import ProfileImage from "../ProfileImage";
 import UserDisplayName from "../UserDisplayName";
 import PinnedIcon from "../icons/PinnedIcon";
+import EditableContentForm from "./EditableContentForm";
+import EditableContentRenderer from "./EditableContentRenderer";
 import ReplyForm from "./ReplyForm";
 
 const countAllReplies = (replies: CommentDto[]): number => {
@@ -25,61 +27,39 @@ const countAllReplies = (replies: CommentDto[]): number => {
   return count;
 };
 
-const getDisplayContent = (
-  content: string,
-  collapsed: boolean,
-  deleted: boolean
-): React.ReactNode => {
-  const sharedClasses = "mb-1 whitespace-pre-wrap";
-  if (deleted)
-    return (
-      <div className={`${sharedClasses} text-gray-400 text-sm`}>
-        This reply has been deleted
-      </div>
-    );
-  if (!collapsed) return <AppMarkdownWrapper markdownContent={content} />;
-  const firstLine = content.split("\n")[0];
-  return content.includes("\n") ? (
-    <div className={`${sharedClasses} text-gray-500`}>{firstLine} ...</div>
-  ) : (
-    <div className={`${sharedClasses}`}>{firstLine}</div>
-  );
-};
-
 interface ReplyComponentProps {
   reply: CommentDto;
   depth?: number;
   user?: UserDto;
   replyingTo: number | null;
   setReplyingTo: (id: number | null) => void;
-  replyContent: string;
-  setReplyContent: (content: string) => void;
-  handleSubmitReply: (e: React.FormEvent) => void;
+  handleSubmitReply: (content: CreateEditableContentDto) => void;
   handleDeleteReply: (id: number) => void;
+  onUpdateReply: (id: number, content: CreateEditableContentDto) => void;
+  onLikeReply: (id: number, unlike?: boolean) => void;
   isSubmitting: boolean;
   newlyAddedReplies: Set<number>;
   highlightedReplyId: number | null;
   compact?: boolean;
-  onUpdateReply: (id: number, content: string) => void;
-  onLikeReply: (id: number, unlike?: boolean) => void;
   homeStyle?: boolean;
-  attachments: string[];
-  setAttachments: (images: string[]) => void;
 }
 
 interface ReplyContentProps
   extends Pick<
     ReplyComponentProps,
-    "reply" | "user" | "setReplyingTo" | "setReplyContent" | "handleDeleteReply"
+    | "reply"
+    | "user"
+    | "setReplyingTo"
+    | "handleDeleteReply"
+    | "onUpdateReply"
+    | "onLikeReply"
+    | "compact"
   > {
   canNest: boolean;
   isReplyingToThis: boolean;
   hasChildren: boolean;
   isCollapsed?: boolean;
   isHighlighted: boolean;
-  onUpdateReply: (id: number, content: string) => void;
-  onLikeReply: (id: number, unlike?: boolean) => void;
-  compact?: boolean;
 }
 
 const ReplyContent: React.FC<ReplyContentProps> = ({
@@ -91,19 +71,19 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
   isCollapsed = false,
   isHighlighted,
   setReplyingTo,
-  setReplyContent,
   handleDeleteReply,
   onUpdateReply,
   onLikeReply,
   compact = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(reply.content);
+  const [editContent, setEditContent] = useState(reply.editableContent.body);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [editAttachments, setEditAttachments] = useState<string[]>(
+    reply.editableContent.attachments
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -123,14 +103,35 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
   }, [showDropdown]);
 
   const handleSaveEdit = async () => {
-    if (editContent.trim() === reply.content.trim()) {
-      setIsEditing(false);
-      return;
-    }
-
     setIsUpdating(true);
     try {
-      await onUpdateReply(reply.id, editContent.trim());
+      // Upload new base64 images and keep existing keys
+      const uploads = await Promise.all(
+        editAttachments.map(async (img) => {
+          if (img.startsWith("data:")) {
+            const res = await imagesUploadImage({ body: { file: img } });
+            return (res.data as unknown as string) ?? "";
+          }
+          return img;
+        })
+      );
+      const attachmentKeys = uploads.filter(Boolean) as string[];
+
+      await forumUpdateComment({
+        path: { id: reply.id.toString() },
+        body: {
+          editableContent: {
+            body: editContent.trim(),
+            attachments: attachmentKeys,
+          },
+        },
+      });
+      console.log("updating reply");
+      console.log(attachmentKeys);
+      onUpdateReply(reply.id, {
+        body: editContent.trim(),
+        attachments: attachmentKeys,
+      });
       setIsEditing(false);
     } catch (error) {
       console.error("Failed to update reply:", error);
@@ -140,40 +141,17 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
   };
 
   const handleCancelEdit = () => {
-    setEditContent(reply.content);
+    setEditContent(reply.editableContent?.body ?? "");
+    setEditAttachments(reply.editableContent?.attachments ?? []);
     setIsEditing(false);
   };
 
   const handleStartEdit = () => {
-    setEditContent(reply.content);
+    setEditContent(reply.editableContent?.body ?? "");
+    setEditAttachments(reply.editableContent?.attachments ?? []);
     setIsEditing(true);
     setShowDropdown(false);
   };
-  const openLightbox = (idx: number) => {
-    setLightboxIndex(idx);
-    setLightboxOpen(true);
-  };
-  const closeLightbox = () => setLightboxOpen(false);
-  const nextImage = () => {
-    if (!reply.attachments || reply.attachments.length === 0) return;
-    setLightboxIndex((i) => (i + 1) % reply.attachments!.length);
-  };
-  const prevImage = () => {
-    if (!reply.attachments || reply.attachments.length === 0) return;
-    setLightboxIndex(
-      (i) => (i - 1 + reply.attachments!.length) % reply.attachments!.length
-    );
-  };
-  useEffect(() => {
-    if (!lightboxOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeLightbox();
-      if (e.key === "ArrowRight") nextImage();
-      if (e.key === "ArrowLeft") prevImage();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [lightboxOpen]);
   return (
     <div className="flex gap-3 relative">
       {/* Blue highlight indicator */}
@@ -220,37 +198,30 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
 
         {/* Middle section: Reply content */}
         <div className="mb-2">
-          {!isEditing &&
-            getDisplayContent(reply.content, isCollapsed, reply.deleted)}
-          {!isEditing && reply.attachments && reply.attachments.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {reply.attachments.map((key, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => openLightbox(idx)}
-                  className="focus:outline-none"
-                >
-                  <img
-                    src={getImageSource(key)}
-                    className="w-28 h-28 object-cover rounded"
-                  />
-                </button>
-              ))}
-            </div>
+          {!isEditing && (
+            <EditableContentRenderer
+              content={reply.editableContent}
+              collapsed={isCollapsed}
+              deleted={reply.deleted}
+            />
           )}
         </div>
 
         {isEditing ? (
-          <div className="">
-            <textarea
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              rows={3}
-              disabled={isUpdating}
+          <div className="rounded-lg p-3 bg-zinc-100">
+            <EditableContentForm
+              value={{ body: editContent, attachments: editAttachments }}
+              onChange={(val) => {
+                setEditContent(val.body);
+                setEditAttachments(val.attachments);
+              }}
+              compact={false}
+              placeholder="Edit your reply..."
             />
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-2 mt-2 justify-end items-center">
+              <span className="text-sm text-zinc-500">
+                Drag an image to attach
+              </span>
               <button
                 onClick={handleSaveEdit}
                 disabled={isUpdating || !editContent.trim()}
@@ -285,9 +256,6 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                 <button
                   onClick={() => {
                     setReplyingTo(isReplyingToThis ? null : reply.id);
-                    if (!isReplyingToThis) {
-                      setReplyContent("");
-                    }
                   }}
                   className="text-gray-600 hover:text-gray-800 hover:underline"
                 >
@@ -337,47 +305,6 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
           </div>
         )}
       </div>
-      {lightboxOpen && reply.attachments && reply.attachments.length > 0 && (
-        <div
-          className="fixed inset-0 z-[1000] bg-black/80 flex items-center justify-center"
-          onClick={closeLightbox}
-        >
-          <div
-            className="relative max-w-5xl w-full px-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={getImageSource(reply.attachments[lightboxIndex])}
-              className="max-h-[80vh] w-auto mx-auto rounded shadow-2xl"
-            />
-            {reply.attachments.length > 1 && (
-              <>
-                <button
-                  onClick={prevImage}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white rounded-full w-10 h-10 flex items-center justify-center"
-                  aria-label="Previous image"
-                >
-                  {"<"}
-                </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white rounded-full w-10 h-10 flex items-center justify-center"
-                  aria-label="Next image"
-                >
-                  {">"}
-                </button>
-              </>
-            )}
-            <button
-              onClick={closeLightbox}
-              className="absolute -right-6 top-4 bg-white/20 hover:bg-white/30 text-black rounded-full w-9 h-9 flex items-center justify-center font-avenir"
-              aria-label="Close"
-            >
-              x
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -388,8 +315,6 @@ const ReplyComponent = ({
   user,
   replyingTo,
   setReplyingTo,
-  replyContent,
-  setReplyContent,
   handleSubmitReply,
   handleDeleteReply,
   isSubmitting,
@@ -399,17 +324,18 @@ const ReplyComponent = ({
   onUpdateReply,
   onLikeReply,
   homeStyle = false,
-  attachments,
-  setAttachments,
 }: ReplyComponentProps) => {
-  const handleUpdateReply = async (id: number, content: string) => {
+  const handleUpdateReply = async (
+    id: number,
+    content: CreateEditableContentDto
+  ) => {
     if (onUpdateReply) {
       await onUpdateReply(id, content);
     } else {
       try {
         await forumUpdateComment({
           path: { id: id.toString() },
-          body: { content },
+          body: { editableContent: content },
         });
         // Note: We don't update reply.content directly as it won't trigger re-render
         // The parent component should handle state updates
@@ -427,6 +353,10 @@ const ReplyComponent = ({
   const isHighlighted = highlightedReplyId === reply.id;
 
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [nestedDraft, setNestedDraft] = useState<{
+    body: string;
+    attachments: string[];
+  }>({ body: "", attachments: [] });
 
   // Common styling classes
   const newReplyClass = isNewlyAdded
@@ -485,14 +415,25 @@ const ReplyComponent = ({
                 isCollapsed={isCollapsed}
                 isHighlighted={isHighlighted}
                 setReplyingTo={setReplyingTo}
-                setReplyContent={setReplyContent}
                 handleDeleteReply={handleDeleteReply}
                 onUpdateReply={handleUpdateReply}
                 onLikeReply={onLikeReply}
                 compact={compact}
               />
             </div>
-
+            {user && isReplyingToThis && !isCollapsed && (
+              <ReplyForm
+                parentId={reply.id}
+                onCancel={() => setReplyingTo(null)}
+                editableContent={nestedDraft}
+                setEditableContent={setNestedDraft}
+                onSubmit={handleSubmitReply}
+                isSubmitting={isSubmitting}
+                className="mt-3"
+                setReplyingTo={setReplyingTo}
+                compact={compact}
+              />
+            )}
             {/* Render nested replies within the same card */}
             {hasChildren && !isCollapsed && reply.children !== undefined && (
               <div>
@@ -515,8 +456,6 @@ const ReplyComponent = ({
                           user={user}
                           replyingTo={replyingTo}
                           setReplyingTo={setReplyingTo}
-                          replyContent={replyContent}
-                          setReplyContent={setReplyContent}
                           handleSubmitReply={handleSubmitReply}
                           handleDeleteReply={handleDeleteReply}
                           isSubmitting={isSubmitting}
@@ -525,8 +464,6 @@ const ReplyComponent = ({
                           onUpdateReply={onUpdateReply}
                           onLikeReply={onLikeReply}
                           compact={compact}
-                          attachments={attachments}
-                          setAttachments={setAttachments}
                         />
                       </div>
                     </div>
@@ -535,23 +472,6 @@ const ReplyComponent = ({
             )}
           </Card>
         </div>
-
-        {/* Reply form for top-level reply */}
-        {user && isReplyingToThis && !isCollapsed && (
-          <ReplyForm
-            parentId={reply.id}
-            onCancel={() => setReplyingTo(null)}
-            replyContent={replyContent}
-            setReplyContent={setReplyContent}
-            onSubmit={handleSubmitReply}
-            isSubmitting={isSubmitting}
-            setReplyingTo={setReplyingTo}
-            className="rounded-t-none"
-            compact={compact}
-            attachments={attachments}
-            setAttachments={setAttachments}
-          />
-        )}
       </div>
     );
   }
@@ -575,28 +495,23 @@ const ReplyComponent = ({
           hasChildren={hasChildren}
           isHighlighted={isHighlighted}
           setReplyingTo={setReplyingTo}
-          setReplyContent={setReplyContent}
           handleDeleteReply={handleDeleteReply}
           onUpdateReply={handleUpdateReply}
           onLikeReply={onLikeReply}
           compact={compact}
         />
       </div>
-
-      {/* Reply form for nested reply */}
       {user && isReplyingToThis && (
-        <div style={indentStyle}>
+        <div style={indentStyle} className="mt-2">
           <ReplyForm
             parentId={reply.id}
             onCancel={() => setReplyingTo(null)}
-            replyContent={replyContent}
-            setReplyContent={setReplyContent}
+            editableContent={nestedDraft}
+            setEditableContent={setNestedDraft}
             onSubmit={handleSubmitReply}
             isSubmitting={isSubmitting}
             setReplyingTo={setReplyingTo}
             compact={compact}
-            attachments={attachments}
-            setAttachments={setAttachments}
           />
         </div>
       )}
@@ -613,8 +528,6 @@ const ReplyComponent = ({
                 user={user}
                 replyingTo={replyingTo}
                 setReplyingTo={setReplyingTo}
-                replyContent={replyContent}
-                setReplyContent={setReplyContent}
                 handleSubmitReply={handleSubmitReply}
                 handleDeleteReply={handleDeleteReply}
                 isSubmitting={isSubmitting}
@@ -623,8 +536,6 @@ const ReplyComponent = ({
                 onUpdateReply={onUpdateReply}
                 onLikeReply={onLikeReply}
                 compact={compact}
-                attachments={attachments}
-                setAttachments={setAttachments}
               />
             </div>
           ))}

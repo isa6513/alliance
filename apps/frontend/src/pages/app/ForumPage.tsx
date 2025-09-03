@@ -26,7 +26,7 @@ const ForumPage: React.FC = () => {
         {isAuthenticated && (
           <div
             onClick={handleCreatePost}
-            className="text-gray-500 hover:bg-zinc-100 p-4 rounded-md flex cursor-pointer flex-col border border-zinc-200"
+            className="text-gray-500 bg-[#fcfcfc] hover:bg-zinc-100 p-4 rounded-md flex cursor-pointer flex-col border border-zinc-200"
           >
             Create a new thread...
           </div>

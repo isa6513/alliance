@@ -18,10 +18,3 @@ export const getApiUrl = (): string => {
     return prod_api_url;
   }
 };
-
-export const getImageSource = (string: string) => {
-  if (import.meta.env.STORYBOOK) {
-    return string;
-  }
-  return `${getApiUrl()}/images/${string}`;
-};

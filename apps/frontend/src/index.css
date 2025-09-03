@@ -110,7 +110,7 @@
   --color-green-2: hsl(95, 38%, 59%);
   --color-green-3: hsl(95, 48%, 46%);
   --color-blue: #318dde;
-  --color-page: #fcfcfc;
+  --color-page: rgb(247, 248, 247);
   --color-greentext: hsl(95, 38%, 46%);
   --color-green: #62a124;
   --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.03), 0 2px 4px -2px rgb(0 0 0 / 0.05);
@@ -144,6 +144,11 @@ h1 {
 h2 {
   font-weight: bold;
   font-size: 20px;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 h1,

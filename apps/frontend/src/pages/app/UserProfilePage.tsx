@@ -24,7 +24,6 @@ import FriendsTab from "../../components/FriendsTab";
 import ProfileImage from "../../components/ProfileImage";
 import UserActivityCard from "../../components/UserActivityCard";
 import { useAuth } from "../../lib/AuthContext";
-import { getImageSource } from "../../lib/config";
 import useActivities, { ActivityList } from "./useActivities";
 
 enum ProfileTabs {
@@ -270,9 +269,7 @@ const UserProfilePage: React.FC = () => {
                 src={
                   editAvatarFile
                     ? URL.createObjectURL(editAvatarFile)
-                    : editAvatarUrl
-                    ? getImageSource(editAvatarUrl)
-                    : undefined
+                    : editAvatarUrl ?? undefined
                 }
                 className="mt-[-55px] w-29 h-29 rounded-md object-cover"
               />

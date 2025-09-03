@@ -16,6 +16,7 @@ import {
 } from 'typeorm';
 import { Notification } from '../../notifs/entities/notification.entity';
 import { User } from '../../user/user.entity';
+import { EditableContent } from './editablecontent.entity';
 
 export enum CommentParentObject {
   Post = 'post',
@@ -30,10 +31,16 @@ export class Comment {
   @Allow()
   id: number;
 
-  @Column('text')
-  @ApiProperty()
+  @OneToOne(() => EditableContent, {
+    cascade: true,
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  @ApiProperty({ type: () => EditableContent })
   @Allow()
-  content: string;
+  @Type(() => EditableContent)
+  editableContent: EditableContent;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn()
@@ -117,10 +124,4 @@ export class Comment {
   @Allow()
   @Type(() => User)
   likes: User[];
-
-  @Column({ type: 'jsonb', default: [] })
-  @ApiPropertyOptional({ type: String, isArray: true })
-  @Allow()
-  @IsOptional()
-  attachments?: string[];
 }

@@ -4,13 +4,17 @@ import {
   PartialType,
   PickType,
 } from '@nestjs/swagger';
-import { Comment } from '../entities/comment.entity';
+import { Type } from 'class-transformer';
+import { ValidateNested } from 'class-validator';
 import { ProfileDto } from 'src/user/user.dto';
+import { Comment } from '../entities/comment.entity';
+import {
+  CreateEditableContentDto,
+  EditableContentDto,
+} from './editablecontent.dto';
 
-// return object for get requests
 export class CommentDto extends PickType(Comment, [
   'id',
-  'content',
   'parentObjectId',
   'parentId',
   'parentObjectType',
@@ -28,8 +32,8 @@ export class CommentDto extends PickType(Comment, [
   @ApiProperty({ type: () => ProfileDto, isArray: true })
   likes: ProfileDto[];
 
-  @ApiPropertyOptional({ type: String, isArray: true })
-  attachments?: string[];
+  @ApiProperty({ type: () => EditableContentDto })
+  editableContent: EditableContentDto;
 
   constructor(comment: Comment) {
     super();
@@ -39,16 +43,19 @@ export class CommentDto extends PickType(Comment, [
       : undefined;
     this.author = new ProfileDto(comment.author);
     this.likes = comment.likes.map((like) => new ProfileDto(like));
-    this.attachments = comment.attachments ?? [];
+    this.editableContent = new EditableContentDto(comment.editableContent);
   }
 }
 
 export class CreateCommentDto extends PickType(Comment, [
-  'content',
   'parentObjectId',
   'parentId',
   'parentObjectType',
-  'attachments',
-]) {}
+]) {
+  @ApiProperty({ type: CreateEditableContentDto })
+  @ValidateNested()
+  @Type(() => CreateEditableContentDto)
+  editableContent: CreateEditableContentDto;
+}
 
 export class UpdateCommentDto extends PartialType(CreateCommentDto) {}

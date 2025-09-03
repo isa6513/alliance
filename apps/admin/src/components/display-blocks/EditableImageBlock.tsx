@@ -1,7 +1,6 @@
-import type { ImageBlock } from "@alliance/shared/forms/display-blocks";
 import { imagesUploadImage } from "@alliance/shared/client";
+import type { ImageBlock } from "@alliance/shared/forms/display-blocks";
 import { useState } from "react";
-import { getImageSource } from "../../lib/config";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 
@@ -49,15 +48,6 @@ export function EditableImageBlock({
     }
   };
 
-  const getImageSrc = () => {
-    if (!block.src) return "";
-    
-    if (block.src.startsWith("http://") || block.src.startsWith("https://")) {
-      return block.src;
-    }
-    
-    return getImageSource(block.src);
-  };
   return (
     <DisplayBlockWrapper
       onRemove={onRemove}
@@ -69,7 +59,7 @@ export function EditableImageBlock({
         {/* Image preview/placeholder */}
         {block.src ? (
           <img
-            src={getImageSrc()}
+            src={block.src}
             alt={block.alt}
             className="max-w-full h-auto rounded"
             style={{
@@ -100,10 +90,8 @@ export function EditableImageBlock({
               <span className="text-xs text-blue-600">Uploading...</span>
             )}
           </div>
-          
-          {uploadError && (
-            <p className="text-xs text-red-600">{uploadError}</p>
-          )}
+
+          {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
         </div>
       </div>
     </DisplayBlockWrapper>

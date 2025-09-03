@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Comment } from 'src/forum/entities/comment.entity';
+import { EditableContent } from 'src/forum/entities/editablecontent.entity';
 import { ActionEventNotifWorker } from 'src/notifs/action-event-notif.worker';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { User } from '../user/user.entity';
@@ -19,6 +20,7 @@ import { Action } from './entities/action.entity';
     TypeOrmModule.forFeature([ActionEvent]),
     TypeOrmModule.forFeature([ActionActivity]),
     TypeOrmModule.forFeature([Comment]),
+    TypeOrmModule.forFeature([EditableContent]),
     UserModule,
     NotifsModule,
   ],

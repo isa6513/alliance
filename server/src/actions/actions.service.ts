@@ -14,6 +14,7 @@ import {
   Comment,
   CommentParentObject,
 } from 'src/forum/entities/comment.entity';
+import { EditableContent } from 'src/forum/entities/editablecontent.entity';
 import { NotifsService } from 'src/notifs/notifs.service';
 import { ILike, In, LessThan, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
@@ -59,6 +60,8 @@ export class ActionsService {
     private readonly actionActivityRepository: Repository<ActionActivity>,
     @InjectRepository(Comment)
     private readonly commentRepository: Repository<Comment>,
+    @InjectRepository(EditableContent)
+    private readonly editableContentRepository: Repository<EditableContent>,
     private readonly notifsService: NotifsService,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
@@ -489,12 +492,18 @@ export class ActionsService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+    const content = this.editableContentRepository.create({
+      body: commentDto.editableContent.body,
+      attachments: commentDto.editableContent.attachments ?? [],
+    });
+    await this.editableContentRepository.save(content);
     const comment = this.commentRepository.create({
-      ...commentDto,
       parentObjectType: CommentParentObject.Activity,
       parentObjectId: id,
+      parentId: commentDto.parentId,
       author: user,
       authorId: user.id,
+      editableContent: content,
     });
     const savedComment = await this.commentRepository.save(comment);
     return new CommentDto(savedComment);
@@ -514,7 +523,40 @@ export class ActionsService {
     if (activity.userId !== userId) {
       throw new ForbiddenException('You are not the owner of this activity');
     }
-    await this.actionActivityRepository.update(id, updateActivityDto);
+    // Update editable content if present
+    if (
+      updateActivityDto.description !== undefined ||
+      updateActivityDto.attachments !== undefined
+    ) {
+      const activityWithContent = await this.actionActivityRepository.findOne({
+        where: { id },
+        relations: ['editableContent'],
+      });
+      if (activityWithContent) {
+        if (activityWithContent.editableContent) {
+          if (updateActivityDto.description !== undefined) {
+            activityWithContent.editableContent.body =
+              updateActivityDto.description;
+          }
+          if (updateActivityDto.attachments !== undefined) {
+            activityWithContent.editableContent.attachments =
+              updateActivityDto.attachments;
+          }
+          await this.editableContentRepository.save(
+            activityWithContent.editableContent,
+          );
+        } else {
+          const ec = this.editableContentRepository.create({
+            body: updateActivityDto.description ?? '',
+            attachments: updateActivityDto.attachments ?? [],
+          });
+          await this.editableContentRepository.save(ec);
+          await this.actionActivityRepository.update(id, {
+            editableContent: ec,
+          });
+        }
+      }
+    }
     return this.getActivity(id);
   }
 

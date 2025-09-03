@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { FormDto, SubmitFormDto, imagesUploadImage } from "../client";
-import { getApiUrl } from "../lib/config";
 import AppMarkdownWrapper from "../ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "../ui/Button";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
@@ -157,17 +156,6 @@ const FormRenderer = ({
         return newSet;
       });
     }
-  };
-
-  const getImageSource = (src: string): string => {
-    if (!src) return "";
-
-    if (src.startsWith("http://") || src.startsWith("https://")) {
-      return src;
-    }
-
-    // Use the shared config to get the API URL and construct the image path
-    return `${getApiUrl()}/images/${src}`;
   };
 
   const handleNext = (e: React.MouseEvent) => {
@@ -473,7 +461,7 @@ const FormRenderer = ({
             {typeof fileValue === "string" && fileValue && (
               <div className="mb-2">
                 <img
-                  src={getImageSource(fileValue)}
+                  src={fileValue}
                   alt="Uploaded file"
                   className="max-w-full h-auto max-h-32 rounded border"
                 />
@@ -602,7 +590,7 @@ const FormRenderer = ({
         return (
           <img
             key={index}
-            src={getImageSource((block as any).src)}
+            src={(block as any).src}
             alt={(block as any).alt}
             className="max-w-full h-auto rounded"
             style={{

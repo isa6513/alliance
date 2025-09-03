@@ -1,6 +1,5 @@
 import ReactMarkdown from "react-markdown";
 import { Outlet, useOutletContext } from "react-router";
-import { getImageSource } from "../lib/config";
 import { useActionLoaderData } from "../pages/app/ActionPage";
 import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
@@ -16,7 +15,7 @@ const ActionContents = () => {
     <div className="flex flex-col gap-y-3 flex-2 pl-10 pt-5">
       {action?.image && (
         <img
-          src={getImageSource(action.image)}
+          src={action.image}
           className="w-full h-auto rounded-md border border-gray-300 max-h-[200px] object-cover mb-5"
         />
       )}

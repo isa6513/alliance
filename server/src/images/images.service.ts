@@ -89,3 +89,14 @@ export class ImagesService {
     return key;
   }
 }
+
+export function getImageSource(string: string) {
+  if (string.startsWith('http')) {
+    return string; // TODO
+  }
+  if (process.env.NODE_ENV === 'production') {
+    return `${process.env.APP_URL}/api/images/${string}`;
+  } else {
+    return `http://localhost:3005/images/${string}`;
+  }
+}
