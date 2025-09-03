@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useState } from "react";
 
 interface EditableContentRendererProps {
   content: EditableContentDto;
-  enableLightbox?: boolean;
   collapsed?: boolean;
   deleted?: boolean;
   className?: string;
@@ -12,7 +11,6 @@ interface EditableContentRendererProps {
 
 const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
   content,
-  enableLightbox = true,
   collapsed = false,
   deleted = false,
   className,
@@ -25,7 +23,6 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
   console.log(attachments);
 
   const openLightbox = (idx: number) => {
-    if (!enableLightbox) return;
     setLightboxIndex(idx);
     setLightboxOpen(true);
   };
@@ -59,7 +56,7 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
       <div
         className={`${className ?? ""} ${sharedClasses} text-gray-400 text-sm`}
       >
-        This reply has been deleted
+        Content has been deleted
       </div>
     );
   }
@@ -97,7 +94,7 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
         </div>
       )}
 
-      {enableLightbox && lightboxOpen && attachments.length > 0 && (
+      {lightboxOpen && attachments.length > 0 && (
         <div
           className="fixed inset-0 z-[1000] bg-black/80 flex items-center justify-center"
           onClick={closeLightbox}

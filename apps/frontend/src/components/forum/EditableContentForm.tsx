@@ -124,7 +124,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
                 className="absolute -top-2 -right-2 bg-black/70 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center pl-[0.5px] pb-[1px]"
                 aria-label="Remove image"
               >
-                ×
+                &times;
               </button>
             </div>
           ))}
