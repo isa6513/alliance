@@ -147,7 +147,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
         <button
           className={`px-4 py-2 ${
             activeTab === "friends"
-              ? "border-b-2 border-black font-bold"
+              ? "border-b-2 border-black font-semibold"
               : "text-stone-500"
           }`}
           onClick={() => setActiveTab("friends")}
@@ -158,7 +158,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
           <button
             className={`px-4 py-2 ${
               activeTab === "received"
-                ? "border-b-2 border-black font-bold"
+                ? "border-b-2 border-black font-semibold"
                 : "text-stone-500"
             }`}
             onClick={() => setActiveTab("received")}
@@ -170,7 +170,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
           <button
             className={`px-4 py-2 ${
               activeTab === "sent"
-                ? "border-b-2 border-black font-bold"
+                ? "border-b-2 border-black font-semibold"
                 : "text-stone-500"
             }`}
             onClick={() => setActiveTab("sent")}

@@ -101,7 +101,7 @@ const UserActivityCard = ({
             {completed ? "completed" : "committed to"} {timeSinceCompleted}
           </p>
         </div>
-        <div className="flex flex-row justify-between items-end">
+        <div className="mt-2 flex flex-row justify-between">
           <div className="flex flex-col space-y-3">
             <div>
               <p

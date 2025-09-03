@@ -23,6 +23,7 @@ import FriendRequestButton from "../../components/FriendRequestButton";
 import FriendsTab from "../../components/FriendsTab";
 import ProfileImage from "../../components/ProfileImage";
 import UserActivityCard from "../../components/UserActivityCard";
+import UserProfileTab from "../../components/UserProfileTab";
 import { useAuth } from "../../lib/AuthContext";
 import useActivities, { ActivityList } from "./useActivities";
 
@@ -262,7 +263,7 @@ const UserProfilePage: React.FC = () => {
     <div className="max-w-[800px] mx-auto">
       <div className="mx-2 space-y-2">
         <div className="w-full h-[100px]"></div>
-        <Card className="px-8 relative gap-y-2 pb-8">
+        <Card className="px-8 pb-6 relative gap-y-2">
           {isEditing ? (
             <div className="relative w-fit">
               <img
@@ -314,27 +315,7 @@ const UserProfilePage: React.FC = () => {
               </div>
             )}
           </div>
-          {/* stats row */}
-          <div className="flex flex-row gap-5 cursor-pointer">
-            <p onClick={() => setSelectedTab(ProfileTabs.Activity)}>
-              <b>{completedActions.length} </b>
-              <span className="text-zinc-500">
-                action{completedActions.length === 1 ? "" : "s"} completed
-              </span>
-            </p>
-            <p onClick={() => setSelectedTab(ProfileTabs.Forum)}>
-              <b>{forumPosts.length} </b>
-              <span className="text-zinc-500">
-                post{forumPosts.length === 1 ? "" : "s"}
-              </span>
-            </p>
-            <p onClick={() => setSelectedTab(ProfileTabs.Friends)}>
-              <b>{friends.length} </b>
-              <span className="text-zinc-500">
-                friend{friends.length === 1 ? "" : "s"}
-              </span>
-            </p>
-          </div>
+
           {isEditing ? (
             <textarea
               value={editBio}
@@ -350,6 +331,27 @@ const UserProfilePage: React.FC = () => {
               />
             )
           )}
+          {/* stats row */}
+          <div className="flex flex-row gap-x-2 cursor-pointer">
+            <UserProfileTab
+              number={completedActions.length}
+              label="actions completed"
+              selected={selectedTab === ProfileTabs.Activity}
+              onClick={() => setSelectedTab(ProfileTabs.Activity)}
+            />
+            <UserProfileTab
+              number={forumPosts.length}
+              label="forum posts"
+              selected={selectedTab === ProfileTabs.Forum}
+              onClick={() => setSelectedTab(ProfileTabs.Forum)}
+            />
+            <UserProfileTab
+              number={friends.length}
+              label="friends"
+              selected={selectedTab === ProfileTabs.Friends}
+              onClick={() => setSelectedTab(ProfileTabs.Friends)}
+            />
+          </div>
           {/* button row */}
           <div className="absolute right-0 top-0 space-x-3 flex flex-row p-5">
             {isAuthenticated && !isMe && (
@@ -405,21 +407,6 @@ const UserProfilePage: React.FC = () => {
             referredCount={referredCount}
           /> */}
         </Card>
-        <div className="flex flex-row w-full justify-evenly">
-          {[ProfileTabs.Activity, ProfileTabs.Forum].map((tab) => (
-            <div
-              onClick={() => setSelectedTab(tab)}
-              key={tab}
-              className={`${
-                selectedTab === tab
-                  ? "font-semibold underline"
-                  : "text-gray-800"
-              } flex-1 text-center py-3 pt-4 cursor-pointer hover:underline`}
-            >
-              <p className="text-md">{tab}</p>
-            </div>
-          ))}
-        </div>
         <div className="mb-8 mt-2">
           {selectedTab === ProfileTabs.Activity && (
             <div className="space-y-2">
