@@ -5,13 +5,8 @@ import {
   UserActionRelation,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import {
-  ActionWithRelation,
-  setRevalidate,
-  useAppLoaderData,
-} from "../../applayout";
+import { setRevalidate, useAppLoaderData } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
 import CheckIcon from "../../components/icons/CheckIcon";
@@ -34,10 +29,6 @@ const HomePage = () => {
   const navigate = useNavigate();
   const { actions, posts, activities } = useAppLoaderData();
 
-  const [currentTask, setCurrentTask] = useState<ActionWithRelation | null>(
-    null
-  );
-
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
   });
@@ -51,17 +42,6 @@ const HomePage = () => {
       action.relation === "none" && action.status === "gathering_commitments"
   );
 
-  // const [todoActions, setTodoActions] = useState<ActionWithRelation[]>(
-  //   actions.filter((action) => canCompleteAction(action, action.relation))
-  // );
-
-  // const [newActions, setNewActions] = useState<ActionWithRelation[]>(
-  //   actions.filter(
-  //     (action) =>
-  //       action.relation === "none" && action.status === "gathering_commitments"
-  //   )
-  // );
-
   const committedActions = actions.filter(
     (action) =>
       action.relation === "joined" && action.status === "gathering_commitments"
@@ -72,25 +52,7 @@ const HomePage = () => {
       action.relation === "joined" && action.status === "commitments_reached"
   );
 
-  const getNewTask = () => {
-    if (newActions.length > 0) {
-      const newTask = newActions[0];
-
-      // setNewActions((prev) => prev.slice(1));
-      setCurrentTask(newTask);
-    } else if (todoActions.length > 0) {
-      const newTask = todoActions[0];
-
-      // setTodoActions((prev) => prev.slice(1));
-      setCurrentTask(newTask);
-    } else {
-      setCurrentTask(null);
-    }
-  };
-
-  useEffect(() => {
-    getNewTask();
-  }, [actions]);
+  const currentTask = newActions[0] || todoActions[0] || null;
 
   const handleTaskComplete = (actionId: number) => {
     actionsComplete({ path: { id: actionId.toString() } }).then(() => {
