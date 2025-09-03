@@ -13,7 +13,7 @@ export default function MembersListCard({ profile }: MembersListCardProps) {
     <Link to={`/user/${profile.id}`}>
       <Card
         style={CardStyle.White}
-        className="min-w-[200px] hover:border-zinc-400 transition-all duration-30 w-full gap-y-3 h-32"
+        className="min-w-[200px] hover:border-zinc-400 transition-all duration-30 w-full gap-y-3"
       >
         <div className="flex flex-row items-center">
           <ProfileImage
@@ -25,11 +25,6 @@ export default function MembersListCard({ profile }: MembersListCardProps) {
             {profile.displayName}
           </UserDisplayName>
         </div>
-        {profile.profileDescription && (
-          <p className="text-zinc-800 overflow-hidden">
-            {profile.profileDescription}
-          </p>
-        )}
       </Card>
     </Link>
   );

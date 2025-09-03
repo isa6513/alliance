@@ -407,7 +407,7 @@ const UserProfilePage: React.FC = () => {
             referredCount={referredCount}
           /> */}
         </Card>
-        <div className="mb-8 mt-2">
+        <div className="pb-24 mt-2">
           {selectedTab === ProfileTabs.Activity && (
             <div className="space-y-2">
               {completedActions.length === 0 && (
