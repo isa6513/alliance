@@ -42,16 +42,25 @@ const HomePage = () => {
     list: ActivityList.Friends,
   });
 
-  const [todoActions, setTodoActions] = useState<ActionWithRelation[]>(
-    actions.filter((action) => canCompleteAction(action, action.relation))
+  const todoActions = actions.filter((action) =>
+    canCompleteAction(action, action.relation)
   );
 
-  const [newActions, setNewActions] = useState<ActionWithRelation[]>(
-    actions.filter(
-      (action) =>
-        action.relation === "none" && action.status === "gathering_commitments"
-    )
+  const newActions = actions.filter(
+    (action) =>
+      action.relation === "none" && action.status === "gathering_commitments"
   );
+
+  // const [todoActions, setTodoActions] = useState<ActionWithRelation[]>(
+  //   actions.filter((action) => canCompleteAction(action, action.relation))
+  // );
+
+  // const [newActions, setNewActions] = useState<ActionWithRelation[]>(
+  //   actions.filter(
+  //     (action) =>
+  //       action.relation === "none" && action.status === "gathering_commitments"
+  //   )
+  // );
 
   const committedActions = actions.filter(
     (action) =>
@@ -67,12 +76,12 @@ const HomePage = () => {
     if (newActions.length > 0) {
       const newTask = newActions[0];
 
-      setNewActions((prev) => prev.slice(1));
+      // setNewActions((prev) => prev.slice(1));
       setCurrentTask(newTask);
     } else if (todoActions.length > 0) {
       const newTask = todoActions[0];
 
-      setTodoActions((prev) => prev.slice(1));
+      // setTodoActions((prev) => prev.slice(1));
       setCurrentTask(newTask);
     } else {
       setCurrentTask(null);
@@ -81,12 +90,11 @@ const HomePage = () => {
 
   useEffect(() => {
     getNewTask();
-  }, []);
+  }, [actions]);
 
   const handleTaskComplete = (actionId: number) => {
     actionsComplete({ path: { id: actionId.toString() } }).then(() => {
       setRevalidate();
-      getNewTask();
       navigate(window.location.pathname);
     });
   };
@@ -94,7 +102,6 @@ const HomePage = () => {
   const handleTaskJoin = (actionId: number) => {
     actionsJoin({ path: { id: actionId.toString() } }).then(() => {
       setRevalidate();
-      getNewTask();
       navigate(window.location.pathname);
     });
   };
@@ -151,27 +158,32 @@ const HomePage = () => {
                   Up next
                 </p>
                 <div className="flex flex-col gap-y-2 w-full">
-                  {todoActions.slice(0, 2).map((action) => (
-                    <SmallActionCard
-                      key={action.id}
-                      {...action}
-                      showDescription={true}
-                      friendActivities={friendActivities.filter(
-                        (activity) =>
-                          activity.actionId === action.id &&
-                          activity.type === "user_completed"
-                      )}
-                      joinedCount={action.usersCompleted}
-                      neededCount={action.usersJoined}
-                    />
-                  ))}
-                  {newActions.map((action) => (
-                    <SmallActionCard
-                      key={action.id}
-                      {...action}
-                      showDescription={true}
-                    />
-                  ))}
+                  {todoActions
+                    .slice(0, 2)
+                    .filter((action) => action.id !== currentTask?.id)
+                    .map((action) => (
+                      <SmallActionCard
+                        key={action.id}
+                        {...action}
+                        showDescription={true}
+                        friendActivities={friendActivities.filter(
+                          (activity) =>
+                            activity.actionId === action.id &&
+                            activity.type === "user_completed"
+                        )}
+                        joinedCount={action.usersCompleted}
+                        neededCount={action.usersJoined}
+                      />
+                    ))}
+                  {newActions
+                    .filter((action) => action.id !== currentTask?.id)
+                    .map((action) => (
+                      <SmallActionCard
+                        key={action.id}
+                        {...action}
+                        showDescription={true}
+                      />
+                    ))}
                   {committedActions.map((action) => (
                     <SmallActionCard
                       key={action.id}
