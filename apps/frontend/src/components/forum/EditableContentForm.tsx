@@ -87,7 +87,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
       <textarea
         className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-transparent border-none ${
           expanded ? "" : "resize-none"
-        }`}
+        } ${compact ? "text-sm" : ""}`}
         rows={expanded ? 3 : 1}
         value={value.body}
         onChange={(e) => onChange({ ...value, body: e.target.value })}

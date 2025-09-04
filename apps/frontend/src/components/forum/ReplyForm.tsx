@@ -29,9 +29,9 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
   const [expanded, setExpanded] = useState(!compact);
   return (
     <div
-      className={`rounded-lg relative bg-zinc-200/60 ${className ?? ""} ${
+      className={`rounded-lg relative bg-zinc-100 ${className ?? ""} ${
         parentId ? "mt-0" : "mt-3"
-      } ${compact ? "p-2" : "p-4"}`}
+      } ${compact ? "p-1" : "p-4"}`}
     >
       <form
         onSubmit={(e) => {
@@ -67,6 +67,21 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
                 Cancel
               </Button>
             )}
+            {!parentId && (
+              <Button
+                type="button"
+                color={ButtonColor.Grey}
+                onClick={() => {
+                  setEditableContent({ body: "", attachments: [] });
+                  setExpanded(false);
+                  onCancel?.();
+                }}
+                className={`${compact ? "text-xs" : ""}`}
+              >
+                Cancel
+              </Button>
+            )}
+
             <Button
               type="submit"
               color={ButtonColor.Stone}
@@ -75,7 +90,9 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
                 (!editableContent.body.trim() &&
                   editableContent.attachments.length === 0)
               }
-              className="transition disabled:opacity-50"
+              className={`transition disabled:opacity-50 ${
+                compact ? "text-xs" : ""
+              }`}
             >
               {isSubmitting ? "Posting..." : "Post Comment"}
             </Button>

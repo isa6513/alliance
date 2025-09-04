@@ -5,7 +5,7 @@ import NavbarVertical from "./NavbarVertical";
 export enum NavbarPage {
   Dashboard = "Home",
   CurrentActions = "Actions",
-  Friends = "Friends",
+  Activity = "Activity",
   Announcements = "Announcements",
   Forum = "Forum",
   Priorities = "Priorities",
@@ -14,7 +14,7 @@ export enum NavbarPage {
 
 export const links: NavbarPage[] = [
   NavbarPage.Dashboard,
-  NavbarPage.Friends,
+  NavbarPage.Activity,
   NavbarPage.CurrentActions,
   NavbarPage.Forum,
   NavbarPage.Priorities,
@@ -23,7 +23,7 @@ export const links: NavbarPage[] = [
 export const destinations: Record<NavbarPage, string> = {
   [NavbarPage.Dashboard]: "/home",
   [NavbarPage.CurrentActions]: "/actions",
-  [NavbarPage.Friends]: "/feed",
+  [NavbarPage.Activity]: "/feed",
   [NavbarPage.Announcements]: "/announcements",
   [NavbarPage.Forum]: "/forum",
   [NavbarPage.Priorities]: "/priorities",

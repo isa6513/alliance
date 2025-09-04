@@ -193,7 +193,7 @@ const ActivityFeedPage = () => {
         ))}
         {hasMore && (
           <button
-            className="mt-4 self-center px-4 py-2 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-900"
+            className="mt-4 self-center px-4 py-2 rounded-md bg-transparent border border-zinc-300 hover:bg-zinc-50 text-zinc-900"
             onClick={loadMore}
             disabled={loadingMore}
           >
