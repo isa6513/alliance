@@ -111,8 +111,10 @@ const HomePage = () => {
               </Card>
             )}
 
-            {(todoActions.length > 0 ||
-              newActions.length > 0 ||
+            {(todoActions.filter((action) => action.id !== currentTask?.id)
+              .length > 0 ||
+              newActions.filter((action) => action.id !== currentTask?.id)
+                .length > 0 ||
               committedActions.length > 0 ||
               commitmentsReachedActions.length > 0) && (
               <>
