@@ -45,6 +45,7 @@ const ForumListPost = ({
     }).then((res) => {
       if (res.data && res.data.author) {
         setLastComment(res.data);
+        console.log("Last comment:", res.data);
       }
     });
   }, [post.id]);
@@ -116,7 +117,7 @@ const ForumListPost = ({
         <ActivityFeedItem
           title={post.title}
           content={`${lastComment ? "replied" : "posted"} ${formatTime(
-            new Date(post.updatedAt),
+            new Date(lastComment ? lastComment.createdAt : post.updatedAt),
             {
               addSuffix: true,
             }

@@ -144,6 +144,7 @@ export class ForumService {
       where: {
         parentObjectId: postId,
         parentObjectType: CommentParentObject.Post,
+        deleted: false,
       },
       relations: ['author', 'editableContent'],
       order: { createdAt: 'DESC' },
