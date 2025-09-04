@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CreateActionDto, FormDto } from "@alliance/shared/client";
 import React, { useMemo, useRef } from "react";
 
@@ -18,6 +19,7 @@ interface ActionFormProps {
   onDelete?: () => void;
   baseUrl?: string;
   availableForms?: FormDto[];
+  formsLoading: boolean;
 }
 
 const ActionForm: React.FC<ActionFormProps> = ({
@@ -33,6 +35,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
   onDelete,
   baseUrl,
   availableForms = [],
+  formsLoading,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -254,6 +257,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">No form required</option>
+                  {formsLoading && <option value="">Loading forms...</option>}
                   {availableForms.map((formOption) => (
                     <option key={formOption.id} value={formOption.id}>
                       {formOption.title || `Form ${formOption.id}`}

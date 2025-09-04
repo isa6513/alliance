@@ -76,7 +76,6 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
                   setExpanded(false);
                   onCancel?.();
                 }}
-                className={`${compact ? "text-xs" : ""}`}
               >
                 Cancel
               </Button>
@@ -90,9 +89,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
                 (!editableContent.body.trim() &&
                   editableContent.attachments.length === 0)
               }
-              className={`transition disabled:opacity-50 ${
-                compact ? "text-xs" : ""
-              }`}
+              className={`transition disabled:opacity-50`}
             >
               {isSubmitting ? "Posting..." : "Post Comment"}
             </Button>

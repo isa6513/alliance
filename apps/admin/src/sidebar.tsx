@@ -115,7 +115,7 @@ const Sidebar: React.FC = () => {
         </div>
       </div>
       <div className="flex-1 overflow-y-scroll max-h-screen">
-        <div className="flex flex-col gap-y-5 min-h-0 p-5 max-w-[calc(100vw-320px)] flex-1 h-fit">
+        <div className="flex flex-col gap-y-5 min-h-0 max-w-[calc(100vw-320px)] flex-1 h-fit">
           <Outlet />
         </div>
       </div>

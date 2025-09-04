@@ -135,17 +135,17 @@ const PostDetailPage: React.FC = () => {
                 </div>
               )}
             </div>
-            <div className="flex flex-row gap-x-2 mt-1 items-center">
+            <div className="flex flex-row gap-x-2 mt-1 mb-4 items-center">
               <Link to={`/user/${post.author.id}`}>
-                <ProfileImage pfp={post.author.profilePicture} size="small" />
+                <ProfileImage
+                  pfp={post.author.profilePicture}
+                  size="small"
+                  className="mr-2"
+                />
+                <UserDisplayName staff={post.author.staff}>
+                  {post.author.displayName}
+                </UserDisplayName>
               </Link>
-              <span>
-                <a href={`/user/${post.author.id}`} className="text-black">
-                  <UserDisplayName staff={post.author.staff}>
-                    {post.author.displayName}
-                  </UserDisplayName>
-                </a>
-              </span>
               <span className="text-zinc-500">
                 {formatTime(new Date(post.createdAt), {
                   addSuffix: true,
@@ -160,13 +160,9 @@ const PostDetailPage: React.FC = () => {
                 </Link>
               )}
             </div>
-
-            <div className="mt-4">
-              <EditableContentRenderer content={post.editableContent} />
-            </div>
+            <EditableContentRenderer content={post.editableContent} />
           </Card>
         </div>
-
         <Comments objectId={post.id} type={"post"} />
       </div>
     </div>

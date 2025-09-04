@@ -96,7 +96,7 @@ const FormsList: React.FC = () => {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-5">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold text-gray-900">Forms</h2>
         <button

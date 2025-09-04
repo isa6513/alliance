@@ -203,7 +203,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
               {timelineData.map(({ action }) => (
                 <div
                   key={action.id}
-                  className="border-b border-gray-100 py-3 pr-4 flex flex-col justify-center bg-white"
+                  className="border-b border-gray-100 py-3 pr-4 flex flex-col justify-center bg-white pl-5"
                   style={{ height: "64px" }}
                 >
                   <div className="text-sm font-medium text-black truncate">

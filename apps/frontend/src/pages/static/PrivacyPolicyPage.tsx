@@ -42,7 +42,7 @@ Alliance collects your data so that we can:
 - Improve our services, analytics, and website functionality.
 - Enforce our Terms of Service and comply with applicable laws.
 
-We do not sell or rent your personal data to third parties.
+We do not sell or rent your personal data to third parties. Mobile information will not be shared with third parties for marketing/promotional purposes
 
 ## What are your data protection rights?
 

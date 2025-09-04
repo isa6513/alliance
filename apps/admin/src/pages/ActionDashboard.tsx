@@ -271,9 +271,8 @@ const ActionDashboard: React.FC = () => {
           [name]: value,
         };
 
-        // Clear taskContents when type changes to Funding
         if (name === "type" && value === "Funding") {
-          newForm.taskContents = undefined;
+          newForm.taskFormId = undefined;
         }
 
         return newForm;
@@ -477,7 +476,7 @@ const ActionDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full p-5">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-[#111] text-[16pt] font-bold">
           {isNew ? "Create New Action" : `Action: ${action?.name}`}
@@ -509,6 +508,7 @@ const ActionDashboard: React.FC = () => {
           isNew={true}
           onCancel={handleCancel}
           availableForms={availableForms}
+          formsLoading={formsLoading}
         />
       ) : (
         // Existing Action Dashboard
@@ -596,14 +596,8 @@ const ActionDashboard: React.FC = () => {
                         <strong>Users Completed:</strong>{" "}
                         {action.usersCompleted}
                       </div>
-                      {action.type === "Funding" ? (
+                      {action.type === "Funding" && (
                         <>
-                          {action.donationThreshold && (
-                            <div className="text-sm text-gray-600">
-                              <strong>Donation Threshold:</strong> $
-                              {(action.donationThreshold || 0) / 100}
-                            </div>
-                          )}
                           {action.donationAmount && (
                             <div className="text-sm text-gray-600">
                               <strong>Suggested Donation:</strong> $
@@ -611,13 +605,12 @@ const ActionDashboard: React.FC = () => {
                             </div>
                           )}
                         </>
-                      ) : (
-                        action.commitmentThreshold && (
-                          <div className="text-sm text-gray-600">
-                            <strong>Commitment Threshold:</strong>{" "}
-                            {action.commitmentThreshold}
-                          </div>
-                        )
+                      )}
+                      {action.commitmentThreshold && (
+                        <div className="text-sm text-gray-600">
+                          <strong>Commitment Threshold:</strong>{" "}
+                          {action.commitmentThreshold}
+                        </div>
                       )}
                       <div className="text-sm text-gray-600">
                         <strong>Action ID:</strong> {action.id}
@@ -721,6 +714,7 @@ const ActionDashboard: React.FC = () => {
                   onDelete={handleDelete}
                   baseUrl={baseUrl}
                   availableForms={availableForms}
+                  formsLoading={formsLoading}
                 />
               </Card>
             )}

@@ -135,9 +135,9 @@ const ActionsList: React.FC = () => {
   return (
     <div className="space-y-4">
       <ActionTimeline actions={actions} className="h-full" />
-      <p className="font-bold my-4 ml-2">All actions</p>
+      <p className="font-bold my-4 px-5">All actions</p>
 
-      <div className="space-y-3 flex-1 overflow-y-auto">
+      <div className="space-y-3 flex-1 overflow-y-auto p-5 pt-0">
         {actions.map((action) => (
           <Card key={action.name} style={CardStyle.White}>
             <div

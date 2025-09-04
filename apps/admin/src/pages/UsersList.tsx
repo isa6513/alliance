@@ -3,7 +3,7 @@ import UserList from "../components/UserList";
 
 const UsersList: React.FC = () => {
   return (
-    <div className="flex-1 overflow-hidden h-full">
+    <div className="flex-1 overflow-hidden h-full p-5">
       <UserList />
     </div>
   );

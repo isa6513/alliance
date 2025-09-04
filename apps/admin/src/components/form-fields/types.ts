@@ -1,5 +1,5 @@
+import { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import type { AnyField } from "@alliance/shared/forms/formschema";
-import { DisplayBlock } from "@alliance/shared/lib/display-blocks";
 
 export interface BaseFieldProps<
   T extends AnyField<string> | DisplayBlock<string>
