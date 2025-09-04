@@ -1,4 +1,4 @@
-import ReactMarkdown from "react-markdown";
+import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import { Outlet, useOutletContext } from "react-router";
 import { useActionLoaderData } from "../pages/app/ActionPage";
 import { TaskPanelContext } from "./ActionPageTaskPanel";
@@ -28,7 +28,7 @@ const ActionContents = () => {
       </div>
       <Outlet context={context} />
       <div className="my-2">
-        <ReactMarkdown>{action?.body}</ReactMarkdown>
+        <AppMarkdownWrapper markdownContent={action?.body} />
       </div>
 
       <hr className="border-zinc-200" />

@@ -147,10 +147,10 @@ resource "aws_security_group" "rds" {
   vpc_id = module.vpc.vpc_id
 
   ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port                = 5432
+    to_port                  = 5432
+    protocol                 = "tcp"
+    security_groups          = [aws_security_group.ec2_security_group.id]
   }
 
   egress {
@@ -175,6 +175,10 @@ resource "aws_db_parameter_group" "alliance" {
   }
 }
 
+resource "random_id" "db_suffix" {
+  byte_length = 3
+}
+
 resource "aws_db_instance" "alliance" {
   identifier             = "alliance"
   db_name                = "alliance"
@@ -188,7 +192,13 @@ resource "aws_db_instance" "alliance" {
   vpc_security_group_ids = [aws_security_group.rds.id]
   parameter_group_name   = aws_db_parameter_group.alliance.name
   publicly_accessible    = false
-  skip_final_snapshot    = true
+
+  deletion_protection        = true
+  skip_final_snapshot        = false
+  final_snapshot_identifier  = "alliance-final-${random_id.db_suffix.hex}"
+
+  backup_retention_period = 7
+  copy_tags_to_snapshot   = true
 }
 
 resource "random_id" "bucket_suffix" {
