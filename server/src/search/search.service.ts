@@ -1,17 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { formatDistanceToNow } from 'date-fns';
 import { ActionsService } from 'src/actions/actions.service';
-import { ForumService } from 'src/forum/forum.service';
-import { UserService } from 'src/user/user.service';
-import { SearchItemDto, SearchItemType } from './searchitem.dto';
-import { User } from 'src/user/user.entity';
+import { readableActionStatus } from 'src/actions/entities/action-event.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { Post } from 'src/forum/entities/post.entity';
-import { actionUrl, postUrl, profileUrl } from './approutes';
-import { formatDistanceToNow } from 'date-fns';
-import { readableActionStatus } from 'src/actions/entities/action-event.entity';
+import { ForumService } from 'src/forum/forum.service';
+import { ProfileDto } from 'src/user/user.dto';
+import { User } from 'src/user/user.entity';
+import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { actionUrl, postUrl, profileUrl } from './approutes';
 import { RecentSearch } from './recentsearch.entity';
+import { SearchItemDto, SearchItemType } from './searchitem.dto';
 
 @Injectable()
 export class SearchService {
@@ -96,12 +97,13 @@ export class SearchService {
   }
 
   userToSearchItem(user: User, friends: boolean, self: boolean): SearchItemDto {
+    const profile = new ProfileDto(user);
     return {
       id: 'u' + user.id,
-      name: user.name,
+      name: profile.displayName,
       type: SearchItemType.User,
       webAppLocation: profileUrl(user.id),
-      image: user.profilePicture,
+      image: profile.profilePicture,
       secondaryData: friends ? ['Friend'] : self ? ['This is you!'] : [],
     };
   }
