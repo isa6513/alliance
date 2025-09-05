@@ -516,6 +516,7 @@ export class ActionsService {
   ): Promise<ActionActivityDto> {
     const activity = await this.actionActivityRepository.findOne({
       where: { id },
+      relations: ['editableContent'],
     });
     if (!activity) {
       throw new NotFoundException('Activity not found');
@@ -523,40 +524,13 @@ export class ActionsService {
     if (activity.userId !== userId) {
       throw new ForbiddenException('You are not the owner of this activity');
     }
-    // Update editable content if present
-    if (
-      updateActivityDto.description !== undefined ||
-      updateActivityDto.attachments !== undefined
-    ) {
-      const activityWithContent = await this.actionActivityRepository.findOne({
-        where: { id },
-        relations: ['editableContent'],
-      });
-      if (activityWithContent) {
-        if (activityWithContent.editableContent) {
-          if (updateActivityDto.description !== undefined) {
-            activityWithContent.editableContent.body =
-              updateActivityDto.description;
-          }
-          if (updateActivityDto.attachments !== undefined) {
-            activityWithContent.editableContent.attachments =
-              updateActivityDto.attachments;
-          }
-          await this.editableContentRepository.save(
-            activityWithContent.editableContent,
-          );
-        } else {
-          const ec = this.editableContentRepository.create({
-            body: updateActivityDto.description ?? '',
-            attachments: updateActivityDto.attachments ?? [],
-          });
-          await this.editableContentRepository.save(ec);
-          await this.actionActivityRepository.update(id, {
-            editableContent: ec,
-          });
-        }
-      }
-    }
+    console.log(updateActivityDto.editableContent);
+
+    activity.editableContent = updateActivityDto.editableContent;
+    await this.actionActivityRepository.save(activity);
+
+    console.log(this.getActivity(id));
+
     return this.getActivity(id);
   }
 

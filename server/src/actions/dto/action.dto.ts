@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional, OmitType, PartialType, PickType } from '@nestjs/swagger';
+import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { CommentDto } from 'src/forum/dto/comment.dto';
 import { ProfileDto } from 'src/user/user.dto';
 import { UserActionRelation } from '../actions.service';
@@ -77,6 +77,7 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   'id',
   'type',
   'createdAt',
+  'editableContent',
 ]) {
   @ApiProperty({ type: () => ProfileDto })
   user: ProfileDto;
@@ -96,12 +97,6 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   @ApiProperty({ type: () => CommentDto, isArray: true })
   comments: CommentDto[];
 
-  @ApiPropertyOptional()
-  description?: string;
-
-  @ApiPropertyOptional({ type: String, isArray: true })
-  attachments?: string[];
-
   constructor(actionActivity: ActionActivity, comments: CommentDto[] = []) {
     super();
     Object.assign(this, actionActivity);
@@ -114,14 +109,11 @@ export class ActionActivityDto extends PickType(ActionActivity, [
         ? actionActivity.likes.map((like) => new ProfileDto(like))
         : [];
     this.comments = comments;
-    this.description = actionActivity.editableContent?.body ?? undefined;
-    this.attachments = actionActivity.editableContent?.attachments ?? [];
   }
 }
 
 export class UpdateActionActivityDto extends PickType(ActionActivityDto, [
-  'description',
-  'attachments',
+  'editableContent',
 ]) {}
 
 export class ActionRelationsDto {

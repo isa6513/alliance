@@ -150,11 +150,6 @@ export type StreamableFile = {
  */
 export type ActionActivityType = 'user_joined' | 'user_completed';
 
-/**
- * Type of the action
- */
-export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
-
 export type EditableContent = {
     /**
      * Markdown or plain text body
@@ -165,6 +160,11 @@ export type EditableContent = {
      */
     attachments: Array<string>;
 };
+
+/**
+ * Type of the action
+ */
+export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
 
 export type ActionActivity = {
     id: number;
@@ -329,14 +329,13 @@ export type ActionActivityDto = {
      */
     type: ActionActivityType;
     createdAt: string;
+    editableContent?: EditableContent;
     user: ProfileDto;
     actionId: number;
     action: ActionDto;
     actionName: string;
     likes: Array<ProfileDto>;
     comments: Array<CommentDto>;
-    description?: string;
-    attachments?: Array<string>;
 };
 
 export type UserActionRelation = 'joined' | 'completed' | 'none';
@@ -475,16 +474,26 @@ export type CreateActionEventDto = {
     showInTimeline: boolean;
 };
 
+export type CreateEditableContentDto = {
+    /**
+     * Markdown or plain text body
+     */
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
+};
+
 export type CreateCommentDto = {
-    editableContent: EditableContent;
     parentObjectType: CommentParentObject;
     parentObjectId: number;
     parentId?: number;
+    editableContent: CreateEditableContentDto;
 };
 
 export type UpdateActionActivityDto = {
-    description?: string;
-    attachments?: Array<string>;
+    editableContent?: EditableContent;
 };
 
 export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted';
@@ -498,17 +507,6 @@ export type NotificationDto = {
     read: boolean;
     createdAt: string;
     updatedAt: string;
-};
-
-export type CreateEditableContentDto = {
-    /**
-     * Markdown or plain text body
-     */
-    body: string;
-    /**
-     * Image keys attached to the content
-     */
-    attachments: Array<string>;
 };
 
 export type CreatePostDto = {
@@ -538,10 +536,10 @@ export type UpdatePostDto = {
 };
 
 export type UpdateCommentDto = {
-    editableContent?: EditableContent;
     parentObjectType?: CommentParentObject;
     parentObjectId?: number;
     parentId?: number;
+    editableContent?: CreateEditableContentDto;
 };
 
 export type CitySearchDto = {

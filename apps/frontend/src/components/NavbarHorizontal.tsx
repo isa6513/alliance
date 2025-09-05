@@ -58,9 +58,9 @@ const NavbarHorizontal: React.FC = () => {
               <Link
                 to={destinations[link]}
                 key={link}
-                className={`py-2 md:py-4 px-6 border-b-2 border-l-1 last:border-r-1  border-x-zinc-200 ${
+                className={`py-2 md:py-4 px-6 border-b-2 border-x-zinc-200 ${
                   currentLocation === link
-                    ? " border-green text-green font-medium bg-zinc-50"
+                    ? " border-green text-green bg-zinc-50"
                     : "border-transparent hover:bg-zinc-50"
                 }`}
               >

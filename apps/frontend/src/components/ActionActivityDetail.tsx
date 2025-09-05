@@ -61,12 +61,12 @@ const ActionActivityDetail = () => {
   const isOwner = activity?.user.id === user?.id;
   const [editing, setEditing] = useState(false);
   const [activityDescription, setActivityDescription] = useState(
-    activity?.description || ""
+    activity?.editableContent?.body || ""
   );
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setActivityDescription(activity?.description || "");
+    setActivityDescription(activity?.editableContent?.body || "");
   }, [activity]);
 
   const handleSave = async () => {
@@ -81,7 +81,7 @@ const ActionActivityDetail = () => {
           id: activity.id,
         },
         body: {
-          description: activityDescription,
+          editableContent: { body: activityDescription, attachments: [] },
         },
       });
       if (resp.error) {
@@ -92,7 +92,7 @@ const ActionActivityDetail = () => {
       setActivities(
         activities.map((a) => (a.id === activity.id ? newActivity : a))
       );
-      setActivityDescription(newActivity.description || "");
+      setActivityDescription(newActivity.editableContent?.body || "");
       setEditing(false);
     } catch (error) {
       console.error("Error updating activity:", error);
@@ -102,7 +102,7 @@ const ActionActivityDetail = () => {
   };
 
   const handleCancel = () => {
-    setActivityDescription(activity?.description || "");
+    setActivityDescription(activity?.editableContent?.body || "");
     setEditing(false);
   };
 
@@ -144,9 +144,11 @@ const ActionActivityDetail = () => {
                 {isOwner && !editing && (
                   <button
                     onClick={() => setEditing(true)}
-                    className="text-green text-sm underline"
+                    className="text-green text-sm underline ml-2"
                   >
-                    {activity.description ? "Edit details" : "Add details"}
+                    {activity.editableContent?.body
+                      ? "Edit details"
+                      : "Add details"}
                   </button>
                 )}
               </div>
@@ -189,9 +191,11 @@ const ActionActivityDetail = () => {
                 </div>
               </div>
             ) : (
-              activity.description && <p>{activity.description}</p>
+              activity.editableContent?.body && (
+                <p>{activity.editableContent.body}</p>
+              )
             )}
-            {activity.attachments?.map((attachment) => (
+            {activity.editableContent?.attachments?.map((attachment) => (
               <img
                 key={attachment}
                 src={attachment}

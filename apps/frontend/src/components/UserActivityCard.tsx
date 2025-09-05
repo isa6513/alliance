@@ -29,7 +29,7 @@ const UserActivityCard = ({
   const { user: self } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editDescription, setEditDescription] = useState(
-    activity.description || ""
+    activity.editableContent?.body || ""
   );
   const [isSaving, setIsSaving] = useState(false);
 
@@ -44,9 +44,9 @@ const UserActivityCard = ({
   });
 
   const handleEdit = useCallback(() => {
-    setEditDescription(activity.description || "");
+    setEditDescription(activity.editableContent?.body || "");
     setIsEditing(true);
-  }, [activity.description]);
+  }, [activity.editableContent]);
 
   const handleSave = useCallback(async () => {
     if (!self || isSaving) return;
@@ -55,7 +55,7 @@ const UserActivityCard = ({
     try {
       const response = await actionsUpdateActivity({
         path: { id: activity.id },
-        body: { description: editDescription },
+        body: { editableContent: { body: editDescription, attachments: [] } },
       });
 
       if (response.error) {
@@ -76,20 +76,20 @@ const UserActivityCard = ({
   }, [self, activity.id, editDescription, onActivityUpdate, isSaving]);
 
   const handleCancel = useCallback(() => {
-    setEditDescription(activity.description || "");
+    setEditDescription(activity.editableContent?.body || "");
     setIsEditing(false);
-  }, [activity.description]);
+  }, [activity.editableContent]);
 
   return (
     <div className="flex flex-row justify-stretch items-center space-x-4">
       <Card
-        className="block bg-page text-[11pt] flex-1 border-b"
+        className="block bg-page text-[11pt] flex-1 border-b gap-y-2"
         style={CardStyle.White}
       >
-        <div className="flex flex-row gap-x-2 items-center">
+        <div className="flex flex-row gap-x-1 items-center">
           <div className="flex-shrink-0">
-            <Link to={`/user/${activity.user.id}`}>
-              <ProfileImage pfp={activity.user.profilePicture} size="medium" />
+            <Link to={`/user/${activity.user.id}`} className="mr-2">
+              <ProfileImage pfp={activity.user.profilePicture} size="small" />
             </Link>
           </div>
           <Link to={`/user/${activity.user.id}`}>
@@ -98,18 +98,18 @@ const UserActivityCard = ({
             </p>
           </Link>
           <p className="text-zinc-500">
-            {completed ? "completed" : "committed to"} {timeSinceCompleted}
+            {completed ? "completed" : "committed to"}
+          </p>
+          <p
+            className="text-green cursor-pointer hover:underline font-medium"
+            onClick={handleClick}
+          >
+            {activity.action.name}
           </p>
         </div>
         <div className="flex flex-row justify-between items-end">
           <div className="flex flex-col space-y-3">
             <div>
-              <p
-                className="text-green cursor-pointer hover:underline font-medium"
-                onClick={handleClick}
-              >
-                {activity.action.name}
-              </p>
               {isEditing ? (
                 <div className="flex-1 space-y-2">
                   <textarea
@@ -138,8 +138,11 @@ const UserActivityCard = ({
                   </div>
                 </div>
               ) : (
-                activity.description && <p>{activity.description}</p>
+                activity.editableContent?.body && (
+                  <p>{activity.editableContent.body}</p>
+                )
               )}
+              <p className="text-zinc-500">{timeSinceCompleted}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2 self-end">
@@ -172,9 +175,7 @@ const UserActivityCard = ({
         </div>
 
         {completed && (
-          <div className="mt-2">
-            <Comments objectId={activity.id} type="activity" compact />
-          </div>
+          <Comments objectId={activity.id} type="activity" compact />
         )}
       </Card>
     </div>
