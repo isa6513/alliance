@@ -189,15 +189,12 @@ const HomePage = () => {
           <div className="flex flex-col gap-y-3">
             <div className="flex lg:hidden">{bulletinCard}</div>
             <Card style={CardStyle.White}>
-              <p className="font-medium text-base text-black mb-3">
-                Forum activity
-              </p>
+              <p className="font-medium text-base text-black">Forum activity</p>
               {posts?.length === 0 && (
-                <p className="text-zinc-400">No forum activity yet</p>
+                <p className="text-zinc-400 mb-3">No forum activity yet</p>
               )}
-
               {posts?.length > 0 && (
-                <div className="flex flex-col divide-y *:py-3 -my-3">
+                <div className="flex flex-col *:py-3">
                   {posts?.slice(0, 3).map((post) => (
                     <ForumListPost
                       key={post.id}

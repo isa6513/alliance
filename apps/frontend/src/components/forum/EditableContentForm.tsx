@@ -93,6 +93,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         value={value.body}
         onChange={(e) => onChange({ ...value, body: e.target.value })}
         placeholder={placeholder}
+        autoFocus={expanded}
       />
       {isDragging && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 rounded-lg pointer-events-none">

@@ -432,6 +432,7 @@ const ReplyComponent = ({
                 className="mt-3"
                 setReplyingTo={setReplyingTo}
                 compact={compact}
+                startExpanded={true}
               />
             )}
             {/* Render nested replies within the same card */}
@@ -512,6 +513,7 @@ const ReplyComponent = ({
             isSubmitting={isSubmitting}
             setReplyingTo={setReplyingTo}
             compact={compact}
+            startExpanded={true}
           />
         </div>
       )}

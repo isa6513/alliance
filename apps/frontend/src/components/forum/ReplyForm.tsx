@@ -13,6 +13,7 @@ interface ReplyFormProps {
   setReplyingTo: (id: number | null) => void;
   compact?: boolean;
   className?: string;
+  startExpanded?: boolean;
 }
 
 const ReplyForm: React.FC<ReplyFormProps> = ({
@@ -25,8 +26,9 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
   setReplyingTo,
   compact,
   className,
+  startExpanded = false,
 }: ReplyFormProps) => {
-  const [expanded, setExpanded] = useState(!compact);
+  const [expanded, setExpanded] = useState(startExpanded);
   return (
     <div
       className={`rounded-lg relative bg-zinc-100 ${className ?? ""} ${
