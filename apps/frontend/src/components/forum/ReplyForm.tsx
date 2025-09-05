@@ -41,6 +41,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
       >
         <EditableContentForm
           value={editableContent}
+          expanded={expanded}
           onChange={(val) => {
             setEditableContent(val);
             if ((val.body || val.attachments.length > 0) && !expanded)
