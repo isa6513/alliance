@@ -335,19 +335,21 @@ const UserProfilePage: React.FC = () => {
           <div className="flex flex-row gap-x-2 cursor-pointer">
             <UserProfileTab
               number={completedActions.length}
-              label="actions completed"
+              label={`action${
+                completedActions.length === 1 ? "" : "s"
+              } completed`}
               selected={selectedTab === ProfileTabs.Activity}
               onClick={() => setSelectedTab(ProfileTabs.Activity)}
             />
             <UserProfileTab
               number={forumPosts.length}
-              label="forum posts"
+              label={`forum post${forumPosts.length === 1 ? "" : "s"}`}
               selected={selectedTab === ProfileTabs.Forum}
               onClick={() => setSelectedTab(ProfileTabs.Forum)}
             />
             <UserProfileTab
               number={friends.length}
-              label="friends"
+              label={`friend${friends.length === 1 ? "" : "s"}`}
               selected={selectedTab === ProfileTabs.Friends}
               onClick={() => setSelectedTab(ProfileTabs.Friends)}
             />
@@ -411,7 +413,7 @@ const UserProfilePage: React.FC = () => {
           {selectedTab === ProfileTabs.Activity && (
             <div className="space-y-2">
               {completedActions.length === 0 && (
-                <p className="text-center text-zinc-500">
+                <p className="mt-4 text-center text-zinc-500">
                   No actions completed yet
                 </p>
               )}
@@ -429,7 +431,9 @@ const UserProfilePage: React.FC = () => {
           {selectedTab === ProfileTabs.Forum && (
             <div className="flex flex-col gap-y-1">
               {forumPosts.length === 0 && (
-                <p className="text-center text-zinc-500">No forum posts yet</p>
+                <p className="mt-4 text-center text-zinc-500">
+                  No forum posts yet
+                </p>
               )}
               {forumPosts?.map((post: PostDto) => (
                 <ForumListPost post={post} key={post.id} />
@@ -440,7 +444,9 @@ const UserProfilePage: React.FC = () => {
             <Card className="justify-center">
               <div className="px-2">
                 {friends.length === 0 && (
-                  <p className="text-center text-stone-500">No friends yet</p>
+                  <p className="mt-4 text-center text-stone-500">
+                    No friends yet
+                  </p>
                 )}
                 <FriendsTab
                   userId={profileUser.id}

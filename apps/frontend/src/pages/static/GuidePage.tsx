@@ -70,7 +70,7 @@ const GuidePage: React.FC = () => {
               sign up.
             </p>
           </div>
-          <Card className="md:mb-2" style={CardStyle.GreenOutline}>
+          <Card className="md:mb-2" style={CardStyle.Green}>
             <p>
               This guide was developed and approved by 25 founding members of
               the Alliance. Learn more about the process{" "}

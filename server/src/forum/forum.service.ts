@@ -562,7 +562,7 @@ export class ForumService {
 
   async findPostsByUser(userId: number): Promise<Post[]> {
     return this.postRepository.find({
-      where: { authorId: userId },
+      where: { authorId: userId, deleted: false },
       relations: ['author', 'action'],
     });
   }
