@@ -32,11 +32,8 @@ const NavbarHorizontal: React.FC = () => {
       flex flex-col md:flex-row border-zinc-300 border-b bg-white
     w-screen text-left items-center fixed px-7 z-10 justify-between gap-x-5"
       >
-        <div className="flex flex-row lg:gap-x-0 items-center">
-          <Link
-            to={destinations[NavbarPage.Dashboard]}
-            className="shrink-0 hidden sm:block"
-          >
+        <div className="flex flex-row lg:gap-x-0 items-center w-full md:w-auto justify-around">
+          <Link to={destinations[NavbarPage.Dashboard]} className="shrink-0">
             <img
               src={logo}
               alt="logo"
@@ -58,7 +55,7 @@ const NavbarHorizontal: React.FC = () => {
               <Link
                 to={destinations[link]}
                 key={link}
-                className={`py-2 md:py-4 px-6 border-b-2 border-x-zinc-200 ${
+                className={`py-2 md:py-4 px-2 md:px-4 lg:px-6 border-b-2 border-x-zinc-200 ${
                   currentLocation === link
                     ? " border-green text-green bg-zinc-50"
                     : "border-transparent hover:bg-zinc-50"
