@@ -32,7 +32,7 @@ const NavbarHorizontal: React.FC = () => {
       flex flex-col md:flex-row border-zinc-300 border-b bg-white
     w-screen text-left items-center fixed px-7 z-10 justify-between gap-x-5"
       >
-        <div className="flex flex-row gap-x-1 sm:gap-x-4 lg:gap-x-8 items-center">
+        <div className="flex flex-row gap-x-1 sm:gap-x-4 lg:gap-x-4 items-center">
           <Link
             to={destinations[NavbarPage.Dashboard]}
             className="shrink-0 hidden sm:block"
@@ -58,9 +58,9 @@ const NavbarHorizontal: React.FC = () => {
               <Link
                 to={destinations[link]}
                 key={link}
-                className={`py-2 md:py-4 px-2 border-b-2 ${
+                className={`py-2 md:py-4 px-4 border-b-2 ${
                   currentLocation === link
-                    ? " border-green-3"
+                    ? " border-green"
                     : "border-transparent"
                 }`}
               >

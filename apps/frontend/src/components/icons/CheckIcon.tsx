@@ -8,7 +8,7 @@ const CheckIcon = ({ size = "small" }: { size?: "small" | "large" }) => {
     <svg
       viewBox="0 0 88 88"
       className={`${sizeClass[size]}`}
-      fill="rgb(108, 174, 61)"
+      fill="var(--color-green)"
       aria-label="Done"
       xmlns="http://www.w3.org/2000/svg"
     >

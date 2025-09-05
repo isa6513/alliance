@@ -33,12 +33,12 @@ const ActivityFeedItem = ({
                 {title}
               </Link>
             ) : (
-              <p className="text-zinc-700">{title}</p>
+              <p className="text-green">{title}</p>
             )}
           </>
         )}
         <p className="text-zinc-500">
-          <Link to={`/user/${user.id}`} className="text-zinc-700">
+          <Link to={`/user/${user.id}`}>
             <UserDisplayName staff={user.staff}>
               {user.displayName}
             </UserDisplayName>

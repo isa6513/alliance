@@ -1,6 +1,6 @@
 const DeadlineIcon = ({
   size = "small",
-  fill = "rgb(108, 174, 61)",
+  fill = "var(--color-green)",
 }: {
   size?: "small" | "large";
   fill?: string;

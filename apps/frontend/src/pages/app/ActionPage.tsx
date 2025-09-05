@@ -187,7 +187,7 @@ export default function ActionPage() {
                           100
                         }
                       />
-                      <p className="mt-2 text-green-3 text-sm font-weight-450">
+                      <p className="mt-2 text-green text-sm font-weight-450">
                         {(
                           liveUserCount ?? action.usersJoined
                         )?.toLocaleString() || 0}{" "}
@@ -207,7 +207,7 @@ export default function ActionPage() {
                           100
                         }
                       />
-                      <p className="mt-2 text-green-3 text-sm font-weight-450">
+                      <p className="mt-2 text-green text-sm font-weight-450">
                         {(action.usersCompleted ?? 0).toLocaleString()} members
                         completed
                       </p>

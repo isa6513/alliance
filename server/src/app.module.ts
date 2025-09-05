@@ -78,7 +78,7 @@ export class AppModule {
   }
 
   async onModuleInit() {
-    if (process.env.ADMIN_USER) {
+    if (process.env.ADMIN_USER && process.env.NODE_ENV === 'development') {
       const user = await this.userService.findOneByEmail(
         process.env.ADMIN_USER,
       );

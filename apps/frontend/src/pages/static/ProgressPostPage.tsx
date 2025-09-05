@@ -1,9 +1,9 @@
-import React from "react";
-import Footer from "../../components/Footer";
-import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import matter from "gray-matter";
+import React from "react";
 import { useLoaderData } from "react-router";
+import Footer from "../../components/Footer";
 import MarkdownWrapper from "../../components/MarkdownWrapper";
+import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 
 export async function loader({ params }: { params: { slug: string } }) {
   const { slug } = params;
@@ -54,7 +54,7 @@ const ProgressPostPage: React.FC = () => {
               day: "numeric",
             })}
           </p>
-          <p className="self-start text-base text-green border border-green-2 py-1 px-2 bg-green-1/20 rounded mb-8">
+          <p className="self-start text-base text-green border border-green py-1 px-2 bg-green/20 rounded mb-8">
             {frontmatter?.members} members
           </p>
           <MarkdownWrapper id="post-content" markdownContent={content ?? ""} />

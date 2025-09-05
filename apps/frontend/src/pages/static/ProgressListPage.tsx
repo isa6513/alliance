@@ -50,7 +50,7 @@ const ProgressListPage: React.FC = () => {
                     <p className="text-base md:text-3xl font-adobe">
                       {post.frontmatter.title}
                     </p>
-                    <p className="text-sm md:text-base text-green border border-green-2 py-1 px-2 bg-green-1/20 rounded">
+                    <p className="text-sm md:text-base text-green border border-green py-1 px-2 bg-green/20 rounded">
                       {post.frontmatter.members} members
                     </p>
                     {/* <Tag style={TagStyle.Green} size="large">

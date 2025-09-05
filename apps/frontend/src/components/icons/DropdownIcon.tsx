@@ -1,6 +1,6 @@
 const CheckIcon = ({
   size = "small",
-  fill = "rgb(108, 174, 61)",
+  fill = "var(--color-green)",
 }: {
   size?: "mini" | "small" | "large";
   fill?: string;

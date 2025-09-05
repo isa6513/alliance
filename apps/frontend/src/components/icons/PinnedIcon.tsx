@@ -12,7 +12,7 @@ const PinnedIcon = ({ size = "small" }: { size?: "small" | "large" }) => {
       y="0px"
       viewBox="0 0 100 100"
       className={`${sizeClass[size]}`}
-      fill="rgb(108, 174, 61)"
+      fill="var(--color-green)"
       aria-label="Pinned"
     >
       <g>

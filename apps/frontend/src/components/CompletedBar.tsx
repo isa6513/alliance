@@ -14,7 +14,7 @@ const CompletedBar: React.FC<CompletedBarProps> = ({
       } rounded-[3px] mt-1`}
     >
       <div
-        className="h-3 bg-green-2 rounded-[3px]"
+        className="h-3 bg-green rounded-[3px]"
         style={{ width: `${percentage}%` }}
       ></div>
     </div>

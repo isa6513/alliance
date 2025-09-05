@@ -154,7 +154,7 @@ const PostDetailPage: React.FC = () => {
               {post.action && (
                 <Link
                   to={`/actions/${post.action.id}`}
-                  className="inline-block bg-green-1/20 text-green hover:bg-green-1/40 px-3 py-1 rounded-lg text-sm"
+                  className="inline-block bg-green/20 text-green hover:bg-green/40 px-3 py-1 rounded-lg text-sm"
                 >
                   {post.action.name}
                 </Link>

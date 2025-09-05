@@ -308,7 +308,7 @@ const UserProfilePage: React.FC = () => {
               <div className="flex flex-row gap-3 items-center">
                 <h1 className="font-adobe">{profileUser.displayName}</h1>
                 {profileUser.staff && (
-                  <div className="text-sm bg-[#5598da] text-white px-3 py-0.5 rounded self-center mb-1">
+                  <div className="text-sm bg-staff text-white px-3 py-0.5 rounded self-center mb-1">
                     Staff
                   </div>
                 )}

@@ -46,8 +46,8 @@ const Card: React.FC<CardProps> = ({
     [CardStyle.LightGrey]: "bg-[#fcfcfc] border-zinc-300 rounded-md",
     [CardStyle.Black]: "bg-black border-zinc-300 text-white",
     [CardStyle.Image]: "bg-transparent border-none",
-    [CardStyle.Green]: "bg-green-1 border-green-2 rounded-lg",
-    [CardStyle.GreenOutline]: "border-green-2 bg-green-1/40 rounded",
+    [CardStyle.Green]: "bg-green border-green rounded-lg",
+    [CardStyle.GreenOutline]: "border-green bg-green/20 rounded",
     [CardStyle.Transparent]:
       "bg-transparent border-gray-2 hover:border border-box rounded-md",
   };
