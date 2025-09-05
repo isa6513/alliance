@@ -32,7 +32,7 @@ const NavbarHorizontal: React.FC = () => {
       flex flex-col md:flex-row border-zinc-300 border-b bg-white
     w-screen text-left items-center fixed px-7 z-10 justify-between gap-x-5"
       >
-        <div className="flex flex-row gap-x-1 sm:gap-x-4 lg:gap-x-0 items-center">
+        <div className="flex flex-row lg:gap-x-0 items-center">
           <Link
             to={destinations[NavbarPage.Dashboard]}
             className="shrink-0 hidden sm:block"

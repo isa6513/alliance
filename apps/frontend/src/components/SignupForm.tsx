@@ -18,12 +18,12 @@ const SignupForm = ({
   referralCode,
 }: SignupFormProps) => {
   const [formData, setFormData] = useState<
-    SignUpDto & { confirmEmail: string }
+    SignUpDto & { confirmPassword: string }
   >({
     name: "",
     email: "",
-    confirmEmail: "",
     password: "",
+    confirmPassword: "",
     mode: "cookie",
   });
 
@@ -33,11 +33,11 @@ const SignupForm = ({
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
-      if (formData.email !== formData.confirmEmail) {
+      if (formData.password !== formData.confirmPassword) {
         setFieldErrors({
-          confirmEmail: "Emails do not match",
+          confirmPassword: "Passwords do not match",
         });
-        console.log("Emails do not match");
+        console.log("Passwords do not match");
         return;
       }
 
@@ -75,7 +75,7 @@ const SignupForm = ({
       />
 
       <FormInput
-        label="Email Address"
+        label="Email"
         type="email"
         value={formData.email}
         onChange={handleChange}
@@ -86,17 +86,6 @@ const SignupForm = ({
       />
 
       <FormInput
-        label="Confirm email"
-        type="email"
-        value={formData.confirmEmail}
-        onChange={handleChange}
-        placeholder="your@email.com"
-        required
-        name="confirmEmail"
-        error={fieldErrors.confirmEmail}
-      />
-
-      <FormInput
         label="Password"
         type="password"
         value={formData.password}
@@ -104,6 +93,16 @@ const SignupForm = ({
         required
         name="password"
         error={fieldErrors.password}
+      />
+
+      <FormInput
+        label="Confirm password"
+        type="password"
+        value={formData.confirmPassword}
+        onChange={handleChange}
+        required
+        name="confirmPassword"
+        error={fieldErrors.confirmPassword}
       />
 
       <div className="pt-2">
