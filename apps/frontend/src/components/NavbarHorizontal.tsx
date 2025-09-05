@@ -32,7 +32,7 @@ const NavbarHorizontal: React.FC = () => {
       flex flex-col md:flex-row border-zinc-300 border-b bg-white
     w-screen text-left items-center fixed px-7 z-10 justify-between gap-x-5"
       >
-        <div className="flex flex-row gap-x-1 sm:gap-x-4 lg:gap-x-4 items-center">
+        <div className="flex flex-row gap-x-1 sm:gap-x-4 lg:gap-x-0 items-center">
           <Link
             to={destinations[NavbarPage.Dashboard]}
             className="shrink-0 hidden sm:block"
@@ -40,7 +40,7 @@ const NavbarHorizontal: React.FC = () => {
             <img
               src={logo}
               alt="logo"
-              className={`w-7 h-7 ${
+              className={`w-7 h-7 mr-8 ${
                 import.meta.env.MODE === "development" ? "grayscale invert" : ""
               }`}
             />
@@ -58,10 +58,10 @@ const NavbarHorizontal: React.FC = () => {
               <Link
                 to={destinations[link]}
                 key={link}
-                className={`py-2 md:py-4 px-4 border-b-2 ${
+                className={`py-2 md:py-4 px-6 border-b-2 border-l-1 last:border-r-1  border-x-zinc-200 ${
                   currentLocation === link
-                    ? " border-green"
-                    : "border-transparent"
+                    ? " border-green text-green font-medium bg-zinc-50"
+                    : "border-transparent hover:bg-zinc-50"
                 }`}
               >
                 <p

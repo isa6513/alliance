@@ -47,6 +47,9 @@ const ProfileDropdown = () => {
           <Link to={profileUrl} onClick={() => setIsOpen(false)}>
             Profile
           </Link>
+          <Link to="/contract" onClick={() => setIsOpen(false)}>
+            Contract
+          </Link>
           <Link to="/settings" onClick={() => setIsOpen(false)}>
             Settings
           </Link>
