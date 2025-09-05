@@ -1,7 +1,7 @@
 import { actionsUpdateActivity } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useEffect, useState } from "react";
-import { useNavigate, useOutletContext, useParams } from "react-router";
+import { Link, useNavigate, useOutletContext, useParams } from "react-router";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
 import { formatTime } from "../lib/utils";
@@ -10,6 +10,7 @@ import { TaskPanelContext } from "./ActionPageTaskPanel";
 import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
 import Comments from "./Comments";
 import ProfileImage from "./ProfileImage";
+import UserDisplayName from "./UserDisplayName";
 
 export function ErrorBoundary(error: unknown) {
   console.error(error);
@@ -121,16 +122,25 @@ const ActionActivityDetail = () => {
         {activity !== null && (
           <>
             <div className="mt-4 flex flex-row items-center justify-between">
-              <div className="flex flex-row items-center gap-x-4">
-                {activity.user.profilePicture !== null && (
-                  <ProfileImage
-                    pfp={activity.user.profilePicture}
-                    size="medium"
-                  />
-                )}
-                <p className="font-semibold">
-                  {activity.user.displayName} {verb} this action
-                </p>
+              <div className="flex flex-row items-center">
+                <div className="flex flex-row items-center gap-x-2">
+                  {activity.user.profilePicture !== null && (
+                    <Link to={`/user/${activity.user.id}`}>
+                      <ProfileImage
+                        pfp={activity.user.profilePicture}
+                        size="medium"
+                      />
+                    </Link>
+                  )}
+                  <p className="font-medium">
+                    <Link to={`/user/${activity.user.id}`}>
+                      <UserDisplayName staff={activity.user.staff}>
+                        {activity.user.displayName}
+                      </UserDisplayName>
+                    </Link>{" "}
+                    {verb} this action
+                  </p>
+                </div>
                 {isOwner && !editing && (
                   <button
                     onClick={() => setEditing(true)}
