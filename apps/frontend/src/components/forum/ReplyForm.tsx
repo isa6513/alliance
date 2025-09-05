@@ -45,6 +45,13 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
             setEditableContent(val);
             if ((val.body || val.attachments.length > 0) && !expanded)
               setExpanded(true);
+
+            if (
+              expanded &&
+              val.body.trim() === "" &&
+              val.attachments.length === 0
+            )
+              setExpanded(false);
           }}
           compact={compact}
           placeholder={"Add a comment..."}
