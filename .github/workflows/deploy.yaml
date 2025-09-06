@@ -407,7 +407,7 @@ jobs:
             cd ~/nest-backend
             NODE_OPTIONS=--max_old_space_size=800 npm install --omit=dev --max_old_space_size=800
 
-            npm run migration:run
+            npm run migration:runprod
 
             npm install -g pm2
             pm2 delete nest-app || true
