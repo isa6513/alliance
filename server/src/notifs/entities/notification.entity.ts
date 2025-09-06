@@ -27,6 +27,12 @@ export class Notification {
   })
   user: User;
 
+  @ManyToOne(() => User, (user) => user.notifications, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  associatedUser?: User;
+
   @Column({ type: 'enum', enum: NotificationCategory })
   @ApiProperty({ enum: NotificationCategory, enumName: 'NotificationCategory' })
   category: NotificationCategory;

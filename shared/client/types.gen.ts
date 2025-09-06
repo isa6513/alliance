@@ -500,11 +500,13 @@ export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_requ
 
 export type NotificationDto = {
     id: number;
+    associatedUser?: ProfileDto;
     category: NotificationCategory;
     message: string;
     webAppLocation: string | null;
     mobileAppLocation: string | null;
     read: boolean;
+    cleared: boolean;
     createdAt: string;
     updatedAt: string;
 };

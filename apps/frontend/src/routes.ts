@@ -40,6 +40,7 @@ export default [
 
     layout("authonly.tsx", [
       route("/home", "pages/app/HomePage.tsx"),
+      route("/notifications", "pages/app/NotificationsPage.tsx"),
       route("/settings", "pages/app/SettingsPage.tsx"),
       route("/contract", "pages/app/ContractPage.tsx"),
       route("/commit", "pages/app/CommitActionPage.tsx"),

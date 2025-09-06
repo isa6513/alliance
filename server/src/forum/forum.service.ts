@@ -359,6 +359,7 @@ export class ForumService {
           category: NotificationCategory.ForumReply,
           webAppLocation: replyUrl(post.id, comment.id),
           mobileAppLocation: replyUrl(post.id, comment.id),
+          associatedUser: comment.author,
         });
         notifications.push(postNotif);
       }
@@ -383,6 +384,7 @@ export class ForumService {
           category: NotificationCategory.ForumReply,
           webAppLocation: replyUrl(post.id, comment.id),
           mobileAppLocation: replyUrl(post.id, comment.id),
+          associatedUser: comment.author,
         });
         notifications.push(parentNotif);
       }
@@ -415,6 +417,7 @@ export class ForumService {
           category: NotificationCategory.ForumReply,
           webAppLocation: appUrl,
           mobileAppLocation: appUrl,
+          associatedUser: comment.author,
         });
         notifications.push(activityNotif);
       }
@@ -445,6 +448,7 @@ export class ForumService {
           category: NotificationCategory.ForumReply,
           webAppLocation: appUrl,
           mobileAppLocation: appUrl,
+          associatedUser: comment.author,
         });
         notifications.push(parentNotif);
       }

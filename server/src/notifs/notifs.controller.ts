@@ -1,16 +1,16 @@
 import {
   Controller,
   Get,
-  Post,
   Param,
-  UseGuards,
-  Request,
   ParseIntPipe,
+  Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
-import { NotifsService } from './notifs.service';
-import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
 import { ApiOkResponse } from '@nestjs/swagger';
+import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
 import { NotificationDto } from './dto/notification.dto';
+import { NotifsService } from './notifs.service';
 
 @Controller('notifs')
 export class NotifsController {
@@ -20,7 +20,9 @@ export class NotifsController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [NotificationDto] })
   findAll(@Request() req: JwtRequest): Promise<NotificationDto[]> {
-    return this.notifsService.findAll(req.user.sub);
+    return this.notifsService
+      .findAll(req.user.sub)
+      .then((notifs) => notifs.map((notif) => new NotificationDto(notif)));
   }
 
   @Post('read/:id')

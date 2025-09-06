@@ -1,23 +1,10 @@
-import {
-  NotificationDto,
-  notifsClear,
-  notifsFindAll,
-  notifsSetRead,
-  notifsSetReadAll,
-} from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { formatDate } from "date-fns";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link } from "react-router";
 import notifBell from "../assets/notif-bell.svg";
-import { useAuth } from "../lib/AuthContext";
-
-function getWebAppLocation(webAppLocation: string) {
-  if (webAppLocation.startsWith("/")) {
-    return webAppLocation;
-  }
-  return "/" + webAppLocation;
-}
+import { useNotifications } from "../lib/useNotifications";
+import ProfileImage from "./ProfileImage";
 
 const useOutsideClick = (onClickOutside: () => void) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -38,103 +25,18 @@ const useOutsideClick = (onClickOutside: () => void) => {
 };
 
 const NotificationsIcon = () => {
-  const [notifications, setNotifications] = useState<NotificationDto[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (!isAuthenticated) {
-      return;
-    }
-    notifsFindAll().then(
-      ({ data: notifications }: { data: NotificationDto[] | undefined }) => {
-        if (notifications) {
-          setNotifications(
-            notifications.sort(
-              (a, b) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime()
-            )
-          );
-          setUnreadCount(
-            notifications.filter((notification) => !notification.read).length
-          );
-        }
-      }
-    );
-  }, [isAuthenticated]);
+  const {
+    notifications,
+    unreadCount,
+    handleMarkAllAsRead,
+    handleClearAll,
+    handleNotifClick,
+  } = useNotifications();
 
   const toggle = useCallback(() => {
     setIsOpen(!isOpen);
   }, [isOpen]);
-
-  const handleNotifClick = useCallback(
-    (id: number, webAppLocation: string | null) => () => {
-      notifsSetRead({ path: { id } });
-      const newNotifications = notifications.map((notification) => ({
-        ...notification,
-        read: notification.id === id ? true : notification.read,
-      }));
-      setNotifications(newNotifications);
-      setUnreadCount(
-        newNotifications.filter((notification) => !notification.read).length
-      );
-
-      const clickedNotif = notifications.find((n) => n.id === id);
-      if (clickedNotif?.category === "friend_request") {
-        navigate(
-          webAppLocation
-            ? getWebAppLocation(webAppLocation)
-            : window.location.pathname,
-          {
-            state: {
-              openFriendRequest: true,
-            },
-          }
-        );
-      } else if (clickedNotif?.category === "friend_request_accepted") {
-        navigate(
-          webAppLocation
-            ? getWebAppLocation(webAppLocation)
-            : window.location.pathname,
-          {
-            state: {
-              openFriends: true,
-            },
-          }
-        );
-      } else {
-        navigate(
-          webAppLocation
-            ? getWebAppLocation(webAppLocation)
-            : window.location.pathname
-        );
-      }
-    },
-    [navigate, notifications]
-  );
-
-  const handleMarkAllAsRead = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      notifsSetReadAll();
-      setNotifications(
-        notifications.map((notification) => ({
-          ...notification,
-          read: true,
-        }))
-      );
-      setUnreadCount(0);
-    },
-    [notifications]
-  );
-
-  const handleClearAll = useCallback(() => {
-    notifsClear();
-    setNotifications([]);
-    setUnreadCount(0);
-  }, []);
 
   const ref = useOutsideClick(() => setIsOpen(false));
 
@@ -162,7 +64,13 @@ const NotificationsIcon = () => {
           className="absolute top-[calc(100%-10px)] shadow-lg/5 right-5 bg-white rounded border border-zinc-200 p-4 min-w-[370px] space-y-2 max-h-[500px] overflow-y-auto cursor-default"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex flex-row border-b border-zinc-200 justify-end gap-x-8 pb-2">
+          <div className="flex flex-row border-b border-zinc-200 justify-between">
+            <Link
+              to="/notifications"
+              className="text-black hover:bg-zinc-100 p-2 rounded-md flex cursor-pointer flex-col text-sm font-medium"
+            >
+              See all
+            </Link>
             <Button
               color={ButtonColor.Transparent}
               onClick={handleMarkAllAsRead}
@@ -190,7 +98,15 @@ const NotificationsIcon = () => {
               <p className="text-gray-500 text-xs">
                 {formatDate(notification.updatedAt, "MM/dd/yyyy")}
               </p>
-              {notification.message}
+              <div className="flex flex-row items-center gap-x-2">
+                {notification.associatedUser && (
+                  <ProfileImage
+                    pfp={notification.associatedUser.profilePicture}
+                    size="small"
+                  />
+                )}
+                {notification.message}
+              </div>
             </div>
           ))}
         </div>
