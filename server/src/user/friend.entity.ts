@@ -1,17 +1,17 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  ManyToOne,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
-  Unique,
-  OneToOne,
+  Entity,
   JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+  UpdateDateColumn,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
-import { User } from './user.entity';
 import { Notification } from '../notifs/entities/notification.entity';
+import { User } from './user.entity';
 export enum FriendStatus {
   Pending = 'pending',
   Accepted = 'accepted',
@@ -28,12 +28,14 @@ export class Friend {
   /** User who initiated the request */
   @ManyToOne(() => User, (user) => user.sentFriendRequests, {
     onDelete: 'CASCADE',
+    eager: true,
   })
   requester: User;
 
   /** User who received the request */
   @ManyToOne(() => User, (user) => user.receivedFriendRequests, {
     onDelete: 'CASCADE',
+    eager: true,
   })
   addressee: User;
 

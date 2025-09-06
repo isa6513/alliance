@@ -129,21 +129,7 @@ export class AuthController {
   @ApiOkResponse({ type: UserDto })
   async me(@Request() req: JwtRequest): Promise<UserDto> {
     const profile = await this.authService.getProfile(req.user.email);
-    return {
-      email: profile.email,
-      name: profile.name,
-      admin: profile.admin,
-      staff: profile.staff,
-      id: profile.id,
-      onboardingComplete: profile.onboardingComplete,
-      socialNotifsPreference: profile.socialNotifsPreference,
-      emailNotifsEnabled: profile.emailNotifsEnabled,
-      pushNotifsEnabled: profile.pushNotifsEnabled,
-      textNotifsEnabled: profile.textNotifsEnabled,
-      turnedOffAllNotifs: profile.turnedOffAllNotifs,
-      referralCode: profile.referralCode,
-      anonymous: profile.anonymous,
-    };
+    return new UserDto(profile);
   }
 
   @Post('logout')

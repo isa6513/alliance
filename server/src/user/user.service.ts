@@ -108,7 +108,10 @@ export class UserService {
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOneBy({ email: email });
+    return this.userRepository.findOne({
+      where: { email: email },
+      relations: ['sentFriendRequests', 'receivedFriendRequests'],
+    });
   }
 
   async findOneByReferralCode(referralCode: string): Promise<User | null> {

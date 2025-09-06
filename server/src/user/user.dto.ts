@@ -5,30 +5,11 @@ import {
   PartialType,
   PickType,
 } from '@nestjs/swagger';
-import { IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import { Allow, IsOptional } from 'class-validator';
 import { getImageSource } from 'src/images/images.service';
 import { FriendStatus } from './friend.entity';
 import { User } from './user.entity';
-
-export class UserDto extends PickType(User, [
-  'name',
-  'email',
-  'admin',
-  'staff',
-  'id',
-  'onboardingComplete',
-  'emailNotifsEnabled',
-  'pushNotifsEnabled',
-  'textNotifsEnabled',
-  'socialNotifsPreference',
-  'turnedOffAllNotifs',
-  'referralCode',
-  'anonymous',
-]) {
-  @ApiPropertyOptional()
-  @IsOptional()
-  cityId?: number;
-}
 
 export class FriendStatusDto {
   @ApiProperty({ enum: FriendStatus, nullable: true, enumName: 'FriendStatus' })
@@ -71,6 +52,37 @@ export class ProfileDto extends PickType(User, [
     if (user.profilePicture) {
       this.profilePicture = getImageSource(user.profilePicture);
     }
+  }
+}
+
+export class UserDto extends PickType(User, [
+  'name',
+  'email',
+  'admin',
+  'staff',
+  'id',
+  'onboardingComplete',
+  'emailNotifsEnabled',
+  'pushNotifsEnabled',
+  'textNotifsEnabled',
+  'socialNotifsPreference',
+  'turnedOffAllNotifs',
+  'referralCode',
+  'anonymous',
+]) {
+  @ApiPropertyOptional()
+  @IsOptional()
+  cityId?: number;
+
+  @ApiProperty({ type: ProfileDto, isArray: true })
+  @Type(() => ProfileDto)
+  @Allow()
+  friends: ProfileDto[];
+
+  constructor(user: User) {
+    super();
+    Object.assign(this, user);
+    this.friends = user.friends.map((friend) => new ProfileDto(friend));
   }
 }
 
