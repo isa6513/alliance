@@ -177,7 +177,7 @@ export type ActionActivity = {
     userId: number;
     createdAt: string;
     dollar_amount?: number;
-    editableContent?: EditableContent;
+    editableContent: EditableContent;
     likes: Array<User>;
 };
 
@@ -330,7 +330,7 @@ export type ActionActivityDto = {
      */
     type: ActionActivityType;
     createdAt: string;
-    editableContent?: EditableContent;
+    editableContent: EditableContent;
     user: ProfileDto;
     actionId: number;
     action: ActionDto;
@@ -494,7 +494,7 @@ export type CreateCommentDto = {
 };
 
 export type UpdateActionActivityDto = {
-    editableContent?: EditableContent;
+    editableContent: EditableContent;
 };
 
 export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted';

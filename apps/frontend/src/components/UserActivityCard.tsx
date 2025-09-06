@@ -1,6 +1,8 @@
 import {
   ActionActivityDto,
   actionsUpdateActivity,
+  CreateEditableContentDto,
+  imagesUploadImage,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -11,6 +13,7 @@ import { formatTime } from "../lib/utils";
 import ActivityLikeButton from "./ActivityLikeButton";
 import Comments from "./Comments";
 import ProfileImage from "./ProfileImage";
+import EditableContentForm from "./forum/EditableContentForm";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;
@@ -28,23 +31,27 @@ const UserActivityCard = ({
   const navigate = useNavigate();
   const { user: self } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [editDescription, setEditDescription] = useState(
-    activity.editableContent?.body || ""
-  );
+  const [editContent, setEditContent] = useState<CreateEditableContentDto>({
+    body: activity.editableContent.body,
+    attachments: activity.editableContent.attachments,
+  });
   const [isSaving, setIsSaving] = useState(false);
 
   const completed = activity.type === "user_completed";
 
   const handleClick = useCallback(() => {
-    navigate(`/actions/${activity.actionId}/activity/${activity.id}`);
-  }, [activity.actionId, activity.id, navigate]);
+    navigate(`/actions/${activity.actionId}`);
+  }, [activity.actionId, navigate]);
 
   const timeSinceCompleted = formatTime(new Date(activity.createdAt), {
     addSuffix: true,
   });
 
   const handleEdit = useCallback(() => {
-    setEditDescription(activity.editableContent?.body || "");
+    setEditContent({
+      body: activity.editableContent.body,
+      attachments: activity.editableContent.attachments,
+    });
     setIsEditing(true);
   }, [activity.editableContent]);
 
@@ -53,9 +60,26 @@ const UserActivityCard = ({
 
     setIsSaving(true);
     try {
+      // Upload new base64 images while preserving existing keys
+      const uploads = await Promise.all(
+        (editContent.attachments || []).map(async (img) => {
+          if (img.startsWith("data:")) {
+            const res = await imagesUploadImage({ body: { file: img } });
+            return (res.data as unknown as string) ?? "";
+          }
+          return img;
+        })
+      );
+      const attachmentKeys = uploads.filter(Boolean) as string[];
+
       const response = await actionsUpdateActivity({
         path: { id: activity.id },
-        body: { editableContent: { body: editDescription, attachments: [] } },
+        body: {
+          editableContent: {
+            body: editContent.body,
+            attachments: attachmentKeys,
+          },
+        },
       });
 
       if (response.error) {
@@ -73,10 +97,20 @@ const UserActivityCard = ({
     } finally {
       setIsSaving(false);
     }
-  }, [self, activity.id, editDescription, onActivityUpdate, isSaving]);
+  }, [
+    self,
+    isSaving,
+    editContent.attachments,
+    editContent.body,
+    activity.id,
+    onActivityUpdate,
+  ]);
 
   const handleCancel = useCallback(() => {
-    setEditDescription(activity.editableContent?.body || "");
+    setEditContent({
+      body: activity.editableContent.body,
+      attachments: activity.editableContent.attachments,
+    });
     setIsEditing(false);
   }, [activity.editableContent]);
 
@@ -94,11 +128,11 @@ const UserActivityCard = ({
           </div>
           <Link
             to={`/user/${activity.user.id}`}
-            className="text-zinc-600 hover:underline"
+            className="text-zinc-900 hover:underline"
           >
             {activity.user.displayName}
           </Link>
-          <p className="text-zinc-500">
+          <p className="text-zinc-900">
             {completed ? "completed" : "committed to"}
           </p>
           <p
@@ -109,49 +143,51 @@ const UserActivityCard = ({
           </p>
         </div>
         <div className="flex flex-row justify-between items-end">
-          <div className="flex flex-col space-y-3">
+          <div className="flex flex-col space-y-3 w-full">
             <div>
               {isEditing ? (
                 <div className="flex-1 space-y-2">
-                  <textarea
-                    value={editDescription}
-                    onChange={(e) => setEditDescription(e.target.value)}
-                    placeholder="Add a description..."
-                    className="w-full border border-stone-300 rounded p-2 text-sm resize-none"
-                    rows={2}
-                  />
-                  <div className="flex space-x-2">
-                    <Button
-                      color={ButtonColor.Light}
-                      onClick={handleCancel}
-                      className="text-xs py-1 px-2"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      color={ButtonColor.Blue}
-                      onClick={handleSave}
-                      disabled={isSaving}
-                      className="text-xs py-1 px-2"
-                    >
-                      {isSaving ? "Saving..." : "Save"}
-                    </Button>
+                  <div className="rounded-lg p-3 bg-zinc-100">
+                    <EditableContentForm
+                      value={editContent}
+                      onChange={setEditContent}
+                      compact={false}
+                      placeholder="Add a description..."
+                    />
+                    <div className="mt-2 flex justify-end items-center gap-2">
+                      <Button
+                        color={ButtonColor.Blue}
+                        onClick={handleSave}
+                        disabled={isSaving || !editContent.body.trim()}
+                      >
+                        {isSaving ? "Saving..." : "Save"}
+                      </Button>
+                      <Button
+                        color={ButtonColor.Light}
+                        onClick={handleCancel}
+                        disabled={isSaving}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ) : (
                 activity.editableContent?.body && (
-                  <p>{activity.editableContent.body}</p>
+                  <p className="my-3">{activity.editableContent.body}</p>
                 )
               )}
               <p className="text-zinc-500">{timeSinceCompleted}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2 self-end">
-            <ActivityLikeButton
-              liked={activity.likes.some((like) => like.id === self?.id)}
-              likes={activity.likes.length}
-              handleLike={() => handleLike(activity.id)}
-            />
+            {!isEditing && (
+              <ActivityLikeButton
+                liked={activity.likes.some((like) => like.id === self?.id)}
+                likes={activity.likes.length}
+                handleLike={() => handleLike(activity.id)}
+              />
+            )}
             {canEdit && !isEditing && (
               <button
                 onClick={(e) => {

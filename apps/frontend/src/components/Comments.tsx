@@ -240,9 +240,30 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
 
   return (
     <div>
+      {user && !replyingTo ? (
+        <ReplyForm
+          parentId={null}
+          editableContent={editableContent}
+          setEditableContent={setEditableContent}
+          onSubmit={handleSubmitReply}
+          isSubmitting={isSubmitting}
+          setReplyingTo={setReplyingTo}
+          compact={compact}
+        />
+      ) : !user ? (
+        <div className="text-center py-6 bg-gray-50 rounded-lg">
+          <p className="text-gray-600">
+            Please{" "}
+            <Link to="/login" className="text-blue-600 hover:underline">
+              log in
+            </Link>{" "}
+            to post a reply.
+          </p>
+        </div>
+      ) : null}
       {error && <div className="text-red-500">{error}</div>}
       {comments && comments.length > 0 ? (
-        <div className="space-y-3 mb-3">
+        <div className="space-y-3 my-3">
           {comments
             .filter((comment) => !comment.deleted || comment.children?.length)
             .map((reply) => (
@@ -263,28 +284,6 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
                 homeStyle={homeStyle}
               />
             ))}
-        </div>
-      ) : null}
-
-      {user && !replyingTo ? (
-        <ReplyForm
-          parentId={null}
-          editableContent={editableContent}
-          setEditableContent={setEditableContent}
-          onSubmit={handleSubmitReply}
-          isSubmitting={isSubmitting}
-          setReplyingTo={setReplyingTo}
-          compact={compact}
-        />
-      ) : !user ? (
-        <div className="text-center py-6 bg-gray-50 rounded-lg">
-          <p className="text-gray-600">
-            Please{" "}
-            <Link to="/login" className="text-blue-600 hover:underline">
-              log in
-            </Link>{" "}
-            to post a reply.
-          </p>
         </div>
       ) : null}
     </div>

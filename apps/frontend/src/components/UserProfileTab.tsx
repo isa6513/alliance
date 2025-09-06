@@ -21,7 +21,7 @@ const UserProfileTab: React.FC<UserProfileTabProps> = ({
       <span className={`${selected ? "text-white" : "text-black"}`}>
         {number}
       </span>
-      <span className={`${selected ? "text-white/80" : "text-zinc-500"}`}>
+      <span className={`${selected ? "text-white/90" : "text-zinc-600"}`}>
         {label}
       </span>
     </div>

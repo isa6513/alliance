@@ -524,12 +524,8 @@ export class ActionsService {
     if (activity.userId !== userId) {
       throw new ForbiddenException('You are not the owner of this activity');
     }
-    console.log(updateActivityDto.editableContent);
-
     activity.editableContent = updateActivityDto.editableContent;
     await this.actionActivityRepository.save(activity);
-
-    console.log(this.getActivity(id));
 
     return this.getActivity(id);
   }

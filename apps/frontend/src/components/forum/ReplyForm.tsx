@@ -31,7 +31,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
   const [expanded, setExpanded] = useState(startExpanded);
   return (
     <div
-      className={`rounded-lg relative bg-zinc-100 ${className ?? ""} ${
+      className={`rounded-lg relative bg-black/5 ${className ?? ""} ${
         parentId ? "mt-0" : "mt-3"
       } ${compact ? "p-1" : "p-4"}`}
     >
