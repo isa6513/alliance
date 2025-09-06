@@ -32,7 +32,6 @@ export class NotifsService {
       where: { user: { id: userId } },
       relations: ['user', 'associatedUser'],
     });
-    console.log(notifs);
     return notifs;
   }
 

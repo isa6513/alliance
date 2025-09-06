@@ -1,25 +1,22 @@
-import {
-  ActionActivityDto,
-  ActionDto,
-  UserActionRelation,
-} from "@alliance/shared/client/types.gen";
+import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback } from "react";
 import { useNavigate } from "react-router";
+import { ActionWithRelation } from "../applayout";
 import CompletedBar from "./CompletedBar";
+import Tag, { TagStyle } from "./Tag";
 import UserProfilePicRow from "./UserProfilePicRow";
 
 export interface ActionItemCardProps
   extends Pick<
-    ActionDto,
-    "name" | "shortDescription" | "category" | "id" | "status"
+    ActionWithRelation,
+    "name" | "shortDescription" | "category" | "id" | "status" | "relation"
   > {
   className?: string;
   joinedCount?: number;
   neededCount?: number;
   friendCommitmentActivities?: ActionActivityDto[];
   showDescription?: boolean;
-  userRelation?: UserActionRelation;
   activity?: ActionActivityDto;
 }
 
@@ -32,6 +29,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   neededCount,
   friendCommitmentActivities = [],
   activity,
+  relation,
 }) => {
   const navigate = useNavigate();
 
@@ -54,23 +52,16 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
       >
         <div className="flex flex-row items-start gap-x-8">
           <div className="flex-1 flex flex-col">
-            <p className="font-medium text-black">{name}</p>
+            <div className="flex flex-row items-center justify-between gap-x-2 mb-2">
+              <p className="font-medium text-black">{name}</p>
+              {relation === "completed" && (
+                <Tag style={TagStyle.Green} className="text-green font-medium">
+                  Completed
+                </Tag>
+              )}
+            </div>
             <p className="text-zinc-500">{shortDescription}</p>
           </div>
-          {/* <div>
-            <div className="w-24 flex flex-col gap-y-2">
-              {userRelation === "none" &&
-                status === "gathering_commitments" && (
-                  <Button
-                    color={ButtonColor.Green}
-                    onClick={goToActionPage}
-                    className="w-full"
-                  >
-                    Commit
-                  </Button>
-                )}
-            </div>
-          </div> */}
         </div>
         {activity && joinedCount && neededCount && (
           <div className="mt-6">
@@ -94,34 +85,6 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
           </div>
         )}
       </Card>
-
-      {/* {activity && (
-        <div className="flex flex-col border-x border-b rounded-b-md border-zinc-300 bg-zinc-50 p-4">
-          <div className="flex flex-row gap-y-2 bg-zinc-50 text-sm items-center gap-x-4">
-            <p className="text-zinc-600 flex-1">
-              {activity.type === "user_joined"
-                ? `You committed ${formatTime(new Date(activity.createdAt), {
-                    addSuffix: true,
-                  })}`
-                : `You completed ${formatTime(new Date(activity.createdAt), {
-                    addSuffix: true,
-                  })}`}
-            </p>
-            <p className="text-zinc-600">{activity.likes.length} likes</p>
-            <p
-              className="text-zinc-600 cursor-pointer"
-              onClick={() => setToggleComments(!toggleComments)}
-            >
-              Reply
-            </p>
-          </div>
-          {toggleComments && (
-            <div className="mt-2">
-              <Comments objectId={activity.id} type={"activity"} homeStyle />
-            </div>
-          )}
-        </div>
-      )} */}
     </div>
   );
 };

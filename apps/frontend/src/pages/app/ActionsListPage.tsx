@@ -1,12 +1,35 @@
-import { FilterMode, filterActions } from "@alliance/shared/lib/actionUtils";
+import { FilterMode } from "@alliance/shared/lib/actionUtils";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useMemo, useState } from "react";
-import { useAppLoaderData } from "../../applayout";
+import { ActionWithRelation, useAppLoaderData } from "../../applayout";
 import ActionItemCard from "../../components/ActionItemCard";
 import { useActionCounts } from "../../lib/useActionWebSocket";
 
+export const filterActions = (
+  actions: ActionWithRelation[],
+  mode: FilterMode
+): ActionWithRelation[] => {
+  switch (mode) {
+    case FilterMode.All:
+      return actions;
+    case FilterMode.GatheringCommitments:
+      return actions.filter(
+        (action) => action.status === "gathering_commitments"
+      );
+    case FilterMode.InProgress:
+      return actions.filter((action) => action.status === "member_action");
+    case FilterMode.Past:
+      return actions.filter(
+        (action) => action.status === "completed" || action.status === "failed"
+      );
+    default:
+      const x: never = mode;
+      throw new Error(`Invalid filter mode: ${x}`);
+  }
+};
+
 const ActionsListPage = () => {
-  const { actions, relations } = useAppLoaderData();
+  const { actions } = useAppLoaderData();
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
   const actionIds = useMemo(() => actions.map((a) => a.id), [actions]);
@@ -50,7 +73,6 @@ const ActionsListPage = () => {
               //     ? action.usersCompleted
               //     : undefined
               // }
-              userRelation={relations?.get(action.id) ?? undefined}
             />
           ))}
         </div>
