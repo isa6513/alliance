@@ -5,6 +5,7 @@ import {
   tasksListForms,
 } from "@alliance/shared/client";
 import { FormSchema, Page } from "@alliance/shared/forms/formschema";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -99,12 +100,9 @@ const FormsList: React.FC = () => {
     <div className="space-y-4 p-5">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold text-gray-900">Forms</h2>
-        <button
-          onClick={handleCreateForm}
-          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium"
-        >
+        <Button color={ButtonColor.Green} onClick={handleCreateForm}>
           Create New Form
-        </button>
+        </Button>
       </div>
 
       {formsLoading ? (

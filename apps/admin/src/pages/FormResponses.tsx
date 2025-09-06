@@ -209,7 +209,7 @@ const FormResponses: React.FC = () => {
   }, [form, responses, orderedFieldIds, fieldLabels, formatValue]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-3">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">

@@ -206,20 +206,16 @@ const HomePage = () => {
                 </div>
               )}
             </Card>
-            <Card style={CardStyle.White}>
-              <div className="flex flex-row justify-between">
-                <p className="font-medium text-base text-black mb-3">
-                  Friend activity
-                </p>
-                <Link to="/feed" className="text-link text-sm">
-                  See all
-                </Link>
-              </div>
-
-              {friendActivities.length === 0 && (
-                <p className="text-zinc-400">No friend activity yet</p>
-              )}
-              {friendActivities.length > 0 && (
+            {friendActivities.length !== 0 && (
+              <Card style={CardStyle.White}>
+                <div className="flex flex-row justify-between">
+                  <p className="font-medium text-base text-black mb-3">
+                    Friend activity
+                  </p>
+                  <Link to="/feed" className="text-link text-sm">
+                    See all
+                  </Link>
+                </div>
                 <div className="flex flex-col divide-y *:py-3 -my-3">
                   {friendActivities.map((activity) => (
                     <ActionActivityFeedItem
@@ -232,8 +228,8 @@ const HomePage = () => {
                     />
                   ))}
                 </div>
-              )}
-            </Card>
+              </Card>
+            )}
           </div>
         </div>
       </div>
