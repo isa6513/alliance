@@ -73,7 +73,7 @@ const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
                   {link}
                 </span>
                 {todoActions > 0 && link === NavbarPage.Dashboard && (
-                  <div className="text-xs text-white bg-green rounded-full w-5 h-5 items-center justify-center flex mt-[2px]">
+                  <div className="text-xs text-white bg-green rounded-full w-4.5 h-4.5 items-center justify-center flex mt-[2px]">
                     <span className="text-xs">{todoActions}</span>
                   </div>
                 )}

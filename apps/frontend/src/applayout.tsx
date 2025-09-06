@@ -141,6 +141,10 @@ export default function AppLayout() {
   const todoActions = actions.filter((action) =>
     canCompleteAction(action, action.relation)
   );
+  const newActions = actions.filter(
+    (action) =>
+      action.relation === "none" && action.status === "gathering_commitments"
+  );
 
   const navigate = useNavigate();
   const navigation = useNavigation();
@@ -181,7 +185,11 @@ export default function AppLayout() {
 
   return (
     <>
-      {isAuthenticated && <NavbarHorizontal todoActions={todoActions.length} />}
+      {isAuthenticated && (
+        <NavbarHorizontal
+          todoActions={todoActions.length + newActions.length}
+        />
+      )}
       <Outlet />
       {isFeatureEnabled(Features.BugReporting) && <BugReportButton />}
     </>
