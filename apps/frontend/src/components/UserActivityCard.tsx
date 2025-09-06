@@ -86,16 +86,17 @@ const UserActivityCard = ({
         className="block bg-page text-[11pt] flex-1 border-b gap-y-2"
         style={CardStyle.White}
       >
-        <div className="flex flex-row gap-x-1 items-center">
-          <div className="flex-shrink-0">
+        <div className="*:inline space-x-1">
+          <div className="flex-shrink-0 inline">
             <Link to={`/user/${activity.user.id}`} className="mr-2">
               <ProfileImage pfp={activity.user.profilePicture} size="small" />
             </Link>
           </div>
-          <Link to={`/user/${activity.user.id}`}>
-            <p className="text-zinc-600 hover:underline">
-              {activity.user.displayName}
-            </p>
+          <Link
+            to={`/user/${activity.user.id}`}
+            className="text-zinc-600 hover:underline"
+          >
+            {activity.user.displayName}
           </Link>
           <p className="text-zinc-500">
             {completed ? "completed" : "committed to"}
