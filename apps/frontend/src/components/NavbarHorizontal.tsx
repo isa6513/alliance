@@ -9,7 +9,11 @@ import NotificationsIcon from "./NotificationsIcon";
 import ProfileDropdown from "./ProfileDropdown";
 import SearchBar from "./SearchBar";
 
-const NavbarHorizontal: React.FC = () => {
+const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
+  todoActions,
+}: {
+  todoActions: number;
+}) => {
   const activeLinks = isFeatureEnabled(Features.Forum)
     ? links
     : links.filter((link) => link !== NavbarPage.Forum);
@@ -55,19 +59,24 @@ const NavbarHorizontal: React.FC = () => {
               <Link
                 to={destinations[link]}
                 key={link}
-                className={`py-2 md:py-4 px-2 md:px-4 lg:px-6 border-b-2 border-x-zinc-200 ${
+                className={`py-2 md:py-4 px-2 md:px-4 lg:px-6 border-b-2 border-x-zinc-200 space-x-1 flex flex-row items-center ${
                   currentLocation === link
                     ? " border-green text-green bg-zinc-50"
                     : "border-transparent hover:bg-zinc-50"
                 }`}
               >
-                <p
+                <span
                   className={`whitespace-nowrap ${
                     currentLocation === link ? "" : ""
                   }`}
                 >
                   {link}
-                </p>
+                </span>
+                {todoActions > 0 && link === NavbarPage.Dashboard && (
+                  <div className="text-xs text-white bg-green rounded-full w-5 h-5 items-center justify-center flex mt-[2px]">
+                    <span className="text-xs">{todoActions}</span>
+                  </div>
+                )}
               </Link>
             )
           )}

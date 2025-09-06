@@ -14,6 +14,7 @@ import { useEffect } from "react";
 import {
   Outlet,
   ShouldRevalidateFunctionArgs,
+  useLoaderData,
   useNavigate,
   useNavigation,
   useRouteLoaderData,
@@ -22,6 +23,7 @@ import BugReportButton from "./components/BugReportButton";
 import NavbarHorizontal from "./components/NavbarHorizontal";
 import { useAuth } from "./lib/AuthContext";
 import { isFeatureEnabled } from "./lib/config";
+import { canCompleteAction } from "./pages/app/HomePage";
 
 export interface RouteMatch {
   data: unknown;
@@ -134,6 +136,12 @@ const authOnlyRoutes = ["/home", "/settings", "/profile", "/onboarding"];
 export default function AppLayout() {
   const { isAuthenticated, loading, logout } = useAuth();
 
+  const { actions } = useLoaderData<typeof clientLoader>();
+
+  const todoActions = actions.filter((action) =>
+    canCompleteAction(action, action.relation)
+  );
+
   const navigate = useNavigate();
   const navigation = useNavigation();
 
@@ -173,7 +181,7 @@ export default function AppLayout() {
 
   return (
     <>
-      {isAuthenticated && <NavbarHorizontal />}
+      {isAuthenticated && <NavbarHorizontal todoActions={todoActions.length} />}
       <Outlet />
       {isFeatureEnabled(Features.BugReporting) && <BugReportButton />}
     </>
