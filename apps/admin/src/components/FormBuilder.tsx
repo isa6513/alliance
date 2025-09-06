@@ -734,12 +734,18 @@ export function FormBuilder({
     const showInsertionBar =
       dragOverIndex === index && dropPosition && !isDragging;
 
+    // Build previous answer fields for conditional visibility controls
+    const previousFields = currentPage.fields
+      .slice(0, index)
+      .filter((f): f is AnyField<string> => (f as any)?.kind && (f as any)?.label !== undefined);
+
     const commonProps = {
       onUpdate: updateField,
       onRemove: removeField,
       onDragStart: handleDragStart(index),
       onDragEnd: handleDragEnd,
       isDragging: isDragging,
+      previousFields,
     };
 
     // Render the element with insertion bar indicators

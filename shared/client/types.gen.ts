@@ -28,6 +28,15 @@ export type AccessToken = {
 
 export type NotificationPreference = 'all' | 'digest' | 'none';
 
+export type ProfileDto = {
+    id: number;
+    admin: boolean;
+    staff: boolean;
+    profilePicture: string | null;
+    profileDescription: string | null;
+    displayName: string;
+};
+
 export type UserDto = {
     id: number;
     name: string;
@@ -43,6 +52,7 @@ export type UserDto = {
     onboardingComplete: boolean;
     anonymous: boolean;
     cityId?: number;
+    friends: Array<ProfileDto>;
 };
 
 export type ForgotPasswordDto = {
@@ -52,15 +62,6 @@ export type ForgotPasswordDto = {
 export type ResetPasswordDto = {
     token: string;
     password: string;
-};
-
-export type ProfileDto = {
-    id: number;
-    admin: boolean;
-    staff: boolean;
-    profilePicture: string | null;
-    profileDescription: string | null;
-    displayName: string;
 };
 
 export type OnboardingDto = {
@@ -500,7 +501,6 @@ export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_requ
 
 export type NotificationDto = {
     id: number;
-    associatedUser?: ProfileDto;
     category: NotificationCategory;
     message: string;
     webAppLocation: string | null;
@@ -509,6 +509,7 @@ export type NotificationDto = {
     cleared: boolean;
     createdAt: string;
     updatedAt: string;
+    associatedUser?: ProfileDto;
 };
 
 export type CreatePostDto = {

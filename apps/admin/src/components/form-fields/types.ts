@@ -10,6 +10,8 @@ export interface BaseFieldProps<
   onDragStart?: (e: React.DragEvent) => void;
   onDragEnd?: (e: React.DragEvent) => void;
   isDragging?: boolean;
+  // Fields earlier on the same page; used for conditional visibility
+  previousFields?: AnyField<string>[];
 }
 
 export interface FieldWrapperProps {

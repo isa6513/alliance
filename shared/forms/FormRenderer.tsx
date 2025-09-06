@@ -5,7 +5,7 @@ import AppMarkdownWrapper from "../ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "../ui/Button";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import type { DisplayBlock } from "./display-blocks";
-import type { AnyField, FormSchema } from "./formschema";
+import type { AnyField, FormSchema, Condition } from "./formschema";
 
 interface FormRendererProps {
   form: FormDto["schema"];
@@ -610,6 +610,27 @@ const FormRenderer = ({
     element: AnyField<string> | DisplayBlock<string>,
     index: number
   ) => {
+    const cond = (element as any)?.visibleIf as Condition<string> | undefined;
+    if (cond) {
+      const evalCond = (c: Condition<string>): boolean => {
+        if ("expr" in c) {
+          // Basic safeguard: do not evaluate arbitrary expressions in renderer
+          // Future: support a small expression language if needed.
+          return true;
+        }
+        const val = formData[c.when];
+        // If condition expects a boolean (checkbox controllers), coerce undefined → false
+        if (typeof c.equals === "boolean") {
+          return Boolean(val) === c.equals;
+        }
+        if (Array.isArray(val)) {
+          // multiselect: treat equals as "includes"
+          return val.includes(c.equals as any);
+        }
+        return val === (c.equals as any);
+      };
+      if (!evalCond(cond)) return null;
+    }
     // Check if it's a form field (has 'label' property) vs display block
     if ("label" in element) {
       return renderField(element as AnyField<string>, index);

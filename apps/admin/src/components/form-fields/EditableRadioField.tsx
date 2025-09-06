@@ -1,5 +1,6 @@
 import type { RadioField } from "@alliance/shared/forms/formschema";
 import { FieldWrapper } from "./FieldWrapper";
+import { RequiredAsterisk, RequiredToggle, ConditionalVisibility } from "./CommonControls";
 import type { BaseFieldProps } from "./types";
 
 export function EditableRadioField({
@@ -9,6 +10,7 @@ export function EditableRadioField({
   onDragStart,
   onDragEnd,
   isDragging,
+  previousFields,
 }: BaseFieldProps<RadioField<string, string>>) {
   const addOption = () => {
     const newOption = {
@@ -58,16 +60,17 @@ export function EditableRadioField({
           </div>
 
           <div>
-            <label className="flex items-center text-xs text-gray-700">
-              <input
-                type="checkbox"
-                checked={field.required || false}
-                onChange={(e) => onUpdate({ required: e.target.checked })}
-                className="mr-1"
-              />
-              Required
-            </label>
+            <RequiredToggle
+              checked={field.required}
+              onChange={(checked) => onUpdate({ required: checked })}
+            />
           </div>
+
+          <ConditionalVisibility
+            field={field}
+            previousFields={previousFields || []}
+            onChange={onUpdate}
+          />
 
           {/* Options Configuration */}
           <div>
@@ -119,7 +122,7 @@ export function EditableRadioField({
         <div>
           <label className="block text-sm font-medium text-gray-900 mb-2">
             {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
+            <RequiredAsterisk required={!!field.required} />
           </label>
           <div className="space-y-2">
             {field.options?.map((option, index) => (

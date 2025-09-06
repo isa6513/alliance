@@ -1,5 +1,6 @@
 import type { PhoneField } from "@alliance/shared/forms/formschema";
 import { FieldWrapper } from "./FieldWrapper";
+import { RequiredAsterisk, RequiredToggle, ConditionalVisibility } from "./CommonControls";
 import type { BaseFieldProps } from "./types";
 
 export function EditablePhoneField({
@@ -9,6 +10,7 @@ export function EditablePhoneField({
   onDragStart,
   onDragEnd,
   isDragging,
+  previousFields,
 }: BaseFieldProps<PhoneField<string>>) {
   return (
     <FieldWrapper
@@ -60,15 +62,10 @@ export function EditablePhoneField({
           </div>
 
           <div>
-            <label className="flex items-center text-xs text-gray-700">
-              <input
-                type="checkbox"
-                checked={field.required || false}
-                onChange={(e) => onUpdate({ required: e.target.checked })}
-                className="mr-1"
-              />
-              Required
-            </label>
+            <RequiredToggle
+              checked={field.required}
+              onChange={(checked) => onUpdate({ required: checked })}
+            />
           </div>
         </div>
 
@@ -76,7 +73,7 @@ export function EditablePhoneField({
         <div>
           <label className="block text-sm font-medium text-gray-900 mb-1">
             {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
+            <RequiredAsterisk required={!!field.required} />
           </label>
           <input
             type="tel"
@@ -85,6 +82,12 @@ export function EditablePhoneField({
             disabled
           />
         </div>
+
+        <ConditionalVisibility
+          field={field}
+          previousFields={previousFields || []}
+          onChange={onUpdate}
+        />
       </div>
     </FieldWrapper>
   );

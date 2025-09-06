@@ -1,4 +1,9 @@
 import type { TextField } from "@alliance/shared/forms/formschema";
+import {
+  ConditionalVisibility,
+  RequiredAsterisk,
+  RequiredToggle,
+} from "./CommonControls";
 import { FieldWrapper } from "./FieldWrapper";
 import type { BaseFieldProps } from "./types";
 
@@ -9,6 +14,7 @@ export function EditableTextField({
   onDragStart,
   onDragEnd,
   isDragging,
+  previousFields,
 }: BaseFieldProps<TextField<string>>) {
   return (
     <FieldWrapper
@@ -47,15 +53,10 @@ export function EditableTextField({
           </div>
 
           <div className="flex items-center space-x-4">
-            <label className="flex items-center text-xs text-gray-700">
-              <input
-                type="checkbox"
-                checked={field.required || false}
-                onChange={(e) => onUpdate({ required: e.target.checked })}
-                className="mr-1"
-              />
-              Required
-            </label>
+            <RequiredToggle
+              checked={field.required}
+              onChange={(checked) => onUpdate({ required: checked })}
+            />
 
             <div className="flex items-center space-x-2">
               <label className="text-xs text-gray-700">Max Length:</label>
@@ -74,13 +75,19 @@ export function EditableTextField({
               />
             </div>
           </div>
+
+          <ConditionalVisibility
+            field={field}
+            previousFields={previousFields || []}
+            onChange={onUpdate}
+          />
         </div>
 
         {/* Field Preview */}
         <div>
           <label className="block text-sm font-medium text-gray-900 mb-1">
             {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
+            <RequiredAsterisk required={!!field.required} />
           </label>
           <input
             type="text"
