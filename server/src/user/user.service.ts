@@ -426,4 +426,16 @@ export class UserService {
     });
     return users;
   }
+
+  async signContract(userId: number): Promise<User> {
+    const user = await this.findOneOrFail(userId);
+    user.contractDateSigned = new Date();
+    return this.userRepository.save(user);
+  }
+
+  async suspendContract(userId: number): Promise<User> {
+    const user = await this.findOneOrFail(userId);
+    user.contractDateSigned = null;
+    return this.userRepository.save(user);
+  }
 }

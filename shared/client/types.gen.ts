@@ -41,6 +41,7 @@ export type UserDto = {
     id: number;
     name: string;
     email: string;
+    contractDateSigned: string | null;
     emailNotifsEnabled: boolean;
     textNotifsEnabled: boolean;
     pushNotifsEnabled: boolean;
@@ -77,6 +78,7 @@ export type UpdateProfileDto = {
     phoneNumber?: string;
     phoneNumberVerified?: boolean;
     emailVerified?: boolean;
+    contractDateSigned?: string | null;
     emailNotifsEnabled?: boolean;
     textNotifsEnabled?: boolean;
     pushNotifsEnabled?: boolean;
@@ -120,6 +122,7 @@ export type User = {
     phoneNumber?: string;
     phoneNumberVerified: boolean;
     emailVerified: boolean;
+    contractDateSigned: string | null;
     emailNotifsEnabled: boolean;
     textNotifsEnabled: boolean;
     pushNotifsEnabled: boolean;
@@ -930,6 +933,40 @@ export type UserOnboardingErrors = {
 export type UserOnboardingResponses = {
     200: unknown;
 };
+
+export type UserSignContractData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/signcontract';
+};
+
+export type UserSignContractErrors = {
+    401: unknown;
+};
+
+export type UserSignContractResponses = {
+    200: string;
+};
+
+export type UserSignContractResponse = UserSignContractResponses[keyof UserSignContractResponses];
+
+export type UserSuspendContractData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/suspendcontract';
+};
+
+export type UserSuspendContractErrors = {
+    401: unknown;
+};
+
+export type UserSuspendContractResponses = {
+    200: string;
+};
+
+export type UserSuspendContractResponse = UserSuspendContractResponses[keyof UserSuspendContractResponses];
 
 export type UserUpdateData = {
     body: UpdateProfileDto;

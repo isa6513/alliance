@@ -66,6 +66,10 @@ export class User {
   @ApiProperty()
   emailVerified: boolean;
 
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  contractDateSigned: Date | null;
+
   // @Column({
   //   type: 'enum',
   //   enum: NotificationChannel,

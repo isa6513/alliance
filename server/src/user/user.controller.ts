@@ -64,6 +64,24 @@ export class UserController {
     await this.userService.onboarding(req.user.sub, body);
   }
 
+  @Post('signcontract')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: String })
+  @ApiUnauthorizedResponse()
+  async signContract(@Request() req: JwtRequest) {
+    const user = await this.userService.signContract(req.user.sub);
+    return user.contractDateSigned;
+  }
+
+  @Post('suspendcontract')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: String })
+  @ApiUnauthorizedResponse()
+  async suspendContract(@Request() req: JwtRequest) {
+    const user = await this.userService.suspendContract(req.user.sub);
+    return user.contractDateSigned;
+  }
+
   @Post('update')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ProfileDto })
