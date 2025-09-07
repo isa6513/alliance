@@ -87,7 +87,7 @@ const HomePage = () => {
 
   return (
     <div className="flex flex-col w-full h-full items-center bg-page min-h-[calc(100vh-50px)]">
-      <div className="flex flex-row px-6 md:gap-x-6 lg:gap-x-10 w-full justify-center">
+      <div className="flex flex-row px-6 md:gap-x-6 xl:gap-x-10 w-full justify-center">
         <div className="hidden lg:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch max-w-[350px] flex-1 min-w-[150px]">
           {bulletinCard}
         </div>
@@ -185,7 +185,7 @@ const HomePage = () => {
             {/* <InviteMemberCard /> */}
           </div>
         </div>
-        <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch w-[350px]">
+        <div className="hidden md:flex flex-col py-16 gap-y-5 overflow-y-auto items-stretch w-[300px] xl:w-[350px]">
           <div className="flex flex-col gap-y-3">
             <div className="flex lg:hidden">{bulletinCard}</div>
             <Card style={CardStyle.White}>

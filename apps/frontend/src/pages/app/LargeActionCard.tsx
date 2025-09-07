@@ -97,7 +97,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
          ${state === LargeActionCardState.Minified ? "pb-4" : ""}`}
     >
       <div className="p-2">
-        <div className="flex flex-row gap-x-4 mb-2">
+        <div className="flex flex-row flex-wrap gap-x-4 mb-2">
           {!!action.timeEstimate && (
             <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
               <ClockIcon />
