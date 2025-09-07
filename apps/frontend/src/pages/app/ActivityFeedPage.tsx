@@ -28,11 +28,11 @@ const ActivityFeedPage = () => {
 
   const modeButtons = modes.map((m) => (
     <Button
-      color={mode === m ? ButtonColor.Green : ButtonColor.White}
+      color={mode === m ? ButtonColor.Black : ButtonColor.White}
       key={m}
       onClick={() => setMode(m)}
     >
-      {m}
+      <p className="capitalize">{m}</p>
     </Button>
   ));
 

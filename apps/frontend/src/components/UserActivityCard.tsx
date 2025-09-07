@@ -32,10 +32,8 @@ const UserActivityCard = ({
   const { user: self } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState<CreateEditableContentDto>({
-    body: activity.editableContent ? activity.editableContent.body : "",
-    attachments: activity.editableContent
-      ? activity.editableContent.attachments
-      : [],
+    body: activity.editableContent.body,
+    attachments: activity.editableContent.attachments,
   });
   const [isSaving, setIsSaving] = useState(false);
 
