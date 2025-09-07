@@ -117,6 +117,14 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
               </p>
             </div>
           )}
+          <div>
+            <p className="text-base text-zinc-500">
+              {action.status === "gathering_commitments"
+                ? "Launched "
+                : "Action began "}
+              {formatTime(new Date(lastEvent.date), { addSuffix: true })}
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-row items-start gap-x-8">
