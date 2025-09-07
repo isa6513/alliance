@@ -106,8 +106,19 @@ export async function clientLoader() {
     relation: actionToRelationMap.get(action.id),
   }));
 
+  // Sort so that actions with the earliest last event come first
+  const actionsSortedByDate = actionsWithRelation?.sort((a, b) => {
+    const aEvent = a.events[a.events.length - 1];
+    const bEvent = b.events[b.events.length - 1];
+
+    const aDate = aEvent ? new Date(aEvent.date) : new Date(0);
+    const bDate = bEvent ? new Date(bEvent.date) : new Date(0);
+
+    return aDate.getTime() - bDate.getTime();
+  });
+
   return {
-    actions: actionsWithRelation ?? [],
+    actions: actionsSortedByDate ?? [],
     relations: actionToRelationMap,
     activities: activitiesForAction,
     posts: posts.data ?? [],
