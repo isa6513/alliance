@@ -151,6 +151,11 @@ export type StreamableFile = {
  */
 export type ActionActivityType = 'user_joined' | 'user_completed';
 
+/**
+ * Type of the action
+ */
+export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
+
 export type EditableContent = {
     /**
      * Markdown or plain text body
@@ -162,11 +167,6 @@ export type EditableContent = {
     attachments: Array<string>;
 };
 
-/**
- * Type of the action
- */
-export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
-
 export type ActionActivity = {
     id: number;
     /**
@@ -177,7 +177,7 @@ export type ActionActivity = {
     userId: number;
     createdAt: string;
     dollar_amount?: number;
-    editableContent: EditableContent;
+    editableContent?: EditableContent;
     likes: Array<User>;
 };
 
@@ -330,7 +330,6 @@ export type ActionActivityDto = {
      */
     type: ActionActivityType;
     createdAt: string;
-    editableContent: EditableContent;
     user: ProfileDto;
     actionId: number;
     action: ActionDto;
@@ -494,7 +493,7 @@ export type CreateCommentDto = {
 };
 
 export type UpdateActionActivityDto = {
-    editableContent: EditableContent;
+    [key: string]: unknown;
 };
 
 export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted';

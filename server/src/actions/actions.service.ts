@@ -524,7 +524,19 @@ export class ActionsService {
     if (activity.userId !== userId) {
       throw new ForbiddenException('You are not the owner of this activity');
     }
-    activity.editableContent = updateActivityDto.editableContent;
+    let editableContent = await this.editableContentRepository.findOne({
+      where: { id: activity.editableContent?.id },
+    });
+    if (!editableContent) {
+      editableContent = this.editableContentRepository.create(
+        updateActivityDto.editableContent,
+      );
+    }
+    editableContent.attachments = updateActivityDto.editableContent.attachments;
+    editableContent.body = updateActivityDto.editableContent.body;
+    await this.editableContentRepository.save(editableContent);
+
+    activity.editableContent = editableContent;
     await this.actionActivityRepository.save(activity);
 
     return this.getActivity(id);

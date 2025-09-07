@@ -1,5 +1,6 @@
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { CommentDto } from 'src/forum/dto/comment.dto';
+import { EditableContentDto } from 'src/forum/dto/editablecontent.dto';
 import { ProfileDto } from 'src/user/user.dto';
 import { UserActionRelation } from '../actions.service';
 import { ActionActivity } from '../entities/action-activity.entity';
@@ -77,7 +78,6 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   'id',
   'type',
   'createdAt',
-  'editableContent',
 ]) {
   @ApiProperty({ type: () => ProfileDto })
   user: ProfileDto;
@@ -97,6 +97,8 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   @ApiProperty({ type: () => CommentDto, isArray: true })
   comments: CommentDto[];
 
+  editableContent: EditableContentDto;
+
   constructor(actionActivity: ActionActivity, comments: CommentDto[] = []) {
     super();
     Object.assign(this, actionActivity);
@@ -109,6 +111,12 @@ export class ActionActivityDto extends PickType(ActionActivity, [
         ? actionActivity.likes.map((like) => new ProfileDto(like))
         : [];
     this.comments = comments;
+    if (!this.editableContent) {
+      this.editableContent = {
+        body: '',
+        attachments: [],
+      };
+    }
   }
 }
 

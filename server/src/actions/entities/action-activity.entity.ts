@@ -82,9 +82,10 @@ export class ActionActivity {
   })
   @JoinColumn()
   @Allow()
+  @IsOptional()
   @Type(() => EditableContent)
-  @ApiProperty({ type: () => EditableContent })
-  editableContent: EditableContent;
+  @ApiPropertyOptional({ type: () => EditableContent })
+  editableContent?: EditableContent;
 
   @ManyToMany(() => User, { onDelete: 'CASCADE', eager: true })
   @JoinTable()
