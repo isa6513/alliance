@@ -97,6 +97,7 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   @ApiProperty({ type: () => CommentDto, isArray: true })
   comments: CommentDto[];
 
+  @ApiProperty({ type: () => EditableContentDto })
   editableContent: EditableContentDto;
 
   constructor(actionActivity: ActionActivity, comments: CommentDto[] = []) {

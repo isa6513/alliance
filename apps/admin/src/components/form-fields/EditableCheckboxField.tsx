@@ -1,7 +1,8 @@
 import type { CheckboxField } from "@alliance/shared/forms/formschema";
-import { FieldWrapper } from "./FieldWrapper";
+import RenderField from "@alliance/shared/forms/RenderField";
+import { ConditionalVisibility, RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
-import { RequiredAsterisk, RequiredToggle, ConditionalVisibility } from "./CommonControls";
+import { FieldWrapper } from "./FieldWrapper";
 import type { BaseFieldProps } from "./types";
 
 export function EditableCheckboxField({
@@ -22,7 +23,7 @@ export function EditableCheckboxField({
     >
       <div className="space-y-3">
         {/* Field Configuration */}
-        <div className="bg-gray-50 p-3 rounded-md space-y-2">
+        <div className="bg-gray-100 p-3 rounded-md space-y-2">
           <FieldLabelEditor
             label="Checkbox Label"
             value={field.label}
@@ -46,17 +47,7 @@ export function EditableCheckboxField({
 
         {/* Field Preview */}
         <div>
-          <div className="flex items-center space-x-3">
-            <input
-              type="checkbox"
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              disabled
-            />
-            <label className="text-sm font-medium text-gray-900">
-              {field.label}
-              <RequiredAsterisk required={!!field.required} />
-            </label>
-          </div>
+          <RenderField field={field} disabled />
         </div>
       </div>
     </FieldWrapper>

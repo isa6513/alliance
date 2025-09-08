@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { FormDto, SubmitFormDto, imagesUploadImage } from "../client";
-import AppMarkdownWrapper from "../ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "../ui/Button";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
+import RenderField from "./RenderField";
 import type { DisplayBlock } from "./display-blocks";
 import type { AnyField, Condition, FormSchema } from "./formschema";
 
@@ -219,282 +219,18 @@ const FormRenderer = ({
     }
   }, [persistKey, baseStorageKey]);
 
-  const renderField = (field: AnyField<string>, index: number) => {
-    const value = formData[field.id] || "";
-
-    switch (field.kind) {
-      case "text":
-        return (
-          <div key={index} className="space-y-1">
-            <label className="block   text-gray-700">
-              {field.label}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            <input
-              type="text"
-              value={value}
-              onChange={(e) => updateField(field.id, e.target.value)}
-              required={field.required}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder={(field as any).placeholder}
-            />
-          </div>
-        );
-
-      case "textarea":
-        return (
-          <div key={index} className="space-y-1">
-            <label className="block text-gray-700">
-              {field.label}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            <textarea
-              value={value}
-              onChange={(e) => updateField(field.id, e.target.value)}
-              required={field.required}
-              rows={(field as any).rows || 3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder={(field as any).placeholder}
-            />
-          </div>
-        );
-
-      case "email":
-        return (
-          <div key={index} className="space-y-1">
-            <label className="block text-gray-700">
-              {field.label}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            <input
-              type="email"
-              value={value}
-              onChange={(e) => updateField(field.id, e.target.value)}
-              required={field.required}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder={(field as any).placeholder}
-            />
-          </div>
-        );
-
-      case "phone":
-        return (
-          <div key={index} className="space-y-1">
-            <label className="block   text-gray-700">
-              {field.label}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            <input
-              type="tel"
-              value={value}
-              onChange={(e) => {
-                // Only allow digits, +, spaces, dashes, and parentheses
-                const sanitized = e.target.value.replace(/[^0-9+\s\-()]/g, "");
-                updateField(field.id, sanitized);
-              }}
-              required={field.required}
-              pattern={(field as any).pattern}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder={(field as any).placeholder || "Enter phone number"}
-            />
-          </div>
-        );
-
-      case "number":
-        return (
-          <div key={index} className="space-y-1">
-            <label className="block   text-gray-700">
-              {field.label}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            <input
-              type="number"
-              value={value}
-              onChange={(e) =>
-                updateField(field.id, parseFloat(e.target.value) || "")
-              }
-              required={field.required}
-              min={(field as any).min}
-              max={(field as any).max}
-              step={(field as any).step}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder={(field as any).placeholder}
-            />
-          </div>
-        );
-
-      case "checkbox":
-        return (
-          <div key={index} className="space-y-1">
-            <label className="flex items-start">
-              <input
-                type="checkbox"
-                checked={!!value}
-                onChange={(e) => updateField(field.id, e.target.checked)}
-                required={field.required}
-                className="mt-1 mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <span className="text-zinc-700 flex">
-                <FormMarkdownWrapper markdownContent={field.label} />
-                {field.required && <span className="text-red-500 ml-1">*</span>}
-              </span>
-            </label>
-          </div>
-        );
-
-      case "radio":
-        return (
-          <div key={index} className="space-y-2">
-            <label className="block   text-gray-700">
-              {field.label}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            <div className="space-y-2">
-              {(field as any).options.map((option: any, optIndex: number) => (
-                <label key={optIndex} className="flex items-start">
-                  <input
-                    type="radio"
-                    name={field.id}
-                    value={option.value}
-                    checked={value === option.value}
-                    onChange={(e) => updateField(field.id, e.target.value)}
-                    required={field.required}
-                    className="mt-1 mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                  />
-                  <span className=" text-gray-700">{option.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        );
-
-      case "select":
-        return (
-          <div key={index} className="space-y-1">
-            <label className="block   text-gray-700">
-              {field.label}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            <select
-              value={value}
-              onChange={(e) => updateField(field.id, e.target.value)}
-              required={field.required}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent has-[option.placeholder:checked]:text-gray-400"
-            >
-              <option value="" className="placeholder" selected disabled>
-                Select an option
-              </option>
-              {(field as any).options.map((option: any, optIndex: number) => (
-                <option key={optIndex} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        );
-
-      case "multiselect":
-        return (
-          <div key={index} className="space-y-2">
-            <label className="block   text-gray-700">
-              {field.label}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            <div className="space-y-2">
-              {(field as any).options.map((option: any, optIndex: number) => (
-                <label key={optIndex} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={
-                      Array.isArray(value) && value.includes(option.value)
-                    }
-                    onChange={(e) => {
-                      const currentValues = Array.isArray(value) ? value : [];
-                      if (e.target.checked) {
-                        updateField(field.id, [...currentValues, option.value]);
-                      } else {
-                        updateField(
-                          field.id,
-                          currentValues.filter((v) => v !== option.value)
-                        );
-                      }
-                    }}
-                    className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <span className=" text-gray-700">{option.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        );
-
-      case "date":
-        return (
-          <div key={index} className="space-y-1">
-            <label className="block   text-gray-700">
-              {field.label}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-            <input
-              type="date"
-              value={value}
-              onChange={(e) => updateField(field.id, e.target.value)}
-              required={field.required}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-        );
-
-      case "file":
-        const isUploading = uploadingFields.has(field.id);
-        const uploadError = uploadErrors[field.id];
-        const fileValue = formData[field.id];
-
-        return (
-          <div key={index} className="space-y-2">
-            <label className="block   text-gray-700">
-              {field.label}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-
-            {/* Show uploaded image preview if it's an image key */}
-            {typeof fileValue === "string" && fileValue && (
-              <div className="mb-2">
-                <img
-                  src={fileValue}
-                  alt="Uploaded file"
-                  className="max-w-full h-auto max-h-32 rounded border"
-                />
-              </div>
-            )}
-
-            <div className="flex items-center space-x-2">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    handleFileUpload(field.id, file);
-                  }
-                }}
-                required={field.required && !fileValue}
-                disabled={isUploading}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file: file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
-              />
-              {isUploading && (
-                <span className=" text-blue-600">Uploading...</span>
-              )}
-            </div>
-
-            {uploadError && <p className=" text-red-600">{uploadError}</p>}
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
+  const renderField = (field: AnyField<string>, index: number) => (
+    <div key={index}>
+      <RenderField
+        field={field}
+        value={formData[field.id]}
+        onChange={(val) => updateField(field.id, val)}
+        onFileSelected={(file) => handleFileUpload(field.id, file)}
+        uploading={uploadingFields.has(field.id)}
+        uploadError={uploadErrors[field.id]}
+      />
+    </div>
+  );
 
   const renderDisplayBlock = (block: DisplayBlock<string>, index: number) => {
     switch (block.kind) {
@@ -525,7 +261,7 @@ const FormRenderer = ({
           <div key={index} className="text-gray-900">
             {(block as any).markdown ? (
               <div className="prose prose-sm max-w-none">
-                <AppMarkdownWrapper markdownContent={(block as any).text} />
+                <FormMarkdownWrapper markdownContent={(block as any).text} />
               </div>
             ) : (
               <p className="whitespace-pre-wrap">{(block as any).text}</p>

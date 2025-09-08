@@ -3,13 +3,10 @@ import type {
   MultiSelectField,
   SelectField,
 } from "@alliance/shared/forms/formschema";
-import {
-  ConditionalVisibility,
-  RequiredAsterisk,
-  RequiredToggle,
-} from "./CommonControls";
-import { FieldWrapper } from "./FieldWrapper";
+import RenderField from "@alliance/shared/forms/RenderField";
+import { ConditionalVisibility, RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
+import { FieldWrapper } from "./FieldWrapper";
 import type { BaseFieldProps } from "./types";
 
 type ChoiceField<TId extends string> =
@@ -18,9 +15,7 @@ type ChoiceField<TId extends string> =
 
 type EditableChoiceFieldProps<TId extends string> = BaseFieldProps<
   ChoiceField<TId>
-> & {
-  multiple?: boolean;
-};
+>;
 
 export function EditableChoiceField<TId extends string = string>({
   field,
@@ -30,10 +25,7 @@ export function EditableChoiceField<TId extends string = string>({
   onDragEnd,
   isDragging,
   previousFields,
-  multiple,
 }: EditableChoiceFieldProps<TId>) {
-  const isMulti = multiple ?? field.kind === "multiselect";
-
   const addOption = () => {
     const nextIndex = (field.options?.length || 0) + 1;
     const newOption = {
@@ -77,7 +69,7 @@ export function EditableChoiceField<TId extends string = string>({
     >
       <div className="space-y-3">
         {/* Field Configuration */}
-        <div className="bg-gray-50 p-3 rounded-md space-y-2">
+        <div className="bg-gray-100 p-3 rounded-md space-y-2">
           <FieldLabelEditor
             value={field.label}
             onChange={(v) => onUpdate({ label: v })}
@@ -164,55 +156,8 @@ export function EditableChoiceField<TId extends string = string>({
           </div>
         </div>
 
-        {/* Field Preview */}
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-1">
-            {field.label}
-            <RequiredAsterisk required={!!field.required} />
-          </label>
-          {isMulti ? (
-            <div className="border border-gray-300 rounded-md p-2 bg-gray-50 min-h-[100px]">
-              <p className="text-xs text-gray-500 mb-2">
-                Multiple selections allowed:
-              </p>
-              <div className="space-y-2">
-                {field.options?.map((option, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      disabled
-                    />
-                    <label className="text-sm text-gray-900">
-                      {option.label}
-                    </label>
-                  </div>
-                ))}
-                {(!field.options || field.options.length === 0) && (
-                  <p className="text-sm text-gray-500 italic">
-                    No options added yet
-                  </p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <select
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled
-            >
-              <option value="">Select an option...</option>
-              {field.options?.map((option, index) => (
-                <option key={index} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          )}
-          {(!field.options || field.options.length === 0) && !isMulti && (
-            <p className="text-xs text-gray-500 mt-1 italic">
-              No options added yet
-            </p>
-          )}
+          <RenderField field={field} disabled />
         </div>
       </div>
     </FieldWrapper>

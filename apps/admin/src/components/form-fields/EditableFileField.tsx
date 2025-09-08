@@ -1,7 +1,8 @@
 import type { FileField } from "@alliance/shared/forms/formschema";
-import { FieldWrapper } from "./FieldWrapper";
+import RenderField from "@alliance/shared/forms/RenderField";
+import { ConditionalVisibility, RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
-import { RequiredAsterisk, RequiredToggle, ConditionalVisibility } from "./CommonControls";
+import { FieldWrapper } from "./FieldWrapper";
 import type { BaseFieldProps } from "./types";
 
 export function EditableFileField({
@@ -22,7 +23,7 @@ export function EditableFileField({
     >
       <div className="space-y-3">
         {/* Field Configuration */}
-        <div className="bg-gray-50 p-3 rounded-md space-y-2">
+        <div className="bg-gray-100 p-3 rounded-md space-y-2">
           <FieldLabelEditor
             value={field.label}
             onChange={(v) => onUpdate({ label: v })}
@@ -44,20 +45,7 @@ export function EditableFileField({
 
         {/* Field Preview */}
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-1">
-            {field.label}
-            <RequiredAsterisk required={!!field.required} />
-          </label>
-          <div className="relative">
-            <input
-              type="file"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              disabled
-            />
-          </div>
-          <p className="text-xs text-gray-500 mt-1">
-            Files will be uploaded on form submission
-          </p>
+          <RenderField field={field} disabled />
         </div>
       </div>
     </FieldWrapper>

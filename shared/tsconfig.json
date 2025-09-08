@@ -6,5 +6,13 @@
     "moduleResolution": "bundler",
     "jsx": "react-jsx"
   },
-  "include": ["lib", "client", "forms/display-blocks.ts", "forms/formschema.ts"]
+  "include": [
+    "lib",
+    "client",
+    "ui",
+    "forms/display-blocks.ts",
+    "forms/formschema.ts",
+    "forms/FormRenderer.tsx",
+    "forms/RenderField.tsx"
+  ]
 }

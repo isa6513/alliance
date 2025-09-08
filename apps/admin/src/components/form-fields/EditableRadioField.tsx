@@ -1,7 +1,8 @@
 import type { RadioField } from "@alliance/shared/forms/formschema";
-import { FieldWrapper } from "./FieldWrapper";
+import RenderField from "@alliance/shared/forms/RenderField";
+import { ConditionalVisibility, RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
-import { RequiredAsterisk, RequiredToggle, ConditionalVisibility } from "./CommonControls";
+import { FieldWrapper } from "./FieldWrapper";
 import type { BaseFieldProps } from "./types";
 
 export function EditableRadioField({
@@ -46,7 +47,7 @@ export function EditableRadioField({
     >
       <div className="space-y-3">
         {/* Field Configuration */}
-        <div className="bg-gray-50 p-3 rounded-md space-y-2">
+        <div className="bg-gray-100 p-3 rounded-md space-y-2">
           <FieldLabelEditor
             value={field.label}
             onChange={(v) => onUpdate({ label: v })}
@@ -110,33 +111,7 @@ export function EditableRadioField({
             </div>
           </div>
         </div>
-
-        {/* Field Preview */}
-        <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
-            {field.label}
-            <RequiredAsterisk required={!!field.required} />
-          </label>
-          <div className="space-y-2">
-            {field.options?.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  name={field.id}
-                  value={option.value}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                  disabled
-                />
-                <label className="text-sm text-gray-900">{option.label}</label>
-              </div>
-            ))}
-            {(!field.options || field.options.length === 0) && (
-              <p className="text-sm text-gray-500 italic">
-                No options added yet
-              </p>
-            )}
-          </div>
-        </div>
+        <RenderField field={field} disabled />
       </div>
     </FieldWrapper>
   );

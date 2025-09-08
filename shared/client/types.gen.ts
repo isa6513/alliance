@@ -339,6 +339,7 @@ export type ActionActivityDto = {
     actionName: string;
     likes: Array<ProfileDto>;
     comments: Array<CommentDto>;
+    editableContent: EditableContentDto;
 };
 
 export type UserActionRelation = 'joined' | 'completed' | 'none';
@@ -496,7 +497,7 @@ export type CreateCommentDto = {
 };
 
 export type UpdateActionActivityDto = {
-    [key: string]: unknown;
+    editableContent: EditableContentDto;
 };
 
 export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted';
