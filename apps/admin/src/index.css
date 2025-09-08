@@ -157,6 +157,7 @@ img {
 }
 
 input,
+textarea,
 select {
   background-color: white;
 }

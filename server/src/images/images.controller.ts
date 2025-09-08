@@ -20,7 +20,7 @@ import { IsNotEmpty } from 'class-validator';
 import { Response } from 'express';
 import { basename } from 'path';
 import { Readable } from 'stream';
-import { ImagesService } from './images.service';
+import { getImageSource, ImagesService } from './images.service';
 
 export class BodyDto {
   @IsNotEmpty()
@@ -83,6 +83,6 @@ export class ImagesController {
   @ApiOkResponse({ type: String })
   async uploadImage(@Body() body) {
     const key = await this.imagesService.uploadImage(body.file);
-    return key;
+    return getImageSource(key);
   }
 }

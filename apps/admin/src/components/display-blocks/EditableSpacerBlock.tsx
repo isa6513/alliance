@@ -1,4 +1,5 @@
 import type { SpacerBlock } from "@alliance/shared/forms/display-blocks";
+import RenderDisplayBlock from "@alliance/shared/forms/RenderDisplayBlock";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 
@@ -18,25 +19,6 @@ export function EditableSpacerBlock({
       isDragging={isDragging}
     >
       <div className="space-y-2">
-        {/* The spacer itself */}
-        <div
-          className={`bg-gray-100 border border-dashed border-gray-300 flex items-center justify-center ${
-            block.size === "xs"
-              ? "h-2"
-              : block.size === "sm"
-              ? "h-4"
-              : block.size === "md"
-              ? "h-8"
-              : block.size === "lg"
-              ? "h-16"
-              : block.size === "xl"
-              ? "h-24"
-              : "h-8"
-          }`}
-        >
-          <p className="text-xs text-gray-500">Spacer</p>
-        </div>
-
         {/* Compact size selector */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">Size:</span>
@@ -55,6 +37,9 @@ export function EditableSpacerBlock({
             <option value="lg">LG</option>
             <option value="xl">XL</option>
           </select>
+        </div>
+        <div className="pt-2 border-t border-gray-200">
+          <RenderDisplayBlock block={block} />
         </div>
       </div>
     </DisplayBlockWrapper>

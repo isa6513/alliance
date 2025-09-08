@@ -1,5 +1,6 @@
 import type { HtmlBlock } from "@alliance/shared/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
+import RenderDisplayBlock from "@alliance/shared/forms/RenderDisplayBlock";
 import type { BaseDisplayBlockProps } from "./types";
 
 export function EditableHtmlBlock({
@@ -26,14 +27,10 @@ export function EditableHtmlBlock({
           placeholder="Enter HTML content"
           rows={Math.max(2, block.html.split("\n").length)}
         />
-
-        {/* Live preview */}
-        {block.html && (
-          <div
-            className="text-sm border-t border-yellow-300 pt-2"
-            dangerouslySetInnerHTML={{ __html: block.html }}
-          />
-        )}
+        {/* Preview */}
+        <div className="pt-2 border-t border-gray-200">
+          <RenderDisplayBlock block={block} />
+        </div>
       </div>
     </DisplayBlockWrapper>
   );

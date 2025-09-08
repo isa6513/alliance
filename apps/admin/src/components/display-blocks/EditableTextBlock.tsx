@@ -18,7 +18,6 @@ export function EditableTextBlock({
       isDragging={isDragging}
     >
       <div className="space-y-2">
-        {/* Inline editable text */}
         <textarea
           value={block.text}
           onChange={(e) => onUpdate({ text: e.target.value })}
@@ -27,7 +26,6 @@ export function EditableTextBlock({
           rows={Math.max(2, block.text.split("\n").length)}
         />
 
-        {/* Compact markdown toggle */}
         <div className="flex items-center gap-2">
           <label className="flex items-center text-xs text-gray-500">
             <input

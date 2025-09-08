@@ -2,6 +2,7 @@ import { imagesUploadImage } from "@alliance/shared/client";
 import type { ImageBlock } from "@alliance/shared/forms/display-blocks";
 import { useState } from "react";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
+import RenderDisplayBlock from "@alliance/shared/forms/RenderDisplayBlock";
 import type { BaseDisplayBlockProps } from "./types";
 
 export function EditableImageBlock({
@@ -56,25 +57,6 @@ export function EditableImageBlock({
       isDragging={isDragging}
     >
       <div className="space-y-2">
-        {/* Image preview/placeholder */}
-        {block.src ? (
-          <img
-            src={block.src}
-            alt={block.alt}
-            className="max-w-full h-auto rounded"
-            style={{
-              maxHeight: "200px",
-              aspectRatio: block.aspectRatio
-                ? block.aspectRatio.toString()
-                : undefined,
-            }}
-          />
-        ) : (
-          <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded p-8 text-center">
-            <p className="text-gray-500 text-sm">Upload an image below</p>
-          </div>
-        )}
-
         {/* Compact inline controls */}
         <div className="space-y-2">
           {/* File upload */}
@@ -92,6 +74,11 @@ export function EditableImageBlock({
           </div>
 
           {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
+        </div>
+
+        {/* Preview */}
+        <div className="pt-2 border-t border-gray-200">
+          <RenderDisplayBlock block={block} />
         </div>
       </div>
     </DisplayBlockWrapper>

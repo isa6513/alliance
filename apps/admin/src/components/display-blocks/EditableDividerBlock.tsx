@@ -1,5 +1,6 @@
 import type { DividerBlock } from "@alliance/shared/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
+import RenderDisplayBlock from "@alliance/shared/forms/RenderDisplayBlock";
 import type { BaseDisplayBlockProps } from "./types";
 
 export function EditableDividerBlock({
@@ -18,21 +19,6 @@ export function EditableDividerBlock({
       isDragging={isDragging}
     >
       <div className="space-y-2">
-        {/* The divider itself */}
-        <hr
-          className={`border-gray-300 ${
-            block.thickness === "hairline"
-              ? "border-t"
-              : block.thickness === "thin"
-              ? "border-t"
-              : block.thickness === "medium"
-              ? "border-t-2"
-              : block.thickness === "thick"
-              ? "border-t-4"
-              : "border-t"
-          }`}
-        />
-
         {/* Compact thickness selector */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">Thickness:</span>
@@ -54,6 +40,11 @@ export function EditableDividerBlock({
             <option value="medium">Medium</option>
             <option value="thick">Thick</option>
           </select>
+        </div>
+
+        {/* Preview */}
+        <div className="pt-2 border-t border-gray-200">
+          <RenderDisplayBlock block={block} />
         </div>
       </div>
     </DisplayBlockWrapper>

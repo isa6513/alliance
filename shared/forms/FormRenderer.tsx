@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { FormDto, SubmitFormDto, imagesUploadImage } from "../client";
 import Button, { ButtonColor } from "../ui/Button";
-import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
+import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
 import type { DisplayBlock } from "./display-blocks";
 import type { AnyField, Condition, FormSchema } from "./formschema";
@@ -232,116 +232,6 @@ const FormRenderer = ({
     </div>
   );
 
-  const renderDisplayBlock = (block: DisplayBlock<string>, index: number) => {
-    switch (block.kind) {
-      case "header":
-        return React.createElement(
-          `h${(block as any).level || 2}`,
-          {
-            key: index,
-            className: `font-bold text-gray-900 ${
-              ((block as any).level || 2) === 1
-                ? "text-3xl"
-                : ((block as any).level || 2) === 2
-                ? "text-2xl"
-                : ((block as any).level || 2) === 3
-                ? "text-xl"
-                : ((block as any).level || 2) === 4
-                ? "text-lg"
-                : ((block as any).level || 2) === 5
-                ? "text-base"
-                : ""
-            }`,
-          },
-          (block as any).text
-        );
-
-      case "text":
-        return (
-          <div key={index} className="text-gray-900">
-            {(block as any).markdown ? (
-              <div className="prose prose-sm max-w-none">
-                <FormMarkdownWrapper markdownContent={(block as any).text} />
-              </div>
-            ) : (
-              <p className="whitespace-pre-wrap">{(block as any).text}</p>
-            )}
-          </div>
-        );
-
-      case "label":
-        return (
-          <span key={index} className="  text-gray-700">
-            {(block as any).text}
-          </span>
-        );
-
-      case "divider":
-        return (
-          <hr
-            key={index}
-            className={`border-gray-300 ${
-              (block as any).thickness === "hairline"
-                ? "border-t"
-                : (block as any).thickness === "thin"
-                ? "border-t"
-                : (block as any).thickness === "medium"
-                ? "border-t-2"
-                : (block as any).thickness === "thick"
-                ? "border-t-4"
-                : "border-t"
-            }`}
-          />
-        );
-
-      case "spacer":
-        return (
-          <div
-            key={index}
-            className={`${
-              (block as any).size === "xs"
-                ? "h-2"
-                : (block as any).size === "sm"
-                ? "h-4"
-                : (block as any).size === "md"
-                ? "h-8"
-                : (block as any).size === "lg"
-                ? "h-16"
-                : (block as any).size === "xl"
-                ? "h-24"
-                : "h-8"
-            }`}
-          />
-        );
-
-      case "html":
-        return (
-          <div
-            key={index}
-            dangerouslySetInnerHTML={{ __html: (block as any).html }}
-          />
-        );
-
-      case "image":
-        return (
-          <img
-            key={index}
-            src={(block as any).src}
-            alt={(block as any).alt}
-            className="max-h-80 w-auto rounded"
-            style={{
-              aspectRatio: (block as any).aspectRatio
-                ? (block as any).aspectRatio.toString()
-                : undefined,
-            }}
-          />
-        );
-
-      default:
-        return null;
-    }
-  };
-
   const renderElement = (
     element: AnyField<string> | DisplayBlock<string>,
     index: number
@@ -371,7 +261,12 @@ const FormRenderer = ({
     if ("label" in element) {
       return renderField(element as AnyField<string>, index);
     } else {
-      return renderDisplayBlock(element as DisplayBlock<string>, index);
+      return (
+        <RenderDisplayBlock
+          key={index}
+          block={element as DisplayBlock<string>}
+        />
+      );
     }
   };
 

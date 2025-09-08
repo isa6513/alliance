@@ -57,7 +57,7 @@ export class TasksService {
   ): Promise<Form> {
     const form = await this.getForm(formId);
     Object.assign(form, updateFormDto);
-    return this.formRepository.save(form);
+    return this.transformImageUrls(await this.formRepository.save(form));
   }
 
   async submitForm(
