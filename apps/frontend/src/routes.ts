@@ -39,7 +39,7 @@ export default [
     route("forum/edit/:postId", "pages/app/PostFormPage.tsx"),
 
     layout("authonly.tsx", [
-      route("/home", "pages/app/HomePage.tsx"),
+      route("/tasks", "pages/app/HomePage.tsx"),
       route("/notifications", "pages/app/NotificationsPage.tsx"),
       route("/settings", "pages/app/SettingsPage.tsx"),
       route("/contract", "pages/app/ContractPage.tsx"),

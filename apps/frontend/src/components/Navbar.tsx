@@ -3,7 +3,7 @@ import NavbarHorizontal from "./NavbarHorizontal";
 import NavbarVertical from "./NavbarVertical";
 
 export enum NavbarPage {
-  Dashboard = "Home",
+  Dashboard = "Tasks",
   CurrentActions = "Actions",
   Activity = "Activity",
   Announcements = "Announcements",
@@ -21,7 +21,7 @@ export const links: NavbarPage[] = [
 ];
 
 export const destinations: Record<NavbarPage, string> = {
-  [NavbarPage.Dashboard]: "/home",
+  [NavbarPage.Dashboard]: "/tasks",
   [NavbarPage.CurrentActions]: "/actions",
   [NavbarPage.Activity]: "/feed",
   [NavbarPage.Announcements]: "/announcements",
