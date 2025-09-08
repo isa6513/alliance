@@ -123,7 +123,6 @@ const HomePage = () => {
                 <p className="mt-4 font-serif text-3xl">Up next</p>
                 <div className="flex flex-col gap-y-2 w-full">
                   {todoActions
-                    .slice(0, 2)
                     .filter((action) => action.id !== currentTask?.id)
                     .map((action) => (
                       <SmallActionCard
