@@ -76,13 +76,13 @@ const statusOptions: Record<ActionStatus, string> = {
 
 const defaultEventNames: Record<ActionStatus, string> = {
   draft: "",
-  gathering_commitments: "Action Launched",
-  commitments_reached: "Commitments Reached",
+  gathering_commitments: "Gathering commitments",
+  commitments_reached: "Pending office action",
   member_action: "Members taking action",
-  resolution: "Awaiting Resolution",
-  completed: "Action Successful",
-  failed: "Action Failed",
-  abandoned: "Action Abandoned",
+  resolution: "Pending office resolution",
+  completed: "Action successful",
+  failed: "Action failed",
+  abandoned: "Action dropped",
   upcoming: "",
 };
 

@@ -32,7 +32,7 @@ const TwoColumnSplit = ({
           {left}
         </div>
         <div
-          className={`flex-col items-stretch max-w-[400px] h-full ${
+          className={`flex-col items-stretch w-[300px] lg:w-[400px] h-full ${
             coloredRight ? "bg-[#eee]" : ""
           } ${collapseRight ? "hidden sm:flex" : ""}`}
         >

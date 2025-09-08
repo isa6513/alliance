@@ -23,12 +23,9 @@ import { setRevalidate } from "../../applayout";
 import ActionActivityList from "../../components/ActionActivityList";
 import ActionEventsPanel from "../../components/ActionEventsPanel";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
-import CompletedBar from "../../components/CompletedBar";
 import TwoColumnSplit from "../../components/system/TwoColumnSplit";
 import { useAuth } from "../../lib/AuthContext";
-import { useActionCount } from "../../lib/useActionWebSocket";
 import { testActions } from "../../stories/testData";
-import StatusTag from "./StatusTag";
 import useActivities, { ActivityList } from "./useActivities";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
@@ -100,7 +97,7 @@ export default function ActionPage() {
   const { isAuthenticated } = useAuth();
 
   const actionId = action?.id || 0;
-  const liveUserCount = useActionCount(actionId);
+
   //   const { activities: liveActivities } = useActionActivity(actionId);
 
   const { activities, handleLikeActivity, setActivities } = useActivities({
@@ -171,64 +168,9 @@ export default function ActionPage() {
         }
         right={
           <div className="flex flex-col gap-y-4 pt-2">
-            <Card style={CardStyle.White}>
-              <p className="font-medium text-base text-black">Status</p>
-              {action && (
-                <div className="mt-1">
-                  <StatusTag status={action.status} />
-
-                  {action.status === "gathering_commitments" ||
-                  action.status === "commitments_reached" ? (
-                    <div className="mt-6">
-                      <CompletedBar
-                        percentage={
-                          ((liveUserCount ?? action.usersJoined) /
-                            (action.commitmentThreshold ?? 1)) *
-                          100
-                        }
-                      />
-                      <p className="mt-2 text-green text-sm font-weight-450">
-                        {(
-                          liveUserCount ?? action.usersJoined
-                        )?.toLocaleString() || 0}{" "}
-                        commitments made
-                      </p>
-                      <p className="text-zinc-400 text-sm">
-                        {(action.commitmentThreshold ?? 0).toLocaleString()}{" "}
-                        commitments needed
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="mt-6">
-                      <CompletedBar
-                        percentage={
-                          ((action.usersCompleted ?? 0) /
-                            (action.usersJoined ?? 1)) *
-                          100
-                        }
-                      />
-                      <p className="mt-2 text-green text-sm font-weight-450">
-                        {(action.usersCompleted ?? 0).toLocaleString()} members
-                        completed
-                      </p>
-                      <p className="text-zinc-400 text-sm">
-                        {(action.usersJoined ?? 0).toLocaleString()} members
-                        committed
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* <div className="w-full border-t border-gray-300" />
-            <UserBubbleRow />
-            <p className="text-center pt-2 text-[11pt]">
-              <b>6 friends</b> already joined this action!
-            </p> */}
-            </Card>
             {action !== undefined && (
               <Card style={CardStyle.White}>
-                <ActionEventsPanel events={action.events} />
+                <ActionEventsPanel action={action} events={action.events} />
               </Card>
             )}
             {action && (

@@ -84,7 +84,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
             )}
             {waitingForOffice && (
               <Tag style={TagStyle.GreyOutline} className="mb-2">
-                Waiting for office to launch
+                Pending office action
               </Tag>
             )}
             {waitingOnOthers && (

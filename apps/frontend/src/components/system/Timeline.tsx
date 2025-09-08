@@ -19,11 +19,11 @@ interface TimelineProps {
 const Timeline: React.FC<TimelineProps> = ({
   children,
   lineWidth = 2,
-  dotSize = 10,
-  lineColor = "#d4d4d8", // zinc-300
+  dotSize = 16,
+  lineColor = "var(--color-zinc-200)",
   className,
 }) => {
-  const halfDot = useMemo(() => dotSize / 2 + 3, [dotSize]);
+  const halfDot = useMemo(() => dotSize / 2, [dotSize]);
 
   const bottomElementRef = useRef<HTMLLIElement>(null);
 
@@ -61,10 +61,7 @@ const Timeline: React.FC<TimelineProps> = ({
   return (
     <div className={`relative pl-2 ${className ?? ""}`}>
       {/* vertical line */}
-      <div
-        className="absolute top-0 bottom-0 mt-[20px] -ml-[1px]"
-        style={lineStyle}
-      />
+      <div className="absolute top-0 bottom-0 -ml-[1px]" style={lineStyle} />
 
       <ul className="space-y-6">
         {React.Children.map(children, (child, index) => (
@@ -77,11 +74,11 @@ const Timeline: React.FC<TimelineProps> = ({
             <div
               style={{ ...dotBaseStyle }}
               className={`relative ${
-                index === 0 ? "bg-zinc-700" : "bg-zinc-300"
-              } mt-[20px] flex items-center justify-center bg-white`}
+                index === 0 ? "bg-green" : "bg-zinc-200"
+              } mt-1 flex items-center justify-center`}
             ></div>
             {/* content */}
-            <div className="pl-4">{child}</div>
+            <div className="pl-6">{child}</div>
           </li>
         ))}
       </ul>
