@@ -33,7 +33,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
     [NavbarPage.People]: "/people",
     [NavbarPage.Guide]: "/guide",
     [NavbarPage.Progress]: "/progress",
-    [NavbarPage.LogIn]: isAuthenticated ? "/home" : "/login",
+    [NavbarPage.LogIn]: isAuthenticated ? "/tasks" : "/login",
   };
 
   return (

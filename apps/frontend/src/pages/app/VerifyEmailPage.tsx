@@ -29,7 +29,7 @@ const VerifyEmailPage = () => {
       ) : (
         <p>Verifying email...</p>
       )}
-      <Link to="/home" className="text-blue-500">
+      <Link to="/tasks" className="text-blue-500">
         go home
       </Link>
     </div>

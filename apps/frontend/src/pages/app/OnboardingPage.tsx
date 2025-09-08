@@ -21,7 +21,7 @@ const OnboardingPage: React.FC = () => {
       },
     });
     if (response.response.ok) {
-      navigate("/home");
+      navigate("/tasks");
       window.location.reload(); //TODO: fix state reload
     }
   };

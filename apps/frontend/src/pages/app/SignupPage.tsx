@@ -36,7 +36,7 @@ const SignupPage: React.FC = () => {
               name: user.name,
             });
           }
-          window.location.href = "/home";
+          window.location.href = "/tasks";
         } else {
           setError("please try again");
         }

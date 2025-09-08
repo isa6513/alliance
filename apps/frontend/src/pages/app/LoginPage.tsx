@@ -28,7 +28,7 @@ const LoginPage: React.FC = () => {
   const returnUrl = useMemo((): string => {
     const qp = searchParams.get("redirect");
     if (qp && qp.startsWith("/")) return qp;
-    return "/home";
+    return "/tasks";
   }, [searchParams]);
 
   useEffect(() => {

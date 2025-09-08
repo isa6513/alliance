@@ -142,7 +142,7 @@ export function HydrateFallback() {
   );
 }
 
-const authOnlyRoutes = ["/home", "/settings", "/profile", "/onboarding"];
+const authOnlyRoutes = ["/tasks", "/settings", "/profile", "/onboarding"];
 
 export default function AppLayout() {
   const { isAuthenticated, loading, logout } = useAuth();

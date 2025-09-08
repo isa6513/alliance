@@ -18,7 +18,7 @@ const ProfileDropdown = () => {
 
   const handleLogout = useCallback(async () => {
     await logout();
-    navigate("/home");
+    navigate("/tasks");
   }, [logout, navigate]);
 
   return (
