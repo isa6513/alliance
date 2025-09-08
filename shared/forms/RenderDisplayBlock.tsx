@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import type { DisplayBlock } from "./display-blocks";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
+import type { DisplayBlock } from "./display-blocks";
 
 type Props<TId extends string = string> = {
   block: DisplayBlock<TId>;
@@ -15,7 +15,7 @@ export default function RenderDisplayBlock<TId extends string = string>({
       return React.createElement(
         `h${(block as any).level || 2}`,
         {
-          className: `font-bold text-gray-900 ${
+          className: `font-medium text-zinc-900 ${
             ((block as any).level || 2) === 1
               ? "text-3xl"
               : ((block as any).level || 2) === 2
@@ -34,7 +34,7 @@ export default function RenderDisplayBlock<TId extends string = string>({
 
     case "text":
       return (
-        <div className="text-gray-900">
+        <div className="text-zinc-900">
           {(block as any).markdown ? (
             <div className="prose prose-sm max-w-none">
               <FormMarkdownWrapper markdownContent={(block as any).text} />
@@ -105,4 +105,3 @@ export default function RenderDisplayBlock<TId extends string = string>({
       return null;
   }
 }
-

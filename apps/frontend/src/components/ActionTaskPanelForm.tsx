@@ -56,7 +56,6 @@ const ActionTaskPanelForm = ({
   return (
     <Card style={CardStyle.LightGrey}>
       <div className="flex flex-col gap-y-2">
-        <p className="font-medium text-lg mb-1">Steps</p>
         <div>
           {form && (
             <FormRenderer

@@ -18,8 +18,8 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
           <strong className="!font-medium" {...props} />
         ),
         p: ({ ...props }) => <p className="" {...props} />,
-        ol: ({ ...props }) => <ol {...props} />,
-        ul: ({ ...props }) => <ul {...props} />,
+        ol: ({ ...props }) => <ol className="list-decimal pl-6" {...props} />,
+        ul: ({ ...props }) => <ul className="list-disc pl-4" {...props} />,
         li: ({ ...props }) => <li {...props} />,
         a: ({ ...props }) => <a className="text-link" {...props} />,
       }}

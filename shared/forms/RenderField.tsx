@@ -26,7 +26,7 @@ export function RenderField<TId extends string = string>({
     case "text":
       return (
         <div className="space-y-1">
-          <label className="block   text-gray-700">
+          <label className="block text-gray-700">
             {field.label}
             {field.required && <span className="text-red-500 ml-1">*</span>}
           </label>
