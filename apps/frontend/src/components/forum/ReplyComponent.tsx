@@ -447,8 +447,8 @@ const ReplyComponent = ({
                     <div key={childReply.id}>
                       <div
                         className={`${
-                          compact ? "" : "border-t border-gray-200"
-                        } -mx-4 my-4`}
+                          compact ? "my-2" : "border-t border-gray-200 my-4"
+                        } -mx-4`}
                       ></div>
                       <div>
                         <ReplyComponent
@@ -523,7 +523,9 @@ const ReplyComponent = ({
         <div>
           {reply.children.map((childReply) => (
             <div key={childReply.id}>
-              <div className="border-t border-gray-200 my-4"></div>
+              <div
+                className={compact ? "my-2" : "border-t border-gray-200 my-4"}
+              ></div>
               <ReplyComponent
                 reply={childReply}
                 depth={depth + 1}
