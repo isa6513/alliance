@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Action } from 'src/actions/entities/action.entity';
+import { getImageSource } from 'src/images/images.service';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Form } from './entities/form.entity';
@@ -11,7 +12,7 @@ import {
   FormResponseDto,
   SubmitFormDto,
 } from './form.dto';
-import { FormSchema } from './schema';
+import { FormSchema, Page } from './schema';
 
 @Injectable()
 export class TasksService {
@@ -33,6 +34,19 @@ export class TasksService {
     const form = await this.formRepository.findOne({ where: { id: formId } });
     if (!form) {
       throw new NotFoundException('Form not found');
+    }
+
+    return this.transformImageUrls(form);
+  }
+
+  async transformImageUrls(form: Form): Promise<Form> {
+    const pages = form.schema.pages as Page<string>[];
+    for (const page of pages) {
+      for (const field of page.fields) {
+        if (field.kind === 'image') {
+          field.src = getImageSource(field.src);
+        }
+      }
     }
     return form;
   }

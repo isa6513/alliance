@@ -45,7 +45,6 @@ const ForumListPost = ({
     }).then((res) => {
       if (res.data && res.data.author) {
         setLastComment(res.data);
-        console.log("Last comment:", res.data);
       }
     });
   }, [post.id]);

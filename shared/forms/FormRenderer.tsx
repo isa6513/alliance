@@ -5,7 +5,7 @@ import AppMarkdownWrapper from "../ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "../ui/Button";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import type { DisplayBlock } from "./display-blocks";
-import type { AnyField, FormSchema, Condition } from "./formschema";
+import type { AnyField, Condition, FormSchema } from "./formschema";
 
 interface FormRendererProps {
   form: FormDto["schema"];
@@ -592,7 +592,7 @@ const FormRenderer = ({
             key={index}
             src={(block as any).src}
             alt={(block as any).alt}
-            className="max-w-full h-auto rounded"
+            className="max-h-80 w-auto rounded"
             style={{
               aspectRatio: (block as any).aspectRatio
                 ? (block as any).aspectRatio.toString()
