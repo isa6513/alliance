@@ -209,11 +209,6 @@ export function ConditionalVisibility<TId extends string>({
           </div>
         </div>
       )}
-      {!enabled && controllers.length > 0 && (
-        <p className="mt-1 text-[11px] text-gray-500">
-          Show this field only when a previous field has a specific value.
-        </p>
-      )}
       {controllers.length === 0 && (
         <p className="mt-1 text-[11px] text-gray-400">
           No earlier checkbox/select/radio fields available to reference.
