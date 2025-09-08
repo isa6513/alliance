@@ -233,7 +233,7 @@ export function RenderField<TId extends string = string>({
     case "multiselect":
       return (
         <div className="space-y-2">
-          <label className="block   text-gray-700">
+          <label className="block text-gray-800">
             {field.label}
             {field.required && <span className="text-red-500 ml-1">*</span>}
           </label>

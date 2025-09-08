@@ -274,7 +274,7 @@ const FormRenderer = ({
     <div className="mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Page Content */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {currentPage.fields.map((element, index) =>
             renderElement(element, index)
           )}
