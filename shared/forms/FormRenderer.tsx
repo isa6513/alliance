@@ -326,13 +326,13 @@ const FormRenderer = ({
       case "checkbox":
         return (
           <div key={index} className="space-y-1">
-            <label className="flex items-center">
+            <label className="flex items-start">
               <input
                 type="checkbox"
                 checked={!!value}
                 onChange={(e) => updateField(field.id, e.target.checked)}
                 required={field.required}
-                className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="mt-1 mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <span className="text-zinc-700 flex">
                 <FormMarkdownWrapper markdownContent={field.label} />
@@ -351,7 +351,7 @@ const FormRenderer = ({
             </label>
             <div className="space-y-2">
               {(field as any).options.map((option: any, optIndex: number) => (
-                <label key={optIndex} className="flex items-center">
+                <label key={optIndex} className="flex items-start">
                   <input
                     type="radio"
                     name={field.id}
@@ -359,7 +359,7 @@ const FormRenderer = ({
                     checked={value === option.value}
                     onChange={(e) => updateField(field.id, e.target.value)}
                     required={field.required}
-                    className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    className="mt-1 mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                   />
                   <span className=" text-gray-700">{option.label}</span>
                 </label>
