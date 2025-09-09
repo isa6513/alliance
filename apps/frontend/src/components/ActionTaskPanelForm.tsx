@@ -7,7 +7,7 @@ import {
 import FormRenderer, {
   computeFormStorageKey,
 } from "@alliance/shared/forms/FormRenderer";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import { FormSchema } from "@alliance/shared/forms/formschema";
 import { useEffect, useState } from "react";
 
 interface ActionTaskPanelActivityProps {
@@ -54,20 +54,18 @@ const ActionTaskPanelForm = ({
     }
   };
   return (
-    <Card style={CardStyle.LightGrey}>
-      <div className="flex flex-col gap-y-2">
-        <div>
-          {form && (
-            <FormRenderer
-              form={form.schema}
-              onSubmit={handleSubmitForm}
-              persistKey={String(taskFormId)}
-              onFormStarted={onFormStarted}
-            />
-          )}
-        </div>
+    <div className="flex flex-col gap-y-2">
+      <div>
+        {form && (
+          <FormRenderer
+            form={form.schema as unknown as FormSchema<string, string>}
+            onSubmit={handleSubmitForm}
+            persistKey={String(taskFormId)}
+            onFormStarted={onFormStarted}
+          />
+        )}
       </div>
-    </Card>
+    </div>
   );
 };
 

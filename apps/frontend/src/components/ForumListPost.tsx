@@ -108,7 +108,7 @@ const ForumListPost = ({
     return (
       <div
         key={post.id}
-        className="flex items-start space-x-3 rounded-md border-gray-200 cursor-pointer hover:bg-gray-50"
+        className="flex items-start space-x-3 rounded-md border-gray-200 cursor-pointer hover:bg-gray-100 px-4 -mx-4"
         onClick={() => {
           navigate(`/forum/post/${post.id}`);
         }}

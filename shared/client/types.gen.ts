@@ -1199,6 +1199,19 @@ export type UserMyProfileResponses = {
 
 export type UserMyProfileResponse = UserMyProfileResponses[keyof UserMyProfileResponses];
 
+export type UserCountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/count';
+};
+
+export type UserCountResponses = {
+    200: number;
+};
+
+export type UserCountResponse = UserCountResponses[keyof UserCountResponses];
+
 export type UserFindOneData = {
     body?: never;
     path: {

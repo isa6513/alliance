@@ -66,7 +66,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
   return (
     <div className={`relative ${className}`}>
       <Card
-        className="block overflow-hidden"
+        className="block overflow-hidden rounded-none"
         style={CardStyle.White}
         onClick={goToActionPage}
       >
@@ -98,7 +98,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
           </div>
         </div>
         {activity && joinedCount && neededCount && (
-          <div className="mt-6">
+          <div className="mt-2">
             <div className="flex flex-row items-center justify-between w-full gap-x-2">
               <p className="text-zinc-500 text-base mb-0.5">
                 {joinedCount} / {neededCount}{" "}

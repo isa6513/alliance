@@ -167,7 +167,10 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       return (
         <>
           {completionElement}
-          <ActionTaskPanelOptOut onOptOut={handleOptOutAction} />
+          <ActionTaskPanelOptOut
+            onOptOut={handleOptOutAction}
+            className="mt-3"
+          />
         </>
       );
     }

@@ -40,7 +40,7 @@ const ActionEventsPanel = ({ action, events }: ActionEventsPanelProps) => {
                           {(
                             liveUserCount ?? action.usersJoined
                           )?.toLocaleString() || 0}{" "}
-                          commitments made
+                          commitment{action.usersJoined === 1 ? "" : "s"} made
                         </span>
                         <span className="text-zinc-500 text-sm">
                           {" "}

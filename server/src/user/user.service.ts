@@ -126,6 +126,12 @@ export class UserService {
     await this.userRepository.update(id, { admin });
   }
 
+  async count(): Promise<number> {
+    return this.userRepository.count({
+      where: { isNotSignedUpPartialProfile: false },
+    });
+  }
+
   async sendWelcomeEmail(userId: number) {
     if (process.env.NODE_ENV === 'test') {
       return;

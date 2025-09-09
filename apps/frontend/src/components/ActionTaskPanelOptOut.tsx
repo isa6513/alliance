@@ -5,9 +5,13 @@ import { useOutsideClick } from "./NotificationsIcon";
 
 export interface ActionTaskPanelOptOutProps {
   onOptOut: (reason: string) => void;
+  className?: string;
 }
 
-const ActionTaskPanelOptOut = ({ onOptOut }: ActionTaskPanelOptOutProps) => {
+const ActionTaskPanelOptOut = ({
+  onOptOut,
+  className,
+}: ActionTaskPanelOptOutProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [customReason, setCustomReason] = useState("");
 
@@ -19,20 +23,19 @@ const ActionTaskPanelOptOut = ({ onOptOut }: ActionTaskPanelOptOutProps) => {
   const ref = useOutsideClick(() => setDropdownOpen(false));
 
   return (
-    <div className="relative">
+    <div className={`relative ${className}`}>
       <div className="flex flex-row gap-x-1 w-full items-center relative">
-        <span>Can&apos;t complete this action?</span>
-        <Button
-          color={ButtonColor.White}
-          className="flex items-center !p-0 border-none !text-base !h-[45px] cursor-pointer hover:!bg-transparent hover:underline"
+        <span className="text-sm">Can&apos;t complete this action?</span>
+        <p
+          className="text-gray-500 cursor-pointer hover:underline text-sm"
           onClick={() => setDropdownOpen(!dropdownOpen)}
         >
-          <p className="text-gray-500">Let us know.</p>
-        </Button>
+          Let us know.
+        </p>
       </div>
       <Dropdown
         isOpen={dropdownOpen}
-        className="absolute top-[45px] left-0 gap-y-2 *:w-full min-w-[300px]"
+        className="absolute top-[25px] left-0 gap-y-2 *:w-full min-w-[300px]"
         ref={ref}
       >
         <textarea

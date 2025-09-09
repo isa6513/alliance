@@ -254,6 +254,12 @@ export class UserController {
     return new ProfileDto(user);
   }
 
+  @Get('count')
+  @ApiOkResponse({ type: Number })
+  async count(): Promise<number> {
+    return this.userService.count();
+  }
+
   @Get('slug/:id')
   @Public()
   @ApiOkResponse({ type: ProfileDto })

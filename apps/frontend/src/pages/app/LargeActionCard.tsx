@@ -1,7 +1,11 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-import { ActionDto, UserActionRelation } from "@alliance/shared/client";
+import {
+  ActionDto,
+  UserActionRelation,
+  userCount,
+} from "@alliance/shared/client";
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -42,7 +46,18 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
     LargeActionCardState.Default
   );
 
+  useEffect(() => {
+    setState(LargeActionCardState.Default);
+  }, [action]);
+
   const liveUserCount = useActionCount(action.id);
+
+  const [members, setMembers] = useState(30);
+  useEffect(() => {
+    userCount().then((count) => {
+      setMembers(count.data ?? 30);
+    });
+  }, []);
 
   const handleUpdateActionState = useCallback(() => {
     setState(LargeActionCardState.Closed);
@@ -62,6 +77,8 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   const threshold =
     action.status === "gathering_commitments"
       ? action.commitmentThreshold ?? 10
+      : action.commitmentless
+      ? members
       : action.usersJoined;
 
   const lastEvent = action.events[action.events.length - 1];
@@ -69,11 +86,11 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   return (
     <Card
       style={CardStyle.White}
-      className={`shadow-lg transition-all duration-300 ${
+      className={`transition-all duration-300 ${
         state === LargeActionCardState.Closed
           ? "opacity-0 overflow-hidden"
           : "opacity-100"
-      } !border-green !border-2 w-full relative
+      } w-full relative !rounded-none p-6
          ${state === LargeActionCardState.Minified ? "pb-4" : ""}`}
     >
       <div className="p-2">
@@ -108,17 +125,11 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
         </div>
 
         <div className="flex flex-row items-start gap-x-8">
-          <div className="flex-1 flex flex-col">
-            <p className="font-medium text-lg text-black">{action.name}</p>
-            <p className="text-zinc-500">{action.shortDescription}</p>
-
-            {/* {action.type === "Funding" && <Badge>$5</Badge>}
-          {action.type === "Activity" && !!action.timeEstimate && (
-            <Badge>takes {action.timeEstimate}</Badge>
-          )}
-          {action.type === "Ongoing" && <Badge>3 week commitment</Badge>} */}
+          <div className="flex-1 flex flex-col gap-y-2">
+            <p className="font-medium text-lg">{action.name}</p>
+            <p>{action.shortDescription}</p>
           </div>
-          <div className="w-24 flex flex-col gap-y-2">
+          <div className="w-24 absolute right-10 top-10">
             <Button
               color={ButtonColor.Transparent}
               onClick={goToActionPage}
@@ -128,11 +139,11 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             </Button>
           </div>
         </div>
-        {!action.commitmentless && (
-          <div className="mt-6">
+        {
+          <div className="mt-2">
             <div>
               <div className="flex flex-row items-center justify-between w-full gap-x-2">
-                <p className="text-zinc-500 text-base mb-1">
+                <p className="text-zinc-500 text-sm mb-1">
                   {liveUserCount ?? 0} / {threshold}{" "}
                   {action.status === "gathering_commitments"
                     ? "committed"
@@ -153,8 +164,8 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
               />
             </div>
           </div>
-        )}
-        <div className="mt-4">
+        }
+        <div className="mt-6 border-t border-zinc-200 pt-6">
           <ActionTaskPanel
             action={action}
             userRelation={userRelation}
