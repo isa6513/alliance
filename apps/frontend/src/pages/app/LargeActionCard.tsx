@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import {
   ActionDto,
   actionsDecline,
+  actionsOptout,
   UserActionRelation,
 } from "@alliance/shared/client";
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
@@ -66,6 +67,25 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       setTimeout(() => {
         onDecline(action.id);
       }, 5);
+    },
+    [action.id, onDecline]
+  );
+
+  const handleOptOutAction = useCallback(
+    async (reason: string) => {
+      console.log("handleOptOutAction", reason);
+      const req = await actionsOptout({
+        path: { id: action.id },
+        body: { reason },
+      });
+      if (req.error) {
+        console.error("Failed to opt out action", req.error);
+        throw new Error("Failed to opt out action");
+      }
+      setState(LargeActionCardState.Closed);
+      setTimeout(() => {
+        onDecline(action.id);
+      }, 100);
     },
     [action.id, onDecline]
   );
@@ -208,6 +228,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             }
             handleJoinAction={() => setState(LargeActionCardState.Committed)}
             handleDeclineAction={handleDeclineAction}
+            handleOptOutAction={handleOptOutAction}
           />
         </div>
       </div>

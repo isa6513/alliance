@@ -1,5 +1,5 @@
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card from "@alliance/shared/ui/Card";
+import Dropdown from "@alliance/shared/ui/Dropdown";
 import { useState } from "react";
 import ActionCommitButton from "./ActionCommitButton";
 import { useOutsideClick } from "./NotificationsIcon";
@@ -56,45 +56,42 @@ const ActionTaskPanelCommit = ({
           <p className="text-gray-500">...</p>
         </Button>
       </div>
-      {dropdownOpen && (
-        <Card
-          className="absolute top-[55px] right-0 gap-y-2 *:w-full z-10 shadow-lg"
-          ref={ref}
+      <Dropdown
+        isOpen={dropdownOpen}
+        className="absolute top-[55px] right-0 gap-y-2 *:w-full"
+        ref={ref}
+      >
+        <p className="mb-5 mr-8">Can&apos;t participate in this action?</p>
+        <Button
+          color={moralObjectionSelected ? ButtonColor.Light : ButtonColor.Black}
+          onClick={handleMoralObjection}
         >
-          <p className="mb-5 mr-8">Can&apos;t participate in this action?</p>
-          <Button
-            color={
-              moralObjectionSelected ? ButtonColor.Light : ButtonColor.Black
-            }
-            onClick={handleMoralObjection}
-          >
-            I have a moral objection
-          </Button>
-          <Button
-            color={otherReasonSelected ? ButtonColor.Light : ButtonColor.Black}
-            onClick={handleOtherReason}
-          >
-            Other reason
-          </Button>
-          {(otherReasonSelected || moralObjectionSelected) && (
-            <>
-              <textarea
-                className="w-full h-20 border border-gray-300 rounded-md px-3 py-2 text-sm"
-                value={customReason}
-                onChange={(e) => setCustomReason(e.target.value)}
-                placeholder="Explain in more detail..."
-              />
-              <Button
-                color={ButtonColor.Black}
-                onClick={handleSubmit}
-                className="w-full"
-              >
-                Confirm inability to participate
-              </Button>
-            </>
-          )}
-        </Card>
-      )}
+          I have a moral objection
+        </Button>
+        <Button
+          color={otherReasonSelected ? ButtonColor.Light : ButtonColor.Black}
+          onClick={handleOtherReason}
+        >
+          Other reason
+        </Button>
+        {(otherReasonSelected || moralObjectionSelected) && (
+          <>
+            <textarea
+              className="w-full h-20 border border-gray-300 rounded-md px-3 py-2 text-sm"
+              value={customReason}
+              onChange={(e) => setCustomReason(e.target.value)}
+              placeholder="Explain in more detail..."
+            />
+            <Button
+              color={ButtonColor.Black}
+              onClick={handleSubmit}
+              className="w-full"
+            >
+              Confirm inability to participate
+            </Button>
+          </>
+        )}
+      </Dropdown>
     </div>
   );
 };

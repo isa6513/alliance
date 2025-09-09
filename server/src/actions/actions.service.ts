@@ -124,6 +124,20 @@ export class ActionsService {
     });
     if (
       activities.some(
+        (activity) => activity.type === ActionActivityType.USER_DECLINED,
+      )
+    ) {
+      return UserActionRelation.Declined;
+    }
+    if (
+      activities.some(
+        (activity) => activity.type === ActionActivityType.USER_WONT_COMPLETE,
+      )
+    ) {
+      return UserActionRelation.Declined;
+    }
+    if (
+      activities.some(
         (activity) => activity.type === ActionActivityType.USER_COMPLETED,
       )
     ) {
@@ -135,13 +149,6 @@ export class ActionsService {
       )
     ) {
       return UserActionRelation.Joined;
-    }
-    if (
-      activities.some(
-        (activity) => activity.type === ActionActivityType.USER_DECLINED,
-      )
-    ) {
-      return UserActionRelation.Declined;
     }
     return UserActionRelation.None;
   }
@@ -206,6 +213,26 @@ export class ActionsService {
       user: user,
       declineReason: reason,
       isMoral,
+    });
+    const savedActivity = await this.actionActivityRepository.save(activity);
+    return new ActionActivityDto(savedActivity);
+  }
+
+  async optoutAction(
+    actionId: number,
+    userId: number,
+    reason: string,
+  ): Promise<ActionActivityDto> {
+    const action = await this.findOne(actionId);
+    const user = await this.userService.findOneOrFail(userId);
+
+    const activity = this.actionActivityRepository.create({
+      type: ActionActivityType.USER_WONT_COMPLETE,
+      actionId: actionId,
+      userId: userId,
+      action: action,
+      user: user,
+      declineReason: reason,
     });
     const savedActivity = await this.actionActivityRepository.save(activity);
     return new ActionActivityDto(savedActivity);

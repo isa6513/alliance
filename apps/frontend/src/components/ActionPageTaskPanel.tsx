@@ -1,9 +1,9 @@
-import { ActionActivityDto, UserActionRelation } from "@alliance/shared/client";
+import { UserActionRelation } from "@alliance/shared/client";
 import Card from "@alliance/shared/ui/Card";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
 import { useActionLoaderData } from "../pages/app/ActionPage";
-import ActionTaskPanel from "./ActionTaskPanel";
+import ActionTaskPanel, { ActionTaskPanelProps } from "./ActionTaskPanel";
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import ActionTaskPanelDeclined from "./ActionTaskPanelDeclined";
 
@@ -24,23 +24,14 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   );
 }
 
-export type TaskPanelContext = {
-  handleCompleteAction: () => void;
-  handleJoinAction: () => void;
-  handleDeclineAction: (moral: boolean, reason: string) => void;
+export interface TaskPanelContext
+  extends Omit<ActionTaskPanelProps, "action" | "userRelation"> {
   userRelation: UserActionRelation | null;
-  activities: ActionActivityDto[];
-  handleLikeActivity: (activityId: number) => Promise<void>;
-  setActivities: React.Dispatch<React.SetStateAction<ActionActivityDto[]>>;
-};
+}
 
 const ActionPageTaskPanel = () => {
-  const {
-    handleCompleteAction,
-    handleJoinAction,
-    handleDeclineAction,
-    userRelation,
-  } = useOutletContext<TaskPanelContext>();
+  const { userRelation, ...panelHandlers } =
+    useOutletContext<TaskPanelContext>();
   const action = useActionLoaderData();
 
   if (!userRelation) {
@@ -61,9 +52,7 @@ const ActionPageTaskPanel = () => {
     <ActionTaskPanel
       action={action}
       userRelation={userRelation}
-      handleCompleteAction={handleCompleteAction}
-      handleJoinAction={handleJoinAction}
-      handleDeclineAction={handleDeclineAction}
+      {...panelHandlers}
     />
   );
 };

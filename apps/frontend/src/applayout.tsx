@@ -78,7 +78,9 @@ export async function clientLoader() {
     (activity) => activity.type === "user_joined"
   );
   const declineActivities = activityList.filter(
-    (activity) => activity.type === "user_declined"
+    (activity) =>
+      activity.type === "user_declined" ||
+      activity.type === "user_wont_complete"
   );
 
   joinActivities.forEach((activity) => {

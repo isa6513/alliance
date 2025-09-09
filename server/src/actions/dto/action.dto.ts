@@ -85,6 +85,12 @@ export class DeclineActionDto {
   moral: boolean;
 }
 
+export class OptOutActionDto {
+  @ApiProperty()
+  @IsString()
+  reason: string;
+}
+
 export class ActionActivityDto extends PickType(ActionActivity, [
   'id',
   'type',

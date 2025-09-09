@@ -5,6 +5,7 @@ import {
   actionsFindOne,
   actionsJoin,
   actionsMyStatus,
+  actionsOptout,
   actionsUserLocations,
   LatLonDto,
   UserActionRelation,
@@ -112,6 +113,19 @@ export default function ActionPage() {
         path: { id: actionId },
         body: { reason, moral },
       });
+      setUserRelation("declined");
+      setRevalidate();
+    },
+    [actionId]
+  );
+
+  const handleOptOutAction = useCallback(
+    async (reason: string) => {
+      await actionsOptout({
+        path: { id: actionId },
+        body: { reason },
+      });
+      setUserRelation("declined");
       setRevalidate();
     },
     [actionId]
@@ -126,6 +140,7 @@ export default function ActionPage() {
         if (response.error) {
           console.error("Failed to fetch user status", response.error);
         }
+        console.log("response", response);
         if (response.data) {
           setUserRelation(response.data.relation);
         }
@@ -142,11 +157,11 @@ export default function ActionPage() {
   }, [id]);
 
   const onJoinAction = useCallback(async () => {
-    if (!id) return;
+    if (!actionId) return;
 
     try {
       const response = await actionsJoin({
-        path: { id },
+        path: { id: actionId },
       });
 
       if (response.error) {
@@ -159,7 +174,7 @@ export default function ActionPage() {
     } finally {
       setRevalidate();
     }
-  }, [id]);
+  }, [actionId]);
 
   return (
     <div className="w-full h-full bg-white min-h-[calc(100vh-50px)]">
@@ -171,10 +186,8 @@ export default function ActionPage() {
                 userRelation,
                 handleCompleteAction,
                 handleJoinAction: onJoinAction,
-                activities,
-                handleLikeActivity,
-                setActivities,
                 handleDeclineAction,
+                handleOptOutAction,
               } satisfies TaskPanelContext
             }
           />

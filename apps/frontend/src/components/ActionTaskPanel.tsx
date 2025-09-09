@@ -8,14 +8,16 @@ import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
 import ActionTaskPanelCommit from "./ActionTaskPanelCommit";
 import ActionTaskPanelForm from "./ActionTaskPanelForm";
 import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
+import ActionTaskPanelOptOut from "./ActionTaskPanelOptOut";
 import { StripeWrapper } from "./StripeWrapper";
 
-interface ActionTaskPanelProps {
+export interface ActionTaskPanelProps {
   action: ActionDto;
   userRelation: Extract<UserActionRelation, "joined" | "none">;
   handleCompleteAction: () => void;
   handleJoinAction: () => void;
   handleDeclineAction: (moral: boolean, reason: string) => void;
+  handleOptOutAction: (reason: string) => void;
 }
 
 const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
@@ -24,6 +26,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   handleCompleteAction,
   handleJoinAction,
   handleDeclineAction,
+  handleOptOutAction,
 }: ActionTaskPanelProps) => {
   const { isAuthenticated } = useAuth();
 
@@ -72,9 +75,10 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     }
   }
 
+  let completionElement = null;
   if (canCompleteAction(action, userRelation)) {
     if (action.type === "Funding") {
-      return (
+      completionElement = (
         <StripeWrapper actionId={action.id}>
           <ActionTaskPanelFunding
             onPaymentSuccess={handleCompleteWithTracking}
@@ -84,7 +88,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     }
     console.log("action.taskFormId", action.taskFormId);
     if (action.type === "Activity" && action.taskFormId) {
-      return (
+      completionElement = (
         <ActionTaskPanelForm
           taskFormId={action.taskFormId}
           onCompleteAction={handleCompleteWithTracking}
@@ -93,14 +97,22 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       );
     }
     if (action.type === "Activity" && !action.taskFormId) {
-      return <p>Couldn&apos;t load action contents</p>;
+      completionElement = <p>Couldn&apos;t load action contents</p>;
     }
     if (action.type === "Ongoing") {
-      return (
+      completionElement = (
         <ActionTaskPanelActivity
           action={action}
           onCompleteAction={handleCompleteWithTracking}
         />
+      );
+    }
+    if (completionElement) {
+      return (
+        <>
+          {completionElement}
+          <ActionTaskPanelOptOut onOptOut={handleOptOutAction} />
+        </>
       );
     }
   }

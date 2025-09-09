@@ -21,7 +21,8 @@ export function canCompleteAction(
   return (
     action.status === "member_action" &&
     (relation === "joined" ||
-      (action.commitmentless && relation !== "completed"))
+      (action.commitmentless && relation !== "completed")) &&
+    relation !== "declined"
   );
 }
 
@@ -62,7 +63,7 @@ const HomePage = () => {
   };
 
   const handleTaskJoin = (actionId: number) => {
-    actionsJoin({ path: { id: actionId.toString() } }).then(() => {
+    actionsJoin({ path: { id: actionId } }).then(() => {
       setRevalidate();
       navigate(window.location.pathname);
     });

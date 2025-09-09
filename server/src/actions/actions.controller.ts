@@ -38,6 +38,7 @@ import {
   CreateActionEventDto,
   DeclineActionDto,
   LatLonDto,
+  OptOutActionDto,
   UpdateActionActivityDto,
   UpdateActionDto,
 } from './dto/action.dto';
@@ -60,7 +61,7 @@ export class ActionsController {
   @Post('join/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ActionActivityDto })
-  join(@Request() req: JwtRequest, @Param('id') id: string) {
+  join(@Request() req: JwtRequest, @Param('id', ParseIntPipe) id: number) {
     if (!req.user) {
       throw new UnauthorizedException('User not found');
     }
@@ -81,6 +82,17 @@ export class ActionsController {
       body.reason,
       body.moral,
     );
+  }
+
+  @Post('optout/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ActionActivityDto })
+  optout(
+    @Request() req: JwtRequest,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: OptOutActionDto,
+  ) {
+    return this.actionsService.optoutAction(+id, req.user.sub, body.reason);
   }
 
   @Post('complete/:id')

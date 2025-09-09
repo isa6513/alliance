@@ -152,7 +152,7 @@ export type StreamableFile = {
 /**
  * Type of action activity
  */
-export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined';
+export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete';
 
 /**
  * Type of the action
@@ -347,6 +347,10 @@ export type ActionActivityDto = {
 export type DeclineActionDto = {
     reason: string;
     moral: boolean;
+};
+
+export type OptOutActionDto = {
+    reason: string;
 };
 
 export type UserActionRelation = 'joined' | 'completed' | 'none' | 'declined';
@@ -1273,7 +1277,7 @@ export type ImagesUploadImageResponse = ImagesUploadImageResponses[keyof ImagesU
 export type ActionsJoinData = {
     body?: never;
     path: {
-        id: string;
+        id: number;
     };
     query?: never;
     url: '/actions/join/{id}';
@@ -1299,6 +1303,21 @@ export type ActionsDeclineResponses = {
 };
 
 export type ActionsDeclineResponse = ActionsDeclineResponses[keyof ActionsDeclineResponses];
+
+export type ActionsOptoutData = {
+    body: OptOutActionDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/optout/{id}';
+};
+
+export type ActionsOptoutResponses = {
+    200: ActionActivityDto;
+};
+
+export type ActionsOptoutResponse = ActionsOptoutResponses[keyof ActionsOptoutResponses];
 
 export type ActionsCompleteData = {
     body?: never;
