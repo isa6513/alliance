@@ -75,8 +75,8 @@ const HomePage = () => {
           <div className="flex flex-col gap-y-2 border-zinc-200 max-w-2xl">
             <div
               className={
-                (currentTask ? "min-h-screen" : "") +
-                " flex flex-col items-center justify-center py-20"
+                (currentTask ? "min-h-[calc(100vh-40px)]" : "") +
+                " flex flex-col items-center justify-center py-20 pt-16"
               }
             >
               <p className="font-serif text-center font-medium text-3xl mb-8">
