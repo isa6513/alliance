@@ -27,7 +27,7 @@ const HomePage = () => {
   const { actions, posts, activities } = useAppLoaderData();
 
   const { activities: friendActivities, handleLikeActivity } = useActivities({
-    list: ActivityList.Global,
+    list: ActivityList.Friends,
   });
 
   const todoActions = actions.filter((action) =>
