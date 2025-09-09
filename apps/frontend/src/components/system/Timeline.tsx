@@ -42,7 +42,7 @@ const Timeline: React.FC<TimelineProps> = ({
       backgroundColor: lineColor,
       top: halfDot,
       bottom: bottomElementRef.current
-        ? bottomElementRef.current.clientHeight - 2 * halfDot
+        ? bottomElementRef.current.clientHeight - halfDot
         : 0,
     });
   }, [bottomElementRef, lineWidth, lineColor, halfDot]);
@@ -78,7 +78,7 @@ const Timeline: React.FC<TimelineProps> = ({
               } mt-1 flex items-center justify-center`}
             ></div>
             {/* content */}
-            <div className="pl-6">{child}</div>
+            <div className="pl-5">{child}</div>
           </li>
         ))}
       </ul>

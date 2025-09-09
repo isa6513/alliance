@@ -19,10 +19,13 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
         ),
         p: ({ ...props }) => <p className="text-zinc-800" {...props} />,
         ol: ({ ...props }) => (
-          <ol className="text-zinc-800 list-decimal pl-6" {...props} />
+          <ol
+            className="text-zinc-800 list-decimal list-inside pl-2"
+            {...props}
+          />
         ),
         ul: ({ ...props }) => (
-          <ul className="text-zinc-800 list-disc pl-4" {...props} />
+          <ul className="text-zinc-800 list-disc list-inside pl-2" {...props} />
         ),
         li: ({ ...props }) => <li className="text-zinc-800 my-1" {...props} />,
         a: ({ ...props }) => <a className="text-link" {...props} />,
