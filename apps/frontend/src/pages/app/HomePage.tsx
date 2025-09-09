@@ -1,12 +1,7 @@
-import {
-  ActionDto,
-  actionsComplete,
-  actionsJoin,
-  UserActionRelation,
-} from "@alliance/shared/client";
+import { ActionDto, UserActionRelation } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { Link, useNavigate } from "react-router";
-import { setRevalidate, useAppLoaderData } from "../../applayout";
+import { useAppLoaderData } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
 import CheckIcon from "../../components/icons/CheckIcon";
@@ -55,25 +50,6 @@ const HomePage = () => {
 
   const currentTask = newActions[0] || todoActions[0] || null;
 
-  const handleTaskComplete = (actionId: number) => {
-    actionsComplete({ path: { id: actionId.toString() } }).then(() => {
-      setRevalidate();
-      navigate(window.location.pathname);
-    });
-  };
-
-  const handleTaskJoin = (actionId: number) => {
-    actionsJoin({ path: { id: actionId } }).then(() => {
-      setRevalidate();
-      navigate(window.location.pathname);
-    });
-  };
-
-  const handleTaskDecline = () => {
-    setRevalidate();
-    navigate(window.location.pathname);
-  };
-
   const bulletinCard = (
     <Card style={CardStyle.White}>
       <p className="font-medium text-base text-black mb-2">Bulletin</p>
@@ -105,9 +81,7 @@ const HomePage = () => {
                 action={currentTask}
                 userRelation={currentTask.relation as "joined" | "none"}
                 friendActivities={[]}
-                onComplete={handleTaskComplete}
-                onJoin={handleTaskJoin}
-                onDecline={handleTaskDecline}
+                onUpdateActionState={() => navigate(window.location.pathname)}
               />
             ) : (
               <Card style={CardStyle.Transparent}>

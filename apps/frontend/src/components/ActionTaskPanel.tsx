@@ -1,7 +1,15 @@
-import { ActionDto, UserActionRelation } from "@alliance/shared/client";
+import {
+  ActionDto,
+  actionsComplete,
+  actionsDecline,
+  actionsJoin,
+  actionsOptout,
+  UserActionRelation,
+} from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import posthog from "posthog-js";
 import { useCallback } from "react";
+import { setRevalidate } from "../applayout";
 import { useAuth } from "../lib/AuthContext";
 import { canCompleteAction } from "../pages/app/HomePage";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
@@ -14,30 +22,78 @@ import { StripeWrapper } from "./StripeWrapper";
 export interface ActionTaskPanelProps {
   action: ActionDto;
   userRelation: Extract<UserActionRelation, "joined" | "none">;
-  handleCompleteAction: () => void;
-  handleJoinAction: () => void;
-  handleDeclineAction: (moral: boolean, reason: string) => void;
-  handleOptOutAction: (reason: string) => void;
+  onCompleteAction: () => void;
+  onJoinAction: () => void;
+  onDeclineAction: () => void;
+  onOptOutAction: () => void;
 }
 
 const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   action,
   userRelation,
-  handleCompleteAction,
-  handleJoinAction,
-  handleDeclineAction,
-  handleOptOutAction,
+  onCompleteAction,
+  onJoinAction,
+  onDeclineAction,
+  onOptOutAction,
 }: ActionTaskPanelProps) => {
   const { isAuthenticated } = useAuth();
 
-  const handleCompleteWithTracking = useCallback(() => {
-    handleCompleteAction();
+  const handleCompleteWithTracking = useCallback(async () => {
+    const req = await actionsComplete({
+      path: { id: action.id },
+    });
+    if (req.error) {
+      throw new Error("Failed to complete action");
+    }
     posthog.capture("action_completed", {
       actionId: action.id,
       actionType: action.type,
       actionName: action.name,
     });
-  }, [action, handleCompleteAction]);
+    setRevalidate();
+    onCompleteAction();
+  }, [action, onCompleteAction]);
+
+  const handleJoinAction = useCallback(async () => {
+    const req = await actionsJoin({
+      path: { id: action.id },
+    });
+    if (req.error) {
+      throw new Error("Failed to join action");
+    }
+    setRevalidate();
+    onJoinAction();
+  }, [action, onJoinAction]);
+
+  const handleDeclineAction = useCallback(
+    async (moral: boolean, reason: string) => {
+      const req = await actionsDecline({
+        path: { id: action.id },
+        body: { reason, moral },
+      });
+      if (req.error) {
+        throw new Error("Failed to decline action");
+      }
+      setRevalidate();
+      onDeclineAction();
+    },
+    [action, onDeclineAction]
+  );
+
+  const handleOptOutAction = useCallback(
+    async (reason: string) => {
+      const req = await actionsOptout({
+        path: { id: action.id },
+        body: { reason },
+      });
+      if (req.error) {
+        throw new Error("Failed to opt out of action");
+      }
+      setRevalidate();
+      onOptOutAction();
+    },
+    [action, onOptOutAction]
+  );
 
   const handleFormStarted = useCallback(() => {
     posthog.capture("form_started", {

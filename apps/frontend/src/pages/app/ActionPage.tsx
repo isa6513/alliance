@@ -1,17 +1,13 @@
 import {
   ActionDto,
-  actionsComplete,
-  actionsDecline,
   actionsFindOne,
-  actionsJoin,
   actionsMyStatus,
-  actionsOptout,
   actionsUserLocations,
   LatLonDto,
   UserActionRelation,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   data,
   isRouteErrorResponse,
@@ -21,7 +17,6 @@ import {
   useRouteLoaderData,
 } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/ActionPage";
-import { setRevalidate } from "../../applayout";
 import ActionActivityList from "../../components/ActionActivityList";
 import ActionEventsPanel from "../../components/ActionEventsPanel";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
@@ -107,30 +102,6 @@ export default function ActionPage() {
     objectId: actionId,
   });
 
-  const handleDeclineAction = useCallback(
-    async (moral: boolean, reason: string) => {
-      await actionsDecline({
-        path: { id: actionId },
-        body: { reason, moral },
-      });
-      setUserRelation("declined");
-      setRevalidate();
-    },
-    [actionId]
-  );
-
-  const handleOptOutAction = useCallback(
-    async (reason: string) => {
-      await actionsOptout({
-        path: { id: actionId },
-        body: { reason },
-      });
-      setUserRelation("declined");
-      setRevalidate();
-    },
-    [actionId]
-  );
-
   useEffect(() => {
     if (isAuthenticated && id) {
       actionsMyStatus({
@@ -148,34 +119,6 @@ export default function ActionPage() {
     }
   }, [isAuthenticated, id]);
 
-  const handleCompleteAction = useCallback(async () => {
-    setUserRelation("completed");
-    actionsComplete({
-      path: { id },
-    });
-    setRevalidate();
-  }, [id]);
-
-  const onJoinAction = useCallback(async () => {
-    if (!actionId) return;
-
-    try {
-      const response = await actionsJoin({
-        path: { id: actionId },
-      });
-
-      if (response.error) {
-        throw new Error("Failed to join action");
-      } else {
-        setUserRelation("joined");
-      }
-    } catch (err) {
-      console.error("Error joining action:", err);
-    } finally {
-      setRevalidate();
-    }
-  }, [actionId]);
-
   return (
     <div className="w-full h-full bg-white min-h-[calc(100vh-50px)]">
       <TwoColumnSplit
@@ -184,10 +127,10 @@ export default function ActionPage() {
             context={
               {
                 userRelation,
-                handleCompleteAction,
-                handleJoinAction: onJoinAction,
-                handleDeclineAction,
-                handleOptOutAction,
+                onCompleteAction: () => setUserRelation("completed"),
+                onJoinAction: () => setUserRelation("joined"),
+                onDeclineAction: () => setUserRelation("declined"),
+                onOptOutAction: () => setUserRelation("declined"),
               } satisfies TaskPanelContext
             }
           />

@@ -1322,7 +1322,7 @@ export type ActionsOptoutResponse = ActionsOptoutResponses[keyof ActionsOptoutRe
 export type ActionsCompleteData = {
     body?: never;
     path: {
-        id: string;
+        id: number;
     };
     query?: never;
     url: '/actions/complete/{id}';

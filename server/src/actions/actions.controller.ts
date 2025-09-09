@@ -98,11 +98,8 @@ export class ActionsController {
   @Post('complete/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ActionActivityDto })
-  complete(@Request() req: JwtRequest, @Param('id') id: string) {
-    if (!req.user) {
-      throw new UnauthorizedException('User not found');
-    }
-    return this.actionsService.completeAction(+id, req.user.sub);
+  complete(@Request() req: JwtRequest, @Param('id', ParseIntPipe) id: number) {
+    return this.actionsService.completeAction(id, req.user.sub);
   }
 
   @Get('myStatus/:id')

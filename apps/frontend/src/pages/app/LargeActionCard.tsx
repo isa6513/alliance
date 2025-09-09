@@ -1,12 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router";
 
-import {
-  ActionDto,
-  actionsDecline,
-  actionsOptout,
-  UserActionRelation,
-} from "@alliance/shared/client";
+import { ActionDto, UserActionRelation } from "@alliance/shared/client";
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -22,9 +17,7 @@ export interface LargeActionCardProps {
   action: ActionDto;
   userRelation: Extract<UserActionRelation, "joined" | "none">;
   friendActivities: ActionActivityDto[];
-  onComplete: (actionId: number) => void;
-  onJoin: (actionId: number) => void;
-  onDecline: (actionId: number) => void;
+  onUpdateActionState: () => void;
 }
 
 enum LargeActionCardState {
@@ -41,9 +34,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   action,
   userRelation,
   friendActivities = [],
-  onComplete,
-  onDecline,
-  onJoin,
+  onUpdateActionState,
 }: LargeActionCardProps) => {
   const navigate = useNavigate();
 
@@ -53,42 +44,12 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
 
   const liveUserCount = useActionCount(action.id);
 
-  const handleDeclineAction = useCallback(
-    async (moral: boolean, reason: string) => {
-      const req = await actionsDecline({
-        path: { id: action.id },
-        body: { reason, moral },
-      });
-      if (req.error) {
-        console.error("Failed to decline action", req.error);
-        throw new Error("Failed to decline action");
-      }
-      setState(LargeActionCardState.Closed);
-      setTimeout(() => {
-        onDecline(action.id);
-      }, 5);
-    },
-    [action.id, onDecline]
-  );
-
-  const handleOptOutAction = useCallback(
-    async (reason: string) => {
-      console.log("handleOptOutAction", reason);
-      const req = await actionsOptout({
-        path: { id: action.id },
-        body: { reason },
-      });
-      if (req.error) {
-        console.error("Failed to opt out action", req.error);
-        throw new Error("Failed to opt out action");
-      }
-      setState(LargeActionCardState.Closed);
-      setTimeout(() => {
-        onDecline(action.id);
-      }, 100);
-    },
-    [action.id, onDecline]
-  );
+  const handleUpdateActionState = useCallback(() => {
+    setState(LargeActionCardState.Closed);
+    setTimeout(() => {
+      onUpdateActionState();
+    }, 200);
+  }, [onUpdateActionState]);
 
   const goToActionPage = useCallback(
     (e: React.MouseEvent) => {
@@ -97,32 +58,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
     },
     [navigate, action]
   );
-
-  useEffect(() => {
-    if (state === LargeActionCardState.Completed) {
-      setState(LargeActionCardState.Closed);
-      setTimeout(() => {
-        onComplete(action.id);
-        setState(LargeActionCardState.Default);
-      }, 500);
-    }
-
-    if (state === LargeActionCardState.Committed) {
-      setState(LargeActionCardState.Closed);
-      setTimeout(() => {
-        onJoin(action.id);
-        setState(LargeActionCardState.Default);
-      }, 500);
-    }
-  }, [state, action, onComplete, onJoin]);
-
-  //   const timeRemaining = useMemo(() => {
-  //     if (!action.myRelation?.deadline) return null;
-  //     return (
-  //       formatDistanceToNow(new Date(action.myRelation.deadline), {}) +
-  //       " to complete"
-  //     );
-  //   }, [action.myRelation?.deadline]);
 
   const threshold =
     action.status === "gathering_commitments"
@@ -223,12 +158,10 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
           <ActionTaskPanel
             action={action}
             userRelation={userRelation}
-            handleCompleteAction={() =>
-              setState(LargeActionCardState.Completed)
-            }
-            handleJoinAction={() => setState(LargeActionCardState.Committed)}
-            handleDeclineAction={handleDeclineAction}
-            handleOptOutAction={handleOptOutAction}
+            onCompleteAction={handleUpdateActionState}
+            onJoinAction={handleUpdateActionState}
+            onDeclineAction={handleUpdateActionState}
+            onOptOutAction={handleUpdateActionState}
           />
         </div>
       </div>
