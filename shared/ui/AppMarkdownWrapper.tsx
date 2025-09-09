@@ -21,6 +21,9 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
           <h3 className="!font-medium text-lg" {...props} />
         ),
         p: ({ ...props }) => <p className="mb-3 last:mb-0" {...props} />,
+        strong: ({ ...props }) => (
+          <strong className="!font-medium" {...props} />
+        ),
         ol: ({ ...props }) => (
           <ol className="list-decimal list-inside pl-2" {...props} />
         ),
