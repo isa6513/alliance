@@ -136,6 +136,13 @@ export class ActionsService {
     ) {
       return UserActionRelation.Joined;
     }
+    if (
+      activities.some(
+        (activity) => activity.type === ActionActivityType.USER_DECLINED,
+      )
+    ) {
+      return UserActionRelation.Declined;
+    }
     return UserActionRelation.None;
   }
 

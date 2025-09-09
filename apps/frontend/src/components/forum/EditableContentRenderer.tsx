@@ -20,8 +20,6 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
 
   const attachments = content.attachments;
 
-  console.log(attachments);
-
   const openLightbox = (idx: number) => {
     setLightboxIndex(idx);
     setLightboxOpen(true);
