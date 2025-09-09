@@ -6,7 +6,7 @@ import notifBell from "../assets/notif-bell.svg";
 import { useNotifications } from "../lib/useNotifications";
 import ProfileImage from "./ProfileImage";
 
-const useOutsideClick = (onClickOutside: () => void) => {
+export const useOutsideClick = (onClickOutside: () => void) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -1,14 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
-import { FormDto, SubmitFormDto, imagesUploadImage } from "../client";
+import { SubmitFormDto, imagesUploadImage } from "../client";
 import Button, { ButtonColor } from "../ui/Button";
 import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
 import type { DisplayBlock } from "./display-blocks";
-import type { AnyField, Condition, FormSchema } from "./formschema";
+import type { AnyField, Condition, FieldValue, FormSchema } from "./formschema";
 
 interface FormRendererProps {
-  form: FormDto["schema"];
+  form: FormSchema<string, string>;
   onSubmit: ((data: SubmitFormDto) => void) | null; // null for admin preview
   /**
    * Optional identifier to enable client-side persistence of form progress.
@@ -71,7 +70,9 @@ const FormRenderer = ({
       return 0;
     }
   });
-  const [formData, setFormData] = useState<Record<string, any>>(() => {
+  const [formData, setFormData] = useState<
+    Record<string, FieldValue<AnyField<string>>>
+  >(() => {
     if (typeof window === "undefined" || !persistKey) return {};
     try {
       const raw = window.localStorage.getItem(storageKey);
@@ -104,7 +105,10 @@ const FormRenderer = ({
   const isLastPage = currentPageIndex === schema.pages.length - 1;
   const isFirstPage = currentPageIndex === 0;
 
-  const updateField = (fieldId: string, value: any) => {
+  const updateField = (
+    fieldId: string,
+    value: FieldValue<AnyField<string>>
+  ) => {
     ensureStarted();
     setFormData((prev) => ({ ...prev, [fieldId]: value }));
   };
@@ -236,7 +240,7 @@ const FormRenderer = ({
     element: AnyField<string> | DisplayBlock<string>,
     index: number
   ) => {
-    const cond = (element as any)?.visibleIf as Condition<string> | undefined;
+    const cond = element.visibleIf;
     if (cond) {
       const evalCond = (c: Condition<string>): boolean => {
         if ("expr" in c) {
@@ -249,11 +253,11 @@ const FormRenderer = ({
         if (typeof c.equals === "boolean") {
           return Boolean(val) === c.equals;
         }
-        if (Array.isArray(val)) {
+        if (Array.isArray(val) && c.equals) {
           // multiselect: treat equals as "includes"
-          return val.includes(c.equals as any);
+          return val.includes(c.equals as string);
         }
-        return val === (c.equals as any);
+        return val === c.equals;
       };
       if (!evalCond(cond)) return null;
     }

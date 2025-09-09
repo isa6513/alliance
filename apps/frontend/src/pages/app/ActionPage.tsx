@@ -1,6 +1,7 @@
 import {
   ActionDto,
   actionsComplete,
+  actionsDecline,
   actionsFindOne,
   actionsJoin,
   actionsMyStatus,
@@ -105,6 +106,17 @@ export default function ActionPage() {
     objectId: actionId,
   });
 
+  const handleDeclineAction = useCallback(
+    async (moral: boolean, reason: string) => {
+      await actionsDecline({
+        path: { id: actionId },
+        body: { reason, moral },
+      });
+      setRevalidate();
+    },
+    [actionId]
+  );
+
   useEffect(() => {
     if (isAuthenticated && id) {
       actionsMyStatus({
@@ -162,12 +174,13 @@ export default function ActionPage() {
                 activities,
                 handleLikeActivity,
                 setActivities,
+                handleDeclineAction,
               } satisfies TaskPanelContext
             }
           />
         }
         right={
-          <div className="flex flex-col gap-y-4 pt-2">
+          <div className="flex flex-col gap-y-4 pt-2 pr-4">
             {action !== undefined && (
               <Card style={CardStyle.White}>
                 <ActionEventsPanel action={action} events={action.events} />

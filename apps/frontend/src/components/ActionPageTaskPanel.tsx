@@ -26,6 +26,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 export type TaskPanelContext = {
   handleCompleteAction: () => void;
   handleJoinAction: () => void;
+  handleDeclineAction: (moral: boolean, reason: string) => void;
   userRelation: UserActionRelation | null;
   activities: ActionActivityDto[];
   handleLikeActivity: (activityId: number) => Promise<void>;
@@ -33,8 +34,12 @@ export type TaskPanelContext = {
 };
 
 const ActionPageTaskPanel = () => {
-  const { handleCompleteAction, handleJoinAction, userRelation } =
-    useOutletContext<TaskPanelContext>();
+  const {
+    handleCompleteAction,
+    handleJoinAction,
+    handleDeclineAction,
+    userRelation,
+  } = useOutletContext<TaskPanelContext>();
   const action = useActionLoaderData();
 
   if (!userRelation) {
@@ -51,6 +56,7 @@ const ActionPageTaskPanel = () => {
       userRelation={userRelation}
       handleCompleteAction={handleCompleteAction}
       handleJoinAction={handleJoinAction}
+      handleDeclineAction={handleDeclineAction}
     />
   );
 };

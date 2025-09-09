@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-import { ActionDto, UserActionRelation } from "@alliance/shared/client";
+import {
+  ActionDto,
+  actionsDecline,
+  UserActionRelation,
+} from "@alliance/shared/client";
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -19,6 +23,7 @@ export interface LargeActionCardProps {
   friendActivities: ActionActivityDto[];
   onComplete: (actionId: number) => void;
   onJoin: (actionId: number) => void;
+  onDecline: (actionId: number) => void;
 }
 
 enum LargeActionCardState {
@@ -28,6 +33,7 @@ enum LargeActionCardState {
   Completed = "completed",
   Committed = "committed",
   Closed = "closed",
+  Declined = "declined",
 }
 
 const LargeActionCard: React.FC<LargeActionCardProps> = ({
@@ -35,6 +41,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   userRelation,
   friendActivities = [],
   onComplete,
+  onDecline,
   onJoin,
 }: LargeActionCardProps) => {
   const navigate = useNavigate();
@@ -44,6 +51,24 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   );
 
   const liveUserCount = useActionCount(action.id);
+
+  const handleDeclineAction = useCallback(
+    async (moral: boolean, reason: string) => {
+      const req = await actionsDecline({
+        path: { id: action.id },
+        body: { reason, moral },
+      });
+      if (req.error) {
+        console.error("Failed to decline action", req.error);
+        throw new Error("Failed to decline action");
+      }
+      setState(LargeActionCardState.Closed);
+      setTimeout(() => {
+        onDecline(action.id);
+      }, 5);
+    },
+    [action.id, onDecline]
+  );
 
   const goToActionPage = useCallback(
     (e: React.MouseEvent) => {
@@ -182,6 +207,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
               setState(LargeActionCardState.Completed)
             }
             handleJoinAction={() => setState(LargeActionCardState.Committed)}
+            handleDeclineAction={handleDeclineAction}
           />
         </div>
       </div>

@@ -152,7 +152,7 @@ export type StreamableFile = {
 /**
  * Type of action activity
  */
-export type ActionActivityType = 'user_joined' | 'user_completed';
+export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined';
 
 /**
  * Type of the action
@@ -182,6 +182,8 @@ export type ActionActivity = {
     dollar_amount?: number;
     editableContent?: EditableContent;
     likes: Array<User>;
+    declineReason?: string;
+    isMoral?: boolean;
 };
 
 /**
@@ -342,7 +344,12 @@ export type ActionActivityDto = {
     editableContent: EditableContentDto;
 };
 
-export type UserActionRelation = 'joined' | 'completed' | 'none';
+export type DeclineActionDto = {
+    reason: string;
+    moral: boolean;
+};
+
+export type UserActionRelation = 'joined' | 'completed' | 'none' | 'declined';
 
 export type UserActionRelationDto = {
     relation: UserActionRelation;
@@ -1277,6 +1284,21 @@ export type ActionsJoinResponses = {
 };
 
 export type ActionsJoinResponse = ActionsJoinResponses[keyof ActionsJoinResponses];
+
+export type ActionsDeclineData = {
+    body: DeclineActionDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/decline/{id}';
+};
+
+export type ActionsDeclineResponses = {
+    200: ActionActivityDto;
+};
+
+export type ActionsDeclineResponse = ActionsDeclineResponses[keyof ActionsDeclineResponses];
 
 export type ActionsCompleteData = {
     body?: never;

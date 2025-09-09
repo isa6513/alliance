@@ -19,6 +19,7 @@ import { Action } from './action.entity';
 export enum ActionActivityType {
   USER_JOINED = 'user_joined',
   USER_COMPLETED = 'user_completed',
+  USER_DECLINED = 'user_declined',
 }
 
 @Entity()
@@ -93,4 +94,14 @@ export class ActionActivity {
   @ApiProperty({ type: () => User, isArray: true })
   @Type(() => User)
   likes: User[];
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  @IsOptional()
+  declineReason?: string;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  @IsOptional()
+  isMoral?: boolean; // for moral declines
 }

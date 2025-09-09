@@ -42,6 +42,7 @@ export enum UserActionRelation {
   Joined = 'joined',
   Completed = 'completed',
   None = 'none',
+  Declined = 'declined',
 }
 
 export class UserActionRelationDto {
@@ -148,10 +149,7 @@ export class ActionsService {
     }
 
     const action = await this.findOne(actionId);
-    const user = await this.userService.findOne(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    const user = await this.userService.findOneOrFail(userId);
 
     const activity = this.actionActivityRepository.create({
       type: type,
@@ -182,6 +180,28 @@ export class ActionsService {
       userId,
       ActionActivityType.USER_JOINED,
     );
+  }
+
+  async declineAction(
+    actionId: number,
+    userId: number,
+    reason: string,
+    isMoral: boolean,
+  ): Promise<ActionActivityDto> {
+    const action = await this.findOne(actionId);
+    const user = await this.userService.findOneOrFail(userId);
+
+    const activity = this.actionActivityRepository.create({
+      type: ActionActivityType.USER_DECLINED,
+      actionId: actionId,
+      userId: userId,
+      action: action,
+      user: user,
+      declineReason: reason,
+      isMoral,
+    });
+    const savedActivity = await this.actionActivityRepository.save(activity);
+    return new ActionActivityDto(savedActivity);
   }
 
   async completeAction(
@@ -454,10 +474,7 @@ export class ActionsService {
     if (!activity) {
       throw new NotFoundException('Activity not found');
     }
-    const user = await this.userService.findOne(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    const user = await this.userService.findOneOrFail(userId);
 
     const qb = this.actionActivityRepository
       .createQueryBuilder()
@@ -488,10 +505,7 @@ export class ActionsService {
     commentDto: CreateCommentDto,
     userId: number,
   ): Promise<CommentDto> {
-    const user = await this.userService.findOne(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    const user = await this.userService.findOneOrFail(userId);
     const content = this.editableContentRepository.create({
       body: commentDto.editableContent.body,
       attachments: commentDto.editableContent.attachments ?? [],

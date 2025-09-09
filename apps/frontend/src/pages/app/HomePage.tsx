@@ -68,6 +68,11 @@ const HomePage = () => {
     });
   };
 
+  const handleTaskDecline = () => {
+    setRevalidate();
+    navigate(window.location.pathname);
+  };
+
   const bulletinCard = (
     <Card style={CardStyle.White}>
       <p className="font-medium text-base text-black mb-2">Bulletin</p>
@@ -101,6 +106,7 @@ const HomePage = () => {
                 friendActivities={[]}
                 onComplete={handleTaskComplete}
                 onJoin={handleTaskJoin}
+                onDecline={handleTaskDecline}
               />
             ) : (
               <Card style={CardStyle.Transparent}>

@@ -104,7 +104,7 @@ export type DateField<TId extends string> = BaseField<"date", TId, string>; // I
 export type FileField<TId extends string> = BaseField<
   "file",
   TId,
-  { key: string; name: string; size: number }
+  { name: string; file: File }
 >;
 
 export type AnyField<TId extends string = string> =
@@ -168,7 +168,7 @@ type OptionalIdsOf<S extends FormSchema<any, any>> = Exclude<
   RequiredIdsOf<S>
 >;
 
-type FieldValue<F extends AnyField<any>> = NonNullable<F["_value"]>;
+export type FieldValue<F extends AnyField<any>> = NonNullable<F["_value"]>;
 
 // Response type derived from **answer fields only**
 export type ResponseOf<S extends FormSchema<any, any>> = {

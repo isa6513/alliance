@@ -7,7 +7,6 @@ const FormBuilder: React.FC = () => {
 
   return (
     <FormBuilderComponent
-      actionId={93} // TODO: This should probably come from route params or context
       formId={formId && formId !== "new" ? formId : undefined}
       key={formId || "new"}
     />

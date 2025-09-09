@@ -1,11 +1,20 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
-import type { AnyField } from "./formschema";
+import type {
+  AnyField,
+  DateField,
+  EmailField,
+  FieldValue,
+  NumberField,
+  PhoneField,
+  SelectField,
+  TextareaField,
+  TextField,
+} from "./formschema";
 
 export type RenderFieldProps<TId extends string = string> = {
   field: AnyField<TId>;
-  value?: any;
-  onChange?: (value: any) => void;
+  value?: FieldValue<AnyField<TId>>;
+  onChange?: (value: FieldValue<AnyField<TId>>) => void;
   disabled?: boolean;
   // File upload hooks (used by file field)
   onFileSelected?: (file: File) => void;
@@ -32,12 +41,12 @@ export function RenderField<TId extends string = string>({
           </label>
           <input
             type="text"
-            value={value ?? ""}
+            value={(value as TextField<TId>["_value"]) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder={(field as any).placeholder}
+            placeholder={field.placeholder}
           />
         </div>
       );
@@ -50,20 +59,17 @@ export function RenderField<TId extends string = string>({
             {field.required && <span className="text-red-500 ml-1">*</span>}
           </label>
           <textarea
-            rows={(field as any).rows || 3}
-            maxLength={(field as any).maxLength}
-            value={value ?? ""}
+            rows={field.rows || 3}
+            maxLength={field.maxLength}
+            value={(value as TextareaField<TId>["_value"]) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
-            placeholder={
-              (field as any).placeholder || "Enter your text here..."
-            }
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
           />
-          {(field as any).maxLength && (
+          {field.maxLength && (
             <p className="text-xs text-gray-500 mt-1">
-              Maximum {(field as any).maxLength} characters
+              Maximum {field.maxLength} characters
             </p>
           )}
         </div>
@@ -78,7 +84,7 @@ export function RenderField<TId extends string = string>({
           </label>
           <input
             type="email"
-            value={value ?? ""}
+            value={(value as EmailField<TId>["_value"]) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
@@ -97,7 +103,7 @@ export function RenderField<TId extends string = string>({
           </label>
           <input
             type="tel"
-            value={value ?? ""}
+            value={(value as PhoneField<TId>["_value"]) ?? ""}
             onChange={
               onChange
                 ? (e) => {
@@ -109,9 +115,9 @@ export function RenderField<TId extends string = string>({
             }
             required={field.required}
             disabled={disabled}
-            pattern={(field as any).pattern}
+            pattern={field.pattern}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder={(field as any).placeholder || "Enter phone number"}
+            placeholder={field.placeholder || "Enter phone number"}
           />
         </div>
       );
@@ -125,7 +131,7 @@ export function RenderField<TId extends string = string>({
           </label>
           <input
             type="number"
-            value={value ?? ""}
+            value={(value as NumberField<TId>["_value"]) ?? ""}
             onChange={
               onChange
                 ? (e) => onChange(parseFloat(e.target.value) || "")
@@ -133,21 +139,18 @@ export function RenderField<TId extends string = string>({
             }
             required={field.required}
             disabled={disabled}
-            min={(field as any).min}
-            max={(field as any).max}
-            step={(field as any).step}
+            min={field.min}
+            max={field.max}
+            step={field.step}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder={(field as any).placeholder}
           />
-          {(field as any).min !== undefined ||
-          (field as any).max !== undefined ? (
+          {field.min !== undefined || field.max !== undefined ? (
             <p className="text-xs text-gray-500 mt-1">
-              {(field as any).min !== undefined &&
-              (field as any).max !== undefined
-                ? `Range: ${(field as any).min} - ${(field as any).max}`
-                : (field as any).min !== undefined
-                ? `Minimum: ${(field as any).min}`
-                : `Maximum: ${(field as any).max}`}
+              {field.min !== undefined && field.max !== undefined
+                ? `Range: ${field.min} - ${field.max}`
+                : field.min !== undefined
+                ? `Minimum: ${field.min}`
+                : `Maximum: ${field.max}`}
             </p>
           ) : null}
         </div>
@@ -183,7 +186,7 @@ export function RenderField<TId extends string = string>({
             {field.required && <span className="text-red-500 ml-1">*</span>}
           </label>
           <div className="space-y-2">
-            {(field as any).options.map((option: any, optIndex: number) => (
+            {field.options.map((option, optIndex) => (
               <label key={optIndex} className="flex items-start">
                 <input
                   type="radio"
@@ -212,7 +215,7 @@ export function RenderField<TId extends string = string>({
             {field.required && <span className="text-red-500 ml-1">*</span>}
           </label>
           <select
-            value={value ?? ""}
+            value={(value as SelectField<TId, string>["_value"]) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
@@ -221,7 +224,7 @@ export function RenderField<TId extends string = string>({
             <option value="" className="placeholder" disabled>
               Select an option
             </option>
-            {(field as any).options.map((option: any, optIndex: number) => (
+            {field.options.map((option, optIndex) => (
               <option key={optIndex} value={option.value}>
                 {option.label}
               </option>
@@ -238,7 +241,7 @@ export function RenderField<TId extends string = string>({
             {field.required && <span className="text-red-500 ml-1">*</span>}
           </label>
           <div className="space-y-2">
-            {(field as any).options.map((option: any, optIndex: number) => (
+            {field.options.map((option, optIndex) => (
               <label key={optIndex} className="flex items-center">
                 <input
                   type="checkbox"
@@ -253,9 +256,7 @@ export function RenderField<TId extends string = string>({
                             onChange([...currentValues, option.value]);
                           } else {
                             onChange(
-                              currentValues.filter(
-                                (v: any) => v !== option.value
-                              )
+                              currentValues.filter((v) => v !== option.value)
                             );
                           }
                         }
@@ -281,7 +282,7 @@ export function RenderField<TId extends string = string>({
           </label>
           <input
             type="date"
-            value={value ?? ""}
+            value={(value as DateField<TId>["_value"]) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
@@ -319,7 +320,11 @@ export function RenderField<TId extends string = string>({
                 const file = e.target.files?.[0];
                 if (!file || disabled) return;
                 if (onFileSelected) onFileSelected(file);
-                else if (onChange) onChange(file);
+                else if (onChange)
+                  onChange({
+                    name: file.name,
+                    file,
+                  });
               }}
               required={field.required && !fileValue}
               disabled={disabled || isUploading}

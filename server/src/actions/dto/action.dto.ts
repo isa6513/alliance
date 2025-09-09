@@ -1,4 +1,5 @@
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
+import { IsBoolean, IsString } from 'class-validator';
 import { CommentDto } from 'src/forum/dto/comment.dto';
 import { EditableContentDto } from 'src/forum/dto/editablecontent.dto';
 import { ProfileDto } from 'src/user/user.dto';
@@ -72,6 +73,16 @@ export class LatLonDto {
 
   @ApiProperty({ type: Number })
   longitude: number;
+}
+
+export class DeclineActionDto {
+  @ApiProperty()
+  @IsString()
+  reason: string;
+
+  @ApiProperty()
+  @IsBoolean()
+  moral: boolean;
 }
 
 export class ActionActivityDto extends PickType(ActionActivity, [

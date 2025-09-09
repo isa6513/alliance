@@ -1,14 +1,12 @@
-import { useAuth } from "../lib/AuthContext";
-
 import { ActionDto, UserActionRelation } from "@alliance/shared/client";
-import ActionTaskPanelForm from "./ActionTaskPanelForm";
-
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import posthog from "posthog-js";
 import { useCallback } from "react";
+import { useAuth } from "../lib/AuthContext";
 import { canCompleteAction } from "../pages/app/HomePage";
-import ActionCommitButton from "./ActionCommitButton";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
+import ActionTaskPanelCommit from "./ActionTaskPanelCommit";
+import ActionTaskPanelForm from "./ActionTaskPanelForm";
 import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
 import { StripeWrapper } from "./StripeWrapper";
 
@@ -17,6 +15,7 @@ interface ActionTaskPanelProps {
   userRelation: Extract<UserActionRelation, "joined" | "none">;
   handleCompleteAction: () => void;
   handleJoinAction: () => void;
+  handleDeclineAction: (moral: boolean, reason: string) => void;
 }
 
 const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
@@ -24,6 +23,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   userRelation,
   handleCompleteAction,
   handleJoinAction,
+  handleDeclineAction,
 }: ActionTaskPanelProps) => {
   const { isAuthenticated } = useAuth();
 
@@ -64,10 +64,9 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         return null;
       }
       return (
-        <ActionCommitButton
-          committed={false}
-          isAuthenticated={true}
+        <ActionTaskPanelCommit
           onCommit={handleJoinAction}
+          onDecline={handleDeclineAction}
         />
       );
     }

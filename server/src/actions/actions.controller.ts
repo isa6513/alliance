@@ -36,6 +36,7 @@ import {
   ActionDto,
   CreateActionDto,
   CreateActionEventDto,
+  DeclineActionDto,
   LatLonDto,
   UpdateActionActivityDto,
   UpdateActionDto,
@@ -64,6 +65,22 @@ export class ActionsController {
       throw new UnauthorizedException('User not found');
     }
     return this.actionsService.joinAction(+id, req.user.sub);
+  }
+
+  @Post('decline/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ActionActivityDto })
+  decline(
+    @Request() req: JwtRequest,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: DeclineActionDto,
+  ) {
+    return this.actionsService.declineAction(
+      id,
+      req.user.sub,
+      body.reason,
+      body.moral,
+    );
   }
 
   @Post('complete/:id')

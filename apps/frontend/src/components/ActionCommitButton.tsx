@@ -6,12 +6,14 @@ import SignupForm from "./SignupForm";
 
 export interface ActionCommitButtonProps {
   committed: boolean;
+  className?: string;
   isAuthenticated: boolean;
   onCommit: () => void;
 }
 
 const ActionCommitButton = ({
   committed,
+  className,
   isAuthenticated,
   onCommit,
 }: ActionCommitButtonProps) => {
@@ -70,7 +72,7 @@ const ActionCommitButton = ({
   }
 
   return (
-    <div className="relative">
+    <div className={`relative ${className}`}>
       <Button
         onClick={handleClick}
         disabled={committed}

@@ -77,9 +77,16 @@ export async function clientLoader() {
   const joinActivities = activityList.filter(
     (activity) => activity.type === "user_joined"
   );
+  const declineActivities = activityList.filter(
+    (activity) => activity.type === "user_declined"
+  );
 
   joinActivities.forEach((activity) => {
     actionToRelationMap.set(activity.actionId, "joined");
+  });
+
+  declineActivities.forEach((activity) => {
+    actionToRelationMap.set(activity.actionId, "declined");
   });
 
   completionActivities.forEach((activity) => {

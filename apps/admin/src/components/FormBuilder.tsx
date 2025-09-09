@@ -44,7 +44,6 @@ import {
 interface FormBuilderProps {
   onSave?: (schema: FormSchema<string, string>) => void;
   initialSchema?: FormSchema<string, string>;
-  actionId?: number;
   formId?: string;
 }
 
@@ -737,7 +736,10 @@ export function FormBuilder({
     // Build previous answer fields for conditional visibility controls
     const previousFields = currentPage.fields
       .slice(0, index)
-      .filter((f): f is AnyField<string> => (f as any)?.kind && (f as any)?.label !== undefined);
+      .filter(
+        (f): f is AnyField<string> =>
+          (f as any)?.kind && (f as any)?.label !== undefined
+      );
 
     const commonProps = {
       onUpdate: updateField,

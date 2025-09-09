@@ -342,7 +342,7 @@ export class UserService {
     return rel ? rel.status : FriendStatus.None;
   }
 
-  private async findOneOrFail(id: number): Promise<User> {
+  async findOneOrFail(id: number): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException(`User ${id} not found`);
     return user;
