@@ -233,7 +233,8 @@ export function RenderField<TId extends string = string>({
         </div>
       );
 
-    case "multiselect":
+    case "multiselect": {
+      const selectedCount = Array.isArray(value) ? value.length : 0;
       return (
         <div className="space-y-2">
           <label className="block text-gray-800">
@@ -245,6 +246,7 @@ export function RenderField<TId extends string = string>({
               <label key={optIndex} className="flex items-center">
                 <input
                   type="checkbox"
+                  name={field.id}
                   checked={Array.isArray(value) && value.includes(option.value)}
                   onChange={
                     onChange
@@ -262,7 +264,9 @@ export function RenderField<TId extends string = string>({
                         }
                       : undefined
                   }
-                  required={field.required}
+                  required={
+                    !!field.required && selectedCount === 0 && optIndex === 0
+                  }
                   disabled={disabled}
                   className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
@@ -272,6 +276,7 @@ export function RenderField<TId extends string = string>({
           </div>
         </div>
       );
+    }
 
     case "date":
       return (
