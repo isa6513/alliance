@@ -74,10 +74,10 @@ const HomePage = () => {
           <div className="flex flex-col gap-y-2 border-zinc-200 w-full sm:w-xl lg:w-2xl">
             <div
               className={
-                "min-h-[calc(100vh-var(--nav-height))] flex flex-col items-center justify-center"
+                "min-h-[calc(100vh-var(--nav-height))] flex flex-col items-center"
               }
             >
-              <p className="font-serif text-center font-medium text-3xl mb-8">
+              <p className="font-serif text-center font-medium text-3xl mb-8 mt-12 sm:mt-16 lg:mt-24">
                 Current task
               </p>
               {currentTask && currentTask.relation ? (
@@ -92,7 +92,7 @@ const HomePage = () => {
                   style={CardStyle.Transparent}
                   className="rounded-none w-full"
                 >
-                  <div className="px-2 py-24 flex flex-col items-center gap-y-4">
+                  <div className="px-2 py-36 flex flex-col items-center gap-y-4">
                     <CheckIcon size="large" />
                     <p className="text-center text-zinc-500 text-xl">
                       Nothing to do right now!

@@ -37,25 +37,29 @@ const ActivityFeedPage = () => {
   ));
 
   return (
-    <div className="max-w-4xl mx-auto pt-16 md:pt-12 px-3 pb-24 flex flex-row">
-      <div className="space-y-2 w-full flex flex-col justify-stretch">
-        <div className="mx-auto flex flex-row gap-x-2 mb-4">{modeButtons}</div>
-        {activitiesToShow.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-screen text-zinc-500">
-            <p className="pb-20">No activities found</p>
+    <div className="flex flex-col bg-white items-center min-h-[calc(100vh-var(--nav-height))]">
+      <div className="w-full sm:w-xl md:w-3xl mx-auto pt-16 md:pt-12 px-3 pb-24 flex flex-row">
+        <div className="space-y-2 w-full flex flex-col justify-stretch">
+          <div className="mx-auto flex flex-row gap-x-2 mb-4">
+            {modeButtons}
           </div>
-        )}
-        {activitiesToShow.map((activity) => (
-          <UserActivityCard
-            activity={activity}
-            key={activity.id}
-            handleLike={handleLikeActivity}
-            onActivityUpdate={updateActivity}
-            canEdit={activity.user.id === user?.id}
-          />
-        ))}
+          {activitiesToShow.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-screen text-zinc-500">
+              <p className="pb-20">No activities found</p>
+            </div>
+          )}
+          {activitiesToShow.map((activity) => (
+            <UserActivityCard
+              activity={activity}
+              key={activity.id}
+              handleLike={handleLikeActivity}
+              onActivityUpdate={updateActivity}
+              canEdit={activity.user.id === user?.id}
+            />
+          ))}
+        </div>
+        <div className="w-30 hidden md:flex"></div>
       </div>
-      <div className="w-30 hidden md:flex"></div>
     </div>
   );
 };

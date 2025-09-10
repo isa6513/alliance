@@ -13,46 +13,37 @@ const GuidePage: React.FC = () => {
       <div className="flex flex-col md:flex-row mx-auto gap-10 pt-16 md:pt-28 pb-56 px-5">
         <aside className="min-w-80">
           <div className="flex flex-col md:sticky top-12 md:pr-10 md:border-r border-zinc-200">
-            <h2 className="font-adobe !font-semibold !text-xl md:!text-2xl max-w-2xl mb-4">
+            <h2 className="font-serif !font-medium !text-xl md:!text-2xl max-w-2xl mb-4">
               Table of Contents
             </h2>
             <ol className="flex flex-col gap-y-1">
               <li>
-                <a href="#goals" className="underline hover:text-greentext">
+                <a href="#goals" className="underline hover:text-green">
                   Goals
                 </a>
               </li>
               <li>
-                <a href="#structure" className="underline hover:text-greentext">
+                <a href="#structure" className="underline hover:text-green">
                   Structure
                 </a>
               </li>
               <li>
-                <a
-                  href="#priorities"
-                  className="underline hover:text-greentext"
-                >
+                <a href="#priorities" className="underline hover:text-green">
                   How do we determine priorities?
                 </a>
               </li>
               <li>
-                <a
-                  href="#membership"
-                  className="underline hover:text-greentext"
-                >
+                <a href="#membership" className="underline hover:text-green">
                   What does it mean to be a member?
                 </a>
               </li>
               <li className="ml-4">
-                <a href="#contract" className="underline hover:text-greentext">
+                <a href="#contract" className="underline hover:text-green">
                   Contract
                 </a>
               </li>
               <li>
-                <a
-                  href="#governance"
-                  className="underline hover:text-greentext"
-                >
+                <a href="#governance" className="underline hover:text-green">
                   Governance
                 </a>
               </li>
@@ -61,7 +52,7 @@ const GuidePage: React.FC = () => {
         </aside>
         <div className="flex flex-col max-w-3xl">
           <div className="mx-auto w-full mb-4 md:mb-8">
-            <h2 className="font-adobe !font-semibold !text-4xl md:!text-6xl">
+            <h2 className="font-serif !font-medium !text-4xl md:!text-6xl">
               Guide to the Alliance
             </h2>
             <p className="text-md md:text-lg text-zinc-500 mt-2">
