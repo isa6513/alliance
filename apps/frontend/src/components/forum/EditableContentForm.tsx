@@ -21,16 +21,9 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const dragCounterRef = useRef(0);
 
-  const handleFilesSelected = async (e: {
-    target?: { files: FileList | null };
-    dataTransfer?: DataTransfer | null;
-  }) => {
-    const files = e.target?.files ?? e.dataTransfer?.files ?? null;
-    if (!files || files.length === 0) return;
-
+  const readImagesFromFiles = async (files: File[]): Promise<string[]> => {
     const readers: Promise<string>[] = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    for (const file of files) {
       if (!file.type.startsWith("image/")) continue;
       readers.push(
         new Promise((resolve, reject) => {
@@ -41,15 +34,58 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         })
       );
     }
+    return Promise.all(readers);
+  };
+
+  const handleFilesSelected = async (e: {
+    target?: { files: FileList | null };
+    dataTransfer?: DataTransfer | null;
+  }) => {
+    const files = e.target?.files ?? e.dataTransfer?.files ?? null;
+    if (!files || files.length === 0) return;
 
     try {
-      const base64s = await Promise.all(readers);
+      const base64s = await readImagesFromFiles(Array.from(files));
       onChange({
         ...value,
         attachments: [...(value.attachments ?? []), ...base64s],
       });
     } catch (err) {
       console.error("Failed reading image file(s)", err);
+    }
+  };
+
+  const onPaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    try {
+      const items = Array.from(e.clipboardData?.items ?? []);
+      const imageFiles: File[] = [];
+
+      for (const item of items) {
+        if (item.kind === "file" && item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) imageFiles.push(file);
+        }
+      }
+
+      // Fallback: some browsers may not populate items for images but will set files
+      if (imageFiles.length === 0 && e.clipboardData?.files?.length) {
+        for (let i = 0; i < e.clipboardData.files.length; i++) {
+          const file = e.clipboardData.files[i];
+          if (file && file.type.startsWith("image/")) imageFiles.push(file);
+        }
+      }
+
+      if (imageFiles.length > 0) {
+        // Prevent default paste of blob name/text into the textarea
+        e.preventDefault();
+        const base64s = await readImagesFromFiles(imageFiles);
+        onChange({
+          ...value,
+          attachments: [...(value.attachments ?? []), ...base64s],
+        });
+      }
+    } catch (err) {
+      console.error("Failed to paste image(s)", err);
     }
   };
 
@@ -92,6 +128,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         rows={expanded ? 2 : 1}
         value={value.body}
         onChange={(e) => onChange({ ...value, body: e.target.value })}
+        onPaste={onPaste}
         placeholder={placeholder}
         autoFocus={expanded}
       />
