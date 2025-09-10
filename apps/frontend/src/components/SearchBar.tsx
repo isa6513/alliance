@@ -175,12 +175,12 @@ const SearchBar = () => {
   return (
     <div
       ref={divRef}
-      className="relative flex-1 max-w-[500px] flex flex-col overflow-visible h-[37.5px] rounded-md"
+      className="relative flex-1 max-w-[500px] flex flex-col overflow-visible h-[37.5px] rounded"
     >
       <input
         type="text"
         placeholder="Search"
-        className="w-full !bg-zinc-100 p-2 px-4 rounded-lg focus:outline-none"
+        className="w-full !bg-zinc-100 p-2 px-4 rounded focus:outline-none"
         value={search}
         onChange={onChange}
         onFocus={handleFocus}

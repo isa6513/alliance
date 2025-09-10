@@ -35,9 +35,21 @@ const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
         className="
       flex flex-col md:flex-row border-zinc-300 border-b bg-white
     w-screen text-left items-center fixed px-7 z-10 justify-between gap-x-5"
+        id="main-nav"
+        ref={(el) => {
+          if (el) {
+            document.documentElement.style.setProperty(
+              "--nav-height",
+              `${el.offsetHeight}px`
+            );
+          }
+        }}
       >
         <div className="flex flex-row lg:gap-x-0 items-center w-full md:w-auto justify-around">
-          <Link to={destinations[NavbarPage.Dashboard]} className="shrink-0">
+          <Link
+            to={destinations[NavbarPage.Dashboard]}
+            className="hidden sm:block shrink-0"
+          >
             <img
               src={logo}
               alt="logo"

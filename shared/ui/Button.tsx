@@ -50,7 +50,7 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <button
       type={type}
-      className={`px-4 py-2 text-sm font-medium w-fit h-fit rounded flex items-center justify-center ${
+      className={`px-4 py-2 text-sm font-medium rounded w-fit h-fit flex items-center justify-center ${
         disabled ? "opacity-50 !cursor-not-allowed" : ``
       } ${color} ${
         color === ButtonColor.Light ? "!text-zinc-800" : ""

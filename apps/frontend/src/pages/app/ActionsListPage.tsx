@@ -16,8 +16,14 @@ export const filterActions = (
       return actions.filter(
         (action) => action.status === "gathering_commitments"
       );
-    case FilterMode.InProgress:
+    case FilterMode.PendingOfficeAction:
+      return actions.filter(
+        (action) => action.status === "commitments_reached"
+      );
+    case FilterMode.MemberAction:
       return actions.filter((action) => action.status === "member_action");
+    case FilterMode.PendingOfficeResolution:
+      return actions.filter((action) => action.status === "resolution");
     case FilterMode.Past:
       return actions.filter(
         (action) => action.status === "completed" || action.status === "failed"
@@ -41,10 +47,9 @@ const ActionsListPage = () => {
   );
 
   return (
-    <div className="flex flex-col bg-page items-center">
+    <div className="flex flex-col bg-white items-center">
       <div className="px-4 py-16 md:py-12 flex flex-col items-center w-[calc(min(650px,100%))] gap-y-6">
         <div className="flex flex-row justify-center items-center w-full gap-x-4">
-          <p className="text-lg text-left h-fit">Filter:</p>
           <div className="flex flex-row gap-2 items-center flex-wrap ">
             {Object.values(FilterMode).map((mode) => (
               <Button

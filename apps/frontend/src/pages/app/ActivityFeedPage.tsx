@@ -37,14 +37,9 @@ const ActivityFeedPage = () => {
   ));
 
   return (
-    <div className="max-w-4xl mx-auto p-6 flex flex-row">
-      <div className="w-30 *:w-20 gap-y-2 flex-col px-3 hidden md:flex">
-        {modeButtons}
-      </div>
+    <div className="max-w-4xl mx-auto pt-16 md:pt-12 px-3 pb-24 flex flex-row">
       <div className="space-y-2 w-full flex flex-col justify-stretch">
-        <div className="flex flex-row md:hidden gap-x-2 mb-4">
-          {modeButtons}
-        </div>
+        <div className="mx-auto flex flex-row gap-x-2 mb-4">{modeButtons}</div>
         {activitiesToShow.length === 0 && (
           <div className="flex flex-col items-center justify-center h-screen text-zinc-500">
             <p className="pb-20">No activities found</p>

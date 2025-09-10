@@ -12,26 +12,25 @@ const ActionContents = () => {
   }
 
   return (
-    <div className="flex flex-col gap-y-3 flex-2 pl-10 pt-5">
+    <div className="flex flex-col gap-y-3 flex-2 pl-10 pt-5 mb-24">
       {action?.image && (
         <img
           src={action.image}
           className="w-full h-auto rounded-md border border-gray-300 max-h-[200px] object-cover mb-5"
         />
       )}
-      <div className="flex flex-row justify-between items-start">
+      <div className="flex flex-row justify-between items-start mb-4">
         <div className="flex flex-col gap-y-3">
           {action !== undefined && (
-            <h1 className="font-adobe">{action.name}</h1>
+            <h1 className="font-serif !font-medium">{action.name}</h1>
           )}
         </div>
       </div>
       <Outlet context={context} />
-      <div className="my-2">
+      <hr className="border-zinc-200 my-6" />
+      <div className="mb-4">
         <AppMarkdownWrapper markdownContent={action?.body} />
       </div>
-
-      <hr className="border-zinc-200" />
 
       <Comments objectId={action.id} type={"action"} />
     </div>

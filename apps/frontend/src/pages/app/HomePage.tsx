@@ -68,14 +68,13 @@ const HomePage = () => {
   );
 
   return (
-    <div className="flex flex-col items-center min-h-[calc(100vh-50px)]">
-      <div className="flex flex-row  w-full justify-between bg-white">
-        <div className="flex flex-col gap-y-5 overflow-y-auto !overflow-visible flex-1 items-center px-5 pb-20">
-          <div className="flex flex-col gap-y-2 border-zinc-200 w-xl lg:w-2xl">
+    <div className={`flex flex-col w-full h-full items-center bg-white`}>
+      <div className="flex flex-row w-full justify-between">
+        <div className="flex flex-col gap-y-5 overflow-y-auto !overflow-visible flex-1 items-center px-5">
+          <div className="flex flex-col gap-y-2 border-zinc-200 w-full sm:w-xl lg:w-2xl">
             <div
               className={
-                (currentTask ? "min-h-[calc(100vh-40px)]" : "") +
-                " flex flex-col items-center justify-center py-20 pt-16"
+                "min-h-[calc(100vh-var(--nav-height))] flex flex-col items-center justify-center"
               }
             >
               <p className="font-serif text-center font-medium text-3xl mb-8">
@@ -109,7 +108,7 @@ const HomePage = () => {
                 .length > 0 ||
               committedActions.length > 0 ||
               commitmentsReachedActions.length > 0) && (
-              <>
+              <div className="pb-54 flex flex-col items-center ">
                 <p className="mb-8 font-serif text-3xl text-center">Up next</p>
                 <div className="flex flex-col gap-y-2 w-full">
                   {todoActions
@@ -168,11 +167,13 @@ const HomePage = () => {
                     />
                   ))}
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
-        <div className="hidden border-l px-6 border-zinc-200 md:flex flex-col py-2 gap-y-5 overflow-y-auto items-stretch w-[360px]">
+        <div
+          className={`hidden border-l pl-6 pr-10 border-zinc-200 md:flex flex-col py-2 gap-y-5 sticky top-[var(--nav-height)] min-h-[calc(100vh-var(--nav-height))] h-fit items-stretch w-[380px]`}
+        >
           <div className="flex flex-col divide-y *:py-6 *:px-2 divide-zinc-200">
             <div className="flex">{bulletinCard}</div>
             <div>

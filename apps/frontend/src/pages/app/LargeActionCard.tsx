@@ -90,10 +90,19 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
         state === LargeActionCardState.Closed
           ? "opacity-0 overflow-hidden"
           : "opacity-100"
-      } w-full relative !rounded-none p-6
+      } w-full relative p-6
          ${state === LargeActionCardState.Minified ? "pb-4" : ""}`}
     >
-      <div className="p-2">
+      <div className="p-0 sm:p-2">
+        <div className="w-24 mb-4 sm:mb-0 sm:absolute right-8 top-8">
+          <Button
+            color={ButtonColor.Transparent}
+            onClick={goToActionPage}
+            className="w-full text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
+          >
+            Details
+          </Button>
+        </div>
         <div className="flex flex-row flex-wrap gap-x-4 mb-2">
           {!!action.timeEstimate && (
             <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
@@ -128,15 +137,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
           <div className="flex-1 flex flex-col gap-y-2">
             <p className="font-medium text-lg">{action.name}</p>
             <p>{action.shortDescription}</p>
-          </div>
-          <div className="w-24 absolute right-8 top-8">
-            <Button
-              color={ButtonColor.Transparent}
-              onClick={goToActionPage}
-              className="w-full text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
-            >
-              Details
-            </Button>
           </div>
         </div>
         {

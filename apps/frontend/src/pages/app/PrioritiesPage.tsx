@@ -4,7 +4,7 @@ const PrioritiesPage: React.FC = () => {
   return (
     <div className="flex flex-col max-w-3xl mx-auto p-3 pt-16 md:pt-12">
       <div className="gap-y-2 flex flex-col text-lg">
-        <p className="font-adobe text-3xl font-semibold">
+        <p className="font-serif text-3xl font-medium">
           Our current priorities
         </p>
         <p className="text-zinc-500 mb-2">Last updated August 27, 2025</p>
