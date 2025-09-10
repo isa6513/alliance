@@ -24,7 +24,7 @@ const BugReportButton = () => {
     <>
       <div className="fixed bottom-4 left-4">
         {isOpen ? (
-          <div className="padding-2 bg-white border border-zinc-300 rounded-md">
+          <div className="p-2 bg-white border border-zinc-300 rounded-md">
             <textarea
               rows={4}
               value={description}

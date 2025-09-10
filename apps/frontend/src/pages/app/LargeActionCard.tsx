@@ -146,8 +146,8 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
                 <p className="text-zinc-500 text-sm mb-1">
                   {liveUserCount ?? 0} / {threshold}{" "}
                   {action.status === "gathering_commitments"
-                    ? "committed"
-                    : "completed"}
+                    ? "members committed"
+                    : "members completed"}
                   {friendActivities.length > 0 && (
                     <>
                       , including {friendActivities.length} friend

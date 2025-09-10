@@ -1,3 +1,5 @@
+import { PostHogConfig } from "posthog-js";
+import { PostHogProvider } from "posthog-js/react";
 import {
   isRouteErrorResponse,
   Links,
@@ -6,10 +8,9 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-import { AuthProvider } from "./lib/AuthContext";
-import { PostHogProvider } from "posthog-js/react";
-import { PostHogConfig } from "posthog-js";
 import { Route } from "../.react-router/types/src/+types/root";
+import { HtmlBackgroundManager } from "./components/HtmlBackgroundManager";
+import { AuthProvider } from "./lib/AuthContext";
 
 const options: Partial<PostHogConfig> = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
@@ -78,6 +79,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <AuthProvider>{children}</AuthProvider>
         )}
         <ScrollRestoration />
+        <HtmlBackgroundManager />
         <Scripts />
       </body>
     </html>

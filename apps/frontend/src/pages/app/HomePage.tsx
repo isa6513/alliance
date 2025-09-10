@@ -5,7 +5,6 @@ import { useAppLoaderData } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
 import CheckIcon from "../../components/icons/CheckIcon";
-import "../../whitepage.css";
 import LargeActionCard from "./LargeActionCard";
 import SmallActionCard from "./SmallActionCard";
 import useActivities, { ActivityList } from "./useActivities";
@@ -69,8 +68,8 @@ const HomePage = () => {
   );
 
   return (
-    <div className="flex flex-col w-full h-full items-center min-h-[calc(100vh-50px)]">
-      <div className="flex flex-row  w-full justify-between">
+    <div className="flex flex-col items-center min-h-[calc(100vh-50px)]">
+      <div className="flex flex-row  w-full justify-between bg-white">
         <div className="flex flex-col gap-y-5 overflow-y-auto !overflow-visible flex-1 items-center px-5 pb-20">
           <div className="flex flex-col gap-y-2 border-zinc-200 w-xl lg:w-2xl">
             <div

@@ -132,6 +132,17 @@ export const useAuth = (): AuthContextType => {
       loading: false,
     };
   }
-  if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
+  if (!ctx) {
+    if (import.meta.env.PROD) {
+      throw new Error("useAuth must be used within an AuthProvider");
+    }
+    return {
+      isAuthenticated: false,
+      user: undefined,
+      login: () => Promise.resolve(),
+      logout: () => Promise.resolve(),
+      loading: false,
+    };
+  }
   return ctx;
 };

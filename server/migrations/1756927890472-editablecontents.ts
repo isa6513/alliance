@@ -17,25 +17,53 @@ export class Test1756927890472 implements MigrationInterface {
         )
       `);
 
-    // Backfill from comment
-    await queryRunner.query(`
-        INSERT INTO "editable_content" ("body", "attachments", "origin_comment_id")
-        SELECT "content", COALESCE("attachments", '[]'::jsonb), "id" FROM "comment"
-      `);
+    // --- Column existence checks ---
+    const hasCommentAttachments = await queryRunner.hasColumn(
+      'comment',
+      'attachments',
+    );
+    const hasActionActivityDescription = await queryRunner.hasColumn(
+      'action_activity',
+      'description',
+    );
+    const hasActionActivityAttachments = await queryRunner.hasColumn(
+      'action_activity',
+      'attachments',
+    );
 
-    // Backfill from post (no attachments previously)
+    // --- Backfill from comment ---
+    const insertFromComment = hasCommentAttachments
+      ? `
+          INSERT INTO "editable_content" ("body", "attachments", "origin_comment_id")
+          SELECT "content", COALESCE("attachments", '[]'::jsonb), "id" FROM "comment"
+        `
+      : `
+          INSERT INTO "editable_content" ("body", "attachments", "origin_comment_id")
+          SELECT "content", '[]'::jsonb, "id" FROM "comment"
+        `;
+    await queryRunner.query(insertFromComment);
+
+    // --- Backfill from post (no attachments previously) ---
     await queryRunner.query(`
         INSERT INTO "editable_content" ("body", "attachments", "origin_post_id")
         SELECT "content", '[]'::jsonb, "id" FROM "post"
       `);
 
-    // Backfill from action_activity (use description + attachments if present)
+    // --- Backfill from action_activity ---
+    // Build the SELECT expressions depending on which columns exist
+    const aaBodyExpr = hasActionActivityDescription
+      ? `COALESCE("description", '')`
+      : `''`;
+    const aaAttExpr = hasActionActivityAttachments
+      ? `COALESCE("attachments", '[]'::jsonb)`
+      : `'[]'::jsonb`;
+
     await queryRunner.query(`
         INSERT INTO "editable_content" ("body", "attachments", "origin_action_activity_id")
-        SELECT COALESCE("description", ''), COALESCE("attachments", '[]'::jsonb), "id" FROM "action_activity"
+        SELECT ${aaBodyExpr}, ${aaAttExpr}, "id" FROM "action_activity"
       `);
 
-    // Add relation columns
+    // --- Add relation columns ---
     await queryRunner.query(
       `ALTER TABLE "comment" ADD COLUMN "editableContentId" integer`,
     );
@@ -46,7 +74,7 @@ export class Test1756927890472 implements MigrationInterface {
       `ALTER TABLE "action_activity" ADD COLUMN "editableContentId" integer`,
     );
 
-    // Map relations from origin ids
+    // --- Map relations from origin ids ---
     await queryRunner.query(`
         UPDATE "comment" c SET "editableContentId" = ec.id
         FROM "editable_content" ec
@@ -63,35 +91,46 @@ export class Test1756927890472 implements MigrationInterface {
         WHERE ec.origin_action_activity_id = a.id
       `);
 
-    // Add foreign keys and not-null where appropriate
+    // --- FKs / nullability ---
     await queryRunner.query(`
         ALTER TABLE "comment"
         ALTER COLUMN "editableContentId" SET NOT NULL,
-        ADD CONSTRAINT "FK_comment_editable_content" FOREIGN KEY ("editableContentId") REFERENCES "editable_content"("id") ON DELETE CASCADE
+        ADD CONSTRAINT "FK_comment_editable_content"
+          FOREIGN KEY ("editableContentId") REFERENCES "editable_content"("id") ON DELETE CASCADE
       `);
     await queryRunner.query(`
         ALTER TABLE "post"
         ALTER COLUMN "editableContentId" SET NOT NULL,
-        ADD CONSTRAINT "FK_post_editable_content" FOREIGN KEY ("editableContentId") REFERENCES "editable_content"("id") ON DELETE CASCADE
+        ADD CONSTRAINT "FK_post_editable_content"
+          FOREIGN KEY ("editableContentId") REFERENCES "editable_content"("id") ON DELETE CASCADE
       `);
     await queryRunner.query(`
         ALTER TABLE "action_activity"
-        ADD CONSTRAINT "FK_action_activity_editable_content" FOREIGN KEY ("editableContentId") REFERENCES "editable_content"("id") ON DELETE CASCADE
+        ADD CONSTRAINT "FK_action_activity_editable_content"
+          FOREIGN KEY ("editableContentId") REFERENCES "editable_content"("id") ON DELETE CASCADE
       `);
 
-    // Drop old columns now that content is migrated
+    // --- Drop legacy columns now that content is migrated ---
     await queryRunner.query(`ALTER TABLE "comment" DROP COLUMN "content"`);
-    await queryRunner.query(`ALTER TABLE "comment" DROP COLUMN "attachments"`);
+    if (hasCommentAttachments) {
+      await queryRunner.query(
+        `ALTER TABLE "comment" DROP COLUMN "attachments"`,
+      );
+    }
     await queryRunner.query(`ALTER TABLE "post" DROP COLUMN "content"`);
-    // action_activity legacy columns
-    await queryRunner.query(
-      `ALTER TABLE "action_activity" DROP COLUMN IF EXISTS "description"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "action_activity" DROP COLUMN IF EXISTS "attachments"`,
-    );
 
-    // Remove origin mapping columns from editable_content
+    if (hasActionActivityDescription) {
+      await queryRunner.query(
+        `ALTER TABLE "action_activity" DROP COLUMN "description"`,
+      );
+    }
+    if (hasActionActivityAttachments) {
+      await queryRunner.query(
+        `ALTER TABLE "action_activity" DROP COLUMN "attachments"`,
+      );
+    }
+
+    // --- Remove origin mapping columns from editable_content ---
     await queryRunner.query(
       `ALTER TABLE "editable_content" DROP COLUMN "origin_comment_id"`,
     );
