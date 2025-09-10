@@ -68,7 +68,7 @@ const HomePage = () => {
   );
 
   return (
-    <div className={`flex flex-col w-full h-full items-center bg-white`}>
+    <div className={`flex flex-col w-full items-center bg-white`}>
       <div className="flex flex-row w-full justify-between">
         <div className="flex flex-col gap-y-5 overflow-y-auto !overflow-visible flex-1 items-center px-5">
           <div className="flex flex-col gap-y-2 border-zinc-200 w-full sm:w-xl lg:w-2xl">
