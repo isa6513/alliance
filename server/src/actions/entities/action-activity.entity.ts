@@ -105,4 +105,9 @@ export class ActionActivity {
   @ApiPropertyOptional()
   @IsOptional()
   isMoral?: boolean; // for moral declines
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  @IsOptional()
+  outOfTime?: boolean; // for opting out due to running out of time
 }

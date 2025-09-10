@@ -72,7 +72,7 @@ const HomePage = () => {
     <div className="flex flex-col w-full h-full items-center min-h-[calc(100vh-50px)]">
       <div className="flex flex-row  w-full justify-between">
         <div className="flex flex-col gap-y-5 overflow-y-auto !overflow-visible flex-1 items-center px-5 pb-20">
-          <div className="flex flex-col gap-y-2 border-zinc-200 max-w-2xl">
+          <div className="flex flex-col gap-y-2 border-zinc-200 w-xl lg:w-2xl">
             <div
               className={
                 (currentTask ? "min-h-[calc(100vh-40px)]" : "") +

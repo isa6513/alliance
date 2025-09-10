@@ -14,12 +14,14 @@ interface ActionTaskPanelActivityProps {
   taskFormId: number;
   onCompleteAction: () => void;
   onFormStarted: () => void;
+  onAbandonAction: (outOfTime: boolean, reason: string) => void;
 }
 
 const ActionTaskPanelForm = ({
   taskFormId,
   onCompleteAction,
   onFormStarted,
+  onAbandonAction,
 }: ActionTaskPanelActivityProps) => {
   const [form, setForm] = useState<FormDto | null>(null);
   useEffect(() => {
@@ -62,6 +64,7 @@ const ActionTaskPanelForm = ({
             onSubmit={handleSubmitForm}
             persistKey={String(taskFormId)}
             onFormStarted={onFormStarted}
+            onAbandonAction={onAbandonAction}
           />
         )}
       </div>

@@ -1,8 +1,8 @@
+import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Dropdown from "@alliance/shared/ui/Dropdown";
 import { useState } from "react";
 import ActionCommitButton from "./ActionCommitButton";
-import { useOutsideClick } from "./NotificationsIcon";
 
 export interface ActionTaskPanelCommitProps {
   onCommit: () => void;
@@ -41,7 +41,7 @@ const ActionTaskPanelCommit = ({
 
   return (
     <div className="relative">
-      <div className="flex flex-row gap-x-4 w-full items-center relative">
+      <div className="flex flex-row gap-x-2 w-full items-center relative">
         <ActionCommitButton
           committed={false}
           isAuthenticated={true}
@@ -58,18 +58,26 @@ const ActionTaskPanelCommit = ({
       </div>
       <Dropdown
         isOpen={dropdownOpen}
-        className="absolute top-[55px] right-0 gap-y-2 *:w-full"
+        className="absolute top-[55px] right-0 gap-y-2 *:w-full w-[300px]"
         ref={ref}
       >
-        <p className="mb-5 mr-8">Can&apos;t participate in this action?</p>
+        <p className="mb-1 text-center">
+          Can&apos;t participate in this action?
+        </p>
         <Button
-          color={moralObjectionSelected ? ButtonColor.Light : ButtonColor.Black}
+          color={ButtonColor.White}
+          className={`!items-start !justify-start text-left !font-normal ${
+            moralObjectionSelected ? "!bg-zinc-100" : ""
+          }`}
           onClick={handleMoralObjection}
         >
           I have a moral objection
         </Button>
         <Button
-          color={otherReasonSelected ? ButtonColor.Light : ButtonColor.Black}
+          color={ButtonColor.White}
+          className={`!items-start !justify-start text-left !font-normal ${
+            otherReasonSelected ? "!bg-zinc-100" : ""
+          }`}
           onClick={handleOtherReason}
         >
           Other reason
@@ -87,7 +95,7 @@ const ActionTaskPanelCommit = ({
               onClick={handleSubmit}
               className="w-full"
             >
-              Confirm inability to participate
+              Confirm absence
             </Button>
           </>
         )}

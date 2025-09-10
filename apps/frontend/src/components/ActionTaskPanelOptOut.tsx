@@ -1,7 +1,7 @@
+import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Dropdown from "@alliance/shared/ui/Dropdown";
 import { useState } from "react";
-import { useOutsideClick } from "./NotificationsIcon";
 
 export interface ActionTaskPanelOptOutProps {
   onOptOut: (reason: string) => void;

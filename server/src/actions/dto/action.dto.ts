@@ -89,6 +89,10 @@ export class OptOutActionDto {
   @ApiProperty()
   @IsString()
   reason: string;
+
+  @ApiProperty()
+  @IsBoolean()
+  outOfTime: boolean;
 }
 
 export class ActionActivityDto extends PickType(ActionActivity, [

@@ -222,6 +222,7 @@ export class ActionsService {
     actionId: number,
     userId: number,
     reason: string,
+    outOfTime: boolean,
   ): Promise<ActionActivityDto> {
     const action = await this.findOne(actionId);
     const user = await this.userService.findOneOrFail(userId);
@@ -233,6 +234,7 @@ export class ActionsService {
       action: action,
       user: user,
       declineReason: reason,
+      outOfTime,
     });
     const savedActivity = await this.actionActivityRepository.save(activity);
     return new ActionActivityDto(savedActivity);

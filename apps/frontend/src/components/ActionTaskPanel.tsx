@@ -16,7 +16,6 @@ import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
 import ActionTaskPanelCommit from "./ActionTaskPanelCommit";
 import ActionTaskPanelForm from "./ActionTaskPanelForm";
 import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
-import ActionTaskPanelOptOut from "./ActionTaskPanelOptOut";
 import { StripeWrapper } from "./StripeWrapper";
 
 export interface ActionTaskPanelProps {
@@ -80,11 +79,11 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     [action, onDeclineAction]
   );
 
-  const handleOptOutAction = useCallback(
-    async (reason: string) => {
+  const handleAbandonAction = useCallback(
+    async (outOfTime: boolean, reason: string) => {
       const req = await actionsOptout({
         path: { id: action.id },
-        body: { reason },
+        body: { reason, outOfTime },
       });
       if (req.error) {
         throw new Error("Failed to opt out of action");
@@ -149,6 +148,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
           taskFormId={action.taskFormId}
           onCompleteAction={handleCompleteWithTracking}
           onFormStarted={handleFormStarted}
+          onAbandonAction={handleAbandonAction}
         />
       );
     }
@@ -167,10 +167,10 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       return (
         <>
           {completionElement}
-          <ActionTaskPanelOptOut
+          {/* <ActionTaskPanelOptOut
             onOptOut={handleOptOutAction}
             className="mt-3"
-          />
+          /> */}
         </>
       );
     }

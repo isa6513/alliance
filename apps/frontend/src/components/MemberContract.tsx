@@ -19,8 +19,13 @@ const MemberContract = ({ id }: MemberContractProps) => {
           </li>
           <ol className="list-inside list-[lower-alpha] ml-6">
             <li>
+              I have spent more than 15 minutes completing Alliance tasks in the
+              past week.
+            </li>
+            <li>
               I cannot complete the task due to a serious external circumstance,
-              such as a medical issue or family emergency.
+              such as a medical issue or family emergency. In this case, I will
+              inform the strategic office as soon as I can.
             </li>
             <li>
               I believe the task is immoral. In this case, I will inform the

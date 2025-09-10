@@ -32,7 +32,7 @@ export enum ButtonColor {
   Transparent = "bg-transparent hover:bg-gray-100 text-black",
   Grey = "bg-gray-200 !text-black",
   Outline = "border border-gray-2 text-black",
-  White = "border border-gray-2 text-black bg-white hover:bg-gray-50",
+  White = "border border-gray-2 text-black bg-white hover:bg-zinc-50",
   Black = "bg-black hover:bg-zinc-800 text-white",
 }
 
@@ -53,7 +53,7 @@ const Button: React.FC<ButtonProps> = ({
       className={`px-4 py-2 text-sm font-medium w-fit h-fit rounded flex items-center justify-center ${
         disabled ? "opacity-50 !cursor-not-allowed" : ``
       } ${color} ${
-        color === ButtonColor.Light ? "!text-stone-800" : ""
+        color === ButtonColor.Light ? "!text-zinc-800" : ""
       } ${className} `}
       style={{
         fontWeight: 450,

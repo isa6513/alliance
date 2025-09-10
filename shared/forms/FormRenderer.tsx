@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { SubmitFormDto, imagesUploadImage } from "../client";
+import { useOutsideClick } from "../lib/useOutsideClick";
 import Button, { ButtonColor } from "../ui/Button";
+import Dropdown from "../ui/Dropdown";
 import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
 import type { DisplayBlock } from "./display-blocks";
@@ -17,6 +19,7 @@ interface FormRendererProps {
    */
   persistKey?: string | null;
   onFormStarted?: () => void;
+  onAbandonAction?: (outOfTime: boolean, reason: string) => void;
 }
 
 /**
@@ -41,6 +44,7 @@ const FormRenderer = ({
   onSubmit,
   persistKey,
   onFormStarted,
+  onAbandonAction,
 }: FormRendererProps) => {
   // Compute schema and a namespaced storage key for persistence (if enabled)
   const schema = form as unknown as FormSchema<string, string>;
@@ -90,6 +94,13 @@ const FormRenderer = ({
   );
   const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
   const [hasEmittedStart, setHasEmittedStart] = useState(false);
+
+  // Dropdown state for "decline to participate" options
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [otherReasonSelected, setOtherReasonSelected] = useState(false);
+  const [outOfTimeSelected, setOutOfTimeSelected] = useState(false);
+  const [customReason, setCustomReason] = useState("");
+  const ref = useOutsideClick(() => setDropdownOpen(false));
 
   const ensureStarted = () => {
     if (!hasEmittedStart) {
@@ -190,6 +201,25 @@ const FormRenderer = ({
     }
   };
 
+  const handleOutOfTime = () => {
+    setOutOfTimeSelected(!outOfTimeSelected);
+    if (otherReasonSelected) {
+      setOtherReasonSelected(false);
+    }
+  };
+
+  const handleOtherReason = () => {
+    setOtherReasonSelected(!otherReasonSelected);
+    if (outOfTimeSelected) {
+      setOutOfTimeSelected(false);
+    }
+  };
+
+  const handleAbandon = () => {
+    onAbandonAction?.(outOfTimeSelected, customReason);
+    setDropdownOpen(false);
+  };
+
   // Persist progress when enabled
   useEffect(() => {
     if (!persistKey || typeof window === "undefined") return;
@@ -284,7 +314,7 @@ const FormRenderer = ({
           )}
         </div>
         {/* Navigation */}
-        <div className="flex justify-between items-center gap-x-3">
+        <div className="flex justify-between items-center gap-x-2">
           {schema.pages.length > 1 && (
             <div>
               <div>
@@ -334,6 +364,60 @@ const FormRenderer = ({
               </Button>
             )}
           </div>
+
+          {onAbandonAction && (
+            <div className="relative">
+              <Button
+                color={ButtonColor.White}
+                className="px-4 flex items-center !pb-3 !h-[45px] cursor-pointer"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <p className="text-gray-500">...</p>
+              </Button>
+              <Dropdown
+                isOpen={dropdownOpen}
+                className="absolute top-[55px] right-0 gap-y-2 *:w-full w-[300px]"
+                ref={ref}
+              >
+                <p className="mb-1 text-center">Withdrawal options</p>
+                <Button
+                  color={ButtonColor.White}
+                  className={`!items-start !justify-start text-left !font-normal ${
+                    outOfTimeSelected ? "!bg-zinc-100" : ""
+                  }`}
+                  onClick={handleOutOfTime}
+                >
+                  Took more than 15 minutes
+                </Button>
+                <Button
+                  color={ButtonColor.White}
+                  className={`!items-start !justify-start text-left !font-normal ${
+                    otherReasonSelected ? "!bg-zinc-100" : ""
+                  }`}
+                  onClick={handleOtherReason}
+                >
+                  Other reason
+                </Button>
+                {(otherReasonSelected || outOfTimeSelected) && (
+                  <>
+                    <textarea
+                      className="w-full h-20 border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      value={customReason}
+                      onChange={(e) => setCustomReason(e.target.value)}
+                      placeholder="Explain in more detail..."
+                    />
+                    <Button
+                      color={ButtonColor.Black}
+                      onClick={handleAbandon}
+                      className="w-full"
+                    >
+                      Abandon action
+                    </Button>
+                  </>
+                )}
+              </Dropdown>
+            </div>
+          )}
         </div>
       </form>
     </div>

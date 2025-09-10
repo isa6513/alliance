@@ -184,6 +184,7 @@ export type ActionActivity = {
     likes: Array<User>;
     declineReason?: string;
     isMoral?: boolean;
+    outOfTime?: boolean;
 };
 
 /**
@@ -351,6 +352,7 @@ export type DeclineActionDto = {
 
 export type OptOutActionDto = {
     reason: string;
+    outOfTime: boolean;
 };
 
 export type UserActionRelation = 'joined' | 'completed' | 'none' | 'declined';

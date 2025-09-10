@@ -1,28 +1,11 @@
+import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { formatDate } from "date-fns";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { Link } from "react-router";
 import notifBell from "../assets/notif-bell.svg";
 import { useNotifications } from "../lib/useNotifications";
 import ProfileImage from "./ProfileImage";
-
-export const useOutsideClick = (onClickOutside: () => void) => {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        onClickOutside();
-      }
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, [ref, onClickOutside]);
-
-  return ref;
-};
 
 const NotificationsIcon = () => {
   const [isOpen, setIsOpen] = useState(false);

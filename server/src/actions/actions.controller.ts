@@ -92,7 +92,12 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: OptOutActionDto,
   ) {
-    return this.actionsService.optoutAction(+id, req.user.sub, body.reason);
+    return this.actionsService.optoutAction(
+      +id,
+      req.user.sub,
+      body.reason,
+      body.outOfTime,
+    );
   }
 
   @Post('complete/:id')
