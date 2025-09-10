@@ -136,34 +136,55 @@ const ActionsList: React.FC = () => {
     <div className="space-y-4">
       <ActionTimeline actions={actions} className="h-full" />
       <p className="font-bold my-4 px-5">All actions</p>
+      <p className="text-sm text-zinc-500 px-5">
+        Sorted by appearance to users (earliest last event first)
+      </p>
 
       <div className="space-y-3 flex-1 overflow-y-auto p-5 pt-0">
-        {actions.map((action) => (
-          <Card key={action.name} style={CardStyle.White}>
-            <div
-              onClick={() => handleEditAction(action.id)}
-              className="cursor-pointer relative"
-            >
-              <div className="flex justify-between mb-2 ">
-                <h2 className="font-bold text-sm">{action.name}</h2>
-                <span className="absolute p-2 right-0 top-0 bg-zinc-50 text-zinc-800 font-medium text-xs rounded-sm text-nowrap border-zinc-200 border">
-                  {action.status}
-                </span>
-              </div>
-              <p className="text-xs">{action.shortDescription}</p>
+        {actions
+          .sort((a, b) => {
+            const aEvent = a.events[a.events.length - 1];
+            const bEvent = b.events[b.events.length - 1];
 
-              <ActionProgressBar
-                status={action.status}
-                usersJoined={action.usersJoined}
-                usersCompleted={action.usersCompleted}
-                commitmentThreshold={action.commitmentThreshold}
-                actionType={action.type}
-                donationAmount={action.donationAmount}
-                className="mt-2"
-              />
-            </div>
-          </Card>
-        ))}
+            const aDate = aEvent ? new Date(aEvent.date) : new Date(0);
+            const bDate = bEvent ? new Date(bEvent.date) : new Date(0);
+
+            return aDate.getTime() - bDate.getTime();
+          })
+          .map((action) => (
+            <Card key={action.name} style={CardStyle.White}>
+              <div
+                onClick={() => handleEditAction(action.id)}
+                className="cursor-pointer relative"
+              >
+                <div className="flex justify-between mb-2 ">
+                  <div className="flex flex-row items-center gap-x-2">
+                    <h2 className="font-bold text-sm">{action.name}</h2>
+                    <p className="text-sm text-zinc-500">
+                      Last event{" "}
+                      {new Date(
+                        action.events[action.events.length - 1]?.date
+                      ).toLocaleString()}
+                    </p>
+                  </div>
+                  <span className="absolute p-2 right-0 top-0 bg-zinc-50 text-zinc-800 font-medium text-xs rounded-sm text-nowrap border-zinc-200 border">
+                    {action.status}
+                  </span>
+                </div>
+                <p className="text-xs">{action.shortDescription}</p>
+
+                <ActionProgressBar
+                  status={action.status}
+                  usersJoined={action.usersJoined}
+                  usersCompleted={action.usersCompleted}
+                  commitmentThreshold={action.commitmentThreshold}
+                  actionType={action.type}
+                  donationAmount={action.donationAmount}
+                  className="mt-2"
+                />
+              </div>
+            </Card>
+          ))}
         <div className="flex justify-between items-center">
           <button
             onClick={() => setShowPopulateConfirm(true)}

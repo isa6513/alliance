@@ -173,8 +173,8 @@ const HomePage = () => {
             )}
           </div>
         </div>
-        <div className="hidden border-l px-8 border-zinc-200 md:flex flex-col py-2 gap-y-5 overflow-y-auto items-stretch w-[360px]">
-          <div className="flex flex-col divide-y *:py-8 *:px-2 divide-zinc-200">
+        <div className="hidden border-l px-6 border-zinc-200 md:flex flex-col py-2 gap-y-5 overflow-y-auto items-stretch w-[360px]">
+          <div className="flex flex-col divide-y *:py-6 *:px-2 divide-zinc-200">
             <div className="flex">{bulletinCard}</div>
             <div>
               <p className="font-medium text-xl font-serif text-black">

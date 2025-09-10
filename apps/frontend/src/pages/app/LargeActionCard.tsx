@@ -129,7 +129,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             <p className="font-medium text-lg">{action.name}</p>
             <p>{action.shortDescription}</p>
           </div>
-          <div className="w-24 absolute right-10 top-10">
+          <div className="w-24 absolute right-8 top-8">
             <Button
               color={ButtonColor.Transparent}
               onClick={goToActionPage}
@@ -140,7 +140,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
           </div>
         </div>
         {
-          <div className="mt-2">
+          <div className="mt-6">
             <div>
               <div className="flex flex-row items-center justify-between w-full gap-x-2">
                 <p className="text-zinc-500 text-sm mb-1">
