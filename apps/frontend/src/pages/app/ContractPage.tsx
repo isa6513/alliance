@@ -57,45 +57,47 @@ const ContractPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col max-w-3xl mx-auto p-3 pt-16 md:pt-12">
-      <div className="gap-y-2 flex flex-col text-lg">
-        <p className="font-adobe text-3xl font-semibold">Contract</p>
-        <p className="text-zinc-600 mb-2">
-          Below is your membership contract. This page is also where we will
-          post updates to the contract, and where you can terminate your
-          membership if you choose to do so.
-        </p>
-        <MemberContract />
+    <div className="flex flex-col bg-white items-center min-h-[calc(100vh-var(--nav-height))]">
+      <div className="flex flex-col max-w-3xl mx-auto p-3 pt-16 md:pt-12">
+        <div className="gap-y-2 flex flex-col text-lg">
+          <p className="font-serif text-3xl font-medium">Contract</p>
+          <p className="text-zinc-600 mb-2">
+            Below is your membership contract. This page is also where we will
+            post updates to the contract, and where you can terminate your
+            membership if you choose to do so.
+          </p>
+          <MemberContract />
 
-        {!contractDateSigned && (
-          <div className="flex flex-row">
-            <FormInput
-              name="name"
-              type="text"
-              placeholder={user.name}
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-            />
-            <Button
-              onClick={handleContractSign}
-              color={ButtonColor.Black}
-              className="ml-2 !h-auto px-6"
-            >
-              Sign
-            </Button>
-          </div>
-        )}
-        {contractDateSigned && (
-          <div className="flex flex-row justify-between items-center">
-            <p className="mt-2 text-green">
-              You signed this contract on{" "}
-              {new Date(contractDateSigned).toLocaleDateString()}.
-            </p>
-            <Button onClick={handleContractSuspend} color={ButtonColor.Red}>
-              Suspend contract
-            </Button>
-          </div>
-        )}
+          {!contractDateSigned && (
+            <div className="flex flex-row">
+              <FormInput
+                name="name"
+                type="text"
+                placeholder={user.name}
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+              />
+              <Button
+                onClick={handleContractSign}
+                color={ButtonColor.Black}
+                className="ml-2 !h-auto px-6"
+              >
+                Sign
+              </Button>
+            </div>
+          )}
+          {contractDateSigned && (
+            <div className="flex flex-row justify-between items-center">
+              <p className="mt-2 text-green">
+                You signed this contract on{" "}
+                {new Date(contractDateSigned).toLocaleDateString()}.
+              </p>
+              <Button onClick={handleContractSuspend} color={ButtonColor.Red}>
+                Suspend contract
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

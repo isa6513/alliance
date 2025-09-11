@@ -47,7 +47,7 @@ const ProgressListPage: React.FC = () => {
                 > */}
                 <div className="p-0.5">
                   <div className="flex justify-between">
-                    <p className="text-base md:text-3xl font-adobe">
+                    <p className="text-base md:text-3xl font-serif">
                       {post.frontmatter.title}
                     </p>
                     <p className="text-sm md:text-base text-green border border-green py-1 px-2 bg-green/20 rounded">

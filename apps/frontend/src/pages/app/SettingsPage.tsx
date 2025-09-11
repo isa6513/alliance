@@ -158,7 +158,7 @@ const SettingsPage: React.FC = () => {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
         <div className="max-w-4xl mx-auto">
-          <h1 className="!text-3xl !font-adobe mb-2">Account</h1>
+          <h1 className="!text-3xl !font-serif !font-medium mb-2">Account</h1>
           <Card style={CardStyle.White} className="p-8">
             <p className="text-center text-stone-500">
               Loading your account information...
@@ -178,7 +178,7 @@ const SettingsPage: React.FC = () => {
         <Card style={CardStyle.White} className="p-8 mb-6 relative gap-y-4">
           <div className="flex justify-between mb-2">
             <div className="gap-x-2">
-              <h1 className="text-3xl font-adobe mb-2">Account</h1>
+              <h1 className="text-3xl font-serif !font-medium mb-2">Account</h1>
               <AdminOnly>
                 <Badge className="!bg-yellow-600 text-white">Admin</Badge>
               </AdminOnly>

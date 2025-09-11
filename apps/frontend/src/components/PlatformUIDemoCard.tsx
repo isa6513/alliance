@@ -28,7 +28,7 @@ const PlatformUIDemoCard = ({
         style={CardStyle.Black}
         className="w-full !p-0 overflow-hidden h-[300px]"
       >
-        <p className="font-adobe text-xl font-bold p-5 pb-3 text-left">
+        <p className="font-serif text-xl font-bold p-5 pb-3 text-left">
           {titles[idx]}
         </p>
         <img

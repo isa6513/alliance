@@ -302,11 +302,13 @@ const UserProfilePage: React.FC = () => {
                 type="text"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                className="w-full border border-zinc-300 focus:outline-none !text-[30px] font-bold font-adobe"
+                className="w-full border border-zinc-300 focus:outline-none !text-[30px] font-medium font-serif"
               />
             ) : (
               <div className="flex flex-row gap-3 items-center">
-                <h1 className="font-adobe">{profileUser.displayName}</h1>
+                <h1 className="font-serif !font-medium">
+                  {profileUser.displayName}
+                </h1>
                 {profileUser.staff && (
                   <div className="text-sm bg-staff text-white px-3 py-0.5 rounded self-center mb-1">
                     Staff

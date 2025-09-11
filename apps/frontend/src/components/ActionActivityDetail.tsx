@@ -19,7 +19,7 @@ export function ErrorBoundary(error: unknown) {
 
   return (
     <div className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5">
-      <h1 className="font-adobe w-full">{action.name}</h1>
+      <h1 className="font-serif !font-medium w-full">{action.name}</h1>
       <div
         className="flex flex-row gap-x-3 items-center cursor-pointer border-b border-gray-300 pb-3 hover:underline"
         onClick={() => {
@@ -109,7 +109,7 @@ const ActionActivityDetail = () => {
   return (
     <>
       <div className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5">
-        <h1 className="font-adobe w-full">{action.name}</h1>
+        <h1 className="font-serif !font-medium w-full">{action.name}</h1>
         <div
           className="flex flex-row gap-x-2 items-center cursor-pointer hover:bg-zinc-50 self-start px-2 py-1 rounded border border-zinc-200"
           onClick={() => {

@@ -7,7 +7,7 @@ interface MemberContractProps {
 
 const MemberContract = ({ id }: MemberContractProps) => {
   return (
-    <Card className="" style={CardStyle.LightGrey} id={id}>
+    <Card className="" style={CardStyle.White} id={id}>
       <div className="text-lg p-2">
         <ol className="list-decimal list-inside mb-2 flex flex-col gap-y-2">
           <li>
