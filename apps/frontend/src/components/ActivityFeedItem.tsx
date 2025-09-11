@@ -19,8 +19,8 @@ const ActivityFeedItem = ({
   showTitle = true,
 }: ActivityFeedItem) => {
   return (
-    <div className="flex flex-row gap-x-2 items-center">
-      <div className="flex-shrink-0">
+    <div className="flex flex-row gap-x-2">
+      <div className="flex-shrink-0 mt-2">
         <Link to={`/user/${user.id}`}>
           <ProfileImage pfp={user.profilePicture} size="medium" />
         </Link>
