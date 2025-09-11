@@ -44,7 +44,7 @@ const ActionPageTaskPanel = () => {
   console.log("userRelation", userRelation);
 
   if (userRelation === "completed") {
-    return <ActionTaskPanelCompleted />;
+    return <ActionTaskPanelCompleted action={action} />;
   }
 
   if (userRelation === "declined") {

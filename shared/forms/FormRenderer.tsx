@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { SubmitFormDto, imagesUploadImage } from "../client";
+import { FormResponseDto, SubmitFormDto, imagesUploadImage } from "../client";
 import { useOutsideClick } from "../lib/useOutsideClick";
 import Button, { ButtonColor } from "../ui/Button";
 import Dropdown from "../ui/Dropdown";
@@ -20,6 +20,8 @@ interface FormRendererProps {
   persistKey?: string | null;
   onFormStarted?: () => void;
   onAbandonAction?: (outOfTime: boolean, reason: string) => void;
+  renderFormAsCompleted?: boolean;
+  completedFormResponse?: FormResponseDto;
 }
 
 /**
@@ -45,9 +47,12 @@ const FormRenderer = ({
   persistKey,
   onFormStarted,
   onAbandonAction,
+  renderFormAsCompleted,
+  completedFormResponse,
 }: FormRendererProps) => {
   // Compute schema and a namespaced storage key for persistence (if enabled)
   const schema = form as unknown as FormSchema<string, string>;
+  const readOnly = !!renderFormAsCompleted;
   const baseStorageKey = computeFormStorageKey({
     slug: schema.slug,
     version: schema.version,
@@ -59,6 +64,7 @@ const FormRenderer = ({
   });
 
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(() => {
+    if (readOnly) return 0;
     if (typeof window === "undefined" || !persistKey) return 0;
     try {
       const raw = window.localStorage.getItem(storageKey);
@@ -77,6 +83,14 @@ const FormRenderer = ({
   const [formData, setFormData] = useState<
     Record<string, FieldValue<AnyField<string>>>
   >(() => {
+    if (readOnly) {
+      return (
+        (completedFormResponse?.answers as Record<
+          string,
+          FieldValue<AnyField<string>>
+        >) || {}
+      );
+    }
     if (typeof window === "undefined" || !persistKey) return {};
     try {
       const raw = window.localStorage.getItem(storageKey);
@@ -103,6 +117,7 @@ const FormRenderer = ({
   const ref = useOutsideClick(() => setDropdownOpen(false));
 
   const ensureStarted = () => {
+    if (readOnly) return;
     if (!hasEmittedStart) {
       try {
         onFormStarted?.();
@@ -120,11 +135,13 @@ const FormRenderer = ({
     fieldId: string,
     value: FieldValue<AnyField<string>>
   ) => {
+    if (readOnly) return;
     ensureStarted();
     setFormData((prev) => ({ ...prev, [fieldId]: value }));
   };
 
   const handleFileUpload = async (fieldId: string, file: File) => {
+    if (readOnly) return;
     ensureStarted();
     setUploadingFields((prev) => new Set(prev).add(fieldId));
     setUploadErrors((prev) => {
@@ -194,7 +211,7 @@ const FormRenderer = ({
     e.stopPropagation();
     if (!isLastPage) {
       setCurrentPageIndex((prev) => prev + 1);
-    } else if (onSubmit) {
+    } else if (onSubmit && !readOnly) {
       onSubmit({ answers: formData });
       // Do not eagerly clear persisted data here, since we don't know if
       // submission succeeded. Caller (parent) should clear on success.
@@ -222,6 +239,7 @@ const FormRenderer = ({
 
   // Persist progress when enabled
   useEffect(() => {
+    if (readOnly) return;
     if (!persistKey || typeof window === "undefined") return;
     try {
       window.localStorage.setItem(
@@ -231,10 +249,11 @@ const FormRenderer = ({
     } catch {
       // ignore storage errors (quota, private mode, etc.)
     }
-  }, [formData, currentPageIndex, persistKey, storageKey]);
+  }, [formData, currentPageIndex, persistKey, storageKey, readOnly]);
 
   // If key changes (different form/version/instance), attempt to restore
   useEffect(() => {
+    if (readOnly) return;
     if (!persistKey || typeof window === "undefined") return;
     try {
       const raw = window.localStorage.getItem(storageKey);
@@ -251,15 +270,31 @@ const FormRenderer = ({
     } catch {
       // ignore invalid JSON or access errors
     }
-  }, [persistKey, baseStorageKey]);
+  }, [persistKey, baseStorageKey, readOnly]);
+
+  // When rendering a completed form, sync provided answers into local state
+  useEffect(() => {
+    if (!readOnly) return;
+    if (completedFormResponse?.answers) {
+      setFormData(
+        completedFormResponse.answers as Record<
+          string,
+          FieldValue<AnyField<string>>
+        >
+      );
+    }
+  }, [readOnly, completedFormResponse]);
 
   const renderField = (field: AnyField<string>, index: number) => (
     <div key={index}>
       <RenderField
         field={field}
         value={formData[field.id]}
-        onChange={(val) => updateField(field.id, val)}
-        onFileSelected={(file) => handleFileUpload(field.id, file)}
+        onChange={readOnly ? undefined : (val) => updateField(field.id, val)}
+        onFileSelected={
+          readOnly ? undefined : (file) => handleFileUpload(field.id, file)
+        }
+        disabled={readOnly}
         uploading={uploadingFields.has(field.id)}
         uploadError={uploadErrors[field.id]}
       />
@@ -308,7 +343,11 @@ const FormRenderer = ({
     <div className="mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Page Content */}
-        <div className="space-y-3">
+        <div
+          className={`space-y-3 ${
+            readOnly && schema.pages.length === 1 ? "mb-0" : ""
+          }`}
+        >
           {currentPage.fields.map((element, index) =>
             renderElement(element, index)
           )}
@@ -346,7 +385,7 @@ const FormRenderer = ({
               >
                 Next
               </Button>
-            ) : onSubmit ? (
+            ) : readOnly ? null : onSubmit ? (
               <Button
                 color={ButtonColor.Black}
                 type="submit"
@@ -365,7 +404,7 @@ const FormRenderer = ({
             )}
           </div>
 
-          {onAbandonAction && (
+          {onAbandonAction && !readOnly && (
             <div className="relative">
               <Button
                 color={ButtonColor.White}

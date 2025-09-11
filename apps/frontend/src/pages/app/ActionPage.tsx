@@ -2,8 +2,6 @@ import {
   ActionDto,
   actionsFindOne,
   actionsMyStatus,
-  actionsUserLocations,
-  LatLonDto,
   UserActionRelation,
 } from "@alliance/shared/client";
 import { useEffect, useMemo, useState } from "react";
@@ -43,9 +41,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
 export async function loader({
   params,
-}: Route.LoaderArgs): Promise<
-  (ActionDto & { locations: LatLonDto[] }) | undefined
-> {
+}: Route.LoaderArgs): Promise<ActionDto | undefined> {
   if (!params.id || isNaN(parseInt(params.id))) {
     return undefined;
   }
@@ -53,14 +49,11 @@ export async function loader({
     path: { id: parseInt(params.id) },
   });
 
-  const locations = await actionsUserLocations({
-    path: { id: parseInt(params.id) },
-  });
   if (!action.data) {
     throw data("Record Not Found", { status: 404 });
   }
 
-  return { ...action.data, locations: locations.data || [] };
+  return { ...action.data };
 }
 
 export function meta({ data }: Route.MetaArgs) {
@@ -157,6 +150,7 @@ export default function ActionPage() {
           </div>
         }
         bg="bg-white"
+        collapseRight={true}
         border={false}
       />
     </div>

@@ -71,24 +71,18 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
         onClick={goToActionPage}
       >
         <div className="flex flex-row items-start gap-x-8">
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col *:mb-2">
             {waitingOnCompletion && (
-              <Tag style={TagStyle.GreyOutline} className="mb-2">
-                Needs your completion
-              </Tag>
+              <Tag style={TagStyle.GreyOutline}>Needs your completion</Tag>
             )}
             {waitingOnCommitment && (
-              <Tag style={TagStyle.GreyOutline} className="mb-2">
-                Gathering commitments
-              </Tag>
+              <Tag style={TagStyle.GreyOutline}>Gathering commitments</Tag>
             )}
             {waitingForOffice && (
-              <Tag style={TagStyle.GreyOutline} className="mb-2">
-                Pending office action
-              </Tag>
+              <Tag style={TagStyle.GreyOutline}>Pending office action</Tag>
             )}
             {waitingOnOthers && (
-              <Tag style={TagStyle.GreyOutline} className="mb-2">
+              <Tag style={TagStyle.GreyOutline}>
                 Waiting for commitments from others
               </Tag>
             )}

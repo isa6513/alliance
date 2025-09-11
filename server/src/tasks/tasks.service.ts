@@ -158,4 +158,17 @@ export class TasksService {
     });
     return responses;
   }
+
+  async getMyFormResponse(
+    userId: number,
+    formId: number,
+  ): Promise<FormResponseDto> {
+    const response = await this.formResponseRepository.findOne({
+      where: { formId, user: { id: userId } },
+    });
+    if (!response) {
+      throw new NotFoundException('Form response not found');
+    }
+    return response;
+  }
 }

@@ -57,6 +57,16 @@ export class TasksController {
     return this.tasksService.getFormResponses(id);
   }
 
+  @Get('myResponse/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: FormResponseDto })
+  async getMyFormResponse(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: JwtRequest,
+  ) {
+    return this.tasksService.getMyFormResponse(req.user.sub, id);
+  }
+
   @Get('slug/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: FormDto })

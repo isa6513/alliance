@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { ActionWithRelation, useAppLoaderData } from "../../applayout";
 import ActionItemCard from "../../components/ActionItemCard";
 import { useGrayBackground } from "../../components/HtmlBackgroundManager";
-import { useActionCounts } from "../../lib/useActionWebSocket";
 
 export const filterActions = (
   actions: ActionWithRelation[],
@@ -39,15 +38,17 @@ const ActionsListPage = () => {
   const { actions } = useAppLoaderData();
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
-  const actionIds = useMemo(() => actions.map((a) => a.id), [actions]);
-  const liveCounts = useActionCounts(actionIds);
+  const modeToActions: Record<FilterMode, ActionWithRelation[]> =
+    useMemo(() => {
+      return Object.values(FilterMode).reduce((acc, mode) => {
+        acc[mode] = filterActions(actions, mode);
+        return acc;
+      }, {} as Record<FilterMode, ActionWithRelation[]>);
+    }, [actions]);
 
   useGrayBackground();
 
-  const filteredActions = useMemo(
-    () => filterActions(actions, filterMode),
-    [actions, filterMode]
-  );
+  const filteredActions = modeToActions[filterMode];
 
   return (
     <div className="flex flex-col items-center">

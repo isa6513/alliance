@@ -2265,6 +2265,21 @@ export type TasksGetFormResponsesResponses = {
 
 export type TasksGetFormResponsesResponse = TasksGetFormResponsesResponses[keyof TasksGetFormResponsesResponses];
 
+export type TasksGetMyFormResponseData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/myResponse/{id}';
+};
+
+export type TasksGetMyFormResponseResponses = {
+    200: FormResponseDto;
+};
+
+export type TasksGetMyFormResponseResponse = TasksGetMyFormResponseResponses[keyof TasksGetMyFormResponseResponses];
+
 export type TasksGetFormData = {
     body?: never;
     path: {

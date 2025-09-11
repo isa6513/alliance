@@ -12,6 +12,7 @@ const TwoColumnSplit = ({
   left,
   right,
   coloredRight = false,
+  collapseRight = false,
 }: TwoColumnSplitProps) => {
   return (
     <div
@@ -25,7 +26,9 @@ const TwoColumnSplit = ({
         {left}
       </div>
       <div
-        className={`border-l  border-zinc-200 md:flex flex-col gap-y-5 overflow-y-auto items-stretch w-[360px] p-10`}
+        className={`border-l  border-zinc-200 md:flex flex-col gap-y-5 overflow-y-auto items-stretch w-[360px] p-10 ${
+          collapseRight ? "hidden md:flex" : ""
+        }`}
       >
         {right}
       </div>
