@@ -6,7 +6,6 @@ import {
   LatLonDto,
   UserActionRelation,
 } from "@alliance/shared/client";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useEffect, useMemo, useState } from "react";
 import {
   data,
@@ -20,6 +19,7 @@ import { Route } from "../../../.react-router/types/src/pages/app/+types/ActionP
 import ActionActivityList from "../../components/ActionActivityList";
 import ActionEventsPanel from "../../components/ActionEventsPanel";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
+import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import TwoColumnSplit from "../../components/system/TwoColumnSplit";
 import { useAuth } from "../../lib/AuthContext";
 import { testActions } from "../../stories/testData";
@@ -77,6 +77,8 @@ export function meta({ data }: Route.MetaArgs) {
 export default function ActionPage() {
   const { id: idParam } = useParams();
 
+  useWhiteBackground();
+
   const loaderData = useLoaderData<typeof loader>();
 
   const action = useMemo(() => {
@@ -131,16 +133,17 @@ export default function ActionPage() {
                 onJoinAction: () => setUserRelation("joined"),
                 onDeclineAction: () => setUserRelation("declined"),
                 onOptOutAction: () => setUserRelation("declined"),
+                activities,
+                handleLikeActivity,
+                setActivities,
               } satisfies TaskPanelContext
             }
           />
         }
         right={
-          <div className="flex flex-col gap-y-4 pt-2 pr-4">
+          <div className="divide-y divide-zinc-200 *:py-5">
             {action !== undefined && (
-              <Card style={CardStyle.White}>
-                <ActionEventsPanel action={action} events={action.events} />
-              </Card>
+              <ActionEventsPanel action={action} events={action.events} />
             )}
             {action && (
               <ActionActivityList

@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router";
 import { useAppLoaderData } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
+import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import CheckIcon from "../../components/icons/CheckIcon";
 import LargeActionCard from "./LargeActionCard";
 import SmallActionCard from "./SmallActionCard";
@@ -49,6 +50,8 @@ const HomePage = () => {
   );
 
   const currentTask = newActions[0] || todoActions[0] || null;
+
+  useWhiteBackground();
 
   const bulletinCard = (
     <div>

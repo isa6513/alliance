@@ -3,6 +3,7 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useMemo, useState } from "react";
 import { ActionWithRelation, useAppLoaderData } from "../../applayout";
 import ActionItemCard from "../../components/ActionItemCard";
+import { useGrayBackground } from "../../components/HtmlBackgroundManager";
 import { useActionCounts } from "../../lib/useActionWebSocket";
 
 export const filterActions = (
@@ -40,6 +41,8 @@ const ActionsListPage = () => {
 
   const actionIds = useMemo(() => actions.map((a) => a.id), [actions]);
   const liveCounts = useActionCounts(actionIds);
+
+  useGrayBackground();
 
   const filteredActions = useMemo(
     () => filterActions(actions, filterMode),

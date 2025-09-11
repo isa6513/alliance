@@ -1,4 +1,4 @@
-import { UserActionRelation } from "@alliance/shared/client";
+import { ActionActivityDto, UserActionRelation } from "@alliance/shared/client";
 import Card from "@alliance/shared/ui/Card";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
@@ -27,6 +27,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 export interface TaskPanelContext
   extends Omit<ActionTaskPanelProps, "action" | "userRelation"> {
   userRelation: UserActionRelation | null;
+  activities: ActionActivityDto[];
+  handleLikeActivity: (activityId: number) => Promise<void>;
+  setActivities: (activities: ActionActivityDto[]) => void;
 }
 
 const ActionPageTaskPanel = () => {

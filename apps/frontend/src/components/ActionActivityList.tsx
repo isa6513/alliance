@@ -1,5 +1,4 @@
 import { ActionActivityDto } from "@alliance/shared/client";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import ActionActivityFeedItem from "./ActionActivityFeedItem";
@@ -56,31 +55,29 @@ const ActionActivityList = ({
   const hasMore = allActivities.length > defaultMaxActivities;
 
   return (
-    <Card style={CardStyle.White}>
-      <div className="space-y-3 w-full">
-        <p className="font-medium text-base text-black">Recent activity</p>
-        <div className="flex flex-col divide-y *:py-3 -my-3">
-          {displayedActivities.map((activity) => (
-            <ActionActivityFeedItem
-              key={activity.id}
-              activity={activity}
-              showTime={false}
-              card={false}
-              showAction={false}
-              handleLike={handleLike}
-            />
-          ))}
-        </div>
-        {hasMore && !showAll && (
-          <button
-            onClick={() => setShowAll(true)}
-            className="text-[#318dde] hover:text-blue-800 text-sm font-medium"
-          >
-            See all ({allActivities.length})
-          </button>
-        )}
+    <div className="space-y-3 w-full">
+      <p className="font-medium text-base text-black">Recent activity</p>
+      <div className="flex flex-col *:py-3 -my-3">
+        {displayedActivities.map((activity) => (
+          <ActionActivityFeedItem
+            key={activity.id}
+            activity={activity}
+            showTime={false}
+            card={false}
+            showAction={false}
+            handleLike={handleLike}
+          />
+        ))}
       </div>
-    </Card>
+      {hasMore && !showAll && (
+        <button
+          onClick={() => setShowAll(true)}
+          className="text-[#318dde] hover:text-blue-800 text-sm font-medium"
+        >
+          See all ({allActivities.length})
+        </button>
+      )}
+    </div>
   );
 };
 

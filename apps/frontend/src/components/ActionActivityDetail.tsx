@@ -1,4 +1,7 @@
-import { actionsUpdateActivity } from "@alliance/shared/client";
+import {
+  ActionActivityDto,
+  actionsUpdateActivity,
+} from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useOutletContext, useParams } from "react-router";
@@ -6,7 +9,6 @@ import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
 import { formatTime } from "../lib/utils";
 import { useActionLoaderData } from "../pages/app/ActionPage";
-import { TaskPanelContext } from "./ActionPageTaskPanel";
 import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
 import Comments from "./Comments";
 import ProfileImage from "./ProfileImage";
@@ -36,6 +38,12 @@ export function ErrorBoundary(error: unknown) {
   );
 }
 
+export interface ActionActivityDetailContext {
+  activities: ActionActivityDto[];
+  handleLikeActivity: (activityId: number) => Promise<void>;
+  setActivities: (activities: ActionActivityDto[]) => void;
+}
+
 const ActionActivityDetail = () => {
   const navigate = useNavigate();
   const action = useActionLoaderData();
@@ -43,7 +51,7 @@ const ActionActivityDetail = () => {
   const activityId = parseInt(params.activityId!);
   const { user } = useAuth();
   const { activities, handleLikeActivity, setActivities } =
-    useOutletContext<TaskPanelContext>();
+    useOutletContext<ActionActivityDetailContext>();
 
   // Find the activity from the shared state
   const activity = activities.find((a) => a.id === activityId) || null;
@@ -108,7 +116,7 @@ const ActionActivityDetail = () => {
 
   return (
     <>
-      <div className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5">
+      <div className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5 w-full">
         <h1 className="font-serif !font-medium w-full">{action.name}</h1>
         <div
           className="flex flex-row gap-x-2 items-center cursor-pointer hover:bg-zinc-50 self-start px-2 py-1 rounded border border-zinc-200"

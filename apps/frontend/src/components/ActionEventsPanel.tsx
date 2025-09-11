@@ -66,11 +66,13 @@ const ActionEventsPanel = ({ action, events }: ActionEventsPanelProps) => {
                           {(action.usersCompleted ?? 0).toLocaleString()}{" "}
                           completed
                         </span>
-                        <span className="text-zinc-500 text-sm">
-                          {" "}
-                          of {(action.usersJoined ?? 0).toLocaleString()}{" "}
-                          committed
-                        </span>
+                        {!action.commitmentless && (
+                          <span className="text-zinc-500 text-sm">
+                            {" "}
+                            of {(action.usersJoined ?? 0).toLocaleString()}{" "}
+                            committed
+                          </span>
+                        )}
                       </p>
                       <CompletedBar
                         percentage={

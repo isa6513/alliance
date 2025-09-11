@@ -27,7 +27,7 @@ const ActionContents = () => {
         </div>
       </div>
       <Outlet context={context} />
-      <hr className="border-zinc-200 my-6" />
+      <hr className="border-zinc-200 my-2" />
       <div className="mb-4">
         <AppMarkdownWrapper markdownContent={action?.body} />
       </div>

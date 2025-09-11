@@ -1,6 +1,9 @@
 import React from "react";
+import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 
 const PrioritiesPage: React.FC = () => {
+  useWhiteBackground();
+
   return (
     <div className="flex flex-col max-w-3xl mx-auto p-3 pt-16 md:pt-12">
       <div className="gap-y-2 flex flex-col text-lg">

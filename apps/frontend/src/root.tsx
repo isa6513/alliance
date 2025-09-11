@@ -73,13 +73,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
             apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
             options={options}
           >
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <HtmlBackgroundManager>{children}</HtmlBackgroundManager>
+            </AuthProvider>
           </PostHogProvider>
         ) : (
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <HtmlBackgroundManager>{children}</HtmlBackgroundManager>
+          </AuthProvider>
         )}
         <ScrollRestoration />
-        <HtmlBackgroundManager />
         <Scripts />
       </body>
     </html>
