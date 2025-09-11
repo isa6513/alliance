@@ -1,5 +1,5 @@
 import { FilterMode } from "@alliance/shared/lib/actionUtils";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import { useMemo, useState } from "react";
 import { ActionWithRelation, useAppLoaderData } from "../../applayout";
 import ActionItemCard from "../../components/ActionItemCard";
@@ -16,7 +16,7 @@ export const filterActions = (
       return actions.filter(
         (action) => action.status === "gathering_commitments"
       );
-    case FilterMode.PendingOfficeAction:
+    case FilterMode.CommitmentsReached:
       return actions.filter(
         (action) => action.status === "commitments_reached"
       );
@@ -53,21 +53,16 @@ const ActionsListPage = () => {
   return (
     <div className="flex flex-col items-center">
       <div className="px-4 py-16 md:py-12 flex flex-col items-center w-[calc(min(650px,100%))] gap-y-6">
-        <div className="flex flex-row justify-center items-center w-full gap-x-4">
-          <div className="flex flex-row gap-2 items-center flex-wrap ">
-            {Object.values(FilterMode).map((mode) => (
-              <Button
-                key={mode}
-                color={
-                  filterMode === mode ? ButtonColor.Black : ButtonColor.White
-                }
-                onClick={() => setFilterMode(mode)}
-                className="text-nowrap"
-              >
-                {mode}
-              </Button>
-            ))}
-          </div>
+        <div className="flex flex-row justify-start items-center gap-x-4 w-full">
+          <p>Filter by:</p>
+          <DropdownSelect
+            options={Object.values(FilterMode)}
+            secondaryLabels={Object.values(FilterMode).map((mode) =>
+              modeToActions[mode].length.toString()
+            )}
+            value={filterMode}
+            onChange={(mode) => setFilterMode(mode as FilterMode)}
+          />
         </div>
 
         <div className="flex flex-col gap-y-2 w-full">
@@ -84,6 +79,9 @@ const ActionsListPage = () => {
               // }
             />
           ))}
+          {filteredActions.length === 0 && (
+            <p className="text-center text-zinc-500">No matching actions</p>
+          )}
         </div>
       </div>
     </div>

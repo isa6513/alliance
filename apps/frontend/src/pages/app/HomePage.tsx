@@ -1,11 +1,11 @@
 import { ActionDto, UserActionRelation } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
 import { Link, useNavigate } from "react-router";
 import { useAppLoaderData } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
-import CheckIcon from "../../components/icons/CheckIcon";
 import LargeActionCard from "./LargeActionCard";
 import SmallActionCard from "./SmallActionCard";
 import useActivities, { ActivityList } from "./useActivities";

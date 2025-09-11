@@ -4,11 +4,11 @@ import {
   PostDto,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { formatTime } from "../lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
-import PinnedIcon from "./icons/PinnedIcon";
 import ProfileImage from "./ProfileImage";
 import UserDisplayName from "./UserDisplayName";
 

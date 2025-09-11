@@ -6,12 +6,12 @@ import {
   imagesUploadImage,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
 import { formatDistanceToNow } from "date-fns";
 import React, { useEffect, useRef, useState } from "react";
 import CommentLikeButton from "../CommentLikeButton";
 import ProfileImage from "../ProfileImage";
 import UserDisplayName from "../UserDisplayName";
-import PinnedIcon from "../icons/PinnedIcon";
 import EditableContentForm from "./EditableContentForm";
 import EditableContentRenderer from "./EditableContentRenderer";
 import ReplyForm from "./ReplyForm";

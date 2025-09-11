@@ -58,7 +58,7 @@ const ActionTaskPanelCompleted = ({
             form={form?.schema as unknown as FormSchema<string, string>}
             completedFormResponse={formResponse}
             renderFormAsCompleted
-            onSubmit={() => {}}
+            onSubmit={null}
           />
         </Card>
       )}

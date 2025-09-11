@@ -1,9 +1,9 @@
+import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAppLoaderData } from "../applayout";
 import { useAuth } from "../lib/AuthContext";
 import ProfileImage from "./ProfileImage";
-import DropdownIcon from "./icons/DropdownIcon";
 
 const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);

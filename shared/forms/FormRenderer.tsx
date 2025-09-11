@@ -8,9 +8,8 @@ import RenderField from "./RenderField";
 import type { DisplayBlock } from "./display-blocks";
 import type { AnyField, Condition, FieldValue, FormSchema } from "./formschema";
 
-interface FormRendererProps {
+type FormRendererProps = {
   form: FormSchema<string, string>;
-  onSubmit: ((data: SubmitFormDto) => void) | null; // null for admin preview
   /**
    * Optional identifier to enable client-side persistence of form progress.
    * When provided, the renderer will save partial answers and page progress
@@ -22,7 +21,16 @@ interface FormRendererProps {
   onAbandonAction?: (outOfTime: boolean, reason: string) => void;
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
-}
+  onSubmit: ((data: SubmitFormDto) => void) | null; // null for admin preview
+} & (
+  | {
+      renderFormAsCompleted: true;
+      completedFormResponse: FormResponseDto;
+    }
+  | {
+      renderFormAsCompleted: false;
+    }
+);
 
 /**
  * Compute a stable localStorage key for a form draft.

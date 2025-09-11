@@ -4,6 +4,7 @@ import {
   PostDto,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { setRevalidate } from "../../applayout";
@@ -11,7 +12,6 @@ import Comments from "../../components/Comments";
 import ProfileImage from "../../components/ProfileImage";
 import UserDisplayName from "../../components/UserDisplayName";
 import EditableContentRenderer from "../../components/forum/EditableContentRenderer";
-import PinnedIcon from "../../components/icons/PinnedIcon";
 import { useAuth } from "../../lib/AuthContext";
 import { formatTime } from "../../lib/utils";
 

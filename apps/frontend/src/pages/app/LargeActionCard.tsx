@@ -9,10 +9,10 @@ import {
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import ClockIcon from "@alliance/shared/ui/icons/ClockIcon";
+import DeadlineIcon from "@alliance/shared/ui/icons/DeadlineIcon";
 import ActionTaskPanel from "../../components/ActionTaskPanel";
 import CompletedBar from "../../components/CompletedBar";
-import ClockIcon from "../../components/icons/ClockIcon";
-import DeadlineIcon from "../../components/icons/DeadlineIcon";
 import UserProfilePicRow from "../../components/UserProfilePicRow";
 import { useActionCount } from "../../lib/useActionWebSocket";
 import { formatTime } from "../../lib/utils";
