@@ -58,7 +58,7 @@ const ActionActivityFeedItem = ({
           navigate(`/actions/${activity.actionId}/activity/${activity.id}`);
         }}
       >
-        <div className="flex flex-row gap-x-3 items-start">
+        <div className="flex flex-row gap-x-3 items-center">
           <div className="flex-1">
             <ActivityFeedItem
               title={activity.actionName}
