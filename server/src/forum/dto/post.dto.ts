@@ -37,11 +37,15 @@ export class PostDto extends PickType(Post, [
   @ApiProperty({ type: () => EditableContentDto })
   editableContent: EditableContentDto;
 
+  @ApiProperty({ type: () => ProfileDto, isArray: true })
+  likes: ProfileDto[];
+
   constructor(post: Post, commentCount?: number) {
     super();
     Object.assign(this, post);
     this.author = new ProfileDto(post.author);
     this.commentCount = commentCount;
+    this.likes = post.likes.map((like) => new ProfileDto(like));
     this.editableContent = new EditableContentDto(post.editableContent);
   }
 }

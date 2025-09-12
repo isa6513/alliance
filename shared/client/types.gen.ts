@@ -546,6 +546,7 @@ export type PostDto = {
     author: ProfileDto;
     commentCount?: number;
     editableContent: EditableContentDto;
+    likes: Array<ProfileDto>;
 };
 
 export type UpdatePostDto = {
@@ -1780,7 +1781,7 @@ export type ForumFindPostsByActionResponse = ForumFindPostsByActionResponses[key
 export type ForumRemovePostData = {
     body?: never;
     path: {
-        id: string;
+        id: number;
     };
     query?: never;
     url: '/forum/posts/{id}';
@@ -1808,7 +1809,7 @@ export type ForumFindOnePostResponse = ForumFindOnePostResponses[keyof ForumFind
 export type ForumUpdatePostData = {
     body: UpdatePostDto;
     path: {
-        id: string;
+        id: number;
     };
     query?: never;
     url: '/forum/posts/{id}';
@@ -1911,7 +1912,7 @@ export type ForumCreateCommentResponse = ForumCreateCommentResponses[keyof Forum
 export type ForumDeleteCommentData = {
     body?: never;
     path: {
-        id: string;
+        id: number;
     };
     query?: never;
     url: '/forum/comments/{id}';
@@ -1924,7 +1925,7 @@ export type ForumDeleteCommentResponses = {
 export type ForumUpdateCommentData = {
     body: UpdateCommentDto;
     path: {
-        id: string;
+        id: number;
     };
     query?: never;
     url: '/forum/comments/{id}';
@@ -1939,7 +1940,7 @@ export type ForumUpdateCommentResponse = ForumUpdateCommentResponses[keyof Forum
 export type ForumLikeCommentData = {
     body?: never;
     path: {
-        id: string;
+        id: number;
     };
     query?: never;
     url: '/forum/comments/{id}/like';
@@ -1954,7 +1955,7 @@ export type ForumLikeCommentResponse = ForumLikeCommentResponses[keyof ForumLike
 export type ForumUnlikeCommentData = {
     body?: never;
     path: {
-        id: string;
+        id: number;
     };
     query?: never;
     url: '/forum/comments/{id}/unlike';
@@ -1965,6 +1966,32 @@ export type ForumUnlikeCommentResponses = {
 };
 
 export type ForumUnlikeCommentResponse = ForumUnlikeCommentResponses[keyof ForumUnlikeCommentResponses];
+
+export type ForumLikePostData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/forum/posts/{id}/like';
+};
+
+export type ForumLikePostResponses = {
+    200: unknown;
+};
+
+export type ForumUnlikePostData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/forum/posts/{id}/unlike';
+};
+
+export type ForumUnlikePostResponses = {
+    200: unknown;
+};
 
 export type GeoSearchCityData = {
     body?: never;

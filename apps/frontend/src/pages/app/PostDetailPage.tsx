@@ -54,7 +54,7 @@ const PostDetailPage: React.FC = () => {
     if (window.confirm("Are you sure you want to delete this post?")) {
       try {
         await forumRemovePost({
-          path: { id: post.id.toString() },
+          path: { id: post.id },
         });
         setRevalidate();
         navigate("/forum");

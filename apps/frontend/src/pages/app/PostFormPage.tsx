@@ -122,7 +122,7 @@ const PostFormPage: React.FC = () => {
           return;
         }
         response = await forumUpdatePost({
-          path: { id: postId },
+          path: { id: parseInt(postId) },
           body: postData,
         });
       }
@@ -201,6 +201,7 @@ const PostFormPage: React.FC = () => {
                   value={content}
                   onChange={setContent}
                   compact={false}
+                  expanded={true}
                   placeholder="Write your post content here..."
                 />
                 <div className="mt-3 flex justify-end text-sm text-zinc-500">

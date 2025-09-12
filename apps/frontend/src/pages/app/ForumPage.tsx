@@ -25,15 +25,15 @@ const ForumPage: React.FC = () => {
 
   return (
     <div className="flex flex-col max-w-4xl mx-auto px-3 pt-16 md:pt-12">
-      <div className="gap-y-2 flex flex-col">
-        {isAuthenticated && (
-          <div
-            onClick={handleCreatePost}
-            className="text-gray-500 bg-[#fcfcfc] hover:bg-zinc-100 p-4 rounded-md flex cursor-pointer flex-col border border-zinc-200"
-          >
-            Create a new thread...
-          </div>
-        )}
+      {isAuthenticated && (
+        <div
+          onClick={handleCreatePost}
+          className="text-gray-500 hover:bg-zinc-200/60 p-4 flex cursor-pointer flex-col border border-zinc-200 mb-3"
+        >
+          Create a new thread...
+        </div>
+      )}
+      <div className="flex flex-col divide-y divide-zinc-200 pb-10 border border-zinc-200">
         {sorted.map((post) => (
           <ForumListPost key={post.id} post={post} />
         ))}

@@ -3,10 +3,9 @@ import {
   forumFindLastCommentForPost,
   PostDto,
 } from "@alliance/shared/client";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { formatTime } from "../lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
 import ProfileImage from "./ProfileImage";
@@ -51,13 +50,11 @@ const ForumListPost = ({
 
   if (card) {
     return (
-      <Card
-        key={post.id}
-        className={`w-full mb-0 !gap-y-1`}
-        onClick={() => navigate(`/forum/post/${post.id}`)}
-        style={CardStyle.White}
+      <Link
+        to={`/forum/post/${post.id}`}
+        className={`w-full mb-0 !gap-y-1 p-4 hover:bg-zinc-100 bg-white`}
       >
-        <div className="flex flex-row gap-1">
+        <div className="flex flex-row gap-1 mb-2">
           {post.pinned && <PinnedIcon size="small" />}
           <p className="font-medium text-base">{post.title}</p>
         </div>
@@ -102,7 +99,7 @@ const ForumListPost = ({
             </div>
           )}
         </div>
-      </Card>
+      </Link>
     );
   } else {
     return (

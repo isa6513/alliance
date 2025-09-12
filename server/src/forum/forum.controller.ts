@@ -116,12 +116,12 @@ export class ForumController {
   @ApiOperation({ summary: 'Update a post' })
   @ApiOkResponse({ type: PostDto })
   async updatePost(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
     @ReqUser() user: JwtPayload,
   ): Promise<PostDto> {
     return new PostDto(
-      await this.forumService.updatePost(+id, updatePostDto, user.sub),
+      await this.forumService.updatePost(id, updatePostDto, user.sub),
     );
   }
 
@@ -129,8 +129,11 @@ export class ForumController {
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Delete a post' })
   @ApiOkResponse()
-  removePost(@Param('id') id: string, @ReqUser() user: JwtPayload) {
-    return this.forumService.removePost(+id, user.sub);
+  removePost(
+    @Param('id', ParseIntPipe) id: number,
+    @ReqUser() user: JwtPayload,
+  ) {
+    return this.forumService.removePost(id, user.sub);
   }
 
   @Post('comments')
@@ -149,12 +152,12 @@ export class ForumController {
   @ApiOperation({ summary: 'Update a comment' })
   @ApiOkResponse({ type: CommentDto })
   async updateComment(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateCommentDto: UpdateCommentDto,
     @ReqUser() user: JwtPayload,
   ): Promise<CommentDto> {
     return new CommentDto(
-      await this.forumService.updateComment(+id, updateCommentDto, user.sub),
+      await this.forumService.updateComment(id, updateCommentDto, user.sub),
     );
   }
 
@@ -163,10 +166,10 @@ export class ForumController {
   @ApiOperation({ summary: 'Like a comment' })
   @ApiOkResponse({ type: CommentDto })
   async likeComment(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @ReqUser() user: JwtPayload,
   ): Promise<void> {
-    await this.forumService.likeComment(+id, user.sub);
+    await this.forumService.likePostOrComment(id, user.sub, false, 'comment');
   }
 
   @Post('comments/:id/unlike')
@@ -174,17 +177,42 @@ export class ForumController {
   @ApiOperation({ summary: 'Unlike a comment' })
   @ApiOkResponse({ type: CommentDto })
   async unlikeComment(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @ReqUser() user: JwtPayload,
   ): Promise<void> {
-    await this.forumService.likeComment(+id, user.sub, true);
+    await this.forumService.likePostOrComment(id, user.sub, true, 'comment');
+  }
+
+  @Post('posts/:id/like')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Like a post' })
+  @ApiOkResponse()
+  async likePost(
+    @Param('id', ParseIntPipe) id: number,
+    @ReqUser() user: JwtPayload,
+  ): Promise<void> {
+    await this.forumService.likePostOrComment(id, user.sub, false, 'post');
+  }
+
+  @Post('posts/:id/unlike')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Unlike a post' })
+  @ApiOkResponse()
+  async unlikePost(
+    @Param('id', ParseIntPipe) id: number,
+    @ReqUser() user: JwtPayload,
+  ): Promise<void> {
+    await this.forumService.likePostOrComment(id, user.sub, true, 'post');
   }
 
   @Delete('comments/:id')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Delete a reply' })
   @ApiOkResponse()
-  deleteComment(@Param('id') id: string, @ReqUser() user: JwtPayload) {
+  deleteComment(
+    @Param('id', ParseIntPipe) id: number,
+    @ReqUser() user: JwtPayload,
+  ) {
     return this.forumService.deleteReply(+id, user.sub);
   }
 }

@@ -1,7 +1,7 @@
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import React, { useCallback } from "react";
-import { useNavigate } from "react-router";
+import React from "react";
+import { Link } from "react-router";
 import { ActionWithRelation } from "../applayout";
 import CompletedBar from "./CompletedBar";
 import Tag, { TagStyle } from "./Tag";
@@ -31,24 +31,12 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   activity,
   relation,
 }) => {
-  const navigate = useNavigate();
-
-  const goToActionPage = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      navigate(`/actions/${id}`);
-    },
-    [navigate, id]
-  );
-
-  // const [toggleComments, setToggleComments] = useState(false);
-
   return (
-    <div className={`relative ${className}`}>
+    <Link to={`/actions/${id}`} className={`relative ${className}`}>
       <Card
         className="block overflow-hidden"
         style={CardStyle.White}
-        onClick={goToActionPage}
+        onClick={() => {}}
       >
         <div className="flex flex-row items-start gap-x-8">
           <div className="flex-1 flex flex-col">
@@ -85,7 +73,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
           </div>
         )}
       </Card>
-    </div>
+    </Link>
   );
 };
 

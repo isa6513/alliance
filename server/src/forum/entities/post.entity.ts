@@ -6,6 +6,8 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -84,4 +86,11 @@ export class Post {
   @ApiProperty()
   @Allow()
   deleted: boolean;
+
+  @ManyToMany(() => User, { onDelete: 'CASCADE', eager: true })
+  @ApiProperty({ type: () => User, isArray: true })
+  @JoinTable()
+  @Allow()
+  @Type(() => User)
+  likes: User[];
 }

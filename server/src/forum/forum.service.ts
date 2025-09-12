@@ -501,38 +501,47 @@ export class ForumService {
     return updatedReply;
   }
 
-  async likeComment(id: number, userId: number, unlike = false) {
-    const comment = await this.commentRepository.findOne({
-      where: { id },
-      relations: ['likes', 'author'],
-    });
+  async likePostOrComment(
+    id: number,
+    userId: number,
+    unlike = false,
+    type: 'comment' | 'post',
+  ) {
+    const object =
+      type === 'comment'
+        ? await this.commentRepository.findOne({
+            where: { id },
+            relations: ['likes', 'author'],
+          })
+        : await this.postRepository.findOne({
+            where: { id },
+            relations: ['likes', 'author'],
+          });
 
-    if (!comment) {
-      throw new NotFoundException(`Comment with ID "${id}" not found`);
+    if (!object) {
+      throw new NotFoundException(`${type} with ID "${id}" not found`);
     }
 
-    const user = await this.userRepository.findOne({
+    const user = await this.userRepository.findOneOrFail({
       where: { id: userId },
     });
 
-    if (!user) {
-      throw new NotFoundException(`User with ID "${userId}" not found`);
-    }
-
     if (unlike) {
-      if (!comment.likes.some((like) => like.id === userId)) {
-        throw new NotFoundException(`You have not liked this comment`);
+      if (!object.likes.some((like) => like.id === userId)) {
+        throw new NotFoundException(`User has not liked this ${type}`);
       }
 
-      comment.likes = comment.likes.filter((like) => like.id !== userId);
+      object.likes = object.likes.filter((like) => like.id !== userId);
     } else {
-      if (comment.likes.some((like) => like.id === userId)) {
-        throw new NotFoundException(`You have already liked this comment`);
+      if (object.likes.some((like) => like.id === userId)) {
+        throw new NotFoundException(`User has already liked this ${type}`);
       }
 
-      comment.likes.push(user);
+      object.likes.push(user);
     }
-    await this.commentRepository.save(comment);
+    await (type === 'comment'
+      ? this.commentRepository.save(object)
+      : this.postRepository.save(object));
   }
 
   async deleteReply(id: number, userId: number): Promise<void> {
