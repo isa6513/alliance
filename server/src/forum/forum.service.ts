@@ -58,6 +58,7 @@ export class ForumService {
       author: user,
       authorId: user.id,
       editableContent: content,
+      likes: [],
     });
     return this.postRepository.save(post);
   }
