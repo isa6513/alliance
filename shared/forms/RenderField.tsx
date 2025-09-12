@@ -1,3 +1,4 @@
+import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import type {
   AnyField,
   DateField,
@@ -170,7 +171,7 @@ export function RenderField<TId extends string = string>({
               className="mt-1 mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <span className="text-zinc-700">
-              <span>{field.label}</span>
+              <FormMarkdownWrapper markdownContent={field.label} />
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </span>
           </label>

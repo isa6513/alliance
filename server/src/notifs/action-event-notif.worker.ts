@@ -88,7 +88,9 @@ export class ActionEventNotifWorker {
           where: { actionId: action.id, type: ActionActivityType.USER_JOINED },
           relations: ['user'],
         });
-        const users = activities.map((a) => a.user);
+        const users = action.commitmentless
+          ? await this.userService.findActiveUsers()
+          : activities.map((a) => a.user);
         await this.notifsService.sendMemberActionNotifs(event, action, users);
       }
 
