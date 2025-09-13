@@ -55,7 +55,7 @@ const ActionTaskPanelCompleted = ({
       {action.taskFormId && formResponse && form && (
         <Card style={CardStyle.Grey} className="inline-block">
           <FormRenderer
-            form={form?.schema as unknown as FormSchema<string, string>}
+            form={form?.schema as unknown as FormSchema}
             completedFormResponse={formResponse}
             renderFormAsCompleted
             onSubmit={null}

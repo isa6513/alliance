@@ -13,7 +13,7 @@ export function EditableEmailField({
   onDragEnd,
   isDragging,
   previousFields,
-}: BaseFieldProps<EmailField<string>>) {
+}: BaseFieldProps<EmailField>) {
   return (
     <FieldWrapper
       onRemove={onRemove}

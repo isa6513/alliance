@@ -10,7 +10,7 @@ export function EditableHtmlBlock({
   onDragStart,
   onDragEnd,
   isDragging,
-}: BaseDisplayBlockProps<HtmlBlock<string>>) {
+}: BaseDisplayBlockProps<HtmlBlock>) {
   return (
     <DisplayBlockWrapper
       onRemove={onRemove}

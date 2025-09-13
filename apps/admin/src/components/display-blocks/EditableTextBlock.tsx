@@ -9,7 +9,7 @@ export function EditableTextBlock({
   onDragStart,
   onDragEnd,
   isDragging,
-}: BaseDisplayBlockProps<TextBlock<string>>) {
+}: BaseDisplayBlockProps<TextBlock>) {
   return (
     <DisplayBlockWrapper
       onRemove={onRemove}

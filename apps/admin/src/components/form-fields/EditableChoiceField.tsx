@@ -1,23 +1,15 @@
-import type {
-  AnyField,
-  MultiSelectField,
-  SelectField,
-} from "@alliance/shared/forms/formschema";
+import type { AnyField, MultiSelectField, SelectField } from "@alliance/shared/forms/formschema";
 import RenderField from "@alliance/shared/forms/RenderField";
 import { ConditionalVisibility, RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
 import type { BaseFieldProps } from "./types";
 
-type ChoiceField<TId extends string> =
-  | SelectField<TId, string>
-  | MultiSelectField<TId, string>;
+type ChoiceField = SelectField | MultiSelectField;
 
-type EditableChoiceFieldProps<TId extends string> = BaseFieldProps<
-  ChoiceField<TId>
->;
+type EditableChoiceFieldProps = BaseFieldProps<ChoiceField>;
 
-export function EditableChoiceField<TId extends string = string>({
+export function EditableChoiceField({
   field,
   onUpdate,
   onRemove,
@@ -25,7 +17,7 @@ export function EditableChoiceField<TId extends string = string>({
   onDragEnd,
   isDragging,
   previousFields,
-}: EditableChoiceFieldProps<TId>) {
+}: EditableChoiceFieldProps) {
   const addOption = () => {
     const nextIndex = (field.options?.length || 0) + 1;
     const newOption = {
@@ -82,11 +74,7 @@ export function EditableChoiceField<TId extends string = string>({
             />
           </div>
 
-          <ConditionalVisibility
-            field={field}
-            previousFields={(previousFields || []) as AnyField<TId>[]}
-            onChange={onUpdate}
-          />
+          <ConditionalVisibility field={field} previousFields={(previousFields || []) as AnyField[]} onChange={onUpdate} />
 
           {/* Options Configuration */}
           <div>

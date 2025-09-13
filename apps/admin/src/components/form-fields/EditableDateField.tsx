@@ -13,7 +13,7 @@ export function EditableDateField({
   onDragEnd,
   isDragging,
   previousFields,
-}: BaseFieldProps<DateField<string>>) {
+}: BaseFieldProps<DateField>) {
   return (
     <FieldWrapper
       onRemove={onRemove}

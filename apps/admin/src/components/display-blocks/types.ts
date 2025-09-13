@@ -1,6 +1,6 @@
-import type { DisplayBlock } from "@alliance/shared/lib/display-blocks";
+import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 
-export interface BaseDisplayBlockProps<T extends DisplayBlock<string>> {
+export interface BaseDisplayBlockProps<T extends DisplayBlock> {
   block: T;
   onUpdate: (updates: Partial<T>) => void;
   onRemove: () => void;

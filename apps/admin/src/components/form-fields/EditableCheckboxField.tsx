@@ -13,7 +13,7 @@ export function EditableCheckboxField({
   onDragEnd,
   isDragging,
   previousFields,
-}: BaseFieldProps<CheckboxField<string>>) {
+}: BaseFieldProps<CheckboxField>) {
   return (
     <FieldWrapper
       onRemove={onRemove}

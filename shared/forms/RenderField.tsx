@@ -1,20 +1,10 @@
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
-import type {
-  AnyField,
-  DateField,
-  EmailField,
-  FieldValue,
-  NumberField,
-  PhoneField,
-  SelectField,
-  TextareaField,
-  TextField,
-} from "./formschema";
+import type { AnyField, FormValue } from "./formschema";
 
-export type RenderFieldProps<TId extends string = string> = {
-  field: AnyField<TId>;
-  value?: FieldValue<AnyField<TId>>;
-  onChange?: (value: FieldValue<AnyField<TId>>) => void;
+export type RenderFieldProps = {
+  field: AnyField;
+  value?: FormValue;
+  onChange?: (value: FormValue) => void;
   disabled?: boolean;
   // File upload hooks (used by file field)
   onFileSelected?: (file: File) => void;
@@ -22,7 +12,7 @@ export type RenderFieldProps<TId extends string = string> = {
   uploadError?: string | null;
 };
 
-export function RenderField<TId extends string = string>({
+export function RenderField({
   field,
   value,
   onChange,
@@ -30,7 +20,7 @@ export function RenderField<TId extends string = string>({
   onFileSelected,
   uploading,
   uploadError,
-}: RenderFieldProps<TId>) {
+}: RenderFieldProps) {
   switch (field.kind) {
     case "text":
       return (
@@ -41,7 +31,7 @@ export function RenderField<TId extends string = string>({
           </label>
           <input
             type="text"
-            value={(value as TextField<TId>["_value"]) ?? ""}
+            value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
@@ -61,7 +51,7 @@ export function RenderField<TId extends string = string>({
           <textarea
             rows={field.rows || 3}
             maxLength={field.maxLength}
-            value={(value as TextareaField<TId>["_value"]) ?? ""}
+            value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
@@ -84,7 +74,7 @@ export function RenderField<TId extends string = string>({
           </label>
           <input
             type="email"
-            value={(value as EmailField<TId>["_value"]) ?? ""}
+            value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
@@ -103,7 +93,7 @@ export function RenderField<TId extends string = string>({
           </label>
           <input
             type="tel"
-            value={(value as PhoneField<TId>["_value"]) ?? ""}
+            value={(value as string) ?? ""}
             onChange={
               onChange
                 ? (e) => {
@@ -131,10 +121,17 @@ export function RenderField<TId extends string = string>({
           </label>
           <input
             type="number"
-            value={(value as NumberField<TId>["_value"]) ?? ""}
+            value={
+              value === undefined || value === null
+                ? ""
+                : (value as number | string)
+            }
             onChange={
               onChange
-                ? (e) => onChange(parseFloat(e.target.value) || "")
+                ? (e) =>
+                    onChange(
+                      e.target.value === "" ? "" : parseFloat(e.target.value)
+                    )
                 : undefined
             }
             required={field.required}
@@ -215,7 +212,7 @@ export function RenderField<TId extends string = string>({
             {field.required && <span className="text-red-500 ml-1">*</span>}
           </label>
           <select
-            value={(value as SelectField<TId, string>["_value"]) ?? ""}
+            value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
@@ -287,7 +284,7 @@ export function RenderField<TId extends string = string>({
           </label>
           <input
             type="date"
-            value={(value as DateField<TId>["_value"]) ?? ""}
+            value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
@@ -325,11 +322,6 @@ export function RenderField<TId extends string = string>({
                 const file = e.target.files?.[0];
                 if (!file || disabled) return;
                 if (onFileSelected) onFileSelected(file);
-                else if (onChange)
-                  onChange({
-                    name: file.name,
-                    file,
-                  });
               }}
               required={field.required && !fileValue}
               disabled={disabled || isUploading}

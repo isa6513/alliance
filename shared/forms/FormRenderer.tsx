@@ -6,10 +6,10 @@ import Dropdown from "../ui/Dropdown";
 import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
 import type { DisplayBlock } from "./display-blocks";
-import type { AnyField, Condition, FieldValue, FormSchema } from "./formschema";
+import type { AnyField, Condition, FormSchema, FormValue } from "./formschema";
 
 type FormRendererProps = {
-  form: FormSchema<string, string>;
+  form: FormSchema;
   persistKey?: string | null;
   onFormStarted?: () => void;
   onAbandonAction?: (outOfTime: boolean, reason: string) => void;
@@ -53,7 +53,7 @@ const FormRenderer = ({
   completedFormResponse,
 }: FormRendererProps) => {
   // Compute schema and a namespaced storage key for persistence (if enabled)
-  const schema = form as unknown as FormSchema<string, string>;
+  const schema = form as unknown as FormSchema;
   const readOnly = !!renderFormAsCompleted;
   const baseStorageKey = computeFormStorageKey({
     slug: schema.slug,
@@ -82,15 +82,10 @@ const FormRenderer = ({
       return 0;
     }
   });
-  const [formData, setFormData] = useState<
-    Record<string, FieldValue<AnyField<string>>>
-  >(() => {
+  const [formData, setFormData] = useState<Record<string, FormValue>>(() => {
     if (readOnly) {
       return (
-        (completedFormResponse?.answers as Record<
-          string,
-          FieldValue<AnyField<string>>
-        >) || {}
+        (completedFormResponse?.answers as Record<string, FormValue>) || {}
       );
     }
     if (typeof window === "undefined" || !persistKey) return {};
@@ -133,10 +128,7 @@ const FormRenderer = ({
   const isLastPage = currentPageIndex === schema.pages.length - 1;
   const isFirstPage = currentPageIndex === 0;
 
-  const updateField = (
-    fieldId: string,
-    value: FieldValue<AnyField<string>>
-  ) => {
+  const updateField = (fieldId: string, value: FormValue) => {
     if (readOnly) return;
     ensureStarted();
     setFormData((prev) => ({ ...prev, [fieldId]: value }));
@@ -268,16 +260,11 @@ const FormRenderer = ({
   useEffect(() => {
     if (!readOnly) return;
     if (completedFormResponse?.answers) {
-      setFormData(
-        completedFormResponse.answers as Record<
-          string,
-          FieldValue<AnyField<string>>
-        >
-      );
+      setFormData(completedFormResponse.answers as Record<string, FormValue>);
     }
   }, [readOnly, completedFormResponse]);
 
-  const renderField = (field: AnyField<string>, index: number) => (
+  const renderField = (field: AnyField, index: number) => (
     <div key={index}>
       <RenderField
         field={field}
@@ -294,12 +281,12 @@ const FormRenderer = ({
   );
 
   const renderElement = (
-    element: AnyField<string> | DisplayBlock<string>,
+    element: AnyField | DisplayBlock,
     index: number
   ) => {
     const cond = element.visibleIf;
     if (cond) {
-      const evalCond = (c: Condition<string>): boolean => {
+      const evalCond = (c: Condition): boolean => {
         if ("expr" in c) {
           // Basic safeguard: do not evaluate arbitrary expressions in renderer
           // Future: support a small expression language if needed.
@@ -320,12 +307,12 @@ const FormRenderer = ({
     }
     // Check if it's a form field (has 'label' property) vs display block
     if ("label" in element) {
-      return renderField(element as AnyField<string>, index);
+      return renderField(element as AnyField, index);
     } else {
       return (
         <RenderDisplayBlock
           key={index}
-          block={element as DisplayBlock<string>}
+          block={element as DisplayBlock}
         />
       );
     }

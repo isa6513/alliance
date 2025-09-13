@@ -42,8 +42,8 @@ import {
 } from "./form-fields";
 
 interface FormBuilderProps {
-  onSave?: (schema: FormSchema<string, string>) => void;
-  initialSchema?: FormSchema<string, string>;
+  onSave?: (schema: FormSchema) => void;
+  initialSchema?: FormSchema;
   formId?: string;
 }
 
@@ -56,7 +56,7 @@ export function FormBuilder({
   const urlFormId = searchParams.get("id");
   const formId = propFormId || urlFormId;
 
-  const [schema, setSchema] = useState<FormSchema<string, string>>(
+  const [schema, setSchema] = useState<FormSchema>(
     initialSchema || {
       slug: "untitled-form",
       version: 1,
@@ -192,7 +192,7 @@ export function FormBuilder({
             // Convert the form entity back to FormSchema
             const form = response.data as any;
             if (form.schema) {
-              setSchema(form.schema as FormSchema<string, string>);
+              setSchema(form.schema as unknown as FormSchema);
             }
           }
         })
@@ -210,7 +210,7 @@ export function FormBuilder({
 
   const addField = (kind: FieldKind, insertIndex?: number) => {
     const fieldId = `field-${Date.now()}`;
-    let newField: AnyField<string>;
+    let newField: AnyField;
 
     switch (kind) {
       case "text":
@@ -324,7 +324,7 @@ export function FormBuilder({
 
   const addDisplayBlock = (kind: DisplayKind, insertIndex?: number) => {
     const blockId = `block-${Date.now()}`;
-    let newBlock: DisplayBlock<string>;
+    let newBlock: DisplayBlock;
 
     switch (kind) {
       case "header":
@@ -383,12 +383,12 @@ export function FormBuilder({
     });
   };
 
-  const updateSchema = (newSchema: FormSchema<string, string>) => {
+  const updateSchema = (newSchema: FormSchema) => {
     setSchema(newSchema);
   };
 
   const addPage = () => {
-    const newPage: Page<string> = {
+    const newPage: Page = {
       id: `page-${schema.pages.length + 1}`,
       title: `Page ${schema.pages.length + 1}`,
       fields: [],
@@ -694,13 +694,8 @@ export function FormBuilder({
     );
   };
 
-  const renderField = (
-    field: AnyField<string> | DisplayBlock<string>,
-    index: number
-  ) => {
-    const updateField = (
-      updates: Partial<AnyField<string> | DisplayBlock<string>>
-    ) => {
+  const renderField = (field: AnyField | DisplayBlock, index: number) => {
+    const updateField = (updates: Partial<AnyField | DisplayBlock>) => {
       updateSchema({
         ...schema,
         pages: schema.pages.map((page, idx) =>
@@ -708,7 +703,9 @@ export function FormBuilder({
             ? {
                 ...page,
                 fields: page.fields.map((f, i) =>
-                  i === index ? { ...f, ...updates } : f
+                  i === index
+                    ? ({ ...f, ...updates } as AnyField | DisplayBlock)
+                    : f
                 ),
               }
             : page
@@ -737,7 +734,7 @@ export function FormBuilder({
     const previousFields = currentPage.fields
       .slice(0, index)
       .filter(
-        (f): f is AnyField<string> =>
+        (f): f is AnyField =>
           (f as any)?.kind && (f as any)?.label !== undefined
       );
 
@@ -769,7 +766,7 @@ export function FormBuilder({
           {/* Check if it's a form field (has 'label' property) vs display block */}
           {"label" in field
             ? (() => {
-                const formField = field as AnyField<string>;
+                const formField = field as AnyField;
                 switch (formField.kind) {
                   case "text":
                     return (
@@ -853,7 +850,7 @@ export function FormBuilder({
                 }
               })()
             : (() => {
-                const block = field as DisplayBlock<string>;
+                const block = field as DisplayBlock;
                 switch (block.kind) {
                   case "header":
                     return (

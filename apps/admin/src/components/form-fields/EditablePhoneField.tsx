@@ -13,7 +13,7 @@ export function EditablePhoneField({
   onDragEnd,
   isDragging,
   previousFields,
-}: BaseFieldProps<PhoneField<string>>) {
+}: BaseFieldProps<PhoneField>) {
   return (
     <FieldWrapper
       onRemove={onRemove}

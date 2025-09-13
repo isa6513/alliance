@@ -10,10 +10,11 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
-type FormWithSchema = Pick<FormDto, "id" | "title"> & {
-  schema: FormSchema<string, string>;
-  pages?: Page<string>[];
-};
+type FormWithSchema =
+  Pick<FormDto, "id" | "title"> & {
+    schema: FormSchema;
+    pages?: Page[];
+  };
 
 const PAGE_SIZE = 1; // show one response per page (step-through)
 

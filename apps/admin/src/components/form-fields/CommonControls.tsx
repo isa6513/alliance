@@ -47,22 +47,20 @@ import type {
   SelectField,
 } from "@alliance/shared/forms/formschema";
 
-type ConditionalVisibilityProps<TId extends string> = {
-  field: AnyField<TId>;
-  previousFields: AnyField<TId>[];
+type ConditionalVisibilityProps = {
+  field: AnyField;
+  previousFields: AnyField[];
   // Only updates the "visibleIf" property for a field
-  onChange: (updates: { visibleIf?: Condition<TId> }) => void;
+  onChange: (updates: { visibleIf?: Condition }) => void;
 };
 
-type ControllerField<TId extends string> =
-  | CheckboxField<TId>
-  | RadioField<TId, string>
-  | SelectField<TId, string>
-  | MultiSelectField<TId, string>;
+type ControllerField =
+  | CheckboxField
+  | RadioField
+  | SelectField
+  | MultiSelectField;
 
-function isConditionalController<TId extends string>(
-  f: AnyField<TId>
-): f is ControllerField<TId> {
+function isConditionalController(f: AnyField): f is ControllerField {
   return (
     f.kind === "checkbox" ||
     f.kind === "radio" ||
@@ -71,28 +69,25 @@ function isConditionalController<TId extends string>(
   );
 }
 
-export function ConditionalVisibility<TId extends string>({
+export function ConditionalVisibility({
   field,
   previousFields,
   onChange,
-}: ConditionalVisibilityProps<TId>) {
+}: ConditionalVisibilityProps) {
   const controllers = (previousFields || []).filter(
-    (f): f is ControllerField<TId> => isConditionalController(f)
+    (f): f is ControllerField => isConditionalController(f)
   );
 
-  type SimpleCondition<T extends string> = Exclude<
-    Condition<T>,
-    { expr: string }
-  >;
+  type SimpleCondition = Exclude<Condition, { expr: string }>;
 
   const cond = field.visibleIf;
   const enabled = !!cond && "when" in cond;
-  const selectedControllerId: TId | undefined =
+  const selectedControllerId: string | undefined =
     cond && "when" in cond ? cond.when : undefined;
   const selectedController = controllers.find(
     (f) => f.id === selectedControllerId
   );
-  const equalsValue: SimpleCondition<TId>["equals"] | undefined =
+  const equalsValue: SimpleCondition["equals"] | undefined =
     cond && "when" in cond ? cond.equals : undefined;
 
   const handleEnableToggle = (checked: boolean) => {
@@ -103,7 +98,7 @@ export function ConditionalVisibility<TId extends string>({
     // Enable with first available controller (if any)
     const first = controllers[0];
     if (!first) return;
-    let defaultEquals: SimpleCondition<TId>["equals"];
+    let defaultEquals: SimpleCondition["equals"];
     if (first.kind === "checkbox") {
       defaultEquals = true;
     } else {
@@ -120,7 +115,7 @@ export function ConditionalVisibility<TId extends string>({
   const handleControllerChange = (id: string) => {
     const next = controllers.find((f) => f.id === id);
     if (!next) return;
-    let nextEquals: SimpleCondition<TId>["equals"];
+    let nextEquals: SimpleCondition["equals"];
     if (next.kind === "checkbox") {
       nextEquals = true;
     } else {
@@ -133,7 +128,7 @@ export function ConditionalVisibility<TId extends string>({
 
   const handleEqualsChange = (val: string) => {
     if (!selectedController) return;
-    const equals: SimpleCondition<TId>["equals"] =
+    const equals: SimpleCondition["equals"] =
       selectedController.kind === "checkbox" ? val === "true" : val;
     onChange({
       visibleIf: {

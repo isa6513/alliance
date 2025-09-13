@@ -12,7 +12,7 @@ export function EditableImageBlock({
   onDragStart,
   onDragEnd,
   isDragging,
-}: BaseDisplayBlockProps<ImageBlock<string>>) {
+}: BaseDisplayBlockProps<ImageBlock>) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 

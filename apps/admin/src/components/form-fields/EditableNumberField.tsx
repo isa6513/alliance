@@ -13,7 +13,7 @@ export function EditableNumberField({
   onDragEnd,
   isDragging,
   previousFields,
-}: BaseFieldProps<NumberField<string>>) {
+}: BaseFieldProps<NumberField>) {
   return (
     <FieldWrapper
       onRemove={onRemove}

@@ -9,7 +9,7 @@ export function EditableHeaderBlock({
   onDragStart,
   onDragEnd,
   isDragging,
-}: BaseDisplayBlockProps<HeaderBlock<string>>) {
+}: BaseDisplayBlockProps<HeaderBlock>) {
   return (
     <DisplayBlockWrapper
       onRemove={onRemove}

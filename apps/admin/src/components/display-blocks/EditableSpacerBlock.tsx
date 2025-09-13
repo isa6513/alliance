@@ -10,7 +10,7 @@ export function EditableSpacerBlock({
   onDragStart,
   onDragEnd,
   isDragging,
-}: BaseDisplayBlockProps<SpacerBlock<string>>) {
+}: BaseDisplayBlockProps<SpacerBlock>) {
   return (
     <DisplayBlockWrapper
       onRemove={onRemove}

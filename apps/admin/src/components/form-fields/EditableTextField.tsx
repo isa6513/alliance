@@ -13,7 +13,7 @@ export function EditableTextField({
   onDragEnd,
   isDragging,
   previousFields,
-}: BaseFieldProps<TextField<string>>) {
+}: BaseFieldProps<TextField>) {
   return (
     <FieldWrapper
       onRemove={onRemove}

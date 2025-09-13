@@ -60,7 +60,7 @@ const ActionTaskPanelForm = ({
       <div>
         {form && (
           <FormRenderer
-            form={form.schema as unknown as FormSchema<string, string>}
+            form={form.schema as unknown as FormSchema}
             onSubmit={handleSubmitForm}
             persistKey={String(taskFormId)}
             onFormStarted={onFormStarted}

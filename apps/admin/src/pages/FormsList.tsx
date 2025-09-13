@@ -10,10 +10,11 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-export type Form = Pick<FormDto, "id" | "title" | "usedInAction"> & {
-  schema: FormSchema<string, string>;
-  pages: Page<string>[];
-};
+export type Form =
+  Pick<FormDto, "id" | "title" | "usedInAction"> & {
+    schema: FormSchema;
+    pages: Page[];
+  };
 
 const FormsList: React.FC = () => {
   const [forms, setForms] = useState<Form[]>([]);

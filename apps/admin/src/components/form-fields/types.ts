@@ -1,9 +1,7 @@
 import { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import type { AnyField } from "@alliance/shared/forms/formschema";
 
-export interface BaseFieldProps<
-  T extends AnyField<string> | DisplayBlock<string>
-> {
+export interface BaseFieldProps<T extends AnyField | DisplayBlock> {
   field: T;
   onUpdate: (updates: Partial<T>) => void;
   onRemove: () => void;
@@ -11,7 +9,7 @@ export interface BaseFieldProps<
   onDragEnd?: (e: React.DragEvent) => void;
   isDragging?: boolean;
   // Fields earlier on the same page; used for conditional visibility
-  previousFields?: AnyField<string>[];
+  previousFields?: AnyField[];
 }
 
 export interface FieldWrapperProps {

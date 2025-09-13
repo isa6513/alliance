@@ -3,13 +3,11 @@ import React from "react";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import type { DisplayBlock } from "./display-blocks";
 
-type Props<TId extends string = string> = {
-  block: DisplayBlock<TId>;
+type Props = {
+  block: DisplayBlock;
 };
 
-export default function RenderDisplayBlock<TId extends string = string>({
-  block,
-}: Props<TId>) {
+export default function RenderDisplayBlock({ block }: Props) {
   switch (block.kind) {
     case "header":
       return React.createElement(

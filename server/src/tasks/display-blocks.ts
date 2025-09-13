@@ -10,61 +10,61 @@ export type DisplayKind =
   | 'html' // controlled/allowlisted HTML snippet
   | 'image'; // decorative image
 
-interface BaseBlock<TFieldIds extends string> {
+interface BaseBlock {
   kind: DisplayKind;
   /** Optional: display blocks usually don’t need IDs, but you can keep one for analytics/testing */
   id?: string;
-  visibleIf?: Condition<TFieldIds>;
+  visibleIf?: Condition;
   width?: 'full' | '1/2' | '1/3';
 }
 
 // Specific blocks
 
-export type HeaderBlock<TFieldIds extends string> = BaseBlock<TFieldIds> & {
+export type HeaderBlock = BaseBlock & {
   kind: 'header';
   text: string;
   level?: 1 | 2 | 3 | 4 | 5 | 6; // default 2
 };
 
-export type TextBlock<TFieldIds extends string> = BaseBlock<TFieldIds> & {
+export type TextBlock = BaseBlock & {
   kind: 'text';
   text: string;
   markdown?: boolean; // default false
 };
 
-export type LabelBlock<TFieldIds extends string> = BaseBlock<TFieldIds> & {
+export type LabelBlock = BaseBlock & {
   kind: 'label';
   text: string;
 };
 
-export type DividerBlock<TFieldIds extends string> = BaseBlock<TFieldIds> & {
+export type DividerBlock = BaseBlock & {
   kind: 'divider';
   thickness?: 'hairline' | 'thin' | 'medium' | 'thick';
 };
 
-export type SpacerBlock<TFieldIds extends string> = BaseBlock<TFieldIds> & {
+export type SpacerBlock = BaseBlock & {
   kind: 'spacer';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 };
 
-export type HtmlBlock<TFieldIds extends string> = BaseBlock<TFieldIds> & {
+export type HtmlBlock = BaseBlock & {
   kind: 'html';
   /** store a sanitized/whitelisted HTML snippet on the server */
   html: string;
 };
 
-export type ImageBlock<TFieldIds extends string> = BaseBlock<TFieldIds> & {
+export type ImageBlock = BaseBlock & {
   kind: 'image';
   alt: string;
   src: string; // or { key: string } if you want S3 keys
   aspectRatio?: number; // e.g., 16/9
 };
 
-export type DisplayBlock<TFieldIds extends string = string> =
-  | HeaderBlock<TFieldIds>
-  | TextBlock<TFieldIds>
-  | LabelBlock<TFieldIds>
-  | DividerBlock<TFieldIds>
-  | SpacerBlock<TFieldIds>
-  | HtmlBlock<TFieldIds>
-  | ImageBlock<TFieldIds>;
+export type DisplayBlock =
+  | HeaderBlock
+  | TextBlock
+  | LabelBlock
+  | DividerBlock
+  | SpacerBlock
+  | HtmlBlock
+  | ImageBlock;

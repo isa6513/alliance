@@ -13,7 +13,7 @@ export function EditableRadioField({
   onDragEnd,
   isDragging,
   previousFields,
-}: BaseFieldProps<RadioField<string, string>>) {
+}: BaseFieldProps<RadioField>) {
   const addOption = () => {
     const newOption = {
       label: `Option ${(field.options?.length || 0) + 1}`,

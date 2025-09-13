@@ -40,7 +40,7 @@ export class TasksService {
   }
 
   async transformImageUrls(form: Form): Promise<Form> {
-    const pages = form.schema.pages as Page<string>[];
+    const pages = form.schema.pages as Page[];
     for (const page of pages) {
       for (const field of page.fields) {
         if (field.kind === 'image') {
@@ -107,7 +107,7 @@ export class TasksService {
     form: Form,
     answers: Record<string, string>,
   ): Promise<string | null> {
-    const schema = form.schema as unknown as FormSchema<string, string>;
+    const schema = form.schema as unknown as FormSchema;
 
     const phoneNumbers: { fieldId: string; label: string; value: string }[] =
       [];

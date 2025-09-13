@@ -10,7 +10,7 @@ export function EditableDividerBlock({
   onDragStart,
   onDragEnd,
   isDragging,
-}: BaseDisplayBlockProps<DividerBlock<string>>) {
+}: BaseDisplayBlockProps<DividerBlock>) {
   return (
     <DisplayBlockWrapper
       onRemove={onRemove}

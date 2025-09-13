@@ -135,7 +135,8 @@ const ActionForm: React.FC<ActionFormProps> = ({
         name: "commitmentless",
         label: "Commitmentless",
         type: "checkbox",
-        helpText: "Does not require commitment (e.g., onboarding)",
+        helpText:
+          "all members (not just committed) will be shown this action to complete. (e.g. for onboarding)",
       },
       { name: "image", label: "Image", type: "file" },
     ],
