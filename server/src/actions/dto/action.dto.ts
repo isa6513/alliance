@@ -1,11 +1,15 @@
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
-import { IsBoolean, IsString } from 'class-validator';
+import { Allow, IsBoolean, IsString } from 'class-validator';
 import { CommentDto } from 'src/forum/dto/comment.dto';
 import { EditableContentDto } from 'src/forum/dto/editablecontent.dto';
 import { ProfileDto } from 'src/user/user.dto';
 import { UserActionRelation } from '../actions.service';
 import { ActionActivity } from '../entities/action-activity.entity';
-import { ActionEvent, ActionStatus } from '../entities/action-event.entity';
+import {
+  ActionEvent,
+  ActionStatus,
+  NotificationType,
+} from '../entities/action-event.entity';
 import { Action } from '../entities/action.entity';
 
 export class ActionEventDto extends PickType(ActionEvent, [
@@ -149,4 +153,25 @@ export class UpdateActionActivityDto extends PickType(ActionActivityDto, [
 export class ActionRelationsDto {
   @ApiProperty({ type: () => Map<number, UserActionRelation> })
   relations: Map<number, UserActionRelation>;
+}
+
+export class PreEventNotifDataDto {
+  @ApiProperty()
+  n_emails: number;
+
+  @ApiProperty()
+  n_texts: number;
+
+  @ApiProperty()
+  n_pushes: number;
+}
+
+export class PreEventNotifDataQueryDto {
+  @ApiProperty({ enum: ActionStatus, enumName: 'ActionStatus' })
+  @Allow()
+  type: ActionStatus;
+
+  @ApiProperty({ enum: NotificationType, enumName: 'NotificationType' })
+  @Allow()
+  sendNotifsTo: NotificationType;
 }

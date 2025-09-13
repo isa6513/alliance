@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailModule } from 'src/mail/mail.module';
-import { SmsModule } from 'src/sms/sms.module';
+import { MmsModule } from 'src/mms/mms.module';
 import { ActionEventNotif } from './entities/action-event-notif.entity';
 import { Notification } from './entities/notification.entity';
 import { NotifsController } from './notifs.controller';
@@ -11,7 +11,7 @@ import { NotifsService } from './notifs.service';
   imports: [
     TypeOrmModule.forFeature([Notification, ActionEventNotif]),
     MailModule,
-    SmsModule,
+    MmsModule,
   ],
   controllers: [NotifsController],
   providers: [NotifsService],

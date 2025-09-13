@@ -513,6 +513,12 @@ export type UpdateActionActivityDto = {
     editableContent: EditableContentDto;
 };
 
+export type PreEventNotifDataDto = {
+    n_emails: number;
+    n_texts: number;
+    n_pushes: number;
+};
+
 export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted';
 
 export type NotificationDto = {
@@ -1688,6 +1694,24 @@ export type ActionsUpdateActivityResponses = {
 };
 
 export type ActionsUpdateActivityResponse = ActionsUpdateActivityResponses[keyof ActionsUpdateActivityResponses];
+
+export type ActionsEventNotifDataData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query: {
+        type: ActionStatus;
+        sendNotifsTo: NotificationType;
+    };
+    url: '/actions/preEventNotifData/{id}';
+};
+
+export type ActionsEventNotifDataResponses = {
+    200: PreEventNotifDataDto;
+};
+
+export type ActionsEventNotifDataResponse = ActionsEventNotifDataResponses[keyof ActionsEventNotifDataResponses];
 
 export type NotifsFindAllData = {
     body?: never;

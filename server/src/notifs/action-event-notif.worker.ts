@@ -1,5 +1,5 @@
 // action-event-notif.worker.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
@@ -18,10 +18,13 @@ import { UserService } from '../user/user.service';
 
 @Injectable()
 export class ActionEventNotifWorker {
+  private readonly logger = new Logger(ActionEventNotifWorker.name);
   constructor(
     private readonly dataSource: DataSource,
     @InjectRepository(ActionEvent)
     private readonly eventRepo: Repository<ActionEvent>,
+    @InjectRepository(ActionActivity)
+    private readonly actionActivityRepository: Repository<ActionActivity>,
     private readonly notifsService: NotifsService,
     private readonly userService: UserService,
   ) {}
@@ -52,6 +55,29 @@ export class ActionEventNotifWorker {
     }
   }
 
+  async getBaseUsersForEvent(eventStatus: ActionStatus, action: Action) {
+    if (
+      eventStatus === ActionStatus.MemberAction ||
+      eventStatus === ActionStatus.CommitmentsReached ||
+      eventStatus === ActionStatus.Resolution //TODO: decide
+    ) {
+      const activities = await this.actionActivityRepository.find({
+        where: {
+          actionId: action.id,
+          type: ActionActivityType.USER_JOINED,
+        },
+        relations: ['user'],
+      });
+      const users = action.commitmentless
+        ? await this.userService.findActiveUsers()
+        : activities.map((a) => a.user);
+
+      return users;
+    }
+
+    return this.userService.findActiveUsers();
+  }
+
   private async processOne(eventId: number) {
     await this.dataSource.transaction(async (manager) => {
       const event = await manager
@@ -78,23 +104,17 @@ export class ActionEventNotifWorker {
         .loadOne<Action>();
       if (!action) return;
 
+      const users = await this.getBaseUsersForEvent(event.newStatus, action);
+
       if (event.newStatus === ActionStatus.GatheringCommitments) {
-        const users = await this.userService.findActiveUsers();
         await this.notifsService.sendCommitmentNotifs(event, action, users);
       }
 
       if (event.newStatus === ActionStatus.MemberAction) {
-        const activities = await manager.getRepository(ActionActivity).find({
-          where: { actionId: action.id, type: ActionActivityType.USER_JOINED },
-          relations: ['user'],
-        });
-        const users = action.commitmentless
-          ? await this.userService.findActiveUsers()
-          : activities.map((a) => a.user);
         await this.notifsService.sendMemberActionNotifs(event, action, users);
       }
 
-      console.log('notifs sent for event', event.id);
+      this.logger.log('notifs sent for event ' + event.id);
 
       event.notifsSentAt = new Date();
       await manager.getRepository(ActionEvent).save(event);

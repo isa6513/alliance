@@ -15,6 +15,7 @@ import {
   CommentParentObject,
 } from 'src/forum/entities/comment.entity';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
+import { ActionEventNotifWorker } from 'src/notifs/action-event-notif.worker';
 import { NotifsService } from 'src/notifs/notifs.service';
 import { ILike, In, LessThan, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
@@ -24,6 +25,7 @@ import {
   CreateActionDto,
   CreateActionEventDto,
   LatLonDto,
+  PreEventNotifDataDto,
   UpdateActionActivityDto,
   UpdateActionDto,
 } from './dto/action.dto';
@@ -66,6 +68,7 @@ export class ActionsService {
     private readonly notifsService: NotifsService,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
+    private readonly actionEventNotifWorker: ActionEventNotifWorker,
   ) {}
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
@@ -601,5 +604,44 @@ export class ActionsService {
       throw new BadRequestException('Action has no funding amount');
     }
     return action.donationAmount;
+  }
+
+  async eventNotifData(
+    actionId: number,
+    type: ActionStatus,
+    sendNotifsTo: NotificationType,
+  ): Promise<PreEventNotifDataDto> {
+    if (sendNotifsTo === NotificationType.None) {
+      return {
+        n_texts: 0,
+        n_emails: 0,
+        n_pushes: 0,
+      };
+    }
+
+    const action = await this.actionRepository.findOne({
+      where: { id: actionId },
+    });
+    if (!action) {
+      throw new NotFoundException('Action not found');
+    }
+
+    const users = await this.actionEventNotifWorker.getBaseUsersForEvent(
+      type,
+      action,
+    );
+
+    const texts = users.filter((user) =>
+      this.notifsService.shouldTextUser(user),
+    );
+    const emails = users.filter((user) =>
+      this.notifsService.shouldEmailUser(user),
+    );
+
+    return {
+      n_texts: texts.length,
+      n_emails: emails.length,
+      n_pushes: 0,
+    };
   }
 }

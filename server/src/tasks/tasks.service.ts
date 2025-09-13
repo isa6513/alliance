@@ -80,7 +80,16 @@ export class TasksService {
     );
     if (phoneNumber) {
       //TODO: non hacky version of this
-      user.phoneNumber = phoneNumber;
+      let formattedPhoneNumber = '';
+      if (phoneNumber.startsWith('+1')) {
+        formattedPhoneNumber = phoneNumber;
+      } else if (phoneNumber.startsWith('1')) {
+        formattedPhoneNumber = '+' + phoneNumber;
+      } else {
+        formattedPhoneNumber = '+1' + phoneNumber;
+      }
+
+      user.phoneNumber = formattedPhoneNumber;
       await this.userService.update(user.id, user);
     }
 

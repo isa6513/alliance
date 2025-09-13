@@ -2,6 +2,7 @@ import {
   ActionDto,
   actionsAddEvent,
   actionsCreate,
+  actionsEventNotifData,
   actionsFindOne,
   actionsRemove,
   ActionStatus,
@@ -9,6 +10,7 @@ import {
   CreateActionDto,
   CreateActionEventDto,
   FormDto,
+  PreEventNotifDataDto,
   tasksListForms,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -158,10 +160,29 @@ const ActionDashboard: React.FC = () => {
   const [useCustomName, setUseCustomName] = useState<boolean>(false);
   const [launchNow, setLaunchNow] = useState<boolean>(true);
   const [deadlineExists, setDeadlineExists] = useState<boolean>(false);
+  const [notifData, setNotifData] = useState<PreEventNotifDataDto | null>(null);
 
   const [creatingEvent, setCreatingEvent] = useState<boolean>(false);
   const [eventCreatedSuccess, setEventCreatedSuccess] =
     useState<boolean>(false);
+
+  useEffect(() => {
+    const loadNotifData = async () => {
+      const response = await actionsEventNotifData({
+        path: { id: parseInt(actionId || "") },
+        query: {
+          type: eventForm.newStatus,
+          sendNotifsTo: eventForm.sendNotifsTo,
+        },
+      });
+      if (response.data) {
+        setNotifData(response.data);
+      }
+    };
+    loadNotifData();
+  }, [eventForm.newStatus, eventForm.sendNotifsTo, actionId]);
+
+  console.log(notifData);
 
   // Reset form when switching to new action mode
   useEffect(() => {
@@ -998,6 +1019,12 @@ const ActionDashboard: React.FC = () => {
                         "Add Event"
                       )}
                     </button>
+                    <div>
+                      <p>
+                        This will send <b>{notifData?.n_emails}</b> emails and{" "}
+                        <b>{notifData?.n_texts}</b> texts
+                      </p>
+                    </div>
                   </form>
                 </Card>
                 <Card style={CardStyle.White}>

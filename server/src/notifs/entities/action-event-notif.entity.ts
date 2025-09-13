@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ActionEvent } from 'src/actions/entities/action-event.entity';
 import { Mail } from 'src/mail/mail.entity';
+import { Mms } from 'src/mms/mms.entity';
 import { User } from 'src/user/user.entity';
 import {
   Column,
@@ -35,6 +36,11 @@ export class ActionEventNotif {
   @OneToOne(() => Mail, { nullable: true })
   @JoinColumn({ name: 'mailId' })
   mail: Mail | null;
+
+  @ApiProperty({ nullable: true })
+  @OneToOne(() => Mms, { nullable: true })
+  @JoinColumn({ name: 'mmsId' })
+  mms: Mms | null;
 
   @ManyToOne(() => User, (user) => user.actionEventNotifs, {
     onDelete: 'CASCADE',

@@ -8,8 +8,8 @@ import { ActionEvent } from 'src/actions/entities/action-event.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { EmailStatus, Mail } from 'src/mail/mail.entity';
 import { MailService } from 'src/mail/mail.service';
+import { MmsService } from 'src/mms/mms.service';
 import { actionUrl } from 'src/search/approutes';
-import { SmsService } from 'src/sms/sms.service';
 import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { ActionEventNotif } from './entities/action-event-notif.entity';
@@ -24,8 +24,14 @@ export class NotifsService {
     @InjectRepository(ActionEventNotif)
     private readonly actionEventNotifsRepository: Repository<ActionEventNotif>,
     private readonly mailService: MailService,
-    private readonly smsService: SmsService,
-  ) {}
+    private readonly mmsService: MmsService,
+  ) {
+    // mmsService.sendMms(
+    //   '+16502728685',
+    //   'This is a test message from the alliance foundation',
+    //   [],
+    // );
+  }
 
   async findAll(userId: number) {
     const notifs = await this.notifsRepository.find({
@@ -69,12 +75,20 @@ export class NotifsService {
     );
   }
 
-  private shouldEmailUser(user: User) {
-    return user.emailNotifsEnabled && !user.turnedOffAllNotifs;
-  }
-  private shouldTextUser(user: User) {
+  shouldEmailUser(user: User) {
     return (
-      user.textNotifsEnabled && !user.turnedOffAllNotifs && user.phoneNumber
+      user.emailNotifsEnabled &&
+      !user.turnedOffAllNotifs &&
+      user.emailNotifsEnabled
+    );
+  }
+
+  shouldTextUser(user: User) {
+    return (
+      user.textNotifsEnabled &&
+      !user.turnedOffAllNotifs &&
+      user.phoneNumber &&
+      user.textNotifsEnabled
     );
   }
 
@@ -109,11 +123,14 @@ export class NotifsService {
         if (result.status === EmailStatus.Sent) {
           notif.sent = true;
         }
-      } else if (this.shouldTextUser(user) && process.env.SMS_ENABLED !== '0') {
-        const result = await this.smsService.sendSms(
+      }
+      if (this.shouldTextUser(user) && process.env.SMS_ENABLED === '1') {
+        const result = await this.mmsService.sendMms(
           user.phoneNumber!,
           smsContent(user, action),
+          [],
         );
+
         if (result) {
           notif.sent = true;
         }
@@ -163,7 +180,7 @@ export class NotifsService {
           actionUrl(action.id, true),
         ),
       (user, action) =>
-        `New member action: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
+        `New Alliance action to complete: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
     );
   }
 }

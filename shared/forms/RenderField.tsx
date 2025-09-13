@@ -170,7 +170,7 @@ export function RenderField<TId extends string = string>({
               disabled={disabled}
               className="mt-1 mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <span className="text-zinc-700">
+            <span className="text-zinc-700 flex flex-row items-start">
               <FormMarkdownWrapper markdownContent={field.label} />
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </span>

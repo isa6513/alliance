@@ -39,6 +39,8 @@ import {
   DeclineActionDto,
   LatLonDto,
   OptOutActionDto,
+  PreEventNotifDataDto,
+  PreEventNotifDataQueryDto,
   UpdateActionActivityDto,
   UpdateActionDto,
 } from './dto/action.dto';
@@ -418,5 +420,19 @@ export class ActionsController {
     @Request() req: JwtRequest,
   ): Promise<ActionActivityDto> {
     return this.actionsService.updateActivity(id, commentDto, req.user.sub);
+  }
+
+  @Get('preEventNotifData/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: PreEventNotifDataDto })
+  eventNotifData(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: PreEventNotifDataQueryDto,
+  ): Promise<PreEventNotifDataDto> {
+    return this.actionsService.eventNotifData(
+      id,
+      query.type,
+      query.sendNotifsTo,
+    );
   }
 }

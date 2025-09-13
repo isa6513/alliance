@@ -16,11 +16,11 @@ import { ForumModule } from './forum/forum.module';
 import { GeoModule } from './geo/geo.module';
 import { ImagesModule } from './images/images.module';
 import { MailModule } from './mail/mail.module';
+import { MmsModule } from './mms/mms.module';
 import { NotifsModule } from './notifs/notifs.module';
 import { PaymentsModule } from './payments/payments.module';
 import { S3Module } from './s3/s3.module';
 import { SearchModule } from './search/search.module';
-import { SmsModule } from './sms/sms.module';
 import { TasksModule } from './tasks/tasks.module';
 import { UserModule } from './user/user.module';
 import { UserService } from './user/user.service';
@@ -62,12 +62,12 @@ import { UserService } from './user/user.service';
     ForumModule,
     NotifsModule,
     GeoModule,
-    SmsModule,
     MailModule,
     PaymentsModule,
     AdminViewerModule,
     SearchModule,
     TasksModule,
+    MmsModule,
   ],
   controllers: [AppController],
   providers: [],
