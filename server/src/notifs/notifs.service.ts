@@ -124,7 +124,7 @@ export class NotifsService {
           notif.sent = true;
         }
       }
-      if (this.shouldTextUser(user) && process.env.SMS_ENABLED === '1') {
+      if (this.shouldTextUser(user)) {
         const result = await this.mmsService.sendMms(
           user.phoneNumber!,
           smsContent(user, action),
