@@ -380,12 +380,10 @@ jobs:
             export STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}
             export ASSETS_BUCKET=${{ secrets.ASSETS_BUCKET_NAME }}
             export POSTHOG_KEY=${{ secrets.POSTHOG_KEY }}
-            export SINCH_PROJECT_ID=${{ secrets.SINCH_PROJECT_ID }}
-            export SINCH_KEY_ID=${{ secrets.SINCH_KEY_ID }}
-            export SINCH_KEY_SECRET=${{ secrets.SINCH_KEY_SECRET }}
-            export SINCH_NUMBER=${{ secrets.SINCH_NUMBER }}
-            export SINCH_REGION=${{ secrets.SINCH_REGION }}
             export APP_URL=https://${{vars.DOMAIN_NAME}}
+            export TWILIO_PHONE_NUMBER=${{ secrets.TWILIO_PHONE_NUMBER }}
+            export TWILIO_ACCOUNT_SID=${{ secrets.TWILIO_ACCOUNT_SID }}
+            export TWILIO_AUTH_TOKEN=${{ secrets.TWILIO_AUTH_TOKEN }}
 
             rollback () {
               echo "Deployment failed - rolling back"
