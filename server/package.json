@@ -48,6 +48,7 @@
     "cookie-parser": "^1.4.7",
     "date-fns": "^4.1.0",
     "jest-ts-auto-mock": "^2.1.0",
+    "libphonenumber-js": "^1.12.17",
     "nodemailer": "^7.0.3",
     "pg": "^8.15.5",
     "postgres": "^3.4.5",

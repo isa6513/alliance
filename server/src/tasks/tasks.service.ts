@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { parsePhoneNumberWithError } from 'libphonenumber-js';
 import { Action } from 'src/actions/entities/action.entity';
 import { getImageSource } from 'src/images/images.service';
 import { UserService } from 'src/user/user.service';
@@ -16,6 +17,7 @@ import { FormSchema, Page } from './schema';
 
 @Injectable()
 export class TasksService {
+  private readonly logger = new Logger(TasksService.name);
   constructor(
     @InjectRepository(Form)
     private formRepository: Repository<Form>,
@@ -79,19 +81,19 @@ export class TasksService {
       submitFormDto.answers,
     );
     if (phoneNumber) {
-      //TODO: non hacky version of this
-      let formattedPhoneNumber = '';
-      if (phoneNumber.startsWith('+1')) {
-        formattedPhoneNumber = phoneNumber;
-      } else if (phoneNumber.startsWith('1')) {
-        formattedPhoneNumber = '+' + phoneNumber;
-      } else {
-        formattedPhoneNumber = '+1' + phoneNumber;
-      }
+      this.logger.log(`Extracted phone number: ${phoneNumber}`);
+      const parsedNumber = parsePhoneNumberWithError(phoneNumber, 'US'); //TODO: check with non US numbers
 
-      user.phoneNumber = formattedPhoneNumber;
-      await this.userService.update(user.id, user);
+      if (parsedNumber.isValid()) {
+        this.logger.log(`Valid phone number: ${parsedNumber.number}`);
+        user.phoneNumberValidated = true;
+        user.phoneNumber = parsedNumber.number;
+      } else {
+        this.logger.warn(`Parsed an invalid phone number: ${phoneNumber}`);
+        user.phoneNumber = phoneNumber;
+      }
     }
+    await this.userService.update(user.id, user);
 
     const formResponse = this.formResponseRepository.create({
       ...submitFormDto,

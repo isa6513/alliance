@@ -60,7 +60,7 @@ export class User {
 
   @Column({ default: false })
   @ApiProperty()
-  phoneNumberVerified: boolean;
+  phoneNumberValidated: boolean;
 
   @Column({ default: false })
   @ApiProperty()
