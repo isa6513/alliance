@@ -1,4 +1,4 @@
-const CheckIcon = ({
+const DropdownIcon = ({
   size = "small",
   fill = "var(--color-green)",
 }: {
@@ -25,4 +25,4 @@ const CheckIcon = ({
   );
 };
 
-export default CheckIcon;
+export default DropdownIcon;

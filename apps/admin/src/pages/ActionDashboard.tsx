@@ -13,7 +13,10 @@ import {
   PreEventNotifDataDto,
   tasksListForms,
 } from "@alliance/shared/client";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
+import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import ActionForm from "../components/ActionForm";
@@ -165,6 +168,8 @@ const ActionDashboard: React.FC = () => {
   const [creatingEvent, setCreatingEvent] = useState<boolean>(false);
   const [eventCreatedSuccess, setEventCreatedSuccess] =
     useState<boolean>(false);
+
+  const [addEventExpanded, setAddEventExpanded] = useState(true);
 
   useEffect(() => {
     const loadNotifData = async () => {
@@ -571,28 +576,19 @@ const ActionDashboard: React.FC = () => {
               <div className="space-y-4">
                 {/* Current Status */}
                 <div className="flex flex-row gap-x-2">
-                  <button
+                  <Button
                     onClick={() =>
                       window.open(
                         `/database?table=action&id=${action.id}`,
                         "_blank"
                       )
                     }
-                    className="inline-flex cursor-pointer items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    color={ButtonColor.White}
+                    className="!px-3 !text-sm gap-x-1"
                   >
-                    <svg
-                      className="w-4 h-4 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      viewBox="0 0 24 24"
-                    >
-                      <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                      <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"></path>
-                      <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"></path>
-                    </svg>
+                    <DatabaseIcon size="large" />
                     Edit in Database
-                  </button>
+                  </Button>
                 </div>
                 <Card style={CardStyle.White}>
                   <h2 className="text-lg font-semibold mb-0">
@@ -722,7 +718,7 @@ const ActionDashboard: React.FC = () => {
             )}
 
             {activeTab === "details" && (
-              <Card style={CardStyle.White}>
+              <Card style={CardStyle.Grey}>
                 <ActionForm
                   form={form}
                   onInputChange={handleInputChange}
@@ -743,384 +739,396 @@ const ActionDashboard: React.FC = () => {
             {activeTab === "events" && action && (
               <div className="space-y-4">
                 <Card style={CardStyle.White}>
-                  <h2 className="text-lg font-semibold mb-4">Add New Event</h2>
-                  <form onSubmit={handleAddEvent} className="space-y-4">
-                    <div className="mb-4 flex flex-row items-center">
-                      <label
-                        htmlFor="newStatus"
-                        className="block text-black min-w-25"
-                      >
-                        New Status
-                      </label>
-                      <select
-                        id="newStatus"
-                        name="newStatus"
-                        value={eventForm.newStatus}
-                        onChange={handleEventInputChange}
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        {Object.entries(statusOptions).map(([key, label]) => (
-                          <option key={key} value={key}>
-                            {label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div
-                      className={`${
-                        useCustomName ? "bg-zinc-100" : ""
-                      } p-2 -m-1 rounded-md`}
+                  <div className="flex flex-row items-center justify-start gap-x-2">
+                    <button
+                      onClick={() => setAddEventExpanded(!addEventExpanded)}
+                      style={{
+                        transform: addEventExpanded
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                      }}
                     >
-                      <div className="flex items-center mb-2">
-                        <input
-                          type="checkbox"
-                          id="useCustomName"
-                          checked={useCustomName}
-                          onChange={(e) => setUseCustomName(e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
+                      <DropdownIcon size="small" fill="black" />
+                    </button>
+                    <h2 className="text-lg font-semibold">Add New Event</h2>
+                  </div>
+                  {addEventExpanded && (
+                    <form onSubmit={handleAddEvent} className="space-y-4 mt-4">
+                      <div className="mb-4 flex flex-row items-center">
                         <label
-                          htmlFor="useCustomName"
-                          className="ml-2 block text-black"
+                          htmlFor="newStatus"
+                          className="block text-black min-w-25"
                         >
-                          Use custom name
-                        </label>
-                      </div>
-                      {!useCustomName && (
-                        <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                          <p className="text-sm text-blue-800">
-                            <strong>Using default title:</strong>{" "}
-                            {defaultEventNames[
-                              eventForm.newStatus as ActionStatus
-                            ] || "No default name for this status"}
-                          </p>
-                        </div>
-                      )}
-
-                      {useCustomName && (
-                        <>
-                          <div>
-                            <label
-                              htmlFor="eventTitle"
-                              className="block text-black mb-1"
-                            >
-                              Event Title *
-                            </label>
-                            <input
-                              type="text"
-                              id="eventTitle"
-                              name="title"
-                              value={eventForm.title}
-                              onChange={handleEventInputChange}
-                              required={useCustomName}
-                              placeholder="e.g., Launch Event, Commitments Reached"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                          </div>
-
-                          <div>
-                            <label
-                              htmlFor="eventDescription"
-                              className="block text-black mb-1"
-                            >
-                              Description
-                            </label>
-                            <textarea
-                              id="eventDescription"
-                              name="description"
-                              value={eventForm.description}
-                              onChange={handleEventInputChange}
-                              rows={2}
-                              placeholder="Describe what happened or what this event represents"
-                              className="bg-white w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    <div
-                      className={`${
-                        !launchNow ? "bg-zinc-100" : ""
-                      } p-2 -m-1 rounded-md mt-4`}
-                    >
-                      <div className="flex items-center mb-4">
-                        <input
-                          type="checkbox"
-                          id="launchNow"
-                          checked={launchNow}
-                          onChange={(e) => setLaunchNow(e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <label
-                          htmlFor="launchNow"
-                          className="ml-2 block text-black"
-                        >
-                          Launch now
-                        </label>
-                      </div>
-
-                      {!launchNow && (
-                        <div>
-                          <label
-                            htmlFor="eventDate"
-                            className="block text-black mb-1"
-                          >
-                            Event Date & Time * (
-                            {Intl.DateTimeFormat().resolvedOptions().timeZone})
-                          </label>
-                          <input
-                            type="datetime-local"
-                            id="eventDate"
-                            name="date"
-                            value={eventForm.date}
-                            onChange={handleEventInputChange}
-                            required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    <div
-                      className={`${
-                        deadlineExists ? "bg-zinc-100" : ""
-                      } p-2 -m-1 rounded-md`}
-                    >
-                      <div className="flex items-center mb-4">
-                        <input
-                          type="checkbox"
-                          id="deadlineExists"
-                          checked={deadlineExists}
-                          onChange={(e) => setDeadlineExists(e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <label
-                          htmlFor="deadlineExists"
-                          className="ml-2 block text-black"
-                        >
-                          Has deadline
-                        </label>
-                      </div>
-
-                      {deadlineExists && (
-                        <div>
-                          <label
-                            htmlFor="deadline"
-                            className="block text-black mb-1"
-                          >
-                            Event Deadline Date & Time * (
-                            {Intl.DateTimeFormat().resolvedOptions().timeZone})
-                          </label>
-                          <input
-                            type="datetime-local"
-                            id="deadline"
-                            name="deadline"
-                            value={eventForm.deadline}
-                            onChange={handleEventInputChange}
-                            required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label
-                          htmlFor="sendNotifsTo"
-                          className="block text-black mb-1"
-                        >
-                          Send Notifications To
+                          New Status
                         </label>
                         <select
-                          id="sendNotifsTo"
-                          name="sendNotifsTo"
-                          value={eventForm.sendNotifsTo}
+                          id="newStatus"
+                          name="newStatus"
+                          value={eventForm.newStatus}
                           onChange={handleEventInputChange}
+                          required
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                          <option value="all">All</option>
-                          <option value="none">None</option>
+                          {Object.entries(statusOptions).map(([key, label]) => (
+                            <option key={key} value={key}>
+                              {label}
+                            </option>
+                          ))}
                         </select>
                       </div>
 
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id="showInTimeline"
-                          name="showInTimeline"
-                          checked={eventForm.showInTimeline}
-                          onChange={handleEventInputChange}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded ml-10"
-                        />
-                        <label
-                          htmlFor="showInTimeline"
-                          className="ml-2 block text-black"
-                        >
-                          Show in public timeline
-                        </label>
+                      <div
+                        className={`${
+                          useCustomName ? "bg-zinc-100" : ""
+                        } p-2 -m-1 rounded-md`}
+                      >
+                        <div className="flex items-center mb-2">
+                          <input
+                            type="checkbox"
+                            id="useCustomName"
+                            checked={useCustomName}
+                            onChange={(e) => setUseCustomName(e.target.checked)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <label
+                            htmlFor="useCustomName"
+                            className="ml-2 block text-black"
+                          >
+                            Use custom name
+                          </label>
+                        </div>
+                        {!useCustomName && (
+                          <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                            <p className="text-sm text-blue-800">
+                              <strong>Using default title:</strong>{" "}
+                              {defaultEventNames[
+                                eventForm.newStatus as ActionStatus
+                              ] || "No default name for this status"}
+                            </p>
+                          </div>
+                        )}
+
+                        {useCustomName && (
+                          <>
+                            <div>
+                              <label
+                                htmlFor="eventTitle"
+                                className="block text-black mb-1"
+                              >
+                                Event Title *
+                              </label>
+                              <input
+                                type="text"
+                                id="eventTitle"
+                                name="title"
+                                value={eventForm.title}
+                                onChange={handleEventInputChange}
+                                required={useCustomName}
+                                placeholder="e.g., Launch Event, Commitments Reached"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+
+                            <div>
+                              <label
+                                htmlFor="eventDescription"
+                                className="block text-black mb-1"
+                              >
+                                Description
+                              </label>
+                              <textarea
+                                id="eventDescription"
+                                name="description"
+                                value={eventForm.description}
+                                onChange={handleEventInputChange}
+                                rows={2}
+                                placeholder="Describe what happened or what this event represents"
+                                className="bg-white w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                          </>
+                        )}
                       </div>
-                    </div>
 
-                    <button
-                      type="submit"
-                      disabled={creatingEvent}
-                      className={`w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${
-                        creatingEvent
-                          ? "bg-gray-400 text-white cursor-not-allowed"
-                          : eventCreatedSuccess
-                          ? "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
-                          : "bg-[#333] text-white hover:bg-[#444] focus:ring-blue-500"
-                      }`}
-                    >
-                      {creatingEvent ? (
-                        <span className="flex items-center justify-center">
-                          <svg
-                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
+                      <div
+                        className={`${
+                          !launchNow ? "bg-zinc-100" : ""
+                        } p-2 -m-1 rounded-md mt-4`}
+                      >
+                        <div className="flex items-center mb-4">
+                          <input
+                            type="checkbox"
+                            id="launchNow"
+                            checked={launchNow}
+                            onChange={(e) => setLaunchNow(e.target.checked)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <label
+                            htmlFor="launchNow"
+                            className="ml-2 block text-black"
                           >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                          </svg>
-                          Adding Event...
-                        </span>
-                      ) : eventCreatedSuccess ? (
-                        <span className="flex items-center justify-center">
-                          <svg
-                            className="w-5 h-5 mr-2"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                              clipRule="evenodd"
+                            Launch now
+                          </label>
+                        </div>
+
+                        {!launchNow && (
+                          <div>
+                            <label
+                              htmlFor="eventDate"
+                              className="block text-black mb-1"
+                            >
+                              Launch time (
+                              {Intl.DateTimeFormat().resolvedOptions().timeZone}
+                              ):
+                            </label>
+                            <input
+                              type="datetime-local"
+                              id="eventDate"
+                              name="date"
+                              value={eventForm.date}
+                              onChange={handleEventInputChange}
+                              required
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
-                          </svg>
-                          Event Added!
-                        </span>
-                      ) : (
-                        "Add Event"
-                      )}
-                    </button>
-                    <div>
-                      <p>
-                        This will send <b>{notifData?.n_emails}</b> emails and{" "}
-                        <b>{notifData?.n_texts}</b> texts
-                      </p>
-                    </div>
-                  </form>
-                </Card>
-                <Card style={CardStyle.White}>
-                  <h2 className="text-lg font-semibold mb-4">All Events</h2>
-                  <div className="space-y-3">
-                    {action.events && action.events.length > 0 ? (
-                      action.events
-                        .sort(
-                          (a, b) =>
-                            new Date(b.date).getTime() -
-                            new Date(a.date).getTime()
-                        )
-                        .map((event) => (
-                          <div
-                            key={event.id}
-                            className="border border-gray-200 rounded-lg p-3"
+                          </div>
+                        )}
+                      </div>
+
+                      <div
+                        className={`${
+                          deadlineExists ? "bg-zinc-100" : ""
+                        } p-2 -m-1 rounded-md`}
+                      >
+                        <div className="flex items-center mb-4">
+                          <input
+                            type="checkbox"
+                            id="deadlineExists"
+                            checked={deadlineExists}
+                            onChange={(e) =>
+                              setDeadlineExists(e.target.checked)
+                            }
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <label
+                            htmlFor="deadlineExists"
+                            className="ml-2 block text-black"
                           >
-                            <div className="flex justify-between items-start mb-2">
-                              <h3 className="font-medium text-gray-900 text-sm">
-                                {event.title}
-                              </h3>
-                              <span
-                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                                  event.newStatus
-                                )}`}
-                              >
-                                {formatStatus(event.newStatus)}
-                              </span>
+                            Has deadline
+                          </label>
+                        </div>
+
+                        {deadlineExists && (
+                          <div>
+                            <label
+                              htmlFor="deadline"
+                              className="block text-black mb-1"
+                            >
+                              Event Deadline Date & Time * (
+                              {Intl.DateTimeFormat().resolvedOptions().timeZone}
+                              )
+                            </label>
+                            <input
+                              type="datetime-local"
+                              id="deadline"
+                              name="deadline"
+                              value={eventForm.deadline}
+                              onChange={handleEventInputChange}
+                              required
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label
+                            htmlFor="sendNotifsTo"
+                            className="block text-black mb-1"
+                          >
+                            Send Notifications To
+                          </label>
+                          <select
+                            id="sendNotifsTo"
+                            name="sendNotifsTo"
+                            value={eventForm.sendNotifsTo}
+                            onChange={handleEventInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="all">All</option>
+                            <option value="none">None</option>
+                          </select>
+                        </div>
+
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="showInTimeline"
+                            name="showInTimeline"
+                            checked={eventForm.showInTimeline}
+                            onChange={handleEventInputChange}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded ml-10"
+                          />
+                          <label
+                            htmlFor="showInTimeline"
+                            className="ml-2 block text-black"
+                          >
+                            Show in public timeline
+                          </label>
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={creatingEvent}
+                        className={`w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${
+                          creatingEvent
+                            ? "bg-gray-400 text-white cursor-not-allowed"
+                            : eventCreatedSuccess
+                            ? "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
+                            : "bg-[#333] text-white hover:bg-[#444] focus:ring-blue-500"
+                        }`}
+                      >
+                        {creatingEvent ? (
+                          <span className="flex items-center justify-center">
+                            <svg
+                              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                            Adding Event...
+                          </span>
+                        ) : eventCreatedSuccess ? (
+                          <span className="flex items-center justify-center">
+                            <svg
+                              className="w-5 h-5 mr-2"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Event Added!
+                          </span>
+                        ) : (
+                          "Add Event"
+                        )}
+                      </button>
+                      <div>
+                        <p>
+                          This will send <b>{notifData?.n_emails}</b> emails and{" "}
+                          <b>{notifData?.n_texts}</b> texts
+                        </p>
+                      </div>
+                    </form>
+                  )}
+                </Card>
+                <h2 className="text-lg font-semibold mb-4">All Events</h2>
+                <div className="space-y-3">
+                  {action.events && action.events.length > 0 ? (
+                    action.events
+                      .sort(
+                        (a, b) =>
+                          new Date(b.date).getTime() -
+                          new Date(a.date).getTime()
+                      )
+                      .map((event) => (
+                        <div
+                          key={event.id}
+                          className="border border-gray-200 rounded-lg p-3 bg-white"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-medium text-gray-900 text-sm">
+                              {event.title}
+                            </h3>
+                            <span
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                event.newStatus
+                              )}`}
+                            >
+                              {formatStatus(event.newStatus)}
+                            </span>
+                          </div>
+
+                          {event.description && (
+                            <p className="text-sm text-gray-600 mb-2">
+                              {event.description}
+                            </p>
+                          )}
+
+                          <div className="text-xs text-gray-500 space-y-1">
+                            <div>
+                              Date:{" "}
+                              {new Date(event.date).toLocaleString(undefined, {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                timeZoneName: "short",
+                              })}
                             </div>
-
-                            {event.description && (
-                              <p className="text-sm text-gray-600 mb-2">
-                                {event.description}
-                              </p>
-                            )}
-
-                            <div className="text-xs text-gray-500 space-y-1">
-                              <div>
-                                Date:{" "}
-                                {new Date(event.date).toLocaleString(
-                                  undefined,
-                                  {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    timeZoneName: "short",
-                                  }
-                                )}
-                              </div>
-                              <div>
-                                Notifications: {event.sendNotifsTo} | Timeline:{" "}
-                                {event.showInTimeline ? "Visible" : "Hidden"}
-                              </div>
-                            </div>
-
-                            <div className="pt-2 mt-2 border-t border-gray-100">
-                              <button
-                                onClick={() =>
-                                  window.open(
-                                    `/database?table=action_event&id=${event.id}`,
-                                    "_blank"
-                                  )
-                                }
-                                className="inline-flex items-center px-2 py-1 border border-gray-300 text-xs leading-4 font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                              >
-                                <svg
-                                  className="w-3 h-3 mr-1"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth={2}
-                                >
-                                  <ellipse
-                                    cx="12"
-                                    cy="5"
-                                    rx="9"
-                                    ry="3"
-                                  ></ellipse>
-                                  <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"></path>
-                                  <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"></path>
-                                </svg>
-                                Edit in Database
-                              </button>
+                            <div>
+                              Notifications: {event.sendNotifsTo} | Timeline:{" "}
+                              {event.showInTimeline ? "Visible" : "Hidden"}
                             </div>
                           </div>
-                        ))
-                    ) : (
-                      <div className="text-sm text-gray-500 text-center py-4">
-                        No events created yet. Add an event to change the action
-                        status.
-                      </div>
-                    )}
-                  </div>
-                </Card>
+
+                          <div className="pt-2 mt-2 flex flex-row gap-x-2">
+                            <Button
+                              onClick={() =>
+                                window.open(
+                                  `/database?table=action_event&id=${event.id}`,
+                                  "_blank"
+                                )
+                              }
+                              color={ButtonColor.White}
+                              className="!px-3 !text-xs gap-x-1"
+                            >
+                              <DatabaseIcon />
+                              Edit in Database
+                            </Button>
+                            <Button
+                              onClick={() =>
+                                window.open(
+                                  `/database?table=action_event&id=${event.id}`,
+                                  "_blank"
+                                )
+                              }
+                              color={ButtonColor.White}
+                              className="!px-3 !text-xs gap-x-1"
+                              disabled
+                            >
+                              See notifications
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    <div className="text-sm text-gray-500 text-center py-4">
+                      No events created yet. Add an event to change the action
+                      status.
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>

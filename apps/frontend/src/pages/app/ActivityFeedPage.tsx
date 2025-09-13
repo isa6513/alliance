@@ -16,6 +16,8 @@ const ActivityFeedPage = () => {
     list: ActivityList.Global,
   });
 
+  console.log(activities);
+
   const friendsActivities = user
     ? activities.filter(
         (activity) =>
