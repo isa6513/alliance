@@ -174,7 +174,7 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
     if (window.confirm("Are you sure you want to delete this reply?")) {
       try {
         await forumDeleteComment({
-          path: { id: replyId.toString() },
+          path: { id: replyId },
         });
 
         // Refresh the post to get updated reply hierarchy
@@ -192,7 +192,7 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
   ) => {
     try {
       await forumUpdateComment({
-        path: { id: replyId.toString() },
+        path: { id: replyId },
         body: { editableContent: content },
       });
 
@@ -228,11 +228,11 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
   const handleLikeReply = async (replyId: number, unlike = false) => {
     if (unlike) {
       await forumUnlikeComment({
-        path: { id: replyId.toString() },
+        path: { id: replyId },
       });
     } else {
       await forumLikeComment({
-        path: { id: replyId.toString() },
+        path: { id: replyId },
       });
     }
     fetchComments();

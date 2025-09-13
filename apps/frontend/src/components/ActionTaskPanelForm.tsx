@@ -65,6 +65,7 @@ const ActionTaskPanelForm = ({
             persistKey={String(taskFormId)}
             onFormStarted={onFormStarted}
             onAbandonAction={onAbandonAction}
+            renderFormAsCompleted={false}
           />
         )}
       </div>

@@ -10,12 +10,6 @@ import type { AnyField, Condition, FieldValue, FormSchema } from "./formschema";
 
 type FormRendererProps = {
   form: FormSchema<string, string>;
-  /**
-   * Optional identifier to enable client-side persistence of form progress.
-   * When provided, the renderer will save partial answers and page progress
-   * to localStorage under a key derived from the form schema and this value.
-   * Use a per-instance id (e.g., taskFormId) to avoid collisions across contexts.
-   */
   persistKey?: string | null;
   onFormStarted?: () => void;
   onAbandonAction?: (outOfTime: boolean, reason: string) => void;
@@ -221,8 +215,6 @@ const FormRenderer = ({
       setCurrentPageIndex((prev) => prev + 1);
     } else if (onSubmit && !readOnly) {
       onSubmit({ answers: formData });
-      // Do not eagerly clear persisted data here, since we don't know if
-      // submission succeeded. Caller (parent) should clear on success.
     }
   };
 
@@ -249,34 +241,26 @@ const FormRenderer = ({
   useEffect(() => {
     if (readOnly) return;
     if (!persistKey || typeof window === "undefined") return;
-    try {
-      window.localStorage.setItem(
-        storageKey,
-        JSON.stringify({ formData, currentPageIndex, updatedAt: Date.now() })
-      );
-    } catch {
-      // ignore storage errors (quota, private mode, etc.)
-    }
+    window.localStorage.setItem(
+      storageKey,
+      JSON.stringify({ formData, currentPageIndex, updatedAt: Date.now() })
+    );
   }, [formData, currentPageIndex, persistKey, storageKey, readOnly]);
 
   // If key changes (different form/version/instance), attempt to restore
   useEffect(() => {
     if (readOnly) return;
     if (!persistKey || typeof window === "undefined") return;
-    try {
-      const raw = window.localStorage.getItem(storageKey);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (parsed?.formData && typeof parsed.formData === "object") {
-        setFormData(parsed.formData);
-      }
-      if (typeof parsed?.currentPageIndex === "number") {
-        const maxIdx = Math.max(0, (schema.pages?.length || 1) - 1);
-        const idx = Math.min(Math.max(0, parsed.currentPageIndex), maxIdx);
-        setCurrentPageIndex(idx);
-      }
-    } catch {
-      // ignore invalid JSON or access errors
+    const raw = window.localStorage.getItem(storageKey);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (parsed?.formData && typeof parsed.formData === "object") {
+      setFormData(parsed.formData);
+    }
+    if (typeof parsed?.currentPageIndex === "number") {
+      const maxIdx = Math.max(0, (schema.pages?.length || 1) - 1);
+      const idx = Math.min(Math.max(0, parsed.currentPageIndex), maxIdx);
+      setCurrentPageIndex(idx);
     }
   }, [persistKey, baseStorageKey, readOnly]);
 

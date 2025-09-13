@@ -118,7 +118,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
       const attachmentKeys = uploads.filter(Boolean) as string[];
 
       await forumUpdateComment({
-        path: { id: reply.id.toString() },
+        path: { id: reply.id },
         body: {
           editableContent: {
             body: editContent.trim(),
@@ -334,7 +334,7 @@ const ReplyComponent = ({
     } else {
       try {
         await forumUpdateComment({
-          path: { id: id.toString() },
+          path: { id },
           body: { editableContent: content },
         });
         // Note: We don't update reply.content directly as it won't trigger re-render

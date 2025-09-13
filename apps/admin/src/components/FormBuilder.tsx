@@ -1143,7 +1143,11 @@ export function FormBuilder({
 
         <div className="flex-1 p-6 overflow-y-auto min-h-0">
           {isPreviewMode ? (
-            <FormRenderer form={schema} onSubmit={null} />
+            <FormRenderer
+              form={schema}
+              onSubmit={null}
+              renderFormAsCompleted={false}
+            />
           ) : (
             <div
               className="max-w-2xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8"
