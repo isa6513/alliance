@@ -64,7 +64,7 @@ export class MailService {
     } else {
       mail.status = EmailStatus.Failed;
     }
-    mail.sentMessageId = messageId || null;
+    mail.sentMessageId = messageId;
     return this.mailRepository.save(mail);
   }
 

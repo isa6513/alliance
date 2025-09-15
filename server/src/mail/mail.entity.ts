@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   Column,
   CreateDateColumn,
@@ -29,8 +29,8 @@ export class Mail {
   id: number;
 
   @Column({ type: 'text', nullable: true })
-  @ApiProperty({ nullable: true })
-  sentMessageId: string | null;
+  @ApiPropertyOptional()
+  sentMessageId?: string;
 
   @ApiProperty()
   @Column()

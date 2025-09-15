@@ -544,9 +544,7 @@ export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | '
 
 export type Mail = {
     id: number;
-    sentMessageId: {
-        [key: string]: unknown;
-    } | null;
+    sentMessageId?: string;
     to: string;
     status: string;
     emailType: EmailType;
