@@ -56,6 +56,7 @@ const ActionPageTaskPanel = () => {
       action={action}
       userRelation={userRelation}
       {...panelHandlers}
+      card={true}
     />
   );
 };

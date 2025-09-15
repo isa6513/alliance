@@ -15,6 +15,7 @@ interface ActionTaskPanelActivityProps {
   onCompleteAction: () => void;
   onFormStarted: () => void;
   onAbandonAction: (outOfTime: boolean, reason: string) => void;
+  card?: boolean;
 }
 
 const ActionTaskPanelForm = ({
@@ -22,6 +23,7 @@ const ActionTaskPanelForm = ({
   onCompleteAction,
   onFormStarted,
   onAbandonAction,
+  card = false,
 }: ActionTaskPanelActivityProps) => {
   const [form, setForm] = useState<FormDto | null>(null);
   useEffect(() => {
@@ -56,7 +58,11 @@ const ActionTaskPanelForm = ({
     }
   };
   return (
-    <div className="flex flex-col gap-y-2">
+    <div
+      className={`flex flex-col gap-y-2 ${
+        card ? "p-6 border border-zinc-200" : ""
+      }`}
+    >
       <div>
         {form && (
           <FormRenderer

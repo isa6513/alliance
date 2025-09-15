@@ -53,7 +53,7 @@ const ActionTaskPanelCompleted = ({
         </p>
       </Card>
       {action.taskFormId && formResponse && form && (
-        <Card style={CardStyle.Grey} className="inline-block">
+        <Card style={CardStyle.Grey} className="inline-block !p-6">
           <FormRenderer
             form={form?.schema as unknown as FormSchema}
             completedFormResponse={formResponse}

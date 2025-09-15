@@ -25,6 +25,7 @@ export interface ActionTaskPanelProps {
   onJoinAction: () => void;
   onDeclineAction: () => void;
   onOptOutAction: () => void;
+  card?: boolean;
 }
 
 const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
@@ -34,6 +35,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   onJoinAction,
   onDeclineAction,
   onOptOutAction,
+  card = false,
 }: ActionTaskPanelProps) => {
   const { isAuthenticated } = useAuth();
 
@@ -149,6 +151,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
           onCompleteAction={handleCompleteWithTracking}
           onFormStarted={handleFormStarted}
           onAbandonAction={handleAbandonAction}
+          card={card}
         />
       );
     }
