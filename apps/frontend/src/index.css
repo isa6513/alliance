@@ -114,6 +114,10 @@
   font-weight: 450;
 }
 
+* {
+  font-synthesis: none !important;
+}
+
 html {
   overflow-x: hidden;
   font-size: 15px;
