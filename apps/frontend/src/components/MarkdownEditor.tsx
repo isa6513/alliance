@@ -33,7 +33,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       <div className="flex justify-between items-center">
         <label
           htmlFor="markdown-editor"
-          className=" text-[11pt] text-stone-800 mb-1"
+          className=" text-[11pt] text-zinc-800 mb-1"
         >
           {label}
         </label>

@@ -22,14 +22,14 @@ const ActionContents = () => {
       <div className="flex flex-row justify-between items-start mb-4">
         <div className="flex flex-col gap-y-3">
           {action !== undefined && (
-            <h1 className="font-serif !font-medium">{action.name}</h1>
+            <h1 className="font-serif !font-semibold">{action.name}</h1>
           )}
         </div>
       </div>
+
       <Outlet context={context} />
-      <div className="my-4">
-        <AppMarkdownWrapper markdownContent={action?.body} />
-      </div>
+
+      <AppMarkdownWrapper markdownContent={action?.body} className="mb-4" />
 
       <Comments objectId={action.id} type={"action"} />
     </div>

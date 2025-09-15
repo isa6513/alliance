@@ -55,7 +55,9 @@ const HomePage = () => {
 
   const bulletinCard = (
     <div>
-      <p className="font-medium text-xl text-black mb-2 font-serif">Bulletin</p>
+      <p className="font-semibold text-xl text-black mb-2 font-serif">
+        Bulletin
+      </p>
       <p className="text-black mb-2">
         Right now, we are focused on organizational improvement and small-scale
         experiments that test collective action strategies.
@@ -80,7 +82,7 @@ const HomePage = () => {
                 "min-h-[calc(100vh-var(--nav-height))] flex flex-col items-center"
               }
             >
-              <p className="font-serif text-center font-medium text-3xl mb-8 mt-12 sm:mt-16 lg:mt-24">
+              <p className="font-serif text-center font-semibold text-3xl mb-8 mt-12 sm:mt-16 lg:mt-28">
                 Current task
               </p>
               {currentTask && currentTask.relation ? (
@@ -91,13 +93,10 @@ const HomePage = () => {
                   onUpdateActionState={() => navigate(window.location.pathname)}
                 />
               ) : (
-                <Card
-                  style={CardStyle.Transparent}
-                  className="rounded-none w-full"
-                >
+                <Card style={CardStyle.Transparent} className="w-full">
                   <div className="px-2 py-36 flex flex-col items-center gap-y-4">
                     <CheckIcon size="large" />
-                    <p className="text-center text-zinc-500 text-xl">
+                    <p className="text-center text-zinc-500 text-lg">
                       Nothing to do right now!
                     </p>
                   </div>
@@ -112,7 +111,9 @@ const HomePage = () => {
               committedActions.length > 0 ||
               commitmentsReachedActions.length > 0) && (
               <div className="pb-54 flex flex-col items-center ">
-                <p className="mb-8 font-serif text-3xl text-center">Up next</p>
+                <p className="mb-8 font-serif font-semibold text-3xl text-center">
+                  Up next
+                </p>
                 <div className="flex flex-col gap-y-2 w-full">
                   {todoActions
                     .filter((action) => action.id !== currentTask?.id)
@@ -180,7 +181,7 @@ const HomePage = () => {
           <div className="flex flex-col divide-y *:py-6 *:px-2 divide-zinc-200">
             <div className="flex">{bulletinCard}</div>
             <div>
-              <p className="font-medium text-xl font-serif text-black">
+              <p className="font-semibold text-xl font-serif text-black">
                 Forum activity
               </p>
               {posts?.length === 0 && (
@@ -201,7 +202,7 @@ const HomePage = () => {
             </div>
             <div>
               <div className="flex flex-row justify-between">
-                <p className="font-medium text-xl font-serif text-black mb-3">
+                <p className="font-semibold text-xl font-serif text-black mb-3">
                   Friend activity
                 </p>
                 {friendActivities.length > 0 && (

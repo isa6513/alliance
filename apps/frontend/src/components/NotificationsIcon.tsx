@@ -50,7 +50,7 @@ const NotificationsIcon = () => {
           <div className="flex flex-row border-b border-zinc-200 justify-between">
             <Link
               to="/notifications"
-              className="text-black hover:bg-zinc-100 p-2 rounded-md flex cursor-pointer flex-col text-sm font-medium"
+              className="text-black hover:bg-zinc-100 p-2 rounded-md flex cursor-pointer flex-col text-sm"
             >
               See all
             </Link>
@@ -65,7 +65,7 @@ const NotificationsIcon = () => {
             </Button>
           </div>
           {notifications.length === 0 && (
-            <p className="text-zinc-500">No notifications</p>
+            <p className="text-zinc-500 text-center py-2">No notifications</p>
           )}
           {notifications.map((notification) => (
             <div

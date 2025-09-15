@@ -251,10 +251,10 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
           compact={compact}
         />
       ) : !user ? (
-        <div className="text-center py-6 bg-gray-50 rounded-lg">
-          <p className="text-gray-600">
+        <div className="text-center py-6 bg-zinc-50 rounded-lg">
+          <p className="text-zinc-600">
             Please{" "}
-            <Link to="/login" className="text-blue-600 hover:underline">
+            <Link to="/login" className="text-green hover:underline">
               log in
             </Link>{" "}
             to post a reply.

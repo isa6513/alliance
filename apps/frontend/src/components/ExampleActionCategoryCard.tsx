@@ -8,9 +8,9 @@ const ExampleActionCategoryCard: React.FC<ExampleActionCategoryCardProps> = ({
   description,
 }: ExampleActionCategoryCardProps) => {
   return (
-    <div className="flex flex-col border border-zinc-200 rounded p-3 md:p-6 bg-white md:!py-5">
-      <p className="text-xl font-bold mb-2">{title}</p>
-      <p className="text-lg">{description}</p>
+    <div className="flex flex-col border border-zinc-200 rounded p-4 md:p-5 bg-white">
+      <p className="text-lg font-semibold">{title}</p>
+      <p className="text-lg text-zinc-900">{description}</p>
     </div>
   );
 };

@@ -172,7 +172,7 @@ const ActionActivityDetail = () => {
                   value={activityDescription}
                   onChange={(e) => setActivityDescription(e.target.value)}
                   placeholder="Add any details you want to share about this activity..."
-                  className="w-full border border-stone-300 focus:outline-none p-2 rounded"
+                  className="w-full border border-zinc-300 focus:outline-none p-2 rounded"
                   rows={4}
                   onKeyDown={(e) => {
                     if (e.key === "Escape") {

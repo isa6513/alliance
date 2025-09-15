@@ -35,7 +35,7 @@ export function RenderField({
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-zinc-200 rounded focus:outline-none focus:ring-1 focus:ring-green focus:border-transparent"
             placeholder={field.placeholder}
           />
         </div>

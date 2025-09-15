@@ -8,7 +8,7 @@ interface MemberContractProps {
 const MemberContract = ({ id }: MemberContractProps) => {
   return (
     <Card className="" style={CardStyle.White} id={id}>
-      <div className="text-lg p-2">
+      <div className="text-lg text-zinc-900 px-5 py-4">
         <ol className="list-decimal list-inside mb-2 flex flex-col gap-y-2">
           <li>
             I commit to complete up to 15 minutes of Alliance tasks per week.

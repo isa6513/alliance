@@ -10,7 +10,8 @@ const ProfileImage = ({
   size?: "mini" | "small" | "medium" | "large" | "huge";
 }) => {
   const sizeClass = {
-    mini: "w-4 h-4 rounded-sm",
+    mini: "w-4 h-4 rounded-xs",
+    smaller: "w-5 h-5 rounded-xs",
     small: "w-6 h-6 rounded",
     medium: "w-8 h-8 rounded",
     large: "w-9 h-9 rounded",

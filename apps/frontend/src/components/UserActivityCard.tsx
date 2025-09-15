@@ -147,7 +147,7 @@ const UserActivityCard = ({
             <div>
               {isEditing ? (
                 <div className="flex-1 space-y-2">
-                  <div className="rounded-lg p-3 bg-zinc-100">
+                  <div className="rounded p-3 bg-zinc-100">
                     <EditableContentForm
                       value={editContent}
                       onChange={setEditContent}

@@ -35,7 +35,7 @@ const InviteMemberCard = () => {
             <code className="flex-1 px-3 py-3 bg-gray-100 rounded text-sm">
               {`${window.location.origin}/signup?ref=${user.referralCode}`}
             </code>
-            <Button onClick={copyReferralLink} className="active:bg-stone-500">
+            <Button onClick={copyReferralLink} className="active:bg-zinc-500">
               Copy
             </Button>
           </div>

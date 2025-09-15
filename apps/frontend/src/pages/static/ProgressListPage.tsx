@@ -30,8 +30,8 @@ const ProgressListPage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex-1 container mx-auto pt-16 md:pt-28 pb-56 flex flex-col px-5">
-        <div className="mx-auto w-full max-w-3xl flex flex-col gap-4 md:gap-6">
-          <h2 className="font-serif !font-medium !text-4xl md:!text-5xl mb-6">
+        <div className="mx-auto w-full max-w-3xl flex flex-col gap-4 md:gap-12">
+          <h2 className="text-center font-serif !font-semibold !text-4xl md:!text-6xl">
             Progress
           </h2>
           <div className="flex flex-col gap-y-4">
@@ -39,7 +39,7 @@ const ProgressListPage: React.FC = () => {
               <Link
                 to={`/progress/${post.slug}`}
                 key={post.slug}
-                className="hover:bg-zinc-100 p-3 -m-3 rounded-lg transition-all duration-50"
+                className="hover:bg-zinc-100 p-3 -m-3 flex flex-row justify-between rounded transition-all duration-50"
               >
                 {/* <Card
                   style={CardStyle.White}
@@ -47,12 +47,10 @@ const ProgressListPage: React.FC = () => {
                 > */}
                 <div className="p-0.5">
                   <div className="flex justify-between">
-                    <p className="text-base md:text-3xl font-serif">
+                    <p className="text-base md:text-xl">
                       {post.frontmatter.title}
                     </p>
-                    <p className="text-sm md:text-base text-green border border-green py-1 px-2 bg-green/20 rounded">
-                      {post.frontmatter.members} members
-                    </p>
+
                     {/* <Tag style={TagStyle.Green} size="large">
                       {post.frontmatter.members} members
                     </Tag> */}
@@ -69,6 +67,9 @@ const ProgressListPage: React.FC = () => {
                     )}
                   </p>
                 </div>
+                <p className="self-start text-sm md:text-base text-green border border-green py-1 px-2 bg-green/20 rounded">
+                  {post.frontmatter.members} members
+                </p>
                 {/* </Card> */}
               </Link>
             ))}

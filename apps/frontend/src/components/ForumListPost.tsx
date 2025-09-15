@@ -58,7 +58,7 @@ const ForumListPost = ({
           {post.pinned && <PinnedIcon size="small" />}
           <p className="font-medium text-base">{post.title}</p>
         </div>
-        <div className="flex justify-between items-end text-sm text-gray-500">
+        <div className="flex justify-between items-end text-sm text-zinc-500">
           <div className="flex flex-row gap-x-1.5 items-center">
             <ProfileImage pfp={post.author.profilePicture} size="small" />
             <p>
@@ -105,7 +105,7 @@ const ForumListPost = ({
     return (
       <div
         key={post.id}
-        className="flex items-start space-x-3 rounded-md border-gray-200 cursor-pointer hover:bg-gray-100 px-4 -mx-4"
+        className="flex items-start space-x-3 rounded-md border-zinc-200 cursor-pointer hover:bg-zinc-50 px-4 -mx-4"
         onClick={() => {
           navigate(`/forum/post/${post.id}`);
         }}

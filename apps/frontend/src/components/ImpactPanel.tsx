@@ -32,7 +32,7 @@ const ImpactPanel: React.FC<ImpactPanelProps> = ({
 }: ImpactPanelProps) => {
   return (
     // <Card className="px-8">
-    <div className="flex flex-col gap-3 bg-stone-100 rounded-md p-3 px-5">
+    <div className="flex flex-col gap-3 bg-zinc-100 rounded-md p-3 px-5">
       <div className="flex flex-row gap-3">
         <div className="flex flex-col gap-3">
           <h2 className="text-lg font-bold">

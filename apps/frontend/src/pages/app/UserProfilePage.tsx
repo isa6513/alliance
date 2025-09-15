@@ -240,7 +240,7 @@ const UserProfilePage: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           <div className="w-full h-[900px]"></div>
           <Card style={CardStyle.White} className="p-8">
-            <p className="text-center text-stone-500">Loading profile...</p>
+            <p className="text-center text-zinc-500">Loading profile...</p>
           </Card>
         </div>
       </div>
@@ -252,7 +252,7 @@ const UserProfilePage: React.FC = () => {
       <div className="bg-page pt-20 px-8 md:px-16">
         <div className="max-w-4xl mx-auto">
           <Card style={CardStyle.White} className="p-8">
-            <p className="text-center text-stone-500">User not found</p>
+            <p className="text-center text-zinc-500">User not found</p>
           </Card>
         </div>
       </div>
@@ -306,7 +306,7 @@ const UserProfilePage: React.FC = () => {
               />
             ) : (
               <div className="flex flex-row gap-3 items-center">
-                <h1 className="font-serif !font-medium">
+                <h1 className="font-serif !font-semibold">
                   {profileUser.displayName}
                 </h1>
                 {profileUser.staff && (
@@ -323,13 +323,14 @@ const UserProfilePage: React.FC = () => {
               value={editBio}
               onChange={(e) => setEditBio(e.target.value)}
               rows={6}
-              className="w-full border border-stone-300 focus:outline-none p-2 -ml-2 mt-4"
+              className="w-full border border-zinc-300 focus:outline-none p-2 -ml-2 mt-4 mb-2"
               placeholder="Write something about yourself..."
             />
           ) : (
             profileUser.profileDescription && (
               <AppMarkdownWrapper
                 markdownContent={profileUser.profileDescription}
+                className="mb-2"
               />
             )
           )}
@@ -446,7 +447,7 @@ const UserProfilePage: React.FC = () => {
             <Card className="justify-center">
               <div className="px-2">
                 {friends.length === 0 && (
-                  <p className="mt-4 text-center text-stone-500">
+                  <p className="mt-4 text-center text-zinc-500">
                     No friends yet
                   </p>
                 )}

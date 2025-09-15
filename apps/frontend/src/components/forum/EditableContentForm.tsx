@@ -122,7 +122,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
       onDrop={onDrop}
     >
       <textarea
-        className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-transparent border-none ${
+        className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-transparent border-none ${
           expanded ? "" : "resize-none"
         } ${compact ? "text-sm" : ""}`}
         rows={expanded ? 2 : 1}
@@ -133,7 +133,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         autoFocus={expanded}
       />
       {isDragging && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 rounded-lg pointer-events-none">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 rounded pointer-events-none">
           <div className="text-white font-medium">Drop images to attach</div>
         </div>
       )}

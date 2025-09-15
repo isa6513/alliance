@@ -134,7 +134,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
         </div>
 
         <div className="flex flex-row items-start gap-x-8">
-          <div className="flex-1 flex flex-col gap-y-2">
+          <div className="flex-1 flex flex-col gap-y-1">
             <p className="font-medium text-lg">{action.name}</p>
             <p>{action.shortDescription}</p>
           </div>

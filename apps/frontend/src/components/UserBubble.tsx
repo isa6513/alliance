@@ -16,7 +16,7 @@ const UserBubble: React.FC<UserBubbleProps> = ({
   return (
     <div
       className={`border rounded-full bg-gray-200 overflow-hidden ${
-        clipped ? "mr-[-25px] border-stone-50" : " border-stone-50"
+        clipped ? "mr-[-25px] border-zinc-50" : " border-zinc-50"
       } ${className}`}
     >
       <img

@@ -8,8 +8,10 @@ const NotificationsPage = () => {
 
   return (
     <div className="flex flex-col bg-page items-center">
-      <div className="px-4 py-16 md:py-12 flex flex-col items-center w-[calc(min(650px,100%))] gap-y-6">
-        <h2 className="w-full !font-medium">All Notifications</h2>
+      <div className="px-4 py-16 md:py-20 flex flex-col items-center w-[calc(min(650px,100%))] gap-y-6">
+        <h2 className="w-full !font-semibold font-serif !text-3xl md:!text-4xl">
+          All Notifications
+        </h2>
         <div className="flex flex-col gap-y-2 w-full">
           {allNotifications.map((notification) => (
             <Card

@@ -25,8 +25,8 @@ const Tag: React.FC<TagProps> = ({
   const tagStyle = style ?? TagStyle.Grey;
 
   const sizeClasses = {
-    small: "px-2 py-1 rounded-md text-sm",
-    large: "px-4 py-2 rounded-lg text-base",
+    small: "px-2 py-1 rounded text-sm",
+    large: "px-4 py-2 rounded text-base",
   };
 
   const styleClasses = {
@@ -35,7 +35,7 @@ const Tag: React.FC<TagProps> = ({
     [TagStyle.Grey]: "px-2 py-1 bg-zinc-400/20 self-start text-zinc-500",
     [TagStyle.Yellow]: "px-2 py-1 bg-yellow-400/20 self-start text-yellow-600",
     [TagStyle.GreyOutline]:
-      "px-2 py-1 border border-zinc-300 self-start text-zinc-500",
+      "px-2 py-1 border border-zinc-200 self-start text-zinc-500",
     [TagStyle.GreenOutline]:
       "px-2 py-1 border border-green self-start text-green",
   };

@@ -96,7 +96,7 @@ const Sidebar: React.FC = () => {
                 <div
                   key={action.id}
                   onClick={() => handleEditAction(action.id)}
-                  className="cursor-pointer hover:bg-stone-200 p-2 rounded-md"
+                  className="cursor-pointer hover:bg-zinc-200 p-2 rounded-md"
                 >
                   <p className="text-sm">{action.name}</p>
                 </div>

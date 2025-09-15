@@ -10,59 +10,59 @@ const GuidePage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
-      <div className="flex flex-col md:flex-row mx-auto gap-10 pt-16 md:pt-28 pb-56 px-5">
+      <div className="flex flex-col md:flex-row mx-40 gap-18 pt-16 md:pt-32 pb-56 px-5">
         <aside className="min-w-80">
-          <div className="flex flex-col md:sticky top-12 md:pr-10 md:border-r border-zinc-200">
-            <h2 className="font-serif !font-medium !text-xl md:!text-2xl max-w-2xl mb-4">
+          <div className="flex flex-col md:sticky top-12 md:pr-18 md:border-r border-zinc-200">
+            <h2 className="font-serif !font-semibold !text-xl md:!text-2xl max-w-2xl mb-4">
               Table of Contents
             </h2>
-            <ol className="flex flex-col gap-y-1">
+            <ol className="flex flex-col gap-y-1 *:hover:underline">
               <li>
-                <a href="#goals" className="underline hover:text-green">
+                <a href="#goals" className="">
                   Goals
                 </a>
               </li>
               <li>
-                <a href="#structure" className="underline hover:text-green">
+                <a href="#structure" className="">
                   Structure
                 </a>
               </li>
               <li>
-                <a href="#priorities" className="underline hover:text-green">
+                <a href="#priorities" className="">
                   How do we determine priorities?
                 </a>
               </li>
               <li>
-                <a href="#membership" className="underline hover:text-green">
+                <a href="#membership" className="">
                   What does it mean to be a member?
                 </a>
               </li>
               <li className="ml-4">
-                <a href="#contract" className="underline hover:text-green">
+                <a href="#contract" className="">
                   Contract
                 </a>
               </li>
               <li>
-                <a href="#governance" className="underline hover:text-green">
+                <a href="#governance" className="">
                   Governance
                 </a>
               </li>
             </ol>
           </div>
         </aside>
-        <div className="flex flex-col max-w-3xl">
-          <div className="mx-auto w-full mb-4 md:mb-8">
-            <h2 className="font-serif !font-medium !text-4xl md:!text-6xl">
+        <div className="flex flex-col max-w-[46rem]">
+          <div className="mx-auto w-full mb-4 md:mb-16">
+            <h2 className="font-serif text-center !font-semibold !text-4xl md:!text-6xl mb-3 text-black">
               Guide to the Alliance
             </h2>
-            <p className="text-md md:text-lg text-zinc-500 mt-2">
+            <p className="text-center text-base md:text-lg text-zinc-900">
               Information about the Alliance in recommended reading order. If
               you think you are likely to become a member, you do not need to
               read everything—we will walk you through the information when you
               sign up.
             </p>
           </div>
-          <Card className="md:mb-2" style={CardStyle.Green}>
+          <Card className="mb-6" style={CardStyle.Green}>
             <p>
               This guide was developed and approved by 25 founding members of
               the Alliance. Learn more about the process{" "}
@@ -72,6 +72,7 @@ const GuidePage: React.FC = () => {
               .
             </p>
           </Card>
+
           <MarkdownWrapper
             id="introduction"
             markdownContent="
@@ -88,6 +89,7 @@ While this project is highly ambitious, we believe it is the right time to under
           />
           <MarkdownWrapper
             id="goals"
+            className="mt-6"
             markdownContent="
 # Goals
 
@@ -103,6 +105,7 @@ As a starting point, we seek to address pressing global crises that affect billi
           />
           <MarkdownWrapper
             id="structure"
+            className="mt-6"
             markdownContent="
 
 # Structure
@@ -127,7 +130,7 @@ We are capable of working together in many possible arrangements for many purpos
 
 "
           />
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-4 my-6 w-full max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-3 my-6 w-full max-w-4xl mx-auto">
             <ExampleActionCategoryCard
               title="Collective funding"
               description="We pool funding for specific initiatives and projects within the Alliance and with our partners."
@@ -155,6 +158,7 @@ We are capable of working together in many possible arrangements for many purpos
           </div>
           <MarkdownWrapper
             id="priorities"
+            className="mt-2"
             markdownContent="
 
 # How do we determine priorities?
@@ -195,6 +199,7 @@ We accept our decision-making process will inevitably contain imperfections and 
           />
           <MarkdownWrapper
             id="membership"
+            className="mt-6"
             markdownContent="
 # What does it mean to be a member?
 
@@ -214,7 +219,9 @@ The following constitutes the basic promise that members make to one another:
 "
           />
 
-          <MemberContract id="contract" />
+          <div className="my-4">
+            <MemberContract id="contract" />
+          </div>
           <MarkdownWrapper
             id="required-investment"
             markdownContent="
@@ -232,6 +239,7 @@ For example, early members may take part in:
           />
           <MarkdownWrapper
             id="governance"
+            className="mt-6"
             markdownContent="
 # Governance
 Our governance depends on a periodic “course adjustment” process:
@@ -248,7 +256,7 @@ This governance procedure will be in effect prior to public launch. When we are 
 "
           />
         </div>
-        <aside className="w-80"></aside>
+        {/* <aside className="w-80"></aside> */}
       </div>
       <Footer />
     </div>

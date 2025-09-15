@@ -93,7 +93,7 @@ const LoginPage: React.FC = () => {
 
                 <div className="pt-2">
                   <button
-                    className="w-full flex justify-center text-center py-2 bg-stone-800 text-white rounded-md font-medium"
+                    className="w-full flex justify-center text-center py-2 bg-black text-white rounded-md font-medium"
                     type="submit"
                     disabled={loading}
                   >

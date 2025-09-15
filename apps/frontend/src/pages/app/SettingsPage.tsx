@@ -160,7 +160,7 @@ const SettingsPage: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           <h1 className="!text-3xl !font-serif !font-medium mb-2">Account</h1>
           <Card style={CardStyle.White} className="p-8">
-            <p className="text-center text-stone-500">
+            <p className="text-center text-zinc-500">
               Loading your account information...
             </p>
           </Card>

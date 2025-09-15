@@ -130,7 +130,7 @@ const LoginPage: React.FC = () => {
 
               <div className="pt-2">
                 <Button
-                  color={ButtonColor.Stone}
+                  color={ButtonColor.Black}
                   className="w-full flex justify-center text-center py-3"
                   type="submit"
                   disabled={loading}

@@ -208,7 +208,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         </div>
 
         {isEditing ? (
-          <div className="rounded-lg p-3 bg-zinc-100">
+          <div className="rounded p-3 bg-zinc-100">
             <EditableContentForm
               value={{ body: editContent, attachments: editAttachments }}
               onChange={(val) => {
@@ -396,7 +396,7 @@ const ReplyComponent = ({
           </button>
         )}
 
-        <div className={`border-transparent duration-1000 rounded-lg`}>
+        <div className={`border-transparent duration-1000 rounded`}>
           <Card
             key={reply.id}
             className={`!display-block transition-colors duration-1000 ${newReplyClass} ${

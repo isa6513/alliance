@@ -14,7 +14,7 @@ const Badge: React.FC<BadgeProps> = ({
     <div
       className={`${
         className ?? ""
-      } self-start font-medium whitespace-nowrap flex items-center justify-center bg-stone-200 text-gray-800 ${
+      } self-start font-medium whitespace-nowrap flex items-center justify-center bg-zinc-200 text-gray-800 ${
         size === "sm"
           ? "text-xs py-1 px-3 rounded-sm"
           : "py-2 px-3 text-sm rounded-md"

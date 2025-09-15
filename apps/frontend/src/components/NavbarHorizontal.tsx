@@ -73,7 +73,7 @@ const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
                 key={link}
                 className={`py-4 px-2 md:px-4 lg:px-6 border-b-2 border-x-zinc-200 space-x-1 flex flex-row items-center ${
                   currentLocation === link
-                    ? " border-green text-green bg-zinc-50"
+                    ? " border-green text-green "
                     : "border-transparent hover:bg-zinc-50"
                 }`}
               >

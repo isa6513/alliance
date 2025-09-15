@@ -69,7 +69,9 @@ const SignupPage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-page">
       <div className="flex flex-col flex-grow items-center justify-center ">
         <div className="w-full max-w-md px-8">
-          <h2 className="text-2xl text-center mb-8">Create an account</h2>
+          <h2 className="font-serif !text-3xl text-center mb-8">
+            Create an account
+          </h2>
 
           {error && (
             <Card
@@ -90,7 +92,7 @@ const SignupPage: React.FC = () => {
           <div className="mt-6 text-center">
             <p className="text-[11pt] text-zinc-600">
               Already have an account?{" "}
-              <Link to="/login" className="text-blue hover:underline">
+              <Link to="/login" className="text-green hover:underline">
                 Log in
               </Link>
             </p>

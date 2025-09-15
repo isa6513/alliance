@@ -126,7 +126,7 @@ const ProfileEditPage: React.FC = () => {
     <div className="bg-page w-full">
       <div className="max-w-[800px] mx-auto space-y-2">
         <div className="w-full h-[100px]"></div>
-        <div className="px-8 relative space-y-2 border-stone-300 border py-4 rounded mx-2 bg-white">
+        <div className="px-8 relative space-y-2 border-zinc-300 border py-4 rounded mx-2 bg-white">
           <div className="relative w-fit">
             <img
               src={
@@ -173,7 +173,7 @@ const ProfileEditPage: React.FC = () => {
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             rows={6}
-            className="w-full border border-stone-300 focus:outline-none p-2 -ml-2 mt-2"
+            className="w-full border border-zinc-300 focus:outline-none p-2 -ml-2 mt-2"
           />
           {/* button row */}
           <div className="absolute right-0 top-0 space-x-3 flex flex-row p-5">
@@ -196,7 +196,7 @@ const ProfileEditPage: React.FC = () => {
     //       <div className="flex flex-col items-center gap-4">
     //         <ProfileImage
     //           src={avatarUrl}
-    //           className="w-24 h-24 border-2 border-stone-300 rounded-full object-cover"
+    //           className="w-24 h-24 border-2 border-zinc-300 rounded-full object-cover"
     //         />
     //         <label className="cursor-pointer text-blue-600 underline text-sm">
     //           <input
@@ -216,7 +216,7 @@ const ProfileEditPage: React.FC = () => {
     //           type="text"
     //           value={name}
     //           onChange={(e) => setName(e.target.value)}
-    //           className="w-full border border-stone-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    //           className="w-full border border-zinc-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
     //         />
     //       </div>
 
@@ -227,15 +227,15 @@ const ProfileEditPage: React.FC = () => {
     //           value={bio}
     //           onChange={(e) => setBio(e.target.value)}
     //           rows={6}
-    //           className="w-full border border-stone-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    //           className="w-full border border-zinc-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
     //           placeholder="Write something about yourself (supports Markdown)"
     //         />
-    //         <p className="text-xs text-stone-500">Markdown preview:</p>
+    //         <p className="text-xs text-zinc-500">Markdown preview:</p>
     //         <div className="border border-dashed rounded-md p-3 prose max-w-none">
     //           {bio.trim() ? (
     //             <ReactMarkdown>{bio}</ReactMarkdown>
     //           ) : (
-    //             <p className="text-stone-400 italic">Nothing to preview…</p>
+    //             <p className="text-zinc-400 italic">Nothing to preview…</p>
     //           )}
     //         </div>
     //       </div>

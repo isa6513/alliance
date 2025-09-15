@@ -20,23 +20,20 @@ const ActivityFeedItem = ({
 }: ActivityFeedItem) => {
   return (
     <div className="flex flex-row gap-x-2">
-      <div className="flex-shrink-0 mt-2">
+      <div className="flex-shrink-0 mt-1">
         <Link to={`/user/${user.id}`}>
-          <ProfileImage pfp={user.profilePicture} size="medium" />
+          <ProfileImage pfp={user.profilePicture} size="small" />
         </Link>
       </div>
       <div className="">
         {showTitle && (
           <>
             {titleLink ? (
-              <Link
-                to={titleLink}
-                className="text-green font-medium hover:underline"
-              >
+              <Link to={titleLink} className="text-green hover:underline">
                 {title}
               </Link>
             ) : (
-              <p className="text-green font-medium">{title}</p>
+              <p className="text-green">{title}</p>
             )}
           </>
         )}

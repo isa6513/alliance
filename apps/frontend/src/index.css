@@ -84,25 +84,14 @@
 }
 
 @font-face {
-  font-family: "Hanken Grotesk";
-  src: url("/assets/fonts/HankenGrotesk-VariableFont_wght.ttf")
-    format("truetype");
-}
-
-@font-face {
   font-family: "Inter";
   src: url("/assets/fonts/Inter-VariableFont_opsz,wght.ttf") format("truetype");
 }
 
 @font-face {
-  font-family: "Freight Sans";
-  src: url("/assets/fonts/freight_sans_medium.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Freight Sans";
-  src: url("/assets/fonts/freight_sans_bold.woff2") format("woff2");
-  font-weight: bold;
+  font-family: "Hedvig";
+  src: url("/assets/fonts/HedvigLettersSerif-Regular-VariableFont_opsz.ttf")
+    format("truetype");
 }
 
 @theme {
@@ -138,12 +127,12 @@ html.white {
 }
 
 h1 {
-  font-weight: bold;
+  font-weight: 600;
   font-size: 30px;
 }
 
 h2 {
-  font-weight: bold;
+  font-weight: 600;
   font-size: 20px;
 }
 
@@ -163,11 +152,7 @@ span,
 label,
 input,
 button {
-  font-family: "IBM Plex Sans", sans-serif;
-}
-
-.font-adobe {
-  font-family: "Adobe Clean Serif", sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 img {
@@ -179,12 +164,8 @@ select {
   background-color: white;
 }
 
-.font-hanken {
-  font-family: "Hanken Grotesk", sans-serif;
-}
-
 .font-serif {
-  font-family: "georgia", serif;
+  font-family: "EB-Garamond", "Georgia", serif;
 }
 
 .font-ibm {
@@ -260,4 +241,8 @@ select {
 a,
 button {
   cursor: pointer;
+}
+
+hr {
+  border-color: var(--color-zinc-200);
 }

@@ -42,15 +42,15 @@ const FormInput: React.FC<FormInputProps> = ({
         required={required}
         disabled={disabled}
         className={`border ${
-          error ? "border-red-500" : "border-gray-300"
-        } rounded-md px-3 py-3 pb-2 bg-white focus:outline-none focus:ring-1 focus:ring-cyan-500 
+          error ? "border-red-500" : "border-zinc-200"
+        } rounded px-3 py-3 pb-2 bg-white focus:outline-none
         text-[11pt]  transition-all duration-200 
         ${
           disabled
-            ? "bg-page text-stone-500 cursor-not-allowed"
-            : "hover:border-gray-400"
+            ? "bg-page text-zinc-500 cursor-not-allowed"
+            : "hover:border-zinc-300"
         } 
-        ${error ? "focus:border-red-500" : "focus:border-cyan-500"}`}
+        ${error ? "focus:border-red-500" : "focus:border-green"}`}
         autoComplete={autoComplete}
       />
       {error && <p className="text-red-500 text-[10pt] mt-1">{error}</p>}
