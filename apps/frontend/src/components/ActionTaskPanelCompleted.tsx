@@ -45,25 +45,29 @@ const ActionTaskPanelCompleted = ({
   console.log("form", form);
   console.log("formResponse", formResponse);
 
-  return (
-    <div className="flex flex-col gap-y-5">
+  if (action.taskFormId && formResponse && form) {
+    return (
+      <Card style={CardStyle.Grey} className="inline-block !p-6">
+        <Card style={CardStyle.Green} className="border-none mb-4 bg-green/30">
+          You&apos;ve completed this action! Thank you for your help.
+        </Card>
+        <FormRenderer
+          form={form?.schema as unknown as FormSchema}
+          completedFormResponse={formResponse}
+          renderFormAsCompleted
+          onSubmit={null}
+        />
+      </Card>
+    );
+  } else {
+    return (
       <Card style={CardStyle.Green}>
         <p className="">
           You&apos;ve completed this action! Thank you for your help.
         </p>
       </Card>
-      {action.taskFormId && formResponse && form && (
-        <Card style={CardStyle.Grey} className="inline-block !p-6">
-          <FormRenderer
-            form={form?.schema as unknown as FormSchema}
-            completedFormResponse={formResponse}
-            renderFormAsCompleted
-            onSubmit={null}
-          />
-        </Card>
-      )}
-    </div>
-  );
+    );
+  }
 };
 
 export default ActionTaskPanelCompleted;
