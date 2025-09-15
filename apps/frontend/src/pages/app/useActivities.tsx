@@ -29,7 +29,7 @@ export type UseActivitiesProps =
 
 const useActivities = ({ list, objectId }: UseActivitiesProps) => {
   const [activities, setActivities] = useState<ActionActivityDto[]>([]);
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     let apiCall;
@@ -57,7 +57,7 @@ const useActivities = ({ list, objectId }: UseActivitiesProps) => {
 
       setActivities(respActivities);
     });
-  }, [list, objectId]);
+  }, [list, objectId, isAuthenticated]);
 
   const handleLikeActivity = useCallback(
     async (activityId: number) => {

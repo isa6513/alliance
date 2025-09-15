@@ -250,7 +250,7 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
           setReplyingTo={setReplyingTo}
           compact={compact}
         />
-      ) : !user ? (
+      ) : !user && !compact ? (
         <div className="text-center py-6 bg-zinc-50 rounded border border-zinc-200">
           <p className="text-zinc-600">
             Please{" "}
