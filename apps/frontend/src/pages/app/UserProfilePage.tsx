@@ -431,23 +431,23 @@ const UserProfilePage: React.FC = () => {
               ))}
             </div>
           )}
-          <div className="pb-24 mt-2">
-            {selectedTab === ProfileTabs.Forum && (
-              <div className="flex flex-col gap-y-1">
-                {forumPosts.length === 0 ? (
-                  <p className="mt-4 text-center text-zinc-500">
-                    No forum posts yet
-                  </p>
-                ) : (
-                  <div className="flex flex-col divide-y divide-zinc-200 mb-10 border border-zinc-200 rounded overflow-hidden">
-                    {forumPosts?.map((post: PostDto) => (
-                      <ForumListPost post={post} key={post.id} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+
+          {selectedTab === ProfileTabs.Forum && (
+            <div className="flex flex-col gap-y-1">
+              {forumPosts.length === 0 ? (
+                <p className="mt-4 text-center text-zinc-500">
+                  No forum posts yet
+                </p>
+              ) : (
+                <div className="flex flex-col divide-y divide-zinc-200 mb-10 border border-zinc-200 rounded overflow-hidden">
+                  {forumPosts?.map((post: PostDto) => (
+                    <ForumListPost post={post} key={post.id} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {selectedTab === ProfileTabs.Friends && (
             <Card className="justify-center">
               <div className="px-2">
@@ -462,18 +462,6 @@ const UserProfilePage: React.FC = () => {
                   originalTab={openFriendRequest ? "received" : "friends"}
                 />
               </div>
-              {/* <div className="flex flex-col gap-y-2">
-                {friends?.map((friend: ProfileDto) => (
-                  <div
-                    className="flex flex-row w-full gap-2 items-center cursor-pointer hover:bg-zinc-50 rounded-md w-fit"
-                    onClick={() => navigate(`/user/${friend.id}`)}
-                    key={friend.id}
-                  >
-                    <ProfileImage pfp={friend.profilePicture} size="medium" />
-                    <p className="text-zinc-500">{friend.displayName}</p>
-                  </div>
-                ))}
-              </div> */}
             </Card>
           )}
         </div>

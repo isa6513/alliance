@@ -190,15 +190,16 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
                 {friends.map((friend) => (
                   <Link
                     key={friend.id}
-                    className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-gray-500"
+                    className="flex items-center p-3 border border-gray-300 rounded cursor-pointer hover:border-gray-500"
                     to={`/user/${friend.id}`}
                   >
                     <ProfileImage
-                      className="!w-12 !h-12 mr-4"
+                      size="medium"
+                      className="mr-3"
                       pfp={friend.profilePicture}
                     />
                     <div className="flex-grow">
-                      <p className="font-medium">{friend.displayName}</p>
+                      <p className="">{friend.displayName}</p>
                     </div>
                     {isMe && (
                       <Button
