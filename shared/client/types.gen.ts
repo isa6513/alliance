@@ -2085,8 +2085,10 @@ export type ForumLikePostData = {
 };
 
 export type ForumLikePostResponses = {
-    200: unknown;
+    200: PostDto;
 };
+
+export type ForumLikePostResponse = ForumLikePostResponses[keyof ForumLikePostResponses];
 
 export type ForumUnlikePostData = {
     body?: never;
@@ -2098,8 +2100,10 @@ export type ForumUnlikePostData = {
 };
 
 export type ForumUnlikePostResponses = {
-    200: unknown;
+    200: PostDto;
 };
+
+export type ForumUnlikePostResponse = ForumUnlikePostResponses[keyof ForumUnlikePostResponses];
 
 export type GeoSearchCityData = {
     body?: never;

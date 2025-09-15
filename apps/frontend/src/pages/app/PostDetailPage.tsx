@@ -1,14 +1,17 @@
 import {
   forumFindOnePost,
+  forumLikePost,
   forumRemovePost,
+  forumUnlikePost,
   PostDto,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { setRevalidate } from "../../applayout";
 import Comments from "../../components/Comments";
+import PostLikeButton from "../../components/PostLikeButton";
 import ProfileImage from "../../components/ProfileImage";
 import UserDisplayName from "../../components/UserDisplayName";
 import EditableContentRenderer from "../../components/forum/EditableContentRenderer";
@@ -18,33 +21,29 @@ import { formatTime } from "../../lib/utils";
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
   const [post, setPost] = useState<PostDto | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchPost = async () => {
-      if (!postId) return;
+  const fetchPost = useCallback(async () => {
+    if (!postId) return;
 
-      try {
-        setIsLoading(true);
-        const response = await forumFindOnePost({
-          path: { id: postId },
-        });
-        setPost(response.data ?? null);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching post details:", err);
-        setError("Failed to load post details");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPost();
+    try {
+      const response = await forumFindOnePost({
+        path: { id: postId },
+      });
+      setPost(response.data ?? null);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching post details:", err);
+      setError("Failed to load post details");
+    }
   }, [postId]);
+
+  useEffect(() => {
+    fetchPost();
+  }, [fetchPost]);
 
   const handleDeletePost = async () => {
     if (!post || post.author.id !== user?.id) {
@@ -65,15 +64,21 @@ const PostDetailPage: React.FC = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center py-10">
-          <div className="loader">Loading...</div>
-        </div>
-      </div>
-    );
-  }
+  const handleLike = useCallback(async () => {
+    if (!post) return;
+
+    if (post.likes.some((like) => like.id === user?.id)) {
+      await forumUnlikePost({
+        path: { id: post.id },
+      });
+    } else {
+      await forumLikePost({
+        path: { id: post.id },
+      });
+    }
+
+    fetchPost();
+  }, [post, fetchPost, user]);
 
   if (error) {
     return (
@@ -134,6 +139,13 @@ const PostDetailPage: React.FC = () => {
                   </span>
                 </div>
               )}
+              <div className="ml-2 -mt-1">
+                <PostLikeButton
+                  liked={post.likes.some((like) => like.id === user?.id)}
+                  likes={post.likes.length}
+                  handleLike={handleLike}
+                />
+              </div>
             </div>
             <div className="flex flex-row gap-x-2 mt-1 mb-4 items-center">
               <Link to={`/user/${post.author.id}`}>

@@ -507,7 +507,7 @@ export class ForumService {
     userId: number,
     unlike = false,
     type: 'comment' | 'post',
-  ) {
+  ): Promise<Comment | Post> {
     const object =
       type === 'comment'
         ? await this.commentRepository.findOne({
@@ -540,9 +540,11 @@ export class ForumService {
 
       object.likes.push(user);
     }
-    await (type === 'comment'
+    const obj = await (type === 'comment'
       ? this.commentRepository.save(object)
       : this.postRepository.save(object));
+
+    return obj;
   }
 
   async deleteReply(id: number, userId: number): Promise<void> {

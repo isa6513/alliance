@@ -1,7 +1,7 @@
 import BaseLikeButton, { BaseLikeButtonProps } from "./BaseLikeButton";
 
-const ActivityLikeButton: React.FC<BaseLikeButtonProps> = (props) => {
+const PostLikeButton: React.FC<BaseLikeButtonProps> = (props) => {
   return <BaseLikeButton {...props} border></BaseLikeButton>;
 };
 
-export default ActivityLikeButton;
+export default PostLikeButton;

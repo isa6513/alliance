@@ -18,6 +18,7 @@ import {
   UpdateCommentDto,
 } from './dto/comment.dto';
 import { CreatePostDto, PostDto, UpdatePostDto } from './dto/post.dto';
+import { Post as PostEntity } from './entities/post.entity';
 import { ForumService } from './forum.service';
 
 @ApiTags('forum')
@@ -185,24 +186,38 @@ export class ForumController {
 
   @Post('posts/:id/like')
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Like a post' })
-  @ApiOkResponse()
+  @ApiOperation({ summary: 'Like a comment' })
+  @ApiOkResponse({ type: PostDto })
   async likePost(
     @Param('id', ParseIntPipe) id: number,
     @ReqUser() user: JwtPayload,
   ): Promise<void> {
-    await this.forumService.likePostOrComment(id, user.sub, false, 'post');
+    new PostDto(
+      (await this.forumService.likePostOrComment(
+        id,
+        user.sub,
+        false,
+        'post',
+      )) as PostEntity,
+    );
   }
 
   @Post('posts/:id/unlike')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Unlike a post' })
-  @ApiOkResponse()
+  @ApiOkResponse({ type: PostDto })
   async unlikePost(
     @Param('id', ParseIntPipe) id: number,
     @ReqUser() user: JwtPayload,
   ): Promise<void> {
-    await this.forumService.likePostOrComment(id, user.sub, true, 'post');
+    new PostDto(
+      (await this.forumService.likePostOrComment(
+        id,
+        user.sub,
+        true,
+        'post',
+      )) as PostEntity,
+    );
   }
 
   @Delete('comments/:id')

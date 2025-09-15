@@ -78,7 +78,6 @@ const ActionActivityFeedItem = ({
             liked={activity.likes.some((like) => like.id === user?.id)}
             likes={activity.likes.length}
             handleLike={() => handleLike(activity)}
-            size="medium"
           />
         </div>
       </div>
