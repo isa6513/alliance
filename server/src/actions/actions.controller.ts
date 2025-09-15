@@ -34,6 +34,7 @@ import { ActionsService, UserActionRelationDto } from './actions.service';
 import {
   ActionActivityDto,
   ActionDto,
+  ActionEventDto,
   CreateActionDto,
   CreateActionEventDto,
   DeclineActionDto,
@@ -178,6 +179,13 @@ export class ActionsController {
   @ApiOkResponse({ type: ActionActivityDto })
   async getActivity(@Param('id', ParseIntPipe) id: number) {
     return this.actionsService.getActivity(id);
+  }
+
+  @Get('events/:id')
+  @Public()
+  @ApiOkResponse({ type: ActionEventDto })
+  async getEvent(@Param('id', ParseIntPipe) id: number) {
+    return this.actionsService.getEvent(id);
   }
 
   @Get(':id/activities')

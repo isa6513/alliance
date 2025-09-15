@@ -132,11 +132,11 @@ export class ActionEvent {
   notifications: ActionEventNotif[];
 
   @Column({ type: 'timestamptz', nullable: true })
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'When notifications for this event were sent (idempotency)',
-    nullable: true,
+    type: Date,
   })
   @Type(() => Date)
   @IsOptional()
-  notifsSentAt: Date | null;
+  notifsSentAt?: Date;
 }

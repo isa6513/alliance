@@ -255,7 +255,7 @@ const SettingsPage: React.FC = () => {
           <hr className="border-zinc-300 mt-4" />
 
           <div>
-            <h2 className="text-lg !font-semibold mb-4">Notifications</h2>
+            <h2 className="!text-lg !font-semibold mb-4">Action reminders</h2>
 
             <div className="mb-4">
               {!(

@@ -1108,14 +1108,10 @@ const ActionDashboard: React.FC = () => {
                             </Button>
                             <Button
                               onClick={() =>
-                                window.open(
-                                  `/database?table=action_event&id=${event.id}`,
-                                  "_blank"
-                                )
+                                (window.location.href = `/event/${event.id}`)
                               }
                               color={ButtonColor.White}
                               className="!px-3 !text-xs gap-x-1"
-                              disabled
                             >
                               See notifications
                             </Button>

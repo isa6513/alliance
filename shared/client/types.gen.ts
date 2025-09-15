@@ -76,7 +76,7 @@ export type UpdateProfileDto = {
     name?: string;
     email?: string;
     phoneNumber?: string;
-    phoneNumberVerified?: boolean;
+    phoneNumberValidated?: boolean;
     emailVerified?: boolean;
     contractDateSigned?: string | null;
     emailNotifsEnabled?: boolean;
@@ -120,7 +120,7 @@ export type User = {
     name: string;
     email: string;
     phoneNumber?: string;
-    phoneNumberVerified: boolean;
+    phoneNumberValidated: boolean;
     emailVerified: boolean;
     contractDateSigned: string | null;
     emailNotifsEnabled: boolean;
@@ -230,6 +230,10 @@ export type ActionEventDto = {
      * Indicates whether the event should be shown in the timeline
      */
     showInTimeline: boolean;
+    /**
+     * When notifications for this event were sent (idempotency)
+     */
+    notifsSentAt?: string;
 };
 
 export type ActionDto = {
@@ -532,6 +536,45 @@ export type NotificationDto = {
     createdAt: string;
     updatedAt: string;
     associatedUser?: ProfileDto;
+};
+
+export type NotificationChannel = 'text' | 'email' | 'push';
+
+export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction';
+
+export type Mail = {
+    id: number;
+    sentMessageId: {
+        [key: string]: unknown;
+    } | null;
+    to: string;
+    status: string;
+    emailType: EmailType;
+    createdAt: string;
+};
+
+export type Mms = {
+    id: number;
+    to: string;
+    from: string;
+    body: string;
+    status: string;
+    twilioSid: string;
+    errorCode?: number;
+    errorMessage?: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type ActionEventNotifDto = {
+    channel: NotificationChannel;
+    mail: Mail | null;
+    mms: Mms | null;
+    /**
+     * Indicates whether the notification has been sent
+     */
+    sent: boolean;
+    user: ProfileDto;
 };
 
 export type CreatePostDto = {
@@ -1443,6 +1486,21 @@ export type ActionsGetActivityResponses = {
 
 export type ActionsGetActivityResponse = ActionsGetActivityResponses[keyof ActionsGetActivityResponses];
 
+export type ActionsGetEventData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/events/{id}';
+};
+
+export type ActionsGetEventResponses = {
+    200: ActionEventDto;
+};
+
+export type ActionsGetEventResponse = ActionsGetEventResponses[keyof ActionsGetEventResponses];
+
 export type ActionsGetActionActivitiesData = {
     body?: never;
     path: {
@@ -1758,6 +1816,34 @@ export type NotifsClearData = {
 };
 
 export type NotifsClearResponses = {
+    200: unknown;
+};
+
+export type NotifsNotifsForEventData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/notifs/for-event/{id}';
+};
+
+export type NotifsNotifsForEventResponses = {
+    200: Array<ActionEventNotifDto>;
+};
+
+export type NotifsNotifsForEventResponse = NotifsNotifsForEventResponses[keyof NotifsNotifsForEventResponses];
+
+export type NotifsReloadNotifDataForEventData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/notifs/reloadNotifDataForEvent/{id}';
+};
+
+export type NotifsReloadNotifDataForEventResponses = {
     200: unknown;
 };
 

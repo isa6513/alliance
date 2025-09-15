@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   CreateDateColumn,
@@ -24,20 +25,26 @@ export enum EmailStatus {
 @Entity()
 export class Mail {
   @PrimaryGeneratedColumn()
+  @ApiProperty()
   id: number;
 
   @Column({ type: 'text', nullable: true })
+  @ApiProperty({ nullable: true })
   sentMessageId: string | null;
 
+  @ApiProperty()
   @Column()
   to: string;
 
+  @ApiProperty()
   @Column()
   status: string;
 
   @Column({ type: 'text' })
+  @ApiProperty({ enum: EmailType, enumName: 'EmailType' })
   emailType: EmailType;
 
+  @ApiProperty()
   @CreateDateColumn()
   createdAt: Date;
 }

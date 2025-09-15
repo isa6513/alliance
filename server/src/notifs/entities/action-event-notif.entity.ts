@@ -32,12 +32,12 @@ export class ActionEventNotif {
   @ApiProperty({ enum: NotificationChannel, enumName: 'NotificationChannel' })
   channel: NotificationChannel;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: Mail, nullable: true })
   @OneToOne(() => Mail, { nullable: true })
   @JoinColumn({ name: 'mailId' })
   mail: Mail | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: Mms, nullable: true })
   @OneToOne(() => Mms, { nullable: true })
   @JoinColumn({ name: 'mmsId' })
   mms: Mms | null;

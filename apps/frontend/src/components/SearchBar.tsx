@@ -150,6 +150,7 @@ const SearchBar = () => {
   const handleGlobalKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "k" && e.metaKey) {
+        e.preventDefault();
         setOpen(true);
         inputRef.current?.focus();
         setSelectedItem(items[0]);

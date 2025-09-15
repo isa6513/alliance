@@ -21,6 +21,7 @@ export class ActionEventDto extends PickType(ActionEvent, [
   'sendNotifsTo',
   'date',
   'deadline',
+  'notifsSentAt',
 ]) {
   constructor(partial: Partial<ActionEventDto>) {
     super();
@@ -28,7 +29,10 @@ export class ActionEventDto extends PickType(ActionEvent, [
   }
 }
 
-export class CreateActionEventDto extends OmitType(ActionEventDto, ['id']) {}
+export class CreateActionEventDto extends OmitType(ActionEventDto, [
+  'id',
+  'notifsSentAt',
+]) {}
 
 export class ActionDto extends OmitType(Action, [
   'createdAt',

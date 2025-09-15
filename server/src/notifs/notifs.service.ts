@@ -116,25 +116,24 @@ export class NotifsService {
       notif.actionEvent = event;
       notif.channel = NotificationChannel.Email;
       notif.sent = false;
-      if (this.shouldEmailUser(user)) {
-        notif.channel = NotificationChannel.Email;
-        const result = await sendMail(user, action);
-        notif.mail = result;
-        if (result.status === EmailStatus.Sent) {
-          notif.sent = true;
-        }
-      }
       if (this.shouldTextUser(user)) {
         const result = await this.mmsService.sendMms(
           user.phoneNumber!,
           smsContent(user, action),
           [],
         );
-
-        if (result) {
+        if (!result.errorCode) {
           notif.sent = true;
         }
         notif.channel = NotificationChannel.Text;
+        notif.mms = result;
+      } else if (this.shouldEmailUser(user)) {
+        notif.channel = NotificationChannel.Email;
+        const result = await sendMail(user, action);
+        notif.mail = result;
+        if (result.status === EmailStatus.Sent) {
+          notif.sent = true;
+        }
       } else {
         //TODO: pushes
       }
@@ -182,5 +181,29 @@ export class NotifsService {
       (user, action) =>
         `New Alliance action to complete: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
     );
+  }
+
+  async notifsForEvent(id: number) {
+    return this.actionEventNotifsRepository.find({
+      where: { actionEvent: { id } },
+      relations: ['user', 'mail', 'mms'],
+    });
+  }
+
+  async reloadNotifDataForEvent(id: number) {
+    const notifs = await this.notifsForEvent(id);
+    for (const notif of notifs) {
+      if (notif.channel === NotificationChannel.Text) {
+        const mms = notif.mms;
+        if (!mms) {
+          continue;
+        }
+        notif.mms = await this.mmsService.refreshMmsData(mms);
+        await this.actionEventNotifsRepository.save(notif);
+      }
+      if (notif.channel === NotificationChannel.Email) {
+        //TODO: refresh mail data
+      }
+    }
   }
 }

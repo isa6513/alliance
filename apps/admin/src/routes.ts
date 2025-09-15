@@ -10,6 +10,7 @@ export default [
       route("/forms/:formId", "pages/FormBuilder.tsx"),
       route("/users", "pages/UsersList.tsx"),
       route("/image", "pages/ImageUpload.tsx"),
+      route("/event/:eventId", "pages/ActionEventDashboard.tsx"),
     ]),
     route("/database", "pages/DatabaseViewer.tsx"),
   ]),

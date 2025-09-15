@@ -22,6 +22,7 @@ import { UserService } from '../user/user.service';
 import {
   ActionActivityDto,
   ActionDto,
+  ActionEventDto,
   CreateActionDto,
   CreateActionEventDto,
   LatLonDto,
@@ -503,6 +504,17 @@ export class ActionsService {
     });
     const commentsDto = comments.map((comment) => new CommentDto(comment));
     return new ActionActivityDto(activity, commentsDto);
+  }
+
+  async getEvent(id: number): Promise<ActionEventDto> {
+    const event = await this.actionEventRepository.findOne({
+      where: { id },
+      relations: ['action'],
+    });
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+    return new ActionEventDto(event);
   }
 
   async likeActivity(id: number, userId: number, unlike = false) {

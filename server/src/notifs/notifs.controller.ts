@@ -8,8 +8,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
 import { NotificationDto } from './dto/notification.dto';
+import { ActionEventNotifDto } from './entities/action-event-notif.dto';
 import { NotifsService } from './notifs.service';
 
 @Controller('notifs')
@@ -44,5 +46,21 @@ export class NotifsController {
   @ApiOkResponse()
   clear(@Request() req: JwtRequest) {
     return this.notifsService.clear(req.user.sub);
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('for-event/:id')
+  @ApiOkResponse({ type: [ActionEventNotifDto] })
+  notifsForEvent(@Param('id', ParseIntPipe) id: number) {
+    return this.notifsService
+      .notifsForEvent(id)
+      .then((notifs) => notifs.map((notif) => new ActionEventNotifDto(notif)));
+  }
+
+  @Post('reloadNotifDataForEvent/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  reloadNotifDataForEvent(@Param('id', ParseIntPipe) id: number) {
+    return this.notifsService.reloadNotifDataForEvent(id);
   }
 }
