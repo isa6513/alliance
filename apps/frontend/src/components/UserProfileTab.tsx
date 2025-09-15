@@ -14,8 +14,8 @@ const UserProfileTab: React.FC<UserProfileTabProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`flex gap-x-1 items-center rounded-md py-1.5 px-4 text-sm cursor-pointer ${
-        selected ? "bg-green" : "bg-white border border-zinc-200"
+      className={`flex gap-x-1 items-center rounded py-1.5 px-4 text-sm cursor-pointer ${
+        selected ? "bg-black" : "bg-white border border-zinc-200"
       }`}
     >
       <span className={`${selected ? "text-white" : "text-black"}`}>
