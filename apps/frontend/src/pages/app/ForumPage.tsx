@@ -28,12 +28,12 @@ const ForumPage: React.FC = () => {
       {isAuthenticated && (
         <div
           onClick={handleCreatePost}
-          className="text-gray-500 hover:bg-zinc-200/60 p-4 flex cursor-pointer flex-col border border-zinc-200 mb-3 rounded-sm"
+          className="text-zinc-500 hover:bg-zinc-100 p-4 flex cursor-pointer flex-col border border-zinc-200 mb-3 rounded-sm"
         >
           Create a new thread...
         </div>
       )}
-      <div className="flex flex-col divide-y divide-zinc-200 mb-10 border border-zinc-200 rounded-sm overflow-hidden">
+      <div className="flex flex-col divide-y divide-zinc-200 mb-10 border border-zinc-200 rounded overflow-hidden">
         {sorted.map((post) => (
           <ForumListPost key={post.id} post={post} />
         ))}

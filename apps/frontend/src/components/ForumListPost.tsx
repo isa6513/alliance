@@ -52,7 +52,7 @@ const ForumListPost = ({
     return (
       <Link
         to={`/forum/post/${post.id}`}
-        className={`w-full mb-0 !gap-y-1 p-4 hover:bg-zinc-100 bg-white`}
+        className={`w-full mb-0 !gap-y-1 p-4 hover:bg-zinc-50 bg-white`}
       >
         <div className="flex flex-row gap-1 mb-2">
           {post.pinned && <PinnedIcon size="small" />}

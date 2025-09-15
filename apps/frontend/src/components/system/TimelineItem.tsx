@@ -19,7 +19,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         </p>
         <p className="text-zinc-500 text-sm">{time}</p>
       </div>
-      <p className="mt-1 text-zinc-700">{description}</p>
+      <p className="mt-1 text-zinc-500 text-sm">{description}</p>
     </span>
   );
 };

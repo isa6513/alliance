@@ -37,7 +37,7 @@ const ActivityLikeButton = ({
     <div
       className={`flex flex-row gap-x-1 items-center ${
         handleLike !== null &&
-        "border border-zinc-200 rounded-md hover:bg-zinc-100"
+        "border border-zinc-200 rounded hover:bg-zinc-100"
       } px-2 py-1.5  cursor-pointer transition-colors duration-100`}
       onClick={(e) => {
         if (handleLike) {

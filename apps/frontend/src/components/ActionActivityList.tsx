@@ -56,7 +56,9 @@ const ActionActivityList = ({
 
   return (
     <div className="space-y-3 w-full">
-      <p className="font-medium text-base text-black">Recent activity</p>
+      <p className="font-serif font-semibold text-xl text-black">
+        Recent activity
+      </p>
       <div className="flex flex-col *:py-3 -my-3">
         {displayedActivities.map((activity) => (
           <ActionActivityFeedItem

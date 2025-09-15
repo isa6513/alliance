@@ -134,7 +134,7 @@ export default function ActionPage() {
           />
         }
         right={
-          <div className="divide-y divide-zinc-200 *:py-5">
+          <div className="divide-y divide-zinc-200 *:py-7">
             {action !== undefined && (
               <ActionEventsPanel action={action} events={action.events} />
             )}

@@ -15,7 +15,7 @@ const ActionEventsPanel = ({ action, events }: ActionEventsPanelProps) => {
 
   return (
     <div className="flex flex-col gap-y-3 w-full">
-      <p className="font-medium text-base text-black">Status</p>
+      <p className="font-semibold font-serif text-xl text-black">Stage</p>
       <Timeline>
         {events
           .slice()

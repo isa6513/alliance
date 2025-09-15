@@ -310,7 +310,7 @@ const UserProfilePage: React.FC = () => {
                   {profileUser.displayName}
                 </h1>
                 {profileUser.staff && (
-                  <div className="text-sm bg-staff text-white px-3 py-0.5 rounded self-center mb-1">
+                  <div className="text-sm bg-staff text-white px-3 py-0.5 rounded self-center mt-2">
                     Staff
                   </div>
                 )}
@@ -414,7 +414,7 @@ const UserProfilePage: React.FC = () => {
         </Card>
         <div className="pb-24 mt-2">
           {selectedTab === ProfileTabs.Activity && (
-            <div className="space-y-2">
+            <div className="flex flex-col gap-y-1">
               {completedActions.length === 0 && (
                 <p className="mt-4 text-center text-zinc-500">
                   No actions completed yet
@@ -431,18 +431,23 @@ const UserProfilePage: React.FC = () => {
               ))}
             </div>
           )}
-          {selectedTab === ProfileTabs.Forum && (
-            <div className="flex flex-col gap-y-1">
-              {forumPosts.length === 0 && (
-                <p className="mt-4 text-center text-zinc-500">
-                  No forum posts yet
-                </p>
-              )}
-              {forumPosts?.map((post: PostDto) => (
-                <ForumListPost post={post} key={post.id} />
-              ))}
-            </div>
-          )}
+          <div className="pb-24 mt-2">
+            {selectedTab === ProfileTabs.Forum && (
+              <div className="flex flex-col gap-y-1">
+                {forumPosts.length === 0 ? (
+                  <p className="mt-4 text-center text-zinc-500">
+                    No forum posts yet
+                  </p>
+                ) : (
+                  <div className="flex flex-col divide-y divide-zinc-200 mb-10 border border-zinc-200 rounded overflow-hidden">
+                    {forumPosts?.map((post: PostDto) => (
+                      <ForumListPost post={post} key={post.id} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           {selectedTab === ProfileTabs.Friends && (
             <Card className="justify-center">
               <div className="px-2">

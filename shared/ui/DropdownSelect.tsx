@@ -21,7 +21,7 @@ const DropdownSelect = ({
   return (
     <div className="relative">
       <button
-        className="font-ibm text-sm border border-gray-2 text-black bg-white hover:bg-gray-50 px-3 rounded-sm py-2 flex flex-row gap-x-2 items-center"
+        className="font-ibm text-sm border border-gray-2 text-black bg-white hover:bg-zinc-50 px-3 rounded-sm py-2 flex flex-row gap-x-2 items-center"
         style={{
           fontWeight: 450,
         }}
@@ -30,7 +30,7 @@ const DropdownSelect = ({
         <span>{value}</span> <DropdownIcon size="mini" fill="black" />
       </button>
       <div
-        className={`absolute z-10 top-[calc(100% - 30px)] left-0 w-[200px] bg-white border border-gray-2 overflow-hidden rounded-md ${
+        className={`absolute z-10 top-[calc(100% - 30px)] left-0 w-[220px] bg-white border border-zinc-200 overflow-hidden rounded ${
           isOpen ? "flex flex-col" : "hidden"
         }`}
         ref={ref}
@@ -42,7 +42,7 @@ const DropdownSelect = ({
               onChange(option);
               setIsOpen(false);
             }}
-            className="px-4 pr-3 py-2 hover:bg-gray-50 text-left font-ibm text-sm"
+            className="px-4 pr-3 py-2 hover:bg-zinc-50 text-left font-ibm text-sm"
             style={{
               fontWeight: 450,
             }}
