@@ -139,8 +139,6 @@ export class ActionEventNotifWorker {
       [now],
     );
 
-    console.log(rows);
-
     for (const row of rows) {
       await this.processOne({
         eventId: row.currentEventId,

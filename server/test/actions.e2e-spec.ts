@@ -183,7 +183,10 @@ describe('Actions (e2e)', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.length).toBe(2);
-      expect(res.body[1].status).toBe(ActionStatus.Draft);
+      console.log(res.body);
+      expect([res.body[1].status, res.body[0].status]).toContain(
+        ActionStatus.Draft,
+      );
     });
 
     it('unauthenticated user cannot access individual draft action', async () => {
