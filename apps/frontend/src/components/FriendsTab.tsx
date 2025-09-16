@@ -9,9 +9,9 @@ import {
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
-import ProfileImage from "./ProfileImage";
 
 interface FriendsTabProps {
   userId: number;

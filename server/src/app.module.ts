@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import * as multer from 'multer';
 import { ActionsModule } from './actions/actions.module';
 import { AdminViewerModule } from './admin-viewer/admin-viewer.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { connectionOptions } from './datasources/dataSource';
@@ -68,6 +69,7 @@ import { UserService } from './user/user.service';
     SearchModule,
     TasksModule,
     MmsModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [],

@@ -6,13 +6,13 @@ import {
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import { formatTime } from "../lib/utils";
 import ActivityLikeButton from "./ActivityLikeButton";
 import Comments from "./Comments";
-import ProfileImage from "./ProfileImage";
 import EditableContentForm from "./forum/EditableContentForm";
 
 interface UserActivityCardProps {

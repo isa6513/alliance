@@ -4,9 +4,9 @@ import {
   SearchItemType,
   searchSaveSelected,
 } from "@alliance/shared/client";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import ProfileImage from "./ProfileImage";
 
 const SearchBar = () => {
   const [search, setSearch] = useState("");

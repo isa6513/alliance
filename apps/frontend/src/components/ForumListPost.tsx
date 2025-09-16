@@ -4,11 +4,11 @@ import {
   PostDto,
 } from "@alliance/shared/client";
 import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { formatTime } from "../lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
-import ProfileImage from "./ProfileImage";
 import UserDisplayName from "./UserDisplayName";
 
 export interface ForumListPostProps {

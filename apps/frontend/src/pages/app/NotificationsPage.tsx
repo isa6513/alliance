@@ -1,5 +1,5 @@
 import Card from "@alliance/shared/ui/Card";
-import ProfileImage from "../../components/ProfileImage";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useNotifications } from "../../lib/useNotifications";
 import { formatTime } from "../../lib/utils";
 

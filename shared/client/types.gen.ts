@@ -825,6 +825,11 @@ export type FormResponseDto = {
     user: User;
 };
 
+export type TimeSpentForUserDto = {
+    userId: number;
+    timeSpentLast7Days: number;
+};
+
 export type AppHealthCheckData = {
     body?: never;
     path?: never;
@@ -2459,6 +2464,19 @@ export type TasksDeleteFormData = {
 export type TasksDeleteFormResponses = {
     200: unknown;
 };
+
+export type AnalyticsGetTimeSpentPerUserData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/time-spent-per-user';
+};
+
+export type AnalyticsGetTimeSpentPerUserResponses = {
+    200: Array<TimeSpentForUserDto>;
+};
+
+export type AnalyticsGetTimeSpentPerUserResponse = AnalyticsGetTimeSpentPerUserResponses[keyof AnalyticsGetTimeSpentPerUserResponses];
 
 export type ClientOptions = {
     baseUrl: string;

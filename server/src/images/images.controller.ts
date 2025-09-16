@@ -42,6 +42,7 @@ export class ImagesController {
     @Param('key') key: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
+    if (!key) throw new NotFoundException();
     try {
       const { Body, ContentType } = await this.s3.send(
         new GetObjectCommand({ Bucket: this.bucket, Key: key }),

@@ -1,8 +1,8 @@
 import { ProfileDto, userFindOne } from "@alliance/shared/client";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import React, { useEffect, useMemo, useState } from "react";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
-import ProfileImage from "../../components/ProfileImage";
 
 const PeoplePage: React.FC = () => {
   const authorIds: Record<string, number> = useMemo(() => {

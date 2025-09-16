@@ -6,13 +6,13 @@ import {
   PostDto,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { setRevalidate } from "../../applayout";
 import Comments from "../../components/Comments";
 import PostLikeButton from "../../components/PostLikeButton";
-import ProfileImage from "../../components/ProfileImage";
 import UserDisplayName from "../../components/UserDisplayName";
 import EditableContentRenderer from "../../components/forum/EditableContentRenderer";
 import { useAuth } from "../../lib/AuthContext";

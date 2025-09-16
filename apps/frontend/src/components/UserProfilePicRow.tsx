@@ -1,5 +1,5 @@
 import { ProfileDto } from "@alliance/shared/client";
-import ProfileImage from "./ProfileImage";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 
 const UserProfilePicRow = ({ users }: { users: ProfileDto[] }) => {
   const unique = users.filter(function (item, pos, self) {

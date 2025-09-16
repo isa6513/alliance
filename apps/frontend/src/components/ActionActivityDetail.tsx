@@ -3,6 +3,7 @@ import {
   actionsUpdateActivity,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useOutletContext, useParams } from "react-router";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
@@ -11,7 +12,6 @@ import { formatTime } from "../lib/utils";
 import { useActionLoaderData } from "../pages/app/ActionPage";
 import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
 import Comments from "./Comments";
-import ProfileImage from "./ProfileImage";
 import UserDisplayName from "./UserDisplayName";
 
 export function ErrorBoundary(error: unknown) {

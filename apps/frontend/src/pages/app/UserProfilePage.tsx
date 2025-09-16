@@ -14,6 +14,7 @@ import {
 import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import React, { useCallback, useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
@@ -21,7 +22,6 @@ import { useAppLoaderData } from "../../applayout";
 import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
 import FriendsTab from "../../components/FriendsTab";
-import ProfileImage from "../../components/ProfileImage";
 import UserActivityCard from "../../components/UserActivityCard";
 import UserProfileTab from "../../components/UserProfileTab";
 import { useAuth } from "../../lib/AuthContext";

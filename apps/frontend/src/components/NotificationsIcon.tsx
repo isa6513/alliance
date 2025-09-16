@@ -1,11 +1,11 @@
 import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { formatDate } from "date-fns";
 import { useCallback, useState } from "react";
 import { Link } from "react-router";
 import notifBell from "../assets/notif-bell.svg";
 import { useNotifications } from "../lib/useNotifications";
-import ProfileImage from "./ProfileImage";
 
 const NotificationsIcon = () => {
   const [isOpen, setIsOpen] = useState(false);

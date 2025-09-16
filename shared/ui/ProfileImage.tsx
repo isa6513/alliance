@@ -1,5 +1,3 @@
-import userImage from "../assets/noun-user-icon.svg";
-
 const ProfileImage = ({
   pfp,
   className,
@@ -19,7 +17,7 @@ const ProfileImage = ({
   };
   return (
     <img
-      src={!!pfp ? pfp : userImage}
+      src={!!pfp ? pfp : "/noun-user-icon.svg"}
       className={`object-cover bg-white inline ${className} ${
         sizeClass[size]
       } ${!pfp ? "border border-zinc-300" : ""}`}

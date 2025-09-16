@@ -1,36 +1,36 @@
 import {
-  Controller,
-  Get,
-  Put,
-  Delete,
-  Param,
-  Query,
   Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Put,
+  Query,
   UseGuards,
-  ValidationPipe,
   UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import {
-  ApiTags,
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
   ApiQuery,
-  ApiBadRequestResponse,
-  ApiNotFoundResponse,
-  ApiBody,
+  ApiTags,
 } from '@nestjs/swagger';
-import { AdminViewerService } from './admin-viewer.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
-import { TableListDto } from './dto/table-list.dto';
-import { TableDataDto, TableDataQueryDto } from './dto/table-data.dto';
-import {
-  UpdateRecordDto,
-  UpdateRecordResponseDto,
-} from './dto/update-record.dto';
+import { AdminViewerService } from './admin-viewer.service';
 import {
   DeleteRecordsDto,
   DeleteRecordsResponseDto,
 } from './dto/delete-records.dto';
+import { TableDataDto, TableDataQueryDto } from './dto/table-data.dto';
+import { TableListDto } from './dto/table-list.dto';
+import {
+  UpdateRecordDto,
+  UpdateRecordResponseDto,
+} from './dto/update-record.dto';
 
 @ApiTags('admin-viewer')
 @Controller('admin-viewer')

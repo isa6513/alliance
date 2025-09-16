@@ -7,10 +7,10 @@ import {
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { formatDistanceToNow } from "date-fns";
 import React, { useEffect, useRef, useState } from "react";
 import CommentLikeButton from "../CommentLikeButton";
-import ProfileImage from "../ProfileImage";
 import UserDisplayName from "../UserDisplayName";
 import EditableContentForm from "./EditableContentForm";
 import EditableContentRenderer from "./EditableContentRenderer";

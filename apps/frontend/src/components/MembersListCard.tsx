@@ -1,7 +1,7 @@
 import { ProfileDto } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { Link } from "react-router";
-import ProfileImage from "./ProfileImage";
 import UserDisplayName from "./UserDisplayName";
 
 export interface MembersListCardProps {

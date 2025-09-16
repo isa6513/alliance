@@ -384,6 +384,8 @@ jobs:
             export TWILIO_PHONE_NUMBER=${{ secrets.TWILIO_PHONE_NUMBER }}
             export TWILIO_ACCOUNT_SID=${{ secrets.TWILIO_ACCOUNT_SID }}
             export TWILIO_AUTH_TOKEN=${{ secrets.TWILIO_AUTH_TOKEN }}
+            export POSTHOG_QUERY_KEY=${{ secrets.POSTHOG_QUERY_KEY }}
+            export POSTHOG_PROJECT_ID=${{ secrets.POSTHOG_PROJECT_ID }}
 
             rollback () {
               echo "Deployment failed - rolling back"
