@@ -68,8 +68,6 @@ export class UserService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { cityId, profilePicture, ...updateData } = data;
 
-    console.log('profilePicture input data', profilePicture);
-
     if (profilePicture && profilePicture.length > 100) {
       //TODO: differentiate between file and url
       const key = profilePicture
