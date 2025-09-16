@@ -5,5 +5,5 @@ export class TimeSpentForUserDto {
   userId: number;
 
   @ApiProperty()
-  timeSpentLast7Days: number;
+  timeSpent: number;
 }

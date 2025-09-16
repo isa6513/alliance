@@ -8,31 +8,11 @@ export class AnalyticsService {
   private readonly API_KEY: string;
   private readonly PROJECT_ID: string;
   private readonly logger = new Logger(AnalyticsService.name);
-  private timeSpentPerUser: TimeSpentForUserDto[] = [];
+  private timeSpentPerUserLast7Days: TimeSpentForUserDto[] = [];
+  private timeSpentPerUserTotal: TimeSpentForUserDto[] = [];
 
-  constructor(private readonly userService: UserService) {
-    if (!process.env.POSTHOG_QUERY_KEY || !process.env.POSTHOG_PROJECT_ID) {
-      this.logger.warn('POSTHOG_QUERY_KEY or POSTHOG_PROJECT_ID is not set');
-      return;
-    }
-    this.API_KEY = process.env.POSTHOG_QUERY_KEY;
-    this.PROJECT_ID = process.env.POSTHOG_PROJECT_ID;
-  }
-
-  @Cron('*/5 * * * *')
-  async getTimeSpentFromPosthog() {
-    if (!this.API_KEY) {
-      this.logger.warn('POSTHOG_QUERY_KEY or POSTHOG_PROJECT_ID is not set');
-      return;
-    }
-    const users = await this.userService.findActiveUsers();
-
-    const emailToUserId = users.reduce((acc, user) => {
-      acc[user.email] = user.id;
-      return acc;
-    }, {});
-
-    const query = `
+  getQuery(range: 'last7Days' | 'total') {
+    return `
 SELECT
   p.id AS person_id,
   JSONExtractString(p.properties, 'email') AS email,
@@ -48,17 +28,37 @@ JOIN person_distinct_ids AS pdi
 JOIN persons AS p
   ON p.id = pdi.person_id
 WHERE e.event = '$pageview'
-  AND e.timestamp >= now() - INTERVAL 7 DAY
+  ${range === 'last7Days' ? 'AND e.timestamp >= now() - INTERVAL 7 DAY' : ''}
 
 GROUP BY p.id, email
 ORDER BY total_session_duration_seconds DESC
 LIMIT 100
           `;
+  }
+
+  constructor(private readonly userService: UserService) {
+    if (!process.env.POSTHOG_QUERY_KEY || !process.env.POSTHOG_PROJECT_ID) {
+      this.logger.warn('POSTHOG_QUERY_KEY or POSTHOG_PROJECT_ID is not set');
+      return;
+    }
+    this.API_KEY = process.env.POSTHOG_QUERY_KEY;
+    this.PROJECT_ID = process.env.POSTHOG_PROJECT_ID;
+  }
+
+  async getPosthogData(
+    range: 'last7Days' | 'total',
+  ): Promise<TimeSpentForUserDto[]> {
+    const users = await this.userService.findActiveUsers();
+
+    const emailToUserId = users.reduce((acc, user) => {
+      acc[user.email] = user.id;
+      return acc;
+    }, {});
 
     const body = {
       query: {
         kind: 'HogQLQuery',
-        query: query,
+        query: this.getQuery(range),
       },
     };
 
@@ -84,15 +84,34 @@ LIMIT 100
       };
     });
 
-    const timeSpentPerUser: TimeSpentForUserDto[] = results.map((result) => ({
-      userId: emailToUserId[result.email],
-      timeSpentLast7Days: result.total_session_duration_seconds,
-    }));
+    const timeSpentPerUser: TimeSpentForUserDto[] = results.map(
+      (result) =>
+        ({
+          userId: emailToUserId[result.email],
+          timeSpent: result.total_session_duration_seconds,
+        }) satisfies TimeSpentForUserDto,
+    );
+    return timeSpentPerUser;
+  }
 
-    this.timeSpentPerUser = timeSpentPerUser;
+  @Cron('*/5 * * * *')
+  async getTimeSpentFromPosthog() {
+    if (!this.API_KEY) {
+      this.logger.warn('POSTHOG_QUERY_KEY or POSTHOG_PROJECT_ID is not set');
+      return;
+    }
+    const timeSpentPerUserLast7Days = await this.getPosthogData('last7Days');
+    const timeSpentPerUserTotal = await this.getPosthogData('total');
+
+    this.timeSpentPerUserLast7Days = timeSpentPerUserLast7Days;
+    this.timeSpentPerUserTotal = timeSpentPerUserTotal;
   }
 
   async getTimeSpentPerUser(): Promise<TimeSpentForUserDto[]> {
-    return this.timeSpentPerUser;
+    return this.timeSpentPerUserLast7Days;
+  }
+
+  async getTimeSpentPerUserTotal(): Promise<TimeSpentForUserDto[]> {
+    return this.timeSpentPerUserTotal;
   }
 }

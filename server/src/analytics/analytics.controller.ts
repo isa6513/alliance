@@ -12,4 +12,10 @@ export class AnalyticsController {
   getTimeSpentPerUser() {
     return this.analyticsService.getTimeSpentPerUser();
   }
+
+  @Get('time-spent-per-user-total')
+  @ApiOkResponse({ type: [TimeSpentForUserDto] })
+  getTimeSpentPerUserTotal() {
+    return this.analyticsService.getTimeSpentPerUserTotal();
+  }
 }

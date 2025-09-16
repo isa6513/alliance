@@ -1,5 +1,6 @@
 import {
   analyticsGetTimeSpentPerUser,
+  analyticsGetTimeSpentPerUserTotal,
   userList,
 } from "@alliance/shared/client";
 import { TimeSpentForUserDto, User } from "@alliance/shared/client/types.gen";
@@ -8,14 +9,21 @@ import UserCard from "../components/UserCard";
 
 const UsersList: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [timeSpentPerUser, setTimeSpentPerUser] = useState<
+  const [timeSpentPerUserLast7, setTimeSpentPerUserLast7] = useState<
     TimeSpentForUserDto[]
   >([]);
-
+  const [timeSpentPerUserTotal, setTimeSpentPerUserTotal] = useState<
+    TimeSpentForUserDto[]
+  >([]);
   useEffect(() => {
     analyticsGetTimeSpentPerUser().then((res) => {
       if (res.data) {
-        setTimeSpentPerUser(res.data);
+        setTimeSpentPerUserLast7(res.data);
+      }
+    });
+    analyticsGetTimeSpentPerUserTotal().then((res) => {
+      if (res.data) {
+        setTimeSpentPerUserTotal(res.data);
       }
     });
   }, []);
@@ -24,8 +32,13 @@ const UsersList: React.FC = () => {
     userList().then((res) => setUsers(res.data || []));
   }, []);
 
-  const userToTimeSpent = timeSpentPerUser.reduce((acc, time) => {
-    acc[time.userId] = time.timeSpentLast7Days;
+  const userToTimeSpent = timeSpentPerUserLast7.reduce((acc, time) => {
+    acc[time.userId] = time.timeSpent;
+    return acc;
+  }, {} as Record<number, number>);
+
+  const userToTimeSpentTotal = timeSpentPerUserTotal.reduce((acc, time) => {
+    acc[time.userId] = time.timeSpent;
     return acc;
   }, {} as Record<number, number>);
 
@@ -44,6 +57,7 @@ const UsersList: React.FC = () => {
             key={user.id}
             user={user}
             timeSpent={userToTimeSpent[user.id]}
+            timeSpentTotal={userToTimeSpentTotal[user.id]}
           />
         ))}
       </div>
