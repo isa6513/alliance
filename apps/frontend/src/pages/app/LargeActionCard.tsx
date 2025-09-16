@@ -155,28 +155,32 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
         </div>
         {
           <div className="mt-6">
-            <div>
-              <div className="flex flex-row items-center justify-between w-full gap-x-2">
-                <p className="text-zinc-500 text-sm mb-1">
-                  {liveUserCount ?? 0} / {threshold}{" "}
-                  {action.status === "gathering_commitments"
-                    ? "members committed"
-                    : "members completed"}
-                  {friendActivities.length > 0 && (
-                    <>
-                      , including {friendActivities.length} friend
-                      {friendActivities.length === 1 ? "" : "s"}
-                    </>
-                  )}
-                </p>
-                <UserProfilePicRow
-                  users={friendActivities.map((activity) => activity.user)}
+            {!action.commitmentless && (
+              <div>
+                <div className="flex flex-row items-center justify-between w-full gap-x-2">
+                  <p className="text-zinc-500 text-sm mb-1">
+                    {liveUserCount ?? action.usersCompleted} / {threshold}{" "}
+                    {action.status === "gathering_commitments"
+                      ? "members committed"
+                      : "members completed"}
+                    {friendActivities.length > 0 && (
+                      <>
+                        , including {friendActivities.length} friend
+                        {friendActivities.length === 1 ? "" : "s"}
+                      </>
+                    )}
+                  </p>
+                  <UserProfilePicRow
+                    users={friendActivities.map((activity) => activity.user)}
+                  />
+                </div>
+                <CompletedBar
+                  percentage={
+                    ((liveUserCount ?? action.usersCompleted) / threshold) * 100
+                  }
                 />
               </div>
-              <CompletedBar
-                percentage={(liveUserCount ?? 0 / threshold) * 100}
-              />
-            </div>
+            )}
           </div>
         }
         <div className="mt-6 border-t border-zinc-200 pt-6">
