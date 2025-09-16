@@ -24,7 +24,10 @@ const UserCard = ({
         : ["hours", "minutes", "seconds"];
     return formatDuration(interval, {
       format: formatUnits,
-    });
+    })
+      .replace(" hours", "h")
+      .replace(" minutes", "m")
+      .replace(" seconds", "s");
   };
 
   const time = formatTime(timeSpent);
@@ -51,11 +54,13 @@ const UserCard = ({
         <p className="font-semibold text-sm">Activity</p>
         <div className="flex flex-row text-sm justify-between ">
           <p className="text-zinc-500">Last 7 days</p>
-          <p>{time || "0"}</p>
+          <p className={`${!time && "text-zinc-500"}`}>{time || "0"}</p>
         </div>
         <div className="flex flex-row text-sm justify-between ">
           <p className="text-zinc-500">Total</p>
-          <p>{timeTotal || "0"}</p>
+          <p className={`${!timeTotal && "text-zinc-500"}`}>
+            {timeTotal || "0"}
+          </p>
         </div>
       </div>
     </Card>
