@@ -15,6 +15,15 @@ import {
 import { Action } from '../actions/entities/action.entity';
 import { NotifsService } from '../notifs/notifs.service';
 import { UserService } from '../user/user.service';
+import { ActionEventNotifType } from './entities/action-event-notif.entity';
+
+export interface ActionEventNotification {
+  eventId: number;
+  type: ActionEventNotifType;
+}
+export type ReminderKind =
+  | ActionEventNotifType.ThreeDayReminder
+  | ActionEventNotifType.OneDayReminder;
 
 @Injectable()
 export class ActionEventNotifWorker {
@@ -45,13 +54,101 @@ export class ActionEventNotifWorker {
       .leftJoinAndSelect('event.action', 'action')
       .where('event.sendNotifsTo != :none', { none: NotificationType.None })
       .andWhere('event.date <= :now', { now })
-      .andWhere('event.notifsSentAt IS NULL')
+      .andWhere('event.announcementNotifsSentAt IS NULL')
       .orderBy('event.date', 'ASC')
       .limit(2)
       .getMany();
 
     for (const event of due) {
-      await this.processOne(event.id);
+      await this.processOne({
+        eventId: event.id,
+        type: ActionEventNotifType.Announcement,
+      });
+    }
+
+    const rows: Array<{
+      actionId: number;
+      currentEventId: number;
+      nextEventId: number;
+      nextDate: string;
+      which: '3dayreminder' | '1dayreminder';
+    }> = await this.eventRepo.query(
+      `
+          WITH params AS (
+            SELECT $1::timestamptz AS now
+          ),
+          current AS (
+            SELECT
+              e.*,
+              ROW_NUMBER() OVER (PARTITION BY e."actionId" ORDER BY e.date DESC) AS rn
+            FROM action_event e, params
+            WHERE e.date <= (SELECT now FROM params)
+          ),
+          next AS (
+            SELECT
+              e.*,
+              ROW_NUMBER() OVER (PARTITION BY e."actionId" ORDER BY e.date ASC) AS rn
+            FROM action_event e, params
+            WHERE e.date > (SELECT now FROM params)
+          ),
+          pairs AS (
+            SELECT
+              c."actionId",
+              c.id  AS "currentEventId",
+              c."newStatus",
+              c."threeDayReminderNotifsSentAt",
+              c."oneDayReminderNotifsSentAt",
+              n.id  AS "nextEventId",
+              n.date AS "nextDate"
+            FROM current c
+            JOIN next n
+              ON n."actionId" = c."actionId"
+             AND n.rn = 1
+            WHERE c.rn = 1
+          ),
+          due AS (
+            SELECT
+              p."actionId",
+              p."currentEventId",
+              p."nextEventId",
+              p."nextDate",
+              CASE
+                -- Prioritize 1-day if both thresholds are crossed
+                WHEN p."nextDate" <= (SELECT now FROM params) + INTERVAL '1 day'
+                     AND p."oneDayReminderNotifsSentAt" IS NULL
+                THEN '1dayreminder'
+                WHEN p."nextDate" <= (SELECT now FROM params) + INTERVAL '3 day'
+                     AND p."threeDayReminderNotifsSentAt" IS NULL
+                THEN '3dayreminder'
+                ELSE NULL
+              END AS which
+            FROM pairs p
+            WHERE p."newStatus" IN ('gathering_commitments', 'member_action')
+          )
+          SELECT
+            "actionId",
+            "currentEventId",
+            "nextEventId",
+            "nextDate",
+            which
+          FROM due
+          WHERE which IS NOT NULL
+          ORDER BY "nextDate" ASC
+          LIMIT 100
+          `,
+      [now],
+    );
+
+    console.log(rows);
+
+    for (const row of rows) {
+      await this.processOne({
+        eventId: row.currentEventId,
+        type:
+          row.which === '3dayreminder'
+            ? ActionEventNotifType.ThreeDayReminder
+            : ActionEventNotifType.OneDayReminder,
+      });
     }
   }
 
@@ -78,19 +175,23 @@ export class ActionEventNotifWorker {
     return this.userService.findActiveUsers();
   }
 
-  private async processOne(eventId: number) {
+  private async processOne(notif: ActionEventNotification) {
     await this.dataSource.transaction(async (manager) => {
       const event = await manager
         .createQueryBuilder(ActionEvent, 'event')
-        .where('event.id = :id', { id: eventId })
+        .where('event.id = :id', { id: notif.eventId })
         // .setLock('pessimistic_write') // or 'pessimistic_write_or_fail'
         // .setOnLocked('skip_locked')          // optional: avoid blocking if already locked (TypeORM >=0.3.15)
         .getOne();
 
+      console.log('processing notif', notif.eventId);
+
       if (!event) return;
 
       if (
-        event.notifsSentAt ||
+        (notif.type === 'announcement' && event.announcementNotifsSentAt) ||
+        (notif.type === '3dayreminder' && event.threeDayReminderNotifsSentAt) ||
+        (notif.type === '1dayreminder' && event.oneDayReminderNotifsSentAt) ||
         event.date > new Date() ||
         event.sendNotifsTo === NotificationType.None
       ) {
@@ -104,19 +205,56 @@ export class ActionEventNotifWorker {
         .loadOne<Action>();
       if (!action) return;
 
+      console.log('didnt return');
+
       const users = await this.getBaseUsersForEvent(event.newStatus, action);
 
-      if (event.newStatus === ActionStatus.GatheringCommitments) {
-        await this.notifsService.sendCommitmentNotifs(event, action, users);
-      }
+      if (notif.type === 'announcement') {
+        if (event.newStatus === ActionStatus.GatheringCommitments) {
+          await this.notifsService.sendCommitmentNotifs(event, action, users);
+        }
 
-      if (event.newStatus === ActionStatus.MemberAction) {
-        await this.notifsService.sendMemberActionNotifs(event, action, users);
+        if (event.newStatus === ActionStatus.MemberAction) {
+          await this.notifsService.sendMemberActionNotifs(event, action, users);
+        }
+      } else {
+        if (event.newStatus === ActionStatus.GatheringCommitments) {
+          console.log('sending commitment reminder notifs');
+          await this.notifsService.sendCommitmentReminderNotifs(
+            event,
+            action,
+            users,
+            notif.type,
+          );
+        }
+
+        if (event.newStatus === ActionStatus.MemberAction) {
+          console.log('sending member action reminder notifs');
+          await this.notifsService.sendMemberActionReminderNotifs(
+            event,
+            action,
+            users,
+            notif.type,
+          );
+        }
       }
 
       this.logger.log('notifs sent for event ' + event.id);
 
-      event.notifsSentAt = new Date();
+      switch (notif.type) {
+        case ActionEventNotifType.Announcement:
+          event.announcementNotifsSentAt = new Date();
+          break;
+        case ActionEventNotifType.ThreeDayReminder:
+          event.threeDayReminderNotifsSentAt = new Date();
+          break;
+        case ActionEventNotifType.OneDayReminder:
+          event.oneDayReminderNotifsSentAt = new Date();
+          break;
+        default:
+          ((x: never) => x)(notif.type);
+      }
+
       await manager.getRepository(ActionEvent).save(event);
     });
   }

@@ -124,11 +124,20 @@ export class ActionEvent {
   notifications: ActionEventNotif[];
 
   @Column({ type: 'timestamptz', nullable: true })
-  @ApiPropertyOptional({
-    description: 'When notifications for this event were sent (idempotency)',
-    type: Date,
-  })
+  @ApiPropertyOptional({ type: Date })
   @Type(() => Date)
   @IsOptional()
-  notifsSentAt?: Date;
+  announcementNotifsSentAt?: Date;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiPropertyOptional({ type: Date })
+  @Type(() => Date)
+  @IsOptional()
+  threeDayReminderNotifsSentAt?: Date;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiPropertyOptional({ type: Date })
+  @Type(() => Date)
+  @IsOptional()
+  oneDayReminderNotifsSentAt?: Date;
 }

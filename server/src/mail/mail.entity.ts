@@ -14,6 +14,8 @@ export enum EmailType {
   Other = 'other',
   Commitment = 'commitment',
   MemberAction = 'memberaction',
+  CommitmentReminder = 'commitmentreminder',
+  MemberActionReminder = 'memberactionreminder',
 }
 
 export enum EmailStatus {
@@ -40,7 +42,7 @@ export class Mail {
   @Column()
   status: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'enum', enum: EmailType, enumName: 'EmailType' })
   @ApiProperty({ enum: EmailType, enumName: 'EmailType' })
   emailType: EmailType;
 

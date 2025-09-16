@@ -13,11 +13,15 @@ export interface ActionEventsPanelProps {
 const ActionEventsPanel = ({ action, events }: ActionEventsPanelProps) => {
   const liveUserCount = useActionCount(action.id);
 
+  const pastEvents = events.filter(
+    (event) => new Date(event.date) < new Date()
+  );
+
   return (
     <div className="flex flex-col gap-y-3 w-full">
       <p className="font-semibold font-serif text-xl text-black">Stage</p>
       <Timeline>
-        {events
+        {pastEvents
           .slice()
           .reverse()
           .map((event, idx) => (

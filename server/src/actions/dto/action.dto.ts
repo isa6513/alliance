@@ -20,7 +20,9 @@ export class ActionEventDto extends PickType(ActionEvent, [
   'showInTimeline',
   'sendNotifsTo',
   'date',
-  'notifsSentAt',
+  'announcementNotifsSentAt',
+  'threeDayReminderNotifsSentAt',
+  'oneDayReminderNotifsSentAt',
 ]) {
   constructor(partial: Partial<ActionEventDto>) {
     super();
@@ -30,7 +32,9 @@ export class ActionEventDto extends PickType(ActionEvent, [
 
 export class CreateActionEventDto extends OmitType(ActionEventDto, [
   'id',
-  'notifsSentAt',
+  'announcementNotifsSentAt',
+  'threeDayReminderNotifsSentAt',
+  'oneDayReminderNotifsSentAt',
 ]) {}
 
 export class ActionDto extends OmitType(Action, [

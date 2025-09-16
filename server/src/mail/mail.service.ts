@@ -1,6 +1,7 @@
 import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ReminderKind } from 'src/notifs/action-event-notif.worker';
 import { Repository } from 'typeorm';
 import { EmailStatus, EmailType, Mail } from './mail.entity';
 
@@ -12,7 +13,7 @@ export class MailService {
     private readonly mailRepository: Repository<Mail>,
   ) {}
 
-  private readonly templates = {
+  private readonly templates: Record<EmailType, string> = {
     [EmailType.Welcome]: 'welcome',
     [EmailType.PasswordReset]: 'password-reset',
     [EmailType.Verification]: '',
@@ -20,6 +21,8 @@ export class MailService {
     [EmailType.PartialSignup]: 'partial-signup',
     [EmailType.Commitment]: 'commitment',
     [EmailType.MemberAction]: 'memberaction',
+    [EmailType.CommitmentReminder]: 'commitmentreminder',
+    [EmailType.MemberActionReminder]: 'memberactionreminder',
   };
 
   async sendMail(
@@ -155,6 +158,48 @@ export class MailService {
         name,
         actionName,
         url,
+      },
+    );
+  }
+
+  public async sendCommitmentReminderEmail(
+    email: string,
+    name: string,
+    actionName: string,
+    url: string,
+    kind: ReminderKind,
+  ): Promise<Mail> {
+    return this.sendMail(
+      email,
+      EmailType.CommitmentReminder,
+      `${kind === '3dayreminder' ? '3 day' : '1 day'} left to commit to: ` +
+        actionName,
+      {
+        name,
+        actionName,
+        url,
+        daysleft: kind === '3dayreminder' ? '3 days' : '1 day',
+      },
+    );
+  }
+
+  public async sendMemberActionReminderEmail(
+    email: string,
+    name: string,
+    actionName: string,
+    url: string,
+    kind: ReminderKind,
+  ): Promise<Mail> {
+    return this.sendMail(
+      email,
+      EmailType.MemberActionReminder,
+      `${kind === '3dayreminder' ? '3 day' : '1 day'} left to complete: ` +
+        actionName,
+      {
+        name,
+        actionName,
+        url,
+        daysleft: kind === '3dayreminder' ? '3 days' : '1 day',
       },
     );
   }

@@ -12,9 +12,18 @@ import { MmsService } from 'src/mms/mms.service';
 import { actionUrl } from 'src/search/approutes';
 import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
-import { ActionEventNotif } from './entities/action-event-notif.entity';
+import { ReminderKind } from './action-event-notif.worker';
+import {
+  ActionEventNotif,
+  ActionEventNotifType,
+} from './entities/action-event-notif.entity';
 import { Notification } from './entities/notification.entity';
 import { NotificationChannel } from './notifchannel';
+import {
+  defaultEventText1DayReminder,
+  defaultEventText3DayReminder,
+  defaultEventTextAnnouncement,
+} from './notifcontents';
 
 @Injectable()
 export class NotifsService {
@@ -98,25 +107,18 @@ export class NotifsService {
     users: User[],
     sendMail: (user: User, action: Action) => Promise<Mail>,
     smsContent: (user: User, action: Action) => string,
+    type: ActionEventNotifType,
   ) {
+    console.log('sending to n users: ', users.length);
     for (const user of users) {
-      if (
-        await this.actionEventNotifsRepository.findOne({
-          where: {
-            user: { id: user.id },
-            actionEvent: { id: event.id },
-            sent: true,
-          },
-        })
-      ) {
-        continue;
-      }
       const notif = new ActionEventNotif();
       notif.user = user;
       notif.actionEvent = event;
       notif.channel = NotificationChannel.Email;
       notif.sent = false;
+      notif.type = type;
       if (this.shouldTextUser(user)) {
+        console.log('sending text notif to user', user.id);
         const result = await this.mmsService.sendMms(
           user.phoneNumber!,
           smsContent(user, action),
@@ -128,6 +130,7 @@ export class NotifsService {
         notif.channel = NotificationChannel.Text;
         notif.mms = result;
       } else if (this.shouldEmailUser(user)) {
+        console.log('sending email notif to user', user.id);
         notif.channel = NotificationChannel.Email;
         const result = await sendMail(user, action);
         notif.mail = result;
@@ -157,8 +160,8 @@ export class NotifsService {
           action.name,
           actionUrl(action.id, true),
         ),
-      (user, action) =>
-        `Hi ${user.name}, please confirm your participation in this action: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
+      defaultEventTextAnnouncement[event.newStatus],
+      ActionEventNotifType.Announcement,
     );
   }
 
@@ -178,8 +181,63 @@ export class NotifsService {
           action.name,
           actionUrl(action.id, true),
         ),
+      defaultEventTextAnnouncement[event.newStatus],
+      ActionEventNotifType.Announcement,
+    );
+  }
+
+  async sendCommitmentReminderNotifs(
+    event: ActionEvent,
+    action: Action,
+    users: User[],
+    kind: ReminderKind,
+  ) {
+    await this.sendActionNotifsToUsers(
+      event,
+      action,
+      users,
       (user, action) =>
-        `Hi #${user.name}, please complete this action to which you committed: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
+        this.mailService.sendCommitmentReminderEmail(
+          user.email,
+          user.name,
+          action.name,
+          actionUrl(action.id, true),
+          kind,
+        ),
+      kind === '3dayreminder'
+        ? defaultEventText3DayReminder[event.newStatus]
+        : defaultEventText1DayReminder[event.newStatus],
+      kind === ActionEventNotifType.ThreeDayReminder
+        ? ActionEventNotifType.ThreeDayReminder
+        : ActionEventNotifType.OneDayReminder,
+    );
+  }
+
+  // TODO: refactor all of this a lot
+  async sendMemberActionReminderNotifs(
+    event: ActionEvent,
+    action: Action,
+    users: User[],
+    kind: ReminderKind,
+  ) {
+    await this.sendActionNotifsToUsers(
+      event,
+      action,
+      users,
+      (user, action) =>
+        this.mailService.sendMemberActionReminderEmail(
+          user.email,
+          user.name,
+          action.name,
+          actionUrl(action.id, true),
+          kind,
+        ),
+      kind === '3dayreminder'
+        ? defaultEventText3DayReminder[event.newStatus]
+        : defaultEventText1DayReminder[event.newStatus],
+      kind === ActionEventNotifType.ThreeDayReminder
+        ? ActionEventNotifType.ThreeDayReminder
+        : ActionEventNotifType.OneDayReminder,
     );
   }
 

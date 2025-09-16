@@ -13,6 +13,12 @@ import {
 } from 'typeorm';
 import { NotificationChannel } from '../notifchannel';
 
+export enum ActionEventNotifType {
+  Announcement = 'announcement',
+  ThreeDayReminder = '3dayreminder',
+  OneDayReminder = '1dayreminder',
+}
+
 @Entity()
 export class ActionEventNotif {
   @PrimaryGeneratedColumn()
@@ -23,6 +29,15 @@ export class ActionEventNotif {
   })
   @JoinColumn({ name: 'actionEventId' })
   actionEvent: ActionEvent;
+
+  @Column({
+    type: 'enum',
+    enum: ActionEventNotifType,
+    enumName: 'ActionEventNotifType',
+    default: ActionEventNotifType.Announcement,
+  })
+  @ApiProperty({ enum: ActionEventNotifType, enumName: 'ActionEventNotifType' })
+  type: ActionEventNotifType;
 
   @Column({
     type: 'enum',
