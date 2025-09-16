@@ -3,7 +3,7 @@ import {
   ActionEventDto,
   ActionStatus,
 } from "@alliance/shared/client";
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router";
 
 interface PhaseSegment {
@@ -102,8 +102,6 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
   };
 
   const navigate = useNavigate();
-
-  const [hovered, setHovered] = useState<boolean>(false);
 
   return (
     <div
@@ -207,14 +205,6 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
                   width: `${stickyLabel.width}px`,
                   top: 0,
                   height: "40px",
-                }}
-                onMouseEnter={(e) => {
-                  e.stopPropagation();
-                  setHovered(true);
-                }}
-                onMouseLeave={(e) => {
-                  e.stopPropagation();
-                  setHovered(false);
                 }}
               >
                 {/* <span

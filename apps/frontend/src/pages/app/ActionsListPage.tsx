@@ -16,7 +16,7 @@ export const filterActions = (
       return actions.filter(
         (action) => action.status === "gathering_commitments"
       );
-    case FilterMode.CommitmentsReached:
+    case FilterMode.OfficeAction:
       return actions.filter((action) => action.status === "office_action");
     case FilterMode.MemberAction:
       return actions.filter((action) => action.status === "member_action");
