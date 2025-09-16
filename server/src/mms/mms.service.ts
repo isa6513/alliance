@@ -59,7 +59,11 @@ export class MmsService {
    * @param mediaUrls An array of publicly accessible URLs for the media attachments (up to 10).
    * @returns A Promise resolving to the Twilio MessageInstance.
    */
-  async sendMms(to: string, body: string, mediaUrls: string[]): Promise<Mms> {
+  async sendMms(
+    to: string,
+    body: string,
+    mediaUrls: string[],
+  ): Promise<Mms | null> {
     this.logger.log(
       `Attempting to send MMS to ${to} with ${mediaUrls.length} media items.`,
     );
@@ -107,12 +111,7 @@ export class MmsService {
         `Failed to send MMS to ${to}: ${errorMessage}`,
         error instanceof Error ? error.stack : undefined,
       );
-      // Consider mapping specific Twilio errors (e.g., 21211 invalid 'to' number)
-      // to different NestJS exceptions (e.g., BadRequestException) if needed.
-      // For now, rethrow as InternalServerErrorException for simplicity.
-      throw new InternalServerErrorException(
-        `Failed to send MMS via Twilio: ${errorMessage}`,
-      );
+      return null;
     }
   }
 

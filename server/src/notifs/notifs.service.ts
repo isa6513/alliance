@@ -124,7 +124,7 @@ export class NotifsService {
           smsContent(user, action),
           [],
         );
-        if (!result.errorCode) {
+        if (result && !result.errorCode) {
           notif.sent = true;
         }
         notif.channel = NotificationChannel.Text;
