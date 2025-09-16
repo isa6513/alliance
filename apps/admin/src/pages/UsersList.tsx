@@ -43,8 +43,12 @@ const UsersList: React.FC = () => {
   }, {} as Record<number, number>);
 
   const sorted = users.sort((a, b) => {
-    return (userToTimeSpent[b.id] ?? 0) - (userToTimeSpent[a.id] ?? 0);
+    return (
+      (userToTimeSpentTotal[b.id] ?? 0) - (userToTimeSpentTotal[a.id] ?? 0)
+    );
   });
+
+  console.log(userToTimeSpentTotal);
 
   return (
     <div className="h-full p-5 pt-20 flex flex-col items-center gap-y-3">

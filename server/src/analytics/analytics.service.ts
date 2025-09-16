@@ -32,7 +32,6 @@ WHERE e.event = '$pageview'
 
 GROUP BY p.id, email
 ORDER BY total_session_duration_seconds DESC
-LIMIT 100
           `;
   }
 
