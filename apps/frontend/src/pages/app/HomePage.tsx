@@ -185,7 +185,7 @@ const HomePage = () => {
                 Forum activity
               </p>
               {posts?.length === 0 && (
-                <p className="text-zinc-400 mb-3">No forum activity yet</p>
+                <p className="text-zinc-400 mt-3 mb-3">No activity yet.</p>
               )}
               {posts?.length > 0 && (
                 <div className="flex flex-col *:py-3">

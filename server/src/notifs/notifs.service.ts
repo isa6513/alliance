@@ -158,7 +158,7 @@ export class NotifsService {
           actionUrl(action.id, true),
         ),
       (user, action) =>
-        `New action to join: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
+        `Hi ${user.name}, please confirm your participation in this action: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
     );
   }
 
@@ -179,7 +179,7 @@ export class NotifsService {
           actionUrl(action.id, true),
         ),
       (user, action) =>
-        `New Alliance action to complete: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
+        `Hi #${user.name}, please complete this action to which you committed: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
     );
   }
 
