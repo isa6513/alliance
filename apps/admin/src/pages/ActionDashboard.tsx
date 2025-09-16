@@ -31,7 +31,7 @@ const getStatusColor = (status: ActionDto["status"]) => {
       return "bg-blue-100 text-blue-800";
     case "gathering_commitments":
       return "bg-yellow-100 text-yellow-800";
-    case "commitments_reached":
+    case "office_action":
       return "bg-orange-100 text-orange-800";
     case "member_action":
       return "bg-purple-100 text-purple-800";
@@ -71,7 +71,7 @@ const statusOptions: Record<ActionStatus, string> = {
   draft: "Draft",
   upcoming: "Upcoming",
   gathering_commitments: "Gathering Commitments",
-  commitments_reached: "Commitments Reached",
+  office_action: "Commitments Reached",
   member_action: "Member Action",
   resolution: "Resolution",
   completed: "Completed",
@@ -82,7 +82,7 @@ const statusOptions: Record<ActionStatus, string> = {
 const defaultEventNames: Record<ActionStatus, string> = {
   draft: "",
   gathering_commitments: "Gathering commitments",
-  commitments_reached: "Pending office action",
+  office_action: "Pending office action",
   member_action: "Members taking action",
   resolution: "Pending office resolution",
   completed: "Action successful",

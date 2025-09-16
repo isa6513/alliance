@@ -190,7 +190,7 @@ export type ActionActivity = {
 /**
  * Number of users who have joined the action
  */
-export type ActionStatus = 'draft' | 'upcoming' | 'gathering_commitments' | 'commitments_reached' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
+export type ActionStatus = 'draft' | 'upcoming' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
 
 /**
  * Notification type for the event

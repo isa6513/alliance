@@ -55,8 +55,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
   const waitingOnCommitment =
     status === "gathering_commitments" && relation === "none";
 
-  const waitingForOffice =
-    status === "commitments_reached" && relation === "joined";
+  const waitingForOffice = status === "office_action" && relation === "joined";
 
   const waitingOnOthers =
     status === "gathering_commitments" && relation === "joined";

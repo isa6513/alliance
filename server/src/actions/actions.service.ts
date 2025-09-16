@@ -377,7 +377,7 @@ export class ActionsService {
       ) {
         await this.createAutomaticTransitionEvent(
           actionId,
-          ActionStatus.CommitmentsReached,
+          ActionStatus.OfficeAction,
           'Commitment threshold reached',
           `${action.usersJoined} people have committed to this action, meeting the threshold of ${action.commitmentThreshold}.`,
         );

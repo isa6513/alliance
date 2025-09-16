@@ -48,8 +48,6 @@ const UsersList: React.FC = () => {
     );
   });
 
-  console.log(userToTimeSpentTotal);
-
   return (
     <div className="h-full p-5 pt-20 flex flex-col items-center gap-y-3">
       {window.location.href.includes("localhost") && (

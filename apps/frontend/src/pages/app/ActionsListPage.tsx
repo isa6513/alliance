@@ -17,9 +17,7 @@ export const filterActions = (
         (action) => action.status === "gathering_commitments"
       );
     case FilterMode.CommitmentsReached:
-      return actions.filter(
-        (action) => action.status === "commitments_reached"
-      );
+      return actions.filter((action) => action.status === "office_action");
     case FilterMode.MemberAction:
       return actions.filter((action) => action.status === "member_action");
     case FilterMode.PendingOfficeResolution:

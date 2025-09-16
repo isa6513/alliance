@@ -3,7 +3,7 @@ import Tag, { TagStyle } from "../../components/Tag";
 
 const actionStatusStyles: Record<ActionDto["status"], TagStyle> = {
   gathering_commitments: TagStyle.GreyOutline,
-  commitments_reached: TagStyle.GreenOutline,
+  office_action: TagStyle.GreenOutline,
   member_action: TagStyle.GreenOutline,
   resolution: TagStyle.GreyOutline,
   completed: TagStyle.Green,
@@ -15,7 +15,7 @@ const actionStatusStyles: Record<ActionDto["status"], TagStyle> = {
 
 const actionStatusDescriptions: Record<ActionDto["status"], string> = {
   gathering_commitments: "Gathering commitments",
-  commitments_reached: "Pending office launch",
+  office_action: "Pending office launch",
   member_action: "Members are now taking action",
   resolution: "Pending office resolution",
   completed: "Completed",

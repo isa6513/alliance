@@ -23,7 +23,7 @@ export enum ActionStatus {
   Draft = 'draft',
   Upcoming = 'upcoming',
   GatheringCommitments = 'gathering_commitments',
-  CommitmentsReached = 'commitments_reached', // all commitments have been reached, actions not yet started
+  OfficeAction = 'office_action', // all commitments have been reached, actions not yet started
   MemberAction = 'member_action', // all committed members start doing the action
   Resolution = 'resolution', // member action done, office working on resolution
   Completed = 'completed', // resolution done
@@ -35,7 +35,7 @@ export const readableActionStatus: Record<ActionStatus, string> = {
   [ActionStatus.Draft]: 'Draft',
   [ActionStatus.Upcoming]: 'Upcoming',
   [ActionStatus.GatheringCommitments]: 'Gathering commitments',
-  [ActionStatus.CommitmentsReached]: 'Commitments reached',
+  [ActionStatus.OfficeAction]: 'Commitments reached',
   [ActionStatus.MemberAction]: 'Members taking action',
   [ActionStatus.Resolution]: 'Resolution ongoing',
   [ActionStatus.Completed]: 'Completed',

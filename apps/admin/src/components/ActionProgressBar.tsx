@@ -1,4 +1,4 @@
-import { ActionDto } from "@alliance/shared/client";
+import { ActionDto, ActionStatus } from "@alliance/shared/client";
 import React from "react";
 
 export interface ActionProgressBarProps {
@@ -101,17 +101,18 @@ const ActionProgressBar: React.FC<ActionProgressBarProps> = ({
   }
 
   // Completion progress for various statuses
-  const completionStatuses = [
+  const completionStatuses: ActionStatus[] = [
     "member_action",
-    "commitments_reached",
+    "office_action",
     "resolution",
   ];
+
   if (completionStatuses.includes(status)) {
     const percentage =
       usersJoined > 0 ? (usersCompleted / usersJoined) * 100 : 0;
     const statusColors = {
       member_action: "bg-purple-500",
-      commitments_reached: "bg-orange-500",
+      office_action: "bg-orange-500",
       resolution: "bg-indigo-500",
     } as const;
 

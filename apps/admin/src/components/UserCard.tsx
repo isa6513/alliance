@@ -17,7 +17,7 @@ const UserCard = ({
   const navigate = useNavigate();
 
   const formatTime = (time: number) => {
-    const interval = intervalToDuration({ start: 0, end: time });
+    const interval = intervalToDuration({ start: 0, end: time * 1000 });
     const formatUnits: (keyof Duration)[] =
       interval.minutes || interval.hours || interval.days
         ? ["hours", "minutes"]

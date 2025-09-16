@@ -106,7 +106,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
 
   if (
     action.status === "gathering_commitments" ||
-    action.status === "commitments_reached"
+    action.status === "office_action"
   ) {
     if (userRelation === "joined") {
       return (

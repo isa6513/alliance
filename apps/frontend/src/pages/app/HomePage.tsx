@@ -46,7 +46,7 @@ const HomePage = () => {
 
   const commitmentsReachedActions = actions.filter(
     (action) =>
-      action.relation === "joined" && action.status === "commitments_reached"
+      action.relation === "joined" && action.status === "office_action"
   );
 
   const currentTask = newActions[0] || todoActions[0] || null;

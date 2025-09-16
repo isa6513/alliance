@@ -58,7 +58,7 @@ export class ActionEventNotifWorker {
   async getBaseUsersForEvent(eventStatus: ActionStatus, action: Action) {
     if (
       eventStatus === ActionStatus.MemberAction ||
-      eventStatus === ActionStatus.CommitmentsReached ||
+      eventStatus === ActionStatus.OfficeAction ||
       eventStatus === ActionStatus.Resolution //TODO: decide
     ) {
       const activities = await this.actionActivityRepository.find({

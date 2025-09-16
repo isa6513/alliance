@@ -8,29 +8,32 @@ export class AnalyticsService {
   private readonly API_KEY: string;
   private readonly PROJECT_ID: string;
   private readonly logger = new Logger(AnalyticsService.name);
+
   private timeSpentPerUserLast7Days: TimeSpentForUserDto[] = [];
   private timeSpentPerUserTotal: TimeSpentForUserDto[] = [];
 
   getQuery(range: 'last7Days' | 'total') {
     return `
+WITH per_session AS (
+  SELECT
+    p.id AS person_id,
+    any(JSONExtractString(p.properties, 'email')) AS email,
+    e.session.id AS session_id,
+    /* end/start are identical on every event in the session, so any() is fine */
+    any(e.session.$end_timestamp - e.session.$start_timestamp) AS session_duration
+  FROM events AS e
+  JOIN person_distinct_ids AS pdi ON e.distinct_id = pdi.distinct_id
+  JOIN persons AS p ON p.id = pdi.person_id
+  WHERE e.event = '$pageview'
+    ${range === 'last7Days' ? 'AND e.timestamp >= now() - INTERVAL 7 DAY' : ''}
+  GROUP BY person_id, session_id
+)
 SELECT
-  p.id AS person_id,
-  JSONExtractString(p.properties, 'email') AS email,
-  SUM(
-    COALESCE(
-      e.session.$end_timestamp - e.session.$start_timestamp,
-      0
-    )
-  ) AS total_session_duration_seconds
-FROM events AS e
-JOIN person_distinct_ids AS pdi
-  ON e.distinct_id = pdi.distinct_id
-JOIN persons AS p
-  ON p.id = pdi.person_id
-WHERE e.event = '$pageview'
-  ${range === 'last7Days' ? 'AND e.timestamp >= now() - INTERVAL 7 DAY' : ''}
-
-GROUP BY p.id, email
+  person_id,
+  email,
+  sum(session_duration) AS total_session_duration_seconds
+FROM per_session
+GROUP BY person_id, email
 ORDER BY total_session_duration_seconds DESC
           `;
   }
@@ -93,7 +96,7 @@ ORDER BY total_session_duration_seconds DESC
     return timeSpentPerUser;
   }
 
-  @Cron('*/5 * * * *')
+  @Cron('* * * * *')
   async getTimeSpentFromPosthog() {
     if (!this.API_KEY) {
       this.logger.warn('POSTHOG_QUERY_KEY or POSTHOG_PROJECT_ID is not set');

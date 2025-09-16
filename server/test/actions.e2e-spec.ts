@@ -496,7 +496,7 @@ describe('Actions (e2e)', () => {
           },
           {
             title: 'Commitments Reached',
-            newStatus: ActionStatus.CommitmentsReached,
+            newStatus: ActionStatus.OfficeAction,
             date: new Date(now - 7200000), // 2 hours ago
           },
         ];
@@ -604,7 +604,7 @@ describe('Actions (e2e)', () => {
         .get(`/actions/slug/${newAction.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
-      expect(res.body.status).toBe(ActionStatus.CommitmentsReached);
+      expect(res.body.status).toBe(ActionStatus.OfficeAction);
       expect(res.body.usersJoined).toBe(2);
       expect(res.body.events.length).toBe(2); // Automatic transition event created
 
@@ -614,7 +614,7 @@ describe('Actions (e2e)', () => {
       );
       expect(automaticEvent).toBeDefined();
       expect(automaticEvent.description).toContain('2 people have committed');
-      expect(automaticEvent.newStatus).toBe(ActionStatus.CommitmentsReached);
+      expect(automaticEvent.newStatus).toBe(ActionStatus.OfficeAction);
       expect(automaticEvent.sendNotifsTo).toBe(NotificationType.Joined);
 
       // Cleanup
