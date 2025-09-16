@@ -30,7 +30,7 @@ const STATUS_LABELS: Record<ActionStatus, string> = {
   draft: "Draft",
   upcoming: "Upcoming",
   gathering_commitments: "Gathering Commitments",
-  office_action: "Commitments Reached",
+  office_action: "Office Action",
   member_action: "Member Action",
   resolution: "Resolution",
   completed: "Completed",

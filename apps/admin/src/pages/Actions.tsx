@@ -73,7 +73,7 @@ const ActionsList: React.FC = () => {
             await actionsAddEvent({
               path: { id: response.data.id },
               body: {
-                title: "Commitments Reached",
+                title: "Member action",
                 description: "Enough people have committed! Time for action.",
                 newStatus: "member_action",
                 date: new Date(Date.now() - 26400000).toISOString(),

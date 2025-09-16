@@ -35,7 +35,7 @@ export const readableActionStatus: Record<ActionStatus, string> = {
   [ActionStatus.Draft]: 'Draft',
   [ActionStatus.Upcoming]: 'Upcoming',
   [ActionStatus.GatheringCommitments]: 'Gathering commitments',
-  [ActionStatus.OfficeAction]: 'Commitments reached',
+  [ActionStatus.OfficeAction]: 'Office action',
   [ActionStatus.MemberAction]: 'Members taking action',
   [ActionStatus.Resolution]: 'Resolution ongoing',
   [ActionStatus.Completed]: 'Completed',
@@ -83,14 +83,6 @@ export class ActionEvent {
   @IsNotEmpty()
   @Type(() => Date)
   date: Date;
-
-  @Column({ nullable: true })
-  @ApiPropertyOptional({
-    description: 'Deadline for the event',
-  })
-  @IsOptional()
-  @Type(() => Date)
-  deadline?: Date;
 
   @UpdateDateColumn()
   @ApiProperty({ description: 'Timestamp when the event was last updated' })

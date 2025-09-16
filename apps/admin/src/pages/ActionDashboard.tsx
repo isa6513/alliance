@@ -17,6 +17,7 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
+import { formatDate } from "date-fns";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import ActionForm from "../components/ActionForm";
@@ -71,7 +72,7 @@ const statusOptions: Record<ActionStatus, string> = {
   draft: "Draft",
   upcoming: "Upcoming",
   gathering_commitments: "Gathering Commitments",
-  office_action: "Commitments Reached",
+  office_action: "Office Action",
   member_action: "Member Action",
   resolution: "Resolution",
   completed: "Completed",
@@ -162,7 +163,7 @@ const ActionDashboard: React.FC = () => {
 
   const [useCustomName, setUseCustomName] = useState<boolean>(false);
   const [launchNow, setLaunchNow] = useState<boolean>(true);
-  const [deadlineExists, setDeadlineExists] = useState<boolean>(false);
+  const [useDeadlineEvent, setUseDeadlineEvent] = useState<boolean>(false);
   const [notifData, setNotifData] = useState<PreEventNotifDataDto | null>(null);
 
   const [creatingEvent, setCreatingEvent] = useState<boolean>(false);
@@ -173,8 +174,9 @@ const ActionDashboard: React.FC = () => {
 
   useEffect(() => {
     const loadNotifData = async () => {
+      if (!actionId) return;
       const response = await actionsEventNotifData({
-        path: { id: parseInt(actionId || "") },
+        path: { id: parseInt(actionId) },
         query: {
           type: eventForm.newStatus,
           sendNotifsTo: eventForm.sendNotifsTo,
@@ -433,9 +435,39 @@ const ActionDashboard: React.FC = () => {
         path: { id: parseInt(actionId) },
         body: eventData,
       });
+      let updatedAction = response.data;
 
-      if (response.data) {
-        setAction(response.data);
+      if (
+        useDeadlineEvent &&
+        !response.error &&
+        (eventForm.newStatus === "member_action" ||
+          eventForm.newStatus === "gathering_commitments")
+      ) {
+        const officeActionEvent = {
+          title: defaultEventNames["office_action"],
+          date: new Date(
+            new Date(eventForm.date).getTime() + 604800000
+          ).toISOString(),
+          newStatus: "office_action",
+          sendNotifsTo: "none",
+          showInTimeline: true,
+          description: "",
+        } satisfies CreateActionEventDto;
+
+        const officeActionEventResponse = await actionsAddEvent({
+          path: { id: parseInt(actionId) },
+          body: officeActionEvent,
+        });
+        updatedAction = officeActionEventResponse.data;
+
+        if (officeActionEventResponse.error) {
+          alert("Failed to add office action event");
+          console.error(officeActionEventResponse.error);
+        }
+      }
+
+      if (updatedAction) {
+        setAction(updatedAction);
         handleActionUpdated();
 
         // Show success feedback
@@ -824,7 +856,7 @@ const ActionDashboard: React.FC = () => {
                                 value={eventForm.title}
                                 onChange={handleEventInputChange}
                                 required={useCustomName}
-                                placeholder="e.g., Launch Event, Commitments Reached"
+                                placeholder="e.g., Launch Event, Office Action"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                               />
                             </div>
@@ -852,7 +884,7 @@ const ActionDashboard: React.FC = () => {
 
                       <div
                         className={`${
-                          !launchNow ? "bg-zinc-100" : ""
+                          !launchNow ? "bg-zinc-100 mb-2" : ""
                         } p-2 -m-1 rounded-md mt-4`}
                       >
                         <div className="flex items-center mb-4">
@@ -894,51 +926,53 @@ const ActionDashboard: React.FC = () => {
                         )}
                       </div>
 
-                      <div
-                        className={`${
-                          deadlineExists ? "bg-zinc-100" : ""
-                        } p-2 -m-1 rounded-md`}
-                      >
-                        <div className="flex items-center mb-4">
-                          <input
-                            type="checkbox"
-                            id="deadlineExists"
-                            checked={deadlineExists}
-                            onChange={(e) =>
-                              setDeadlineExists(e.target.checked)
-                            }
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          />
-                          <label
-                            htmlFor="deadlineExists"
-                            className="ml-2 block text-black"
-                          >
-                            Has deadline
-                          </label>
-                        </div>
-
-                        {deadlineExists && (
-                          <div>
-                            <label
-                              htmlFor="deadline"
-                              className="block text-black mb-1"
-                            >
-                              Event Deadline Date & Time * (
-                              {Intl.DateTimeFormat().resolvedOptions().timeZone}
-                              )
-                            </label>
+                      {(eventForm.newStatus === "member_action" ||
+                        eventForm.newStatus === "gathering_commitments") && (
+                        <div
+                          className={`${
+                            useDeadlineEvent ? "bg-zinc-100 mb-2" : ""
+                          } p-2 -m-1 rounded-md`}
+                        >
+                          <div className="flex items-center mb-2">
                             <input
-                              type="datetime-local"
-                              id="deadline"
-                              name="deadline"
-                              value={eventForm.deadline}
-                              onChange={handleEventInputChange}
-                              required
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              type="checkbox"
+                              id="deadlineExists"
+                              checked={useDeadlineEvent}
+                              onChange={(e) =>
+                                setUseDeadlineEvent(e.target.checked)
+                              }
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                             />
+                            <label
+                              htmlFor="deadlineExists"
+                              className="ml-2 block text-black"
+                            >
+                              Automatically create office action transition 1
+                              week after launch
+                            </label>
                           </div>
-                        )}
-                      </div>
+
+                          {useDeadlineEvent && (
+                            <div>
+                              <p className="text-sm text-gray-600 mb-1">
+                                This will create a second action event timed to
+                                one week after the launch of this one, providing
+                                a deadline for members.
+                              </p>
+                              {eventForm.date && (
+                                <p className="text-sm text-gray-600 mb-1">
+                                  Date:{" "}
+                                  {formatDate(
+                                    new Date(eventForm.date).getTime() +
+                                      604800000,
+                                    "MM/dd/yyyy HH:mm a"
+                                  )}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
