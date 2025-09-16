@@ -52,7 +52,4 @@ export default [
     route("/signup", "pages/app/SignupPage.tsx"),
     route("/resetpassword", "pages/app/ResetPasswordPage.tsx"),
   ]),
-  layout("onboarding.tsx", [
-    route("/onboarding", "pages/app/OnboardingPage.tsx"),
-  ]),
 ] satisfies RouteConfig;

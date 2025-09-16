@@ -1,14 +1,13 @@
-import { StoryObj, Meta } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
 import UserProfilePage from "../pages/app/UserProfilePage";
 
-import StoryRouter from "./StoryRouter";
-import { http, HttpResponse } from "msw";
 import { FriendStatusDto } from "@alliance/shared/client";
+import { http, HttpResponse } from "msw";
 import {
   testActionsWithRelation,
+  testForumPosts,
   testFriends,
   testUser,
-  testForumPosts,
 } from "./testData";
 
 const meta = {
@@ -49,10 +48,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => {
-    return (
-      <StoryRouter initialEntry="/user/1" path="/user/:id">
-        <UserProfilePage />
-      </StoryRouter>
-    );
+    return <UserProfilePage />;
   },
 };

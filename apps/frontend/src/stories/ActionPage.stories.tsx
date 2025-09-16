@@ -1,11 +1,9 @@
-import { StoryObj, Meta } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
 import ActionPage from "../pages/app/ActionPage";
 
-import StoryRouter from "./StoryRouter";
+import { UserActionDto } from "@alliance/shared/client";
 import { http, HttpResponse } from "msw";
 import { testActions, testActivities, testForumPosts } from "./testData";
-import { UserActionDto } from "@alliance/shared/client";
-import NavbarHorizontal from "../components/NavbarHorizontal";
 
 const meta = {
   title: "Alliance/ActionPage",
@@ -43,11 +41,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => {
-    return (
-      <StoryRouter initialEntry="/action/1" path="/action/:id">
-        <NavbarHorizontal />
-        <ActionPage />
-      </StoryRouter>
-    );
+    return <ActionPage />;
   },
 };

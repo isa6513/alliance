@@ -23,13 +23,9 @@ const IssueCard: React.FC<IssueCardProps> = ({ name, description, href }) => {
       style={CardStyle.Outline}
       bgImage={bgImage}
     >
-      <div className="drop-shadow-lg drop-shadow-black/20 space-y-2">
-        <h2 className="font-serif font-normal !text-4xl drop-shadow-xl drop-shadow-white/40">
-          {name}
-        </h2>
-        <p className="drop-shadow-2xl drop-shadow-white/90 text-bold">
-          {description}
-        </p>
+      <div className=" space-y-2">
+        <h2 className="font-serif font-normal !text-4xl">{name}</h2>
+        <p className="text-bold">{description}</p>
       </div>
     </Card>
   );

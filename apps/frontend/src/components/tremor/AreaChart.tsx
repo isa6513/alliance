@@ -3,8 +3,8 @@
 
 "use client";
 
-import React from "react";
 import { RiArrowLeftSLine, RiArrowRightSLine } from "@remixicon/react";
+import React from "react";
 import {
   Area,
   CartesianGrid,
@@ -646,7 +646,7 @@ const AreaChart = React.forwardRef<HTMLDivElement, AreaChartProps>(
       <div
         ref={ref}
         className={cx("h-10 w-full", className)}
-        tremor-id="tremor-raw"
+        data-tremor-id="tremor-raw"
         {...other}
       >
         <ResponsiveContainer>
@@ -814,7 +814,10 @@ const AreaChart = React.forwardRef<HTMLDivElement, AreaChartProps>(
               />
             ) : null}
             {categories.map((category) => {
-              const categoryId = `${areaId}-${category.replace(/[^a-zA-Z0-9]/g, "")}`;
+              const categoryId = `${areaId}-${category.replace(
+                /[^a-zA-Z0-9]/g,
+                ""
+              )}`;
               return (
                 <React.Fragment key={category}>
                   <defs key={category}>

@@ -7,7 +7,6 @@ import NewNavbar from "../../components/NewNavbar";
 import PlatformUIDemoCard from "../../components/PlatformUIDemoCard";
 
 const NewLandingPage: React.FC = () => {
-  const size = 2 * Math.min(window.innerWidth, window.innerHeight);
   const [scrollOffset, setScrollOffset] = useState(0);
   const [navbarHeight, setNavbarHeight] = useState(0);
   const mainContentRef = useRef<HTMLDivElement>(null);

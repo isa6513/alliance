@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router";
-import Navbar, { platformSublinks } from "./Navbar";
 import DropdownLink from "./DropdownLink";
+import { platformSublinks } from "./Navbar";
 
 enum NavbarPage {
   Updates = "Updates",

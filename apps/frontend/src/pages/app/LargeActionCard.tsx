@@ -81,7 +81,21 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       ? members
       : action.usersJoined;
 
-  const lastEvent = action.events[action.events.length - 1];
+  const pastEvents = action.events.filter(
+    (event) => new Date(event.date) <= new Date()
+  );
+
+  const futureEvents = action.events.filter(
+    (event) => new Date(event.date) > new Date()
+  );
+
+  const lastEvent = pastEvents[pastEvents.length - 1];
+  const nextEvent = futureEvents.length > 0 ? futureEvents[0] : null;
+
+  const deadlineColor =
+    !!nextEvent && new Date(nextEvent.date).getTime() - Date.now() < 172800000 // 2 days
+      ? "var(--color-red-600)"
+      : "var(--color-zinc-500)";
 
   return (
     <Card
@@ -112,25 +126,25 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
               }`}</p>
             </div>
           )}
-          {!!lastEvent.deadline && (
+          {!!nextEvent && (
             <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
-              <DeadlineIcon fill="#dc2626" />
-              <p className="text-red-600">
-                {`${formatTime(new Date(lastEvent.deadline), {
+              <DeadlineIcon fill={deadlineColor} />
+              <p style={{ color: deadlineColor }}>
+                {`${formatTime(new Date(nextEvent.date), {
                   addSuffix: false,
                 })}`}{" "}
                 left
               </p>
             </div>
           )}
-          <div>
+          {!nextEvent && (
             <p className="text-base text-zinc-500">
               {action.status === "gathering_commitments"
                 ? "Launched "
                 : "Action began "}
               {formatTime(new Date(lastEvent.date), { addSuffix: true })}
             </p>
-          </div>
+          )}
         </div>
 
         <div className="flex flex-row items-start gap-x-8">

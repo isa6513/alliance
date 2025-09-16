@@ -4,6 +4,7 @@ import {
   PaymentMethodDto,
   paymentsClearPaymentMethods,
   paymentsPaymentMethod,
+  UserDto,
   userMyLocation,
   userUpdate,
 } from "@alliance/shared/client";
@@ -18,29 +19,39 @@ import FormInput from "../../components/system/FormInput";
 import { AdminOnly } from "../../lib/AdminOnly";
 import { useAuth } from "../../lib/AuthContext";
 
+type EditableUserFields = Pick<
+  UserDto,
+  | "name"
+  | "phoneNumber"
+  | "anonymous"
+  | "emailNotifsEnabled"
+  | "pushNotifsEnabled"
+  | "textNotifsEnabled"
+  | "cityId"
+>;
+
+const mapUserToEditable = (source?: Partial<UserDto>): EditableUserFields => ({
+  name: source?.name ?? "",
+  phoneNumber: source?.phoneNumber,
+  anonymous: source?.anonymous ?? false,
+  emailNotifsEnabled: source?.emailNotifsEnabled ?? false,
+  pushNotifsEnabled: source?.pushNotifsEnabled ?? false,
+  textNotifsEnabled: source?.textNotifsEnabled ?? false,
+  cityId: source?.cityId,
+});
+
 const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const [location, setLocation] = useState<City | null>(null);
-  const [selectedCityId, setSelectedCityId] = useState<number | null>(null);
-  const [anonymous, setAnonymous] = useState<boolean>(false);
-
-  const [emailNotifsEnabled, setEmailNotifsEnabled] = useState<boolean>(false);
-  const [pushNotifsEnabled, setPushNotifsEnabled] = useState<boolean>(false);
-  const [textNotifsEnabled, setTextNotifsEnabled] = useState<boolean>(false);
-
-  const [originalCityId, setOriginalCityId] = useState<number | null>(null);
-  const [originalAnonymous, setOriginalAnonymous] = useState<boolean>(false);
-
-  // Original notification preferences
-  const [originalEmailNotifsEnabled, setOriginalEmailNotifsEnabled] =
-    useState<boolean>(false);
-  const [originalPushNotifsEnabled, setOriginalPushNotifsEnabled] =
-    useState<boolean>(false);
-  const [originalTextNotifsEnabled, setOriginalTextNotifsEnabled] =
-    useState<boolean>(false);
+  const [editableUser, setEditableUser] = useState<EditableUserFields | null>(
+    null
+  );
+  const [initialUser, setInitialUser] = useState<EditableUserFields | null>(
+    null
+  );
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodDto | null>(
     null
@@ -49,24 +60,35 @@ const SettingsPage: React.FC = () => {
 
   const navigate = useNavigate();
 
+  const updateEditableUser = useCallback(
+    (updates: Partial<EditableUserFields>) => {
+      setEditableUser((prev) => (prev ? { ...prev, ...updates } : prev));
+    },
+    []
+  );
+
   const handleLogout = useCallback(async () => {
     await logout();
     navigate("/login");
   }, [logout, navigate]);
 
-  console.log(user);
+  const handleCitySelect = useCallback(
+    (city: CitySearchDto) => {
+      updateEditableUser({ cityId: city.id });
+    },
+    [updateEditableUser]
+  );
 
-  const handleCitySelect = useCallback((city: CitySearchDto) => {
-    setSelectedCityId(city.id);
-  }, []);
-
-  // Check if there are any changes from original values
   const hasChanges =
-    selectedCityId !== originalCityId ||
-    anonymous !== originalAnonymous ||
-    emailNotifsEnabled !== originalEmailNotifsEnabled ||
-    pushNotifsEnabled !== originalPushNotifsEnabled ||
-    textNotifsEnabled !== originalTextNotifsEnabled;
+    editableUser !== null &&
+    initialUser !== null &&
+    (editableUser.name !== initialUser.name ||
+      editableUser.cityId !== initialUser.cityId ||
+      editableUser.anonymous !== initialUser.anonymous ||
+      editableUser.emailNotifsEnabled !== initialUser.emailNotifsEnabled ||
+      editableUser.pushNotifsEnabled !== initialUser.pushNotifsEnabled ||
+      editableUser.textNotifsEnabled !== initialUser.textNotifsEnabled ||
+      editableUser.phoneNumber !== initialUser.phoneNumber);
 
   const loadPaymentMethod = useCallback(async () => {
     try {
@@ -92,64 +114,68 @@ const SettingsPage: React.FC = () => {
   }, []);
 
   const handleSave = useCallback(async () => {
+    if (!editableUser) {
+      return;
+    }
+
     setSaving(true);
     try {
       await userUpdate({
         body: {
-          cityId: selectedCityId || undefined,
-          anonymous: anonymous,
-          emailNotifsEnabled: emailNotifsEnabled,
-          pushNotifsEnabled: pushNotifsEnabled,
-          textNotifsEnabled: textNotifsEnabled,
+          cityId: editableUser.cityId ?? undefined,
+          name: editableUser.name,
+          anonymous: editableUser.anonymous,
+          emailNotifsEnabled: editableUser.emailNotifsEnabled,
+          pushNotifsEnabled: editableUser.pushNotifsEnabled,
+          textNotifsEnabled: editableUser.textNotifsEnabled,
+          phoneNumber: editableUser.phoneNumber ?? undefined,
         },
       });
 
-      // Refresh the location data
+      setInitialUser({ ...editableUser });
+
       const locationResponse = await userMyLocation();
       if (locationResponse.data) {
-        setLocation(locationResponse.data);
+        const city = locationResponse.data;
+        setLocation(city);
+        const cityId = city.id;
+        setEditableUser((prev) =>
+          prev ? { ...prev, cityId } : { ...editableUser, cityId }
+        );
+        setInitialUser((prev) =>
+          prev ? { ...prev, cityId } : { ...editableUser, cityId }
+        );
       }
-
-      // Update original values to reflect the saved state
-      setOriginalCityId(selectedCityId);
-      setOriginalAnonymous(anonymous);
-      setOriginalEmailNotifsEnabled(emailNotifsEnabled);
-      setOriginalPushNotifsEnabled(pushNotifsEnabled);
-      setOriginalTextNotifsEnabled(textNotifsEnabled);
     } catch (error) {
       console.error("Failed to save settings:", error);
     } finally {
       setSaving(false);
     }
-  }, [
-    selectedCityId,
-    anonymous,
-    emailNotifsEnabled,
-    pushNotifsEnabled,
-    textNotifsEnabled,
-  ]);
+  }, [editableUser]);
 
   useEffect(() => {
-    if (user) {
-      setLoading(false);
-      setAnonymous(user.anonymous || false);
-      setOriginalAnonymous(user.anonymous || false);
-
-      setEmailNotifsEnabled(user.emailNotifsEnabled || false);
-      setOriginalEmailNotifsEnabled(user.emailNotifsEnabled || false);
-      setPushNotifsEnabled(user.pushNotifsEnabled || false);
-      setOriginalPushNotifsEnabled(user.pushNotifsEnabled || false);
-      setTextNotifsEnabled(user.textNotifsEnabled || false);
-      setOriginalTextNotifsEnabled(user.textNotifsEnabled || false);
-
-      loadPaymentMethod();
+    if (!user) {
+      return;
     }
-    userMyLocation().then((location) => {
-      console.log(location);
-      if (location.data) {
-        setLocation(location.data);
-        setSelectedCityId(location.data.id);
-        setOriginalCityId(location.data.id);
+
+    setLoading(false);
+    const mappedUser = mapUserToEditable(user);
+    setEditableUser(mappedUser);
+    setInitialUser(mappedUser);
+
+    loadPaymentMethod();
+
+    userMyLocation().then((locationResponse) => {
+      if (locationResponse.data) {
+        const city = locationResponse.data;
+        setLocation(city);
+        const cityId = city.id;
+        setEditableUser((prev) =>
+          prev ? { ...prev, cityId } : { ...mappedUser, cityId }
+        );
+        setInitialUser((prev) =>
+          prev ? { ...prev, cityId } : { ...mappedUser, cityId }
+        );
       }
     });
   }, [user, loadPaymentMethod]);
@@ -168,7 +194,8 @@ const SettingsPage: React.FC = () => {
       </div>
     );
   }
-  if (!user) {
+
+  if (!user || !editableUser) {
     return <div>Not found</div>;
   }
 
@@ -183,51 +210,81 @@ const SettingsPage: React.FC = () => {
                 <Badge className="!bg-yellow-600 text-white">Admin</Badge>
               </AdminOnly>
             </div>
-            <Button
-              onClick={handleLogout}
-              color={ButtonColor.Stone}
-              className="px-4"
-            >
-              Log Out
-            </Button>
-          </div>
-          <div>
-            <p className="mb-1">
-              Name{" "}
-              {user.anonymous ? (
-                <i className="text-gray-500">(Not shown)</i>
-              ) : (
-                ""
+            <div className="flex flex-row gap-x-2">
+              <Button
+                onClick={handleLogout}
+                color={ButtonColor.Stone}
+                className="px-4"
+              >
+                Log Out
+              </Button>
+              {hasChanges && (
+                <Button
+                  color={ButtonColor.Green}
+                  onClick={handleSave}
+                  disabled={saving}
+                >
+                  {saving ? "Saving..." : "Save Changes"}
+                </Button>
               )}
-            </p>
-            <FormInput
-              name="name"
-              type="text"
-              value={user.name || ""}
-              onChange={() => {}}
-              disabled
-            />
+            </div>
+          </div>
+          <div className="flex flex-row w-full items-center gap-x-4 *:gap-x-1">
+            <div className="flex-1 flex flex-col">
+              <p className="mb-1">
+                Name{" "}
+                {editableUser.anonymous ? (
+                  <i className="text-gray-500">(Not shown)</i>
+                ) : (
+                  ""
+                )}
+              </p>
+              <FormInput
+                name="name"
+                type="text"
+                value={editableUser.name}
+                onChange={(event) =>
+                  updateEditableUser({ name: event.target.value })
+                }
+                placeholder="Enter full name"
+              />
+            </div>
+            <div className="flex-1 flex flex-col">
+              <p className="mb-1">
+                Email <i className="text-gray-500">(Not shown)</i>
+              </p>
+              <FormInput
+                name="email"
+                type="email"
+                value={user.email || ""}
+                onChange={() => {}}
+                disabled
+              />
+            </div>
           </div>
 
-          <div>
-            <p className="mb-1">
-              Email <i className="text-gray-500">(Not shown)</i>
-            </p>
-            <FormInput
-              name="email"
-              type="email"
-              value={user.email || ""}
-              onChange={() => {}}
-              disabled
-            />
-          </div>
-
-          <div>
-            <label className="block font-medium mb-2">Location</label>
-            <CityAutosuggest
-              onSelect={handleCitySelect}
-              placeholder={location?.name || "Select a city"}
-            />
+          <div className="flex flex-row w-full items-center gap-x-4 *:gap-x-1">
+            <div className="flex-1 flex flex-col">
+              <label className="block mb-1">Location</label>
+              <CityAutosuggest
+                onSelect={handleCitySelect}
+                placeholder={location?.name || "Select a city"}
+                className="flex-1"
+              />
+            </div>
+            <div className="flex-1 flex flex-col">
+              <label className="block mb-1">Phone number</label>
+              <FormInput
+                name="phoneNumber"
+                type="tel"
+                value={editableUser.phoneNumber ?? ""}
+                onChange={(event) =>
+                  updateEditableUser({ phoneNumber: event.target.value })
+                }
+                placeholder="Enter phone number"
+                className="flex-1"
+              />
+            </div>
           </div>
 
           <div>
@@ -235,17 +292,19 @@ const SettingsPage: React.FC = () => {
             <div className="flex flex-row gap-x-2">
               <Button
                 color={
-                  anonymous === true ? ButtonColor.Black : ButtonColor.Light
+                  editableUser.anonymous ? ButtonColor.Black : ButtonColor.Light
                 }
-                onClick={() => setAnonymous(true)}
+                onClick={() => updateEditableUser({ anonymous: true })}
               >
                 Yes
               </Button>
               <Button
                 color={
-                  anonymous === false ? ButtonColor.Black : ButtonColor.Light
+                  !editableUser.anonymous
+                    ? ButtonColor.Black
+                    : ButtonColor.Light
                 }
-                onClick={() => setAnonymous(false)}
+                onClick={() => updateEditableUser({ anonymous: false })}
               >
                 No
               </Button>
@@ -259,9 +318,9 @@ const SettingsPage: React.FC = () => {
 
             <div className="mb-4">
               {!(
-                emailNotifsEnabled ||
-                pushNotifsEnabled ||
-                textNotifsEnabled
+                editableUser.emailNotifsEnabled ||
+                editableUser.pushNotifsEnabled ||
+                editableUser.textNotifsEnabled
               ) && (
                 <p className="text-sm text-gray-500 mt-2">
                   You will not receive any notifications. Please keep a
@@ -274,18 +333,24 @@ const SettingsPage: React.FC = () => {
             <div className="flex flex-col gap-y-2">
               <LargeCheckbox
                 label="Email"
-                checked={emailNotifsEnabled}
-                onChange={(checked) => setEmailNotifsEnabled(checked)}
+                checked={editableUser.emailNotifsEnabled}
+                onChange={(checked) =>
+                  updateEditableUser({ emailNotifsEnabled: checked })
+                }
               />
               <LargeCheckbox
                 label="Text/SMS"
-                checked={pushNotifsEnabled}
-                onChange={(checked) => setPushNotifsEnabled(checked)}
+                checked={editableUser.pushNotifsEnabled}
+                onChange={(checked) =>
+                  updateEditableUser({ pushNotifsEnabled: checked })
+                }
               />
               <LargeCheckbox
                 label="Push"
-                checked={textNotifsEnabled}
-                onChange={(checked) => setTextNotifsEnabled(checked)}
+                checked={editableUser.textNotifsEnabled}
+                onChange={(checked) =>
+                  updateEditableUser({ textNotifsEnabled: checked })
+                }
               />
             </div>
           </div>
@@ -343,18 +408,6 @@ const SettingsPage: React.FC = () => {
               <p className="text-zinc-500">No payment methods set up yet</p>
             )}
           </div>
-
-          {hasChanges && (
-            <div className="flex flex-row justify-end w-full">
-              <Button
-                color={ButtonColor.Green}
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </Button>
-            </div>
-          )}
         </Card>
       </div>
     </div>

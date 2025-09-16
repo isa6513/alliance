@@ -41,6 +41,7 @@ export type UserDto = {
     id: number;
     name: string;
     email: string;
+    phoneNumber?: string;
     contractDateSigned: string | null;
     emailNotifsEnabled: boolean;
     textNotifsEnabled: boolean;
@@ -222,10 +223,6 @@ export type ActionEventDto = {
      * time of the event (for display)
      */
     date: string;
-    /**
-     * Deadline for the event
-     */
-    deadline?: string;
     /**
      * Indicates whether the event should be shown in the timeline
      */
@@ -485,10 +482,6 @@ export type CreateActionEventDto = {
      * time of the event (for display)
      */
     date: string;
-    /**
-     * Deadline for the event
-     */
-    deadline?: string;
     /**
      * Indicates whether the event should be shown in the timeline
      */

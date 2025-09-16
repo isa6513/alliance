@@ -5,7 +5,7 @@ interface UserBubbleRowProps {
   bgColor?: string;
 }
 
-const UserBubbleRow: React.FC<UserBubbleRowProps> = ({ n = 5 }) => {
+const UserBubbleRow = ({ n = 5 }: UserBubbleRowProps) => {
   return (
     <div className="flex flex-row gap-x-2">
       {Array.from({ length: n - 1 }).map((_, i) => (

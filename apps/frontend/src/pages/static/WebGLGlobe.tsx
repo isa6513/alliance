@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 /**
  * <SphereWebGL /> – renders an Earth sphere with a slower‑moving cloud overlay.
@@ -52,34 +52,40 @@ export default function SphereWebGL({
     return out;
   };
 
-  const setRotateYScale = (out: Float32Array, rad: number, scale: number) => {
-    const s = Math.sin(rad);
-    const c = Math.cos(rad);
-    identity(out);
-    out[0] = c * scale; // scale X
-    out[2] = s * scale;
-    out[8] = -s * scale;
-    out[10] = c * scale; // scale Z
-    return out;
-  };
+  const setRotateYScale = useCallback(
+    (out: Float32Array, rad: number, scale: number) => {
+      const s = Math.sin(rad);
+      const c = Math.cos(rad);
+      identity(out);
+      out[0] = c * scale; // scale X
+      out[2] = s * scale;
+      out[8] = -s * scale;
+      out[10] = c * scale; // scale Z
+      return out;
+    },
+    []
+  );
 
-  const perspective = (
-    out: Float32Array,
-    fovy: number,
-    aspect: number,
-    near: number,
-    far: number
-  ) => {
-    const f = 1.0 / Math.tan(fovy / 2);
-    identity(out);
-    out[0] = f / aspect;
-    out[5] = f;
-    out[10] = (far + near) / (near - far);
-    out[11] = -1;
-    out[14] = (2 * far * near) / (near - far);
-    out[15] = 0;
-    return out;
-  };
+  const perspective = useCallback(
+    (
+      out: Float32Array,
+      fovy: number,
+      aspect: number,
+      near: number,
+      far: number
+    ) => {
+      const f = 1.0 / Math.tan(fovy / 2);
+      identity(out);
+      out[0] = f / aspect;
+      out[5] = f;
+      out[10] = (far + near) / (near - far);
+      out[11] = -1;
+      out[14] = (2 * far * near) / (near - far);
+      out[15] = 0;
+      return out;
+    },
+    []
+  );
 
   /* -------------------------------- Effect -------------------------------- */
   useEffect(() => {
@@ -341,7 +347,17 @@ export default function SphereWebGL({
       gl.deleteShader(vs);
       gl.deleteShader(fs);
     };
-  }, [baseSrc, overlaySrc, width, height, baseSpeed, overlaySpeed, pixelRatio]);
+  }, [
+    baseSrc,
+    overlaySrc,
+    width,
+    height,
+    baseSpeed,
+    overlaySpeed,
+    pixelRatio,
+    perspective,
+    setRotateYScale,
+  ]);
 
   return (
     <canvas

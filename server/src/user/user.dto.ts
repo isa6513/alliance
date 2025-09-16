@@ -70,6 +70,7 @@ export class UserDto extends PickType(User, [
   'turnedOffAllNotifs',
   'referralCode',
   'anonymous',
+  'phoneNumber',
 ]) {
   @ApiPropertyOptional()
   @IsOptional()

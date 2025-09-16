@@ -3,14 +3,15 @@ import React from "react";
 interface FormInputProps {
   label?: string;
   type: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   required?: boolean;
   autoComplete?: string;
   error?: string;
   name: string;
   disabled?: boolean;
+  className?: string;
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -24,9 +25,10 @@ const FormInput: React.FC<FormInputProps> = ({
   error,
   name,
   disabled = false,
+  className,
 }) => {
   return (
-    <div className="flex flex-col gap-1 w-full">
+    <div className={`flex flex-col gap-1 ${className}`}>
       {label && (
         <label className="font-newsreader mb-1 text-black" htmlFor={name}>
           {label}

@@ -158,7 +158,6 @@ const ActionDashboard: React.FC = () => {
     date: formatDateForInput(new Date()),
     showInTimeline: true,
     sendNotifsTo: "all",
-    deadline: undefined,
   });
 
   const [useCustomName, setUseCustomName] = useState<boolean>(false);
@@ -450,7 +449,7 @@ const ActionDashboard: React.FC = () => {
           ).toISOString(),
           newStatus: "office_action",
           sendNotifsTo: "none",
-          showInTimeline: true,
+          showInTimeline: false,
           description: "",
         } satisfies CreateActionEventDto;
 
