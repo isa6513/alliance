@@ -178,7 +178,7 @@ const HomePage = () => {
         <div
           className={`hidden border-l pl-6 pr-10 border-zinc-200 md:flex flex-col py-2 gap-y-5 sticky top-[var(--nav-height)] min-h-[calc(100vh-var(--nav-height))] h-fit items-stretch w-[380px]`}
         >
-          <div className="flex flex-col divide-y *:py-6 *:px-2 divide-zinc-200">
+          <div className="flex flex-col divide-y *:py-5 *:px-2 divide-zinc-200">
             <div className="flex">{bulletinCard}</div>
             <div>
               <p className="font-semibold text-xl font-serif text-black">
@@ -189,7 +189,7 @@ const HomePage = () => {
               )}
               {posts?.length > 0 && (
                 <div className="flex flex-col *:py-3 -mb-3">
-                  {posts?.slice(0, 3).map((post) => (
+                  {posts?.slice(0, 2).map((post) => (
                     <ForumListPost
                       key={post.id}
                       post={post}
