@@ -227,10 +227,9 @@ export type ActionEventDto = {
      * Indicates whether the event should be shown in the timeline
      */
     showInTimeline: boolean;
-    /**
-     * When notifications for this event were sent (idempotency)
-     */
-    notifsSentAt?: string;
+    announcementNotifsSentAt?: string;
+    threeDayReminderNotifsSentAt?: string;
+    oneDayReminderNotifsSentAt?: string;
 };
 
 export type ActionDto = {
@@ -531,9 +530,11 @@ export type NotificationDto = {
     associatedUser?: ProfileDto;
 };
 
+export type ActionEventNotifType = 'announcement' | '3dayreminder' | '1dayreminder';
+
 export type NotificationChannel = 'text' | 'email' | 'push';
 
-export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction';
+export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder';
 
 export type Mail = {
     id: number;
@@ -558,6 +559,7 @@ export type Mms = {
 };
 
 export type ActionEventNotifDto = {
+    type: ActionEventNotifType;
     channel: NotificationChannel;
     mail: Mail | null;
     mms: Mms | null;
@@ -2001,6 +2003,21 @@ export type ForumFindPostsByUserResponses = {
 };
 
 export type ForumFindPostsByUserResponse = ForumFindPostsByUserResponses[keyof ForumFindPostsByUserResponses];
+
+export type ForumFindCommentsByUserData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/forum/posts/user/{id}/comments';
+};
+
+export type ForumFindCommentsByUserResponses = {
+    200: Array<CommentDto>;
+};
+
+export type ForumFindCommentsByUserResponse = ForumFindCommentsByUserResponses[keyof ForumFindCommentsByUserResponses];
 
 export type ForumCreateCommentData = {
     body: CreateCommentDto;

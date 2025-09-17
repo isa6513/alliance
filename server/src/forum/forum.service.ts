@@ -583,6 +583,13 @@ export class ForumService {
     });
   }
 
+  async findCommentsByUser(userId: number): Promise<Comment[]> {
+    return this.commentRepository.find({
+      where: { authorId: userId, deleted: false },
+      relations: ['author'],
+    });
+  }
+
   async findPostsByTitle(title: string): Promise<Post[]> {
     return this.postRepository.find({
       where: { title: ILike(`%${title}%`), deleted: false },

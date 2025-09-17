@@ -142,39 +142,42 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
   return (
     <>
       <div className="flex mb-4">
-        <button
-          className={`px-4 py-2 ${
+        <Button
+          color={ButtonColor.Transparent}
+          className={`px-4 py-2 rounded-none  ${
             activeTab === "friends"
-              ? "border-b-2 border-black font-semibold"
+              ? "border-b-1 border-black font-semibold"
               : "text-zinc-500"
           }`}
           onClick={() => setActiveTab("friends")}
         >
           Friends ({friends.length})
-        </button>
+        </Button>
         {isMe && (
-          <button
-            className={`px-4 py-2 ${
+          <Button
+            color={ButtonColor.Transparent}
+            className={`px-4 py-2 rounded-none ${
               activeTab === "received"
-                ? "border-b-2 border-black font-semibold"
+                ? "border-b-1 border-black font-semibold"
                 : "text-zinc-500"
             }`}
             onClick={() => setActiveTab("received")}
           >
             Received Requests ({receivedRequests.length})
-          </button>
+          </Button>
         )}
         {isMe && (
-          <button
-            className={`px-4 py-2 ${
+          <Button
+            color={ButtonColor.Transparent}
+            className={`px-4 py-2 rounded-none ${
               activeTab === "sent"
-                ? "border-b-2 border-black font-semibold"
+                ? "border-b-1 border-black font-semibold"
                 : "text-zinc-500"
             }`}
             onClick={() => setActiveTab("sent")}
           >
             Sent Requests ({sentRequests.length})
-          </button>
+          </Button>
         )}
       </div>
 
@@ -182,7 +185,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
         {activeTab === "friends" && (
           <>
             {friends.length === 0 ? (
-              <p className="text-center text-zinc-500 py-4">
+              <p className="text-center text-zinc-500 py-4 text-sm">
                 You don&apos;t have any friends yet.
               </p>
             ) : (
@@ -226,7 +229,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
         {activeTab === "received" && (
           <>
             {receivedRequests.length === 0 ? (
-              <p className="text-center text-zinc-500 py-4">
+              <p className="text-center text-zinc-500 py-4 text-sm">
                 No pending friend requests.
               </p>
             ) : (
@@ -271,7 +274,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
         {activeTab === "sent" && (
           <>
             {sentRequests.length === 0 ? (
-              <p className="text-center text-zinc-500 py-4">
+              <p className="text-center text-zinc-500 py-4 text-sm">
                 You haven&apos;t sent any friend requests.
               </p>
             ) : (

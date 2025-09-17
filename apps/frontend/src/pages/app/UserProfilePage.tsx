@@ -1,8 +1,10 @@
 import {
+  CommentDto,
   FriendStatusDto,
   PostDto,
   ProfileDto,
   UpdateProfileDto,
+  forumFindCommentsByUser,
   forumFindPostsByUser,
   userFindOne,
   userListFriends,
@@ -15,21 +17,24 @@ import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import React, { useCallback, useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
 import { useAppLoaderData } from "../../applayout";
+import EditableContentRenderer from "../../components/forum/EditableContentRenderer";
 import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
 import FriendsTab from "../../components/FriendsTab";
 import UserActivityCard from "../../components/UserActivityCard";
+import UserDisplayName from "../../components/UserDisplayName";
 import UserProfileTab from "../../components/UserProfileTab";
 import { useAuth } from "../../lib/AuthContext";
+import { formatTime } from "../../lib/utils";
 import useActivities, { ActivityList } from "./useActivities";
 
 enum ProfileTabs {
   Activity = "Actions",
-  Forum = "Posts",
+  Forum = "Forum Activity",
   Friends = "Friends",
 }
 
@@ -44,6 +49,34 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
     </div>
   );
 }
+
+interface ForumActivityCommentCardProps {
+  comment: CommentDto;
+}
+
+const ForumActivityCommentCard: React.FC<ForumActivityCommentCardProps> = ({
+  comment,
+}) => {
+  return (
+    <Link
+      to={`/forum/post/${comment.parentObjectId}?replyId=${comment.id}`}
+      className="w-full mb-0 p-4 hover:bg-zinc-50 bg-white space-y-2"
+    >
+      <div className="flex flex-row items-center gap-x-2 text-sm text-zinc-600">
+        <ProfileImage pfp={comment.author.profilePicture} size="small" />
+        <span>
+          <UserDisplayName staff={comment.author.staff}>
+            {comment.author.displayName}
+          </UserDisplayName>{" "}
+          {`commented ${formatTime(new Date(comment.createdAt), {
+            addSuffix: true,
+          })}`}
+        </span>
+      </div>
+      <EditableContentRenderer content={comment.editableContent} />
+    </Link>
+  );
+};
 
 const UserProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -66,6 +99,7 @@ const UserProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
+  const [forumComments, setForumComments] = useState<CommentDto[]>([]);
   const [friends, setFriends] = useState<ProfileDto[]>([]);
 
   // Edit mode state
@@ -79,6 +113,26 @@ const UserProfilePage: React.FC = () => {
   const [editAvatarFile, setEditAvatarFile] = useState<File | null>(null);
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  const forumActivityItems = useMemo(() => {
+    const postItems = forumPosts.map((post) => ({
+      type: "post" as const,
+      createdAt: post.createdAt,
+      post,
+    }));
+
+    const commentItems = forumComments.map((comment) => ({
+      type: "comment" as const,
+      createdAt: comment.createdAt,
+      comment,
+    }));
+
+    return [...postItems, ...commentItems].sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [forumPosts, forumComments]);
+
+  const forumActivityCount = forumActivityItems.length;
 
   const {
     activities: completedActions,
@@ -121,9 +175,12 @@ const UserProfilePage: React.FC = () => {
         const { data: forumPostsData } = await forumFindPostsByUser({
           path: { id: userId },
         });
-        if (forumPostsData) {
-          setForumPosts(forumPostsData);
-        }
+        setForumPosts(forumPostsData ?? []);
+
+        const { data: forumCommentsData } = await forumFindCommentsByUser({
+          path: { id: userId },
+        });
+        setForumComments(forumCommentsData ?? []);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -345,8 +402,8 @@ const UserProfilePage: React.FC = () => {
               onClick={() => setSelectedTab(ProfileTabs.Activity)}
             />
             <UserProfileTab
-              number={forumPosts.length}
-              label={`forum post${forumPosts.length === 1 ? "" : "s"}`}
+              number={forumActivityCount}
+              label={forumActivityCount === 1 ? "forum post" : "forum posts"}
               selected={selectedTab === ProfileTabs.Forum}
               onClick={() => setSelectedTab(ProfileTabs.Forum)}
             />
@@ -434,15 +491,28 @@ const UserProfilePage: React.FC = () => {
 
           {selectedTab === ProfileTabs.Forum && (
             <div className="flex flex-col gap-y-1">
-              {forumPosts.length === 0 ? (
+              {forumActivityItems.length === 0 ? (
                 <p className="mt-4 text-center text-zinc-500">
-                  No forum posts yet
+                  No forum activity yet
                 </p>
               ) : (
                 <div className="flex flex-col divide-y divide-zinc-200 mb-10 border border-zinc-200 rounded overflow-hidden">
-                  {forumPosts?.map((post: PostDto) => (
-                    <ForumListPost post={post} key={post.id} />
-                  ))}
+                  {forumActivityItems.map((item) => {
+                    if (item.type === "post") {
+                      return (
+                        <ForumListPost
+                          post={item.post}
+                          key={`post-${item.post.id}`}
+                        />
+                      );
+                    }
+                    return (
+                      <ForumActivityCommentCard
+                        comment={item.comment}
+                        key={`comment-${item.comment.id}`}
+                      />
+                    );
+                  })}
                 </div>
               )}
             </div>
