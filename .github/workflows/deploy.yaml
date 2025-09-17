@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   test-backend-e2e:
-    environment: ${{ env.env_name }}
+    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -51,7 +51,7 @@ jobs:
 
   build-react-app:
     runs-on: ubuntu-latest
-    environment: ${{ env.env_name }}
+    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -105,7 +105,7 @@ jobs:
 
   build-admin-frontend:
     runs-on: ubuntu-latest
-    environment: ${{ env.env_name }}
+    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -144,7 +144,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-react-app
-    environment: ${{ env.env_name }}
+    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     steps:
       - name: SSH and Deploy frontend SSR on EC2
         uses: appleboy/ssh-action@v1.0.0
@@ -248,7 +248,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-admin-frontend
-    environment: ${{ env.env_name }}
+    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     steps:
       - name: Download Admin Build Artifact
         uses: actions/download-artifact@v4
@@ -304,7 +304,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - test-backend-e2e
-    environment: ${{ env.env_name }}
+    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -336,7 +336,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-nest-backend
-    environment: ${{ env.env_name }}
+    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     steps:
       - name: Download NestJS Build Artifact
         uses: actions/download-artifact@v4
@@ -434,7 +434,7 @@ jobs:
       - deploy-react-app
       - deploy-admin-app
     runs-on: ubuntu-latest
-    environment: ${{ env.env_name }}
+    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     steps:
       - name: Check main app
         run: |
@@ -453,7 +453,7 @@ jobs:
       - deploy-react-app
       - deploy-admin-app
     runs-on: ubuntu-latest
-    environment: ${{ env.env_name }}
+    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     steps:
       - name: Check main app
         run: |
@@ -473,7 +473,7 @@ jobs:
       - deploy-react-app
       - deploy-admin-app
     runs-on: ubuntu-latest
-    environment: ${{ env.env_name }}
+    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     steps:
       - name: Check API health
         run: |
@@ -489,13 +489,13 @@ jobs:
       - verify-https
       - verify-api
     if: always()
-    environment: ${{ env.env_name }}
+    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     steps:
       - name: Post webhook if any upstream failed/cancelled
         if: ${{ contains(join(needs.*.result, ','), 'failure') || contains(join(needs.*.result, ','), 'skipped') }}
         run: |
           curl -X POST -H 'Content-type: application/json' \
-            --data "{\"text\":\"Deploy ${{ env.env_name }} failed for ${{ github.event.head_commit.message }}. <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Open run>\"}" \
+            --data "{\"text\":\"Deploy ${{ github.ref_name == 'staging' && 'staging' || 'production' }} failed for ${{ github.event.head_commit.message }}. <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Open run>\"}" \
             ${{ secrets.SLACK_WEBHOOK_URL }}
   # build-mobile-app:
   #   runs-on: ubuntu-latest
