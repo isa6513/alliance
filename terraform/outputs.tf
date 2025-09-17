@@ -44,3 +44,35 @@ output "dev_secret_access_key" {
   value       = aws_iam_access_key.dev.secret
   sensitive   = true
 }
+
+# ---------- STAGING ----------
+output "staging_instance_id" {
+  description = "ID of the staging EC2 instance"
+  value       = aws_instance.app_server_staging.id
+}
+
+output "staging_server_ip" {
+  description = "Public IP (EIP) of the staging EC2 instance"
+  value       = aws_eip.app_eip_staging.public_ip
+}
+
+output "staging_rds_hostname" {
+  description = "Staging RDS instance hostname"
+  value       = aws_db_instance.alliance_staging.address
+}
+
+output "staging_rds_port" {
+  description = "Staging RDS instance port"
+  value       = aws_db_instance.alliance_staging.port
+}
+
+output "staging_rds_username" {
+  description = "Staging RDS master username"
+  value       = aws_db_instance.alliance_staging.username
+  # If you restored from a snapshot, this may come from the snapshot's master user.
+}
+
+output "staging_assets_bucket_name" {
+  description = "S3 bucket used for staging static assets and uploads"
+  value       = aws_s3_bucket.staging_assets.bucket
+}
