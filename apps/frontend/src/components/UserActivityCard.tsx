@@ -158,7 +158,7 @@ const UserActivityCard = ({
                       <Button
                         color={ButtonColor.Blue}
                         onClick={handleSave}
-                        disabled={isSaving || !editContent.body.trim()}
+                        disabled={isSaving}
                       >
                         {isSaving ? "Saving..." : "Save"}
                       </Button>

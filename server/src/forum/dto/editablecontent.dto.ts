@@ -9,9 +9,11 @@ export class EditableContentDto extends PickType(EditableContent, [
   constructor(editableContent: EditableContent) {
     super();
     Object.assign(this, editableContent);
-    this.attachments = editableContent.attachments.map((attachment) =>
-      getImageSource(attachment),
-    );
+    this.attachments = editableContent
+      ? editableContent.attachments.map((attachment) =>
+          getImageSource(attachment),
+        )
+      : [];
   }
 }
 

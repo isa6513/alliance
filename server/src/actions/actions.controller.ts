@@ -424,10 +424,10 @@ export class ActionsController {
   @ApiOkResponse({ type: ActionActivityDto })
   updateActivity(
     @Param('id', ParseIntPipe) id: number,
-    @Body() commentDto: UpdateActionActivityDto,
+    @Body() activityDto: UpdateActionActivityDto,
     @Request() req: JwtRequest,
   ): Promise<ActionActivityDto> {
-    return this.actionsService.updateActivity(id, commentDto, req.user.sub);
+    return this.actionsService.updateActivity(id, activityDto, req.user.sub);
   }
 
   @Get('preEventNotifData/:id')

@@ -1,4 +1,5 @@
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { Allow, IsBoolean, IsString } from 'class-validator';
 import { CommentDto } from 'src/forum/dto/comment.dto';
 import { EditableContentDto } from 'src/forum/dto/editablecontent.dto';
@@ -112,24 +113,36 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   'createdAt',
 ]) {
   @ApiProperty({ type: () => ProfileDto })
+  @Type(() => ProfileDto)
+  @Allow()
   user: ProfileDto;
 
   @ApiProperty()
+  @Allow()
   actionId: number;
 
   @ApiProperty({ type: () => ActionDto })
+  @Type(() => ActionDto)
+  @Allow()
   action: ActionDto;
 
   @ApiProperty()
+  @Allow()
   actionName: string;
 
   @ApiProperty({ type: () => ProfileDto, isArray: true })
+  @Type(() => ProfileDto)
+  @Allow()
   likes: ProfileDto[];
 
   @ApiProperty({ type: () => CommentDto, isArray: true })
+  @Type(() => CommentDto)
+  @Allow()
   comments: CommentDto[];
 
   @ApiProperty({ type: () => EditableContentDto })
+  @Type(() => EditableContentDto)
+  @Allow()
   editableContent: EditableContentDto;
 
   constructor(actionActivity: ActionActivity, comments: CommentDto[] = []) {
