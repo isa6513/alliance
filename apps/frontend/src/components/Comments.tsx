@@ -24,9 +24,18 @@ export interface CommentsProps {
   type: CommentParentObject;
   compact?: boolean;
   homeStyle?: boolean; // minimal version for homepage
+  autofocus?: boolean;
+  showForm?: boolean;
 }
 
-const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
+const Comments = ({
+  objectId,
+  type,
+  compact,
+  homeStyle,
+  autofocus,
+  showForm = true,
+}: CommentsProps) => {
   const [editableContent, setEditableContent] =
     useState<CreateEditableContentDto>({ body: "", attachments: [] });
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
@@ -239,7 +248,7 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
 
   return (
     <div>
-      {user && !replyingTo ? (
+      {user && !replyingTo && showForm ? (
         <ReplyForm
           parentId={null}
           editableContent={editableContent}
@@ -248,6 +257,7 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
           isSubmitting={isSubmitting}
           setReplyingTo={setReplyingTo}
           compact={compact}
+          startExpanded={autofocus}
         />
       ) : !user && !compact ? (
         <div className="text-center py-6 bg-zinc-50 rounded border border-zinc-200">

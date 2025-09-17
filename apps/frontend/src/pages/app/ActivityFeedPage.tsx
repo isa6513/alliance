@@ -57,6 +57,33 @@ const ActivityFeedPage = () => {
     };
   }, [mode, updateHeight]);
 
+  const renderActivityColumn = (mode: Mode) => {
+    const list = mode === "friends" ? friendsActivities : activities;
+    return (
+      <div className="w-1/2">
+        <div
+          ref={mode === "friends" ? friendsRef : everyoneRef}
+          className="flex flex-col divide-y divide-zinc-200 *:p-4"
+        >
+          {list.map((activity) => (
+            <UserActivityCard
+              activity={activity}
+              key={activity.id}
+              handleLike={handleLikeActivity}
+              onActivityUpdate={updateActivity}
+              canEdit={activity.user.id === user?.id}
+            />
+          ))}
+          {list.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-64 text-zinc-500 p-8">
+              <p>No{mode === "friends" ? " friend " : ""}activity yet</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col items-center min-h-[calc(100vh-var(--nav-height))]">
       <div className="w-full sm:w-xl md:w-3xl mx-auto pt-12 md:pt-8 px-3 pb-24 flex flex-row">
@@ -89,48 +116,8 @@ const ActivityFeedPage = () => {
                   mode === "friends" ? "translateX(0%)" : "translateX(-50%)",
               }}
             >
-              <div className="w-1/2">
-                <div
-                  ref={friendsRef}
-                  className="flex flex-col divide-y divide-zinc-200 *:p-4"
-                >
-                  {friendsActivities.map((activity) => (
-                    <UserActivityCard
-                      activity={activity}
-                      key={activity.id}
-                      handleLike={handleLikeActivity}
-                      onActivityUpdate={updateActivity}
-                      canEdit={activity.user.id === user?.id}
-                    />
-                  ))}
-                  {friendsActivities.length === 0 && (
-                    <div className="flex flex-col items-center justify-center h-64 text-zinc-500 p-8">
-                      <p>No activities from friends yet</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="w-1/2">
-                <div
-                  ref={everyoneRef}
-                  className="flex flex-col divide-y divide-zinc-200 *:p-4"
-                >
-                  {activities.map((activity) => (
-                    <UserActivityCard
-                      activity={activity}
-                      key={activity.id}
-                      handleLike={handleLikeActivity}
-                      onActivityUpdate={updateActivity}
-                      canEdit={activity.user?.id === user?.id}
-                    />
-                  ))}
-                  {activities.length === 0 && (
-                    <div className="flex flex-col items-center justify-center h-64 text-zinc-500 p-8">
-                      <p>No activities found</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+              {renderActivityColumn("friends")}
+              {renderActivityColumn("everyone")}
             </div>
           </div>
         </div>

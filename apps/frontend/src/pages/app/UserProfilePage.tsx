@@ -471,7 +471,7 @@ const UserProfilePage: React.FC = () => {
         </Card>
         <div className="pb-24 mt-2">
           {selectedTab === ProfileTabs.Activity && (
-            <div className="flex flex-col gap-y-1">
+            <div className="flex flex-col divide-y divide-zinc-200 mb-10 border border-zinc-200 rounded overflow-hidden *:p-4 bg-white">
               {completedActions.length === 0 && (
                 <p className="mt-4 text-center text-zinc-500">
                   No actions completed yet

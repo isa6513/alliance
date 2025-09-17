@@ -113,6 +113,8 @@ const UserActivityCard = ({
     setIsEditing(false);
   }, [activity.editableContent]);
 
+  const [showCommentForm, setShowCommentForm] = useState(false);
+
   return (
     <div className="flex flex-row justify-stretch items-center space-x-4">
       <div className="block bg-white text-[11pt] flex-1 gap-y-2">
@@ -185,12 +187,13 @@ const UserActivityCard = ({
               />
             )}
             {canEdit && !isEditing && (
-              <button
+              <Button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleEdit();
                 }}
-                className="flex flex-row gap-x-1 items-center border border-zinc-200 rounded px-2 py-1.5 hover:bg-zinc-100 cursor-pointer transition-colors duration-100"
+                color={ButtonColor.White}
+                className="flex flex-row gap-x-1 items-center !px-3 !py-[6px] !h-full"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -202,13 +205,33 @@ const UserActivityCard = ({
                   <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z" />
                 </svg>
                 <span className="text-sm text-zinc-800">Edit</span>
-              </button>
+              </Button>
+            )}
+            {completed && activity.comments.length === 0 && (
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowCommentForm(true);
+                }}
+                color={ButtonColor.White}
+                className="flex flex-row gap-x-1 items-center !px-3 !py-[6px] !h-full"
+              >
+                <span className="text-sm text-zinc-800 text-nowrap">
+                  Add comment
+                </span>
+              </Button>
             )}
           </div>
         </div>
 
         {completed && (
-          <Comments objectId={activity.id} type="activity" compact />
+          <Comments
+            objectId={activity.id}
+            type="activity"
+            compact
+            showForm={showCommentForm}
+            autofocus={showCommentForm}
+          />
         )}
       </div>
     </div>

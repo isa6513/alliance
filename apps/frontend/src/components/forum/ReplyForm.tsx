@@ -33,11 +33,12 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
     <div
       className={`rounded relative bg-black/4 ${className ?? ""} ${
         parentId ? "mt-0" : "mt-3"
-      } ${compact ? "p-1" : "p-4"}`}
+      } ${compact ? "p-2" : "p-4"}`}
     >
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          setExpanded(false);
           onSubmit(editableContent);
         }}
       >
