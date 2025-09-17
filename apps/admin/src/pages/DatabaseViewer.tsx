@@ -1018,6 +1018,9 @@ const DatabaseViewer: React.FC = () => {
                                   ? "new-row-fade"
                                   : isSelectedRow
                                   ? "bg-yellow-50 border-yellow-200 hover:bg-yellow-100"
+                                  : rowPrimaryKey !== null &&
+                                    selectedRows.has(rowPrimaryKey)
+                                  ? "bg-blue-50 border-blue-200"
                                   : "hover:bg-gray-50"
                               } ${
                                 isNewRow
