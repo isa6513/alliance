@@ -1,17 +1,19 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as sharp from 'sharp';
 import { Repository } from 'typeorm';
 import { Image } from './entities/image.entity';
-import { FilesService } from './files.service';
 
 @Injectable()
 export class ImagesService {
   constructor(
     @InjectRepository(Image)
     private imageRepository: Repository<Image>,
-    private filesService: FilesService,
     @Inject('S3_CLIENT') private readonly s3: S3Client,
   ) {}
 
@@ -45,7 +47,10 @@ export class ImagesService {
       return false;
     }
     await this.imageRepository.delete(id);
-    await this.filesService.deleteFile(image.key);
+
+    await this.s3.send(
+      new DeleteObjectCommand({ Bucket: this.bucket, Key: image.key }),
+    ); //TODO: untested
 
     return true;
   }
