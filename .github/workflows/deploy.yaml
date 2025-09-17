@@ -13,7 +13,7 @@ env:
   CI: ""
 
 concurrency:
-  group: ${{ github.workflow }}-${{ env.env_name }}
+  group: ${{ github.workflow }}-${{ github.ref_name == 'staging' && 'staging' || 'production' }}
 
 jobs:
   test-backend-e2e:
