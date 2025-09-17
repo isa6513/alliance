@@ -119,9 +119,9 @@ const PostDetailPage: React.FC = () => {
           </Link>
           <Card className="py-6 px-5 mb-3" style={CardStyle.White}>
             <div className="flex justify-between items-start">
-              <div className="flex flex-row gap-x-1 items-center w-full -mt-2">
+              <div className="flex flex-row gap-x-1 items-center w-full ">
                 {post.pinned && <PinnedIcon size="large" />}
-                <h1 className="!text-xl !font-medium">{post.title}</h1>
+                <h1 className="!text-xl !font-medium -mt-1">{post.title}</h1>
               </div>
               {post.author.id === user?.id && (
                 <div className="space-x-2">
@@ -147,7 +147,7 @@ const PostDetailPage: React.FC = () => {
                 />
               </div>
             </div>
-            <div className="flex flex-row gap-x-2 mt-1 mb-4 items-center">
+            <div className="flex flex-row gap-x-2 mb-4 items-center">
               <Link to={`/user/${post.author.id}`}>
                 <ProfileImage
                   pfp={post.author.profilePicture}

@@ -392,7 +392,7 @@ const UserProfilePage: React.FC = () => {
             )
           )}
           {/* stats row */}
-          <div className="flex flex-row gap-x-2 cursor-pointer">
+          <div className="mt-2 flex flex-row gap-x-2 cursor-pointer">
             <UserProfileTab
               number={completedActions.length}
               label={`action${
