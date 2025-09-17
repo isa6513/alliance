@@ -1,6 +1,7 @@
 interface UserProfileTabProps {
   number: number;
   label: string;
+  shortLabel?: string;
   selected: boolean;
   onClick: () => void;
 }
@@ -8,6 +9,7 @@ interface UserProfileTabProps {
 const UserProfileTab: React.FC<UserProfileTabProps> = ({
   number,
   label,
+  shortLabel,
   selected,
   onClick,
 }: UserProfileTabProps) => {
@@ -22,7 +24,8 @@ const UserProfileTab: React.FC<UserProfileTabProps> = ({
         {number}
       </span>
       <span className={`${selected ? "text-white/90" : "text-zinc-600"}`}>
-        {label}
+        <span className="hidden sm:inline">{label}</span>
+        <span className="inline sm:hidden">{shortLabel || label}</span>
       </span>
     </div>
   );

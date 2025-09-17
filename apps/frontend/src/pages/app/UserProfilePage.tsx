@@ -398,12 +398,14 @@ const UserProfilePage: React.FC = () => {
               label={`action${
                 completedActions.length === 1 ? "" : "s"
               } completed`}
+              shortLabel={`action${completedActions.length === 1 ? "" : "s"}`}
               selected={selectedTab === ProfileTabs.Activity}
               onClick={() => setSelectedTab(ProfileTabs.Activity)}
             />
             <UserProfileTab
               number={forumActivityCount}
               label={forumActivityCount === 1 ? "forum post" : "forum posts"}
+              shortLabel={forumActivityCount === 1 ? "post" : "posts"}
               selected={selectedTab === ProfileTabs.Forum}
               onClick={() => setSelectedTab(ProfileTabs.Forum)}
             />
