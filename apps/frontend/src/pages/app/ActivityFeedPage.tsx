@@ -30,9 +30,12 @@ const ActivityFeedPage = () => {
 
   const modeButtons = modes.map((m) => (
     <Button
-      color={mode === m ? ButtonColor.Black : ButtonColor.White}
+      color={ButtonColor.Transparent}
       key={m}
       onClick={() => setMode(m)}
+      className={`!border-b-[1.5px] rounded-none ${
+        m === mode ? "!border-b-green" : "!border-b-transparent"
+      }`}
     >
       <p className="capitalize">{m}</p>
     </Button>
@@ -42,7 +45,7 @@ const ActivityFeedPage = () => {
     <div className="flex flex-col bg-white items-center min-h-[calc(100vh-var(--nav-height))]">
       <div className="w-full sm:w-xl md:w-3xl mx-auto pt-16 md:pt-12 px-3 pb-24 flex flex-row">
         <div className="space-y-2 w-full flex flex-col justify-stretch">
-          <div className="mx-auto flex flex-row gap-x-2 mb-4">
+          <div className="mx-auto flex flex-row gap-x-2 mb-4 w-full justify-start">
             {modeButtons}
           </div>
           {activitiesToShow.length === 0 && (
