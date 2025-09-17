@@ -2,7 +2,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Comment } from 'src/forum/entities/comment.entity';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
+import { MailModule } from 'src/mail/mail.module';
+import { MmsModule } from 'src/mms/mms.module';
 import { ActionEventNotifWorker } from 'src/notifs/action-event-notif.worker';
+import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { User } from '../user/user.entity';
 import { UserModule } from '../user/user.module';
@@ -21,8 +24,11 @@ import { Action } from './entities/action.entity';
     TypeOrmModule.forFeature([ActionActivity]),
     TypeOrmModule.forFeature([Comment]),
     TypeOrmModule.forFeature([EditableContent]),
+    TypeOrmModule.forFeature([ActionEventNotif]),
     UserModule,
     NotifsModule,
+    MailModule,
+    MmsModule,
   ],
   controllers: [ActionsController],
   providers: [ActionsService, ActionsGateway, ActionEventNotifWorker],

@@ -43,7 +43,6 @@ const Comments = ({ objectId, type, compact, homeStyle }: CommentsProps) => {
 
   const [comments, setComments] = useState<CommentDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // attachments are managed inside editableContent
 
   const fetchComments = useCallback(async () => {
     let response;

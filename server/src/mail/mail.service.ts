@@ -1,7 +1,13 @@
 import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ReminderKind } from 'src/notifs/action-event-notif.worker';
+import { ActionStatus } from 'src/actions/entities/action-event.entity';
+import {
+  ActionEventNotificationContext,
+  ReminderKind,
+} from 'src/notifs/action-event-notif.worker';
+import { ActionEventNotifType } from 'src/notifs/entities/action-event-notif.entity';
+import { actionUrl } from 'src/search/approutes';
 import { Repository } from 'typeorm';
 import { EmailStatus, EmailType, Mail } from './mail.entity';
 
@@ -28,7 +34,7 @@ export class MailService {
   async sendMail(
     recipient: string,
     emailType: EmailType,
-    subject: string,
+    subject: string | null,
     context: ISendMailOptions['context'],
   ): Promise<Mail> {
     if (process.env.NODE_ENV === 'test') {
@@ -50,7 +56,7 @@ export class MailService {
     const e = await this.mailerService.sendMail({
       to: recipient,
       from: 'no-reply@worldalliance.org',
-      subject: subject,
+      subject: subject ?? undefined,
       headers: {
         'o:tag': emailType,
       },
@@ -202,5 +208,56 @@ export class MailService {
         daysleft: kind === '3dayreminder' ? '3 days' : '1 day',
       },
     );
+  }
+
+  getSubject(context: ActionEventNotificationContext): string {
+    if (context.type === ActionEventNotifType.Announcement) {
+      if (context.event.newStatus === ActionStatus.GatheringCommitments) {
+        return 'New Action: ' + context.action.name;
+      }
+      if (context.event.newStatus === ActionStatus.MemberAction) {
+        return 'Ready to complete: ' + context.action.name;
+      }
+    } else if (context.type === ActionEventNotifType.ThreeDayReminder) {
+      if (context.event.newStatus === ActionStatus.GatheringCommitments) {
+        return '3 days left to commit to: ' + context.action.name;
+      }
+      if (context.event.newStatus === ActionStatus.MemberAction) {
+        return '3 days left to complete: ' + context.action.name;
+      }
+    } else if (context.type === ActionEventNotifType.OneDayReminder) {
+      if (context.event.newStatus === ActionStatus.GatheringCommitments) {
+        return '1 day left to commit to: ' + context.action.name;
+      }
+      if (context.event.newStatus === ActionStatus.MemberAction) {
+        return '1 day left to complete: ' + context.action.name;
+      }
+    }
+    throw new Error('Invalid event in mail context: ' + context.event);
+  }
+
+  public async sendActionEventNotificationEmail(
+    context: ActionEventNotificationContext,
+  ): Promise<Mail> {
+    const subject = this.getSubject(context);
+
+    const emailType =
+      context.type === ActionEventNotifType.Announcement
+        ? context.event.newStatus === ActionStatus.GatheringCommitments
+          ? EmailType.Commitment
+          : EmailType.MemberAction
+        : context.event.newStatus === ActionStatus.GatheringCommitments
+          ? EmailType.CommitmentReminder
+          : EmailType.MemberActionReminder;
+
+    return this.sendMail(context.user.email, emailType, subject, {
+      name: context.user.name,
+      actionName: context.action.name,
+      url: actionUrl(context.action.id, true),
+      daysleft:
+        context.type === ActionEventNotifType.ThreeDayReminder
+          ? '3 days'
+          : '1 day',
+    });
   }
 }

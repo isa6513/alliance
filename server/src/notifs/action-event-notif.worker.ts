@@ -2,6 +2,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
+import { EmailStatus } from 'src/mail/mail.entity';
+import { MailService } from 'src/mail/mail.service';
+import { Mms } from 'src/mms/mms.entity';
+import { MmsService } from 'src/mms/mms.service';
+import { User } from 'src/user/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import {
   ActionActivity,
@@ -15,15 +20,27 @@ import {
 import { Action } from '../actions/entities/action.entity';
 import { NotifsService } from '../notifs/notifs.service';
 import { UserService } from '../user/user.service';
-import { ActionEventNotifType } from './entities/action-event-notif.entity';
+import {
+  ActionEventNotif,
+  ActionEventNotifType,
+} from './entities/action-event-notif.entity';
+import { NotificationChannel } from './notifchannel';
+import {
+  defaultEventText1DayReminder,
+  defaultEventText3DayReminder,
+  defaultEventTextAnnouncement,
+} from './textnotifcontents';
 
-export interface ActionEventNotification {
-  eventId: number;
-  type: ActionEventNotifType;
-}
 export type ReminderKind =
   | ActionEventNotifType.ThreeDayReminder
   | ActionEventNotifType.OneDayReminder;
+
+export interface ActionEventNotificationContext {
+  event: ActionEvent;
+  type: ActionEventNotifType;
+  user: User;
+  action: Action;
+}
 
 @Injectable()
 export class ActionEventNotifWorker {
@@ -36,9 +53,13 @@ export class ActionEventNotifWorker {
     private readonly actionActivityRepository: Repository<ActionActivity>,
     private readonly notifsService: NotifsService,
     private readonly userService: UserService,
+    private readonly mailService: MailService,
+    private readonly mmsService: MmsService,
+    @InjectRepository(ActionEventNotif)
+    private readonly actionEventNotifsRepository: Repository<ActionEventNotif>,
   ) {}
 
-  @Cron('* * * * *')
+  @Cron('*/3 * * * *')
   async dispatchDueNotifs() {
     if (
       process.env.NODE_ENV === 'development' &&
@@ -60,10 +81,7 @@ export class ActionEventNotifWorker {
       .getMany();
 
     for (const event of due) {
-      await this.processOne({
-        eventId: event.id,
-        type: ActionEventNotifType.Announcement,
-      });
+      await this.processOne(event.id, ActionEventNotifType.Announcement);
     }
 
     const rows: Array<{
@@ -140,13 +158,12 @@ export class ActionEventNotifWorker {
     );
 
     for (const row of rows) {
-      await this.processOne({
-        eventId: row.currentEventId,
-        type:
-          row.which === '3dayreminder'
-            ? ActionEventNotifType.ThreeDayReminder
-            : ActionEventNotifType.OneDayReminder,
-      });
+      await this.processOne(
+        row.currentEventId,
+        row.which === '3dayreminder'
+          ? ActionEventNotifType.ThreeDayReminder
+          : ActionEventNotifType.OneDayReminder,
+      );
     }
   }
 
@@ -173,23 +190,21 @@ export class ActionEventNotifWorker {
     return this.userService.findActiveUsers();
   }
 
-  private async processOne(notif: ActionEventNotification) {
+  private async processOne(eventId: number, type: ActionEventNotifType) {
     await this.dataSource.transaction(async (manager) => {
       const event = await manager
         .createQueryBuilder(ActionEvent, 'event')
-        .where('event.id = :id', { id: notif.eventId })
-        // .setLock('pessimistic_write') // or 'pessimistic_write_or_fail'
-        // .setOnLocked('skip_locked')          // optional: avoid blocking if already locked (TypeORM >=0.3.15)
+        .where('event.id = :id', { id: eventId })
         .getOne();
 
-      console.log('processing notif', notif.eventId);
+      console.log('processing notif', eventId);
 
       if (!event) return;
 
       if (
-        (notif.type === 'announcement' && event.announcementNotifsSentAt) ||
-        (notif.type === '3dayreminder' && event.threeDayReminderNotifsSentAt) ||
-        (notif.type === '1dayreminder' && event.oneDayReminderNotifsSentAt) ||
+        (type === 'announcement' && event.announcementNotifsSentAt) ||
+        (type === '3dayreminder' && event.threeDayReminderNotifsSentAt) ||
+        (type === '1dayreminder' && event.oneDayReminderNotifsSentAt) ||
         event.date > new Date() ||
         event.sendNotifsTo === NotificationType.None
       ) {
@@ -203,43 +218,52 @@ export class ActionEventNotifWorker {
         .loadOne<Action>();
       if (!action) return;
 
-      console.log('didnt return');
-
       const users = await this.getBaseUsersForEvent(event.newStatus, action);
 
-      if (notif.type === 'announcement') {
-        if (event.newStatus === ActionStatus.GatheringCommitments) {
-          await this.notifsService.sendCommitmentNotifs(event, action, users);
-        }
+      const baseContext: Omit<ActionEventNotificationContext, 'user'> = {
+        event,
+        type,
+        action,
+      };
 
-        if (event.newStatus === ActionStatus.MemberAction) {
-          await this.notifsService.sendMemberActionNotifs(event, action, users);
-        }
-      } else {
-        if (event.newStatus === ActionStatus.GatheringCommitments) {
-          console.log('sending commitment reminder notifs');
-          await this.notifsService.sendCommitmentReminderNotifs(
-            event,
-            action,
-            users,
-            notif.type,
-          );
-        }
+      for (const user of users) {
+        const context: ActionEventNotificationContext = {
+          ...baseContext,
+          user,
+        };
+        const notif = new ActionEventNotif();
+        notif.user = user;
+        notif.actionEvent = event;
+        notif.channel = NotificationChannel.Email;
+        notif.sent = false;
+        notif.type = type;
+        if (this.notifsService.shouldTextUser(user)) {
+          console.log('sending text notif to user', user.id);
+          const result = await this.sendActionEventNotificationMms(context);
 
-        if (event.newStatus === ActionStatus.MemberAction) {
-          console.log('sending member action reminder notifs');
-          await this.notifsService.sendMemberActionReminderNotifs(
-            event,
-            action,
-            users,
-            notif.type,
-          );
+          if (result && !result.errorCode) {
+            notif.sent = true;
+          }
+          notif.channel = NotificationChannel.Text;
+          notif.mms = result;
+        } else if (this.notifsService.shouldEmailUser(user)) {
+          console.log('sending email notif to user', user.id);
+          notif.channel = NotificationChannel.Email;
+          const result =
+            await this.mailService.sendActionEventNotificationEmail(context);
+          notif.mail = result;
+          if (result.status === EmailStatus.Sent) {
+            notif.sent = true;
+          }
+        } else {
+          //TODO: pushes
         }
+        await this.actionEventNotifsRepository.save(notif);
       }
 
       this.logger.log('notifs sent for event ' + event.id);
 
-      switch (notif.type) {
+      switch (type) {
         case ActionEventNotifType.Announcement:
           event.announcementNotifsSentAt = new Date();
           break;
@@ -250,10 +274,34 @@ export class ActionEventNotifWorker {
           event.oneDayReminderNotifsSentAt = new Date();
           break;
         default:
-          ((x: never) => x)(notif.type);
+          ((x: never) => x)(type);
       }
 
       await manager.getRepository(ActionEvent).save(event);
     });
+  }
+
+  async sendActionEventNotificationMms(
+    context: ActionEventNotificationContext,
+  ): Promise<Mms | null> {
+    let body = '';
+    if (context.type === ActionEventNotifType.Announcement) {
+      body = defaultEventTextAnnouncement[context.event.newStatus](
+        context.user,
+        context.action,
+      );
+    } else if (context.type === ActionEventNotifType.ThreeDayReminder) {
+      body = defaultEventText3DayReminder[context.event.newStatus](
+        context.user,
+        context.action,
+      );
+    } else if (context.type === ActionEventNotifType.OneDayReminder) {
+      body = defaultEventText1DayReminder[context.event.newStatus](
+        context.user,
+        context.action,
+      );
+    }
+
+    return this.mmsService.sendMms(context.user.phoneNumber!, body, []);
   }
 }

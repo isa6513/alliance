@@ -52,13 +52,6 @@ export class MmsService {
     }
   }
 
-  /**
-   * Sends an MMS message using Twilio.
-   * @param to The recipient's phone number in E.164 format (e.g., +15551234567).
-   * @param body The text body of the message.
-   * @param mediaUrls An array of publicly accessible URLs for the media attachments (up to 10).
-   * @returns A Promise resolving to the Twilio MessageInstance.
-   */
   async sendMms(
     to: string,
     body: string,
@@ -70,14 +63,11 @@ export class MmsService {
 
     if (mediaUrls.length === 0) {
       this.logger.warn('No media URLs provided. Sending as SMS instead.');
-      // Note: Twilio automatically sends as SMS if mediaUrl is empty/omitted,
-      // but the DTO currently requires mediaUrls. Modify DTO if SMS fallback is desired.
     }
     if (mediaUrls.length > 10) {
       this.logger.error(
         `Cannot send more than 10 media items. Provided: ${mediaUrls.length}`,
       );
-      // Use BadRequestException as this is a client-provided data issue
       throw new BadRequestException(
         'Exceeded maximum number of media attachments (10).',
       );
@@ -88,7 +78,7 @@ export class MmsService {
         to: to,
         from: this.twilioPhoneNumber,
         body: body,
-        mediaUrl: mediaUrls, // Pass the array directly
+        mediaUrl: mediaUrls,
       });
 
       this.logger.log(`MMS sent successfully! Message SID: ${message.sid}`);
