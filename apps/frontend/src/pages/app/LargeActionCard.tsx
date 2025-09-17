@@ -118,14 +118,15 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
           </Button>
           <div className="flex flex-col flex-1">
             <div className="flex flex-row flex-wrap gap-x-4 mb-2">
-              {!!action.timeEstimate && (
-                <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
-                  <ClockIcon />
-                  <p className="text-green">{`${action.timeEstimate} minute${
-                    action.timeEstimate === 1 ? "" : "s"
-                  }`}</p>
-                </div>
-              )}
+              {!!action.timeEstimate &&
+                action.status !== "gathering_commitments" && (
+                  <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
+                    <ClockIcon />
+                    <p className="text-green">{`${action.timeEstimate} minute${
+                      action.timeEstimate === 1 ? "" : "s"
+                    }`}</p>
+                  </div>
+                )}
               {!!nextEvent && (
                 <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
                   <DeadlineIcon fill={deadlineColor} />

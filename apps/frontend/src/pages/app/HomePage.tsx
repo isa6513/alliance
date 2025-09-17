@@ -50,6 +50,12 @@ const HomePage = () => {
   );
 
   const currentTask = newActions[0] || todoActions[0] || null;
+  const remainingTasksEstimatedTime = todoActions.reduce((sum, action) => {
+    if (action.timeEstimate) {
+      return sum + action.timeEstimate;
+    }
+    return sum;
+  }, 0);
 
   useWhiteBackground();
 
@@ -82,9 +88,22 @@ const HomePage = () => {
                 "min-h-[calc(100vh-var(--nav-height))] flex flex-col items-center"
               }
             >
-              <p className="font-serif text-center font-semibold text-3xl mb-8 mt-12 sm:mt-16 lg:mt-28">
-                Current task
-              </p>
+              <div className="mb-8">
+                <p className="font-serif text-center font-semibold text-3xl mt-12 sm:mt-16 lg:mt-28">
+                  Current task
+                </p>
+                {todoActions.length + newActions.length > 0 && (
+                  <p className="mt-1 text-zinc-500 text-center px-4">
+                    {todoActions.length + newActions.length} task
+                    {todoActions.length + newActions.length !== 1
+                      ? "s"
+                      : ""}{" "}
+                    left
+                    {todoActions.length > 0 &&
+                      ` for a total of ${remainingTasksEstimatedTime} minutes`}
+                  </p>
+                )}
+              </div>
               {currentTask && currentTask.relation ? (
                 <LargeActionCard
                   action={currentTask}
