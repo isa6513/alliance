@@ -34,6 +34,13 @@ const ForumListPost = ({
     navigate(`/user/${post.author?.id}`);
   };
 
+  const lastCommentAuthorClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (lastComment?.author) {
+      navigate(`/user/${lastComment.author.id}`);
+    }
+  };
+
   const actionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/actions/${post.action?.id}`);
@@ -100,13 +107,12 @@ const ForumListPost = ({
 
           {lastComment && showReply && (
             <div className="flex items-center gap-x-1">
-              <ProfileImage pfp={post.author.profilePicture} size="mini" />
-              <span onClick={authorClick}>
-                <UserDisplayName
-                  staff={
-                    lastComment ? lastComment.author.staff : post.author.staff
-                  }
-                >
+              <ProfileImage
+                pfp={lastComment.author.profilePicture}
+                size="mini"
+              />
+              <span onClick={lastCommentAuthorClick}>
+                <UserDisplayName staff={lastComment.author.staff}>
                   {lastComment.author.displayName}
                 </UserDisplayName>
                 {` replied ${formatTime(new Date(lastComment.createdAt), {

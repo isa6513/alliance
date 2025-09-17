@@ -272,7 +272,7 @@ const Comments = ({
       ) : null}
       {error && <div className="text-red-500">{error}</div>}
       {comments && comments.length > 0 ? (
-        <div className={`${compact ? "mt-3 " : "space-y-3 my-3"}`}>
+        <div className={`${compact ? "mt-3 " : "space-y-2 my-3"}`}>
           {comments
             .filter((comment) => !comment.deleted || comment.children?.length)
             .map((reply) => (
