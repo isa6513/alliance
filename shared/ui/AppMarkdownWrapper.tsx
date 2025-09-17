@@ -15,17 +15,20 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
       <ReactMarkdown
         components={{
           h1: ({ ...props }) => (
-            <h1 className="first:mt-0 mt-6 !font-medium !text-2xl" {...props} />
+            <h1
+              className="first:mt-0 mt-6 !font-semibold !text-2xl"
+              {...props}
+            />
           ),
           h2: ({ ...props }) => (
-            <h2 className="first:mt-0 mt-6 !font-medium text-lg" {...props} />
+            <h2 className="first:mt-0 mt-6 !font-semibold text-lg" {...props} />
           ),
           h3: ({ ...props }) => (
-            <h3 className="first:mt-0 mt-6 !font-medium text-lg" {...props} />
+            <h3 className="first:mt-0 mt-6 !font-semibold text-lg" {...props} />
           ),
           p: ({ ...props }) => <p className="first:mt-0 mt-4" {...props} />,
           strong: ({ ...props }) => (
-            <strong className="!font-medium" {...props} />
+            <strong className="!font-semibold" {...props} />
           ),
           ol: ({ ...props }) => (
             <ol className="list-decimal list-inside pl-2" {...props} />
