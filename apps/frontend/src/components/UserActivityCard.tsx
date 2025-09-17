@@ -5,7 +5,6 @@ import {
   imagesUploadImage,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router";
@@ -116,10 +115,7 @@ const UserActivityCard = ({
 
   return (
     <div className="flex flex-row justify-stretch items-center space-x-4">
-      <Card
-        className="block bg-page text-[11pt] flex-1 border-b gap-y-2"
-        style={CardStyle.White}
-      >
+      <div className="block bg-white text-[11pt] flex-1 gap-y-2">
         <div className="*:inline space-x-1">
           <div className="flex-shrink-0 inline">
             <Link to={`/user/${activity.user.id}`} className="mr-2">
@@ -214,7 +210,7 @@ const UserActivityCard = ({
         {completed && (
           <Comments objectId={activity.id} type="activity" compact />
         )}
-      </Card>
+      </div>
     </div>
   );
 };
