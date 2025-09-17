@@ -61,7 +61,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
         />
         {expanded && (
           <div className="mt-3 flex justify-end space-x-2 items-center">
-            <p className="text-sm text-zinc-500 pr-2">
+            <p className="text-sm text-zinc-500 pr-2 hidden sm:block">
               Drag an image to attach
             </p>
             {parentId && (
@@ -99,7 +99,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
                 (!editableContent.body.trim() &&
                   editableContent.attachments.length === 0)
               }
-              className={`transition disabled:opacity-50`}
+              className={`transition disabled:opacity-50 text-nowrap`}
             >
               {isSubmitting ? "Posting..." : "Post Comment"}
             </Button>

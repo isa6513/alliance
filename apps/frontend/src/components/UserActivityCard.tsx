@@ -174,7 +174,7 @@ const UserActivityCard = ({
                   <p className="my-3">{activity.editableContent.body}</p>
                 )
               )}
-              <p className="text-zinc-600 text-sm">{timeSinceCompleted}</p>
+              <p className="text-zinc-500 text-sm">{timeSinceCompleted}</p>
             </div>
           </div>
           {!isEditing && (
