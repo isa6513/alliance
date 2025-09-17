@@ -123,32 +123,12 @@ const PostDetailPage: React.FC = () => {
                 {post.pinned && <PinnedIcon size="large" />}
                 <h1 className="!text-xl !font-medium -mt-1">{post.title}</h1>
               </div>
-              {post.author.id === user?.id && (
-                <div className="space-x-2">
-                  <Link
-                    to={`/forum/edit/${post.id}`}
-                    className="px-4 py-2 text-sm bg-zinc-100 text-gray-700 rounded hover:bg-zinc-200"
-                  >
-                    Edit
-                  </Link>
-                  <span
-                    onClick={handleDeletePost}
-                    className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 cursor-pointer"
-                  >
-                    Delete
-                  </span>
-                </div>
-              )}
-              <div className="ml-2 -mt-1">
-                <PostLikeButton
-                  liked={post.likes.some((like) => like.id === user?.id)}
-                  likes={post.likes.length}
-                  handleLike={handleLike}
-                />
-              </div>
             </div>
-            <div className="flex flex-row gap-x-2 mb-4 items-center">
-              <Link to={`/user/${post.author.id}`}>
+            <div className="flex flex-row gap-x-2 mb-4 mt-1 items-center">
+              <Link
+                to={`/user/${post.author.id}`}
+                className="flex items-center"
+              >
                 <ProfileImage
                   pfp={post.author.profilePicture}
                   size="small"
@@ -173,6 +153,31 @@ const PostDetailPage: React.FC = () => {
               )}
             </div>
             <EditableContentRenderer content={post.editableContent} />
+            <div className="flex items-center mt-4 gap-x-1.5 -mb-2">
+              <div className="">
+                <PostLikeButton
+                  liked={post.likes.some((like) => like.id === user?.id)}
+                  likes={post.likes.length}
+                  handleLike={handleLike}
+                />
+              </div>
+              {post.author.id === user?.id && (
+                <>
+                  <Link
+                    to={`/forum/edit/${post.id}`}
+                    className="px-4 py-2 text-sm bg-zinc-100 text-gray-700 rounded hover:bg-zinc-200"
+                  >
+                    Edit
+                  </Link>
+                  <span
+                    onClick={handleDeletePost}
+                    className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 cursor-pointer"
+                  >
+                    Delete
+                  </span>
+                </>
+              )}
+            </div>
           </Card>
         </div>
         <Comments objectId={post.id} type={"post"} />

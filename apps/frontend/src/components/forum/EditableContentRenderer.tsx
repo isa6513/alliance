@@ -81,7 +81,10 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
       {content && (
         <AppMarkdownWrapper
           markdownContent={
-            charLimit ? content.body.slice(0, charLimit) : content.body
+            charLimit
+              ? content.body.slice(0, charLimit) +
+                (charLimit < content.body.length ? "..." : "")
+              : content.body
           }
         />
       )}

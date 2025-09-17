@@ -108,51 +108,56 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
          ${state === LargeActionCardState.Minified ? "pb-4" : ""}`}
     >
       <div className="p-0 sm:p-2">
-        <div className="w-24 mb-4 sm:mb-0 sm:absolute right-8 top-8">
+        <div className="flex flex-col sm:flex-row gap-x-2 items-start mb-1">
           <Button
             color={ButtonColor.Transparent}
             onClick={goToActionPage}
-            className="w-full text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
+            className="!px-6 block mb-4 sm:hidden text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
+          >
+            Details
+          </Button>
+          <div className="flex flex-col flex-1">
+            <div className="flex flex-row flex-wrap gap-x-4 mb-2">
+              {!!action.timeEstimate && (
+                <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
+                  <ClockIcon />
+                  <p className="text-green">{`${action.timeEstimate} minute${
+                    action.timeEstimate === 1 ? "" : "s"
+                  }`}</p>
+                </div>
+              )}
+              {!!nextEvent && (
+                <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
+                  <DeadlineIcon fill={deadlineColor} />
+                  <p style={{ color: deadlineColor }}>
+                    {`${formatTime(new Date(nextEvent.date), {
+                      addSuffix: false,
+                    })}`}{" "}
+                    left
+                  </p>
+                </div>
+              )}
+              {!nextEvent && (
+                <p className="text-base text-zinc-500">
+                  {action.status === "gathering_commitments"
+                    ? "Launched "
+                    : "Action began "}
+                  {formatTime(new Date(lastEvent.date), { addSuffix: true })}
+                </p>
+              )}
+            </div>
+            <p className="font-medium text-lg">{action.name}</p>
+          </div>
+          <Button
+            color={ButtonColor.Transparent}
+            onClick={goToActionPage}
+            className="!px-6 hidden sm:block text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
           >
             Details
           </Button>
         </div>
-        <div className="flex flex-row flex-wrap gap-x-4 mb-2">
-          {!!action.timeEstimate && (
-            <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
-              <ClockIcon />
-              <p className="text-green">{`${action.timeEstimate} minute${
-                action.timeEstimate === 1 ? "" : "s"
-              }`}</p>
-            </div>
-          )}
-          {!!nextEvent && (
-            <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
-              <DeadlineIcon fill={deadlineColor} />
-              <p style={{ color: deadlineColor }}>
-                {`${formatTime(new Date(nextEvent.date), {
-                  addSuffix: false,
-                })}`}{" "}
-                left
-              </p>
-            </div>
-          )}
-          {!nextEvent && (
-            <p className="text-base text-zinc-500">
-              {action.status === "gathering_commitments"
-                ? "Launched "
-                : "Action began "}
-              {formatTime(new Date(lastEvent.date), { addSuffix: true })}
-            </p>
-          )}
-        </div>
+        <p>{action.shortDescription}</p>
 
-        <div className="flex flex-row items-start gap-x-8">
-          <div className="flex-1 flex flex-col gap-y-1">
-            <p className="font-medium text-lg">{action.name}</p>
-            <p>{action.shortDescription}</p>
-          </div>
-        </div>
         {
           <div className="mt-6">
             {!action.commitmentless && (
