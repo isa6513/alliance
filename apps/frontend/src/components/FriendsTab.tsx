@@ -193,7 +193,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
                 {friends.map((friend) => (
                   <Link
                     key={friend.id}
-                    className="flex items-center p-3 border border-gray-300 rounded cursor-pointer hover:border-gray-500"
+                    className="flex items-center p-3 border border-zinc-300 rounded cursor-pointer hover:border-zinc-500"
                     to={`/user/${friend.id}`}
                   >
                     <ProfileImage
@@ -237,7 +237,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
                 {receivedRequests.map((request) => (
                   <div
                     key={request.id}
-                    className="flex items-center p-3 border border-gray-300 rounded-lg"
+                    className="flex items-center p-3 border border-zinc-300 rounded-lg"
                   >
                     <ProfileImage
                       pfp={request.profilePicture}
@@ -282,7 +282,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
                 {sentRequests.map((request) => (
                   <div
                     key={request.id}
-                    className="flex items-center p-3 border border-gray-300 rounded-lg"
+                    className="flex items-center p-3 border border-zinc-300 rounded-lg"
                   >
                     <ProfileImage
                       pfp={request.profilePicture}

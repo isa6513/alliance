@@ -7,6 +7,7 @@ interface EditableContentRendererProps {
   collapsed?: boolean;
   deleted?: boolean;
   className?: string;
+  charLimit?: number;
 }
 
 const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
@@ -14,6 +15,7 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
   collapsed = false,
   deleted = false,
   className,
+  charLimit,
 }) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -76,7 +78,13 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
 
   return (
     <div className={className}>
-      {content && <AppMarkdownWrapper markdownContent={content.body} />}
+      {content && (
+        <AppMarkdownWrapper
+          markdownContent={
+            charLimit ? content.body.slice(0, charLimit) : content.body
+          }
+        />
+      )}
       {attachments.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
           {attachments.map((key, idx) => (

@@ -62,7 +62,8 @@ const ForumActivityCommentCard: React.FC<ForumActivityCommentCardProps> = ({
       to={`/forum/post/${comment.parentObjectId}?replyId=${comment.id}`}
       className="w-full mb-0 p-4 hover:bg-zinc-50 bg-white space-y-2"
     >
-      <div className="flex flex-row items-center gap-x-2 text-sm text-zinc-600">
+      <EditableContentRenderer content={comment.editableContent} />
+      <div className="flex flex-row items-center gap-x-2 text-sm text-zinc-500">
         <ProfileImage pfp={comment.author.profilePicture} size="small" />
         <span>
           <UserDisplayName staff={comment.author.staff}>
@@ -73,7 +74,6 @@ const ForumActivityCommentCard: React.FC<ForumActivityCommentCardProps> = ({
           })}`}
         </span>
       </div>
-      <EditableContentRenderer content={comment.editableContent} />
     </Link>
   );
 };
@@ -503,6 +503,8 @@ const UserProfilePage: React.FC = () => {
                         <ForumListPost
                           post={item.post}
                           key={`post-${item.post.id}`}
+                          showReply={false}
+                          showContentPreview
                         />
                       );
                     }

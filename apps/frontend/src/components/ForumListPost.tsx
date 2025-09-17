@@ -9,18 +9,23 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { formatTime } from "../lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
+import EditableContentRenderer from "./forum/EditableContentRenderer";
 import UserDisplayName from "./UserDisplayName";
 
 export interface ForumListPostProps {
   post: PostDto;
   card?: boolean;
   showAction?: boolean;
+  showReply?: boolean;
+  showContentPreview?: boolean;
 }
 
 const ForumListPost = ({
   post,
   card = true,
   showAction = true,
+  showReply = true,
+  showContentPreview = false,
 }: ForumListPostProps) => {
   const navigate = useNavigate();
 
@@ -54,9 +59,19 @@ const ForumListPost = ({
         to={`/forum/post/${post.id}`}
         className={`w-full mb-0 !gap-y-1 p-4 hover:bg-zinc-50 bg-white`}
       >
-        <div className="flex flex-row gap-1 mb-2">
-          {post.pinned && <PinnedIcon size="small" />}
-          <p className="font-medium text-base">{post.title}</p>
+        <div className="flex flex-col gap-y-0 mb-2">
+          <div className="flex flex-row gap-y-1">
+            {post.pinned && <PinnedIcon size="small" />}
+            <p className="text-base">{post.title}</p>
+          </div>
+          {showContentPreview && (
+            <div className="text-zinc-500">
+              <EditableContentRenderer
+                content={post.editableContent}
+                charLimit={140}
+              />
+            </div>
+          )}
         </div>
         <div className="flex justify-between items-end text-sm text-zinc-500">
           <div className="flex flex-row gap-x-1.5 items-center">
@@ -81,7 +96,7 @@ const ForumListPost = ({
             )}
           </div>
 
-          {lastComment && (
+          {lastComment && showReply && (
             <div className="flex items-center gap-x-1">
               <ProfileImage pfp={post.author.profilePicture} size="mini" />
               <span onClick={authorClick}>
