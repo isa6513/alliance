@@ -149,7 +149,6 @@ const UserActivityCard = ({
                     <EditableContentForm
                       value={editContent}
                       onChange={setEditContent}
-                      compact={false}
                       placeholder="Add a description..."
                     />
                     <div className="mt-2 flex justify-end items-center gap-2">
@@ -175,11 +174,11 @@ const UserActivityCard = ({
                   <p className="my-3">{activity.editableContent.body}</p>
                 )
               )}
-              <p className="text-zinc-500">{timeSinceCompleted}</p>
+              <p className="text-zinc-600 text-sm">{timeSinceCompleted}</p>
             </div>
           </div>
           {!isEditing && (
-            <div className="flex items-center space-x-2 self-end">
+            <div className="flex items-center space-x-2 self-end mt-2">
               <ActivityLikeButton
                 liked={activity.likes.some((like) => like.id === self?.id)}
                 likes={activity.likes.length}

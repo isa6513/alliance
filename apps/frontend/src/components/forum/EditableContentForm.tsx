@@ -4,7 +4,6 @@ import React, { useRef, useState } from "react";
 interface EditableContentFormProps {
   value: CreateEditableContentDto;
   onChange: (value: CreateEditableContentDto) => void;
-  compact?: boolean;
   className?: string;
   placeholder?: string;
   expanded?: boolean;
@@ -13,7 +12,6 @@ interface EditableContentFormProps {
 const EditableContentForm: React.FC<EditableContentFormProps> = ({
   value,
   onChange,
-  compact,
   className,
   placeholder,
   expanded,
@@ -124,7 +122,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
       <textarea
         className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-transparent border-none ${
           expanded ? "" : "resize-none"
-        } ${compact ? "text-sm" : ""}`}
+        }`}
         rows={expanded ? 2 : 1}
         value={value.body}
         onChange={(e) => onChange({ ...value, body: e.target.value })}

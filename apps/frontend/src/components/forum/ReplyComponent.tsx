@@ -215,7 +215,6 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                 setEditContent(val.body);
                 setEditAttachments(val.attachments);
               }}
-              compact={false}
               placeholder="Edit your reply..."
             />
             <div className="flex gap-2 mt-2 justify-end items-center">

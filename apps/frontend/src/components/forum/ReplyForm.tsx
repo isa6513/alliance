@@ -57,7 +57,6 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
             )
               setExpanded(false);
           }}
-          compact={compact}
           placeholder={"Add a comment..."}
         />
         {expanded && (
