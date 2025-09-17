@@ -69,13 +69,14 @@ const ContractPage: React.FC = () => {
           <MemberContract />
 
           {!contractDateSigned && (
-            <div className="flex flex-row mt-2">
+            <div className="flex flex-row mt-2 w-full">
               <FormInput
                 name="name"
                 type="text"
                 placeholder={user.name}
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
+                className="flex-1"
               />
               <Button
                 onClick={handleContractSign}
