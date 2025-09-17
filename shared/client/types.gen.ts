@@ -2019,6 +2019,21 @@ export type ForumFindCommentsByUserResponses = {
 
 export type ForumFindCommentsByUserResponse = ForumFindCommentsByUserResponses[keyof ForumFindCommentsByUserResponses];
 
+export type ForumFindForumCommentsByUserData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/forum/posts/user/{id}/forumComments';
+};
+
+export type ForumFindForumCommentsByUserResponses = {
+    200: Array<CommentDto>;
+};
+
+export type ForumFindForumCommentsByUserResponse = ForumFindForumCommentsByUserResponses[keyof ForumFindForumCommentsByUserResponses];
+
 export type ForumCreateCommentData = {
     body: CreateCommentDto;
     path?: never;

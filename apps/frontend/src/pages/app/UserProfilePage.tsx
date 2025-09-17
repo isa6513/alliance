@@ -4,7 +4,7 @@ import {
   PostDto,
   ProfileDto,
   UpdateProfileDto,
-  forumFindCommentsByUser,
+  forumFindForumCommentsByUser,
   forumFindPostsByUser,
   userFindOne,
   userListFriends,
@@ -62,7 +62,11 @@ const ForumActivityCommentCard: React.FC<ForumActivityCommentCardProps> = ({
       to={`/forum/post/${comment.parentObjectId}?replyId=${comment.id}`}
       className="w-full mb-0 p-4 hover:bg-zinc-50 bg-white space-y-2"
     >
-      <EditableContentRenderer content={comment.editableContent} />
+      <EditableContentRenderer
+        content={comment.editableContent}
+        charLimit={140}
+        className="text-zinc-500"
+      />
       <div className="flex flex-row items-center gap-x-2 text-sm text-zinc-500">
         <ProfileImage pfp={comment.author.profilePicture} size="small" />
         <span>
@@ -177,7 +181,7 @@ const UserProfilePage: React.FC = () => {
         });
         setForumPosts(forumPostsData ?? []);
 
-        const { data: forumCommentsData } = await forumFindCommentsByUser({
+        const { data: forumCommentsData } = await forumFindForumCommentsByUser({
           path: { id: userId },
         });
         setForumComments(forumCommentsData ?? []);
@@ -475,7 +479,7 @@ const UserProfilePage: React.FC = () => {
           {selectedTab === ProfileTabs.Activity && (
             <div className="flex flex-col divide-y divide-zinc-200 mb-10 border border-zinc-200 rounded overflow-hidden *:p-4 bg-white">
               {completedActions.length === 0 && (
-                <p className="mt-4 text-center text-zinc-500">
+                <p className="text-center text-zinc-500">
                   No actions completed yet
                 </p>
               )}
@@ -511,6 +515,9 @@ const UserProfilePage: React.FC = () => {
                       );
                     }
                     return (
+                      // <ForumListPost
+                      //   post={item.comment.parentPost}
+                      //   commentFeature={item.comment}
                       <ForumActivityCommentCard
                         comment={item.comment}
                         key={`comment-${item.comment.id}`}

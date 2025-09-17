@@ -123,6 +123,17 @@ export class ForumController {
       .then((comments) => comments.map((comment) => new CommentDto(comment)));
   }
 
+  @Get('posts/user/:id/forumComments')
+  @ApiOperation({ summary: 'Get all forum comments by a specific user' })
+  @ApiOkResponse({ type: [CommentDto] })
+  findForumCommentsByUser(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<CommentDto[]> {
+    return this.forumService
+      .findForumCommentsByUser(id)
+      .then((comments) => comments.map((comment) => new CommentDto(comment)));
+  }
+
   @Patch('posts/:id')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Update a post' })

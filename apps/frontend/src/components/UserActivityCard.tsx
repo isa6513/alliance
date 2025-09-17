@@ -215,7 +215,7 @@ const UserActivityCard = ({
                   className="flex flex-row gap-x-1 items-center !px-3 !py-[6px] !h-full"
                 >
                   <span className="text-sm text-zinc-800 text-nowrap">
-                    Add comment
+                    Reply
                   </span>
                 </Button>
               )}

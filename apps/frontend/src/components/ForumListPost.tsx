@@ -14,6 +14,7 @@ import UserDisplayName from "./UserDisplayName";
 
 export interface ForumListPostProps {
   post: PostDto;
+  commentFeature?: CommentDto;
   card?: boolean;
   showAction?: boolean;
   showReply?: boolean;
@@ -22,6 +23,7 @@ export interface ForumListPostProps {
 
 const ForumListPost = ({
   post,
+  commentFeature,
   card = true,
   showAction = true,
   showReply = true,
@@ -71,15 +73,18 @@ const ForumListPost = ({
         <div className="flex flex-col gap-y-0 mb-2">
           <div className="flex flex-row gap-y-1">
             {post.pinned && <PinnedIcon size="small" />}
-            <p className="text-base">{post.title}</p>
+            <p className={`text-base`}>{post.title}</p>
           </div>
           {showContentPreview && (
-            <div className="text-zinc-500">
-              <EditableContentRenderer
-                content={post.editableContent}
-                charLimit={140}
-              />
-            </div>
+            <EditableContentRenderer
+              content={
+                commentFeature
+                  ? commentFeature.editableContent
+                  : post.editableContent
+              }
+              charLimit={140}
+              className="text-zinc-500"
+            />
           )}
         </div>
         <div className="flex justify-between items-end text-sm text-zinc-500">

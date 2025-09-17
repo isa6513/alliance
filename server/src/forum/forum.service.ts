@@ -590,6 +590,18 @@ export class ForumService {
     });
   }
 
+  async findForumCommentsByUser(userId: number): Promise<Comment[]> {
+    return this.commentRepository.find({
+      where: {
+        authorId: userId,
+        deleted: false,
+        parentObjectType: CommentParentObject.Post,
+      },
+      relations: ['author', 'editableContent'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async findPostsByTitle(title: string): Promise<Post[]> {
     return this.postRepository.find({
       where: { title: ILike(`%${title}%`), deleted: false },
