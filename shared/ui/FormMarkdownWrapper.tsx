@@ -11,13 +11,30 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
   return (
     <ReactMarkdown
       components={{
-        h1: ({ ...props }) => <h1 className="!font-medium" {...props} />,
-        h2: ({ ...props }) => <h2 className="!font-medium" {...props} />,
-        h3: ({ ...props }) => <h3 className="!font-medium" {...props} />,
+        h1: ({ ...props }) => (
+          <h1
+            className="!font-medium first:mt-0 mt-4 !font-medium"
+            {...props}
+          />
+        ),
+        h2: ({ ...props }) => (
+          <h2
+            className="!font-medium first:mt-0 mt-4 !font-medium"
+            {...props}
+          />
+        ),
+        h3: ({ ...props }) => (
+          <h3
+            className="!font-medium first:mt-0 mt-4 !font-medium"
+            {...props}
+          />
+        ),
         strong: ({ ...props }) => (
           <strong className="!font-medium" {...props} />
         ),
-        p: ({ ...props }) => <p className="text-zinc-800" {...props} />,
+        p: ({ ...props }) => (
+          <p className="text-zinc-800 first:mt-0 mt-2" {...props} />
+        ),
         ol: ({ ...props }) => (
           <ol
             className="text-zinc-800 list-decimal list-inside pl-2"
