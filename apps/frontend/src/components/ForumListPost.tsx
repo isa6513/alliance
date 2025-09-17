@@ -135,7 +135,11 @@ const ForumListPost = ({
         key={post.id}
         className="flex items-start space-x-3 rounded-md border-zinc-200 cursor-pointer hover:bg-zinc-50 px-4 -mx-4"
         onClick={() => {
-          navigate(`/forum/post/${post.id}`);
+          navigate(
+            lastComment && showReply
+              ? `/forum/post/${post.id}?replyId=${lastComment.id}`
+              : `/forum/post/${post.id}`
+          );
         }}
       >
         <ActivityFeedItem

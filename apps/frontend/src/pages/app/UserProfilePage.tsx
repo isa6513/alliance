@@ -479,7 +479,7 @@ const UserProfilePage: React.FC = () => {
           {selectedTab === ProfileTabs.Activity && (
             <div className="flex flex-col divide-y divide-zinc-200 mb-10 border border-zinc-200 rounded overflow-hidden *:p-4 bg-white">
               {completedActions.length === 0 && (
-                <p className="text-center text-zinc-500">
+                <p className="my-4 text-center text-zinc-500">
                   No actions completed yet
                 </p>
               )}
@@ -498,7 +498,7 @@ const UserProfilePage: React.FC = () => {
           {selectedTab === ProfileTabs.Forum && (
             <div className="flex flex-col gap-y-1">
               {forumActivityItems.length === 0 ? (
-                <p className="mt-4 text-center text-zinc-500">
+                <p className="my-4 text-center text-zinc-500">
                   No forum activity yet
                 </p>
               ) : (
@@ -533,7 +533,7 @@ const UserProfilePage: React.FC = () => {
             <Card className="justify-center">
               <div className="px-2">
                 {friends.length === 0 && (
-                  <p className="mt-4 text-center text-zinc-500">
+                  <p className="my-4 text-center text-zinc-500">
                     No friends yet
                   </p>
                 )}
