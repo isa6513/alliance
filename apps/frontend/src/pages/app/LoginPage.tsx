@@ -18,7 +18,6 @@ const LoginPage: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [searchParams] = useSearchParams();
   const [message, setMessage] = useState<string | null>(
     location.state?.message || null
@@ -59,14 +58,13 @@ const LoginPage: React.FC = () => {
     } catch {
       setError("Authentication failed.");
       setMessage(null);
-      setShowForgotPassword(true);
       setLoading(false);
     }
   };
 
   const handleForgotPasswordClick = async () => {
     if (!formData.email) {
-      setError("Please enter an email address first.");
+      setMessage('Enter an email address, then click "Forgot password" again.');
       return;
     }
 
@@ -153,7 +151,7 @@ const LoginPage: React.FC = () => {
             </div>
           )}
           <p
-            className="mt-4 text-blue-600 text-center hover:underline cursor-pointer"
+            className="mt-4 text-blue-600/70 text-center hover:underline cursor-pointer"
             onClick={handleForgotPasswordClick}
           >
             Forgot password?

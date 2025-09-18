@@ -185,15 +185,17 @@ const ActionsList: React.FC = () => {
               </div>
             </Card>
           ))}
-        <div className="flex justify-between items-center">
-          <button
-            onClick={() => setShowPopulateConfirm(true)}
-            disabled={isPopulating}
-            className="bg-gray-100 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm font-medium"
-          >
-            {isPopulating ? "Populating..." : "Populate Test Data"}
-          </button>
-        </div>
+        {window.location.href.includes("localhost") && (
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => setShowPopulateConfirm(true)}
+              disabled={isPopulating}
+              className="bg-gray-100 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm font-medium"
+            >
+              {isPopulating ? "Populating..." : "Populate Test Data"}
+            </button>
+          </div>
+        )}
       </div>
 
       {showPopulateConfirm && (
