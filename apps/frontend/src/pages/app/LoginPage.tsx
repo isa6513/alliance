@@ -151,7 +151,7 @@ const LoginPage: React.FC = () => {
             </div>
           )}
           <p
-            className="mt-4 text-blue-600/70 text-center hover:underline cursor-pointer"
+            className="mt-4 text-green text-center hover:underline cursor-pointer"
             onClick={handleForgotPasswordClick}
           >
             Forgot password?
