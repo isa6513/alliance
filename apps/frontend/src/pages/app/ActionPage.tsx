@@ -115,7 +115,6 @@ export default function ActionPage() {
 
   return (
     <div className="max-w-[1250px] mx-auto flex bg-white min-h-[calc(100vh-50px)]">
-      {/* LEFT: just normal flow, no overflow */}
       <div className="flex-1 p-10">
         <Outlet
           context={
@@ -133,7 +132,7 @@ export default function ActionPage() {
         />
       </div>
       <div
-        className="w-[360px] shrink-0 sticky top-[var(--nav-height)] self-start divide-y divide-zinc-200 flex flex-col *:py-5 p-10 pt-14 border-l border-zinc-200"
+        className="w-[360px] shrink-0 sticky top-[var(--nav-height)] self-start divide-y divide-zinc-200 flex flex-col *:py-5 p-10 pt-14 border-l border-zinc-200 overflow-auto"
         style={{ height: `calc(100vh - var(--nav-height))` }}
       >
         {action && (

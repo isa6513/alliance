@@ -13,12 +13,12 @@ import {
   forumUpdateComment,
   imagesUploadImage,
 } from "@alliance/shared/client";
+import posthog from "posthog-js";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ReplyComponent from "./forum/ReplyComponent";
 import ReplyForm from "./forum/ReplyForm";
-import posthog from "posthog-js";
 
 export interface CommentsProps {
   objectId: number;
@@ -124,7 +124,7 @@ const Comments = ({
             return fileB64; // already a key
           })
         );
-        attachmentKeys = uploads.filter(Boolean) as string[];
+        attachmentKeys = uploads.filter(Boolean);
       }
       const commentDto: CreateCommentDto = {
         parentObjectId: Number(objectId),

@@ -52,6 +52,7 @@ const ActionActivityList = ({
   const displayedActivities = showAll
     ? allActivities
     : allActivities.slice(0, maxN);
+
   const hasMore = allActivities.length > maxN;
 
   return (
@@ -74,7 +75,7 @@ const ActionActivityList = ({
       {hasMore && !showAll && (
         <button
           onClick={() => setShowAll(true)}
-          className="text-[#318dde] hover:text-blue-800 text-sm font-medium"
+          className="text-green hover:text-green/70 mt-3 font-medium"
         >
           See all ({allActivities.length})
         </button>
