@@ -120,7 +120,7 @@ const UserActivityCard = ({
       <div className="block bg-white text-[11pt] flex-1 gap-y-2">
         <div className="*:inline space-x-1">
           <div className="flex-shrink-0 inline">
-            <Link to={`/user/${activity.user.id}`} className="mr-2">
+            <Link to={`/user/${activity.user.id}`} className="mr-1">
               <ProfileImage pfp={activity.user.profilePicture} size="small" />
             </Link>
           </div>
