@@ -17,15 +17,17 @@ interface FriendsTabProps {
   userId: number;
   isMe?: boolean;
   originalTab?: "friends" | "received" | "sent";
+  friends?: ProfileDto[];
 }
 
 const FriendsTab: React.FC<FriendsTabProps> = ({
   userId,
   isMe = false,
   originalTab = "friends",
+  friends: initialFriends = [],
 }: FriendsTabProps) => {
-  const [loading, setLoading] = useState(true);
-  const [friends, setFriends] = useState<ProfileDto[]>([]);
+  const [loading, setLoading] = useState(!!initialFriends.length);
+  const [friends, setFriends] = useState<ProfileDto[]>(initialFriends);
   const [receivedRequests, setReceivedRequests] = useState<ProfileDto[]>([]);
   const [sentRequests, setSentRequests] = useState<ProfileDto[]>([]);
   const [activeTab, setActiveTab] = useState<"friends" | "received" | "sent">(
@@ -133,7 +135,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
     !sentRequests.length
   ) {
     return (
-      <Card style={CardStyle.White} className="p-6">
+      <Card style={CardStyle.White} className="p-4">
         <p className="text-center text-zinc-500 py-4">Loading friend data...</p>
       </Card>
     );

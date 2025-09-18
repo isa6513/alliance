@@ -540,6 +540,7 @@ const UserProfilePage: React.FC = () => {
                   userId={profileUser.id}
                   isMe={isMe}
                   originalTab={openFriendRequest ? "received" : "friends"}
+                  friends={friends}
                 />
               </div>
             </Card>
