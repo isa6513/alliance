@@ -65,7 +65,6 @@ const ForumActivityCommentCard: React.FC<ForumActivityCommentCardProps> = ({
       <EditableContentRenderer
         content={comment.editableContent}
         charLimit={140}
-        className="text-zinc-500"
       />
       <div className="flex flex-row items-center gap-x-2 text-sm text-zinc-500">
         <ProfileImage pfp={comment.author.profilePicture} size="small" />
