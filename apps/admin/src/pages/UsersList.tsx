@@ -53,7 +53,7 @@ const UsersList: React.FC = () => {
       {window.location.href.includes("localhost") && (
         <p className="text-sm text-gray-500">note: posthog data is prod-only</p>
       )}
-      <div className="flex flex-row flex-wrap gap-3 justify-center">
+      <div className="flex flex-row flex-wrap gap-3">
         {sorted.map((user) => (
           <UserCard
             key={user.id}

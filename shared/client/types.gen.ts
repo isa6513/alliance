@@ -114,6 +114,7 @@ export type FriendStatus = 'pending' | 'accepted' | 'declined' | 'none';
 
 export type FriendStatusDto = {
     status: FriendStatus | null;
+    didReceiveRequest: boolean;
 };
 
 export type User = {

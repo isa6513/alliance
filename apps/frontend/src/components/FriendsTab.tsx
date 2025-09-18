@@ -241,13 +241,18 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
                     key={request.id}
                     className="flex items-center p-3 border border-zinc-300 rounded-lg"
                   >
-                    <ProfileImage
-                      pfp={request.profilePicture}
-                      className="!w-12 !h-12 mr-4"
-                    />
-                    <div className="flex-grow">
-                      <p className="font-medium">{request.displayName}</p>
-                    </div>
+                    <Link
+                      to={`/user/${request.id}`}
+                      className="flex flex-row flex-2 items-center hover:underline"
+                    >
+                      <ProfileImage
+                        pfp={request.profilePicture}
+                        className="!w-12 !h-12 mr-4"
+                      />
+                      <div className="flex-grow">
+                        <p className="font-medium">{request.displayName}</p>
+                      </div>
+                    </Link>
                     <div className="flex space-x-2">
                       <Button
                         onClick={() => handleAcceptRequest(request.id)}

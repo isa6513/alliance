@@ -6,6 +6,7 @@ import {
   UpdateProfileDto,
   forumFindForumCommentsByUser,
   forumFindPostsByUser,
+  userAcceptFriendRequest,
   userFindOne,
   userListFriends,
   userMyFriendRelationship,
@@ -94,8 +95,9 @@ const UserProfilePage: React.FC = () => {
   const [profileUser, setProfileUser] = useState<ProfileDto | null>(
     isMe ? myProfile : null
   );
-  const [friendStatus, setFriendStatus] =
-    useState<FriendStatusDto["status"]>("none");
+  const [friendStatus, setFriendStatus] = useState<FriendStatusDto | null>(
+    null
+  );
 
   const [selectedTab, setSelectedTab] = useState(ProfileTabs.Activity);
 
@@ -173,7 +175,9 @@ const UserProfilePage: React.FC = () => {
         const { data: friendStatusData } = await userMyFriendRelationship({
           path: { id: userId },
         });
-        setFriendStatus(friendStatusData?.status ?? "none");
+        if (friendStatusData) {
+          setFriendStatus(friendStatusData);
+        }
 
         const { data: forumPostsData } = await forumFindPostsByUser({
           path: { id: userId },
@@ -210,9 +214,19 @@ const UserProfilePage: React.FC = () => {
     if (!id || !user) return;
     try {
       await userRequestFriend({ path: { targetUserId: parseInt(id) } });
-      setFriendStatus("pending");
+      setFriendStatus({ status: "pending", didReceiveRequest: false });
     } catch (error) {
       console.error("Error sending friend request:", error);
+    }
+  }, [id, user]);
+
+  const handleAcceptFriendRequest = useCallback(async () => {
+    if (!id || !user) return;
+    const response = await userAcceptFriendRequest({
+      path: { requesterId: parseInt(id) },
+    });
+    if (!response.error) {
+      setFriendStatus({ status: "accepted", didReceiveRequest: false });
     }
   }, [id, user]);
 
@@ -220,7 +234,7 @@ const UserProfilePage: React.FC = () => {
     if (!id || !user) return;
     try {
       await userRemoveFriend({ path: { targetUserId: parseInt(id) } });
-      setFriendStatus("none");
+      setFriendStatus({ status: "none", didReceiveRequest: false });
     } catch (error) {
       console.error("Error removing friend:", error);
     }
@@ -427,6 +441,7 @@ const UserProfilePage: React.FC = () => {
                   friendStatus={friendStatus}
                   handleSendFriendRequest={handleSendFriendRequest}
                   handleRemoveFriend={handleRemoveFriend}
+                  handleAcceptFriendRequest={handleAcceptFriendRequest}
                 />
                 {/* <Button
                   color={ButtonColor.Light}

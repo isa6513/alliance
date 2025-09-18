@@ -16,7 +16,12 @@ import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity
 import { ILike, Repository } from 'typeorm';
 import { Friend, FriendStatus } from './friend.entity';
 import { PrefillUser } from './prefill-user.entity';
-import { OnboardingDto, ProfileDto, UpdateProfileDto } from './user.dto';
+import {
+  FriendStatusDto,
+  OnboardingDto,
+  ProfileDto,
+  UpdateProfileDto,
+} from './user.dto';
 import { User } from './user.entity';
 
 export interface PWResetJwtPayload {
@@ -335,7 +340,7 @@ export class UserService {
   async getRelationshipStatus(
     userId: number,
     targetUserId: number,
-  ): Promise<FriendStatus> {
+  ): Promise<FriendStatusDto> {
     const rel =
       (await this.friendRepository.findOne({
         where: { requester: { id: userId }, addressee: { id: targetUserId } },
@@ -343,7 +348,13 @@ export class UserService {
       (await this.friendRepository.findOne({
         where: { requester: { id: targetUserId }, addressee: { id: userId } },
       }));
-    return rel ? rel.status : FriendStatus.None;
+
+    const status = rel ? rel.status : FriendStatus.None;
+    return {
+      status,
+      didReceiveRequest:
+        status === FriendStatus.Pending && rel?.addressee.id === userId,
+    };
   }
 
   async findOneOrFail(id: number): Promise<User> {
