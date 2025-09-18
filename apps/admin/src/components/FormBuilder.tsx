@@ -16,7 +16,6 @@ import type {
   Page,
 } from "@alliance/shared/forms/formschema";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router";
 import {
   EditableDividerBlock,
   EditableHeaderBlock,
@@ -52,9 +51,7 @@ export function FormBuilder({
   initialSchema,
   formId: propFormId,
 }: FormBuilderProps) {
-  const [searchParams] = useSearchParams();
-  const urlFormId = searchParams.get("id");
-  const formId = propFormId || urlFormId;
+  const [formId, setFormId] = useState(propFormId);
 
   const [schema, setSchema] = useState<FormSchema>(
     initialSchema || {
@@ -443,9 +440,9 @@ export function FormBuilder({
         // If creating a new form, update the URL to include the new form ID
         if (!formId && response.data && (response.data as any).id) {
           const newFormId = (response.data as any).id;
-          const newUrl = new URL(window.location.href);
-          newUrl.searchParams.set("id", newFormId.toString());
-          window.history.replaceState({}, "", newUrl.toString());
+          const newUrl = "/forms/" + newFormId;
+          window.history.replaceState({}, "", newUrl);
+          setFormId(newFormId);
         }
       } else {
         setSaveError("Could not save form");
