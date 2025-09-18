@@ -65,6 +65,11 @@ const LoginPage: React.FC = () => {
   };
 
   const handleForgotPasswordClick = async () => {
+    if (!formData.email) {
+      setError("Please enter an email address first.");
+      return;
+    }
+
     setError(null);
     await authForgotPassword({
       body: { email: formData.email },
@@ -92,14 +97,6 @@ const LoginPage: React.FC = () => {
               className="!border-red-400 !bg-red-50 mb-6 flex flex-row space-x-2"
             >
               <span className="text-red-700">{error}</span>
-              {showForgotPassword && (
-                <span
-                  className="text-blue-600 hover:underline cursor-pointer"
-                  onClick={handleForgotPasswordClick}
-                >
-                  Forgot password?
-                </span>
-              )}
             </Card>
           )}
           <Card className="p-8 z-10 relative" style={CardStyle.White}>
@@ -150,6 +147,12 @@ const LoginPage: React.FC = () => {
               </p>
             </div>
           )}
+          <p
+            className="mt-4 text-blue-600 text-center hover:underline cursor-pointer"
+            onClick={handleForgotPasswordClick}
+          >
+            Forgot password?
+          </p>
         </div>
       </div>
     </div>
