@@ -18,6 +18,7 @@ import { Link, useSearchParams } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ReplyComponent from "./forum/ReplyComponent";
 import ReplyForm from "./forum/ReplyForm";
+import posthog from "posthog-js";
 
 export interface CommentsProps {
   objectId: number;
@@ -158,6 +159,9 @@ const Comments = ({
       setError(null);
     } catch (err) {
       console.error("Error posting reply:", err);
+      posthog.capture("error", {
+        error: err,
+      });
       setError("Failed to submit reply");
     } finally {
       setIsSubmitting(false);
