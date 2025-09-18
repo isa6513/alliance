@@ -71,12 +71,17 @@ const LoginPage: React.FC = () => {
     }
 
     setError(null);
-    await authForgotPassword({
+    const resp = await authForgotPassword({
       body: { email: formData.email },
     });
-    setMessage(
-      "A link to reset your password has been sent to your email address."
-    );
+    if (resp.error) {
+      setError("Error sending password reset email.");
+      console.error(resp.error);
+    } else {
+      setMessage(
+        "A link to reset your password has been sent to your email address."
+      );
+    }
   };
 
   const showRegisterLink = isFeatureEnabled(Features.PublicSignup);
