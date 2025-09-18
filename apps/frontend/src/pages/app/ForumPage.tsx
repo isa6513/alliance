@@ -24,7 +24,7 @@ const ForumPage: React.FC = () => {
   useGrayBackground();
 
   return (
-    <div className="flex flex-col max-w-4xl mx-auto px-3 pt-16 md:pt-12">
+    <div className="flex flex-col max-w-4xl mx-auto px-3 pt-3 md:pt-12">
       {isAuthenticated && (
         <div
           onClick={handleCreatePost}

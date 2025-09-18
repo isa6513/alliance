@@ -323,7 +323,7 @@ const UserProfilePage: React.FC = () => {
   return (
     <div className="max-w-[800px] mx-auto">
       <div className="mx-2 space-y-2">
-        <div className="w-full h-[100px]"></div>
+        <div className="w-full h-[50px] md:h-[100px]"></div>
         <Card className="px-8 pb-6 relative gap-y-2">
           {isEditing ? (
             <div className="relative w-fit">

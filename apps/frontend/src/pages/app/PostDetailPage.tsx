@@ -108,7 +108,7 @@ const PostDetailPage: React.FC = () => {
 
   return (
     <div className="w-full">
-      <div className="container max-w-4xl mx-auto px-4 py-8 ">
+      <div className="container max-w-4xl mx-auto px-4 py-4 md:py-8">
         <div className="relative">
           <Link
             to="/forum"

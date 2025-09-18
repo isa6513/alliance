@@ -50,7 +50,7 @@ const ActionsListPage = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="px-4 py-16 md:py-12 flex flex-col items-center w-[calc(min(650px,100%))] gap-y-6">
+      <div className="px-4 py-4 md:py-12 flex flex-col items-center w-[calc(min(650px,100%))] gap-y-6">
         <div className="flex flex-row justify-start items-center gap-x-4 w-full">
           <p>Filter by:</p>
           <DropdownSelect
