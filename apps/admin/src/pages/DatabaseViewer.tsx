@@ -707,7 +707,13 @@ const DatabaseViewer: React.FC = () => {
                 />
               </svg>
             </button>
-            <h1 className="!text-xl font-bold text-gray-900">
+            <h1
+              className={`!text-xl font-bold ${
+                window.location.href.includes("localhost")
+                  ? "text-gray-900"
+                  : "text-red"
+              }`}
+            >
               Database Viewer
             </h1>
           </div>
