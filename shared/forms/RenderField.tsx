@@ -169,7 +169,14 @@ export function RenderField({
             />
             <span className="text-zinc-700 flex flex-row items-start">
               <FormMarkdownWrapper markdownContent={field.label} />
-              {field.required && <span className="text-red-500 ml-1">*</span>}
+              {field.required && (
+                <span
+                  className="text-red-500 ml-1"
+                  style={{ display: "inline" }}
+                >
+                  *
+                </span>
+              )}
             </span>
           </label>
         </div>

@@ -822,19 +822,28 @@ export type SubmitFormDto = {
     };
 };
 
-export type CreateFormDto = {
+export type Page = {
+    [key: string]: unknown;
+};
+
+export type FormSchema = {
     title: string;
-    schema: {
+    description?: string;
+    pages: Array<Page>;
+    submit?: {
         [key: string]: unknown;
     };
+};
+
+export type CreateFormDto = {
+    title: string;
+    schema: FormSchema;
 };
 
 export type FormDto = {
     id: number;
     title: string;
-    schema: {
-        [key: string]: unknown;
-    };
+    schema: FormSchema;
     usedInAction?: string;
 };
 
@@ -845,6 +854,9 @@ export type FormResponseDto = {
         [key: string]: unknown;
     };
     user: User;
+    schemaSnapshot: {
+        [key: string]: unknown;
+    };
 };
 
 export type TimeSpentForUserDto = {

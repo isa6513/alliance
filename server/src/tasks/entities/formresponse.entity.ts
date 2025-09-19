@@ -47,4 +47,10 @@ export class FormResponse {
   @Allow()
   @Type(() => Date)
   createdAt: Date;
+
+  @Column({ type: 'jsonb' })
+  @ApiProperty()
+  @IsDefined()
+  @Type(() => Object)
+  schemaSnapshot: Record<string, unknown>;
 }

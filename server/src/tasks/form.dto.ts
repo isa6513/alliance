@@ -17,4 +17,5 @@ export class FormResponseDto extends PickType(FormResponse, [
   'answers',
   'formId',
   'user',
+  'schemaSnapshot',
 ]) {}

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { DisplayBlock } from './display-blocks';
 
 // field-kinds.ts
@@ -89,16 +90,20 @@ export type AnyField =
   | DateField
   | FileField;
 
-export interface Page {
+export class Page {
   id: string;
   title?: string;
   description?: string;
   fields: Array<AnyField | DisplayBlock>;
 }
 
-export interface FormSchema {
+export class FormSchema {
+  @ApiProperty()
   title: string;
+  @ApiPropertyOptional()
   description?: string;
+  @ApiProperty({ type: Page, isArray: true })
   pages: Page[];
+  @ApiPropertyOptional()
   submit?: { label?: string };
 }

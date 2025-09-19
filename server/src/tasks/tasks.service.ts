@@ -99,6 +99,7 @@ export class TasksService {
       ...submitFormDto,
       form,
       formId,
+      schemaSnapshot: form.schema,
       user,
     });
 
