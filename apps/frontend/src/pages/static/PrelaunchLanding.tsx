@@ -39,7 +39,7 @@ While this project is ambitious, we believe it is the right time to undertake it
                   What does membership require?{" "}
                 </span>
                 <br />
-                Membership currently requires a 15 minute weekly commitment.
+                Membership currently requires a 15-minute weekly commitment.
               </p>
 
               <p>

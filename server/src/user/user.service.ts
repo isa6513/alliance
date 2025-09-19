@@ -112,7 +112,7 @@ export class UserService {
 
   async findOneByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({
-      where: { email: email },
+      where: { email: ILike(email) },
       relations: ['sentFriendRequests', 'receivedFriendRequests'],
     });
   }
