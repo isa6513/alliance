@@ -74,22 +74,8 @@ const GuidePage: React.FC = () => {
           </Card>
 
           <MarkdownWrapper
-            id="introduction"
-            markdownContent="
-
-Humanity faces many crises which are unlikely to be resolved by business as usual. Among them are extreme poverty, environmental destruction, breakdown of democratic institutions, and unsafe technological development.
-
-Large-scale change will require that people work together reliably and strategically.
-
-The Alliance is group that aims to give its members, and ultimately a significant proportion of humanity, the ability to make deliberate, large-scale change. It uses data, expertise, and democratic input so that its members can take effective collective action at scale.
-
-While this project is highly ambitious, we believe it is the right time to undertake it seriously and carefully.
-
-"
-          />
-          <MarkdownWrapper
             id="goals"
-            className="mt-6"
+            className=""
             markdownContent="
 # Goals
 
