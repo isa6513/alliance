@@ -35,12 +35,12 @@ const MarkdownWrapper: React.FC<MarkdownWrapperProps> = ({
           ),
           p: ({ ...props }) => (
             <p
-              className="text-zinc-900 text-lg first:mt-0 !mt-2 md:!mt-4"
+              className="text-zinc-900 text-lg first:!mt-0 !mt-2 md:!mt-4"
               {...props}
             />
           ),
           strong: ({ ...props }) => (
-            <strong className="font-semibold" {...props} />
+            <strong className="font-semibold " {...props} />
           ),
           ol: ({ ...props }) => (
             <ol

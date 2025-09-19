@@ -3,23 +3,24 @@ import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import "./PrelaunchLanding.css";
 import Footer from "../../components/Footer";
 import MarkdownWrapper from "../../components/MarkdownWrapper";
-// import earth from "../../assets/earth.png";
+import earth from "../../assets/earth.png";
 
 const PrelaunchLandingPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
-      <div className="flex-1 container mx-auto pt-16 md:pt-28 pb-56 flex flex-col px-5">
+      <div className="flex-1 container mx-auto pt-8 pb-28 md:pb-56 flex flex-col px-5">
         <div className="flex flex-col max-w-3xl mx-auto">
+          <img src={earth} className="mx-auto mb-16 w-80 md:w-100" />
           <h2 className="text-center font-serif !font-semibold !text-4xl md:!text-7xl">
             The Alliance
           </h2>
-          <p className="text-center !mt-4 text-xl md:text-2xl mb-10">
+          <p className="text-center !mt-4 text-xl md:text-2xl">
             The Alliance is a group of people who take collective action to
             advance humanity’s common interests.
           </p>
-          {/* <img src={earth} className="mx-auto mb-14 w-150" /> */}
-          <div className="mx-auto w-full max-w-3xl flex flex-col gap-4 md:gap-12">
+
+          <div className="mx-auto w-full max-w-3xl flex flex-col gap-8 md:gap-12 mt-12">
             <MarkdownWrapper
               id="introduction"
               markdownContent="
@@ -30,16 +31,31 @@ The Alliance aims to give its members, and ultimately a significant proportion o
 
 While this project is ambitious, we believe it is the right time to undertake it seriously and carefully.
 
-**What does membership require?**
-Membership currently requires a 15 minute weekly commitment.
-
-**Are you affiliated with any existing political group?** No.
-
-**How can I join?**
-Membership is currently by invitation only.
-
 "
             />
+            <div className="md:border border-zinc-200 md:p-8 md:-mx-8 flex flex-col text-lg gap-2 md:gap-4">
+              <p>
+                <span className="text-zinc-500">
+                  What does membership require?{" "}
+                </span>
+                <br />
+                Membership currently requires a 15 minute weekly commitment.
+              </p>
+
+              <p>
+                <span className="text-zinc-500">
+                  Are you affiliated with any existing political group?
+                </span>
+                <br />
+                No.
+              </p>
+
+              <p>
+                <span className="text-zinc-500">How can I join?</span> <br />
+                The Alliance is in an experimental phase. Membership is
+                currently by invitation only.
+              </p>
+            </div>
           </div>
         </div>
       </div>
