@@ -711,7 +711,7 @@ const DatabaseViewer: React.FC = () => {
               className={`!text-xl font-bold ${
                 window.location.href.includes("localhost")
                   ? "text-gray-900"
-                  : "text-red"
+                  : "text-red-500"
               }`}
             >
               Database Viewer
