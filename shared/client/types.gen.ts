@@ -716,6 +716,32 @@ export type TableDataDto = {
     totalPages: number;
 };
 
+export type CreateRecordDto = {
+    /**
+     * Object containing column names and their values for the new record
+     */
+    record: {
+        [key: string]: unknown;
+    };
+};
+
+export type CreateRecordResponseDto = {
+    /**
+     * Whether the insert was successful
+     */
+    success: boolean;
+    /**
+     * Success or error message
+     */
+    message: string;
+    /**
+     * The created record data
+     */
+    createdRecord?: {
+        [key: string]: unknown;
+    };
+};
+
 export type UpdateRecordDto = {
     /**
      * The primary key value of the record to update
@@ -2327,6 +2353,35 @@ export type AdminViewerDeleteRecordsResponses = {
 };
 
 export type AdminViewerDeleteRecordsResponse = AdminViewerDeleteRecordsResponses[keyof AdminViewerDeleteRecordsResponses];
+
+export type AdminViewerCreateRecordData = {
+    body: CreateRecordDto;
+    path: {
+        /**
+         * Name of the database table
+         */
+        tableName: string;
+    };
+    query?: never;
+    url: '/admin-viewer/tables/{tableName}/records';
+};
+
+export type AdminViewerCreateRecordErrors = {
+    /**
+     * Invalid create data or validation failed
+     */
+    400: unknown;
+    /**
+     * Table not found
+     */
+    404: unknown;
+};
+
+export type AdminViewerCreateRecordResponses = {
+    200: CreateRecordResponseDto;
+};
+
+export type AdminViewerCreateRecordResponse = AdminViewerCreateRecordResponses[keyof AdminViewerCreateRecordResponses];
 
 export type AdminViewerUpdateRecordData = {
     body: UpdateRecordDto;

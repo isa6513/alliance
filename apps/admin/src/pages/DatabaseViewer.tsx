@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  adminViewerCreateRecord,
   adminViewerDeleteRecords,
   adminViewerGetTableData,
   adminViewerGetTables,
@@ -10,7 +11,7 @@ import type {
   TableDataDto,
   TableMetadataDto,
 } from "@alliance/shared/client/types.gen";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import CellEditor from "../components/CellEditor";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -62,6 +63,23 @@ const DatabaseViewer: React.FC = () => {
     tableName: string;
     primaryKeyValues: (string | number)[];
   } | null>(null);
+  const [isAddRowOpen, setIsAddRowOpen] = useState(false);
+  const [newRecordInputs, setNewRecordInputs] = useState<
+    Record<string, string>
+  >({});
+  const [isCreatingRecord, setIsCreatingRecord] = useState(false);
+  const [newRecordError, setNewRecordError] = useState<string | null>(null);
+  const [newRecordFieldErrors, setNewRecordFieldErrors] = useState<
+    Record<string, string>
+  >({});
+  const highlightTimeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const editableColumns = useMemo(() => {
+    if (!tableData) return [] as ColumnMetadataDto[];
+    return tableData.columns.filter((column) => {
+      const normalized = column.name.toLowerCase();
+      return normalized !== "datecreated" && normalized !== "dateupdated";
+    });
+  }, [tableData]);
 
   // WebSocket connection for live updates
   const {
@@ -142,6 +160,35 @@ const DatabaseViewer: React.FC = () => {
     }
   }, [selectedTable, query, selectedRow, setDefaultSorting]);
 
+  const highlightRow = useCallback(
+    (primaryKeyValue: string | number) => {
+      const key = String(primaryKeyValue);
+
+      setNewRows((prev) => {
+        const next = new Set(prev);
+        next.add(key);
+        return next;
+      });
+
+      const existingTimeout = highlightTimeoutsRef.current.get(key);
+      if (existingTimeout) {
+        clearTimeout(existingTimeout);
+      }
+
+      const timeout = setTimeout(() => {
+        setNewRows((prev) => {
+          const next = new Set(prev);
+          next.delete(key);
+          return next;
+        });
+        highlightTimeoutsRef.current.delete(key);
+      }, 3000);
+
+      highlightTimeoutsRef.current.set(key, timeout);
+    },
+    [setNewRows]
+  );
+
   //   Set up event handlers
   useEffect(() => {
     setEventHandlers({
@@ -155,19 +202,8 @@ const DatabaseViewer: React.FC = () => {
           );
           if (primaryKeyColumn && event.entity) {
             const primaryKeyValue = event.entity[primaryKeyColumn.name];
-            if (primaryKeyValue) {
-              // Add to new rows set for highlighting
-              setNewRows((prev) => new Set(prev).add(String(primaryKeyValue)));
-
-              // Remove highlight after 3 seconds
-              setTimeout(() => {
-                setNewRows((prev) => {
-                  const newSet = new Set(prev);
-                  newSet.delete(String(primaryKeyValue));
-                  return newSet;
-                });
-              }, 3000);
-
+            if (primaryKeyValue !== undefined && primaryKeyValue !== null) {
+              highlightRow(primaryKeyValue);
               // Refresh table data to show the new row
               loadTableData();
             }
@@ -189,7 +225,7 @@ const DatabaseViewer: React.FC = () => {
         }
       },
     });
-  }, [selectedTable, tableData, loadTableData, setEventHandlers]);
+  }, [selectedTable, tableData, loadTableData, setEventHandlers, highlightRow]);
 
   // Initialize selected table and row from URL params
   useEffect(() => {
@@ -261,6 +297,15 @@ const DatabaseViewer: React.FC = () => {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      highlightTimeoutsRef.current.forEach((timeout) => {
+        clearTimeout(timeout);
+      });
+      highlightTimeoutsRef.current.clear();
     };
   }, []);
 
@@ -497,6 +542,328 @@ const DatabaseViewer: React.FC = () => {
 
   const cancelDelete = () => {
     setPendingDelete(null);
+  };
+
+  const openAddRowModal = () => {
+    if (!tableData) return;
+
+    const initialInputs: Record<string, string> = {};
+    editableColumns.forEach((column) => {
+      initialInputs[column.name] = "";
+    });
+
+    setNewRecordInputs(initialInputs);
+    setNewRecordError(null);
+    setNewRecordFieldErrors({});
+    setIsAddRowOpen(true);
+  };
+
+  const closeAddRowModal = () => {
+    setIsAddRowOpen(false);
+    setNewRecordInputs({});
+    setNewRecordError(null);
+    setNewRecordFieldErrors({});
+  };
+
+  const handleNewRecordInputChange = (columnName: string, value: string) => {
+    setNewRecordInputs((prev) => ({
+      ...prev,
+      [columnName]: value,
+    }));
+
+    if (!tableData) return;
+
+    const column = editableColumns.find((col) => col.name === columnName);
+    if (!column) return;
+
+    const { error } = parseNewRecordValue(column, value);
+
+    setNewRecordFieldErrors((prev) => {
+      const next = { ...prev };
+      if (error) {
+        next[columnName] = error;
+      } else {
+        delete next[columnName];
+      }
+      return next;
+    });
+
+    setNewRecordError(null);
+  };
+
+  const parseNewRecordValue = (
+    column: ColumnMetadataDto,
+    rawValue: string
+  ): { value: unknown; error?: string } => {
+    const trimmed = rawValue.trim();
+
+    if (trimmed === "") {
+      if (column.isNullable) {
+        return { value: null };
+      }
+      return { value: undefined };
+    }
+
+    const columnLabel = `Value for "${column.name}"`;
+
+    switch (column.dataType) {
+      case "number": {
+        const parsed = Number(trimmed);
+        if (Number.isNaN(parsed)) {
+          return {
+            value: undefined,
+            error: `${columnLabel} must be a valid number.`,
+          };
+        }
+        return { value: parsed };
+      }
+
+      case "boolean": {
+        const lower = trimmed.toLowerCase();
+        if (["true", "1"].includes(lower)) {
+          return { value: true };
+        }
+        if (["false", "0"].includes(lower)) {
+          return { value: false };
+        }
+        return {
+          value: undefined,
+          error: `${columnLabel} must be true/false or 1/0.`,
+        };
+      }
+
+      case "json": {
+        try {
+          return { value: JSON.parse(trimmed) };
+        } catch {
+          return {
+            value: undefined,
+            error: `${columnLabel} must be valid JSON.`,
+          };
+        }
+      }
+
+      case "date":
+      case "datetime":
+        if (Number.isNaN(Date.parse(trimmed))) {
+          return {
+            value: undefined,
+            error: `${columnLabel} must be a valid date/time.`,
+          };
+        }
+        return { value: trimmed };
+
+      case "enum": {
+        if (column.enumValues && !column.enumValues.includes(trimmed)) {
+          return {
+            value: undefined,
+            error: `${columnLabel} must be one of: ${column.enumValues.join(", ")}.`,
+          };
+        }
+        return { value: trimmed };
+      }
+
+      case "uuid": {
+        const uuidRegex =
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(trimmed)) {
+          return {
+            value: undefined,
+            error: `${columnLabel} must be a valid UUID.`,
+          };
+        }
+        return { value: trimmed };
+      }
+
+      default:
+        return { value: rawValue };
+    }
+  };
+
+  const handleCreateRecord = async () => {
+    if (!selectedTable || !tableData) return;
+
+    setNewRecordError(null);
+    const record: Record<string, unknown> = {};
+    const fieldErrors: Record<string, string> = {};
+
+    editableColumns.forEach((column) => {
+      const rawValue = newRecordInputs[column.name] ?? "";
+      const { value, error } = parseNewRecordValue(column, rawValue);
+
+      if (error) {
+        fieldErrors[column.name] = error;
+        return;
+      }
+
+      if (value !== undefined) {
+        record[column.name] = value;
+      }
+    });
+
+    const errorMessages = Object.values(fieldErrors);
+    if (errorMessages.length > 0) {
+      setNewRecordFieldErrors(fieldErrors);
+      setNewRecordError(errorMessages.join("\n"));
+      return;
+    }
+
+    if (Object.keys(record).length === 0) {
+      setNewRecordError("Provide at least one value before creating a record.");
+      return;
+    }
+
+    try {
+      setIsCreatingRecord(true);
+      setNewRecordFieldErrors({});
+      const response = await adminViewerCreateRecord({
+        path: { tableName: selectedTable },
+        body: { record },
+      });
+
+      if (response.data?.success) {
+        alert("Record created successfully");
+
+        const primaryKeyColumn = tableData.columns.find((col) => col.isPrimary);
+        if (primaryKeyColumn) {
+          const createdRecord = response.data.createdRecord as
+            | Record<string, unknown>
+            | undefined;
+          const primaryKeyValue =
+            createdRecord?.[primaryKeyColumn.name] ??
+            record[primaryKeyColumn.name];
+
+          if (
+            primaryKeyValue !== undefined &&
+            primaryKeyValue !== null &&
+            (typeof primaryKeyValue === "string" ||
+              typeof primaryKeyValue === "number")
+          ) {
+            highlightRow(primaryKeyValue);
+          }
+        }
+
+        closeAddRowModal();
+        await loadTableData();
+      } else {
+        setNewRecordError(response.data?.message || "Failed to create record");
+      }
+    } catch (error) {
+      console.error("Failed to create record:", error);
+      setNewRecordError(
+        error instanceof Error ? error.message : "Unknown error creating record"
+      );
+    } finally {
+      setIsCreatingRecord(false);
+    }
+  };
+
+  const renderNewRecordField = (column: ColumnMetadataDto) => {
+    const value = newRecordInputs[column.name] ?? "";
+    const baseInputClasses =
+      "w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white";
+    const hasError = !!newRecordFieldErrors[column.name];
+    const inputClasses = `${baseInputClasses} ${
+      hasError ? "border-red-500" : "border-gray-300"
+    }`;
+
+    switch (column.dataType) {
+      case "boolean":
+        return (
+          <select
+            value={value}
+            onChange={(e) =>
+              handleNewRecordInputChange(column.name, e.target.value)
+            }
+            className={inputClasses}
+          >
+            <option value="">-- Select --</option>
+            <option value="true">true</option>
+            <option value="false">false</option>
+          </select>
+        );
+
+      case "enum":
+        return (
+          <select
+            value={value}
+            onChange={(e) =>
+              handleNewRecordInputChange(column.name, e.target.value)
+            }
+            className={inputClasses}
+          >
+            <option value="">-- Select --</option>
+            {column.enumValues?.map((enumValue) => (
+              <option key={enumValue} value={enumValue}>
+                {enumValue}
+              </option>
+            ))}
+          </select>
+        );
+
+      case "number":
+        return (
+          <input
+            type="text"
+            inputMode="decimal"
+            value={value}
+            onChange={(e) =>
+              handleNewRecordInputChange(column.name, e.target.value)
+            }
+            className={inputClasses}
+            placeholder={column.isNullable ? "Leave blank for NULL" : undefined}
+          />
+        );
+
+      case "date":
+        return (
+          <input
+            type="date"
+            value={value}
+            onChange={(e) =>
+              handleNewRecordInputChange(column.name, e.target.value)
+            }
+            className={inputClasses}
+          />
+        );
+
+      case "datetime":
+        return (
+          <input
+            type="datetime-local"
+            value={value}
+            onChange={(e) =>
+              handleNewRecordInputChange(column.name, e.target.value)
+            }
+            className={inputClasses}
+          />
+        );
+
+      case "json":
+        return (
+          <textarea
+            value={value}
+            onChange={(e) =>
+              handleNewRecordInputChange(column.name, e.target.value)
+            }
+            className={`${inputClasses} h-32 resize-y`}
+            placeholder="Enter valid JSON"
+          />
+        );
+
+      default:
+        return (
+          <input
+            type="text"
+            value={value}
+            onChange={(e) =>
+              handleNewRecordInputChange(column.name, e.target.value)
+            }
+            className={inputClasses}
+            placeholder={column.isNullable ? "Leave blank for NULL" : undefined}
+          />
+        );
+    }
   };
 
   // Clear table data when changing tables to avoid showing stale data
@@ -849,6 +1216,26 @@ const DatabaseViewer: React.FC = () => {
                   )}
                 </div>
                 <div className="flex items-center space-x-4">
+                  <button
+                    onClick={openAddRowModal}
+                    disabled={!tableData || isAddRowOpen}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    <span>Add Row</span>
+                  </button>
                   {selectedRows.size > 0 && (
                     <button
                       onClick={handleDeleteSelected}
@@ -1173,6 +1560,91 @@ const DatabaseViewer: React.FC = () => {
           </div>
         )}
       </div>
+
+      {isAddRowOpen && tableData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Add Row to {selectedTable}
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Provide values for the columns you want to set. Leave fields
+                blank to keep database defaults or NULL for nullable columns.
+              </p>
+            </div>
+            <div className="px-6 py-4 overflow-y-auto">
+              <div className="grid gap-4 md:grid-cols-2">
+                {editableColumns.map((column) => (
+                  <div
+                    key={column.name}
+                    className={`space-y-1 ${
+                      column.dataType === "json" ? "md:col-span-2" : ""
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-gray-700">
+                        {column.name}
+                      </label>
+                      <div className="flex items-center space-x-2 text-xs text-gray-400">
+                        <span>{column.dataType}</span>
+                        {column.isPrimary && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700">
+                            PK
+                          </span>
+                        )}
+                        {column.relationTarget && (
+                          <span>↗ {column.relationTarget}</span>
+                        )}
+                      </div>
+                    </div>
+                    {renderNewRecordField(column)}
+                    {newRecordFieldErrors[column.name] ? (
+                      <p className="text-xs text-red-600">
+                        {newRecordFieldErrors[column.name]}
+                      </p>
+                    ) : (
+                      <span className="text-xs text-gray-400">
+                        {column.isNullable
+                          ? "Optional"
+                          : column.isPrimary
+                          ? "Leave blank to use the auto-generated default"
+                          : "Required (may have default)"}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            {newRecordError && (
+              <div className="px-6 text-sm text-red-600 whitespace-pre-line">
+                {newRecordError}
+              </div>
+            )}
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={closeAddRowModal}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:ring-2 focus:ring-blue-500"
+                disabled={isCreatingRecord}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleCreateRecord}
+                disabled={
+                  isCreatingRecord ||
+                  Object.keys(newRecordFieldErrors).length > 0
+                }
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCreatingRecord ? "Creating..." : "Create Record"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ConfirmDialog
         isOpen={!!pendingUpdate}

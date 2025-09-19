@@ -8,6 +8,10 @@ import {
   DeleteRecordsDto,
   DeleteRecordsResponseDto,
 } from './dto/delete-records.dto';
+import {
+  CreateRecordDto,
+  CreateRecordResponseDto,
+} from './dto/create-record.dto';
 import { TableDataDto, TableDataQueryDto } from './dto/table-data.dto';
 import { TableListDto, TableMetadataDto } from './dto/table-list.dto';
 import {
@@ -152,6 +156,96 @@ export class AdminViewerService {
         limit,
         totalPages: Math.ceil(totalCount / limit),
       };
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async createRecord(
+    tableName: string,
+    createData: CreateRecordDto,
+  ): Promise<CreateRecordResponseDto> {
+    const metadata = this.dataSource.entityMetadatas.find(
+      (m) => m.tableName === tableName,
+    );
+
+    if (!metadata) {
+      throw new NotFoundException(`Table ${tableName} not found`);
+    }
+
+    const columns = this.getColumnMetadata(metadata);
+
+    if (!createData.record || Object.keys(createData.record).length === 0) {
+      return {
+        success: false,
+        message: 'No data provided to create a record',
+      };
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.startTransaction();
+
+      const columnNames: string[] = [];
+      const valuePlaceholders: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 1;
+
+      for (const [columnName, value] of Object.entries(createData.record)) {
+        const normalizedName = columnName.toLowerCase();
+        if (normalizedName === 'datecreated' || normalizedName === 'dateupdated') {
+          continue;
+        }
+
+        const columnMeta = columns.find((col) => col.name === columnName);
+
+        if (!columnMeta) {
+          throw new Error(
+            `Column ${columnName} not found in table ${tableName}`,
+          );
+        }
+
+        const convertedValue = this.convertValueForDatabase(value, columnMeta);
+
+        if (convertedValue !== undefined) {
+          columnNames.push(`"${columnName}"`);
+          valuePlaceholders.push(`$${paramIndex}`);
+          values.push(convertedValue);
+          paramIndex++;
+        }
+      }
+
+      if (columnNames.length === 0) {
+        return {
+          success: false,
+          message: 'No valid columns provided for insertion',
+        };
+      }
+
+      const insertQuery = `
+        INSERT INTO "${tableName}" (${columnNames.join(', ')})
+        VALUES (${valuePlaceholders.join(', ')})
+        RETURNING *
+      `;
+
+      const result = await queryRunner.query(insertQuery, values);
+
+      await queryRunner.commitTransaction();
+
+      return {
+        success: true,
+        message: 'Record created successfully',
+        createdRecord: result[0],
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new Error(`Failed to create record: ${error.message}`);
     } finally {
       await queryRunner.release();
     }

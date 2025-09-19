@@ -39,6 +39,8 @@ import {
   EditableTextField,
   EditableTextareaField,
 } from "./form-fields";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import { useNavigate } from "react-router";
 
 interface FormBuilderProps {
   onSave?: (schema: FormSchema) => void;
@@ -103,6 +105,8 @@ export function FormBuilder({
   >([]);
 
   const currentPage = schema.pages[selectedPageIndex];
+
+  const navigate = useNavigate();
 
   // Available elements for search
   const availableElements = useMemo(
@@ -943,27 +947,30 @@ export function FormBuilder({
               />
             </div>
             <div className="flex items-center space-x-2">
-              <button
+              <Button
+                onClick={() => navigate(`/forms/${formId}/responses`)}
+                color={ButtonColor.Light}
+              >
+                View Responses
+              </Button>
+              <Button
                 onClick={() => setIsPreviewMode(!isPreviewMode)}
-                className={`px-3 py-2 rounded-md text-sm font-medium ${"bg-gray-100 hover:bg-gray-200 text-gray-700"}`}
+                color={ButtonColor.Light}
               >
                 {isPreviewMode ? "Edit Form" : "Preview Form"}
-              </button>
+              </Button>
               {!isPreviewMode && (
-                <button
-                  onClick={addPage}
-                  className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-sm font-medium"
-                >
+                <Button onClick={addPage} color={ButtonColor.Light}>
                   Add Page
-                </button>
+                </Button>
               )}
-              <button
+              <Button
                 onClick={handleSaveForm}
                 disabled={isSaving || isLoading}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white rounded-md text-sm font-medium"
+                color={ButtonColor.Blue}
               >
                 {isSaving ? "Saving..." : "Save Form"}
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -1108,7 +1115,7 @@ export function FormBuilder({
         </div>
 
         {/* Loading/Success/Error Messages */}
-        <div className="flex-shrink-0 mx-4 min-h-0">
+        <div className="flex-shrink-0 mx-4 min-h-0 relative">
           {isLoading && (
             <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 mb-2">
               <span className="block sm:inline">Loading form...</span>
@@ -1122,7 +1129,7 @@ export function FormBuilder({
             </div>
           )}
           {saveSuccess && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 mb-2">
+            <div className="bg-green/20 text-green-700 px-4 py-3 mb-2 absolute top-0 left-0 right-0 rounded-sm">
               <span className="block sm:inline">Form saved successfully!</span>
             </div>
           )}
