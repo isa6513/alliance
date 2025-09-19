@@ -16,6 +16,8 @@ const LoginPage: React.FC = () => {
     password: "",
     mode: "cookie",
   });
+
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
@@ -116,16 +118,23 @@ const LoginPage: React.FC = () => {
                   autoComplete="email"
                 />
               </div>
-              <div>
+              <div className="relative">
                 <FormInput
                   label="Password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={handleChange}
                   autoComplete="current-password"
                   required
                   name="password"
                 />
+                <button
+                  type="button"
+                  className="absolute right-0 top-2 text-xs text-green hover:underline"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
               </div>
 
               <div className="pt-2">
