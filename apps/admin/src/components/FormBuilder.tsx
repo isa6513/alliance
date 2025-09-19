@@ -57,8 +57,6 @@ export function FormBuilder({
 
   const [schema, setSchema] = useState<FormSchema>(
     initialSchema || {
-      slug: "untitled-form",
-      version: 1,
       title: "Untitled Form",
       description: "",
       pages: [
