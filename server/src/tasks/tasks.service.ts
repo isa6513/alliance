@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
 import { Action } from 'src/actions/entities/action.entity';
@@ -13,7 +18,7 @@ import {
   FormResponseDto,
   SubmitFormDto,
 } from './form.dto';
-import { FormSchema, Page } from './schema';
+import { FormSchema, isQuestionField, Page } from './schema';
 
 @Injectable()
 export class TasksService {
@@ -53,6 +58,25 @@ export class TasksService {
     return form;
   }
 
+  async validateFormSubmission(
+    form: Form,
+    submitFormDto: SubmitFormDto,
+  ): Promise<void> {
+    const schema = form.schema as unknown as FormSchema;
+
+    for (const page of schema.pages) {
+      for (const field of page.fields) {
+        if (isQuestionField(field)) {
+          if (field.required) {
+            if (!submitFormDto.answers[field.id]) {
+              throw new BadRequestException(`Field ${field.label} is required`);
+            }
+          }
+        }
+      }
+    }
+  }
+
   async updateForm(
     formId: number,
     updateFormDto: CreateFormDto,
@@ -75,6 +99,10 @@ export class TasksService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    console.log('submitFormDto', submitFormDto);
+
+    await this.validateFormSubmission(form, submitFormDto);
 
     const phoneNumber = await this.extractPhoneNumber(
       form,
@@ -99,7 +127,7 @@ export class TasksService {
       ...submitFormDto,
       form,
       formId,
-      schemaSnapshot: form.schema,
+      schemaSnapshot: submitFormDto.schemaSnapshot,
       user,
     });
 

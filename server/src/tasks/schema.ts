@@ -107,3 +107,9 @@ export class FormSchema {
   @ApiPropertyOptional()
   submit?: { label?: string };
 }
+
+export function isQuestionField(
+  field: AnyField | DisplayBlock,
+): field is AnyField {
+  return 'label' in field;
+}

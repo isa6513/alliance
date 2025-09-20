@@ -823,6 +823,9 @@ export type SubmitFormDto = {
     answers: {
         [key: string]: unknown;
     };
+    schemaSnapshot: {
+        [key: string]: unknown;
+    };
 };
 
 export type Page = {

@@ -280,14 +280,17 @@ const FormResponses: React.FC = () => {
               </button>
             </div>
           </div>
-          <div className="max-w-[600px] mx-auto pt-10">
-            <FormRenderer
-              form={form?.schema as unknown as FormSchema}
-              completedFormResponse={pageItems[0]}
-              renderFormAsCompleted
-              onSubmit={null}
-            />
-          </div>
+          {form !== null && (
+            <div className="max-w-[600px] mx-auto pt-10">
+              <FormRenderer
+                id={form.id}
+                form={form.schema as unknown as FormSchema}
+                completedFormResponse={pageItems[0]}
+                renderFormAsCompleted
+                onSubmit={null}
+              />
+            </div>
+          )}
         </>
       )}
     </div>

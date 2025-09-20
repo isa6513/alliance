@@ -205,7 +205,10 @@ const FormRenderer = ({
     if (!isLastPage) {
       setCurrentPageIndex((prev) => prev + 1);
     } else if (onSubmit && !readOnly) {
-      onSubmit({ answers: formData });
+      onSubmit({
+        answers: formData,
+        schemaSnapshot: form as unknown as Record<string, unknown>,
+      });
     }
   };
 
