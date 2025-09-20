@@ -84,9 +84,31 @@ const DatabaseViewer: React.FC = () => {
   const highlightTimeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const editableColumns = useMemo(() => {
     if (!tableData) return [] as ColumnMetadataDto[];
+
+    const seen = new Set<string>();
+
     return tableData.columns.filter((column) => {
       const normalized = column.name.toLowerCase();
-      return normalized !== "createdat" && normalized !== "updatedat";
+
+      if (
+        normalized === "createdat" ||
+        normalized === "updatedat" ||
+        normalized === "datecreated" ||
+        normalized === "dateupdated"
+      ) {
+        return false;
+      }
+
+      if (column.dataType === "relation") {
+        return false;
+      }
+
+      if (seen.has(column.name)) {
+        return false;
+      }
+
+      seen.add(column.name);
+      return true;
     });
   }, [tableData]);
 
