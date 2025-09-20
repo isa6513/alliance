@@ -32,6 +32,7 @@ import UserProfileTab from "../../components/UserProfileTab";
 import { useAuth } from "../../lib/AuthContext";
 import { formatTime } from "../../lib/utils";
 import useActivities, { ActivityList } from "./useActivities";
+import { sharp_allowed_mime_types } from "@alliance/shared/lib/config";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -352,7 +353,7 @@ const UserProfilePage: React.FC = () => {
                 <label className="cursor-pointer text-zinc-400 underline text-sm absolute m-auto text-center w-full h-full flex items-center justify-center">
                   <input
                     type="file"
-                    accept="image/*"
+                    accept={sharp_allowed_mime_types.join(",")}
                     className="hidden w-full h-full"
                     onChange={handleAvatarChange}
                   />

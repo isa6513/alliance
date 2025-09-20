@@ -193,6 +193,8 @@ resource "aws_db_instance" "alliance" {
   parameter_group_name   = aws_db_parameter_group.alliance.name
   publicly_accessible    = false
 
+  snapshot_identifier    = "rds:alliance-2025-09-19-12-03"
+
   deletion_protection        = true
   skip_final_snapshot        = false
   final_snapshot_identifier  = "alliance-final-${random_id.db_suffix.hex}"
