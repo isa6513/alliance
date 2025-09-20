@@ -5,6 +5,7 @@ import ForumListPost from "../../components/ForumListPost";
 import { useGrayBackground } from "../../components/HtmlBackgroundManager";
 import { useAuth } from "../../lib/AuthContext";
 import List from "@alliance/shared/ui/List";
+import CenterLayout from "@alliance/shared/ui/CenterLayout";
 
 const ForumPage: React.FC = () => {
   const { posts } = useAppLoaderData();
@@ -25,7 +26,7 @@ const ForumPage: React.FC = () => {
   useGrayBackground();
 
   return (
-    <div className="flex flex-col max-w-4xl mx-auto px-3 pt-3 md:pt-12">
+    <CenterLayout>
       {isAuthenticated && (
         <div
           onClick={handleCreatePost}
@@ -39,7 +40,7 @@ const ForumPage: React.FC = () => {
           <ForumListPost key={post.id} post={post} />
         ))}
       </List>
-    </div>
+    </CenterLayout>
   );
 };
 
