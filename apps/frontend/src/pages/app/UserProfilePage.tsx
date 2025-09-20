@@ -33,6 +33,7 @@ import { useAuth } from "../../lib/AuthContext";
 import { formatTime } from "../../lib/utils";
 import useActivities, { ActivityList } from "./useActivities";
 import { sharp_allowed_mime_types } from "@alliance/shared/lib/config";
+import List from "@alliance/shared/ui/List";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -249,7 +250,7 @@ const UserProfilePage: React.FC = () => {
 
     setImageUploadError(null);
 
-    if (!file.type.startsWith("image/")) {
+    if (!sharp_allowed_mime_types.includes(file.type)) {
       setImageUploadError("Please select a valid image file.");
       return;
     }
@@ -481,18 +482,10 @@ const UserProfilePage: React.FC = () => {
               </div>
             )}
           </div>
-          {/* <div className="absolute -left-20 top-0 p-5">
-          <BackButton />
-          </div> */}
-          {/* <ImpactPanel
-            completedActions={completedActions}
-            isMe={isMe}
-            referredCount={referredCount}
-          /> */}
         </Card>
         <div className="pb-24 mt-2">
           {selectedTab === ProfileTabs.Activity && (
-            <div className="flex flex-col divide-y divide-zinc-200 mb-10 border border-zinc-200 rounded overflow-hidden *:p-4 bg-white">
+            <List className="mb-10 *:p-4">
               {completedActions.length === 0 && (
                 <p className="my-4 text-center text-zinc-500">
                   No actions completed yet
@@ -507,7 +500,7 @@ const UserProfilePage: React.FC = () => {
                   canEdit={isMe}
                 />
               ))}
-            </div>
+            </List>
           )}
 
           {selectedTab === ProfileTabs.Forum && (
@@ -517,7 +510,7 @@ const UserProfilePage: React.FC = () => {
                   No forum activity yet
                 </p>
               ) : (
-                <div className="flex flex-col divide-y divide-zinc-200 mb-10 border border-zinc-200 rounded overflow-hidden">
+                <List className="mb-10">
                   {forumActivityItems.map((item) => {
                     if (item.type === "post") {
                       return (
@@ -530,16 +523,13 @@ const UserProfilePage: React.FC = () => {
                       );
                     }
                     return (
-                      // <ForumListPost
-                      //   post={item.comment.parentPost}
-                      //   commentFeature={item.comment}
                       <ForumActivityCommentCard
                         comment={item.comment}
                         key={`comment-${item.comment.id}`}
                       />
                     );
                   })}
-                </div>
+                </List>
               )}
             </div>
           )}

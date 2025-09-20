@@ -4,6 +4,7 @@ import { useAppLoaderData } from "../../applayout";
 import ForumListPost from "../../components/ForumListPost";
 import { useGrayBackground } from "../../components/HtmlBackgroundManager";
 import { useAuth } from "../../lib/AuthContext";
+import List from "@alliance/shared/ui/List";
 
 const ForumPage: React.FC = () => {
   const { posts } = useAppLoaderData();
@@ -33,11 +34,11 @@ const ForumPage: React.FC = () => {
           Create a new thread...
         </div>
       )}
-      <div className="flex flex-col divide-y divide-zinc-200 mb-10 border border-zinc-200 rounded overflow-hidden">
+      <List className="mb-10">
         {sorted.map((post) => (
           <ForumListPost key={post.id} post={post} />
         ))}
-      </div>
+      </List>
     </div>
   );
 };

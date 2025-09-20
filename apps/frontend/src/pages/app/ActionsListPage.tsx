@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ActionWithRelation, useAppLoaderData } from "../../applayout";
 import ActionItemCard from "../../components/ActionItemCard";
 import { useGrayBackground } from "../../components/HtmlBackgroundManager";
+import List from "@alliance/shared/ui/List";
 
 export const filterActions = (
   actions: ActionWithRelation[],
@@ -63,12 +64,12 @@ const ActionsListPage = () => {
           />
         </div>
 
-        <div className="flex flex-col gap-y-2 w-full">
+        <List className="w-full">
           {filteredActions.map((action) => (
             <ActionItemCard
               key={action.id}
               {...action}
-              className="w-full"
+              className="w-full hover:bg-zinc-100"
               // joinedCount={liveCounts[action.id] ?? action.usersJoined}
               // neededCount={
               //   action.status === "member_action"
@@ -80,7 +81,7 @@ const ActionsListPage = () => {
           {filteredActions.length === 0 && (
             <p className="text-center text-zinc-500">No matching actions</p>
           )}
-        </div>
+        </List>
       </div>
     </div>
   );
