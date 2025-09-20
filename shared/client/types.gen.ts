@@ -43,6 +43,7 @@ export type UserDto = {
     email: string;
     phoneNumber?: string;
     contractDateSigned: string | null;
+    contractDateSuspended: string | null;
     emailNotifsEnabled: boolean;
     textNotifsEnabled: boolean;
     pushNotifsEnabled: boolean;
@@ -80,6 +81,7 @@ export type UpdateProfileDto = {
     phoneNumberValidated?: boolean;
     emailVerified?: boolean;
     contractDateSigned?: string | null;
+    contractDateSuspended?: string | null;
     emailNotifsEnabled?: boolean;
     textNotifsEnabled?: boolean;
     pushNotifsEnabled?: boolean;
@@ -125,6 +127,7 @@ export type User = {
     phoneNumberValidated: boolean;
     emailVerified: boolean;
     contractDateSigned: string | null;
+    contractDateSuspended: string | null;
     emailNotifsEnabled: boolean;
     textNotifsEnabled: boolean;
     pushNotifsEnabled: boolean;

@@ -114,7 +114,10 @@ export default function ActionPage() {
   }, [isAuthenticated, id]);
 
   return (
-    <div className="max-w-[1250px] mx-auto flex bg-white min-h-[calc(100vh-50px)]">
+    <div
+      className="max-w-[1250px] mx-auto flex bg-white min-h-[calc(100vh-var(--nav-height))]"
+      style={{ boxSizing: "border-box" }}
+    >
       <div className="flex-1 p-10">
         <Outlet
           context={

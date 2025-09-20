@@ -63,6 +63,7 @@ export class UserDto extends PickType(User, [
   'admin',
   'staff',
   'contractDateSigned',
+  'contractDateSuspended',
   'id',
   'onboardingComplete',
   'emailNotifsEnabled',

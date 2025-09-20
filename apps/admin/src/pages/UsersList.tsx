@@ -51,7 +51,9 @@ const UsersList: React.FC = () => {
   return (
     <div className="h-full p-5 pt-20 flex flex-col items-center gap-y-3">
       {window.location.href.includes("localhost") && (
-        <p className="text-sm text-gray-500">note: posthog data is prod-only</p>
+        <p className="text-sm text-gray-500">
+          note: activity data is prod-only
+        </p>
       )}
       <div className="flex flex-row flex-wrap gap-3">
         {sorted.map((user) => (

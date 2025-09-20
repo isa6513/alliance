@@ -445,12 +445,13 @@ export class UserService {
   async signContract(userId: number): Promise<User> {
     const user = await this.findOneOrFail(userId);
     user.contractDateSigned = new Date();
+    user.contractDateSuspended = null;
     return this.userRepository.save(user);
   }
 
   async suspendContract(userId: number): Promise<User> {
     const user = await this.findOneOrFail(userId);
-    user.contractDateSigned = null;
+    user.contractDateSuspended = new Date();
     return this.userRepository.save(user);
   }
 }
