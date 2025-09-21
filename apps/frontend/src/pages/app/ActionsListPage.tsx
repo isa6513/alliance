@@ -81,7 +81,7 @@ const ActionsListPage = () => {
           />
         ))}
         {filteredActions.length === 0 && (
-          <p className="text-center text-zinc-500">No matching actions</p>
+          <p className="text-center text-zinc-500 py-5">No matching actions</p>
         )}
       </List>
     </CenterLayout>

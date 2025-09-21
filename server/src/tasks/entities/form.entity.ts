@@ -11,7 +11,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { FormResponse } from './formresponse.entity';
-import { FormSchema } from '../schema';
 
 @Entity()
 export class Form {
@@ -26,7 +25,7 @@ export class Form {
   title: string;
 
   @Column({ type: 'jsonb' })
-  @ApiProperty({ type: () => FormSchema })
+  @ApiProperty()
   @IsDefined()
   @Type(() => Object)
   schema!: Record<string, unknown>;
