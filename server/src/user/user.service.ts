@@ -162,7 +162,7 @@ export class UserService {
   async getVerifyEmailToken(userId: number) {
     const payload = { sub: userId, type: 'verify-email' };
     return this.jwtService.sign(payload, {
-      expiresIn: `1d`,
+      expiresIn: `7d`,
       secret: process.env.JWT_SECRET,
     });
   }
