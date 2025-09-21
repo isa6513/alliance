@@ -131,7 +131,7 @@ const PostDetailPage: React.FC = () => {
               >
                 <ProfileImage
                   pfp={post.author.profilePicture}
-                  size="small"
+                  size="medium"
                   className="mr-2"
                 />
                 <UserDisplayName staff={post.author.staff}>

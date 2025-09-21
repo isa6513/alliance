@@ -372,14 +372,17 @@ jobs:
         id: drift
         run: |
           set -e
+
           OUT="$(npx typeorm-ts-node-commonjs --dataSource dist/src/datasources/dataSource.js schema:log || true)"
           echo "$OUT"
-          # If schema:log prints any "query:" lines, there is drift
-          if echo "$OUT" | grep -q '^query:'; then
-            echo "DRIFT=1" >> $GITHUB_OUTPUT
+
+          if echo "$OUT" | grep -Eiq '^\s*(ALTER|CREATE|DROP|COMMENT|RENAME|TRUNCATE|INSERT INTO|UPDATE |DELETE FROM)\b'; then
+            echo "Schema drift detected (entities != schema after migrations)."
+            echo "DRIFT=1" >> "$GITHUB_OUTPUT"
             exit 1
           else
-            echo "DRIFT=0" >> $GITHUB_OUTPUT
+            echo "No drift"
+            echo "DRIFT=0" >> "$GITHUB_OUTPUT"
           fi
         working-directory: ./server
 
