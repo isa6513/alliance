@@ -113,3 +113,29 @@ export function isQuestionField(
 ): field is AnyField {
   return 'label' in field;
 }
+
+export function isQuestionVisible(
+  element: AnyField | DisplayBlock,
+  formData: Record<string, FormValue>,
+): boolean {
+  const cond = element.visibleIf;
+  if (cond) {
+    const evalCond = (c: Condition): boolean => {
+      if ('expr' in c) {
+        return true;
+      }
+      const val = formData[c.when];
+      // If condition expects a boolean (checkbox controllers), coerce undefined → false
+      if (typeof c.equals === 'boolean') {
+        return Boolean(val) === c.equals;
+      }
+      if (Array.isArray(val) && c.equals) {
+        // multiselect: treat equals as "includes"
+        return val.includes(c.equals as string);
+      }
+      return val === c.equals;
+    };
+    if (!evalCond(cond)) return false;
+  }
+  return true;
+}

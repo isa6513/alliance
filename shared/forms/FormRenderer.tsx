@@ -287,8 +287,7 @@ const FormRenderer = ({
     if (cond) {
       const evalCond = (c: Condition): boolean => {
         if ("expr" in c) {
-          // Basic safeguard: do not evaluate arbitrary expressions in renderer
-          // Future: support a small expression language if needed.
+          // TODO: better safety check
           return true;
         }
         const val = formData[c.when];

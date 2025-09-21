@@ -18,7 +18,7 @@ import {
   FormResponseDto,
   SubmitFormDto,
 } from './form.dto';
-import { FormSchema, isQuestionField, Page } from './schema';
+import { FormSchema, isQuestionField, isQuestionVisible, Page } from './schema';
 
 @Injectable()
 export class TasksService {
@@ -67,7 +67,10 @@ export class TasksService {
     for (const page of schema.pages) {
       for (const field of page.fields) {
         if (isQuestionField(field)) {
-          if (field.required) {
+          if (
+            field.required &&
+            isQuestionVisible(field, submitFormDto.answers)
+          ) {
             if (!submitFormDto.answers[field.id]) {
               throw new BadRequestException(`Field ${field.label} is required`);
             }

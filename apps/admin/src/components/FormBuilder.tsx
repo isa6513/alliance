@@ -1127,7 +1127,7 @@ export function FormBuilder({
             </div>
           )}
           {saveSuccess && (
-            <div className="bg-green/20 text-green-700 px-4 py-3 mb-2 absolute top-0 left-0 right-0 rounded-sm">
+            <div className="bg-green/20 text-green-700 px-4 py-3 mb-2 rounded-sm">
               <span className="block sm:inline">Form saved successfully!</span>
             </div>
           )}
