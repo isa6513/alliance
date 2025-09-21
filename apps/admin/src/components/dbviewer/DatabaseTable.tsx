@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type {
   ColumnMetadataDto,
   TableDataDto,
@@ -6,6 +6,7 @@ import type {
 import type {
   SelectedRowState,
   TableDataQueryState,
+  ColumnFilterState,
 } from "./DatabaseViewer.hooks";
 
 interface DatabaseTableProps {
@@ -17,7 +18,11 @@ interface DatabaseTableProps {
   highlightedRows: Set<string>;
   onSelectRow: (value: string | number, checked: boolean) => void;
   onSelectAllRows: (checked: boolean) => void;
-  onSort: (columnName: string) => void;
+  onSortAscending: (columnName: string) => void;
+  onSortDescending: (columnName: string) => void;
+  onApplyFilter: (columnName: string, value: string) => void;
+  onClearFilter: () => void;
+  columnFilter: ColumnFilterState | null;
   onPageChange: (page: number) => void;
   formatCellValue: (
     value: unknown,
@@ -46,7 +51,11 @@ const DatabaseTable: React.FC<DatabaseTableProps> = ({
   highlightedRows,
   onSelectRow,
   onSelectAllRows,
-  onSort,
+  onSortAscending,
+  onSortDescending,
+  onApplyFilter,
+  onClearFilter,
+  columnFilter,
   onPageChange,
   formatCellValue,
   handleCellClick,
@@ -58,6 +67,106 @@ const DatabaseTable: React.FC<DatabaseTableProps> = ({
       const primaryKeyValue = getRowPrimaryKey(row, tableData.columns);
       return primaryKeyValue !== null && selectedRows.has(primaryKeyValue);
     });
+
+  const [openColumnIndex, setOpenColumnIndex] = useState<number | null>(null);
+  const [filterDraft, setFilterDraft] = useState<string>("");
+  const activeMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (openColumnIndex === null) {
+      return;
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (activeMenuRef.current && activeMenuRef.current.contains(target)) {
+        return;
+      }
+      setOpenColumnIndex(null);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpenColumnIndex(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [openColumnIndex]);
+
+  useEffect(() => {
+    if (openColumnIndex === null) {
+      setFilterDraft("");
+      activeMenuRef.current = null;
+      return;
+    }
+
+    const column = tableData.columns[openColumnIndex];
+    if (!column) {
+      setFilterDraft("");
+      return;
+    }
+
+    if (columnFilter && columnFilter.column === column.name) {
+      setFilterDraft(columnFilter.value);
+    } else {
+      setFilterDraft("");
+    }
+  }, [openColumnIndex, columnFilter, tableData.columns]);
+
+  const handleColumnMenuToggle = useCallback(
+    (columnIndex: number) => {
+      setOpenColumnIndex((prev) => {
+        if (prev === columnIndex) {
+          setFilterDraft("");
+          return null;
+        }
+
+        const nextColumn = tableData.columns[columnIndex];
+        if (nextColumn) {
+          if (columnFilter && columnFilter.column === nextColumn.name) {
+            setFilterDraft(columnFilter.value);
+          } else {
+            setFilterDraft("");
+          }
+        }
+
+        return columnIndex;
+      });
+    },
+    [columnFilter, tableData.columns]
+  );
+
+  const handleSortOption = useCallback(
+    (columnName: string, direction: "ASC" | "DESC") => {
+      if (direction === "ASC") {
+        onSortAscending(columnName);
+      } else {
+        onSortDescending(columnName);
+      }
+      setOpenColumnIndex(null);
+    },
+    [onSortAscending, onSortDescending]
+  );
+
+  const handleApplyFilterAction = useCallback(
+    (columnName: string, value: string) => {
+      onApplyFilter(columnName, value);
+      setOpenColumnIndex(null);
+    },
+    [onApplyFilter]
+  );
+
+  const handleClearFilterAction = useCallback(() => {
+    onClearFilter();
+    setOpenColumnIndex(null);
+  }, [onClearFilter]);
 
   return (
     <div className="h-full flex flex-col">
@@ -89,42 +198,157 @@ const DatabaseTable: React.FC<DatabaseTableProps> = ({
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
               </th>
-              {tableData.columns.map((column, columnIndex) => (
-                <th
-                  key={`${column.name}-${columnIndex}`}
-                  onClick={() => onSort(column.name)}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>{column.name}</span>
-                    {column.isPrimary && (
-                      <span className="text-yellow-500">🔑</span>
-                    )}
-                    {column.dataType === "relation" && (
-                      <span className="text-blue-500">🔗</span>
-                    )}
-                    {query.sortBy === column.name && (
-                      <span>{query.sortOrder === "ASC" ? "↑" : "↓"}</span>
-                    )}
-                  </div>
-                  <div className="text-xs text-gray-400 normal-case">
-                    <span className="font-medium">{column.dataType}</span>
-                    {column.rawType &&
-                      column.rawType.toLowerCase() !==
-                        column.dataType.toLowerCase() && (
-                        <span className="text-gray-300 ml-1">
-                          ({column.rawType})
+              {tableData.columns.map((column, columnIndex) => {
+                const isMenuOpen = openColumnIndex === columnIndex;
+                const isFilteredColumn = columnFilter?.column === column.name;
+
+                const canApplyFilter = filterDraft.trim().length > 0;
+
+                const sanitizedColumnId = column.name
+                  .toLowerCase()
+                  .replace(/[^a-z0-9_-]/gi, "-");
+                const filterInputId = `filter-${sanitizedColumnId}`;
+
+                return (
+                  <th
+                    key={`${column.name}-${columnIndex}`}
+                    className={`px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer ${
+                      isMenuOpen ? "bg-gray-100" : "hover:bg-gray-100"
+                    }`}
+                    onClick={() => handleColumnMenuToggle(columnIndex)}
+                  >
+                    <div className="relative">
+                      <div
+                        className={`flex w-full items-center py-1 justify-between rounded text-left text-xs font-medium uppercase tracking-wider text-gray-600`}
+                      >
+                        <span className="flex items-center space-x-1">
+                          <span>{column.name}</span>
+                          {column.isPrimary && (
+                            <span className="text-yellow-500">🔑</span>
+                          )}
+                          {column.dataType === "relation" && (
+                            <span className="text-blue-500">🔗</span>
+                          )}
+                          {query.sortBy === column.name && (
+                            <span>{query.sortOrder === "ASC" ? "↑" : "↓"}</span>
+                          )}
+                          {isFilteredColumn && (
+                            <span
+                              className="text-blue-500 text-lg absolute -right-3 -top-1"
+                              title="Column filter active"
+                            >
+                              ●
+                            </span>
+                          )}
                         </span>
+                      </div>
+                      <div className="text-xs text-gray-400 normal-case">
+                        <span className="font-medium">{column.dataType}</span>
+                        {column.rawType &&
+                          column.rawType.toLowerCase() !==
+                            column.dataType.toLowerCase() && (
+                            <span className="text-gray-300 ml-1">
+                              ({column.rawType})
+                            </span>
+                          )}
+                        {column.relationTarget && (
+                          <span className="text-blue-400">
+                            {" "}
+                            → {column.relationTarget}
+                          </span>
+                        )}
+                      </div>
+                      {isMenuOpen && (
+                        <div
+                          ref={(node) => {
+                            activeMenuRef.current = node;
+                          }}
+                          className="absolute -left-6 mt-2 w-56 rounded-md border border-gray-200 bg-white shadow-lg z-20"
+                        >
+                          <div className="py-1">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleSortOption(column.name, "ASC")
+                              }
+                              className="flex w-full items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              <span>Sort ascending</span>
+                              <span className="text-gray-400">↑</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleSortOption(column.name, "DESC")
+                              }
+                              className="flex w-full items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              <span>Sort descending</span>
+                              <span className="text-gray-400">↓</span>
+                            </button>
+                          </div>
+                          <div className="border-t border-gray-100 px-4 py-3">
+                            <label
+                              htmlFor={filterInputId}
+                              className="block text-[10px] font-semibold uppercase tracking-wide text-gray-500"
+                            >
+                              Filter by value
+                            </label>
+                            <input
+                              id={filterInputId}
+                              type="text"
+                              value={filterDraft}
+                              onChange={(event) =>
+                                setFilterDraft(event.target.value)
+                              }
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter" && canApplyFilter) {
+                                  event.preventDefault();
+                                  handleApplyFilterAction(
+                                    column.name,
+                                    filterDraft
+                                  );
+                                }
+                              }}
+                              autoFocus
+                              className="mt-2 w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                              placeholder="Enter value"
+                            />
+                            <div className="mt-2 flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleApplyFilterAction(
+                                    column.name,
+                                    filterDraft
+                                  )
+                                }
+                                disabled={!canApplyFilter}
+                                className={`px-3 py-1 text-sm font-medium text-white rounded ${
+                                  canApplyFilter
+                                    ? "bg-blue-600 hover:bg-blue-700"
+                                    : "bg-blue-200 cursor-not-allowed"
+                                }`}
+                              >
+                                Apply
+                              </button>
+                              {isFilteredColumn && (
+                                <button
+                                  type="button"
+                                  onClick={handleClearFilterAction}
+                                  className="px-3 py-1 text-sm font-medium text-gray-600 rounded border border-gray-300 hover:bg-gray-100"
+                                >
+                                  Clear
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       )}
-                    {column.relationTarget && (
-                      <span className="text-blue-400">
-                        {" "}
-                        → {column.relationTarget}
-                      </span>
-                    )}
-                  </div>
-                </th>
-              ))}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">

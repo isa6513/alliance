@@ -83,24 +83,54 @@ export class AdminViewerService {
     try {
       // Build base query
       let baseQuery = `SELECT * FROM "${tableName}"`;
-      const params: (string | number)[] = [];
+      let countQuery = `SELECT COUNT(*) as count FROM "${tableName}"`;
 
-      // Add search functionality
+      const whereClauses: string[] = [];
+      const whereParams: (string | number | boolean)[] = [];
+
+      let remainingSearch = search;
+
       if (search) {
-        const searchableColumns = columns
-          .filter(
-            (col) =>
-              col.dataType === ColumnDataType.STRING ||
-              col.dataType === ColumnDataType.UUID ||
-              col.dataType === ColumnDataType.ENUM,
-          )
-          .map((col) => `"${col.name}"::text ILIKE $${params.length + 1}`)
-          .join(' OR ');
+        const columnFilter = this.parseColumnFilter(search, columns);
+        if (columnFilter) {
+          const filterClause = this.buildColumnFilterCondition(
+            columnFilter.column,
+            columnFilter.value,
+            whereParams,
+          );
 
-        if (searchableColumns) {
-          baseQuery += ` WHERE ${searchableColumns}`;
-          params.push(`%${search}%`);
+          if (filterClause) {
+            whereClauses.push(filterClause);
+            remainingSearch = undefined;
+          }
         }
+      }
+
+      if (remainingSearch) {
+        const searchableColumnsList = columns.filter(
+          (col) =>
+            col.dataType === ColumnDataType.STRING ||
+            col.dataType === ColumnDataType.UUID ||
+            col.dataType === ColumnDataType.ENUM,
+        );
+
+        if (searchableColumnsList.length > 0) {
+          const placeholderIndex = whereParams.length + 1;
+          const searchableColumns = searchableColumnsList
+            .map(
+              (col) => `"${col.name}"::text ILIKE $${placeholderIndex}`,
+            )
+            .join(' OR ');
+
+          whereClauses.push(`(${searchableColumns})`);
+          whereParams.push(`%${remainingSearch}%`);
+        }
+      }
+
+      if (whereClauses.length > 0) {
+        const whereSql = whereClauses.join(' AND ');
+        baseQuery += ` WHERE ${whereSql}`;
+        countQuery += ` WHERE ${whereSql}`;
       }
 
       // Add sorting
@@ -112,34 +142,15 @@ export class AdminViewerService {
         baseQuery += ` ORDER BY "${primaryColumn}" ${sortOrder}`;
       }
 
+      const dataParams = [...whereParams];
       // Add pagination
-      baseQuery += ` LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-      params.push(limit, offset);
+      baseQuery += ` LIMIT $${dataParams.length + 1} OFFSET $${dataParams.length + 2}`;
+      dataParams.push(limit, offset);
 
       // Execute main query
-      const rows = await queryRunner.query(baseQuery, params);
+      const rows = await queryRunner.query(baseQuery, dataParams);
 
-      // Get total count
-      let countQuery = `SELECT COUNT(*) as count FROM "${tableName}"`;
-      const countParams: (string | number)[] = [];
-
-      if (search) {
-        const searchableColumns = columns
-          .filter(
-            (col) =>
-              col.dataType === ColumnDataType.STRING ||
-              col.dataType === ColumnDataType.UUID ||
-              col.dataType === ColumnDataType.ENUM,
-          )
-          .map((col) => `"${col.name}"::text ILIKE $${countParams.length + 1}`)
-          .join(' OR ');
-
-        if (searchableColumns) {
-          countQuery += ` WHERE ${searchableColumns}`;
-          countParams.push(`%${search}%`);
-        }
-      }
-
+      const countParams = [...whereParams];
       const countResult = await queryRunner.query(countQuery, countParams);
       const totalCount = parseInt(countResult[0].count);
 
@@ -632,6 +643,106 @@ export class AdminViewerService {
     }
 
     return ColumnDataType.UNKNOWN;
+  }
+
+  private parseColumnFilter(
+    search: string | undefined,
+    columns: ColumnMetadataDto[],
+  ): { column: ColumnMetadataDto; value: string } | null {
+    if (!search) {
+      return null;
+    }
+
+    const match = search.match(/^\s*([^:]+)\s*:\s*(.+)$/);
+    if (!match) {
+      return null;
+    }
+
+    const [, columnSegment, valueSegment] = match;
+    const columnName = columnSegment.trim();
+    let rawValue = valueSegment.trim();
+
+    if (!columnName || !rawValue) {
+      return null;
+    }
+
+    if (
+      (rawValue.startsWith('"') && rawValue.endsWith('"')) ||
+      (rawValue.startsWith("'") && rawValue.endsWith("'"))
+    ) {
+      rawValue = rawValue.slice(1, -1).trim();
+    }
+
+    if (!rawValue) {
+      return null;
+    }
+
+    const column = columns.find(
+      (col) => col.name.toLowerCase() === columnName.toLowerCase(),
+    );
+
+    if (!column) {
+      return null;
+    }
+
+    return { column, value: rawValue };
+  }
+
+  private buildColumnFilterCondition(
+    column: ColumnMetadataDto,
+    rawValue: string,
+    params: (string | number | boolean)[],
+  ): string | null {
+    const trimmedValue = rawValue.trim();
+    if (!trimmedValue) {
+      return null;
+    }
+
+    const normalizedValue = trimmedValue.toLowerCase();
+    if (normalizedValue === 'null') {
+      return `"${column.name}" IS NULL`;
+    }
+
+    switch (column.dataType) {
+      case ColumnDataType.NUMBER: {
+        const numericValue = Number(trimmedValue);
+        if (Number.isNaN(numericValue)) {
+          return null;
+        }
+        params.push(numericValue);
+        return `"${column.name}" = $${params.length}`;
+      }
+      case ColumnDataType.BOOLEAN: {
+        if (['true', '1', 'yes', 'y', 't'].includes(normalizedValue)) {
+          params.push(true);
+          return `"${column.name}" = $${params.length}`;
+        }
+        if (['false', '0', 'no', 'n', 'f'].includes(normalizedValue)) {
+          params.push(false);
+          return `"${column.name}" = $${params.length}`;
+        }
+        return null;
+      }
+      case ColumnDataType.ENUM: {
+        params.push(trimmedValue);
+        return `"${column.name}" = $${params.length}`;
+      }
+      case ColumnDataType.UUID: {
+        params.push(trimmedValue);
+        return `"${column.name}"::text ILIKE $${params.length}`;
+      }
+      case ColumnDataType.DATE:
+      case ColumnDataType.DATETIME:
+      case ColumnDataType.JSON:
+      case ColumnDataType.STRING:
+      case ColumnDataType.UNKNOWN:
+      case ColumnDataType.RELATION: {
+        params.push(`%${trimmedValue}%`);
+        return `"${column.name}"::text ILIKE $${params.length}`;
+      }
+      default:
+        return null;
+    }
   }
 
   private getColumnMetadata(metadata: EntityMetadata): ColumnMetadataDto[] {

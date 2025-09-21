@@ -84,7 +84,7 @@ const DatabaseToolbar: React.FC<DatabaseToolbarProps> = ({
             onClick={onOpenAddRow}
             disabled={disableAddRow}
             color={ButtonColor.Blue}
-            className="!py-[10px]"
+            className="!py-[10px] gap-x-2"
           >
             <svg
               className="h-4 w-4"
@@ -148,6 +148,14 @@ const DatabaseToolbar: React.FC<DatabaseToolbarProps> = ({
                 />
               </svg>
             </div>
+            {searchInput && (
+              <div
+                className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                onClick={() => onSearchChange("")}
+              >
+                <span className="text-gray-400 !font-mono text-xs">x</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

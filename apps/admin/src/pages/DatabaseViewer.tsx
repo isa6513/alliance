@@ -31,10 +31,13 @@ const DatabaseViewer: React.FC = () => {
     setSelectedRow,
     query,
     setPage,
-    setSort,
+    setSortWithOrder,
     applyImmediateSearch,
     searchInput,
     setSearchInput,
+    columnFilter,
+    applyColumnFilter,
+    clearColumnFilter,
     highlightedRows,
     highlightRow,
     selectedRows,
@@ -127,12 +130,30 @@ const DatabaseViewer: React.FC = () => {
     setErrorMessage(null);
   }, [errorMessage, showError, setErrorMessage]);
 
-  const handleSort = useCallback(
+  const handleSortAscending = useCallback(
     (columnName: string) => {
-      setSort(columnName);
+      setSortWithOrder(columnName, "ASC");
     },
-    [setSort]
+    [setSortWithOrder]
   );
+
+  const handleSortDescending = useCallback(
+    (columnName: string) => {
+      setSortWithOrder(columnName, "DESC");
+    },
+    [setSortWithOrder]
+  );
+
+  const handleFilterColumn = useCallback(
+    (columnName: string, value: string) => {
+      applyColumnFilter(columnName, value);
+    },
+    [applyColumnFilter]
+  );
+
+  const handleClearColumnFilter = useCallback(() => {
+    clearColumnFilter();
+  }, [clearColumnFilter]);
 
   const handlePageChange = useCallback(
     (newPage: number) => {
@@ -782,7 +803,11 @@ const DatabaseViewer: React.FC = () => {
                   highlightedRows={highlightedRows}
                   onSelectRow={handleSelectRow}
                   onSelectAllRows={handleSelectAllRows}
-                  onSort={handleSort}
+                  onSortAscending={handleSortAscending}
+                  onSortDescending={handleSortDescending}
+                  onApplyFilter={handleFilterColumn}
+                  onClearFilter={handleClearColumnFilter}
+                  columnFilter={columnFilter}
                   onPageChange={handlePageChange}
                   formatCellValue={formatCellValue}
                   handleCellClick={handleCellClick}

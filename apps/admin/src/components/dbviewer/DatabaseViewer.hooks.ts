@@ -27,10 +27,16 @@ export interface TableDataQueryState {
   search?: string;
 }
 
+export interface ColumnFilterState {
+  column: string;
+  value: string;
+}
+
 type TableQueryAction =
   | { type: "SET_PAGE"; page: number }
   | { type: "SET_LIMIT"; limit: number }
   | { type: "SET_SORT"; column: string }
+  | { type: "SET_SORT_WITH_ORDER"; column: string; order: "ASC" | "DESC" }
   | { type: "APPLY_DEFAULT_SORT"; column: string; order: "ASC" | "DESC" }
   | { type: "SET_SEARCH"; search?: string }
   | { type: "RESET" };
@@ -73,6 +79,13 @@ const tableQueryReducer = (
         page: 1,
       };
     }
+    case "SET_SORT_WITH_ORDER":
+      return {
+        ...state,
+        sortBy: action.column,
+        sortOrder: action.order,
+        page: 1,
+      };
     case "APPLY_DEFAULT_SORT":
       if (state.sortBy) {
         return state;
@@ -121,6 +134,13 @@ export const useTableQuery = (initialState: TableDataQueryState) => {
     dispatch({ type: "SET_SORT", column });
   }, []);
 
+  const setSortWithOrder = useCallback(
+    (column: string, order: "ASC" | "DESC") => {
+      dispatch({ type: "SET_SORT_WITH_ORDER", column, order });
+    },
+    []
+  );
+
   const applyDefaultSort = useCallback(
     (column: string, order: "ASC" | "DESC") => {
       dispatch({ type: "APPLY_DEFAULT_SORT", column, order });
@@ -141,6 +161,7 @@ export const useTableQuery = (initialState: TableDataQueryState) => {
     setPage,
     setLimit,
     setSort,
+    setSortWithOrder,
     setSearch,
     applyDefaultSort,
     reset,
@@ -311,9 +332,13 @@ interface UseDatabaseViewerStateResult {
   query: TableDataQueryState;
   setPage: (page: number) => void;
   setSort: (column: string) => void;
+  setSortWithOrder: (column: string, order: "ASC" | "DESC") => void;
   applyImmediateSearch: (value?: string) => void;
   searchInput: string;
   setSearchInput: (value: string) => void;
+  columnFilter: ColumnFilterState | null;
+  applyColumnFilter: (column: string, value: string) => void;
+  clearColumnFilter: () => void;
   highlightedRows: Set<string>;
   highlightRow: (value: string | number) => void;
   clearHighlights: () => void;
@@ -359,6 +384,9 @@ export const useDatabaseViewerState = ({
       : null
   );
   const [searchInput, setSearchInputState] = useState<string>("");
+  const [columnFilter, setColumnFilterState] = useState<ColumnFilterState | null>(
+    null
+  );
   const [selectedRows, setSelectedRows] = useState<Set<string | number>>(
     new Set()
   );
@@ -379,14 +407,79 @@ export const useDatabaseViewerState = ({
     tableDataRef.current = tableData;
   }, [tableData]);
 
-  const { query, setPage, setSort, setSearch, applyDefaultSort, reset } =
-    useTableQuery(DEFAULT_QUERY);
+  const {
+    query,
+    setPage,
+    setSort,
+    setSortWithOrder,
+    setSearch,
+    applyDefaultSort,
+    reset,
+  } = useTableQuery(DEFAULT_QUERY);
 
   const debouncedSearch = useDebouncedValue(searchInput, 300);
 
   useEffect(() => {
     setSearch(debouncedSearch || undefined);
   }, [debouncedSearch, setSearch]);
+
+  const parseColumnFilter = useCallback(
+    (input: string): ColumnFilterState | null => {
+      if (!input) {
+        return null;
+      }
+
+      const colonIndex = input.indexOf(":");
+      if (colonIndex === -1) {
+        return null;
+      }
+
+      const columnPart = input.slice(0, colonIndex).trim();
+      const valuePart = input.slice(colonIndex + 1).trim();
+
+      if (!columnPart || !valuePart || !tableData?.columns?.length) {
+        return null;
+      }
+
+      const matchingColumn = tableData.columns.find(
+        (col) => col.name.toLowerCase() === columnPart.toLowerCase()
+      );
+
+      if (!matchingColumn) {
+        return null;
+      }
+
+      return {
+        column: matchingColumn.name,
+        value: valuePart,
+      };
+    },
+    [tableData]
+  );
+
+  useEffect(() => {
+    const parsed = parseColumnFilter(searchInput);
+    setColumnFilterState((prev) => {
+      if (!parsed && !prev) {
+        return prev;
+      }
+
+      if (
+        parsed &&
+        prev &&
+        parsed.column === prev.column &&
+        parsed.value === prev.value
+      ) {
+        return prev;
+      }
+
+      return parsed;
+    });
+  }, [searchInput, parseColumnFilter]);
+
+  const updateSearchInput = useCallback((value: string) => {
+    setSearchInputState(value);
+  }, []);
 
   const updateSearchParams = useCallback(
     (updates: Record<string, string | null | undefined>) => {
@@ -413,11 +506,37 @@ export const useDatabaseViewerState = ({
 
   const applyImmediateSearch = useCallback(
     (value?: string) => {
-      setSearchInputState(value ?? "");
-      setSearch(value);
+      updateSearchInput(value ?? "");
+      setSearch(value ?? undefined);
     },
-    [setSearch]
+    [setSearch, updateSearchInput]
   );
+
+  const applyColumnFilter = useCallback(
+    (columnName: string, rawValue: string) => {
+      const trimmedValue = rawValue.trim();
+
+      if (!trimmedValue) {
+        applyImmediateSearch(undefined);
+        return;
+      }
+
+      const resolvedColumn =
+        tableData?.columns.find((col) => col.name === columnName)?.name ??
+        tableData?.columns.find(
+          (col) => col.name.toLowerCase() === columnName.toLowerCase()
+        )?.name ??
+        columnName;
+
+      const filterString = `${resolvedColumn}: ${trimmedValue}`;
+      applyImmediateSearch(filterString);
+    },
+    [tableData, applyImmediateSearch]
+  );
+
+  const clearColumnFilter = useCallback(() => {
+    applyImmediateSearch(undefined);
+  }, [applyImmediateSearch]);
 
   const selectTable = useCallback(
     (tableName: string) => {
@@ -730,9 +849,13 @@ export const useDatabaseViewerState = ({
     query,
     setPage,
     setSort,
+    setSortWithOrder,
     applyImmediateSearch,
     searchInput,
-    setSearchInput: setSearchInputState,
+    setSearchInput: updateSearchInput,
+    columnFilter,
+    applyColumnFilter,
+    clearColumnFilter,
     highlightedRows,
     highlightRow,
     clearHighlights,
