@@ -390,6 +390,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-nest-backend
+      - migrations-drift-check
     environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     steps:
       - name: Download NestJS Build Artifact
