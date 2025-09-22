@@ -1,4 +1,4 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ImagesModule } from 'src/images/images.module';
@@ -31,24 +31,6 @@ import { IsUserAlreadyExist } from './validators/user-already-exists.validator';
   providers: [UserService, IsUserAlreadyExist],
   exports: [UserService],
 })
-export class UserModule implements OnModuleInit {
+export class UserModule {
   constructor(private readonly userService: UserService) {}
-
-  async onModuleInit() {
-    if (process.env.ADMIN_USER) {
-      const user = await this.userService.findOneByEmail(
-        process.env.ADMIN_USER,
-      );
-      if (user) {
-        await this.userService.setAdmin(user.id, true);
-      } else {
-        await this.userService.create({
-          email: process.env.ADMIN_USER,
-          password: process.env.ADMIN_PASSWORD,
-          name: 'Admin',
-          admin: true,
-        });
-      }
-    }
-  }
 }
