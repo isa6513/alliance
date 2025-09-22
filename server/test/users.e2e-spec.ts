@@ -6,11 +6,13 @@ import { GeoModule } from '../src/geo/geo.module';
 import { FriendStatus } from '../src/user/friend.entity';
 import { User } from '../src/user/user.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
+import { UserService } from 'src/user/user.service';
 
 describe('Users (e2e)', () => {
   let ctx: TestContext;
   let userRepo: Repository<User>;
   let cityRepo: Repository<City>;
+  let userService: UserService;
 
   let userAId: number;
   let userAToken: string;
@@ -21,6 +23,7 @@ describe('Users (e2e)', () => {
     ctx = await createTestApp([GeoModule]);
     userRepo = ctx.dataSource.getRepository(User);
     cityRepo = ctx.dataSource.getRepository(City);
+    userService = ctx.app.get(UserService);
     const userA = userRepo.create({
       name: 'Friend A',
       email: 'frienda@example.com',
@@ -259,6 +262,61 @@ describe('Users (e2e)', () => {
   });
 
   /* ──────────────────────────────────────────────────────────── */
+
+  it('user can sign and suspend the contract', async () => {
+    const sign = await request(ctx.app.getHttpServer())
+      .post('/user/signcontract')
+      .set('Authorization', `Bearer ${userAToken}`)
+      .expect(201);
+
+    expect(typeof sign.text === 'string' || sign.body).toBeTruthy();
+
+    const suspend = await request(ctx.app.getHttpServer())
+      .post('/user/suspendcontract')
+      .set('Authorization', `Bearer ${userAToken}`)
+      .expect(201);
+
+    expect(typeof suspend.text === 'string' || suspend.body).toBeTruthy();
+  });
+
+  it('returns profile information for the authenticated user', async () => {
+    const profile = await request(ctx.app.getHttpServer())
+      .get('/user/myprofile')
+      .set('Authorization', `Bearer ${userAToken}`)
+      .expect(200);
+
+    expect(profile.body.id).toBe(userAId);
+
+    const members = await request(ctx.app.getHttpServer())
+      .get('/user/members')
+      .set('Authorization', `Bearer ${userAToken}`)
+      .expect(200);
+
+    expect(Array.isArray(members.body)).toBe(true);
+    expect(members.body.length).toBeGreaterThan(0);
+  });
+
+  it('allows admins to list all users', async () => {
+    const list = await request(ctx.app.getHttpServer())
+      .get('/user/list')
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      .expect(200);
+
+    expect(Array.isArray(list.body)).toBe(true);
+    expect(list.body.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('verifies email tokens via the public endpoint', async () => {
+    const token = await userService.getVerifyEmailToken(userAId);
+
+    await request(ctx.app.getHttpServer())
+      .post('/user/verifyEmail')
+      .send({ token })
+      .expect(201);
+
+    const refreshed = await userRepo.findOne({ where: { id: userAId } });
+    expect(refreshed?.emailVerified).toBe(true);
+  });
 
   afterAll(async () => {
     await ctx.app.close();

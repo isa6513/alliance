@@ -59,16 +59,6 @@ export class GeoService {
 
       if (!geonameid) continue;
 
-      console.log(
-        geonameid,
-        name,
-        countryCode,
-        admin1,
-        admin2,
-        latitude,
-        longitude,
-      );
-      console.log(countries[countryCode]);
       cities.push({
         id: parseInt(geonameid),
         name: name,

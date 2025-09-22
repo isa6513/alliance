@@ -42,7 +42,7 @@ export class CommentDto extends PickType(Comment, [
       ? comment.children.map((child) => new CommentDto(child))
       : undefined;
     this.author = new ProfileDto(comment.author);
-    this.likes = comment.likes.map((like) => new ProfileDto(like));
+    this.likes = (comment.likes ?? []).map((like) => new ProfileDto(like));
     this.editableContent = new EditableContentDto(comment.editableContent);
   }
 }

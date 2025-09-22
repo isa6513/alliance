@@ -556,4 +556,184 @@ describe('Forum (e2e)', () => {
         .expect(404);
     });
   });
+
+  describe('Additional endpoints', () => {
+    it('returns the last comment for a post', async () => {
+      const postResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          title: 'Post With Last Comment',
+          editableContent: {
+            body: 'Initial body',
+            attachments: [],
+          },
+        } satisfies CreatePostDto)
+        .expect(201);
+
+      const postId = postResponse.body.id;
+
+      const firstComment = await request(ctx.app.getHttpServer())
+        .post('/forum/comments')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          editableContent: { body: 'First', attachments: [] },
+          parentObjectId: postId,
+          parentObjectType: CommentParentObject.Post,
+        } satisfies CreateCommentDto)
+        .expect(201);
+
+      const secondComment = await request(ctx.app.getHttpServer())
+        .post('/forum/comments')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          editableContent: { body: 'Second', attachments: [] },
+          parentObjectId: postId,
+          parentObjectType: CommentParentObject.Post,
+        } satisfies CreateCommentDto)
+        .expect(201);
+
+      const lastComment = await request(ctx.app.getHttpServer())
+        .get(`/forum/posts/${postId}/last-comment`)
+        .expect(200);
+
+      expect(lastComment.body.id).toBe(secondComment.body.id);
+      expect(lastComment.body.parentObjectId).toBe(postId);
+    });
+
+    it('lists posts and comments authored by a user', async () => {
+      const postResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          title: 'User Authored Post',
+          editableContent: {
+            body: 'Body content',
+            attachments: [],
+          },
+        } satisfies CreatePostDto)
+        .expect(201);
+
+      const postId = postResponse.body.id;
+
+      const commentResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/comments')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          editableContent: { body: 'User comment', attachments: [] },
+          parentObjectId: postId,
+          parentObjectType: CommentParentObject.Post,
+        } satisfies CreateCommentDto)
+        .expect(201);
+
+      const postsByUser = await request(ctx.app.getHttpServer())
+        .get(`/forum/posts/user/${ctx.testUserId}`)
+        .expect(200);
+
+      expect(postsByUser.body.some((post) => post.id === postId)).toBe(true);
+
+      const commentsByUser = await request(ctx.app.getHttpServer())
+        .get(`/forum/posts/user/${ctx.testUserId}/comments`)
+        .expect(200);
+
+      expect(
+        commentsByUser.body.some((comment) => comment.id === commentResponse.body.id),
+      ).toBe(true);
+
+      const forumComments = await request(ctx.app.getHttpServer())
+        .get(`/forum/posts/user/${ctx.testUserId}/forumComments`)
+        .expect(200);
+
+      expect(
+        forumComments.body.some((comment) => comment.id === commentResponse.body.id),
+      ).toBe(true);
+    });
+
+    it('provides activity and action level comment listings', async () => {
+      const actionJoin = await request(ctx.app.getHttpServer())
+        .post(`/actions/join/${testAction.id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      const activityId = actionJoin.body.id;
+
+      await request(ctx.app.getHttpServer())
+        .post(`/actions/addActivityComment/${activityId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          editableContent: { body: 'Activity comment', attachments: [] },
+          parentObjectId: activityId,
+          parentObjectType: CommentParentObject.Activity,
+        })
+        .expect(201);
+
+      await request(ctx.app.getHttpServer())
+        .post('/forum/comments')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          editableContent: { body: 'Action level comment', attachments: [] },
+          parentObjectId: testAction.id,
+          parentObjectType: CommentParentObject.Action,
+        } satisfies CreateCommentDto)
+        .expect(201);
+
+      const activityComments = await request(ctx.app.getHttpServer())
+        .get(`/forum/activity/${activityId}/comments`)
+        .expect(200);
+
+      expect(activityComments.body.length).toBeGreaterThan(0);
+
+      const actionComments = await request(ctx.app.getHttpServer())
+        .get(`/forum/actions/${testAction.id}/comments`)
+        .expect(200);
+
+      expect(actionComments.body.length).toBeGreaterThan(0);
+    });
+
+    it('supports liking and unliking posts and comments', async () => {
+      const postResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          title: 'Post To Like',
+          editableContent: {
+            body: 'Body',
+            attachments: [],
+          },
+        } satisfies CreatePostDto)
+        .expect(201);
+
+      const postId = postResponse.body.id;
+
+      const commentResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/comments')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          editableContent: { body: 'Likeable comment', attachments: [] },
+          parentObjectId: postId,
+          parentObjectType: CommentParentObject.Post,
+        })
+        .expect(201);
+
+      await request(ctx.app.getHttpServer())
+        .post(`/forum/posts/${postId}/like`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      await request(ctx.app.getHttpServer())
+        .post(`/forum/posts/${postId}/unlike`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      await request(ctx.app.getHttpServer())
+        .post(`/forum/comments/${commentResponse.body.id}/like`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      await request(ctx.app.getHttpServer())
+        .post(`/forum/comments/${commentResponse.body.id}/unlike`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+    });
+  });
 });

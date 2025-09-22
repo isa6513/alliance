@@ -1,5 +1,7 @@
 import { UserActionRelation } from 'src/actions/actions.service';
 import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
+import { CommentParentObject } from 'src/forum/entities/comment.entity';
+import { UserService } from 'src/user/user.service';
 import * as request from 'supertest';
 import { Repository } from 'typeorm';
 import {
@@ -21,11 +23,47 @@ describe('Actions (e2e)', () => {
   let testDraftAction: Action;
   let actionRepo: Repository<Action>;
   let eventRepo: Repository<ActionEvent>;
+  let userService: UserService;
+
+  const createPublishedAction = async (
+    name: string,
+    options: {
+      status?: ActionStatus;
+      sendNotifsTo?: NotificationType;
+      actionOverrides?: Partial<Action>;
+    } = {},
+  ) => {
+    const action = await actionRepo.save(
+      actionRepo.create({
+        name,
+        category: 'Test',
+        body: 'Body copy',
+        taskContents: 'Task copy',
+        shortDescription: `${name} short description`,
+        ...options.actionOverrides,
+      }),
+    );
+
+    const event = await eventRepo.save(
+      eventRepo.create({
+        title: `${name} launch`,
+        description: 'Action live',
+        newStatus: options.status ?? ActionStatus.MemberAction,
+        sendNotifsTo: options.sendNotifsTo ?? NotificationType.All,
+        date: new Date(Date.now() - 1000),
+        showInTimeline: true,
+        action,
+      }),
+    );
+
+    return { action, event };
+  };
 
   beforeAll(async () => {
     ctx = await createTestApp([]);
     actionRepo = ctx.dataSource.getRepository(Action);
     eventRepo = ctx.dataSource.getRepository(ActionEvent);
+    userService = ctx.app.get(UserService);
 
     // Create test action with MemberAction status
     testAction = actionRepo.create({
@@ -745,6 +783,303 @@ describe('Actions (e2e)', () => {
 
       // Cleanup
       await actionRepo.delete(newAction.id);
+    });
+  });
+
+  describe('Additional endpoints', () => {
+    it('allows a user to decline an action with a moral reason', async () => {
+      const { action } = await createPublishedAction('Decline Scenario');
+
+      const decline = await request(ctx.app.getHttpServer())
+        .post(`/actions/decline/${action.id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({ reason: 'Cannot participate', moral: true })
+        .expect(201);
+
+      expect(decline.body.type).toBe(ActionActivityType.USER_DECLINED);
+      expect(decline.body.actionId).toBe(action.id);
+
+      await actionRepo.delete(action.id);
+    });
+
+    it('allows a user to opt out of completing an action', async () => {
+      const { action } = await createPublishedAction('Optout Scenario');
+
+      const optout = await request(ctx.app.getHttpServer())
+        .post(`/actions/optout/${action.id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({ reason: 'Out of time', outOfTime: true })
+        .expect(201);
+
+      expect(optout.body.type).toBe(ActionActivityType.USER_WONT_COMPLETE);
+      await actionRepo.delete(action.id);
+    });
+
+    it('records a completion activity for a user', async () => {
+      const { action } = await createPublishedAction('Completion Scenario');
+
+      await request(ctx.app.getHttpServer())
+        .post(`/actions/join/${action.id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      const complete = await request(ctx.app.getHttpServer())
+        .post(`/actions/complete/${action.id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      expect(complete.body.type).toBe(ActionActivityType.USER_COMPLETED);
+
+      const feed = await request(ctx.app.getHttpServer())
+        .get('/actions/activities/feed')
+        .query({ limit: 5 })
+        .expect(200);
+
+      expect(
+        feed.body.some((activity) => activity.id === complete.body.id),
+      ).toBe(true);
+
+      await actionRepo.delete(action.id);
+    });
+
+    it('rejects invalid before cursor when fetching the activity feed', async () => {
+      await request(ctx.app.getHttpServer())
+        .get('/actions/activities/feed')
+        .query({ before: 'not-a-date' })
+        .expect(400);
+    });
+
+    it('exposes per-action activities and individual activity details', async () => {
+      const { action } = await createPublishedAction('Activities Scenario');
+
+      const join = await request(ctx.app.getHttpServer())
+        .post(`/actions/join/${action.id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      const activityId = join.body.id;
+
+      const activities = await request(ctx.app.getHttpServer())
+        .get(`/actions/${action.id}/activities`)
+        .expect(200);
+
+      expect(activities.body.length).toBeGreaterThan(0);
+
+      const single = await request(ctx.app.getHttpServer())
+        .get(`/actions/activities/${activityId}`)
+        .expect(200);
+
+      expect(single.body.id).toBe(activityId);
+
+      const event = await eventRepo.findOne({
+        where: { action: { id: action.id } },
+      });
+      expect(event).toBeDefined();
+
+      const eventRes = await request(ctx.app.getHttpServer())
+        .get(`/actions/events/${event!.id}`)
+        .expect(200);
+
+      expect(eventRes.body.id).toBe(event!.id);
+
+      await actionRepo.delete(action.id);
+    });
+
+    it('shows draft actions only to admins', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .get('/actions/all')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .expect(200);
+
+      const hasDraft = res.body.some(
+        (action: Action) => action.status === ActionStatus.Draft,
+      );
+      expect(hasDraft).toBe(true);
+    });
+
+    it('returns friend activity for accepted relationships', async () => {
+      const { action } = await createPublishedAction(
+        'Friend Activity Scenario',
+      );
+      const friend = await userService.create({
+        name: 'Friend User',
+        email: `friend-${Date.now()}@example.com`,
+        password: 'Password123!',
+      });
+
+      await userService.makeFriendsAutomated(ctx.testUserId, friend.id);
+
+      const friendToken = ctx.jwtService.sign({
+        sub: friend.id,
+        email: friend.email,
+        name: friend.name,
+      });
+
+      await request(ctx.app.getHttpServer())
+        .post(`/actions/join/${action.id}`)
+        .set('Authorization', `Bearer ${friendToken}`)
+        .expect(201);
+
+      const friendActivity = await request(ctx.app.getHttpServer())
+        .get('/actions/friendActivity')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+
+      expect(friendActivity.body.length).toBeGreaterThan(0);
+      expect(friendActivity.body[0].user.id).toBe(friend.id);
+
+      await actionRepo.delete(action.id);
+    });
+
+    it('supports liking, unliking, and commenting on activities', async () => {
+      const { action } = await createPublishedAction(
+        'Activity Reactions Scenario',
+      );
+
+      const join = await request(ctx.app.getHttpServer())
+        .post(`/actions/join/${action.id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      const activityId = join.body.id;
+
+      const like = await request(ctx.app.getHttpServer())
+        .post(`/actions/likeActivity/${activityId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      expect(like.body.likes.length).toBe(1);
+
+      const comment = await request(ctx.app.getHttpServer())
+        .post(`/actions/addActivityComment/${activityId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          editableContent: { body: 'Great job', attachments: [] },
+          parentObjectId: activityId,
+          parentObjectType: CommentParentObject.Activity,
+        })
+        .expect(201);
+
+      expect(comment.body.parentObjectId).toBe(activityId);
+
+      const update = await request(ctx.app.getHttpServer())
+        .post(`/actions/updateActivity/${activityId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          editableContent: { body: 'Updated note', attachments: [] },
+        })
+        .expect(201);
+
+      expect(update.body.editableContent.body).toBe('Updated note');
+
+      const unlike = await request(ctx.app.getHttpServer())
+        .post(`/actions/unlikeActivity/${activityId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      expect(unlike.body.likes.length).toBe(0);
+
+      await actionRepo.delete(action.id);
+    });
+
+    it('allows admins to preview notification counts', async () => {
+      const baseUsers = await Promise.all(
+        ['alice', 'bob', 'carol'].map((name, index) =>
+          userService.create({
+            name: `Notif ${name}`,
+            email: `notif-${name}-${Date.now()}@example.com`,
+            password: 'Password123!',
+            phoneNumber: `+14155550${100 + index}`,
+            phoneNumberValidated: true,
+            contractDateSigned: new Date(),
+            emailNotifsEnabled: true,
+            textNotifsEnabled: true,
+            turnedOffAllNotifs: false,
+          }),
+        ),
+      );
+
+      const tokens = baseUsers.map((user) =>
+        ctx.jwtService.sign({
+          sub: user.id,
+          email: user.email,
+          name: user.name,
+        }),
+      );
+
+      const { action: memberAction } = await createPublishedAction(
+        'Notif Member Scenario',
+        {
+          status: ActionStatus.MemberAction,
+        },
+      );
+
+      for (const token of tokens.slice(0, 2)) {
+        await request(ctx.app.getHttpServer())
+          .post(`/actions/join/${memberAction.id}`)
+          .set('Authorization', `Bearer ${token}`)
+          .expect(201);
+      }
+
+      const memberRes = await request(ctx.app.getHttpServer())
+        .get(`/actions/preEventNotifData/${memberAction.id}`)
+        .query({
+          type: ActionStatus.MemberAction,
+          sendNotifsTo: NotificationType.Joined,
+        })
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .expect(200);
+
+      expect(memberRes.body).toMatchObject({
+        n_emails: 2,
+        n_texts: 2,
+        n_pushes: 0,
+      });
+
+      const { action: gatherAction } = await createPublishedAction(
+        'Notif Gathering Scenario',
+        {
+          status: ActionStatus.GatheringCommitments,
+        },
+      );
+
+      const gatherRes = await request(ctx.app.getHttpServer())
+        .get(`/actions/preEventNotifData/${gatherAction.id}`)
+        .query({
+          type: ActionStatus.GatheringCommitments,
+          sendNotifsTo: NotificationType.All,
+        })
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .expect(200);
+
+      expect(gatherRes.body.n_emails).toBe(baseUsers.length);
+      expect(gatherRes.body.n_texts).toBe(baseUsers.length);
+      expect(gatherRes.body.n_pushes).toBe(0);
+
+      const { action: commitmentlessAction } = await createPublishedAction(
+        'Notif Commitmentless Scenario',
+        {
+          status: ActionStatus.MemberAction,
+          actionOverrides: { commitmentless: true },
+        },
+      );
+
+      const commitmentlessRes = await request(ctx.app.getHttpServer())
+        .get(`/actions/preEventNotifData/${commitmentlessAction.id}`)
+        .query({
+          type: ActionStatus.MemberAction,
+          sendNotifsTo: NotificationType.All,
+        })
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .expect(200);
+
+      expect(commitmentlessRes.body.n_emails).toBe(baseUsers.length);
+      expect(commitmentlessRes.body.n_texts).toBe(baseUsers.length);
+      expect(commitmentlessRes.body.n_pushes).toBe(0);
+
+      await actionRepo.delete(memberAction.id);
+      await actionRepo.delete(gatherAction.id);
+      await actionRepo.delete(commitmentlessAction.id);
     });
   });
 
