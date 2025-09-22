@@ -8,6 +8,7 @@ import FormRenderer, {
   computeFormStorageKey,
 } from "@alliance/shared/forms/FormRenderer";
 import { FormSchema } from "@alliance/shared/forms/formschema";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useEffect, useState } from "react";
 
 interface ActionTaskPanelActivityProps {
@@ -26,6 +27,8 @@ const ActionTaskPanelForm = ({
   card = false,
 }: ActionTaskPanelActivityProps) => {
   const [form, setForm] = useState<FormDto | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchForm = async () => {
       const form = await tasksGetForm({
@@ -40,6 +43,8 @@ const ActionTaskPanelForm = ({
   }, [taskFormId]);
 
   const handleSubmitForm = async (data: SubmitFormDto) => {
+    setError(null);
+
     const response = await tasksSubmitForm({
       path: { id: taskFormId },
       body: data,
@@ -52,8 +57,12 @@ const ActionTaskPanelForm = ({
         });
         window.localStorage.removeItem(storageKey);
       }
-
       onCompleteAction();
+    } else {
+      console.error(response.error);
+      setError(
+        "Failed to submit action. We have been notified of the problem and will take a look. You can also try again later."
+      );
     }
   };
   return (
@@ -75,6 +84,11 @@ const ActionTaskPanelForm = ({
           />
         )}
       </div>
+      {error && (
+        <Card style={CardStyle.White} className="!border-red-400 !bg-red-50">
+          <div className="text-red-500">{error}</div>
+        </Card>
+      )}
     </div>
   );
 };
