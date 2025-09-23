@@ -17,20 +17,17 @@ import UserDisplayName from "./UserDisplayName";
 export function ErrorBoundary(error: unknown) {
   console.error(error);
   const action = useActionLoaderData();
-  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5">
       <h1 className="font-serif !font-medium w-full">{action.name}</h1>
-      <div
+      <Link
         className="flex flex-row gap-x-3 items-center cursor-pointer border-b border-gray-300 pb-3 hover:underline"
-        onClick={() => {
-          navigate(`/actions/${action.id}`);
-        }}
+        to={`/actions/${action.id}`}
       >
         <img src={chevronLeft} className="w-4 h-4 rotate-90" />
         <p className="">Back to action</p>
-      </div>
+      </Link>
       <div className="flex flex-col items-center justify-center h-100 text-red-500">
         <p>Error loading user action</p>
       </div>
@@ -45,7 +42,6 @@ export interface ActionActivityDetailContext {
 }
 
 const ActionActivityDetail = () => {
-  const navigate = useNavigate();
   const action = useActionLoaderData();
   const params = useParams();
   const activityId = parseInt(params.activityId!);
@@ -117,19 +113,17 @@ const ActionActivityDetail = () => {
   return (
     <>
       <div className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5 w-full">
-        <h1 className="font-serif !font-medium w-full">{action.name}</h1>
-        <div
-          className="flex flex-row gap-x-2 items-center cursor-pointer hover:bg-zinc-50 self-start px-2 py-1 rounded border border-zinc-200"
-          onClick={() => {
-            navigate(`/actions/${action.id}`);
-          }}
+        <Link
+          className="flex flex-row gap-x-2 items-center cursor-pointer hover:bg-zinc-50 self-start px-2 py-1 rounded border border-zinc-300"
+          to={`/actions/${action.id}`}
         >
           <img src={chevronLeft} className="w-3 h-3 rotate-90" />
-          <p className="">Back to action</p>
-        </div>
+          Back to action
+        </Link>
+        <h1 className="font-serif !font-medium w-full">{action.name}</h1>
         {activity !== null && (
           <>
-            <div className="mt-4 flex flex-row items-center justify-between">
+            <div className="flex flex-row items-center justify-between">
               <div className="flex flex-row items-center">
                 <div className="flex flex-row items-center gap-x-2">
                   {activity.user.profilePicture !== null && (
@@ -210,7 +204,7 @@ const ActionActivityDetail = () => {
                 className="w-full h-auto rounded-md object-cover"
               />
             ))}
-            <div className="flex flex-row items-center justify-between">
+            <div className="flex flex-row items-center justify-between mt-1">
               <ActivityLikesButtonRow
                 isLiked={isLiked}
                 likes={activity.likes}
