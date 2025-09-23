@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 
 interface ActionTaskPanelActivityProps {
   taskFormId: number;
-  onCompleteAction: () => void;
+  onCompleteAction: (() => void) | null;
   onFormStarted: () => void;
   onAbandonAction: (outOfTime: boolean, reason: string) => void;
   card?: boolean;
@@ -42,29 +42,32 @@ const ActionTaskPanelForm = ({
     fetchForm();
   }, [taskFormId]);
 
-  const handleSubmitForm = async (data: SubmitFormDto) => {
-    setError(null);
+  const handleSubmitForm = onCompleteAction
+    ? async (data: SubmitFormDto) => {
+        setError(null);
 
-    const response = await tasksSubmitForm({
-      path: { id: taskFormId },
-      body: data,
-    });
-    if (response.response.ok) {
-      if (typeof window !== "undefined" && form) {
-        const storageKey = computeFormStorageKey({
-          formId: form.id,
-          instanceId: taskFormId,
+        const response = await tasksSubmitForm({
+          path: { id: taskFormId },
+          body: data,
         });
-        window.localStorage.removeItem(storageKey);
+        if (response.response.ok) {
+          if (typeof window !== "undefined" && form) {
+            const storageKey = computeFormStorageKey({
+              formId: form.id,
+              instanceId: taskFormId,
+            });
+            window.localStorage.removeItem(storageKey);
+          }
+          onCompleteAction();
+        } else {
+          console.error(response.error);
+          setError(
+            "Failed to submit action. We have been notified of the problem and will take a look. You can also try again later."
+          );
+        }
       }
-      onCompleteAction();
-    } else {
-      console.error(response.error);
-      setError(
-        "Failed to submit action. We have been notified of the problem and will take a look. You can also try again later."
-      );
-    }
-  };
+    : null;
+
   return (
     <div
       className={`flex flex-col gap-y-2 ${

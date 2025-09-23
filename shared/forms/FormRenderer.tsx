@@ -367,8 +367,8 @@ const FormRenderer = ({
               </Button>
             ) : (
               <Button
-                color={ButtonColor.Grey}
-                className="!cursor-not-allowed"
+                color={ButtonColor.Black}
+                className="!cursor-not-allowed w-full !py-3 !text-base"
                 onClick={() => {}}
               >
                 {schema.submit?.label || "Complete"} (Preview Mode)

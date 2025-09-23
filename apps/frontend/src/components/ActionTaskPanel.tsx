@@ -178,6 +178,22 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       );
     }
   }
+
+  if (action.status === "draft") {
+    return (
+      <>
+        {action.taskFormId && (
+          <ActionTaskPanelForm
+            taskFormId={action.taskFormId}
+            onCompleteAction={null}
+            onFormStarted={handleFormStarted}
+            onAbandonAction={handleAbandonAction}
+          />
+        )}
+      </>
+    );
+  }
+
   return null;
 };
 
