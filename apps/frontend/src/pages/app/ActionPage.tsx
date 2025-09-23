@@ -31,7 +31,6 @@ export async function loader({
     path: { id: parseInt(params.id) },
   });
 
-  console.log(params);
   if (!action.data) {
     return null;
   }
