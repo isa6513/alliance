@@ -22,25 +22,33 @@ import { useAuth } from "../../lib/AuthContext";
 import { testActions } from "../../stories/testData";
 import useActivities, { ActivityList } from "./useActivities";
 
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  console.error(error);
-  return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <div>
-        <p className="font-bold pb-2">Could not load action</p>
-        <p>
-          {isRouteErrorResponse(error) && error.status === 404
-            ? "Not found"
-            : "API server is not responding. Please try again later."}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 export async function loader({
   params,
-}: Route.LoaderArgs): Promise<ActionDto | undefined> {
+}: Route.LoaderArgs): Promise<ActionDto | null> {
+  if (!params.id || isNaN(parseInt(params.id))) {
+    return null;
+  }
+  const action = await actionsFindOne({
+    path: { id: parseInt(params.id) },
+  });
+
+  console.log(params);
+  if (!action.data) {
+    return null;
+  }
+
+  return { ...action.data };
+}
+
+export async function clientLoader({
+  params,
+  serverLoader,
+}: Route.ClientLoaderArgs): Promise<ActionDto | undefined> {
+  const serverData = await serverLoader();
+  if (serverData) {
+    return serverData;
+  }
+
   if (!params.id || isNaN(parseInt(params.id))) {
     return undefined;
   }
@@ -48,12 +56,14 @@ export async function loader({
     path: { id: parseInt(params.id) },
   });
 
+  console.log(params);
   if (!action.data) {
     throw data("Record Not Found", { status: 404 });
   }
 
   return { ...action.data };
 }
+clientLoader.hydrate = true as const; // (3)
 
 export function meta({ data }: Route.MetaArgs) {
   const action = data as ActionDto | undefined;
@@ -158,8 +168,5 @@ export default function ActionPage() {
 
 export function useActionLoaderData() {
   const action = useRouteLoaderData<typeof loader>("pages/app/ActionPage"); //TODO: why is this based on file path
-  if (!action) {
-    throw new Error("No data - applayout loader not found");
-  }
   return action;
 }
