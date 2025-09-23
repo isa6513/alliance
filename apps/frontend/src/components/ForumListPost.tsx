@@ -6,7 +6,7 @@ import {
 import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { formatTime } from "../lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
 import EditableContentRenderer from "./forum/EditableContentRenderer";
@@ -33,11 +33,13 @@ const ForumListPost = ({
 
   const authorClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     navigate(`/user/${post.author?.id}`);
   };
 
   const lastCommentAuthorClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     if (lastComment?.author) {
       navigate(`/user/${lastComment.author.id}`);
     }
@@ -64,10 +66,8 @@ const ForumListPost = ({
 
   if (card) {
     return (
-      <div
-        onClick={() => {
-          navigate(`/forum/post/${post.id}`);
-        }}
+      <Link
+        to={`/forum/post/${post.id}`}
         className={`w-full mb-0 !gap-y-1 p-4 hover:bg-zinc-50 bg-white cursor-pointer`}
       >
         <div className="flex flex-col gap-y-0 mb-2">
@@ -95,18 +95,20 @@ const ForumListPost = ({
                 <UserDisplayName staff={post.author.staff}>
                   {post.author.displayName}
                 </UserDisplayName>
+              </span>
+              <span>
                 {` posted ${formatTime(new Date(post.createdAt), {
                   addSuffix: true,
                 })}`}
               </span>
             </p>
             {post.action?.name !== undefined && showAction && (
-              <a
+              <p
                 onClick={actionClick}
                 className="inline-block bg-green/20 text-green hover:bg-green/40 px-3 py-1 rounded-lg text-sm"
               >
                 {post.action.name}
-              </a>
+              </p>
             )}
           </div>
 
@@ -127,13 +129,13 @@ const ForumListPost = ({
             </div>
           )}
         </div>
-      </div>
+      </Link>
     );
   } else {
     return (
       <div
         key={post.id}
-        className="flex items-start space-x-3 rounded-md border-zinc-200 cursor-pointer hover:bg-zinc-50 px-4 -mx-4"
+        className="flex items-start space-x-3 rounded-md border-zinc-200 hover:bg-zinc-50 px-4 -mx-4"
         onClick={() => {
           navigate(
             lastComment && showReply
