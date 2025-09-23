@@ -17,6 +17,18 @@ const ActionEventsPanel = ({ action, events }: ActionEventsPanelProps) => {
     (event) => new Date(event.date) < new Date()
   );
 
+  if (action.status === "draft" && events.length === 0) {
+    pastEvents.push({
+      id: 0,
+      title: "Draft",
+      description: "This action is being viewed as a draft preview",
+      date: new Date().toISOString(),
+      newStatus: "draft",
+      sendNotifsTo: "none",
+      showInTimeline: true,
+    });
+  }
+
   return (
     <div className="flex flex-col gap-y-3 w-full">
       <p className="font-semibold font-serif text-xl text-black">Stage</p>
