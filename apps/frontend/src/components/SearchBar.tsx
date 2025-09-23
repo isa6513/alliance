@@ -188,6 +188,13 @@ const SearchBar = () => {
         onKeyDown={handleKeyDown}
         ref={inputRef}
       />
+      {open && items.length === 0 && (
+        <div className="w-full bg-zinc-100 -mt-[3px] pt-[7px] shrink-0 rounded-b-md p-2 flex flex-col max-h-[min(calc(100vh-50px),400px)] overflow-y-auto">
+          <p className="text-black text-sm font-medium pl-3 pt-3 pb-1 w-full border-t border-zinc-200">
+            No results found
+          </p>
+        </div>
+      )}
       {open && items.length > 0 && (
         <div className="w-full bg-zinc-100 -mt-[3px] pt-[7px] shrink-0 rounded-b-md p-2 flex flex-col max-h-[min(calc(100vh-50px),400px)] overflow-y-auto">
           {categoriesWithItems.map((category) => (
