@@ -13,6 +13,7 @@ import List from "@alliance/shared/ui/List";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
+import { setRevalidate } from "../applayout";
 
 interface FriendsTabProps {
   userId: number;
@@ -37,6 +38,9 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
   const [processingIds, setProcessingIds] = useState<Record<string, boolean>>(
     {}
   );
+  console.log("originalTab", originalTab);
+  console.log("isMe", isMe);
+  console.log(activeTab);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -78,6 +82,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
       const response = await userAcceptFriendRequest({ path: { requesterId } });
       console.log("response", response);
       fetchData();
+      setRevalidate();
     } catch (error) {
       console.error("Error accepting friend request:", error);
     } finally {
@@ -142,6 +147,48 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
     );
   }
 
+  const friendsList: React.ReactNode = (
+    <>
+      {friends.length === 0 ? (
+        <p className="text-center text-zinc-500 py-4 text-sm">
+          No friends yet.
+        </p>
+      ) : (
+        <List>
+          {friends.map((friend) => (
+            <Link
+              key={friend.id}
+              className="flex items-center p-3 hover:bg-zinc-100"
+              to={`/user/${friend.id}`}
+            >
+              <ProfileImage className="mr-3" pfp={friend.profilePicture} />
+              <div className="flex-grow">
+                <p className="">{friend.displayName}</p>
+              </div>
+              {isMe && (
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveFriend(friend.id);
+                  }}
+                  color={ButtonColor.Red}
+                  disabled={processingIds[friend.id]}
+                  className="text-sm bg-transparent hover:!text-red-700"
+                >
+                  {processingIds[friend.id] ? "Removing..." : "Remove friend"}
+                </Button>
+              )}
+            </Link>
+          ))}
+        </List>
+      )}
+    </>
+  );
+
+  if (!isMe) {
+    return friendsList;
+  }
+
   return (
     <>
       <div className="flex mb-4">
@@ -185,50 +232,9 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
       </div>
 
       <div className="">
-        {activeTab === "friends" && (
-          <>
-            {friends.length === 0 ? (
-              <p className="text-center text-zinc-500 py-4 text-sm">
-                You don&apos;t have any friends yet.
-              </p>
-            ) : (
-              <List>
-                {friends.map((friend) => (
-                  <Link
-                    key={friend.id}
-                    className="flex items-center p-3 hover:bg-zinc-100"
-                    to={`/user/${friend.id}`}
-                  >
-                    <ProfileImage
-                      className="mr-3"
-                      pfp={friend.profilePicture}
-                    />
-                    <div className="flex-grow">
-                      <p className="">{friend.displayName}</p>
-                    </div>
-                    {isMe && (
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveFriend(friend.id);
-                        }}
-                        color={ButtonColor.Red}
-                        disabled={processingIds[friend.id]}
-                        className="text-sm bg-transparent hover:!text-red-700"
-                      >
-                        {processingIds[friend.id]
-                          ? "Removing..."
-                          : "Remove friend"}
-                      </Button>
-                    )}
-                  </Link>
-                ))}
-              </List>
-            )}
-          </>
-        )}
+        {activeTab === "friends" && friendsList}
 
-        {activeTab === "received" && (
+        {activeTab === "received" && isMe && (
           <>
             {receivedRequests.length === 0 ? (
               <p className="text-center text-zinc-500 py-4 text-sm">

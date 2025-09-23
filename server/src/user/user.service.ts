@@ -23,6 +23,7 @@ import {
   UpdateProfileDto,
 } from './user.dto';
 import { User } from './user.entity';
+import { profileUrl } from 'src/search/approutes';
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -221,7 +222,7 @@ export class UserService {
         user: addressee,
         category: NotificationCategory.FriendRequest,
         message: `${requester.name} wants to be friends`,
-        webAppLocation: '/profile',
+        webAppLocation: profileUrl(requesterId),
         associatedUser: requester,
       });
 

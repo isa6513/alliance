@@ -10,6 +10,7 @@ import {
   userFindOne,
   userListFriends,
   userMyFriendRelationship,
+  userMyProfile,
   userRemoveFriend,
   userRequestFriend,
   userUpdate,
@@ -21,7 +22,7 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
-import { useAppLoaderData } from "../../applayout";
+import { setRevalidate, useAppLoaderData } from "../../applayout";
 import EditableContentRenderer from "../../components/forum/EditableContentRenderer";
 import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
@@ -227,8 +228,13 @@ const UserProfilePage: React.FC = () => {
     const response = await userAcceptFriendRequest({
       path: { requesterId: parseInt(id) },
     });
+    setRevalidate();
     if (!response.error) {
       setFriendStatus({ status: "accepted", didReceiveRequest: false });
+    }
+    const profile = await userMyProfile();
+    if (profile.data) {
+      setFriends((prev) => [...prev, profile.data]);
     }
   }, [id, user]);
 
@@ -535,21 +541,12 @@ const UserProfilePage: React.FC = () => {
           )}
 
           {selectedTab === ProfileTabs.Friends && (
-            <Card className="justify-center">
-              <div className="px-2">
-                {friends.length === 0 && (
-                  <p className="my-4 text-center text-zinc-500">
-                    No friends yet
-                  </p>
-                )}
-                <FriendsTab
-                  userId={profileUser.id}
-                  isMe={isMe}
-                  originalTab={openFriendRequest ? "received" : "friends"}
-                  friends={friends}
-                />
-              </div>
-            </Card>
+            <FriendsTab
+              userId={profileUser.id}
+              isMe={isMe}
+              originalTab={openFriendRequest ? "received" : "friends"}
+              friends={friends}
+            />
           )}
         </div>
       </div>
