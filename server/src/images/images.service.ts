@@ -59,6 +59,7 @@ export class ImagesService {
     const spliced = image.substring(image.indexOf(',') + 1);
     const imgBuffer = Buffer.from(spliced, 'base64');
     const processed = await sharp(imgBuffer)
+      .rotate()
       .resize({ width: 400 })
       .webp({ effort: 3 })
       .toBuffer();
@@ -80,7 +81,10 @@ export class ImagesService {
   async uploadImage(file: string): Promise<string> {
     const spliced = file.substring(file.indexOf(',') + 1);
     const imgBuffer = Buffer.from(spliced, 'base64');
-    const processed = await sharp(imgBuffer).webp({ effort: 3 }).toBuffer();
+    const processed = await sharp(imgBuffer)
+      .rotate()
+      .webp({ effort: 3 })
+      .toBuffer();
 
     const key = `${Date.now()}.webp`;
     await this.s3.send(
