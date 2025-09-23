@@ -44,19 +44,6 @@ Alliance collects your data so that we can:
 
 We do not sell or rent your personal data to third parties. Mobile information will not be shared with third parties for marketing/promotional purposes
 
-## What are your data protection rights?
-
-Alliance Foundation would like to make sure you are fully aware of all of your data protection rights. Every user is entitled to the following:
-
-- The right to access – You have the right to request copies of your personal data.
-- The right to rectification – You have the right to request correction of inaccurate or incomplete data.
-- The right to erasure – You have the right to request that we erase your personal data, under certain conditions.
-- The right to restrict processing – You have the right to request that we limit processing of your data, under certain conditions.
-- The right to object to processing – You have the right to object to our processing of your data, under certain conditions.
-- The right to data portability – You have the right to request that we transfer your data to another organization, or directly to you, under certain conditions.
-
-If you make a request, we have one month to respond to you. To exercise these rights, please contact us using the details below.
-
 ## How do we use cookies?
 
 Alliance uses cookies in the following ways:

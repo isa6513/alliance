@@ -261,10 +261,10 @@ const UserProfilePage: React.FC = () => {
       return;
     }
 
-    const maxSizeInBytes = 5 * 1024 * 1024;
+    const maxSizeInBytes = 20 * 1024 * 1024;
     if (file.size > maxSizeInBytes) {
       setImageUploadError(
-        "Image size must be less than 5MB. Please choose a smaller image."
+        "Image size must be less than 20MB. Please choose a smaller image."
       );
       return;
     }
