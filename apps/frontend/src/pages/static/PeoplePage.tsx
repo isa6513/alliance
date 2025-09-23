@@ -65,7 +65,7 @@ const PeoplePage: React.FC = () => {
               Strategic Office
             </h2>
 
-            <div className="flex flex-col gap-y-1 text-lg md:text-xl">
+            <div className="flex flex-col gap-y-1 text-base md:text-lg">
               {Object.entries(authorLinks).map(([name, link]) => (
                 <p key={name} className="flex items-center gap-x-2">
                   <ProfileImage

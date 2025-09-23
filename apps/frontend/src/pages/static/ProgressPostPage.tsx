@@ -44,16 +44,22 @@ const ProgressPostPage: React.FC = () => {
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex-1 container mx-auto pt-16 md:pt-28 pb-56 flex flex-col px-5">
         <div className="mx-auto w-full max-w-3xl flex flex-col">
-          <h2 className="font-serif text-center !font-semibold !text-2xl md:!text-5xl mb-2">
+          <h2 className="font-serif text-center !font-semibold !text-2xl md:!text-5xl mb-4">
             {frontmatter?.title}
           </h2>
-          <p className="text-center text-lg text-zinc-500 mb-2">
-            {new Date(frontmatter?.date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>
+          <div className="flex flex-col gap-y-0.5 text-lg text-center mb-4">
+            <p className="">
+              By{" "}
+              {frontmatter?.authors.map((author: string) => author).join(", ")}
+            </p>
+            <p className="">
+              {new Date(frontmatter?.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+          </div>
           <p className="self-center text-base text-green border border-green py-1 px-2 bg-green/20 rounded mb-16">
             {frontmatter?.members} members
           </p>

@@ -79,13 +79,11 @@ const GuidePage: React.FC = () => {
             markdownContent="
 # Goals
 
-The only official stance of the Alliance, and the only belief required to be a member, is that humanity must cooperate to advance its collective interests.
+The Alliance is nonideological. The goals, structure, membership expectations, and process we describe in this guide all derive from the wants and needs expressed by members and from robust evidence about the wants and needs of humanity.
 
-The goals, structure, membership expectations, and process we describe in this guide all derive from the wants and needs expressed by initial members and from robust evidence about the wants and needs of humanity. They are subject to future revision.
+We believe that the chief purpose of civilization is to serve individuals and future generations in their pursuit of fulfillment and happiness. We want to create a world in which every individual has the resources and freedom to achieve happiness and fulfillment, humanity’s most important decisions are made with democratic input, and people live free of political, economic, and environmental insecurity.
 
-A founding principle of the Alliance is that the chief purpose of civilization is to serve individuals and future generations in their pursuit of fulfillment and happiness. That is, a world in which every individual has the resources and freedom to achieve happiness and fulfillment, humanity’s most important decisions are made with democratic input, and people live free of political, economic, and environmental insecurity.
-
-As a starting point, we seek to address pressing global crises that affect billions of current and future people.
+Therefore, as a starting point, we seek to address urgent global crises that harm or will harm billions of current and future people.
 
 "
           />
@@ -98,7 +96,7 @@ As a starting point, we seek to address pressing global crises that affect billi
 
 Our current structure has two key components:
 1. **Commitment-based membership.** We each dependably make a small amount of our time and resources available to the Alliance.
-2. **Central strategy.** We are served by a strategic office that designs collective actions to ensure they are effective. The strategic office will break actions into easy-to-follow steps and communicate with members over an online platform.
+2. **Central strategy.** We are served by a strategic office that designs collective actions to ensure they are effective. The strategic office breaks actions into easy-to-follow steps and communicate with members over an online platform.
 
 These two components are mutually dependent. Without a strategic office, members do not have concrete plans to act on. Without members that can be counted upon, the strategic office cannot make concrete plans.
 
@@ -108,9 +106,9 @@ Analogously, companies require:
 
 When either component is missing, individuals are only able to take isolated actions or simple, one-off collective actions.
 
-In return for their commitment, members’ contributions have a massively amplified impact.
+In return for their commitment, members’ contributions have a massively amplified impact. The Alliance will be able to plan in advance, coordinate flexibly, wield clear leverage, act proactively rather than reactively, and learn from experience.
 
-The Alliance will be able to plan in advance, coordinate flexibly, wield undeniable power, act proactively rather than reactively, and learn from experience. Simply put, our structure enables the same tight cooperation that makes corporations, governments, and other formal organizations coherent and effective.
+Simply put, our structure enables the same tight cooperation that makes corporations, governments, and other formal organizations coherent and effective.
 
 We are capable of working together in many possible arrangements for many purposes. A few broad categories of collective actions we can take together include:
 
@@ -189,19 +187,23 @@ We accept our decision-making process will inevitably contain imperfections and 
             markdownContent="
 # What does it mean to be a member?
 
+Alliance members are individuals that have committed to cooperate with one another to build a better future for all.
+
+When you take action as a member, you can do so with confidence that everyone else is playing their part. Likewise, when others take action, they are depending on you to play your part.
+
 ## Dependability
-Alliance members are individuals that have committed to cooperate with one another to build a better future for all. Our common goal is not to create a future that is perfect from the perspective of every member, but to create a future that members agree is significantly better than the future that would occur otherwise.
+The Alliance will not work unless members reliably take the actions assigned to them, even when doing so is tedious or inconvenient. When individuals are not reliable, others are forced to compensate, trust degrades, and projects stagnate. Moreover, member reliability is key to the Alliance’s ability to plan effective collective actions.
 
-**The Alliance will not work unless members reliably take the actions assigned to them, even in the face of uncertainty or inconvenience.**
+Effective cooperation is not achieved by pursuit of some idealistic harmony: it is achieved by working through uncertainty, disagreement, and discomfort in order to reach a common goal.
 
-The power of cooperation does not stem from attaining some idealistic harmony: it comes from working through issues, rain or shine, in order to reach a common goal. When members aren’t reliable, others are forced to compensate, trust degrades, and projects slowly stagnate.
+Our common goal is not to create a future that is perfect from the perspective of every member, but to create a future that members agree is significantly better than the future that would occur otherwise. Therefore, members abide by a *democratic process that decides actions* rather than decide individually whether or not to participate in every action. Similarly, a democratic society depends on citizens following every law, not only the laws they agree with.
 
-Members promise to abide by a *democratic process that decides actions* rather than decide individually whether or not to participate in every action. Similarly, a democratic society depends on citizens following every law, not only the laws they agree with.
+We will use democratic processes, deliberation, and moral reasoning to address disagreements as much as possible.
 
 We recognize the risks associated with collective decision-making. Our approach is to start small: we put limits on the total amount of time and money that are collectively allocated, and our governance procedures ensure that members approve of the overall goals and direction of the Alliance.
 
 ## Contract
-The following constitutes the basic promise that members make to one another:
+The following constitutes the basic promise that current members make to one another:
 "
           />
 
@@ -213,14 +215,14 @@ The following constitutes the basic promise that members make to one another:
             markdownContent="
 
 ## Example actions
-Eventually, we will focus on actions that achieve direct impact. Today, we are in a “setup” and “experimental” phase in which we are learning from members and refining the initial shape of the Alliance.
+Eventually, we will focus on actions that achieve direct impact. Today, we are in an experimental phase in which we are learning from members and refining the early shape of the Alliance.
 
-For example, early members may take part in:
+Early members may take part in:
 - Shaping early governance processes.
 - Talking to friends and family about the Alliance.
 - Testing the Alliance online platform.
 - Reading about and discussing Alliance priorities with other members.
-- Participating in small-scale (<$1/day) donation-pooling experiments.
+- Participating in small-scale (less than $1/day) donation-pooling experiments.
 "
           />
           <MarkdownWrapper

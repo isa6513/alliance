@@ -16,8 +16,8 @@ const PrelaunchLandingPage: React.FC = () => {
             The Alliance
           </h2>
           <p className="max-w-2xl font-light text-center mx-auto !mt-4 text-xl md:text-3xl">
-            A group of people taking collective action to advance humanity’s
-            common interests.
+            A global group of people taking collective action to advance
+            humanity’s common interests.
           </p>
 
           <div className="mx-auto w-full flex flex-col mt-12 md:mt-18 *:py-12 *:border-t *:border-zinc-300">
@@ -26,37 +26,18 @@ const PrelaunchLandingPage: React.FC = () => {
               maxWidth="max-w-3xl"
               markdownContent="
 
-Humanity faces many crises which are unlikely to be resolved by business as usual. Among them are extreme poverty, environmental destruction, breakdown of democratic institutions, and unsafe technological development.
+Today, humanity faces crises that are causing irreversible and compounding harms. Among them are extreme poverty, environmental destruction, breakdown of democratic institutions, and dangerous technological development.
 
-The Alliance aims to give its members, and ultimately a significant proportion of humanity, the ability to make deliberate, large-scale change. It plans to do so by facilitating strategic, sustained collective action.
+Billions of people agree that these crises are urgent, and moreover have the collective power to solve them, but lack the ability to coordinate.
+
+The Alliance aims to give its members, and ultimately a significant proportion of humanity, the ability to make deliberate, large-scale change. We plan to do so by facilitating strategic, sustained collective action.
+
+We believe that commitment unlocks cooperation. The Alliance is enabled by a voluntary contract that requires members to contribute a small, consistent amount of their time and resources. Membership is currently by invitation only and requires a 15-minute weekly commitment.
 
 While this project is ambitious, we believe it is the right time to undertake it seriously and carefully.
 
 "
             />
-            <div className="flex flex-col text-lg gap-2 md:gap-4 max-w-3xl">
-              <p>
-                <span className="text-zinc-500">
-                  What does membership require?{" "}
-                </span>
-                <br />
-                Membership currently requires a 15-minute weekly commitment.
-              </p>
-
-              <p>
-                <span className="text-zinc-500">
-                  Are you affiliated with any existing political group?
-                </span>
-                <br />
-                No.
-              </p>
-
-              <p>
-                <span className="text-zinc-500">How can I join?</span> <br />
-                The Alliance is in an experimental phase. Membership is
-                currently by invitation only.
-              </p>
-            </div>
           </div>
         </div>
       </div>

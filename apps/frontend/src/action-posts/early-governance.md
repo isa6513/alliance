@@ -1,6 +1,7 @@
 ---
 title: "Early Collective Governance"
 date: "2025-08-19"
+authors: ["Sidney Hough", "Mark Xu", "Casey Manning"]
 members: 25
 ---
 
