@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { activityReplyUrl, replyUrl } from 'src/search/approutes';
 import { ProfileDto } from 'src/user/user.dto';
-import { ILike, Repository } from 'typeorm';
+import { ILike, In, Repository } from 'typeorm';
 import {
   Notification,
   NotificationCategory,
@@ -17,11 +17,13 @@ import {
   CommentDto,
   CreateCommentDto,
   UpdateCommentDto,
+  UserCommentDto,
 } from './dto/comment.dto';
 import { CreatePostDto, PostDto, UpdatePostDto } from './dto/post.dto';
 import { Comment, CommentParentObject } from './entities/comment.entity';
 import { EditableContent } from './entities/editablecontent.entity';
 import { Post } from './entities/post.entity';
+import { Action } from 'src/actions/entities/action.entity';
 
 @Injectable()
 export class ForumService {
@@ -32,6 +34,8 @@ export class ForumService {
     private commentRepository: Repository<Comment>,
     @InjectRepository(Notification)
     private notifRepository: Repository<Notification>,
+    @InjectRepository(Action)
+    private actionRepository: Repository<Action>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(ActionActivity)
@@ -583,11 +587,43 @@ export class ForumService {
     });
   }
 
-  async findCommentsByUser(userId: number): Promise<Comment[]> {
-    return this.commentRepository.find({
+  async findCommentsByUser(userId: number): Promise<UserCommentDto[]> {
+    const comments = await this.commentRepository.find({
       where: { authorId: userId, deleted: false },
       relations: ['author'],
     });
+    const postIds = comments
+      .filter(
+        (comment) => comment.parentObjectType === CommentParentObject.Post,
+      )
+      .map((comment) => comment.parentObjectId);
+
+    const actionIds = comments
+      .filter(
+        (comment) => comment.parentObjectType === CommentParentObject.Action,
+      )
+      .map((comment) => comment.parentObjectId);
+
+    const posts = await this.postRepository.find({
+      where: { id: In(postIds) },
+    });
+
+    const actions = await this.actionRepository.find({
+      where: { id: In(actionIds) },
+    });
+
+    return comments.map(
+      (comment) =>
+        new UserCommentDto(
+          comment,
+          comment.parentObjectType === CommentParentObject.Post
+            ? posts.find((post) => post.id === comment.parentObjectId)?.title
+            : comment.parentObjectType === CommentParentObject.Action
+              ? actions.find((action) => action.id === comment.parentObjectId)
+                  ?.name
+              : undefined,
+        ),
+    );
   }
 
   async findForumCommentsByUser(userId: number): Promise<Comment[]> {

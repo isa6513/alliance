@@ -8,9 +8,20 @@ import { Notification } from '../notifs/entities/notification.entity';
 import { User } from '../user/user.entity';
 import { ActionActivity } from '../actions/entities/action-activity.entity';
 import { EditableContent } from './entities/editablecontent.entity';
+import { Action } from 'src/actions/entities/action.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Post, Comment, Notification, User, ActionActivity, EditableContent])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Post,
+      Comment,
+      Notification,
+      User,
+      ActionActivity,
+      EditableContent,
+      Action,
+    ]),
+  ],
   controllers: [ForumController],
   providers: [ForumService],
   exports: [ForumService],

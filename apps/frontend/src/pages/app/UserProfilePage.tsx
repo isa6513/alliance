@@ -1,10 +1,10 @@
 import {
-  CommentDto,
   FriendStatusDto,
   PostDto,
   ProfileDto,
   UpdateProfileDto,
-  forumFindForumCommentsByUser,
+  UserCommentDto,
+  forumFindCommentsByUser,
   forumFindPostsByUser,
   userAcceptFriendRequest,
   userFindOne,
@@ -20,21 +20,19 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
 import { setRevalidate, useAppLoaderData } from "../../applayout";
-import EditableContentRenderer from "../../components/forum/EditableContentRenderer";
 import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
 import FriendsTab from "../../components/FriendsTab";
 import UserActivityCard from "../../components/UserActivityCard";
-import UserDisplayName from "../../components/UserDisplayName";
 import UserProfileTab from "../../components/UserProfileTab";
 import { useAuth } from "../../lib/AuthContext";
-import { formatTime } from "../../lib/utils";
 import useActivities, { ActivityList } from "./useActivities";
 import { sharp_allowed_mime_types } from "@alliance/shared/lib/config";
 import List from "@alliance/shared/ui/List";
+import ForumActivityCommentCard from "../../components/ForumActivityCommentCard";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -53,37 +51,6 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
     </div>
   );
 }
-
-interface ForumActivityCommentCardProps {
-  comment: CommentDto;
-}
-
-const ForumActivityCommentCard: React.FC<ForumActivityCommentCardProps> = ({
-  comment,
-}) => {
-  return (
-    <Link
-      to={`/forum/post/${comment.parentObjectId}?replyId=${comment.id}`}
-      className="w-full mb-0 p-4 hover:bg-zinc-50 bg-white space-y-2"
-    >
-      <EditableContentRenderer
-        content={comment.editableContent}
-        charLimit={140}
-      />
-      <div className="flex flex-row items-center gap-x-2 text-sm text-zinc-500">
-        <ProfileImage pfp={comment.author.profilePicture} size="small" />
-        <span>
-          <UserDisplayName staff={comment.author.staff}>
-            {comment.author.displayName}
-          </UserDisplayName>{" "}
-          {`commented ${formatTime(new Date(comment.createdAt), {
-            addSuffix: true,
-          })}`}
-        </span>
-      </div>
-    </Link>
-  );
-};
 
 const UserProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -107,7 +74,7 @@ const UserProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
-  const [forumComments, setForumComments] = useState<CommentDto[]>([]);
+  const [forumComments, setForumComments] = useState<UserCommentDto[]>([]);
   const [friends, setFriends] = useState<ProfileDto[]>([]);
 
   // Edit mode state
@@ -187,7 +154,7 @@ const UserProfilePage: React.FC = () => {
         });
         setForumPosts(forumPostsData ?? []);
 
-        const { data: forumCommentsData } = await forumFindForumCommentsByUser({
+        const { data: forumCommentsData } = await forumFindCommentsByUser({
           path: { id: userId },
         });
         setForumComments(forumCommentsData ?? []);

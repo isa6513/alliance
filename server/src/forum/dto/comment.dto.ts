@@ -47,6 +47,16 @@ export class CommentDto extends PickType(Comment, [
   }
 }
 
+export class UserCommentDto extends CommentDto {
+  @ApiPropertyOptional()
+  parentTitle?: string;
+
+  constructor(comment: Comment, parentTitle?: string) {
+    super(comment);
+    this.parentTitle = parentTitle;
+  }
+}
+
 export class CreateCommentDto extends PickType(Comment, [
   'parentObjectId',
   'parentId',

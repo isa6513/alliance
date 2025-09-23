@@ -16,6 +16,7 @@ import {
   CommentDto,
   CreateCommentDto,
   UpdateCommentDto,
+  UserCommentDto,
 } from './dto/comment.dto';
 import { CreatePostDto, PostDto, UpdatePostDto } from './dto/post.dto';
 import { Post as PostEntity } from './entities/post.entity';
@@ -114,13 +115,11 @@ export class ForumController {
 
   @Get('posts/user/:id/comments')
   @ApiOperation({ summary: 'Get all comments by a specific user' })
-  @ApiOkResponse({ type: [CommentDto] })
+  @ApiOkResponse({ type: [UserCommentDto] })
   findCommentsByUser(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<CommentDto[]> {
-    return this.forumService
-      .findCommentsByUser(id)
-      .then((comments) => comments.map((comment) => new CommentDto(comment)));
+  ): Promise<UserCommentDto[]> {
+    return this.forumService.findCommentsByUser(id);
   }
 
   @Get('posts/user/:id/forumComments')
