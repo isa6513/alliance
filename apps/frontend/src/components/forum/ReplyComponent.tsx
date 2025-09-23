@@ -15,6 +15,7 @@ import UserDisplayName from "../UserDisplayName";
 import EditableContentForm from "./EditableContentForm";
 import EditableContentRenderer from "./EditableContentRenderer";
 import ReplyForm from "./ReplyForm";
+import { Link } from "react-router";
 
 const countAllReplies = (replies: CommentDto[]): number => {
   let count = 0;
@@ -160,12 +161,12 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
       )}
 
       {/* Profile picture column */}
-      <div className="flex-shrink-0">
+      <Link to={`/user/${reply.author.id}`} className="flex-shrink-0">
         <ProfileImage
           pfp={reply.author.profilePicture}
           size={compact ? "small" : "medium"}
         />
-      </div>
+      </Link>
 
       {/* Content column */}
       <div className="flex-1 ">
