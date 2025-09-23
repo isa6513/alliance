@@ -115,13 +115,22 @@ const ActionForm: React.FC<ActionFormProps> = ({
         type: "number",
         show: (f) => f.type === "Funding",
         helpText: "Suggested amount per person",
+        inGrid: true,
       },
       {
         name: "commitmentless",
         label: "Commitmentless",
+        inGrid: true,
         type: "checkbox",
         helpText:
           "all members (not just committed) will be shown this action to complete. (e.g. for onboarding)",
+      },
+      {
+        name: "taskFormId",
+        label: "Task Form",
+        type: "select",
+        show: (f) => f.type === "Activity",
+        inGrid: true,
       },
       {
         name: "commitmentThreshold",
@@ -131,12 +140,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         show: (f) => !f.commitmentless,
         inGrid: true,
       },
-      {
-        name: "taskFormId",
-        label: "Task Form",
-        type: "select",
-        show: (f) => f.type === "Activity",
-      },
+
       { name: "body", label: "Body", type: "textarea", required: true },
       {
         name: "shortDescription",
@@ -288,7 +292,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
     if (f.type === "checkbox") {
       return (
         <div key={String(f.name)}>
-          <div className="flex items-center flex-row gap-x-3">
+          <div className="flex items-center flex-row gap-x-3 mt-5">
             <label
               htmlFor={String(f.name)}
               className="block font-medium text-gray-700"
@@ -347,46 +351,13 @@ const ActionForm: React.FC<ActionFormProps> = ({
         .map((f) => {
           return renderField(f);
         })}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
         {fieldDefs
           .filter((f) => f.inGrid)
           .filter((f) => (f.show ? f.show(form) : true))
-          .map((f) => (
-            <div key={String(f.name)}>
-              <label
-                htmlFor={String(f.name)}
-                className="block font-medium text-gray-700 mb-1"
-              >
-                {f.label}
-              </label>
-              {f.type === "select" ? (
-                <select
-                  id={String(f.name)}
-                  name={String(f.name)}
-                  value={(form as any)[f.name]}
-                  onChange={onInputChange}
-                  required={f.required}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {f.options?.map((opt) => (
-                    <option key={String(opt.value)} value={String(opt.value)}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type={f.type}
-                  id={String(f.name)}
-                  name={String(f.name)}
-                  value={(form as any)[f.name] ?? ""}
-                  onChange={onInputChange}
-                  required={f.required}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              )}
-            </div>
-          ))}
+          .map((f) => {
+            return renderField(f);
+          })}
       </div>
       {fieldDefs
         .filter((f) => !f.inGrid && !f.aboveGrid)
