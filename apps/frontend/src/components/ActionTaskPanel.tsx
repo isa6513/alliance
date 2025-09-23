@@ -188,6 +188,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
             onCompleteAction={null}
             onFormStarted={handleFormStarted}
             onAbandonAction={handleAbandonAction}
+            card={card}
           />
         )}
       </>
