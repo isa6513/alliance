@@ -9,6 +9,7 @@ import {
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../lib/AuthContext";
+import posthog from "posthog-js";
 
 export enum ActivityList {
   Friends = "friends",
@@ -99,6 +100,11 @@ const useActivities = ({ list, objectId }: UseActivitiesProps) => {
                 : a
             )
           );
+
+          posthog.capture("activity_liked", {
+            activityId: activity.id,
+            activityType: activity.type,
+          });
         }
       }
     },
