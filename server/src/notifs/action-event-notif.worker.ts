@@ -19,6 +19,7 @@ import {
 } from '../actions/entities/action-event.entity';
 import { Action } from '../actions/entities/action.entity';
 import { NotifsService } from '../notifs/notifs.service';
+import { generateCIDForNotif } from './notif_utils';
 import { UserService } from '../user/user.service';
 import {
   ActionEventNotif,
@@ -40,6 +41,7 @@ export interface ActionEventNotificationContext {
   type: ActionEventNotifType;
   user: User;
   action: Action;
+  cid: string;
 }
 
 @Injectable()
@@ -220,16 +222,18 @@ export class ActionEventNotifWorker {
 
       const users = await this.getBaseUsersForEvent(event.newStatus, action);
 
-      const baseContext: Omit<ActionEventNotificationContext, 'user'> = {
-        event,
-        type,
-        action,
-      };
+      const baseContext: Omit<ActionEventNotificationContext, 'user' | 'cid'> =
+        {
+          event,
+          type,
+          action,
+        };
 
       for (const user of users) {
         const context: ActionEventNotificationContext = {
           ...baseContext,
           user,
+          cid: await generateCIDForNotif(),
         };
         const notif = new ActionEventNotif();
         notif.user = user;
@@ -237,8 +241,9 @@ export class ActionEventNotifWorker {
         notif.channel = NotificationChannel.Email;
         notif.sent = false;
         notif.type = type;
+        let sentAnyNotif = false;
         if (this.notifsService.shouldTextUser(user)) {
-          console.log('sending text notif to user', user.id);
+          sentAnyNotif = true;
           const result = await this.sendActionEventNotificationMms(context);
 
           if (result && !result.errorCode) {
@@ -246,8 +251,9 @@ export class ActionEventNotifWorker {
           }
           notif.channel = NotificationChannel.Text;
           notif.mms = result;
-        } else if (this.notifsService.shouldEmailUser(user)) {
-          console.log('sending email notif to user', user.id);
+        }
+        if (!notif.sent && this.notifsService.shouldEmailUser(user)) {
+          sentAnyNotif = true;
           notif.channel = NotificationChannel.Email;
           const result =
             await this.mailService.sendActionEventNotificationEmail(context);
@@ -258,7 +264,9 @@ export class ActionEventNotifWorker {
         } else {
           //TODO: pushes
         }
-        await this.actionEventNotifsRepository.save(notif);
+        if (sentAnyNotif) {
+          await this.actionEventNotifsRepository.save(notif);
+        }
       }
 
       this.logger.log('notifs sent for event ' + event.id);
@@ -286,22 +294,18 @@ export class ActionEventNotifWorker {
   ): Promise<Mms | null> {
     let body = '';
     if (context.type === ActionEventNotifType.Announcement) {
-      body = defaultEventTextAnnouncement[context.event.newStatus](
-        context.user,
-        context.action,
-      );
+      body = defaultEventTextAnnouncement[context.event.newStatus](context);
     } else if (context.type === ActionEventNotifType.ThreeDayReminder) {
-      body = defaultEventText3DayReminder[context.event.newStatus](
-        context.user,
-        context.action,
-      );
+      body = defaultEventText3DayReminder[context.event.newStatus](context);
     } else if (context.type === ActionEventNotifType.OneDayReminder) {
-      body = defaultEventText1DayReminder[context.event.newStatus](
-        context.user,
-        context.action,
-      );
+      body = defaultEventText1DayReminder[context.event.newStatus](context);
     }
 
-    return this.mmsService.sendMms(context.user.phoneNumber!, body, []);
+    return this.mmsService.sendMms(
+      context.user.phoneNumber!,
+      body,
+      [],
+      context.cid,
+    );
   }
 }

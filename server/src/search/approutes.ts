@@ -22,3 +22,7 @@ export function activityReplyUrl(
 ) {
   return `/actions/${actionId}/activity/${activityId}?replyId=${replyId}`;
 }
+
+export function withCid(url: string, cid: string) {
+  return url.includes('?') ? `${url}&cid=${cid}` : `${url}?cid=${cid}`;
+}

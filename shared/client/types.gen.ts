@@ -547,6 +547,8 @@ export type Mail = {
     status: string;
     emailType: EmailType;
     createdAt: string;
+    cid?: string;
+    clickedLink: boolean;
 };
 
 export type Mms = {
@@ -560,6 +562,8 @@ export type Mms = {
     errorMessage?: string;
     createdAt: string;
     updatedAt: string;
+    cid?: string;
+    clickedLink: boolean;
 };
 
 export type ActionEventNotifDto = {
@@ -572,6 +576,14 @@ export type ActionEventNotifDto = {
      */
     sent: boolean;
     user: ProfileDto;
+};
+
+export type NotifClickDto = {
+    [key: string]: unknown;
+};
+
+export type NotifClickResponseDto = {
+    mms: boolean;
 };
 
 export type CreatePostDto = {
@@ -1896,6 +1908,19 @@ export type NotifsReloadNotifDataForEventData = {
 export type NotifsReloadNotifDataForEventResponses = {
     200: unknown;
 };
+
+export type NotifsLinkClickData = {
+    body: NotifClickDto;
+    path?: never;
+    query?: never;
+    url: '/notifs/linkClick';
+};
+
+export type NotifsLinkClickResponses = {
+    200: NotifClickResponseDto;
+};
+
+export type NotifsLinkClickResponse = NotifsLinkClickResponses[keyof NotifsLinkClickResponses];
 
 export type ForumFindAllPostsData = {
     body?: never;

@@ -1,7 +1,7 @@
 import {
-    Injectable,
-    NotFoundException,
-    UnauthorizedException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/mail/mail.service';
@@ -11,6 +11,7 @@ import { Repository } from 'typeorm';
 import { ActionEventNotif } from './entities/action-event-notif.entity';
 import { Notification } from './entities/notification.entity';
 import { NotificationChannel } from './notifchannel';
+import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
 
 @Injectable()
 export class NotifsService {
@@ -66,12 +67,20 @@ export class NotifsService {
   }
 
   shouldEmailUser(user: User) {
-    return user.emailNotifsEnabled && !user.turnedOffAllNotifs && user.contractDateSigned;
+    return (
+      user.emailNotifsEnabled &&
+      !user.turnedOffAllNotifs &&
+      user.contractDateSigned
+    );
   }
 
   shouldTextUser(user: User) {
     return (
-      user.textNotifsEnabled && !user.turnedOffAllNotifs && user.phoneNumber && user.contractDateSigned
+      user.textNotifsEnabled &&
+      !user.turnedOffAllNotifs &&
+      user.phoneNumber &&
+      user.contractDateSigned &&
+      user.phoneNumberValidated
     );
   }
 
@@ -97,5 +106,14 @@ export class NotifsService {
         //TODO: refresh mail data
       }
     }
+  }
+
+  async notifLinkClick(body: NotifClickDto): Promise<NotifClickResponseDto> {
+    const mms = await this.mmsService.setClickedLinkByCid(body.cid);
+    if (mms) {
+      return { mms: true };
+    }
+    await this.mailService.setClickedLinkByCid(body.cid);
+    return { mms: false };
   }
 }

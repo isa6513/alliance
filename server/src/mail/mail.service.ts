@@ -1,5 +1,5 @@
 import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
 import {
@@ -7,7 +7,7 @@ import {
   ReminderKind,
 } from 'src/notifs/action-event-notif.worker';
 import { ActionEventNotifType } from 'src/notifs/entities/action-event-notif.entity';
-import { actionUrl } from 'src/search/approutes';
+import { actionUrl, withCid } from 'src/search/approutes';
 import { Repository } from 'typeorm';
 import { EmailStatus, EmailType, Mail } from './mail.entity';
 
@@ -36,12 +36,15 @@ export class MailService {
     emailType: EmailType,
     subject: string | null,
     context: ISendMailOptions['context'],
+    cid?: string,
   ): Promise<Mail> {
     if (process.env.NODE_ENV === 'test') {
       return {
         id: 0,
         sentMessageId: 'test',
         to: recipient,
+        cid,
+        clickedLink: false,
         status: EmailStatus.Sent,
         emailType: emailType,
         createdAt: new Date(),
@@ -51,6 +54,7 @@ export class MailService {
       to: recipient,
       emailType: emailType,
       status: EmailStatus.Pending,
+      cid,
     });
 
     const e = await this.mailerService.sendMail({
@@ -250,14 +254,36 @@ export class MailService {
           ? EmailType.CommitmentReminder
           : EmailType.MemberActionReminder;
 
-    return this.sendMail(context.user.email, emailType, subject, {
-      name: context.user.name,
-      actionName: context.action.name,
-      url: actionUrl(context.action.id, true),
-      daysleft:
-        context.type === ActionEventNotifType.ThreeDayReminder
-          ? '3 days'
-          : '1 day',
-    });
+    console.log(
+      'url',
+      withCid(actionUrl(context.action.id, true), context.cid),
+    );
+    console.log('cid', context.cid);
+
+    return this.sendMail(
+      context.user.email,
+      emailType,
+      subject,
+      {
+        name: context.user.name,
+        actionName: context.action.name,
+        url: withCid(actionUrl(context.action.id, true), context.cid),
+        daysleft:
+          context.type === ActionEventNotifType.ThreeDayReminder
+            ? '3 days'
+            : '1 day',
+        cid: context.cid,
+      },
+      context.cid,
+    );
+  }
+
+  async setClickedLinkByCid(cid: string): Promise<void> {
+    const mail = await this.mailRepository.findOne({ where: { cid } });
+    if (!mail) {
+      throw new NotFoundException('Mail not found');
+    }
+    mail.clickedLink = true;
+    await this.mailRepository.save(mail);
   }
 }

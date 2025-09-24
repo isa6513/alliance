@@ -49,4 +49,12 @@ export class Mail {
   @ApiProperty()
   @CreateDateColumn()
   createdAt: Date;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  cid?: string;
+
+  @Column({ default: false })
+  @ApiProperty({ type: Boolean })
+  clickedLink: boolean;
 }

@@ -646,9 +646,9 @@ export class ActionsService {
     const texts = users.filter((user) =>
       this.notifsService.shouldTextUser(user),
     );
-    const emails = users.filter((user) =>
-      this.notifsService.shouldEmailUser(user),
-    );
+    const emails = users
+      .filter((user) => this.notifsService.shouldEmailUser(user))
+      .filter((user) => !texts.includes(user));
 
     return {
       n_texts: texts.length,

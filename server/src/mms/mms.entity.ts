@@ -49,4 +49,12 @@ export class Mms {
   @UpdateDateColumn()
   @ApiProperty({ type: Date })
   updatedAt: Date;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  cid?: string;
+
+  @Column({ default: false })
+  @ApiProperty({ type: Boolean })
+  clickedLink: boolean;
 }

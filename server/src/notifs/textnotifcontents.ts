@@ -1,35 +1,34 @@
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
-import { Action } from 'src/actions/entities/action.entity';
-import { actionUrl } from 'src/search/approutes';
-import { User } from 'src/user/user.entity';
+import { actionUrl, withCid } from 'src/search/approutes';
+import { ActionEventNotificationContext } from './action-event-notif.worker';
 
 type announcedStates =
   | ActionStatus.GatheringCommitments
   | ActionStatus.MemberAction;
 
 export const defaultEventTextAnnouncement: {
-  [x in announcedStates]: (user: User, action: Action) => string;
+  [x in announcedStates]: (context: ActionEventNotificationContext) => string;
 } = {
-  [ActionStatus.GatheringCommitments]: (user, action) =>
-    `new action: ${action.name}. Please confirm commitment at ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
-  [ActionStatus.MemberAction]: (user, action) =>
-    `An action you committed to needs to be completed: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
+  [ActionStatus.GatheringCommitments]: (context) =>
+    `new action: ${context.action.name}. Please confirm commitment at ${withCid(actionUrl(context.action.id, true), context.cid)}. Reply STOP to opt out.`,
+  [ActionStatus.MemberAction]: (context) =>
+    `An action you committed to needs to be completed: ${context.action.name}. ${withCid(actionUrl(context.action.id, true), context.cid)}. Reply STOP to opt out.`,
 };
 
 export const defaultEventText3DayReminder: {
-  [x in announcedStates]: (user: User, action: Action) => string;
+  [x in announcedStates]: (context: ActionEventNotificationContext) => string;
 } = {
-  [ActionStatus.GatheringCommitments]: (user, action) =>
-    `You have 3 days left to confirm participation in: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
-  [ActionStatus.MemberAction]: (user, action) =>
-    `You have 3 days left to ${action.commitmentless ? 'complete' : 'fulfill your commitment to'}: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
+  [ActionStatus.GatheringCommitments]: (context) =>
+    `You have 3 days left to confirm participation in: ${context.action.name}. ${withCid(actionUrl(context.action.id, true), context.cid)}. Reply STOP to opt out.`,
+  [ActionStatus.MemberAction]: (context) =>
+    `You have 3 days left to ${context.action.commitmentless ? 'complete' : 'fulfill your commitment to'}: ${context.action.name}. ${withCid(actionUrl(context.action.id, true), context.cid)}. Reply STOP to opt out.`,
 };
 
 export const defaultEventText1DayReminder: {
-  [x in announcedStates]: (user: User, action: Action) => string;
+  [x in announcedStates]: (context: ActionEventNotificationContext) => string;
 } = {
-  [ActionStatus.GatheringCommitments]: (user, action) =>
-    `You have 1 day left to confirm participation in: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
-  [ActionStatus.MemberAction]: (user, action) =>
-    `You have 1 day left to ${action.commitmentless ? 'complete' : 'fulfill your commitment to'}: ${action.name}. ${actionUrl(action.id, true)}. Reply STOP to opt out.`,
+  [ActionStatus.GatheringCommitments]: (context) =>
+    `You have 1 day left to confirm participation in: ${context.action.name}. ${withCid(actionUrl(context.action.id, true), context.cid)}. Reply STOP to opt out.`,
+  [ActionStatus.MemberAction]: (context) =>
+    `You have 1 day left to ${context.action.commitmentless ? 'complete' : 'fulfill your commitment to'}: ${context.action.name}. ${withCid(actionUrl(context.action.id, true), context.cid)}. Reply STOP to opt out.`,
 };

@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
@@ -13,6 +14,7 @@ import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
 import { NotificationDto } from './dto/notification.dto';
 import { ActionEventNotifDto } from './entities/action-event-notif.dto';
 import { NotifsService } from './notifs.service';
+import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
 
 @Controller('notifs')
 export class NotifsController {
@@ -62,5 +64,11 @@ export class NotifsController {
   @ApiOkResponse()
   reloadNotifDataForEvent(@Param('id', ParseIntPipe) id: number) {
     return this.notifsService.reloadNotifDataForEvent(id);
+  }
+
+  @Post('linkClick')
+  @ApiOkResponse({ type: NotifClickResponseDto })
+  linkClick(@Body() body: NotifClickDto) {
+    return this.notifsService.notifLinkClick(body);
   }
 }

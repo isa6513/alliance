@@ -1,4 +1,3 @@
-// src/mms/mms.service.ts
 import {
   BadRequestException,
   Injectable,
@@ -56,6 +55,7 @@ export class MmsService {
     to: string,
     body: string,
     mediaUrls: string[],
+    cid?: string,
   ): Promise<Mms | null> {
     this.logger.log(
       `Attempting to send MMS to ${to} with ${mediaUrls.length} media items.`,
@@ -91,6 +91,7 @@ export class MmsService {
         status: message.status,
         errorCode: message.errorCode,
         errorMessage: message.errorMessage,
+        cid: cid,
       });
 
       return this.mmsRepository.save(mms);
@@ -112,5 +113,16 @@ export class MmsService {
       ...mms,
       ...message,
     });
+  }
+
+  // doesnt throw to allow fallback to mail - TODO this is kind of unintuitive
+  async setClickedLinkByCid(cid: string): Promise<boolean> {
+    const mms = await this.mmsRepository.findOne({ where: { cid } });
+    if (!mms) {
+      return false;
+    }
+    mms.clickedLink = true;
+    await this.mmsRepository.save(mms);
+    return true;
   }
 }
