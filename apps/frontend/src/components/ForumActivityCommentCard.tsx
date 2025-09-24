@@ -14,9 +14,9 @@ const ForumActivityCommentCard = ({
 }: ForumActivityCommentCardProps) => {
   const url =
     comment.parentObjectType === "post"
-      ? `/forum/post/${comment.parentObjectId}`
+      ? `/forum/post/${comment.parentObjectId}?replyId=${comment.id}`
       : comment.parentObjectType === "action"
-      ? `/forum/action/${comment.parentObjectId}`
+      ? `/actions/${comment.parentObjectId}?replyId=${comment.id}`
       : null;
 
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ const ForumActivityCommentCard = ({
 
   return (
     <Link
-      to={`/forum/post/${comment.parentObjectId}?replyId=${comment.id}`}
+      to={url}
       className="w-full mb-0 p-4 hover:bg-zinc-50 bg-white space-y-2"
     >
       <EditableContentRenderer

@@ -396,8 +396,7 @@ const UserProfilePage: React.FC = () => {
             />
             <UserProfileTab
               number={forumActivityCount}
-              label={forumActivityCount === 1 ? "forum post" : "forum posts"}
-              shortLabel={forumActivityCount === 1 ? "post" : "posts"}
+              label={forumActivityCount === 1 ? "post" : "posts"}
               selected={selectedTab === ProfileTabs.Forum}
               onClick={() => setSelectedTab(ProfileTabs.Forum)}
             />
