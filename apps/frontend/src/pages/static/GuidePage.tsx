@@ -170,13 +170,10 @@ To determine member interests, the strategic office will solicit input by runnin
 The Alliance will also undergo a periodic [course adjustment](#governance) process to check that members feel their contributions are well-utilized and their voices are heard.
 
 ## Pragmatic considerations
-The Alliance aims to address serious problems faced by civilization. This work involves unavoidable tradeoffs.
-
-We will not be able to solve every problem. We will often need to prioritize crises based on their scale, tractability, and time-sensitivity.
-
-The urgency of global crises will demand imperfect solutions. It will not be possible to consult and satisfy every stakeholder in every action that we take.
-
-Need for swift action will preclude that every decision is made with full member consensus. The strategic office will address serious operational concerns with its plans, but its mission would be severely impeded by extensive discussion over every action.
+The Alliance aims to address urgent problems faced by civilization. This work involves unavoidable tradeoffs:
+1. We will often need to prioritize issues based on their scale, tractability, and time-sensitivity.
+2. It will not be possible to consult and satisfy every stakeholder in every action that we take.
+3. It will not be possible for every decision to be made with full member consensus. The strategic office will address serious operational concerns with its plans, but our mission would be severely impeded by extensive debate about every action.
 
 We accept our decision-making process will inevitably contain imperfections and we will seek to minimize their harm.
 "
@@ -200,7 +197,7 @@ Our common goal is not to create a future that is perfect from the perspective o
 
 We will use democratic processes, deliberation, and moral reasoning to address disagreements as much as possible.
 
-We recognize the risks associated with collective decision-making. Our approach is to start small: we put limits on the total amount of time and money that are collectively allocated, and our governance procedures ensure that members approve of the overall goals and direction of the Alliance.
+We recognize the risks associated with collective decision-making. To mitigate these risks, we put limits on the total amount of time and resources required from members, and our governance procedures ensure that members approve of the overall goals and direction of the Alliance.
 
 ## Contract
 The following constitutes the basic promise that current members make to one another:

@@ -126,7 +126,7 @@ export default function ActionPage() {
       className="max-w-[1250px] mx-auto flex bg-white min-h-[calc(100vh-var(--nav-height))]"
       style={{ boxSizing: "border-box" }}
     >
-      <div className="flex-1 p-10">
+      <div className="flex-1 p-3 sm:p-10">
         <Outlet
           context={
             {

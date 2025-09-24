@@ -34,7 +34,7 @@ const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
       <div
         className="
       flex flex-col md:flex-row border-zinc-300 border-b bg-white
-    w-screen text-left items-center fixed px-7 z-10 justify-between gap-x-5 pt-1 md:pt-0"
+    w-screen text-left items-center fixed px-3 sm:px-7 z-10 justify-between gap-x-5 pt-1 md:pt-0"
         id="main-nav"
         ref={(el) => {
           if (el) {
