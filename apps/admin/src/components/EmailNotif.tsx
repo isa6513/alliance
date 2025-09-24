@@ -11,6 +11,11 @@ function statusClasses(status?: string) {
   return "bg-stone-200 text-gray-800";
 }
 
+export function linkClickClasses(clickedLink?: boolean) {
+  if (clickedLink) return "bg-green-100 text-green-800";
+  return "bg-red-100 text-red-800";
+}
+
 export interface EmailNotifProps {
   notif: ActionEventNotifDto;
 }
@@ -30,10 +35,26 @@ const EmailNotif: React.FC<EmailNotifProps> = ({ notif }) => {
   return (
     <Card style={CardStyle.White}>
       <div className="flex items-start justify-between">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-y-2">
           <div className="flex items-center gap-2">
             <p className="font-medium text-sm">{user.displayName}</p>
             <span className="text-xs text-zinc-500">{mail.to}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge
+              className={`${statusClasses(
+                mail.status
+              )} !bg-zinc-100 !py-2 !px-3`}
+            >
+              {mail.status}
+            </Badge>
+            <Badge
+              className={`${linkClickClasses(
+                mail.clickedLink
+              )}  !bg-zinc-100 !py-2 !px-3`}
+            >
+              {mail.clickedLink ? "Link clicked" : "No link clicked"}
+            </Badge>
           </div>
           {mail.sentMessageId && (
             <span className="text-xs text-zinc-500 wrap-anywhere">
@@ -41,7 +62,6 @@ const EmailNotif: React.FC<EmailNotifProps> = ({ notif }) => {
             </span>
           )}
         </div>
-        <Badge className={`${statusClasses(mail.status)}`}>{mail.status}</Badge>
       </div>
       <p className="text-xs text-zinc-500">
         {new Date(mail.createdAt).toLocaleString()}
