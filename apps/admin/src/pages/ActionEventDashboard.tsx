@@ -87,8 +87,11 @@ const ActionEventDashboard: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4 text-sm text-zinc-600">
-          {event.notifsSentAt ? (
-            <span>Sent at {new Date(event.notifsSentAt).toLocaleString()}</span>
+          {event.announcementNotifsSentAt ? (
+            <span>
+              Sent at{" "}
+              {new Date(event.announcementNotifsSentAt).toLocaleString()}
+            </span>
           ) : (
             <span>Waiting to send notifs…</span>
           )}

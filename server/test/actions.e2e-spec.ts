@@ -989,7 +989,7 @@ describe('Actions (e2e)', () => {
             name: `Notif ${name}`,
             email: `notif-${name}-${Date.now()}@example.com`,
             password: 'Password123!',
-            phoneNumber: `+14155550${100 + index}`,
+            phoneNumber: index === 0 ? undefined : `+14155550${100 + index}`,
             phoneNumberValidated: true,
             contractDateSigned: new Date(),
             emailNotifsEnabled: true,
@@ -1031,8 +1031,8 @@ describe('Actions (e2e)', () => {
         .expect(200);
 
       expect(memberRes.body).toMatchObject({
-        n_emails: 2,
-        n_texts: 2,
+        n_emails: 1,
+        n_texts: 1,
         n_pushes: 0,
       });
 
@@ -1052,8 +1052,8 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .expect(200);
 
-      expect(gatherRes.body.n_emails).toBe(baseUsers.length);
-      expect(gatherRes.body.n_texts).toBe(baseUsers.length);
+      expect(gatherRes.body.n_emails).toBe(1);
+      expect(gatherRes.body.n_texts).toBe(baseUsers.length - 1);
       expect(gatherRes.body.n_pushes).toBe(0);
 
       const { action: commitmentlessAction } = await createPublishedAction(
@@ -1073,8 +1073,8 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .expect(200);
 
-      expect(commitmentlessRes.body.n_emails).toBe(baseUsers.length);
-      expect(commitmentlessRes.body.n_texts).toBe(baseUsers.length);
+      expect(commitmentlessRes.body.n_emails).toBe(1);
+      expect(commitmentlessRes.body.n_texts).toBe(baseUsers.length - 1);
       expect(commitmentlessRes.body.n_pushes).toBe(0);
 
       await actionRepo.delete(memberAction.id);
