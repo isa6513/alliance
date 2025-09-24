@@ -22,13 +22,6 @@ const ContractPage: React.FC = () => {
   }, [user]);
 
   const handleContractSign = async () => {
-    if (editName.trim().toLowerCase() !== user?.name.toLowerCase()) {
-      alert(
-        "Please enter your name exactly as you have set it on your profile."
-      );
-      return;
-    }
-
     try {
       const res = await userSignContract();
       if (res.data) {
@@ -77,7 +70,7 @@ const ContractPage: React.FC = () => {
               <FormInput
                 name="name"
                 type="text"
-                placeholder={user.name}
+                placeholder="Type your full name"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 className="flex-1"
