@@ -52,7 +52,6 @@ const Sidebar: React.FC = () => {
           <h1 className="text-black text-[14pt] font-bold pb-0">
             Alliance Admin
           </h1>
-          <p className="font-bold">Tools</p>
           <div className="flex flex-col gap-y-2">
             <Link
               to="/"

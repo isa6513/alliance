@@ -12,6 +12,15 @@ export type RenderFieldProps = {
   uploadError?: string | null;
 };
 
+export function RenderLabel({ field }: { field: AnyField }) {
+  return (
+    <label className="block text-gray-700">
+      <FormMarkdownWrapper markdownContent={field.label} inline />
+      {field.required && <span className="text-red-500 ml-1">*</span>}
+    </label>
+  );
+}
+
 export function RenderField({
   field,
   value,
@@ -25,10 +34,7 @@ export function RenderField({
     case "text":
       return (
         <div className="space-y-1">
-          <label className="block text-gray-700">
-            {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
-          </label>
+          <RenderLabel field={field} />
           <input
             type="text"
             value={(value as string) ?? ""}
@@ -44,10 +50,7 @@ export function RenderField({
     case "textarea":
       return (
         <div className="space-y-1">
-          <label className="block text-gray-700">
-            {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
-          </label>
+          <RenderLabel field={field} />
           <textarea
             rows={field.rows || 3}
             maxLength={field.maxLength}
@@ -68,10 +71,7 @@ export function RenderField({
     case "email":
       return (
         <div className="space-y-1">
-          <label className="block   text-gray-700">
-            {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
-          </label>
+          <RenderLabel field={field} />
           <input
             type="email"
             value={(value as string) ?? ""}
@@ -87,10 +87,7 @@ export function RenderField({
     case "phone":
       return (
         <div className="space-y-1">
-          <label className="block   text-gray-700">
-            {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
-          </label>
+          <RenderLabel field={field} />
           <input
             type="tel"
             value={(value as string) ?? ""}
@@ -115,10 +112,7 @@ export function RenderField({
     case "number":
       return (
         <div className="space-y-1">
-          <label className="block   text-gray-700">
-            {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
-          </label>
+          <RenderLabel field={field} />
           <input
             type="number"
             value={
@@ -130,7 +124,7 @@ export function RenderField({
               onChange
                 ? (e) =>
                     onChange(
-                      e.target.value === "" ? "" : parseFloat(e.target.value),
+                      e.target.value === "" ? "" : parseFloat(e.target.value)
                     )
                 : undefined
             }
@@ -146,8 +140,8 @@ export function RenderField({
               {field.min !== undefined && field.max !== undefined
                 ? `Range: ${field.min} - ${field.max}`
                 : field.min !== undefined
-                  ? `Minimum: ${field.min}`
-                  : `Maximum: ${field.max}`}
+                ? `Minimum: ${field.min}`
+                : `Maximum: ${field.max}`}
             </p>
           ) : null}
         </div>
@@ -167,17 +161,7 @@ export function RenderField({
               disabled={disabled}
               className="mt-1 mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-zinc-300 rounded"
             />
-            <span className="text-zinc-700 flex flex-row items-start">
-              <FormMarkdownWrapper markdownContent={field.label} />
-              {field.required && (
-                <span
-                  className="text-red-500 ml-1"
-                  style={{ display: "inline" }}
-                >
-                  *
-                </span>
-              )}
-            </span>
+            <RenderLabel field={field} />
           </label>
         </div>
       );
@@ -185,10 +169,7 @@ export function RenderField({
     case "radio":
       return (
         <div className="space-y-2">
-          <label className="block   text-gray-700">
-            {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
-          </label>
+          <RenderLabel field={field} />
           <div className="space-y-2">
             {field.options.map((option, optIndex) => (
               <label key={optIndex} className="flex items-start">
@@ -214,10 +195,7 @@ export function RenderField({
     case "select":
       return (
         <div className="space-y-1">
-          <label className="block   text-gray-700">
-            {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
-          </label>
+          <RenderLabel field={field} />
           <select
             value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
@@ -241,10 +219,7 @@ export function RenderField({
       const selectedCount = Array.isArray(value) ? value.length : 0;
       return (
         <div className="space-y-2">
-          <label className="block text-gray-800">
-            {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
-          </label>
+          <RenderLabel field={field} />
           <div className="space-y-2">
             {field.options.map((option, optIndex) => (
               <label key={optIndex} className="flex items-center">
@@ -262,7 +237,7 @@ export function RenderField({
                             onChange([...currentValues, option.value]);
                           } else {
                             onChange(
-                              currentValues.filter((v) => v !== option.value),
+                              currentValues.filter((v) => v !== option.value)
                             );
                           }
                         }
@@ -285,10 +260,7 @@ export function RenderField({
     case "date":
       return (
         <div className="space-y-1">
-          <label className="block   text-gray-700">
-            {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
-          </label>
+          <RenderLabel field={field} />
           <input
             type="date"
             value={(value as string) ?? ""}
@@ -306,11 +278,7 @@ export function RenderField({
       const err = uploadError;
       return (
         <div className="space-y-2">
-          <label className="block   text-gray-700">
-            {field.label}
-            {field.required && <span className="text-red-500 ml-1">*</span>}
-          </label>
-
+          <RenderLabel field={field} />
           {typeof fileValue === "string" && fileValue && (
             <div className="mb-2">
               <img
@@ -320,7 +288,6 @@ export function RenderField({
               />
             </div>
           )}
-
           <div className="flex items-center space-x-2">
             <input
               type="file"
