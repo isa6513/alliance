@@ -2,7 +2,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsDefined } from 'class-validator';
-import { User } from 'src/user/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   CreateDateColumn,

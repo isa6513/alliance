@@ -5,7 +5,7 @@ import { DataSource } from 'typeorm';
 import { AuthModule } from '../src/auth/auth.module';
 import { ActionsModule } from '../src/actions/actions.module';
 import { UserModule } from '../src/user/user.module';
-import { User } from '../src/user/user.entity';
+import { User } from '../src/user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';

@@ -5,7 +5,7 @@ import { ForumController } from './forum.controller';
 import { Post } from './entities/post.entity';
 import { Comment } from './entities/comment.entity';
 import { Notification } from '../notifs/entities/notification.entity';
-import { User } from '../user/user.entity';
+import { User } from '../user/entities/user.entity';
 import { ActionActivity } from '../actions/entities/action-activity.entity';
 import { EditableContent } from './entities/editablecontent.entity';
 import { Action } from 'src/actions/entities/action.entity';

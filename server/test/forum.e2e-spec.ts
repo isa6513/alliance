@@ -1,7 +1,7 @@
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
 import { CreateCommentDto, UpdateCommentDto } from 'src/forum/dto/comment.dto';
 import { CommentParentObject } from 'src/forum/entities/comment.entity';
-import { User } from 'src/user/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import * as request from 'supertest';
 import { Repository } from 'typeorm';
 import { Action } from '../src/actions/entities/action.entity';
@@ -637,7 +637,9 @@ describe('Forum (e2e)', () => {
         .expect(200);
 
       expect(
-        commentsByUser.body.some((comment) => comment.id === commentResponse.body.id),
+        commentsByUser.body.some(
+          (comment) => comment.id === commentResponse.body.id,
+        ),
       ).toBe(true);
 
       const forumComments = await request(ctx.app.getHttpServer())
@@ -645,7 +647,9 @@ describe('Forum (e2e)', () => {
         .expect(200);
 
       expect(
-        forumComments.body.some((comment) => comment.id === commentResponse.body.id),
+        forumComments.body.some(
+          (comment) => comment.id === commentResponse.body.id,
+        ),
       ).toBe(true);
     });
 

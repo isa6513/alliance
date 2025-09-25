@@ -14,15 +14,15 @@ import {
 } from 'src/notifs/entities/notification.entity';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
 import { ILike, Repository } from 'typeorm';
-import { Friend, FriendStatus } from './friend.entity';
-import { PrefillUser } from './prefill-user.entity';
+import { Friend, FriendStatus } from './entities/friend.entity';
+import { PrefillUser } from './entities/prefill-user.entity';
 import {
   FriendStatusDto,
   OnboardingDto,
   ProfileDto,
   UpdateProfileDto,
 } from './user.dto';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { profileUrl } from 'src/search/approutes';
 
 export interface PWResetJwtPayload {

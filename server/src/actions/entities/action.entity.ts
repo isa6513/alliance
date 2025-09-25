@@ -6,12 +6,15 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { ActionActivity, ActionActivityType } from './action-activity.entity';
 import { ActionEvent, ActionStatus } from './action-event.entity';
+import { Group } from 'src/user/entities/group.entity';
 
 export enum ActionTaskType {
   Funding = 'Funding', //giving money to a particular cause
@@ -125,6 +128,15 @@ export class Action {
   @IsArray()
   @Type(() => ActionEvent)
   events: ActionEvent[];
+
+  @ManyToMany(() => Group, (group) => group.participatingIn, {
+    nullable: true,
+  })
+  @ApiPropertyOptional({ type: () => Group, isArray: true })
+  @Allow()
+  @JoinTable()
+  @Type(() => Group)
+  participatingGroups?: Group[];
 
   @Expose()
   @ApiProperty({

@@ -8,8 +8,8 @@ import {
 import { Type } from 'class-transformer';
 import { Allow, IsOptional } from 'class-validator';
 import { getImageSource } from 'src/images/images.service';
-import { FriendStatus } from './friend.entity';
-import { User } from './user.entity';
+import { FriendStatus } from './entities/friend.entity';
+import { User } from './entities/user.entity';
 
 export class FriendStatusDto {
   @ApiProperty({ enum: FriendStatus, nullable: true, enumName: 'FriendStatus' })

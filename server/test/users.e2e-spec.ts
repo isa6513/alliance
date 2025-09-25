@@ -3,8 +3,8 @@ import * as request from 'supertest';
 import { Repository } from 'typeorm';
 import { City } from '../src/geo/city.entity';
 import { GeoModule } from '../src/geo/geo.module';
-import { FriendStatus } from '../src/user/friend.entity';
-import { User } from '../src/user/user.entity';
+import { FriendStatus } from '../src/user/entities/friend.entity';
+import { User } from '../src/user/entities/user.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { UserService } from 'src/user/user.service';
 

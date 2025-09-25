@@ -10,7 +10,7 @@ import {
   ActionStatus,
   NotificationType,
 } from 'src/actions/entities/action-event.entity';
-import { User } from 'src/user/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { FormSchema } from 'src/tasks/schema';
 
 const sampleSchema: FormSchema = {

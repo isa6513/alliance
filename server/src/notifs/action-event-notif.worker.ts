@@ -6,7 +6,7 @@ import { EmailStatus } from 'src/mail/mail.entity';
 import { MailService } from 'src/mail/mail.service';
 import { Mms } from 'src/mms/mms.entity';
 import { MmsService } from 'src/mms/mms.service';
-import { User } from 'src/user/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import {
   ActionActivity,

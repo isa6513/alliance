@@ -6,7 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import { MailService } from '../mail/mail.service';
-import { User } from '../user/user.entity';
+import { User } from '../user/entities/user.entity';
 import { PWResetJwtPayload, UserService } from '../user/user.service';
 import { AuthTokens } from './dto/authtokens.dto';
 import { SignUpDto } from './dto/sign-up.dto';

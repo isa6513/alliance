@@ -7,7 +7,7 @@ import { Action } from 'src/actions/entities/action.entity';
 import { Post } from 'src/forum/entities/post.entity';
 import { ForumService } from 'src/forum/forum.service';
 import { ProfileDto } from 'src/user/user.dto';
-import { User } from 'src/user/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { actionUrl, postUrl, profileUrl } from './approutes';

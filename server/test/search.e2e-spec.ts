@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import * as request from 'supertest';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { SearchModule } from 'src/search/search.module';
-import { User } from 'src/user/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import {
   ActionEvent,
@@ -150,7 +150,9 @@ describe('Search (e2e)', () => {
       .set('Authorization', `Bearer ${ctx.accessToken}`)
       .expect(200);
 
-    const userItems = response.body.filter((item) => item.id === `u${targetUser.id}`);
+    const userItems = response.body.filter(
+      (item) => item.id === `u${targetUser.id}`,
+    );
     expect(userItems.length).toBe(1);
   });
 });

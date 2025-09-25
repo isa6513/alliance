@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../../user/user.entity';
+import { User } from '../../user/entities/user.entity';
 
 export enum NotificationCategory {
   ActionEvent = 'action_event',

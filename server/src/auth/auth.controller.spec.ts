@@ -4,8 +4,8 @@ import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from '../user/user.entity';
-import { Friend } from '../user/friend.entity';
+import { User } from '../user/entities/user.entity';
+import { Friend } from '../user/entities/friend.entity';
 
 describe('AuthController', () => {
   let appController: AuthController;

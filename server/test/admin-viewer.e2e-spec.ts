@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Repository } from 'typeorm';
 import * as request from 'supertest';
-import { User } from '../src/user/user.entity';
+import { User } from '../src/user/entities/user.entity';
 import { Action } from '../src/actions/entities/action.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { AdminViewerModule } from '../src/admin-viewer/admin-viewer.module';

@@ -7,10 +7,10 @@ import { ActionActivity } from '../actions/entities/action-activity.entity';
 import { Action } from '../actions/entities/action.entity';
 import { City } from '../geo/city.entity';
 import { Notification } from '../notifs/entities/notification.entity';
-import { Friend } from './friend.entity';
-import { PrefillUser } from './prefill-user.entity';
+import { Friend } from './entities/friend.entity';
+import { PrefillUser } from './entities/prefill-user.entity';
 import { UserController } from './user.controller';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { IsUserAlreadyExist } from './validators/user-already-exists.validator';
 

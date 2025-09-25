@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ActionEvent } from 'src/actions/entities/action-event.entity';
 import { Mail } from 'src/mail/mail.entity';
 import { Mms } from 'src/mms/mms.entity';
-import { User } from 'src/user/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   Entity,

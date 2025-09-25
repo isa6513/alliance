@@ -22,7 +22,7 @@ import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { City } from 'src/geo/city.entity';
 import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
 import { Public } from '../auth/public.decorator';
-import { FriendStatus } from './friend.entity';
+import { FriendStatus } from './entities/friend.entity';
 import { PrefillUserDto } from './prefill-user.dto';
 import {
   FriendStatusDto,
@@ -31,7 +31,7 @@ import {
   UpdateProfileDto,
   userToDto,
 } from './user.dto';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 
 class VerifyEmailBody {

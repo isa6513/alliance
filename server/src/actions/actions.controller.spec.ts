@@ -6,10 +6,10 @@ import { JwtService } from '@nestjs/jwt';
 import { Action } from './entities/action.entity';
 import { ActionEvent } from './entities/action-event.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from '../user/user.entity';
+import { User } from '../user/entities/user.entity';
 import { UserAction } from './entities/user-action.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Friend } from '../user/friend.entity';
+import { Friend } from '../user/entities/friend.entity';
 describe('ActionsController', () => {
   let controller: ActionsController;
 

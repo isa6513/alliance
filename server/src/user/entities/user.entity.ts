@@ -21,14 +21,16 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Notification } from '../notifs/entities/notification.entity';
+import { Notification } from '../../notifs/entities/notification.entity';
 import { Friend, FriendStatus } from './friend.entity';
+import { Group } from './group.entity';
 
 export enum NotificationPreference {
   All = 'all',
@@ -246,4 +248,8 @@ export class User {
   @OneToOne(() => Mail, { nullable: true })
   @JoinColumn({ name: 'welcomeMailId' })
   welcomeMail: Mail | null;
+
+  @ManyToMany(() => Group, (group) => group.users)
+  @Type(() => Group)
+  groups: Group[];
 }

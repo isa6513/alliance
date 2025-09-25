@@ -12,7 +12,7 @@ import {
   Notification,
   NotificationCategory,
 } from '../notifs/entities/notification.entity';
-import { User } from '../user/user.entity';
+import { User } from '../user/entities/user.entity';
 import {
   CommentDto,
   CreateCommentDto,

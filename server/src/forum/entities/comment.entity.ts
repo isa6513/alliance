@@ -15,7 +15,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Notification } from '../../notifs/entities/notification.entity';
-import { User } from '../../user/user.entity';
+import { User } from '../../user/entities/user.entity';
 import { EditableContent } from './editablecontent.entity';
 
 export enum CommentParentObject {

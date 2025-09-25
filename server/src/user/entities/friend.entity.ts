@@ -10,7 +10,7 @@ import {
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
-import { Notification } from '../notifs/entities/notification.entity';
+import { Notification } from '../../notifs/entities/notification.entity';
 import { User } from './user.entity';
 export enum FriendStatus {
   Pending = 'pending',

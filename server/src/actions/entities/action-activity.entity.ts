@@ -13,7 +13,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from '../../user/user.entity';
+import { User } from '../../user/entities/user.entity';
 import { Action } from './action.entity';
 
 export enum ActionActivityType {

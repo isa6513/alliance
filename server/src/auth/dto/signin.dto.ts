@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
-import { User } from '../../user/user.entity';
+import { User } from '../../user/entities/user.entity';
 import { IsDefined, IsEnum } from 'class-validator';
 export type TokenMode = 'cookie' | 'header';
 

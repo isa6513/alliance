@@ -1,6 +1,6 @@
 import * as request from 'supertest';
 import { NotifsModule } from 'src/notifs/notifs.module';
-import { User } from 'src/user/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import {
   Notification,

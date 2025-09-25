@@ -14,7 +14,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Action } from '../../actions/entities/action.entity';
-import { User } from '../../user/user.entity';
+import { User } from '../../user/entities/user.entity';
 import { EditableContent } from './editablecontent.entity';
 
 @Entity()
