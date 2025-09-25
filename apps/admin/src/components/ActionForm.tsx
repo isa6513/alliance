@@ -222,11 +222,17 @@ const ActionForm: React.FC<ActionFormProps> = ({
           >
             <option value="">No form required</option>
             {formsLoading && <option value="">Loading forms...</option>}
-            {availableForms.map((formOption) => (
-              <option key={formOption.id} value={formOption.id}>
-                {formOption.title || `Form ${formOption.id}`}
-              </option>
-            ))}
+            {availableForms
+              .sort((a, b) => (!a.usedInAction ? -1 : !b.usedInAction ? 1 : 0))
+              .map((formOption) => (
+                <option
+                  key={formOption.id}
+                  value={formOption.id}
+                  disabled={!!formOption.usedInAction}
+                >
+                  {formOption.title || `Form ${formOption.id}`}
+                </option>
+              ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
             Form to show in task panel for completion
