@@ -23,6 +23,7 @@ export interface TestContext {
   adminAccessToken: string;
   jwtService: JwtService;
   testUserId: number;
+  adminUserId: number;
   agent: TestAgent;
 }
 
@@ -110,6 +111,7 @@ export async function createTestApp(
     adminAccessToken,
     jwtService,
     testUserId: user.id,
+    adminUserId: adminUser.id,
     agent,
   };
 }

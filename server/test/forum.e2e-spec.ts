@@ -8,17 +8,21 @@ import { Action } from '../src/actions/entities/action.entity';
 import { CreatePostDto } from '../src/forum/dto/post.dto';
 import { ForumModule } from '../src/forum/forum.module';
 import { createTestApp, TestContext } from './e2e-test-utils';
+import { NotificationCategory } from 'src/notifs/entities/notification.entity';
+import { Notification } from 'src/notifs/entities/notification.entity';
 
 describe('Forum (e2e)', () => {
   let ctx: TestContext;
   let actionRepo: Repository<Action>;
   let testAction: Action;
   let userRepo: Repository<User>;
+  let notifRepo: Repository<Notification>;
 
   beforeAll(async () => {
     ctx = await createTestApp([ForumModule]);
     actionRepo = ctx.dataSource.getRepository(Action);
     userRepo = ctx.dataSource.getRepository(User);
+    notifRepo = ctx.dataSource.getRepository(Notification);
     // Create test action
     testAction = actionRepo.create({
       name: 'Test Action',
@@ -492,6 +496,102 @@ describe('Forum (e2e)', () => {
       });
     });
 
+    it('notifies post comment parent authors when they receive a reply', async () => {
+      const parentResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/comments')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          editableContent: {
+            body: 'Parent action comment',
+            attachments: [],
+          },
+          parentObjectId: testPostId,
+          parentObjectType: CommentParentObject.Post,
+        } satisfies CreateCommentDto)
+        .expect(201);
+
+      const childResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/comments')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          editableContent: {
+            body: 'Child post reply',
+            attachments: [],
+          },
+          parentObjectId: testPostId,
+          parentId: parentResponse.body.id,
+          parentObjectType: CommentParentObject.Post,
+        } satisfies CreateCommentDto)
+        .expect(201);
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const notifications = await notifRepo.find({
+        where: {
+          user: { id: ctx.testUserId },
+          category: NotificationCategory.ForumReply,
+        },
+        relations: ['associatedUser', 'user'],
+      });
+
+      expect(
+        notifications.some(
+          (notif) =>
+            notif.webAppLocation ===
+              `/forum/post/${testPostId}?replyId=${childResponse.body.id}` &&
+            notif.associatedUser?.id === ctx.adminUserId,
+        ),
+      ).toBe(true);
+    });
+
+    it('notifies action comment parent authors when they receive a reply', async () => {
+      const parentResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/comments')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          editableContent: {
+            body: 'Parent action comment',
+            attachments: [],
+          },
+          parentObjectId: testAction.id,
+          parentObjectType: CommentParentObject.Action,
+        } satisfies CreateCommentDto)
+        .expect(201);
+
+      const childResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/comments')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          editableContent: {
+            body: 'Child action reply',
+            attachments: [],
+          },
+          parentObjectId: testAction.id,
+          parentId: parentResponse.body.id,
+          parentObjectType: CommentParentObject.Action,
+        } satisfies CreateCommentDto)
+        .expect(201);
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const notifications = await notifRepo.find({
+        where: {
+          user: { id: ctx.testUserId },
+          category: NotificationCategory.ForumReply,
+        },
+        relations: ['associatedUser', 'user'],
+      });
+
+      expect(
+        notifications.some(
+          (notif) =>
+            notif.webAppLocation ===
+              `/actions/${testAction.id}?replyId=${childResponse.body.id}` &&
+            notif.associatedUser?.id === ctx.adminUserId,
+        ),
+      ).toBe(true);
+    });
+
     it('should fail to create nested reply with invalid parentId', async () => {
       await request(ctx.app.getHttpServer())
         .post('/forum/comments')
@@ -573,7 +673,7 @@ describe('Forum (e2e)', () => {
 
       const postId = postResponse.body.id;
 
-      const firstComment = await request(ctx.app.getHttpServer())
+      await request(ctx.app.getHttpServer())
         .post('/forum/comments')
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({

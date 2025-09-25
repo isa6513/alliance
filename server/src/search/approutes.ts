@@ -1,3 +1,8 @@
+import {
+  Comment,
+  CommentParentObject,
+} from 'src/forum/entities/comment.entity';
+
 export function profileUrl(userId: number) {
   return `/user/${userId}`;
 }
@@ -11,16 +16,16 @@ export function postUrl(postId: number) {
   return `/forum/post/${postId}`;
 }
 
-export function replyUrl(postId: number, replyId: number) {
-  return `/forum/post/${postId}?replyId=${replyId}`;
-}
-
-export function activityReplyUrl(
-  actionId: number,
-  activityId: number,
-  replyId: number,
+export function commentUrl(
+  comment: Pick<Comment, 'parentObjectType' | 'parentObjectId' | 'id'>,
 ) {
-  return `/actions/${actionId}/activity/${activityId}?replyId=${replyId}`;
+  if (comment.parentObjectType === CommentParentObject.Post) {
+    return `/forum/post/${comment.parentObjectId}?replyId=${comment.id}`;
+  } else if (comment.parentObjectType === CommentParentObject.Action) {
+    return `/actions/${comment.parentObjectId}?replyId=${comment.id}`;
+  } else if (comment.parentObjectType === CommentParentObject.Activity) {
+    return `/actions/${comment.parentObjectId}/activity/${comment.parentObjectId}?replyId=${comment.id}`;
+  }
 }
 
 export function withCid(url: string, cid: string) {

@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
-import { activityReplyUrl, replyUrl } from 'src/search/approutes';
+import { commentUrl } from 'src/search/approutes';
 import { ProfileDto } from 'src/user/user.dto';
 import { ILike, In, Repository } from 'typeorm';
 import {
@@ -312,29 +312,19 @@ export class ForumService {
       updatedAt: new Date(),
     });
 
-    const replyAuthor = await this.userRepository.findOne({
-      where: { id: userId },
-    });
-    if (!replyAuthor) {
-      throw new NotFoundException(`Reply author with ID "${userId}" not found`);
-    }
-
     await this.commentRepository.save(reply);
 
-    const replyWithAuthor = await this.commentRepository.findOne({
+    const replyWithAuthor = await this.commentRepository.findOneOrFail({
       where: { id: reply.id },
       relations: ['author', 'editableContent'],
     });
 
-    this.sendNotifsForNewComment(replyWithAuthor!);
+    this.sendNotifsForNewComment(replyWithAuthor);
 
-    const loadedReply = await this.commentRepository.findOne({
+    const loadedReply = await this.commentRepository.findOneOrFail({
       where: { id: reply.id },
       relations: ['author', 'editableContent'],
     });
-    if (!loadedReply) {
-      throw new NotFoundException(`Reply with ID "${reply.id}" not found`);
-    }
 
     return new CommentDto(loadedReply);
   }
@@ -343,125 +333,43 @@ export class ForumService {
     // Create notifications
     const notifications: Notification[] = [];
 
-    if (comment.parentObjectType === CommentParentObject.Post) {
-      const post = await this.postRepository.findOne({
-        where: { id: comment.parentObjectId },
+    const usersToNotify: User[] = [];
+
+    if (comment.parentId) {
+      const parentReply = await this.commentRepository.findOneOrFail({
+        where: { id: comment.parentId, deleted: false },
         relations: ['author'],
       });
+      usersToNotify.push(parentReply.author);
+    }
 
-      if (!post || post.deleted) {
-        throw new NotFoundException(
-          `Post with ID "${comment.parentObjectId}" not found`,
-        );
-      }
-
-      const authorProfile = new ProfileDto(comment.author);
-      // Notify post author if different from comment author
-      if (post.authorId !== comment.authorId) {
-        const postNotif = this.notifRepository.create({
-          user: post.author,
-          message: `${authorProfile.displayName} replied to your forum post`,
-          category: NotificationCategory.ForumReply,
-          webAppLocation: replyUrl(post.id, comment.id),
-          mobileAppLocation: replyUrl(post.id, comment.id),
-          associatedUser: comment.author,
-        });
-        notifications.push(postNotif);
-      }
-
-      let parentReply: Comment | null = null;
-      if (comment.parentId) {
-        parentReply = await this.commentRepository.findOne({
-          where: { id: comment.parentId },
-          relations: ['author'],
-        });
-      }
-
-      // Notify parent reply author if this is a nested reply and different from comment author
-      if (
-        parentReply &&
-        parentReply.authorId !== comment.authorId &&
-        parentReply.authorId !== post.authorId
-      ) {
-        const parentNotif = this.notifRepository.create({
-          user: parentReply.author,
-          message: `${authorProfile.displayName} replied to your comment`,
-          category: NotificationCategory.ForumReply,
-          webAppLocation: replyUrl(post.id, comment.id),
-          mobileAppLocation: replyUrl(post.id, comment.id),
-          associatedUser: comment.author,
-        });
-        notifications.push(parentNotif);
-      }
-
-      if (notifications.length > 0) {
-        await this.notifRepository.save(notifications);
-        comment.notification = notifications[0]; // Associate with first notification for backward compatibility
-      }
-    } else if (comment.parentObjectType === CommentParentObject.Activity) {
-      const activity = await this.actionActivityRepository.findOne({
+    if (comment.parentObjectType === CommentParentObject.Post) {
+      const post = await this.postRepository.findOneOrFail({
+        where: { id: comment.parentObjectId, deleted: false },
+        relations: ['author'],
+      });
+      usersToNotify.push(post.author);
+    }
+    if (comment.parentObjectType === CommentParentObject.Activity) {
+      const activity = await this.actionActivityRepository.findOneOrFail({
         where: { id: comment.parentObjectId },
         relations: ['user'],
       });
-      if (!activity) {
-        throw new NotFoundException(
-          `Activity with ID "${comment.parentObjectId}" not found`,
-        );
-      }
-
-      const authorProfile = new ProfileDto(comment.author);
-      if (activity.userId !== comment.authorId) {
-        const appUrl = activityReplyUrl(
-          activity.actionId,
-          activity.id,
-          comment.id,
-        );
-        const activityNotif = this.notifRepository.create({
-          user: activity.user,
-          message: `${authorProfile.displayName} replied to your action activity`,
-          category: NotificationCategory.ForumReply,
-          webAppLocation: appUrl,
-          mobileAppLocation: appUrl,
-          associatedUser: comment.author,
-        });
-        notifications.push(activityNotif);
-      }
-
-      // Handle parent comment notifications for activities
-      let parentReply: Comment | null = null;
-      if (comment.parentId) {
-        parentReply = await this.commentRepository.findOne({
-          where: { id: comment.parentId },
-          relations: ['author'],
-        });
-      }
-
-      // Notify parent reply author if this is a nested reply and different from comment author and activity owner
-      if (
-        parentReply &&
-        parentReply.authorId !== comment.authorId &&
-        parentReply.authorId !== activity.userId
-      ) {
-        const appUrl = activityReplyUrl(
-          activity.actionId,
-          activity.id,
-          comment.id,
-        );
-        const parentNotif = this.notifRepository.create({
-          user: parentReply.author,
-          message: `${authorProfile.displayName} replied to your comment`,
-          category: NotificationCategory.ForumReply,
-          webAppLocation: appUrl,
-          mobileAppLocation: appUrl,
-          associatedUser: comment.author,
-        });
-        notifications.push(parentNotif);
-      }
-
-      if (notifications.length > 0) {
-        await this.notifRepository.save(notifications);
-      }
+      usersToNotify.push(activity.user);
     }
+
+    for (const userToNotify of usersToNotify) {
+      const profile = new ProfileDto(userToNotify);
+      const notif = this.notifRepository.create({
+        user: userToNotify,
+        message: `New reply from ${profile.displayName}`,
+        category: NotificationCategory.ForumReply,
+        webAppLocation: commentUrl(comment),
+        associatedUser: comment.author,
+      });
+      notifications.push(notif);
+    }
+    await this.notifRepository.save(notifications);
   }
 
   async updateComment(
@@ -567,7 +475,7 @@ export class ForumService {
     // Clear notifications that point to this deleted reply
     // For forum comments, the parentObjectId is the post ID when parentObjectType is 'post'
     if (reply.parentObjectType === CommentParentObject.Post) {
-      const replyNotificationUrl = replyUrl(reply.parentObjectId, reply.id);
+      const replyNotificationUrl = commentUrl(reply);
       await this.notifRepository.update(
         {
           webAppLocation: replyNotificationUrl,
