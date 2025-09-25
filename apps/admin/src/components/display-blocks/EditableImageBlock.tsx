@@ -2,7 +2,6 @@ import { imagesUploadImage } from "@alliance/shared/client";
 import type { ImageBlock } from "@alliance/shared/forms/display-blocks";
 import { useState } from "react";
 import RenderDisplayBlock from "@alliance/shared/forms/RenderDisplayBlock";
-import { ConditionalVisibility } from "../form-fields/CommonControls";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 
@@ -57,36 +56,31 @@ export function EditableImageBlock({
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       isDragging={isDragging}
+      block={block}
+      onUpdate={onUpdate}
+      previousFields={previousFields}
     >
-      <div className="space-y-3">
-        <div className="space-y-2">
-          {/* File upload */}
-          <div className="flex items-center space-x-2">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              disabled={isUploading}
-              className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
-            />
-            {isUploading && (
-              <span className="text-xs text-blue-600">Uploading...</span>
-            )}
-          </div>
-
-          {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
-
-          {/* Preview */}
-          <div className="pt-2 border-t border-gray-200">
-            <RenderDisplayBlock block={block} />
-          </div>
+      <div className="space-y-2">
+        {/* File upload */}
+        <div className="flex items-center space-x-2">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            disabled={isUploading}
+            className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+          />
+          {isUploading && (
+            <span className="text-xs text-blue-600">Uploading...</span>
+          )}
         </div>
 
-        <ConditionalVisibility
-          field={block}
-          previousFields={previousFields || []}
-          onChange={onUpdate}
-        />
+        {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
+
+        {/* Preview */}
+        <div className="pt-2 border-t border-gray-200">
+          <RenderDisplayBlock block={block} />
+        </div>
       </div>
     </DisplayBlockWrapper>
   );

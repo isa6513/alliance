@@ -1,18 +1,36 @@
-interface DisplayBlockWrapperProps {
+import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
+import type { AnyField, Condition } from "@alliance/shared/forms/formschema";
+import { ConditionalVisibility } from "../form-fields/CommonControls";
+
+interface DisplayBlockWrapperProps<T extends DisplayBlock = DisplayBlock> {
   children: React.ReactNode;
   onRemove: () => void;
   onDragStart?: (e: React.DragEvent) => void;
   onDragEnd?: (e: React.DragEvent) => void;
   isDragging?: boolean;
+  block?: T;
+  onUpdate?: (updates: Partial<T>) => void;
+  previousFields?: AnyField[];
 }
 
-export function DisplayBlockWrapper({
+export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
   children,
   onRemove,
   onDragStart,
   onDragEnd,
   isDragging,
-}: DisplayBlockWrapperProps) {
+  block,
+  onUpdate,
+  previousFields,
+}: DisplayBlockWrapperProps<T>) {
+  const showConditional = Boolean(block && onUpdate);
+
+  const handleConditionalChange = (updates: { visibleIf?: Condition }) => {
+    if (onUpdate) {
+      onUpdate(updates);
+    }
+  };
+
   return (
     <div
       className={`group relative border rounded-lg p-4 pl-8 transition-all ${
@@ -60,7 +78,16 @@ export function DisplayBlockWrapper({
           ×
         </button>
       </div>
-      {children}
+      <div className={showConditional ? "space-y-3" : undefined}>
+        {children}
+        {showConditional && (
+          <ConditionalVisibility
+            field={block as DisplayBlock}
+            previousFields={previousFields || []}
+            onChange={handleConditionalChange}
+          />
+        )}
+      </div>
     </div>
   );
 }
