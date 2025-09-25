@@ -28,6 +28,7 @@ export function EditableTextBlock({
           className="w-full text-gray-900 border-none outline-none bg-transparent resize-none whitespace-pre-wrap"
           placeholder="Enter text content"
           rows={Math.max(2, block.text.split("\n").length)}
+          style={{ resize: "vertical" }}
         />
 
         <div className="flex items-center gap-2">
