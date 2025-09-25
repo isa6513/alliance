@@ -2,6 +2,7 @@ import { ActionDto, actionsFindAllWithDrafts } from "@alliance/shared/client";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router";
 import { useAuth } from "./lib/AuthContext";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 
 const Sidebar: React.FC = () => {
   const [actions, setActions] = useState<ActionDto[]>([]);
@@ -30,6 +31,10 @@ const Sidebar: React.FC = () => {
     }
   }, []);
 
+  const currentActionId = window.location.pathname.includes("/actions/")
+    ? parseInt(window.location.pathname.split("/actions/")[1])
+    : null;
+
   useEffect(() => {
     loadActions();
   }, [loadActions]);
@@ -55,39 +60,40 @@ const Sidebar: React.FC = () => {
           <div className="flex flex-col gap-y-2">
             <Link
               to="/"
-              className="w-full text-center bg-gray-100 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm"
+              className="pl-6 w-full bg-white hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm"
             >
               Actions
             </Link>
             <Link
-              to="/database"
-              className="w-full bg-blue-100 text-center hover:bg-blue-200/60 border border-blue-400 text-black px-4 py-2 rounded-md text-sm "
+              to="/users"
+              className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm"
             >
-              Database Viewer
+              Users
             </Link>
             <Link
               to="/forms"
-              className="w-full text-center bg-green-100 hover:bg-green-200/60 border border-green-400 text-black px-4 py-2 rounded-md text-sm "
+              className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-green px-4 py-2 rounded-md text-sm "
             >
               Forms
             </Link>
             <Link
-              to="/users"
-              className="w-full text-center bg-gray-100 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm"
+              to="/database"
+              className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-blue-500 px-4 py-2 rounded-md text-sm "
             >
-              Users
+              Database Viewer →
             </Link>
           </div>
-          <div className="flex flex-row justify-between items-center mt-3">
+          <div className="flex flex-row justify-between items-center mt-3 mx-2">
             <p className="font-bold">Current Actions</p>
-            <button
+            <Button
               onClick={handleCreateAction}
-              className="bg-green-3 hover:bg-green-2 text-white px-3 py-1 rounded-md text-sm font-medium"
+              className="bg-green-3 hover:bg-green-2 text-white !px-3 !py-1 rounded-md text-sm"
+              color={ButtonColor.Green}
             >
               Create
-            </button>
+            </Button>
           </div>
-          <div className="flex flex-col gap-y-2">
+          <div className="flex flex-col">
             {actionsLoading ? (
               <p className="text-sm text-gray-500">Loading actions...</p>
             ) : (
@@ -95,7 +101,9 @@ const Sidebar: React.FC = () => {
                 <div
                   key={action.id}
                   onClick={() => handleEditAction(action.id)}
-                  className="cursor-pointer hover:bg-zinc-200 p-2 rounded-md"
+                  className={`cursor-pointer hover:bg-zinc-200 p-2 py-3 rounded-md ${
+                    currentActionId === action.id ? "bg-zinc-200" : ""
+                  }`}
                 >
                   <p className="text-sm">{action.name}</p>
                 </div>

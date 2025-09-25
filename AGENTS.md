@@ -1,1 +1,2 @@
-NEVER run yarn tsc. no typecheck is needed after making edits.
+- NEVER run yarn tsc. no typecheck is needed after making edits.
+- when defining DTOs on the server, use @ApiPropertyOptional for all optional (? marked) properties rather than setting nullable
