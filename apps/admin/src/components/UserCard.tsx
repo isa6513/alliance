@@ -252,13 +252,17 @@ const UserCard = ({
                 ? "bg-green text-white"
                 : "bg-zinc-100 text-zinc-500 border border-zinc-200";
               return (
-                <div
-                  key={action.id}
-                  className={`flex-1 h-4 rounded flex items-center justify-center text-xs font-semibold ${className}`}
-                  title={`${action.name} • ${formatRelationStatus(
-                    relation?.status
-                  )}`}
-                ></div>
+                <div key={action.id} className="relative group flex-1">
+                  <div
+                    className={`h-3 w-full rounded flex items-center justify-center text-xs font-semibold ${className}`}
+                    aria-label={`${action.name} – ${formatRelationStatus(
+                      relation?.status
+                    )}`}
+                  ></div>
+                  <div className="pointer-events-none absolute -top-8 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] font-medium text-zinc-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100">
+                    {action.name}
+                  </div>
+                </div>
               );
             })}
           </div>
