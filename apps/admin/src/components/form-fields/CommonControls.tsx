@@ -38,6 +38,7 @@ export function RequiredAsterisk({
 }
 
 // ---------------- Conditional Visibility ----------------
+import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import type {
   AnyField,
   CheckboxField,
@@ -48,7 +49,7 @@ import type {
 } from "@alliance/shared/forms/formschema";
 
 type ConditionalVisibilityProps = {
-  field: AnyField;
+  field: (AnyField | DisplayBlock) & { visibleIf?: Condition };
   previousFields: AnyField[];
   // Only updates the "visibleIf" property for a field
   onChange: (updates: { visibleIf?: Condition }) => void;

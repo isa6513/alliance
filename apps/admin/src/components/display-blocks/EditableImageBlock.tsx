@@ -1,8 +1,9 @@
 import { imagesUploadImage } from "@alliance/shared/client";
 import type { ImageBlock } from "@alliance/shared/forms/display-blocks";
 import { useState } from "react";
-import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import RenderDisplayBlock from "@alliance/shared/forms/RenderDisplayBlock";
+import { ConditionalVisibility } from "../form-fields/CommonControls";
+import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 
 export function EditableImageBlock({
@@ -12,6 +13,7 @@ export function EditableImageBlock({
   onDragStart,
   onDragEnd,
   isDragging,
+  previousFields,
 }: BaseDisplayBlockProps<ImageBlock>) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -56,8 +58,7 @@ export function EditableImageBlock({
       onDragEnd={onDragEnd}
       isDragging={isDragging}
     >
-      <div className="space-y-2">
-        {/* Compact inline controls */}
+      <div className="space-y-3">
         <div className="space-y-2">
           {/* File upload */}
           <div className="flex items-center space-x-2">
@@ -74,12 +75,18 @@ export function EditableImageBlock({
           </div>
 
           {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
+
+          {/* Preview */}
+          <div className="pt-2 border-t border-gray-200">
+            <RenderDisplayBlock block={block} />
+          </div>
         </div>
 
-        {/* Preview */}
-        <div className="pt-2 border-t border-gray-200">
-          <RenderDisplayBlock block={block} />
-        </div>
+        <ConditionalVisibility
+          field={block}
+          previousFields={previousFields || []}
+          onChange={onUpdate}
+        />
       </div>
     </DisplayBlockWrapper>
   );

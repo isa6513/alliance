@@ -190,6 +190,7 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
 
   return (
     <div className="space-y-4">
+      {error && <p className="text-red-500">{error}</p>}
       <Card style={CardStyle.White}>
         <div className="flex flex-row items-center justify-start gap-x-2">
           <button
