@@ -41,6 +41,7 @@ export const testActions: ActionDto[] = [
         sendNotifsTo: "all",
       },
     ],
+    commitmentless: false,
   },
   {
     name: "Make Target end stocking of Coca-Cola single-use plastic bottles",
@@ -57,6 +58,7 @@ export const testActions: ActionDto[] = [
     type: "Activity",
     usersCompleted: 57,
     events: [],
+    commitmentless: false,
   },
 ];
 
@@ -67,6 +69,7 @@ export const testUser: ProfileDto = {
   profilePicture: "https://via.placeholder.com/150",
   profileDescription:
     "This is a test description of a user thats a sort of medium length. It isn't too long, but it also isn't that short. It has a sort of just right amount of length.",
+  staff: false,
 };
 
 export const testUser2: ProfileDto = {
@@ -76,6 +79,7 @@ export const testUser2: ProfileDto = {
   profilePicture: "https://via.placeholder.com/150",
   profileDescription:
     "This is a test description of a user thats a sort of medium length. It isn't too long, but it also isn't that short. It has a sort of just right amount of length.",
+  staff: false,
 };
 
 export const testAuthUser: UserDto = {
@@ -86,6 +90,16 @@ export const testAuthUser: UserDto = {
   onboardingComplete: false,
   referralCode: "1234567890",
   anonymous: false,
+  forumDigestPreference: "off",
+  contractDateSigned: null,
+  contractDateSuspended: null,
+  emailNotifsEnabled: false,
+  textNotifsEnabled: false,
+  pushNotifsEnabled: false,
+  socialNotifsPreference: "all",
+  turnedOffAllNotifs: false,
+  staff: false,
+  friends: [],
 };
 
 export const testFriends: ProfileDto[] = [testUser, testUser, testUser];
@@ -94,12 +108,17 @@ export const testForumPosts: PostDto[] = [
   {
     id: 1,
     title: "First Post",
-    content: "This is the content of the first post.",
+    editableContent: {
+      body: "This is the content of the first post.",
+      attachments: [],
+    },
     authorId: 1,
-    replies: [],
+    commentCount: 0,
+    likes: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    author: testAuthUser,
+    author: testUser,
+    pinned: false,
   },
 ];
 
@@ -107,34 +126,16 @@ export const testTodoActions: ActionDto[] = [
   {
     ...testActions[0],
     status: "member_action",
-    myRelation: {
-      status: "joined",
-      deadline: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-      dateCommitted: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-      dateCompleted: new Date().toISOString(),
-    },
   },
   {
     ...testActions[1],
     status: "member_action",
-    myRelation: {
-      status: "joined",
-      deadline: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-      dateCommitted: new Date().toISOString(),
-      dateCompleted: new Date().toISOString(),
-    },
   },
   {
     ...testActions[1],
     status: "member_action",
     type: "Ongoing",
     name: "Stop buying from Coca-Cola",
-    myRelation: {
-      status: "joined",
-      deadline: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-      dateCommitted: new Date().toISOString(),
-      dateCompleted: new Date().toISOString(),
-    },
   },
 ];
 
@@ -217,11 +218,40 @@ export const testActivities: ActionActivityDto[] = [
     createdAt: new Date().toISOString(),
     user: {
       id: 0,
-      email: "jo@example.com",
       admin: false,
       profilePicture: null,
       profileDescription: null,
       displayName: "John Doe",
+      staff: false,
+    },
+    actionId: 0,
+    action: {
+      id: 0,
+      name: "",
+      category: "",
+      image: undefined,
+      commitmentThreshold: undefined,
+      donationAmount: undefined,
+      commitmentless: false,
+      body: "",
+      taskContents: undefined,
+      shortDescription: "",
+      timeEstimate: undefined,
+      type: "Funding",
+      taskFormId: undefined,
+      participatingGroups: undefined,
+      usersJoined: 0,
+      activities: [],
+      status: "gathering_commitments",
+      usersCompleted: 0,
+      events: [],
+    },
+    actionName: "",
+    likes: [],
+    comments: [],
+    editableContent: {
+      body: "",
+      attachments: [],
     },
   },
   {
@@ -234,6 +264,36 @@ export const testActivities: ActionActivityDto[] = [
       profilePicture: null,
       profileDescription: null,
       displayName: "Some One",
+      staff: false,
+    },
+    actionId: 0,
+    action: {
+      id: 0,
+      name: "",
+      category: "",
+      image: undefined,
+      commitmentThreshold: undefined,
+      donationAmount: undefined,
+      commitmentless: false,
+      body: "",
+      taskContents: undefined,
+      shortDescription: "",
+      timeEstimate: undefined,
+      type: "Funding",
+      taskFormId: undefined,
+      participatingGroups: undefined,
+      usersJoined: 0,
+      activities: [],
+      status: "gathering_commitments",
+      usersCompleted: 0,
+      events: [],
+    },
+    actionName: "",
+    likes: [],
+    comments: [],
+    editableContent: {
+      body: "",
+      attachments: [],
     },
   },
 ];

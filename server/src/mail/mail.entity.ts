@@ -16,6 +16,7 @@ export enum EmailType {
   MemberAction = 'memberaction',
   CommitmentReminder = 'commitmentreminder',
   MemberActionReminder = 'memberactionreminder',
+  ForumDigest = 'forum_digest',
 }
 
 export enum EmailStatus {

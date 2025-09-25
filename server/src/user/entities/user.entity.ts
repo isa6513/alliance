@@ -38,6 +38,12 @@ export enum NotificationPreference {
   None = 'none',
 }
 
+export enum ForumDigestPreference {
+  Off = 'off',
+  Daily = 'daily',
+  Weekly = 'weekly',
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -123,6 +129,17 @@ export class User {
   @Column({ default: false })
   @ApiProperty()
   turnedOffAllNotifs: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: ForumDigestPreference,
+    default: ForumDigestPreference.Off,
+  })
+  @ApiProperty({
+    enum: ForumDigestPreference,
+    enumName: 'ForumDigestPreference',
+  })
+  forumDigestPreference: ForumDigestPreference;
 
   @Column()
   @ApiProperty()

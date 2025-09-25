@@ -28,6 +28,8 @@ export type AccessToken = {
 
 export type NotificationPreference = 'all' | 'digest' | 'none';
 
+export type ForumDigestPreference = 'off' | 'daily' | 'weekly';
+
 export type ProfileDto = {
     id: number;
     admin: boolean;
@@ -48,6 +50,7 @@ export type UserDto = {
     textNotifsEnabled: boolean;
     pushNotifsEnabled: boolean;
     socialNotifsPreference: NotificationPreference;
+    forumDigestPreference: ForumDigestPreference;
     turnedOffAllNotifs: boolean;
     admin: boolean;
     staff: boolean;
@@ -86,6 +89,7 @@ export type UpdateProfileDto = {
     textNotifsEnabled?: boolean;
     pushNotifsEnabled?: boolean;
     socialNotifsPreference?: NotificationPreference;
+    forumDigestPreference?: ForumDigestPreference;
     turnedOffAllNotifs?: boolean;
     password?: string;
     admin?: boolean;
@@ -132,6 +136,7 @@ export type User = {
     textNotifsEnabled: boolean;
     pushNotifsEnabled: boolean;
     socialNotifsPreference: NotificationPreference;
+    forumDigestPreference: ForumDigestPreference;
     turnedOffAllNotifs: boolean;
     password: string;
     admin: boolean;

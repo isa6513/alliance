@@ -29,6 +29,7 @@ export class MailService {
     [EmailType.MemberAction]: 'memberaction',
     [EmailType.CommitmentReminder]: 'commitmentreminder',
     [EmailType.MemberActionReminder]: 'memberactionreminder',
+    [EmailType.ForumDigest]: 'forumdigest',
   };
 
   async sendMail(
@@ -212,6 +213,30 @@ export class MailService {
         daysleft: kind === '3dayreminder' ? '3 days' : '1 day',
       },
     );
+  }
+
+  public async sendForumDigestEmail(
+    email: string,
+    name: string,
+    unreadCount: number,
+    notifications: {
+      message: string;
+      url?: string | null;
+      createdAt: string;
+    }[],
+  ): Promise<Mail> {
+    const subject = `You have ${unreadCount} unread Alliance forum notification${unreadCount === 1 ? '' : 's'}`;
+
+    return this.sendMail(email, EmailType.ForumDigest, subject, {
+      name,
+      count: unreadCount,
+      notifications: notifications.map((item) => ({
+        message: item.message,
+        url: item.url,
+        createdAt: item.createdAt,
+      })),
+      appUrl: process.env.APP_URL,
+    });
   }
 
   getSubject(context: ActionEventNotificationContext): string {

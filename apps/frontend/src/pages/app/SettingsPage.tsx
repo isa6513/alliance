@@ -28,6 +28,7 @@ type EditableUserFields = Pick<
   | "pushNotifsEnabled"
   | "textNotifsEnabled"
   | "cityId"
+  | "forumDigestPreference"
 >;
 
 const mapUserToEditable = (source?: Partial<UserDto>): EditableUserFields => ({
@@ -38,6 +39,7 @@ const mapUserToEditable = (source?: Partial<UserDto>): EditableUserFields => ({
   pushNotifsEnabled: source?.pushNotifsEnabled ?? false,
   textNotifsEnabled: source?.textNotifsEnabled ?? false,
   cityId: source?.cityId,
+  forumDigestPreference: source?.forumDigestPreference ?? "off",
 });
 
 const SettingsPage: React.FC = () => {
@@ -88,7 +90,8 @@ const SettingsPage: React.FC = () => {
       editableUser.emailNotifsEnabled !== initialUser.emailNotifsEnabled ||
       editableUser.pushNotifsEnabled !== initialUser.pushNotifsEnabled ||
       editableUser.textNotifsEnabled !== initialUser.textNotifsEnabled ||
-      editableUser.phoneNumber !== initialUser.phoneNumber);
+      editableUser.phoneNumber !== initialUser.phoneNumber ||
+      editableUser.forumDigestPreference !== initialUser.forumDigestPreference);
 
   const loadPaymentMethod = useCallback(async () => {
     try {
@@ -128,6 +131,7 @@ const SettingsPage: React.FC = () => {
           emailNotifsEnabled: editableUser.emailNotifsEnabled,
           pushNotifsEnabled: editableUser.pushNotifsEnabled,
           textNotifsEnabled: editableUser.textNotifsEnabled,
+          forumDigestPreference: editableUser.forumDigestPreference,
           phoneNumber: editableUser.phoneNumber ?? undefined,
         },
       });
@@ -314,7 +318,7 @@ const SettingsPage: React.FC = () => {
           <hr className="border-zinc-300 mt-4" />
 
           <div>
-            <h2 className="!text-lg !font-semibold mb-4">Action reminders</h2>
+            <p className="!font-base !font-semibold mb-4">Action reminders</p>
 
             <div className="mb-4">
               {!(
@@ -352,6 +356,27 @@ const SettingsPage: React.FC = () => {
                   updateEditableUser({ textNotifsEnabled: checked })
                 }
               />
+              <div className="flex flex-col">
+                <label className="my-2 font-semibold">
+                  Forum activity email digest
+                </label>
+                <select
+                  className="border border-zinc-300 rounded-md px-3 py-2"
+                  value={editableUser.forumDigestPreference}
+                  onChange={(event) =>
+                    updateEditableUser({
+                      forumDigestPreference: event.target.value as
+                        | "off"
+                        | "daily"
+                        | "weekly",
+                    })
+                  }
+                >
+                  <option value={"off"}>Off</option>
+                  <option value={"daily"}>Daily</option>
+                  <option value={"weekly"}>Weekly</option>
+                </select>
+              </div>
             </div>
           </div>
 

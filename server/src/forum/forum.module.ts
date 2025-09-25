@@ -9,6 +9,10 @@ import { User } from '../user/entities/user.entity';
 import { ActionActivity } from '../actions/entities/action-activity.entity';
 import { EditableContent } from './entities/editablecontent.entity';
 import { Action } from 'src/actions/entities/action.entity';
+import { MailModule } from 'src/mail/mail.module';
+import { NotifsModule } from 'src/notifs/notifs.module';
+import { ForumDigestService } from './forum-digest.service';
+import { ForumDigestLog } from './entities/forum-digest-log.entity';
 
 @Module({
   imports: [
@@ -20,10 +24,13 @@ import { Action } from 'src/actions/entities/action.entity';
       ActionActivity,
       EditableContent,
       Action,
+      ForumDigestLog,
     ]),
+    MailModule,
+    NotifsModule,
   ],
   controllers: [ForumController],
-  providers: [ForumService],
+  providers: [ForumService, ForumDigestService],
   exports: [ForumService],
 })
 export class ForumModule {}
