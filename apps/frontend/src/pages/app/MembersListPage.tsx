@@ -1,6 +1,7 @@
 import { userMembers } from "@alliance/shared/client";
 import { useLoaderData } from "react-router";
-import MembersListCard from "../../components/MembersListCard";
+import MembersListItem from "../../components/MembersListItem";
+import List from "@alliance/shared/ui/List";
 
 export async function clientLoader() {
   const members = await userMembers();
@@ -19,11 +20,11 @@ const MembersListPage = () => {
       <p className="text-lg md:text-2xl font-serif font-medium pt-10 relative w-fit">
         Members ({members.length})
       </p>
-      <div className="flex flex-col gap-2 justify-center w-full">
+      <List>
         {members.map((member) => (
-          <MembersListCard key={member.id} profile={member} />
+          <MembersListItem key={member.id} profile={member} />
         ))}
-      </div>
+      </List>
     </div>
   );
 };
