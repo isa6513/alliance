@@ -3,7 +3,7 @@ import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import "./PrelaunchLanding.css";
 import Footer from "../../components/Footer";
 import MarkdownWrapper from "../../components/MarkdownWrapper";
-import earth from "../../assets/earth.png";
+import earth from "../../assets/earth.webp";
 
 const PrelaunchLandingPage: React.FC = () => {
   return (
