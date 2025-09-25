@@ -103,8 +103,6 @@ export class TasksService {
       throw new NotFoundException('User not found');
     }
 
-    console.log('submitFormDto', submitFormDto);
-
     await this.validateFormSubmission(form, submitFormDto);
 
     const phoneNumber = await this.extractPhoneNumber(

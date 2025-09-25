@@ -13,7 +13,9 @@ export class GroupDto extends OmitType(Group, ['users', 'participatingIn']) {
   constructor(group: Group) {
     super();
     Object.assign(this, group);
-    this.users = group.users.map((user) => new ProfileDto(user));
+    this.users = group.users
+      ? group.users.map((user) => new ProfileDto(user))
+      : [];
   }
 }
 
