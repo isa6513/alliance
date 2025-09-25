@@ -318,23 +318,24 @@ const SettingsPage: React.FC = () => {
           <hr className="border-zinc-300 mt-4" />
 
           <div>
-            <p className="!font-base !font-semibold mb-4">Action reminders</p>
+            <h2 className="!font-semibold text-lg mb-4">Notifications</h2>
 
-            <div className="mb-4">
+            <p className="!font-medium mb-0">Action reminders</p>
+            <div className="">
               {!(
                 editableUser.emailNotifsEnabled ||
                 editableUser.pushNotifsEnabled ||
                 editableUser.textNotifsEnabled
               ) && (
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-zinc-500">
                   You will not receive any notifications. Please keep a
-                  notification channel enabled if you want to participate as an
-                  Alliance member!
+                  notification channel enabled if you need reminders to complete
+                  actions on time.
                 </p>
               )}
             </div>
 
-            <div className="flex flex-col gap-y-2">
+            <div className="flex flex-col gap-y-2 mt-2">
               <LargeCheckbox
                 label="Email"
                 checked={editableUser.emailNotifsEnabled}
@@ -357,9 +358,11 @@ const SettingsPage: React.FC = () => {
                 }
               />
               <div className="flex flex-col">
-                <label className="my-2 font-semibold">
-                  Forum activity email digest
-                </label>
+                <p className="!font-medium mt-2">Platform activity digest</p>
+                <p className="text-sm text-zinc-500 mb-2">
+                  This includes replies to your posts, friend requests, and
+                  other updates.
+                </p>
                 <select
                   className="border border-zinc-300 rounded-md px-3 py-2"
                   value={editableUser.forumDigestPreference}
