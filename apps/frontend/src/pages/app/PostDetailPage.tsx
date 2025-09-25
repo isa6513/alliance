@@ -16,7 +16,7 @@ import PostLikeButton from "../../components/PostLikeButton";
 import UserDisplayName from "../../components/UserDisplayName";
 import EditableContentRenderer from "../../components/forum/EditableContentRenderer";
 import { useAuth } from "../../lib/AuthContext";
-import { formatTime } from "../../lib/utils";
+import { formatTime, useCIDFromParams } from "../../lib/utils";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
@@ -25,6 +25,8 @@ const PostDetailPage: React.FC = () => {
 
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  useCIDFromParams();
 
   const fetchPost = useCallback(async () => {
     if (!postId) return;

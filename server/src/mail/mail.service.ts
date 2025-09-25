@@ -224,19 +224,26 @@ export class MailService {
       url?: string | null;
       createdAt: string;
     }[],
+    cid: string,
   ): Promise<Mail> {
     const subject = `You have ${unreadCount} unread Alliance forum notification${unreadCount === 1 ? '' : 's'}`;
 
-    return this.sendMail(email, EmailType.ForumDigest, subject, {
-      name,
-      count: unreadCount,
-      notifications: notifications.map((item) => ({
-        message: item.message,
-        url: item.url,
-        createdAt: item.createdAt,
-      })),
-      appUrl: process.env.APP_URL,
-    });
+    return this.sendMail(
+      email,
+      EmailType.ForumDigest,
+      subject,
+      {
+        name,
+        count: unreadCount,
+        notifications: notifications.map((item) => ({
+          message: item.message,
+          url: item.url,
+          createdAt: item.createdAt,
+        })),
+        appUrl: process.env.APP_URL,
+      },
+      cid,
+    );
   }
 
   getSubject(context: ActionEventNotificationContext): string {

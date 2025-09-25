@@ -9,6 +9,8 @@ import {
 import { ForumDigestPreference, User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ForumDigestLog } from './entities/forum-digest-log.entity';
+import { withCid } from 'src/search/approutes';
+import { generateCIDForNotif } from 'src/notifs/notif_utils';
 
 @Injectable()
 export class ForumDigestService {
@@ -41,7 +43,9 @@ export class ForumDigestService {
       .orderBy('notification.createdAt', 'ASC')
       .getMany();
 
-    console.log(`Found ${notifications.length} notifications to send`);
+    console.log(
+      `Found ${notifications.length} notifications to send digests for`,
+    );
 
     if (notifications.length === 0) {
       return;
@@ -81,9 +85,11 @@ export class ForumDigestService {
         continue;
       }
 
+      const cidForNotif = await generateCIDForNotif();
+
       const digestItems = userNotifications.map((item) => ({
         message: item.message,
-        url: this.getAbsoluteUrl(item.webAppLocation ?? item.mobileAppLocation),
+        url: withCid(this.getAbsoluteUrl(item.webAppLocation), cidForNotif),
         createdAt: this.formatTimestamp(item.createdAt),
       }));
 
@@ -93,6 +99,7 @@ export class ForumDigestService {
           user.name,
           userNotifications.length,
           digestItems,
+          cidForNotif,
         );
         await this.notificationRepository.update(
           userNotifications.map((item) => item.id),
@@ -149,10 +156,7 @@ export class ForumDigestService {
     return now.toISOString().slice(0, 10);
   }
 
-  private getAbsoluteUrl(path?: string | null): string | null {
-    if (!path) {
-      return null;
-    }
+  private getAbsoluteUrl(path: string): string {
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }

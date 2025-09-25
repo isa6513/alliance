@@ -2,7 +2,6 @@ import {
   ActionDto,
   actionsFindOne,
   actionsMyStatus,
-  notifsLinkClick,
   UserActionRelation,
 } from "@alliance/shared/client";
 import { useEffect, useMemo, useState } from "react";
@@ -12,7 +11,6 @@ import {
   useLoaderData,
   useParams,
   useRouteLoaderData,
-  useSearchParams,
 } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/ActionPage";
 import ActionActivityList from "../../components/ActionActivityList";
@@ -22,7 +20,7 @@ import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import { useAuth } from "../../lib/AuthContext";
 import { testActions } from "../../stories/testData";
 import useActivities, { ActivityList } from "./useActivities";
-import posthog from "posthog-js";
+import { useCIDFromParams } from "../../lib/utils";
 
 export async function loader({
   params,
@@ -98,29 +96,7 @@ export default function ActionPage() {
 
   const { isAuthenticated } = useAuth();
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const cid = searchParams.get("cid");
-
-  useEffect(() => {
-    if (cid) {
-      posthog.register_for_session({ cid });
-
-      notifsLinkClick({
-        body: { cid },
-      }).then((response) => {
-        let platform = "unknown";
-        if (response.data) {
-          platform = response.data.mms ? "mms" : "email";
-          setSearchParams({});
-        }
-        posthog.capture("notif_link_click", {
-          cid,
-          platform,
-        });
-        console.log("capturing for platform", platform);
-      });
-    }
-  }, [cid, setSearchParams]);
+  useCIDFromParams();
 
   const actionId = action?.id || 0;
 
