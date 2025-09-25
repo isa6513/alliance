@@ -133,7 +133,7 @@ export class Action {
     nullable: true,
   })
   @ApiPropertyOptional({ type: () => Group, isArray: true })
-  @Allow()
+  @IsOptional()
   @JoinTable()
   @Type(() => Group)
   participatingGroups?: Group[];

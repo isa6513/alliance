@@ -24,6 +24,8 @@ import {
 } from './user.dto';
 import { User } from './entities/user.entity';
 import { profileUrl } from 'src/search/approutes';
+import { Group } from './entities/group.entity';
+import { CreateGroupDto } from './group.dto';
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -43,6 +45,8 @@ export class UserService {
     private notifRepository: Repository<Notification>,
     @InjectRepository(Friend)
     private readonly friendRepository: Repository<Friend>,
+    @InjectRepository(Group)
+    private readonly groupRepository: Repository<Group>,
     private readonly jwtService: JwtService,
     private readonly imagesService: ImagesService,
     private readonly mailService: MailService,
@@ -454,5 +458,44 @@ export class UserService {
     const user = await this.findOneOrFail(userId);
     user.contractDateSuspended = new Date();
     return this.userRepository.save(user);
+  }
+
+  async createGroup(body: CreateGroupDto): Promise<Group> {
+    const group = this.groupRepository.create(body);
+    return this.groupRepository.save(group);
+  }
+
+  async findAllGroups(): Promise<Group[]> {
+    return this.groupRepository.find({ relations: ['users'] });
+  }
+
+  async addUserToGroup(groupId: number, userId: number): Promise<Group> {
+    const group = await this.groupRepository.findOneOrFail({
+      where: { id: groupId },
+      relations: ['users'],
+    });
+    group.users.push(await this.findOneOrFail(userId));
+    return this.groupRepository.save(group);
+  }
+
+  async removeUserFromGroup(groupId: number, userId: number): Promise<Group> {
+    const group = await this.groupRepository.findOneOrFail({
+      where: { id: groupId },
+      relations: ['users'],
+    });
+    group.users = group.users.filter((user) => user.id !== userId);
+    return this.groupRepository.save(group);
+  }
+
+  async updateGroup(groupId: number, body: CreateGroupDto): Promise<Group> {
+    const group = await this.groupRepository.findOneOrFail({
+      where: { id: groupId },
+    });
+    Object.assign(group, body);
+    return this.groupRepository.save(group);
+  }
+
+  async deleteGroup(groupId: number): Promise<void> {
+    await this.groupRepository.delete(groupId);
   }
 }

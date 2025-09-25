@@ -33,6 +33,7 @@ import {
 } from './user.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
+import { AddUserToGroupDto, CreateGroupDto, GroupDto } from './group.dto';
 
 class VerifyEmailBody {
   @IsString()
@@ -275,5 +276,62 @@ export class UserController {
   @ApiOkResponse({ type: User })
   async verifyEmail(@Body() body: VerifyEmailBody) {
     return this.userService.verifyEmail(body.token);
+  }
+
+  @Post('createGroup')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: GroupDto })
+  async createGroup(@Body() body: CreateGroupDto) {
+    return new GroupDto(await this.userService.createGroup(body));
+  }
+
+  @Get('groups')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [GroupDto] })
+  async getGroups() {
+    return (await this.userService.findAllGroups()).map(
+      (group) => new GroupDto(group),
+    );
+  }
+
+  @Post('groups/:groupId/addUser')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: GroupDto })
+  async addUserToGroup(
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Body() body: AddUserToGroupDto,
+  ) {
+    return new GroupDto(
+      await this.userService.addUserToGroup(groupId, body.userId),
+    );
+  }
+
+  @Post('groups/:groupId/removeUser')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: GroupDto })
+  async removeUserFromGroup(
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Body() body: AddUserToGroupDto,
+  ) {
+    return new GroupDto(
+      await this.userService.removeUserFromGroup(groupId, body.userId),
+    );
+  }
+
+  @Post('groups/:groupId/update')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: GroupDto })
+  async updateGroup(
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Body() body: CreateGroupDto,
+  ) {
+    return new GroupDto(await this.userService.updateGroup(groupId, body));
+  }
+
+  @Delete('groups/:groupId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async deleteGroup(@Param('groupId', ParseIntPipe) groupId: number) {
+    await this.userService.deleteGroup(groupId);
   }
 }

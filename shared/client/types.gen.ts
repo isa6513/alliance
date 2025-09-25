@@ -150,6 +150,26 @@ export type VerifyEmailBody = {
     [key: string]: unknown;
 };
 
+export type CreateGroupDto = {
+    name: string;
+    description: string;
+    publicDisplayName?: string;
+};
+
+export type GroupDto = {
+    id: number;
+    name: string;
+    description: string;
+    publicDisplayName?: string;
+    createdAt: string;
+    updatedAt: string;
+    users: Array<ProfileDto>;
+};
+
+export type AddUserToGroupDto = {
+    userId: number;
+};
+
 export type StreamableFile = {
     [key: string]: unknown;
 };
@@ -163,6 +183,102 @@ export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declin
  * Type of the action
  */
 export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
+
+/**
+ * New status of the action after the event
+ */
+export type ActionStatus = 'draft' | 'upcoming' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
+
+/**
+ * Notification type for the event
+ */
+export type NotificationType = 'all' | 'joined' | 'none';
+
+export type ActionEventNotifType = 'announcement' | '3dayreminder' | '1dayreminder';
+
+export type NotificationChannel = 'text' | 'email' | 'push';
+
+export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder';
+
+export type Mail = {
+    id: number;
+    sentMessageId?: string;
+    to: string;
+    status: string;
+    emailType: EmailType;
+    createdAt: string;
+    cid?: string;
+    clickedLink: boolean;
+};
+
+export type Mms = {
+    id: number;
+    to: string;
+    from: string;
+    body: string;
+    status: string;
+    twilioSid: string;
+    errorCode?: number;
+    errorMessage?: string;
+    createdAt: string;
+    updatedAt: string;
+    cid?: string;
+    clickedLink: boolean;
+};
+
+export type ActionEventNotif = {
+    type: ActionEventNotifType;
+    channel: NotificationChannel;
+    mail: Mail | null;
+    mms: Mms | null;
+    /**
+     * Indicates whether the notification has been sent
+     */
+    sent: boolean;
+};
+
+export type ActionEvent = {
+    /**
+     * Unique identifier for the action event
+     */
+    id: number;
+    /**
+     * Title of the event
+     */
+    title: string;
+    /**
+     * secondary text
+     */
+    description: string;
+    /**
+     * New status of the action after the event
+     */
+    newStatus: ActionStatus;
+    /**
+     * Notification type for the event
+     */
+    sendNotifsTo: NotificationType;
+    /**
+     * time of the event (for display)
+     */
+    date: string;
+    /**
+     * Timestamp when the event was last updated
+     */
+    updatedAt: string;
+    /**
+     * Indicates whether the event should be shown in the timeline
+     */
+    showInTimeline: boolean;
+    /**
+     * The action associated with this event
+     */
+    action: Action;
+    notifications: Array<Array<ActionEventNotif>>;
+    announcementNotifsSentAt?: string;
+    threeDayReminderNotifsSentAt?: string;
+    oneDayReminderNotifsSentAt?: string;
+};
 
 export type EditableContent = {
     /**
@@ -192,15 +308,94 @@ export type ActionActivity = {
     outOfTime?: boolean;
 };
 
-/**
- * Number of users who have joined the action
- */
-export type ActionStatus = 'draft' | 'upcoming' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
+export type Action = {
+    /**
+     * Unique identifier for the action
+     */
+    id: number;
+    /**
+     * Name of the action
+     */
+    name: string;
+    /**
+     * Category of the action
+     */
+    category: string;
+    /**
+     * Image URL for the action
+     */
+    image?: string;
+    /**
+     * Number of commitments needed to start the action
+     */
+    commitmentThreshold?: number;
+    /**
+     * Suggested donation amount (cents)
+     */
+    donationAmount?: number;
+    /**
+     * e.g. onboarding
+     */
+    commitmentless: boolean;
+    /**
+     * markdown page body
+     */
+    body: string;
+    /**
+     * markdown contents for activity task card (instructions)
+     */
+    taskContents?: string;
+    /**
+     * Short description shown in cards
+     */
+    shortDescription: string;
+    /**
+     * Time estimate in minutes
+     */
+    timeEstimate?: number;
+    /**
+     * Type of the action
+     */
+    type: ActionTaskType;
+    /**
+     * Form associated with the action
+     */
+    taskFormId?: number;
+    /**
+     * Timestamp when the action was created
+     */
+    createdAt: string;
+    /**
+     * Timestamp when the action was last updated
+     */
+    updatedAt: string;
+    events: Array<Array<ActionEvent>>;
+    participatingGroups?: Array<Group>;
+    /**
+     * Number of users who have joined the action
+     */
+    usersJoined: number;
+    activities: Array<Array<ActionActivity>>;
+    /**
+     * Number of users who have joined the action
+     */
+    status: string;
+    /**
+     * Number of users who have completed the action
+     */
+    usersCompleted: number;
+};
 
-/**
- * Notification type for the event
- */
-export type NotificationType = 'all' | 'joined' | 'none';
+export type Group = {
+    id: number;
+    users: Array<User>;
+    participatingIn: Array<Action>;
+    name: string;
+    description: string;
+    publicDisplayName?: string;
+    createdAt: string;
+    updatedAt: string;
+};
 
 export type ActionEventDto = {
     /**
@@ -289,6 +484,7 @@ export type ActionDto = {
      * Form associated with the action
      */
     taskFormId?: number;
+    participatingGroups?: Array<Group>;
     /**
      * Number of users who have joined the action
      */
@@ -415,6 +611,7 @@ export type CreateActionDto = {
      * Form associated with the action
      */
     taskFormId?: number;
+    participatingGroups?: Array<Group>;
 };
 
 export type UpdateActionDto = {
@@ -462,6 +659,7 @@ export type UpdateActionDto = {
      * Form associated with the action
      */
     taskFormId?: number;
+    participatingGroups?: Array<Group>;
 };
 
 export type CreateActionEventDto = {
@@ -532,38 +730,6 @@ export type NotificationDto = {
     createdAt: string;
     updatedAt: string;
     associatedUser?: ProfileDto;
-};
-
-export type ActionEventNotifType = 'announcement' | '3dayreminder' | '1dayreminder';
-
-export type NotificationChannel = 'text' | 'email' | 'push';
-
-export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder';
-
-export type Mail = {
-    id: number;
-    sentMessageId?: string;
-    to: string;
-    status: string;
-    emailType: EmailType;
-    createdAt: string;
-    cid?: string;
-    clickedLink: boolean;
-};
-
-export type Mms = {
-    id: number;
-    to: string;
-    from: string;
-    body: string;
-    status: string;
-    twilioSid: string;
-    errorCode?: number;
-    errorMessage?: string;
-    createdAt: string;
-    updatedAt: string;
-    cid?: string;
-    clickedLink: boolean;
 };
 
 export type ActionEventNotifDto = {
@@ -1357,6 +1523,90 @@ export type UserVerifyEmailResponses = {
 };
 
 export type UserVerifyEmailResponse = UserVerifyEmailResponses[keyof UserVerifyEmailResponses];
+
+export type UserCreateGroupData = {
+    body: CreateGroupDto;
+    path?: never;
+    query?: never;
+    url: '/user/createGroup';
+};
+
+export type UserCreateGroupResponses = {
+    200: GroupDto;
+};
+
+export type UserCreateGroupResponse = UserCreateGroupResponses[keyof UserCreateGroupResponses];
+
+export type UserGetGroupsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/groups';
+};
+
+export type UserGetGroupsResponses = {
+    200: Array<GroupDto>;
+};
+
+export type UserGetGroupsResponse = UserGetGroupsResponses[keyof UserGetGroupsResponses];
+
+export type UserAddUserToGroupData = {
+    body: AddUserToGroupDto;
+    path: {
+        groupId: number;
+    };
+    query?: never;
+    url: '/user/groups/{groupId}/addUser';
+};
+
+export type UserAddUserToGroupResponses = {
+    200: GroupDto;
+};
+
+export type UserAddUserToGroupResponse = UserAddUserToGroupResponses[keyof UserAddUserToGroupResponses];
+
+export type UserRemoveUserFromGroupData = {
+    body: AddUserToGroupDto;
+    path: {
+        groupId: number;
+    };
+    query?: never;
+    url: '/user/groups/{groupId}/removeUser';
+};
+
+export type UserRemoveUserFromGroupResponses = {
+    200: GroupDto;
+};
+
+export type UserRemoveUserFromGroupResponse = UserRemoveUserFromGroupResponses[keyof UserRemoveUserFromGroupResponses];
+
+export type UserUpdateGroupData = {
+    body: CreateGroupDto;
+    path: {
+        groupId: number;
+    };
+    query?: never;
+    url: '/user/groups/{groupId}/update';
+};
+
+export type UserUpdateGroupResponses = {
+    200: GroupDto;
+};
+
+export type UserUpdateGroupResponse = UserUpdateGroupResponses[keyof UserUpdateGroupResponses];
+
+export type UserDeleteGroupData = {
+    body?: never;
+    path: {
+        groupId: number;
+    };
+    query?: never;
+    url: '/user/groups/{groupId}';
+};
+
+export type UserDeleteGroupResponses = {
+    200: unknown;
+};
 
 export type ImagesGetImageData = {
     body?: never;

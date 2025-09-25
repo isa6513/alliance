@@ -13,6 +13,7 @@ import { UserController } from './user.controller';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { IsUserAlreadyExist } from './validators/user-already-exists.validator';
+import { Group } from './entities/group.entity';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { IsUserAlreadyExist } from './validators/user-already-exists.validator';
     TypeOrmModule.forFeature([City]),
     TypeOrmModule.forFeature([Notification]),
     TypeOrmModule.forFeature([PrefillUser]),
+    TypeOrmModule.forFeature([Group]),
     JwtModule,
     ImagesModule,
     MailModule,

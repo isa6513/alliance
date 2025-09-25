@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Allow } from 'class-validator';
+import { Allow, IsOptional } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
@@ -46,7 +46,7 @@ export class Group {
 
   @Column({ nullable: true })
   @ApiPropertyOptional()
-  @Allow()
+  @IsOptional()
   publicDisplayName?: string;
 
   @CreateDateColumn()

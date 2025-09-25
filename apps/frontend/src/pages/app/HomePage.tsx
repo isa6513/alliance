@@ -94,11 +94,7 @@ const HomePage = () => {
                 </p>
                 {todoActions.length + newActions.length > 0 && (
                   <p className="mt-1 text-zinc-500 text-center px-4">
-                    {todoActions.length + newActions.length} task
-                    {todoActions.length + newActions.length !== 1
-                      ? "s"
-                      : ""}{" "}
-                    left
+                    {todoActions.length + newActions.length} left
                     {todoActions.length > 0 &&
                       ` for a total of ${remainingTasksEstimatedTime} minutes`}
                   </p>
