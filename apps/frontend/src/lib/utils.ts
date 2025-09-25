@@ -63,7 +63,8 @@ export const useCIDFromParams = () => {
         let platform = "unknown";
         if (response.data) {
           platform = response.data.mms ? "mms" : "email";
-          setSearchParams({});
+          searchParams.delete("cid");
+          setSearchParams(searchParams);
         }
         posthog.capture("notif_link_click", {
           cid,
@@ -71,5 +72,5 @@ export const useCIDFromParams = () => {
         });
       });
     }
-  }, [cid, setSearchParams]);
+  }, [cid, setSearchParams, searchParams]);
 };
