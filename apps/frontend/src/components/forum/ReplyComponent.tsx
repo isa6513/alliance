@@ -187,7 +187,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
               })}
             </span>
             {hasChildren && isCollapsed && reply.children !== undefined && (
-              <span className="text-xs bg-gray-200 px-2 py-1 rounded">
+              <span className="text-xs bg-gray-200 px-2 py-1 -my-1 rounded">
                 {countAllReplies(reply.children)}{" "}
                 {countAllReplies(reply.children) === 1 ? "reply" : "replies"}{" "}
                 hidden
@@ -373,7 +373,7 @@ const ReplyComponent = ({
         {hasChildren && !compact && (
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`absolute  top-6 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer z-10 ${
+            className={`absolute  top-6 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer ${
               compact ? "left-0" : "-left-6"
             }`}
             aria-label={isCollapsed ? "Expand replies" : "Collapse replies"}

@@ -66,11 +66,9 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
     return (
       <div className={className}>
         {content.body.includes("\n") ? (
-          <div className={`${sharedClasses} text-gray-500`}>
-            {firstLine} ...
-          </div>
+          <p className={`${sharedClasses} text-gray-500`}>{firstLine} ...</p>
         ) : (
-          <div className={`${sharedClasses}`}>{firstLine}</div>
+          <p className={`${sharedClasses}`}>{firstLine}</p>
         )}
       </div>
     );
