@@ -113,12 +113,12 @@ const Sidebar: React.FC = () => {
         </div>
         <div className="flex flex-row justify-between items-center p-3 px-5">
           <p className="text-sm text-gray-800">{user?.email}</p>
-          <button
-            className="bg-zinc-200 hover:bg-zinc-300 border border-zinc-300 text-[#222] px-3 py-1 rounded-md text-sm font-medium"
+          <Button
+            className="bg-zinc-200 hover:bg-zinc-300 border border-zinc-300 text-[#222] !px-3 !py-1 rounded-md text-sm"
             onClick={logout}
           >
             Log out
-          </button>
+          </Button>
         </div>
       </div>
       <div className="flex-1 overflow-y-scroll max-h-screen">

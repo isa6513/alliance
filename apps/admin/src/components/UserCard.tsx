@@ -1,23 +1,22 @@
-import { GroupDto, User } from "@alliance/shared/client/types.gen";
+import {
+  GroupDto,
+  User,
+  UserActionRelationDetailDto,
+  UserActionSummaryDto,
+  UserActionRelationStatus,
+} from "@alliance/shared/client/types.gen";
 import { getApiUrl } from "@alliance/shared/lib/config";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { Duration, formatDuration, intervalToDuration } from "date-fns";
-import { useNavigate } from "react-router";
 import Badge from "@alliance/shared/ui/Badge";
 import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
 import { useMemo, useState } from "react";
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
+import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
+import { Link } from "react-router";
 
-const UserCard = ({
-  user,
-  timeSpent,
-  timeSpentTotal,
-  groups,
-  allGroups,
-  onToggleGroup,
-  isGroupPending,
-}: {
+export interface UserCardProps {
   user: User;
   timeSpent: number;
   timeSpentTotal: number;
@@ -28,10 +27,71 @@ const UserCard = ({
     nextChecked: boolean
   ) => void | Promise<void>;
   isGroupPending: (groupId: number) => boolean;
-}) => {
-  const navigate = useNavigate();
+  actions: UserActionSummaryDto[];
+  actionRelations: UserActionRelationDetailDto[];
+}
+
+const UserCard = ({
+  user,
+  timeSpent,
+  timeSpentTotal,
+  groups,
+  allGroups,
+  onToggleGroup,
+  isGroupPending,
+  actions,
+  actionRelations,
+}: UserCardProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isActionDetailsOpen, setIsActionDetailsOpen] = useState(false);
   const dropdownRef = useOutsideClick(() => setIsDropdownOpen(false));
+
+  const relationByActionId = useMemo(() => {
+    return actionRelations.reduce((acc, relation) => {
+      acc[relation.actionId] = relation;
+      return acc;
+    }, {} as Record<number, UserActionRelationDetailDto>);
+  }, [actionRelations]);
+
+  const formatRelationStatus = (status?: UserActionRelationStatus) => {
+    switch (status) {
+      case "completed":
+        return "Completed";
+      case "joined":
+        return "Joined";
+      case "declined":
+        return "Declined";
+      case "wont_complete":
+        return "Won't complete";
+      default:
+        return "Not started";
+    }
+  };
+
+  const relationStatusColor = (status?: UserActionRelationStatus) => {
+    switch (status) {
+      case "completed":
+        return "text-green-600";
+      case "joined":
+        return "text-blue-600";
+      case "declined":
+        return "text-amber-600";
+      case "wont_complete":
+        return "text-red-600";
+      default:
+        return "text-zinc-500";
+    }
+  };
+
+  const humanize = (value?: string) => {
+    if (!value) {
+      return undefined;
+    }
+    return value
+      .split("_")
+      .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+      .join(" ");
+  };
 
   const sortedAllGroups = useMemo(() => {
     return [...allGroups].sort((a, b) => a.name.localeCompare(b.name));
@@ -72,21 +132,22 @@ const UserCard = ({
     : "Not signed";
 
   return (
-    <Card
-      style={CardStyle.White}
-      className="min-w-[300px] text-sm"
-      onClick={() => navigate(`/database/?table=user&id=${user.id}`)}
-    >
-      <div className="flex flex-row items-center gap-x-3 border-b pb-2 mb-2 border-zinc-200">
-        <ProfileImage
-          pfp={
-            user.profilePicture
-              ? getApiUrl() + "/images/" + user.profilePicture
-              : null
-          }
-          size="large"
-        />
-        <p className="text-base">{user.name}</p>
+    <Card style={CardStyle.White} className="min-w-[300px] flex-1 text-sm">
+      <div className="flex flex-row items-center justify-between gap-x-3 border-b pb-2 mb-2 border-zinc-200">
+        <div className="flex flex-row items-center gap-x-3">
+          <ProfileImage
+            pfp={
+              user.profilePicture
+                ? getApiUrl() + "/images/" + user.profilePicture
+                : null
+            }
+            size="large"
+          />
+          <p className="text-base">{user.name}</p>
+        </div>
+        <Link to={`/database/?table=user&id=${user.id}`}>
+          <DatabaseIcon size="small" />
+        </Link>
       </div>
       <div className="flex flex-row items-center border-b pb-2 mb-2 border-zinc-200">
         <p>
@@ -168,6 +229,74 @@ const UserCard = ({
           </div>
         ) : null}
       </div>
+      {actions.length > 0 && (
+        <div className="border-b pb-2 mb-2 border-zinc-200">
+          <div className="flex items-center justify-between">
+            <p className="font-semibold">Actions</p>
+            <button
+              type="button"
+              className="text-xs font-medium text-blue-600 hover:text-blue-700"
+              onClick={(event) => {
+                event.stopPropagation();
+                setIsActionDetailsOpen((open) => !open);
+              }}
+            >
+              {isActionDetailsOpen ? "Hide details" : "Show details"}
+            </button>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1 w-full">
+            {actions.map((action) => {
+              const relation = relationByActionId[action.id];
+              const isCompleted = relation?.status === "completed";
+              const className = isCompleted
+                ? "bg-green text-white"
+                : "bg-zinc-100 text-zinc-500 border border-zinc-200";
+              return (
+                <div
+                  key={action.id}
+                  className={`flex-1 h-4 rounded flex items-center justify-center text-xs font-semibold ${className}`}
+                  title={`${action.name} • ${formatRelationStatus(
+                    relation?.status
+                  )}`}
+                ></div>
+              );
+            })}
+          </div>
+          {isActionDetailsOpen && (
+            <div className="mt-3 space-y-2">
+              {actions.map((action) => {
+                const relation = relationByActionId[action.id];
+                const statusLabel = formatRelationStatus(relation?.status);
+                return (
+                  <div
+                    key={action.id}
+                    className="rounded border border-zinc-200 bg-zinc-50 p-2"
+                  >
+                    <div className="flex items-start justify-between gap-2 text-sm">
+                      <span className="font-medium text-zinc-700">
+                        {action.name}
+                      </span>
+                      <span
+                        className={`font-semibold text-nowrap ${relationStatusColor(
+                          relation?.status
+                        )}`}
+                      >
+                        {statusLabel}
+                      </span>
+                    </div>
+                    <div className="mt-1 flex flex-col gap-1 text-xs text-zinc-500">
+                      <span>
+                        Action status:{" "}
+                        {humanize(action.status) ?? action.status}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
       <div>
         <p className="font-semibold ">Activity</p>
         <div className="flex flex-row justify-between ">

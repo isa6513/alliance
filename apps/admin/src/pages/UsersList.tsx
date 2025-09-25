@@ -4,12 +4,16 @@ import {
   userAddUserToGroup,
   userGetGroups,
   userList,
+  userActionRelations as userGetActionRelations,
   userRemoveUserFromGroup,
 } from "@alliance/shared/client";
 import {
   GroupDto,
   TimeSpentForUserDto,
   User,
+  UserActionRelationDetailDto,
+  UserActionRelationsResponseDto,
+  UserActionSummaryDto,
 } from "@alliance/shared/client/types.gen";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import UserCard from "../components/UserCard";
@@ -29,6 +33,12 @@ const UsersList: React.FC = () => {
     TimeSpentForUserDto[]
   >([]);
   const [groups, setGroups] = useState<GroupDto[]>([]);
+  const [actionSummaries, setActionSummaries] = useState<
+    UserActionSummaryDto[]
+  >([]);
+  const [userActionRelations, setUserActionRelations] = useState<
+    Record<number, UserActionRelationDetailDto[]>
+  >({});
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
   const [filterMode, setFilterMode] = useState<UserFilterMode>("All");
   const [isGroupFilterOpen, setIsGroupFilterOpen] = useState(false);
@@ -60,6 +70,21 @@ const UsersList: React.FC = () => {
 
   useEffect(() => {
     userGetGroups().then((res) => setGroups(res.data || []));
+  }, []);
+
+  useEffect(() => {
+    userGetActionRelations().then((res) => {
+      const data: UserActionRelationsResponseDto | undefined = res.data;
+      if (!data) {
+        return;
+      }
+      setActionSummaries(data.actions ?? []);
+      const relationMap: Record<number, UserActionRelationDetailDto[]> = {};
+      for (const entry of data.users ?? []) {
+        relationMap[entry.userId] = entry.relations ?? [];
+      }
+      setUserActionRelations(relationMap);
+    });
   }, []);
 
   const userToTimeSpent = useMemo(() => {
@@ -308,6 +333,8 @@ const UsersList: React.FC = () => {
             isGroupPending={(groupId) =>
               pendingGroupOps.has(`${user.id}-${groupId}`)
             }
+            actions={actionSummaries}
+            actionRelations={userActionRelations[user.id] || []}
           />
         ))}
       </div>

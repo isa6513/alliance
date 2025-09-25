@@ -50,8 +50,8 @@ export type UserDto = {
     textNotifsEnabled: boolean;
     pushNotifsEnabled: boolean;
     socialNotifsPreference: NotificationPreference;
-    forumDigestPreference: ForumDigestPreference;
     turnedOffAllNotifs: boolean;
+    forumDigestPreference: ForumDigestPreference;
     admin: boolean;
     staff: boolean;
     referralCode: string | null;
@@ -89,8 +89,8 @@ export type UpdateProfileDto = {
     textNotifsEnabled?: boolean;
     pushNotifsEnabled?: boolean;
     socialNotifsPreference?: NotificationPreference;
-    forumDigestPreference?: ForumDigestPreference;
     turnedOffAllNotifs?: boolean;
+    forumDigestPreference?: ForumDigestPreference;
     password?: string;
     admin?: boolean;
     staff?: boolean;
@@ -136,8 +136,8 @@ export type User = {
     textNotifsEnabled: boolean;
     pushNotifsEnabled: boolean;
     socialNotifsPreference: NotificationPreference;
-    forumDigestPreference: ForumDigestPreference;
     turnedOffAllNotifs: boolean;
+    forumDigestPreference: ForumDigestPreference;
     password: string;
     admin: boolean;
     staff: boolean;
@@ -149,6 +149,35 @@ export type User = {
     over18: boolean | null;
     onboardingComplete: boolean;
     anonymous: boolean;
+};
+
+export type ActionStatus = 'draft' | 'upcoming' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
+
+export type UserActionSummaryDto = {
+    id: number;
+    name: string;
+    status: ActionStatus;
+};
+
+export type UserActionRelationStatus = 'none' | 'joined' | 'completed' | 'declined' | 'wont_complete';
+
+export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete';
+
+export type UserActionRelationDetailDto = {
+    actionId: number;
+    status: UserActionRelationStatus;
+    latestActivityType?: ActionActivityType;
+    latestActivityAt?: string;
+};
+
+export type UserActionRelationsForUserDto = {
+    userId: number;
+    relations: Array<UserActionRelationDetailDto>;
+};
+
+export type UserActionRelationsResponseDto = {
+    actions: Array<UserActionSummaryDto>;
+    users: Array<UserActionRelationsForUserDto>;
 };
 
 export type VerifyEmailBody = {
@@ -180,19 +209,9 @@ export type StreamableFile = {
 };
 
 /**
- * Type of action activity
- */
-export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete';
-
-/**
  * Type of the action
  */
 export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
-
-/**
- * New status of the action after the event
- */
-export type ActionStatus = 'draft' | 'upcoming' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
 
 /**
  * Notification type for the event
@@ -203,7 +222,7 @@ export type ActionEventNotifType = 'announcement' | '3dayreminder' | '1dayremind
 
 export type NotificationChannel = 'text' | 'email' | 'push';
 
-export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder';
+export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder' | 'forum_digest';
 
 export type Mail = {
     id: number;
@@ -1457,6 +1476,19 @@ export type UserListResponses = {
 };
 
 export type UserListResponse = UserListResponses[keyof UserListResponses];
+
+export type UserActionRelationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/action-relations';
+};
+
+export type UserActionRelationsResponses = {
+    200: UserActionRelationsResponseDto;
+};
+
+export type UserActionRelationsResponse = UserActionRelationsResponses[keyof UserActionRelationsResponses];
 
 export type UserMembersData = {
     body?: never;

@@ -34,6 +34,7 @@ import {
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { AddUserToGroupDto, CreateGroupDto, GroupDto } from './group.dto';
+import { UserActionRelationsResponseDto } from './dto/user-action-relations.dto';
 
 class VerifyEmailBody {
   @IsString()
@@ -233,6 +234,13 @@ export class UserController {
   @ApiOkResponse({ type: [User] })
   async list(): Promise<User[]> {
     return this.userService.findAll();
+  }
+
+  @Get('action-relations')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: UserActionRelationsResponseDto })
+  async actionRelations(): Promise<UserActionRelationsResponseDto> {
+    return this.userService.getUserActionRelations();
   }
 
   @Get('members')

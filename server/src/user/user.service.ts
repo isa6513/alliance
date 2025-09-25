@@ -13,7 +13,13 @@ import {
   NotificationCategory,
 } from 'src/notifs/entities/notification.entity';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
-import { ILike, Repository } from 'typeorm';
+import { ILike, In, Repository } from 'typeorm';
+import { Action } from 'src/actions/entities/action.entity';
+import {
+  ActionActivity,
+  ActionActivityType,
+} from 'src/actions/entities/action-activity.entity';
+import { ActionStatus } from 'src/actions/entities/action-event.entity';
 import { Friend, FriendStatus } from './entities/friend.entity';
 import { PrefillUser } from './entities/prefill-user.entity';
 import {
@@ -26,6 +32,13 @@ import { User } from './entities/user.entity';
 import { profileUrl } from 'src/search/approutes';
 import { Group } from './entities/group.entity';
 import { CreateGroupDto } from './group.dto';
+import {
+  UserActionRelationDetailDto,
+  UserActionRelationsForUserDto,
+  UserActionRelationsResponseDto,
+  UserActionRelationStatus,
+  UserActionSummaryDto,
+} from './dto/user-action-relations.dto';
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -43,6 +56,10 @@ export class UserService {
     private cityRepository: Repository<City>,
     @InjectRepository(Notification)
     private notifRepository: Repository<Notification>,
+    @InjectRepository(Action)
+    private readonly actionRepository: Repository<Action>,
+    @InjectRepository(ActionActivity)
+    private readonly actionActivityRepository: Repository<ActionActivity>,
     @InjectRepository(Friend)
     private readonly friendRepository: Repository<Friend>,
     @InjectRepository(Group)
@@ -138,6 +155,140 @@ export class UserService {
     return this.userRepository.count({
       where: { isNotSignedUpPartialProfile: false },
     });
+  }
+
+  async getUserActionRelations(): Promise<UserActionRelationsResponseDto> {
+    const actions = await this.actionRepository.find({ relations: ['events'] });
+
+    const activeStatuses = new Set<ActionStatus>([
+      ActionStatus.Upcoming,
+      ActionStatus.GatheringCommitments,
+      ActionStatus.OfficeAction,
+      ActionStatus.MemberAction,
+      ActionStatus.Resolution,
+    ]);
+
+    const relevantActions = actions
+      .map((action) => ({ action, status: action.status }))
+      .filter(({ status }) => activeStatuses.has(status));
+
+    if (relevantActions.length === 0) {
+      return { actions: [], users: [] };
+    }
+
+    const actionSummaries: UserActionSummaryDto[] = relevantActions
+      .sort((a, b) => a.action.name.localeCompare(b.action.name))
+      .map(({ action, status }) => ({
+        id: action.id,
+        name: action.name,
+        status,
+      }));
+
+    const actionIds = actionSummaries.map((summary) => summary.id);
+    const actionOrder = new Map(actionIds.map((id, index) => [id, index]));
+
+    const activities = await this.actionActivityRepository.find({
+      where: { actionId: In(actionIds) },
+      select: ['actionId', 'userId', 'type', 'createdAt'],
+      order: { createdAt: 'ASC' },
+    });
+
+    const statusPriority: Record<UserActionRelationStatus, number> = {
+      [UserActionRelationStatus.Completed]: 4,
+      [UserActionRelationStatus.WontComplete]: 3,
+      [UserActionRelationStatus.Declined]: 2,
+      [UserActionRelationStatus.Joined]: 1,
+      [UserActionRelationStatus.None]: 0,
+    };
+
+    const typeToStatus = (
+      type: ActionActivityType,
+    ): UserActionRelationStatus => {
+      switch (type) {
+        case ActionActivityType.USER_COMPLETED:
+          return UserActionRelationStatus.Completed;
+        case ActionActivityType.USER_WONT_COMPLETE:
+          return UserActionRelationStatus.WontComplete;
+        case ActionActivityType.USER_DECLINED:
+          return UserActionRelationStatus.Declined;
+        case ActionActivityType.USER_JOINED:
+          return UserActionRelationStatus.Joined;
+        default:
+          return UserActionRelationStatus.None;
+      }
+    };
+
+    const perUser = new Map<
+      number,
+      Map<
+        number,
+        {
+          status: UserActionRelationStatus;
+          priority: number;
+          latestActivityType?: ActionActivityType;
+          latestActivityAt?: Date;
+        }
+      >
+    >();
+
+    for (const activity of activities) {
+      const status = typeToStatus(activity.type);
+      if (status === UserActionRelationStatus.None) {
+        continue;
+      }
+
+      const userRelations = perUser.get(activity.userId) ?? new Map();
+      const existing = userRelations.get(activity.actionId);
+      const priority = statusPriority[status];
+
+      if (!existing || priority >= existing.priority) {
+        const shouldReplace =
+          !existing ||
+          priority > existing.priority ||
+          (priority === existing.priority &&
+            (!existing.latestActivityAt ||
+              existing.latestActivityAt < activity.createdAt));
+
+        if (shouldReplace) {
+          userRelations.set(activity.actionId, {
+            status,
+            priority,
+            latestActivityType: activity.type,
+            latestActivityAt: activity.createdAt,
+          });
+        }
+      }
+
+      perUser.set(activity.userId, userRelations);
+    }
+
+    const users: UserActionRelationsForUserDto[] = Array.from(perUser.entries()).map(
+      ([userId, actionMap]) => {
+        const relations: UserActionRelationDetailDto[] = Array.from(
+          actionMap.entries(),
+        )
+          .map(([actionId, detail]) => ({
+            actionId,
+            status: detail.status,
+            latestActivityType: detail.latestActivityType,
+            latestActivityAt: detail.latestActivityAt?.toISOString(),
+          }))
+          .sort((a, b) =>
+            (actionOrder.get(a.actionId) ?? 0) -
+            (actionOrder.get(b.actionId) ?? 0),
+          );
+
+        return {
+          userId,
+          relations,
+        } satisfies UserActionRelationsForUserDto;
+      },
+    );
+
+    return {
+      actions: actionSummaries,
+      users,
+    };
   }
 
   async sendWelcomeEmail(userId: number) {
