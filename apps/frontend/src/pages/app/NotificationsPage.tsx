@@ -1,7 +1,7 @@
-import Card from "@alliance/shared/ui/Card";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useNotifications } from "../../lib/useNotifications";
 import { formatTime } from "../../lib/utils";
+import List from "@alliance/shared/ui/List";
 
 const NotificationsPage = () => {
   const { allNotifications, handleNotifClick } = useNotifications();
@@ -12,10 +12,11 @@ const NotificationsPage = () => {
         <h2 className="w-full !font-semibold font-serif !text-3xl md:!text-4xl">
           All Notifications
         </h2>
-        <div className="flex flex-col gap-y-2 w-full">
+        <List className="w-full">
           {allNotifications.map((notification) => (
-            <Card
+            <div
               key={notification.id}
+              className="hover:bg-zinc-100 p-4 rounded-md flex cursor-pointer flex-col gap-y-2"
               onClick={handleNotifClick(
                 notification.id,
                 notification.webAppLocation
@@ -30,14 +31,14 @@ const NotificationsPage = () => {
                 )}
                 <h3>{notification.message}</h3>
               </div>
-              <p className=" text-zinc-500">
+              <p className=" text-zinc-500 text-sm">
                 {formatTime(new Date(notification.createdAt), {
                   addSuffix: true,
                 })}
               </p>
-            </Card>
+            </div>
           ))}
-        </div>
+        </List>
       </div>
     </div>
   );
