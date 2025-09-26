@@ -138,6 +138,15 @@ export class Action {
   @Type(() => Group)
   participatingGroups?: Group[];
 
+  @Column({ default: false })
+  @ApiPropertyOptional({
+    description:
+      'Whether to show the action to members who are not of participating groups',
+    default: false,
+  })
+  @IsOptional()
+  showToNonparticipating?: boolean;
+
   @Expose()
   @ApiProperty({
     description: 'Number of users who have joined the action',

@@ -396,6 +396,10 @@ export type Action = {
     events: Array<Array<ActionEvent>>;
     participatingGroups?: Array<Group>;
     /**
+     * Whether to show the action to members who are not of participating groups
+     */
+    showToNonparticipating?: boolean;
+    /**
      * Number of users who have joined the action
      */
     usersJoined: number;
@@ -509,6 +513,10 @@ export type ActionDto = {
      */
     taskFormId?: number;
     participatingGroups?: Array<Group>;
+    /**
+     * Whether to show the action to members who are not of participating groups
+     */
+    showToNonparticipating?: boolean;
     /**
      * Number of users who have joined the action
      */
@@ -636,6 +644,10 @@ export type CreateActionDto = {
      */
     taskFormId?: number;
     participatingGroups?: Array<Group>;
+    /**
+     * Whether to show the action to members who are not of participating groups
+     */
+    showToNonparticipating?: boolean;
 };
 
 export type UpdateActionDto = {
@@ -684,6 +696,10 @@ export type UpdateActionDto = {
      */
     taskFormId?: number;
     participatingGroups?: Array<Group>;
+    /**
+     * Whether to show the action to members who are not of participating groups
+     */
+    showToNonparticipating?: boolean;
 };
 
 export type CreateActionEventDto = {
@@ -736,9 +752,13 @@ export type UpdateActionActivityDto = {
 };
 
 export type PreEventNotifDataDto = {
-    n_emails: number;
-    n_texts: number;
-    n_pushes: number;
+    emails: Array<UserDto>;
+    texts: Array<UserDto>;
+    pushes: Array<UserDto>;
+};
+
+export type CanParticipateDto = {
+    canParticipate: boolean;
 };
 
 export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted';
@@ -1751,7 +1771,7 @@ export type ActionsCompleteResponse = ActionsCompleteResponses[keyof ActionsComp
 export type ActionsMyStatusData = {
     body?: never;
     path: {
-        id: string;
+        id: number;
     };
     query?: never;
     url: '/actions/myStatus/{id}';
@@ -1903,19 +1923,6 @@ export type ActionsLiveListData = {
 export type ActionsLiveListResponses = {
     200: unknown;
 };
-
-export type ActionsOpengraphData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/actions/opengraph';
-};
-
-export type ActionsOpengraphResponses = {
-    200: string;
-};
-
-export type ActionsOpengraphResponse = ActionsOpengraphResponses[keyof ActionsOpengraphResponses];
 
 export type ActionsFriendActivityData = {
     body?: never;
@@ -2119,6 +2126,21 @@ export type ActionsEventNotifDataResponses = {
 };
 
 export type ActionsEventNotifDataResponse = ActionsEventNotifDataResponses[keyof ActionsEventNotifDataResponses];
+
+export type ActionsCanParticipateData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/canParticipate/{id}';
+};
+
+export type ActionsCanParticipateResponses = {
+    200: CanParticipateDto;
+};
+
+export type ActionsCanParticipateResponse = ActionsCanParticipateResponses[keyof ActionsCanParticipateResponses];
 
 export type NotifsFindAllData = {
     body?: never;

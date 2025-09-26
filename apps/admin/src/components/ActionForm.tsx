@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CreateActionDto, FormDto } from "@alliance/shared/client";
+import {
+  CreateActionDto,
+  FormDto,
+  GroupDto,
+} from "@alliance/shared/client";
 import React, { useMemo, useRef } from "react";
 
 interface ActionFormProps {
@@ -20,6 +24,10 @@ interface ActionFormProps {
   baseUrl?: string;
   availableForms?: FormDto[];
   formsLoading: boolean;
+  availableGroups?: GroupDto[];
+  groupsLoading: boolean;
+  selectedGroupIds: number[];
+  onGroupsChange: (ids: number[]) => void;
 }
 
 const ActionForm: React.FC<ActionFormProps> = ({
@@ -36,8 +44,25 @@ const ActionForm: React.FC<ActionFormProps> = ({
   baseUrl,
   availableForms = [],
   formsLoading,
+  availableGroups = [],
+  groupsLoading,
+  selectedGroupIds,
+  onGroupsChange,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleToggleGroup = (groupId: number) => {
+    const nextSelection = selectedGroupIds.includes(groupId)
+      ? selectedGroupIds.filter((id) => id !== groupId)
+      : [...selectedGroupIds, groupId];
+    onGroupsChange(nextSelection);
+  };
+
+  const handleClearGroups = () => {
+    if (selectedGroupIds.length) {
+      onGroupsChange([]);
+    }
+  };
 
   // Centralized field definitions to make adding/removing fields easier
   type FieldType =
@@ -371,6 +396,71 @@ const ActionForm: React.FC<ActionFormProps> = ({
         .map((f) => {
           return renderField(f);
         })}
+
+      <div className="border border-gray-200 rounded-md p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className="text-sm font-medium text-gray-700">
+              Participating groups
+            </p>
+            <p className="text-xs text-gray-500">
+              Select one or more groups to limit participation. Leave empty to
+              make the action open to everyone.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleClearGroups}
+            disabled={!selectedGroupIds.length}
+            className="text-xs text-blue-600 hover:text-blue-800 disabled:text-gray-300"
+          >
+            Clear
+          </button>
+        </div>
+        {groupsLoading ? (
+          <p className="text-sm text-gray-500">Loading groups…</p>
+        ) : availableGroups.length ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {availableGroups.map((group) => {
+              const checked = selectedGroupIds.includes(group.id);
+              return (
+                <label
+                  key={group.id}
+                  className={`flex items-start gap-2 rounded-md border px-3 py-2 text-sm transition-colors ${
+                    checked
+                      ? "border-blue-400 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    checked={checked}
+                    onChange={() => handleToggleGroup(group.id)}
+                  />
+                  <span className="flex flex-col">
+                    <span className="font-medium text-gray-800">
+                      {group.name}
+                    </span>
+                    {group.publicDisplayName && (
+                      <span className="text-xs text-gray-500">
+                        {group.publicDisplayName}
+                      </span>
+                    )}
+                    <span className="text-xs text-gray-500">
+                      {group.description}
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500">
+            No groups available yet. Create one in the Groups dashboard.
+          </p>
+        )}
+      </div>
 
       <div className="flex justify-end space-x-3 pt-4">
         {onCancel && (

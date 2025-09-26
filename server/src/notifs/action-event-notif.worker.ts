@@ -170,6 +170,20 @@ export class ActionEventNotifWorker {
   }
 
   async getBaseUsersForEvent(eventStatus: ActionStatus, action: Action) {
+    const targetGroupIds = new Set(
+      (action.participatingGroups || []).map((group) => group.id),
+    );
+    const restrictToGroups = targetGroupIds.size > 0;
+
+    const filterToEligible = (users: User[]): User[] => {
+      if (!restrictToGroups) {
+        return users;
+      }
+      return users.filter((user) =>
+        (user.groups || []).some((group) => targetGroupIds.has(group.id)),
+      );
+    };
+
     if (
       eventStatus === ActionStatus.MemberAction ||
       eventStatus === ActionStatus.OfficeAction ||
@@ -180,28 +194,32 @@ export class ActionEventNotifWorker {
           actionId: action.id,
           type: ActionActivityType.USER_JOINED,
         },
-        relations: ['user'],
+        relations: restrictToGroups ? ['user', 'user.groups'] : ['user'],
       });
-      const users = action.commitmentless
-        ? await this.userService.findActiveUsers()
-        : activities.map((a) => a.user);
 
-      return users;
+      if (action.commitmentless) {
+        const users = restrictToGroups
+          ? await this.userService.findActiveUsersWithGroups()
+          : await this.userService.findActiveUsers();
+        return filterToEligible(users);
+      }
+
+      return filterToEligible(activities.map((a) => a.user));
     }
 
-    return this.userService.findActiveUsers();
+    return filterToEligible(await this.userService.findActiveUsersWithGroups());
   }
 
   private async processOne(eventId: number, type: ActionEventNotifType) {
     await this.dataSource.transaction(async (manager) => {
-      const event = await manager
-        .createQueryBuilder(ActionEvent, 'event')
-        .where('event.id = :id', { id: eventId })
-        .getOne();
+      const event = await manager.getRepository(ActionEvent).findOne({
+        where: { id: eventId },
+        relations: ['action', 'action.participatingGroups'],
+      });
 
       console.log('processing notif', eventId);
 
-      if (!event) return;
+      if (!event || !event.action) return;
 
       if (
         (type === 'announcement' && event.announcementNotifsSentAt) ||
@@ -213,12 +231,7 @@ export class ActionEventNotifWorker {
         return;
       }
 
-      const action = await manager
-        .createQueryBuilder()
-        .relation(ActionEvent, 'action')
-        .of(event)
-        .loadOne<Action>();
-      if (!action) return;
+      const action = event.action;
 
       const users = await this.getBaseUsersForEvent(event.newStatus, action);
 

@@ -1,4 +1,8 @@
-import { ActionStatus } from 'src/actions/entities/action-event.entity';
+import {
+  ActionEvent,
+  ActionStatus,
+  NotificationType,
+} from 'src/actions/entities/action-event.entity';
 import { CreateCommentDto, UpdateCommentDto } from 'src/forum/dto/comment.dto';
 import { CommentParentObject } from 'src/forum/entities/comment.entity';
 import { User } from 'src/user/entities/user.entity';
@@ -17,12 +21,14 @@ describe('Forum (e2e)', () => {
   let testAction: Action;
   let userRepo: Repository<User>;
   let notifRepo: Repository<Notification>;
+  let eventRepo: Repository<ActionEvent>;
 
   beforeAll(async () => {
     ctx = await createTestApp([ForumModule]);
     actionRepo = ctx.dataSource.getRepository(Action);
     userRepo = ctx.dataSource.getRepository(User);
     notifRepo = ctx.dataSource.getRepository(Notification);
+    eventRepo = ctx.dataSource.getRepository(ActionEvent);
     // Create test action
     testAction = actionRepo.create({
       name: 'Test Action',
@@ -31,6 +37,17 @@ describe('Forum (e2e)', () => {
       status: ActionStatus.GatheringCommitments,
     });
     await actionRepo.save(testAction);
+
+    const event = eventRepo.create({
+      title: 'Action Started',
+      description: 'Action is now in gathering commitments phase',
+      newStatus: ActionStatus.GatheringCommitments,
+      sendNotifsTo: NotificationType.None,
+      date: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
+      showInTimeline: true,
+      action: testAction,
+    });
+    await eventRepo.save(event);
   }, 50000);
 
   describe('Posts', () => {

@@ -35,6 +35,7 @@ import {
   ActionActivityDto,
   ActionDto,
   ActionEventDto,
+  CanParticipateDto,
   CreateActionDto,
   CreateActionEventDto,
   DeclineActionDto,
@@ -68,6 +69,7 @@ export class ActionsController {
     if (!req.user) {
       throw new UnauthorizedException('User not found');
     }
+    console.log('joining action', id, req.user.sub);
     return this.actionsService.joinAction(+id, req.user.sub);
   }
 
@@ -118,7 +120,7 @@ export class ActionsController {
   })
   async myStatus(
     @Request() req: JwtRequest,
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<UserActionRelationDto> {
     if (!req.user) {
       throw new UnauthorizedException('User not found');
@@ -133,12 +135,11 @@ export class ActionsController {
     return { relation: relation };
   }
 
-  //doesn't include drafts
   @Get()
-  @Public()
+  @UseGuards(AuthOptionalGuard)
   @ApiOkResponse({ type: [ActionDto] })
-  async findAll(): Promise<ActionDto[]> {
-    return this.actionsService.findPublic();
+  async findAll(@Request() req: JwtRequest): Promise<ActionDto[]> {
+    return this.actionsService.findPublic(req.user?.sub);
   }
 
   @Get('myActivity')
@@ -271,34 +272,6 @@ export class ActionsController {
     return counters$;
   }
 
-  @Get('opengraph')
-  @Public()
-  @ApiOkResponse({ type: String })
-  async opengraph(@Query() query) {
-    const { url } = query;
-    const id = url.substring(url.lastIndexOf('/') + 1);
-    const action = await this.actionsService.findOne(+id);
-    if (!action) {
-      throw new NotFoundException('Action not found');
-    }
-
-    // Don't allow opengraph for draft actions
-    if (action.status === ActionStatus.Draft) {
-      throw new NotFoundException('Action not found');
-    }
-    const html = `
-    <html prefix="og: https://ogp.me/ns#">
-        <head>
-        <title>Join the Alliance to participate in ${action.name}</title>
-            <meta property="og:title" content="${action.name}" />
-            <meta property="og:description" content="${action.shortDescription}" />
-            <meta property="og:type" content="website" />
-        </head>
-    </html>
-    `;
-    return html;
-  }
-
   @Get('friendActivity')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [ActionActivityDto] })
@@ -314,7 +287,7 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
   ): Promise<ActionDto | null> {
-    const action = await this.actionsService.findOne(id);
+    const action = await this.actionsService.findOne(id, req.user?.sub);
 
     if (!action) {
       throw new NotFoundException('Action not found');
@@ -367,8 +340,9 @@ export class ActionsController {
   async addEvent(
     @Param('id', ParseIntPipe) id: number,
     @Body() actionEventDto: CreateActionEventDto,
+    @Request() req: JwtRequest,
   ): Promise<ActionDto> {
-    return this.actionsService.addEvent(id, actionEventDto);
+    return this.actionsService.addEvent(id, actionEventDto, req.user?.sub);
   }
 
   @Post('clearDb')
@@ -442,5 +416,20 @@ export class ActionsController {
       query.type,
       query.sendNotifsTo,
     );
+  }
+
+  @Get('canParticipate/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CanParticipateDto })
+  async canParticipate(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: JwtRequest,
+  ): Promise<CanParticipateDto> {
+    return {
+      canParticipate: await this.actionsService.eligibleForAction(
+        id,
+        req.user.sub,
+      ),
+    };
   }
 }

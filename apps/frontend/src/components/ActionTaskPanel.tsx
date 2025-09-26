@@ -8,7 +8,7 @@ import {
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import posthog from "posthog-js";
-import { useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { setRevalidate } from "../applayout";
 import { useAuth } from "../lib/AuthContext";
 import { canCompleteAction } from "../pages/app/HomePage";
@@ -38,14 +38,54 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   card = false,
 }: ActionTaskPanelProps) => {
   const { isAuthenticated } = useAuth();
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const extractErrorMessage = useCallback((error: unknown) => {
+    if (!error) {
+      return "Something went wrong. Please try again.";
+    }
+    if (typeof error === "string") {
+      return error;
+    }
+    if (typeof error === "object" && error !== null) {
+      const maybeError = error as {
+        message?: string;
+        body?: { message?: string | string[] };
+      };
+      const bodyMessage = maybeError.body?.message;
+      if (Array.isArray(bodyMessage)) {
+        return bodyMessage.join(", ");
+      }
+      if (typeof bodyMessage === "string") {
+        return bodyMessage;
+      }
+      if (typeof maybeError.message === "string") {
+        return maybeError.message;
+      }
+    }
+    return "Something went wrong. Please try again.";
+  }, []);
+
+  const errorMessageNode = useMemo(() => {
+    if (!actionError) {
+      return null;
+    }
+    return (
+      <p className="mt-2 text-sm text-red-600" role="alert">
+        {actionError}
+      </p>
+    );
+  }, [actionError]);
 
   const handleCompleteWithTracking = useCallback(async () => {
     const req = await actionsComplete({
       path: { id: action.id },
     });
     if (req.error) {
-      throw new Error("Failed to complete action");
+      setActionError(extractErrorMessage(req.error));
+      return;
     }
+    setActionError(null);
     posthog.capture("action_completed", {
       actionId: action.id,
       actionType: action.type,
@@ -53,18 +93,20 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     });
     setRevalidate();
     onCompleteAction();
-  }, [action, onCompleteAction]);
+  }, [action, extractErrorMessage, onCompleteAction]);
 
   const handleJoinAction = useCallback(async () => {
     const req = await actionsJoin({
       path: { id: action.id },
     });
     if (req.error) {
-      throw new Error("Failed to join action");
+      setActionError(extractErrorMessage(req.error));
+      return;
     }
+    setActionError(null);
     setRevalidate();
     onJoinAction();
-  }, [action, onJoinAction]);
+  }, [action, extractErrorMessage, onJoinAction]);
 
   const handleDeclineAction = useCallback(
     async (moral: boolean, reason: string) => {
@@ -73,12 +115,14 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         body: { reason, moral },
       });
       if (req.error) {
-        throw new Error("Failed to decline action");
+        setActionError(extractErrorMessage(req.error));
+        return;
       }
+      setActionError(null);
       setRevalidate();
       onDeclineAction();
     },
-    [action, onDeclineAction]
+    [action, extractErrorMessage, onDeclineAction]
   );
 
   const handleAbandonAction = useCallback(
@@ -88,12 +132,14 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         body: { reason, outOfTime },
       });
       if (req.error) {
-        throw new Error("Failed to opt out of action");
+        setActionError(extractErrorMessage(req.error));
+        return;
       }
+      setActionError(null);
       setRevalidate();
       onOptOutAction();
     },
-    [action, onOptOutAction]
+    [action, extractErrorMessage, onOptOutAction]
   );
 
   const handleFormStarted = useCallback(() => {
@@ -124,10 +170,13 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         return null;
       }
       return (
-        <ActionTaskPanelCommit
-          onCommit={handleJoinAction}
-          onDecline={handleDeclineAction}
-        />
+        <>
+          <ActionTaskPanelCommit
+            onCommit={handleJoinAction}
+            onDecline={handleDeclineAction}
+          />
+          {errorMessageNode}
+        </>
       );
     }
   }
@@ -170,6 +219,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       return (
         <>
           {completionElement}
+          {errorMessageNode}
           {/* <ActionTaskPanelOptOut
             onOptOut={handleOptOutAction}
             className="mt-3"
@@ -191,11 +241,12 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
             card={card}
           />
         )}
+        {errorMessageNode}
       </>
     );
   }
 
-  return null;
+  return errorMessageNode;
 };
 
 export default ActionTaskPanel;

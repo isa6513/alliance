@@ -8,6 +8,7 @@ import { ActionEventNotifWorker } from 'src/notifs/action-event-notif.worker';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { User } from '../user/entities/user.entity';
+import { Group } from '../user/entities/group.entity';
 import { UserModule } from '../user/user.module';
 import { ActionsController } from './actions.controller';
 import { ActionsGateway } from './actions.gateway';
@@ -25,6 +26,7 @@ import { Action } from './entities/action.entity';
     TypeOrmModule.forFeature([Comment]),
     TypeOrmModule.forFeature([EditableContent]),
     TypeOrmModule.forFeature([ActionEventNotif]),
+    TypeOrmModule.forFeature([Group]),
     UserModule,
     NotifsModule,
     MailModule,

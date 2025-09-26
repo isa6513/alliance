@@ -576,6 +576,15 @@ export class UserService {
     });
   }
 
+  async findActiveUsersWithGroups(): Promise<User[]> {
+    return this.userRepository.find({
+      where: {
+        isNotSignedUpPartialProfile: false,
+      },
+      relations: ['groups'],
+    });
+  }
+
   async createPartialProfile(
     body: Pick<PaymentUserDataToken, 'email' | 'firstName' | 'lastName'>,
   ): Promise<User> {

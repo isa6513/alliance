@@ -30,18 +30,17 @@ export interface TaskPanelContext
   activities: ActionActivityDto[];
   handleLikeActivity: (activityId: number) => Promise<void>;
   setActivities: (activities: ActionActivityDto[]) => void;
+  canParticipate: boolean | null;
 }
 
 const ActionPageTaskPanel = () => {
-  const { userRelation, ...panelHandlers } =
+  const { userRelation, canParticipate, ...panelHandlers } =
     useOutletContext<TaskPanelContext>();
   const action = useActionLoaderData();
 
-  if (!userRelation) {
+  if (!userRelation || !canParticipate || !action) {
     return null;
   }
-
-  console.log("userRelation", userRelation);
 
   if (userRelation === "completed") {
     return <ActionTaskPanelCompleted action={action} />;

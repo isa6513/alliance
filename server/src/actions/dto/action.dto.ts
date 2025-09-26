@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { Allow, IsBoolean, IsString } from 'class-validator';
 import { CommentDto } from 'src/forum/dto/comment.dto';
 import { EditableContentDto } from 'src/forum/dto/editablecontent.dto';
-import { ProfileDto } from 'src/user/user.dto';
+import { ProfileDto, UserDto } from 'src/user/user.dto';
 import { UserActionRelation } from '../actions.service';
 import { ActionActivity } from '../entities/action-activity.entity';
 import {
@@ -176,14 +176,14 @@ export class ActionRelationsDto {
 }
 
 export class PreEventNotifDataDto {
-  @ApiProperty()
-  n_emails: number;
+  @ApiProperty({ type: () => UserDto, isArray: true })
+  emails: UserDto[];
 
-  @ApiProperty()
-  n_texts: number;
+  @ApiProperty({ type: () => UserDto, isArray: true })
+  texts: UserDto[];
 
-  @ApiProperty()
-  n_pushes: number;
+  @ApiProperty({ type: () => UserDto, isArray: true })
+  pushes: UserDto[];
 }
 
 export class PreEventNotifDataQueryDto {
@@ -194,4 +194,9 @@ export class PreEventNotifDataQueryDto {
   @ApiProperty({ enum: NotificationType, enumName: 'NotificationType' })
   @Allow()
   sendNotifsTo: NotificationType;
+}
+
+export class CanParticipateDto {
+  @ApiProperty({ type: Boolean })
+  canParticipate: boolean;
 }

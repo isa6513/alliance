@@ -1,5 +1,6 @@
 import {
   ActionDto,
+  actionsCanParticipate,
   actionsFindOne,
   actionsMyStatus,
   UserActionRelation,
@@ -93,6 +94,7 @@ export default function ActionPage() {
   const [userRelation, setUserRelation] = useState<UserActionRelation | null>(
     null
   );
+  const [canParticipate, setCanParticipate] = useState<boolean | null>(null);
 
   const { isAuthenticated } = useAuth();
 
@@ -110,15 +112,17 @@ export default function ActionPage() {
   useEffect(() => {
     if (isAuthenticated && id) {
       actionsMyStatus({
-        path: { id },
+        path: { id: parseInt(id) },
       }).then((response) => {
-        console.log("response", response);
-        if (response.error) {
-          console.error("Failed to fetch user status", response.error);
-        }
-        console.log("response", response);
         if (response.data) {
           setUserRelation(response.data.relation);
+        }
+      });
+      actionsCanParticipate({
+        path: { id: parseInt(id) },
+      }).then((response) => {
+        if (response.data) {
+          setCanParticipate(response.data.canParticipate);
         }
       });
     }
@@ -138,6 +142,7 @@ export default function ActionPage() {
               onJoinAction: () => setUserRelation("joined"),
               onDeclineAction: () => setUserRelation("declined"),
               onOptOutAction: () => setUserRelation("declined"),
+              canParticipate,
               activities,
               handleLikeActivity,
               setActivities,

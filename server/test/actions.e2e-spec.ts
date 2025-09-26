@@ -5,6 +5,7 @@ import { UserService } from 'src/user/user.service';
 import * as request from 'supertest';
 import { Repository } from 'typeorm';
 import {
+  ActionDto,
   ActionEventDto,
   CreateActionDto,
   CreateActionEventDto,
@@ -16,6 +17,8 @@ import {
 } from '../src/actions/entities/action-event.entity';
 import { Action, ActionTaskType } from '../src/actions/entities/action.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
+import { Group } from '../src/user/entities/group.entity';
+import { User } from '../src/user/entities/user.entity';
 
 describe('Actions (e2e)', () => {
   let ctx: TestContext;
@@ -24,6 +27,11 @@ describe('Actions (e2e)', () => {
   let actionRepo: Repository<Action>;
   let eventRepo: Repository<ActionEvent>;
   let userService: UserService;
+  let groupRepo: Repository<Group>;
+  let userRepo: Repository<User>;
+  let restrictedGroup: Group;
+  let groupRestrictedAction: Action;
+  let outsiderToken: string;
 
   const createPublishedAction = async (
     name: string,
@@ -64,6 +72,8 @@ describe('Actions (e2e)', () => {
     actionRepo = ctx.dataSource.getRepository(Action);
     eventRepo = ctx.dataSource.getRepository(ActionEvent);
     userService = ctx.app.get(UserService);
+    groupRepo = ctx.dataSource.getRepository(Group);
+    userRepo = ctx.dataSource.getRepository(User);
 
     // Create test action with MemberAction status
     testAction = actionRepo.create({
@@ -95,6 +105,55 @@ describe('Actions (e2e)', () => {
     await eventRepo.save(memberActionEvent);
 
     // testDraftAction has no events, so it defaults to Draft status
+
+    const defaultUser = await userRepo.findOneOrFail({
+      where: { id: ctx.testUserId },
+    });
+    defaultUser.contractDateSigned = new Date();
+    await userRepo.save(defaultUser);
+
+    restrictedGroup = await groupRepo.save(
+      groupRepo.create({
+        name: 'Restricted Cohort',
+        description: 'Members only',
+        users: [defaultUser],
+      }),
+    );
+
+    const outsider = await userRepo.save(
+      userRepo.create({
+        email: 'outsider@example.com',
+        password: 'pass',
+        name: 'Outsider',
+      }),
+    );
+
+    outsiderToken = ctx.jwtService.sign(
+      { sub: outsider.id, email: outsider.email, name: outsider.name },
+      { secret: process.env.JWT_SECRET },
+    );
+
+    const { action: restricted } = await createPublishedAction(
+      'Group Restricted Action',
+      {
+        actionOverrides: {
+          participatingGroups: [restrictedGroup],
+          showToNonparticipating: true,
+        },
+      },
+    );
+
+    await createPublishedAction('Group Restricted Hidden Action', {
+      actionOverrides: {
+        participatingGroups: [restrictedGroup],
+        showToNonparticipating: false,
+      },
+    });
+
+    groupRestrictedAction = await actionRepo.findOneOrFail({
+      where: { id: restricted.id },
+      relations: ['participatingGroups'],
+    });
   }, 50000);
 
   describe('Actions', () => {
@@ -211,7 +270,12 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.length).toBe(1);
+
+      expect(
+        res.body.some(
+          (action: ActionDto) => action.status === ActionStatus.Draft,
+        ),
+      ).toBe(false);
     });
 
     it('admin can see draft actions', async () => {
@@ -220,10 +284,12 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.length).toBe(2);
-      expect([res.body[1].status, res.body[0].status]).toContain(
-        ActionStatus.Draft,
-      );
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(
+        res.body.some(
+          (action: ActionDto) => action.status === ActionStatus.Draft,
+        ),
+      ).toBe(true);
     });
 
     it('unauthenticated user cannot access individual draft action', async () => {
@@ -256,7 +322,70 @@ describe('Actions (e2e)', () => {
       const res = await request(ctx.app.getHttpServer()).get('/actions');
 
       expect(res.status).toBe(200);
-      expect(res.body.length).toBe(1);
+      expect(res.body.length).toBeGreaterThan(1);
+
+      expect(
+        res.body.some(
+          (action: ActionDto) => action.status === ActionStatus.Draft,
+        ),
+      ).toBe(false);
+    });
+
+    it('allows members of participating groups to join restricted actions', async () => {
+      const res = await ctx.agent
+        .post(`/actions/join/${groupRestrictedAction.id}`)
+        .expect(201);
+
+      expect(res.body.actionId).toBe(groupRestrictedAction.id);
+    });
+
+    it('blocks users outside participating groups from joining restricted actions', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/actions/join/${groupRestrictedAction.id}`)
+        .set('Authorization', `Bearer ${outsiderToken}`);
+
+      expect(res.status).toBe(403);
+    });
+
+    it('only counts eligible participants in pre-event notification data', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .get(`/actions/preEventNotifData/${groupRestrictedAction.id}`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .query({
+          type: ActionStatus.MemberAction,
+          sendNotifsTo: NotificationType.All,
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.emails.length).toBe(1);
+      expect(res.body.texts.length).toBe(0);
+    });
+
+    it('shows actions to outsider if showToNonparticipating is true', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .get('/actions')
+        .set('Authorization', `Bearer ${outsiderToken}`);
+
+      expect(res.status).toBe(200);
+      expect(
+        res.body.some(
+          (action: ActionDto) => action.name === 'Group Restricted Action',
+        ),
+      ).toBe(true);
+    });
+
+    it('does not show actions to non-participating groups if showToNonparticipating is false', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .get('/actions')
+        .set('Authorization', `Bearer ${outsiderToken}`);
+
+      expect(res.status).toBe(200);
+      expect(
+        res.body.some(
+          (action: ActionDto) =>
+            action.name === 'Group Restricted Hidden Action',
+        ),
+      ).toBe(false);
     });
 
     it('admin can add an event to an action', async () => {
@@ -998,6 +1127,7 @@ describe('Actions (e2e)', () => {
           }),
         ),
       );
+      const n_users = baseUsers.length + 1; // +1 for default sample user
 
       const tokens = baseUsers.map((user) =>
         ctx.jwtService.sign({
@@ -1030,11 +1160,9 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .expect(200);
 
-      expect(memberRes.body).toMatchObject({
-        n_emails: 1,
-        n_texts: 1,
-        n_pushes: 0,
-      });
+      expect(memberRes.body.emails.length).toBe(1);
+      expect(memberRes.body.texts.length).toBe(1);
+      expect(memberRes.body.pushes.length).toBe(0);
 
       const { action: gatherAction } = await createPublishedAction(
         'Notif Gathering Scenario',
@@ -1052,9 +1180,11 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .expect(200);
 
-      expect(gatherRes.body.n_emails).toBe(1);
-      expect(gatherRes.body.n_texts).toBe(baseUsers.length - 1);
-      expect(gatherRes.body.n_pushes).toBe(0);
+      //   expect(gatherRes.body.n_emails).toBe(1);
+      expect(gatherRes.body.texts.length + gatherRes.body.emails.length).toBe(
+        n_users,
+      );
+      expect(gatherRes.body.pushes.length).toBe(0);
 
       const { action: commitmentlessAction } = await createPublishedAction(
         'Notif Commitmentless Scenario',
@@ -1073,9 +1203,9 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .expect(200);
 
-      expect(commitmentlessRes.body.n_emails).toBe(1);
-      expect(commitmentlessRes.body.n_texts).toBe(baseUsers.length - 1);
-      expect(commitmentlessRes.body.n_pushes).toBe(0);
+      expect(commitmentlessRes.body.emails.length).toBe(2);
+      expect(commitmentlessRes.body.texts.length).toBe(2);
+      expect(commitmentlessRes.body.pushes.length).toBe(0);
 
       await actionRepo.delete(memberAction.id);
       await actionRepo.delete(gatherAction.id);

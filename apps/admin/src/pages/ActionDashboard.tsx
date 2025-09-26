@@ -7,7 +7,9 @@ import {
   CreateActionDto,
   FormDto,
   tasksListForms,
+  userGetGroups,
 } from "@alliance/shared/client";
+import type { Group, GroupDto } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
@@ -66,6 +68,9 @@ const ActionDashboard: React.FC = () => {
   const [uploadingImage, setUploadingImage] = useState<boolean>(false);
   const [availableForms, setAvailableForms] = useState<FormDto[]>([]);
   const [formsLoading, setFormsLoading] = useState<boolean>(true);
+  const [availableGroups, setAvailableGroups] = useState<GroupDto[]>([]);
+  const [groupsLoading, setGroupsLoading] = useState<boolean>(true);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -97,6 +102,31 @@ const ActionDashboard: React.FC = () => {
     loadForms();
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadGroups = async () => {
+      try {
+        const response = await userGetGroups();
+        if (!cancelled && response.data) {
+          setAvailableGroups(response.data);
+        }
+      } catch (err) {
+        console.error("Failed to load groups:", err);
+      } finally {
+        if (!cancelled) {
+          setGroupsLoading(false);
+        }
+      }
+    };
+
+    loadGroups();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const [form, setForm] = useState<CreateActionDto & { taskFormId?: number }>({
     name: "",
     category: "",
@@ -107,6 +137,7 @@ const ActionDashboard: React.FC = () => {
     commitmentless: false,
     type: "Activity",
     taskFormId: undefined,
+    participatingGroups: [],
   });
 
   // Reset form when switching to new action mode
@@ -122,10 +153,12 @@ const ActionDashboard: React.FC = () => {
         commitmentless: false,
         type: "Activity",
         taskFormId: undefined,
+        participatingGroups: [],
       });
       setImageFile(null);
       setImagePreview(null);
       setError(null);
+      setSelectedGroupIds([]);
     }
   }, [isNew]);
 
@@ -151,7 +184,12 @@ const ActionDashboard: React.FC = () => {
         setForm({
           ...formData,
           taskFormId: actionData.taskFormId,
+          participatingGroups: actionData.participatingGroups ?? [],
         });
+
+        setSelectedGroupIds(
+          (actionData.participatingGroups || []).map((group) => group.id)
+        );
 
         setLoading(false);
       } catch (err) {
@@ -222,6 +260,19 @@ const ActionDashboard: React.FC = () => {
     }
   };
 
+  const handleGroupsChange = useCallback(
+    (ids: number[]) => {
+      setSelectedGroupIds(ids);
+      setForm((prev) => ({
+        ...prev,
+        participatingGroups: ids.map(
+          (id) => ({ id } as unknown as Group)
+        ),
+      }));
+    },
+    []
+  );
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -274,6 +325,9 @@ const ActionDashboard: React.FC = () => {
 
       const formData = {
         ...form,
+        participatingGroups: selectedGroupIds.map(
+          (id) => ({ id } as unknown as Group)
+        ),
         // ...(imageFilename && { image: imageFilename }),
       };
 
@@ -383,6 +437,10 @@ const ActionDashboard: React.FC = () => {
           onCancel={handleCancel}
           availableForms={availableForms}
           formsLoading={formsLoading}
+          availableGroups={availableGroups}
+          groupsLoading={groupsLoading}
+          selectedGroupIds={selectedGroupIds}
+          onGroupsChange={handleGroupsChange}
         />
       ) : (
         // Existing Action Dashboard
@@ -580,6 +638,10 @@ const ActionDashboard: React.FC = () => {
                   baseUrl={baseUrl}
                   availableForms={availableForms}
                   formsLoading={formsLoading}
+                  availableGroups={availableGroups}
+                  groupsLoading={groupsLoading}
+                  selectedGroupIds={selectedGroupIds}
+                  onGroupsChange={handleGroupsChange}
                 />
               </Card>
             )}

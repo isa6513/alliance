@@ -40,6 +40,8 @@ import {
   NotificationType,
 } from './entities/action-event.entity';
 import { Action, ActionTaskType } from './entities/action.entity';
+import { Group } from 'src/user/entities/group.entity';
+import { UserDto } from 'src/user/user.dto';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -66,6 +68,8 @@ export class ActionsService {
     private readonly commentRepository: Repository<Comment>,
     @InjectRepository(EditableContent)
     private readonly editableContentRepository: Repository<EditableContent>,
+    @InjectRepository(Group)
+    private readonly groupRepository: Repository<Group>,
     private readonly notifsService: NotifsService,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
@@ -73,14 +77,21 @@ export class ActionsService {
   ) {}
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
-    const action = this.actionRepository.create(createActionDto);
+    const { participatingGroups, ...rest } = createActionDto;
+    const action = this.actionRepository.create(rest);
+
+    if (participatingGroups && participatingGroups.length > 0) {
+      action.participatingGroups =
+        await this.resolveParticipatingGroups(participatingGroups);
+    }
+
     return this.actionRepository.save(action);
   }
 
   findAll(): Promise<ActionDto[]> {
     return this.actionRepository
       .find({
-        relations: ['events', 'activities'],
+        relations: ['events', 'activities', 'participatingGroups'],
       })
       .then((actions) => {
         return actions.map((action) => this.entityToDto(action));
@@ -96,24 +107,63 @@ export class ActionsService {
     };
   }
 
-  findPublic(): Promise<ActionDto[]> {
-    return this.actionRepository
-      .find({
-        relations: ['events', 'activities'],
-      })
-      .then((actions) => {
-        return actions
-          .filter((action) => action.status !== ActionStatus.Draft)
-          .map((action) => this.entityToDto(action));
-      });
+  async findPublic(userId?: number): Promise<ActionDto[]> {
+    const actions = await this.actionRepository.find({
+      relations: ['events', 'activities', 'participatingGroups'],
+    });
+
+    const filtered: Action[] = [];
+    for (const action of actions) {
+      if (await this.userCanSeeAction(action.id, userId)) {
+        filtered.push(action);
+      }
+    }
+
+    return filtered.map((action) => this.entityToDto(action));
   }
 
-  async findOne(id: number): Promise<Action> {
+  async userCanSeeAction(actionId: number, userId?: number): Promise<boolean> {
+    const action = await this.actionRepository.findOneOrFail({
+      where: { id: actionId },
+      relations: ['participatingGroups', 'participatingGroups.users', 'events'],
+    });
+
+    const user = userId ? await this.userService.findOne(userId) : null;
+    if (user?.admin) {
+      return true;
+    }
+    if (action.status === ActionStatus.Draft) {
+      return false;
+    }
+    if (
+      !action.participatingGroups?.length ||
+      action.showToNonparticipating === true
+    ) {
+      return true;
+    }
+    if (!userId) {
+      return false;
+    }
+
+    return action.participatingGroups?.some((group) =>
+      group.users.some((user) => user.id === userId),
+    );
+  }
+
+  async findOne(
+    id: number,
+    userId?: number,
+    serverSide = false,
+  ): Promise<Action> {
     const action = await this.actionRepository.findOne({
       where: { id },
-      relations: ['events', 'activities'],
+      relations: ['events', 'activities', 'participatingGroups'],
     });
-    if (!action) {
+
+    if (
+      !action ||
+      !((await this.userCanSeeAction(action.id, userId)) || serverSide)
+    ) {
       throw new NotFoundException('Action not found');
     }
     return instanceToPlain(action) as Action;
@@ -162,11 +212,27 @@ export class ActionsService {
     userId: number,
     type: ActionActivityType,
   ): Promise<ActionActivityDto> {
+    console.log('creating action activity', actionId, userId, type);
+    const acti = await this.actionRepository.findOne({
+      where: { id: actionId },
+      relations: ['participatingGroups', 'events'],
+    });
+    console.log('found action', acti);
+    console.log('status', acti?.status);
+    const action = await this.findOne(actionId, userId);
+    console.log('found action didnt fail');
+
+    if (
+      type === ActionActivityType.USER_JOINED ||
+      type === ActionActivityType.USER_COMPLETED
+    ) {
+      await this.ensureUserEligibleForAction(action, userId);
+    }
+
     if (type === ActionActivityType.USER_JOINED) {
       this.eventEmitter.emit('action.delta', { actionId, delta: +1 });
     }
 
-    const action = await this.findOne(actionId);
     const user = await this.userService.findOneOrFail(userId);
 
     const activity = this.actionActivityRepository.create({
@@ -207,6 +273,7 @@ export class ActionsService {
     isMoral: boolean,
   ): Promise<ActionActivityDto> {
     const action = await this.findOne(actionId);
+    await this.ensureUserEligibleForAction(action, userId);
     const user = await this.userService.findOneOrFail(userId);
 
     const activity = this.actionActivityRepository.create({
@@ -229,6 +296,7 @@ export class ActionsService {
     outOfTime: boolean,
   ): Promise<ActionActivityDto> {
     const action = await this.findOne(actionId);
+    await this.ensureUserEligibleForAction(action, userId);
     const user = await this.userService.findOneOrFail(userId);
 
     const activity = this.actionActivityRepository.create({
@@ -259,15 +327,34 @@ export class ActionsService {
     id: number,
     updateActionDto: UpdateActionDto,
   ): Promise<Action | null> {
-    await this.actionRepository.update(id, updateActionDto);
+    const action = await this.actionRepository.findOne({
+      where: { id },
+      relations: ['participatingGroups'],
+    });
+
+    if (!action) {
+      throw new NotFoundException('Action not found');
+    }
+
+    const { participatingGroups, ...rest } = updateActionDto;
+
+    Object.assign(action, rest);
+
+    if (participatingGroups !== undefined) {
+      action.participatingGroups =
+        await this.resolveParticipatingGroups(participatingGroups);
+    }
+
+    await this.actionRepository.save(action);
     return this.findOne(id);
   }
 
   async addEvent(
     actionId: number,
     actionEventDto: CreateActionEventDto,
+    userId?: number,
   ): Promise<ActionDto> {
-    const action = await this.findOne(actionId);
+    const action = await this.findOne(actionId, userId);
 
     const newEvent = this.actionEventRepository.create({
       ...actionEventDto,
@@ -277,7 +364,7 @@ export class ActionsService {
     await this.actionEventRepository.save(newEvent);
 
     // re-fetch action from database to get the updated events
-    const newAction = await this.findOne(actionId);
+    const newAction = await this.findOne(actionId, userId);
 
     return new ActionDto(newAction);
   }
@@ -366,8 +453,66 @@ export class ActionsService {
     return activities.map((activity) => new ActionActivityDto(activity));
   }
 
+  private async resolveParticipatingGroups(
+    groups?: Array<Partial<Group>>,
+  ): Promise<Group[]> {
+    if (!groups || groups.length === 0) {
+      return [];
+    }
+
+    const ids = groups
+      .map((group) => group?.id)
+      .filter((id): id is number => typeof id === 'number');
+
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const uniqueIds = Array.from(new Set(ids));
+    const found = await this.groupRepository.findBy({ id: In(uniqueIds) });
+
+    if (found.length !== uniqueIds.length) {
+      const foundIds = new Set(found.map((group) => group.id));
+      const missing = uniqueIds.filter((id) => !foundIds.has(id));
+      throw new NotFoundException(`Group(s) not found: ${missing.join(', ')}`);
+    }
+
+    return found;
+  }
+
+  async ensureUserEligibleForAction(action: Action, userId: number) {
+    const groups = action.participatingGroups || [];
+    if (groups.length === 0) {
+      return;
+    }
+
+    const user = await this.userService.findOne(userId, ['groups']);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const userGroupIds = new Set((user.groups || []).map((group) => group.id));
+    const isMember = groups.some((group) => userGroupIds.has(group.id));
+
+    if (!isMember) {
+      throw new ForbiddenException(
+        'This action is not available to your groups.',
+      );
+    }
+  }
+
+  async eligibleForAction(actionId: number, userId: number): Promise<boolean> {
+    const action = await this.findOne(actionId, userId);
+    try {
+      await this.ensureUserEligibleForAction(action, userId);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async checkAndProcessAutomaticTransitions(actionId: number) {
-    const action = await this.findOne(actionId);
+    const action = await this.findOne(actionId, undefined, true);
 
     // Check if we should transition from GatheringCommitments to CommitmentsReached
     if (action.status === ActionStatus.GatheringCommitments) {
@@ -406,7 +551,7 @@ export class ActionsService {
     title: string,
     description: string,
   ): Promise<void> {
-    const action = await this.findOne(actionId);
+    const action = await this.findOne(actionId, undefined, true);
 
     const eventData: CreateActionEventDto = {
       title,
@@ -608,7 +753,7 @@ export class ActionsService {
   }
 
   async getPaymentAmountForAction(id: number): Promise<number> {
-    const action = await this.findOne(id);
+    const action = await this.findOne(id, undefined, true);
     if (action.type !== ActionTaskType.Funding) {
       throw new BadRequestException('Action is not a funding action');
     }
@@ -625,14 +770,15 @@ export class ActionsService {
   ): Promise<PreEventNotifDataDto> {
     if (sendNotifsTo === NotificationType.None) {
       return {
-        n_texts: 0,
-        n_emails: 0,
-        n_pushes: 0,
+        texts: [],
+        emails: [],
+        pushes: [],
       };
     }
 
     const action = await this.actionRepository.findOne({
       where: { id: actionId },
+      relations: ['participatingGroups'],
     });
     if (!action) {
       throw new NotFoundException('Action not found');
@@ -650,10 +796,12 @@ export class ActionsService {
       .filter((user) => this.notifsService.shouldEmailUser(user))
       .filter((user) => !texts.includes(user));
 
+    const pushes = [];
+
     return {
-      n_texts: texts.length,
-      n_emails: emails.length,
-      n_pushes: 0,
+      texts: texts.map((user) => new UserDto(user)),
+      emails: emails.map((user) => new UserDto(user)),
+      pushes: pushes.map((user) => new UserDto(user)),
     };
   }
 }
