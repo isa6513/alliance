@@ -13,7 +13,7 @@ In order to begin taking actions together, we needed a shared foundation. We wan
 
 We will use these premises for many purposes going forward, including to explain the Alliance to new members, to justify proposed collective actions, and to provide a framework for member deliberations.
 
-Certain premises, such as our vision, are unlikely to change; others, such as the process by which the strategic office is held accountable to members, are subject to future revision.
+Certain premises, such as our vision, are unlikely to change; others, such as the process by which the strategic office is held accountable to members, are subject to future revision. In the meantime, the strategic office will make small edits to the produced guide for clarity, but will not make major changes to content without member consultation.
 
 ## What we did
 
