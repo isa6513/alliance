@@ -191,7 +191,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
 
   return (
     <>
-      <div className="flex mb-4">
+      <div className="flex mt-2 mb-3">
         <Button
           color={ButtonColor.Transparent}
           className={`px-4 py-2 rounded-none  ${
