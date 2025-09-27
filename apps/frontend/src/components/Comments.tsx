@@ -279,6 +279,11 @@ const Comments = ({
         <div className={`${compact ? "mt-3 " : "space-y-2 my-3"}`}>
           {comments
             .filter((comment) => !comment.deleted || comment.children?.length)
+            .sort((a, b) => {
+              const dateA = new Date(a.createdAt).getTime();
+              const dateB = new Date(b.createdAt).getTime();
+              return dateB - dateA;
+            })
             .map((reply) => (
               <ReplyComponent
                 key={reply.id}
