@@ -110,10 +110,13 @@ export async function clientLoader() {
     }
   });
 
-  const actionsWithRelation = actions.data?.map((action) => ({
-    ...action,
-    relation: actionToRelationMap.get(action.id),
-  }));
+  // for most users draft actions will be filtered out on server. extra filter just makes admin users not see extra actions
+  const actionsWithRelation = actions.data
+    ?.filter((action) => action.status !== "draft")
+    .map((action) => ({
+      ...action,
+      relation: actionToRelationMap.get(action.id),
+    }));
 
   // Sort so that actions with the earliest last event come first
   const actionsSortedByDate = actionsWithRelation?.sort((a, b) => {
