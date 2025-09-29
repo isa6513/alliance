@@ -76,6 +76,15 @@ jobs:
         run: corepack yarn workspace @alliance/frontend build
         working-directory: ./
 
+      - name: Posthog sourcemap injection
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/PostHog/posthog/releases/latest/download/posthog-cli-installer.sh | sh
+          posthog-cli-update
+          POSTHOG_CLI_ENV_ID=${{ secrets.POSTHOG_PROJECT_ID }} POSTHOG_CLI_TOKEN=${{ secrets.POSTHOG_CLI_TOKEN }} posthog-cli login
+
+          posthog-cli sourcemap inject --directory ./build/client/assets/
+          posthog-cli sourcemap upload --directory ./build/client/assets/
+
       - name: create output folder
         run: |
           rm -rf output
