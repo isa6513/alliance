@@ -8,6 +8,7 @@ export enum UserActionRelationStatus {
   Completed = 'completed',
   Declined = 'declined',
   WontComplete = 'wont_complete',
+  MissedDeadline = 'missed_deadline',
 }
 
 export class UserActionSummaryDto {

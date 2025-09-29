@@ -161,7 +161,6 @@ export class UserService {
     const actions = await this.actionRepository.find({ relations: ['events'] });
 
     const activeStatuses = new Set<ActionStatus>([
-      ActionStatus.Upcoming,
       ActionStatus.GatheringCommitments,
       ActionStatus.OfficeAction,
       ActionStatus.MemberAction,
@@ -174,6 +173,22 @@ export class UserService {
 
     if (relevantActions.length === 0) {
       return { actions: [], users: [] };
+    }
+
+    const now = new Date();
+    const memberActionPhaseEnded = new Map<number, boolean>();
+
+    for (const { action } of relevantActions) {
+      const pastEvents = (action.events ?? [])
+        .filter((event) => event.date <= now)
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
+      const memberActionIndex = pastEvents.findIndex(
+        (event) => event.newStatus === ActionStatus.MemberAction,
+      );
+      memberActionPhaseEnded.set(
+        action.id,
+        memberActionIndex !== -1 && memberActionIndex < pastEvents.length - 1,
+      );
     }
 
     const actionSummaries: UserActionSummaryDto[] = relevantActions
@@ -194,9 +209,10 @@ export class UserService {
     });
 
     const statusPriority: Record<UserActionRelationStatus, number> = {
-      [UserActionRelationStatus.Completed]: 4,
-      [UserActionRelationStatus.WontComplete]: 3,
-      [UserActionRelationStatus.Declined]: 2,
+      [UserActionRelationStatus.Completed]: 5,
+      [UserActionRelationStatus.WontComplete]: 4,
+      [UserActionRelationStatus.Declined]: 3,
+      [UserActionRelationStatus.MissedDeadline]: 2,
       [UserActionRelationStatus.Joined]: 1,
       [UserActionRelationStatus.None]: 0,
     };
@@ -242,48 +258,53 @@ export class UserService {
       const priority = statusPriority[status];
 
       if (!existing || priority >= existing.priority) {
-        const shouldReplace =
-          !existing ||
-          priority > existing.priority ||
-          (priority === existing.priority &&
-            (!existing.latestActivityAt ||
-              existing.latestActivityAt < activity.createdAt));
-
-        if (shouldReplace) {
-          userRelations.set(activity.actionId, {
-            status,
-            priority,
-            latestActivityType: activity.type,
-            latestActivityAt: activity.createdAt,
-          });
-        }
+        userRelations.set(activity.actionId, {
+          status,
+          priority,
+          latestActivityType: activity.type,
+          latestActivityAt: activity.createdAt,
+        });
       }
 
       perUser.set(activity.userId, userRelations);
     }
 
-    const users: UserActionRelationsForUserDto[] = Array.from(perUser.entries()).map(
-      ([userId, actionMap]) => {
-        const relations: UserActionRelationDetailDto[] = Array.from(
-          actionMap.entries(),
-        )
-          .map(([actionId, detail]) => ({
-            actionId,
-            status: detail.status,
-            latestActivityType: detail.latestActivityType,
-            latestActivityAt: detail.latestActivityAt?.toISOString(),
-          }))
-          .sort((a, b) =>
+    for (const [, actionMap] of perUser) {
+      for (const [actionId, detail] of actionMap) {
+        if (
+          detail.status === UserActionRelationStatus.Joined &&
+          memberActionPhaseEnded.get(actionId)
+        ) {
+          detail.status = UserActionRelationStatus.MissedDeadline;
+          detail.priority =
+            statusPriority[UserActionRelationStatus.MissedDeadline];
+        }
+      }
+    }
+
+    const users: UserActionRelationsForUserDto[] = Array.from(
+      perUser.entries(),
+    ).map(([userId, actionMap]) => {
+      const relations: UserActionRelationDetailDto[] = Array.from(
+        actionMap.entries(),
+      )
+        .map(([actionId, detail]) => ({
+          actionId,
+          status: detail.status,
+          latestActivityType: detail.latestActivityType,
+          latestActivityAt: detail.latestActivityAt?.toISOString(),
+        }))
+        .sort(
+          (a, b) =>
             (actionOrder.get(a.actionId) ?? 0) -
             (actionOrder.get(b.actionId) ?? 0),
-          );
+        );
 
-        return {
-          userId,
-          relations,
-        } satisfies UserActionRelationsForUserDto;
-      },
-    );
+      return {
+        userId,
+        relations,
+      } satisfies UserActionRelationsForUserDto;
+    });
 
     return {
       actions: actionSummaries,

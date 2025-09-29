@@ -159,7 +159,7 @@ export type UserActionSummaryDto = {
     status: ActionStatus;
 };
 
-export type UserActionRelationStatus = 'none' | 'joined' | 'completed' | 'declined' | 'wont_complete';
+export type UserActionRelationStatus = 'none' | 'joined' | 'completed' | 'declined' | 'wont_complete' | 'missed_deadline';
 
 export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete';
 
