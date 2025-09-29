@@ -359,10 +359,10 @@ export class ForumService {
     }
 
     for (const userToNotify of usersToNotify) {
-      const profile = new ProfileDto(userToNotify);
+      const authorDto = new ProfileDto(comment.author);
       const notif = this.notifRepository.create({
         user: userToNotify,
-        message: `New reply from ${profile.displayName}`,
+        message: `New reply from ${authorDto.displayName}`,
         category: NotificationCategory.ForumReply,
         webAppLocation: commentUrl(comment),
         associatedUser: comment.author,
