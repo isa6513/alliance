@@ -18,6 +18,9 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ["@alliance/shared"],
   },
+  build: {
+    sourcemap: true,
+  },
   server: {
     watch: {
       usePolling: true,
