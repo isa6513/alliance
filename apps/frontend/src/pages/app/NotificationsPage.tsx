@@ -16,7 +16,7 @@ const NotificationsPage = () => {
           {allNotifications.map((notification) => (
             <div
               key={notification.id}
-              className="hover:bg-zinc-100 p-4 rounded-md flex cursor-pointer flex-col gap-y-2"
+              className="hover:bg-zinc-100 p-4 flex cursor-pointer flex-col gap-y-2"
               onClick={handleNotifClick(
                 notification.id,
                 notification.webAppLocation
