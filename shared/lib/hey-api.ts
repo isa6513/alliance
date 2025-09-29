@@ -13,22 +13,28 @@ export const AuthEvents = {
 export const createClientConfig: CreateClientConfig = (config) => {
   const originalFetch = (config?.fetch ?? fetch).bind(globalThis);
 
-  const wrappedFetch: typeof fetch = async (input: RequestInfo | URL) => {
-    const inputreq = input as Request;
-    const res = await originalFetch(new Request(input).clone());
+  const wrappedFetch: typeof fetch = async (
+    input: RequestInfo | URL,
+    init?: RequestInit
+  ) => {
+    const req = new Request(input, init);
+    const retryReq = req.clone();
+
+    const res = await originalFetch(retryReq);
 
     if (
       res.status !== 401 ||
-      inputreq.url.includes("auth/refresh") ||
+      req.url.includes("auth/refresh") ||
       window.location.pathname.includes("/login") ||
       window.location.pathname.includes("/signup")
-    )
+    ) {
       return res;
+    }
 
     const refreshRes = await authRefreshTokens();
 
     if (refreshRes.response.ok) {
-      const retryRes = await originalFetch(inputreq.clone());
+      const retryRes = await originalFetch(retryReq);
       if (retryRes.status !== 401) {
         return retryRes;
       } else {

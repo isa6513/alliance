@@ -32,7 +32,7 @@ export class AuthService {
       secure: prod,
       path: '/',
       sameSite: 'strict',
-      maxAge: 1000 * 60 * 15, // 15 min
+      maxAge: 1000 * 60 * 30, // 30 min
     });
     if (refresh) {
       res.cookie(AuthService.REFRESH_COOKIE, refresh, {
