@@ -18,13 +18,14 @@ export function postUrl(postId: number) {
 
 export function commentUrl(
   comment: Pick<Comment, 'parentObjectType' | 'parentObjectId' | 'id'>,
+  actionId?: number,
 ) {
   if (comment.parentObjectType === CommentParentObject.Post) {
     return `/forum/post/${comment.parentObjectId}?replyId=${comment.id}`;
   } else if (comment.parentObjectType === CommentParentObject.Action) {
     return `/actions/${comment.parentObjectId}?replyId=${comment.id}`;
   } else if (comment.parentObjectType === CommentParentObject.Activity) {
-    return `/actions/${comment.parentObjectId}/activity/${comment.parentObjectId}?replyId=${comment.id}`;
+    return `/actions/${actionId}/activity/${comment.parentObjectId}?replyId=${comment.id}`;
   }
 }
 

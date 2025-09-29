@@ -330,10 +330,10 @@ export class ForumService {
   }
 
   async sendNotifsForNewComment(comment: Comment): Promise<void> {
-    // Create notifications
     const notifications: Notification[] = [];
 
     const usersToNotify: User[] = [];
+    const actionIds: Map<number, number> = new Map();
 
     if (comment.parentId) {
       const parentReply = await this.commentRepository.findOneOrFail({
@@ -353,9 +353,10 @@ export class ForumService {
     if (comment.parentObjectType === CommentParentObject.Activity) {
       const activity = await this.actionActivityRepository.findOneOrFail({
         where: { id: comment.parentObjectId },
-        relations: ['user'],
+        relations: ['user', 'action'],
       });
       usersToNotify.push(activity.user);
+      actionIds.set(activity.id, activity.action.id);
     }
 
     for (const userToNotify of usersToNotify) {
@@ -364,7 +365,12 @@ export class ForumService {
         user: userToNotify,
         message: `New reply from ${authorDto.displayName}`,
         category: NotificationCategory.ForumReply,
-        webAppLocation: commentUrl(comment),
+        webAppLocation: commentUrl(
+          comment,
+          comment.parentObjectType === CommentParentObject.Activity
+            ? actionIds.get(comment.parentObjectId)
+            : undefined,
+        ),
         associatedUser: comment.author,
       });
       notifications.push(notif);
