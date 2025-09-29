@@ -114,7 +114,9 @@ export class ForumController {
   }
 
   @Get('posts/user/:id/comments')
-  @ApiOperation({ summary: 'Get all comments by a specific user' })
+  @ApiOperation({
+    summary: 'Get all comments by a specific user, excluding activity comments',
+  })
   @ApiOkResponse({ type: [UserCommentDto] })
   findCommentsByUser(
     @Param('id', ParseIntPipe) id: number,

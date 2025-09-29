@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { commentUrl } from 'src/search/approutes';
 import { ProfileDto } from 'src/user/user.dto';
-import { ILike, In, Repository } from 'typeorm';
+import { ILike, In, Not, Repository } from 'typeorm';
 import {
   Notification,
   NotificationCategory,
@@ -497,7 +497,11 @@ export class ForumService {
 
   async findCommentsByUser(userId: number): Promise<UserCommentDto[]> {
     const comments = await this.commentRepository.find({
-      where: { authorId: userId, deleted: false },
+      where: {
+        authorId: userId,
+        deleted: false,
+        parentObjectType: Not(CommentParentObject.Activity),
+      },
       relations: ['author'],
     });
     const postIds = comments
