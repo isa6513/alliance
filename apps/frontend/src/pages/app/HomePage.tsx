@@ -36,12 +36,16 @@ const HomePage = () => {
 
   const newActions = actions.filter(
     (action) =>
-      action.relation === "none" && action.status === "gathering_commitments"
+      action.relation === "none" &&
+      action.status === "gathering_commitments" &&
+      action.canParticipate
   );
 
   const committedActions = actions.filter(
     (action) =>
-      action.relation === "joined" && action.status === "gathering_commitments"
+      action.relation === "joined" &&
+      action.status === "gathering_commitments" &&
+      action.canParticipate
   );
 
   const commitmentsReachedActions = actions.filter(

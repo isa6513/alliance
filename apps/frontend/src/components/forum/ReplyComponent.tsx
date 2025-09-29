@@ -257,7 +257,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                   onClick={() => {
                     setReplyingTo(isReplyingToThis ? null : reply.id);
                   }}
-                  className="text-gray-600 hover:text-gray-800 hover:underline"
+                  className="text-zinc-500 hover:text-zinc-700 hover:underline"
                 >
                   {!isReplyingToThis && "Reply"}
                 </button>

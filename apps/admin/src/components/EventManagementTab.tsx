@@ -471,8 +471,8 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
             </button>
             <div>
               <p>
-                This will send <b>{notifData?.n_emails}</b> emails and{" "}
-                <b>{notifData?.n_texts}</b> texts
+                This will send <b>{notifData?.emails.length}</b> emails and{" "}
+                <b>{notifData?.texts.length}</b> texts
               </p>
             </div>
           </form>

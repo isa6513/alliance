@@ -1,6 +1,7 @@
 import {
   ActionActivityDto,
   ActionDto,
+  actionsCanParticipate,
   actionsFindAll,
   actionsMyActivity,
   forumFindAllPosts,
@@ -35,7 +36,8 @@ export interface RouteMatches {
 }
 
 export type ActionWithRelation = ActionDto & {
-  relation: UserActionRelation | undefined;
+  relation?: UserActionRelation;
+  canParticipate: boolean;
 };
 
 export interface LoaderData {
@@ -66,6 +68,7 @@ export async function clientLoader() {
 
   const activityList = activities.data ?? [];
   const actionToRelationMap = new Map<number, UserActionRelation>();
+  const actionToCanParticipateMap = new Map<number, boolean>();
   if (activities.data) {
     for (const action of actions.data ?? []) {
       actionToRelationMap.set(action.id, "none");
@@ -95,6 +98,21 @@ export async function clientLoader() {
     actionToRelationMap.set(activity.actionId, "completed");
   });
 
+  await Promise.all(
+    actions.data?.map(async (action) => {
+      return actionsCanParticipate({
+        path: { id: action.id },
+      }).then((response) => {
+        if (response.data) {
+          actionToCanParticipateMap.set(
+            action.id,
+            response.data.canParticipate
+          );
+        }
+      });
+    }) ?? []
+  );
+
   const activitiesForAction = new Map<number, ActivitiesForAction>();
   activityList.forEach((activity) => {
     if (!activitiesForAction.has(activity.actionId)) {
@@ -116,6 +134,7 @@ export async function clientLoader() {
     .map((action) => ({
       ...action,
       relation: actionToRelationMap.get(action.id),
+      canParticipate: actionToCanParticipateMap.get(action.id) ?? false,
     }));
 
   // Sort so that actions with the earliest last event come first

@@ -40,32 +40,6 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   const { isAuthenticated } = useAuth();
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const extractErrorMessage = useCallback((error: unknown) => {
-    if (!error) {
-      return "Something went wrong. Please try again.";
-    }
-    if (typeof error === "string") {
-      return error;
-    }
-    if (typeof error === "object" && error !== null) {
-      const maybeError = error as {
-        message?: string;
-        body?: { message?: string | string[] };
-      };
-      const bodyMessage = maybeError.body?.message;
-      if (Array.isArray(bodyMessage)) {
-        return bodyMessage.join(", ");
-      }
-      if (typeof bodyMessage === "string") {
-        return bodyMessage;
-      }
-      if (typeof maybeError.message === "string") {
-        return maybeError.message;
-      }
-    }
-    return "Something went wrong. Please try again.";
-  }, []);
-
   const errorMessageNode = useMemo(() => {
     if (!actionError) {
       return null;
@@ -82,7 +56,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       path: { id: action.id },
     });
     if (req.error) {
-      setActionError(extractErrorMessage(req.error));
+      setActionError("Something went wrong. Please try again.");
       return;
     }
     setActionError(null);
@@ -93,20 +67,20 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     });
     setRevalidate();
     onCompleteAction();
-  }, [action, extractErrorMessage, onCompleteAction]);
+  }, [action, onCompleteAction]);
 
   const handleJoinAction = useCallback(async () => {
     const req = await actionsJoin({
       path: { id: action.id },
     });
     if (req.error) {
-      setActionError(extractErrorMessage(req.error));
+      setActionError("Something went wrong. Please try again.");
       return;
     }
     setActionError(null);
     setRevalidate();
     onJoinAction();
-  }, [action, extractErrorMessage, onJoinAction]);
+  }, [action, onJoinAction]);
 
   const handleDeclineAction = useCallback(
     async (moral: boolean, reason: string) => {
@@ -115,14 +89,14 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         body: { reason, moral },
       });
       if (req.error) {
-        setActionError(extractErrorMessage(req.error));
+        setActionError("Something went wrong. Please try again.");
         return;
       }
       setActionError(null);
       setRevalidate();
       onDeclineAction();
     },
-    [action, extractErrorMessage, onDeclineAction]
+    [action, onDeclineAction]
   );
 
   const handleAbandonAction = useCallback(
@@ -132,14 +106,14 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         body: { reason, outOfTime },
       });
       if (req.error) {
-        setActionError(extractErrorMessage(req.error));
+        setActionError("Something went wrong. Please try again.");
         return;
       }
       setActionError(null);
       setRevalidate();
       onOptOutAction();
     },
-    [action, extractErrorMessage, onOptOutAction]
+    [action, onOptOutAction]
   );
 
   const handleFormStarted = useCallback(() => {
