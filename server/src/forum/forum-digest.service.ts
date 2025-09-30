@@ -10,7 +10,7 @@ import { ForumDigestPreference, User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ForumDigestLog } from './entities/forum-digest-log.entity';
 import { withCid } from 'src/search/approutes';
-import { generateCIDForNotif } from 'src/notifs/notif_utils';
+import { generateCIDForNotif } from 'src/notifs/notif-utils';
 
 @Injectable()
 export class ForumDigestService {

@@ -36,11 +36,7 @@ export class ActionEventRecipientService {
       );
     };
 
-    if (
-      eventStatus === ActionStatus.MemberAction ||
-      eventStatus === ActionStatus.OfficeAction ||
-      eventStatus === ActionStatus.Resolution
-    ) {
+    if (eventStatus === ActionStatus.MemberAction) {
       const activities = await this.actionActivityRepository.find({
         where: {
           actionId: action.id,
@@ -59,6 +55,10 @@ export class ActionEventRecipientService {
       return filterToEligible(activities.map((activity) => activity.user));
     }
 
-    return filterToEligible(await this.userService.findActiveUsersWithGroups());
+    if (eventStatus === ActionStatus.GatheringCommitments) {
+      return filterToEligible(await this.userService.findActiveUsers());
+    }
+
+    return [];
   }
 }

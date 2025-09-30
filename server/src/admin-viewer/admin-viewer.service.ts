@@ -117,9 +117,7 @@ export class AdminViewerService {
         if (searchableColumnsList.length > 0) {
           const placeholderIndex = whereParams.length + 1;
           const searchableColumns = searchableColumnsList
-            .map(
-              (col) => `"${col.name}"::text ILIKE $${placeholderIndex}`,
-            )
+            .map((col) => `"${col.name}"::text ILIKE $${placeholderIndex}`)
             .join(' OR ');
 
           whereClauses.push(`(${searchableColumns})`);
@@ -205,7 +203,10 @@ export class AdminViewerService {
 
       for (const [columnName, value] of Object.entries(createData.record)) {
         const normalizedName = columnName.toLowerCase();
-        if (normalizedName === 'datecreated' || normalizedName === 'dateupdated') {
+        if (
+          normalizedName === 'datecreated' ||
+          normalizedName === 'dateupdated'
+        ) {
           continue;
         }
 

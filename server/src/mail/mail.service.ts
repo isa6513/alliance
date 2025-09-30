@@ -217,6 +217,30 @@ export class MailService {
     );
   }
 
+  public async sendMissedDeadlineEmail(
+    email: string,
+    name: string,
+    actionName: string,
+    isSecondMiss: boolean,
+    cid?: string,
+  ): Promise<Mail> {
+    const emailType = isSecondMiss
+      ? EmailType.MissedSecondDeadline
+      : EmailType.MissedDeadline;
+    const subject = `Failed to complete action: ${actionName}`;
+
+    return this.sendMail(
+      email,
+      emailType,
+      subject,
+      {
+        name,
+        actionName,
+      },
+      cid,
+    );
+  }
+
   public async sendForumDigestEmail(
     email: string,
     name: string,
@@ -271,7 +295,8 @@ export class MailService {
         return '1 day left to complete: ' + context.action.name;
       }
     }
-    throw new Error('Invalid event in mail context: ' + context.event);
+    console.log(context);
+    throw new Error('Invalid event in mail context: ' + context.type);
   }
 
   public async sendActionEventNotificationEmail(
