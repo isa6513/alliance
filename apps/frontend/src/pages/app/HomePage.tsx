@@ -1,8 +1,7 @@
-import { ActionDto, UserActionRelation } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
 import { Link, useNavigate } from "react-router";
-import { useAppLoaderData } from "../../applayout";
+import { ActionWithRelation, useAppLoaderData } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
@@ -10,15 +9,13 @@ import LargeActionCard from "./LargeActionCard";
 import SmallActionCard from "./SmallActionCard";
 import useActivities, { ActivityList } from "./useActivities";
 
-export function canCompleteAction(
-  action: ActionDto,
-  relation?: UserActionRelation
-) {
+export function canCompleteAction(action: ActionWithRelation) {
   return (
     action.status === "member_action" &&
-    (relation === "joined" ||
-      (action.commitmentless && relation !== "completed")) &&
-    relation !== "declined"
+    (action.relation === "joined" ||
+      (action.commitmentless && action.relation !== "completed")) &&
+    action.relation !== "declined" &&
+    action.canParticipate
   );
 }
 
@@ -30,9 +27,7 @@ const HomePage = () => {
     list: ActivityList.Friends,
   });
 
-  const todoActions = actions.filter((action) =>
-    canCompleteAction(action, action.relation)
-  );
+  const todoActions = actions.filter((action) => canCompleteAction(action));
 
   const newActions = actions.filter(
     (action) =>

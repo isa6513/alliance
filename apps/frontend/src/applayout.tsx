@@ -180,12 +180,12 @@ export default function AppLayout() {
 
   const { actions } = useLoaderData<typeof clientLoader>();
 
-  const todoActions = actions.filter((action) =>
-    canCompleteAction(action, action.relation)
-  );
+  const todoActions = actions.filter((action) => canCompleteAction(action));
   const newActions = actions.filter(
     (action) =>
-      action.relation === "none" && action.status === "gathering_commitments"
+      action.relation === "none" &&
+      action.status === "gathering_commitments" &&
+      action.canParticipate
   );
 
   const navigate = useNavigate();
