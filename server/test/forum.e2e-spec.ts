@@ -7,7 +7,7 @@ import { CreateCommentDto, UpdateCommentDto } from 'src/forum/dto/comment.dto';
 import { CommentParentObject } from 'src/forum/entities/comment.entity';
 import { User } from 'src/user/entities/user.entity';
 import * as request from 'supertest';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Action } from '../src/actions/entities/action.entity';
 import { CreatePostDto } from '../src/forum/dto/post.dto';
 import { ForumModule } from '../src/forum/forum.module';
@@ -607,6 +607,28 @@ describe('Forum (e2e)', () => {
             notif.associatedUser?.id === ctx.adminUserId,
         ),
       ).toBe(true);
+    });
+
+    it('does not notify parent author when they reply to their own post', async () => {
+      const response = await request(ctx.app.getHttpServer())
+        .post('/forum/comments')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          editableContent: { body: 'Reply to own post', attachments: [] },
+          parentObjectId: testPostId,
+          parentObjectType: CommentParentObject.Post,
+        } satisfies CreateCommentDto)
+        .expect(201);
+
+      const replyId = response.body.id;
+
+      const allNotifs = await notifRepo
+        .find({})
+        .then((notifs) => notifs.map((notif) => notif.webAppLocation));
+
+      expect(
+        allNotifs.some((notif) => notif.includes(`replyId=${replyId}`)),
+      ).toBe(false);
     });
 
     it('should fail to create nested reply with invalid parentId', async () => {

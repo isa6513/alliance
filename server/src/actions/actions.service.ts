@@ -212,15 +212,7 @@ export class ActionsService {
     userId: number,
     type: ActionActivityType,
   ): Promise<ActionActivityDto> {
-    console.log('creating action activity', actionId, userId, type);
-    const acti = await this.actionRepository.findOne({
-      where: { id: actionId },
-      relations: ['participatingGroups', 'events'],
-    });
-    console.log('found action', acti);
-    console.log('status', acti?.status);
     const action = await this.findOne(actionId, userId);
-    console.log('found action didnt fail');
 
     if (
       type === ActionActivityType.USER_JOINED ||
