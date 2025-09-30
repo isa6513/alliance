@@ -32,7 +32,6 @@ export default [
     route("/feed", "pages/app/ActivityFeedPage.tsx"),
     route("/user/:id", "pages/app/UserProfilePage.tsx"),
     route("/verifyEmail", "pages/app/VerifyEmailPage.tsx"),
-    route("/members", "pages/app/MembersListPage.tsx"),
 
     route("forum", "pages/app/ForumPage.tsx"),
     route("forum/post/:id", "pages/app/PostDetailPage.tsx"),
@@ -45,6 +44,7 @@ export default [
       route("/contract", "pages/app/ContractPage.tsx"),
       route("/commit", "pages/app/CommitActionPage.tsx"),
       route("/priorities", "pages/app/PrioritiesPage.tsx"),
+      route("/members", "pages/app/MembersListPage.tsx"),
     ]),
   ]),
   layout("loggedoutonly.tsx", [

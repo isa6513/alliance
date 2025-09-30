@@ -30,6 +30,8 @@ export class MailService {
     [EmailType.CommitmentReminder]: 'commitmentreminder',
     [EmailType.MemberActionReminder]: 'memberactionreminder',
     [EmailType.ForumDigest]: 'forumdigest',
+    [EmailType.MissedDeadline]: 'misseddeadline',
+    [EmailType.MissedSecondDeadline]: 'missedseconddeadline',
   };
 
   async sendMail(

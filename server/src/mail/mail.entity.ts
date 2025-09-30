@@ -17,6 +17,8 @@ export enum EmailType {
   CommitmentReminder = 'commitmentreminder',
   MemberActionReminder = 'memberactionreminder',
   ForumDigest = 'forum_digest',
+  MissedDeadline = 'missed_deadline',
+  MissedSecondDeadline = 'missed_second_deadline',
 }
 
 export enum EmailStatus {

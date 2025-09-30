@@ -7,7 +7,7 @@ import { CreateCommentDto, UpdateCommentDto } from 'src/forum/dto/comment.dto';
 import { CommentParentObject } from 'src/forum/entities/comment.entity';
 import { User } from 'src/user/entities/user.entity';
 import * as request from 'supertest';
-import { ILike, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Action } from '../src/actions/entities/action.entity';
 import { CreatePostDto } from '../src/forum/dto/post.dto';
 import { ForumModule } from '../src/forum/forum.module';
