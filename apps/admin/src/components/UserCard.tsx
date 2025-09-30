@@ -140,7 +140,7 @@ const UserCard = ({
     : "Not signed";
 
   return (
-    <Card style={CardStyle.White} className="min-w-[300px] flex-1 text-sm">
+    <Card style={CardStyle.White} className="flex-1 text-sm">
       <div className="flex flex-row items-center justify-between gap-x-3 border-b pb-2 mb-2 border-zinc-200">
         <div className="flex flex-row items-center gap-x-3">
           <ProfileImage

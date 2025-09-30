@@ -232,7 +232,7 @@ const UsersList: React.FC = () => {
   );
 
   return (
-    <div className="h-full p-5 pt-20 flex flex-col items-center gap-y-3">
+    <div className="h-full p-5 pt-20 flex flex-col items-center gap-y-3 overflow-x-hidden">
       <div className="flex flex-row gap-3 w-full items-center">
         <div className="flex flex-row gap-3 items-center">
           <DropdownSelect
@@ -318,7 +318,7 @@ const UsersList: React.FC = () => {
           <p className="text-sm text-red-500">{groupMutationError}</p>
         </div>
       )}
-      <div className="flex flex-row flex-wrap gap-3 w-full">
+      <div className="grid gap-3 w-full [grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
         {(modeToUsers[filterMode] ?? []).map((user) => (
           <UserCard
             key={user.id}
