@@ -1,13 +1,12 @@
 // routes/root.tsx
-import { Navigate, Outlet } from "react-router";
-import { useAuth } from "./lib/AuthContext";
+import { Outlet } from "react-router";
 
 export default function AuthOnlyLayout() {
-  const { isAuthenticated, loading } = useAuth();
+  //   const { isAuthenticated, loading } = useAuth();
 
-  if (!isAuthenticated && !loading) {
-    return <Navigate to="/login" />;
-  }
+  //   if (!isAuthenticated && !loading) {
+  //     return <Navigate to="/login" />;
+  //   }
 
   return <Outlet />;
 }
