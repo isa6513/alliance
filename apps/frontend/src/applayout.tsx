@@ -4,6 +4,7 @@ import {
   actionsCanParticipate,
   actionsFindAll,
   actionsMyActivity,
+  authMe,
   forumFindAllPosts,
   PostDto,
   ProfileDto,
@@ -173,7 +174,13 @@ export function HydrateFallback() {
   );
 }
 
-const authOnlyRoutes = ["/tasks", "/settings", "/profile", "/onboarding"];
+const authOnlyRoutes = [
+  "tasks",
+  "settings",
+  "profile",
+  "onboarding",
+  "members",
+];
 
 export default function AppLayout() {
   const { isAuthenticated, loading, logout } = useAuth();
@@ -208,6 +215,7 @@ export default function AppLayout() {
     const wasLoggedIn = localStorage.getItem("was-logged-in") === "true";
 
     const handleUnauthorized = () => {
+      console.log("handleUnauthorized", window.location.pathname);
       if (
         !window.location.pathname.includes("/login") &&
         !isNavigating &&
@@ -220,6 +228,7 @@ export default function AppLayout() {
     };
 
     window.addEventListener("auth:unauthorized", handleUnauthorized);
+    authMe();
     return () => {
       window.removeEventListener("auth:unauthorized", handleUnauthorized);
     };

@@ -37,15 +37,13 @@ export default [
     route("forum/post/:id", "pages/app/PostDetailPage.tsx"),
     route("forum/edit/:postId", "pages/app/PostFormPage.tsx"),
 
-    layout("authonly.tsx", [
-      route("/tasks", "pages/app/HomePage.tsx"),
-      route("/notifications", "pages/app/NotificationsPage.tsx"),
-      route("/settings", "pages/app/SettingsPage.tsx"),
-      route("/contract", "pages/app/ContractPage.tsx"),
-      route("/commit", "pages/app/CommitActionPage.tsx"),
-      route("/priorities", "pages/app/PrioritiesPage.tsx"),
-      route("/members", "pages/app/MembersListPage.tsx"),
-    ]),
+    route("/tasks", "pages/app/HomePage.tsx"),
+    route("/notifications", "pages/app/NotificationsPage.tsx"),
+    route("/settings", "pages/app/SettingsPage.tsx"),
+    route("/contract", "pages/app/ContractPage.tsx"),
+    route("/commit", "pages/app/CommitActionPage.tsx"),
+    route("/priorities", "pages/app/PrioritiesPage.tsx"),
+    route("/members", "pages/app/MembersListPage.tsx"),
   ]),
   layout("loggedoutonly.tsx", [
     route("/login", "pages/app/LoginPage.tsx"),

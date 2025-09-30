@@ -42,6 +42,7 @@ export const createClientConfig: CreateClientConfig = (config) => {
       }
     }
 
+    console.log("onUnauthorized");
     AuthEvents.onUnauthorized();
     return res;
   };
