@@ -69,7 +69,6 @@ export class ActionsController {
     if (!req.user) {
       throw new UnauthorizedException('User not found');
     }
-    console.log('joining action', id, req.user.sub);
     return this.actionsService.joinAction(+id, req.user.sub);
   }
 

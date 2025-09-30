@@ -49,6 +49,26 @@ jobs:
         run: npm run test:e2e
         working-directory: ./server
 
+  test-backend-unit:
+    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Backend Dependencies
+        run: npm ci
+        working-directory: ./server
+
+      - name: Run Jest Tests
+        run: npm run test
+        working-directory: ./server
+
   build-react-app:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}

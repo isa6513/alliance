@@ -15,7 +15,7 @@ import {
   CommentParentObject,
 } from 'src/forum/entities/comment.entity';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
-import { ActionEventNotifWorker } from 'src/notifs/action-event-notif.worker';
+import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
 import { NotifsService } from 'src/notifs/notifs.service';
 import { ILike, In, LessThan, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
@@ -73,7 +73,7 @@ export class ActionsService {
     private readonly notifsService: NotifsService,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
-    private readonly actionEventNotifWorker: ActionEventNotifWorker,
+    private readonly actionEventRecipientService: ActionEventRecipientService,
   ) {}
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
@@ -776,7 +776,7 @@ export class ActionsService {
       throw new NotFoundException('Action not found');
     }
 
-    const users = await this.actionEventNotifWorker.getBaseUsersForEvent(
+    const users = await this.actionEventRecipientService.getBaseUsersForEvent(
       type,
       action,
     );

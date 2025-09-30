@@ -9,22 +9,18 @@ import { MmsService } from 'src/mms/mms.service';
 import { User } from 'src/user/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import {
-  ActionActivity,
-  ActionActivityType,
-} from '../actions/entities/action-activity.entity';
-import {
   ActionEvent,
-  ActionStatus,
   NotificationType,
 } from '../actions/entities/action-event.entity';
 import { Action } from '../actions/entities/action.entity';
 import { NotifsService } from '../notifs/notifs.service';
 import { generateCIDForNotif } from './notif_utils';
-import { UserService } from '../user/user.service';
 import {
   ActionEventNotif,
   ActionEventNotifType,
 } from './entities/action-event-notif.entity';
+import { ActionEventReminderService } from './action-event-reminder.service';
+import { ActionEventRecipientService } from './action-event-recipient.service';
 import { NotificationChannel } from './notifchannel';
 import {
   defaultEventText1DayReminder,
@@ -51,14 +47,13 @@ export class ActionEventNotifWorker {
     private readonly dataSource: DataSource,
     @InjectRepository(ActionEvent)
     private readonly eventRepo: Repository<ActionEvent>,
-    @InjectRepository(ActionActivity)
-    private readonly actionActivityRepository: Repository<ActionActivity>,
     private readonly notifsService: NotifsService,
-    private readonly userService: UserService,
     private readonly mailService: MailService,
     private readonly mmsService: MmsService,
     @InjectRepository(ActionEventNotif)
     private readonly actionEventNotifsRepository: Repository<ActionEventNotif>,
+    private readonly recipientService: ActionEventRecipientService,
+    private readonly reminderService: ActionEventReminderService,
   ) {}
 
   @Cron('*/3 * * * *')
@@ -86,128 +81,11 @@ export class ActionEventNotifWorker {
       await this.processOne(event.id, ActionEventNotifType.Announcement);
     }
 
-    const rows: Array<{
-      actionId: number;
-      currentEventId: number;
-      nextEventId: number;
-      nextDate: string;
-      which: '3dayreminder' | '1dayreminder';
-    }> = await this.eventRepo.query(
-      `
-          WITH params AS (
-            SELECT $1::timestamptz AS now
-          ),
-          current AS (
-            SELECT
-              e.*,
-              ROW_NUMBER() OVER (PARTITION BY e."actionId" ORDER BY e.date DESC) AS rn
-            FROM action_event e, params
-            WHERE e.date <= (SELECT now FROM params)
-          ),
-          next AS (
-            SELECT
-              e.*,
-              ROW_NUMBER() OVER (PARTITION BY e."actionId" ORDER BY e.date ASC) AS rn
-            FROM action_event e, params
-            WHERE e.date > (SELECT now FROM params)
-          ),
-          pairs AS (
-            SELECT
-              c."actionId",
-              c.id  AS "currentEventId",
-              c."newStatus",
-              c."threeDayReminderNotifsSentAt",
-              c."oneDayReminderNotifsSentAt",
-              n.id  AS "nextEventId",
-              n.date AS "nextDate"
-            FROM current c
-            JOIN next n
-              ON n."actionId" = c."actionId"
-             AND n.rn = 1
-            WHERE c.rn = 1
-          ),
-          due AS (
-            SELECT
-              p."actionId",
-              p."currentEventId",
-              p."nextEventId",
-              p."nextDate",
-              CASE
-                -- Prioritize 1-day if both thresholds are crossed
-                WHEN p."nextDate" <= (SELECT now FROM params) + INTERVAL '1 day'
-                     AND p."oneDayReminderNotifsSentAt" IS NULL
-                THEN '1dayreminder'
-                WHEN p."nextDate" <= (SELECT now FROM params) + INTERVAL '3 day'
-                     AND p."threeDayReminderNotifsSentAt" IS NULL
-                THEN '3dayreminder'
-                ELSE NULL
-              END AS which
-            FROM pairs p
-            WHERE p."newStatus" IN ('gathering_commitments', 'member_action')
-          )
-          SELECT
-            "actionId",
-            "currentEventId",
-            "nextEventId",
-            "nextDate",
-            which
-          FROM due
-          WHERE which IS NOT NULL
-          ORDER BY "nextDate" ASC
-          LIMIT 100
-          `,
-      [now],
-    );
+    const dueReminders = await this.reminderService.findDueReminderEvents(now);
 
-    for (const row of rows) {
-      await this.processOne(
-        row.currentEventId,
-        row.which === '3dayreminder'
-          ? ActionEventNotifType.ThreeDayReminder
-          : ActionEventNotifType.OneDayReminder,
-      );
+    for (const reminder of dueReminders) {
+      await this.processOne(reminder.currentEventId, reminder.type);
     }
-  }
-
-  async getBaseUsersForEvent(eventStatus: ActionStatus, action: Action) {
-    const targetGroupIds = new Set(
-      (action.participatingGroups || []).map((group) => group.id),
-    );
-    const restrictToGroups = targetGroupIds.size > 0;
-
-    const filterToEligible = (users: User[]): User[] => {
-      if (!restrictToGroups) {
-        return users;
-      }
-      return users.filter((user) =>
-        (user.groups || []).some((group) => targetGroupIds.has(group.id)),
-      );
-    };
-
-    if (
-      eventStatus === ActionStatus.MemberAction ||
-      eventStatus === ActionStatus.OfficeAction ||
-      eventStatus === ActionStatus.Resolution //TODO: decide
-    ) {
-      const activities = await this.actionActivityRepository.find({
-        where: {
-          actionId: action.id,
-          type: ActionActivityType.USER_JOINED,
-        },
-        relations: restrictToGroups ? ['user', 'user.groups'] : ['user'],
-      });
-
-      if (action.commitmentless) {
-        const users = restrictToGroups
-          ? await this.userService.findActiveUsersWithGroups()
-          : await this.userService.findActiveUsers();
-        return filterToEligible(users);
-      }
-
-      return filterToEligible(activities.map((a) => a.user));
-    }
-
-    return filterToEligible(await this.userService.findActiveUsersWithGroups());
   }
 
   private async processOne(eventId: number, type: ActionEventNotifType) {
@@ -233,7 +111,10 @@ export class ActionEventNotifWorker {
 
       const action = event.action;
 
-      const users = await this.getBaseUsersForEvent(event.newStatus, action);
+      const users = await this.recipientService.getBaseUsersForEvent(
+        event.newStatus,
+        action,
+      );
 
       const baseContext: Omit<ActionEventNotificationContext, 'user' | 'cid'> =
         {

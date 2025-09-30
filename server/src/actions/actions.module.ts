@@ -5,6 +5,8 @@ import { EditableContent } from 'src/forum/entities/editablecontent.entity';
 import { MailModule } from 'src/mail/mail.module';
 import { MmsModule } from 'src/mms/mms.module';
 import { ActionEventNotifWorker } from 'src/notifs/action-event-notif.worker';
+import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
+import { ActionEventReminderService } from 'src/notifs/action-event-reminder.service';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { User } from '../user/entities/user.entity';
@@ -33,7 +35,13 @@ import { Action } from './entities/action.entity';
     MmsModule,
   ],
   controllers: [ActionsController],
-  providers: [ActionsService, ActionsGateway, ActionEventNotifWorker],
+  providers: [
+    ActionsService,
+    ActionsGateway,
+    ActionEventNotifWorker,
+    ActionEventRecipientService,
+    ActionEventReminderService,
+  ],
   exports: [ActionsService],
 })
 export class ActionsModule {}

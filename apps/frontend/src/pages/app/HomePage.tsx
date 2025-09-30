@@ -215,12 +215,12 @@ const HomePage = () => {
               )}
             </div>
             <div>
-              <div className="flex flex-row justify-between">
-                <p className="font-semibold text-xl font-serif text-black mb-3">
+              <div className="flex flex-row justify-between items-center mb-3">
+                <p className="font-semibold text-xl font-serif text-black">
                   Friend activity
                 </p>
                 {friendActivities.length > 0 && (
-                  <Link to="/feed" className="text-link text-sm">
+                  <Link to="/feed" className="text-link text-sm mt-0">
                     See all
                   </Link>
                 )}
