@@ -5,11 +5,9 @@ import List from "@alliance/shared/ui/List";
 
 export async function clientLoader() {
   const members = await userMembers();
-  if (!members.data) {
-    throw new Error("Failed to load members");
-  }
+
   return {
-    members: members.data,
+    members: members.data ?? [],
   };
 }
 
