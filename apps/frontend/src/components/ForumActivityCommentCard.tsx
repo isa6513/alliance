@@ -30,10 +30,7 @@ const ForumActivityCommentCard = ({
       to={url}
       className="w-full mb-0 p-4 hover:bg-zinc-50 bg-white space-y-2"
     >
-      <EditableContentRenderer
-        content={comment.editableContent}
-        charLimit={140}
-      />
+      <EditableContentRenderer content={comment.editableContent} truncated />
       <div className="flex flex-row items-center gap-x-2 text-sm text-zinc-500">
         <ProfileImage pfp={comment.author.profilePicture} size="small" />
         <span>

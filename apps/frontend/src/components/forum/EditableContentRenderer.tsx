@@ -7,7 +7,7 @@ interface EditableContentRendererProps {
   collapsed?: boolean;
   deleted?: boolean;
   className?: string;
-  charLimit?: number;
+  truncated?: boolean;
 }
 
 const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
@@ -15,7 +15,7 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
   collapsed = false,
   deleted = false,
   className,
-  charLimit,
+  truncated = false,
 }) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -62,14 +62,9 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
   }
 
   if (collapsed) {
-    const firstLine = content.body.split("\n")[0];
     return (
-      <div className={className}>
-        {content.body.includes("\n") ? (
-          <p className={`${sharedClasses} text-gray-500`}>{firstLine} ...</p>
-        ) : (
-          <p className={`${sharedClasses}`}>{firstLine}</p>
-        )}
+      <div className={`line-clamp-1 ${className ?? ""}`}>
+        <AppMarkdownWrapper markdownContent={content.body} />
       </div>
     );
   }
@@ -77,14 +72,9 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
   return (
     <div className={className}>
       {content && (
-        <AppMarkdownWrapper
-          markdownContent={
-            charLimit
-              ? content.body.slice(0, charLimit) +
-                (charLimit < content.body.length ? "..." : "")
-              : content.body
-          }
-        />
+        <div className={`${truncated ? "line-clamp-3" : ""}`}>
+          <AppMarkdownWrapper markdownContent={content.body} />
+        </div>
       )}
       {attachments.length > 0 && (
         <div className={`flex flex-wrap gap-2 ${content.body ? "mt-2" : ""}`}>

@@ -360,6 +360,9 @@ export class ForumService {
     }
 
     for (const userToNotify of usersToNotify) {
+      if (userToNotify.id === comment.authorId) {
+        continue;
+      }
       const authorDto = new ProfileDto(comment.author);
       const notif = this.notifRepository.create({
         user: userToNotify,
