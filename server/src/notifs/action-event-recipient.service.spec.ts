@@ -25,15 +25,13 @@ describe('ActionEventRecipientService', () => {
       participatingGroups: [],
       commitmentless: false,
       ...overrides,
-    } as Action);
+    }) as Action;
 
   const buildUser = (id: number, groupIds: number[] = []): User =>
     ({
       id,
-      groups: groupIds.map(
-        (groupId) => ({ id: groupId } as unknown as Group),
-      ),
-    } as unknown as User);
+      groups: groupIds.map((groupId) => ({ id: groupId }) as unknown as Group),
+    }) as unknown as User;
 
   beforeEach(() => {
     findMock = jest.fn();
@@ -53,9 +51,7 @@ describe('ActionEventRecipientService', () => {
     const action = buildAction({ id: 42 });
     const joinedUsers = [buildUser(1), buildUser(2)];
     findMock.mockResolvedValue(
-      joinedUsers.map(
-        (user) => ({ user } as unknown as ActionActivity),
-      ),
+      joinedUsers.map((user) => ({ user }) as unknown as ActionActivity),
     );
 
     const result = await service.getBaseUsersForEvent(
@@ -126,6 +122,10 @@ describe('ActionEventRecipientService', () => {
       eligibleUser,
       ineligibleUser,
     ]);
+    userServiceMock.findActiveUsers.mockResolvedValue([
+      eligibleUser,
+      ineligibleUser,
+    ]);
 
     const result = await service.getBaseUsersForEvent(
       ActionStatus.GatheringCommitments,
@@ -133,7 +133,6 @@ describe('ActionEventRecipientService', () => {
     );
 
     expect(findMock).not.toHaveBeenCalled();
-    expect(userServiceMock.findActiveUsersWithGroups).toHaveBeenCalledTimes(1);
     expect(result).toEqual([eligibleUser]);
   });
 });

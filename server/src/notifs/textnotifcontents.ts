@@ -12,7 +12,7 @@ export const defaultEventTextAnnouncement: {
   [ActionStatus.GatheringCommitments]: (context) =>
     `new action: ${context.action.name}. Please confirm commitment at ${withCid(actionUrl(context.action.id, true), context.cid)}. Reply STOP to opt out.`,
   [ActionStatus.MemberAction]: (context) =>
-    `An action you committed to is ready to be completed: ${context.action.name}. ${withCid(actionUrl(context.action.id, true), context.cid)}. Reply STOP to opt out.`,
+    `An action ${context.action.commitmentless ? '' : 'you committed to '}is ready to be completed: ${context.action.name}. ${withCid(actionUrl(context.action.id, true), context.cid)}. Reply STOP to opt out.`,
 };
 
 export const defaultEventText3DayReminder: {
