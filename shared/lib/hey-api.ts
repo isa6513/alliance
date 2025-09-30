@@ -20,7 +20,7 @@ export const createClientConfig: CreateClientConfig = (config) => {
     const req = new Request(input, init);
     const retryReq = req.clone();
 
-    const res = await originalFetch(retryReq);
+    const res = await originalFetch(req);
 
     if (
       res.status !== 401 ||
