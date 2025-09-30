@@ -82,7 +82,7 @@ const ForumListPost = ({
                   ? commentFeature.editableContent
                   : post.editableContent
               }
-              charLimit={140}
+              truncated
               className="text-zinc-500"
             />
           )}
