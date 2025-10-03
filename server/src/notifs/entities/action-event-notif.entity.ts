@@ -11,7 +11,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { NotificationChannel } from '../notifchannel';
+import { NotificationChannel } from '../notif-utils';
 
 export enum ActionEventNotifType {
   Announcement = 'announcement',

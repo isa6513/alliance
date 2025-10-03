@@ -218,11 +218,11 @@ export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
  */
 export type NotificationType = 'all' | 'joined' | 'none';
 
-export type ActionEventNotifType = 'announcement' | '3dayreminder' | '1dayreminder';
+export type ActionEventNotifType = 'announcement' | '3dayreminder' | '1dayreminder' | 'misseddeadline' | 'missedseconddeadline';
 
 export type NotificationChannel = 'text' | 'email' | 'push';
 
-export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder' | 'forum_digest';
+export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder' | 'forum_digest' | 'missed_deadline' | 'missed_second_deadline';
 
 export type Mail = {
     id: number;
@@ -2204,6 +2204,21 @@ export type NotifsNotifsForEventResponses = {
 };
 
 export type NotifsNotifsForEventResponse = NotifsNotifsForEventResponses[keyof NotifsNotifsForEventResponses];
+
+export type NotifsNotifsForUserData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/notifs/for-user/{id}';
+};
+
+export type NotifsNotifsForUserResponses = {
+    200: Array<ActionEventNotifDto>;
+};
+
+export type NotifsNotifsForUserResponse = NotifsNotifsForUserResponses[keyof NotifsNotifsForUserResponses];
 
 export type NotifsReloadNotifDataForEventData = {
     body?: never;

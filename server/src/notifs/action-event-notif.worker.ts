@@ -26,7 +26,7 @@ import {
   MissedDeadlineCandidate,
 } from './action-event-reminder.service';
 import { ActionEventRecipientService } from './action-event-recipient.service';
-import { NotificationChannel } from './notifchannel';
+import { NotificationChannel } from './notif-utils';
 import {
   defaultEventText1DayReminder,
   defaultEventText3DayReminder,

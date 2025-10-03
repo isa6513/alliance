@@ -151,7 +151,9 @@ const UserCard = ({
             }
             size="large"
           />
-          <p className="text-base">{user.name}</p>
+          <Link to={`/user/${user.id}`} className="text-base">
+            {user.name}
+          </Link>
         </div>
         <Link to={`/database/?table=user&id=${user.id}`}>
           <DatabaseIcon size="small" />

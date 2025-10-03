@@ -10,7 +10,7 @@ import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ActionEventNotif } from './entities/action-event-notif.entity';
 import { Notification } from './entities/notification.entity';
-import { NotificationChannel } from './notifchannel';
+import { NotificationChannel } from './notif-utils';
 import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
 
 @Injectable()
@@ -87,6 +87,13 @@ export class NotifsService {
   async notifsForEvent(id: number) {
     return this.actionEventNotifsRepository.find({
       where: { actionEvent: { id } },
+      relations: ['user', 'mail', 'mms'],
+    });
+  }
+
+  async notifsForUser(id: number) {
+    return this.actionEventNotifsRepository.find({
+      where: { user: { id } },
       relations: ['user', 'mail', 'mms'],
     });
   }
