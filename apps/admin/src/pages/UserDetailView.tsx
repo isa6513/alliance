@@ -367,9 +367,10 @@ const UserDetailView: React.FC = () => {
               };
               const statusLabel = formatRelationStatus(relation.status);
               return (
-                <div
+                <Link
                   key={action.id}
-                  className="rounded border border-zinc-200 bg-zinc-50 p-3"
+                  to={`/actions/${action.id}`}
+                  className="rounded border border-zinc-200 bg-zinc-50 p-3 hover:bg-zinc-100/80 transition-colors duration-50"
                 >
                   <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                     <div>
@@ -387,7 +388,7 @@ const UserDetailView: React.FC = () => {
                       {statusLabel}
                     </span>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

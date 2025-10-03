@@ -74,16 +74,15 @@ const ActionDashboard: React.FC = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState<Tab>(
-    (searchParams.get("tab") as Tab) || "overview"
-  );
+  const activeTab = (searchParams.get("tab") as Tab) ?? "overview";
 
-  useEffect(() => {
+  const onTabChange = (t: Tab) => {
     setSearchParams((prev) => {
-      prev.set("tab", activeTab);
-      return prev;
+      const next = new URLSearchParams(prev);
+      next.set("tab", t);
+      return next;
     });
-  }, [activeTab, setSearchParams, searchParams]);
+  };
 
   // Load available forms on component mount
   useEffect(() => {
@@ -260,18 +259,13 @@ const ActionDashboard: React.FC = () => {
     }
   };
 
-  const handleGroupsChange = useCallback(
-    (ids: number[]) => {
-      setSelectedGroupIds(ids);
-      setForm((prev) => ({
-        ...prev,
-        participatingGroups: ids.map(
-          (id) => ({ id } as unknown as Group)
-        ),
-      }));
-    },
-    []
-  );
+  const handleGroupsChange = useCallback((ids: number[]) => {
+    setSelectedGroupIds(ids);
+    setForm((prev) => ({
+      ...prev,
+      participatingGroups: ids.map((id) => ({ id } as unknown as Group)),
+    }));
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -451,7 +445,7 @@ const ActionDashboard: React.FC = () => {
               {tabData.map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
+                  onClick={() => onTabChange(tab.key)}
                   className={`py-2 px-1 border-b-2 text-sm ${
                     activeTab === tab.key
                       ? "border-blue-500 text-blue-600"
@@ -504,7 +498,7 @@ const ActionDashboard: React.FC = () => {
                         action.status
                       )}`}
                       onClick={() => {
-                        setActiveTab("events");
+                        onTabChange("events");
                       }}
                     >
                       {formatStatus(action.status)}
