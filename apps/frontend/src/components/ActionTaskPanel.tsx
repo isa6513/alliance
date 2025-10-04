@@ -156,7 +156,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   }
 
   let completionElement = null;
-  if (canCompleteAction(action, userRelation)) {
+  if (canCompleteAction(action)) {
     if (action.type === "Funding") {
       completionElement = (
         <StripeWrapper actionId={action.id}>
@@ -194,10 +194,6 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         <>
           {completionElement}
           {errorMessageNode}
-          {/* <ActionTaskPanelOptOut
-            onOptOut={handleOptOutAction}
-            className="mt-3"
-          /> */}
         </>
       );
     }

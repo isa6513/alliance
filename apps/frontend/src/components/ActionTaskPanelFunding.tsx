@@ -122,7 +122,8 @@ const ActionTaskPanelFunding = ({
   }, [stripe, elements, savedPaymentMethod, clientSecret, onPaymentSuccess]);
 
   if (status === "succeeded") {
-    return <ActionTaskPanelCompleted />;
+    // right now we dont need action data to just show the basic "completed" for funding
+    return <ActionTaskPanelCompleted action={null} />;
   }
 
   return (

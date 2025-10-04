@@ -9,7 +9,7 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useEffect, useState } from "react";
 
 export interface ActionTaskPanelCompletedProps {
-  action: ActionDto;
+  action: ActionDto | null;
 }
 
 const ActionTaskPanelCompleted = ({
@@ -20,7 +20,7 @@ const ActionTaskPanelCompleted = ({
   );
 
   useEffect(() => {
-    if (action.taskFormId) {
+    if (action?.taskFormId) {
       const fetchFormAndResponse = async (id: number) => {
         const formResponse = await tasksGetMyFormResponse({
           path: { id },
@@ -31,11 +31,11 @@ const ActionTaskPanelCompleted = ({
       };
       fetchFormAndResponse(action.taskFormId);
     }
-  }, [action.taskFormId]);
+  }, [action]);
 
   console.log("formResponse", formResponse);
 
-  if (action.taskFormId && formResponse) {
+  if (action?.taskFormId && formResponse) {
     return (
       <Card style={CardStyle.Grey} className="inline-block !p-6">
         <Card style={CardStyle.Green} className="border-none mb-4 bg-green/30">

@@ -5,10 +5,6 @@ import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import "../index.css";
 
-export const stripePromise = loadStripe(
-  "pk_test_51RcteKQ3i6almwvvqvNwXcL1mZik72XFgovP6SzDeP7WDVfC0mXXbxpxbJWmY2kGIy5l1SYAQNmyznRfFP5lKt6O00EeWgC6mr"
-);
-
 export interface PaymentMethodData {
   stripeId: string;
   last4: string;
@@ -36,6 +32,10 @@ export const StripeWrapper = ({ children, actionId }: StripeWrapperProps) => {
   const [savedPaymentMethod, setSavedPaymentMethod] = useState<
     PaymentMethodData | undefined
   >();
+
+  const stripePromise = loadStripe(
+    "pk_test_51RcteKQ3i6almwvvqvNwXcL1mZik72XFgovP6SzDeP7WDVfC0mXXbxpxbJWmY2kGIy5l1SYAQNmyznRfFP5lKt6O00EeWgC6mr"
+  );
 
   console.log("clientSecret", clientSecret);
 
