@@ -213,20 +213,21 @@ const SearchBar = () => {
                     selectedItem?.id === item.id ? "bg-zinc-200" : ""
                   }`}
                 >
-                  {item.image !== undefined &&
-                    (item.type === "user" ? (
-                      <ProfileImage
-                        pfp={item.image}
-                        size="small"
-                        className="mr-2"
-                      />
-                    ) : (
+                  {item.type === "user" ? (
+                    <ProfileImage
+                      pfp={item.image ?? null}
+                      size="small"
+                      className="mr-2"
+                    />
+                  ) : (
+                    item.image !== undefined && (
                       <img
                         src={item.image}
                         alt={item.name}
                         className="aspect-square h-8 rounded-md object-cover mr-2"
                       />
-                    ))}
+                    )
+                  )}
                   <div className="flex flex-col">
                     <span>{item.name}</span>
                     {item.secondaryData && (
