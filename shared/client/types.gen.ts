@@ -598,6 +598,24 @@ export type LatLonDto = {
     longitude: number;
 };
 
+export type NotificationScheduleMetadataDto = {
+    currentEventId?: number;
+    nextEventId?: number;
+    deadlineEventId?: number;
+    isSecondMiss?: boolean;
+};
+
+export type NotificationScheduleEntryDto = {
+    type: ActionEventNotifType;
+    scheduledFor: string;
+    actionId: number;
+    actionName: string;
+    actionStatus: ActionStatus;
+    eventId: number;
+    estimatedRecipients: number;
+    metadata?: NotificationScheduleMetadataDto;
+};
+
 export type CreateActionDto = {
     /**
      * Name of the action
@@ -1869,6 +1887,28 @@ export type ActionsGetEventResponses = {
 };
 
 export type ActionsGetEventResponse = ActionsGetEventResponses[keyof ActionsGetEventResponses];
+
+export type ActionsGetNotificationScheduleData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * ISO timestamp for the start of the window
+         */
+        windowStart: string;
+        /**
+         * ISO timestamp for the end of the window
+         */
+        windowEnd: string;
+    };
+    url: '/actions/notification-schedule';
+};
+
+export type ActionsGetNotificationScheduleResponses = {
+    200: Array<NotificationScheduleEntryDto>;
+};
+
+export type ActionsGetNotificationScheduleResponse = ActionsGetNotificationScheduleResponses[keyof ActionsGetNotificationScheduleResponses];
 
 export type ActionsGetActionActivitiesData = {
     body?: never;

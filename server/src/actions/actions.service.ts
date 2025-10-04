@@ -16,6 +16,7 @@ import {
 } from 'src/forum/entities/comment.entity';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
+import { ActionEventReminderService } from 'src/notifs/action-event-reminder.service';
 import { NotifsService } from 'src/notifs/notifs.service';
 import { ILike, In, LessThan, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
@@ -42,6 +43,7 @@ import {
 import { Action, ActionTaskType } from './entities/action.entity';
 import { Group } from 'src/user/entities/group.entity';
 import { UserDto } from 'src/user/user.dto';
+import { NotificationScheduleEntryDto } from './dto/notification-schedule.dto';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -74,6 +76,7 @@ export class ActionsService {
     private userService: UserService,
     public eventEmitter: EventEmitter2,
     private readonly actionEventRecipientService: ActionEventRecipientService,
+    private readonly actionEventReminderService: ActionEventReminderService,
   ) {}
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
@@ -120,6 +123,16 @@ export class ActionsService {
     }
 
     return filtered.map((action) => this.entityToDto(action));
+  }
+
+  async getNotificationSchedule(
+    windowStart: Date,
+    windowEnd: Date,
+  ): Promise<NotificationScheduleEntryDto[]> {
+    return this.actionEventReminderService.getNotificationSchedule(
+      windowStart,
+      windowEnd,
+    );
   }
 
   async userCanSeeAction(actionId: number, userId?: number): Promise<boolean> {
@@ -318,6 +331,7 @@ export class ActionsService {
   async update(
     id: number,
     updateActionDto: UpdateActionDto,
+    userId: number,
   ): Promise<Action | null> {
     const action = await this.actionRepository.findOne({
       where: { id },
@@ -338,7 +352,7 @@ export class ActionsService {
     }
 
     await this.actionRepository.save(action);
-    return this.findOne(id);
+    return this.findOne(id, userId);
   }
 
   async addEvent(

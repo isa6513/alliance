@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Between, In, IsNull, LessThanOrEqual, Not, Repository } from 'typeorm';
 import { ActionEventNotifType } from './entities/action-event-notif.entity';
 import {
   ActionEvent,
@@ -11,33 +11,12 @@ import {
   ActionActivity,
   ActionActivityType,
 } from '../actions/entities/action-activity.entity';
-
-type PastEventRow = {
-  id: number;
-  actionId: number;
-  date: Date | string;
-  newStatus: ActionStatus;
-  threeDayReminderNotifsSentAt?: Date | string | null;
-  oneDayReminderNotifsSentAt?: Date | string | null;
-  rn?: number;
-};
-
-type PastEventSummary = {
-  id: number;
-  actionId: number;
-  date: Date;
-  newStatus: ActionStatus;
-  threeDayReminderNotifsSentAt: Date | null;
-  oneDayReminderNotifsSentAt: Date | null;
-};
-
-export interface ReminderCandidate {
-  actionId: number;
-  currentEventId: number;
-  nextEventId: number;
-  nextDate: Date;
-  type: ActionEventNotifType;
-}
+import { ActionEventRecipientService } from './action-event-recipient.service';
+import { Action } from '../actions/entities/action.entity';
+import {
+  NotificationScheduleEntryDto,
+  NotificationScheduleMetadataDto,
+} from 'src/actions/dto/notification-schedule.dto';
 
 export interface MissedDeadlineCandidate {
   actionId: number;
@@ -54,6 +33,8 @@ export const ANNOUNCEMENT_SUPPORTED_STATUSES: ActionStatus[] = [
   ActionStatus.MemberAction,
 ];
 
+export const NOTIFICATION_LOOKBACK_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 const POST_MEMBER_ACTION_STATUSES = new Set<ActionStatus>([
   ActionStatus.OfficeAction,
   ActionStatus.Resolution,
@@ -62,6 +43,15 @@ const POST_MEMBER_ACTION_STATUSES = new Set<ActionStatus>([
   ActionStatus.Abandoned,
 ]);
 
+interface NotificationPlan {
+  type: ActionEventNotifType;
+  scheduledFor: Date;
+  referenceEvent: ActionEvent;
+  targetEvent: ActionEvent;
+  metadata?: NotificationScheduleMetadataDto;
+  recipients?: number;
+}
+
 @Injectable()
 export class ActionEventReminderService {
   constructor(
@@ -69,186 +59,362 @@ export class ActionEventReminderService {
     private readonly eventRepository: Repository<ActionEvent>,
     @InjectRepository(ActionActivity)
     private readonly actionActivityRepository: Repository<ActionActivity>,
+    private readonly recipientService: ActionEventRecipientService,
   ) {}
 
-  async findDueAnnouncementEventIds(now: Date): Promise<number[]> {
-    const statuses = ANNOUNCEMENT_SUPPORTED_STATUSES.map(
-      (status) => `'${status}'`,
-    ).join(', ');
+  async evaluateNotifications(
+    windowStart: Date,
+    windowEnd: Date,
+    includeRecipients = false,
+  ): Promise<NotificationPlan[]> {
+    const start = new Date(windowStart);
+    const end = new Date(windowEnd);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      throw new Error('Invalid schedule window');
+    }
+    if (end.getTime() < start.getTime()) {
+      throw new Error('windowEnd must not be before windowStart');
+    }
 
-    const rows: Array<{ id: number }> = await this.eventRepository.query(
-      `
-        SELECT id
-        FROM action_event
-        WHERE "sendNotifsTo" != $1
-          AND date <= $2
-          AND "announcementNotifsSentAt" IS NULL
-          AND "newStatus" IN (${statuses})
-        ORDER BY date ASC
-        LIMIT 100
-      `,
-      [NotificationType.None, now],
-    );
+    const plans: NotificationPlan[] = [];
+    const requiredEvents = new Set<number>();
 
-    return rows.map((row) => row.id);
-  }
+    // Announcements
+    const announcements = await this.eventRepository.find({
+      where: {
+        sendNotifsTo: Not(NotificationType.None),
+        announcementNotifsSentAt: IsNull(),
+        newStatus: In(ANNOUNCEMENT_SUPPORTED_STATUSES),
+        date: Between(start, end),
+      },
+      relations: ['action', 'action.participatingGroups'],
+      order: { date: 'ASC' },
+    });
 
-  async findDueReminderEvents(now: Date): Promise<ReminderCandidate[]> {
-    const { latestEvents } = await this.loadPastEvents(now);
+    for (const event of announcements) {
+      plans.push({
+        type: ActionEventNotifType.Announcement,
+        scheduledFor: event.date,
+        referenceEvent: event,
+        targetEvent: event,
+      });
+      requiredEvents.add(event.id);
+    }
 
-    const eligibleActions = Array.from(latestEvents.entries()).filter(
-      ([, event]) =>
-        event.newStatus === ActionStatus.GatheringCommitments ||
-        event.newStatus === ActionStatus.MemberAction,
-    );
+    // Reminders
+    const reminderPlans = await this.computeReminderPlans(start, end);
+    for (const plan of reminderPlans) {
+      plans.push(plan);
+      requiredEvents.add(plan.referenceEvent.id);
+      requiredEvents.add(plan.targetEvent.id);
+    }
 
-    if (eligibleActions.length === 0) {
+    // Missed deadlines
+    const deadlinePlans = await this.computeDeadlinePlans(start, end);
+    for (const plan of deadlinePlans) {
+      plans.push(plan);
+      requiredEvents.add(plan.referenceEvent.id);
+      requiredEvents.add(plan.targetEvent.id);
+    }
+
+    if (plans.length === 0) {
       return [];
     }
 
-    const actionIds = eligibleActions.map(([actionId]) => actionId);
-
-    const placeholders = actionIds
-      .map((_, index) => `$${index + 2}`)
-      .join(', ');
-    const nextRows: Array<{
-      id: number;
-      actionId: number;
-      date: Date | string;
-    }> = await this.eventRepository.query(
-      `
-        SELECT id, "actionId", date
-        FROM action_event
-        WHERE date > $1
-          AND "actionId" IN (${placeholders})
-        ORDER BY "actionId" ASC, date ASC
-      `,
-      [now, ...actionIds],
+    // Load any events that were not already fully populated with relations
+    const missingEventIds = Array.from(requiredEvents).filter((id) =>
+      plans.every(
+        (plan) => plan.referenceEvent.id !== id && plan.targetEvent.id !== id,
+      ),
     );
-
-    const earliestNextEventByAction = new Map<
-      number,
-      { id: number; actionId: number; date: Date }
-    >();
-    for (const row of nextRows) {
-      if (!earliestNextEventByAction.has(row.actionId)) {
-        earliestNextEventByAction.set(row.actionId, {
-          id: row.id,
-          actionId: row.actionId,
-          date: this.toDate(row.date),
-        });
+    if (missingEventIds.length > 0) {
+      const extras = await this.eventRepository.find({
+        where: { id: In(missingEventIds) },
+        relations: ['action', 'action.participatingGroups'],
+      });
+      const map = new Map(extras.map((event) => [event.id, event]));
+      for (const plan of plans) {
+        if (!plan.referenceEvent.action) {
+          const replacement = map.get(plan.referenceEvent.id);
+          if (replacement) plan.referenceEvent = replacement;
+        }
+        if (!plan.targetEvent.action) {
+          const replacement = map.get(plan.targetEvent.id);
+          if (replacement) plan.targetEvent = replacement;
+        }
       }
     }
 
-    const oneDayMs = 24 * 60 * 60 * 1000;
-    const threeDayMs = 3 * oneDayMs;
-
-    const candidates: ReminderCandidate[] = [];
-
-    for (const [actionId, currentEvent] of eligibleActions) {
-      const nextEvent = earliestNextEventByAction.get(actionId);
-      if (!nextEvent) {
-        continue;
-      }
-
-      const millisUntilNext = nextEvent.date.getTime() - now.getTime();
-      let type: ActionEventNotifType | null = null;
-
-      if (
-        currentEvent.oneDayReminderNotifsSentAt == null &&
-        millisUntilNext <= oneDayMs
-      ) {
-        type = ActionEventNotifType.OneDayReminder;
-      } else if (
-        currentEvent.threeDayReminderNotifsSentAt == null &&
-        millisUntilNext <= threeDayMs
-      ) {
-        type = ActionEventNotifType.ThreeDayReminder;
-      }
-
-      if (type) {
-        candidates.push({
-          actionId,
-          currentEventId: currentEvent.id,
-          nextEventId: nextEvent.id,
-          nextDate: nextEvent.date,
-          type,
-        });
-      }
-    }
-
-    candidates.sort((a, b) => a.nextDate.getTime() - b.nextDate.getTime());
-
-    return candidates.slice(0, 100);
-  }
-
-  async findMissedDeadlineCandidates(
-    now: Date,
-  ): Promise<MissedDeadlineCandidate[]> {
-    const rows: PastEventRow[] = await this.eventRepository.query(
-      `
-        SELECT id, "actionId", date, "newStatus"
-        FROM action_event
-        WHERE date <= $1
-        ORDER BY "actionId" ASC, date ASC
-      `,
-      [now],
-    );
-
-    const eventsByAction = new Map<number, PastEventSummary[]>();
-
-    for (const row of rows) {
-      const summary: PastEventSummary = {
-        id: row.id,
-        actionId: row.actionId,
-        date: this.toDate(row.date),
-        newStatus: row.newStatus,
-        threeDayReminderNotifsSentAt: row.threeDayReminderNotifsSentAt
-          ? this.toDate(row.threeDayReminderNotifsSentAt)
-          : null,
-        oneDayReminderNotifsSentAt: row.oneDayReminderNotifsSentAt
-          ? this.toDate(row.oneDayReminderNotifsSentAt)
-          : null,
+    if (includeRecipients) {
+      const cache = new Map<string, number>();
+      const getCount = async (
+        status: ActionStatus,
+        action: Action,
+      ): Promise<number> => {
+        const key = `${status}:${action.id}`;
+        if (cache.has(key)) {
+          return cache.get(key)!;
+        }
+        const users = await this.recipientService.getBaseUsersForEvent(
+          status,
+          action,
+        );
+        cache.set(key, users.length);
+        return users.length;
       };
 
-      const arr = eventsByAction.get(row.actionId) ?? [];
-      arr.push(summary);
-      eventsByAction.set(row.actionId, arr);
+      for (const plan of plans) {
+        if (
+          plan.type === ActionEventNotifType.MissedDeadline ||
+          plan.type === ActionEventNotifType.MissedSecondDeadline
+        ) {
+          plan.recipients = plan.recipients ?? 0;
+          continue;
+        }
+        plan.recipients = await getCount(
+          plan.referenceEvent.newStatus,
+          plan.referenceEvent.action,
+        );
+      }
     }
 
-    const candidatesByAction = new Map<
-      number,
-      {
-        deadlineEvent: PastEventSummary;
-        resolutionEvent: PastEventSummary;
-      }
-    >();
+    plans.sort((a, b) => a.scheduledFor.getTime() - b.scheduledFor.getTime());
+    return plans;
+  }
 
-    for (const [actionId, events] of eventsByAction) {
-      for (let i = events.length - 1; i >= 0; i -= 1) {
-        const candidateDeadline = events[i];
-        if (candidateDeadline.newStatus !== ActionStatus.MemberAction) {
+  async getNotificationSchedule(
+    windowStart: Date,
+    windowEnd: Date,
+  ): Promise<NotificationScheduleEntryDto[]> {
+    const plans = await this.evaluateNotifications(
+      windowStart,
+      windowEnd,
+      true,
+    );
+
+    return plans.map((plan) => ({
+      type: plan.type,
+      scheduledFor: plan.scheduledFor,
+      actionId: plan.referenceEvent.action!.id,
+      actionName: plan.referenceEvent.action!.name,
+      actionStatus: plan.referenceEvent.newStatus,
+      eventId: plan.targetEvent.id,
+      estimatedRecipients: plan.recipients ?? 0,
+      metadata: plan.metadata,
+    }));
+  }
+
+  async evaluateDueNotifications(now: Date) {
+    const windowStart = new Date(now.getTime() - NOTIFICATION_LOOKBACK_WINDOW_MS);
+    return this.evaluateNotifications(windowStart, now, false);
+  }
+
+  private async computeReminderPlans(
+    windowStart: Date,
+    windowEnd: Date,
+  ): Promise<NotificationPlan[]> {
+    const results: NotificationPlan[] = [];
+    const reminderWindowEnd = new Date(
+      windowEnd.getTime() + 3 * 24 * 60 * 60 * 1000,
+    );
+
+    const events = await this.eventRepository.find({
+      where: { date: LessThanOrEqual(reminderWindowEnd) },
+      relations: ['action', 'action.participatingGroups'],
+      order: { action: { id: 'ASC' }, date: 'ASC' },
+    });
+
+    const eventsByAction = new Map<number, ActionEvent[]>();
+    for (const event of events) {
+      if (!event.action) continue;
+      const list = eventsByAction.get(event.action.id) ?? [];
+      list.push(event);
+      eventsByAction.set(event.action.id, list);
+    }
+
+    const threeDayMs = 3 * 24 * 60 * 60 * 1000;
+    const oneDayMs = 24 * 60 * 60 * 1000;
+
+    for (const [, list] of eventsByAction) {
+      list.sort((a, b) => a.date.getTime() - b.date.getTime());
+      for (let i = 0; i < list.length - 1; i += 1) {
+        const current = list[i];
+        const next = list[i + 1];
+        if (
+          !current.action ||
+          !ANNOUNCEMENT_SUPPORTED_STATUSES.includes(current.newStatus)
+        ) {
           continue;
         }
 
-        let followUp: PastEventSummary | null = null;
-        for (let j = i + 1; j < events.length; j += 1) {
-          const event = events[j];
-          if (event.newStatus === ActionStatus.MemberAction) {
+        if (current.threeDayReminderNotifsSentAt == null) {
+          const scheduled = new Date(next.date.getTime() - threeDayMs);
+          if (scheduled >= windowStart && scheduled <= windowEnd) {
+            results.push({
+              type: ActionEventNotifType.ThreeDayReminder,
+              scheduledFor: scheduled,
+              referenceEvent: current,
+              targetEvent: next,
+              metadata: {
+                currentEventId: current.id,
+                nextEventId: next.id,
+              },
+            });
+          }
+        }
+
+        if (current.oneDayReminderNotifsSentAt == null) {
+          const scheduled = new Date(next.date.getTime() - oneDayMs);
+          if (scheduled >= windowStart && scheduled <= windowEnd) {
+            results.push({
+              type: ActionEventNotifType.OneDayReminder,
+              scheduledFor: scheduled,
+              referenceEvent: current,
+              targetEvent: next,
+              metadata: {
+                currentEventId: current.id,
+                nextEventId: next.id,
+              },
+            });
+          }
+        }
+      }
+    }
+
+    return results;
+  }
+
+  private async computeDeadlinePlans(
+    windowStart: Date,
+    windowEnd: Date,
+  ): Promise<NotificationPlan[]> {
+    const candidates = await this.findMissedDeadlineCandidates(
+      windowStart,
+      windowEnd,
+    );
+
+    if (!candidates.length) {
+      return [];
+    }
+
+    const eventIds = Array.from(
+      new Set(
+        candidates.flatMap((candidate) => [
+          candidate.deadlineEventId,
+          candidate.resolutionEventId,
+        ]),
+      ),
+    );
+
+    const events = await this.eventRepository.find({
+      where: { id: In(eventIds) },
+      relations: ['action', 'action.participatingGroups'],
+    });
+
+    const eventMap = new Map(events.map((event) => [event.id, event]));
+
+    const aggregated = new Map<
+      string,
+      {
+        deadlineEvent: ActionEvent;
+        resolutionEvent: ActionEvent;
+        count: number;
+        isSecondMiss: boolean;
+      }
+    >();
+
+    for (const candidate of candidates) {
+      const deadlineEvent = eventMap.get(candidate.deadlineEventId);
+      const resolutionEvent = eventMap.get(candidate.resolutionEventId);
+      if (!deadlineEvent || !resolutionEvent || !deadlineEvent.action) {
+        continue;
+      }
+
+      const key = `${candidate.resolutionEventId}:${candidate.isSecondMiss ? 'second' : 'first'}`;
+      const group = aggregated.get(key) ?? {
+        deadlineEvent,
+        resolutionEvent,
+        count: 0,
+        isSecondMiss: false,
+      };
+
+      group.count += 1;
+      group.isSecondMiss = group.isSecondMiss || candidate.isSecondMiss;
+      aggregated.set(key, group);
+    }
+
+    const plans: NotificationPlan[] = [];
+
+    for (const group of aggregated.values()) {
+      plans.push({
+        type: group.isSecondMiss
+          ? ActionEventNotifType.MissedSecondDeadline
+          : ActionEventNotifType.MissedDeadline,
+        scheduledFor: group.resolutionEvent.date,
+        referenceEvent: group.deadlineEvent,
+        targetEvent: group.resolutionEvent,
+        metadata: {
+          deadlineEventId: group.deadlineEvent.id,
+          isSecondMiss: group.isSecondMiss || undefined,
+        },
+        recipients: group.count,
+      });
+    }
+
+    return plans;
+  }
+
+  async findMissedDeadlineCandidates(
+    reference: Date,
+    windowEnd: Date = reference,
+  ): Promise<MissedDeadlineCandidate[]> {
+    const rows = await this.eventRepository.find({
+      where: { date: LessThanOrEqual(windowEnd) },
+      relations: ['action'],
+      order: { action: { id: 'ASC' }, date: 'ASC' },
+    });
+
+    const eventsByAction = new Map<number, ActionEvent[]>();
+    for (const event of rows) {
+      if (!event.action) continue;
+      const list = eventsByAction.get(event.action.id) ?? [];
+      list.push(event);
+      eventsByAction.set(event.action.id, list);
+    }
+
+    const candidates = new Map<
+      number,
+      { deadlineEvent: ActionEvent; resolutionEvent: ActionEvent }
+    >();
+
+    for (const [actionId, list] of eventsByAction) {
+      list.sort((a, b) => a.date.getTime() - b.date.getTime());
+      for (let i = list.length - 1; i >= 0; i -= 1) {
+        const deadline = list[i];
+        if (deadline.newStatus !== ActionStatus.MemberAction) {
+          continue;
+        }
+
+        let followUp: ActionEvent | null = null;
+        for (let j = i + 1; j < list.length; j += 1) {
+          const candidate = list[j];
+          if (candidate.newStatus === ActionStatus.MemberAction) {
             continue;
           }
-
-          if (!POST_MEMBER_ACTION_STATUSES.has(event.newStatus)) {
+          if (!POST_MEMBER_ACTION_STATUSES.has(candidate.newStatus)) {
             continue;
           }
-
-          followUp = event;
+          followUp = candidate;
           break;
         }
 
-        if (followUp) {
-          candidatesByAction.set(actionId, {
-            deadlineEvent: candidateDeadline,
+        if (
+          followUp &&
+          followUp.date >= reference &&
+          followUp.date <= windowEnd
+        ) {
+          candidates.set(actionId, {
+            deadlineEvent: deadline,
             resolutionEvent: followUp,
           });
         }
@@ -257,58 +423,43 @@ export class ActionEventReminderService {
       }
     }
 
-    if (candidatesByAction.size === 0) {
+    if (candidates.size === 0) {
       return [];
     }
 
-    const actionIds = Array.from(candidatesByAction.keys());
-
     const activities = await this.actionActivityRepository.find({
-      where: { actionId: In(actionIds) },
+      where: { actionId: In(Array.from(candidates.keys())) },
       order: { createdAt: 'ASC' },
       select: ['actionId', 'userId', 'type', 'createdAt'],
     });
 
     const latestActivityByAction = new Map<
       number,
-      Map<
-        number,
-        {
-          type: ActionActivityType;
-          createdAt: Date;
-        }
-      >
+      Map<number, { type: ActionActivityType; createdAt: Date }>
     >();
 
     for (const activity of activities) {
-      const userMap =
+      const map =
         latestActivityByAction.get(activity.actionId) ??
         new Map<number, { type: ActionActivityType; createdAt: Date }>();
-
-      userMap.set(activity.userId, {
+      map.set(activity.userId, {
         type: activity.type,
         createdAt: activity.createdAt,
       });
-
-      latestActivityByAction.set(activity.actionId, userMap);
+      latestActivityByAction.set(activity.actionId, map);
     }
 
-    const rawCandidates: Array<
-      MissedDeadlineCandidate & { _timelineDate: Date }
-    > = [];
+    const raw: Array<MissedDeadlineCandidate & { _timelineDate: Date }> = [];
 
-    for (const [actionId, context] of candidatesByAction) {
+    for (const [actionId, context] of candidates) {
       const userMap = latestActivityByAction.get(actionId);
-      if (!userMap) {
-        continue;
-      }
+      if (!userMap) continue;
 
       for (const [userId, activity] of userMap) {
         if (activity.type !== ActionActivityType.USER_JOINED) {
           continue;
         }
-
-        rawCandidates.push({
+        raw.push({
           actionId,
           userId,
           deadlineEventId: context.deadlineEvent.id,
@@ -321,16 +472,16 @@ export class ActionEventReminderService {
       }
     }
 
-    if (rawCandidates.length === 0) {
+    if (raw.length === 0) {
       return [];
     }
 
     const userIds = Array.from(
-      new Set(rawCandidates.map((candidate) => candidate.userId)),
+      new Set(raw.map((candidate) => candidate.userId)),
     );
-
     const completionsByUser = new Map<number, Date[]>();
-    if (userIds.length > 0) {
+
+    if (userIds.length) {
       const completionActivities = await this.actionActivityRepository.find({
         where: {
           userId: In(userIds),
@@ -340,28 +491,27 @@ export class ActionEventReminderService {
         select: ['userId', 'createdAt'],
       });
 
-      for (const completion of completionActivities) {
-        const list = completionsByUser.get(completion.userId) ?? [];
-        list.push(completion.createdAt);
-        completionsByUser.set(completion.userId, list);
+      for (const activity of completionActivities) {
+        const list = completionsByUser.get(activity.userId) ?? [];
+        list.push(activity.createdAt);
+        completionsByUser.set(activity.userId, list);
       }
     }
 
-    const candidatesByUser = new Map<
+    const groupedByUser = new Map<
       number,
       Array<MissedDeadlineCandidate & { _timelineDate: Date }>
     >();
 
-    for (const candidate of rawCandidates) {
-      const arr = candidatesByUser.get(candidate.userId) ?? [];
-      arr.push(candidate);
-      candidatesByUser.set(candidate.userId, arr);
+    for (const candidate of raw) {
+      const list = groupedByUser.get(candidate.userId) ?? [];
+      list.push(candidate);
+      groupedByUser.set(candidate.userId, list);
     }
 
-    for (const [userId, candidates] of candidatesByUser) {
-      const completions = (completionsByUser.get(userId) ?? [])
-        .slice()
-        .sort((a, b) => a.getTime() - b.getTime());
+    for (const [userId, list] of groupedByUser) {
+      const completions = (completionsByUser.get(userId) ?? []).slice();
+      completions.sort((a, b) => a.getTime() - b.getTime());
 
       const timeline: Array<
         | { type: 'completion'; time: Date }
@@ -376,7 +526,7 @@ export class ActionEventReminderService {
         timeline.push({ type: 'completion', time: completion });
       }
 
-      for (const candidate of candidates) {
+      for (const candidate of list) {
         timeline.push({
           type: 'miss',
           time: candidate._timelineDate,
@@ -384,81 +534,19 @@ export class ActionEventReminderService {
         });
       }
 
-      timeline.sort((a, b) => {
-        const diff = a.time.getTime() - b.time.getTime();
-        if (diff !== 0) {
-          return diff;
-        }
-        if (a.type === b.type) {
-          return 0;
-        }
-        return a.type === 'completion' ? -1 : 1;
-      });
+      timeline.sort((a, b) => a.time.getTime() - b.time.getTime());
 
       let consecutiveMisses = 0;
-      for (const entry of timeline) {
-        if (entry.type === 'completion') {
+      for (const item of timeline) {
+        if (item.type === 'completion') {
           consecutiveMisses = 0;
         } else {
           consecutiveMisses += 1;
-          entry.candidate.isSecondMiss = consecutiveMisses >= 2;
+          item.candidate.isSecondMiss = consecutiveMisses >= 2;
         }
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return rawCandidates.map(({ _timelineDate, ...rest }) => rest);
-  }
-
-  private toDate(value: string | Date): Date {
-    return value instanceof Date ? value : new Date(value);
-  }
-
-  private async loadPastEvents(now: Date): Promise<{
-    latestEvents: Map<number, PastEventSummary>;
-    previousEvents: Map<number, PastEventSummary>;
-  }> {
-    const rows: PastEventRow[] = await this.eventRepository.query(
-      `
-        SELECT
-          id,
-          "actionId",
-          date,
-          "newStatus",
-          "threeDayReminderNotifsSentAt",
-          "oneDayReminderNotifsSentAt",
-          ROW_NUMBER() OVER (PARTITION BY "actionId" ORDER BY date DESC) AS rn
-        FROM action_event
-        WHERE date <= $1
-        ORDER BY "actionId" ASC, date DESC
-      `,
-      [now],
-    );
-
-    const latestEvents = new Map<number, PastEventSummary>();
-    const previousEvents = new Map<number, PastEventSummary>();
-
-    for (const row of rows) {
-      const summary: PastEventSummary = {
-        id: row.id,
-        actionId: row.actionId,
-        date: this.toDate(row.date),
-        newStatus: row.newStatus,
-        threeDayReminderNotifsSentAt: row.threeDayReminderNotifsSentAt
-          ? this.toDate(row.threeDayReminderNotifsSentAt)
-          : null,
-        oneDayReminderNotifsSentAt: row.oneDayReminderNotifsSentAt
-          ? this.toDate(row.oneDayReminderNotifsSentAt)
-          : null,
-      };
-
-      if (row.rn === 1) {
-        latestEvents.set(row.actionId, summary);
-      } else if (row.rn === 2 && !previousEvents.has(row.actionId)) {
-        previousEvents.set(row.actionId, summary);
-      }
-    }
-
-    return { latestEvents, previousEvents };
+    return raw;
   }
 }

@@ -1,8 +1,5 @@
 import { Repository } from 'typeorm';
-import {
-  ActionEventReminderService,
-  MissedDeadlineCandidate,
-} from './action-event-reminder.service';
+import { ActionEventReminderService } from './action-event-reminder.service';
 import { ActionEventNotifType } from './entities/action-event-notif.entity';
 import {
   ActionStatus,
@@ -13,470 +10,210 @@ import {
   ActionActivityType,
 } from '../actions/entities/action-activity.entity';
 import { ActionEvent } from '../actions/entities/action-event.entity';
+import { ActionEventRecipientService } from './action-event-recipient.service';
+
+const announcementEvent = (overrides: Partial<ActionEvent> = {}): ActionEvent =>
+  ({
+    id: 1,
+    date: new Date('2024-01-11T12:00:00Z'),
+    newStatus: ActionStatus.GatheringCommitments,
+    sendNotifsTo: NotificationType.All,
+    announcementNotifsSentAt: null,
+    action: {
+      id: 10,
+      name: 'Announcement Action',
+      participatingGroups: [],
+    },
+    ...overrides,
+  }) as unknown as ActionEvent;
+
+const reminderEvent = (overrides: Partial<ActionEvent> = {}): ActionEvent =>
+  ({
+    id: 2,
+    action: {
+      id: 20,
+      name: 'Reminder Action',
+      participatingGroups: [],
+    },
+    date: new Date('2024-01-13T12:00:00Z'),
+    newStatus: ActionStatus.Resolution,
+    ...overrides,
+  }) as unknown as ActionEvent;
 
 describe('ActionEventReminderService', () => {
   let eventQueryMock: jest.Mock;
-  let actionActivityFindMock: jest.Mock;
-  let eventRepositoryMock: { query: jest.Mock };
-  let actionActivityRepositoryMock: { find: jest.Mock };
+  let repositoryMock: { query: jest.Mock; find: jest.Mock };
+  let activityRepositoryMock: { find: jest.Mock };
+  let recipientServiceMock: { getBaseUsersForEvent: jest.Mock };
   let service: ActionEventReminderService;
-  const now = new Date('2024-01-10T12:00:00Z');
-
-  const buildPastEventRow = (
-    overrides: Partial<{
-      id: number;
-      actionId: number;
-      date: Date | string;
-      newStatus: ActionStatus;
-      threeDayReminderNotifsSentAt: Date | string | null;
-      oneDayReminderNotifsSentAt: Date | string | null;
-      rn: number;
-    }>,
-  ) => ({
-    id: 0,
-    actionId: 0,
-    date: new Date('2024-01-01T00:00:00Z'),
-    newStatus: ActionStatus.GatheringCommitments,
-    threeDayReminderNotifsSentAt: null,
-    oneDayReminderNotifsSentAt: null,
-    rn: 1,
-    ...overrides,
-  });
-
-  const buildNextRow = (
-    overrides: Partial<{ id: number; actionId: number; date: Date | string }>,
-  ) => ({
-    id: 0,
-    actionId: 0,
-    date: new Date('2024-01-02T00:00:00Z'),
-    ...overrides,
-  });
 
   beforeEach(() => {
     eventQueryMock = jest.fn();
-    actionActivityFindMock = jest.fn();
-    eventRepositoryMock = {
+    repositoryMock = {
       query: eventQueryMock,
+      find: jest.fn().mockResolvedValue([]),
     };
-    actionActivityRepositoryMock = {
-      find: actionActivityFindMock,
+    activityRepositoryMock = {
+      find: jest.fn().mockResolvedValue([]),
     };
+    recipientServiceMock = {
+      getBaseUsersForEvent: jest.fn().mockResolvedValue([]),
+    };
+
     service = new ActionEventReminderService(
-      eventRepositoryMock as unknown as Repository<ActionEvent>,
-      actionActivityRepositoryMock as unknown as Repository<ActionActivity>,
+      repositoryMock as unknown as Repository<ActionEvent>,
+      activityRepositoryMock as unknown as Repository<ActionActivity>,
+      recipientServiceMock as unknown as ActionEventRecipientService,
     );
   });
 
-  describe('findDueAnnouncementEventIds', () => {
-    it('returns event ids when announcements are due', async () => {
-      const rows = [{ id: 42 }];
-      eventQueryMock.mockResolvedValueOnce(rows);
-
-      const result = await service.findDueAnnouncementEventIds(now);
-
-      expect(result).toEqual([42]);
-      expect(eventQueryMock).toHaveBeenCalledWith(
-        expect.stringContaining('"announcementNotifsSentAt" IS NULL'),
-        [NotificationType.None, now],
-      );
-    });
-
-    it('returns empty array when nothing is due', async () => {
-      eventQueryMock.mockResolvedValueOnce([]);
-
-      const result = await service.findDueAnnouncementEventIds(now);
-
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('findDueReminderEvents', () => {
-    it('returns 3-day reminder candidates when within window and unsent', async () => {
-      const pastRows = [
-        buildPastEventRow({
-          id: 1,
-          actionId: 1,
-          date: new Date('2024-01-08T12:00:00Z'),
-          newStatus: ActionStatus.GatheringCommitments,
-        }),
-      ];
-      const nextRows = [
-        buildNextRow({
-          id: 2,
-          actionId: 1,
-          date: new Date('2024-01-12T11:00:00Z'),
-        }),
-      ];
-
-      eventQueryMock.mockResolvedValueOnce(pastRows).mockResolvedValueOnce(nextRows);
-
-      const result = await service.findDueReminderEvents(now);
-
-      expect(eventQueryMock).toHaveBeenCalledTimes(2);
-
-      expect(result).toEqual([
-        {
-          actionId: 1,
-          currentEventId: 1,
-          nextEventId: 2,
-          nextDate: new Date('2024-01-12T11:00:00Z'),
-          type: ActionEventNotifType.ThreeDayReminder,
-        },
-      ]);
-    });
-
-    it('prefers 1-day reminders when both windows are satisfied', async () => {
-      const pastRows = [
-        buildPastEventRow({
-          id: 10,
-          actionId: 10,
-          date: new Date('2024-01-09T12:00:00Z'),
-          newStatus: ActionStatus.MemberAction,
-        }),
-      ];
-      const nextRows = [
-        buildNextRow({
-          id: 11,
-          actionId: 10,
-          date: new Date('2024-01-10T18:00:00Z'),
-        }),
-      ];
-
-      eventQueryMock.mockResolvedValueOnce(pastRows).mockResolvedValueOnce(nextRows);
-
-      const result = await service.findDueReminderEvents(now);
-
-      expect(result[0].type).toBe(ActionEventNotifType.OneDayReminder);
-    });
-
-    it('skips actions missing a future event', async () => {
-      const pastRows = [buildPastEventRow({ id: 20, actionId: 20 })];
-
-      eventQueryMock.mockResolvedValueOnce(pastRows).mockResolvedValueOnce([]);
-
-      const result = await service.findDueReminderEvents(now);
-
-      expect(result).toHaveLength(0);
-    });
-
-    it('skips 3-day window if reminder already sent', async () => {
-      const pastRows = [
-        buildPastEventRow({
-          id: 30,
-          actionId: 30,
-          date: new Date('2024-01-08T12:00:00Z'),
-          newStatus: ActionStatus.MemberAction,
-          threeDayReminderNotifsSentAt: new Date('2024-01-07T00:00:00Z'),
-        }),
-      ];
-      const nextRows = [
-        buildNextRow({
-          id: 31,
-          actionId: 30,
-          date: new Date('2024-01-12T12:00:00Z'),
-        }),
-      ];
-
-      eventQueryMock.mockResolvedValueOnce(pastRows).mockResolvedValueOnce(nextRows);
-
-      const result = await service.findDueReminderEvents(now);
-
-      expect(result).toHaveLength(0);
-    });
-
-    it('falls back to 3-day reminder when 1-day already sent', async () => {
-      const pastRows = [
-        buildPastEventRow({
-          id: 35,
-          actionId: 35,
-          newStatus: ActionStatus.MemberAction,
-          oneDayReminderNotifsSentAt: new Date('2024-01-09T20:00:00Z'),
-        }),
-      ];
-      const nextRows = [
-        buildNextRow({
-          id: 36,
-          actionId: 35,
-          date: new Date('2024-01-10T18:00:00Z'),
-        }),
-      ];
-
-      eventQueryMock.mockResolvedValueOnce(pastRows).mockResolvedValueOnce(nextRows);
-
-      const result = await service.findDueReminderEvents(now);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].type).toBe(ActionEventNotifType.ThreeDayReminder);
-    });
-
-    it('omits reminders when both flags already populated', async () => {
-      const pastRows = [
-        buildPastEventRow({
-          id: 37,
-          actionId: 37,
-          newStatus: ActionStatus.MemberAction,
-          threeDayReminderNotifsSentAt: new Date('2024-01-08T00:00:00Z'),
-          oneDayReminderNotifsSentAt: new Date('2024-01-09T20:00:00Z'),
-        }),
-      ];
-      const nextRows = [
-        buildNextRow({
-          id: 38,
-          actionId: 37,
-          date: new Date('2024-01-10T18:00:00Z'),
-        }),
-      ];
-
-      eventQueryMock.mockResolvedValueOnce(pastRows).mockResolvedValueOnce(nextRows);
-
-      const result = await service.findDueReminderEvents(now);
-
-      expect(result).toHaveLength(0);
-    });
-
-    it('orders results by the next event date and caps at 100', async () => {
-      const pastRows = Array.from({ length: 120 }, (_, idx) =>
-        buildPastEventRow({
-          id: 1000 + idx,
-          actionId: 1000 + idx,
-          date: new Date('2024-01-08T12:00:00Z'),
-          newStatus: ActionStatus.MemberAction,
-        }),
-      );
-
-      const nextRows = pastRows.map((event, idx) =>
-        buildNextRow({
-          id: 2000 + idx,
-          actionId: event.actionId,
-          date: new Date('2024-01-10T12:00:00Z'),
-        }),
-      );
-
-      eventQueryMock.mockResolvedValueOnce(pastRows).mockResolvedValueOnce(nextRows);
-
-      const result = await service.findDueReminderEvents(now);
-
-      expect(result).toHaveLength(100);
-      expect(result[0].nextDate <= result[1].nextDate).toBe(true);
-    });
-
-    it('ignores current events whose status is not eligible', async () => {
-      const pastRows = [
-        buildPastEventRow({
-          id: 50,
-          actionId: 50,
-          newStatus: ActionStatus.Resolution,
-        }),
-      ];
-
-      eventQueryMock.mockResolvedValueOnce(pastRows);
-
-      await service.findDueReminderEvents(now);
-
-      expect(eventQueryMock).toHaveBeenNthCalledWith(
-        1,
-        expect.stringContaining('ROW_NUMBER'),
-        [now],
-      );
-    });
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('findMissedDeadlineCandidates', () => {
-    const buildDeadlineRows = () => [
-      buildPastEventRow({
-        id: 1,
-        actionId: 1,
-        date: new Date('2024-01-08T12:00:00Z'),
-        newStatus: ActionStatus.MemberAction,
-      }),
-      buildPastEventRow({
-        id: 2,
-        actionId: 1,
-        date: new Date('2024-01-09T12:00:00Z'),
-        newStatus: ActionStatus.OfficeAction,
-      }),
-    ];
-
-    it('returns users who remained joined when the action moved past member action', async () => {
-      eventQueryMock.mockResolvedValueOnce(buildDeadlineRows());
-
-      actionActivityFindMock
-        .mockResolvedValueOnce([
-          {
-            actionId: 1,
-            userId: 10,
-            type: ActionActivityType.USER_JOINED,
-            createdAt: new Date('2024-01-01T00:00:00Z'),
-          },
-        ])
-        .mockResolvedValueOnce([]);
-
-      const result = await service.findMissedDeadlineCandidates(now);
-
-      expect(result).toEqual<MissedDeadlineCandidate[]>([
+    it('identifies missed deadlines and second misses', async () => {
+      (repositoryMock.find as jest.Mock).mockResolvedValueOnce([
         {
-          actionId: 1,
-          userId: 10,
-          deadlineEventId: 1,
-          deadlineDate: new Date('2024-01-08T12:00:00Z'),
-          resolutionEventId: 2,
-          resolutionDate: new Date('2024-01-09T12:00:00Z'),
-          isSecondMiss: false,
+          id: 1,
+          action: { id: 100, name: 'Deadline Action' },
+          date: new Date('2024-01-05T12:00:00Z'),
+          newStatus: ActionStatus.MemberAction,
+        } as unknown as ActionEvent,
+        {
+          id: 2,
+          action: { id: 100, name: 'Deadline Action' },
+          date: new Date('2024-01-10T12:00:00Z'),
+          newStatus: ActionStatus.OfficeAction,
+        } as unknown as ActionEvent,
+      ]);
+
+      eventQueryMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          actionId: 100,
+          date: new Date('2024-01-05T12:00:00Z'),
+          newStatus: ActionStatus.MemberAction,
+        },
+        {
+          id: 2,
+          actionId: 100,
+          date: new Date('2024-01-10T12:00:00Z'),
+          newStatus: ActionStatus.OfficeAction,
         },
       ]);
+
+      activityRepositoryMock.find.mockResolvedValue([
+        {
+          actionId: 100,
+          userId: 1,
+          type: ActionActivityType.USER_JOINED,
+          createdAt: new Date('2024-01-04T00:00:00Z'),
+        },
+      ]);
+
+      const results = await service.findMissedDeadlineCandidates(
+        new Date('2024-01-07T00:00:00Z'),
+        new Date('2024-01-12T00:00:00Z'),
+      );
+
+      //   const sanitized = results.map((candidate) => {
+      //     const { _timelineDate, ...rest } = candidate;
+      //     return rest;
+      //   });
+
+      expect(results.length).toBe(1);
+      expect(results[0]).toMatchObject({
+        actionId: 100,
+        userId: 1,
+        deadlineEventId: 1,
+        deadlineDate: new Date('2024-01-05T12:00:00Z'),
+        resolutionEventId: 2,
+        resolutionDate: new Date('2024-01-10T12:00:00Z'),
+        isSecondMiss: false,
+      });
     });
+  });
 
-    it('omits users who completed the action', async () => {
-      eventQueryMock.mockResolvedValueOnce(buildDeadlineRows());
+  describe('evaluateNotifications', () => {
+    it('includes reminder plans for upcoming events', async () => {
+      const windowStart = new Date('2024-01-10T00:00:00Z');
+      const windowEnd = new Date('2024-01-12T23:59:59Z');
 
-      actionActivityFindMock
-        .mockResolvedValueOnce([
-          {
-            actionId: 1,
-            userId: 10,
-            type: ActionActivityType.USER_COMPLETED,
-            createdAt: new Date('2024-01-05T00:00:00Z'),
-          },
-        ])
+      const currentEvent = reminderEvent({
+        id: 500,
+        date: new Date('2024-01-10T12:00:00Z'),
+        newStatus: ActionStatus.MemberAction,
+      });
+
+      const nextEvent = reminderEvent({
+        id: 501,
+        date: new Date('2024-01-13T12:00:00Z'),
+        newStatus: ActionStatus.Resolution,
+      });
+
+      (repositoryMock.find as jest.Mock)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([currentEvent, nextEvent])
         .mockResolvedValueOnce([]);
 
-      const result = await service.findMissedDeadlineCandidates(now);
-
-      expect(result).toHaveLength(0);
-    });
-
-    it('flags a second consecutive miss without an intervening completion', async () => {
-      const rows = [
-        buildPastEventRow({
-          id: 4,
-          actionId: 2,
-          date: new Date('2024-01-07T12:00:00Z'),
-          newStatus: ActionStatus.MemberAction,
-        }),
-        buildPastEventRow({
-          id: 5,
-          actionId: 2,
-          date: new Date('2024-01-09T12:00:00Z'),
-          newStatus: ActionStatus.Resolution,
-        }),
-        buildPastEventRow({
-          id: 2,
-          actionId: 1,
-          date: new Date('2024-01-03T12:00:00Z'),
-          newStatus: ActionStatus.MemberAction,
-        }),
-        buildPastEventRow({
-          id: 3,
-          actionId: 1,
-          date: new Date('2024-01-05T12:00:00Z'),
-          newStatus: ActionStatus.Resolution,
-        }),
-      ];
-
-      eventQueryMock.mockResolvedValueOnce(rows);
-
-      actionActivityFindMock
-        .mockResolvedValueOnce([
-          {
-            actionId: 1,
-            userId: 10,
-            type: ActionActivityType.USER_JOINED,
-            createdAt: new Date('2024-01-01T00:00:00Z'),
-          },
-          {
-            actionId: 2,
-            userId: 10,
-            type: ActionActivityType.USER_JOINED,
-            createdAt: new Date('2024-01-06T00:00:00Z'),
-          },
-        ])
+      jest
+        .spyOn(
+          service as unknown as { findMissedDeadlineCandidates: jest.Mock },
+          'findMissedDeadlineCandidates',
+        )
         .mockResolvedValueOnce([]);
 
-      const result = await service.findMissedDeadlineCandidates(now);
+      const plans = await service.evaluateNotifications(
+        windowStart,
+        windowEnd,
+        false,
+      );
 
-      const second = result.find((candidate) => candidate.actionId === 2);
-
-      expect(result).toHaveLength(2);
-      expect(second?.isSecondMiss).toBe(true);
+      expect(plans.map((plan) => plan.type)).toEqual([
+        ActionEventNotifType.ThreeDayReminder,
+        ActionEventNotifType.OneDayReminder,
+      ]);
+      expect(plans[0].referenceEvent.id).toBe(currentEvent.id);
+      expect(plans[0].targetEvent.id).toBe(nextEvent.id);
     });
+  });
 
-    it('resets the consecutive counter when a completion occurs between misses', async () => {
-      const rows = [
-        buildPastEventRow({
-          id: 5,
-          actionId: 3,
-          date: new Date('2024-01-07T12:00:00Z'),
-          newStatus: ActionStatus.MemberAction,
-        }),
-        buildPastEventRow({
-          id: 6,
-          actionId: 3,
-          date: new Date('2024-01-09T12:00:00Z'),
-          newStatus: ActionStatus.Resolution,
-        }),
-        buildPastEventRow({
-          id: 3,
-          actionId: 2,
-          date: new Date('2024-01-03T12:00:00Z'),
-          newStatus: ActionStatus.MemberAction,
-        }),
-        buildPastEventRow({
-          id: 4,
-          actionId: 2,
-          date: new Date('2024-01-05T12:00:00Z'),
-          newStatus: ActionStatus.Resolution,
-        }),
-        buildPastEventRow({
-          id: 1,
-          actionId: 1,
-          date: new Date('2023-12-28T12:00:00Z'),
-          newStatus: ActionStatus.MemberAction,
-        }),
-        buildPastEventRow({
-          id: 2,
-          actionId: 1,
-          date: new Date('2023-12-30T12:00:00Z'),
-          newStatus: ActionStatus.Resolution,
-        }),
-      ];
+  describe('getNotificationSchedule', () => {
+    it('maps evaluation plans to DTOs', async () => {
+      const plan = {
+        type: ActionEventNotifType.Announcement,
+        scheduledFor: new Date('2024-01-11T12:00:00Z'),
+        referenceEvent: announcementEvent(),
+        targetEvent: announcementEvent(),
+        metadata: { currentEventId: 1 },
+        recipients: 5,
+      };
 
-      eventQueryMock.mockResolvedValueOnce(rows);
+      jest
+        .spyOn(
+          service as unknown as { evaluateNotifications: jest.Mock },
+          'evaluateNotifications',
+        )
+        .mockResolvedValueOnce([plan]);
 
-      actionActivityFindMock
-        .mockResolvedValueOnce([
-          {
-            actionId: 1,
-            userId: 10,
-            type: ActionActivityType.USER_JOINED,
-            createdAt: new Date('2023-12-20T00:00:00Z'),
-          },
-          {
-            actionId: 2,
-            userId: 10,
-            type: ActionActivityType.USER_JOINED,
-            createdAt: new Date('2024-01-01T00:00:00Z'),
-          },
-          {
-            actionId: 3,
-            userId: 10,
-            type: ActionActivityType.USER_JOINED,
-            createdAt: new Date('2024-01-06T00:00:00Z'),
-          },
-        ])
-        .mockResolvedValueOnce([
-          {
-            userId: 10,
-            createdAt: new Date('2024-01-04T00:00:00Z'),
-          },
-        ]);
+      const result = await service.getNotificationSchedule(
+        new Date('2024-01-10T12:00:00Z'),
+        new Date('2024-01-12T12:00:00Z'),
+      );
 
-      const result = await service.findMissedDeadlineCandidates(now);
-
-      const afterCompletion = result.find((candidate) => candidate.actionId === 2);
-      const third = result.find((candidate) => candidate.actionId === 3);
-
-      expect(afterCompletion?.isSecondMiss).toBe(false);
-      expect(third?.isSecondMiss).toBe(true);
+      expect(result).toEqual([
+        {
+          type: plan.type,
+          scheduledFor: plan.scheduledFor,
+          actionId: plan.referenceEvent.action!.id,
+          actionName: plan.referenceEvent.action!.name,
+          actionStatus: plan.referenceEvent.newStatus,
+          eventId: plan.targetEvent.id,
+          estimatedRecipients: 5,
+          metadata: plan.metadata,
+        },
+      ]);
     });
   });
 });

@@ -77,6 +77,12 @@ const Sidebar: React.FC = () => {
               Forms
             </Link>
             <Link
+              to="/schedule"
+              className={`w-full pl-6 border border-gray-300 px-4 py-2 rounded-md text-sm bg-white hover:bg-gray-200/50 text-blue-500`}
+            >
+              Notification Timeline
+            </Link>
+            <Link
               to="/database"
               className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-blue-500 px-4 py-2 rounded-md text-sm "
             >

@@ -1,6 +1,6 @@
 // action-event-notif.worker.ts
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EmailStatus } from 'src/mail/mail.entity';
 import { MailService } from 'src/mail/mail.service';
@@ -24,6 +24,7 @@ import {
   ActionEventReminderService,
   ANNOUNCEMENT_SUPPORTED_STATUSES,
   MissedDeadlineCandidate,
+  NOTIFICATION_LOOKBACK_WINDOW_MS,
 } from './action-event-reminder.service';
 import { ActionEventRecipientService } from './action-event-recipient.service';
 import { NotificationChannel } from './notif-utils';
@@ -63,7 +64,7 @@ export class ActionEventNotifWorker {
     private readonly reminderService: ActionEventReminderService,
   ) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron('*/3 * * * *')
   async dispatchDueNotifs() {
     if (
       process.env.NODE_ENV === 'development' &&
@@ -72,25 +73,27 @@ export class ActionEventNotifWorker {
       return;
     }
 
-    console.log('dispatching due notifs');
-
     const now = new Date();
+    const windowStart = new Date(
+      now.getTime() - NOTIFICATION_LOOKBACK_WINDOW_MS,
+    );
 
-    const dueAnnouncementIds =
-      await this.reminderService.findDueAnnouncementEventIds(now);
+    console.log('evaluating due notifs for', now);
 
-    for (const eventId of dueAnnouncementIds) {
-      await this.processOne(eventId, ActionEventNotifType.Announcement);
-    }
+    const duePlans = await this.reminderService.evaluateDueNotifications(now);
 
-    const dueReminders = await this.reminderService.findDueReminderEvents(now);
-
-    for (const reminder of dueReminders) {
-      await this.processOne(reminder.currentEventId, reminder.type);
+    for (const plan of duePlans) {
+      if (
+        plan.type === ActionEventNotifType.MissedDeadline ||
+        plan.type === ActionEventNotifType.MissedSecondDeadline
+      ) {
+        continue;
+      }
+      await this.processOne(plan.referenceEvent.id, plan.type);
     }
 
     const missedDeadlineCandidates =
-      await this.reminderService.findMissedDeadlineCandidates(now);
+      await this.reminderService.findMissedDeadlineCandidates(windowStart, now);
 
     for (const candidate of missedDeadlineCandidates) {
       await this.processMissedDeadlineCandidate(candidate);
@@ -103,8 +106,6 @@ export class ActionEventNotifWorker {
         where: { id: eventId },
         relations: ['action', 'action.participatingGroups'],
       });
-
-      console.log('processing notif', eventId);
 
       if (!event || !event.action) return;
 

@@ -46,6 +46,10 @@ import {
   UpdateActionActivityDto,
   UpdateActionDto,
 } from './dto/action.dto';
+import {
+  NotificationScheduleEntryDto,
+  NotificationScheduleQueryDto,
+} from './dto/notification-schedule.dto';
 import { ActionStatus } from './entities/action-event.entity';
 
 @Controller('actions')
@@ -188,6 +192,26 @@ export class ActionsController {
     return this.actionsService.getEvent(id);
   }
 
+  @Get('notification-schedule')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: NotificationScheduleEntryDto, isArray: true })
+  async getNotificationSchedule(
+    @Query() query: NotificationScheduleQueryDto,
+  ): Promise<NotificationScheduleEntryDto[]> {
+    const start = new Date(query.windowStart);
+    const end = new Date(query.windowEnd);
+
+    const schedule = await this.actionsService.getNotificationSchedule(
+      start,
+      end,
+    );
+
+    return schedule.map((entry) => ({
+      ...entry,
+      scheduledFor: new Date(entry.scheduledFor),
+    }));
+  }
+
   @Get(':id/activities')
   @Public()
   @ApiOkResponse({ type: [ActionActivityDto] })
@@ -314,8 +338,9 @@ export class ActionsController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateActionDto: UpdateActionDto,
+    @Request() req: JwtRequest,
   ) {
-    return this.actionsService.update(id, updateActionDto);
+    return this.actionsService.update(id, updateActionDto, req.user.sub);
   }
 
   @Delete(':id')
