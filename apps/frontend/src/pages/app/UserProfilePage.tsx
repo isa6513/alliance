@@ -77,7 +77,7 @@ const UserProfilePage: React.FC = () => {
 
   const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
   const [forumComments, setForumComments] = useState<UserCommentDto[]>([]);
-  const [friends, setFriends] = useState<ProfileDto[]>([]);
+  const [friends, setFriends] = useState<ProfileDto[] | null>(null);
 
   // Edit mode state
   const [editName, setEditName] = useState<string>(user?.name ?? "");
@@ -165,7 +165,7 @@ const UserProfilePage: React.FC = () => {
       }
     };
     setProfile(null);
-    setFriends([]);
+    setFriends(null);
     setFriendStatus(null);
     setForumPosts([]);
     setForumComments([]);
@@ -208,7 +208,7 @@ const UserProfilePage: React.FC = () => {
     }
     const profile = await userMyProfile();
     if (profile.data) {
-      setFriends((prev) => [...prev, profile.data]);
+      setFriends((prev) => (prev ? [...prev, profile.data] : prev));
     }
   }, [id, user]);
 
@@ -391,7 +391,11 @@ const UserProfilePage: React.FC = () => {
             )
           )}
           {/* stats row */}
-          <div className="mt-2 flex flex-row gap-x-2 cursor-pointer">
+          <div
+            className={`mt-2 flex flex-row gap-x-2 cursor-pointer ${
+              friends === null ? "opacity-0" : ""
+            }`}
+          >
             <UserProfileTab
               number={completedActions.length}
               label={`action${
@@ -408,15 +412,15 @@ const UserProfilePage: React.FC = () => {
               onClick={() => setSelectedTab(ProfileTabs.Forum)}
             />
             <UserProfileTab
-              number={friends.length}
-              label={`friend${friends.length === 1 ? "" : "s"}`}
+              number={friends?.length ?? 0}
+              label={`friend${friends?.length === 1 ? "" : "s"}`}
               selected={selectedTab === ProfileTabs.Friends}
               onClick={() => setSelectedTab(ProfileTabs.Friends)}
             />
           </div>
           {/* button row */}
           <div className="absolute right-0 top-0 space-x-3 flex flex-row p-5">
-            {isAuthenticated && !isMe && (
+            {isAuthenticated && !isMe && friendStatus !== null && (
               <>
                 <FriendRequestButton
                   friendStatus={friendStatus}
