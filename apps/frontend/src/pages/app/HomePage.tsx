@@ -1,7 +1,11 @@
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
 import { Link, useNavigate } from "react-router";
-import { ActionWithRelation, useAppLoaderData } from "../../applayout";
+import {
+  ActionWithRelation,
+  useAppActionData,
+  usePostsData,
+} from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
@@ -21,7 +25,8 @@ export function canCompleteAction(action: ActionWithRelation) {
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { actions, posts, activities } = useAppLoaderData();
+  const posts = usePostsData();
+  const { actions, activities } = useAppActionData();
 
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,

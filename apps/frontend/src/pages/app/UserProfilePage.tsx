@@ -61,10 +61,10 @@ const UserProfilePage: React.FC = () => {
   const { openFriendRequest } = state || false;
   const { openFriends } = state || false;
 
-  const { profile: myProfile } = useAppLoaderData();
-  const [profileUser, setProfileUser] = useState<ProfileDto | null>(
-    isMe ? myProfile : null
-  );
+  const [profile, setProfile] = useState<ProfileDto | null>(null);
+  useAppLoaderData().profile.then((data) => {
+    setProfile(data ?? null);
+  });
   const [friendStatus, setFriendStatus] = useState<FriendStatusDto | null>(
     null
   );
@@ -80,10 +80,10 @@ const UserProfilePage: React.FC = () => {
   // Edit mode state
   const [editName, setEditName] = useState<string>(user?.name ?? "");
   const [editBio, setEditBio] = useState<string>(
-    myProfile?.profileDescription ?? ""
+    profile?.profileDescription ?? ""
   );
   const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(
-    myProfile?.profilePicture ?? null
+    profile?.profilePicture ?? null
   );
   const [editAvatarFile, setEditAvatarFile] = useState<File | null>(null);
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
@@ -129,7 +129,7 @@ const UserProfilePage: React.FC = () => {
           path: { id: userId },
         });
         if (userData && userData.displayName) {
-          setProfileUser(userData);
+          setProfile(userData);
           if (isMe) {
             setEditName(userData.displayName);
             setEditBio(userData.profileDescription || "");
@@ -262,7 +262,7 @@ const UserProfilePage: React.FC = () => {
       });
 
       if (response.data) {
-        setProfileUser(response.data);
+        setProfile(response.data);
         setIsEditing(false);
       }
     } catch (err: unknown) {
@@ -273,17 +273,17 @@ const UserProfilePage: React.FC = () => {
   };
 
   const handleCancel = () => {
-    if (profileUser) {
-      setEditName(profileUser.displayName || "");
-      setEditBio(profileUser.profileDescription || "");
-      setEditAvatarUrl(profileUser.profilePicture || null);
+    if (profile) {
+      setEditName(profile.displayName || "");
+      setEditBio(profile.profileDescription || "");
+      setEditAvatarUrl(profile.profilePicture || null);
       setEditAvatarFile(null);
     }
     setImageUploadError(null);
     setIsEditing(false);
   };
 
-  if (!profileUser) {
+  if (!profile) {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
         <div className="max-w-4xl mx-auto">
@@ -296,7 +296,7 @@ const UserProfilePage: React.FC = () => {
     );
   }
 
-  if (!profileUser) {
+  if (!profile) {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
         <div className="max-w-4xl mx-auto">
@@ -340,7 +340,7 @@ const UserProfilePage: React.FC = () => {
             </div>
           ) : (
             <ProfileImage
-              pfp={profileUser.profilePicture}
+              pfp={profile.profilePicture}
               size="huge"
               className="mt-[-55px]"
             />
@@ -356,9 +356,9 @@ const UserProfilePage: React.FC = () => {
             ) : (
               <div className="flex flex-row gap-3 items-center">
                 <h1 className="font-serif !font-semibold">
-                  {profileUser.displayName}
+                  {profile.displayName}
                 </h1>
-                {profileUser.staff && (
+                {profile.staff && (
                   <div className="text-sm bg-staff text-white px-3 py-0.5 rounded self-center mt-2">
                     Staff
                   </div>
@@ -376,9 +376,9 @@ const UserProfilePage: React.FC = () => {
               placeholder="Write something about yourself..."
             />
           ) : (
-            profileUser.profileDescription && (
+            profile.profileDescription && (
               <AppMarkdownWrapper
-                markdownContent={profileUser.profileDescription}
+                markdownContent={profile.profileDescription}
                 className="mb-2"
               />
             )
@@ -508,7 +508,7 @@ const UserProfilePage: React.FC = () => {
 
           {selectedTab === ProfileTabs.Friends && (
             <FriendsTab
-              userId={profileUser.id}
+              userId={profile.id}
               isMe={isMe}
               originalTab={openFriendRequest ? "received" : "friends"}
               friends={friends}

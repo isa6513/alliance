@@ -359,11 +359,7 @@ const ReplyComponent = ({
   }>({ body: "", attachments: [] });
 
   // Common styling classes
-  const newReplyClass = isNewlyAdded
-    ? depth === 0
-      ? "border-1 !border-green-600/80 bg-green-50"
-      : "border-l-2 border-green-600/80 bg-green-50/30 pl-3"
-    : "";
+  const newReplyClass = isNewlyAdded ? "!bg-green/10" : "";
 
   // For top-level replies only, render the entire thread in a card
   if (depth === 0) {

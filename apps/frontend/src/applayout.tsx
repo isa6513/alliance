@@ -12,7 +12,7 @@ import {
   userMyProfile,
 } from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Outlet,
   ShouldRevalidateFunctionArgs,
@@ -42,11 +42,15 @@ export type ActionWithRelation = ActionDto & {
 };
 
 export interface LoaderData {
+  actionData: Promise<ActionLoaderData | null>;
+  posts: Promise<PostDto[]>;
+  profile: Promise<ProfileDto | null>;
+}
+
+export interface ActionLoaderData {
   actions: ActionWithRelation[];
   relations?: Map<number, UserActionRelation>;
   activities?: Map<number, ActivitiesForAction>;
-  posts: PostDto[];
-  profile: ProfileDto | null;
 }
 
 export interface ActivitiesForAction {
@@ -56,105 +60,117 @@ export interface ActivitiesForAction {
 
 const revalidateKey = "revalidate";
 
-export async function clientLoader() {
+export function clientLoader() {
   localStorage.setItem(revalidateKey, "false");
   console.log("clientLoader");
 
-  const [actions, activities, posts, profile] = await Promise.all([
+  const result: Promise<ActionLoaderData | null> = Promise.all([
     actionsFindAll(),
     actionsMyActivity(),
-    forumFindAllPosts(),
-    userMyProfile(),
-  ]);
-
-  const activityList = activities.data ?? [];
-  const actionToRelationMap = new Map<number, UserActionRelation>();
-  const actionToCanParticipateMap = new Map<number, boolean>();
-  if (activities.data) {
-    for (const action of actions.data ?? []) {
-      actionToRelationMap.set(action.id, "none");
+  ]).then(([actions, activities]) => {
+    if (!actions.data) {
+      return null;
     }
-  }
-  const completionActivities = activityList.filter(
-    (activity) => activity.type === "user_completed"
-  );
-  const joinActivities = activityList.filter(
-    (activity) => activity.type === "user_joined"
-  );
-  const declineActivities = activityList.filter(
-    (activity) =>
-      activity.type === "user_declined" ||
-      activity.type === "user_wont_complete"
-  );
 
-  joinActivities.forEach((activity) => {
-    actionToRelationMap.set(activity.actionId, "joined");
-  });
+    const activityList = activities.data ?? [];
+    const actionToRelationMap = new Map<number, UserActionRelation>();
 
-  declineActivities.forEach((activity) => {
-    actionToRelationMap.set(activity.actionId, "declined");
-  });
-
-  completionActivities.forEach((activity) => {
-    actionToRelationMap.set(activity.actionId, "completed");
-  });
-
-  await Promise.all(
-    actions.data?.map(async (action) => {
-      return actionsCanParticipate({
-        path: { id: action.id },
-      }).then((response) => {
-        if (response.data) {
-          actionToCanParticipateMap.set(
-            action.id,
-            response.data.canParticipate
-          );
-        }
-      });
-    }) ?? []
-  );
-
-  const activitiesForAction = new Map<number, ActivitiesForAction>();
-  activityList.forEach((activity) => {
-    if (!activitiesForAction.has(activity.actionId)) {
-      activitiesForAction.set(activity.actionId, {
-        join: null,
-        completion: null,
-      });
+    if (activities.data) {
+      for (const action of actions.data) {
+        actionToRelationMap.set(action.id, "none");
+      }
     }
-    if (activity.type === "user_joined") {
-      activitiesForAction.get(activity.actionId)!.join = activity;
-    } else if (activity.type === "user_completed") {
-      activitiesForAction.get(activity.actionId)!.completion = activity;
-    }
+    const completionActivities = activityList.filter(
+      (activity) => activity.type === "user_completed"
+    );
+    const joinActivities = activityList.filter(
+      (activity) => activity.type === "user_joined"
+    );
+    const declineActivities = activityList.filter(
+      (activity) =>
+        activity.type === "user_declined" ||
+        activity.type === "user_wont_complete"
+    );
+
+    joinActivities.forEach((activity) => {
+      actionToRelationMap.set(activity.actionId, "joined");
+    });
+
+    declineActivities.forEach((activity) => {
+      actionToRelationMap.set(activity.actionId, "declined");
+    });
+
+    completionActivities.forEach((activity) => {
+      actionToRelationMap.set(activity.actionId, "completed");
+    });
+
+    const actionToCanParticipateMap = new Map<number, boolean>();
+
+    const activitiesForAction = new Map<number, ActivitiesForAction>();
+    activityList.forEach((activity) => {
+      if (!activitiesForAction.has(activity.actionId)) {
+        activitiesForAction.set(activity.actionId, {
+          join: null,
+          completion: null,
+        });
+      }
+      if (activity.type === "user_joined") {
+        activitiesForAction.get(activity.actionId)!.join = activity;
+      } else if (activity.type === "user_completed") {
+        activitiesForAction.get(activity.actionId)!.completion = activity;
+      }
+    });
+
+    // for most users draft actions will be filtered out on server. extra filter just makes admin users not see extra actions
+    const actionsWithRelation = actions.data
+      ?.filter((action) => action.status !== "draft")
+      .map((action) => ({
+        ...action,
+        relation: actionToRelationMap.get(action.id),
+        canParticipate: actionToCanParticipateMap.get(action.id) ?? false,
+      }));
+
+    // Sort so that actions with the earliest last event come first
+    const actionsSortedByDate = actionsWithRelation?.sort((a, b) => {
+      const aEvent = a.events[a.events.length - 1];
+      const bEvent = b.events[b.events.length - 1];
+
+      const aDate = aEvent ? new Date(aEvent.date) : new Date(0);
+      const bDate = bEvent ? new Date(bEvent.date) : new Date(0);
+
+      return aDate.getTime() - bDate.getTime();
+    });
+
+    Promise.all(
+      actions.data?.map(async (action) => {
+        return actionsCanParticipate({
+          path: { id: action.id },
+        }).then((response) => {
+          if (response.data) {
+            actionToCanParticipateMap.set(
+              action.id,
+              response.data.canParticipate
+            );
+          }
+        });
+      }) ?? []
+    );
+
+    return {
+      actions: actionsSortedByDate,
+      relations: actionToRelationMap,
+      activities: activitiesForAction,
+    };
   });
 
-  // for most users draft actions will be filtered out on server. extra filter just makes admin users not see extra actions
-  const actionsWithRelation = actions.data
-    ?.filter((action) => action.status !== "draft")
-    .map((action) => ({
-      ...action,
-      relation: actionToRelationMap.get(action.id),
-      canParticipate: actionToCanParticipateMap.get(action.id) ?? false,
-    }));
+  const posts = forumFindAllPosts().then((response) => response.data ?? []);
 
-  // Sort so that actions with the earliest last event come first
-  const actionsSortedByDate = actionsWithRelation?.sort((a, b) => {
-    const aEvent = a.events[a.events.length - 1];
-    const bEvent = b.events[b.events.length - 1];
-
-    const aDate = aEvent ? new Date(aEvent.date) : new Date(0);
-    const bDate = bEvent ? new Date(bEvent.date) : new Date(0);
-
-    return aDate.getTime() - bDate.getTime();
-  });
+  const profile = userMyProfile().then((response) => response.data ?? null);
 
   return {
-    actions: actionsSortedByDate ?? [],
-    relations: actionToRelationMap,
-    activities: activitiesForAction,
-    posts: posts.data ?? [],
-    profile: profile.data ?? null,
+    actionData: result,
+    posts,
+    profile,
   } satisfies LoaderData;
 }
 
@@ -163,6 +179,35 @@ export function useAppLoaderData(): LoaderData {
   if (!data) {
     throw new Error("No data - applayout loader not found");
   }
+  return data;
+}
+
+export function useAppActionData(): ActionLoaderData {
+  const [data, setData] = useState<ActionLoaderData | null>(null);
+  const appLayoutData = useRouteLoaderData<typeof clientLoader>("applayout");
+  appLayoutData?.actionData.then((data) => {
+    if (data) {
+      setData(data);
+    }
+  });
+  return data ?? { actions: [], relations: new Map(), activities: new Map() };
+}
+
+export function usePostsData(): PostDto[] {
+  const [data, setData] = useState<PostDto[]>([]);
+  const appLayoutData = useRouteLoaderData<typeof clientLoader>("applayout");
+  appLayoutData?.posts.then((data) => {
+    setData(data);
+  });
+  return data;
+}
+
+export function useProfileData(): ProfileDto | null {
+  const [data, setData] = useState<ProfileDto | null>(null);
+  const appLayoutData = useRouteLoaderData<typeof clientLoader>("applayout");
+  appLayoutData?.profile.then((data) => {
+    setData(data);
+  });
   return data;
 }
 
@@ -185,15 +230,24 @@ const authOnlyRoutes = [
 export default function AppLayout() {
   const { isAuthenticated, loading, logout } = useAuth();
 
-  const { actions } = useLoaderData<typeof clientLoader>();
+  const [nTasks, setNTasks] = useState<number>(0);
 
-  const todoActions = actions.filter((action) => canCompleteAction(action));
-  const newActions = actions.filter(
-    (action) =>
-      action.relation === "none" &&
-      action.status === "gathering_commitments" &&
-      action.canParticipate
-  );
+  const { actionData } = useLoaderData<typeof clientLoader>();
+
+  actionData.then((data) => {
+    if (data) {
+      const todoActions = data.actions.filter((action) =>
+        canCompleteAction(action)
+      );
+      const newActions = data.actions.filter(
+        (action) =>
+          action.relation === "none" &&
+          action.status === "gathering_commitments" &&
+          action.canParticipate
+      );
+      setNTasks(todoActions.length + newActions.length);
+    }
+  });
 
   const navigate = useNavigate();
   const navigation = useNavigation();
@@ -236,11 +290,7 @@ export default function AppLayout() {
 
   return (
     <>
-      {isAuthenticated && (
-        <NavbarHorizontal
-          todoActions={todoActions.length + newActions.length}
-        />
-      )}
+      {isAuthenticated && <NavbarHorizontal todoActions={nTasks} />}
       <Outlet />
       {isFeatureEnabled(Features.BugReporting) && <BugReportButton />}
     </>

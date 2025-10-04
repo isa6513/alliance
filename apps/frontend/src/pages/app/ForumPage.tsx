@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { useNavigate } from "react-router";
-import { useAppLoaderData } from "../../applayout";
+import { usePostsData } from "../../applayout";
 import ForumListPost from "../../components/ForumListPost";
 import { useGrayBackground } from "../../components/HtmlBackgroundManager";
 import { useAuth } from "../../lib/AuthContext";
@@ -8,7 +8,7 @@ import List from "@alliance/shared/ui/List";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
 
 const ForumPage: React.FC = () => {
-  const { posts } = useAppLoaderData();
+  const posts = usePostsData();
 
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
