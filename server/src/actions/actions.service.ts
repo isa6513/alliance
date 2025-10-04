@@ -44,6 +44,7 @@ import { Action, ActionTaskType } from './entities/action.entity';
 import { Group } from 'src/user/entities/group.entity';
 import { UserDto } from 'src/user/user.dto';
 import { NotificationScheduleEntryDto } from './dto/notification-schedule.dto';
+import { User } from 'src/user/entities/user.entity';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -101,12 +102,13 @@ export class ActionsService {
       });
   }
 
-  entityToDto(action: Action): ActionDto {
+  entityToDto(action: Action, canParticipate?: boolean): ActionDto {
     return {
       ...action,
       usersJoined: action.usersJoined,
       usersCompleted: action.usersCompleted,
       status: action.status,
+      canParticipate,
     };
   }
 
@@ -122,7 +124,13 @@ export class ActionsService {
       }
     }
 
-    return filtered.map((action) => this.entityToDto(action));
+    const user = userId ? await this.userService.findOne(userId) : null;
+
+    return await Promise.all(
+      filtered.map(async (action) =>
+        this.entityToDto(action, await this.isEligibleForAction(action, user)),
+      ),
+    );
   }
 
   async getNotificationSchedule(
@@ -484,6 +492,22 @@ export class ActionsService {
     }
 
     return found;
+  }
+
+  async isEligibleForAction(
+    action: Action,
+    user: User | null,
+  ): Promise<boolean> {
+    if (!user) {
+      return false;
+    }
+    const groups = action.participatingGroups || [];
+    if (groups.length === 0) {
+      return true;
+    }
+    const userGroupIds = new Set((user.groups || []).map((group) => group.id));
+    const isMember = groups.some((group) => userGroupIds.has(group.id));
+    return isMember;
   }
 
   async ensureUserEligibleForAction(action: Action, userId: number) {

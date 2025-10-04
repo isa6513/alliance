@@ -1,4 +1,10 @@
-import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  OmitType,
+  PartialType,
+  PickType,
+} from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsBoolean, IsString } from 'class-validator';
 import { CommentDto } from 'src/forum/dto/comment.dto';
@@ -54,6 +60,9 @@ export class ActionDto extends OmitType(Action, [
 
   @ApiProperty({ enum: ActionStatus, enumName: 'ActionStatus' })
   status: ActionStatus;
+
+  @ApiPropertyOptional()
+  canParticipate?: boolean;
 
   constructor(action: Partial<Action>) {
     super();

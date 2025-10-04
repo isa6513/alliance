@@ -531,6 +531,7 @@ export type ActionDto = {
      */
     usersCompleted: number;
     events: Array<ActionEventDto>;
+    canParticipate?: boolean;
 };
 
 export type CommentParentObject = 'post' | 'action' | 'activity';
@@ -666,6 +667,7 @@ export type CreateActionDto = {
      * Whether to show the action to members who are not of participating groups
      */
     showToNonparticipating?: boolean;
+    canParticipate?: boolean;
 };
 
 export type UpdateActionDto = {
@@ -718,6 +720,7 @@ export type UpdateActionDto = {
      * Whether to show the action to members who are not of participating groups
      */
     showToNonparticipating?: boolean;
+    canParticipate?: boolean;
 };
 
 export type CreateActionEventDto = {

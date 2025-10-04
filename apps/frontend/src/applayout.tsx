@@ -1,7 +1,6 @@
 import {
   ActionActivityDto,
   ActionDto,
-  actionsCanParticipate,
   actionsFindAll,
   actionsMyActivity,
   authMe,
@@ -38,7 +37,6 @@ export interface RouteMatches {
 
 export type ActionWithRelation = ActionDto & {
   relation?: UserActionRelation;
-  canParticipate: boolean;
 };
 
 export interface LoaderData {
@@ -104,8 +102,6 @@ export function clientLoader() {
       actionToRelationMap.set(activity.actionId, "completed");
     });
 
-    const actionToCanParticipateMap = new Map<number, boolean>();
-
     const activitiesForAction = new Map<number, ActivitiesForAction>();
     activityList.forEach((activity) => {
       if (!activitiesForAction.has(activity.actionId)) {
@@ -127,7 +123,6 @@ export function clientLoader() {
       .map((action) => ({
         ...action,
         relation: actionToRelationMap.get(action.id),
-        canParticipate: actionToCanParticipateMap.get(action.id) ?? false,
       }));
 
     // Sort so that actions with the earliest last event come first
@@ -140,21 +135,6 @@ export function clientLoader() {
 
       return aDate.getTime() - bDate.getTime();
     });
-
-    Promise.all(
-      actions.data?.map(async (action) => {
-        return actionsCanParticipate({
-          path: { id: action.id },
-        }).then((response) => {
-          if (response.data) {
-            actionToCanParticipateMap.set(
-              action.id,
-              response.data.canParticipate
-            );
-          }
-        });
-      }) ?? []
-    );
 
     return {
       actions: actionsSortedByDate,
