@@ -329,7 +329,7 @@ const UserProfilePage: React.FC = () => {
               value={editBio}
               onChange={(e) => setEditBio(e.target.value)}
               rows={6}
-              className="w-full border-none !bg-zinc-100 px-2 -mx-2 rounded focus:outline-none p-2 mb-2"
+              className="w-full border-none !bg-zinc-100 px-2 -ml-2 rounded focus:outline-none p-2 mb-2"
               placeholder="Write something about yourself..."
             />
           ) : (

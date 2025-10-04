@@ -135,7 +135,7 @@ const ForumListPost = ({
     return (
       <div
         key={post.id}
-        className="flex items-start space-x-3 rounded-md border-zinc-200 hover:bg-zinc-50 px-4 -mx-4"
+        className="flex items-start space-x-3 rounded-md border-zinc-200 hover:bg-zinc-100 px-4 -mx-4 cursor-pointer"
         onClick={() => {
           navigate(
             lastComment && showReply

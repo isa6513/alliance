@@ -38,7 +38,7 @@ const ActivityFeedItem = ({
           </>
         )}
         <p className="text-zinc-900">
-          <Link to={`/user/${user.id}`}>
+          <Link to={`/user/${user.id}`} onClick={(e) => e.stopPropagation()}>
             <UserDisplayName staff={user.staff}>
               {user.displayName}
             </UserDisplayName>
