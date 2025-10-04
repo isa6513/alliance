@@ -397,6 +397,12 @@ const ActionDashboard: React.FC = () => {
     { key: "events", label: "Event Management" },
   ];
 
+  const currentEventId = action?.events
+    ?.filter((event) => new Date(event.date).getTime() < new Date().getTime())
+    .sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )[0]?.id;
+
   return (
     <div className="flex flex-col h-full p-5">
       <div className="flex justify-between items-center mb-4">
@@ -570,7 +576,9 @@ const ActionDashboard: React.FC = () => {
                             <div className="flex-shrink-0">
                               <div
                                 className={`w-3 h-3 rounded-full ${
-                                  index === 0 ? "bg-blue-500" : "bg-gray-300"
+                                  event.id === currentEventId
+                                    ? "bg-blue-500"
+                                    : "bg-gray-300"
                                 }`}
                               />
                             </div>
