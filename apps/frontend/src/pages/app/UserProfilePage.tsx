@@ -63,7 +63,9 @@ const UserProfilePage: React.FC = () => {
 
   const [profile, setProfile] = useState<ProfileDto | null>(null);
   useAppLoaderData().profile.then((data) => {
-    setProfile(data ?? null);
+    if (!profile && isMe) {
+      setProfile(data ?? null);
+    }
   });
   const [friendStatus, setFriendStatus] = useState<FriendStatusDto | null>(
     null
@@ -162,6 +164,11 @@ const UserProfilePage: React.FC = () => {
         console.error("Error fetching user data:", error);
       }
     };
+    setProfile(null);
+    setFriends([]);
+    setFriendStatus(null);
+    setForumPosts([]);
+    setForumComments([]);
 
     if (id) {
       fetchData();
