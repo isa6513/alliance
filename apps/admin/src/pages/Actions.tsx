@@ -143,6 +143,8 @@ const ActionsList: React.FC = () => {
       <div className="space-y-3 flex-1 overflow-y-auto p-5 pt-0">
         {actions
           .sort((a, b) => {
+            if (a.events.length === 0) return 1;
+            if (b.events.length === 0) return -1;
             const aEvent = a.events[a.events.length - 1];
             const bEvent = b.events[b.events.length - 1];
 
