@@ -33,6 +33,7 @@ import useActivities, { ActivityList } from "./useActivities";
 import { sharp_allowed_mime_types } from "@alliance/shared/lib/config";
 import List from "@alliance/shared/ui/List";
 import ForumActivityCommentCard from "../../components/ForumActivityCommentCard";
+import ProfileImageEditor from "../../components/ProfileImageEditor";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -87,8 +88,7 @@ const UserProfilePage: React.FC = () => {
   const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(
     profile?.profilePicture ?? null
   );
-  const [editAvatarFile, setEditAvatarFile] = useState<File | null>(null);
-  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const [avatarEditorKey, setAvatarEditorKey] = useState(0);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   const forumActivityItems = useMemo(() => {
@@ -164,11 +164,6 @@ const UserProfilePage: React.FC = () => {
         console.error("Error fetching user data:", error);
       }
     };
-    setProfile(null);
-    setFriends(null);
-    setFriendStatus(null);
-    setForumPosts([]);
-    setForumComments([]);
 
     if (id) {
       fetchData();
@@ -179,6 +174,11 @@ const UserProfilePage: React.FC = () => {
   useEffect(() => {
     setSelectedTab(ProfileTabs.Activity);
     setIsEditing(false);
+    setProfile(null);
+    setFriends(null);
+    setFriendStatus(null);
+    setForumPosts([]);
+    setForumComments([]);
   }, [id]);
 
   useEffect(() => {
@@ -222,38 +222,6 @@ const UserProfilePage: React.FC = () => {
     }
   }, [id, user]);
 
-  const handleAvatarChange: React.ChangeEventHandler<HTMLInputElement> = (
-    e
-  ) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-
-    setImageUploadError(null);
-
-    if (!sharp_allowed_mime_types.includes(file.type)) {
-      setImageUploadError("Please select a valid image file.");
-      return;
-    }
-
-    const maxSizeInBytes = 20 * 1024 * 1024;
-    if (file.size > maxSizeInBytes) {
-      setImageUploadError(
-        "Image size must be less than 20MB. Please choose a smaller image."
-      );
-      return;
-    }
-
-    setEditAvatarFile(file);
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setEditAvatarUrl(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
   const handleSave = async () => {
     if (!user || isSavingProfile) return;
 
@@ -284,9 +252,8 @@ const UserProfilePage: React.FC = () => {
       setEditName(profile.displayName || "");
       setEditBio(profile.profileDescription || "");
       setEditAvatarUrl(profile.profilePicture || null);
-      setEditAvatarFile(null);
     }
-    setImageUploadError(null);
+    setAvatarEditorKey((prev) => prev + 1);
     setIsEditing(false);
   };
 
@@ -321,30 +288,13 @@ const UserProfilePage: React.FC = () => {
         <div className="w-full h-[50px] md:h-[100px]"></div>
         <Card className="px-8 pb-6 relative gap-y-2">
           {isEditing ? (
-            <div className="relative w-fit">
-              <img
-                src={
-                  editAvatarFile
-                    ? URL.createObjectURL(editAvatarFile)
-                    : editAvatarUrl ?? undefined
-                }
-                className="mt-[-55px] w-29 h-29 rounded-md object-cover"
-              />
-              <div className="absolute w-29 h-29 top-[-55px] bg-zinc-50/50 border border-dashed border-zinc-300 rounded-md hover:bg-zinc-100 transition-colors duration-100">
-                <label className="cursor-pointer text-zinc-400 underline text-sm absolute m-auto text-center w-full h-full flex items-center justify-center">
-                  <input
-                    type="file"
-                    accept={sharp_allowed_mime_types.join(",")}
-                    className="hidden w-full h-full"
-                    onChange={handleAvatarChange}
-                  />
-                  <p className="text-center">Change photo</p>
-                </label>
-              </div>
-              {imageUploadError && (
-                <p className="text-red-500 text-sm mt-2">{imageUploadError}</p>
-              )}
-            </div>
+            <ProfileImageEditor
+              key={avatarEditorKey}
+              className="mt-[-55px]"
+              initialImageUrl={editAvatarUrl}
+              onChange={setEditAvatarUrl}
+              allowedMimeTypes={sharp_allowed_mime_types}
+            />
           ) : (
             <ProfileImage
               pfp={profile.profilePicture}
@@ -358,7 +308,7 @@ const UserProfilePage: React.FC = () => {
                 type="text"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                className="w-full border border-zinc-300 focus:outline-none !text-[30px] font-medium font-serif"
+                className="w-full border-none !bg-zinc-100 px-2 -mx-2 rounded focus:outline-none !text-[30px] !font-semibold font-serif"
               />
             ) : (
               <div className="flex flex-row gap-3 items-center">
@@ -379,7 +329,7 @@ const UserProfilePage: React.FC = () => {
               value={editBio}
               onChange={(e) => setEditBio(e.target.value)}
               rows={6}
-              className="w-full border border-zinc-300 focus:outline-none p-2 -ml-2 mt-4 mb-2"
+              className="w-full border-none !bg-zinc-100 px-2 -mx-2 rounded focus:outline-none p-2 mb-2"
               placeholder="Write something about yourself..."
             />
           ) : (
@@ -522,7 +472,7 @@ const UserProfilePage: React.FC = () => {
               userId={profile.id}
               isMe={isMe}
               originalTab={openFriendRequest ? "received" : "friends"}
-              friends={friends}
+              friends={friends ?? []}
             />
           )}
         </div>

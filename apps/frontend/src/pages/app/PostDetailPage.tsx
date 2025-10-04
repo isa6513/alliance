@@ -93,19 +93,7 @@ const PostDetailPage: React.FC = () => {
   }
 
   if (!post) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-10 text-gray-500">
-          <p>Post not found</p>
-          <Link
-            to="/forum"
-            className="text-blue-600 hover:underline mt-2 inline-block"
-          >
-            Return to Forum
-          </Link>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
