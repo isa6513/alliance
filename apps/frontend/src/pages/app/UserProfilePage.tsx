@@ -20,7 +20,7 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocation, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
 import { setRevalidate, useAppLoaderData } from "../../applayout";
 import ForumListPost from "../../components/ForumListPost";
@@ -212,6 +212,8 @@ const UserProfilePage: React.FC = () => {
     }
   }, [id, user]);
 
+  const navigate = useNavigate();
+
   const handleRemoveFriend = useCallback(async () => {
     if (!id || !user) return;
     try {
@@ -239,6 +241,8 @@ const UserProfilePage: React.FC = () => {
       if (response.data) {
         setProfile(response.data);
         setIsEditing(false);
+        setRevalidate();
+        navigate(`/user/${id}`); // to make navbar pfp reload
       }
     } catch (err: unknown) {
       console.error(err);
