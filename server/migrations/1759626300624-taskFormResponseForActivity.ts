@@ -6,77 +6,74 @@ export class TaskFormResponseForActivity1759626300624
   name = 'TaskFormResponseForActivity1759626300624';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // 1) Add nullable column first
+    // 1) Add nullable column
     await queryRunner.query(`
-          ALTER TABLE "action_activity"
-          ADD COLUMN "taskFormResponseId" integer
-        `);
+      ALTER TABLE "action_activity"
+      ADD COLUMN "taskFormResponseId" integer
+    `);
 
-    // 2) Backfill: for each action_activity, find a form_response that
-    //    matches the activity's user AND the action's taskFormId.
-    //    If multiple match, choose the lowest response id to be deterministic.
-    //
-    //    Schema assumptions used here:
-    //    - action_activity has columns: "id", "actionId", "userId"
-    //    - action has columns: "id", "taskFormId"
-    //    - form_response has columns: "id", "formId", "userId"
-    //
-    //    If you prefer "latest" by createdAt, replace MIN(fr.id) with:
-    //      (SELECT fr2.id FROM form_response fr2
-    //       WHERE fr2."formId" = a."taskFormId"
-    //         AND fr2."userId" = aa2."userId"
-    //       ORDER BY fr2."createdAt" DESC NULLS LAST, fr2.id DESC
-    //       LIMIT 1)
+    // 2) Backfill with de-duplication:
+    //    - Match on (action.taskFormId, activity.userId)
+    //    - If multiple activities map to the same form_response, keep only ONE
+    //      activity (rn = 1) and leave the others NULL so the UNIQUE can be added.
+    //    - Order the keeper by activity.createdAt ASC then id ASC.
+    //      (If you don't have createdAt, this still works thanks to id.)
     await queryRunner.query(`
-          WITH chosen AS (
-            SELECT
-              aa2.id            AS aa_id,
-              MIN(fr.id)        AS fr_id
-            FROM "action_activity" aa2
-            JOIN "action" a
-              ON a.id = aa2."actionId"
-            JOIN "form_response" fr
-              ON fr."formId" = a."taskFormId"
-             AND fr."userId"  = aa2."userId"
-            GROUP BY aa2.id
-          )
-          UPDATE "action_activity" aa
-             SET "taskFormResponseId" = c.fr_id
-          FROM chosen c
-          WHERE aa.id = c.aa_id
-            AND aa."taskFormResponseId" IS NULL
-        `);
+      WITH matches AS (
+        SELECT
+          aa2.id AS aa_id,
+          fr.id  AS fr_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY fr.id
+            ORDER BY aa2."createdAt" ASC NULLS LAST, aa2.id ASC
+          ) AS rn
+        FROM "action_activity" aa2
+        JOIN "action" a
+          ON a.id = aa2."actionId"
+        JOIN "form_response" fr
+          ON fr."formId" = a."taskFormId"
+         AND fr."userId"  = aa2."userId"
+      ),
+      chosen AS (
+        SELECT aa_id, fr_id
+        FROM matches
+        WHERE rn = 1
+      )
+      UPDATE "action_activity" aa
+         SET "taskFormResponseId" = c.fr_id
+      FROM chosen c
+      WHERE aa.id = c.aa_id
+        AND aa."taskFormResponseId" IS NULL
+    `);
 
-    // 3) Add constraints after data is populated
+    // 3) Constraints after data is clean
     await queryRunner.query(`
-          ALTER TABLE "action_activity"
-          ADD CONSTRAINT "UQ_9641dee187a19400c6fd1f716f7" UNIQUE ("taskFormResponseId")
-        `);
+      ALTER TABLE "action_activity"
+      ADD CONSTRAINT "UQ_9641dee187a19400c6fd1f716f7" UNIQUE ("taskFormResponseId")
+    `);
 
     await queryRunner.query(`
-          ALTER TABLE "action_activity"
-          ADD CONSTRAINT "FK_9641dee187a19400c6fd1f716f7"
-          FOREIGN KEY ("taskFormResponseId")
-          REFERENCES "form_response"("id")
-          ON DELETE CASCADE
-          ON UPDATE NO ACTION
-        `);
+      ALTER TABLE "action_activity"
+      ADD CONSTRAINT "FK_9641dee187a19400c6fd1f716f7"
+      FOREIGN KEY ("taskFormResponseId")
+      REFERENCES "form_response"("id")
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-          ALTER TABLE "action_activity"
-          DROP CONSTRAINT "FK_9641dee187a19400c6fd1f716f7"
-        `);
-
+      ALTER TABLE "action_activity"
+      DROP CONSTRAINT "FK_9641dee187a19400c6fd1f716f7"
+    `);
     await queryRunner.query(`
-          ALTER TABLE "action_activity"
-          DROP CONSTRAINT "UQ_9641dee187a19400c6fd1f716f7"
-        `);
-
+      ALTER TABLE "action_activity"
+      DROP CONSTRAINT "UQ_9641dee187a19400c6fd1f716f7"
+    `);
     await queryRunner.query(`
-          ALTER TABLE "action_activity"
-          DROP COLUMN "taskFormResponseId"
-        `);
+      ALTER TABLE "action_activity"
+      DROP COLUMN "taskFormResponseId"
+    `);
   }
 }

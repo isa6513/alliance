@@ -315,6 +315,19 @@ export type EditableContent = {
     attachments: Array<string>;
 };
 
+export type FormResponse = {
+    id: number;
+    formId: number;
+    answers: {
+        [key: string]: unknown;
+    };
+    user: User;
+    createdAt: string;
+    schemaSnapshot: {
+        [key: string]: unknown;
+    };
+};
+
 export type ActionActivity = {
     id: number;
     /**
@@ -327,6 +340,7 @@ export type ActionActivity = {
     dollar_amount?: number;
     editableContent?: EditableContent;
     likes: Array<User>;
+    taskFormResponse?: FormResponse;
     declineReason?: string;
     isMoral?: boolean;
     outOfTime?: boolean;
@@ -780,6 +794,15 @@ export type PreEventNotifDataDto = {
 
 export type CanParticipateDto = {
     canParticipate: boolean;
+};
+
+export type CreateActionActivityDto = {
+    /**
+     * Type of action activity
+     */
+    type: ActionActivityType;
+    actionId: number;
+    userId: number;
 };
 
 export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted';
@@ -2194,6 +2217,19 @@ export type ActionsCanParticipateResponses = {
 };
 
 export type ActionsCanParticipateResponse = ActionsCanParticipateResponses[keyof ActionsCanParticipateResponses];
+
+export type ActionsCreateActivityData = {
+    body: CreateActionActivityDto;
+    path?: never;
+    query?: never;
+    url: '/actions/createActivity';
+};
+
+export type ActionsCreateActivityResponses = {
+    200: ActionActivityDto;
+};
+
+export type ActionsCreateActivityResponse = ActionsCreateActivityResponses[keyof ActionsCreateActivityResponses];
 
 export type NotifsFindAllData = {
     body?: never;

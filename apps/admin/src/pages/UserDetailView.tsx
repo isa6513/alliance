@@ -22,11 +22,12 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
 import { Duration, formatDuration, intervalToDuration } from "date-fns";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLoaderData } from "react-router";
 import { Route } from "../../.react-router/types/src/pages/+types/UserDetailView";
 import EmailNotif from "../components/EmailNotif";
 import TextNotif from "../components/TextNotif";
+import CreateActivityControls from "../components/CreateActivityControls";
 
 export async function clientLoader({ params }: Route.LoaderArgs) {
   const userIdParam = params.userId;
@@ -93,6 +94,8 @@ const UserDetailView: React.FC = () => {
     notifs,
   } = loaderData;
 
+  const [actionRelationsState, setActionRelationsState] =
+    useState<UserActionRelationDetailDto[]>(actionRelations);
   const [allGroups, setAllGroups] = useState<GroupDto[]>(loaderData.allGroups);
   const [pendingGroupOps, setPendingGroupOps] = useState<Set<string>>(
     () => new Set()
@@ -101,9 +104,25 @@ const UserDetailView: React.FC = () => {
     null
   );
 
+  useEffect(() => {
+    setActionRelationsState(actionRelations);
+  }, [actionRelations]);
+
   const sortedAllGroups = useMemo(() => {
     return [...allGroups].sort((a, b) => a.name.localeCompare(b.name));
   }, [allGroups]);
+
+  const upsertActionRelation = useCallback(
+    (newRelation: UserActionRelationDetailDto) => {
+      setActionRelationsState((prev) => {
+        const remaining = prev.filter(
+          (relation) => relation.actionId !== newRelation.actionId
+        );
+        return [...remaining, newRelation];
+      });
+    },
+    []
+  );
 
   const userGroups = useMemo(() => {
     return allGroups.filter((group) =>
@@ -116,11 +135,11 @@ const UserDetailView: React.FC = () => {
   }, [userGroups]);
 
   const relationByActionId = useMemo(() => {
-    return actionRelations.reduce((acc, relation) => {
+    return actionRelationsState.reduce((acc, relation) => {
       acc[relation.actionId] = relation;
       return acc;
     }, {} as Record<number, UserActionRelationDetailDto>);
-  }, [actionRelations]);
+  }, [actionRelationsState]);
 
   const { emailNotifs, textNotifs, otherNotifs } = useMemo(() => {
     const email: ActionEventNotifDto[] = [];
@@ -361,20 +380,22 @@ const UserDetailView: React.FC = () => {
         {actionSummaries.length ? (
           <div className="grid gap-3">
             {actionSummaries.map((action) => {
-              const relation = relationByActionId[action.id] ?? {
-                actionId: action.id,
-                status: "none" as const,
-              };
-              const statusLabel = formatRelationStatus(relation.status);
+              const relation = relationByActionId[action.id];
+              const relationStatus = relation?.status ?? "none";
+              const statusLabel = formatRelationStatus(relationStatus);
               return (
-                <Link
+                <div
                   key={action.id}
-                  to={`/actions/${action.id}`}
-                  className="rounded border border-zinc-200 bg-zinc-50 p-3 hover:bg-zinc-100/80 transition-colors duration-50"
+                  className="rounded border border-zinc-200 bg-zinc-50 p-3"
                 >
                   <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                     <div>
-                      <p className="font-medium text-zinc-800">{action.name}</p>
+                      <Link
+                        to={`/actions/${action.id}`}
+                        className="font-medium text-zinc-800 hover:text-blue-600"
+                      >
+                        {action.name}
+                      </Link>
                       <p className="text-xs text-zinc-500">
                         Action status:{" "}
                         {humanize(action.status) ?? action.status}
@@ -382,13 +403,20 @@ const UserDetailView: React.FC = () => {
                     </div>
                     <span
                       className={`text-sm font-semibold ${relationStatusColor(
-                        relation.status
+                        relationStatus
                       )}`}
                     >
                       {statusLabel}
                     </span>
                   </div>
-                </Link>
+                  {!relation && (
+                    <CreateActivityControls
+                      actionId={action.id}
+                      userId={user.id}
+                      onCreated={upsertActionRelation}
+                    />
+                  )}
+                </div>
               );
             })}
           </div>

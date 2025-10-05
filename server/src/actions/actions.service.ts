@@ -24,6 +24,7 @@ import {
   ActionActivityDto,
   ActionDto,
   ActionEventDto,
+  CreateActionActivityDto,
   CreateActionDto,
   CreateActionEventDto,
   LatLonDto,
@@ -833,5 +834,15 @@ export class ActionsService {
       emails: emails.map((user) => new UserDto(user)),
       pushes: pushes.map((user) => new UserDto(user)),
     };
+  }
+
+  async adminCreateActivity(
+    activityDto: CreateActionActivityDto,
+  ): Promise<ActionActivityDto> {
+    return this.createActionActivity(
+      activityDto.actionId,
+      activityDto.userId,
+      activityDto.type,
+    );
   }
 }

@@ -6,7 +6,7 @@ import {
   PickType,
 } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { Allow, IsBoolean, IsString } from 'class-validator';
+import { Allow, IsBoolean, IsNumber, IsString } from 'class-validator';
 import { CommentDto } from 'src/forum/dto/comment.dto';
 import { EditableContentDto } from 'src/forum/dto/editablecontent.dto';
 import { ProfileDto, UserDto } from 'src/user/user.dto';
@@ -173,6 +173,15 @@ export class ActionActivityDto extends PickType(ActionActivity, [
       };
     }
   }
+}
+
+export class CreateActionActivityDto extends PickType(ActionActivityDto, [
+  'actionId',
+  'type',
+]) {
+  @ApiProperty()
+  @IsNumber()
+  userId: number;
 }
 
 export class UpdateActionActivityDto extends PickType(ActionActivityDto, [

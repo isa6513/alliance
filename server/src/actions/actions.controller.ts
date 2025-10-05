@@ -36,6 +36,7 @@ import {
   ActionDto,
   ActionEventDto,
   CanParticipateDto,
+  CreateActionActivityDto,
   CreateActionDto,
   CreateActionEventDto,
   DeclineActionDto,
@@ -455,5 +456,14 @@ export class ActionsController {
         req.user.sub,
       ),
     };
+  }
+
+  @Post('createActivity')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionActivityDto })
+  createActivity(
+    @Body() activityDto: CreateActionActivityDto,
+  ): Promise<ActionActivityDto> {
+    return this.actionsService.adminCreateActivity(activityDto);
   }
 }
