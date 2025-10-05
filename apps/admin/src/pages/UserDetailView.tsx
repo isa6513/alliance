@@ -23,7 +23,7 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
 import { Duration, formatDuration, intervalToDuration } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useLoaderData } from "react-router";
+import { Link, useLoaderData, useNavigate } from "react-router";
 import { Route } from "../../.react-router/types/src/pages/+types/UserDetailView";
 import EmailNotif from "../components/EmailNotif";
 import TextNotif from "../components/TextNotif";
@@ -112,17 +112,11 @@ const UserDetailView: React.FC = () => {
     return [...allGroups].sort((a, b) => a.name.localeCompare(b.name));
   }, [allGroups]);
 
-  const upsertActionRelation = useCallback(
-    (newRelation: UserActionRelationDetailDto) => {
-      setActionRelationsState((prev) => {
-        const remaining = prev.filter(
-          (relation) => relation.actionId !== newRelation.actionId
-        );
-        return [...remaining, newRelation];
-      });
-    },
-    []
-  );
+  const navigate = useNavigate();
+
+  const upsertActionRelation = useCallback(() => {
+    navigate(window.location.pathname);
+  }, [navigate]);
 
   const userGroups = useMemo(() => {
     return allGroups.filter((group) =>

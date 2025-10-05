@@ -1,20 +1,9 @@
 import {
   ActionActivityType,
   actionsCreateActivity,
-  UserActionRelationDetailDto,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useCallback, useState } from "react";
-
-const ACTIVITY_TYPE_TO_STATUS: Record<
-  ActionActivityType,
-  UserActionRelationDetailDto["status"]
-> = {
-  user_joined: "joined",
-  user_completed: "completed",
-  user_declined: "declined",
-  user_wont_complete: "wont_complete",
-};
 
 const ACTIVITY_TYPE_OPTIONS: Array<{
   value: ActionActivityType;
@@ -29,7 +18,7 @@ const ACTIVITY_TYPE_OPTIONS: Array<{
 export interface CreateActivityControlsProps {
   actionId: number;
   userId: number;
-  onCreated: (detail: UserActionRelationDetailDto) => void;
+  onCreated: () => void;
 }
 
 const CreateActivityControls = ({
@@ -63,18 +52,14 @@ const CreateActivityControls = ({
 
       if (response.error) {
         console.error("Failed to create activity", response.error);
-        setError("Failed to create activity. Try again.");
+        setError(
+          (response.error as { message: string }).message ??
+            "Failed to create activity. Try again."
+        );
         return;
       }
 
-      const createdAt = response.data?.createdAt ?? new Date().toISOString();
-
-      onCreated({
-        actionId,
-        status: ACTIVITY_TYPE_TO_STATUS[selectedType],
-        latestActivityType: selectedType,
-        latestActivityAt: createdAt,
-      });
+      onCreated();
     } catch (err) {
       console.error("Failed to create activity", err);
       setError("Failed to create activity. Try again.");

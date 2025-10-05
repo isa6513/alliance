@@ -561,18 +561,18 @@ export class ActionsService {
     }
 
     // Check if we should transition from MemberAction to Resolution
-    if (action.status === ActionStatus.MemberAction) {
-      if (
-        action.usersJoined > 0 &&
-        action.usersCompleted >= action.usersJoined
-      ) {
-        await this.createAutomaticTransitionEvent(
-          actionId,
-          ActionStatus.Resolution,
-          'All members completed action',
-          `All ${action.usersJoined} committed members have completed the action.`,
-        );
-      }
+    if (
+      action.status === ActionStatus.MemberAction &&
+      action.usersJoined > 0 &&
+      action.usersCompleted >= action.usersJoined &&
+      !action.commitmentless
+    ) {
+      await this.createAutomaticTransitionEvent(
+        actionId,
+        ActionStatus.Resolution,
+        'All members completed action',
+        `All ${action.usersJoined} committed members have completed the action.`,
+      );
     }
   }
 
