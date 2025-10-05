@@ -79,6 +79,16 @@ const HomePage = () => {
         </Link>
         .
       </p>
+      <p className="text-black mt-2">
+        If you have questions or feedback, call a{" "}
+        <Link
+          to="https://calendly.com/d/ctcw-j4f-bp3/talk-to-a-staff-member"
+          className="text-link"
+        >
+          staff member
+        </Link>
+        .
+      </p>
     </div>
   );
 
