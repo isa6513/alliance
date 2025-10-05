@@ -54,7 +54,7 @@ const Card: React.FC<CardProps> = ({
       id={id || undefined}
       className={`${flex ? "flex flex-col" : ""} ${
         styleClasses[cardStyle]
-      }  p-4 border ${className} ${
+      } p-4 border ${className} ${
         onClick ? "cursor-pointer hover:border-zinc-400" : ""
       } bg-cover bg-center rounded`}
       ref={ref}

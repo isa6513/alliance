@@ -15,6 +15,7 @@ import {
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Action } from './action.entity';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 
 export enum ActionActivityType {
   USER_JOINED = 'user_joined',
@@ -95,6 +96,17 @@ export class ActionActivity {
   @ApiProperty({ type: () => User, isArray: true })
   @Type(() => User)
   likes: User[];
+
+  @ApiPropertyOptional({ type: () => FormResponse })
+  @Type(() => FormResponse)
+  @IsOptional()
+  @OneToOne(() => FormResponse, {
+    cascade: true,
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  taskFormResponse?: FormResponse;
 
   @Column({ nullable: true })
   @ApiPropertyOptional()

@@ -37,8 +37,8 @@ const ActionTaskPanelCompleted = ({
 
   if (action?.taskFormId && formResponse) {
     return (
-      <Card style={CardStyle.Grey} className="inline-block !p-6">
-        <Card style={CardStyle.Green} className="border-none mb-4 bg-green/30">
+      <Card style={CardStyle.Grey} className="inline-block !p-6 space-y-4">
+        <Card style={CardStyle.Green} className="border-none bg-green/30">
           You&apos;ve completed this action! Thank you for your help.
         </Card>
         <FormRenderer

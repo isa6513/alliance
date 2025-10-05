@@ -210,13 +210,14 @@ export class TasksService {
     userId: number,
     formId: number,
   ): Promise<FormResponseDto> {
-    const response = await this.formResponseRepository.findOne({
+    const responses = await this.formResponseRepository.find({
       where: { formId, user: { id: userId } },
+      order: { createdAt: 'DESC' },
     });
-    if (!response) {
+    if (!responses.length) {
       throw new NotFoundException('Form response not found');
     }
-    return response;
+    return responses[0];
   }
 
   async customValidators(): Promise<CustomValidatorDto[]> {
@@ -276,7 +277,7 @@ export class TasksService {
         }
         break;
       case 4: // User has replied to the personal habit discussion
-        const replies = await this.forumService.findCommentsForPost(6);
+        const replies = await this.forumService.findCommentsForPost(19);
         if (
           replies.filter((reply) => reply.authorId === user.id).length === 0
         ) {
