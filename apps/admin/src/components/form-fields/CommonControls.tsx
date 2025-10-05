@@ -80,8 +80,8 @@ export function ConditionalVisibility({
   previousFields,
   onChange,
 }: ConditionalVisibilityProps) {
-  const controllers = (previousFields || []).filter(
-    (f): f is ControllerField => isConditionalController(f)
+  const controllers = (previousFields || []).filter((f): f is ControllerField =>
+    isConditionalController(f)
   );
 
   type SimpleCondition = Exclude<Condition, { expr: string }>;
@@ -145,14 +145,14 @@ export function ConditionalVisibility({
   };
 
   return (
-    <div className="mt-2 border-t border-gray-200 pt-2">
+    <div className=" border-gray-200 pt-2">
       <div className="flex items-center justify-between">
         <label className="text-xs font-medium text-gray-700">
           Conditional visibility
         </label>
         <input
           type="checkbox"
-          className="h-4 w-4"
+          className={`h-4 w-4 ${controllers.length === 0 ? "opacity-30" : ""}`}
           checked={enabled}
           onChange={(e) => handleEnableToggle(e.target.checked)}
           disabled={controllers.length === 0}
@@ -244,13 +244,13 @@ function useCustomValidators(): {
   error: string | null;
 } {
   const [validators, setValidators] = useState<CustomValidatorDto[]>(
-    () => cachedValidators ?? [],
+    () => cachedValidators ?? []
   );
   const [loading, setLoading] = useState<boolean>(
-    () => !cachedValidators && !cachedValidatorsError,
+    () => !cachedValidators && !cachedValidatorsError
   );
   const [error, setError] = useState<string | null>(
-    () => cachedValidatorsError,
+    () => cachedValidatorsError
   );
 
   useEffect(() => {
@@ -341,9 +341,7 @@ export function CustomValidatorSelect({
 
   return (
     <div className={`space-y-1 ${className}`}>
-      <label className="block text-xs font-medium text-gray-700">
-        {label}
-      </label>
+      <label className="block text-xs font-medium text-gray-700">{label}</label>
       <select
         className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100"
         value={value ? String(value) : ""}
@@ -360,9 +358,7 @@ export function CustomValidatorSelect({
       {loading && (
         <p className="text-[11px] text-gray-500">Loading validators…</p>
       )}
-      {error && !loading && (
-        <p className="text-[11px] text-red-500">{error}</p>
-      )}
+      {error && !loading && <p className="text-[11px] text-red-500">{error}</p>}
       {!loading && !hasValidators && !error && (
         <p className="text-[11px] text-gray-500">No custom validators found.</p>
       )}
