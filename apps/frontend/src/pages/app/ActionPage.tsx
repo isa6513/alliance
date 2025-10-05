@@ -33,20 +33,23 @@ export async function loader({
     path: { id: parseInt(params.id) },
   });
 
-  if (!action.data) {
-    return null;
-  }
-
-  return { ...action.data };
+  return action.data ?? null;
 }
 
 export async function clientLoader({
   params,
   serverLoader,
 }: Route.ClientLoaderArgs): Promise<ActionDto | undefined> {
+  const canParticipate = await actionsCanParticipate({
+    path: { id: parseInt(params.id) },
+  });
+
   const serverData = await serverLoader();
   if (serverData) {
-    return serverData;
+    return {
+      ...serverData,
+      canParticipate: canParticipate.data?.canParticipate ?? false,
+    };
   }
 
   if (!params.id || isNaN(parseInt(params.id))) {
@@ -61,7 +64,10 @@ export async function clientLoader({
     throw data("Record Not Found", { status: 404 });
   }
 
-  return { ...action.data };
+  return {
+    ...action.data,
+    canParticipate: canParticipate.data?.canParticipate ?? false,
+  };
 }
 clientLoader.hydrate = true as const; // (3)
 
@@ -94,15 +100,11 @@ export default function ActionPage() {
   const [userRelation, setUserRelation] = useState<UserActionRelation | null>(
     null
   );
-  const [canParticipate, setCanParticipate] = useState<boolean | null>(null);
-
   const { isAuthenticated } = useAuth();
 
   useCIDFromParams();
 
   const actionId = action?.id || 0;
-
-  //   const { activities: liveActivities } = useActionActivity(actionId);
 
   const { activities, handleLikeActivity, setActivities } = useActivities({
     list: ActivityList.Action,
@@ -116,13 +118,6 @@ export default function ActionPage() {
       }).then((response) => {
         if (response.data) {
           setUserRelation(response.data.relation);
-        }
-      });
-      actionsCanParticipate({
-        path: { id: parseInt(id) },
-      }).then((response) => {
-        if (response.data) {
-          setCanParticipate(response.data.canParticipate);
         }
       });
     }
@@ -142,7 +137,6 @@ export default function ActionPage() {
               onJoinAction: () => setUserRelation("joined"),
               onDeclineAction: () => setUserRelation("declined"),
               onOptOutAction: () => setUserRelation("declined"),
-              canParticipate,
               activities,
               handleLikeActivity,
               setActivities,

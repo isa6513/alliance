@@ -166,7 +166,6 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         </StripeWrapper>
       );
     }
-    console.log("action.taskFormId", action.taskFormId);
     if (action.type === "Activity" && action.taskFormId) {
       completionElement = (
         <ActionTaskPanelForm
