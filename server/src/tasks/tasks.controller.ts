@@ -20,6 +20,10 @@ import {
   SubmitFormDto,
 } from './form.dto';
 import { TasksService } from './tasks.service';
+import {
+  CustomValidatorDto,
+  CustomValidatorResponseDto,
+} from './customvalidator.dto';
 
 @Controller('tasks')
 export class TasksController {
@@ -89,5 +93,22 @@ export class TasksController {
   @ApiOkResponse()
   async deleteForm(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.tasksService.deleteForm(id);
+  }
+
+  @Get('customValidators')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CustomValidatorDto, isArray: true })
+  async customValidators() {
+    return this.tasksService.customValidators();
+  }
+
+  @Get('runValidator/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CustomValidatorResponseDto })
+  async runValidator(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: JwtRequest,
+  ) {
+    return this.tasksService.runValidator(id, req.user.sub);
   }
 }

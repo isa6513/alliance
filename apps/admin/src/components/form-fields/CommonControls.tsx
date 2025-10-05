@@ -1,3 +1,18 @@
+import { useEffect, useState, type ChangeEvent } from "react";
+import {
+  tasksCustomValidators,
+  type CustomValidatorDto,
+} from "@alliance/shared/client";
+import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
+import type {
+  AnyField,
+  CheckboxField,
+  Condition,
+  MultiSelectField,
+  RadioField,
+  SelectField,
+} from "@alliance/shared/forms/formschema";
+
 type RequiredToggleProps = {
   checked: boolean | undefined;
   onChange: (checked: boolean) => void;
@@ -38,16 +53,6 @@ export function RequiredAsterisk({
 }
 
 // ---------------- Conditional Visibility ----------------
-import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
-import type {
-  AnyField,
-  CheckboxField,
-  Condition,
-  MultiSelectField,
-  RadioField,
-  SelectField,
-} from "@alliance/shared/forms/formschema";
-
 type ConditionalVisibilityProps = {
   field: (AnyField | DisplayBlock) & { visibleIf?: Condition };
   previousFields: AnyField[];
@@ -209,6 +214,157 @@ export function ConditionalVisibility({
         <p className="mt-1 text-[11px] text-gray-400">
           No earlier checkbox/select/radio fields available to reference.
         </p>
+      )}
+    </div>
+  );
+}
+
+// ---------------- Custom Validators ----------------
+
+let cachedValidators: CustomValidatorDto[] | null = null;
+let cachedValidatorsError: string | null = null;
+let pendingValidatorsRequest: Promise<CustomValidatorDto[]> | null = null;
+
+async function fetchCustomValidators(): Promise<CustomValidatorDto[]> {
+  const response = await tasksCustomValidators();
+  if (response.data) {
+    return response.data;
+  }
+
+  if (response.error) {
+    throw response.error;
+  }
+
+  throw new Error("Unknown error loading custom validators");
+}
+
+function useCustomValidators(): {
+  validators: CustomValidatorDto[];
+  loading: boolean;
+  error: string | null;
+} {
+  const [validators, setValidators] = useState<CustomValidatorDto[]>(
+    () => cachedValidators ?? [],
+  );
+  const [loading, setLoading] = useState<boolean>(
+    () => !cachedValidators && !cachedValidatorsError,
+  );
+  const [error, setError] = useState<string | null>(
+    () => cachedValidatorsError,
+  );
+
+  useEffect(() => {
+    if (cachedValidators) {
+      setLoading(false);
+      return;
+    }
+
+    let isCancelled = false;
+    if (!pendingValidatorsRequest) {
+      pendingValidatorsRequest = fetchCustomValidators();
+    }
+
+    setLoading(true);
+
+    pendingValidatorsRequest
+      .then((data) => {
+        if (isCancelled) return;
+        cachedValidators = data;
+        cachedValidatorsError = null;
+        setValidators(data);
+        setError(null);
+        setLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (isCancelled) return;
+        const message =
+          err instanceof Error ? err.message : "Failed to load validators";
+        cachedValidatorsError = message;
+        setError(message);
+        setLoading(false);
+      })
+      .finally(() => {
+        pendingValidatorsRequest = null;
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  return {
+    validators,
+    loading,
+    error,
+  };
+}
+
+type CustomValidatorSelectProps = {
+  value?: number;
+  onChange: (validatorId: number | undefined) => void;
+  className?: string;
+  label?: string;
+};
+
+export function CustomValidatorSelect({
+  value,
+  onChange,
+  className = "",
+  label = "Custom validator",
+}: CustomValidatorSelectProps) {
+  const { validators, loading, error } = useCustomValidators();
+
+  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const nextValue = event.target.value;
+    if (!nextValue) {
+      onChange(undefined);
+      return;
+    }
+    onChange(Number(nextValue));
+  };
+
+  const selectedOptionMissing =
+    typeof value === "number" &&
+    !validators.some((validator) => validator.id === value);
+
+  const effectiveValidators = selectedOptionMissing
+    ? [
+        ...validators,
+        {
+          id: value as number,
+          name: `Validator #${value}`,
+        },
+      ]
+    : validators;
+
+  const hasValidators = effectiveValidators.length > 0;
+
+  return (
+    <div className={`space-y-1 ${className}`}>
+      <label className="block text-xs font-medium text-gray-700">
+        {label}
+      </label>
+      <select
+        className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100"
+        value={value ? String(value) : ""}
+        onChange={handleChange}
+        disabled={loading || (!hasValidators && !value)}
+      >
+        <option value="">None</option>
+        {effectiveValidators.map((validator) => (
+          <option key={validator.id} value={validator.id}>
+            {validator.name}
+          </option>
+        ))}
+      </select>
+      {loading && (
+        <p className="text-[11px] text-gray-500">Loading validators…</p>
+      )}
+      {error && !loading && (
+        <p className="text-[11px] text-red-500">{error}</p>
+      )}
+      {!loading && !hasValidators && !error && (
+        <p className="text-[11px] text-gray-500">No custom validators found.</p>
       )}
     </div>
   );

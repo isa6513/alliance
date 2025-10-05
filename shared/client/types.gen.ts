@@ -1115,6 +1115,16 @@ export type FormResponseDto = {
     };
 };
 
+export type CustomValidatorDto = {
+    name: string;
+    id: number;
+};
+
+export type CustomValidatorResponseDto = {
+    isValid: boolean;
+    message?: string;
+};
+
 export type TimeSpentForUserDto = {
     userId: number;
     timeSpent: number;
@@ -2962,6 +2972,34 @@ export type TasksDeleteFormData = {
 export type TasksDeleteFormResponses = {
     200: unknown;
 };
+
+export type TasksCustomValidatorsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/tasks/customValidators';
+};
+
+export type TasksCustomValidatorsResponses = {
+    200: Array<CustomValidatorDto>;
+};
+
+export type TasksCustomValidatorsResponse = TasksCustomValidatorsResponses[keyof TasksCustomValidatorsResponses];
+
+export type TasksRunValidatorData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/runValidator/{id}';
+};
+
+export type TasksRunValidatorResponses = {
+    200: CustomValidatorResponseDto;
+};
+
+export type TasksRunValidatorResponse = TasksRunValidatorResponses[keyof TasksRunValidatorResponses];
 
 export type AnalyticsGetTimeSpentPerUserData = {
     body?: never;

@@ -29,6 +29,7 @@ interface BaseField<TKind extends FieldKind> {
   description?: string;
   required?: boolean;
   defaultValue?: FormValue | null;
+  customValidatorId?: number;
 
   // simple conditions using string IDs
   visibleIf?: Condition;

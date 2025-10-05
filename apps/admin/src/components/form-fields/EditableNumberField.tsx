@@ -1,6 +1,5 @@
 import type { NumberField } from "@alliance/shared/forms/formschema";
-import RenderField from "@alliance/shared/forms/RenderField";
-import { ConditionalVisibility, RequiredToggle } from "./CommonControls";
+import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
 import type { BaseFieldProps } from "./types";
@@ -16,91 +15,67 @@ export function EditableNumberField({
 }: BaseFieldProps<NumberField>) {
   return (
     <FieldWrapper
+      field={field}
+      onUpdate={onUpdate}
+      previousFields={previousFields}
       onRemove={onRemove}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       isDragging={isDragging}
     >
-      <div className="space-y-3">
-        {/* Field Configuration */}
-        <div className="bg-gray-100 p-3 rounded-md space-y-2">
-          <FieldLabelEditor
-            value={field.label}
-            onChange={(v) => onUpdate({ label: v })}
-          />
+      <FieldLabelEditor
+        value={field.label}
+        onChange={(v) => onUpdate({ label: v })}
+      />
 
-          <div className="flex items-center space-x-4">
-            <RequiredToggle
-              checked={field.required}
-              onChange={(checked) => onUpdate({ required: checked })}
-            />
-          </div>
+      <RequiredToggle
+        checked={field.required}
+        onChange={(checked) => onUpdate({ required: checked })}
+      />
 
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <label className="block text-xs text-gray-700 mb-1">
-                Min Value
-              </label>
-              <input
-                type="number"
-                value={field.min || ""}
-                onChange={(e) =>
-                  onUpdate({
-                    min: e.target.value
-                      ? parseFloat(e.target.value)
-                      : undefined,
-                  })
-                }
-                className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="Min"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-700 mb-1">
-                Max Value
-              </label>
-              <input
-                type="number"
-                value={field.max || ""}
-                onChange={(e) =>
-                  onUpdate({
-                    max: e.target.value
-                      ? parseFloat(e.target.value)
-                      : undefined,
-                  })
-                }
-                className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="Max"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-700 mb-1">Step</label>
-              <input
-                type="number"
-                value={field.step || ""}
-                onChange={(e) =>
-                  onUpdate({
-                    step: e.target.value
-                      ? parseFloat(e.target.value)
-                      : undefined,
-                  })
-                }
-                className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="1"
-                step="any"
-              />
-            </div>
-          </div>
-
-          <ConditionalVisibility
-            field={field}
-            previousFields={previousFields || []}
-            onChange={onUpdate}
+      <div className="grid grid-cols-3 gap-2">
+        <div>
+          <label className="block text-xs text-gray-700 mb-1">Min Value</label>
+          <input
+            type="number"
+            value={field.min ?? ""}
+            onChange={(e) =>
+              onUpdate({
+                min: e.target.value ? parseFloat(e.target.value) : undefined,
+              })
+            }
+            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="Min"
           />
         </div>
-
         <div>
-          <RenderField field={field} disabled />
+          <label className="block text-xs text-gray-700 mb-1">Max Value</label>
+          <input
+            type="number"
+            value={field.max ?? ""}
+            onChange={(e) =>
+              onUpdate({
+                max: e.target.value ? parseFloat(e.target.value) : undefined,
+              })
+            }
+            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="Max"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-gray-700 mb-1">Step</label>
+          <input
+            type="number"
+            value={field.step ?? ""}
+            onChange={(e) =>
+              onUpdate({
+                step: e.target.value ? parseFloat(e.target.value) : undefined,
+              })
+            }
+            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="1"
+            step="any"
+          />
         </div>
       </div>
     </FieldWrapper>

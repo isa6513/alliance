@@ -12,7 +12,10 @@ export interface BaseFieldProps<T extends AnyField | DisplayBlock> {
   previousFields?: AnyField[];
 }
 
-export interface FieldWrapperProps {
+export interface FieldWrapperProps<T extends AnyField | DisplayBlock> {
+  field: T;
+  onUpdate: (updates: Partial<T>) => void;
+  previousFields?: AnyField[];
   onRemove: () => void;
   children: React.ReactNode;
   onDragStart?: (e: React.DragEvent) => void;

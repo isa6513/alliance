@@ -1,5 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { FormResponseDto, SubmitFormDto, imagesUploadImage } from "../client";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FormResponseDto,
+  SubmitFormDto,
+  imagesUploadImage,
+  tasksRunValidator,
+} from "../client";
 import { useOutsideClick } from "../lib/useOutsideClick";
 import Button, { ButtonColor } from "../ui/Button";
 import Dropdown from "../ui/Dropdown";
@@ -100,9 +105,10 @@ const FormRenderer = ({
     }
   });
   const [uploadingFields, setUploadingFields] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [hasEmittedStart, setHasEmittedStart] = useState(false);
 
   // Dropdown state for "decline to participate" options
@@ -111,6 +117,272 @@ const FormRenderer = ({
   const [outOfTimeSelected, setOutOfTimeSelected] = useState(false);
   const [customReason, setCustomReason] = useState("");
   const ref = useOutsideClick(() => setDropdownOpen(false));
+
+  const fieldLookup = useMemo(() => {
+    const entries = new Map<string, AnyField>();
+    for (const page of schema.pages) {
+      for (const element of page.fields) {
+        if ("label" in element) {
+          entries.set(element.id, element as AnyField);
+        }
+      }
+    }
+    return entries;
+  }, [schema]);
+
+  const applyFieldErrorUpdates = useCallback(
+    (updates: Record<string, string | null>) => {
+      if (!updates || Object.keys(updates).length === 0) return;
+
+      setFieldErrors((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        for (const [fieldId, message] of Object.entries(updates)) {
+          if (message && message.trim().length > 0) {
+            if (next[fieldId] !== message) {
+              next[fieldId] = message;
+              changed = true;
+            }
+          } else if (fieldId in next) {
+            delete next[fieldId];
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+    },
+    []
+  );
+
+  const evaluateCondition = useCallback(
+    (cond: Condition, data: Record<string, FormValue> = formData): boolean => {
+      if ("expr" in cond) {
+        return true;
+      }
+      const val = data[cond.when];
+      if (typeof cond.equals === "boolean") {
+        return Boolean(val) === cond.equals;
+      }
+      if (
+        Array.isArray(val) &&
+        cond.equals !== null &&
+        cond.equals !== undefined
+      ) {
+        return val.includes(cond.equals as string);
+      }
+      return val === cond.equals;
+    },
+    [formData]
+  );
+
+  const isElementCurrentlyVisible = useCallback(
+    (
+      element: AnyField | DisplayBlock,
+      data?: Record<string, FormValue>
+    ): boolean => {
+      const cond = element.visibleIf;
+      if (!cond) return true;
+      return evaluateCondition(cond, data ?? formData);
+    },
+    [evaluateCondition, formData]
+  );
+
+  const isFieldConditionallyRequired = useCallback(
+    (field: AnyField, data?: Record<string, FormValue>): boolean => {
+      if (field.requiredIf) {
+        return evaluateCondition(field.requiredIf, data ?? formData);
+      }
+      return !!field.required;
+    },
+    [evaluateCondition, formData]
+  );
+
+  const validateFieldValue = useCallback(
+    (
+      field: AnyField,
+      fieldValue: FormValue | undefined,
+      data?: Record<string, FormValue>
+    ): string | null => {
+      const required = isFieldConditionallyRequired(field, data);
+      if (!required) {
+        return null;
+      }
+
+      const valueToCheck = fieldValue;
+      const isEmptyString =
+        typeof valueToCheck === "string" && valueToCheck.trim() === "";
+
+      switch (field.kind) {
+        case "text":
+        case "textarea":
+        case "email":
+        case "phone":
+        case "date":
+        case "select": {
+          if (valueToCheck === undefined || valueToCheck === null) {
+            return "This field is required.";
+          }
+          if (isEmptyString) {
+            return "This field is required.";
+          }
+          return null;
+        }
+        case "number": {
+          if (
+            valueToCheck === undefined ||
+            valueToCheck === null ||
+            valueToCheck === ""
+          ) {
+            return "Please enter a number.";
+          }
+          return null;
+        }
+        case "checkbox":
+          return valueToCheck === true ? null : "This field is required.";
+        case "radio":
+          return valueToCheck ? null : "Please select an option.";
+        case "multiselect":
+          return Array.isArray(valueToCheck) && valueToCheck.length > 0
+            ? null
+            : "Select at least one option.";
+        case "file":
+          return valueToCheck ? null : "Please upload a file.";
+        default: {
+          if (valueToCheck === undefined || valueToCheck === null) {
+            return "This field is required.";
+          }
+          if (isEmptyString) {
+            return "This field is required.";
+          }
+          return null;
+        }
+      }
+    },
+    [isFieldConditionallyRequired]
+  );
+
+  const runCustomValidatorsForFields = useCallback(
+    async (
+      fieldsToValidate: AnyField[]
+    ): Promise<Record<string, string | null>> => {
+      if (!fieldsToValidate.length || readOnly) {
+        return {};
+      }
+
+      const results = await Promise.all(
+        fieldsToValidate.map(async (field) => {
+          if (!field.customValidatorId) {
+            return [field.id, null] as const;
+          }
+
+          try {
+            const response = await tasksRunValidator({
+              path: { id: field.customValidatorId },
+            });
+
+            if (response.error || !response.data) {
+              throw response.error;
+            }
+
+            const isValid = response.data.isValid;
+            return [
+              field.id,
+              isValid ? null : response.data.message ?? null,
+            ] as const;
+          } catch (err) {
+            console.error("Failed to run custom validator", err);
+            return [
+              field.id,
+              "Unable to validate this field right now. Please try again.",
+            ] as const;
+          }
+        })
+      );
+
+      return Object.fromEntries(results);
+    },
+    [readOnly]
+  );
+
+  const validatePage = useCallback(
+    async (
+      pageIndex: number,
+      includeCustomValidators: boolean
+    ): Promise<{ isValid: boolean; firstInvalidFieldId?: string }> => {
+      const page = schema.pages[pageIndex];
+      if (!page) {
+        return { isValid: true };
+      }
+
+      const updates: Record<string, string | null> = {};
+      const fieldsOnPage = page.fields.filter(
+        (element): element is AnyField => "label" in element
+      );
+      const visibleFields = fieldsOnPage.filter((field) =>
+        isElementCurrentlyVisible(field)
+      );
+      const visibleFieldIds = new Set(visibleFields.map((field) => field.id));
+
+      for (const field of fieldsOnPage) {
+        if (!visibleFieldIds.has(field.id)) {
+          updates[field.id] = null;
+          continue;
+        }
+        const fieldValue = formData[field.id];
+        updates[field.id] = validateFieldValue(field, fieldValue);
+      }
+
+      if (includeCustomValidators && !readOnly) {
+        const candidates = visibleFields.filter(
+          (field) => field.customValidatorId && !updates[field.id]
+        );
+        if (candidates.length > 0) {
+          const customResults = await runCustomValidatorsForFields(candidates);
+          Object.assign(updates, customResults);
+        }
+      }
+
+      applyFieldErrorUpdates(updates);
+
+      const firstInvalid = visibleFields.find((field) => {
+        const message = updates[field.id];
+        return !!(message && message.trim().length > 0);
+      });
+
+      return {
+        isValid: !firstInvalid,
+        firstInvalidFieldId: firstInvalid?.id,
+      };
+    },
+    [
+      schema,
+      formData,
+      isElementCurrentlyVisible,
+      validateFieldValue,
+      runCustomValidatorsForFields,
+      applyFieldErrorUpdates,
+      readOnly,
+    ]
+  );
+
+  const validateAllPages = useCallback(async () => {
+    let firstInvalidPageIndex: number | null = null;
+    let firstInvalidFieldId: string | undefined;
+
+    for (let pageIndex = 0; pageIndex < schema.pages.length; pageIndex += 1) {
+      const result = await validatePage(pageIndex, true);
+      if (!result.isValid && firstInvalidPageIndex === null) {
+        firstInvalidPageIndex = pageIndex;
+        firstInvalidFieldId = result.firstInvalidFieldId;
+      }
+    }
+
+    return {
+      isValid: firstInvalidPageIndex === null,
+      firstInvalidPageIndex,
+      firstInvalidFieldId,
+    } as const;
+  }, [schema.pages.length, validatePage]);
 
   const ensureStarted = () => {
     if (readOnly) return;
@@ -130,7 +402,21 @@ const FormRenderer = ({
   const updateField = (fieldId: string, value: FormValue) => {
     if (readOnly) return;
     ensureStarted();
-    setFormData((prev) => ({ ...prev, [fieldId]: value }));
+    setFormData((prev) => {
+      const next = { ...prev, [fieldId]: value };
+      const fieldDefinition = fieldLookup.get(fieldId);
+      if (fieldDefinition) {
+        const requiredError = validateFieldValue(
+          fieldDefinition,
+          next[fieldId],
+          next
+        );
+        applyFieldErrorUpdates({ [fieldId]: requiredError });
+      } else {
+        applyFieldErrorUpdates({ [fieldId]: null });
+      }
+      return next;
+    });
   };
 
   const handleFileUpload = async (fieldId: string, file: File) => {
@@ -183,10 +469,22 @@ const FormRenderer = ({
     }
   };
 
-  const handleNext = (e: React.MouseEvent) => {
+  const handleNext = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (readOnly) {
+      if (!isLastPage) {
+        setCurrentPageIndex((prev) => prev + 1);
+      }
+      return;
+    }
+
     if (!isLastPage) {
+      const result = await validatePage(currentPageIndex, true);
+      if (!result.isValid) {
+        return;
+      }
       setCurrentPageIndex((prev) => prev + 1);
     }
   };
@@ -199,18 +497,42 @@ const FormRenderer = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isLastPage) {
-      setCurrentPageIndex((prev) => prev + 1);
-    } else if (onSubmit && !readOnly) {
-      onSubmit({
-        answers: formData,
-        schemaSnapshot: form as unknown as Record<string, unknown>,
-      });
+
+    if (readOnly || !onSubmit) {
+      return;
     }
+
+    if (!isLastPage) {
+      const result = await validatePage(currentPageIndex, true);
+      if (result.isValid) {
+        setCurrentPageIndex((prev) => prev + 1);
+      }
+      return;
+    }
+
+    const { isValid, firstInvalidPageIndex } = await validateAllPages();
+    if (!isValid) {
+      if (
+        typeof firstInvalidPageIndex === "number" &&
+        firstInvalidPageIndex !== currentPageIndex
+      ) {
+        setCurrentPageIndex(firstInvalidPageIndex);
+      }
+      return;
+    }
+
+    onSubmit({
+      answers: formData,
+      schemaSnapshot: form as unknown as Record<string, unknown>,
+    });
   };
+
+  const validateForPreview = useCallback(async () => {
+    await validatePage(currentPageIndex, true);
+  }, [formData, form, onSubmit]);
 
   const handleOutOfTime = () => {
     setOutOfTimeSelected(!outOfTimeSelected);
@@ -237,7 +559,7 @@ const FormRenderer = ({
     if (!persistKey || typeof window === "undefined") return;
     window.localStorage.setItem(
       storageKey,
-      JSON.stringify({ formData, currentPageIndex, updatedAt: Date.now() }),
+      JSON.stringify({ formData, currentPageIndex, updatedAt: Date.now() })
     );
   }, [formData, currentPageIndex, persistKey, storageKey, readOnly]);
 
@@ -266,8 +588,12 @@ const FormRenderer = ({
     }
   }, [readOnly, completedFormResponse]);
 
+  useEffect(() => {
+    setFieldErrors({});
+  }, [schema]);
+
   const renderField = (field: AnyField, index: number) => (
-    <div key={index}>
+    <div key={field.id || index}>
       <RenderField
         field={field}
         value={formData[field.id]}
@@ -278,37 +604,19 @@ const FormRenderer = ({
         disabled={readOnly}
         uploading={uploadingFields.has(field.id)}
         uploadError={uploadErrors[field.id]}
+        error={fieldErrors[field.id]}
       />
     </div>
   );
 
   const renderElement = (element: AnyField | DisplayBlock, index: number) => {
-    const cond = element.visibleIf;
-    if (cond) {
-      const evalCond = (c: Condition): boolean => {
-        if ("expr" in c) {
-          // TODO: better safety check
-          return true;
-        }
-        const val = formData[c.when];
-        // If condition expects a boolean (checkbox controllers), coerce undefined → false
-        if (typeof c.equals === "boolean") {
-          return Boolean(val) === c.equals;
-        }
-        if (Array.isArray(val) && c.equals) {
-          // multiselect: treat equals as "includes"
-          return val.includes(c.equals as string);
-        }
-        return val === c.equals;
-      };
-      if (!evalCond(cond)) return null;
+    if (!isElementCurrentlyVisible(element)) {
+      return null;
     }
-    // Check if it's a form field (has 'label' property) vs display block
     if ("label" in element) {
       return renderField(element as AnyField, index);
-    } else {
-      return <RenderDisplayBlock key={index} block={element as DisplayBlock} />;
     }
+    return <RenderDisplayBlock key={index} block={element as DisplayBlock} />;
   };
 
   return (
@@ -321,7 +629,7 @@ const FormRenderer = ({
           }`}
         >
           {currentPage.fields.map((element, index) =>
-            renderElement(element, index),
+            renderElement(element, index)
           )}
         </div>
         {/* Navigation */}
@@ -369,7 +677,7 @@ const FormRenderer = ({
               <Button
                 color={ButtonColor.Black}
                 className="!cursor-not-allowed w-full !py-3 !text-base"
-                onClick={() => {}}
+                onClick={validateForPreview}
               >
                 {schema.submit?.label || "Complete"} (Preview Mode)
               </Button>

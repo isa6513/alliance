@@ -1,6 +1,5 @@
 import type { RadioField } from "@alliance/shared/forms/formschema";
-import RenderField from "@alliance/shared/forms/RenderField";
-import { ConditionalVisibility, RequiredToggle } from "./CommonControls";
+import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
 import type { BaseFieldProps } from "./types";
@@ -40,78 +39,64 @@ export function EditableRadioField({
 
   return (
     <FieldWrapper
+      field={field}
+      onUpdate={onUpdate}
+      previousFields={previousFields}
       onRemove={onRemove}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       isDragging={isDragging}
     >
-      <div className="space-y-3">
-        {/* Field Configuration */}
-        <div className="bg-gray-100 p-3 rounded-md space-y-2">
-          <FieldLabelEditor
-            value={field.label}
-            onChange={(v) => onUpdate({ label: v })}
-          />
+      <FieldLabelEditor
+        value={field.label}
+        onChange={(v) => onUpdate({ label: v })}
+      />
 
-          <div>
-            <RequiredToggle
-              checked={field.required}
-              onChange={(checked) => onUpdate({ required: checked })}
-            />
-          </div>
+      <RequiredToggle
+        checked={field.required}
+        onChange={(checked) => onUpdate({ required: checked })}
+      />
 
-          <ConditionalVisibility
-            field={field}
-            previousFields={previousFields || []}
-            onChange={onUpdate}
-          />
-
-          {/* Options Configuration */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-medium text-gray-700">
-                Options
-              </label>
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-xs font-medium text-gray-700">
+            Options
+          </label>
+          <button
+            onClick={addOption}
+            className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+            type="button"
+          >
+            Add Option
+          </button>
+        </div>
+        <div className="space-y-2 max-h-32 overflow-y-auto">
+          {field.options?.map((option, index) => (
+            <div key={index} className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={option.label}
+                onChange={(e) => updateOption(index, { label: e.target.value })}
+                className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="Option label"
+              />
+              <input
+                type="text"
+                value={option.value}
+                onChange={(e) => updateOption(index, { value: e.target.value })}
+                className="w-20 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="Value"
+              />
               <button
-                onClick={addOption}
-                className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                onClick={() => removeOption(index)}
+                className="text-red-500 hover:text-red-700 text-sm"
+                type="button"
               >
-                Add Option
+                ×
               </button>
             </div>
-            <div className="space-y-2 max-h-32 overflow-y-auto">
-              {field.options?.map((option, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={option.label}
-                    onChange={(e) =>
-                      updateOption(index, { label: e.target.value })
-                    }
-                    className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="Option label"
-                  />
-                  <input
-                    type="text"
-                    value={option.value}
-                    onChange={(e) =>
-                      updateOption(index, { value: e.target.value })
-                    }
-                    className="w-20 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="Value"
-                  />
-                  <button
-                    onClick={() => removeOption(index)}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
-        <RenderField field={field} disabled />
       </div>
     </FieldWrapper>
   );

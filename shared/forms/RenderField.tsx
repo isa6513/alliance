@@ -10,11 +10,19 @@ export type RenderFieldProps = {
   onFileSelected?: (file: File) => void;
   uploading?: boolean;
   uploadError?: string | null;
+  error?: string | null;
 };
 
-export function RenderLabel({ field }: { field: AnyField }) {
+export function RenderLabel({
+  field,
+  error,
+}: {
+  field: AnyField;
+  error?: string | null;
+}) {
+  const hasError = Boolean(error);
   return (
-    <label className="block text-gray-700">
+    <label className={`block ${hasError ? "text-red-600" : "text-gray-700"}`}>
       <FormMarkdownWrapper markdownContent={field.label} inline />
       {field.required && <span className="text-red-500 ml-1">*</span>}
     </label>
@@ -29,28 +37,59 @@ export function RenderField({
   onFileSelected,
   uploading,
   uploadError,
+  error,
 }: RenderFieldProps) {
+  const errorMessage =
+    typeof error === "string" && error.trim().length > 0 ? error : null;
+  const hasError = Boolean(errorMessage);
+
+  const composeClassName = (
+    base: string,
+    overrides: { normal?: string; error?: string } = {},
+  ) => {
+    const normal =
+      overrides.normal ??
+      "border border-zinc-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent";
+    const errorCls =
+      overrides.error ??
+      "border border-red-500 focus:ring-2 focus:ring-red-500 focus:border-transparent";
+    return `${base} ${hasError ? errorCls : normal}`;
+  };
+
+  const renderValidationMessage = () =>
+    hasError ? <p className="text-sm text-red-600">{errorMessage}</p> : null;
+
   switch (field.kind) {
     case "text":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} />
+          <RenderLabel field={field} error={errorMessage} />
           <input
             type="text"
             value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
-            className="w-full px-3 py-2 border border-zinc-300 rounded focus:outline-none focus:ring-1 focus:ring-green focus:border-transparent"
+            aria-invalid={hasError}
+            className={composeClassName(
+              "w-full px-3 py-2 rounded focus:outline-none",
+              {
+                normal:
+                  "border border-zinc-300 focus:ring-1 focus:ring-green focus:border-transparent",
+                error:
+                  "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent",
+              },
+            )}
             placeholder={field.placeholder}
           />
+          {renderValidationMessage()}
         </div>
       );
 
     case "textarea":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} />
+          <RenderLabel field={field} error={errorMessage} />
           <textarea
             rows={field.rows || 3}
             maxLength={field.maxLength}
@@ -58,8 +97,12 @@ export function RenderField({
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
-            className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            aria-invalid={hasError}
+            className={composeClassName(
+              "w-full px-3 py-2 rounded-md focus:outline-none resize-none",
+            )}
           />
+          {renderValidationMessage()}
           {field.maxLength && (
             <p className="text-xs text-gray-500 mt-1">
               Maximum {field.maxLength} characters
@@ -71,23 +114,27 @@ export function RenderField({
     case "email":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} />
+          <RenderLabel field={field} error={errorMessage} />
           <input
             type="email"
             value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
-            className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-invalid={hasError}
+            className={composeClassName(
+              "w-full px-3 py-2 rounded-md focus:outline-none",
+            )}
             placeholder="Enter email address..."
           />
+          {renderValidationMessage()}
         </div>
       );
 
     case "phone":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} />
+          <RenderLabel field={field} error={errorMessage} />
           <input
             type="tel"
             value={(value as string) ?? ""}
@@ -103,16 +150,20 @@ export function RenderField({
             required={field.required}
             disabled={disabled}
             pattern={field.pattern}
-            className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-invalid={hasError}
+            className={composeClassName(
+              "w-full px-3 py-2 rounded-md focus:outline-none",
+            )}
             placeholder={field.placeholder || "Enter phone number"}
           />
+          {renderValidationMessage()}
         </div>
       );
 
     case "number":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} />
+          <RenderLabel field={field} error={errorMessage} />
           <input
             type="number"
             value={
@@ -124,7 +175,7 @@ export function RenderField({
               onChange
                 ? (e) =>
                     onChange(
-                      e.target.value === "" ? "" : parseFloat(e.target.value)
+                      e.target.value === "" ? "" : parseFloat(e.target.value),
                     )
                 : undefined
             }
@@ -133,8 +184,12 @@ export function RenderField({
             min={field.min}
             max={field.max}
             step={field.step}
-            className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-invalid={hasError}
+            className={composeClassName(
+              "w-full px-3 py-2 rounded-md focus:outline-none",
+            )}
           />
+          {renderValidationMessage()}
           {field.min !== undefined || field.max !== undefined ? (
             <p className="text-xs text-gray-500 mt-1">
               {field.min !== undefined && field.max !== undefined
@@ -159,18 +214,34 @@ export function RenderField({
               }
               required={field.required}
               disabled={disabled}
-              className="mt-1 mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-zinc-300 rounded"
+              aria-invalid={hasError}
+              className={composeClassName(
+                `mt-1 mr-2 h-4 w-4 ${
+                  hasError ? "text-red-600" : "text-blue-600"
+                } focus:outline-none rounded`,
+                {
+                  normal:
+                    "border border-zinc-300 focus:ring-blue-500 focus:ring-2",
+                  error:
+                    "border border-red-500 focus:ring-red-500 focus:ring-2",
+                },
+              )}
             />
-            <RenderLabel field={field} />
+            <RenderLabel field={field} error={errorMessage} />
           </label>
+          {renderValidationMessage()}
         </div>
       );
 
     case "radio":
       return (
         <div className="space-y-2">
-          <RenderLabel field={field} />
-          <div className="space-y-2">
+          <RenderLabel field={field} error={errorMessage} />
+          <div
+            className={`space-y-2 ${
+              hasError ? "border-l-2 border-red-500 pl-3" : ""
+            }`}
+          >
             {field.options.map((option, optIndex) => (
               <label key={optIndex} className="flex items-start">
                 <input
@@ -183,25 +254,42 @@ export function RenderField({
                   }
                   required={field.required}
                   disabled={disabled}
-                  className="mt-1 mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-zinc-300"
+                  aria-invalid={hasError}
+                  className={composeClassName(
+                    `mt-1 mr-2 h-4 w-4 ${
+                      hasError ? "text-red-600" : "text-blue-600"
+                    } focus:outline-none`,
+                    {
+                      normal:
+                        "border border-zinc-300 focus:ring-blue-500 focus:ring-2",
+                      error:
+                        "border border-red-500 focus:ring-red-500 focus:ring-2",
+                    },
+                  )}
                 />
-                <span className=" text-gray-700">{option.label}</span>
+                <span className={hasError ? "text-red-600" : "text-gray-700"}>
+                  {option.label}
+                </span>
               </label>
             ))}
           </div>
+          {renderValidationMessage()}
         </div>
       );
 
     case "select":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} />
+          <RenderLabel field={field} error={errorMessage} />
           <select
             value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
-            className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent has-[option.placeholder:checked]:text-gray-400"
+            aria-invalid={hasError}
+            className={composeClassName(
+              "w-full px-3 py-2 rounded-md focus:outline-none has-[option.placeholder:checked]:text-gray-400",
+            )}
           >
             <option value="" className="placeholder" disabled>
               Select an option
@@ -212,6 +300,7 @@ export function RenderField({
               </option>
             ))}
           </select>
+          {renderValidationMessage()}
         </div>
       );
 
@@ -219,8 +308,12 @@ export function RenderField({
       const selectedCount = Array.isArray(value) ? value.length : 0;
       return (
         <div className="space-y-2">
-          <RenderLabel field={field} />
-          <div className="space-y-2">
+          <RenderLabel field={field} error={errorMessage} />
+          <div
+            className={`space-y-2 ${
+              hasError ? "border-l-2 border-red-500 pl-3" : ""
+            }`}
+          >
             {field.options.map((option, optIndex) => (
               <label key={optIndex} className="flex items-center">
                 <input
@@ -237,7 +330,7 @@ export function RenderField({
                             onChange([...currentValues, option.value]);
                           } else {
                             onChange(
-                              currentValues.filter((v) => v !== option.value)
+                              currentValues.filter((v) => v !== option.value),
                             );
                           }
                         }
@@ -247,12 +340,26 @@ export function RenderField({
                     !!field.required && selectedCount === 0 && optIndex === 0
                   }
                   disabled={disabled}
-                  className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-zinc-300 rounded"
+                  aria-invalid={hasError}
+                  className={composeClassName(
+                    `mr-2 h-4 w-4 ${
+                      hasError ? "text-red-600" : "text-blue-600"
+                    } focus:outline-none rounded`,
+                    {
+                      normal:
+                        "border border-zinc-300 focus:ring-blue-500 focus:ring-2",
+                      error:
+                        "border border-red-500 focus:ring-red-500 focus:ring-2",
+                    },
+                  )}
                 />
-                <span className=" text-gray-700">{option.label}</span>
+                <span className={hasError ? "text-red-600" : "text-gray-700"}>
+                  {option.label}
+                </span>
               </label>
             ))}
           </div>
+          {renderValidationMessage()}
         </div>
       );
     }
@@ -260,15 +367,19 @@ export function RenderField({
     case "date":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} />
+          <RenderLabel field={field} error={errorMessage} />
           <input
             type="date"
             value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
-            className="w-full px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-invalid={hasError}
+            className={composeClassName(
+              "w-full px-3 py-2 rounded-md focus:outline-none",
+            )}
           />
+          {renderValidationMessage()}
         </div>
       );
 
@@ -278,7 +389,7 @@ export function RenderField({
       const err = uploadError;
       return (
         <div className="space-y-2">
-          <RenderLabel field={field} />
+          <RenderLabel field={field} error={errorMessage} />
           {typeof fileValue === "string" && fileValue && (
             <div className="mb-2">
               <img
@@ -299,12 +410,17 @@ export function RenderField({
               }}
               required={field.required && !fileValue}
               disabled={disabled || isUploading}
-              className="flex-1 px-3 py-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file: file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+              aria-invalid={hasError}
+              className={composeClassName(
+                "flex-1 px-3 py-2 rounded-md focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50",
+              )}
             />
             {isUploading && (
               <span className=" text-blue-600">Uploading...</span>
             )}
           </div>
+
+          {renderValidationMessage()}
 
           {err && <p className=" text-red-600">{err}</p>}
         </div>

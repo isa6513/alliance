@@ -19,6 +19,11 @@ import {
   SubmitFormDto,
 } from './form.dto';
 import { FormSchema, isQuestionField, isQuestionVisible, Page } from './schema';
+import {
+  CustomValidatorDto,
+  CustomValidatorResponseDto,
+} from './customvalidator.dto';
+import { ForumService } from 'src/forum/forum.service';
 
 @Injectable()
 export class TasksService {
@@ -31,6 +36,7 @@ export class TasksService {
     @InjectRepository(Action)
     private actionRepository: Repository<Action>,
     private userService: UserService,
+    private forumService: ForumService,
   ) {}
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
@@ -211,5 +217,77 @@ export class TasksService {
       throw new NotFoundException('Form response not found');
     }
     return response;
+  }
+
+  async customValidators(): Promise<CustomValidatorDto[]> {
+    return [
+      {
+        name: 'User has uploaded a profile picture',
+        id: 1,
+      },
+      {
+        name: 'User has signed contract',
+        id: 2,
+      },
+      {
+        name: 'User has added a profile description',
+        id: 3,
+      },
+      {
+        name: 'User has replied to the personal habit discussion',
+        id: 4,
+      },
+    ];
+  }
+
+  async runValidator(
+    id: number,
+    userId: number,
+  ): Promise<CustomValidatorResponseDto> {
+    console.log('Running validator', id, userId);
+    const user = await this.userService.findOneOrFail(userId);
+    switch (id) {
+      case 1: // User has uploaded a profile picture
+        if (!user.profilePicture) {
+          return {
+            isValid: false,
+            message:
+              "It looks like you haven't uploaded a profile picture yet - please do that now!",
+          };
+        }
+        break;
+      case 2: // User has signed contract
+        console.log(user.contractDateSigned, user.contractDateSuspended);
+        if (!user.contractDateSigned || user.contractDateSuspended) {
+          return {
+            isValid: false,
+            message:
+              "It looks like you haven't signed the contract yet - please do that now!",
+          };
+        }
+        break;
+      case 3: // User has added a profile description
+        if (!user.profileDescription) {
+          return {
+            isValid: false,
+            message:
+              "It looks like you haven't added a profile description yet - please do that now!",
+          };
+        }
+        break;
+      case 4: // User has replied to the personal habit discussion
+        const replies = await this.forumService.findCommentsForPost(6);
+        if (
+          replies.filter((reply) => reply.authorId === user.id).length === 0
+        ) {
+          return {
+            isValid: false,
+            message:
+              "It looks like you haven't replied to the discussion yet - please do that now!",
+          };
+        }
+        break;
+    }
+    return { isValid: true };
   }
 }
