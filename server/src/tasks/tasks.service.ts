@@ -276,7 +276,7 @@ export class TasksService {
         }
         break;
       case 4: // User has replied to the personal habit discussion
-        const replies = await this.forumService.findCommentsForPost(19);
+        const replies = await this.forumService.findCommentsForPost(6);
         if (
           replies.filter((reply) => reply.authorId === user.id).length === 0
         ) {
