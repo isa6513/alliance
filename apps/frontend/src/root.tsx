@@ -1,4 +1,5 @@
 import { PostHogConfig } from "posthog-js";
+import "posthog-js/dist/exception-autocapture";
 import { PostHogProvider } from "posthog-js/react";
 import {
   isRouteErrorResponse,
