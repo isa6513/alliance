@@ -21,6 +21,7 @@ import { Response } from 'express';
 import { basename } from 'path';
 import { Readable } from 'stream';
 import { getImageSource, ImagesService } from './images.service';
+import { UploadImageResponseDto } from './dto/image-response.dto';
 
 export class BodyDto {
   @IsNotEmpty()
@@ -81,9 +82,9 @@ export class ImagesController {
       },
     },
   })
-  @ApiOkResponse({ type: String })
+  @ApiOkResponse({ type: UploadImageResponseDto })
   async uploadImage(@Body() body) {
     const key = await this.imagesService.uploadImage(body.file);
-    return getImageSource(key);
+    return { url: getImageSource(key), key };
   }
 }

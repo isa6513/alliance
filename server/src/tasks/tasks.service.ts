@@ -168,10 +168,6 @@ export class TasksService {
     }
 
     if (phoneNumbers.length > 0) {
-      console.log(`📞 Phone numbers submitted for form "${form.title}":`);
-      phoneNumbers.forEach((phone) => {
-        console.log(` - ${phone.label}: ${phone.value}`);
-      });
       return phoneNumbers[0].value;
     }
     return null;

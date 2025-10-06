@@ -171,6 +171,8 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-react-app
+      - test-backend-e2e
+      - test-backend-unit
     environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
     steps:
       - name: SSH and Deploy frontend SSR on EC2

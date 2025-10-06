@@ -208,6 +208,11 @@ export type StreamableFile = {
     [key: string]: unknown;
 };
 
+export type UploadImageResponseDto = {
+    url: string;
+    key: string;
+};
+
 /**
  * Type of the action
  */
@@ -1758,7 +1763,7 @@ export type ImagesUploadImageData = {
 };
 
 export type ImagesUploadImageResponses = {
-    200: string;
+    200: UploadImageResponseDto;
 };
 
 export type ImagesUploadImageResponse = ImagesUploadImageResponses[keyof ImagesUploadImageResponses];

@@ -6,6 +6,7 @@ import {
   actionsUpdate,
   CreateActionDto,
   FormDto,
+  imagesUploadImage,
   tasksListForms,
   userGetGroups,
 } from "@alliance/shared/client";
@@ -63,9 +64,8 @@ const ActionDashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(!isNew);
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageKey, setImageKey] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [uploadingImage, setUploadingImage] = useState<boolean>(false);
   const [availableForms, setAvailableForms] = useState<FormDto[]>([]);
   const [formsLoading, setFormsLoading] = useState<boolean>(true);
   const [availableGroups, setAvailableGroups] = useState<GroupDto[]>([]);
@@ -154,7 +154,7 @@ const ActionDashboard: React.FC = () => {
         taskFormId: undefined,
         participatingGroups: [],
       });
-      setImageFile(null);
+      setImageKey(null);
       setImagePreview(null);
       setError(null);
       setSelectedGroupIds([]);
@@ -189,6 +189,9 @@ const ActionDashboard: React.FC = () => {
         setSelectedGroupIds(
           (actionData.participatingGroups || []).map((group) => group.id)
         );
+
+        setImageKey(actionData.image ?? null);
+        setImagePreview(actionData.image ?? null);
 
         setLoading(false);
       } catch (err) {
@@ -270,11 +273,20 @@ const ActionDashboard: React.FC = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImageFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
         setImagePreview(reader.result as string);
+
+        const uploadResp = await imagesUploadImage({
+          body: { file: reader.result as string },
+        });
+        if (uploadResp.data) {
+          console.log(uploadResp.data);
+          setImagePreview(uploadResp.data.url);
+          setImageKey(uploadResp.data.key);
+        }
       };
+
       reader.readAsDataURL(file);
     }
   };
@@ -322,6 +334,7 @@ const ActionDashboard: React.FC = () => {
         participatingGroups: selectedGroupIds.map(
           (id) => ({ id } as unknown as Group)
         ),
+        image: imageKey ?? undefined,
         // ...(imageFilename && { image: imageFilename }),
       };
 
@@ -431,7 +444,6 @@ const ActionDashboard: React.FC = () => {
           onImageChange={handleImageChange}
           onSubmit={handleSubmit}
           saving={saving}
-          uploadingImage={uploadingImage}
           imagePreview={imagePreview}
           isNew={true}
           onCancel={handleCancel}
@@ -568,7 +580,7 @@ const ActionDashboard: React.FC = () => {
                             new Date(b.date).getTime() -
                             new Date(a.date).getTime()
                         )
-                        .map((event, index) => (
+                        .map((event) => (
                           <div
                             key={event.id}
                             className="flex items-center space-x-3"
@@ -633,7 +645,6 @@ const ActionDashboard: React.FC = () => {
                   onImageChange={handleImageChange}
                   onSubmit={handleSubmit}
                   saving={saving}
-                  uploadingImage={uploadingImage}
                   imagePreview={imagePreview}
                   isNew={false}
                   actionId={action?.id}

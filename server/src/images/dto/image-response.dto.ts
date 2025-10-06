@@ -12,3 +12,11 @@ export class DeleteImageResponseDto {
   @ApiProperty({ type: Boolean })
   deleted: boolean;
 }
+
+export class UploadImageResponseDto {
+  @ApiProperty()
+  url: string;
+
+  @ApiProperty()
+  key: string;
+}

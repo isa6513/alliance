@@ -18,6 +18,7 @@ import {
   NotificationType,
 } from '../entities/action-event.entity';
 import { Action } from '../entities/action.entity';
+import { getImageSource } from 'src/images/images.service';
 
 export class ActionEventDto extends PickType(ActionEvent, [
   'id',
@@ -67,6 +68,7 @@ export class ActionDto extends OmitType(Action, [
   constructor(action: Partial<Action>) {
     super();
     Object.assign(this, action);
+    this.image = action.image ? getImageSource(action.image) : undefined;
     this.usersJoined = action.usersJoined || 0;
     this.usersCompleted = action.usersCompleted || 0;
     this.status = action.status || ActionStatus.Draft;

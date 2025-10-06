@@ -12,7 +12,6 @@ interface ActionFormProps {
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
   saving: boolean;
-  uploadingImage: boolean;
   imagePreview: string | null;
   isNew: boolean;
   onCancel?: () => void;
@@ -33,7 +32,6 @@ const ActionForm: React.FC<ActionFormProps> = ({
   onImageChange,
   onSubmit,
   saving,
-  uploadingImage,
   imagePreview,
   isNew,
   onCancel,
@@ -201,7 +199,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
           {imagePreview && (
             <div className="mt-2">
               <p className="text-sm font-medium text-gray-700 mb-1">
-                {isNew ? "Image Preview:" : "New Image Preview:"}
+                Image Preview
               </p>
               <img
                 src={imagePreview}
@@ -489,12 +487,10 @@ const ActionForm: React.FC<ActionFormProps> = ({
         <button
           type="submit"
           className="px-4 py-2 bg-blue-200 text-blue-700 border border-blue-400 rounded-md hover:bg-blue-300/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          disabled={saving || uploadingImage}
+          disabled={saving}
         >
-          {saving || uploadingImage
-            ? uploadingImage
-              ? "Uploading Image..."
-              : isNew
+          {saving
+            ? isNew
               ? "Creating..."
               : "Updating..."
             : isNew

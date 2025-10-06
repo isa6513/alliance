@@ -1141,6 +1141,7 @@ export function FormBuilder({
           {isPreviewMode ? (
             <FormRenderer
               id={0}
+              actionId={0}
               form={schema}
               onSubmit={null}
               renderFormAsCompleted={false}

@@ -323,7 +323,7 @@ export class ActionsController {
       }
     }
 
-    return action;
+    return new ActionDto(action);
   }
 
   @Post('create')
