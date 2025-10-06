@@ -1123,7 +1123,7 @@ export type FormDto = {
     schema: {
         [key: string]: unknown;
     };
-    usedInAction?: string;
+    usedInAction?: ActionDto;
 };
 
 export type FormResponseDto = {

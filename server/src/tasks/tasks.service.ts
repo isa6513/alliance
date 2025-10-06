@@ -183,11 +183,10 @@ export class TasksService {
             id: form.id,
             title: form.title,
             schema: form.schema,
-            usedInAction: (
-              await this.actionRepository.findOne({
+            usedInAction:
+              (await this.actionRepository.findOne({
                 where: { taskFormId: form.id },
-              })
-            )?.name,
+              })) ?? undefined,
           }) satisfies FormDto,
       ),
     );

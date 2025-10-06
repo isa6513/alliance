@@ -1,13 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  CreateActionDto,
-  FormDto,
-  GroupDto,
-} from "@alliance/shared/client";
+import { CreateActionDto, FormDto, GroupDto } from "@alliance/shared/client";
 import React, { useMemo, useRef } from "react";
 
 interface ActionFormProps {
-  form: CreateActionDto & { taskFormId?: number };
+  form: CreateActionDto;
   onInputChange: (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -28,6 +24,7 @@ interface ActionFormProps {
   groupsLoading: boolean;
   selectedGroupIds: number[];
   onGroupsChange: (ids: number[]) => void;
+  actionId?: number;
 }
 
 const ActionForm: React.FC<ActionFormProps> = ({
@@ -48,6 +45,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
   groupsLoading,
   selectedGroupIds,
   onGroupsChange,
+  actionId,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -106,7 +104,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
     (): FieldDef[] => [
       {
         name: "name",
-        label: "Name *",
+        label: "Name",
         type: "textarea",
         required: true,
         inGrid: false,
@@ -115,7 +113,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
       },
       {
         name: "category",
-        label: "Category *",
+        label: "Category",
         type: "text",
         required: true,
         inGrid: true,
@@ -253,7 +251,12 @@ const ActionForm: React.FC<ActionFormProps> = ({
                 <option
                   key={formOption.id}
                   value={formOption.id}
-                  disabled={!!formOption.usedInAction}
+                  disabled={
+                    !(
+                      formOption.usedInAction === undefined ||
+                      formOption.usedInAction.id === actionId
+                    )
+                  }
                 >
                   {formOption.title || `Form ${formOption.id}`}
                 </option>

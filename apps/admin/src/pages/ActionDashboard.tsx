@@ -636,6 +636,7 @@ const ActionDashboard: React.FC = () => {
                   uploadingImage={uploadingImage}
                   imagePreview={imagePreview}
                   isNew={false}
+                  actionId={action?.id}
                   onDelete={handleDelete}
                   baseUrl={baseUrl}
                   availableForms={availableForms}

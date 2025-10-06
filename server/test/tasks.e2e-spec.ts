@@ -162,7 +162,7 @@ describe('Tasks (e2e)', () => {
       .expect(200);
 
     const linked = listResponse.body.find((form) => form.id === formId);
-    expect(linked.usedInAction).toBe('Form Linked Action');
+    expect(linked.usedInAction.name).toBe('Form Linked Action');
 
     const responses = await request(ctx.app.getHttpServer())
       .get(`/tasks/responses/${formId}`)
