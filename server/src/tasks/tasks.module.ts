@@ -7,12 +7,14 @@ import { FormResponse } from './entities/formresponse.entity';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
 import { ForumModule } from 'src/forum/forum.module';
+import { ActionsModule } from 'src/actions/actions.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Form, FormResponse, Action]),
     UserModule,
     ForumModule,
+    ActionsModule,
   ],
   controllers: [TasksController],
   providers: [TasksService],

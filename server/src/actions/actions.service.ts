@@ -46,6 +46,7 @@ import { Group } from 'src/user/entities/group.entity';
 import { UserDto } from 'src/user/user.dto';
 import { NotificationScheduleEntryDto } from './dto/notification-schedule.dto';
 import { User } from 'src/user/entities/user.entity';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -233,6 +234,7 @@ export class ActionsService {
     actionId: number,
     userId: number,
     type: ActionActivityType,
+    taskFormResponse?: FormResponse,
   ): Promise<ActionActivityDto> {
     const action = await this.findOne(actionId, userId);
 
@@ -255,6 +257,7 @@ export class ActionsService {
       userId: userId,
       action: action,
       user: user,
+      taskFormResponse,
     });
     const savedActivity = await this.actionActivityRepository.save(activity);
 
@@ -329,11 +332,13 @@ export class ActionsService {
   async completeAction(
     actionId: number,
     userId: number,
+    taskFormResponse?: FormResponse,
   ): Promise<ActionActivityDto> {
     return this.createActionActivity(
       actionId,
       userId,
       ActionActivityType.USER_COMPLETED,
+      taskFormResponse,
     );
   }
 

@@ -12,6 +12,7 @@ import {
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Action } from './action.entity';
@@ -25,6 +26,7 @@ export enum ActionActivityType {
 }
 
 @Entity()
+@Unique('UQ_activity_user_action_type', ['userId', 'actionId', 'type'])
 export class ActionActivity {
   @PrimaryGeneratedColumn()
   @Allow()

@@ -13,10 +13,11 @@ import { useEffect, useState } from "react";
 
 interface ActionTaskPanelActivityProps {
   taskFormId: number;
-  onCompleteAction: (() => void) | null;
+  onCompleteAction: ((sendComplete: boolean) => void) | null;
   onFormStarted: () => void;
   onAbandonAction: (outOfTime: boolean, reason: string) => void;
   card?: boolean;
+  actionId: number;
 }
 
 const ActionTaskPanelForm = ({
@@ -25,6 +26,7 @@ const ActionTaskPanelForm = ({
   onFormStarted,
   onAbandonAction,
   card = false,
+  actionId,
 }: ActionTaskPanelActivityProps) => {
   const [form, setForm] = useState<FormDto | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +60,7 @@ const ActionTaskPanelForm = ({
             });
             window.localStorage.removeItem(storageKey);
           }
-          onCompleteAction();
+          onCompleteAction(false); //tasksSubmitForm handles completion here
         } else {
           console.error(response.error);
           setError(
@@ -79,6 +81,7 @@ const ActionTaskPanelForm = ({
           <FormRenderer
             form={form.schema as unknown as FormSchema}
             id={form.id}
+            actionId={actionId}
             onSubmit={handleSubmitForm}
             persistKey={String(taskFormId)}
             onFormStarted={onFormStarted}

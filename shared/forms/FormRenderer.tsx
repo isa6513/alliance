@@ -16,6 +16,7 @@ import type { AnyField, Condition, FormSchema, FormValue } from "./formschema";
 type FormRendererProps = {
   form: FormSchema;
   id: number;
+  actionId: number;
   persistKey?: string | null;
   onFormStarted?: () => void;
   onAbandonAction?: (outOfTime: boolean, reason: string) => void;
@@ -57,6 +58,7 @@ const FormRenderer = ({
   onAbandonAction,
   renderFormAsCompleted,
   completedFormResponse,
+  actionId,
 }: FormRendererProps) => {
   // Compute schema and a namespaced storage key for persistence (if enabled)
   const schema = form as unknown as FormSchema;
@@ -527,6 +529,7 @@ const FormRenderer = ({
     onSubmit({
       answers: formData,
       schemaSnapshot: form as unknown as Record<string, unknown>,
+      actionId,
     });
   };
 

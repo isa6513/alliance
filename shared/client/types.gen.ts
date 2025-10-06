@@ -1108,6 +1108,7 @@ export type SubmitFormDto = {
     schemaSnapshot: {
         [key: string]: unknown;
     };
+    actionId: number;
 };
 
 export type CreateFormDto = {

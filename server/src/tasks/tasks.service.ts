@@ -24,6 +24,7 @@ import {
   CustomValidatorResponseDto,
 } from './customvalidator.dto';
 import { ForumService } from 'src/forum/forum.service';
+import { ActionsService } from 'src/actions/actions.service';
 
 @Injectable()
 export class TasksService {
@@ -37,6 +38,7 @@ export class TasksService {
     private actionRepository: Repository<Action>,
     private userService: UserService,
     private forumService: ForumService,
+    private actionsService: ActionsService,
   ) {}
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
@@ -101,13 +103,7 @@ export class TasksService {
     submitFormDto: SubmitFormDto,
   ): Promise<FormResponse> {
     const form = await this.getForm(formId);
-    if (!form) {
-      throw new NotFoundException('Form not found');
-    }
-    const user = await this.userService.findOne(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    const user = await this.userService.findOneOrFail(userId);
 
     await this.validateFormSubmission(form, submitFormDto);
 
@@ -127,8 +123,8 @@ export class TasksService {
         this.logger.warn(`Parsed an invalid phone number: ${phoneNumber}`);
         user.phoneNumber = phoneNumber;
       }
+      await this.userService.update(user.id, user);
     }
-    await this.userService.update(user.id, user);
 
     const formResponse = this.formResponseRepository.create({
       ...submitFormDto,
@@ -137,8 +133,15 @@ export class TasksService {
       schemaSnapshot: submitFormDto.schemaSnapshot,
       user,
     });
+    const savedForm = await this.formResponseRepository.save(formResponse);
 
-    return this.formResponseRepository.save(formResponse);
+    await this.actionsService.completeAction(
+      submitFormDto.actionId,
+      userId,
+      savedForm,
+    );
+
+    return savedForm;
   }
 
   async extractPhoneNumber(

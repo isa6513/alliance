@@ -51,23 +51,28 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     );
   }, [actionError]);
 
-  const handleCompleteWithTracking = useCallback(async () => {
-    const req = await actionsComplete({
-      path: { id: action.id },
-    });
-    if (req.error) {
-      setActionError("Something went wrong. Please try again.");
-      return;
-    }
-    setActionError(null);
-    posthog.capture("action_completed", {
-      actionId: action.id,
-      actionType: action.type,
-      actionName: action.name,
-    });
-    setRevalidate();
-    onCompleteAction();
-  }, [action, onCompleteAction]);
+  const handleCompleteWithTracking = useCallback(
+    async (sendComplete: boolean = true) => {
+      if (sendComplete) {
+        const req = await actionsComplete({
+          path: { id: action.id },
+        });
+        if (req.error) {
+          setActionError("Something went wrong. Please try again.");
+          return;
+        }
+      }
+      setActionError(null);
+      posthog.capture("action_completed", {
+        actionId: action.id,
+        actionType: action.type,
+        actionName: action.name,
+      });
+      setRevalidate();
+      onCompleteAction();
+    },
+    [action, onCompleteAction]
+  );
 
   const handleJoinAction = useCallback(async () => {
     const req = await actionsJoin({
@@ -174,6 +179,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
           onFormStarted={handleFormStarted}
           onAbandonAction={handleAbandonAction}
           card={card}
+          actionId={action.id}
         />
       );
     }
@@ -208,6 +214,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
             onFormStarted={handleFormStarted}
             onAbandonAction={handleAbandonAction}
             card={card}
+            actionId={action.id}
           />
         )}
         {errorMessageNode}

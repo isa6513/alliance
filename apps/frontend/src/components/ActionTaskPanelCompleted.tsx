@@ -44,6 +44,7 @@ const ActionTaskPanelCompleted = ({
         <FormRenderer
           form={formResponse.schemaSnapshot as unknown as FormSchema}
           id={formResponse.formId}
+          actionId={action.id}
           completedFormResponse={formResponse}
           renderFormAsCompleted
           onSubmit={null}
