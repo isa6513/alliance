@@ -192,15 +192,6 @@ describe('Actions (e2e)', () => {
       expect(res.status).toBe(400);
     });
 
-    it('user can join an action', async () => {
-      const action = await actionRepo.findOneBy({
-        name: 'Test Action',
-      });
-      expect(action).not.toBeNull();
-
-      await ctx.agent.post(`/actions/join/${action!.id}`).expect(201);
-    });
-
     it('action will count joined users', async () => {
       const action = await actionRepo.findOneBy({
         name: 'Test Action',

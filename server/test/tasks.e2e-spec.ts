@@ -4,7 +4,7 @@ import { createTestApp, TestContext } from './e2e-test-utils';
 import { TasksModule } from 'src/tasks/tasks.module';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import { Action } from 'src/actions/entities/action.entity';
+import { Action, ActionTaskType } from 'src/actions/entities/action.entity';
 import {
   ActionEvent,
   ActionStatus,
@@ -12,6 +12,8 @@ import {
 } from 'src/actions/entities/action-event.entity';
 import { User } from 'src/user/entities/user.entity';
 import { FormSchema } from 'src/tasks/schema';
+import { ActionActivity } from 'src/actions/entities/action-activity.entity';
+import { CreateActionDto } from 'src/actions/dto/action.dto';
 
 const sampleSchema: FormSchema = {
   title: 'Volunteer Signup',
@@ -48,7 +50,7 @@ describe('Tasks (e2e)', () => {
   let actionRepo: Repository<Action>;
   let eventRepo: Repository<ActionEvent>;
   let userRepo: Repository<User>;
-
+  let actionActivityRepo: Repository<ActionActivity>;
   let formId: number;
 
   beforeAll(async () => {
@@ -58,6 +60,7 @@ describe('Tasks (e2e)', () => {
     actionRepo = ctx.dataSource.getRepository(Action);
     eventRepo = ctx.dataSource.getRepository(ActionEvent);
     userRepo = ctx.dataSource.getRepository(User);
+    actionActivityRepo = ctx.dataSource.getRepository(ActionActivity);
   }, 50000);
 
   afterEach(async () => {
@@ -65,6 +68,7 @@ describe('Tasks (e2e)', () => {
     await formRepo.query('DELETE FROM form');
     await actionRepo.query('DELETE FROM action');
     await eventRepo.query('DELETE FROM action_event');
+    await actionActivityRepo.query('DELETE FROM action_activity');
   });
 
   afterAll(async () => {
@@ -72,6 +76,29 @@ describe('Tasks (e2e)', () => {
   });
 
   it('supports the full admin and member lifecycle for forms', async () => {
+    const testAction = await actionRepo.save(
+      actionRepo.create({
+        name: 'Test Action',
+        category: 'Community',
+        body: 'Body copy',
+        shortDescription: 'Short copy',
+        type: ActionTaskType.Activity,
+        commitmentless: true,
+      } satisfies CreateActionDto),
+    );
+
+    await eventRepo.save(
+      eventRepo.create({
+        title: 'Test Action',
+        description: 'Test Action',
+        newStatus: ActionStatus.MemberAction,
+        sendNotifsTo: NotificationType.None,
+        date: new Date(Date.now() - 1000),
+        showInTimeline: true,
+        action: testAction,
+      }),
+    );
+
     const createResponse = await request(ctx.app.getHttpServer())
       .post('/tasks/createForm')
       .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
@@ -112,6 +139,7 @@ describe('Tasks (e2e)', () => {
         'phone-number': '+14155552671',
       },
       schemaSnapshot: sampleSchema,
+      actionId: testAction.id,
     };
 
     const submitResponse = await request(ctx.app.getHttpServer())
