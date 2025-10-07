@@ -110,13 +110,13 @@ export function FieldWrapper<T extends AnyField>({
     >
       {/* Drag handle */}
       <div
-        className="absolute left-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing transition-opacity"
+        className="absolute -left-3 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing transition-opacity"
         draggable
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
         title="Drag to reorder"
       >
-        <div className="text-gray-400 hover:text-gray-600 p-1">
+        <div className="text-gray-400 hover:text-gray-600 p-2 pr-1 bg-white shadow-lg rounded-sm">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
             <circle cx="2" cy="2" r="1" />
             <circle cx="6" cy="2" r="1" />
