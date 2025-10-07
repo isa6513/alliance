@@ -56,7 +56,6 @@ async function bootstrap() {
   if (process.env.NODE_ENV === 'production') {
     client = new PostHog(process.env.POSTHOG_KEY!, {
       host: 'https://us.i.posthog.com',
-      enableExceptionAutocapture: true,
     });
   }
 

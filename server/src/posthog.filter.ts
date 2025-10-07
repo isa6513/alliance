@@ -32,7 +32,7 @@ export class PosthogExceptionFilter implements ExceptionFilter {
       throw exception;
     }
 
-    let email: string | undefined = undefined;
+    let userid: string | undefined = undefined;
     if (req.cookies.access_token) {
       try {
         const payload = await this.jwtService.verifyAsync<JwtPayload>(
@@ -41,13 +41,13 @@ export class PosthogExceptionFilter implements ExceptionFilter {
             secret: process.env.JWT_SECRET,
           },
         );
-        email = payload.email;
+        userid = payload.sub.toString();
       } catch (error) {
         console.log('error verifying jwt in posthog filter: ', error);
       }
     }
 
-    this.posthog.captureException(exception, email || 'server', {
+    this.posthog.captureException(exception, userid || 'server', {
       event: '$exception',
       properties: {
         message:
