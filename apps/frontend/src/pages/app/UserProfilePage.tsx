@@ -138,12 +138,7 @@ const UserProfilePage: React.FC = () => {
             setEditAvatarUrl(userData.profilePicture || null);
           }
         }
-        const { data: friendsData } = await userListFriends({
-          path: { id: userId },
-        });
-        if (friendsData) {
-          setFriends(friendsData);
-        }
+
         const { data: friendStatusData } = await userMyFriendRelationship({
           path: { id: userId },
         });
@@ -160,6 +155,13 @@ const UserProfilePage: React.FC = () => {
           path: { id: userId },
         });
         setForumComments(forumCommentsData ?? []);
+
+        const { data: friendsData } = await userListFriends({
+          path: { id: userId },
+        });
+        if (friendsData) {
+          setFriends(friendsData);
+        }
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -346,7 +348,7 @@ const UserProfilePage: React.FC = () => {
           )}
           {/* stats row */}
           <div
-            className={`mt-2 flex flex-row gap-x-2 cursor-pointer ${
+            className={`mt-2 flex flex-row gap-x-2 cursor-pointer transition-none ${
               friends === null ? "opacity-0" : ""
             }`}
           >
