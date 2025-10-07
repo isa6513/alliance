@@ -7,6 +7,8 @@ import {
   CreateActionDto,
   FormDto,
   imagesUploadImage,
+  tasksCreateForm,
+  tasksGetForm,
   tasksListForms,
   userGetGroups,
 } from "@alliance/shared/client";
@@ -19,6 +21,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router";
 import ActionForm from "../components/ActionForm";
 import EventManagementTab from "../components/EventManagementTab";
 import { getApiUrl } from "../lib/config";
+import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
 
 // Status color mapping
 export const getStatusColor = (status: ActionDto["status"]) => {
@@ -210,6 +213,39 @@ const ActionDashboard: React.FC = () => {
     },
     [navigate]
   );
+
+  const handleDuplicate = useCallback(async () => {
+    let taskFormId = form.taskFormId;
+    if (taskFormId) {
+      const taskForm = await tasksGetForm({
+        path: { id: taskFormId },
+      });
+      if (taskForm.data) {
+        const newTaskForm = await tasksCreateForm({
+          body: {
+            title: taskForm.data.title + " (Copy)",
+            schema: taskForm.data.schema,
+          },
+        });
+        taskFormId = newTaskForm.data?.id;
+      }
+    }
+
+    const duplicateForm = {
+      ...form,
+      name: `${form.name} (Copy)`,
+      taskFormId,
+    };
+    const response = await actionsCreate({
+      body: duplicateForm,
+    });
+    const newAction = response.data;
+    if (!newAction) {
+      setError("Failed to duplicate action");
+      return;
+    }
+    window.location.href = `/actions/${newAction.id}`;
+  }, [form]);
 
   const handleActionDeleted = useCallback(() => {
     navigate("/");
@@ -506,6 +542,14 @@ const ActionDashboard: React.FC = () => {
                   >
                     <DatabaseIcon size="large" />
                     Edit in Database
+                  </Button>
+                  <Button
+                    onClick={() => handleDuplicate()}
+                    color={ButtonColor.White}
+                    className="!px-3 !text-sm gap-x-1"
+                  >
+                    <CopyIcon size="large" />
+                    Duplicate Action
                   </Button>
                 </div>
                 <Card style={CardStyle.White}>

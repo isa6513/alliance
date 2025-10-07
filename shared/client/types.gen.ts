@@ -2928,8 +2928,10 @@ export type TasksCreateFormData = {
 };
 
 export type TasksCreateFormResponses = {
-    200: unknown;
+    200: FormDto;
 };
+
+export type TasksCreateFormResponse = TasksCreateFormResponses[keyof TasksCreateFormResponses];
 
 export type TasksListFormsData = {
     body?: never;

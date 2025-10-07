@@ -42,7 +42,7 @@ export class TasksController {
 
   @Post('createForm')
   @UseGuards(AdminGuard)
-  @ApiOkResponse()
+  @ApiOkResponse({ type: FormDto })
   async createForm(@Body() body: CreateFormDto) {
     return this.tasksService.createForm(body);
   }
