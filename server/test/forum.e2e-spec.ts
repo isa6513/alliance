@@ -61,6 +61,7 @@ describe('Forum (e2e)', () => {
             body: 'This is a test post',
             attachments: [],
           },
+          visibleAt: new Date(),
         } satisfies CreatePostDto)
         .expect(201);
 
@@ -80,6 +81,7 @@ describe('Forum (e2e)', () => {
             attachments: [],
           },
           actionId: testAction.id,
+          visibleAt: new Date(),
         } satisfies CreatePostDto)
         .expect(201);
 
@@ -97,6 +99,7 @@ describe('Forum (e2e)', () => {
             body: 'This is a test post',
             attachments: [],
           },
+          visibleAt: new Date(),
         } satisfies CreatePostDto)
         .expect(201);
     };
@@ -124,6 +127,7 @@ describe('Forum (e2e)', () => {
             attachments: [],
           },
           actionId: testAction.id,
+          visibleAt: new Date(),
         } satisfies CreatePostDto)
         .expect(201);
 
@@ -169,6 +173,7 @@ describe('Forum (e2e)', () => {
             body: 'This post will be updated',
             attachments: [],
           },
+          visibleAt: new Date(),
         } satisfies CreatePostDto)
         .expect(201);
 
@@ -184,6 +189,7 @@ describe('Forum (e2e)', () => {
             body: 'This post has been updated',
             attachments: [],
           },
+          visibleAt: new Date(),
         } satisfies CreatePostDto)
         .expect(200);
 
@@ -205,6 +211,7 @@ describe('Forum (e2e)', () => {
             body: 'This post will be deleted',
             attachments: [],
           },
+          visibleAt: new Date(),
         } satisfies CreatePostDto)
         .expect(201);
 
@@ -234,6 +241,7 @@ describe('Forum (e2e)', () => {
           attachments: [],
         },
         actionId: testAction.id,
+        visibleAt: new Date(),
       };
 
       // Create a post for reply tests
@@ -658,6 +666,7 @@ describe('Forum (e2e)', () => {
             body: 'This is another test post',
             attachments: [],
           },
+          visibleAt: new Date(),
         } satisfies CreatePostDto)
         .expect(201);
 
@@ -707,6 +716,7 @@ describe('Forum (e2e)', () => {
             body: 'Initial body',
             attachments: [],
           },
+          visibleAt: new Date(),
         } satisfies CreatePostDto)
         .expect(201);
 
@@ -750,6 +760,7 @@ describe('Forum (e2e)', () => {
             body: 'Body content',
             attachments: [],
           },
+          visibleAt: new Date(),
         } satisfies CreatePostDto)
         .expect(201);
 
@@ -843,6 +854,7 @@ describe('Forum (e2e)', () => {
             body: 'Body',
             attachments: [],
           },
+          visibleAt: new Date(),
         } satisfies CreatePostDto)
         .expect(201);
 
