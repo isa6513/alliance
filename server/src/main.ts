@@ -10,6 +10,7 @@ import { PostHog, setupExpressErrorHandler } from 'posthog-node';
 import { ServerOptions } from 'socket.io';
 import { AppModule } from './app.module';
 import { PosthogExceptionFilter } from './posthog.filter';
+import { JwtService } from '@nestjs/jwt';
 
 function validateEnv() {
   const requiredVars = [
@@ -63,6 +64,7 @@ async function bootstrap() {
     rawBody: true,
     bodyParser: false,
   });
+  const jwtService = app.get(JwtService);
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   validateEnv();
   app.use(bodyParser.json({ limit: '50mb' }));
@@ -99,7 +101,7 @@ async function bootstrap() {
   }
 
   if (client) {
-    app.useGlobalFilters(new PosthogExceptionFilter(client));
+    app.useGlobalFilters(new PosthogExceptionFilter(client, jwtService));
     setupExpressErrorHandler(client, app);
   }
 
