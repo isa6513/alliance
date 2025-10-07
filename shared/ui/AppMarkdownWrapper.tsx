@@ -39,6 +39,35 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
           ),
           li: ({ ...props }) => <li className="my-1" {...props} />,
           a: ({ ...props }) => <a className="text-link" {...props} />,
+          code: ({ className, children, ...props }) => {
+            const language = className?.replace("language-", "");
+            const value = String(children).trim();
+
+            if (language === "imgcap") {
+              const [imgLine, ...captionLines] = value.split("\n");
+              const img = imgLine.trim();
+              const caption = captionLines.join("\n").trim();
+
+              return (
+                <div className="text-center my-4">
+                  <img
+                    src={`${getApiUrl()}/images/${img}`}
+                    alt={caption || "Image"}
+                    className="mx-auto max-h-96"
+                  />
+                  {caption && (
+                    <p className="text-sm text-gray-500 mt-2">{caption}</p>
+                  )}
+                </div>
+              );
+            }
+
+            return (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            );
+          },
         }}
         urlTransform={(url) => {
           if (url.startsWith("http")) {
