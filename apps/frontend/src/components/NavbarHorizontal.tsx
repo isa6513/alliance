@@ -18,9 +18,9 @@ const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
     ? links
     : links.filter((link) => link !== NavbarPage.Forum);
 
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !loading) {
     return null;
   }
 

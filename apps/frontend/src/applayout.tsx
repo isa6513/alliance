@@ -284,7 +284,7 @@ export default function AppLayout() {
 
   return (
     <>
-      {isAuthenticated && <NavbarHorizontal todoActions={nTasks} />}
+      <NavbarHorizontal todoActions={nTasks} />
       <Outlet />
       {isFeatureEnabled(Features.BugReporting) && <BugReportButton />}
     </>
