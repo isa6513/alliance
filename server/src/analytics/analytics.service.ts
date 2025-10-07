@@ -14,27 +14,44 @@ export class AnalyticsService {
 
   getQuery(range: 'last7Days' | 'total') {
     return `
-WITH per_session AS (
+WITH scoped_sessions AS (
   SELECT
-    p.id AS person_id,
-    any(JSONExtractString(p.properties, 'email')) AS email,
-    e.session.id AS session_id,
-    /* end/start are identical on every event in the session, so any() is fine */
-    any(e.session.$end_timestamp - e.session.$start_timestamp) AS session_duration
+    e.person_id,
+    e.session.id                                          AS session_id,
+    /* duration is identical across events in a session, but we compute once explicitly */
+    toFloat(e.session.$end_timestamp - e.session.$start_timestamp) AS raw_duration
   FROM events AS e
-  JOIN person_distinct_ids AS pdi ON e.distinct_id = pdi.distinct_id
-  JOIN persons AS p ON p.id = pdi.person_id
   WHERE e.event = '$pageview'
     ${range === 'last7Days' ? 'AND e.timestamp >= now() - INTERVAL 7 DAY' : ''}
-  GROUP BY person_id, session_id
+    AND e.person_id IS NOT NULL
+    AND e.session.id IS NOT NULL
+    AND e.session.$start_timestamp IS NOT NULL
+    AND e.session.$end_timestamp IS NOT NULL
+)
+/* 2) Keep one row per (person_id, session_id) and clamp duration to a reasonable window */
+, per_session AS (
+  SELECT
+    person_id,
+    session_id,
+    /* drop negatives and absurdly long sessions (e.g. > 8h) */
+    greatest(0, least(raw_duration, 8*60*60)) AS session_duration
+  FROM scoped_sessions
+  GROUP BY person_id, session_id, raw_duration
+)
+, per_person AS (
+  SELECT
+    person_id,
+    sum(session_duration) AS total_session_duration_seconds
+  FROM per_session
+  GROUP BY person_id
 )
 SELECT
-  person_id,
-  email,
-  sum(session_duration) AS total_session_duration_seconds
-FROM per_session
-GROUP BY person_id, email
-ORDER BY total_session_duration_seconds DESC
+  pp.person_id,
+  JSONExtractString(p.properties, 'email') AS email,
+  pp.total_session_duration_seconds
+FROM per_person AS pp
+JOIN persons AS p ON p.id = pp.person_id
+ORDER BY pp.total_session_duration_seconds DESC
           `;
   }
 
