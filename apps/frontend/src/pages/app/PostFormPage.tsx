@@ -207,7 +207,7 @@ const PostFormPage: React.FC = () => {
               />
             </div>
 
-            <div className="mb-4">
+            <div className="mb-6">
               <label className="block text-zinc-700 font-medium mb-2">
                 Content
               </label>
@@ -224,38 +224,8 @@ const PostFormPage: React.FC = () => {
               </div>
             </div>
 
-            {/* <div className="mb-6">
-              <label
-                htmlFor="actionId"
-                className="block text-zinc-700 font-medium mb-2 "
-              >
-                Associated Action (Optional)
-              </label>
-              <select
-                id="actionId"
-                value={actionId || ""}
-                onChange={(e) =>
-                  setActionId(
-                    e.target.value ? Number(e.target.value) : undefined
-                  )
-                }
-                className="w-full p-3 border border-zinc-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="">None</option>
-                {actions.map((action) => (
-                  <option key={action.id} value={action.id}>
-                    {action.name}
-                  </option>
-                ))}
-              </select>
-              <p className="text-sm text-gray-500 mt-1">
-                Associating your post with an action will make it visible on
-                that action&apos;s page.
-              </p>
-            </div> */}
-
-            <div className="flex justify-between space-x-3 items-end">
-              <div className="flex space-x-3">
+            <div className="flex justify-between space-x-3 items-center">
+              <div className="flex space-x-3 items-center">
                 <LargeCheckbox
                   label="Schedule post for later"
                   checked={useSchedulePost}

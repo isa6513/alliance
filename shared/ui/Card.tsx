@@ -36,10 +36,10 @@ const Card: React.FC<CardProps> = ({
   const cardStyle = style ?? CardStyle.White;
 
   const styleClasses = {
-    [CardStyle.White]: "bg-white border-zinc-200 hover:border border-box",
+    [CardStyle.White]: "bg-white border-zinc-200 border-box",
     [CardStyle.WhiteSolid]: "bg-white border-none",
     [CardStyle.Alert]: "bg-sky-100 border-sky-300",
-    [CardStyle.Outline]: "bg-transparent border-gray-300",
+    [CardStyle.Outline]: "bg-transparent border-zinc-200 hover:bg-zinc-100",
     [CardStyle.Grey]: "bg-zinc-50 border-zinc-200 border",
     [CardStyle.LightGrey]: "bg-[#fcfcfc] border-zinc-300",
     [CardStyle.Black]: "bg-black border-zinc-300 text-white",
@@ -55,7 +55,7 @@ const Card: React.FC<CardProps> = ({
       className={`${flex ? "flex flex-col" : ""} ${
         styleClasses[cardStyle]
       } p-4 border ${className} ${
-        onClick ? "cursor-pointer hover:border-zinc-400" : ""
+        onClick ? "cursor-pointer " : ""
       } bg-cover bg-center rounded`}
       ref={ref}
       style={{
