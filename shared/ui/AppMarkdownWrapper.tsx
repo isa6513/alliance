@@ -49,7 +49,7 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
               const caption = captionLines.join("\n").trim();
 
               return (
-                <div className="text-center my-4">
+                <div className="text-center my-6">
                   <img
                     src={`${getApiUrl()}/images/${img}`}
                     alt={caption || "Image"}
