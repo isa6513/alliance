@@ -196,12 +196,10 @@ jobs:
             unzip -o ~/react-build.zip
 
             cd ~/output
-            corepack enable
-            corepack prepare yarn@4.9.1 --activate
-            corepack yarn install --omit=dev
+            yarn install --omit=dev
 
             pm2 delete client-ssr || true
-            pm2 start "corepack yarn react-router-serve build/server/index.js" --name client-ssr
+            pm2 start "yarn react-router-serve build/server/index.js" --name client-ssr
             pm2 save
 
             if [ ! -f /etc/nginx/conf.d/alliance.conf ]; then
