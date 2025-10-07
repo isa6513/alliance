@@ -233,6 +233,22 @@ const UserDetailView: React.FC = () => {
     [groupKey, updateGroupInState, user.id]
   );
 
+  const actionSummariesSorted = useMemo(() => {
+    return [...actionSummaries].sort((a, b) => {
+      const relationA = actionRelationsState.find(
+        (relation) => relation.actionId === a.id
+      );
+      const relationB = actionRelationsState.find(
+        (relation) => relation.actionId === b.id
+      );
+      console.log(relationA, relationB);
+      return (
+        new Date(relationB?.latestActivityAt ?? new Date(0)).getTime() -
+        new Date(relationA?.latestActivityAt ?? new Date(0)).getTime()
+      );
+    });
+  }, [actionSummaries, actionRelationsState]);
+
   return (
     <div className="flex flex-col gap-6 p-6">
       <Card style={CardStyle.WhiteSolid} className="p-6">
@@ -373,7 +389,7 @@ const UserDetailView: React.FC = () => {
         </div>
         {actionSummaries.length ? (
           <div className="grid gap-3">
-            {actionSummaries.map((action) => {
+            {actionSummariesSorted.map((action) => {
               const relation = relationByActionId[action.id];
               const relationStatus = relation?.status ?? "none";
               const statusLabel = formatRelationStatus(relationStatus);
@@ -395,13 +411,21 @@ const UserDetailView: React.FC = () => {
                         {humanize(action.status) ?? action.status}
                       </p>
                     </div>
-                    <span
-                      className={`text-sm font-semibold ${relationStatusColor(
-                        relationStatus
-                      )}`}
-                    >
-                      {statusLabel}
-                    </span>
+                    <div className="flex flex-col items-end gap-2">
+                      <span
+                        className={`text-sm font-semibold ${relationStatusColor(
+                          relationStatus
+                        )}`}
+                      >
+                        {statusLabel}
+                      </span>
+                      <span className="text-xs text-zinc-500">
+                        {relation?.latestActivityAt &&
+                          new Date(
+                            relation.latestActivityAt
+                          ).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
                   {!relation && (
                     <CreateActivityControls
