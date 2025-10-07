@@ -167,7 +167,25 @@ export class UserService {
       ActionStatus.Resolution,
     ]);
 
-    const relevantActions = actions
+    const actionsSorted = actions.sort((a, b) => {
+      const aFirstEvent = (a.events ?? []).reduce(
+        (first, event) => {
+          return !first || event.date < first.date ? event : first;
+        },
+        undefined as (typeof a.events)[0] | undefined,
+      );
+      const bFirstEvent = (b.events ?? []).reduce(
+        (first, event) => {
+          return !first || event.date < first.date ? event : first;
+        },
+        undefined as (typeof b.events)[0] | undefined,
+      );
+      return (
+        (aFirstEvent?.date.getTime() ?? 0) - (bFirstEvent?.date.getTime() ?? 0)
+      );
+    });
+
+    const relevantActions = actionsSorted
       .map((action) => ({ action, status: action.status }))
       .filter(({ status }) => activeStatuses.has(status));
 
@@ -191,13 +209,13 @@ export class UserService {
       );
     }
 
-    const actionSummaries: UserActionSummaryDto[] = relevantActions
-      .sort((a, b) => a.action.name.localeCompare(b.action.name))
-      .map(({ action, status }) => ({
+    const actionSummaries: UserActionSummaryDto[] = relevantActions.map(
+      ({ action, status }) => ({
         id: action.id,
         name: action.name,
         status,
-      }));
+      }),
+    );
 
     const actionIds = actionSummaries.map((summary) => summary.id);
     const actionOrder = new Map(actionIds.map((id, index) => [id, index]));
