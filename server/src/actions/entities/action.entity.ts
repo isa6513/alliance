@@ -67,7 +67,7 @@ export class Action {
 
   @Column()
   @ApiProperty({ description: 'markdown page body' })
-  @IsNotEmpty()
+  @Allow()
   body: string;
 
   @Column({ nullable: true })
@@ -79,7 +79,7 @@ export class Action {
 
   @Column({ nullable: true })
   @ApiProperty({ description: 'Short description shown in cards' })
-  @IsNotEmpty()
+  @Allow()
   shortDescription: string;
 
   @Column({ nullable: true })
