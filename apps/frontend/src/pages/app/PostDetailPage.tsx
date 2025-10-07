@@ -119,6 +119,14 @@ const PostDetailPage: React.FC = () => {
           >
             &larr;
           </Link>
+          {new Date(post.visibleAt) > new Date() && (
+            <Card style={CardStyle.Alert} className="mb-2 border-none">
+              <span className="text-zinc-800">
+                Only you can see this post. it is scheduled for{" "}
+                {new Date(post.visibleAt).toLocaleString()}
+              </span>
+            </Card>
+          )}
           <Card className="py-6 px-5 mb-3" style={CardStyle.White}>
             <div className="flex justify-between items-start">
               <div className="flex flex-row gap-x-1 items-center w-full ">

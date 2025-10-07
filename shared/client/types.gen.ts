@@ -848,6 +848,7 @@ export type NotifClickResponseDto = {
 export type CreatePostDto = {
     title: string;
     actionId?: number;
+    visibleAt: string;
     editableContent: CreateEditableContentDto;
 };
 
@@ -859,6 +860,7 @@ export type PostDto = {
     createdAt: string;
     pinned: boolean;
     updatedAt: string;
+    visibleAt: string;
     action?: ActionDto;
     author: ProfileDto;
     commentCount?: number;
@@ -885,6 +887,7 @@ export type UserCommentDto = {
 export type UpdatePostDto = {
     title?: string;
     actionId?: number;
+    visibleAt?: string;
     editableContent?: CreateEditableContentDto;
 };
 

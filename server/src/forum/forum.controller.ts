@@ -7,10 +7,11 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthGuard, JwtPayload } from '../auth/guards/auth.guard';
+import { AuthGuard, JwtPayload, JwtRequest } from '../auth/guards/auth.guard';
 import { ReqUser } from '../auth/user.decorator';
 import {
   CommentDto,
@@ -21,6 +22,7 @@ import {
 import { CreatePostDto, PostDto, UpdatePostDto } from './dto/post.dto';
 import { Post as PostEntity } from './entities/post.entity';
 import { ForumService } from './forum.service';
+import { AuthOptionalGuard } from 'src/auth/guards/authoptional.guard';
 
 @ApiTags('forum')
 @Controller('forum')
@@ -61,8 +63,12 @@ export class ForumController {
   @Get('posts/:id')
   @ApiOperation({ summary: 'Get a specific post with its comments' })
   @ApiOkResponse({ type: PostDto })
-  async findOnePost(@Param('id') id: string): Promise<PostDto> {
-    return this.forumService.findPostWithComments(+id);
+  @UseGuards(AuthOptionalGuard)
+  async findOnePost(
+    @Param('id') id: string,
+    @Request() req: JwtRequest,
+  ): Promise<PostDto> {
+    return this.forumService.findPostWithComments(+id, req.user?.sub);
   }
 
   @Get('posts/:id/last-comment')

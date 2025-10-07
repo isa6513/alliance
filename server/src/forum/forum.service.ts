@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { commentUrl } from 'src/search/approutes';
 import { ProfileDto } from 'src/user/user.dto';
-import { ILike, In, Not, Repository } from 'typeorm';
+import { ILike, In, LessThan, Not, Repository } from 'typeorm';
 import {
   Notification,
   NotificationCategory,
@@ -56,12 +56,20 @@ export class ForumService {
       attachments: createPostDto.editableContent.attachments ?? [],
     });
     await this.editableContentRepository.save(content);
+    let visibleAt = new Date();
+    if (
+      createPostDto.visibleAt &&
+      new Date(createPostDto.visibleAt) > visibleAt
+    ) {
+      visibleAt = new Date(createPostDto.visibleAt);
+    }
     const post = this.postRepository.create({
       title: createPostDto.title,
       actionId: createPostDto.actionId,
       author: user,
       authorId: user.id,
       editableContent: content,
+      visibleAt,
       likes: [],
     });
     return this.postRepository.save(post);
@@ -70,7 +78,7 @@ export class ForumService {
   async findAllPosts(): Promise<PostDto[]> {
     const posts = await this.postRepository
       .find({
-        where: { deleted: false },
+        where: { deleted: false, visibleAt: LessThan(new Date()) },
         relations: ['author', 'action', 'editableContent'],
         order: { updatedAt: 'DESC' },
       })
@@ -118,13 +126,17 @@ export class ForumService {
     return postsWithComments;
   }
 
-  async findOnePost(id: number): Promise<Post> {
+  async findOnePost(id: number, userId?: number): Promise<Post> {
     const post = await this.postRepository.findOne({
       where: { id },
       relations: ['author', 'action', 'editableContent'],
     });
 
-    if (!post || post.deleted) {
+    if (
+      !post ||
+      post.deleted ||
+      (userId !== post.authorId && post.visibleAt > new Date())
+    ) {
       throw new NotFoundException(`Post with ID "${id}" not found`);
     }
 
@@ -565,8 +577,8 @@ export class ForumService {
     });
   }
 
-  async findPostWithComments(id: number): Promise<PostDto> {
-    const post = await this.findOnePost(id);
+  async findPostWithComments(id: number, userId?: number): Promise<PostDto> {
+    const post = await this.findOnePost(id, userId);
     const commentCount = await this.countCommentsForPost(id);
     return new PostDto(post, commentCount);
   }

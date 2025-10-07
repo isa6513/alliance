@@ -82,6 +82,13 @@ export class Post {
   @Type(() => Date)
   updatedAt: Date;
 
+  @Column({ default: () => 'NOW()' })
+  @ApiProperty()
+  @IsOptional()
+  @Type(() => Date)
+  @Allow()
+  visibleAt: Date;
+
   @Column({ default: false })
   @ApiProperty()
   @Allow()

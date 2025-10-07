@@ -21,6 +21,7 @@ export class PostDto extends PickType(Post, [
   'actionId',
   'authorId',
   'createdAt',
+  'visibleAt',
   'updatedAt',
   'pinned',
 ]) {
@@ -47,10 +48,15 @@ export class PostDto extends PickType(Post, [
     this.commentCount = commentCount;
     this.likes = post.likes.map((like) => new ProfileDto(like));
     this.editableContent = new EditableContentDto(post.editableContent);
+    this.createdAt = post.visibleAt ?? post.createdAt;
   }
 }
 
-export class CreatePostDto extends PickType(Post, ['title', 'actionId']) {
+export class CreatePostDto extends PickType(Post, [
+  'title',
+  'actionId',
+  'visibleAt',
+]) {
   @ApiProperty({ type: CreateEditableContentDto })
   @ValidateNested()
   @Type(() => CreateEditableContentDto)

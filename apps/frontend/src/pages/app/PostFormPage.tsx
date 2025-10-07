@@ -1,9 +1,7 @@
 import {
-  ActionDto,
   CreateEditableContentDto,
   CreatePostDto,
   PostDto,
-  actionsFindAll,
   forumCreatePost,
   forumFindOnePost,
   forumUpdatePost,
@@ -16,7 +14,19 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { setRevalidate } from "../../applayout";
 import EditableContentForm from "../../components/forum/EditableContentForm";
 import { useAuth } from "../../lib/AuthContext";
+import LargeCheckbox from "../../components/LargeCheckbox";
 type FormMode = "create" | "edit";
+
+function formatDateToInputValue(date: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  const mm = pad(date.getMonth() + 1);
+  const dd = pad(date.getDate());
+  const hh = pad(date.getHours());
+  const min = pad(date.getMinutes());
+
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+}
 
 const PostFormPage: React.FC = () => {
   const { postId } = useParams<{ postId: string }>();
@@ -28,9 +38,15 @@ const PostFormPage: React.FC = () => {
     body: "",
     attachments: [],
   });
+  console.log(
+    "new Date().toISOString().split('T')[0]",
+    new Date().toISOString().split("T")[0]
+  );
+  const [schedulePostDate, setSchedulePostDate] = useState<string>(
+    formatDateToInputValue(new Date())
+  );
+  const [useSchedulePost, setUseSchedulePost] = useState<boolean>(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [actions, setActions] = useState<ActionDto[]>([]);
   const [isLoading, setIsLoading] = useState(mode === "edit");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,19 +58,11 @@ const PostFormPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Redirect if not authenticated
-    if (!isAuthenticated) {
-      navigate("/login", { state: { from: location.pathname } });
-      return;
-    }
+  console.log("schedulePostDate", schedulePostDate);
 
+  useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch available actions for the dropdown
-        const actionsResponse = await actionsFindAll();
-        setActions(actionsResponse.data ?? []);
-
         if (mode === "edit" && postId) {
           setIsLoading(true);
           const postResponse = await forumFindOnePost({
@@ -64,6 +72,12 @@ const PostFormPage: React.FC = () => {
             setTitle(postResponse.data.title);
             setContent(postResponse.data.editableContent);
             setActionId(postResponse.data.actionId);
+            setSchedulePostDate(
+              formatDateToInputValue(new Date(postResponse.data.visibleAt))
+            );
+            if (postResponse.data.visibleAt) {
+              setUseSchedulePost(true);
+            }
           } else {
             setError("Post not found");
           }
@@ -77,7 +91,7 @@ const PostFormPage: React.FC = () => {
     };
 
     fetchData();
-  }, [isAuthenticated, mode, postId, navigate]);
+  }, [mode, postId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,6 +121,7 @@ const PostFormPage: React.FC = () => {
         title,
         actionId: actionId,
         editableContent: { body: content.body, attachments: attachmentKeys },
+        visibleAt: schedulePostDate ?? new Date().toISOString(),
       };
 
       let response: { data: PostDto | undefined };
@@ -200,7 +215,6 @@ const PostFormPage: React.FC = () => {
                 <EditableContentForm
                   value={content}
                   onChange={setContent}
-                  compact={false}
                   expanded={true}
                   placeholder="Write your post content here..."
                 />
@@ -240,24 +254,47 @@ const PostFormPage: React.FC = () => {
               </p>
             </div> */}
 
-            <div className="flex justify-end space-x-3">
-              <Button
-                onClick={() => navigate("/forum")}
-                color={ButtonColor.Light}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                color={ButtonColor.Black}
-                disabled={isSubmitting || !title.trim() || !content.body.trim()}
-              >
-                {isSubmitting
-                  ? "Saving..."
-                  : mode === "create"
-                  ? "Create Post"
-                  : "Save Changes"}
-              </Button>
+            <div className="flex justify-between space-x-3 items-end">
+              <div className="flex space-x-3">
+                <LargeCheckbox
+                  label="Schedule post for later"
+                  checked={useSchedulePost}
+                  onChange={() => setUseSchedulePost(!useSchedulePost)}
+                />
+                {useSchedulePost && (
+                  <div className="flex space-x-3">
+                    <input
+                      type="datetime-local"
+                      id="schedulePostDate"
+                      name="schedulePostDate"
+                      value={schedulePostDate}
+                      onChange={(e) => setSchedulePostDate(e.target.value)}
+                      className="w-full p-3 py-2 -my-3 border border-zinc-300 rounded-lg focus:outline-none"
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="flex space-x-3">
+                <Button
+                  onClick={() => navigate("/forum")}
+                  color={ButtonColor.Light}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  color={ButtonColor.Black}
+                  disabled={
+                    isSubmitting || !title.trim() || !content.body.trim()
+                  }
+                >
+                  {isSubmitting
+                    ? "Saving..."
+                    : mode === "create"
+                    ? "Create Post"
+                    : "Save Changes"}
+                </Button>
+              </div>
             </div>
           </form>
         </div>

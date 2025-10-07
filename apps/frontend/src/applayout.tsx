@@ -205,6 +205,7 @@ const authOnlyRoutes = [
   "profile",
   "onboarding",
   "members",
+  "forum/edit",
 ];
 
 export default function AppLayout() {

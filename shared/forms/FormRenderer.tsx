@@ -440,7 +440,7 @@ const FormRenderer = ({
               body: { file: reader.result },
             });
             if (data) {
-              updateField(fieldId, data);
+              updateField(fieldId, data.key);
             }
           } catch (error) {
             console.error("Failed to upload image:", error);
