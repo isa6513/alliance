@@ -25,7 +25,7 @@ const ImageUpload: React.FC = () => {
       });
       if (data) {
         console.log(data);
-        setKey(data);
+        setKey(data.url);
       }
     }
   };

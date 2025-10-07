@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CreateActionDto, FormDto, GroupDto } from "@alliance/shared/client";
 import React, { useMemo, useRef } from "react";
+import { MarkdownTextArea } from "./MarkdownTextArea";
 
 interface ActionFormProps {
   form: CreateActionDto;
@@ -60,14 +61,14 @@ const ActionForm: React.FC<ActionFormProps> = ({
     }
   };
 
-  // Centralized field definitions to make adding/removing fields easier
   type FieldType =
     | "text"
     | "textarea"
     | "number"
     | "select"
     | "file"
-    | "checkbox";
+    | "checkbox"
+    | "markdowntextarea";
 
   type FieldDef = {
     name:
@@ -162,7 +163,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         inGrid: true,
       },
 
-      { name: "body", label: "Body", type: "textarea", required: true },
+      { name: "body", label: "Body", type: "markdowntextarea", required: true },
       {
         name: "shortDescription",
         label: "Short Description",
@@ -263,6 +264,29 @@ const ActionForm: React.FC<ActionFormProps> = ({
           <p className="text-xs text-gray-500 mt-1">
             Form to show in task panel for completion
           </p>
+        </div>
+      );
+    }
+
+    if (f.type === "markdowntextarea") {
+      return (
+        <div key={String(f.name)}>
+          <label
+            htmlFor={String(f.name)}
+            className="block font-medium text-gray-700 mb-1"
+          >
+            {f.label}
+          </label>
+          <MarkdownTextArea
+            id={String(f.name)}
+            name={String(f.name)}
+            value={(form as any)[f.name] ?? ""}
+            onChange={onInputChange}
+            rows={f.rows || 6}
+          />
+          {f.helpText && (
+            <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>
+          )}
         </div>
       );
     }

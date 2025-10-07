@@ -1,5 +1,6 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import { getApiUrl } from "../lib/config";
 
 interface AppMarkdownWrapperProps {
   markdownContent: string;
@@ -38,6 +39,12 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
           ),
           li: ({ ...props }) => <li className="my-1" {...props} />,
           a: ({ ...props }) => <a className="text-link" {...props} />,
+        }}
+        urlTransform={(url) => {
+          if (url.startsWith("http")) {
+            return url;
+          }
+          return `${getApiUrl()}/images/${url}`;
         }}
       >
         {markdownContent}
