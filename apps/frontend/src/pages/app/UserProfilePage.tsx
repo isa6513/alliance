@@ -127,41 +127,50 @@ const UserProfilePage: React.FC = () => {
 
         const userId = parseInt(id);
 
-        const { data: userData } = await userFindOne({
+        await userFindOne({
           path: { id: userId },
-        });
-        if (userData && userData.displayName) {
-          setProfile(userData);
-          if (isMe) {
-            setEditName(userData.displayName);
-            setEditBio(userData.profileDescription || "");
-            setEditAvatarUrl(userData.profilePicture || null);
+        }).then((request) => {
+          if (request.data && request.data.displayName) {
+            setProfile(request.data);
+            if (isMe) {
+              setEditName(request.data.displayName);
+              setEditBio(request.data.profileDescription || "");
+              setEditAvatarUrl(request.data.profilePicture || null);
+            }
           }
-        }
-
-        const { data: friendStatusData } = await userMyFriendRelationship({
-          path: { id: userId },
         });
-        if (friendStatusData) {
-          setFriendStatus(friendStatusData);
-        }
 
-        const { data: forumPostsData } = await forumFindPostsByUser({
+        userMyFriendRelationship({
           path: { id: userId },
+        }).then((request) => {
+          if (request.data) {
+            setFriendStatus(request.data);
+          }
         });
-        setForumPosts(forumPostsData ?? []);
 
-        const { data: forumCommentsData } = await forumFindCommentsByUser({
+        forumFindPostsByUser({
           path: { id: userId },
+        }).then((request) => {
+          if (request.data) {
+            setForumPosts(request.data);
+          }
         });
-        setForumComments(forumCommentsData ?? []);
 
-        const { data: friendsData } = await userListFriends({
+        forumFindCommentsByUser({
           path: { id: userId },
+        }).then((request) => {
+          if (request.data) {
+            setForumComments(request.data);
+          }
         });
-        if (friendsData) {
-          setFriends(friendsData);
-        }
+
+        userListFriends({
+          path: { id: userId },
+        }).then((request) => {
+          if (request.data) {
+            setFriends(request.data);
+          }
+        });
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
