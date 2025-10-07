@@ -194,7 +194,7 @@ export function useProfileData(): ProfileDto | null {
 export function HydrateFallback() {
   return (
     <div className="flex h-screen w-screen items-center justify-center">
-      <p>Loading data...</p>
+      <p className="text-zinc-500">Loading data...</p>
     </div>
   );
 }

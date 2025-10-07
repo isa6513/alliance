@@ -17,7 +17,7 @@ import {
 } from "@alliance/shared/client";
 import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import Card from "@alliance/shared/ui/Card";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
@@ -90,6 +90,7 @@ const UserProfilePage: React.FC = () => {
   );
   const [avatarEditorKey, setAvatarEditorKey] = useState(0);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const forumActivityItems = useMemo(() => {
     const postItems = forumPosts.map((post) => ({
@@ -122,58 +123,55 @@ const UserProfilePage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        if (!id) return;
+      if (!id) return;
 
-        const userId = parseInt(id);
+      const userId = parseInt(id);
 
-        await userFindOne({
-          path: { id: userId },
-        }).then((request) => {
-          if (request.data && request.data.displayName) {
-            setProfile(request.data);
-            if (isMe) {
-              setEditName(request.data.displayName);
-              setEditBio(request.data.profileDescription || "");
-              setEditAvatarUrl(request.data.profilePicture || null);
-            }
+      await userFindOne({
+        path: { id: userId },
+      }).then((request) => {
+        if (request.data && request.data.displayName) {
+          setProfile(request.data);
+          if (isMe) {
+            setEditName(request.data.displayName);
+            setEditBio(request.data.profileDescription || "");
+            setEditAvatarUrl(request.data.profilePicture || null);
           }
-        });
+        }
+      });
 
-        userMyFriendRelationship({
-          path: { id: userId },
-        }).then((request) => {
-          if (request.data) {
-            setFriendStatus(request.data);
-          }
-        });
+      userMyFriendRelationship({
+        path: { id: userId },
+      }).then((request) => {
+        if (request.data) {
+          setFriendStatus(request.data);
+        }
+      });
 
-        forumFindPostsByUser({
-          path: { id: userId },
-        }).then((request) => {
-          if (request.data) {
-            setForumPosts(request.data);
-          }
-        });
+      forumFindPostsByUser({
+        path: { id: userId },
+      }).then((request) => {
+        if (request.data) {
+          setForumPosts(request.data);
+        }
+      });
 
-        forumFindCommentsByUser({
-          path: { id: userId },
-        }).then((request) => {
-          if (request.data) {
-            setForumComments(request.data);
-          }
-        });
+      forumFindCommentsByUser({
+        path: { id: userId },
+      }).then((request) => {
+        if (request.data) {
+          setForumComments(request.data);
+        }
+      });
 
-        userListFriends({
-          path: { id: userId },
-        }).then((request) => {
-          if (request.data) {
-            setFriends(request.data);
-          }
-        });
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
+      userListFriends({
+        path: { id: userId },
+      }).then((request) => {
+        if (request.data) {
+          setFriends(request.data);
+          setLoading(false);
+        }
+      });
     };
 
     if (id) {
@@ -272,14 +270,11 @@ const UserProfilePage: React.FC = () => {
     setIsEditing(false);
   };
 
-  if (!profile) {
+  if (!profile && loading) {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
-        <div className="max-w-4xl mx-auto">
-          <div className="w-full h-[900px]"></div>
-          <Card style={CardStyle.White} className="p-8">
-            <p className="text-center text-zinc-500">Loading profile...</p>
-          </Card>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <p className="text-center text-zinc-500">Loading profile...</p>
         </div>
       </div>
     );
@@ -288,10 +283,8 @@ const UserProfilePage: React.FC = () => {
   if (!profile) {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
-        <div className="max-w-4xl mx-auto">
-          <Card style={CardStyle.White} className="p-8">
-            <p className="text-center text-zinc-500">User not found</p>
-          </Card>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <p className="text-center text-zinc-500">User not found</p>
         </div>
       </div>
     );

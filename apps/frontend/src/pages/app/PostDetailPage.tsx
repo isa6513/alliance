@@ -26,6 +26,8 @@ const PostDetailPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(true);
+
   useCIDFromParams();
 
   const fetchPost = useCallback(async () => {
@@ -40,6 +42,8 @@ const PostDetailPage: React.FC = () => {
     } catch (err) {
       console.error("Error fetching post details:", err);
       setError("Failed to load post details");
+    } finally {
+      setLoading(false);
     }
   }, [postId]);
 
@@ -92,8 +96,16 @@ const PostDetailPage: React.FC = () => {
     );
   }
 
-  if (!post) {
-    return null;
+  if (loading || !post) {
+    return (
+      <div className="bg-page pt-20 px-8 md:px-16">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <p className="text-center text-zinc-500">
+            {loading ? "Loading data..." : "Post not found"}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
