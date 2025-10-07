@@ -22,7 +22,6 @@ import {
 import { CreatePostDto, PostDto, UpdatePostDto } from './dto/post.dto';
 import { Post as PostEntity } from './entities/post.entity';
 import { ForumService } from './forum.service';
-import { AuthOptionalGuard } from 'src/auth/guards/authoptional.guard';
 
 @ApiTags('forum')
 @Controller('forum')
@@ -45,6 +44,7 @@ export class ForumController {
   @Get('posts')
   @ApiOperation({ summary: 'Get all forum posts' })
   @ApiOkResponse({ type: [PostDto] })
+  @UseGuards(AuthGuard)
   findAllPosts(): Promise<PostDto[]> {
     return this.forumService.findAllPosts();
   }
@@ -52,6 +52,7 @@ export class ForumController {
   @Get('posts/action/:actionId')
   @ApiOperation({ summary: 'Get posts for a specific action' })
   @ApiOkResponse({ type: [PostDto] })
+  @UseGuards(AuthGuard)
   async findPostsByAction(
     @Param('actionId') actionId: string,
   ): Promise<PostDto[]> {
@@ -63,7 +64,7 @@ export class ForumController {
   @Get('posts/:id')
   @ApiOperation({ summary: 'Get a specific post with its comments' })
   @ApiOkResponse({ type: PostDto })
-  @UseGuards(AuthOptionalGuard)
+  @UseGuards(AuthGuard)
   async findOnePost(
     @Param('id') id: string,
     @Request() req: JwtRequest,

@@ -205,8 +205,16 @@ const authOnlyRoutes = [
   "profile",
   "onboarding",
   "members",
-  "forum/edit",
 ];
+
+export function isAuthOnly(path: string) {
+  if (authOnlyRoutes.includes(path)) {
+    return true;
+  }
+  if (path.includes("/forum")) {
+    return true;
+  }
+}
 
 export default function AppLayout() {
   const { isAuthenticated, loading, logout } = useAuth();
@@ -251,10 +259,15 @@ export default function AppLayout() {
 
     const handleUnauthorized = () => {
       console.log("handleUnauthorized", window.location.pathname);
+      console.log("isNavigating", isNavigating);
+      console.log(
+        "authOnlyRoutes.includes(window.location.pathname)",
+        authOnlyRoutes.includes(window.location.pathname)
+      );
       if (
         !window.location.pathname.includes("/login") &&
         !isNavigating &&
-        (authOnlyRoutes.includes(window.location.pathname) || wasLoggedIn)
+        (isAuthOnly(window.location.pathname) || wasLoggedIn)
       ) {
         console.log("unauthorized, logging out");
         logout();
