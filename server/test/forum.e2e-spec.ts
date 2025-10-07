@@ -110,6 +110,7 @@ describe('Forum (e2e)', () => {
 
       const response = await request(ctx.app.getHttpServer())
         .get('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -133,6 +134,7 @@ describe('Forum (e2e)', () => {
 
       const response = await request(ctx.app.getHttpServer())
         .get(`/forum/posts/action/${testAction.id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -145,6 +147,7 @@ describe('Forum (e2e)', () => {
 
       const postsResponse = await request(ctx.app.getHttpServer())
         .get('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
         .expect(200);
 
       expect(postsResponse.body.length).toBeGreaterThanOrEqual(1);
@@ -154,6 +157,7 @@ describe('Forum (e2e)', () => {
       // Then get specific post
       const response = await request(ctx.app.getHttpServer())
         .get(`/forum/posts/${postId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
         .expect(200);
 
       expect(response.body.id).toBe(postId);
@@ -226,6 +230,7 @@ describe('Forum (e2e)', () => {
       // Verify the post is deleted
       await request(ctx.app.getHttpServer())
         .get(`/forum/posts/${postId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
         .expect(404);
     });
   });
@@ -489,6 +494,7 @@ describe('Forum (e2e)', () => {
 
       const postResponse = await request(ctx.app.getHttpServer())
         .get(`/forum/posts/${testPostId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
         .expect(200);
 
       expect(postResponse.body.commentCount).toBeDefined();
