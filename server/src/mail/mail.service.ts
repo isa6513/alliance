@@ -213,10 +213,10 @@ export class MailService {
   getSubject(context: ActionEventNotificationContext): string {
     if (context.type === ActionEventNotifType.Announcement) {
       if (context.event.newStatus === ActionStatus.GatheringCommitments) {
-        return 'New Action: ' + context.action.name;
+        return 'New action: ' + context.action.name;
       }
       if (context.event.newStatus === ActionStatus.MemberAction) {
-        return 'Ready to complete: ' + context.action.name;
+        return 'Action needs completion: ' + context.action.name;
       }
     } else if (context.type === ActionEventNotifType.ThreeDayReminder) {
       if (context.event.newStatus === ActionStatus.GatheringCommitments) {

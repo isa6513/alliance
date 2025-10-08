@@ -6,6 +6,8 @@ html(lang="en")
     title Action needs your completion
 
   body
-      p #{actionName} is awaiting your completion. You have #{daysleft} left to complete it.
-      p Please do so at the link below:
-      p #{url}
+      p An action needs your completion: "#{actionName}."
+
+      p You have #{daysleft} left to complete it.
+      
+      p #[strong Please complete the action at this link: #{url}]

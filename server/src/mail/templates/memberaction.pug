@@ -6,11 +6,10 @@ html(lang="en")
     title Action needs your completion
 
   body
-      h3 #{actionName} needs your completion
       p Hi #{name},
       case commitmentless
         when true
-          p "#{actionName}" is ready for member action.
+          p A new action is ready for you to complete: "#{actionName}."
         when false
           p You previously committed to "#{actionName}."
 
@@ -19,5 +18,5 @@ html(lang="en")
           p You have #{daysleft} to complete it before the deadline.
         when false
           - break
-      
-      p Please complete the action at this link: #{url}
+
+      p #[strong Please complete the action at this link: #{url}]
