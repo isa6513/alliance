@@ -1,13 +1,11 @@
 import {
   ActionDto,
-  actionsCanParticipate,
   actionsFindOne,
   actionsMyStatus,
   UserActionRelation,
 } from "@alliance/shared/client";
 import { useEffect, useMemo, useState } from "react";
 import {
-  data,
   Outlet,
   useLoaderData,
   useParams,
@@ -23,9 +21,15 @@ import { testActions } from "../../stories/testData";
 import useActivities, { ActivityList } from "./useActivities";
 import { useCIDFromParams } from "../../lib/utils";
 
-export async function loader({
+// export async function loader({
+//   params,
+// }: Route.LoaderArgs): Promise<ActionDto | null> {
+//   return action.data ?? null;
+// }
+
+export async function clientLoader({
   params,
-}: Route.LoaderArgs): Promise<ActionDto | null> {
+}: Route.ClientLoaderArgs): Promise<ActionDto | null> {
   if (!params.id || isNaN(parseInt(params.id))) {
     return null;
   }
@@ -34,40 +38,6 @@ export async function loader({
   });
 
   return action.data ?? null;
-}
-
-export async function clientLoader({
-  params,
-  serverLoader,
-}: Route.ClientLoaderArgs): Promise<ActionDto | undefined> {
-  const canParticipate = await actionsCanParticipate({
-    path: { id: parseInt(params.id) },
-  });
-
-  const serverData = await serverLoader();
-  if (serverData) {
-    return {
-      ...serverData,
-      canParticipate: canParticipate.data?.canParticipate ?? false,
-    };
-  }
-
-  if (!params.id || isNaN(parseInt(params.id))) {
-    return undefined;
-  }
-  const action = await actionsFindOne({
-    path: { id: parseInt(params.id) },
-  });
-
-  console.log(params);
-  if (!action.data) {
-    throw data("Record Not Found", { status: 404 });
-  }
-
-  return {
-    ...action.data,
-    canParticipate: canParticipate.data?.canParticipate ?? false,
-  };
 }
 clientLoader.hydrate = true as const; // (3)
 
@@ -87,7 +57,7 @@ export default function ActionPage() {
 
   useWhiteBackground();
 
-  const loaderData = useLoaderData<typeof loader>();
+  const loaderData = useLoaderData<typeof clientLoader>();
 
   const action = useMemo(() => {
     if (import.meta.env.STORYBOOK) {
@@ -167,6 +137,8 @@ export default function ActionPage() {
 }
 
 export function useActionLoaderData() {
-  const action = useRouteLoaderData<typeof loader>("pages/app/ActionPage"); //TODO: why is this based on file path
+  const action = useRouteLoaderData<typeof clientLoader>(
+    "pages/app/ActionPage"
+  ); //TODO: why is this based on file path
   return action;
 }

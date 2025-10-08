@@ -30,6 +30,7 @@ const BugReportButton = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the issue..."
+              className="focus:outline-none"
             />
             <div className="flex justify-between">
               <p

@@ -183,10 +183,13 @@ export class ActionsService {
       relations: ['events', 'activities', 'participatingGroups'],
     });
 
+    console.log('checking canseeaction:', action?.id, userId, serverSide);
+
     if (
       !action ||
       !((await this.userCanSeeAction(action.id, userId)) || serverSide)
     ) {
+      console.log('cannot see action');
       throw new NotFoundException('Action not found');
     }
     return instanceToPlain(action) as Action;
