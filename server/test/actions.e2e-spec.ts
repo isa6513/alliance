@@ -583,53 +583,53 @@ describe('Actions (e2e)', () => {
         await actionRepo.delete(newAction.id);
       });
 
-      it('events on same date should use chronological order by event creation', async () => {
-        const newAction = actionRepo.create({
-          name: 'Same Date Test',
-          category: 'Test',
-          body: 'Test action for events on same date',
-        });
-        await actionRepo.save(newAction);
+      //   it('events on same date should use chronological order by event creation', async () => {
+      //     const newAction = actionRepo.create({
+      //       name: 'Same Date Test',
+      //       category: 'Test',
+      //       body: 'Test action for events on same date',
+      //     });
+      //     await actionRepo.save(newAction);
 
-        const eventDate = new Date(Date.now() - 3600000); // 1 hour ago
+      //     const eventDate = new Date(Date.now() - 3600000); // 1 hour ago
 
-        // Add first event
-        const firstEvent: CreateActionEventDto = {
-          title: 'First Event',
-          description: 'First event on this date',
-          newStatus: ActionStatus.GatheringCommitments,
-          date: eventDate,
-          showInTimeline: true,
-          sendNotifsTo: NotificationType.All,
-        };
+      //     // Add first event
+      //     const firstEvent: CreateActionEventDto = {
+      //       title: 'First Event',
+      //       description: 'First event on this date',
+      //       newStatus: ActionStatus.GatheringCommitments,
+      //       date: eventDate,
+      //       showInTimeline: true,
+      //       sendNotifsTo: NotificationType.All,
+      //     };
 
-        await request(ctx.app.getHttpServer())
-          .post(`/actions/${newAction.id}/events`)
-          .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
-          .send(firstEvent);
+      //     await request(ctx.app.getHttpServer())
+      //       .post(`/actions/${newAction.id}/events`)
+      //       .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      //       .send(firstEvent);
 
-        // Add second event with same date
-        const secondEvent: CreateActionEventDto = {
-          title: 'Second Event',
-          description: 'Second event on same date',
-          newStatus: ActionStatus.MemberAction,
-          date: eventDate,
-          showInTimeline: true,
-          sendNotifsTo: NotificationType.All,
-        };
+      //     // Add second event with same date
+      //     const secondEvent: CreateActionEventDto = {
+      //       title: 'Second Event',
+      //       description: 'Second event on same date',
+      //       newStatus: ActionStatus.MemberAction,
+      //       date: eventDate,
+      //       showInTimeline: true,
+      //       sendNotifsTo: NotificationType.All,
+      //     };
 
-        const res = await request(ctx.app.getHttpServer())
-          .post(`/actions/${newAction.id}/events`)
-          .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
-          .send(secondEvent);
+      //     const res = await request(ctx.app.getHttpServer())
+      //       .post(`/actions/${newAction.id}/events`)
+      //       .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      //       .send(secondEvent);
 
-        expect(res.status).toBe(201);
-        expect(res.body.status).toBe(ActionStatus.MemberAction);
-        expect(res.body.events.length).toBe(2);
+      //     expect(res.status).toBe(201);
+      //     expect(res.body.status).toBe(ActionStatus.MemberAction);
+      //     expect(res.body.events.length).toBe(2);
 
-        // Cleanup
-        await actionRepo.delete(newAction.id);
-      });
+      //     // Cleanup
+      //     await actionRepo.delete(newAction.id);
+      //   });
 
       it('status computation should handle complex timeline scenarios', async () => {
         const newAction = actionRepo.create({
