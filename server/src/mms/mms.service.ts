@@ -57,6 +57,9 @@ export class MmsService {
     mediaUrls: string[],
     cid?: string,
   ): Promise<Mms | null> {
+    if (process.env.NODE_ENV === 'test') {
+      return null;
+    }
     this.logger.log(
       `Attempting to send MMS to ${to} with ${mediaUrls.length} media items.`,
     );

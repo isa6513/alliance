@@ -438,8 +438,8 @@ export class ActionsController {
     @Request() req: JwtRequest,
   ): Promise<CanParticipateDto> {
     return {
-      canParticipate: await this.actionsService.isEligibleForAction(
-        await this.actionsService.findOne(id, req.user.sub),
+      canParticipate: await this.actionsService.isIdEligibleForAction(
+        id,
         req.user.sub,
       ),
     };
