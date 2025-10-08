@@ -111,9 +111,9 @@ const ActionProgressBar: React.FC<ActionProgressBarProps> = ({
     const percentage =
       usersJoined > 0 ? (usersCompleted / usersJoined) * 100 : 0;
     const statusColors = {
-      member_action: "bg-purple-500",
-      office_action: "bg-orange-500",
-      resolution: "bg-indigo-500",
+      member_action: "bg-green",
+      office_action: "bg-green",
+      resolution: "bg-green",
     } as const;
 
     return (

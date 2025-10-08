@@ -5,6 +5,7 @@ import {
   actionsCreate,
   actionsFindAllWithDrafts,
   actionsSetTestRelations,
+  userList,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
@@ -20,6 +21,7 @@ const ActionsList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showPopulateConfirm, setShowPopulateConfirm] = useState(false);
   const [isPopulating, setIsPopulating] = useState(false);
+  const [totalUsers, setTotalUsers] = useState<number>(0);
   const navigate = useNavigate();
 
   const loadActions = useCallback(async () => {
@@ -38,6 +40,7 @@ const ActionsList: React.FC = () => {
 
   useEffect(() => {
     loadActions();
+    userList().then((res) => setTotalUsers(res.data?.length ?? 0));
   }, [loadActions]);
 
   const handleEditAction = useCallback(
@@ -179,7 +182,9 @@ const ActionsList: React.FC = () => {
 
                 <ActionProgressBar
                   status={action.status}
-                  usersJoined={action.usersJoined}
+                  usersJoined={
+                    action.commitmentless ? totalUsers : action.usersJoined
+                  }
                   usersCompleted={action.usersCompleted}
                   commitmentThreshold={action.commitmentThreshold}
                   actionType={action.type}
