@@ -2,10 +2,7 @@ import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
-import {
-  ActionEventNotificationContext,
-  ReminderKind,
-} from 'src/notifs/action-event-notif.worker';
+import { ActionEventNotificationContext } from 'src/notifs/action-event-notif.worker';
 import { ActionEventNotifType } from 'src/notifs/entities/action-event-notif.entity';
 import { actionUrl, withCid } from 'src/search/approutes';
 import { Repository } from 'typeorm';
@@ -157,66 +154,6 @@ export class MailService {
     );
   }
 
-  public async sendMemberActionEmail(
-    email: string,
-    name: string,
-    actionName: string,
-    url: string,
-  ): Promise<Mail> {
-    return this.sendMail(
-      email,
-      EmailType.MemberAction,
-      'Ready to complete: ' + actionName,
-      {
-        name,
-        actionName,
-        url,
-      },
-    );
-  }
-
-  public async sendCommitmentReminderEmail(
-    email: string,
-    name: string,
-    actionName: string,
-    url: string,
-    kind: ReminderKind,
-  ): Promise<Mail> {
-    return this.sendMail(
-      email,
-      EmailType.CommitmentReminder,
-      `${kind === '3dayreminder' ? '3 day' : '1 day'} left to commit to: ` +
-        actionName,
-      {
-        name,
-        actionName,
-        url,
-        daysleft: kind === '3dayreminder' ? '3 days' : '1 day',
-      },
-    );
-  }
-
-  public async sendMemberActionReminderEmail(
-    email: string,
-    name: string,
-    actionName: string,
-    url: string,
-    kind: ReminderKind,
-  ): Promise<Mail> {
-    return this.sendMail(
-      email,
-      EmailType.MemberActionReminder,
-      `${kind === '3dayreminder' ? '3 day' : '1 day'} left to complete: ` +
-        actionName,
-      {
-        name,
-        actionName,
-        url,
-        daysleft: kind === '3dayreminder' ? '3 days' : '1 day',
-      },
-    );
-  }
-
   public async sendMissedDeadlineEmail(
     email: string,
     name: string,
@@ -327,6 +264,7 @@ export class MailService {
         name: context.user.name,
         actionName: context.action.name,
         url: withCid(actionUrl(context.action.id, true), context.cid),
+        commitmentless: context.action.commitmentless,
         daysleft:
           context.type === ActionEventNotifType.ThreeDayReminder
             ? '3 days'

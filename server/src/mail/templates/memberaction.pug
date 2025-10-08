@@ -8,6 +8,11 @@ html(lang="en")
   body
       h3 #{actionName} needs your completion
       p Hi #{name},
-      p You previously committed to "#{actionName}."
+      case commitmentless
+        when true
+          p "#{actionName}" is ready for member action.
+        when false
+          p You previously committed to "#{actionName}."
+      
       p Please complete the action at this link:
       p #{url}
