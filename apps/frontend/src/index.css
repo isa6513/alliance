@@ -122,6 +122,10 @@
   font-synthesis: none !important;
 }
 
+:root {
+  --nav-height: 55px;
+}
+
 html {
   overflow-x: hidden;
   font-size: 15px;

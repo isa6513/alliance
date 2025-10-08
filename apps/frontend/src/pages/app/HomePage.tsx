@@ -77,10 +77,10 @@ const HomePage = () => {
     }, 0);
 
     return (
-      <div className="flex flex-col gap-y-2 border-zinc-200 w-full sm:w-xl lg:w-2xl">
+      <div className="flex flex-col gap-y-2 border-zinc-200 w-full items-center">
         <div
           className={
-            "md:min-h-[calc(100vh-var(--nav-height))] pb-12 flex flex-col items-center"
+            "md:min-h-[calc(100vh-var(--nav-height))] pb-12 flex flex-col items-center w-xl lg:w-2xl max-w-full"
           }
         >
           <div className="mb-8">
@@ -120,7 +120,7 @@ const HomePage = () => {
             0 ||
           committedActions.length > 0 ||
           commitmentsReachedActions.length > 0) && (
-          <div className="pb-20 flex flex-col items-center ">
+          <div className="pb-20 flex flex-col items-center w-xl lg:w-2xl max-w-full">
             <p className="mb-8 font-serif font-semibold text-3xl text-center">
               Up next
             </p>
@@ -222,8 +222,8 @@ const HomePage = () => {
     <div className={`flex flex-col w-full items-center bg-white`}>
       <div className="flex flex-row w-full justify-between">
         <div
-          className="flex flex-col gap-y-5 !overflow-y-scroll flex-1 items-center px-3 sm:px-5"
-          style={{ height: `calc(100vh - 95px)` }}
+          className="flex flex-col gap-y-5 overflow-y-auto flex-1 items-center px-3 sm:px-5 relative overflow-x-hidden"
+          style={{ height: `calc(100dvh - var(--nav-height) - 2px)` }}
         >
           {mainContent()}
         </div>
