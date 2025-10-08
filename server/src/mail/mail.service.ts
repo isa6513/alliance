@@ -7,6 +7,7 @@ import { ActionEventNotifType } from 'src/notifs/entities/action-event-notif.ent
 import { actionUrl, withCid } from 'src/search/approutes';
 import { Repository } from 'typeorm';
 import { EmailStatus, EmailType, Mail } from './mail.entity';
+import { getDaysFromDeadline } from 'src/notifs/textnotifcontents';
 
 @Injectable()
 export class MailService {
@@ -59,7 +60,7 @@ export class MailService {
 
     const e = await this.mailerService.sendMail({
       to: recipient,
-      from: 'no-reply@worldalliance.org',
+      from: 'Alliance <alliance@worldalliance.org>',
       subject: subject ?? undefined,
       headers: {
         'o:tag': emailType,
@@ -254,23 +255,33 @@ export class MailService {
       'url',
       withCid(actionUrl(context.action.id, true), context.cid),
     );
-    console.log('cid', context.cid);
+
+    const hasDeadline = context.deadlineEvent !== undefined;
+    let announcementDaysLeft = '';
+    if (context.deadlineEvent) {
+      announcementDaysLeft = getDaysFromDeadline(context.deadlineEvent);
+    }
+
+    const emailContext = {
+      name: context.user.name,
+      actionName: context.action.name,
+      url: withCid(actionUrl(context.action.id, true), context.cid),
+      commitmentless: context.action.commitmentless,
+      hasDeadline,
+      daysleft:
+        context.type === ActionEventNotifType.Announcement && hasDeadline
+          ? announcementDaysLeft
+          : context.type === ActionEventNotifType.ThreeDayReminder
+            ? '3 days'
+            : '1 day',
+      cid: context.cid,
+    };
 
     return this.sendMail(
       context.user.email,
       emailType,
       subject,
-      {
-        name: context.user.name,
-        actionName: context.action.name,
-        url: withCid(actionUrl(context.action.id, true), context.cid),
-        commitmentless: context.action.commitmentless,
-        daysleft:
-          context.type === ActionEventNotifType.ThreeDayReminder
-            ? '3 days'
-            : '1 day',
-        cid: context.cid,
-      },
+      emailContext,
       context.cid,
     );
   }

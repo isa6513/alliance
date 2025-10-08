@@ -35,7 +35,7 @@ export const ANNOUNCEMENT_SUPPORTED_STATUSES: ActionStatus[] = [
 
 export const NOTIFICATION_LOOKBACK_WINDOW_MS = 24 * 60 * 60 * 1000;
 
-const POST_MEMBER_ACTION_STATUSES = new Set<ActionStatus>([
+export const POST_MEMBER_ACTION_STATUSES = new Set<ActionStatus>([
   ActionStatus.OfficeAction,
   ActionStatus.Resolution,
   ActionStatus.Completed,
@@ -205,7 +205,9 @@ export class ActionEventReminderService {
   }
 
   async evaluateDueNotifications(now: Date) {
-    const windowStart = new Date(now.getTime() - NOTIFICATION_LOOKBACK_WINDOW_MS);
+    const windowStart = new Date(
+      now.getTime() - NOTIFICATION_LOOKBACK_WINDOW_MS,
+    );
     return this.evaluateNotifications(windowStart, now, false);
   }
 

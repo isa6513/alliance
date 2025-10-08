@@ -13,6 +13,11 @@ html(lang="en")
           p "#{actionName}" is ready for member action.
         when false
           p You previously committed to "#{actionName}."
+
+      case hasDeadline
+        when true
+          p You have #{daysleft} to complete it before the deadline.
+        when false
+          - break
       
-      p Please complete the action at this link:
-      p #{url}
+      p Please complete the action at this link: #{url}

@@ -7,7 +7,7 @@ import { MailService } from 'src/mail/mail.service';
 import { Mms } from 'src/mms/mms.entity';
 import { MmsService } from 'src/mms/mms.service';
 import { User } from 'src/user/entities/user.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, MoreThan, Repository } from 'typeorm';
 import {
   ActionEvent,
   ActionStatus,
@@ -25,6 +25,7 @@ import {
   ANNOUNCEMENT_SUPPORTED_STATUSES,
   MissedDeadlineCandidate,
   NOTIFICATION_LOOKBACK_WINDOW_MS,
+  POST_MEMBER_ACTION_STATUSES,
 } from './action-event-reminder.service';
 import { ActionEventRecipientService } from './action-event-recipient.service';
 import { NotificationChannel } from './notif-utils';
@@ -42,6 +43,7 @@ export type ReminderKind =
 
 export interface ActionEventNotificationContext {
   event: ActionEvent;
+  deadlineEvent?: ActionEvent;
   type: ActionEventNotifType;
   user: User;
   action: Action;
@@ -140,10 +142,21 @@ export class ActionEventNotifWorker {
           action,
         };
 
+      const deadlineEvent =
+        (await manager.getRepository(ActionEvent).findOne({
+          where: {
+            action: { id: action.id },
+            date: MoreThan(event.date),
+            newStatus: In(Array.from(POST_MEMBER_ACTION_STATUSES)),
+          },
+          order: { date: 'ASC' },
+        })) ?? undefined;
+
       for (const user of users) {
         const context: ActionEventNotificationContext = {
           ...baseContext,
           user,
+          deadlineEvent,
           cid: await generateCIDForNotif(),
         };
         const notif = new ActionEventNotif();
