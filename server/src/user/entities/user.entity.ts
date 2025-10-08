@@ -70,6 +70,10 @@ export class User {
   @ApiProperty()
   phoneNumberValidated: boolean;
 
+  @Column({ type: 'timestamp', nullable: true })
+  @ApiPropertyOptional()
+  sentTextOptInMessageAt?: Date;
+
   @Column({ default: false })
   @ApiProperty()
   emailVerified: boolean;

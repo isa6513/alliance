@@ -123,7 +123,14 @@ export class TasksService {
         user.phoneNumberValidated = true;
         user.phoneNumber = parsedNumber.number;
 
-        await this.mmsService.sendMms(parsedNumber.number, welcomeMessage, []);
+        if (!user.sentTextOptInMessageAt) {
+          await this.mmsService.sendMms(
+            parsedNumber.number,
+            welcomeMessage,
+            [],
+          );
+          user.sentTextOptInMessageAt = new Date(); //TODO: check if sent successfully?
+        }
       } else {
         this.logger.warn(`Parsed an invalid phone number: ${phoneNumber}`);
         user.phoneNumber = phoneNumber;
