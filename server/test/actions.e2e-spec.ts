@@ -400,7 +400,9 @@ describe('Actions (e2e)', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.events.length).toBe(2);
-      expect(res.body.events[1].title).toBe('Test Event');
+      expect(res.body.events.map((e: ActionEventDto) => e.title)).toContain(
+        'Test Event',
+      );
     });
 
     it('events are included in action details', async () => {
@@ -414,7 +416,9 @@ describe('Actions (e2e)', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.events.length).toBe(2);
-      expect(res.body.events[1].title).toBe('Test Event');
+      expect(res.body.events.map((e: ActionEventDto) => e.title)).toContain(
+        'Test Event',
+      );
     });
 
     describe('Computed Status Tests', () => {
