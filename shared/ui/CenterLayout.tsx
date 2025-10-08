@@ -10,9 +10,12 @@ const CenterLayout: React.FC<CenterLayoutProps> = ({
 }) => {
   return (
     <div
-      className={`flex flex-col ${width === "4xl" ? "max-w-4xl" : "max-w-3xl"} mx-auto px-3 pt-3 md:pt-12 ${className}`}
+      className={`flex flex-col ${
+        width === "4xl" ? "max-w-4xl" : "max-w-3xl"
+      } mx-auto px-3 pt-3 md:pt-12 ${className}`}
     >
       {children}
+      <div className="h-15 block md:h-5"></div>
     </div>
   );
 };

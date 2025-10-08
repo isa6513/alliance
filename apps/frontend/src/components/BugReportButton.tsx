@@ -60,8 +60,6 @@ const BugReportButton = () => {
           </Button>
         )}
       </div>
-      {/* extra scroll space on mobile */}
-      <div className="h-15 block md:hidden"></div>
     </>
   );
 };

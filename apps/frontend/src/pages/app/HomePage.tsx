@@ -120,7 +120,7 @@ const HomePage = () => {
             0 ||
           committedActions.length > 0 ||
           commitmentsReachedActions.length > 0) && (
-          <div className="pb-54 flex flex-col items-center ">
+          <div className="pb-20 flex flex-col items-center ">
             <p className="mb-8 font-serif font-semibold text-3xl text-center">
               Up next
             </p>
@@ -221,11 +221,14 @@ const HomePage = () => {
   return (
     <div className={`flex flex-col w-full items-center bg-white`}>
       <div className="flex flex-row w-full justify-between">
-        <div className="flex flex-col gap-y-5 overflow-y-auto !overflow-visible flex-1 items-center px-3 sm:px-5">
+        <div
+          className="flex flex-col gap-y-5 !overflow-y-scroll flex-1 items-center px-3 sm:px-5"
+          style={{ height: `calc(100vh - 95px)` }}
+        >
           {mainContent()}
         </div>
         <div
-          className={`hidden border-l pl-6 pr-10 border-zinc-200 md:flex flex-col py-2 gap-y-5 sticky top-[var(--nav-height)] min-h-[calc(100vh-var(--nav-height))] h-fit items-stretch w-[380px]`}
+          className={`hidden border-l pl-6 pr-10 border-zinc-200 md:flex flex-col py-2 gap-y-5 sticky top-[var(--nav-height)] h-[calc(100vh-var(--nav-height))]  items-stretch w-[380px] overflow-y-auto`}
         >
           <div className="flex flex-col divide-y *:py-5 *:px-2 divide-zinc-200">
             <div className="flex">{bulletinCard}</div>
@@ -249,7 +252,7 @@ const HomePage = () => {
                 </div>
               )}
             </div>
-            <div>
+            <div className="!overflow-y-auto">
               <div className="flex flex-row justify-between items-center mb-3">
                 <p className="font-semibold text-xl font-serif text-black">
                   Friend activity
@@ -269,7 +272,7 @@ const HomePage = () => {
                     </a>
                   </div>
                 )}
-                {friendActivities.slice(0, 3).map((activity) => (
+                {friendActivities.slice(0, 2).map((activity) => (
                   <ActionActivityFeedItem
                     key={activity.id}
                     activity={activity}
