@@ -151,7 +151,7 @@ const UserCard = ({
             }
             size="large"
           />
-          <Link to={`/user/${user.id}`} className="text-base">
+          <Link to={`/member/${user.id}`} className="text-base">
             {user.name}
           </Link>
         </div>

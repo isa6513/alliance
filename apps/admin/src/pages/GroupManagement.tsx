@@ -163,8 +163,8 @@ const GroupManagement: React.FC = () => {
       <div className="w-full max-w-4xl flex flex-col gap-3">
         <div className="w-full flex flex-row items-center justify-between mb-4">
           <h2 className="text-2xl font-semibold">Group management</h2>
-          <Link to="/users" className="text-sm text-blue-600 hover:underline">
-            Back to users
+          <Link to="/members" className="text-sm text-blue-600 hover:underline">
+            Back to members
           </Link>
         </div>
         {loading ? (

@@ -80,7 +80,7 @@ const HomePage = () => {
       <div className="flex flex-col gap-y-2 border-zinc-200 w-full items-center">
         <div
           className={
-            "md:min-h-[calc(100vh-var(--nav-height))] pb-12 flex flex-col items-center w-xl lg:w-2xl max-w-full"
+            "md:min-h-[calc(100vh-var(--nav-height) - 2px)] pb-12 flex flex-col items-center w-xl lg:w-2xl max-w-full"
           }
         >
           <div className="mb-8">

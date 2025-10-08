@@ -65,10 +65,10 @@ const Sidebar: React.FC = () => {
               Actions
             </Link>
             <Link
-              to="/users"
+              to="/members"
               className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm"
             >
-              Users
+              Members
             </Link>
             <Link
               to="/forms"

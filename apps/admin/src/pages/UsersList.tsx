@@ -301,7 +301,7 @@ const UsersList: React.FC = () => {
         </div>
         <div className="flex items-center gap-3">
           <Link
-            to="/users/groups"
+            to="/members/groups"
             className="text-sm text-blue-600 hover:underline"
           >
             Manage groups
