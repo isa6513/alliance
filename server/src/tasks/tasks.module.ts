@@ -8,6 +8,7 @@ import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
 import { ForumModule } from 'src/forum/forum.module';
 import { ActionsModule } from 'src/actions/actions.module';
+import { MmsModule } from 'src/mms/mms.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ActionsModule } from 'src/actions/actions.module';
     UserModule,
     ForumModule,
     ActionsModule,
+    MmsModule,
   ],
   controllers: [TasksController],
   providers: [TasksService],

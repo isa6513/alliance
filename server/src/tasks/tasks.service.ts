@@ -25,6 +25,8 @@ import {
 } from './customvalidator.dto';
 import { ForumService } from 'src/forum/forum.service';
 import { ActionsService } from 'src/actions/actions.service';
+import { MmsService } from 'src/mms/mms.service';
+import { welcomeMessage } from 'src/notifs/textnotifcontents';
 
 @Injectable()
 export class TasksService {
@@ -39,6 +41,7 @@ export class TasksService {
     private userService: UserService,
     private forumService: ForumService,
     private actionsService: ActionsService,
+    private mmsService: MmsService,
   ) {}
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
@@ -119,6 +122,8 @@ export class TasksService {
         this.logger.log(`Valid phone number: ${parsedNumber.number}`);
         user.phoneNumberValidated = true;
         user.phoneNumber = parsedNumber.number;
+
+        await this.mmsService.sendMms(parsedNumber.number, welcomeMessage, []);
       } else {
         this.logger.warn(`Parsed an invalid phone number: ${phoneNumber}`);
         user.phoneNumber = phoneNumber;
