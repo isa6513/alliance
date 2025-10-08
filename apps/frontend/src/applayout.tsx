@@ -24,7 +24,7 @@ import BugReportButton from "./components/BugReportButton";
 import NavbarHorizontal from "./components/NavbarHorizontal";
 import { useAuth } from "./lib/AuthContext";
 import { isFeatureEnabled } from "./lib/config";
-import { canCompleteAction } from "./pages/app/HomePage";
+import { canCompleteAction, canJoinAction } from "./pages/app/HomePage";
 
 export interface RouteMatch {
   data: unknown;
@@ -46,9 +46,10 @@ export interface LoaderData {
 }
 
 export interface ActionLoaderData {
-  actions: ActionWithRelation[];
-  relations?: Map<number, UserActionRelation>;
-  activities?: Map<number, ActivitiesForAction>;
+  actions: ActionWithRelation[] | null;
+  relations: Map<number, UserActionRelation> | null;
+  activities: Map<number, ActivitiesForAction> | null;
+  loading: boolean;
 }
 
 export interface ActivitiesForAction {
@@ -66,11 +67,16 @@ export function clientLoader() {
     actionsFindAll(),
     actionsMyActivity(),
   ]).then(([actions, activities]) => {
-    if (!actions.data) {
-      return null;
+    if (!activities.data || !actions.data) {
+      return {
+        actions: actions.data ?? null,
+        relations: null,
+        activities: null,
+        loading: false,
+      };
     }
 
-    const activityList = activities.data ?? [];
+    const activityList = activities.data;
     const actionToRelationMap = new Map<number, UserActionRelation>();
 
     if (activities.data) {
@@ -140,6 +146,7 @@ export function clientLoader() {
       actions: actionsSortedByDate,
       relations: actionToRelationMap,
       activities: activitiesForAction,
+      loading: false,
     };
   });
 
@@ -163,14 +170,21 @@ export function useAppLoaderData(): LoaderData {
 }
 
 export function useAppActionData(): ActionLoaderData {
-  const [data, setData] = useState<ActionLoaderData | null>(null);
+  const [data, setData] = useState<ActionLoaderData>({
+    actions: null,
+    relations: null,
+    activities: null,
+    loading: true,
+  });
   const appLayoutData = useRouteLoaderData<typeof clientLoader>("applayout");
   appLayoutData?.actionData.then((data) => {
     if (data) {
       setData(data);
+    } else {
+      setRevalidate();
     }
   });
-  return data ?? { actions: [], relations: new Map(), activities: new Map() };
+  return data;
 }
 
 export function usePostsData(): PostDto[] {
@@ -225,15 +239,10 @@ export default function AppLayout() {
 
   actionData.then((data) => {
     if (data) {
-      const todoActions = data.actions.filter((action) =>
-        canCompleteAction(action)
-      );
-      const newActions = data.actions.filter(
-        (action) =>
-          action.relation === "none" &&
-          action.status === "gathering_commitments" &&
-          action.canParticipate
-      );
+      const todoActions =
+        data.actions?.filter((action) => canCompleteAction(action)) ?? [];
+      const newActions =
+        data.actions?.filter((action) => canJoinAction(action)) ?? [];
       setNTasks(todoActions.length + newActions.length);
     }
   });

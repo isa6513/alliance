@@ -99,18 +99,8 @@ export class ActionsService {
         relations: ['events', 'activities', 'participatingGroups'],
       })
       .then((actions) => {
-        return actions.map((action) => this.entityToDto(action));
+        return actions.map((action) => new ActionDto(action));
       });
-  }
-
-  entityToDto(action: Action, canParticipate?: boolean): ActionDto {
-    return {
-      ...action,
-      usersJoined: action.usersJoined,
-      usersCompleted: action.usersCompleted,
-      status: action.status,
-      canParticipate: canParticipate ?? false,
-    };
   }
 
   async findPublic(userId?: number): Promise<ActionDto[]> {
@@ -128,11 +118,12 @@ export class ActionsService {
     const user = userId ? await this.userService.findOne(userId) : null;
 
     return await Promise.all(
-      filtered.map(async (action) =>
-        this.entityToDto(
-          action,
-          user ? await this.isEligibleForAction(action, user.id) : false,
-        ),
+      filtered.map(
+        async (action) =>
+          new ActionDto(
+            action,
+            user ? await this.isEligibleForAction(action, user.id) : false,
+          ),
       ),
     );
   }
@@ -201,7 +192,7 @@ export class ActionsService {
   ): Promise<ActionDto> {
     const action = await this.findOne(id, userId, serverSide);
     const user = userId ? await this.userService.findOne(userId) : null;
-    return this.entityToDto(
+    return new ActionDto(
       action,
       user ? await this.isEligibleForAction(action, user.id) : false,
     );

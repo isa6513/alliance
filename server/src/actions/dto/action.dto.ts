@@ -65,7 +65,7 @@ export class ActionDto extends OmitType(Action, [
   @ApiPropertyOptional()
   canParticipate?: boolean;
 
-  constructor(action: Partial<Action>) {
+  constructor(action: Partial<Action>, canParticipate?: boolean) {
     super();
     Object.assign(this, action);
     this.image = action.image ? getImageSource(action.image) : undefined;
@@ -74,6 +74,7 @@ export class ActionDto extends OmitType(Action, [
     this.status = action.status || ActionStatus.Draft;
     this.events =
       action.events?.map((event) => new ActionEventDto({ ...event })) || [];
+    this.canParticipate = canParticipate ?? false;
   }
 }
 

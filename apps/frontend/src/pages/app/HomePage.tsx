@@ -23,43 +23,169 @@ export function canCompleteAction(action: ActionWithRelation) {
   );
 }
 
+export function canJoinAction(action: ActionWithRelation) {
+  return (
+    action.status === "gathering_commitments" &&
+    action.relation === "none" &&
+    action.canParticipate
+  );
+}
+
 const HomePage = () => {
   const navigate = useNavigate();
   const posts = usePostsData();
-  const { actions, activities } = useAppActionData();
+  const { actions, activities, loading } = useAppActionData();
 
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
   });
 
-  const todoActions = actions.filter((action) => canCompleteAction(action));
-
-  const newActions = actions.filter(
-    (action) =>
-      action.relation === "none" &&
-      action.status === "gathering_commitments" &&
-      action.canParticipate
-  );
-
-  const committedActions = actions.filter(
-    (action) =>
-      action.relation === "joined" &&
-      action.status === "gathering_commitments" &&
-      action.canParticipate
-  );
-
-  const commitmentsReachedActions = actions.filter(
-    (action) =>
-      action.relation === "joined" && action.status === "office_action"
-  );
-
-  const currentTask = newActions[0] || todoActions[0] || null;
-  const remainingTasksEstimatedTime = todoActions.reduce((sum, action) => {
-    if (action.timeEstimate) {
-      return sum + action.timeEstimate;
+  const mainContent = () => {
+    if (actions === null) {
+      if (loading) {
+        return null;
+      } else {
+        return (
+          <div className="absolute top-0 left-0 right-0 md:right-[380px] h-full flex justify-center items-center text-center text-zinc-500 py-5">
+            Error loading actions
+          </div>
+        );
+      }
     }
-    return sum;
-  }, 0);
+
+    const todoActions = actions.filter((action) => canCompleteAction(action));
+    const newActions = actions.filter((action) => canJoinAction(action));
+
+    const committedActions = actions.filter(
+      (action) =>
+        action.relation === "joined" &&
+        action.status === "gathering_commitments" &&
+        action.canParticipate
+    );
+
+    const commitmentsReachedActions = actions.filter(
+      (action) =>
+        action.relation === "joined" && action.status === "office_action"
+    );
+
+    const currentTask = newActions[0] || todoActions[0] || null;
+    const remainingTasksEstimatedTime = todoActions.reduce((sum, action) => {
+      if (action.timeEstimate) {
+        return sum + action.timeEstimate;
+      }
+      return sum;
+    }, 0);
+
+    return (
+      <div className="flex flex-col gap-y-2 border-zinc-200 w-full sm:w-xl lg:w-2xl">
+        <div
+          className={
+            "md:min-h-[calc(100vh-var(--nav-height))] pb-12 flex flex-col items-center"
+          }
+        >
+          <div className="mb-8">
+            <p className="font-serif text-center font-semibold text-3xl mt-12 sm:mt-16 lg:mt-28">
+              Current task
+            </p>
+            {todoActions.length + newActions.length > 0 && (
+              <p className="mt-1 text-zinc-500 text-center px-4">
+                {todoActions.length + newActions.length} left
+                {todoActions.length > 0 &&
+                  ` for a total of ${remainingTasksEstimatedTime} minutes`}
+              </p>
+            )}
+          </div>
+          {currentTask && currentTask.relation ? (
+            <LargeActionCard
+              action={currentTask}
+              userRelation={currentTask.relation as "joined" | "none"}
+              friendActivities={[]}
+              onUpdateActionState={() => navigate(window.location.pathname)}
+            />
+          ) : (
+            <Card style={CardStyle.Transparent} className="w-full">
+              <div className="px-2 py-36 flex flex-col items-center gap-y-4">
+                <CheckIcon size="large" />
+                <p className="text-center text-zinc-500 text-lg">
+                  Nothing to do right now!
+                </p>
+              </div>
+            </Card>
+          )}
+        </div>
+
+        {(todoActions.filter((action) => action.id !== currentTask?.id).length >
+          0 ||
+          newActions.filter((action) => action.id !== currentTask?.id).length >
+            0 ||
+          committedActions.length > 0 ||
+          commitmentsReachedActions.length > 0) && (
+          <div className="pb-54 flex flex-col items-center ">
+            <p className="mb-8 font-serif font-semibold text-3xl text-center">
+              Up next
+            </p>
+            <div className="flex flex-col gap-y-2 w-full">
+              {todoActions
+                .filter((action) => action.id !== currentTask?.id)
+                .map((action) => (
+                  <SmallActionCard
+                    key={action.id}
+                    {...action}
+                    showDescription={true}
+                    friendActivities={friendActivities.filter(
+                      (activity) =>
+                        activity.actionId === action.id &&
+                        activity.type === "user_completed"
+                    )}
+                    joinedCount={action.usersCompleted}
+                    neededCount={action.usersJoined}
+                  />
+                ))}
+              {newActions
+                .filter((action) => action.id !== currentTask?.id)
+                .map((action) => (
+                  <SmallActionCard
+                    key={action.id}
+                    {...action}
+                    showDescription={true}
+                  />
+                ))}
+              {committedActions.map((action) => (
+                <SmallActionCard
+                  key={action.id}
+                  {...action}
+                  joinedCount={action.usersJoined}
+                  neededCount={action.commitmentThreshold}
+                  friendActivities={friendActivities.filter(
+                    (activity) =>
+                      activity.actionId === action.id &&
+                      activity.type === "user_joined"
+                  )}
+                  showDescription={false}
+                  activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
+                />
+              ))}
+              {commitmentsReachedActions.map((action) => (
+                <SmallActionCard
+                  key={action.id}
+                  {...action}
+                  joinedCount={action.usersJoined}
+                  neededCount={action.commitmentThreshold}
+                  friendActivities={friendActivities.filter(
+                    (activity) =>
+                      activity.actionId === action.id &&
+                      activity.type === "user_joined"
+                  )}
+                  showDescription={false}
+                  activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   useWhiteBackground();
 
@@ -96,113 +222,7 @@ const HomePage = () => {
     <div className={`flex flex-col w-full items-center bg-white`}>
       <div className="flex flex-row w-full justify-between">
         <div className="flex flex-col gap-y-5 overflow-y-auto !overflow-visible flex-1 items-center px-3 sm:px-5">
-          <div className="flex flex-col gap-y-2 border-zinc-200 w-full sm:w-xl lg:w-2xl">
-            <div
-              className={
-                "md:min-h-[calc(100vh-var(--nav-height))] pb-12 flex flex-col items-center"
-              }
-            >
-              <div className="mb-8">
-                <p className="font-serif text-center font-semibold text-3xl mt-12 sm:mt-16 lg:mt-28">
-                  Current task
-                </p>
-                {todoActions.length + newActions.length > 0 && (
-                  <p className="mt-1 text-zinc-500 text-center px-4">
-                    {todoActions.length + newActions.length} left
-                    {todoActions.length > 0 &&
-                      ` for a total of ${remainingTasksEstimatedTime} minutes`}
-                  </p>
-                )}
-              </div>
-              {currentTask && currentTask.relation ? (
-                <LargeActionCard
-                  action={currentTask}
-                  userRelation={currentTask.relation as "joined" | "none"}
-                  friendActivities={[]}
-                  onUpdateActionState={() => navigate(window.location.pathname)}
-                />
-              ) : (
-                <Card style={CardStyle.Transparent} className="w-full">
-                  <div className="px-2 py-36 flex flex-col items-center gap-y-4">
-                    <CheckIcon size="large" />
-                    <p className="text-center text-zinc-500 text-lg">
-                      Nothing to do right now!
-                    </p>
-                  </div>
-                </Card>
-              )}
-            </div>
-
-            {(todoActions.filter((action) => action.id !== currentTask?.id)
-              .length > 0 ||
-              newActions.filter((action) => action.id !== currentTask?.id)
-                .length > 0 ||
-              committedActions.length > 0 ||
-              commitmentsReachedActions.length > 0) && (
-              <div className="pb-54 flex flex-col items-center ">
-                <p className="mb-8 font-serif font-semibold text-3xl text-center">
-                  Up next
-                </p>
-                <div className="flex flex-col gap-y-2 w-full">
-                  {todoActions
-                    .filter((action) => action.id !== currentTask?.id)
-                    .map((action) => (
-                      <SmallActionCard
-                        key={action.id}
-                        {...action}
-                        showDescription={true}
-                        friendActivities={friendActivities.filter(
-                          (activity) =>
-                            activity.actionId === action.id &&
-                            activity.type === "user_completed"
-                        )}
-                        joinedCount={action.usersCompleted}
-                        neededCount={action.usersJoined}
-                      />
-                    ))}
-                  {newActions
-                    .filter((action) => action.id !== currentTask?.id)
-                    .map((action) => (
-                      <SmallActionCard
-                        key={action.id}
-                        {...action}
-                        showDescription={true}
-                      />
-                    ))}
-                  {committedActions.map((action) => (
-                    <SmallActionCard
-                      key={action.id}
-                      {...action}
-                      joinedCount={action.usersJoined}
-                      neededCount={action.commitmentThreshold}
-                      friendActivities={friendActivities.filter(
-                        (activity) =>
-                          activity.actionId === action.id &&
-                          activity.type === "user_joined"
-                      )}
-                      showDescription={false}
-                      activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
-                    />
-                  ))}
-                  {commitmentsReachedActions.map((action) => (
-                    <SmallActionCard
-                      key={action.id}
-                      {...action}
-                      joinedCount={action.usersJoined}
-                      neededCount={action.commitmentThreshold}
-                      friendActivities={friendActivities.filter(
-                        (activity) =>
-                          activity.actionId === action.id &&
-                          activity.type === "user_joined"
-                      )}
-                      showDescription={false}
-                      activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          {mainContent()}
         </div>
         <div
           className={`hidden border-l pl-6 pr-10 border-zinc-200 md:flex flex-col py-2 gap-y-5 sticky top-[var(--nav-height)] min-h-[calc(100vh-var(--nav-height))] h-fit items-stretch w-[380px]`}

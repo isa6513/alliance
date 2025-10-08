@@ -41,7 +41,7 @@ const ActionsListPage = () => {
   const modeToActions: Record<FilterMode, ActionWithRelation[]> =
     useMemo(() => {
       return Object.values(FilterMode).reduce((acc, mode) => {
-        acc[mode] = filterActions(actions, mode);
+        acc[mode] = filterActions(actions ?? [], mode);
         return acc;
       }, {} as Record<FilterMode, ActionWithRelation[]>);
     }, [actions]);
