@@ -20,7 +20,7 @@ export class Group {
   @Allow()
   id: number;
 
-  @ManyToMany(() => User, (user) => user.groups)
+  @ManyToMany(() => User, (user) => user.groups, { eager: true })
   @ApiProperty({ type: () => User, isArray: true })
   @Allow()
   @JoinTable()

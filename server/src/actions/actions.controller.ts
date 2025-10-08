@@ -51,7 +51,6 @@ import {
   NotificationScheduleEntryDto,
   NotificationScheduleQueryDto,
 } from './dto/notification-schedule.dto';
-import { ActionStatus } from './entities/action-event.entity';
 
 @Controller('actions')
 export class ActionsController {
@@ -311,19 +310,7 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
   ): Promise<ActionDto | null> {
-    const action = await this.actionsService.findOne(id, req.user?.sub);
-
-    if (!action) {
-      throw new NotFoundException('Action not found');
-    }
-
-    if (action.status === ActionStatus.Draft) {
-      if (!req.user || !(await this.userService.isAdmin(req.user.sub))) {
-        throw new NotFoundException('Action not found');
-      }
-    }
-
-    return new ActionDto(action);
+    return this.actionsService.findOneDto(id, req.user?.sub);
   }
 
   @Post('create')
@@ -451,8 +438,8 @@ export class ActionsController {
     @Request() req: JwtRequest,
   ): Promise<CanParticipateDto> {
     return {
-      canParticipate: await this.actionsService.eligibleForAction(
-        id,
+      canParticipate: await this.actionsService.isEligibleForAction(
+        await this.actionsService.findOne(id, req.user.sub),
         req.user.sub,
       ),
     };

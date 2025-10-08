@@ -45,7 +45,6 @@ import { Action, ActionTaskType } from './entities/action.entity';
 import { Group } from 'src/user/entities/group.entity';
 import { UserDto } from 'src/user/user.dto';
 import { NotificationScheduleEntryDto } from './dto/notification-schedule.dto';
-import { User } from 'src/user/entities/user.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 
 export enum UserActionRelation {
@@ -110,7 +109,7 @@ export class ActionsService {
       usersJoined: action.usersJoined,
       usersCompleted: action.usersCompleted,
       status: action.status,
-      canParticipate,
+      canParticipate: canParticipate ?? false,
     };
   }
 
@@ -130,7 +129,10 @@ export class ActionsService {
 
     return await Promise.all(
       filtered.map(async (action) =>
-        this.entityToDto(action, await this.isEligibleForAction(action, user)),
+        this.entityToDto(
+          action,
+          user ? await this.isEligibleForAction(action, user.id) : false,
+        ),
       ),
     );
   }
@@ -183,16 +185,26 @@ export class ActionsService {
       relations: ['events', 'activities', 'participatingGroups'],
     });
 
-    console.log('checking canseeaction:', action?.id, userId, serverSide);
-
     if (
       !action ||
       !((await this.userCanSeeAction(action.id, userId)) || serverSide)
     ) {
-      console.log('cannot see action');
       throw new NotFoundException('Action not found');
     }
     return instanceToPlain(action) as Action;
+  }
+
+  async findOneDto(
+    id: number,
+    userId?: number,
+    serverSide = false,
+  ): Promise<ActionDto> {
+    const action = await this.findOne(id, userId, serverSide);
+    const user = userId ? await this.userService.findOne(userId) : null;
+    return this.entityToDto(
+      action,
+      user ? await this.isEligibleForAction(action, user.id) : false,
+    );
   }
 
   async getActionRelation(
@@ -503,18 +515,17 @@ export class ActionsService {
     return found;
   }
 
-  async isEligibleForAction(
-    action: Action,
-    user: User | null,
-  ): Promise<boolean> {
-    if (!user) {
-      return false;
-    }
+  async isEligibleForAction(action: Action, userId: number): Promise<boolean> {
     const groups = action.participatingGroups || [];
     if (groups.length === 0) {
       return true;
     }
-    const userGroupIds = new Set((user.groups || []).map((group) => group.id));
+    const userWithGroups = await this.userService.findOneOrFail(userId, [
+      'groups',
+    ]);
+    const userGroupIds = new Set(
+      (userWithGroups.groups || []).map((group) => group.id),
+    );
     const isMember = groups.some((group) => userGroupIds.has(group.id));
     return isMember;
   }
@@ -537,16 +548,6 @@ export class ActionsService {
       throw new ForbiddenException(
         'This action is not available to your groups.',
       );
-    }
-  }
-
-  async eligibleForAction(actionId: number, userId: number): Promise<boolean> {
-    const action = await this.findOne(actionId, userId);
-    try {
-      await this.ensureUserEligibleForAction(action, userId);
-      return true;
-    } catch {
-      return false;
     }
   }
 
