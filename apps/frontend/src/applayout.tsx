@@ -14,7 +14,6 @@ import { Features } from "@alliance/shared/lib/features";
 import { useEffect, useState } from "react";
 import {
   Outlet,
-  ShouldRevalidateFunctionArgs,
   useLoaderData,
   useNavigate,
   useNavigation,
@@ -304,6 +303,6 @@ export function setRevalidate() {
   localStorage.setItem(revalidateKey, "true");
 }
 
-export function shouldRevalidate({}: ShouldRevalidateFunctionArgs) {
-  return true;
-}
+// export function shouldRevalidate({}: ShouldRevalidateFunctionArgs) {
+//   return localStorage.getItem(revalidateKey) === "true";
+// }

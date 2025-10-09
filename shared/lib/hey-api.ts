@@ -1,6 +1,6 @@
-import { authRefreshTokens } from "../client";
-import { CreateClientConfig } from "../client/client.gen";
+import { CreateClientConfig } from "@hey-api/client-fetch";
 import { getApiUrl } from "./config";
+import { authRefreshTokens } from "../client";
 
 export const AuthEvents = {
   onUnauthorized: () => {
@@ -20,7 +20,13 @@ export const createClientConfig: CreateClientConfig = (config) => {
     const req = new Request(input, init);
     const retryReq = req.clone();
 
-    const res = await originalFetch(req);
+    let res: Response;
+
+    try {
+      res = await originalFetch(req);
+    } catch (err) {
+      throw err;
+    }
 
     if (
       res.status !== 401 ||
@@ -31,15 +37,16 @@ export const createClientConfig: CreateClientConfig = (config) => {
       return res;
     }
 
-    const refreshRes = await authRefreshTokens();
-
-    if (refreshRes.response.ok) {
-      const retryRes = await originalFetch(retryReq);
-      if (retryRes.status !== 401) {
-        return retryRes;
-      } else {
-        console.log(retryRes);
+    try {
+      const refreshRes = await authRefreshTokens();
+      if (refreshRes.response.ok) {
+        const retryRes = await originalFetch(retryReq);
+        if (retryRes.status !== 401) {
+          return retryRes;
+        }
       }
+    } catch (err) {
+      throw err;
     }
 
     console.log("onUnauthorized");
@@ -51,7 +58,7 @@ export const createClientConfig: CreateClientConfig = (config) => {
 
   return {
     baseUrl,
-    credentials: "include",
+    credentials: "include" as const,
     fetch: wrappedFetch,
     throwOnError: false,
   };
