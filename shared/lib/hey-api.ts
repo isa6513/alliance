@@ -25,6 +25,7 @@ export const createClientConfig: CreateClientConfig = (config) => {
     try {
       res = await originalFetch(req);
     } catch (err) {
+      console.error("Network error in fetch", err);
       throw err;
     }
 
@@ -46,6 +47,7 @@ export const createClientConfig: CreateClientConfig = (config) => {
         }
       }
     } catch (err) {
+      console.error("Error with refresh / retry", err);
       throw err;
     }
 
