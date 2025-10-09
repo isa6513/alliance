@@ -9,6 +9,7 @@ import FormRenderer, {
 } from "@alliance/shared/forms/FormRenderer";
 import { FormSchema } from "@alliance/shared/forms/formschema";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import posthog from "posthog-js";
 import { useEffect, useState } from "react";
 
 interface ActionTaskPanelActivityProps {
@@ -64,6 +65,13 @@ const ActionTaskPanelForm = ({
           onCompleteAction(false); //tasksSubmitForm handles completion here
         } else {
           console.error(response.error);
+          posthog.captureException(response.error, {
+            event: "form_submit_error",
+            properties: {
+              actionId: actionId,
+              actionSubmitFailure: true,
+            },
+          });
           setError(
             "Failed to submit action. We have been notified of the problem and will take a look. You can also try again later."
           );
