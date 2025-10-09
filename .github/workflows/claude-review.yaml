@@ -52,46 +52,16 @@ jobs:
         id: extract_claude
         run: |
           set -euo pipefail
-          FILE="${{ steps.claude.outputs.execution_file }}"
-          if [ -z "${FILE}" ] || [ ! -s "${FILE}" ]; then
-            echo "No execution_file from Claude; skipping deep summary extraction."
-            echo "needs_review=false" >> "$GITHUB_OUTPUT"
-            echo "summary=" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
 
-          SUMMARY_RAW="$(jq -r '
-            .. | objects
-            | select(.role? == "assistant" and .content?)
-            | .content
-            | if type=="array"
-              then map(select(.type=="text") | .text) | join("\n\n")
-              else tostring
-              end
-          ' "$FILE" | tail -n1)"
+          FILE=/home/runner/work/_temp/claude-execution-output.json
 
-          # If empty, fall back to any text we can find
-          if [ -z "${SUMMARY_RAW}" ]; then
-            SUMMARY_RAW="$(jq -r '.. | strings? | select(length>0) ' "$FILE" | tail -n1)"
-          fi
-
-          # Trim to a safe size for Slack blocks (approx 2800 chars)
-          SUMMARY_TRIMMED="$(printf "%s" "$SUMMARY_RAW" | head -c 2800)"
-
-          # Detect NEEDS_REVIEW
-          if printf "%s" "$SUMMARY_TRIMMED" | grep -q "NEEDS_REVIEW"; then
-            echo "needs_review=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "needs_review=false" >> "$GITHUB_OUTPUT"
-          fi
-
-          # Escape for JSON
-          SUMMARY_JSON_ESCAPED="$(python3 - <<'PY'
-          import json,sys; print(json.dumps(sys.stdin.read()))
-          PY
-          <<<"$SUMMARY_TRIMMED")"
-
-          echo "summary=${SUMMARY_JSON_ESCAPED}" >> "$GITHUB_OUTPUT"
+          jq -r '
+            reverse
+            | map(select(.message.role == "assistant"))
+            | map(.message.content[]? | select(.type == "text"))
+            | .[0].text
+          ' "$FILE" > summary.json
+          echo "summary=$(cat summary.json)" >> "$GITHUB_OUTPUT"
 
       - name: Build Slack payload (fallback)
         id: slack_body
