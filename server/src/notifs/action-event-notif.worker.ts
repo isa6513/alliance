@@ -80,8 +80,6 @@ export class ActionEventNotifWorker {
       now.getTime() - NOTIFICATION_LOOKBACK_WINDOW_MS,
     );
 
-    console.log('evaluating due notifs for', now);
-
     const duePlans = await this.reminderService.evaluateDueNotifications(now);
 
     for (const plan of duePlans) {

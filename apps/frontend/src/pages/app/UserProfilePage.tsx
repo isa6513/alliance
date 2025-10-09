@@ -167,9 +167,9 @@ const UserProfilePage: React.FC = () => {
       userListFriends({
         path: { id: userId },
       }).then((request) => {
+        setLoading(false);
         if (request.data) {
           setFriends(request.data);
-          setLoading(false);
         }
       });
     };
@@ -350,9 +350,7 @@ const UserProfilePage: React.FC = () => {
           )}
           {/* stats row */}
           <div
-            className={`mt-2 flex flex-row gap-x-2 cursor-pointer transition-none ${
-              friends === null ? "opacity-0" : ""
-            }`}
+            className={`mt-2 flex flex-row gap-x-2 cursor-pointer transition-none`}
           >
             <UserProfileTab
               number={completedActions.length}
