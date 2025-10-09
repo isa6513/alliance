@@ -34,7 +34,7 @@ export const ANNOUNCEMENT_SUPPORTED_STATUSES: ActionStatus[] = [
   ActionStatus.MemberAction,
 ];
 
-export const NOTIFICATION_LOOKBACK_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
+export const NOTIFICATION_LOOKBACK_WINDOW_MS = 1 * 24 * 60 * 60 * 1000;
 
 export const POST_MEMBER_ACTION_STATUSES = new Set<ActionStatus>([
   ActionStatus.OfficeAction,
