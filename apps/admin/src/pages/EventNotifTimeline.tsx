@@ -175,16 +175,15 @@ const EventNotifTimeline: React.FC = () => {
                     </div>
                   )}
                   <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-                    <div className="grid gap-3 bg-gray-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500 sm:grid-cols-2 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.9fr)_minmax(0,1.6fr)_minmax(0,0.9fr)_minmax(0,0.7fr)]">
+                    <div className="grid gap-3 bg-gray-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500 sm:grid-cols-2 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.9fr)_minmax(0,1.4fr)_minmax(0,0.8fr)]">
                       <div>Time</div>
                       <div>Type</div>
                       <div>Action</div>
                       <div className="hidden lg:block">
                         Estimated Recipients
                       </div>
-                      <div className="hidden lg:block">Details</div>
                     </div>
-                    <div className="grid gap-4 px-4 py-3 text-sm sm:grid-cols-2 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.9fr)_minmax(0,1.6fr)_minmax(0,0.9fr)_minmax(0,0.7fr)] lg:items-center">
+                    <div className="grid gap-4 px-4 py-3 text-sm sm:grid-cols-2 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.9fr)_minmax(0,1.4fr)_minmax(0,0.8fr)] lg:items-center">
                       <div>
                         <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 lg:hidden">
                           Time
@@ -233,20 +232,6 @@ const EventNotifTimeline: React.FC = () => {
                         <div className="text-gray-900">
                           {entry.estimatedRecipients.toLocaleString()}
                         </div>
-                      </div>
-                      <div className="lg:block">
-                        <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 lg:hidden">
-                          Details
-                        </span>
-                        {entry.metadata?.isSecondMiss ? (
-                          <span className="text-red-600 font-medium">
-                            Second consecutive miss
-                          </span>
-                        ) : entry.type === "misseddeadline" ? (
-                          <span>First missed deadline</span>
-                        ) : (
-                          <span>—</span>
-                        )}
                       </div>
                     </div>
                   </div>

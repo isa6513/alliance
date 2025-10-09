@@ -28,10 +28,11 @@ export class ActionEventRecipientService {
     const restrictToGroups = targetGroupIds.size > 0;
 
     const filterToEligible = (users: User[]): User[] => {
+      const withContract = users.filter((user) => user.contractDateSigned);
       if (!restrictToGroups) {
-        return users;
+        return withContract;
       }
-      return users.filter((user) =>
+      return withContract.filter((user) =>
         (user.groups || []).some((group) => targetGroupIds.has(group.id)),
       );
     };

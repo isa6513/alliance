@@ -37,7 +37,7 @@ export class FormResponse {
   answers: Record<string, any>;
 
   @ApiProperty({ type: () => User })
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @IsDefined()
   @Type(() => User)
   user: User;

@@ -27,10 +27,16 @@ describe('ActionEventRecipientService', () => {
       ...overrides,
     }) as Action;
 
-  const buildUser = (id: number, groupIds: number[] = []): User =>
+  const buildUser = (
+    id: number,
+    groupIds: number[] = [],
+    overrides: Partial<User> = {},
+  ): User =>
     ({
       id,
       groups: groupIds.map((groupId) => ({ id: groupId }) as unknown as Group),
+      contractDateSigned: new Date('2024-01-01T00:00:00Z'),
+      ...overrides,
     }) as unknown as User;
 
   beforeEach(() => {
@@ -110,6 +116,23 @@ describe('ActionEventRecipientService', () => {
 
     expect(userServiceMock.findActiveUsers).toHaveBeenCalledTimes(1);
     expect(result).toEqual(activeUsers);
+  });
+
+  it('omits users without signed contracts for commitmentless actions', async () => {
+    const action = buildAction({ commitmentless: true });
+    const activeUsers = [
+      buildUser(5),
+      buildUser(6, [], { contractDateSigned: null }),
+    ];
+    findMock.mockResolvedValue([]);
+    userServiceMock.findActiveUsers.mockResolvedValue(activeUsers);
+
+    const result = await service.getBaseUsersForEvent(
+      ActionStatus.MemberAction,
+      action,
+    );
+
+    expect(result.map((user) => user.id)).toEqual([5]);
   });
 
   it('returns active grouped users filtered by participating groups for other statuses', async () => {

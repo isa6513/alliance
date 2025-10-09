@@ -133,6 +133,119 @@ describe('ActionEventReminderService', () => {
         isSecondMiss: false,
       });
     });
+
+    it('includes all base recipients for commitmentless actions', async () => {
+      const action = {
+        id: 200,
+        name: 'Commitmentless Action',
+        commitmentless: true,
+        participatingGroups: [],
+      };
+
+      (repositoryMock.find as jest.Mock).mockResolvedValueOnce([
+        {
+          id: 10,
+          action,
+          date: new Date('2024-02-01T12:00:00Z'),
+          newStatus: ActionStatus.MemberAction,
+        } as unknown as ActionEvent,
+        {
+          id: 11,
+          action,
+          date: new Date('2024-02-05T12:00:00Z'),
+          newStatus: ActionStatus.Resolution,
+        } as unknown as ActionEvent,
+      ]);
+
+      activityRepositoryMock.find
+        .mockResolvedValueOnce([
+          {
+            actionId: action.id,
+            userId: 1,
+            type: ActionActivityType.USER_JOINED,
+            createdAt: new Date('2024-01-31T00:00:00Z'),
+          },
+        ])
+        .mockResolvedValueOnce([]);
+
+      recipientServiceMock.getBaseUsersForEvent.mockResolvedValueOnce([
+        {
+          id: 1,
+          contractDateSigned: new Date('2024-01-01T00:00:00Z'),
+        },
+        {
+          id: 2,
+          contractDateSigned: new Date('2024-01-02T00:00:00Z'),
+        },
+      ]);
+
+      const results = await service.findMissedDeadlineCandidates(
+        new Date('2024-02-03T00:00:00Z'),
+        new Date('2024-02-06T00:00:00Z'),
+      );
+
+      expect(recipientServiceMock.getBaseUsersForEvent).toHaveBeenCalledWith(
+        ActionStatus.MemberAction,
+        action,
+      );
+      expect(results).toHaveLength(2);
+      expect(results.map((candidate) => candidate.userId).sort()).toEqual([
+        1, 2,
+      ]);
+    });
+
+    it('skips base recipients without signed contracts for commitmentless actions', async () => {
+      const action = {
+        id: 201,
+        name: 'Commitmentless Action',
+        commitmentless: true,
+        participatingGroups: [],
+      };
+
+      (repositoryMock.find as jest.Mock).mockResolvedValueOnce([
+        {
+          id: 20,
+          action,
+          date: new Date('2024-03-01T12:00:00Z'),
+          newStatus: ActionStatus.MemberAction,
+        } as unknown as ActionEvent,
+        {
+          id: 21,
+          action,
+          date: new Date('2024-03-05T12:00:00Z'),
+          newStatus: ActionStatus.Resolution,
+        } as unknown as ActionEvent,
+      ]);
+
+      activityRepositoryMock.find
+        .mockResolvedValueOnce([
+          {
+            actionId: action.id,
+            userId: 1,
+            type: ActionActivityType.USER_JOINED,
+            createdAt: new Date('2024-02-28T00:00:00Z'),
+          },
+        ])
+        .mockResolvedValueOnce([]);
+
+      recipientServiceMock.getBaseUsersForEvent.mockResolvedValueOnce([
+        {
+          id: 1,
+          contractDateSigned: new Date('2024-01-01T00:00:00Z'),
+        },
+        {
+          id: 3,
+          contractDateSigned: null,
+        },
+      ]);
+
+      const results = await service.findMissedDeadlineCandidates(
+        new Date('2024-03-03T00:00:00Z'),
+        new Date('2024-03-06T00:00:00Z'),
+      );
+
+      expect(results.map((candidate) => candidate.userId)).toEqual([1]);
+    });
   });
 
   describe('evaluateNotifications', () => {

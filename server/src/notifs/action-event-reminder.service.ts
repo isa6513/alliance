@@ -17,6 +17,7 @@ import {
   NotificationScheduleEntryDto,
   NotificationScheduleMetadataDto,
 } from 'src/actions/dto/notification-schedule.dto';
+import { User } from '../user/entities/user.entity';
 
 export interface MissedDeadlineCandidate {
   actionId: number;
@@ -33,7 +34,7 @@ export const ANNOUNCEMENT_SUPPORTED_STATUSES: ActionStatus[] = [
   ActionStatus.MemberAction,
 ];
 
-export const NOTIFICATION_LOOKBACK_WINDOW_MS = 24 * 60 * 60 * 1000;
+export const NOTIFICATION_LOOKBACK_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
 
 export const POST_MEMBER_ACTION_STATUSES = new Set<ActionStatus>([
   ActionStatus.OfficeAction,
@@ -372,7 +373,7 @@ export class ActionEventReminderService {
   ): Promise<MissedDeadlineCandidate[]> {
     const rows = await this.eventRepository.find({
       where: { date: LessThanOrEqual(windowEnd) },
-      relations: ['action'],
+      relations: ['action', 'action.participatingGroups'],
       order: { action: { id: 'ASC' }, date: 'ASC' },
     });
 
@@ -453,14 +454,49 @@ export class ActionEventReminderService {
 
     const raw: Array<MissedDeadlineCandidate & { _timelineDate: Date }> = [];
 
-    for (const [actionId, context] of candidates) {
-      const userMap = latestActivityByAction.get(actionId);
-      if (!userMap) continue;
+    const extraRecipientsByAction = new Map<number, User[]>();
 
-      for (const [userId, activity] of userMap) {
-        if (activity.type !== ActionActivityType.USER_JOINED) {
+    await Promise.all(
+      Array.from(candidates.entries()).map(async ([actionId, context]) => {
+        const action = context.deadlineEvent.action;
+        if (!action || !action.commitmentless) {
+          return;
+        }
+
+        const recipients = await this.recipientService.getBaseUsersForEvent(
+          ActionStatus.MemberAction,
+          action,
+        );
+        extraRecipientsByAction.set(actionId, recipients);
+      }),
+    );
+
+    for (const [actionId, context] of candidates) {
+      const userIds = new Set<number>();
+      const userMap = latestActivityByAction.get(actionId);
+
+      if (userMap) {
+        for (const [userId, activity] of userMap) {
+          if (activity.type !== ActionActivityType.USER_JOINED) {
+            continue;
+          }
+          userIds.add(userId);
+        }
+      }
+
+      const extraRecipients = extraRecipientsByAction.get(actionId) ?? [];
+      for (const user of extraRecipients) {
+        if (!user?.id || !user.contractDateSigned) {
           continue;
         }
+        userIds.add(user.id);
+      }
+
+      if (userIds.size === 0) {
+        continue;
+      }
+
+      for (const userId of userIds) {
         raw.push({
           actionId,
           userId,
