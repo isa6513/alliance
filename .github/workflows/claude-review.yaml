@@ -87,19 +87,28 @@ jobs:
       - name: Build Slack payload (needs review)
         id: slack_body_review
         if: ${{ steps.extract_claude.outputs.needs_review == 'true' }}
+        env:
+          SUMMARY: ${{ steps.extract_claude.outputs.summary }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          RUN_URL="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-
-          jq -nc --arg url "$RUN_URL" '{
-            text: "review given",
-            blocks: [
-              { "type": "section", "text": { "type": "mrkdwn", "text": "${{ steps.extract_claude.outputs.summary }}" } },
-              { "type": "actions", "elements": [
-                  { "type": "button", "text": { "type": "plain_text", "text": "Open run" }, "url": $url }
-                ] }
-            ]
-          }' > slack.json
-          echo "payload=$(cat slack.json)" >> "$GITHUB_OUTPUT"
+          # Build Slack JSON safely (SUMMARY may contain quotes/newlines)
+          jq -nc \
+            --arg url "$RUN_URL" \
+            --arg summary "$SUMMARY" \
+            '{
+              text: "review given",
+              blocks: [
+                { "type": "section", "text": { "type": "mrkdwn", "text": $summary } },
+                { "type": "actions", "elements": [
+                    { "type": "button", "text": { "type": "plain_text", "text": "Open run" }, "url": $url }
+                  ] }
+              ]
+            }' > slack.json
+          {
+            echo "payload<<'EOF'"
+            cat slack.json
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Post to Slack (fallback)
         if: ${{ steps.extract_claude.outputs.needs_review != 'true' && (success() || failure()) }}
