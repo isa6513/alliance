@@ -1,6 +1,6 @@
-import { CreateClientConfig } from "@hey-api/client-fetch";
-import { getApiUrl } from "./config";
 import { authRefreshTokens } from "../client";
+import { CreateClientConfig } from "../client/client.gen";
+import { getApiUrl } from "./config";
 
 export const AuthEvents = {
   onUnauthorized: () => {
@@ -20,14 +20,7 @@ export const createClientConfig: CreateClientConfig = (config) => {
     const req = new Request(input, init);
     const retryReq = req.clone();
 
-    let res: Response;
-
-    try {
-      res = await originalFetch(req);
-    } catch (err) {
-      console.error("Network error in fetch", err);
-      throw err;
-    }
+    const res = await originalFetch(req);
 
     if (
       res.status !== 401 ||
@@ -38,17 +31,15 @@ export const createClientConfig: CreateClientConfig = (config) => {
       return res;
     }
 
-    try {
-      const refreshRes = await authRefreshTokens();
-      if (refreshRes.response.ok) {
-        const retryRes = await originalFetch(retryReq);
-        if (retryRes.status !== 401) {
-          return retryRes;
-        }
+    const refreshRes = await authRefreshTokens();
+
+    if (refreshRes.response.ok) {
+      const retryRes = await originalFetch(retryReq);
+      if (retryRes.status !== 401) {
+        return retryRes;
+      } else {
+        console.error(retryRes);
       }
-    } catch (err) {
-      console.error("Error with refresh / retry", err);
-      throw err;
     }
 
     console.log("onUnauthorized");
@@ -60,7 +51,7 @@ export const createClientConfig: CreateClientConfig = (config) => {
 
   return {
     baseUrl,
-    credentials: "include" as const,
+    credentials: "include",
     fetch: wrappedFetch,
     throwOnError: false,
   };
