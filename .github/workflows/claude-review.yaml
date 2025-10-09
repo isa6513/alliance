@@ -42,12 +42,6 @@ jobs:
                - Required actions (checklist)
                - Verdict: Include in your review "[NEEDS_REVIEW]" if the commit author needs to look at your review. If everything is fine, do not include this phrase.
 
-      - name: Debug Claude execution file
-        run: |
-          echo "=== Dumping claude-execution-output.json ==="
-          cat /home/runner/work/_temp/claude-execution-output.json || echo "File not found"
-          echo "=== End of file ==="
-
       - name: Extract Claude summary + NEEDS_REVIEW flag
         id: extract_claude
         run: |
@@ -55,13 +49,25 @@ jobs:
 
           FILE=/home/runner/work/_temp/claude-execution-output.json
 
-          jq -r '
-            reverse
-            | map(select(.message.role == "assistant"))
-            | map(.message.content[]? | select(.type == "text"))
-            | .[0].text
-          ' "$FILE" > summary.json
-          echo "summary=$(cat summary.json)" >> "$GITHUB_OUTPUT"
+          # Grab the last assistant text block (empty string if none)
+          summary="$(
+            jq -r '
+              reverse
+              | map(select(.message.role == "assistant"))
+              | map(.message.content[]? | select(.type == "text"))
+              | (.[0].text // "")
+            ' "$FILE"
+          )"
+
+          delim="EOF_$(date +%s%N)"
+          {
+            echo "summary<<$delim"
+            printf "%s\n" "$summary"
+            echo "$delim"
+          } >> "$GITHUB_OUTPUT"
+
+          needs_review=$([[ "$summary" =~ \[NEEDS_REVIEW\] ]] && echo "true" || echo "false")
+          echo "needs_review=$needs_review" >> "$GITHUB_OUTPUT"
 
       - name: Build Slack payload (fallback)
         id: slack_body
