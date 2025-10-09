@@ -42,6 +42,12 @@ jobs:
                - Required actions (checklist)
                - Verdict: Include in your review "[NEEDS_REVIEW]" if the commit author needs to look at your review. If everything is fine, do not include this phrase.
 
+      - name: Debug Claude execution file
+        run: |
+          echo "=== Dumping claude-execution-output.json ==="
+          cat /home/runner/work/_temp/claude-execution-output.json || echo "File not found"
+          echo "=== End of file ==="
+
       - name: Extract Claude summary + NEEDS_REVIEW flag
         id: extract_claude
         run: |
@@ -94,7 +100,7 @@ jobs:
           RUN_URL="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
           jq -nc --arg url "$RUN_URL" '{
-            text: $title,
+            text: "Fallback - no review needed",
             blocks: [
               { "type": "section", "text": { "type": "mrkdwn", "text": "Fallback - no review needed" } },
               { "type": "actions", "elements": [
