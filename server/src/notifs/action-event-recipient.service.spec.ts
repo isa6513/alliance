@@ -63,6 +63,7 @@ describe('ActionEventRecipientService', () => {
     const result = await service.getBaseUsersForEvent(
       ActionStatus.MemberAction,
       action,
+      new Date(),
     );
 
     expect(findMock).toHaveBeenCalledWith({
@@ -91,6 +92,7 @@ describe('ActionEventRecipientService', () => {
     const result = await service.getBaseUsersForEvent(
       ActionStatus.MemberAction,
       action,
+      new Date(),
     );
 
     expect(findMock).toHaveBeenCalledWith({
@@ -103,6 +105,29 @@ describe('ActionEventRecipientService', () => {
     expect(result).toEqual([eligibleUser]);
   });
 
+  it('excludes users who signed their contract after member action launch', async () => {
+    const action = buildAction({ id: 55 });
+    const memberActionDate = new Date('2024-02-01T00:00:00Z');
+    const onTimeUser = buildUser(1, [], {
+      contractDateSigned: new Date('2024-01-15T00:00:00Z'),
+    });
+    const lateSigner = buildUser(2, [], {
+      contractDateSigned: new Date('2024-02-05T00:00:00Z'),
+    });
+    findMock.mockResolvedValue([
+      { user: onTimeUser } as unknown as ActionActivity,
+      { user: lateSigner } as unknown as ActionActivity,
+    ]);
+
+    const result = await service.getBaseUsersForEvent(
+      ActionStatus.MemberAction,
+      action,
+      memberActionDate,
+    );
+
+    expect(result).toEqual([onTimeUser]);
+  });
+
   it('returns active users when commitmentless action has no group restriction', async () => {
     const action = buildAction({ commitmentless: true });
     const activeUsers = [buildUser(5)];
@@ -112,6 +137,7 @@ describe('ActionEventRecipientService', () => {
     const result = await service.getBaseUsersForEvent(
       ActionStatus.MemberAction,
       action,
+      new Date(),
     );
 
     expect(userServiceMock.findActiveUsers).toHaveBeenCalledTimes(1);
@@ -130,6 +156,7 @@ describe('ActionEventRecipientService', () => {
     const result = await service.getBaseUsersForEvent(
       ActionStatus.MemberAction,
       action,
+      new Date(),
     );
 
     expect(result.map((user) => user.id)).toEqual([5]);
@@ -153,6 +180,7 @@ describe('ActionEventRecipientService', () => {
     const result = await service.getBaseUsersForEvent(
       ActionStatus.GatheringCommitments,
       action,
+      new Date(),
     );
 
     expect(findMock).not.toHaveBeenCalled();

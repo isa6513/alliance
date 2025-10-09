@@ -110,13 +110,6 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Post to Slack (fallback)
-        if: ${{ steps.extract_claude.outputs.needs_review != 'true' && (success() || failure()) }}
-        run: |
-          curl -s -X POST -H 'Content-type: application/json' \
-            --data '${{ steps.slack_body.outputs.payload }}' \
-            "${{ secrets.SLACK_WEBHOOK_URL_CLA }}"
-
       - name: Post to Slack (NEEDS_REVIEW)
         if: ${{ steps.extract_claude.outputs.needs_review == 'true' && (success() || failure()) }}
         run: |

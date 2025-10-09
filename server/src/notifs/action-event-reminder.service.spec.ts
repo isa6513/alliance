@@ -187,6 +187,7 @@ describe('ActionEventReminderService', () => {
       expect(recipientServiceMock.getBaseUsersForEvent).toHaveBeenCalledWith(
         ActionStatus.MemberAction,
         action,
+        new Date('2024-02-01T12:00:00.000Z'),
       );
       expect(results).toHaveLength(2);
       expect(results.map((candidate) => candidate.userId).sort()).toEqual([

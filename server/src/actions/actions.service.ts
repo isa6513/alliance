@@ -844,6 +844,7 @@ export class ActionsService {
     const users = await this.actionEventRecipientService.getBaseUsersForEvent(
       type,
       action,
+      new Date(),
     );
 
     const texts = users.filter((user) =>

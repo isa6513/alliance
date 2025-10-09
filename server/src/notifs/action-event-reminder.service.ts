@@ -151,6 +151,7 @@ export class ActionEventReminderService {
       const getCount = async (
         status: ActionStatus,
         action: Action,
+        eventDate: Date,
       ): Promise<number> => {
         const key = `${status}:${action.id}`;
         if (cache.has(key)) {
@@ -159,6 +160,7 @@ export class ActionEventReminderService {
         const users = await this.recipientService.getBaseUsersForEvent(
           status,
           action,
+          eventDate,
         );
         cache.set(key, users.length);
         return users.length;
@@ -175,6 +177,7 @@ export class ActionEventReminderService {
         plan.recipients = await getCount(
           plan.referenceEvent.newStatus,
           plan.referenceEvent.action,
+          plan.referenceEvent.date,
         );
       }
     }
@@ -466,6 +469,7 @@ export class ActionEventReminderService {
         const recipients = await this.recipientService.getBaseUsersForEvent(
           ActionStatus.MemberAction,
           action,
+          context.deadlineEvent.date,
         );
         extraRecipientsByAction.set(actionId, recipients);
       }),

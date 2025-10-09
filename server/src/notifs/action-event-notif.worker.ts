@@ -155,6 +155,7 @@ export class ActionEventNotifWorker {
     const users = await this.recipientService.getBaseUsersForEvent(
       event.newStatus,
       action,
+      event.date,
     );
 
     const baseContext: Omit<ActionEventNotificationContext, 'user' | 'cid'> = {

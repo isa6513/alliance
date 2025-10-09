@@ -21,6 +21,7 @@ export class ActionEventRecipientService {
   async getBaseUsersForEvent(
     eventStatus: ActionStatus,
     action: Action,
+    eventDate: Date,
   ): Promise<User[]> {
     const targetGroupIds = new Set(
       (action.participatingGroups || []).map((group) => group.id),
@@ -28,7 +29,10 @@ export class ActionEventRecipientService {
     const restrictToGroups = targetGroupIds.size > 0;
 
     const filterToEligible = (users: User[]): User[] => {
-      const withContract = users.filter((user) => user.contractDateSigned);
+      const withContract = users.filter(
+        (user) =>
+          user.contractDateSigned && user.contractDateSigned <= eventDate,
+      );
       if (!restrictToGroups) {
         return withContract;
       }
