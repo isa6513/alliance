@@ -39,7 +39,6 @@ const LoginPage: React.FC = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
     authMe().then((res) => {
       if (res.response.ok) {
         navigate(returnUrl);
