@@ -11,7 +11,7 @@ type announcedStates =
 
 export function getDaysFromDeadline(deadlineEvent: ActionEvent): string {
   return (
-    Math.ceil(
+    Math.floor(
       (deadlineEvent.date.getTime() - new Date().getTime()) /
         (1000 * 60 * 60 * 24),
     ).toString() + ' days'
