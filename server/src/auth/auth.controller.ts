@@ -128,11 +128,8 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: UserDto })
   async me(@Request() req: JwtRequest): Promise<UserDto> {
-    console.log('hit auth me');
     const profile = await this.authService.getProfile(req.user.email);
-    console.log('got in auth me');
     const user = new UserDto(profile);
-    console.log('got user dto: ', user);
     return user;
   }
 
