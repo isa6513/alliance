@@ -7,7 +7,7 @@ import { MailService } from 'src/mail/mail.service';
 import { Mms } from 'src/mms/mms.entity';
 import { MmsService } from 'src/mms/mms.service';
 import { User } from 'src/user/entities/user.entity';
-import { DataSource, In, MoreThan, Repository } from 'typeorm';
+import { DataSource, In, MoreThan, QueryRunner, Repository } from 'typeorm';
 import {
   ActionEvent,
   ActionStatus,
@@ -36,6 +36,7 @@ import {
   defaultEventTextMissedDeadline,
   defaultEventTextMissedSecondDeadline,
 } from './textnotifcontents';
+import { withPgAdvisoryLock } from './lock-utils';
 
 export type ReminderKind =
   | ActionEventNotifType.ThreeDayReminder
@@ -49,6 +50,9 @@ export interface ActionEventNotificationContext {
   action: Action;
   cid: string;
 }
+
+const PROCESS_ONE_LOCK_KEY1 = 0xa11a;
+const PROCESS_ONE_LOCK_KEY2 = 0xce01;
 
 @Injectable()
 export class ActionEventNotifWorker {
@@ -75,143 +79,161 @@ export class ActionEventNotifWorker {
       return;
     }
 
-    const now = new Date();
-    const windowStart = new Date(
-      now.getTime() - NOTIFICATION_LOOKBACK_WINDOW_MS,
+    const ran = await withPgAdvisoryLock(
+      this.dataSource,
+      PROCESS_ONE_LOCK_KEY1,
+      PROCESS_ONE_LOCK_KEY2,
+      async (qr) => {
+        const now = new Date();
+        const windowStart = new Date(
+          now.getTime() - NOTIFICATION_LOOKBACK_WINDOW_MS,
+        );
+
+        const duePlans =
+          await this.reminderService.evaluateDueNotifications(now);
+
+        for (const plan of duePlans) {
+          if (
+            plan.type === ActionEventNotifType.MissedDeadline ||
+            plan.type === ActionEventNotifType.MissedSecondDeadline
+          ) {
+            continue;
+          }
+          await this.processOne(qr, plan.referenceEvent.id, plan.type);
+        }
+
+        const missedDeadlineCandidates =
+          await this.reminderService.findMissedDeadlineCandidates(
+            windowStart,
+            now,
+          );
+
+        for (const candidate of missedDeadlineCandidates) {
+          await this.processMissedDeadlineCandidate(candidate);
+        }
+      },
     );
 
-    const duePlans = await this.reminderService.evaluateDueNotifications(now);
-
-    for (const plan of duePlans) {
-      if (
-        plan.type === ActionEventNotifType.MissedDeadline ||
-        plan.type === ActionEventNotifType.MissedSecondDeadline
-      ) {
-        continue;
-      }
-      await this.processOne(plan.referenceEvent.id, plan.type);
-    }
-
-    const missedDeadlineCandidates =
-      await this.reminderService.findMissedDeadlineCandidates(windowStart, now);
-
-    for (const candidate of missedDeadlineCandidates) {
-      await this.processMissedDeadlineCandidate(candidate);
+    if (ran === null) {
+      this.logger.log('processOne skipped bc of lock');
     }
   }
 
-  private async processOne(eventId: number, type: ActionEventNotifType) {
-    await this.dataSource.transaction(async (manager) => {
-      const event = await manager.getRepository(ActionEvent).findOne({
-        where: { id: eventId },
-        relations: ['action', 'action.participatingGroups'],
-      });
+  private async processOne(
+    qr: QueryRunner,
+    eventId: number,
+    type: ActionEventNotifType,
+  ) {
+    const manager = qr.manager;
 
-      if (!event || !event.action) return;
-
-      if (
-        (type === 'announcement' && event.announcementNotifsSentAt) ||
-        (type === '3dayreminder' && event.threeDayReminderNotifsSentAt) ||
-        (type === '1dayreminder' && event.oneDayReminderNotifsSentAt) ||
-        event.date > new Date() ||
-        event.sendNotifsTo === NotificationType.None
-      ) {
-        return;
-      }
-
-      if (
-        type === ActionEventNotifType.Announcement &&
-        !ANNOUNCEMENT_STATUS_SET.has(event.newStatus)
-      ) {
-        return;
-      }
-
-      const action = event.action;
-
-      const users = await this.recipientService.getBaseUsersForEvent(
-        event.newStatus,
-        action,
-      );
-
-      const baseContext: Omit<ActionEventNotificationContext, 'user' | 'cid'> =
-        {
-          event,
-          type,
-          action,
-        };
-
-      const deadlineEvent =
-        (await manager.getRepository(ActionEvent).findOne({
-          where: {
-            action: { id: action.id },
-            date: MoreThan(event.date),
-            newStatus: In(Array.from(POST_MEMBER_ACTION_STATUSES)),
-          },
-          order: { date: 'ASC' },
-        })) ?? undefined;
-
-      for (const user of users) {
-        const context: ActionEventNotificationContext = {
-          ...baseContext,
-          user,
-          deadlineEvent,
-          cid: await generateCIDForNotif(),
-        };
-        const notif = new ActionEventNotif();
-        notif.user = user;
-        notif.actionEvent = event;
-        notif.channel = NotificationChannel.Email;
-        notif.sent = false;
-        notif.type = type;
-        let sentAnyNotif = false;
-        if (this.notifsService.shouldTextUser(user)) {
-          sentAnyNotif = true;
-          const result = await this.sendActionEventNotificationMms(context);
-
-          if (result && !result.errorCode) {
-            notif.sent = true;
-          }
-          notif.channel = NotificationChannel.Text;
-          notif.mms = result;
-        }
-        if (!notif.sent && this.notifsService.shouldEmailUser(user)) {
-          sentAnyNotif = true;
-          notif.channel = NotificationChannel.Email;
-          const result =
-            await this.mailService.sendActionEventNotificationEmail(context);
-          notif.mail = result;
-          if (result.status === EmailStatus.Sent) {
-            notif.sent = true;
-          }
-        } else {
-          //TODO: pushes
-        }
-        if (sentAnyNotif) {
-          await this.actionEventNotifsRepository.save(notif);
-        }
-      }
-
-      this.logger.log('notifs sent for event ' + event.id);
-
-      switch (type) {
-        case ActionEventNotifType.Announcement:
-          event.announcementNotifsSentAt = new Date();
-          break;
-        case ActionEventNotifType.ThreeDayReminder:
-          event.threeDayReminderNotifsSentAt = new Date();
-          break;
-        case ActionEventNotifType.OneDayReminder:
-          event.oneDayReminderNotifsSentAt = new Date();
-          break;
-        case ActionEventNotifType.MissedDeadline:
-        case ActionEventNotifType.MissedSecondDeadline:
-          break;
-        default:
-          ((x: never) => x)(type);
-      }
-
-      await manager.getRepository(ActionEvent).save(event);
+    const event = await manager.getRepository(ActionEvent).findOne({
+      where: { id: eventId },
+      relations: ['action', 'action.participatingGroups'],
     });
+
+    if (!event || !event.action) return;
+
+    if (
+      (type === 'announcement' && event.announcementNotifsSentAt) ||
+      (type === '3dayreminder' && event.threeDayReminderNotifsSentAt) ||
+      (type === '1dayreminder' && event.oneDayReminderNotifsSentAt) ||
+      event.date > new Date() ||
+      event.sendNotifsTo === NotificationType.None
+    ) {
+      return;
+    }
+
+    if (
+      type === ActionEventNotifType.Announcement &&
+      !ANNOUNCEMENT_STATUS_SET.has(event.newStatus)
+    ) {
+      return;
+    }
+
+    const action = event.action;
+
+    const users = await this.recipientService.getBaseUsersForEvent(
+      event.newStatus,
+      action,
+    );
+
+    const baseContext: Omit<ActionEventNotificationContext, 'user' | 'cid'> = {
+      event,
+      type,
+      action,
+    };
+
+    const deadlineEvent =
+      (await manager.getRepository(ActionEvent).findOne({
+        where: {
+          action: { id: action.id },
+          date: MoreThan(event.date),
+          newStatus: In(Array.from(POST_MEMBER_ACTION_STATUSES)),
+        },
+        order: { date: 'ASC' },
+      })) ?? undefined;
+
+    for (const user of users) {
+      const context: ActionEventNotificationContext = {
+        ...baseContext,
+        user,
+        deadlineEvent,
+        cid: await generateCIDForNotif(),
+      };
+      const notif = new ActionEventNotif();
+      notif.user = user;
+      notif.actionEvent = event;
+      notif.channel = NotificationChannel.Email;
+      notif.sent = false;
+      notif.type = type;
+      let sentAnyNotif = false;
+      if (this.notifsService.shouldTextUser(user)) {
+        sentAnyNotif = true;
+        const result = await this.sendActionEventNotificationMms(context);
+
+        if (result && !result.errorCode) {
+          notif.sent = true;
+        }
+        notif.channel = NotificationChannel.Text;
+        notif.mms = result;
+      }
+      if (!notif.sent && this.notifsService.shouldEmailUser(user)) {
+        sentAnyNotif = true;
+        notif.channel = NotificationChannel.Email;
+        const result =
+          await this.mailService.sendActionEventNotificationEmail(context);
+        notif.mail = result;
+        if (result.status === EmailStatus.Sent) {
+          notif.sent = true;
+        }
+      } else {
+        //TODO: pushes
+      }
+      if (sentAnyNotif) {
+        await this.actionEventNotifsRepository.save(notif);
+      }
+    }
+
+    this.logger.log('notifs sent for event ' + event.id);
+
+    switch (type) {
+      case ActionEventNotifType.Announcement:
+        event.announcementNotifsSentAt = new Date();
+        break;
+      case ActionEventNotifType.ThreeDayReminder:
+        event.threeDayReminderNotifsSentAt = new Date();
+        break;
+      case ActionEventNotifType.OneDayReminder:
+        event.oneDayReminderNotifsSentAt = new Date();
+        break;
+      case ActionEventNotifType.MissedDeadline:
+      case ActionEventNotifType.MissedSecondDeadline:
+        break;
+      default:
+        ((x: never) => x)(type);
+    }
+
+    await manager.getRepository(ActionEvent).save(event);
   }
 
   private async processMissedDeadlineCandidate(
