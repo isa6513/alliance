@@ -47,6 +47,7 @@ import { UserDto } from 'src/user/user.dto';
 import { NotificationScheduleEntryDto } from './dto/notification-schedule.dto';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { User } from 'src/user/entities/user.entity';
+import { ForumService } from 'src/forum/forum.service';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -80,6 +81,7 @@ export class ActionsService {
     public eventEmitter: EventEmitter2,
     private readonly actionEventRecipientService: ActionEventRecipientService,
     private readonly actionEventReminderService: ActionEventReminderService,
+    private readonly forumService: ForumService,
   ) {}
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
@@ -486,7 +488,20 @@ export class ActionsService {
       order: { createdAt: 'DESC' },
       take: limit,
     });
-    return activities.map((activity) => new ActionActivityDto(activity));
+    if (activities.length === 0) {
+      return [];
+    }
+
+    return Promise.all(
+      activities.map(async (activity) => {
+        return new ActionActivityDto(
+          activity,
+          (await this.forumService.findCommentsForActivity(activity.id)).map(
+            (comment) => new CommentDto(comment),
+          ),
+        );
+      }),
+    );
   }
 
   private async resolveParticipatingGroups(
@@ -688,15 +703,11 @@ export class ActionsService {
     if (!activity) {
       throw new NotFoundException('Activity not found');
     }
-    const comments = await this.commentRepository.find({
-      where: {
-        parentObjectType: CommentParentObject.Activity,
-        parentObjectId: id,
-      },
-      relations: ['author'],
-    });
-    const commentsDto = comments.map((comment) => new CommentDto(comment));
-    return new ActionActivityDto(activity, commentsDto);
+    const comments = await this.forumService.findCommentsForActivity(id);
+    return new ActionActivityDto(
+      activity,
+      comments.map((comment) => new CommentDto(comment)),
+    );
   }
 
   async getEvent(id: number): Promise<ActionEventDto> {
@@ -727,10 +738,8 @@ export class ActionsService {
 
     if (unlike) {
       await qb.remove(user);
-    } else {
-      if (!activity.likes.some((like) => like.id === user.id)) {
-        await qb.add(user);
-      }
+    } else if (!activity.likes.some((like) => like.id === user.id)) {
+      await qb.add(user);
     }
 
     const updatedActivity = await this.actionActivityRepository.findOne({

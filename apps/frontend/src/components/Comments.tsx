@@ -27,6 +27,7 @@ export interface CommentsProps {
   homeStyle?: boolean; // minimal version for homepage
   autofocus?: boolean;
   showForm?: boolean;
+  initialComments?: CommentDto[]; // e.g. preloaded from activity fetch
 }
 
 const Comments = ({
@@ -36,6 +37,7 @@ const Comments = ({
   homeStyle,
   autofocus,
   showForm = true,
+  initialComments,
 }: CommentsProps) => {
   const [editableContent, setEditableContent] =
     useState<CreateEditableContentDto>({ body: "", attachments: [] });
@@ -51,7 +53,9 @@ const Comments = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
 
-  const [comments, setComments] = useState<CommentDto[] | null>(null);
+  const [comments, setComments] = useState<CommentDto[] | null>(
+    initialComments ?? null
+  );
   const [error, setError] = useState<string | null>(null);
 
   const fetchComments = useCallback(async () => {
@@ -73,8 +77,12 @@ const Comments = ({
   }, [objectId, type]);
 
   useEffect(() => {
+    if (initialComments) {
+      setComments(initialComments);
+      return;
+    }
     fetchComments();
-  }, [fetchComments]);
+  }, [initialComments, fetchComments]);
 
   // Handle highlighted reply from URL parameters
   useEffect(() => {

@@ -99,7 +99,7 @@ const Sidebar: React.FC = () => {
               Create
             </Button>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-px">
             {actionsLoading ? (
               <p className="text-sm text-gray-500">Loading actions...</p>
             ) : (

@@ -18,6 +18,7 @@ import { ActionsService } from './actions.service';
 import { ActionActivity } from './entities/action-activity.entity';
 import { ActionEvent } from './entities/action-event.entity';
 import { Action } from './entities/action.entity';
+import { ForumModule } from 'src/forum/forum.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { Action } from './entities/action.entity';
     NotifsModule,
     MailModule,
     MmsModule,
+    ForumModule,
   ],
   controllers: [ActionsController],
   providers: [
