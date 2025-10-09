@@ -53,21 +53,21 @@ class SocketIoAdapter extends IoAdapter {
 async function bootstrap() {
   let client: PostHog | null = null;
 
-  if (process.env.NODE_ENV === 'production') {
-    client = new PostHog(process.env.POSTHOG_KEY!, {
-      host: 'https://us.i.posthog.com',
-    });
-  }
+  //   if (process.env.NODE_ENV === 'production') {
+  //     client = new PostHog(process.env.POSTHOG_KEY!, {
+  //       host: 'https://us.i.posthog.com',
+  //     });
+  //   }
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    rawBody: true,
-    bodyParser: false,
+    // rawBody: true,
+    // bodyParser: false,
   });
   const jwtService = app.get(JwtService);
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   validateEnv();
-  app.use(bodyParser.json({ limit: '50mb' }));
-  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+  //   app.use(bodyParser.json({ limit: '50mb' }));
+  //   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidUnknownValues: true }),
   );
@@ -99,10 +99,10 @@ async function bootstrap() {
     });
   }
 
-  if (client) {
-    app.useGlobalFilters(new PosthogExceptionFilter(client, jwtService));
-    setupExpressErrorHandler(client, app);
-  }
+  //   if (client) {
+  //     app.useGlobalFilters(new PosthogExceptionFilter(client, jwtService));
+  //     setupExpressErrorHandler(client, app);
+  //   }
 
   await app.listen(process.env.PORT || 3005, '0.0.0.0');
 }

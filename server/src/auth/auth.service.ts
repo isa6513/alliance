@@ -138,10 +138,14 @@ export class AuthService {
   }
 
   async getProfile(email: string): Promise<User> {
+    console.log('hit get profile');
     const user = await this.usersService.findOneByEmail(email);
+    console.log('find one by email returned');
     if (!user) {
+      console.log('user not found');
       throw new UnauthorizedException();
     }
+    console.log('user found');
     return user;
   }
 
