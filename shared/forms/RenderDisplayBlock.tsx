@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import type { DisplayBlock } from "./display-blocks";
+import { getApiUrl } from "../lib/config";
 
 type Props = {
   block: DisplayBlock;
@@ -11,52 +11,52 @@ export default function RenderDisplayBlock({ block }: Props) {
   switch (block.kind) {
     case "header":
       return React.createElement(
-        `h${(block as any).level || 2}`,
+        `h${block.level || 2}`,
         {
           className: `font-medium text-zinc-900 ${
-            ((block as any).level || 2) === 1
+            (block.level || 2) === 1
               ? "text-3xl"
-              : ((block as any).level || 2) === 2
+              : (block.level || 2) === 2
               ? "text-2xl"
-              : ((block as any).level || 2) === 3
+              : (block.level || 2) === 3
               ? "text-xl"
-              : ((block as any).level || 2) === 4
+              : (block.level || 2) === 4
               ? "text-lg"
-              : ((block as any).level || 2) === 5
+              : (block.level || 2) === 5
               ? "text-base"
               : ""
           }`,
         },
-        (block as any).text
+        block.text
       );
 
     case "text":
       return (
         <div className="text-zinc-900">
-          {(block as any).markdown ? (
+          {block.markdown ? (
             <div className="prose prose-sm max-w-none">
-              <FormMarkdownWrapper markdownContent={(block as any).text} />
+              <FormMarkdownWrapper markdownContent={block.text} />
             </div>
           ) : (
-            <p className="whitespace-pre-wrap">{(block as any).text}</p>
+            <p className="whitespace-pre-wrap">{block.text}</p>
           )}
         </div>
       );
 
     case "label":
-      return <span className="  text-gray-700">{(block as any).text}</span>;
+      return <span className="  text-gray-700">{block.text}</span>;
 
     case "divider":
       return (
         <hr
           className={`border-gray-300 ${
-            (block as any).thickness === "hairline"
+            block.thickness === "hairline"
               ? "border-t"
-              : (block as any).thickness === "thin"
+              : block.thickness === "thin"
               ? "border-t"
-              : (block as any).thickness === "medium"
+              : block.thickness === "medium"
               ? "border-t-2"
-              : (block as any).thickness === "thick"
+              : block.thickness === "thick"
               ? "border-t-4"
               : "border-t"
           }`}
@@ -67,15 +67,15 @@ export default function RenderDisplayBlock({ block }: Props) {
       return (
         <div
           className={`${
-            (block as any).size === "xs"
+            block.size === "xs"
               ? "h-2"
-              : (block as any).size === "sm"
+              : block.size === "sm"
               ? "h-4"
-              : (block as any).size === "md"
+              : block.size === "md"
               ? "h-8"
-              : (block as any).size === "lg"
+              : block.size === "lg"
               ? "h-16"
-              : (block as any).size === "xl"
+              : block.size === "xl"
               ? "h-24"
               : "h-8"
           }`}
@@ -83,17 +83,21 @@ export default function RenderDisplayBlock({ block }: Props) {
       );
 
     case "html":
-      return <div dangerouslySetInnerHTML={{ __html: (block as any).html }} />;
+      return <div dangerouslySetInnerHTML={{ __html: block.html }} />;
 
     case "image":
       return (
         <img
-          src={(block as any).src}
-          alt={(block as any).alt}
+          src={
+            block.src.includes("/")
+              ? block.src
+              : `${getApiUrl()}/images/${block.src}`
+          }
+          alt={block.alt}
           className="max-h-80 w-auto rounded"
           style={{
-            aspectRatio: (block as any).aspectRatio
-              ? (block as any).aspectRatio.toString()
+            aspectRatio: block.aspectRatio
+              ? block.aspectRatio.toString()
               : undefined,
           }}
         />

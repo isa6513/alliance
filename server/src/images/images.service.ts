@@ -100,6 +100,7 @@ export class ImagesService {
 }
 
 export function getImageSource(string: string) {
+  //TODO: if its not a string this breaks badly
   if (string.startsWith('http')) {
     return string; // TODO
   }

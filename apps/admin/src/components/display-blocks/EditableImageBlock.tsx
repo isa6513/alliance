@@ -33,7 +33,7 @@ export function EditableImageBlock({
               body: { file: reader.result },
             });
             if (data) {
-              onUpdate({ src: data });
+              onUpdate({ src: data.key });
             }
           } catch (error) {
             console.error("Failed to upload image:", error);
