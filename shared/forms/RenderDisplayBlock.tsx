@@ -94,7 +94,7 @@ export default function RenderDisplayBlock({ block }: Props) {
               : `${getApiUrl()}/images/${block.src}`
           }
           alt={block.alt}
-          className="max-h-80 w-auto rounded"
+          className="mx-auto max-h-80 w-auto rounded"
           style={{
             aspectRatio: block.aspectRatio
               ? block.aspectRatio.toString()
