@@ -69,7 +69,7 @@ const ActionTaskPanelForm = ({
             event: "form_submit_error",
             properties: {
               actionId: actionId,
-              actionSubmitFailure: true,
+              $exception_fingerprint: "FormSubmitError",
             },
           });
           setError(
