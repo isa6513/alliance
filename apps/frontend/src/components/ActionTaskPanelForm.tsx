@@ -37,7 +37,8 @@ const ActionTaskPanelForm = ({
         path: { id: taskFormId },
       });
       if (!form.data) {
-        throw new Error("Form not found");
+        setError("Unable to load form - please reload");
+        throw new Error((form.error as Error).message);
       }
       setForm(form.data);
     };

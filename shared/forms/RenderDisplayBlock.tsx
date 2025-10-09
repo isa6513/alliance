@@ -91,7 +91,7 @@ export default function RenderDisplayBlock({ block }: Props) {
           src={
             block.src.includes("/")
               ? block.src
-              : `${getApiUrl()}/images/${block.src}`
+              : `${getApiUrl()}/images/${block.src}` //TODO: right now this is only needed for when we upload a new image in the form builder and it uses the key without transformation
           }
           alt={block.alt}
           className="mx-auto max-h-80 w-auto rounded"

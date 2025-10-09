@@ -305,5 +305,5 @@ export function setRevalidate() {
 }
 
 export function shouldRevalidate({}: ShouldRevalidateFunctionArgs) {
-  return localStorage.getItem(revalidateKey) === "true";
+  return true;
 }
