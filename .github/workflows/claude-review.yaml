@@ -24,9 +24,10 @@ jobs:
 
       - name: Run Claude on this commit
         id: claude
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-base-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_tools: "Bash(git:*),View,GlobTool,GrepTool,BatchTool"
           prompt: |
             You are a CI code reviewer for commit ${{ github.sha }} on branch "main".
             Tasks:
