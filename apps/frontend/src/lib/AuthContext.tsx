@@ -24,6 +24,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   user: UserDto | undefined;
   login: (email: string, password: string) => Promise<void>;
+  onLogin: () => void;
   logout: () => Promise<void>;
   loading: boolean;
 }
@@ -101,15 +102,25 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
       setRevalidate();
     }, []);
 
+    const onLogin = useCallback(() => {
+      authMe().then((res) => {
+        if (res.data) {
+          setUser(res.data);
+        }
+      });
+      setRevalidate();
+    }, []);
+
     const value = useMemo<AuthContextType>(
       () => ({
         isAuthenticated: !!user,
         user,
         login,
+        onLogin,
         logout,
         loading,
       }),
-      [user, loading, login, logout]
+      [user, loading, login, logout, onLogin]
     );
 
     return (
@@ -128,6 +139,7 @@ export const useAuth = (): AuthContextType => {
       isAuthenticated: true,
       user: testAuthUser,
       login: () => Promise.resolve(),
+      onLogin: () => {},
       logout: () => Promise.resolve(),
       loading: false,
     };
@@ -140,6 +152,7 @@ export const useAuth = (): AuthContextType => {
       isAuthenticated: false,
       user: undefined,
       login: () => Promise.resolve(),
+      onLogin: () => {},
       logout: () => Promise.resolve(),
       loading: false,
     };

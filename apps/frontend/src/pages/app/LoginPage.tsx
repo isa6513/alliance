@@ -16,7 +16,7 @@ import { setRevalidate } from "../../applayout";
 
 const LoginPage: React.FC = () => {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, onLogin } = useAuth();
   const [formData, setFormData] = useState<SignInDto>({
     email: "",
     password: "",
@@ -68,6 +68,7 @@ const LoginPage: React.FC = () => {
     });
     if (loginResponse.response.ok) {
       setRevalidate();
+      onLogin();
       navigate(returnUrl || "/tasks");
     } else {
       setError("Invalid email or password");
