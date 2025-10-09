@@ -465,6 +465,17 @@ const ActionDashboard: React.FC = () => {
           ← Back
         </button>
       </div>
+      <p className="p-2 border border-gray-200 mb-4">
+        Please see{" "}
+        <a
+          className="text-green underline"
+          href="https://docs.google.com/document/d/1m19_KAO6u_EGnspSji68yoziuPz4MwOQqYDbFez_RpM/edit?usp=sharing"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Guide to preparing public actions
+        </a>
+      </p>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">

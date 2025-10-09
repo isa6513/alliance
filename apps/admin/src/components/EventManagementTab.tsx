@@ -58,7 +58,9 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
   const [eventForm, setEventForm] = useState<CreateActionEventDto>({
     title: "",
     description: "",
-    newStatus: "gathering_commitments",
+    newStatus: action.commitmentless
+      ? "member_action"
+      : "gathering_commitments",
     date: formatDateForInput(new Date()),
     showInTimeline: true,
     sendNotifsTo: "all",
@@ -217,11 +219,20 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {Object.entries(statusOptions).map(([key, label]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
+                {Object.entries(statusOptions).map(([key, label]) => {
+                  // Don't allow selecting gathering_commitments if action is commitmentless
+                  if (
+                    key === "gathering_commitments" &&
+                    action.commitmentless
+                  ) {
+                    return null;
+                  }
+                  return (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -469,9 +480,15 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
                 "Add Event"
               )}
             </button>
-            <div>
-              <p>
-                This will send <b>{notifData?.emails.length}</b> emails and{" "}
+            <div className="flex justify-between items-center">
+              <p
+                className={`px-4 py-2 rounded self-start ${
+                  notifData?.emails.length || notifData?.texts.length
+                    ? "bg-yellow-600 text-white"
+                    : "border border-gray-200"
+                }`}
+              >
+                ⚠️ This will send <b>{notifData?.emails.length}</b> emails and{" "}
                 <b>{notifData?.texts.length}</b> texts
               </p>
             </div>

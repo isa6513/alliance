@@ -162,8 +162,6 @@ const ActionForm: React.FC<ActionFormProps> = ({
         show: (f) => !f.commitmentless,
         inGrid: true,
       },
-
-      { name: "body", label: "Body", type: "markdowntextarea", required: true },
       {
         name: "shortDescription",
         label: "Short Description",
@@ -171,7 +169,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         required: true,
         rows: 2,
       },
-
+      { name: "body", label: "Body", type: "markdowntextarea", required: true },
       { name: "image", label: "Image", type: "file" },
     ],
     [actionTypeOptions]
