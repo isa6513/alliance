@@ -91,7 +91,6 @@ jobs:
           SUMMARY: ${{ steps.extract_claude.outputs.summary }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          # Build Slack JSON safely (SUMMARY may contain quotes/newlines)
           jq -nc \
             --arg url "$RUN_URL" \
             --arg summary "$SUMMARY" \
@@ -104,8 +103,9 @@ jobs:
                   ] }
               ]
             }' > slack.json
+
           {
-            echo "payload<<'EOF'"
+            echo "payload<<EOF"
             cat slack.json
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
