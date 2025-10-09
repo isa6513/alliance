@@ -498,6 +498,7 @@ jobs:
             unzip -o ~/nest-build.zip -d ~/nest-backend
 
             cd ~/nest-backend
+            npm install --omit=dev
 
             npm run migration:runprod
 
