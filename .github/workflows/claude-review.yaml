@@ -28,6 +28,7 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           allowed_tools: "Bash(git:*),View,GlobTool,GrepTool,BatchTool"
+          max_turns: 30
           prompt: |
             You are a CI code reviewer for commit ${{ github.sha }} on branch "main".
             Tasks:
@@ -38,20 +39,60 @@ jobs:
                - File-by-file remarks (only touched files)
                - Required actions (checklist)
                - Verdict: Include in your review "[NEEDS_REVIEW]" if the commit author needs to look at your review. If everything is fine, do not include this phrase.
-          claude_args: |
-            --max-turns 12
-            --allowedTools "Bash(git diff:*)" "Bash(git show:*)" "Read" "Grep" "Glob"
 
-      - name: Build Slack payload
+      - name: Extract Claude summary + NEEDS_REVIEW flag
+        id: extract_claude
+        run: |
+          set -euo pipefail
+          FILE="${{ steps.claude.outputs.execution_file }}"
+          if [ -z "${FILE}" ] || [ ! -s "${FILE}" ]; then
+            echo "No execution_file from Claude; skipping deep summary extraction."
+            echo "needs_review=false" >> "$GITHUB_OUTPUT"
+            echo "summary=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          SUMMARY_RAW="$(jq -r '
+            .. | objects
+            | select(.role? == "assistant" and .content?)
+            | .content
+            | if type=="array"
+              then map(select(.type=="text") | .text) | join("\n\n")
+              else tostring
+              end
+          ' "$FILE" | tail -n1)"
+
+          # If empty, fall back to any text we can find
+          if [ -z "${SUMMARY_RAW}" ]; then
+            SUMMARY_RAW="$(jq -r '.. | strings? | select(length>0) ' "$FILE" | tail -n1)"
+          fi
+
+          # Trim to a safe size for Slack blocks (approx 2800 chars)
+          SUMMARY_TRIMMED="$(printf "%s" "$SUMMARY_RAW" | head -c 2800)"
+
+          # Detect NEEDS_REVIEW
+          if printf "%s" "$SUMMARY_TRIMMED" | grep -q "NEEDS_REVIEW"; then
+            echo "needs_review=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_review=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Escape for JSON
+          SUMMARY_JSON_ESCAPED="$(python3 - <<'PY'
+            import json,sys; print(json.dumps(sys.stdin.read()))
+          PY
+          <<<"$SUMMARY_TRIMMED")"
+
+          echo "summary=${SUMMARY_JSON_ESCAPED}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Slack payload (fallback)
         id: slack_body
+        if: ${{ steps.extract_claude.outputs.needs_review != 'true' }}
         run: |
           RUN_URL="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          SUMMARY_FILE="${GITHUB_STEP_SUMMARY:-/dev/null}"
-          echo "Run URL: $RUN_URL"
-          # Fallback message if no summary exists:
           TITLE="Claude review for ${GITHUB_REF_NAME}@${{ github.sha }}"
           MSG="View the run summary for full feedback: ${RUN_URL}"
-          # Construct a compact JSON payload for Slack Incoming Webhook
+
           jq -nc --arg title "$TITLE" --arg msg "$MSG" --arg url "$RUN_URL" '{
             text: $title,
             blocks: [
@@ -64,11 +105,39 @@ jobs:
           }' > slack.json
           echo "payload=$(cat slack.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Post to Slack
-        if: ${{ success() || failure() }} # always attempt
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Build Slack payload (Claude summary - NEEDS_REVIEW)
+        id: slack_body_review
+        if: ${{ steps.extract_claude.outputs.needs_review == 'true' }}
+        run: |
+          RUN_URL="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          TITLE="⚠️ Claude review needs attention for ${GITHUB_REF_NAME}@${{ github.sha }}"
+          SUMMARY=$(printf %s "${{ steps.extract_claude.outputs.summary }}")
+
+          jq -nc \
+            --arg title "$TITLE" \
+            --arg summary "$SUMMARY" \
+            --arg url "$RUN_URL" '{
+              text: $title,
+              blocks: [
+                { "type": "header", "text": { "type": "plain_text", "text": $title } },
+                { "type": "section", "text": { "type": "mrkdwn", "text": "*Summary*\n" + ($summary | fromjson) } },
+                { "type": "actions", "elements": [
+                    { "type": "button", "text": { "type": "plain_text", "text": "Open run" }, "url": $url }
+                  ] }
+              ]
+            }' > slack_review.json
+          echo "payload=$(cat slack_review.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Post to Slack (fallback)
+        if: ${{ steps.extract_claude.outputs.needs_review != 'true' && (success() || failure()) }}
         run: |
           curl -s -X POST -H 'Content-type: application/json' \
             --data '${{ steps.slack_body.outputs.payload }}' \
+            "${{ secrets.SLACK_WEBHOOK_URL_CLA }}"
+
+      - name: Post to Slack (NEEDS_REVIEW)
+        if: ${{ steps.extract_claude.outputs.needs_review == 'true' && (success() || failure()) }}
+        run: |
+          curl -s -X POST -H 'Content-type: application/json' \
+            --data '${{ steps.slack_body_review.outputs.payload }}' \
             "${{ secrets.SLACK_WEBHOOK_URL_CLA }}"
