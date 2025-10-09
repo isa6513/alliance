@@ -8,17 +8,12 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { PostHog } from 'posthog-node';
-import { JwtPayload } from './auth/guards/auth.guard';
-import { JwtService } from '@nestjs/jwt';
 
 @Catch()
 export class PosthogExceptionFilter implements ExceptionFilter {
-  constructor(
-    private readonly posthog: PostHog,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly posthog: PostHog) {}
 
-  async catch(exception: unknown, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const req = ctx.getRequest<Request>();
 
@@ -32,22 +27,7 @@ export class PosthogExceptionFilter implements ExceptionFilter {
       throw exception;
     }
 
-    let userid: string | undefined = undefined;
-    if (req.cookies.access_token) {
-      try {
-        const payload = await this.jwtService.verifyAsync<JwtPayload>(
-          req.cookies.access_token,
-          {
-            secret: process.env.JWT_SECRET,
-          },
-        );
-        userid = payload.sub.toString();
-      } catch (error) {
-        console.log('error verifying jwt in posthog filter: ', error);
-      }
-    }
-
-    this.posthog.captureException(exception, userid || 'server', {
+    this.posthog.captureException(exception, 'server', {
       event: '$exception',
       properties: {
         message:
