@@ -1,4 +1,9 @@
-import { authForgotPassword, authMe, SignInDto } from "@alliance/shared/client";
+import {
+  authForgotPassword,
+  authLogin,
+  authMe,
+  SignInDto,
+} from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -7,10 +12,11 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import FormInput from "../../components/system/FormInput";
 import { useAuth } from "../../lib/AuthContext";
 import { isFeatureEnabled } from "../../lib/config";
+import { setRevalidate } from "../../applayout";
 
 const LoginPage: React.FC = () => {
   const location = useLocation();
-  const { login, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [formData, setFormData] = useState<SignInDto>({
     email: "",
     password: "",
@@ -53,14 +59,19 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    try {
-      await login(formData.email, formData.password);
-      if (returnUrl) {
-        navigate(returnUrl);
-      }
-    } catch {
-      setError("Authentication failed.");
-      setMessage(null);
+
+    const loginResponse = await authLogin({
+      body: {
+        email: formData.email,
+        password: formData.password,
+        mode: "cookie",
+      },
+    });
+    if (loginResponse.response.ok) {
+      setRevalidate();
+      navigate(returnUrl || "/tasks");
+    } else {
+      setError("Invalid email or password");
       setLoading(false);
     }
   };
