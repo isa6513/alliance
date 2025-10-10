@@ -1,4 +1,7 @@
-import { userMembersWithFriends } from "@alliance/shared/client";
+import {
+  userListSentRequests,
+  userMembersWithFriends,
+} from "@alliance/shared/client";
 import { useLoaderData } from "react-router";
 import MembersListItem from "../../components/MembersListItem";
 import List from "@alliance/shared/ui/List";
@@ -8,9 +11,13 @@ import { useState } from "react";
 
 export async function clientLoader() {
   const members = await userMembersWithFriends();
+  const userSentFriendRequests = await userListSentRequests();
 
   return {
     members: members.data ?? [],
+    userSentFriendRequestIds: userSentFriendRequests.data
+      ? userSentFriendRequests.data.map((req) => req.id)
+      : [],
   };
 }
 
@@ -21,7 +28,8 @@ export enum MemberFilterMode {
 
 const MembersListPage = () => {
   const { user } = useAuth();
-  const { members } = useLoaderData<typeof clientLoader>();
+  const { members, userSentFriendRequestIds } =
+    useLoaderData<typeof clientLoader>();
 
   const [filterMode, setFilterMode] = useState<MemberFilterMode>(
     MemberFilterMode.All
@@ -57,16 +65,14 @@ const MembersListPage = () => {
       <List>
         {(filterMode === MemberFilterMode.All ? members : friendsOfFriends).map(
           (member) => (
-            <MembersListItem key={member.id} profile={member} />
+            <MembersListItem
+              key={member.id}
+              profile={member}
+              sentFriendRequest={userSentFriendRequestIds.includes(member.id)}
+            />
           )
         )}
       </List>
-
-      {/* <List>
-        {members.map((member) => (
-          <MembersListItem key={member.id} profile={member} />
-        ))}
-      </List> */}
     </div>
   );
 };
