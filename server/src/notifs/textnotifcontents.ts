@@ -26,7 +26,7 @@ export const defaultEventTextAnnouncement: {
   [ActionStatus.GatheringCommitments]: (context) =>
     `New Alliance action: ${context.action.name}. Please confirm commitment at ${withCid(actionUrl(context.action.id, true), context.cid)}`,
   [ActionStatus.MemberAction]: (context) =>
-    `An Alliance action ${context.action.commitmentless ? '' : 'you committed to '}is ready to be completed: ${context.action.name}. ${withCid(actionUrl(context.action.id, true), context.cid)}. ${context.deadlineEvent ? `You have ${getDaysFromDeadline(context.deadlineEvent)} to complete.` : ''}`,
+    `An Alliance action ${context.action.commitmentless ? '' : 'you committed to '}is ready for you to complete: ${context.action.name}. ${withCid(actionUrl(context.action.id, true), context.cid)}. ${context.deadlineEvent ? `You have ${getDaysFromDeadline(context.deadlineEvent)} to complete.` : ''}`,
 };
 
 export const defaultEventText3DayReminder: {
