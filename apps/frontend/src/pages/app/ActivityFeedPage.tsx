@@ -5,6 +5,7 @@ import UserActivityCard from "../../components/UserActivityCard";
 import { useAuth } from "../../lib/AuthContext";
 import useActivities, { ActivityList } from "./useActivities";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
+import { Link } from "react-router";
 
 type Mode = "friends" | "everyone";
 
@@ -87,21 +88,27 @@ const ActivityFeedPage = () => {
 
   return (
     <CenterLayout width="3xl">
-      <div className="mx-auto flex flex-row gap-x-2 mb-4 w-full justify-start">
-        {modes.map((m) => (
-          <Button
-            color={ButtonColor.Transparent}
-            key={m}
-            onClick={() => setMode(m)}
-            aria-pressed={m === mode}
-            className={`!border-b-[1.5px] rounded-none ${
-              m === mode ? "!border-b-green" : "!border-b-transparent"
-            }`}
-          >
-            <p className="capitalize">{m}</p>
-          </Button>
-        ))}
+      <div className="mx-auto flex flex-row gap-x-2 mb-4 w-full justify-between items-center">
+        <div className=" flex flex-row gap-x-2 justify-start">
+          {modes.map((m) => (
+            <Button
+              color={ButtonColor.Transparent}
+              key={m}
+              onClick={() => setMode(m)}
+              aria-pressed={m === mode}
+              className={`!border-b-[1.5px] rounded-none ${
+                m === mode ? "!border-b-green" : "!border-b-transparent"
+              }`}
+            >
+              <p className="capitalize">{m}</p>
+            </Button>
+          ))}
+        </div>
+        <Link to="/members" className="text-link text-sm">
+          Member list
+        </Link>
       </div>
+
       <div
         className="relative overflow-hidden border border-zinc-200 rounded transition-[height] duration-100 ease-out bg-white"
         style={{

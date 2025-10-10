@@ -125,6 +125,17 @@ export class UserService {
     return this.userRepository.find();
   }
 
+  findAllWithFriendRequests(): Promise<User[]> {
+    return this.userRepository.find({
+      relations: [
+        'sentFriendRequests',
+        'sentFriendRequests.addressee',
+        'receivedFriendRequests',
+        'receivedFriendRequests.requester',
+      ],
+    });
+  }
+
   findOne(id: number, relations?: string[]): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },

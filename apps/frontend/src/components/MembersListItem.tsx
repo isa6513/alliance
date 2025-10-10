@@ -9,12 +9,12 @@ export interface MembersListCardProps {
 
 export default function MembersListItem({ profile }: MembersListCardProps) {
   return (
-    <Link to={`/user/${profile.id}`} className="p-4 hover:bg-zinc-50">
+    <Link to={`/user/${profile.id}`} className="p-3 hover:bg-zinc-50">
       <div className="flex flex-row items-center">
         <ProfileImage
           pfp={profile.profilePicture}
-          size="large"
-          className="mr-3"
+          size="medium"
+          className="mr-2"
         />
         <UserDisplayName staff={profile.staff} underline={false}>
           {profile.displayName}

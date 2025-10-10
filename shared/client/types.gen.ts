@@ -82,6 +82,7 @@ export type UpdateProfileDto = {
     email?: string;
     phoneNumber?: string;
     phoneNumberValidated?: boolean;
+    sentTextOptInMessageAt?: string;
     emailVerified?: boolean;
     contractDateSigned?: string | null;
     contractDateSuspended?: string | null;
@@ -129,6 +130,7 @@ export type User = {
     email: string;
     phoneNumber?: string;
     phoneNumberValidated: boolean;
+    sentTextOptInMessageAt?: string;
     emailVerified: boolean;
     contractDateSigned: string | null;
     contractDateSuspended: string | null;
@@ -178,6 +180,16 @@ export type UserActionRelationsForUserDto = {
 export type UserActionRelationsResponseDto = {
     actions: Array<UserActionSummaryDto>;
     users: Array<UserActionRelationsForUserDto>;
+};
+
+export type ProfileDtoWithFriends = {
+    id: number;
+    admin: boolean;
+    staff: boolean;
+    profilePicture: string | null;
+    profileDescription: string | null;
+    displayName: string;
+    friends: Array<ProfileDto>;
 };
 
 export type VerifyEmailBody = {
@@ -1585,6 +1597,19 @@ export type UserMembersResponses = {
 };
 
 export type UserMembersResponse = UserMembersResponses[keyof UserMembersResponses];
+
+export type UserMembersWithFriendsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/membersWithFriends';
+};
+
+export type UserMembersWithFriendsResponses = {
+    200: Array<ProfileDtoWithFriends>;
+};
+
+export type UserMembersWithFriendsResponse = UserMembersWithFriendsResponses[keyof UserMembersWithFriendsResponses];
 
 export type UserMyProfileData = {
     body?: never;

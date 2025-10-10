@@ -57,6 +57,18 @@ export class ProfileDto extends PickType(User, [
   }
 }
 
+export class ProfileDtoWithFriends extends ProfileDto {
+  @ApiProperty({ type: ProfileDto, isArray: true })
+  @Type(() => ProfileDto)
+  @Allow()
+  friends: ProfileDto[];
+
+  constructor(user: User) {
+    super(user);
+    this.friends = user.friends.map((friend) => new ProfileDto(friend));
+  }
+}
+
 export class UserDto extends PickType(User, [
   'name',
   'email',

@@ -28,6 +28,7 @@ import {
   FriendStatusDto,
   OnboardingDto,
   ProfileDto,
+  ProfileDtoWithFriends,
   UpdateProfileDto,
   userToDto,
 } from './user.dto';
@@ -249,6 +250,15 @@ export class UserController {
   async members(): Promise<ProfileDto[]> {
     return (await this.userService.findAll()).map(
       (user) => new ProfileDto(user),
+    );
+  }
+
+  @Get('membersWithFriends')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [ProfileDtoWithFriends] })
+  async membersWithFriends(): Promise<ProfileDtoWithFriends[]> {
+    return (await this.userService.findAllWithFriendRequests()).map(
+      (user) => new ProfileDtoWithFriends(user),
     );
   }
 
