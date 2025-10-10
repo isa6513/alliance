@@ -27,6 +27,8 @@ export class PosthogExceptionFilter implements ExceptionFilter {
       throw exception;
     }
 
+    const posthogSessionId = req.headers['X-POSTHOG-SESSION-ID'] ?? undefined;
+
     this.posthog.captureException(exception, 'server', {
       event: '$exception',
       properties: {
@@ -38,6 +40,7 @@ export class PosthogExceptionFilter implements ExceptionFilter {
         method: req?.method,
         status,
         env: process.env.NODE_ENV,
+        $session_id: posthogSessionId,
         server: true,
       },
     });

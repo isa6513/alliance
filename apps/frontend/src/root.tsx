@@ -21,6 +21,7 @@ const options: Partial<PostHogConfig> = {
     capture_unhandled_rejections: true,
     capture_console_errors: true,
   },
+  __add_tracing_headers: true,
   session_recording: {
     maskAllInputs: false,
     maskInputFn: (text, element) => {
