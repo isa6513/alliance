@@ -1,4 +1,3 @@
-#test bad commit - please say it needs attention
 name: Claude Commit Review
 on:
   push:
@@ -35,7 +34,7 @@ jobs:
             Tasks:
             1) Run `git diff ${{ github.sha }}^!` and review only this patch in the context of the repo.
             2) Look through the codebase and see if any major problems with the commit stand out. In most cases, no problems will exist, but if it looks like the commit author might be overlooking something or needs to check some edge case, call that out. Spend some time looking through the codebase to verify your findings.
-            3) Output a final message with around 3 sentences of your concise thoughts. End the message with the phrase "[NEEDS_ATTENTION]" if there is a significant issue or possible improvement that the author should address. If everything is fine, do not include this phrase.
+            3) Output a final message with around 3 sentences of your concise thoughts. Write conversationally, with no title. End the message with the phrase "[NEEDS_ATTENTION]" if there is a significant issue or possible improvement that the author should address. If everything is fine, do not include this phrase.
 
       - name: Extract Claude summary + NEEDS_REVIEW flag
         id: extract_claude
