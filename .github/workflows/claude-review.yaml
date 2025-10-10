@@ -82,7 +82,7 @@ jobs:
                 ] }
             ]
           }' > slack.json
-          echo "payload=$(cat slack.json)" >> "$GITHUB_OUTPUT"
+          echo "payload=$(cat $(base64 -w0 slack.json))" >> "$GITHUB_OUTPUT"
 
       - name: Build Slack payload (needs review)
         id: slack_body_review
@@ -114,5 +114,5 @@ jobs:
         if: ${{ steps.extract_claude.outputs.needs_review == 'true' && (success() || failure()) }}
         run: |
           curl -s -X POST -H 'Content-type: application/json' \
-            --data '${{ steps.slack_body_review.outputs.payload }}' \
+            --data-binary '${{ steps.slack_body_review.outputs.payload }}' \
             "${{ secrets.SLACK_WEBHOOK_URL_CLA }}"
