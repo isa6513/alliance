@@ -58,7 +58,7 @@ jobs:
             echo "summary<<$delim"
             printf "%s\n" "$summary"
             echo "$delim"
-          } >> "$GITHUB_OUTPUT"
+          } | sed 's|['\''"]||g' >> "$GITHUB_OUTPUT"
 
           echo "$summary"
 
@@ -66,23 +66,6 @@ jobs:
 
           echo "$needs_review"
           echo "needs_review=$needs_review" >> "$GITHUB_OUTPUT"
-
-      - name: Build Slack payload (fallback)
-        id: slack_body
-        if: ${{ steps.extract_claude.outputs.needs_review != 'true' }}
-        run: |
-          RUN_URL="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-
-          jq -nc --arg url "$RUN_URL" '{
-            text: "Fallback - no review needed",
-            blocks: [
-              { "type": "section", "text": { "type": "mrkdwn", "text": "Fallback - no review needed" } },
-              { "type": "actions", "elements": [
-                  { "type": "button", "text": { "type": "plain_text", "text": "Open run" }, "url": $url }
-                ] }
-            ]
-          }' > slack.json
-          echo "payload=$(cat $(base64 -w0 slack.json))" >> "$GITHUB_OUTPUT"
 
       - name: Build Slack payload (needs review)
         id: slack_body_review
@@ -114,5 +97,5 @@ jobs:
         if: ${{ steps.extract_claude.outputs.needs_review == 'true' && (success() || failure()) }}
         run: |
           curl -s -X POST -H 'Content-type: application/json' \
-            --data-binary '${{ steps.slack_body_review.outputs.payload }}' \
+            --data '${{ steps.slack_body_review.outputs.payload }}' \
             "${{ secrets.SLACK_WEBHOOK_URL_CLA }}"
