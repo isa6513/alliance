@@ -82,26 +82,24 @@ const InvitePage: React.FC = () => {
             <h3 className="font-serif !text-3xl font-bold mt-2">
               What do you need?
             </h3>
-            <p>
-              <ol className="list-decimal list-inside space-y-3">
-                <li>
-                  <span className="font-bold">
-                    A willingness to take our world&apos;s problems seriously.
-                  </span>{" "}
-                  We need a shared belief that these problems are not right, and
-                  therefore a readiness to take actions that require meaningful
-                  effort. Given this, we can address disagreements with respect
-                  and reasoned deliberation.
-                </li>
-                <li>
-                  <span className="font-bold">
-                    A willingness to make and keep a promise.
-                  </span>{" "}
-                  If we can trust every member follows through on their word, we
-                  can make ambitious and complex plans that rely on one another.
-                </li>
-              </ol>
-            </p>
+            <ol className="list-decimal list-inside space-y-3">
+              <li>
+                <span className="font-bold">
+                  A willingness to take our world&apos;s problems seriously.
+                </span>{" "}
+                We need a shared belief that these problems are not right, and
+                therefore a readiness to take actions that require meaningful
+                effort. Given this, we can address disagreements with respect
+                and reasoned deliberation.
+              </li>
+              <li>
+                <span className="font-bold">
+                  A willingness to make and keep a promise.
+                </span>{" "}
+                If we can trust every member follows through on their word, we
+                can make ambitious and complex plans that rely on one another.
+              </li>
+            </ol>
             <h3 className="font-serif !text-3xl font-bold mt-2">
               How do you join?
             </h3>
