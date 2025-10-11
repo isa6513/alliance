@@ -228,10 +228,10 @@ const HomePage = () => {
               <p className="font-semibold text-xl font-serif text-black">
                 Forum activity
               </p>
-              {posts?.length === 0 && (
+              {posts && posts.length === 0 && (
                 <p className="text-zinc-400 mt-3">No activity yet.</p>
               )}
-              {posts?.length > 0 && (
+              {posts && posts.length > 0 && (
                 <div className="flex flex-col *:py-3 -mb-3">
                   {posts?.slice(0, 2).map((post) => (
                     <ForumListPost

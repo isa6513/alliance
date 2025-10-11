@@ -10,7 +10,6 @@ import { PostHog, setupExpressErrorHandler } from 'posthog-node';
 import { ServerOptions } from 'socket.io';
 import { AppModule } from './app.module';
 import { PosthogExceptionFilter } from './posthog.filter';
-import { JwtService } from '@nestjs/jwt';
 
 function validateEnv() {
   const requiredVars = [

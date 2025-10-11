@@ -34,6 +34,10 @@ const SearchBar = () => {
   };
 
   const fetchItems = useCallback(async () => {
+    if (search.length === 0) {
+      setItems([]);
+      return;
+    }
     const res = await searchAll({ query: { query: search } });
     if (res.data) {
       const itemsByCategory: Record<SearchItemType, SearchItemDto[]> =

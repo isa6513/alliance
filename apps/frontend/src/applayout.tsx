@@ -38,7 +38,7 @@ export type ActionWithRelation = ActionDto & {
 
 export interface LoaderData {
   actionData: Promise<ActionLoaderData | null>;
-  posts: Promise<PostDto[]>;
+  posts: Promise<PostDto[] | null>;
   profile: Promise<ProfileDto | null>;
 }
 
@@ -55,10 +55,10 @@ export interface ActivitiesForAction {
 }
 
 export interface AppLayoutOutletContext {
-  actions: ActionWithRelation[];
+  actions: ActionWithRelation[] | null;
   relations: Map<number, UserActionRelation> | null;
   activities: Map<number, ActivitiesForAction> | null;
-  posts: PostDto[];
+  posts: PostDto[] | null;
   profile: ProfileDto | null;
 }
 
@@ -154,7 +154,7 @@ export function clientLoader() {
     };
   });
 
-  const posts = forumFindAllPosts().then((response) => response.data ?? []);
+  const posts = forumFindAllPosts().then((response) => response.data ?? null);
 
   const profile = userMyProfile().then((response) => response.data ?? null);
 
@@ -206,7 +206,7 @@ export default function AppLayout() {
     profile: profileLoader,
   } = useLoaderData<typeof clientLoader>();
 
-  const [actions, setActions] = useState<ActionWithRelation[]>([]);
+  const [actions, setActions] = useState<ActionWithRelation[] | null>(null);
   const [relations, setRelations] = useState<Map<
     number,
     UserActionRelation
@@ -215,7 +215,7 @@ export default function AppLayout() {
     number,
     ActivitiesForAction
   > | null>(null);
-  const [posts, setPosts] = useState<PostDto[]>([]);
+  const [posts, setPosts] = useState<PostDto[] | null>(null);
   const [profile, setProfile] = useState<ProfileDto | null>(null);
 
   useEffect(() => {

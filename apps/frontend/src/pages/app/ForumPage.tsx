@@ -16,13 +16,17 @@ const ForumPage: React.FC = () => {
     navigate("/forum/edit/new");
   }, [navigate]);
 
+  useGrayBackground();
+
+  if (posts === null) {
+    return null;
+  }
+
   const sorted = posts.sort((a, b) => {
     if (a.pinned && !b.pinned) return -1;
     if (!a.pinned && b.pinned) return 1;
     return 0;
   });
-
-  useGrayBackground();
 
   return (
     <CenterLayout className="space-y-3">

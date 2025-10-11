@@ -9,8 +9,10 @@ function Navbar() {
 
   const nTasks = useMemo(
     () =>
-      context.actions.filter((action) => canCompleteAction(action)).length +
-      context.actions.filter((action) => canJoinAction(action)).length,
+      context.actions
+        ? context.actions.filter((action) => canCompleteAction(action)).length +
+          context.actions.filter((action) => canJoinAction(action)).length
+        : 0,
     [context.actions]
   );
 

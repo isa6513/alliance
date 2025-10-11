@@ -8,16 +8,17 @@ import List from "@alliance/shared/ui/List";
 import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import { useAuth } from "../../lib/AuthContext";
 import { useState } from "react";
+import BasicErrorMessage from "../../components/BasicErrorMessage";
 
 export async function clientLoader() {
   const members = await userMembersWithFriends();
   const userSentFriendRequests = await userListSentRequests();
 
   return {
-    members: members.data ?? [],
+    members: members.data ?? null,
     userSentFriendRequestIds: userSentFriendRequests.data
       ? userSentFriendRequests.data.map((req) => req.id)
-      : [],
+      : null,
   };
 }
 
@@ -34,6 +35,10 @@ const MembersListPage = () => {
   const [filterMode, setFilterMode] = useState<MemberFilterMode>(
     MemberFilterMode.All
   );
+
+  if (members === null) {
+    return <BasicErrorMessage>Could not load members</BasicErrorMessage>;
+  }
 
   const myFriends = user?.friends.map((friend) => friend.id) ?? [];
   const friendsOfFriends = members.filter(
@@ -73,7 +78,7 @@ const MembersListPage = () => {
             <MembersListItem
               key={member.id}
               profile={member}
-              sentFriendRequest={userSentFriendRequestIds.includes(member.id)}
+              sentFriendRequest={userSentFriendRequestIds?.includes(member.id)}
             />
           ))}
         </List>
