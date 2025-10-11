@@ -1,14 +1,14 @@
 import React, { useCallback } from "react";
-import { useNavigate } from "react-router";
-import { usePostsData } from "../../applayout";
+import { useNavigate, useOutletContext } from "react-router";
 import ForumListPost from "../../components/ForumListPost";
 import { useGrayBackground } from "../../components/HtmlBackgroundManager";
 import List from "@alliance/shared/ui/List";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import { AppLayoutOutletContext } from "../../applayout";
 
 const ForumPage: React.FC = () => {
-  const posts = usePostsData();
+  const { posts } = useOutletContext<AppLayoutOutletContext>();
 
   const navigate = useNavigate();
 

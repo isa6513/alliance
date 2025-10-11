@@ -20,10 +20,8 @@ import {
   useRouteLoaderData,
 } from "react-router";
 import BugReportButton from "./components/BugReportButton";
-import NavbarHorizontal from "./components/NavbarHorizontal";
 import { useAuth } from "./lib/AuthContext";
 import { isFeatureEnabled } from "./lib/config";
-import { canCompleteAction, canJoinAction } from "./pages/app/HomePage";
 
 export interface RouteMatch {
   data: unknown;
@@ -54,6 +52,14 @@ export interface ActionLoaderData {
 export interface ActivitiesForAction {
   join: ActionActivityDto | null;
   completion: ActionActivityDto | null;
+}
+
+export interface AppLayoutOutletContext {
+  actions: ActionWithRelation[];
+  relations: Map<number, UserActionRelation> | null;
+  activities: Map<number, ActivitiesForAction> | null;
+  posts: PostDto[];
+  profile: ProfileDto | null;
 }
 
 const revalidateKey = "revalidate";
@@ -168,42 +174,6 @@ export function useAppLoaderData(): LoaderData {
   return data;
 }
 
-export function useAppActionData(): ActionLoaderData {
-  const [data, setData] = useState<ActionLoaderData>({
-    actions: null,
-    relations: null,
-    activities: null,
-    loading: true,
-  });
-  const appLayoutData = useRouteLoaderData<typeof clientLoader>("applayout");
-  appLayoutData?.actionData.then((data) => {
-    if (data) {
-      setData(data);
-    } else {
-      setRevalidate();
-    }
-  });
-  return data;
-}
-
-export function usePostsData(): PostDto[] {
-  const [data, setData] = useState<PostDto[]>([]);
-  const appLayoutData = useRouteLoaderData<typeof clientLoader>("applayout");
-  appLayoutData?.posts.then((data) => {
-    setData(data);
-  });
-  return data;
-}
-
-export function useProfileData(): ProfileDto | null {
-  const [data, setData] = useState<ProfileDto | null>(null);
-  const appLayoutData = useRouteLoaderData<typeof clientLoader>("applayout");
-  appLayoutData?.profile.then((data) => {
-    setData(data);
-  });
-  return data;
-}
-
 export function HydrateFallback() {
   return (
     <div className="flex h-screen w-screen items-center justify-center">
@@ -228,21 +198,48 @@ export function isAuthOnly(path: string) {
     return true;
   }
 }
-
 export default function AppLayout() {
   const { isAuthenticated, loading, logout } = useAuth();
 
-  const [nTasks, setNTasks] = useState<number>(0);
+  const {
+    actionData: actionDataLoader,
+    posts: postsLoader,
+    profile: profileLoader,
+  } = useLoaderData<typeof clientLoader>();
 
-  const { actionData } = useLoaderData<typeof clientLoader>();
+  const [actions, setActions] = useState<ActionWithRelation[]>([]);
+  const [relations, setRelations] = useState<Map<
+    number,
+    UserActionRelation
+  > | null>(null);
+  const [activities, setActivities] = useState<Map<
+    number,
+    ActivitiesForAction
+  > | null>(null);
+  const [posts, setPosts] = useState<PostDto[]>([]);
+  const [profile, setProfile] = useState<ProfileDto | null>(null);
 
-  actionData.then((data) => {
+  actionDataLoader.then((data) => {
+    if (data?.actions) {
+      setActions(data.actions);
+    }
+    if (data?.relations) {
+      setRelations(data.relations);
+    }
+    if (data?.activities) {
+      setActivities(data.activities);
+    }
+  });
+
+  postsLoader.then((data) => {
     if (data) {
-      const todoActions =
-        data.actions?.filter((action) => canCompleteAction(action)) ?? [];
-      const newActions =
-        data.actions?.filter((action) => canJoinAction(action)) ?? [];
-      setNTasks(todoActions.length + newActions.length);
+      setPosts(data);
+    }
+  });
+
+  profileLoader.then((data) => {
+    if (data) {
+      setProfile(data);
     }
   });
 
@@ -255,14 +252,7 @@ export default function AppLayout() {
     if (isAuthenticated) {
       localStorage.setItem("was-logged-in", "true");
     }
-    // prevent user from going into "logged out mode" if their session expires
-    // if (
-    //   !isAuthenticated &&
-    //   localStorage.getItem("was-logged-in") === "true" &&
-    //   !loading
-    // ) {
-    //   navigate("/login?redirect=" + window.location.pathname);
-    // }
+
     const wasLoggedIn = localStorage.getItem("was-logged-in") === "true";
 
     const handleUnauthorized = () => {
@@ -292,8 +282,17 @@ export default function AppLayout() {
 
   return (
     <>
-      <NavbarHorizontal todoActions={nTasks} />
-      <Outlet />
+      <Outlet
+        context={
+          {
+            actions,
+            relations,
+            activities,
+            posts,
+            profile,
+          } satisfies AppLayoutOutletContext
+        }
+      />
       {isFeatureEnabled(Features.BugReporting) && <BugReportButton />}
     </>
   );

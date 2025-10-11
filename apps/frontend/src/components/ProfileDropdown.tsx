@@ -1,9 +1,9 @@
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useOutletContext } from "react-router";
 import { useAuth } from "../lib/AuthContext";
-import { useProfileData } from "../applayout";
+import { AppLayoutOutletContext } from "../applayout";
 
 const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,7 +11,7 @@ const ProfileDropdown = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  const profile = useProfileData();
+  const { profile } = useOutletContext<AppLayoutOutletContext>();
 
   const profilePicture = profile?.profilePicture || null;
   const userId = profile?.id || null;

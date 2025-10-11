@@ -1,11 +1,7 @@
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
-import { Link, useNavigate } from "react-router";
-import {
-  ActionWithRelation,
-  useAppActionData,
-  usePostsData,
-} from "../../applayout";
+import { Link, useNavigate, useOutletContext } from "react-router";
+import { ActionWithRelation, AppLayoutOutletContext } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import ForumListPost from "../../components/ForumListPost";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
@@ -33,8 +29,8 @@ export function canJoinAction(action: ActionWithRelation) {
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const posts = usePostsData();
-  const { actions, activities, loading } = useAppActionData();
+  const { actions, posts, activities } =
+    useOutletContext<AppLayoutOutletContext>();
 
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
@@ -42,15 +38,11 @@ const HomePage = () => {
 
   const mainContent = () => {
     if (actions === null) {
-      if (loading) {
-        return null;
-      } else {
-        return (
-          <div className="absolute top-0 left-0 right-0 md:right-[380px] h-full flex justify-center items-center text-center text-zinc-500 py-5">
-            Error loading actions
-          </div>
-        );
-      }
+      return (
+        <div className="absolute top-0 left-0 right-0 md:right-[380px] h-full flex justify-center items-center text-center text-zinc-500 py-5">
+          Error loading actions
+        </div>
+      );
     }
 
     const todoActions = actions.filter((action) => canCompleteAction(action));

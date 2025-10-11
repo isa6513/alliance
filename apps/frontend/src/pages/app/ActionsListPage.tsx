@@ -1,11 +1,17 @@
 import { FilterMode } from "@alliance/shared/lib/actionUtils";
 import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import { useMemo, useState } from "react";
-import { ActionWithRelation, useAppActionData } from "../../applayout";
+import {
+  ActionWithRelation,
+  AppLayoutOutletContext,
+  LoaderData,
+  useAppActionData,
+} from "../../applayout";
 import ActionItemCard from "../../components/ActionItemCard";
 import { useGrayBackground } from "../../components/HtmlBackgroundManager";
 import List from "@alliance/shared/ui/List";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
+import { useOutletContext } from "react-router";
 
 export const filterActions = (
   actions: ActionWithRelation[],
@@ -35,7 +41,8 @@ export const filterActions = (
 };
 
 const ActionsListPage = () => {
-  const { actions } = useAppActionData();
+  const { actions } = useOutletContext<AppLayoutOutletContext>();
+
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
   const modeToActions: Record<FilterMode, ActionWithRelation[]> =

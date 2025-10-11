@@ -19,32 +19,34 @@ export default [
   route("/progress/:slug", "pages/static/ProgressPostPage.tsx"),
 
   layout("applayout.tsx", [
-    ...prefix("/actions", [
-      route("/", "pages/app/ActionsListPage.tsx"),
-      route(":id", "pages/app/ActionPage.tsx", [
-        layout("components/ActionContents.tsx", [
-          index("components/ActionPageTaskPanel.tsx"),
+    layout("navbar.tsx", [
+      ...prefix("/actions", [
+        route("/", "pages/app/ActionsListPage.tsx"),
+        route(":id", "pages/app/ActionPage.tsx", [
+          layout("components/ActionContents.tsx", [
+            index("components/ActionPageTaskPanel.tsx"),
+          ]),
+          route("activity/:activityId", "components/ActionActivityDetail.tsx"),
         ]),
-        route("activity/:activityId", "components/ActionActivityDetail.tsx"),
       ]),
+      route("/issues/:id", "pages/app/IssuePage.tsx"),
+      route("/profile", "pages/app/ProfileRedirect.tsx"),
+      route("/feed", "pages/app/ActivityFeedPage.tsx"),
+      route("/user/:id", "pages/app/UserProfilePage.tsx"),
+      route("/verifyEmail", "pages/app/VerifyEmailPage.tsx"),
+
+      route("forum", "pages/app/ForumPage.tsx"),
+      route("forum/post/:id", "pages/app/PostDetailPage.tsx"),
+      route("forum/edit/:postId", "pages/app/PostFormPage.tsx"),
+
+      route("/tasks", "pages/app/HomePage.tsx"),
+      route("/notifications", "pages/app/NotificationsPage.tsx"),
+      route("/settings", "pages/app/SettingsPage.tsx"),
+      route("/contract", "pages/app/ContractPage.tsx"),
+      route("/commit", "pages/app/CommitActionPage.tsx"),
+      route("/priorities", "pages/app/PrioritiesPage.tsx"),
+      route("/members", "pages/app/MembersListPage.tsx"),
     ]),
-    route("/issues/:id", "pages/app/IssuePage.tsx"),
-    route("/profile", "pages/app/ProfileRedirect.tsx"),
-    route("/feed", "pages/app/ActivityFeedPage.tsx"),
-    route("/user/:id", "pages/app/UserProfilePage.tsx"),
-    route("/verifyEmail", "pages/app/VerifyEmailPage.tsx"),
-
-    route("forum", "pages/app/ForumPage.tsx"),
-    route("forum/post/:id", "pages/app/PostDetailPage.tsx"),
-    route("forum/edit/:postId", "pages/app/PostFormPage.tsx"),
-
-    route("/tasks", "pages/app/HomePage.tsx"),
-    route("/notifications", "pages/app/NotificationsPage.tsx"),
-    route("/settings", "pages/app/SettingsPage.tsx"),
-    route("/contract", "pages/app/ContractPage.tsx"),
-    route("/commit", "pages/app/CommitActionPage.tsx"),
-    route("/priorities", "pages/app/PrioritiesPage.tsx"),
-    route("/members", "pages/app/MembersListPage.tsx"),
   ]),
   layout("loggedoutonly.tsx", [
     route("/login", "pages/app/LoginPage.tsx"),
