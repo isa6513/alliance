@@ -59,7 +59,7 @@ jobs:
         id: slack_body_review
         if: ${{ steps.extract_codex.outputs.needs_review == 'true' }}
         env:
-          SUMMARY: ${{ steps.extract_codex.outputs.summary }}
+          SUMMARY: ${{ steps.extract_codex.outputs.codex_final_message }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           jq -nc \

@@ -124,7 +124,7 @@ describe('Tasks (e2e)', () => {
 
     const updateResponse = await request(ctx.app.getHttpServer())
       .put(`/tasks/updateForm/${formId}`)
-      .set('Authorization', `Bearer ${ctx.accessToken}`)
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
       .send({
         title: 'Updated Volunteer Signup',
         schema: sampleSchema,
@@ -201,12 +201,12 @@ describe('Tasks (e2e)', () => {
 
     await request(ctx.app.getHttpServer())
       .delete(`/tasks/${formId}`)
-      .set('Authorization', `Bearer ${ctx.accessToken}`)
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
       .expect(200);
 
     await request(ctx.app.getHttpServer())
       .get(`/tasks/slug/${formId}`)
-      .set('Authorization', `Bearer ${ctx.accessToken}`)
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
       .expect(404);
   });
 });
