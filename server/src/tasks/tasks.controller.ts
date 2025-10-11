@@ -79,7 +79,7 @@ export class TasksController {
   }
 
   @Put('updateForm/:formId')
-  @UseGuards(AuthGuard)
+  @UseGuards(AdminGuard)
   @ApiOkResponse()
   async updateForm(
     @Param('formId') formId: string,
@@ -89,7 +89,7 @@ export class TasksController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard)
+  @UseGuards(AdminGuard)
   @ApiOkResponse()
   async deleteForm(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.tasksService.deleteForm(id);

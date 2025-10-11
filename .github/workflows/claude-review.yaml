@@ -29,7 +29,7 @@ jobs:
             Suggest any improvements, potential bugs, or issues.
             Be concise and specific in your feedback.
 
-            Output a final message with 3 sentences or less of your concise thoughts. Write conversationally, with no title. Do not summarize the commit, just address any changes needed. End the message with the phrase "[NEEDS_ATTENTION]" if there is a significant issue or possible improvement that the author should address. If everything is fine, do not include this phrase.
+            Output a final message with 3 sentences or less of your concise thoughts. Do not summarize the commit, just address any changes needed. End the message with the phrase "[NEEDS_ATTENTION]" if there is a significant issue or possible improvement that the author should address. If everything is fine, do not include this phrase.
 
   post_feedback:
     runs-on: ubuntu-latest
@@ -57,9 +57,9 @@ jobs:
 
       - name: Build Slack payload (needs review)
         id: slack_body_review
-        if: ${{ steps.extract_claude.outputs.needs_review == 'true' }}
+        if: ${{ steps.extract_codex.outputs.needs_review == 'true' }}
         env:
-          SUMMARY: ${{ steps.extract_claude.outputs.summary }}
+          SUMMARY: ${{ steps.extract_codex.outputs.summary }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           jq -nc \
@@ -82,7 +82,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Post to Slack (NEEDS_REVIEW)
-        if: ${{ steps.extract_claude.outputs.needs_review == 'true' && (success() || failure()) }}
+        if: ${{ steps.extract_codex.outputs.needs_review == 'true' && (success() || failure()) }}
         run: |
           curl -s -X POST -H 'Content-type: application/json' \
             --data '${{ steps.slack_body_review.outputs.payload }}' \
