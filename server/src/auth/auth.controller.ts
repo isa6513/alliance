@@ -101,7 +101,7 @@ export class AuthController {
     if (signUp.mode === 'header') {
       return { access_token, refresh_token, isAdmin };
     }
-    return { isAdmin: true };
+    return { isAdmin };
   }
 
   @Post('refresh')
