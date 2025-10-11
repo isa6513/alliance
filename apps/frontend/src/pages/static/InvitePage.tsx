@@ -1,52 +1,11 @@
-import { authMe, authRegister, SignUpDto } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import posthog from "posthog-js";
-import React, { useState } from "react";
+import React from "react";
 import { Link, useSearchParams } from "react-router";
-import SignupForm from "../../components/SignupForm";
 
 const InvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();
 
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
   const referralCode = searchParams.get("ref");
-
-  const handleSubmit = async (formData: SignUpDto) => {
-    setError(null);
-    setLoading(true);
-
-    try {
-      const resp = await authRegister({ body: formData });
-      if (resp.response.ok) {
-        const checkAuth = await authMe();
-
-        if (checkAuth.response.ok) {
-          const user = checkAuth.data;
-          if (user) {
-            posthog.identify(user.id.toString(), {
-              email: user.email,
-              name: user.name,
-            });
-            posthog.capture("new_user", {
-              email: user.email,
-              name: user.name,
-            });
-          }
-          window.location.href = "/tasks";
-        } else {
-          setError("please try again");
-        }
-      } else {
-        setError((resp.error as Error).message || "Registration failed");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (!referralCode) {
     return (
@@ -67,15 +26,6 @@ const InvitePage: React.FC = () => {
           <h2 className="font-serif !text-4xl text-center mb-8">
             Invitation to the Alliance
           </h2>
-
-          {error && (
-            <Card
-              style={CardStyle.Alert}
-              className="border-red-400 bg-red-50 mb-6"
-            >
-              <span className="text-red-700">{error}</span>
-            </Card>
-          )}
 
           <Card className="p-12 flex flex-col gap-y-6" style={CardStyle.White}>
             <p>
@@ -98,17 +48,18 @@ const InvitePage: React.FC = () => {
             <p>
               <span className="font-bold">Our unique model</span> could one day
               enable sustained, strategic cooperation among millions of people:
-              <ol className="list-decimal list-inside my-2 space-y-1">
-                <li>
-                  Members commit to give a reliable fraction of their time.
-                  Right now, this is 15 minutes per week.
-                </li>
-                <li>
-                  In return, our staff team prepares a steady stream of
-                  high-impact actions for members to complete following a
-                  democratic assessment of priorities.
-                </li>
-              </ol>
+            </p>
+            <ol className="list-decimal list-inside space-y-3 ">
+              <li>
+                Members commit to give a reliable fraction of their time. Right
+                now, this is 15 minutes per week.
+              </li>
+              <li>
+                A strategic office prepares high-impact actions for members to
+                complete following a democratic assessment of priorities.
+              </li>
+            </ol>
+            <p>
               <span className="font-bold">Imagine if millions of people</span>{" "}
               could instantly boycott a corporation acting unethically, or
               collectively make lifestyle changes to curtail waste, or fund new
@@ -129,10 +80,10 @@ const InvitePage: React.FC = () => {
               What do you need?
             </h3>
             <p>
-              <ol className="list-decimal list-inside space-y-1">
+              <ol className="list-decimal list-inside space-y-3">
                 <li>
                   <span className="font-bold">
-                    A willingness to take our world's problems seriously.
+                    A willingness to take our world&apos;s problems seriously.
                   </span>{" "}
                   We need a shared belief that these problems are not right, and
                   therefore a readiness to take actions that require meaningful
@@ -144,43 +95,44 @@ const InvitePage: React.FC = () => {
                     A willingness to make and keep a promise.
                   </span>{" "}
                   If we can trust every member follows through on their word, we
-                  can make ambitious plans that rely on one another.
+                  can make ambitious and complex plans that rely on one another.
                 </li>
               </ol>
             </p>
             <h3 className="font-serif !text-3xl font-bold">How do you join?</h3>
-            <ol className="list-decimal list-inside space-y-1">
+            <ol className="list-decimal list-inside space-y-3">
               <li>
-                <span className="font-bold">
-                  Skim our{" "}
-                  <Link to="/guide" className="text-link" target="_blank">
-                    Guide
-                  </Link>
-                </span>{" "}
+                Skim our{" "}
+                <Link
+                  to="/guide"
+                  className="py-1 px-2 border border-green hover:bg-zinc-50 rounded-md font-medium shadow mx-1 text-green"
+                  target="_blank"
+                >
+                  guide
+                </Link>
                 to understand our structure, process, and governance.
               </li>
               <li>
-                <span className="font-bold">
-                  Create an account with my{" "}
-                  <Link
-                    to={`/signup?ref=${referralCode}`}
-                    className="text-link"
-                    target="_blank"
-                  >
-                    custom invite link here
-                  </Link>
-                </span>
+                Create an account with my{" "}
+                <Link
+                  to={`/signup?ref=${referralCode}`}
+                  className="py-1 px-2 border border-green hover:bg-zinc-50 font-medium rounded-md shadow mx-1 text-green"
+                  target="_blank"
+                >
+                  personal sign-up link
+                </Link>
                 . We will automatically be added as friends.
               </li>
               <li>
-                <span className="font-bold">
-                  Go through the onboarding tasks on your{" "}
-                  <Link to="/tasks" className="text-link" target="_blank">
-                    Tasks page
-                  </Link>
-                  .
-                </span>{" "}
-                Please let me know if you have any questions!
+                Go through the onboarding tasks on your{" "}
+                <Link
+                  to="/tasks"
+                  className="py-1 px-2 border border-green hover:bg-zinc-50 font-medium rounded-md shadow mx-1 text-green"
+                  target="_blank"
+                >
+                  tasks page
+                </Link>
+                . Please let me know if you have any questions!
               </li>
             </ol>
           </Card>
