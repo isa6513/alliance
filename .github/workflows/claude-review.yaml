@@ -1,4 +1,4 @@
-name: Claude Commit Review
+name: commit review
 on:
   push:
     branches: [main]
@@ -15,6 +15,8 @@ jobs:
       final_message: ${{ steps.run_codex.outputs.final-message }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Run Codex
         id: run_codex
