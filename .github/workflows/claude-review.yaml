@@ -7,60 +7,63 @@ permissions:
   contents: read
 
 jobs:
-  review:
+  codex:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      final_message: ${{ steps.run_codex.outputs.final-message }}
     steps:
-      - name: Checkout (full history for diffs)
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
-          fetch-depth: 0
+          # Explicitly check out the PR's merge commit.
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
 
-      - name: Show commit context
+      - name: Pre-fetch base and head refs for the PR
         run: |
-          echo "Commit: ${{ github.sha }}"
-          git --no-pager show --name-status --pretty=fuller ${{ github.sha }} > commit_show.txt
-          git --no-pager diff --binary ${{ github.sha }}^! > diff.patch
-          echo "Generated diff.patch ($(wc -c < diff.patch) bytes)"
+          git fetch --no-tags origin \
+            ${{ github.event.pull_request.base.ref }} \
+            +refs/pull/${{ github.event.pull_request.number }}/head
 
-      - name: Run Claude on this commit
-        id: claude
-        uses: anthropics/claude-code-base-action@beta
+      # If you want Codex to build and run code, install any dependencies that
+      # need to be downloaded before the "Run Codex" step because Codex's
+      # default sandbox disables network access.
+
+      - name: Run Codex
+        id: run_codex
+        uses: openai/codex-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          allowed_tools: "Bash(git:*),View,GlobTool,GrepTool,BatchTool"
-          max_turns: 30
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           prompt: |
-            You are a CI code reviewer for commit ${{ github.sha }} on branch "main".
-            Tasks:
-            1) Run `git diff ${{ github.sha }}^!` and review only this patch in the context of the repo.
-            2) Look through the codebase and see if any major problems with the commit stand out. In most cases, no problems will exist, but if it looks like the commit author might be overlooking something or needs to check some edge case, call that out. Spend some time looking through the codebase to verify your findings.
-            3) Output a final message with 3 sentences or less of your concise thoughts. Write conversationally, with no title. Do not summarize the commit, just address any changes needed. End the message with the phrase "[NEEDS_ATTENTION]" if there is a significant issue or possible improvement that the author should address. If everything is fine, do not include this phrase.
+            This is commit for ${{ github.repository }}.
+            Commit SHA: ${{ github.sha }}
 
-      - name: Extract Claude summary + NEEDS_REVIEW flag
-        id: extract_claude
+            Review ONLY the changes introduced by the commit.
+            Suggest any improvements, potential bugs, or issues.
+            Be concise and specific in your feedback.
+
+            Output a final message with 3 sentences or less of your concise thoughts. Write conversationally, with no title. Do not summarize the commit, just address any changes needed. End the message with the phrase "[NEEDS_ATTENTION]" if there is a significant issue or possible improvement that the author should address. If everything is fine, do not include this phrase.
+
+  post_feedback:
+    runs-on: ubuntu-latest
+    needs: codex
+    if: needs.codex.outputs.final_message != ''
+    steps:
+      - name: Extract Codex summary + NEEDS_ATTENTION flag
+        env:
+          CODEX_FINAL_MESSAGE: ${{ needs.codex.outputs.final_message }}
+        id: extract_codex
         run: |
-          FILE=/home/runner/work/_temp/claude-execution-output.json
-
-          # Grab the last assistant text block (empty string if none)
-          summary="$(
-            jq -r '
-              reverse
-              | map(select(.message.role == "assistant"))
-              | map(.message.content[]? | select(.type == "text"))
-              | (.[0].text // "")
-            ' "$FILE"
-          )"
-
           delim="EOF_$(date +%s%N)"
           {
-            echo "summary<<$delim"
-            printf "%s\n" "$summary"
+            echo "codex_final_message<<$delim"
+            printf "%s\n" "$CODEX_FINAL_MESSAGE"
             echo "$delim"
           } | sed 's|['\''"]||g' >> "$GITHUB_OUTPUT"
 
-          echo "$summary"
+          echo "$CODEX_FINAL_MESSAGE"
 
-          needs_review=$([[ "$summary" =~ NEEDS_ATTENTION ]] && echo "true" || echo "false")
+          needs_review=$([[ "$CODEX_FINAL_MESSAGE" =~ NEEDS_ATTENTION ]] && echo "true" || echo "false")
 
           echo "$needs_review"
           echo "needs_review=$needs_review" >> "$GITHUB_OUTPUT"
