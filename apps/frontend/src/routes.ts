@@ -9,7 +9,6 @@ import {
 export default [
   route("/", "pages/static/PrelaunchLanding.tsx"),
   route("/landing", "pages/static/NewLandingPage.tsx"),
-  route("/issues", "pages/app/IssuesListPage.tsx"),
   route("/people", "pages/static/PeoplePage.tsx"),
   route("/guide", "pages/static/GuidePage.tsx"),
   route("/privacypolicy", "pages/static/PrivacyPolicyPage.tsx"),

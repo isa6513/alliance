@@ -14,8 +14,6 @@ function Navbar() {
     [context.actions]
   );
 
-  console.log(nTasks);
-
   return (
     <>
       <NavbarHorizontal todoActions={nTasks} />
