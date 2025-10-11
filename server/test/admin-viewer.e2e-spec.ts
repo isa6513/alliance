@@ -90,7 +90,7 @@ describe('AdminViewer (e2e)', () => {
         'test-admin-viewer@example.com',
       ]);
       await actionRepository.query('DELETE FROM "action" WHERE name = $1', [
-        'Test Action for Admin Viewer',
+        'Test Action',
       ]);
     });
 
