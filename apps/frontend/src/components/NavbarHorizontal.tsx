@@ -4,10 +4,43 @@ import logo from "../assets/planet-earth.png";
 import { useAuth } from "../lib/AuthContext";
 import { isFeatureEnabled } from "../lib/config";
 import DropdownLink from "./DropdownLink";
-import { destinations, links, NavbarPage, platformSublinks } from "./Navbar";
 import NotificationsIcon from "./NotificationsIcon";
 import ProfileDropdown from "./ProfileDropdown";
 import SearchBar from "./SearchBar";
+
+export enum NavbarPage {
+  Dashboard = "Tasks",
+  CurrentActions = "Actions",
+  Activity = "Activity",
+  Announcements = "Announcements",
+  Forum = "Forum",
+  Priorities = "Priorities",
+  Platform = "Platform",
+}
+
+export const links: NavbarPage[] = [
+  NavbarPage.Dashboard,
+  NavbarPage.Activity,
+  NavbarPage.CurrentActions,
+  NavbarPage.Forum,
+  NavbarPage.Priorities,
+];
+
+export const destinations: Record<NavbarPage, string> = {
+  [NavbarPage.Dashboard]: "/tasks",
+  [NavbarPage.CurrentActions]: "/actions",
+  [NavbarPage.Activity]: "/feed",
+  [NavbarPage.Announcements]: "/announcements",
+  [NavbarPage.Forum]: "/forum",
+  [NavbarPage.Priorities]: "/priorities",
+  [NavbarPage.Platform]: "/platform",
+};
+
+export const platformSublinks = [
+  { text: "About", to: "/about" },
+  { text: "Resources", to: "/resources" },
+  { text: "Governance", to: "/platform/governance" },
+];
 
 const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
   todoActions,

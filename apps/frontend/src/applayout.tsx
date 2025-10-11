@@ -66,7 +66,6 @@ const revalidateKey = "revalidate";
 
 export function clientLoader() {
   localStorage.setItem(revalidateKey, "false");
-  console.log("clientLoader");
 
   const result: Promise<ActionLoaderData | null> = Promise.all([
     actionsFindAll(),
@@ -219,29 +218,31 @@ export default function AppLayout() {
   const [posts, setPosts] = useState<PostDto[]>([]);
   const [profile, setProfile] = useState<ProfileDto | null>(null);
 
-  actionDataLoader.then((data) => {
-    if (data?.actions) {
-      setActions(data.actions);
-    }
-    if (data?.relations) {
-      setRelations(data.relations);
-    }
-    if (data?.activities) {
-      setActivities(data.activities);
-    }
-  });
+  useEffect(() => {
+    actionDataLoader.then((data) => {
+      if (data?.actions) {
+        setActions(data.actions);
+      }
+      if (data?.relations) {
+        setRelations(data.relations);
+      }
+      if (data?.activities) {
+        setActivities(data.activities);
+      }
+    });
 
-  postsLoader.then((data) => {
-    if (data) {
-      setPosts(data);
-    }
-  });
+    postsLoader.then((data) => {
+      if (data) {
+        setPosts(data);
+      }
+    });
 
-  profileLoader.then((data) => {
-    if (data) {
-      setProfile(data);
-    }
-  });
+    profileLoader.then((data) => {
+      if (data) {
+        setProfile(data);
+      }
+    });
+  }, [actionDataLoader, postsLoader, profileLoader]);
 
   const navigate = useNavigate();
   const navigation = useNavigation();

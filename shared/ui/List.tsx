@@ -3,6 +3,8 @@ export interface ListProps extends React.PropsWithChildren {
 }
 
 const List: React.FC<ListProps> = ({ children, className }) => {
+  if (!children || (Array.isArray(children) && children.length === 0))
+    return null;
   return (
     <div
       className={`flex flex-col divide-y divide-zinc-200 border border-zinc-200 rounded overflow-hidden bg-white ${className}`}

@@ -43,36 +43,43 @@ const MembersListPage = () => {
       member.friends.some((friend) => myFriends.includes(friend.id))
   );
 
+  const selectedMembers =
+    filterMode === MemberFilterMode.All ? members : friendsOfFriends;
+
   return (
     <div className="max-w-[800px] px-2 mx-auto flex flex-col gap-y-4 pb-16">
-      <p className="text-lg md:text-2xl font-serif font-medium pt-10 relative w-fit">
-        Members ({members.length})
-      </p>
+      <div className="flex flex-row gap-x-6 items-center pt-10">
+        <p className="text-lg md:text-2xl font-serif font-medium relative w-fit -mt-1">
+          Members ({members.length})
+        </p>
 
-      <DropdownSelect
-        options={Object.values(MemberFilterMode)}
-        secondaryLabels={Object.values(MemberFilterMode).map((mode) =>
-          mode === MemberFilterMode.All
-            ? members.length.toString()
-            : friendsOfFriends.length.toString()
-        )}
-        value={filterMode}
-        onChange={(value) => {
-          setFilterMode(value as MemberFilterMode);
-        }}
-      />
+        <DropdownSelect
+          options={Object.values(MemberFilterMode)}
+          secondaryLabels={Object.values(MemberFilterMode).map((mode) =>
+            mode === MemberFilterMode.All
+              ? members.length.toString()
+              : friendsOfFriends.length.toString()
+          )}
+          value={filterMode}
+          onChange={(value) => {
+            setFilterMode(value as MemberFilterMode);
+          }}
+        />
+      </div>
 
-      <List>
-        {(filterMode === MemberFilterMode.All ? members : friendsOfFriends).map(
-          (member) => (
+      {selectedMembers.length > 0 ? (
+        <List>
+          {selectedMembers.map((member) => (
             <MembersListItem
               key={member.id}
               profile={member}
               sentFriendRequest={userSentFriendRequestIds.includes(member.id)}
             />
-          )
-        )}
-      </List>
+          ))}
+        </List>
+      ) : (
+        <p className="text-center text-zinc-500 py-5">None found</p>
+      )}
     </div>
   );
 };
