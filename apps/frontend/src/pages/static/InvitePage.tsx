@@ -22,27 +22,30 @@ const InvitePage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-page">
       <div className="flex flex-col flex-grow items-center justify-center ">
-        <div className="w-full max-w-4xl px-8 py-24">
-          <h2 className="font-serif !text-4xl text-center mb-8">
+        <div className="w-full max-w-4xl px-4 md:px-8 py-12 md:py-24">
+          <h2 className="font-serif !text-4xl text-center mb-8 mx-4">
             Invitation to the Alliance
           </h2>
 
-          <Card className="p-12 flex flex-col gap-y-6" style={CardStyle.White}>
+          <Card
+            className="p-4 md:p-12 flex flex-col gap-y-6"
+            style={CardStyle.White}
+          >
             <p>
               Hi friend, I hope you will join me as a member of the Alliance. I
-              believe you share my concerns about the direction that the world
-              is headed, and I think the Alliance is an opportunity to make a
+              believe you to share my concerns about the direction that the
+              world is headed, and I think this is an opportunity to make a
               significant difference.
             </p>
 
-            <h3 className="font-serif !text-3xl font-bold">Why join?</h3>
+            <h3 className="font-serif !text-3xl font-bold mt-2">Why join?</h3>
 
             <p>
               <span className="font-bold">
                 We’re a global group of individuals
               </span>{" "}
               learning to coordinate to advance humanity’s interests. We plan to
-              fight extreme poverty, environmental destruction, breakdown of
+              fight extreme poverty, environmental destruction, the breakdown of
               democratic institutions, and dangerous technological development.
             </p>
             <p>
@@ -55,8 +58,8 @@ const InvitePage: React.FC = () => {
                 now, this is 15 minutes per week.
               </li>
               <li>
-                A strategic office prepares high-impact actions for members to
-                complete following a democratic assessment of priorities.
+                A strategic office prepares high-impact collective actions
+                following a democratic assessment of priorities.
               </li>
             </ol>
             <p>
@@ -76,7 +79,7 @@ const InvitePage: React.FC = () => {
               could have an outsized influence on our approach and culture.
             </p>
 
-            <h3 className="font-serif !text-3xl font-bold">
+            <h3 className="font-serif !text-3xl font-bold mt-2">
               What do you need?
             </h3>
             <p>
@@ -99,40 +102,38 @@ const InvitePage: React.FC = () => {
                 </li>
               </ol>
             </p>
-            <h3 className="font-serif !text-3xl font-bold">How do you join?</h3>
+            <h3 className="font-serif !text-3xl font-bold mt-2">
+              How do you join?
+            </h3>
             <ol className="list-decimal list-inside space-y-3">
               <li>
-                Skim our{" "}
-                <Link
-                  to="/guide"
-                  className="py-1 px-2 border border-green hover:bg-zinc-50 rounded-md font-medium shadow mx-1 text-green"
-                  target="_blank"
-                >
-                  guide
+                Skim our
+                <Link to="/guide" target="_blank">
+                  <div className="inline-block py-0.5 px-2 mx-2 border border-green hover:bg-zinc-50 rounded-md font-medium shadow mx-1 text-green">
+                    guide
+                  </div>
                 </Link>
                 to understand our structure, process, and governance.
               </li>
               <li>
-                Create an account with my{" "}
-                <Link
-                  to={`/signup?ref=${referralCode}`}
-                  className="py-1 px-2 border border-green hover:bg-zinc-50 font-medium rounded-md shadow mx-1 text-green"
-                  target="_blank"
-                >
-                  personal sign-up link
+                Create an account with my
+                <Link to={`/signup?ref=${referralCode}`} target="_blank">
+                  <div className="inline-block py-0.5 px-2 mx-2 border border-green hover:bg-zinc-50 rounded-md font-medium shadow mx-1 text-green">
+                    personal sign-up link
+                  </div>
                 </Link>
-                . We will automatically be added as friends.
+                . We will be automatically added as friends.
               </li>
               <li>
                 Go through the onboarding tasks on your{" "}
-                <Link
-                  to="/tasks"
-                  className="py-1 px-2 border border-green hover:bg-zinc-50 font-medium rounded-md shadow mx-1 text-green"
-                  target="_blank"
-                >
-                  tasks page
+                <Link to="/tasks" target="_blank">
+                  <div className="inline-block py-0.5 px-2 mx-2 border border-green hover:bg-zinc-50 rounded-md font-medium shadow mx-1 text-green">
+                    tasks page
+                  </div>
                 </Link>
-                . Please let me know if you have any questions!
+                , which explain how our online process works and what is
+                expected of members. Please let me know if you have any
+                questions!
               </li>
             </ol>
           </Card>
