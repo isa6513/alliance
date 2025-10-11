@@ -182,11 +182,11 @@ export function HydrateFallback() {
 }
 
 const authOnlyRoutes = [
-  "tasks",
-  "settings",
-  "profile",
-  "onboarding",
-  "members",
+  "/tasks",
+  "/settings",
+  "/profile",
+  "/onboarding",
+  "/members",
 ];
 
 export function isAuthOnly(path: string) {
@@ -257,12 +257,6 @@ export default function AppLayout() {
     const wasLoggedIn = localStorage.getItem("was-logged-in") === "true";
 
     const handleUnauthorized = () => {
-      console.log("handleUnauthorized", window.location.pathname);
-      console.log("isNavigating", isNavigating);
-      console.log(
-        "authOnlyRoutes.includes(window.location.pathname)",
-        authOnlyRoutes.includes(window.location.pathname)
-      );
       if (
         !window.location.pathname.includes("/login") &&
         !isNavigating &&
