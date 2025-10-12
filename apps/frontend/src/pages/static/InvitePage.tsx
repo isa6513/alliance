@@ -49,8 +49,9 @@ const InvitePage: React.FC = () => {
               democratic institutions, and dangerous technological development.
             </p>
             <p>
-              <span className="font-bold">Our unique model</span> could one day
-              enable sustained, strategic cooperation among millions of people:
+              <span className="font-bold">Our unique model</span> is designed to
+              enable durable, strategic cooperation that can start small,
+              iterate quickly, and grow over time.
             </p>
             <ol className="list-decimal list-inside space-y-3 ">
               <li>
