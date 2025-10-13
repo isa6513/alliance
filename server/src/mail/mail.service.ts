@@ -209,7 +209,10 @@ export class MailService {
         context.event.newStatus === ActionStatus.GatheringCommitments
           ? EmailType.Commitment
           : EmailType.MemberAction;
-    } else if (context.type === ActionEventNotifType.ThreeDayReminder) {
+    } else if (
+      context.type === ActionEventNotifType.ThreeDayReminder ||
+      context.type === ActionEventNotifType.OneDayReminder
+    ) {
       emailType =
         context.event.newStatus === ActionStatus.GatheringCommitments
           ? EmailType.CommitmentReminder
