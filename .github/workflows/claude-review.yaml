@@ -31,9 +31,8 @@ jobs:
 
             Review ONLY the changes introduced by the commit.
             Suggest any improvements, potential bugs, or issues.
-            Be concise and specific in your feedback.
 
-            Output a final message with 3 sentences or less of your concise thoughts. Do not summarize the commit, just address any potention problems or improvements. End the message with the phrase "[NEEDS_ATTENTION]" if there is a significant issue or possible improvement that the author should address. If everything is fine, do not include this phrase.
+            Output a final message with your concise thoughts. Do not summarize the commit, just write one short bullet point for each specific issue you found, if any. End the message with the phrase "[NEEDS_ATTENTION]" if there is a significant issue or possible improvement that the author should address. If everything is fine, do not include this phrase.
 
   post_feedback:
     runs-on: ubuntu-latest

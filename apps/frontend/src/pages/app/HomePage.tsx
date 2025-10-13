@@ -8,6 +8,7 @@ import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import LargeActionCard from "./LargeActionCard";
 import SmallActionCard from "./SmallActionCard";
 import useActivities, { ActivityList } from "./useActivities";
+import BasicErrorMessage from "../../components/BasicErrorMessage";
 
 export function canCompleteAction(action: ActionWithRelation) {
   return (
@@ -29,7 +30,7 @@ export function canJoinAction(action: ActionWithRelation) {
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { actions, posts, activities } =
+  const { actions, posts, activities, loading } =
     useOutletContext<AppLayoutOutletContext>();
 
   const { activities: friendActivities, handleLikeActivity } = useActivities({
@@ -39,9 +40,9 @@ const HomePage = () => {
   const mainContent = () => {
     if (actions === null) {
       return (
-        <div className="absolute top-0 left-0 right-0 md:right-[380px] h-full flex justify-center items-center text-center text-zinc-500 py-5">
-          Error loading actions
-        </div>
+        <BasicErrorMessage>
+          {loading ? "Loading..." : "Error loading actions"}
+        </BasicErrorMessage>
       );
     }
 

@@ -46,7 +46,6 @@ export interface ActionLoaderData {
   actions: ActionWithRelation[] | null;
   relations: Map<number, UserActionRelation> | null;
   activities: Map<number, ActivitiesForAction> | null;
-  loading: boolean;
 }
 
 export interface ActivitiesForAction {
@@ -60,6 +59,7 @@ export interface AppLayoutOutletContext {
   activities: Map<number, ActivitiesForAction> | null;
   posts: PostDto[] | null;
   profile: ProfileDto | null;
+  loading: boolean;
 }
 
 const revalidateKey = "revalidate";
@@ -76,8 +76,7 @@ export function clientLoader() {
         actions: actions.data ?? null,
         relations: null,
         activities: null,
-        loading: false,
-      };
+      } satisfies ActionLoaderData;
     }
 
     const activityList = activities.data;
@@ -198,7 +197,7 @@ export function isAuthOnly(path: string) {
   }
 }
 export default function AppLayout() {
-  const { isAuthenticated, loading, logout } = useAuth();
+  const { isAuthenticated, loading: authLoading, logout } = useAuth();
 
   const {
     actionData: actionDataLoader,
@@ -217,6 +216,7 @@ export default function AppLayout() {
   > | null>(null);
   const [posts, setPosts] = useState<PostDto[] | null>(null);
   const [profile, setProfile] = useState<ProfileDto | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     actionDataLoader.then((data) => {
@@ -229,6 +229,7 @@ export default function AppLayout() {
       if (data?.activities) {
         setActivities(data.activities);
       }
+      setLoading(false);
     });
 
     postsLoader.then((data) => {
@@ -273,7 +274,7 @@ export default function AppLayout() {
     return () => {
       window.removeEventListener("auth:unauthorized", handleUnauthorized);
     };
-  }, [isAuthenticated, loading, navigate, isNavigating, logout]);
+  }, [isAuthenticated, authLoading, navigate, isNavigating, logout]);
 
   return (
     <>
@@ -285,6 +286,7 @@ export default function AppLayout() {
             activities,
             posts,
             profile,
+            loading,
           } satisfies AppLayoutOutletContext
         }
       />
@@ -296,7 +298,3 @@ export default function AppLayout() {
 export function setRevalidate() {
   localStorage.setItem(revalidateKey, "true");
 }
-
-// export function shouldRevalidate({}: ShouldRevalidateFunctionArgs) {
-//   return localStorage.getItem(revalidateKey) === "true";
-// }
