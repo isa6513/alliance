@@ -219,18 +219,21 @@ export default function AppLayout() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    actionDataLoader.then((data) => {
-      if (data?.actions) {
-        setActions(data.actions);
-      }
-      if (data?.relations) {
-        setRelations(data.relations);
-      }
-      if (data?.activities) {
-        setActivities(data.activities);
-      }
-      setLoading(false);
-    });
+    actionDataLoader
+      .then((data) => {
+        if (data?.actions) {
+          setActions(data.actions);
+        }
+        if (data?.relations) {
+          setRelations(data.relations);
+        }
+        if (data?.activities) {
+          setActivities(data.activities);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
 
     postsLoader.then((data) => {
       if (data) {
