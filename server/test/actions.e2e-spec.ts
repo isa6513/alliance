@@ -167,6 +167,7 @@ describe('Actions (e2e)', () => {
         shortDescription: 'Do something important',
         type: ActionTaskType.Activity,
         commitmentless: false,
+        everyoneShouldComplete: false,
       };
 
       const res = await request(ctx.app.getHttpServer())
@@ -377,6 +378,141 @@ describe('Actions (e2e)', () => {
             action.name === 'Group Restricted Hidden Action',
         ),
       ).toBe(false);
+    });
+
+    it("excludes shouldComplete flag for users without eligible contracts when everyoneShouldComplete is false", async () => {
+      const { action, event } = await createPublishedAction(
+        'Contract Restricted Action',
+        {
+          status: ActionStatus.MemberAction,
+          actionOverrides: {
+            everyoneShouldComplete: false,
+          },
+        },
+      );
+
+      const unsignedUser = await userService.create({
+        email: `unsigned-${Date.now()}@example.com`,
+        password: 'Password123!',
+        name: 'Unsigned User',
+      });
+
+      const lateSigner = await userService.create({
+        email: `late-${Date.now()}@example.com`,
+        password: 'Password123!',
+        name: 'Late Signer',
+        contractDateSigned: new Date(event.date.getTime() + 1000),
+      });
+
+      const eligibleUser = await userService.create({
+        email: `eligible-${Date.now()}@example.com`,
+        password: 'Password123!',
+        name: 'Eligible User',
+        contractDateSigned: new Date(event.date.getTime() - 1000),
+      });
+
+      const unsignedToken = ctx.jwtService.sign(
+        {
+          sub: unsignedUser.id,
+          email: unsignedUser.email,
+          name: unsignedUser.name,
+        },
+        { secret: process.env.JWT_SECRET },
+      );
+
+      const lateToken = ctx.jwtService.sign(
+        {
+          sub: lateSigner.id,
+          email: lateSigner.email,
+          name: lateSigner.name,
+        },
+        { secret: process.env.JWT_SECRET },
+      );
+
+      const eligibleToken = ctx.jwtService.sign(
+        {
+          sub: eligibleUser.id,
+          email: eligibleUser.email,
+          name: eligibleUser.name,
+        },
+        { secret: process.env.JWT_SECRET },
+      );
+
+      const [unsignedRes, lateRes, eligibleRes] = await Promise.all([
+        request(ctx.app.getHttpServer())
+          .get('/actions')
+          .set('Authorization', `Bearer ${unsignedToken}`)
+          .expect(200),
+        request(ctx.app.getHttpServer())
+          .get('/actions')
+          .set('Authorization', `Bearer ${lateToken}`)
+          .expect(200),
+        request(ctx.app.getHttpServer())
+          .get('/actions')
+          .set('Authorization', `Bearer ${eligibleToken}`)
+          .expect(200),
+      ]);
+
+      const findAction = (res: request.Response) =>
+        res.body.find((a: ActionDto) => a.id === action.id);
+
+      const unsignedAction = findAction(unsignedRes);
+      const lateAction = findAction(lateRes);
+      const eligibleAction = findAction(eligibleRes);
+
+      expect(unsignedAction).toBeDefined();
+      expect(unsignedAction!.shouldParticipate).toBe(false);
+      expect(lateAction).toBeDefined();
+      expect(lateAction!.shouldParticipate).toBe(false);
+      expect(eligibleAction).toBeDefined();
+      expect(eligibleAction!.shouldParticipate).toBe(true);
+
+      await actionRepo.delete(action.id);
+      await userRepo.delete(unsignedUser.id);
+      await userRepo.delete(lateSigner.id);
+      await userRepo.delete(eligibleUser.id);
+    });
+
+    it('shows actions with everyoneShouldComplete true to users without contracts', async () => {
+      const { action } = await createPublishedAction(
+        'Onboarding Action',
+        {
+          status: ActionStatus.MemberAction,
+          actionOverrides: {
+            everyoneShouldComplete: true,
+          },
+        },
+      );
+
+      const contractlessUser = await userService.create({
+        email: `contractless-${Date.now()}@example.com`,
+        password: 'Password123!',
+        name: 'Contractless User',
+      });
+
+      const contractlessToken = ctx.jwtService.sign(
+        {
+          sub: contractlessUser.id,
+          email: contractlessUser.email,
+          name: contractlessUser.name,
+        },
+        { secret: process.env.JWT_SECRET },
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/actions')
+        .set('Authorization', `Bearer ${contractlessToken}`)
+        .expect(200);
+
+      const targetAction = res.body.find(
+        (a: ActionDto) => a.id === action.id,
+      );
+
+      expect(targetAction).toBeDefined();
+      expect(targetAction.shouldParticipate).toBe(true);
+
+      await actionRepo.delete(action.id);
+      await userRepo.delete(contractlessUser.id);
     });
 
     it('admin can add an event to an action', async () => {

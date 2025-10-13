@@ -199,4 +199,13 @@ export class Action {
       ).length || 0
     );
   }
+
+  @Column({ default: false })
+  @ApiProperty({
+    description:
+      'Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)',
+    default: false,
+  })
+  @Allow()
+  everyoneShouldComplete: boolean;
 }

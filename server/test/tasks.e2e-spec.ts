@@ -84,6 +84,7 @@ describe('Tasks (e2e)', () => {
         shortDescription: 'Short copy',
         type: ActionTaskType.Activity,
         commitmentless: true,
+        everyoneShouldComplete: false,
       } satisfies CreateActionDto),
     );
 

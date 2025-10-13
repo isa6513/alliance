@@ -129,13 +129,33 @@ export class ActionsService {
     }
 
     return await Promise.all(
-      filtered.map(
-        async (action) =>
-          new ActionDto(
-            action,
-            user ? await this.isEligibleForAction(action, user) : false,
-          ),
-      ),
+      filtered.map(async (action) => {
+        let shouldComplete = false;
+        if (
+          user &&
+          action.events.some(
+            (event) => event.newStatus === ActionStatus.MemberAction,
+          )
+        ) {
+          const targetGroupIds = new Set(
+            (action.participatingGroups || []).map((group) => group.id),
+          );
+          shouldComplete =
+            this.actionEventRecipientService.userShouldCompleteEvent(
+              user,
+              action.events.find(
+                (event) => event.newStatus === ActionStatus.MemberAction,
+              )!.date,
+              targetGroupIds,
+              action.everyoneShouldComplete,
+            );
+        }
+        return new ActionDto(
+          action,
+          user ? await this.isEligibleForAction(action, user) : false,
+          shouldComplete,
+        );
+      }),
     );
   }
 

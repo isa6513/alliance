@@ -1,7 +1,7 @@
 import { Outlet, useOutletContext } from "react-router";
 import NavbarHorizontal from "./components/NavbarHorizontal";
 import { AppLayoutOutletContext } from "./applayout";
-import { canCompleteAction, canJoinAction } from "./pages/app/HomePage";
+import { canJoinAction, shouldCompleteAction } from "./pages/app/HomePage";
 import { useMemo } from "react";
 
 function Navbar() {
@@ -10,7 +10,8 @@ function Navbar() {
   const nTasks = useMemo(
     () =>
       context.actions
-        ? context.actions.filter((action) => canCompleteAction(action)).length +
+        ? context.actions.filter((action) => shouldCompleteAction(action))
+            .length +
           context.actions.filter((action) => canJoinAction(action)).length
         : 0,
     [context.actions]

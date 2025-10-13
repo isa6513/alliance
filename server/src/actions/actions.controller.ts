@@ -35,7 +35,6 @@ import {
   ActionActivityDto,
   ActionDto,
   ActionEventDto,
-  CanParticipateDto,
   CreateActionActivityDto,
   CreateActionDto,
   CreateActionEventDto,
@@ -428,21 +427,6 @@ export class ActionsController {
       query.type,
       query.sendNotifsTo,
     );
-  }
-
-  @Get('canParticipate/:id')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: CanParticipateDto })
-  async canParticipate(
-    @Param('id', ParseIntPipe) id: number,
-    @Request() req: JwtRequest,
-  ): Promise<CanParticipateDto> {
-    return {
-      canParticipate: await this.actionsService.isIdEligibleForAction(
-        id,
-        req.user.sub,
-      ),
-    };
   }
 
   @Post('createActivity')

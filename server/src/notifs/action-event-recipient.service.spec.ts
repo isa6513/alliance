@@ -71,7 +71,7 @@ describe('ActionEventRecipientService', () => {
         actionId: action.id,
         type: ActionActivityType.USER_JOINED,
       },
-      relations: ['user'],
+      relations: ['user', 'user.groups'],
     });
     expect(result).toEqual(joinedUsers);
     expect(userServiceMock.findActiveUsers).not.toHaveBeenCalled();
@@ -132,6 +132,7 @@ describe('ActionEventRecipientService', () => {
     const action = buildAction({ commitmentless: true });
     const activeUsers = [buildUser(5)];
     findMock.mockResolvedValue([]);
+    userServiceMock.findActiveUsersWithGroups.mockResolvedValue(activeUsers);
     userServiceMock.findActiveUsers.mockResolvedValue(activeUsers);
 
     const result = await service.getBaseUsersForEvent(
@@ -140,7 +141,7 @@ describe('ActionEventRecipientService', () => {
       new Date(),
     );
 
-    expect(userServiceMock.findActiveUsers).toHaveBeenCalledTimes(1);
+    expect(userServiceMock.findActiveUsersWithGroups).toHaveBeenCalledTimes(1);
     expect(result).toEqual(activeUsers);
   });
 
@@ -151,7 +152,7 @@ describe('ActionEventRecipientService', () => {
       buildUser(6, [], { contractDateSigned: null }),
     ];
     findMock.mockResolvedValue([]);
-    userServiceMock.findActiveUsers.mockResolvedValue(activeUsers);
+    userServiceMock.findActiveUsersWithGroups.mockResolvedValue(activeUsers);
 
     const result = await service.getBaseUsersForEvent(
       ActionStatus.MemberAction,

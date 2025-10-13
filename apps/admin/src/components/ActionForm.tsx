@@ -155,6 +155,13 @@ const ActionForm: React.FC<ActionFormProps> = ({
         inGrid: true,
       },
       {
+        name: "everyoneShouldComplete",
+        label:
+          "Everyone Should Complete (i.e. override contract signing requirements for showing in tasks)",
+        type: "checkbox",
+        inGrid: true,
+      },
+      {
         name: "commitmentThreshold",
         label: "Commitment Threshold",
         type: "number",

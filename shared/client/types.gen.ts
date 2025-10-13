@@ -444,6 +444,10 @@ export type Action = {
      * Number of users who have completed the action
      */
     usersCompleted: number;
+    /**
+     * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
+     */
+    everyoneShouldComplete: boolean;
 };
 
 export type Group = {
@@ -562,8 +566,13 @@ export type ActionDto = {
      * Number of users who have completed the action
      */
     usersCompleted: number;
+    /**
+     * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
+     */
+    everyoneShouldComplete: boolean;
     events: Array<ActionEventDto>;
     canParticipate?: boolean;
+    shouldParticipate?: boolean;
 };
 
 export type CommentParentObject = 'post' | 'action' | 'activity';
@@ -699,7 +708,12 @@ export type CreateActionDto = {
      * Whether to show the action to members who are not of participating groups
      */
     showToNonparticipating?: boolean;
+    /**
+     * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
+     */
+    everyoneShouldComplete: boolean;
     canParticipate?: boolean;
+    shouldParticipate?: boolean;
 };
 
 export type UpdateActionDto = {
@@ -752,7 +766,12 @@ export type UpdateActionDto = {
      * Whether to show the action to members who are not of participating groups
      */
     showToNonparticipating?: boolean;
+    /**
+     * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
+     */
+    everyoneShouldComplete?: boolean;
     canParticipate?: boolean;
+    shouldParticipate?: boolean;
 };
 
 export type CreateActionEventDto = {
@@ -808,10 +827,6 @@ export type PreEventNotifDataDto = {
     emails: Array<UserDto>;
     texts: Array<UserDto>;
     pushes: Array<UserDto>;
-};
-
-export type CanParticipateDto = {
-    canParticipate: boolean;
 };
 
 export type CreateActionActivityDto = {
@@ -2237,21 +2252,6 @@ export type ActionsEventNotifDataResponses = {
 };
 
 export type ActionsEventNotifDataResponse = ActionsEventNotifDataResponses[keyof ActionsEventNotifDataResponses];
-
-export type ActionsCanParticipateData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/actions/canParticipate/{id}';
-};
-
-export type ActionsCanParticipateResponses = {
-    200: CanParticipateDto;
-};
-
-export type ActionsCanParticipateResponse = ActionsCanParticipateResponses[keyof ActionsCanParticipateResponses];
 
 export type ActionsCreateActivityData = {
     body: CreateActionActivityDto;

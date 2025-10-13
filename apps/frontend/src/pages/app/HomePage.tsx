@@ -20,6 +20,10 @@ export function canCompleteAction(action: ActionWithRelation) {
   );
 }
 
+export function shouldCompleteAction(action: ActionWithRelation) {
+  return canCompleteAction(action) && action.shouldParticipate;
+}
+
 export function canJoinAction(action: ActionWithRelation) {
   return (
     action.status === "gathering_commitments" &&
@@ -46,7 +50,9 @@ const HomePage = () => {
       );
     }
 
-    const todoActions = actions.filter((action) => canCompleteAction(action));
+    const todoActions = actions.filter((action) =>
+      shouldCompleteAction(action)
+    );
     const newActions = actions.filter((action) => canJoinAction(action));
 
     const committedActions = actions.filter(

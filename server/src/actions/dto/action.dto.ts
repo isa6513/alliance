@@ -65,7 +65,14 @@ export class ActionDto extends OmitType(Action, [
   @ApiPropertyOptional()
   canParticipate?: boolean;
 
-  constructor(action: Partial<Action>, canParticipate?: boolean) {
+  @ApiPropertyOptional()
+  shouldParticipate?: boolean;
+
+  constructor(
+    action: Partial<Action>,
+    canParticipate?: boolean,
+    shouldParticipate?: boolean,
+  ) {
     super();
     Object.assign(this, action);
     this.image = action.image ? getImageSource(action.image) : undefined;
@@ -75,6 +82,7 @@ export class ActionDto extends OmitType(Action, [
     this.events =
       action.events?.map((event) => new ActionEventDto({ ...event })) || [];
     this.canParticipate = canParticipate ?? false;
+    this.shouldParticipate = shouldParticipate ?? false;
   }
 }
 
@@ -215,9 +223,4 @@ export class PreEventNotifDataQueryDto {
   @ApiProperty({ enum: NotificationType, enumName: 'NotificationType' })
   @Allow()
   sendNotifsTo: NotificationType;
-}
-
-export class CanParticipateDto {
-  @ApiProperty({ type: Boolean })
-  canParticipate: boolean;
 }

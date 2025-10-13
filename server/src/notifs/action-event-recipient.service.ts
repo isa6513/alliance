@@ -22,6 +22,22 @@ export class ActionEventRecipientService {
     private readonly userService: UserService,
   ) {}
 
+  public userShouldCompleteEvent(
+    user: User,
+    eventDate: Date,
+    targetGroupIds: Set<number>,
+    everyoneShouldComplete: boolean,
+  ): boolean {
+    return (
+      ((!!user.contractDateSigned &&
+        user.contractDateSigned <= eventDate &&
+        !user.contractDateSuspended) ||
+        everyoneShouldComplete) &&
+      (targetGroupIds.size === 0 ||
+        user.groups.some((group) => targetGroupIds.has(group.id)))
+    );
+  }
+
   async getBaseUsersForEvent(
     eventStatus: ActionStatus,
     action: Action,
@@ -30,44 +46,35 @@ export class ActionEventRecipientService {
     const targetGroupIds = new Set(
       (action.participatingGroups || []).map((group) => group.id),
     );
-    const restrictToGroups = targetGroupIds.size > 0;
 
-    const filterToEligible = (users: User[]): User[] => {
-      const withContract = users.filter(
-        (user) =>
-          user.contractDateSigned &&
-          user.contractDateSigned <= eventDate &&
-          !user.contractDateSuspended,
+    const filterToEligible = (users: User[]) =>
+      users.filter((user) =>
+        this.userShouldCompleteEvent(
+          user,
+          eventDate,
+          targetGroupIds,
+          action.everyoneShouldComplete,
+        ),
       );
-      if (!restrictToGroups) {
-        return withContract;
-      }
-      return withContract.filter((user) =>
-        (user.groups || []).some((group) => targetGroupIds.has(group.id)),
-      );
-    };
 
-    if (eventStatus === ActionStatus.MemberAction) {
+    if (eventStatus === ActionStatus.MemberAction && !action.commitmentless) {
       const activities = await this.actionActivityRepository.find({
         where: {
           actionId: action.id,
           type: ActionActivityType.USER_JOINED,
         },
-        relations: restrictToGroups ? ['user', 'user.groups'] : ['user'],
+        relations: ['user', 'user.groups'],
       });
-
-      if (action.commitmentless) {
-        const users = restrictToGroups
-          ? await this.userService.findActiveUsersWithGroups()
-          : await this.userService.findActiveUsers();
-        return filterToEligible(users);
-      }
-
       return filterToEligible(activities.map((activity) => activity.user));
     }
 
-    if (eventStatus === ActionStatus.GatheringCommitments) {
-      return filterToEligible(await this.userService.findActiveUsers());
+    if (
+      eventStatus === ActionStatus.GatheringCommitments ||
+      eventStatus === ActionStatus.MemberAction
+    ) {
+      return filterToEligible(
+        await this.userService.findActiveUsersWithGroups(),
+      );
     }
 
     return [];

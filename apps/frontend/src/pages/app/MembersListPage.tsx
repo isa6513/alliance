@@ -9,6 +9,7 @@ import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import { useAuth } from "../../lib/AuthContext";
 import { useState } from "react";
 import BasicErrorMessage from "../../components/BasicErrorMessage";
+import CenterLayout from "@alliance/shared/ui/CenterLayout";
 
 export async function clientLoader() {
   const members = await userMembersWithFriends();
@@ -52,8 +53,8 @@ const MembersListPage = () => {
     filterMode === MemberFilterMode.All ? members : friendsOfFriends;
 
   return (
-    <div className="max-w-[800px] px-2 mx-auto flex flex-col gap-y-4 pb-16">
-      <div className="flex flex-row gap-x-6 items-center pt-10">
+    <CenterLayout className="gap-y-4" width="3xl">
+      <div className="flex flex-row gap-x-6 items-center">
         <p className="text-lg md:text-2xl font-serif font-medium relative w-fit -mt-1">
           Members ({members.length})
         </p>
@@ -85,7 +86,7 @@ const MembersListPage = () => {
       ) : (
         <p className="text-center text-zinc-500 py-5">None found</p>
       )}
-    </div>
+    </CenterLayout>
   );
 };
 
