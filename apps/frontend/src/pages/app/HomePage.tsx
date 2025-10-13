@@ -9,6 +9,7 @@ import LargeActionCard from "./LargeActionCard";
 import SmallActionCard from "./SmallActionCard";
 import useActivities, { ActivityList } from "./useActivities";
 import BasicErrorMessage from "../../components/BasicErrorMessage";
+import { useAuth } from "../../lib/AuthContext";
 
 export function canCompleteAction(action: ActionWithRelation) {
   return (
@@ -40,6 +41,8 @@ const HomePage = () => {
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
   });
+
+  const { user } = useAuth();
 
   const mainContent = () => {
     if (actions === null) {
@@ -104,10 +107,19 @@ const HomePage = () => {
           ) : (
             <Card style={CardStyle.Transparent} className="w-full">
               <div className="px-2 py-36 flex flex-col items-center gap-y-4">
-                <CheckIcon size="large" />
-                <p className="text-center text-zinc-500 text-lg">
-                  Nothing to do right now!
-                </p>
+                {user?.contractDateSuspended ? (
+                  <p className="text-center text-zinc-500">
+                    You will not be given new tasks while your contract is
+                    suspended.
+                  </p>
+                ) : (
+                  <>
+                    <CheckIcon size="large" />
+                    <p className="text-center text-zinc-500 text-lg">
+                      Nothing to do right now!
+                    </p>
+                  </>
+                )}
               </div>
             </Card>
           )}
