@@ -235,7 +235,7 @@ export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
  */
 export type NotificationType = 'all' | 'joined' | 'none';
 
-export type ActionEventNotifType = 'announcement' | '3dayreminder' | '1dayreminder' | 'misseddeadline' | 'missedseconddeadline';
+export type ActionEventNotifType = 'announcement' | '3dayreminder' | '1dayreminder' | 'misseddeadline';
 
 export type NotificationChannel = 'text' | 'email' | 'push';
 
@@ -319,6 +319,7 @@ export type ActionEvent = {
     announcementNotifsSentAt?: string;
     threeDayReminderNotifsSentAt?: string;
     oneDayReminderNotifsSentAt?: string;
+    deadlineNotifsSentAt?: string;
 };
 
 export type EditableContent = {
@@ -644,7 +645,7 @@ export type NotificationScheduleEntryDto = {
     actionName: string;
     actionStatus: ActionStatus;
     eventId: number;
-    estimatedRecipients: number;
+    recipients: Array<ProfileDto>;
     metadata?: NotificationScheduleMetadataDto;
 };
 

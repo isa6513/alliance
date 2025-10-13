@@ -12,12 +12,12 @@ import {
   ActionActivityType,
 } from '../actions/entities/action-activity.entity';
 import { ActionEventRecipientService } from './action-event-recipient.service';
-import { Action } from '../actions/entities/action.entity';
 import {
   NotificationScheduleEntryDto,
   NotificationScheduleMetadataDto,
 } from 'src/actions/dto/notification-schedule.dto';
 import { User } from '../user/entities/user.entity';
+import { ProfileDto } from 'src/user/user.dto';
 
 export interface MissedDeadlineCandidate {
   actionId: number;
@@ -26,7 +26,6 @@ export interface MissedDeadlineCandidate {
   deadlineDate: Date;
   resolutionEventId: number;
   resolutionDate: Date;
-  isSecondMiss: boolean;
 }
 
 export const ANNOUNCEMENT_SUPPORTED_STATUSES: ActionStatus[] = [
@@ -50,7 +49,6 @@ interface NotificationPlan {
   referenceEvent: ActionEvent;
   targetEvent: ActionEvent;
   metadata?: NotificationScheduleMetadataDto;
-  recipients?: number;
 }
 
 @Injectable()
@@ -66,7 +64,6 @@ export class ActionEventReminderService {
   async evaluateNotifications(
     windowStart: Date,
     windowEnd: Date,
-    includeRecipients = false,
   ): Promise<NotificationPlan[]> {
     const start = new Date(windowStart);
     const end = new Date(windowEnd);
@@ -122,7 +119,7 @@ export class ActionEventReminderService {
       return [];
     }
 
-    // Load any events that were not already fully populated with relations
+    // Load any events that were not already fully populated with relations TODO
     const missingEventIds = Array.from(requiredEvents).filter((id) =>
       plans.every(
         (plan) => plan.referenceEvent.id !== id && plan.targetEvent.id !== id,
@@ -146,42 +143,6 @@ export class ActionEventReminderService {
       }
     }
 
-    if (includeRecipients) {
-      const cache = new Map<string, number>();
-      const getCount = async (
-        status: ActionStatus,
-        action: Action,
-        eventDate: Date,
-      ): Promise<number> => {
-        const key = `${status}:${action.id}`;
-        if (cache.has(key)) {
-          return cache.get(key)!;
-        }
-        const users = await this.recipientService.getBaseUsersForEvent(
-          status,
-          action,
-          eventDate,
-        );
-        cache.set(key, users.length);
-        return users.length;
-      };
-
-      for (const plan of plans) {
-        if (
-          plan.type === ActionEventNotifType.MissedDeadline ||
-          plan.type === ActionEventNotifType.MissedSecondDeadline
-        ) {
-          plan.recipients = plan.recipients ?? 0;
-          continue;
-        }
-        plan.recipients = await getCount(
-          plan.referenceEvent.newStatus,
-          plan.referenceEvent.action,
-          plan.referenceEvent.date,
-        );
-      }
-    }
-
     plans.sort((a, b) => a.scheduledFor.getTime() - b.scheduledFor.getTime());
     return plans;
   }
@@ -190,29 +151,22 @@ export class ActionEventReminderService {
     windowStart: Date,
     windowEnd: Date,
   ): Promise<NotificationScheduleEntryDto[]> {
-    const plans = await this.evaluateNotifications(
-      windowStart,
-      windowEnd,
-      true,
-    );
+    const plans = await this.evaluateNotifications(windowStart, windowEnd);
 
-    return plans.map((plan) => ({
-      type: plan.type,
-      scheduledFor: plan.scheduledFor,
-      actionId: plan.referenceEvent.action!.id,
-      actionName: plan.referenceEvent.action!.name,
-      actionStatus: plan.referenceEvent.newStatus,
-      eventId: plan.targetEvent.id,
-      estimatedRecipients: plan.recipients ?? 0,
-      metadata: plan.metadata,
-    }));
-  }
-
-  async evaluateDueNotifications(now: Date) {
-    const windowStart = new Date(
-      now.getTime() - NOTIFICATION_LOOKBACK_WINDOW_MS,
+    return Promise.all(
+      plans.map(async (plan) => ({
+        type: plan.type,
+        scheduledFor: plan.scheduledFor,
+        actionId: plan.referenceEvent.action!.id,
+        actionName: plan.referenceEvent.action!.name,
+        actionStatus: plan.referenceEvent.newStatus,
+        eventId: plan.targetEvent.id,
+        recipients: await this.recipientService
+          .getFilteredUsersForEvent(plan.referenceEvent, plan.type)
+          .then((users) => users.map((user) => new ProfileDto(user))),
+        metadata: plan.metadata,
+      })),
     );
-    return this.evaluateNotifications(windowStart, now, false);
   }
 
   private async computeReminderPlans(
@@ -325,7 +279,6 @@ export class ActionEventReminderService {
         deadlineEvent: ActionEvent;
         resolutionEvent: ActionEvent;
         count: number;
-        isSecondMiss: boolean;
       }
     >();
 
@@ -336,7 +289,7 @@ export class ActionEventReminderService {
         continue;
       }
 
-      const key = `${candidate.resolutionEventId}:${candidate.isSecondMiss ? 'second' : 'first'}`;
+      const key = `${candidate.resolutionEventId}`;
       const group = aggregated.get(key) ?? {
         deadlineEvent,
         resolutionEvent,
@@ -345,7 +298,6 @@ export class ActionEventReminderService {
       };
 
       group.count += 1;
-      group.isSecondMiss = group.isSecondMiss || candidate.isSecondMiss;
       aggregated.set(key, group);
     }
 
@@ -353,17 +305,13 @@ export class ActionEventReminderService {
 
     for (const group of aggregated.values()) {
       plans.push({
-        type: group.isSecondMiss
-          ? ActionEventNotifType.MissedSecondDeadline
-          : ActionEventNotifType.MissedDeadline,
+        type: ActionEventNotifType.MissedDeadline,
         scheduledFor: group.resolutionEvent.date,
         referenceEvent: group.deadlineEvent,
         targetEvent: group.resolutionEvent,
         metadata: {
           deadlineEventId: group.deadlineEvent.id,
-          isSecondMiss: group.isSecondMiss || undefined,
         },
-        recipients: group.count,
       });
     }
 
@@ -466,10 +414,9 @@ export class ActionEventReminderService {
           return;
         }
 
-        const recipients = await this.recipientService.getBaseUsersForEvent(
-          ActionStatus.MemberAction,
-          action,
-          context.deadlineEvent.date,
+        const recipients = await this.recipientService.getFilteredUsersForEvent(
+          context.deadlineEvent,
+          ActionEventNotifType.MissedDeadline,
         );
         extraRecipientsByAction.set(actionId, recipients);
       }),
@@ -508,7 +455,6 @@ export class ActionEventReminderService {
           deadlineDate: context.deadlineEvent.date,
           resolutionEventId: context.resolutionEvent.id,
           resolutionDate: context.resolutionEvent.date,
-          isSecondMiss: false,
           _timelineDate: context.resolutionEvent.date,
         });
       }
@@ -577,16 +523,6 @@ export class ActionEventReminderService {
       }
 
       timeline.sort((a, b) => a.time.getTime() - b.time.getTime());
-
-      let consecutiveMisses = 0;
-      for (const item of timeline) {
-        if (item.type === 'completion') {
-          consecutiveMisses = 0;
-        } else {
-          consecutiveMisses += 1;
-          item.candidate.isSecondMiss = consecutiveMisses >= 2;
-        }
-      }
     }
 
     return raw;

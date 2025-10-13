@@ -227,11 +227,16 @@ const EventNotifTimeline: React.FC = () => {
                       </div>
                       <div className="lg:block">
                         <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 lg:hidden">
-                          Estimated Recipients
+                          Recipients
                         </span>
                         <div className="text-gray-900">
-                          {entry.estimatedRecipients.toLocaleString()}
+                          {entry.recipients.length.toLocaleString()}
                         </div>
+                        {entry.recipients.map((recipient) => (
+                          <div key={recipient.id} className="text-gray-500">
+                            {recipient.displayName}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>

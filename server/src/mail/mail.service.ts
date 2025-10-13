@@ -137,48 +137,6 @@ export class MailService {
     );
   }
 
-  public async sendCommitmentEmail(
-    email: string,
-    name: string,
-    actionName: string,
-    url: string,
-  ): Promise<Mail> {
-    return this.sendMail(
-      email,
-      EmailType.Commitment,
-      'New Action: ' + actionName,
-      {
-        name,
-        actionName,
-        url,
-      },
-    );
-  }
-
-  public async sendMissedDeadlineEmail(
-    email: string,
-    name: string,
-    actionName: string,
-    isSecondMiss: boolean,
-    cid?: string,
-  ): Promise<Mail> {
-    const emailType = isSecondMiss
-      ? EmailType.MissedSecondDeadline
-      : EmailType.MissedDeadline;
-    const subject = `Failed to complete action: ${actionName}`;
-
-    return this.sendMail(
-      email,
-      emailType,
-      subject,
-      {
-        name,
-        actionName,
-      },
-      cid,
-    );
-  }
-
   public async sendForumDigestEmail(
     email: string,
     name: string,
@@ -232,6 +190,8 @@ export class MailService {
       if (context.event.newStatus === ActionStatus.MemberAction) {
         return '1 day left to complete: ' + context.action.name;
       }
+    } else if (context.type === ActionEventNotifType.MissedDeadline) {
+      return 'Failed to complete action: ' + context.action.name;
     }
     console.log(context);
     throw new Error('Invalid event in mail context: ' + context.type);
@@ -242,14 +202,28 @@ export class MailService {
   ): Promise<Mail> {
     const subject = this.getSubject(context);
 
-    const emailType =
-      context.type === ActionEventNotifType.Announcement
-        ? context.event.newStatus === ActionStatus.GatheringCommitments
+    let emailType: EmailType | null = null;
+
+    if (context.type === ActionEventNotifType.Announcement) {
+      emailType =
+        context.event.newStatus === ActionStatus.GatheringCommitments
           ? EmailType.Commitment
-          : EmailType.MemberAction
-        : context.event.newStatus === ActionStatus.GatheringCommitments
+          : EmailType.MemberAction;
+    } else if (context.type === ActionEventNotifType.ThreeDayReminder) {
+      emailType =
+        context.event.newStatus === ActionStatus.GatheringCommitments
           ? EmailType.CommitmentReminder
           : EmailType.MemberActionReminder;
+    } else if (context.type === ActionEventNotifType.MissedDeadline) {
+      emailType = context.isSecondMiss
+        ? EmailType.MissedSecondDeadline
+        : EmailType.MissedDeadline;
+    }
+    if (!emailType) {
+      throw new Error(
+        'Invalid event in mail context: ' + JSON.stringify(context),
+      );
+    }
 
     console.log(
       'url',

@@ -48,6 +48,7 @@ import { NotificationScheduleEntryDto } from './dto/notification-schedule.dto';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ForumService } from 'src/forum/forum.service';
+import { ActionEventNotifType } from 'src/notifs/entities/action-event-notif.entity';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -841,11 +842,15 @@ export class ActionsService {
       throw new NotFoundException('Action not found');
     }
 
-    const users = await this.actionEventRecipientService.getBaseUsersForEvent(
-      type,
-      action,
-      new Date(),
-    );
+    const users =
+      await this.actionEventRecipientService.getFilteredUsersForEvent(
+        {
+          newStatus: type,
+          action,
+          date: new Date(),
+        },
+        ActionEventNotifType.Announcement,
+      );
 
     const texts = users.filter((user) =>
       this.notifsService.shouldTextUser(user),

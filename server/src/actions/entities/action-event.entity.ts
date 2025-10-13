@@ -140,4 +140,10 @@ export class ActionEvent {
   @Type(() => Date)
   @IsOptional()
   oneDayReminderNotifsSentAt?: Date;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiPropertyOptional({ type: Date })
+  @Type(() => Date)
+  @IsOptional()
+  deadlineNotifsSentAt?: Date;
 }
