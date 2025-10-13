@@ -2,6 +2,7 @@ import {
   actionsGetNotificationSchedule,
   NotificationScheduleEntryDto,
 } from "@alliance/shared/client";
+import Card from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
@@ -225,18 +226,23 @@ const EventNotifTimeline: React.FC = () => {
                           </p>
                         )}
                       </div>
-                      <div className="lg:block">
+                      <div className="lg:block group">
                         <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 lg:hidden">
                           Recipients
                         </span>
                         <div className="text-gray-900">
                           {entry.recipients.length.toLocaleString()}
                         </div>
-                        {entry.recipients.map((recipient) => (
-                          <div key={recipient.id} className="text-gray-500">
-                            {recipient.displayName}
-                          </div>
-                        ))}
+                        <Card className="text-xs text-gray-500 group-hover:block hidden absolute z-10">
+                          {entry.recipients.map((recipient) => (
+                            <div
+                              key={recipient.id}
+                              className="text-zinc-800 text-sm"
+                            >
+                              {recipient.displayName}
+                            </div>
+                          ))}
+                        </Card>
                       </div>
                     </div>
                   </div>
