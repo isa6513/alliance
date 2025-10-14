@@ -104,6 +104,29 @@ const InvitePage: React.FC = () => {
               </li>
             </ol>
             <h3 className="font-serif !text-3xl font-bold mt-2">
+              What would you do?
+            </h3>
+            <p>
+              <span className="font-bold">
+                Every week, you would log into our online plaform to complete collective actions
+              </span>.
+            </p>
+
+            <p>
+              For instance, we recently signed a letter requesting news coverage of a coalition of businesses that took environmental action at the request of our strategic office. In the future, we might:
+            </p>
+              <ol className="list-decimal list-inside space-y-1">
+              <li>
+                Provide actionable feedback on the website of a partner non-profit.
+              </li>
+              <li>
+                Read about global problems and discuss them with each other.
+              </li> 
+              <li>
+                Edit Alliance communications materials.
+              </li> 
+            </ol>
+            <h3 className="font-serif !text-3xl font-bold mt-2">
               How do you join?
             </h3>
             <ol className="list-decimal list-inside space-y-3">
