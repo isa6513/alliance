@@ -50,6 +50,26 @@ const Sidebar: React.FC = () => {
     [navigate]
   );
 
+  const groups: {
+    name: string;
+    actions: ActionDto[];
+  }[] = [
+    {
+      name: "Active",
+      actions: actions.filter(
+        (action) => action.status !== "draft" && !action.everyoneShouldComplete
+      ),
+    },
+    {
+      name: "Onboarding",
+      actions: actions.filter((action) => action.everyoneShouldComplete),
+    },
+    {
+      name: "Draft",
+      actions: actions.filter((action) => action.status === "draft"),
+    },
+  ];
+
   return (
     <div className="flex flex-row min-h-screen h-fitcontent flex-nowrap bg-pagebg bg-[#fcfcfc]">
       <div className="overflow-y-auto max-h-screen overflow-x-hidden flex flex-col justify-between bg-[#f4f4f4]">
@@ -103,17 +123,33 @@ const Sidebar: React.FC = () => {
             {actionsLoading ? (
               <p className="text-sm text-gray-500">Loading actions...</p>
             ) : (
-              actions.map((action) => (
-                <div
-                  key={action.id}
-                  onClick={() => handleEditAction(action.id)}
-                  className={`cursor-pointer hover:bg-zinc-200 p-2 py-3 rounded-md ${
-                    currentActionId === action.id ? "bg-zinc-200" : ""
-                  }`}
-                >
-                  <p className="text-sm">{action.name}</p>
-                </div>
-              ))
+              groups
+                .filter((group) => group.actions.length > 0)
+                .map((group) => (
+                  <>
+                    <div
+                      key={group.name}
+                      className="flex w-full items-center gap-x-2"
+                    >
+                      <div className="h-px bg-zinc-200 flex-1" />
+                      <p className="text-xs font-bold uppercase text-zinc-700">
+                        {group.name}
+                      </p>
+                      <div className="h-px bg-zinc-200 flex-1" />
+                    </div>
+                    {group.actions.map((action) => (
+                      <div
+                        key={action.id}
+                        onClick={() => handleEditAction(action.id)}
+                        className={`cursor-pointer hover:bg-zinc-200 p-2 py-3 rounded-md ${
+                          currentActionId === action.id ? "bg-zinc-200" : ""
+                        }`}
+                      >
+                        <p className="text-sm">{action.name}</p>
+                      </div>
+                    ))}
+                  </>
+                ))
             )}
           </div>
         </div>
