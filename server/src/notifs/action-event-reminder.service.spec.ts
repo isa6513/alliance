@@ -45,6 +45,7 @@ const defaultReminderEventAction = {
   status: ActionStatus.Draft,
   usersCompleted: 0,
   everyoneShouldComplete: false,
+  archived: false,
 } satisfies Action;
 
 const reminderEvent = (overrides: Partial<ActionEvent> = {}): ActionEvent => ({
