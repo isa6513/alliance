@@ -51,25 +51,88 @@ const CellEditor: React.FC<CellEditorProps> = ({
     handleSave();
   };
 
+  const tryParseDate = (val: unknown): Date | null => {
+    if (val instanceof Date) {
+      return Number.isNaN(val.getTime()) ? null : val;
+    }
+
+    if (typeof val === "string") {
+      const trimmed = val.trim();
+      if (!trimmed) return null;
+
+      const directParse = new Date(trimmed);
+      if (!Number.isNaN(directParse.getTime())) {
+        return directParse;
+      }
+
+      const normalized = trimmed.includes(" ")
+        ? trimmed.replace(" ", "T")
+        : trimmed;
+      const normalizedParse = new Date(normalized);
+      if (!Number.isNaN(normalizedParse.getTime())) {
+        return normalizedParse;
+      }
+    }
+
+    return null;
+  };
+
+  const formatDateParts = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return { year, month, day };
+  };
+
+  const formatDateInput = (date: Date) => {
+    const { year, month, day } = formatDateParts(date);
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatDateTimeInput = (
+    date: Date,
+    includeSeconds: boolean
+  ): string => {
+    const { year, month, day } = formatDateParts(date);
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return includeSeconds
+      ? `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`
+      : `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const formatValueForInput = (val: any): string => {
     if (val === null || val === undefined) return "";
     if (column.dataType === "json") {
       return typeof val === "string" ? val : JSON.stringify(val, null, 2);
     }
     if (column.dataType === "datetime" || column.dataType === "date") {
-      if (val instanceof Date) {
-        return column.dataType === "date"
-          ? val.toISOString().split("T")[0]
-          : val.toISOString().slice(0, 16);
-      }
-      if (typeof val === "string") {
-        const date = new Date(val);
-        if (!isNaN(date.getTime())) {
-          return column.dataType === "date"
-            ? date.toISOString().split("T")[0]
-            : date.toISOString().slice(0, 16);
+      const date = tryParseDate(val);
+
+      if (date) {
+        if (column.dataType === "date") {
+          return formatDateInput(date);
         }
+
+        const originalHasSeconds =
+          typeof val === "string" &&
+          /:\d{2}:\d{2}/.test(val.replace(" ", "T"));
+        const includeSeconds =
+          originalHasSeconds ||
+          date.getSeconds() !== 0 ||
+          date.getMilliseconds() !== 0;
+
+        return formatDateTimeInput(date, includeSeconds);
       }
+
+      if (typeof val === "string") {
+        return val;
+      }
+
+      return "";
     }
     return String(val);
   };
