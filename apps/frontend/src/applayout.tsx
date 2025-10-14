@@ -237,7 +237,12 @@ export default function AppLayout() {
 
     postsLoader.then((data) => {
       if (data) {
-        setPosts(data);
+        setPosts(
+          data.sort(
+            (a, b) =>
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          )
+        );
       }
     });
 
