@@ -195,8 +195,6 @@ Effective cooperation is not achieved by pursuit of some idealistic harmony: it 
 
 Our common goal is not to create a future that is perfect from the perspective of every member, but to create a future that members agree is significantly better than the future that would occur otherwise. Therefore, members abide by a *democratic process that decides actions* rather than decide individually whether or not to participate in every action. Similarly, a democratic society depends on citizens following every law, not only the laws they agree with.
 
-We will use democratic processes, deliberation, and moral reasoning to address disagreements as much as possible.
-
 We recognize the risks associated with collective decision-making. To mitigate these risks, we put limits on the total amount of time and resources required from members, and our governance procedures ensure that members approve of the overall goals and direction of the Alliance.
 
 ## Contract

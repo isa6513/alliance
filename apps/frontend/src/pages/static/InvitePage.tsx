@@ -33,8 +33,8 @@ const InvitePage: React.FC = () => {
           >
             <p>
               Hi friend, I hope you will join me as a member of the Alliance. I
-              believe you to share my concerns about the direction that the
-              world is headed, and I think this is an opportunity to make a
+              believe you share my concerns about the direction that the world
+              is headed, and I think this is an opportunity to make a
               significant difference.
             </p>
 
@@ -47,6 +47,8 @@ const InvitePage: React.FC = () => {
               learning to coordinate to advance humanity’s interests. We plan to
               fight extreme poverty, environmental destruction, the breakdown of
               democratic institutions, and dangerous technological development.
+              Today, we are in an experimental phase focused on learning rather
+              than growth.
             </p>
             <p>
               <span className="font-bold">Our unique model</span> is designed to
@@ -74,10 +76,10 @@ const InvitePage: React.FC = () => {
               <span className="font-bold">
                 This is an important time to join.
               </span>{" "}
-              If we one day accomplish great things, it will be because our
-              friends and family were willing to step up before success was
-              guaranteed. Also, since we are still small and experimental, you
-              could have an outsized influence on our approach and culture.
+              If we eventually succeed, it will be because friends and family
+              were willing to step up before success was guaranteed. In
+              addition, early members will have an outsized influence on our
+              approach and culture.
             </p>
 
             <h3 className="font-serif !text-3xl font-bold mt-2">
@@ -90,8 +92,8 @@ const InvitePage: React.FC = () => {
                 </span>{" "}
                 We need a shared belief that these problems are not right, and
                 therefore a readiness to take actions that require meaningful
-                effort. Given this, we can address disagreements with respect
-                and reasoned deliberation.
+                effort. This shared belief will allow us to address
+                disagreements with respect and reasoned deliberation.
               </li>
               <li>
                 <span className="font-bold">

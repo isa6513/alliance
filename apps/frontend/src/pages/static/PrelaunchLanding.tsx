@@ -32,7 +32,9 @@ Billions of people agree that these crises are urgent, and moreover have the col
 
 The Alliance aims to give its members, and ultimately a significant proportion of humanity, the ability to make deliberate, large-scale change. We plan to do so by facilitating strategic, sustained collective action.
 
-We believe that commitment unlocks cooperation. The Alliance is enabled by a voluntary contract that requires members to contribute a small, consistent amount of their time and resources. Membership is currently by invitation only and requires a 15-minute weekly commitment.
+We believe that commitment unlocks cooperation. The Alliance is enabled by a voluntary contract that requires members to contribute a small, consistent amount of their time and resources.
+
+We are in an experimental phase focused on learning rather than growth. Membership is currently by invitation only and requires a 15-minute weekly commitment.
 
 While this project is ambitious, we believe it is the right time to undertake it seriously and carefully.
 
