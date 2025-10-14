@@ -126,7 +126,7 @@ const Sidebar: React.FC = () => {
               groups
                 .filter((group) => group.actions.length > 0)
                 .map((group) => (
-                  <>
+                  <div key={group.name}>
                     <div
                       key={group.name}
                       className="flex w-full items-center gap-x-2"
@@ -148,7 +148,7 @@ const Sidebar: React.FC = () => {
                         <p className="text-sm">{action.name}</p>
                       </div>
                     ))}
-                  </>
+                  </div>
                 ))
             )}
           </div>

@@ -188,8 +188,6 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
     loadNotifData();
   }, [eventForm.newStatus, eventForm.sendNotifsTo, action.id]);
 
-  console.log(notifData);
-
   return (
     <div className="space-y-4">
       {error && <p className="text-red-500">{error}</p>}
