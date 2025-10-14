@@ -205,24 +205,12 @@ const HomePage = () => {
       <p className="font-semibold text-xl text-black mb-2 font-serif">
         Bulletin
       </p>
+      <Link to="/feed" className="text-link text-sm mt-0"></Link>
       <p className="text-black mb-2">
-        Right now, we are focused on organizational improvement and small-scale
-        experiments that test collective action strategies.
-      </p>
-      <p className="text-black">
-        Learn more about our current{" "}
+        Right now, we are focused on small-scale experiments that test
+        collective action strategies. Learn more about our current{" "}
         <Link to="/priorities" className="text-link">
           priorities
-        </Link>
-        .
-      </p>
-      <p className="text-black mt-2">
-        If you have questions or feedback, call a{" "}
-        <Link
-          to="https://calendly.com/d/ctcw-j4f-bp3/talk-to-a-staff-member"
-          className="text-link"
-        >
-          staff member
         </Link>
         .
       </p>
