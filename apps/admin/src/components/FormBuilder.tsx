@@ -954,11 +954,6 @@ export function FormBuilder({
               >
                 {isPreviewMode ? "Edit Form" : "Preview Form"}
               </Button>
-              {!isPreviewMode && (
-                <Button onClick={addPage} color={ButtonColor.Light}>
-                  Add Page
-                </Button>
-              )}
               <Button
                 onClick={handleSaveForm}
                 disabled={isSaving || isLoading}
@@ -972,7 +967,7 @@ export function FormBuilder({
           {/* Page tabs - only show in edit mode */}
           {!isPreviewMode && (
             <div
-              className="flex space-x-1 mt-4"
+              className="flex space-x-1 mt-4 items-center"
               onDragOver={(e) => {
                 e.preventDefault();
                 e.dataTransfer.dropEffect = "move";
@@ -1105,6 +1100,13 @@ export function FormBuilder({
                   </div>
                 );
               })}
+              <div
+                onClick={addPage}
+                color={ButtonColor.White}
+                className="p-1 !h-6 !w-6 rounded-full hover:bg-gray-200 flex items-center justify-center cursor-pointer"
+              >
+                <p className="-mt-px text-zinc-700">+</p>
+              </div>
             </div>
           )}
         </div>

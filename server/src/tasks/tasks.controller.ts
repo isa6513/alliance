@@ -21,8 +21,11 @@ import {
 } from './form.dto';
 import { TasksService } from './tasks.service';
 import {
-  CustomValidatorDto,
+  CustomValidatorTypeDto,
   CustomValidatorResponseDto,
+  CreateCustomValidatorDto,
+  CreateCustomValidatorResponseDto,
+  CustomValidatorDto,
 } from './customvalidator.dto';
 
 @Controller('tasks')
@@ -97,7 +100,7 @@ export class TasksController {
 
   @Get('customValidators')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: CustomValidatorDto, isArray: true })
+  @ApiOkResponse({ type: CustomValidatorTypeDto, isArray: true })
   async customValidators() {
     return this.tasksService.customValidators();
   }
@@ -110,5 +113,25 @@ export class TasksController {
     @Request() req: JwtRequest,
   ) {
     return this.tasksService.runValidator(id, req.user.sub);
+  }
+
+  @Get('findOneCustomValidator/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CustomValidatorDto })
+  async findOneCustomValidator(@Param('id', ParseIntPipe) id: number) {
+    return this.tasksService.findOneCustomValidator(id);
+  }
+
+  @Post('createCustomValidator')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CreateCustomValidatorResponseDto })
+  async createCustomValidator(
+    @Body() body: CreateCustomValidatorDto,
+  ): Promise<CreateCustomValidatorResponseDto> {
+    const id = await this.tasksService.findOrCreateCustomValidator(
+      body.type,
+      body.idArgument,
+    );
+    return { id };
   }
 }

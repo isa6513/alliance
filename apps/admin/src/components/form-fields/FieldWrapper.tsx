@@ -3,6 +3,11 @@ import type { AnyField } from "@alliance/shared/forms/formschema";
 import { ConditionalVisibility, CustomValidatorSelect } from "./CommonControls";
 import type { FieldWrapperProps } from "./types";
 import RenderField from "@alliance/shared/forms/RenderField";
+import {
+  CustomValidatorType,
+  tasksCreateCustomValidator,
+  tasksFindOneCustomValidator,
+} from "@alliance/shared/client";
 
 function isFormField(field: unknown): field is AnyField {
   return Boolean(
@@ -31,6 +36,13 @@ export function FieldWrapper<T extends AnyField>({
   ] = useState(() => (isCurrentFormField ? Boolean(field.visibleIf) : false));
   const extraMenuRef = useRef<HTMLDivElement | null>(null);
 
+  const [customValidatorType, setCustomValidatorType] = useState<
+    CustomValidatorType | undefined
+  >(undefined);
+  const [customValidatorIdArgument, setCustomValidatorIdArgument] = useState<
+    number | undefined
+  >(undefined);
+
   useEffect(() => {
     if (!isCurrentFormField) {
       setShowCustomValidatorControl(false);
@@ -38,8 +50,20 @@ export function FieldWrapper<T extends AnyField>({
       return;
     }
 
-    if (field.customValidatorId && !showCustomValidatorControl) {
+    if (field.customValidatorId) {
       setShowCustomValidatorControl(true);
+      if (!customValidatorType) {
+        tasksFindOneCustomValidator({
+          path: {
+            id: field.customValidatorId,
+          },
+        }).then((customValidator) => {
+          if (customValidator.data) {
+            setCustomValidatorType(customValidator.data.type);
+            setCustomValidatorIdArgument(customValidator.data.idArgument);
+          }
+        });
+      }
     }
 
     if (field.visibleIf && !showConditionalVisibilityControl) {
@@ -50,6 +74,7 @@ export function FieldWrapper<T extends AnyField>({
     isCurrentFormField,
     showConditionalVisibilityControl,
     showCustomValidatorControl,
+    customValidatorType,
   ]);
 
   useEffect(() => {
@@ -76,8 +101,29 @@ export function FieldWrapper<T extends AnyField>({
     };
   }, [isExtraMenuOpen]);
 
-  const handleValidatorChange = (validatorId: number | undefined) => {
-    onUpdate({ customValidatorId: validatorId } as Partial<T>);
+  const handleValidatorChange = async (
+    validatorType: CustomValidatorType | undefined,
+    idArgument?: number
+  ) => {
+    console.log("handlevalidatorchange", validatorType, idArgument);
+    if (!validatorType) {
+      onUpdate({ customValidatorId: undefined } as Partial<T>);
+      setCustomValidatorType(undefined);
+      setCustomValidatorIdArgument(undefined);
+      return;
+    }
+
+    setCustomValidatorType(validatorType);
+    setCustomValidatorIdArgument(idArgument);
+    const newValidatorId = await tasksCreateCustomValidator({
+      body: {
+        type: validatorType,
+        idArgument,
+      },
+    });
+    if (newValidatorId.data) {
+      onUpdate({ customValidatorId: newValidatorId.data.id } as Partial<T>);
+    }
   };
 
   const handleVisibilityChange = (updates: {
@@ -201,7 +247,8 @@ export function FieldWrapper<T extends AnyField>({
             <div className="space-y-2 border-t border-gray-200 p-4">
               {showCustomValidatorControl && (
                 <CustomValidatorSelect
-                  value={field.customValidatorId}
+                  type={customValidatorType}
+                  idArgument={customValidatorIdArgument}
                   onChange={handleValidatorChange}
                 />
               )}

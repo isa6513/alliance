@@ -20,13 +20,20 @@ import {
 } from './form.dto';
 import { FormSchema, isQuestionField, isQuestionVisible, Page } from './schema';
 import {
-  CustomValidatorDto,
+  CustomValidatorTypeDto,
   CustomValidatorResponseDto,
+  CustomValidatorDto,
 } from './customvalidator.dto';
 import { ForumService } from 'src/forum/forum.service';
 import { ActionsService } from 'src/actions/actions.service';
 import { MmsService } from 'src/mms/mms.service';
 import { welcomeMessage } from 'src/notifs/textnotifcontents';
+import {
+  CustomValidator,
+  CustomValidatorType,
+  typeName,
+  typeUsesIdArgument,
+} from './entities/customvalidator.entity';
 
 @Injectable()
 export class TasksService {
@@ -42,6 +49,8 @@ export class TasksService {
     private forumService: ForumService,
     private actionsService: ActionsService,
     private mmsService: MmsService,
+    @InjectRepository(CustomValidator)
+    private customValidatorRepository: Repository<CustomValidator>,
   ) {}
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
@@ -230,35 +239,47 @@ export class TasksService {
     return responses[0];
   }
 
-  async customValidators(): Promise<CustomValidatorDto[]> {
-    return [
-      {
-        name: 'User has uploaded a profile picture',
-        id: 1,
-      },
-      {
-        name: 'User has signed contract',
-        id: 2,
-      },
-      {
-        name: 'User has added a profile description',
-        id: 3,
-      },
-      {
-        name: 'User has replied to the personal habit discussion',
-        id: 4,
-      },
-    ];
+  async customValidators(): Promise<CustomValidatorTypeDto[]> {
+    const types = Object.values(CustomValidatorType);
+    return types.map((type) => ({
+      name: typeName[type],
+      id: type,
+      withIdField: typeUsesIdArgument[type],
+    }));
+  }
+
+  async findOrCreateCustomValidator(
+    type: CustomValidatorType,
+    idArg?: number,
+  ): Promise<number> {
+    let validator = await this.customValidatorRepository.findOne({
+      where: { type, idArgument: idArg },
+    });
+    if (!validator) {
+      validator = this.customValidatorRepository.create({
+        type,
+        idArgument: idArg,
+      });
+      await this.customValidatorRepository.save(validator);
+    }
+    return validator.id;
+  }
+
+  async findOneCustomValidator(id: number): Promise<CustomValidatorDto> {
+    return this.customValidatorRepository.findOneOrFail({ where: { id } });
   }
 
   async runValidator(
     id: number,
     userId: number,
   ): Promise<CustomValidatorResponseDto> {
-    console.log('Running validator', id, userId);
+    const validator = await this.customValidatorRepository.findOneOrFail({
+      where: { id },
+    });
     const user = await this.userService.findOneOrFail(userId);
-    switch (id) {
-      case 1: // User has uploaded a profile picture
+
+    switch (validator.type) {
+      case CustomValidatorType.UploadedPhoto:
         if (!user.profilePicture) {
           return {
             isValid: false,
@@ -267,7 +288,7 @@ export class TasksService {
           };
         }
         break;
-      case 2: // User has signed contract
+      case CustomValidatorType.SignedContract:
         console.log(user.contractDateSigned, user.contractDateSuspended);
         if (!user.contractDateSigned || user.contractDateSuspended) {
           return {
@@ -277,7 +298,7 @@ export class TasksService {
           };
         }
         break;
-      case 3: // User has added a profile description
+      case CustomValidatorType.AddedProfileDescription:
         if (!user.profileDescription) {
           return {
             isValid: false,
@@ -286,8 +307,13 @@ export class TasksService {
           };
         }
         break;
-      case 4: // User has replied to the personal habit discussion
-        const replies = await this.forumService.findCommentsForPost(6);
+      case CustomValidatorType.RepliedToForumPost:
+        if (!validator.idArgument) {
+          throw new BadRequestException('Validator has no id argument');
+        }
+        const replies = await this.forumService.findCommentsForPost(
+          validator.idArgument,
+        );
         if (
           replies.filter((reply) => reply.authorId === user.id).length === 0
         ) {

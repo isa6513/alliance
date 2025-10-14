@@ -1,7 +1,8 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import {
+  CustomValidatorType,
+  CustomValidatorTypeDto,
   tasksCustomValidators,
-  type CustomValidatorDto,
 } from "@alliance/shared/client";
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import type {
@@ -221,11 +222,11 @@ export function ConditionalVisibility({
 
 // ---------------- Custom Validators ----------------
 
-let cachedValidators: CustomValidatorDto[] | null = null;
+let cachedValidators: CustomValidatorTypeDto[] | null = null;
 let cachedValidatorsError: string | null = null;
-let pendingValidatorsRequest: Promise<CustomValidatorDto[]> | null = null;
+let pendingValidatorsRequest: Promise<CustomValidatorTypeDto[]> | null = null;
 
-async function fetchCustomValidators(): Promise<CustomValidatorDto[]> {
+async function fetchCustomValidators(): Promise<CustomValidatorTypeDto[]> {
   const response = await tasksCustomValidators();
   if (response.data) {
     return response.data;
@@ -239,11 +240,11 @@ async function fetchCustomValidators(): Promise<CustomValidatorDto[]> {
 }
 
 function useCustomValidators(): {
-  validators: CustomValidatorDto[];
+  validators: CustomValidatorTypeDto[];
   loading: boolean;
   error: string | null;
 } {
-  const [validators, setValidators] = useState<CustomValidatorDto[]>(
+  const [validators, setValidators] = useState<CustomValidatorTypeDto[]>(
     () => cachedValidators ?? []
   );
   const [loading, setLoading] = useState<boolean>(
@@ -300,14 +301,19 @@ function useCustomValidators(): {
 }
 
 type CustomValidatorSelectProps = {
-  value?: number;
-  onChange: (validatorId: number | undefined) => void;
+  type?: CustomValidatorType;
+  idArgument?: number;
+  onChange: (
+    validatorType: CustomValidatorType | undefined,
+    idArgument?: number
+  ) => void;
   className?: string;
   label?: string;
 };
 
 export function CustomValidatorSelect({
-  value,
+  type,
+  idArgument,
   onChange,
   className = "",
   label = "Custom validator",
@@ -317,44 +323,46 @@ export function CustomValidatorSelect({
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextValue = event.target.value;
     if (!nextValue) {
-      onChange(undefined);
+      onChange(undefined, idArgument);
       return;
     }
-    onChange(Number(nextValue));
+    onChange(nextValue as CustomValidatorType, idArgument);
   };
 
-  const selectedOptionMissing =
-    typeof value === "number" &&
-    !validators.some((validator) => validator.id === value);
-
-  const effectiveValidators = selectedOptionMissing
-    ? [
-        ...validators,
-        {
-          id: value as number,
-          name: `Validator #${value}`,
-        },
-      ]
-    : validators;
-
-  const hasValidators = effectiveValidators.length > 0;
+  const hasValidators = validators.length > 0;
 
   return (
     <div className={`space-y-1 ${className}`}>
       <label className="block text-xs font-medium text-gray-700">{label}</label>
-      <select
-        className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100"
-        value={value ? String(value) : ""}
-        onChange={handleChange}
-        disabled={loading || (!hasValidators && !value)}
-      >
-        <option value="">None</option>
-        {effectiveValidators.map((validator) => (
-          <option key={validator.id} value={validator.id}>
-            {validator.name}
-          </option>
-        ))}
-      </select>
+      <div className="flex items-center gap-2">
+        <select
+          className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100"
+          value={type}
+          onChange={handleChange}
+          disabled={loading || (!hasValidators && !type)}
+        >
+          <option value="">None</option>
+          {validators.map((validator) => (
+            <option key={validator.id} value={validator.id}>
+              {validator.name}
+            </option>
+          ))}
+        </select>
+        {!!validators.find((validator) => validator.id === type)
+          ?.withIdField && (
+          <input
+            type="number"
+            value={idArgument ?? ""}
+            onChange={(e) =>
+              onChange(
+                type,
+                e.target.value === "" ? undefined : Number(e.target.value)
+              )
+            }
+            className="px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100 w-24"
+          />
+        )}
+      </div>
       {loading && (
         <p className="text-[11px] text-gray-500">Loading validators…</p>
       )}

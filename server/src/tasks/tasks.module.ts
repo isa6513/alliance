@@ -9,10 +9,11 @@ import { TasksService } from './tasks.service';
 import { ForumModule } from 'src/forum/forum.module';
 import { ActionsModule } from 'src/actions/actions.module';
 import { MmsModule } from 'src/mms/mms.module';
+import { CustomValidator } from './entities/customvalidator.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Form, FormResponse, Action]),
+    TypeOrmModule.forFeature([Form, FormResponse, Action, CustomValidator]),
     UserModule,
     ForumModule,
     ActionsModule,

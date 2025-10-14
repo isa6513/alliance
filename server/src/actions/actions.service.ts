@@ -173,7 +173,7 @@ export class ActionsService {
     if (user?.admin) {
       return true;
     }
-    if (action.status === ActionStatus.Draft) {
+    if (action.status === ActionStatus.Draft || action.archived) {
       return false;
     }
     if (

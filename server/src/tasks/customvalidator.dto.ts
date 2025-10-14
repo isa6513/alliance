@@ -1,11 +1,37 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional } from 'class-validator';
+import {
+  CustomValidator,
+  CustomValidatorType,
+} from './entities/customvalidator.entity';
 
-export class CustomValidatorDto {
+export class CustomValidatorTypeDto {
   @ApiProperty()
   @IsNotEmpty()
   name: string;
 
+  @ApiProperty({ enum: CustomValidatorType, enumName: 'CustomValidatorType' })
+  @IsNotEmpty()
+  id: CustomValidatorType;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  withIdField: boolean;
+}
+
+export class CreateCustomValidatorDto {
+  @ApiProperty({ enum: CustomValidatorType, enumName: 'CustomValidatorType' })
+  @IsNotEmpty()
+  type: CustomValidatorType;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  idArgument?: number;
+}
+
+export class CustomValidatorDto extends CustomValidator {}
+
+export class CreateCustomValidatorResponseDto {
   @ApiProperty()
   @IsNotEmpty()
   id: number;

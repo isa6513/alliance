@@ -1177,14 +1177,32 @@ export type FormResponseDto = {
     };
 };
 
-export type CustomValidatorDto = {
+export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost';
+
+export type CustomValidatorTypeDto = {
     name: string;
-    id: number;
+    id: CustomValidatorType;
+    withIdField: boolean;
 };
 
 export type CustomValidatorResponseDto = {
     isValid: boolean;
     message?: string;
+};
+
+export type CustomValidatorDto = {
+    id: number;
+    type: CustomValidatorType;
+    idArgument?: number;
+};
+
+export type CreateCustomValidatorDto = {
+    type: CustomValidatorType;
+    idArgument?: number;
+};
+
+export type CreateCustomValidatorResponseDto = {
+    id: number;
 };
 
 export type TimeSpentForUserDto = {
@@ -3086,7 +3104,7 @@ export type TasksCustomValidatorsData = {
 };
 
 export type TasksCustomValidatorsResponses = {
-    200: Array<CustomValidatorDto>;
+    200: Array<CustomValidatorTypeDto>;
 };
 
 export type TasksCustomValidatorsResponse = TasksCustomValidatorsResponses[keyof TasksCustomValidatorsResponses];
@@ -3105,6 +3123,34 @@ export type TasksRunValidatorResponses = {
 };
 
 export type TasksRunValidatorResponse = TasksRunValidatorResponses[keyof TasksRunValidatorResponses];
+
+export type TasksFindOneCustomValidatorData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/findOneCustomValidator/{id}';
+};
+
+export type TasksFindOneCustomValidatorResponses = {
+    200: CustomValidatorDto;
+};
+
+export type TasksFindOneCustomValidatorResponse = TasksFindOneCustomValidatorResponses[keyof TasksFindOneCustomValidatorResponses];
+
+export type TasksCreateCustomValidatorData = {
+    body: CreateCustomValidatorDto;
+    path?: never;
+    query?: never;
+    url: '/tasks/createCustomValidator';
+};
+
+export type TasksCreateCustomValidatorResponses = {
+    200: CreateCustomValidatorResponseDto;
+};
+
+export type TasksCreateCustomValidatorResponse = TasksCreateCustomValidatorResponses[keyof TasksCreateCustomValidatorResponses];
 
 export type AnalyticsGetTimeSpentPerUserData = {
     body?: never;
