@@ -65,9 +65,10 @@ jobs:
           SUMMARY: ${{ steps.extract_codex.outputs.codex_final_message }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
+          CLEAN_SUMMARY=$(printf "%s" "$SUMMARY" | sed -E 's/\[NEEDS[ _]ATTENTION\]//g' | sed -E 's/[[:space:]]+$//')
           jq -nc \
             --arg url "$RUN_URL" \
-            --arg summary "$SUMMARY" \
+            --arg summary "$CLEAN_SUMMARY" \
             '{
               text: "review given",
               blocks: [
