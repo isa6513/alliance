@@ -59,18 +59,28 @@ const Sidebar: React.FC = () => {
     {
       name: "Active",
       actions: filteredActions.filter(
-        (action) => action.status !== "draft" && !action.everyoneShouldComplete
-      ),
-    },
-    {
-      name: "Onboarding",
-      actions: filteredActions.filter(
-        (action) => action.everyoneShouldComplete
+        (action) =>
+          action.status !== "draft" &&
+          !action.everyoneShouldComplete &&
+          action.status !== "completed"
       ),
     },
     {
       name: "Draft",
       actions: filteredActions.filter((action) => action.status === "draft"),
+    },
+    {
+      name: "Onboarding",
+      actions: filteredActions.filter(
+        (action) =>
+          action.everyoneShouldComplete && action.status !== "completed"
+      ),
+    },
+    {
+      name: "Completed",
+      actions: filteredActions.filter(
+        (action) => action.status === "completed"
+      ),
     },
   ];
 
@@ -139,7 +149,6 @@ const Sidebar: React.FC = () => {
                       <p className="text-xs font-bold uppercase text-zinc-700">
                         {group.name}
                       </p>
-                      <div className="h-px bg-zinc-200 flex-1" />
                     </div>
                     {group.actions.map((action) => (
                       <div
