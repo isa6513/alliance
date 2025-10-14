@@ -13,9 +13,9 @@ export interface ActionEventsPanelProps {
 const ActionEventsPanel = ({ action, events }: ActionEventsPanelProps) => {
   const liveUserCount = useActionCount(action.id);
 
-  const pastEvents = events.filter(
-    (event) => new Date(event.date) < new Date()
-  );
+  const pastEvents = events
+    .filter((event) => new Date(event.date) < new Date())
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   if (action.status === "draft" && events.length === 0) {
     pastEvents.push({
