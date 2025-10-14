@@ -135,7 +135,7 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
         );
 
         // Shared background color
-        const barColor = phase.status === "member_action" ? "#8fcf4e" : "#ddd"; // gray-100
+        const barColor = phase.status === "member_action" ? "#75ba30" : "#ddd"; // gray-100
 
         // Check if this is the last phase and if it extends beyond current time
         const isLastPhase = phaseIndex === phases.length - 1;
@@ -170,8 +170,6 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
             background: `linear-gradient(to right, ${barColor} 0%, ${barColor} ${fadeStartPercent}%, rgba(243, 244, 246, 0.3) ${fadeEndPercent}%, rgba(243, 244, 246, 0.1) 100%)`,
           };
         } else {
-          console.log(phase.status);
-
           backgroundStyle = {
             backgroundColor:
               phase.status === "completed" ? "transparent" : barColor,

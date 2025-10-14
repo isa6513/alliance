@@ -437,4 +437,18 @@ export class ActionsController {
   ): Promise<ActionActivityDto> {
     return this.actionsService.adminCreateActivity(activityDto);
   }
+
+  @Post('archive/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionDto })
+  archive(@Param('id', ParseIntPipe) id: number): Promise<ActionDto> {
+    return this.actionsService.archive(id);
+  }
+
+  @Post('unarchive/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionDto })
+  unarchive(@Param('id', ParseIntPipe) id: number): Promise<ActionDto> {
+    return this.actionsService.unarchive(id);
+  }
 }

@@ -1,8 +1,10 @@
 import {
   ActionDto,
+  actionsArchive,
   actionsCreate,
   actionsFindOne,
   actionsRemove,
+  actionsUnarchive,
   actionsUpdate,
   CreateActionDto,
   FormDto,
@@ -60,9 +62,10 @@ export const formatStatus = (status: string) => {
 type Tab = "overview" | "details" | "events";
 
 const ActionDashboard: React.FC = () => {
-  const { actionId } = useParams<{ actionId: string }>();
+  const { actionId: actionIdParam } = useParams<{ actionId: string }>();
   const navigate = useNavigate();
-  const isNew = actionId === "new";
+  const isNew = actionIdParam === "new";
+  const actionId = isNew ? null : parseInt(actionIdParam!);
   const [action, setAction] = useState<ActionDto | null>(null);
   const [loading, setLoading] = useState<boolean>(!isNew);
   const [saving, setSaving] = useState<boolean>(false);
@@ -140,6 +143,7 @@ const ActionDashboard: React.FC = () => {
     type: "Activity",
     taskFormId: undefined,
     participatingGroups: [],
+    everyoneShouldComplete: false,
   });
 
   // Reset form when switching to new action mode
@@ -156,6 +160,7 @@ const ActionDashboard: React.FC = () => {
         type: "Activity",
         taskFormId: undefined,
         participatingGroups: [],
+        everyoneShouldComplete: false,
       });
       setImageKey(null);
       setImagePreview(null);
@@ -172,7 +177,7 @@ const ActionDashboard: React.FC = () => {
     const loadAction = async () => {
       try {
         const response = await actionsFindOne({
-          path: { id: parseInt(actionId) },
+          path: { id: actionId },
         });
         const actionData = response.data;
         if (!actionData) {
@@ -298,6 +303,21 @@ const ActionDashboard: React.FC = () => {
     }
   };
 
+  const handleArchive = useCallback(async () => {
+    if (actionId) {
+      if (action?.archived) {
+        await actionsUnarchive({
+          path: { id: actionId },
+        });
+      } else {
+        await actionsArchive({
+          path: { id: actionId },
+        });
+      }
+      window.location.reload();
+    }
+  }, [actionId, action?.archived]);
+
   const handleGroupsChange = useCallback((ids: number[]) => {
     setSelectedGroupIds(ids);
     setForm((prev) => ({
@@ -386,7 +406,7 @@ const ActionDashboard: React.FC = () => {
         handleActionCreated(newAction);
       } else if (actionId) {
         const response = await actionsUpdate({
-          path: { id: parseInt(actionId) },
+          path: { id: actionId },
           body: formData,
         });
         const updatedAction = response.data;
@@ -395,7 +415,7 @@ const ActionDashboard: React.FC = () => {
         }
         // Reload the action to get updated data
         const reloadResponse = await actionsFindOne({
-          path: { id: parseInt(actionId) },
+          path: { id: actionId },
         });
         if (reloadResponse.data) {
           setAction(reloadResponse.data);
@@ -420,7 +440,7 @@ const ActionDashboard: React.FC = () => {
       try {
         setLoading(true);
         const response = await actionsRemove({
-          path: { id: parseInt(actionId) },
+          path: { id: actionId },
         });
         if (response.error) {
           throw new Error("Failed to delete action");
@@ -455,9 +475,16 @@ const ActionDashboard: React.FC = () => {
   return (
     <div className="flex flex-col h-full p-5">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-[#111] text-[16pt] font-bold">
-          {isNew ? "Create New Action" : `Action: ${action?.name}`}
-        </h1>
+        <div className="flex flex-row gap-x-2">
+          <div className="flex flex-row gap-x-2 items-center">
+            {action?.archived && (
+              <span className="px-2 py-1 rounded-sm bg-red-200">Archived</span>
+            )}
+          </div>
+          <h1 className="text-[#111] text-[16pt] font-bold">
+            {isNew ? "Create New Action" : `${action?.name}`}
+          </h1>
+        </div>
         <button
           onClick={handleCancel}
           className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 text-nowrap"
@@ -561,6 +588,13 @@ const ActionDashboard: React.FC = () => {
                   >
                     <CopyIcon size="large" />
                     Duplicate Action
+                  </Button>
+                  <Button
+                    onClick={() => handleArchive()}
+                    color={ButtonColor.RedOutline}
+                    className="!px-3 !text-sm gap-x-1 bg-white hover:bg-red-50"
+                  >
+                    {action.archived ? "Unarchive Action" : "Archive Action"}
                   </Button>
                 </div>
                 <Card style={CardStyle.White}>

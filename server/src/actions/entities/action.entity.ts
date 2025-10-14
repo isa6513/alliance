@@ -208,4 +208,11 @@ export class Action {
   })
   @Allow()
   everyoneShouldComplete: boolean;
+
+  @Column({ default: false })
+  @ApiProperty({
+    default: false,
+  })
+  @Allow()
+  archived: boolean;
 }

@@ -897,4 +897,16 @@ export class ActionsService {
       activityDto.type,
     );
   }
+
+  async archive(id: number): Promise<ActionDto> {
+    const action = await this.actionRepository.findOneOrFail({ where: { id } });
+    action.archived = true;
+    return this.actionRepository.save(action);
+  }
+
+  async unarchive(id: number): Promise<ActionDto> {
+    const action = await this.actionRepository.findOneOrFail({ where: { id } });
+    action.archived = false;
+    return this.actionRepository.save(action);
+  }
 }

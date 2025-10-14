@@ -137,7 +137,10 @@ const ActionsList: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <ActionTimeline actions={actions} className="h-full" />
+      <ActionTimeline
+        actions={actions.filter((a) => !a.archived)}
+        className="h-full"
+      />
       <p className="font-bold my-4 px-5">All actions</p>
       <p className="text-sm text-zinc-500 px-5">
         Sorted by appearance to users (earliest last event first)
@@ -146,6 +149,8 @@ const ActionsList: React.FC = () => {
       <div className="space-y-3 flex-1 overflow-y-auto p-5 pt-0">
         {actions
           .sort((a, b) => {
+            if (a.archived) return 1;
+            if (b.archived) return -1;
             if (a.events.length === 0) return 1;
             if (b.events.length === 0) return -1;
             const aEvent = a.events[a.events.length - 1];
@@ -164,6 +169,11 @@ const ActionsList: React.FC = () => {
               >
                 <div className="flex justify-between mb-2 ">
                   <div className="flex flex-row items-center gap-x-2">
+                    {action?.archived && (
+                      <span className="px-2 py-1 rounded-sm bg-red-200 text-xs">
+                        Archived
+                      </span>
+                    )}
                     <h2 className="font-bold text-sm">{action.name}</h2>
                     {action.events.length > 0 && (
                       <p className="text-sm text-zinc-500">

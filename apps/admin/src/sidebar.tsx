@@ -50,23 +50,27 @@ const Sidebar: React.FC = () => {
     [navigate]
   );
 
+  const filteredActions = actions.filter((action) => !action.archived);
+
   const groups: {
     name: string;
     actions: ActionDto[];
   }[] = [
     {
       name: "Active",
-      actions: actions.filter(
+      actions: filteredActions.filter(
         (action) => action.status !== "draft" && !action.everyoneShouldComplete
       ),
     },
     {
       name: "Onboarding",
-      actions: actions.filter((action) => action.everyoneShouldComplete),
+      actions: filteredActions.filter(
+        (action) => action.everyoneShouldComplete
+      ),
     },
     {
       name: "Draft",
-      actions: actions.filter((action) => action.status === "draft"),
+      actions: filteredActions.filter((action) => action.status === "draft"),
     },
   ];
 
@@ -126,7 +130,7 @@ const Sidebar: React.FC = () => {
               groups
                 .filter((group) => group.actions.length > 0)
                 .map((group) => (
-                  <div key={group.name}>
+                  <React.Fragment key={group.name}>
                     <div
                       key={group.name}
                       className="flex w-full items-center gap-x-2"
@@ -148,7 +152,7 @@ const Sidebar: React.FC = () => {
                         <p className="text-sm">{action.name}</p>
                       </div>
                     ))}
-                  </div>
+                  </React.Fragment>
                 ))
             )}
           </div>

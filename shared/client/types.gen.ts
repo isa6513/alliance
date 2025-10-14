@@ -448,6 +448,7 @@ export type Action = {
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
     everyoneShouldComplete: boolean;
+    archived: boolean;
 };
 
 export type Group = {
@@ -570,6 +571,7 @@ export type ActionDto = {
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
     everyoneShouldComplete: boolean;
+    archived: boolean;
     events: Array<ActionEventDto>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
@@ -2265,6 +2267,36 @@ export type ActionsCreateActivityResponses = {
 };
 
 export type ActionsCreateActivityResponse = ActionsCreateActivityResponses[keyof ActionsCreateActivityResponses];
+
+export type ActionsArchiveData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/archive/{id}';
+};
+
+export type ActionsArchiveResponses = {
+    200: ActionDto;
+};
+
+export type ActionsArchiveResponse = ActionsArchiveResponses[keyof ActionsArchiveResponses];
+
+export type ActionsUnarchiveData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/unarchive/{id}';
+};
+
+export type ActionsUnarchiveResponses = {
+    200: ActionDto;
+};
+
+export type ActionsUnarchiveResponse = ActionsUnarchiveResponses[keyof ActionsUnarchiveResponses];
 
 export type NotifsFindAllData = {
     body?: never;

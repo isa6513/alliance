@@ -95,6 +95,7 @@ export class CreateActionDto extends OmitType(ActionDto, [
   'status',
   'taskContents',
   'events',
+  'archived',
 ]) {}
 
 export class UpdateActionDto extends PartialType(CreateActionDto) {}
