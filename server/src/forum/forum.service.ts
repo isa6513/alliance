@@ -244,7 +244,7 @@ export class ForumService {
     updatePostDto: UpdatePostDto,
     userId: number,
   ): Promise<Post> {
-    const post = await this.findOnePost(id);
+    const post = await this.findOnePost(id, userId);
 
     if (post.authorId !== userId) {
       throw new NotFoundException('You can only edit your own posts');
@@ -253,6 +253,7 @@ export class ForumService {
     await this.postRepository.update(id, {
       title: updatePostDto.title ?? post.title,
       actionId: updatePostDto.actionId ?? post.actionId,
+      visibleAt: updatePostDto.visibleAt ?? post.visibleAt,
     });
     if (updatePostDto.editableContent) {
       const ec = await this.editableContentRepository.findOneBy({
@@ -265,11 +266,11 @@ export class ForumService {
         await this.editableContentRepository.save(ec);
       }
     }
-    return this.findOnePost(id);
+    return this.findOnePost(id, userId);
   }
 
   async removePost(id: number, userId: number): Promise<void> {
-    const post = await this.findOnePost(id);
+    const post = await this.findOnePost(id, userId);
 
     if (post.authorId !== userId) {
       throw new NotFoundException('You can only delete your own posts');

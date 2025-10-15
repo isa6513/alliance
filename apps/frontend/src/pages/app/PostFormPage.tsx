@@ -148,12 +148,12 @@ const PostFormPage: React.FC = () => {
         navigate(`/forum/post/${response.data.id}`);
       } else {
         setError("An error occurred while updating the post");
-        console.error("no post id");
-        return;
+        console.error(response);
       }
     } catch (err) {
       console.error("Error saving post:", err);
       setError("Failed to save post");
+    } finally {
       setIsSubmitting(false);
     }
   };
