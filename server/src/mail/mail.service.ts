@@ -30,6 +30,7 @@ export class MailService {
     [EmailType.ForumDigest]: 'forumdigest',
     [EmailType.MissedDeadline]: 'misseddeadline',
     [EmailType.MissedSecondDeadline]: 'missedseconddeadline',
+    [EmailType.CustomActionReminder]: 'customactionreminder',
   };
 
   async sendMail(
@@ -190,6 +191,8 @@ export class MailService {
       if (context.event.newStatus === ActionStatus.MemberAction) {
         return '1 day left to complete: ' + context.action.name;
       }
+    } else if (context.type === ActionEventNotifType.CustomReminder) {
+      return 'Reminder: ' + context.action.name;
     } else if (context.type === ActionEventNotifType.MissedDeadline) {
       return 'Failed to complete action: ' + context.action.name;
     }
@@ -217,6 +220,8 @@ export class MailService {
         context.event.newStatus === ActionStatus.GatheringCommitments
           ? EmailType.CommitmentReminder
           : EmailType.MemberActionReminder;
+    } else if (context.type === ActionEventNotifType.CustomReminder) {
+      emailType = EmailType.CustomActionReminder;
     } else if (context.type === ActionEventNotifType.MissedDeadline) {
       emailType = context.isSecondMiss
         ? EmailType.MissedSecondDeadline
@@ -239,6 +244,11 @@ export class MailService {
       announcementDaysLeft = getDaysFromDeadline(context.deadlineEvent);
     }
 
+    const replacedMessage = context.customEmailMessage?.replace(
+      '#{name}',
+      context.user.name,
+    );
+
     const emailContext = {
       name: context.user.name,
       actionName: context.action.name,
@@ -251,6 +261,7 @@ export class MailService {
           : context.type === ActionEventNotifType.ThreeDayReminder
             ? '3 days'
             : '1 day',
+      customMessage: replacedMessage ?? null,
       cid: context.cid,
     };
 

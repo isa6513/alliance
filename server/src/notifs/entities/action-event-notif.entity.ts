@@ -18,6 +18,7 @@ export enum ActionEventNotifType {
   ThreeDayReminder = '3dayreminder',
   OneDayReminder = '1dayreminder',
   MissedDeadline = 'misseddeadline',
+  CustomReminder = 'customreminder',
 }
 
 @Entity()

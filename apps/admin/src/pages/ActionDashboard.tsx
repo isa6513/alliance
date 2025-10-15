@@ -25,6 +25,7 @@ import EventManagementTab from "../components/EventManagementTab";
 import { getApiUrl } from "../lib/config";
 import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
 import { FormBuilder } from "../components/FormBuilder";
+import ActionRemindersTab from "../components/ActionRemindersTab";
 
 // Status color mapping
 export const getStatusColor = (status: ActionDto["status"]) => {
@@ -60,7 +61,7 @@ export const formatStatus = (status: string) => {
     .join(" ");
 };
 
-type Tab = "overview" | "details" | "events" | "form";
+type Tab = "overview" | "details" | "events" | "form" | "reminders";
 
 const ActionDashboard: React.FC = () => {
   const { actionId: actionIdParam } = useParams<{ actionId: string }>();
@@ -81,7 +82,7 @@ const ActionDashboard: React.FC = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const activeTab = (searchParams.get("tab") as Tab) ?? "overview";
+  const selectedTab = (searchParams.get("tab") as Tab) ?? "overview";
 
   const onTabChange = (t: Tab) => {
     setSearchParams((prev) => {
@@ -476,14 +477,24 @@ const ActionDashboard: React.FC = () => {
 
   const baseUrl = getApiUrl();
 
+  const hasMemberActionEvent = action?.events?.some(
+    (event) => event.newStatus === "member_action"
+  );
+
   const tabData: { key: Tab; label: string }[] = [
     { key: "overview", label: "Status Overview" },
     { key: "details", label: "Action Details" },
     { key: "events", label: "Event Management" },
+    ...(hasMemberActionEvent ? [{ key: "reminders" as Tab, label: "Reminders" }] : []),
     ...(action?.type === "Activity"
       ? [{ key: "form" as Tab, label: "Task Form" }]
       : []),
   ];
+
+  const availableTabs = tabData.map((tab) => tab.key);
+  const activeTab = availableTabs.includes(selectedTab)
+    ? selectedTab
+    : tabData[0].key;
 
   const currentEventId = action?.events
     ?.filter((event) => new Date(event.date).getTime() < new Date().getTime())
@@ -779,6 +790,10 @@ const ActionDashboard: React.FC = () => {
                   onGroupsChange={handleGroupsChange}
                 />
               </Card>
+            )}
+
+            {activeTab === "reminders" && action && (
+              <ActionRemindersTab action={action} setAction={setAction} />
             )}
 
             {activeTab === "form" && action && (

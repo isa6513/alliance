@@ -18,6 +18,7 @@ import {
 } from 'src/actions/dto/notification-schedule.dto';
 import { User } from '../user/entities/user.entity';
 import { ProfileDto } from 'src/user/user.dto';
+import { ActionReminder } from 'src/actions/entities/action-reminder.entity';
 
 export interface MissedDeadlineCandidate {
   actionId: number;
@@ -43,11 +44,12 @@ export const POST_MEMBER_ACTION_STATUSES = new Set<ActionStatus>([
   ActionStatus.Abandoned,
 ]);
 
-interface NotificationPlan {
+export interface NotificationPlan {
   type: ActionEventNotifType;
   scheduledFor: Date;
   referenceEvent: ActionEvent;
   targetEvent: ActionEvent;
+  reminder?: ActionReminder;
   metadata?: NotificationScheduleMetadataDto;
 }
 
@@ -58,6 +60,8 @@ export class ActionEventReminderService {
     private readonly eventRepository: Repository<ActionEvent>,
     @InjectRepository(ActionActivity)
     private readonly actionActivityRepository: Repository<ActionActivity>,
+    @InjectRepository(ActionReminder)
+    private readonly reminderRepository: Repository<ActionReminder>,
     private readonly recipientService: ActionEventRecipientService,
   ) {}
 
@@ -102,6 +106,13 @@ export class ActionEventReminderService {
     // Reminders
     const reminderPlans = await this.computeReminderPlans(start, end);
     for (const plan of reminderPlans) {
+      plans.push(plan);
+      requiredEvents.add(plan.referenceEvent.id);
+      requiredEvents.add(plan.targetEvent.id);
+    }
+
+    const customPlans = await this.computeCustomReminderPlans(start, end);
+    for (const plan of customPlans) {
       plans.push(plan);
       requiredEvents.add(plan.referenceEvent.id);
       requiredEvents.add(plan.targetEvent.id);
@@ -154,18 +165,27 @@ export class ActionEventReminderService {
     const plans = await this.evaluateNotifications(windowStart, windowEnd);
 
     return Promise.all(
-      plans.map(async (plan) => ({
-        type: plan.type,
-        scheduledFor: plan.scheduledFor,
-        actionId: plan.referenceEvent.action!.id,
-        actionName: plan.referenceEvent.action!.name,
-        actionStatus: plan.referenceEvent.newStatus,
-        eventId: plan.targetEvent.id,
-        recipients: await this.recipientService
-          .getFilteredUsersForEvent(plan.referenceEvent, plan.type)
-          .then((users) => users.map((user) => new ProfileDto(user))),
-        metadata: plan.metadata,
-      })),
+      plans.map(async (plan) => {
+        const recipients =
+          plan.type === ActionEventNotifType.CustomReminder && plan.reminder
+            ? plan.reminder.users.map((user) => new ProfileDto(user))
+            : await this.recipientService
+                .getFilteredUsersForEvent(plan.referenceEvent, plan.type)
+                .then((users) =>
+                  users.map((user) => new ProfileDto(user)),
+                );
+
+        return {
+          type: plan.type,
+          scheduledFor: plan.scheduledFor,
+          actionId: plan.referenceEvent.action!.id,
+          actionName: plan.referenceEvent.action!.name,
+          actionStatus: plan.referenceEvent.newStatus,
+          eventId: plan.targetEvent.id,
+          recipients,
+          metadata: plan.metadata,
+        };
+      }),
     );
   }
 
@@ -242,6 +262,43 @@ export class ActionEventReminderService {
     }
 
     return results;
+  }
+
+  private async computeCustomReminderPlans(
+    windowStart: Date,
+    windowEnd: Date,
+  ): Promise<NotificationPlan[]> {
+    const reminders = await this.reminderRepository.find({
+      where: {
+        sendAt: Between(windowStart, windowEnd),
+        sentAt: IsNull(),
+      },
+      relations: [
+        'memberActionEvent',
+        'memberActionEvent.action',
+        'memberActionEvent.action.participatingGroups',
+        'deadlineEvent',
+        'users',
+      ],
+      order: { sendAt: 'ASC' },
+    });
+
+    return reminders
+      .filter(
+        (reminder) =>
+          reminder.memberActionEvent?.action && reminder.users?.length,
+      )
+      .map((reminder) => ({
+        type: ActionEventNotifType.CustomReminder,
+        scheduledFor: reminder.sendAt,
+        referenceEvent: reminder.memberActionEvent,
+        targetEvent: reminder.deadlineEvent ?? reminder.memberActionEvent,
+        reminder,
+        metadata: {
+          reminderId: reminder.id,
+          deadlineEventId: reminder.deadlineEvent?.id,
+        },
+      }));
   }
 
   private async computeDeadlinePlans(

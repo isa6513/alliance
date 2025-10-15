@@ -235,11 +235,11 @@ export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
  */
 export type NotificationType = 'all' | 'joined' | 'none';
 
-export type ActionEventNotifType = 'announcement' | '3dayreminder' | '1dayreminder' | 'misseddeadline';
+export type ActionEventNotifType = 'announcement' | '3dayreminder' | '1dayreminder' | 'misseddeadline' | 'customreminder';
 
 export type NotificationChannel = 'text' | 'email' | 'push';
 
-export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder' | 'forum_digest' | 'missed_deadline' | 'missed_second_deadline';
+export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder' | 'forum_digest' | 'missed_deadline' | 'missed_second_deadline' | 'custom_action_reminder';
 
 export type Mail = {
     id: number;
@@ -276,6 +276,17 @@ export type ActionEventNotif = {
      * Indicates whether the notification has been sent
      */
     sent: boolean;
+};
+
+export type ActionReminder = {
+    memberActionEvent: ActionEvent;
+    deadlineEvent?: ActionEvent;
+    users: Array<Array<unknown>>;
+    customEmailMessage?: string;
+    customTextMessage?: string;
+    sendAt: string;
+    sentAt?: string;
+    notifications: Array<ActionEventNotif>;
 };
 
 export type ActionEvent = {
@@ -320,6 +331,7 @@ export type ActionEvent = {
     threeDayReminderNotifsSentAt?: string;
     oneDayReminderNotifsSentAt?: string;
     deadlineNotifsSentAt?: string;
+    customReminders: Array<ActionReminder>;
 };
 
 export type EditableContent = {
@@ -647,6 +659,7 @@ export type NotificationScheduleMetadataDto = {
     nextEventId?: number;
     deadlineEventId?: number;
     isSecondMiss?: boolean;
+    reminderId?: number;
 };
 
 export type NotificationScheduleEntryDto = {
@@ -803,6 +816,26 @@ export type CreateActionEventDto = {
     showInTimeline: boolean;
 };
 
+export type CreateActionReminderDto = {
+    sendAt: string;
+    customEmailMessage?: string;
+    customTextMessage?: string;
+    deadlineEventId?: number;
+    userIds: Array<number>;
+};
+
+export type ActionReminderDto = {
+    id: number;
+    memberActionEventId: number;
+    deadlineEventId?: number;
+    customEmailMessage?: string;
+    customTextMessage?: string;
+    sendAt: string;
+    sentAt?: string;
+    userIds: Array<number>;
+    users: Array<ProfileDto>;
+};
+
 export type CreateEditableContentDto = {
     /**
      * Markdown or plain text body
@@ -838,6 +871,47 @@ export type CreateActionActivityDto = {
     type: ActionActivityType;
     actionId: number;
     userId: number;
+};
+
+export type AdminActionEventDto = {
+    /**
+     * Unique identifier for the action event
+     */
+    id: number;
+    /**
+     * Title of the event
+     */
+    title: string;
+    /**
+     * secondary text
+     */
+    description: string;
+    /**
+     * New status of the action after the event
+     */
+    newStatus: ActionStatus;
+    /**
+     * Notification type for the event
+     */
+    sendNotifsTo: NotificationType;
+    /**
+     * time of the event (for display)
+     */
+    date: string;
+    /**
+     * Timestamp when the event was last updated
+     */
+    updatedAt: string;
+    /**
+     * Indicates whether the event should be shown in the timeline
+     */
+    showInTimeline: boolean;
+    notifications: Array<Array<ActionEventNotif>>;
+    announcementNotifsSentAt?: string;
+    threeDayReminderNotifsSentAt?: string;
+    oneDayReminderNotifsSentAt?: string;
+    deadlineNotifsSentAt?: string;
+    customReminders: Array<ActionReminder>;
 };
 
 export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted';
@@ -2173,6 +2247,22 @@ export type ActionsAddEventResponses = {
 
 export type ActionsAddEventResponse = ActionsAddEventResponses[keyof ActionsAddEventResponses];
 
+export type ActionsCreateCustomReminderData = {
+    body: CreateActionReminderDto;
+    path: {
+        actionId: number;
+        eventId: number;
+    };
+    query?: never;
+    url: '/actions/{actionId}/events/{eventId}/reminders';
+};
+
+export type ActionsCreateCustomReminderResponses = {
+    200: ActionReminderDto;
+};
+
+export type ActionsCreateCustomReminderResponse = ActionsCreateCustomReminderResponses[keyof ActionsCreateCustomReminderResponses];
+
 export type ActionsClearDbData = {
     body?: never;
     path?: never;
@@ -2315,6 +2405,21 @@ export type ActionsUnarchiveResponses = {
 };
 
 export type ActionsUnarchiveResponse = ActionsUnarchiveResponses[keyof ActionsUnarchiveResponses];
+
+export type ActionsEventWithRemindersData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/eventWithReminders/{id}';
+};
+
+export type ActionsEventWithRemindersResponses = {
+    200: AdminActionEventDto;
+};
+
+export type ActionsEventWithRemindersResponse = ActionsEventWithRemindersResponses[keyof ActionsEventWithRemindersResponses];
 
 export type NotifsFindAllData = {
     body?: never;

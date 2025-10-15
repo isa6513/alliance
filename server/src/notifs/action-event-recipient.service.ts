@@ -80,7 +80,7 @@ export class ActionEventRecipientService {
     return [];
   }
 
-  private async filterForCompletion(
+  async filterForCompletion(
     users: User[],
     event: Pick<ActionEvent, 'newStatus' | 'action' | 'date'>,
   ): Promise<User[]> {

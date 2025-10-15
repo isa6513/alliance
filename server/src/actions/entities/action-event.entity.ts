@@ -12,6 +12,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Action } from './action.entity';
+import { ActionReminder } from './action-reminder.entity';
 
 export enum NotificationType {
   All = 'all',
@@ -119,7 +120,6 @@ export class ActionEvent {
     isArray: true,
   })
   @IsDefined()
-  @Allow()
   @Type(() => ActionEventNotif)
   notifications: ActionEventNotif[];
 
@@ -146,4 +146,10 @@ export class ActionEvent {
   @Type(() => Date)
   @IsOptional()
   deadlineNotifsSentAt?: Date;
+
+  @OneToMany(() => ActionReminder, (reminder) => reminder.memberActionEvent)
+  @ApiProperty({ type: ActionReminder, isArray: true })
+  @Type(() => ActionReminder)
+  @Allow()
+  customReminders: ActionReminder[];
 }

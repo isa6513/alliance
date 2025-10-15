@@ -8,11 +8,13 @@ import { Mms } from 'src/mms/mms.entity';
 import { MmsService } from 'src/mms/mms.service';
 import { User } from 'src/user/entities/user.entity';
 import { DataSource, In, MoreThan, QueryRunner, Repository } from 'typeorm';
+import { actionUrl, withCid } from 'src/search/approutes';
 import {
   ActionEvent,
   NotificationType,
 } from '../actions/entities/action-event.entity';
 import { Action } from '../actions/entities/action.entity';
+import { ActionReminder } from '../actions/entities/action-reminder.entity';
 import { NotifsService } from '../notifs/notifs.service';
 import { generateCIDForNotif } from './notif-utils';
 import {
@@ -23,6 +25,7 @@ import {
   ActionEventReminderService,
   ANNOUNCEMENT_SUPPORTED_STATUSES,
   NOTIFICATION_LOOKBACK_WINDOW_MS,
+  NotificationPlan,
   POST_MEMBER_ACTION_STATUSES,
 } from './action-event-reminder.service';
 import { ActionEventRecipientService } from './action-event-recipient.service';
@@ -48,12 +51,16 @@ export interface ActionEventNotificationContext {
   action: Action;
   cid: string;
   isSecondMiss?: boolean;
+  customEmailMessage?: string;
+  customTextMessage?: string;
 }
 
 const PROCESS_ONE_LOCK_KEY1 = 0xa11a;
 const PROCESS_ONE_LOCK_KEY2 = 0xce01;
 
-const typeToSentAtField: Record<ActionEventNotifType, keyof ActionEvent> = {
+const typeToSentAtField: Partial<
+  Record<ActionEventNotifType, keyof ActionEvent>
+> = {
   [ActionEventNotifType.Announcement]: 'announcementNotifsSentAt',
   [ActionEventNotifType.ThreeDayReminder]: 'threeDayReminderNotifsSentAt',
   [ActionEventNotifType.OneDayReminder]: 'oneDayReminderNotifsSentAt',
@@ -101,7 +108,7 @@ export class ActionEventNotifWorker {
         );
 
         for (const plan of duePlans) {
-          await this.processOne(qr, plan.referenceEvent.id, plan.type);
+          await this.processOne(qr, plan);
         }
       },
     );
@@ -111,57 +118,91 @@ export class ActionEventNotifWorker {
     }
   }
 
-  private async processOne(
-    qr: QueryRunner,
-    eventId: number,
-    type: ActionEventNotifType,
-  ) {
+  private async processOne(qr: QueryRunner, plan: NotificationPlan) {
     const manager = qr.manager;
 
     const event = await manager.getRepository(ActionEvent).findOne({
-      where: { id: eventId },
+      where: { id: plan.referenceEvent.id },
       relations: ['action', 'action.participatingGroups'],
     });
 
     if (!event || !event.action) return;
 
-    if (
-      !!event[typeToSentAtField[type]] ||
-      event.date > new Date() ||
-      event.sendNotifsTo === NotificationType.None
-    ) {
-      return;
-    }
+    const type = plan.type;
 
-    if (
-      type === ActionEventNotifType.Announcement &&
-      !ANNOUNCEMENT_SUPPORTED_STATUSES.includes(event.newStatus)
-    ) {
-      return;
+    let reminder: ActionReminder | null = null;
+
+    if (type === ActionEventNotifType.CustomReminder) {
+      if (!plan.reminder?.id) {
+        return;
+      }
+      reminder = await manager.getRepository(ActionReminder).findOne({
+        where: { id: plan.reminder.id },
+        relations: [
+          'memberActionEvent',
+          'memberActionEvent.action',
+          'memberActionEvent.action.participatingGroups',
+          'deadlineEvent',
+          'users',
+        ],
+      });
+      if (!reminder || reminder.sentAt) {
+        return;
+      }
+    } else {
+      const sentAtField = typeToSentAtField[type];
+      if (
+        (sentAtField && event[sentAtField]) ||
+        event.date > new Date() ||
+        event.sendNotifsTo === NotificationType.None
+      ) {
+        return;
+      }
+
+      if (
+        type === ActionEventNotifType.Announcement &&
+        !ANNOUNCEMENT_SUPPORTED_STATUSES.includes(event.newStatus)
+      ) {
+        return;
+      }
     }
 
     const action = event.action;
 
-    const users = await this.recipientService.getFilteredUsersForEvent(
-      event,
-      type,
-    );
+    const users =
+      type === ActionEventNotifType.CustomReminder && reminder
+        ? await this.recipientService.filterForCompletion(reminder.users, event)
+        : await this.recipientService.getFilteredUsersForEvent(event, type);
+
+    if (!users.length) {
+      return;
+    }
 
     const baseContext: Omit<ActionEventNotificationContext, 'user' | 'cid'> = {
       event,
       type,
       action,
+      customEmailMessage: reminder?.customEmailMessage ?? undefined,
+      customTextMessage: reminder?.customTextMessage ?? undefined,
     };
 
-    const deadlineEvent =
-      (await manager.getRepository(ActionEvent).findOne({
-        where: {
-          action: { id: action.id },
-          date: MoreThan(event.date),
-          newStatus: In(Array.from(POST_MEMBER_ACTION_STATUSES)),
-        },
-        order: { date: 'ASC' },
-      })) ?? undefined;
+    let deadlineEvent: ActionEvent | undefined;
+    if (
+      type === ActionEventNotifType.CustomReminder &&
+      reminder?.deadlineEvent
+    ) {
+      deadlineEvent = reminder.deadlineEvent;
+    } else if (type !== ActionEventNotifType.CustomReminder) {
+      deadlineEvent =
+        (await manager.getRepository(ActionEvent).findOne({
+          where: {
+            action: { id: action.id },
+            date: MoreThan(event.date),
+            newStatus: In(Array.from(POST_MEMBER_ACTION_STATUSES)),
+          },
+          order: { date: 'ASC' },
+        })) ?? undefined;
+    }
 
     for (const user of users) {
       const context: ActionEventNotificationContext = {
@@ -210,9 +251,14 @@ export class ActionEventNotifWorker {
     }
 
     this.logger.log('notifs sent for event ' + event.id);
-    (event[typeToSentAtField[type]] as Date | undefined) = new Date();
-
-    await manager.getRepository(ActionEvent).save(event);
+    const sentAtField = typeToSentAtField[type];
+    if (sentAtField) {
+      (event[sentAtField] as Date | undefined) = new Date();
+      await manager.getRepository(ActionEvent).save(event);
+    } else if (type === ActionEventNotifType.CustomReminder && reminder) {
+      reminder.sentAt = new Date();
+      await manager.getRepository(ActionReminder).save(reminder);
+    }
   }
 
   async sendActionEventNotificationMms(
@@ -225,6 +271,13 @@ export class ActionEventNotifWorker {
       body = defaultEventText3DayReminder[context.event.newStatus](context);
     } else if (context.type === ActionEventNotifType.OneDayReminder) {
       body = defaultEventText1DayReminder[context.event.newStatus](context);
+    } else if (context.type === ActionEventNotifType.CustomReminder) {
+      if (context.customTextMessage) {
+        body = context.customTextMessage.replace('#{name}', context.user.name);
+      } else {
+        const url = withCid(actionUrl(context.action.id, true), context.cid);
+        body = `Reminder: ${context.action.name}. ${url}`;
+      }
     } else if (context.type === ActionEventNotifType.MissedDeadline) {
       body = context.isSecondMiss
         ? defaultEventTextMissedSecondDeadline(context)

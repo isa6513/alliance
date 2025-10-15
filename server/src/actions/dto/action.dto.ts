@@ -6,7 +6,19 @@ import {
   PickType,
 } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { Allow, IsBoolean, IsNumber, IsString } from 'class-validator';
+import {
+  Allow,
+  ArrayNotEmpty,
+  ArrayUnique,
+  IsArray,
+  IsBoolean,
+  IsDate,
+  IsDefined,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { CommentDto } from 'src/forum/dto/comment.dto';
 import { EditableContentDto } from 'src/forum/dto/editablecontent.dto';
 import { ProfileDto, UserDto } from 'src/user/user.dto';
@@ -17,8 +29,83 @@ import {
   ActionStatus,
   NotificationType,
 } from '../entities/action-event.entity';
+import { ActionReminder } from '../entities/action-reminder.entity';
 import { Action } from '../entities/action.entity';
 import { getImageSource } from 'src/images/images.service';
+
+export class ActionReminderDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  memberActionEventId: number;
+
+  @ApiPropertyOptional()
+  deadlineEventId?: number;
+
+  @ApiPropertyOptional()
+  customEmailMessage?: string;
+
+  @ApiPropertyOptional()
+  customTextMessage?: string;
+
+  @ApiProperty({ type: Date })
+  @Type(() => Date)
+  sendAt: Date;
+
+  @ApiPropertyOptional({ type: Date })
+  @Type(() => Date)
+  sentAt?: Date;
+
+  @ApiProperty({ type: Number, isArray: true })
+  userIds: number[];
+
+  @ApiProperty({ type: ProfileDto, isArray: true })
+  @Type(() => ProfileDto)
+  users: ProfileDto[];
+
+  constructor(reminder: ActionReminder) {
+    this.id = reminder.id;
+    this.memberActionEventId = reminder.memberActionEvent?.id ?? 0;
+    this.deadlineEventId = reminder.deadlineEvent?.id ?? undefined;
+    this.customEmailMessage = reminder.customEmailMessage ?? undefined;
+    this.customTextMessage = reminder.customTextMessage ?? undefined;
+    this.sendAt = reminder.sendAt;
+    this.sentAt = reminder.sentAt ?? undefined;
+    this.userIds = reminder.users?.map((user) => user.id) ?? [];
+    this.users = reminder.users?.map((user) => new ProfileDto(user)) ?? [];
+  }
+}
+
+export class CreateActionReminderDto {
+  @ApiProperty({ type: String, format: 'date-time' })
+  @Type(() => Date)
+  @IsDefined()
+  @IsDate()
+  sendAt: Date;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  customEmailMessage?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  customTextMessage?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  deadlineEventId?: number;
+
+  @ApiProperty({ type: Number, isArray: true })
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @Type(() => Number)
+  @IsInt({ each: true })
+  userIds: number[];
+}
 
 export class ActionEventDto extends PickType(ActionEvent, [
   'id',
@@ -32,9 +119,31 @@ export class ActionEventDto extends PickType(ActionEvent, [
   'threeDayReminderNotifsSentAt',
   'oneDayReminderNotifsSentAt',
 ]) {
-  constructor(partial: Partial<ActionEventDto>) {
+  constructor(event: ActionEvent) {
     super();
-    Object.assign(this, partial);
+    Object.assign(this, event);
+  }
+}
+
+export class AdminActionEventDto extends PickType(ActionEvent, [
+  'id',
+  'title',
+  'description',
+  'newStatus',
+  'showInTimeline',
+  'sendNotifsTo',
+  'date',
+  'announcementNotifsSentAt',
+  'threeDayReminderNotifsSentAt',
+  'oneDayReminderNotifsSentAt',
+  'customReminders',
+  'deadlineNotifsSentAt',
+  'updatedAt',
+  'notifications',
+]) {
+  constructor(event: ActionEvent) {
+    super();
+    Object.assign(this, event);
   }
 }
 
@@ -80,7 +189,7 @@ export class ActionDto extends OmitType(Action, [
     this.usersCompleted = action.usersCompleted || 0;
     this.status = action.status || ActionStatus.Draft;
     this.events =
-      action.events?.map((event) => new ActionEventDto({ ...event })) || [];
+      action.events?.map((event) => new ActionEventDto(event)) || [];
     this.canParticipate = canParticipate ?? false;
     this.shouldParticipate = shouldParticipate ?? false;
   }

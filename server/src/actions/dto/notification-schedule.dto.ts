@@ -31,6 +31,9 @@ export class NotificationScheduleMetadataDto {
 
   @ApiPropertyOptional()
   isSecondMiss?: boolean;
+
+  @ApiPropertyOptional()
+  reminderId?: number;
 }
 
 export class NotificationScheduleEntryDto {

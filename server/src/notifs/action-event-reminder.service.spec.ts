@@ -12,6 +12,7 @@ import {
 import { ActionEvent } from '../actions/entities/action-event.entity';
 import { ActionEventRecipientService } from './action-event-recipient.service';
 import { Action, ActionTaskType } from 'src/actions/entities/action.entity';
+import { ActionReminder } from 'src/actions/entities/action-reminder.entity';
 
 const announcementEvent = (overrides: Partial<ActionEvent> = {}): ActionEvent =>
   ({
@@ -56,16 +57,54 @@ const reminderEvent = (overrides: Partial<ActionEvent> = {}): ActionEvent => ({
   updatedAt: new Date('2024-01-01T00:00:00Z'),
   showInTimeline: false,
   notifications: [],
+  customReminders: [],
   action: defaultReminderEventAction,
   date: new Date('2024-01-13T12:00:00Z'),
   newStatus: ActionStatus.Resolution,
   ...overrides,
 });
 
+const customReminder = (
+  overrides: Partial<ActionReminder> = {},
+): ActionReminder =>
+  ({
+    id: 42,
+    memberActionEvent: reminderEvent({
+      id: 700,
+      newStatus: ActionStatus.MemberAction,
+      action: {
+        ...defaultReminderEventAction,
+        id: 999,
+        participatingGroups: [],
+      },
+    }),
+    deadlineEvent: reminderEvent({
+      id: 701,
+      date: new Date('2024-01-15T12:00:00Z'),
+      newStatus: ActionStatus.Resolution,
+    }),
+    users: [
+      {
+        id: 1,
+        name: 'Test User',
+        email: 'test@example.com',
+        phoneNumber: '+15555550100',
+        groups: [],
+      },
+    ],
+    customEmailMessage: 'Custom email message',
+    customTextMessage: 'Custom text message',
+    sendAt: new Date('2024-01-12T12:00:00Z'),
+    sentAt: null,
+    notifications: [],
+    ...overrides,
+  }) as unknown as ActionReminder;
+
 describe('ActionEventReminderService', () => {
   let eventQueryMock: jest.Mock;
   let repositoryMock: { query: jest.Mock; find: jest.Mock };
   let activityRepositoryMock: { find: jest.Mock };
+  let reminderRepositoryMock: { find: jest.Mock };
   let recipientServiceMock: {
     getBaseUsersForEvent: jest.Mock;
     getFilteredUsersForEvent: jest.Mock;
@@ -81,6 +120,9 @@ describe('ActionEventReminderService', () => {
     activityRepositoryMock = {
       find: jest.fn().mockResolvedValue([]),
     };
+    reminderRepositoryMock = {
+      find: jest.fn().mockResolvedValue([]),
+    };
 
     recipientServiceMock = {
       getBaseUsersForEvent: jest.fn().mockResolvedValue([]),
@@ -90,6 +132,7 @@ describe('ActionEventReminderService', () => {
     service = new ActionEventReminderService(
       repositoryMock as unknown as Repository<ActionEvent>,
       activityRepositoryMock as unknown as Repository<ActionActivity>,
+      reminderRepositoryMock as unknown as Repository<ActionReminder>,
       recipientServiceMock as unknown as ActionEventRecipientService,
     );
   });
@@ -197,6 +240,37 @@ describe('ActionEventReminderService', () => {
       ]);
       expect(plans[0].referenceEvent.id).toBe(currentEvent.id);
       expect(plans[0].targetEvent.id).toBe(nextEvent.id);
+    });
+
+    it('includes custom reminder plans', async () => {
+      const windowStart = new Date('2024-01-12T00:00:00Z');
+      const windowEnd = new Date('2024-01-12T23:59:59Z');
+
+      (repositoryMock.find as jest.Mock)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([]);
+
+      reminderRepositoryMock.find.mockResolvedValueOnce([
+        customReminder({
+          sendAt: new Date('2024-01-12T12:00:00Z'),
+        }),
+      ]);
+
+      jest
+        .spyOn(
+          service as unknown as { findMissedDeadlineCandidates: jest.Mock },
+          'findMissedDeadlineCandidates',
+        )
+        .mockResolvedValueOnce([]);
+
+      const plans = await service.evaluateNotifications(windowStart, windowEnd);
+
+      expect(plans).toHaveLength(1);
+      const plan = plans[0];
+      expect(plan.type).toBe(ActionEventNotifType.CustomReminder);
+      expect(plan.reminder?.id).toBe(42);
+      expect(plan.reminder?.users?.length).toBe(1);
     });
   });
 

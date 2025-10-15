@@ -19,12 +19,14 @@ import { ActionActivity } from './entities/action-activity.entity';
 import { ActionEvent } from './entities/action-event.entity';
 import { Action } from './entities/action.entity';
 import { ForumModule } from 'src/forum/forum.module';
+import { ActionReminder } from './entities/action-reminder.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     TypeOrmModule.forFeature([Action]),
     TypeOrmModule.forFeature([ActionEvent]),
+    TypeOrmModule.forFeature([ActionReminder]),
     TypeOrmModule.forFeature([ActionActivity]),
     TypeOrmModule.forFeature([Comment]),
     TypeOrmModule.forFeature([EditableContent]),

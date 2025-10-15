@@ -35,9 +35,12 @@ import {
   ActionActivityDto,
   ActionDto,
   ActionEventDto,
+  ActionReminderDto,
+  AdminActionEventDto,
   CreateActionActivityDto,
   CreateActionDto,
   CreateActionEventDto,
+  CreateActionReminderDto,
   DeclineActionDto,
   LatLonDto,
   OptOutActionDto,
@@ -356,6 +359,17 @@ export class ActionsController {
     return this.actionsService.addEvent(id, actionEventDto, req.user?.sub);
   }
 
+  @Post(':actionId/events/:eventId/reminders')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionReminderDto })
+  async createCustomReminder(
+    @Param('actionId', ParseIntPipe) actionId: number,
+    @Param('eventId', ParseIntPipe) eventId: number,
+    @Body() body: CreateActionReminderDto,
+  ): Promise<ActionReminderDto> {
+    return this.actionsService.createCustomReminder(actionId, eventId, body);
+  }
+
   @Post('clearDb')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
@@ -450,5 +464,14 @@ export class ActionsController {
   @ApiOkResponse({ type: ActionDto })
   unarchive(@Param('id', ParseIntPipe) id: number): Promise<ActionDto> {
     return this.actionsService.unarchive(id);
+  }
+
+  @Get('eventWithReminders/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: AdminActionEventDto })
+  eventWithReminders(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<AdminActionEventDto> {
+    return this.actionsService.getEventWithReminders(id);
   }
 }
