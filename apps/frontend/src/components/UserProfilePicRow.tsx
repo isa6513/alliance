@@ -3,9 +3,7 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useState } from "react";
 
 const UserProfilePicRow = ({ users }: { users: ProfileDto[] }) => {
-  const unique = users.filter(function (item, pos, self) {
-    return self.findIndex((t) => t.id === item.id) === pos;
-  });
+  const unique = users;
 
   const [expanded, setExpanded] = useState(false);
 
@@ -20,7 +18,16 @@ const UserProfilePicRow = ({ users }: { users: ProfileDto[] }) => {
       onClick={handleClick}
     >
       {(expanded ? unique : unique.slice(0, 5)).map((user) => (
-        <ProfileImage pfp={user.profilePicture!} size="small" key={user.id} />
+        <a
+          href={`/user/${user.id}`}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+          key={user.id}
+          className="flex items-center"
+        >
+          <ProfileImage pfp={user.profilePicture!} size="small" />
+        </a>
       ))}
       {users.length > 5 && !expanded && (
         <span className="text-sm text-zinc-500">+{users.length - 5} more</span>

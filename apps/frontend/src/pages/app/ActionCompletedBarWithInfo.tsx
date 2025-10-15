@@ -10,6 +10,7 @@ interface ActionCompletedBarWithInfoProps {
   friendActivities: ActionActivityDto[] | null;
   status: ActionStatus;
   value: number;
+  everyoneShouldComplete: boolean;
 }
 
 const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
@@ -17,7 +18,11 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
   friendActivities,
   value,
   status,
+  everyoneShouldComplete,
 }: ActionCompletedBarWithInfoProps) => {
+  if (everyoneShouldComplete || !threshold) {
+    return null;
+  }
   return (
     <div>
       <div className="flex flex-row items-center justify-between w-full gap-x-2">

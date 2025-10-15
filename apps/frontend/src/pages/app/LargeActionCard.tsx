@@ -152,10 +152,11 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
 
         {
           <div className="mt-6">
-            {!action.everyoneShouldComplete && threshold && (
+            {threshold && (
               <ActionCompletedBarWithInfo
                 threshold={threshold}
                 friendActivities={friendActivities}
+                everyoneShouldComplete={action.everyoneShouldComplete}
                 status={action.status}
                 value={
                   action.status === "member_action"

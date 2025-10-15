@@ -15,6 +15,7 @@ export interface SmallActionCardProps
     | "category"
     | "id"
     | "status"
+    | "everyoneShouldComplete"
     | "relation"
   > {
   className?: string;
@@ -31,6 +32,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
   className,
   status,
   commitmentless,
+  everyoneShouldComplete,
   joinedCount,
   neededCount,
   friendActivities = [],
@@ -93,6 +95,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
             friendActivities={friendActivities}
             status={status}
             value={joinedCount}
+            everyoneShouldComplete={everyoneShouldComplete}
           />
         )}
       </Card>

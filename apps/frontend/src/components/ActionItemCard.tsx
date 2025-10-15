@@ -15,6 +15,7 @@ export interface ActionItemCardProps
     | "status"
     | "relation"
     | "commitmentThreshold"
+    | "everyoneShouldComplete"
   > {
   className?: string;
   joinedCount?: number;
@@ -31,6 +32,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   className,
   joinedCount,
   commitmentThreshold,
+  everyoneShouldComplete,
   status,
   completedCount,
   relation,
@@ -61,6 +63,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
           friendActivities={null}
           status={status}
           value={status === "member_action" ? completedCount : joinedCount}
+          everyoneShouldComplete={everyoneShouldComplete}
         />
       )}
     </Link>

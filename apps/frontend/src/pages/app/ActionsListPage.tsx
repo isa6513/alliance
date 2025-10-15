@@ -50,9 +50,15 @@ const ActionsListPage = () => {
 
   useGrayBackground();
 
-  const filteredActions = modeToActions[filterMode].sort((a, b) => {
-    const latestA = new Date(a.events[a.events.length - 1].date);
-    const latestB = new Date(b.events[b.events.length - 1].date);
+  const filteredActions = [...modeToActions[filterMode]].sort((a, b) => {
+    const latestA =
+      a.events.length > 0
+        ? new Date(a.events[a.events.length - 1].date)
+        : new Date(0);
+    const latestB =
+      b.events.length > 0
+        ? new Date(b.events[b.events.length - 1].date)
+        : new Date(0);
     return latestB.getTime() - latestA.getTime();
   });
 
