@@ -102,7 +102,7 @@ async function bootstrap() {
     setupExpressErrorHandler(client, app);
   }
 
-  await app.listen(process.env.PORT || 3005, '0.0.0.0');
+  await app.listen(3005, '0.0.0.0');
 }
 
 void bootstrap();

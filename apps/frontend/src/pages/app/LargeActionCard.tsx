@@ -22,6 +22,8 @@ export interface LargeActionCardProps {
   userRelation: Extract<UserActionRelation, "joined" | "none">;
   friendActivities: ActionActivityDto[];
   onUpdateActionState: () => void;
+  showDetails?: boolean;
+  className?: string;
 }
 
 enum LargeActionCardState {
@@ -39,6 +41,8 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   userRelation,
   friendActivities = [],
   onUpdateActionState,
+  showDetails = true,
+  className = "",
 }: LargeActionCardProps) => {
   const navigate = useNavigate();
 
@@ -104,18 +108,20 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
         state === LargeActionCardState.Closed
           ? "opacity-0 overflow-hidden"
           : "opacity-100"
-      } w-full relative p-6
+      } ${className} w-full relative p-6
          ${state === LargeActionCardState.Minified ? "pb-4" : ""}`}
     >
       <div className="p-0 sm:p-2">
         <div className="flex flex-col sm:flex-row gap-x-2 items-start mb-1">
-          <Button
-            color={ButtonColor.Transparent}
-            onClick={goToActionPage}
-            className="!px-6 block mb-4 sm:hidden text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
-          >
-            Details
-          </Button>
+          {showDetails && (
+            <Button
+              color={ButtonColor.Transparent}
+              onClick={goToActionPage}
+              className="!px-6 block mb-4 sm:hidden text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
+            >
+              Details
+            </Button>
+          )}
           <div className="flex flex-col flex-1">
             <div className="flex flex-row flex-wrap gap-x-4 mb-2">
               {!!action.timeEstimate &&
@@ -149,13 +155,15 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             </div>
             <p className="font-medium text-lg">{action.name}</p>
           </div>
-          <Button
-            color={ButtonColor.Transparent}
-            onClick={goToActionPage}
-            className="!px-6 hidden sm:block text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
-          >
-            Details
-          </Button>
+          {showDetails && (
+            <Button
+              color={ButtonColor.Transparent}
+              onClick={goToActionPage}
+              className="!px-6 hidden sm:block text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
+            >
+              Details
+            </Button>
+          )}
         </div>
         <p>{action.shortDescription}</p>
 

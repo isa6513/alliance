@@ -1,6 +1,8 @@
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React from "react";
 import { Link, useSearchParams } from "react-router";
+import LargeActionCard from "../app/LargeActionCard";
+import { ActionWithRelation } from "../../applayout";
 
 const InvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -19,6 +21,48 @@ const InvitePage: React.FC = () => {
     );
   }
 
+  const exampleTask: ActionWithRelation = {
+    name: "Ask your local cafe to switch to compostable cups",
+    body: "The Alliance is a global group of people that abide by a process which governs the use of our collective power. We seek to unite millions to billions of people into one cooperative force that represents humanity's collective interests. \n \n Our mission is to build a civilization that serves all individuals in their pursuit of life, liberty, and happiness – a world in which we can take pride. Most pressingly, we seek to resolve ongoing global crises, which include environmental destruction, extreme poverty, democratic dysfunction, and unsafe technological development. It is our aim to end these crises in their entirety in the coming years, not to make incremental improvements \n\n\n The Alliance is a global group of people that abide by a process which governs the use of our collective power. We seek to unite millions to billions of people into one cooperative force that represents humanity's collective interests. \n \n Our mission is to build a civilization that serves all individuals in their pursuit of life, liberty, and happiness – a world in which we can take pride. Most pressingly, we seek to resolve ongoing global crises, which include environmental destruction, extreme poverty, democratic dysfunction, and unsafe technological development. It is our aim to end these crises in their entirety in the coming years, not to make incremental improvements",
+    category: "Climate Change",
+    id: 1,
+    taskFormId: 23,
+    image: "",
+    status: "member_action",
+    timeEstimate: 5,
+    usersJoined: 100,
+    activities: [],
+    shortDescription:
+      "We've negotiated a discount with a compostable cup supplier for all cafes that members can convince to use their cups.",
+    type: "Activity" as const,
+    usersCompleted: 68,
+    everyoneShouldComplete: false,
+    archived: false,
+    relation: "joined" as const,
+    canParticipate: true,
+    events: [
+      {
+        id: 1,
+        title: "Event 1",
+        description: "Event 1 description",
+        date: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+        newStatus: "member_action",
+        showInTimeline: true,
+        sendNotifsTo: "all",
+      },
+      {
+        id: 2,
+        title: "Event 2",
+        description: "Event 2 description",
+        date: new Date(Date.now() - 1000 * 60 * 60 * 49).toISOString(),
+        newStatus: "member_action",
+        showInTimeline: true,
+        sendNotifsTo: "all",
+      },
+    ],
+    commitmentless: false,
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-page">
       <div className="flex flex-col flex-grow items-center justify-center ">
@@ -28,7 +72,7 @@ const InvitePage: React.FC = () => {
           </h2>
 
           <Card
-            className="p-4 md:p-12 flex flex-col gap-y-6"
+            className="p-4 md:p-12 flex flex-col gap-y-5"
             style={CardStyle.White}
           >
             <p>
@@ -108,24 +152,44 @@ const InvitePage: React.FC = () => {
             </h3>
             <p>
               <span className="font-bold">
-                Every week, you would log into our online plaform to complete collective actions
-              </span>.
+                Every week, you would log into our online platform to complete
+                collective actions
+              </span>
+              .
             </p>
 
             <p>
-              For instance, we recently signed a letter requesting news coverage of a coalition of businesses that took environmental action at the request of our strategic office. In the future, we might:
+              For instance, we recently signed a letter requesting news coverage
+              of a coalition of businesses that took environmental action at the
+              request of our strategic office. In the future, we might:
             </p>
-              <ol className="list-decimal list-inside space-y-1">
+            <ol className="list-decimal list-inside space-y-1">
               <li>
-                Provide actionable feedback on the website of a partner non-profit.
+                Provide actionable feedback on the website of a partner
+                non-profit.
               </li>
               <li>
                 Read about global problems and discuss them with each other.
-              </li> 
-              <li>
-                Edit Alliance communications materials.
-              </li> 
+              </li>
+              <li>Edit Alliance communications materials.</li>
             </ol>
+
+            <div>
+              <div className="p-8 bg-zinc-50 mb-2">
+                <LargeActionCard
+                  action={exampleTask}
+                  userRelation={"joined"}
+                  friendActivities={[]}
+                  onUpdateActionState={() => {}}
+                  showDetails={false}
+                  className="pointer-events-none"
+                />
+              </div>
+              <p className="text-center text-sm">
+                Example task you would see on the platform
+              </p>
+            </div>
+
             <h3 className="font-serif !text-3xl font-bold mt-2">
               How do you join?
             </h3>
