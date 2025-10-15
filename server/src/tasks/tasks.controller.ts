@@ -75,7 +75,6 @@ export class TasksController {
   }
 
   @Get('slug/:id')
-  @UseGuards(AuthGuard)
   @ApiOkResponse({ type: FormDto })
   async getForm(@Param('id', ParseIntPipe) id: number) {
     return this.tasksService.getForm(id);
