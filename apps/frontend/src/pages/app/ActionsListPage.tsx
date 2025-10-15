@@ -50,14 +50,16 @@ const ActionsListPage = () => {
 
   useGrayBackground();
 
-  const filteredActions = modeToActions[filterMode];
+  const filteredActions = modeToActions[filterMode].sort((a, b) => {
+    const latestA = new Date(a.events[a.events.length - 1].date);
+    const latestB = new Date(b.events[b.events.length - 1].date);
+    return latestB.getTime() - latestA.getTime();
+  });
 
   return (
     <CenterLayout className="gap-y-4" width="3xl">
       <div className="flex flex-row justify-start items-center w-full">
-        <p className="text-sm mx-4" style={{ fontWeight: 450 }}>
-          Filter by:
-        </p>
+        <p className="mx-4">Filter by:</p>
         <DropdownSelect
           options={Object.values(FilterMode)}
           secondaryLabels={Object.values(FilterMode).map((mode) =>
@@ -74,12 +76,8 @@ const ActionsListPage = () => {
             key={action.id}
             {...action}
             className="w-full hover:bg-zinc-100"
-            // joinedCount={liveCounts[action.id] ?? action.usersJoined}
-            // neededCount={
-            //   action.status === "member_action"
-            //     ? action.usersCompleted
-            //     : undefined
-            // }
+            joinedCount={action.usersJoined}
+            completedCount={action.usersCompleted}
           />
         ))}
         {filteredActions.length === 0 && (

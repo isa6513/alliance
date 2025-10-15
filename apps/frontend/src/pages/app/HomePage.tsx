@@ -101,7 +101,9 @@ const HomePage = () => {
             <LargeActionCard
               action={currentTask}
               userRelation={currentTask.relation as "joined" | "none"}
-              friendActivities={[]}
+              friendActivities={friendActivities.filter(
+                (activity) => activity.actionId === currentTask.id
+              )}
               onUpdateActionState={() => navigate(window.location.pathname)}
             />
           ) : (
@@ -148,7 +150,11 @@ const HomePage = () => {
                         activity.actionId === action.id &&
                         activity.type === "user_completed"
                     )}
-                    joinedCount={action.usersCompleted}
+                    joinedCount={
+                      action.status === "member_action"
+                        ? action.usersCompleted
+                        : action.usersJoined
+                    }
                     neededCount={action.usersJoined}
                   />
                 ))}

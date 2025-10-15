@@ -3,9 +3,8 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback } from "react";
 import { useNavigate } from "react-router";
 import { ActionWithRelation } from "../../applayout";
-import CompletedBar from "../../components/CompletedBar";
 import Tag, { TagStyle } from "../../components/Tag";
-import UserProfilePicRow from "../../components/UserProfilePicRow";
+import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 
 export interface SmallActionCardProps
   extends Pick<
@@ -89,26 +88,12 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
           </div>
         </div>
         {joinedCount !== undefined && neededCount !== undefined && (
-          <div className="mt-2">
-            <div className="flex flex-row items-center justify-between w-full gap-x-2">
-              <p className="text-zinc-500 text-sm mb-0.5">
-                {joinedCount} / {neededCount}{" "}
-                {status === "member_action"
-                  ? "members completed"
-                  : "members committed"}
-                {friendActivities.length > 0 && (
-                  <>
-                    , including {friendActivities.length} friend
-                    {friendActivities.length === 1 ? "" : "s"}
-                  </>
-                )}
-              </p>
-              <UserProfilePicRow
-                users={friendActivities.map((activity) => activity.user)}
-              />
-            </div>
-            <CompletedBar percentage={(joinedCount / neededCount) * 100} />
-          </div>
+          <ActionCompletedBarWithInfo
+            threshold={neededCount}
+            friendActivities={friendActivities}
+            status={status}
+            value={joinedCount}
+          />
         )}
       </Card>
     </div>

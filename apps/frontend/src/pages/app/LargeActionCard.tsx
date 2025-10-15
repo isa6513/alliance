@@ -8,10 +8,8 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ClockIcon from "@alliance/shared/ui/icons/ClockIcon";
 import DeadlineIcon from "@alliance/shared/ui/icons/DeadlineIcon";
 import ActionTaskPanel from "../../components/ActionTaskPanel";
-import CompletedBar from "../../components/CompletedBar";
-import UserProfilePicRow from "../../components/UserProfilePicRow";
-import { useActionCount } from "../../lib/useActionWebSocket";
 import { formatTime } from "../../lib/utils";
+import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 
 export interface LargeActionCardProps {
   action: ActionDto;
@@ -35,7 +33,7 @@ enum LargeActionCardState {
 const LargeActionCard: React.FC<LargeActionCardProps> = ({
   action,
   userRelation,
-  friendActivities = [],
+  friendActivities,
   onUpdateActionState,
   showDetails = true,
   className = "",
@@ -49,8 +47,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   useEffect(() => {
     setState(LargeActionCardState.Default);
   }, [action]);
-
-  const liveUserCount = useActionCount(action.id);
 
   const handleUpdateActionState = useCallback(() => {
     setState(LargeActionCardState.Closed);
@@ -157,30 +153,16 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
         {
           <div className="mt-6">
             {!action.everyoneShouldComplete && threshold && (
-              <div>
-                <div className="flex flex-row items-center justify-between w-full gap-x-2">
-                  <p className="text-zinc-500 text-sm mb-1">
-                    {liveUserCount ?? action.usersCompleted} / {threshold}{" "}
-                    {action.status === "gathering_commitments"
-                      ? "members committed"
-                      : "members completed"}
-                    {friendActivities.length > 0 && (
-                      <>
-                        , including {friendActivities.length} friend
-                        {friendActivities.length === 1 ? "" : "s"}
-                      </>
-                    )}
-                  </p>
-                  <UserProfilePicRow
-                    users={friendActivities.map((activity) => activity.user)}
-                  />
-                </div>
-                <CompletedBar
-                  percentage={
-                    ((liveUserCount ?? action.usersCompleted) / threshold) * 100
-                  }
-                />
-              </div>
+              <ActionCompletedBarWithInfo
+                threshold={threshold}
+                friendActivities={friendActivities}
+                status={action.status}
+                value={
+                  action.status === "member_action"
+                    ? action.usersCompleted
+                    : action.usersJoined
+                }
+              />
             )}
           </div>
         }

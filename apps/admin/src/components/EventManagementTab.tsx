@@ -478,18 +478,23 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
                 "Add Event"
               )}
             </button>
-            <div className="flex justify-between items-center">
-              <p
-                className={`px-4 py-2 rounded self-start ${
-                  notifData?.emails.length || notifData?.texts.length
-                    ? "bg-yellow-600 text-white"
-                    : "border border-gray-200"
-                }`}
-              >
-                ⚠️ This will send <b>{notifData?.emails.length}</b> emails and{" "}
-                <b>{notifData?.texts.length}</b> texts
-              </p>
-            </div>
+            {!(
+              typeof window !== "undefined" &&
+              window.location.href.includes("localhost")
+            ) && (
+              <div className="flex justify-between items-center">
+                <p
+                  className={`px-4 py-2 rounded self-start ${
+                    notifData?.emails.length || notifData?.texts.length
+                      ? "bg-yellow-600 text-white"
+                      : "border border-gray-200"
+                  }`}
+                >
+                  ⚠️ This will send <b>{notifData?.emails.length}</b> emails and{" "}
+                  <b>{notifData?.texts.length}</b> texts
+                </p>
+              </div>
+            )}
           </form>
         )}
       </Card>

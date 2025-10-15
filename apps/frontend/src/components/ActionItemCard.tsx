@@ -2,18 +2,23 @@ import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import React from "react";
 import { Link } from "react-router";
 import { ActionWithRelation } from "../applayout";
-import CompletedBar from "./CompletedBar";
 import Tag, { TagStyle } from "./Tag";
-import UserProfilePicRow from "./UserProfilePicRow";
+import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 
 export interface ActionItemCardProps
   extends Pick<
     ActionWithRelation,
-    "name" | "shortDescription" | "category" | "id" | "status" | "relation"
+    | "name"
+    | "shortDescription"
+    | "category"
+    | "id"
+    | "status"
+    | "relation"
+    | "commitmentThreshold"
   > {
   className?: string;
   joinedCount?: number;
-  neededCount?: number;
+  completedCount?: number;
   friendCommitmentActivities?: ActionActivityDto[];
   showDescription?: boolean;
   activity?: ActionActivityDto;
@@ -25,9 +30,9 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   shortDescription,
   className,
   joinedCount,
-  neededCount,
-  friendCommitmentActivities = [],
-  activity,
+  commitmentThreshold,
+  status,
+  completedCount,
   relation,
 }) => {
   return (
@@ -48,26 +53,15 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
           <p className="text-zinc-500">{shortDescription}</p>
         </div>
       </div>
-      {activity && joinedCount && neededCount && (
-        <div className="mt-6">
-          <div className="flex flex-row items-center justify-between w-full gap-x-2">
-            <p className="text-zinc-500 text-base mb-0.5">
-              {joinedCount} / {neededCount} committed
-              {friendCommitmentActivities.length > 0 && (
-                <>
-                  , including {friendCommitmentActivities.length} friend
-                  {friendCommitmentActivities.length === 1 ? "" : "s"}
-                </>
-              )}
-            </p>
-            <UserProfilePicRow
-              users={friendCommitmentActivities.map(
-                (activity) => activity.user
-              )}
-            />
-          </div>
-          <CompletedBar percentage={(joinedCount / neededCount) * 100} />
-        </div>
+      {joinedCount !== undefined && completedCount !== undefined && (
+        <ActionCompletedBarWithInfo
+          threshold={
+            status === "member_action" ? joinedCount : commitmentThreshold ?? 30
+          }
+          friendActivities={null}
+          status={status}
+          value={status === "member_action" ? completedCount : joinedCount}
+        />
       )}
     </Link>
   );
