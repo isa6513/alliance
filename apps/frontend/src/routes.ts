@@ -21,6 +21,7 @@ export default [
     layout("navbar.tsx", [
       ...prefix("/actions", [
         route("/", "pages/app/ActionsListPage.tsx"),
+        route("/28", "pages/app/SorryPage.tsx"),
         route(":id", "pages/app/ActionPage.tsx", [
           layout("components/ActionContents.tsx", [
             index("components/ActionPageTaskPanel.tsx"),
