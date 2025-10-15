@@ -23,7 +23,6 @@ export interface SmallActionCardProps
   neededCount?: number;
   friendActivities?: ActionActivityDto[];
   showDescription?: boolean;
-  activity?: ActionActivityDto;
 }
 
 const SmallActionCard: React.FC<SmallActionCardProps> = ({
@@ -37,7 +36,6 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
   neededCount,
   friendActivities = [],
   relation,
-  activity,
 }) => {
   const navigate = useNavigate();
 
@@ -48,6 +46,8 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
     },
     [navigate, id]
   );
+
+  console.log(joinedCount, neededCount);
 
   const waitingOnCompletion =
     status === "member_action" && (relation === "joined" || commitmentless);
@@ -92,12 +92,14 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
             <p className="text-zinc-500">{shortDescription}</p>
           </div>
         </div>
-        {activity && joinedCount && neededCount && (
+        {joinedCount !== undefined && neededCount !== undefined && (
           <div className="mt-2">
             <div className="flex flex-row items-center justify-between w-full gap-x-2">
-              <p className="text-zinc-500 text-base mb-0.5">
+              <p className="text-zinc-500 text-sm mb-0.5">
                 {joinedCount} / {neededCount}{" "}
-                {status === "member_action" ? "completed" : "committed"}
+                {status === "member_action"
+                  ? "members completed"
+                  : "members committed"}
                 {friendActivities.length > 0 && (
                   <>
                     , including {friendActivities.length} friend
@@ -109,7 +111,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
                 users={friendActivities.map((activity) => activity.user)}
               />
             </div>
-            <CompletedBar percentage={(joinedCount / neededCount) * 100} dark />
+            <CompletedBar percentage={(joinedCount / neededCount) * 100} />
           </div>
         )}
       </Card>

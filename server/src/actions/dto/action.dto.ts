@@ -170,11 +170,12 @@ export class ActionDto extends OmitType(Action, [
     action: Partial<Action>,
     canParticipate?: boolean,
     shouldParticipate?: boolean,
+    userJoined?: number,
   ) {
     super();
     Object.assign(this, action);
     this.image = action.image ? getImageSource(action.image) : undefined;
-    this.usersJoined = action.usersJoined || 0;
+    this.usersJoined = userJoined || action.usersJoined || 0;
     this.usersCompleted = action.usersCompleted || 0;
     this.status = action.status || ActionStatus.Draft;
     this.events =

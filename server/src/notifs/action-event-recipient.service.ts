@@ -48,13 +48,14 @@ export class ActionEventRecipientService {
     );
 
     const filterToEligible = (users: User[]) =>
-      users.filter((user) =>
-        this.userShouldCompleteEvent(
-          user,
-          eventDate,
-          targetGroupIds,
-          action.everyoneShouldComplete,
-        ),
+      users.filter(
+        (user) =>
+          this.userShouldCompleteEvent(
+            user,
+            eventDate,
+            targetGroupIds,
+            action.everyoneShouldComplete,
+          ) === true,
       );
 
     if (eventStatus === ActionStatus.MemberAction && !action.commitmentless) {

@@ -127,10 +127,6 @@ export class ActionsService {
     const actions = await this.actionRepository.find({
       relations: [
         'events',
-        'events.customReminders',
-        'events.customReminders.users',
-        'events.customReminders.memberActionEvent',
-        'events.customReminders.deadlineEvent',
         'activities',
         'participatingGroups',
         'participatingGroups.users',
@@ -174,6 +170,17 @@ export class ActionsService {
           action,
           user ? await this.isEligibleForAction(action, user) : false,
           shouldComplete,
+          action.commitmentless
+            ? (
+                await this.actionEventRecipientService.getBaseUsersForEvent(
+                  ActionStatus.MemberAction,
+                  action,
+                  action.events.find(
+                    (event) => event.newStatus === ActionStatus.MemberAction,
+                  )?.date ?? new Date(),
+                )
+              ).length
+            : undefined,
         );
       }),
     );

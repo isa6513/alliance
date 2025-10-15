@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-import {
-  ActionDto,
-  UserActionRelation,
-  userCount,
-} from "@alliance/shared/client";
+import { ActionDto, UserActionRelation } from "@alliance/shared/client";
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -56,13 +52,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
 
   const liveUserCount = useActionCount(action.id);
 
-  const [members, setMembers] = useState(30);
-  useEffect(() => {
-    userCount().then((count) => {
-      setMembers(count.data ?? 30);
-    });
-  }, []);
-
   const handleUpdateActionState = useCallback(() => {
     setState(LargeActionCardState.Closed);
     setTimeout(() => {
@@ -80,9 +69,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
 
   const threshold =
     action.status === "gathering_commitments"
-      ? action.commitmentThreshold ?? 10
-      : action.commitmentless
-      ? members
+      ? action.commitmentThreshold
       : action.usersJoined;
 
   const pastEvents = action.events.filter(
@@ -169,7 +156,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
 
         {
           <div className="mt-6">
-            {!action.commitmentless && (
+            {!action.everyoneShouldComplete && threshold && (
               <div>
                 <div className="flex flex-row items-center justify-between w-full gap-x-2">
                   <p className="text-zinc-500 text-sm mb-1">

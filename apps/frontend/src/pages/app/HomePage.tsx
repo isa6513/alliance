@@ -35,7 +35,7 @@ export function canJoinAction(action: ActionWithRelation) {
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { actions, posts, activities, loading } =
+  const { actions, posts, loading } =
     useOutletContext<AppLayoutOutletContext>();
 
   const { activities: friendActivities, handleLikeActivity } = useActivities({
@@ -173,7 +173,6 @@ const HomePage = () => {
                       activity.type === "user_joined"
                   )}
                   showDescription={false}
-                  activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
                 />
               ))}
               {commitmentsReachedActions.map((action) => (
@@ -188,7 +187,6 @@ const HomePage = () => {
                       activity.type === "user_joined"
                   )}
                   showDescription={false}
-                  activity={activities?.get(action.id)?.join ?? undefined} //TODO: type this so that it always exists
                 />
               ))}
             </div>
