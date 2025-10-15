@@ -27,11 +27,12 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
   ) {
     return null;
   }
+  const safeThreshold = Math.max(threshold, value);
   return (
     <div>
       <div className="flex flex-row items-center justify-between w-full gap-x-2">
         <p className="text-zinc-500 text-sm mb-1">
-          {value} / {threshold}{" "}
+          {value} / {safeThreshold}{" "}
           {status === "gathering_commitments"
             ? "members committed"
             : "members completed"}
@@ -42,7 +43,7 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
           />
         )}
       </div>
-      <CompletedBar percentage={(value / threshold) * 100} />
+      <CompletedBar percentage={(value / safeThreshold) * 100} />
     </div>
   );
 };

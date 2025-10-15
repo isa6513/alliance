@@ -123,6 +123,29 @@ export class ActionsService {
       });
   }
 
+  async getUsersJoinedForCommitmentlessAction(action: Action): Promise<number> {
+    const baseUsers =
+      await this.actionEventRecipientService.getBaseUsersForEvent(
+        ActionStatus.MemberAction,
+        action,
+        action.events.find(
+          (event) => event.newStatus === ActionStatus.MemberAction,
+        )?.date ?? new Date(),
+      );
+    const completionActivities = await this.actionActivityRepository.find({
+      where: {
+        actionId: action.id,
+        type: ActionActivityType.USER_COMPLETED,
+      },
+    });
+    const set = new Set([
+      ...baseUsers.map((user) => user.id),
+      ...completionActivities.map((activity) => activity.userId),
+    ]);
+
+    return set.size;
+  }
+
   async findPublic(userId?: number): Promise<ActionDto[]> {
     const actions = await this.actionRepository.find({
       relations: [
@@ -171,15 +194,7 @@ export class ActionsService {
           user ? await this.isEligibleForAction(action, user) : false,
           shouldComplete,
           action.commitmentless
-            ? (
-                await this.actionEventRecipientService.getBaseUsersForEvent(
-                  ActionStatus.MemberAction,
-                  action,
-                  action.events.find(
-                    (event) => event.newStatus === ActionStatus.MemberAction,
-                  )?.date ?? new Date(),
-                )
-              ).length
+            ? await this.getUsersJoinedForCommitmentlessAction(action)
             : undefined,
         );
       }),
