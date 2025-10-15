@@ -72,7 +72,7 @@ const InvitePage: React.FC = () => {
           </h2>
 
           <Card
-            className="p-4 md:p-12 flex flex-col gap-y-5"
+            className="p-4 md:p-12 flex flex-col gap-y-6"
             style={CardStyle.White}
           >
             <p>
@@ -161,20 +161,20 @@ const InvitePage: React.FC = () => {
             <p>
               For instance, we recently signed a letter requesting news coverage
               of a coalition of businesses that took environmental action at the
-              request of our strategic office. In the future, we might:
+              request of our strategic office. Other example actions include:
             </p>
             <ol className="list-decimal list-inside space-y-1">
               <li>
-                Provide actionable feedback on the website of a partner
+                Providing actionable feedback on the website of a partner
                 non-profit.
               </li>
               <li>
-                Read about global problems and discuss them with each other.
+                Reading about global problems and discussing with each other.
               </li>
-              <li>Edit Alliance communications materials.</li>
+              <li>Editing Alliance communications materials.</li>
             </ol>
 
-            <div>
+            <div className="my-4">
               <div className="p-8 bg-zinc-50 mb-2">
                 <LargeActionCard
                   action={exampleTask}
