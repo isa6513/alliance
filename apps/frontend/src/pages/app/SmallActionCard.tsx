@@ -47,8 +47,6 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
     [navigate, id]
   );
 
-  console.log(joinedCount, neededCount);
-
   const waitingOnCompletion =
     status === "member_action" && (relation === "joined" || commitmentless);
 
@@ -59,8 +57,6 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
 
   const waitingOnOthers =
     status === "gathering_commitments" && relation === "joined";
-
-  // const [toggleComments, setToggleComments] = useState(false);
 
   return (
     <div className={`relative ${className}`}>
