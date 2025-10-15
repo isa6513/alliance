@@ -20,7 +20,11 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
   status,
   everyoneShouldComplete,
 }: ActionCompletedBarWithInfoProps) => {
-  if (everyoneShouldComplete || !threshold) {
+  if (
+    everyoneShouldComplete ||
+    !threshold ||
+    !(status === "gathering_commitments" || status === "member_action")
+  ) {
     return null;
   }
   return (
