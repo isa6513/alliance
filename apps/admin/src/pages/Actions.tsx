@@ -137,6 +137,7 @@ const ActionsList: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      <title>Admin panel</title>
       <ActionTimeline
         actions={actions.filter((a) => !a.archived)}
         className="h-full"

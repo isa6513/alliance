@@ -493,6 +493,7 @@ const ActionDashboard: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
+      <title>Action Dashboard</title>
       <div className="flex justify-between items-center mb-2">
         <div className="p-5 pb-0 flex flex-row justify-between w-full">
           <div className="flex flex-row gap-x-2 ">
