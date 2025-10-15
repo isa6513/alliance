@@ -139,7 +139,7 @@ const Sidebar: React.FC = () => {
                       key={group.name}
                       className="flex w-full items-center gap-x-2"
                     >
-                      <div className="h-px bg-zinc-200 flex-1" />
+                      <div className="h-px bg-zinc-300 flex-1" />
                       <p className="text-xs font-bold uppercase text-zinc-700">
                         {group.name}
                       </p>

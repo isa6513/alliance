@@ -85,9 +85,12 @@ const FormsList: React.FC = () => {
   }, [forms]);
 
   const handleEditForm = useCallback(
-    (actionId: number | undefined) => {
-      if (!actionId) return;
-      navigate(`/actions/${actionId}?tab=form`);
+    (formId: number, actionId: number | undefined) => {
+      if (actionId) {
+        navigate(`/actions/${actionId}?tab=form`);
+      } else {
+        navigate(`/forms/${formId}`);
+      }
     },
     [navigate]
   );
@@ -107,7 +110,7 @@ const FormsList: React.FC = () => {
           {forms.map((form) => (
             <Card key={form.id} style={CardStyle.White}>
               <div
-                onClick={() => handleEditForm(form.usedInAction?.id)}
+                onClick={() => handleEditForm(form.id, form.usedInAction?.id)}
                 className="cursor-pointer"
               >
                 <div className="flex justify-between mb-2">
