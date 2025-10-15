@@ -168,12 +168,12 @@ export class ActionEventReminderService {
       plans.map(async (plan) => {
         const recipients =
           plan.type === ActionEventNotifType.CustomReminder && plan.reminder
-            ? plan.reminder.users.map((user) => new ProfileDto(user))
+            ? await this.recipientService
+                .filterForCompletion(plan.reminder.users, plan.referenceEvent)
+                .then((users) => users.map((user) => new ProfileDto(user)))
             : await this.recipientService
                 .getFilteredUsersForEvent(plan.referenceEvent, plan.type)
-                .then((users) =>
-                  users.map((user) => new ProfileDto(user)),
-                );
+                .then((users) => users.map((user) => new ProfileDto(user)));
 
         return {
           type: plan.type,

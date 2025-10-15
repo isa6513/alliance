@@ -10,6 +10,7 @@ import {
 import { ActionReminder } from 'src/actions/entities/action-reminder.entity';
 import { ActionTaskType } from 'src/actions/entities/action.entity';
 import { User } from 'src/user/entities/user.entity';
+import {} from 'src/actions/entities/action-activity.entity';
 
 describe('Action reminders (e2e)', () => {
   let ctx: TestContext;
@@ -82,7 +83,7 @@ describe('Action reminders (e2e)', () => {
     await actionRepo.delete({ id: action.id });
   });
 
-  it('includes custom reminders in the notification schedule', async () => {
+  it('includes custom reminders in the notification schedule, sends to non-completed users only', async () => {
     const action = await actionRepo.save(
       actionRepo.create({
         name: 'Custom Reminder Schedule Action',
@@ -110,6 +111,11 @@ describe('Action reminders (e2e)', () => {
     const userRepo = ctx.dataSource.getRepository(User);
     const testUser = await userRepo.findOneByOrFail({ id: ctx.testUserId });
 
+    await request(ctx.app.getHttpServer())
+      .post(`/actions/complete/${action.id}`)
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      .expect(201);
+
     const reminder = await reminderRepo.save(
       reminderRepo.create({
         memberActionEvent: memberEvent,
@@ -135,12 +141,12 @@ describe('Action reminders (e2e)', () => {
 
     const customEntry = entries.find(
       (entry) =>
-        entry.type === 'customreminder' &&
-        entry.eventId === memberEvent.id &&
-        entry.recipients.some((recipient) => recipient.id === ctx.testUserId),
+        entry.type === 'customreminder' && entry.eventId === memberEvent.id,
     );
 
     expect(customEntry).toBeDefined();
+    expect(customEntry?.recipients.length).toBe(1);
+    expect(customEntry?.recipients[0].id).toBe(testUser.id);
 
     await reminderRepo.delete({ id: reminder.id });
     await eventRepo.delete({ id: memberEvent.id });

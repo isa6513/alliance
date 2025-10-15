@@ -174,10 +174,6 @@ export class ActionEventNotifWorker {
         ? await this.recipientService.filterForCompletion(reminder.users, event)
         : await this.recipientService.getFilteredUsersForEvent(event, type);
 
-    if (!users.length) {
-      return;
-    }
-
     const baseContext: Omit<ActionEventNotificationContext, 'user' | 'cid'> = {
       event,
       type,
