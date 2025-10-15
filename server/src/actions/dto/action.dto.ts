@@ -12,8 +12,6 @@ import {
   ArrayUnique,
   IsArray,
   IsBoolean,
-  IsDate,
-  IsDefined,
   IsInt,
   IsNumber,
   IsOptional,
@@ -77,21 +75,12 @@ export class ActionReminderDto {
   }
 }
 
-export class CreateActionReminderDto {
-  @ApiProperty({ type: String, format: 'date-time' })
-  @Type(() => Date)
-  @IsDefined()
-  @IsDate()
-  sendAt: Date;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  customEmailMessage?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  customTextMessage?: string;
-
+export class CreateActionReminderDto extends PickType(ActionReminder, [
+  'sendAt',
+  'customEmailMessage',
+  'customTextMessage',
+  'includeActionLinkInMessages',
+]) {
   @ApiPropertyOptional()
   @IsOptional()
   @Type(() => Number)

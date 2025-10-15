@@ -53,6 +53,7 @@ export interface ActionEventNotificationContext {
   isSecondMiss?: boolean;
   customEmailMessage?: string;
   customTextMessage?: string;
+  includeActionLinkInCustomMessages?: boolean;
 }
 
 const PROCESS_ONE_LOCK_KEY1 = 0xa11a;
@@ -118,6 +119,21 @@ export class ActionEventNotifWorker {
     }
   }
 
+  processCustomReminderText(
+    text: string,
+    context: ActionEventNotificationContext,
+  ): string {
+    const withName = text.replace('#{name}', context.user.name);
+    if (context.includeActionLinkInCustomMessages) {
+      return (
+        withName +
+        ' ' +
+        withCid(actionUrl(context.action.id, true), context.cid)
+      );
+    }
+    return withName;
+  }
+
   private async processOne(qr: QueryRunner, plan: NotificationPlan) {
     const manager = qr.manager;
 
@@ -180,6 +196,8 @@ export class ActionEventNotifWorker {
       action,
       customEmailMessage: reminder?.customEmailMessage ?? undefined,
       customTextMessage: reminder?.customTextMessage ?? undefined,
+      includeActionLinkInCustomMessages:
+        reminder?.includeActionLinkInMessages ?? false,
     };
 
     let deadlineEvent: ActionEvent | undefined;
@@ -207,6 +225,18 @@ export class ActionEventNotifWorker {
         deadlineEvent,
         cid: await generateCIDForNotif(),
       };
+      if (context.customEmailMessage) {
+        context.customEmailMessage = this.processCustomReminderText(
+          context.customEmailMessage,
+          context,
+        );
+      }
+      if (context.customTextMessage) {
+        context.customTextMessage = this.processCustomReminderText(
+          context.customTextMessage,
+          context,
+        );
+      }
 
       if (type === ActionEventNotifType.MissedDeadline) {
         context.isSecondMiss = false; //TODO;
@@ -269,7 +299,7 @@ export class ActionEventNotifWorker {
       body = defaultEventText1DayReminder[context.event.newStatus](context);
     } else if (context.type === ActionEventNotifType.CustomReminder) {
       if (context.customTextMessage) {
-        body = context.customTextMessage.replace('#{name}', context.user.name);
+        body = context.customTextMessage;
       } else {
         const url = withCid(actionUrl(context.action.id, true), context.cid);
         body = `Reminder: ${context.action.name}. ${url}`;

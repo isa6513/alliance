@@ -457,14 +457,10 @@ export class ActionsService {
     eventId: number,
     dto: CreateActionReminderDto,
   ): Promise<ActionReminderDto> {
-    const event = await this.actionEventRepository.findOne({
+    const event = await this.actionEventRepository.findOneOrFail({
       where: { id: eventId, action: { id: actionId } },
       relations: ['action', 'action.participatingGroups'],
     });
-
-    if (!event) {
-      throw new NotFoundException('Action event not found');
-    }
 
     if (event.newStatus !== ActionStatus.MemberAction) {
       throw new BadRequestException(
@@ -518,6 +514,7 @@ export class ActionsService {
           ? dto.customTextMessage?.trim()
           : undefined,
       sendAt,
+      includeActionLinkInMessages: dto.includeActionLinkInMessages,
     });
 
     const saved = await this.actionReminderRepository.save(reminder);

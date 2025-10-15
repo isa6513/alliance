@@ -284,6 +284,7 @@ export type ActionReminder = {
     users: Array<Array<unknown>>;
     customEmailMessage?: string;
     customTextMessage?: string;
+    includeActionLinkInMessages?: boolean;
     sendAt: string;
     sentAt?: string;
     notifications: Array<ActionEventNotif>;
@@ -817,9 +818,10 @@ export type CreateActionEventDto = {
 };
 
 export type CreateActionReminderDto = {
-    sendAt: string;
     customEmailMessage?: string;
     customTextMessage?: string;
+    includeActionLinkInMessages?: boolean;
+    sendAt: string;
     deadlineEventId?: number;
     userIds: Array<number>;
 };
@@ -1049,6 +1051,11 @@ export type TableListDto = {
     tables: Array<TableMetadataDto>;
 };
 
+/**
+ * Semantic data type of the column
+ */
+export type ColumnDataType = 'string' | 'number' | 'boolean' | 'date' | 'datetime' | 'json' | 'uuid' | 'enum' | 'relation' | 'unknown';
+
 export type ColumnMetadataDto = {
     /**
      * Column name in the database
@@ -1057,7 +1064,7 @@ export type ColumnMetadataDto = {
     /**
      * Semantic data type of the column
      */
-    dataType: 'string' | 'number' | 'boolean' | 'date' | 'datetime' | 'json' | 'uuid' | 'enum' | 'relation' | 'unknown';
+    dataType: ColumnDataType;
     /**
      * Raw TypeORM column type
      */

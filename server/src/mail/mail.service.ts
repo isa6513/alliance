@@ -244,11 +244,6 @@ export class MailService {
       announcementDaysLeft = getDaysFromDeadline(context.deadlineEvent);
     }
 
-    const replacedMessage = context.customEmailMessage?.replace(
-      '#{name}',
-      context.user.name,
-    );
-
     const emailContext = {
       name: context.user.name,
       actionName: context.action.name,
@@ -261,7 +256,7 @@ export class MailService {
           : context.type === ActionEventNotifType.ThreeDayReminder
             ? '3 days'
             : '1 day',
-      customMessage: replacedMessage ?? null,
+      customMessage: context.customEmailMessage,
       cid: context.cid,
     };
 

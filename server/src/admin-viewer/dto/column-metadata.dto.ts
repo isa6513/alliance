@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ColumnDataType } from './column-type.enum';
 
 export class ColumnMetadataDto {
@@ -10,6 +10,7 @@ export class ColumnMetadataDto {
   @ApiProperty({
     enum: ColumnDataType,
     description: 'Semantic data type of the column',
+    enumName: 'ColumnDataType',
   })
   dataType: ColumnDataType;
 
@@ -28,23 +29,24 @@ export class ColumnMetadataDto {
   })
   isNullable: boolean;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     required: false,
     description: 'Target table name for relation columns',
   })
   relationTarget?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     required: false,
     enum: ['one-to-one', 'one-to-many', 'many-to-one', 'many-to-many'],
     description: 'Type of relation if this is a relation column',
   })
   relationType?: 'one-to-one' | 'one-to-many' | 'many-to-one' | 'many-to-many';
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     required: false,
+    isArray: true,
     description: 'Possible values for enum columns',
-    type: [String],
+    type: String,
   })
   enumValues?: string[];
 }

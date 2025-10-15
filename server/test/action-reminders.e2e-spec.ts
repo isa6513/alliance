@@ -60,7 +60,7 @@ describe('Action reminders (e2e)', () => {
       .send({
         sendAt: sendAt.toISOString(),
         customEmailMessage: 'Remember to participate!',
-        userIds: [ctx.testUserId],
+        userIds: [ctx.testUserId, ctx.adminUserId],
       })
       .expect(201);
 

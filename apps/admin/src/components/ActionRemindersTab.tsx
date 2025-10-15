@@ -44,6 +44,8 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     formatDateTimeLocal(new Date(Date.now() + 60 * 60 * 1000))
   );
   const [customEmailMessage, setCustomEmailMessage] = useState<string>("");
+  const [includeActionLinkInMessages, setIncludeActionLinkInMessages] =
+    useState<boolean>(false);
   const [customTextMessage, setCustomTextMessage] = useState<string>("");
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const [userQuery, setUserQuery] = useState<string>("");
@@ -166,6 +168,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
         deadlineEventId:
           deadlineEventId === "" ? undefined : Number(deadlineEventId),
         userIds: selectedUsers.map((user) => user.id),
+        includeActionLinkInMessages,
       },
     });
     setSubmitting(false);
@@ -305,6 +308,19 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
               rows={2}
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
               placeholder="Provide a custom text message or leave blank for the default reminder."
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Include Action Link in Messages
+            </label>
+            <input
+              type="checkbox"
+              checked={includeActionLinkInMessages}
+              onChange={(event) =>
+                setIncludeActionLinkInMessages(event.target.checked)
+              }
             />
           </div>
 
