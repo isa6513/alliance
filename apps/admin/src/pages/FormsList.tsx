@@ -5,7 +5,6 @@ import {
   tasksListForms,
 } from "@alliance/shared/client";
 import { FormSchema, Page } from "@alliance/shared/forms/formschema";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -85,26 +84,16 @@ const FormsList: React.FC = () => {
     };
   }, [forms]);
 
-  const handleCreateForm = useCallback(() => {
-    navigate("/forms/new");
-  }, [navigate]);
-
   const handleEditForm = useCallback(
-    (id: number) => {
-      navigate(`/forms/${id}`);
+    (actionId: number | undefined) => {
+      if (!actionId) return;
+      navigate(`/actions/${actionId}?tab=form`);
     },
     [navigate]
   );
 
   return (
     <div className="space-y-4 p-5">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-900">Forms</h2>
-        <Button color={ButtonColor.Green} onClick={handleCreateForm}>
-          Create New Form
-        </Button>
-      </div>
-
       {formsLoading ? (
         <p>Loading forms...</p>
       ) : error ? (
@@ -118,7 +107,7 @@ const FormsList: React.FC = () => {
           {forms.map((form) => (
             <Card key={form.id} style={CardStyle.White}>
               <div
-                onClick={() => handleEditForm(form.id)}
+                onClick={() => handleEditForm(form.usedInAction?.id)}
                 className="cursor-pointer"
               >
                 <div className="flex justify-between mb-2">

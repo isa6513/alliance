@@ -83,9 +83,9 @@ export class TasksController {
 
   @Put('updateForm/:formId')
   @UseGuards(AdminGuard)
-  @ApiOkResponse()
+  @ApiOkResponse({ type: FormDto })
   async updateForm(
-    @Param('formId') formId: string,
+    @Param('formId', ParseIntPipe) formId: number,
     @Body() body: CreateFormDto,
   ) {
     return this.tasksService.updateForm(+formId, body);

@@ -45,16 +45,16 @@ import { useNavigate } from "react-router";
 interface FormBuilderProps {
   onSave?: (schema: FormSchema) => void;
   initialSchema?: FormSchema;
-  formId?: string;
+  formId?: number;
+  setFormId: (formId: number) => void;
 }
 
 export function FormBuilder({
   onSave,
   initialSchema,
-  formId: propFormId,
+  formId,
+  setFormId,
 }: FormBuilderProps) {
-  const [formId, setFormId] = useState(propFormId);
-
   const [schema, setSchema] = useState<FormSchema>(
     initialSchema || {
       title: "Untitled Form",
@@ -185,7 +185,7 @@ export function FormBuilder({
       setIsLoading(true);
       setLoadError(null);
 
-      tasksGetForm({ path: { id: parseInt(formId) } })
+      tasksGetForm({ path: { id: formId } })
         .then((response) => {
           if (response.data) {
             // Convert the form entity back to FormSchema
@@ -436,16 +436,9 @@ export function FormBuilder({
         });
       }
 
-      if (response.response.ok) {
+      if (response.response.ok && response.data) {
         setSaveSuccess(true);
-
-        // If creating a new form, update the URL to include the new form ID
-        if (!formId && response.data && (response.data as any).id) {
-          const newFormId = (response.data as any).id;
-          const newUrl = "/forms/" + newFormId;
-          window.history.replaceState({}, "", newUrl);
-          setFormId(newFormId);
-        }
+        setFormId(response.data.id);
       } else {
         setSaveError("Could not save form");
       }

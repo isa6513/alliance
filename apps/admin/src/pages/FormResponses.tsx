@@ -284,6 +284,7 @@ const FormResponses: React.FC = () => {
             <div className="max-w-[600px] mx-auto pt-10">
               <FormRenderer
                 id={form.id}
+                actionId={0}
                 form={form.schema as unknown as FormSchema}
                 completedFormResponse={pageItems[0]}
                 renderFormAsCompleted

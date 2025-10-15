@@ -38,13 +38,10 @@ const ActionForm: React.FC<ActionFormProps> = ({
   onCancel,
   onDelete,
   baseUrl,
-  availableForms = [],
-  formsLoading,
   availableGroups = [],
   groupsLoading,
   selectedGroupIds,
   onGroupsChange,
-  actionId,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -71,10 +68,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
     | "markdowntextarea";
 
   type FieldDef = {
-    name:
-      | keyof CreateActionDto
-      | "image" // special case for file upload with preview
-      | "taskFormId"; // included explicitly for clarity
+    name: keyof CreateActionDto | "image"; // special case for file upload with preview
     label: string;
     type: FieldType;
     required?: boolean;
@@ -146,13 +140,6 @@ const ActionForm: React.FC<ActionFormProps> = ({
         type: "checkbox",
         helpText:
           "all members (not just committed) will be shown this action to complete. (e.g. for onboarding)",
-      },
-      {
-        name: "taskFormId",
-        label: "Task Form",
-        type: "select",
-        show: (f) => f.type === "Activity",
-        inGrid: true,
       },
       {
         name: "everyoneShouldComplete",
@@ -231,48 +218,6 @@ const ActionForm: React.FC<ActionFormProps> = ({
       );
     }
 
-    if (f.name === "taskFormId") {
-      return (
-        <div key={String(f.name)}>
-          <label
-            htmlFor={String(f.name)}
-            className="block font-medium text-gray-700 mb-1"
-          >
-            {f.label}
-          </label>
-          <select
-            id={String(f.name)}
-            name={String(f.name)}
-            value={(form as any)[f.name] || ""}
-            onChange={onInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">No form required</option>
-            {formsLoading && <option value="">Loading forms...</option>}
-            {availableForms
-              .sort((a, b) => (!a.usedInAction ? -1 : !b.usedInAction ? 1 : 0))
-              .map((formOption) => (
-                <option
-                  key={formOption.id}
-                  value={formOption.id}
-                  disabled={
-                    !(
-                      formOption.usedInAction === undefined ||
-                      formOption.usedInAction.id === actionId
-                    )
-                  }
-                >
-                  {formOption.title || `Form ${formOption.id}`}
-                </option>
-              ))}
-          </select>
-          <p className="text-xs text-gray-500 mt-1">
-            Form to show in task panel for completion
-          </p>
-        </div>
-      );
-    }
-
     if (f.type === "markdowntextarea") {
       return (
         <div key={String(f.name)}>
@@ -288,6 +233,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
             value={(form as any)[f.name] ?? ""}
             onChange={onInputChange}
             rows={f.rows || 6}
+            className="!text-base"
           />
           {f.helpText && (
             <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>

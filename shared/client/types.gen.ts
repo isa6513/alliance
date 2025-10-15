@@ -3073,15 +3073,17 @@ export type TasksGetFormResponse = TasksGetFormResponses[keyof TasksGetFormRespo
 export type TasksUpdateFormData = {
     body: CreateFormDto;
     path: {
-        formId: string;
+        formId: number;
     };
     query?: never;
     url: '/tasks/updateForm/{formId}';
 };
 
 export type TasksUpdateFormResponses = {
-    200: unknown;
+    200: FormDto;
 };
+
+export type TasksUpdateFormResponse = TasksUpdateFormResponses[keyof TasksUpdateFormResponses];
 
 export type TasksDeleteFormData = {
     body?: never;

@@ -24,6 +24,7 @@ import ActionForm from "../components/ActionForm";
 import EventManagementTab from "../components/EventManagementTab";
 import { getApiUrl } from "../lib/config";
 import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
+import { FormBuilder } from "../components/FormBuilder";
 
 // Status color mapping
 export const getStatusColor = (status: ActionDto["status"]) => {
@@ -59,7 +60,7 @@ export const formatStatus = (status: string) => {
     .join(" ");
 };
 
-type Tab = "overview" | "details" | "events";
+type Tab = "overview" | "details" | "events" | "form";
 
 const ActionDashboard: React.FC = () => {
   const { actionId: actionIdParam } = useParams<{ actionId: string }>();
@@ -168,6 +169,21 @@ const ActionDashboard: React.FC = () => {
       setSelectedGroupIds([]);
     }
   }, [isNew]);
+
+  const setTaskFormId = async (formId: number) => {
+    setForm((prev) => ({ ...prev, taskFormId: formId }));
+    if (actionId) {
+      const response = await actionsUpdate({
+        path: { id: actionId },
+        body: { taskFormId: formId },
+      });
+      if (response.data) {
+        setAction(response.data);
+      } else {
+        setError("Failed to update action form");
+      }
+    }
+  };
 
   useEffect(() => {
     if (isNew || !actionId) {
@@ -464,6 +480,9 @@ const ActionDashboard: React.FC = () => {
     { key: "overview", label: "Status Overview" },
     { key: "details", label: "Action Details" },
     { key: "events", label: "Event Management" },
+    ...(action?.type === "Activity"
+      ? [{ key: "form" as Tab, label: "Task Form" }]
+      : []),
   ];
 
   const currentEventId = action?.events
@@ -473,26 +492,30 @@ const ActionDashboard: React.FC = () => {
     )[0]?.id;
 
   return (
-    <div className="flex flex-col h-full p-5">
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex flex-row gap-x-2">
-          <div className="flex flex-row gap-x-2 items-center">
-            {action?.archived && (
-              <span className="px-2 py-1 rounded-sm bg-red-200">Archived</span>
-            )}
+    <div className="flex flex-col h-full">
+      <div className="flex justify-between items-center mb-2">
+        <div className="p-5 pb-0 flex flex-row justify-between w-full">
+          <div className="flex flex-row gap-x-2 ">
+            <div className="flex flex-row gap-x-2 items-center">
+              {action?.archived && (
+                <span className="px-2 py-1 rounded-sm bg-red-200">
+                  Archived
+                </span>
+              )}
+            </div>
+            <h1 className="text-[#111] text-[16pt] font-bold">
+              {isNew ? "Create New Action" : `${action?.name}`}
+            </h1>
           </div>
-          <h1 className="text-[#111] text-[16pt] font-bold">
-            {isNew ? "Create New Action" : `${action?.name}`}
-          </h1>
+          <button
+            onClick={handleCancel}
+            className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 text-nowrap mr-5"
+          >
+            ← Back
+          </button>
         </div>
-        <button
-          onClick={handleCancel}
-          className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 text-nowrap"
-        >
-          ← Back
-        </button>
       </div>
-      <p className="p-2 border border-gray-200 mb-4">
+      <p className="p-2 border border-gray-200 mb-4 mx-5">
         Please see{" "}
         <a
           className="text-green underline"
@@ -503,7 +526,6 @@ const ActionDashboard: React.FC = () => {
           Guide to preparing public actions
         </a>
       </p>
-
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
@@ -512,25 +534,27 @@ const ActionDashboard: React.FC = () => {
 
       {isNew ? (
         // New Action Creation Form
-        <ActionForm
-          form={form}
-          onInputChange={handleInputChange}
-          onImageChange={handleImageChange}
-          onSubmit={handleSubmit}
-          saving={saving}
-          imagePreview={imagePreview}
-          isNew={true}
-          onCancel={handleCancel}
-          availableForms={availableForms}
-          formsLoading={formsLoading}
-          availableGroups={availableGroups}
-          groupsLoading={groupsLoading}
-          selectedGroupIds={selectedGroupIds}
-          onGroupsChange={handleGroupsChange}
-        />
+        <div className="p-5">
+          <ActionForm
+            form={form}
+            onInputChange={handleInputChange}
+            onImageChange={handleImageChange}
+            onSubmit={handleSubmit}
+            saving={saving}
+            imagePreview={imagePreview}
+            isNew={true}
+            onCancel={handleCancel}
+            availableForms={availableForms}
+            formsLoading={formsLoading}
+            availableGroups={availableGroups}
+            groupsLoading={groupsLoading}
+            selectedGroupIds={selectedGroupIds}
+            onGroupsChange={handleGroupsChange}
+          />
+        </div>
       ) : (
         // Existing Action Dashboard
-        <div className="space-y-4 flex-1 min-h-0">
+        <div className="space-y-4 flex-1 min-h-0 mx-5">
           {/* Tab Navigation */}
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8">
@@ -567,7 +591,7 @@ const ActionDashboard: React.FC = () => {
             {activeTab === "overview" && action && (
               <div className="space-y-4">
                 {/* Current Status */}
-                <div className="flex flex-row gap-x-2">
+                <div className="flex flex-row gap-2 flex-wrap">
                   <Button
                     onClick={() =>
                       window.open(
@@ -588,6 +612,13 @@ const ActionDashboard: React.FC = () => {
                   >
                     <CopyIcon size="large" />
                     Duplicate Action
+                  </Button>
+                  <Button
+                    onClick={() => {}}
+                    color={ButtonColor.White}
+                    className="!px-3 !text-sm gap-x-1 disabled"
+                  >
+                    Export JSON
                   </Button>
                   <Button
                     onClick={() => handleArchive()}
@@ -747,6 +778,13 @@ const ActionDashboard: React.FC = () => {
                   onGroupsChange={handleGroupsChange}
                 />
               </Card>
+            )}
+
+            {activeTab === "form" && action && (
+              <FormBuilder
+                formId={action.taskFormId}
+                setFormId={setTaskFormId}
+              />
             )}
 
             {activeTab === "events" && action && (
