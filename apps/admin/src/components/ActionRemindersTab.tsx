@@ -6,6 +6,7 @@ import {
   User,
   AdminActionEventDto,
   actionsEventWithReminders,
+  ActionReminder,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -189,6 +190,18 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             customReminders: [...existingReminders, created],
           };
         }),
+      };
+    });
+    setEventWithReminders((prev) => {
+      if (!prev) {
+        return undefined;
+      }
+      return {
+        ...prev,
+        customReminders: [
+          ...(prev.customReminders ?? []),
+          created as unknown as ActionReminder,
+        ],
       };
     });
 

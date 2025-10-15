@@ -97,6 +97,7 @@ jobs:
         working-directory: ./
 
       - name: Inject & upload source maps to PostHog
+        continue-on-error: true
         uses: PostHog/upload-source-maps@v0.4.6
         with:
           directory: ./apps/frontend/build/client/assets/
