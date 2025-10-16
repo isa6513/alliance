@@ -143,8 +143,9 @@ const InvitePage: React.FC = () => {
                 <span className="font-bold">
                   A willingness to make and keep a promise.
                 </span>{" "}
-                If we can trust every member follows through on their word, we
-                can make ambitious and complex plans that rely on one another.
+                If we can trust every member to follow through on their
+                commitments, we can make ambitious and complex plans that rely
+                on one another.
               </li>
             </ol>
             <h3 className="font-serif !text-3xl font-bold mt-2">
