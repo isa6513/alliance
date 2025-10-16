@@ -37,7 +37,7 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
               <Link to="/terms" className="">
                 Terms
               </Link>
-              <a href="mailto:support@worldalliance.org" className="">
+              <a href="mailto:contact@worldalliance.org" className="">
                 Contact
               </a>
             </div>
