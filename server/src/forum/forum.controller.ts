@@ -45,8 +45,8 @@ export class ForumController {
   @ApiOperation({ summary: 'Get all forum posts' })
   @ApiOkResponse({ type: [PostDto] })
   @UseGuards(AuthGuard)
-  findAllPosts(): Promise<PostDto[]> {
-    return this.forumService.findAllPosts();
+  findAllPosts(@Request() req: JwtRequest): Promise<PostDto[]> {
+    return this.forumService.findAllPosts(req.user.sub);
   }
 
   @Get('posts/action/:actionId')

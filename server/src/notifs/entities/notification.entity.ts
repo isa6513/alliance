@@ -1,13 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
+import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/datasources/basecolumns';
 
 export enum NotificationCategory {
   ActionEvent = 'action_event',
@@ -57,11 +54,11 @@ export class Notification {
   @ApiProperty()
   cleared: boolean;
 
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   @ApiProperty()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   @ApiProperty()
   updatedAt: Date;
 }

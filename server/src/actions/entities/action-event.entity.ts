@@ -9,10 +9,10 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { Action } from './action.entity';
 import { ActionReminder } from './action-reminder.entity';
+import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
 
 export enum NotificationType {
   All = 'all',
@@ -79,13 +79,13 @@ export class ActionEvent {
   })
   sendNotifsTo: NotificationType;
 
-  @Column()
+  @Column({ type: 'timestamptz' })
   @ApiProperty({ description: 'time of the event (for display)' })
   @IsNotEmpty()
   @Type(() => Date)
   date: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   @ApiProperty({ description: 'Timestamp when the event was last updated' })
   @Type(() => Date)
   @Allow()

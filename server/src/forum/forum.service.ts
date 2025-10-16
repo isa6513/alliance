@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { commentUrl } from 'src/search/approutes';
 import { ProfileDto } from 'src/user/user.dto';
-import { ILike, In, LessThan, Not, Repository } from 'typeorm';
+import { ILike, In, Not, Repository } from 'typeorm';
 import {
   Notification,
   NotificationCategory,
@@ -75,19 +75,26 @@ export class ForumService {
     return this.postRepository.save(post);
   }
 
-  async findAllPosts(): Promise<PostDto[]> {
+  async findAllPosts(userId?: number): Promise<PostDto[]> {
     const posts = await this.postRepository
       .find({
-        where: { deleted: false, visibleAt: LessThan(new Date()) },
+        where: { deleted: false },
         relations: ['author', 'action', 'editableContent'],
         order: { updatedAt: 'DESC' },
       })
       .then((posts) => {
         return Promise.all(
-          posts.map(async (post) => {
-            const commentCount = await this.countCommentsForPost(post.id);
-            return new PostDto(post, commentCount);
-          }),
+          posts
+            .filter(
+              (post) =>
+                !post.visibleAt ||
+                post.visibleAt < new Date() ||
+                post.authorId === userId,
+            )
+            .map(async (post) => {
+              const commentCount = await this.countCommentsForPost(post.id);
+              return new PostDto(post, commentCount);
+            }),
         );
       });
     return posts;
@@ -135,7 +142,8 @@ export class ForumService {
     if (
       !post ||
       post.deleted ||
-      (userId !== post.authorId && post.visibleAt > new Date())
+      (userId !== post.authorId &&
+        (!post.visibleAt || post.visibleAt > new Date()))
     ) {
       throw new NotFoundException(`Post with ID "${id}" not found`);
     }

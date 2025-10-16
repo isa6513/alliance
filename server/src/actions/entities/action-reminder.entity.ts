@@ -1,6 +1,7 @@
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   JoinTable,
@@ -63,13 +64,13 @@ export class ActionReminder {
   includeActionLinkInMessages?: boolean;
 
   @ApiProperty({ type: Date })
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamptz' })
   @IsDefined()
   @Type(() => Date)
   sendAt: Date;
 
   @ApiPropertyOptional({ type: Date, default: null })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   @IsOptional()
   @Type(() => Date)
   sentAt?: Date;
@@ -79,4 +80,10 @@ export class ActionReminder {
   @IsDefined()
   @Type(() => ActionEventNotif)
   notifications: ActionEventNotif[];
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  @ApiProperty()
+  @Allow()
+  @Type(() => Date)
+  createdAt: Date;
 }

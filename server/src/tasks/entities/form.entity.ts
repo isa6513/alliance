@@ -2,15 +2,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsArray, IsDefined } from 'class-validator';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { FormResponse } from './formresponse.entity';
+import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/datasources/basecolumns';
 
 @Entity()
 export class Form {
@@ -30,13 +27,13 @@ export class Form {
   @Type(() => Object)
   schema!: Record<string, unknown>;
 
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   @ApiProperty()
   @Allow()
   @Type(() => Date)
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   @ApiProperty()
   @Allow()
   @Type(() => Date)

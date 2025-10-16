@@ -1,11 +1,9 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/datasources/basecolumns';
 
 @Entity()
 export class Image {
@@ -25,9 +23,9 @@ export class Image {
   @ApiProperty()
   size: number;
 
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   dateCreated: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   dateUpdated: Date;
 }

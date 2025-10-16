@@ -12,11 +12,11 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { Notification } from '../../notifs/entities/notification.entity';
 import { User } from '../../user/entities/user.entity';
 import { EditableContent } from './editablecontent.entity';
+import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
 
 export enum CommentParentObject {
   Post = 'post',
@@ -78,7 +78,7 @@ export class Comment {
   @Type(() => Date)
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   @ApiProperty()
   @Allow()
   @Type(() => Date)

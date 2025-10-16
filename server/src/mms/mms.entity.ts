@@ -1,12 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { MessageStatus } from 'twilio/lib/rest/api/v2010/account/message';
 import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/datasources/basecolumns';
+import { MessageStatus } from 'twilio/lib/rest/api/v2010/account/message';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Mms {
@@ -42,12 +40,12 @@ export class Mms {
   @ApiPropertyOptional()
   errorMessage?: string;
 
-  @CreateDateColumn()
-  @ApiProperty({ type: Date })
+  @CreateDateColumnTz()
+  @ApiProperty()
   createdAt: Date;
 
-  @UpdateDateColumn()
-  @ApiProperty({ type: Date })
+  @UpdateDateColumnTz()
+  @ApiProperty()
   updatedAt: Date;
 
   @Column({ nullable: true })

@@ -7,7 +7,7 @@ import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { formatTime } from "../lib/utils";
+import { cx, formatTime } from "../lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
 import EditableContentRenderer from "./forum/EditableContentRenderer";
 import UserDisplayName from "./UserDisplayName";
@@ -64,16 +64,32 @@ const ForumListPost = ({
     });
   }, [post.id]);
 
+  const isPrivateFuturePost =
+    post.visibleAt && new Date(post.visibleAt) > new Date();
+
   if (card) {
     return (
       <Link
         to={`/forum/post/${post.id}`}
-        className={`w-full mb-0 !gap-y-1 p-4 hover:bg-zinc-50 bg-white cursor-pointer`}
+        className={cx(
+          "w-full mb-0 !gap-y-1 p-4  cursor-pointer",
+          isPrivateFuturePost
+            ? "bg-sky-50 hover:bg-sky-100/60"
+            : "hover:bg-zinc-50 bg-white"
+        )}
       >
         <div className="flex flex-col gap-y-0 mb-2">
-          <div className="flex flex-row gap-y-1">
+          <div className="flex flex-row gap-y-1 items-center gap-2">
             {post.pinned && <PinnedIcon size="small" />}
             <p className={`text-base`}>{post.title}</p>
+            {isPrivateFuturePost && (
+              <span className="text-sm text-blue">
+                Only you can see this - will be posted{" "}
+                {formatTime(new Date(post.visibleAt!), {
+                  addSuffix: true,
+                })}
+              </span>
+            )}
           </div>
           {showContentPreview && (
             <EditableContentRenderer

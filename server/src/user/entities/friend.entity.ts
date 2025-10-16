@@ -1,17 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
-  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   Unique,
-  UpdateDateColumn,
 } from 'typeorm';
 import { Notification } from '../../notifs/entities/notification.entity';
 import { User } from './user.entity';
+import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/datasources/basecolumns';
 export enum FriendStatus {
   Pending = 'pending',
   Accepted = 'accepted',
@@ -43,13 +45,13 @@ export class Friend {
   @ApiProperty({ enum: FriendStatus, enumName: 'FriendStatus' })
   status: FriendStatus;
 
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt: Date;
 
   @Column({ nullable: true })
   acceptedAt?: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   updatedAt: Date;
 
   @OneToOne(() => Notification, {

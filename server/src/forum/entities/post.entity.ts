@@ -3,7 +3,6 @@ import { Type } from 'class-transformer';
 import { Allow, IsNotEmpty, IsOptional } from 'class-validator';
 import {
   Column,
-  CreateDateColumn,
   Entity,
   JoinColumn,
   JoinTable,
@@ -11,11 +10,14 @@ import {
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { Action } from '../../actions/entities/action.entity';
 import { User } from '../../user/entities/user.entity';
 import { EditableContent } from './editablecontent.entity';
+import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/datasources/basecolumns';
 
 @Entity()
 export class Post {
@@ -65,7 +67,7 @@ export class Post {
   @Allow()
   actionId?: number;
 
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   @ApiProperty()
   @Allow()
   @Type(() => Date)
@@ -76,18 +78,18 @@ export class Post {
   @Allow()
   pinned: boolean;
 
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   @ApiProperty()
   @Allow()
   @Type(() => Date)
   updatedAt: Date;
 
-  @Column({ default: () => 'NOW()' })
-  @ApiProperty()
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiPropertyOptional()
   @IsOptional()
   @Type(() => Date)
   @Allow()
-  visibleAt: Date;
+  visibleAt?: Date;
 
   @Column({ default: false })
   @ApiProperty()

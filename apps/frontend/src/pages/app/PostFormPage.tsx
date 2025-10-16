@@ -9,37 +9,15 @@ import {
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card from "@alliance/shared/ui/Card";
+import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { setRevalidate } from "../../applayout";
 import EditableContentForm from "../../components/forum/EditableContentForm";
 import { useAuth } from "../../lib/AuthContext";
 import LargeCheckbox from "../../components/LargeCheckbox";
+
 type FormMode = "create" | "edit";
-
-function formatDateToInputValue(date: Date) {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const yyyy = date.getFullYear();
-  const mm = pad(date.getMonth() + 1);
-  const dd = pad(date.getDate());
-  const hh = pad(date.getHours());
-  const min = pad(date.getMinutes());
-
-  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-}
-
-function toUtcISOString(localDateTime: string | null | undefined) {
-  if (!localDateTime) {
-    return null;
-  }
-  const parsed = new Date(localDateTime);
-  if (Number.isNaN(parsed.getTime())) {
-    return null;
-  }
-  return parsed.toISOString();
-}
-
-const FUTURE_SCHEDULE_THRESHOLD_MS = 60 * 1000;
 
 const PostFormPage: React.FC = () => {
   const { postId } = useParams<{ postId: string }>();
@@ -51,8 +29,8 @@ const PostFormPage: React.FC = () => {
     body: "",
     attachments: [],
   });
-  const [schedulePostDate, setSchedulePostDate] = useState<string>(
-    formatDateToInputValue(new Date())
+  const [scheduledVisibleAt, setScheduledVisibleAt] = useState<string | null>(
+    null
   );
   const [useSchedulePost, setUseSchedulePost] = useState<boolean>(false);
 
@@ -67,6 +45,8 @@ const PostFormPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
+  const canSchedulePost = mode === "create" || scheduledVisibleAt !== null;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -79,15 +59,16 @@ const PostFormPage: React.FC = () => {
             setTitle(postResponse.data.title);
             setContent(postResponse.data.editableContent);
             setActionId(postResponse.data.actionId);
-            const visibleAtDate = new Date(postResponse.data.visibleAt);
-            const now = new Date();
-            const isScheduled =
-              visibleAtDate.getTime() - now.getTime() >
-              FUTURE_SCHEDULE_THRESHOLD_MS;
-            setUseSchedulePost(isScheduled);
-            setSchedulePostDate(
-              formatDateToInputValue(isScheduled ? visibleAtDate : now)
-            );
+            if (
+              !!postResponse.data.visibleAt &&
+              new Date(postResponse.data.visibleAt) > new Date()
+            ) {
+              setScheduledVisibleAt(postResponse.data.visibleAt);
+              setUseSchedulePost(true);
+            } else {
+              setUseSchedulePost(false);
+              setScheduledVisibleAt(null);
+            }
           } else {
             setError("Post not found");
           }
@@ -110,6 +91,15 @@ const PostFormPage: React.FC = () => {
       return;
     }
 
+    if (
+      useSchedulePost &&
+      scheduledVisibleAt &&
+      new Date(scheduledVisibleAt) < new Date()
+    ) {
+      setError("Cannot schedule posts in the past");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       // Upload any new image attachments to get keys
@@ -127,15 +117,15 @@ const PostFormPage: React.FC = () => {
         attachmentKeys = uploads.filter(Boolean) as string[];
       }
 
-      let visibleAt = new Date().toISOString();
+      const nowIso = new Date().toISOString();
+      let visibleAt = nowIso;
       if (useSchedulePost) {
-        const scheduledIso = toUtcISOString(schedulePostDate);
-        if (!scheduledIso) {
+        if (!scheduledVisibleAt) {
           setError("Please select a valid date and time to schedule the post.");
           setIsSubmitting(false);
           return;
         }
-        visibleAt = scheduledIso;
+        visibleAt = scheduledVisibleAt;
       }
 
       const postData: CreatePostDto = {
@@ -245,32 +235,43 @@ const PostFormPage: React.FC = () => {
             </div>
 
             <div className="flex justify-between space-x-3 items-center">
-              <div className="flex space-x-3 items-center">
-                <LargeCheckbox
-                  label="Schedule post for later"
-                  checked={useSchedulePost}
-                  onChange={() => {
-                    setUseSchedulePost(!useSchedulePost);
-                    if (error) {
-                      setError(null);
-                    }
-                  }}
-                />
-                {useSchedulePost && (
-                  <div className="flex space-x-3">
-                    <input
-                      type="datetime-local"
-                      id="schedulePostDate"
-                      name="schedulePostDate"
-                      value={schedulePostDate}
-                      onChange={(e) => {
-                        setSchedulePostDate(e.target.value);
+              <div>
+                {canSchedulePost && (
+                  <div className="flex space-x-3 items-center">
+                    <LargeCheckbox
+                      label="Schedule post for later"
+                      checked={useSchedulePost}
+                      onChange={() => {
+                        setUseSchedulePost(!useSchedulePost);
+                        if (!useSchedulePost && !scheduledVisibleAt) {
+                          setScheduledVisibleAt(new Date().toISOString());
+                        }
                         if (error) {
                           setError(null);
                         }
                       }}
-                      className="w-full p-3 py-2 -my-3 border border-zinc-300 rounded-lg focus:outline-none"
                     />
+                    {useSchedulePost && (
+                      <div className="flex space-x-3">
+                        <DateTimePicker
+                          id="schedulePostDate"
+                          value={scheduledVisibleAt}
+                          onChange={({ utcValue }) => {
+                            setScheduledVisibleAt(utcValue);
+                            if (!utcValue) {
+                              setError(
+                                "Please select a valid date and time to schedule the post."
+                              );
+                              return;
+                            }
+                            if (error) {
+                              setError(null);
+                            }
+                          }}
+                          inputClassName="-my-3"
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

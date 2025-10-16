@@ -90,10 +90,7 @@ const CellEditor: React.FC<CellEditorProps> = ({
     return `${year}-${month}-${day}`;
   };
 
-  const formatDateTimeInput = (
-    date: Date,
-    includeSeconds: boolean
-  ): string => {
+  const formatDateTimeInput = (date: Date, includeSeconds: boolean): string => {
     const { year, month, day } = formatDateParts(date);
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
@@ -118,8 +115,7 @@ const CellEditor: React.FC<CellEditorProps> = ({
         }
 
         const originalHasSeconds =
-          typeof val === "string" &&
-          /:\d{2}:\d{2}/.test(val.replace(" ", "T"));
+          typeof val === "string" && /:\d{2}:\d{2}/.test(val.replace(" ", "T"));
         const includeSeconds =
           originalHasSeconds ||
           date.getSeconds() !== 0 ||

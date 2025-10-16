@@ -2,12 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsDefined, IsString } from 'class-validator';
 import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/datasources/basecolumns';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class EditableContent {
@@ -29,12 +27,12 @@ export class EditableContent {
   @IsDefined()
   attachments: string[];
 
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   @Allow()
   @Type(() => Date)
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   @Allow()
   @Type(() => Date)
   updatedAt: Date;

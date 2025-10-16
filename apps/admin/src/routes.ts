@@ -12,6 +12,7 @@ export default [
       route("/schedule", "pages/EventNotifTimeline.tsx"),
       route("/members/groups", "pages/GroupManagement.tsx"),
       route("/member/:userId", "pages/UserDetailView.tsx"),
+      route("/date", "pages/DateTest.tsx"),
       route("/members", "pages/UsersList.tsx"),
       route("/image", "pages/ImageUpload.tsx"),
       route("/event/:eventId", "pages/ActionEventDashboard.tsx"),

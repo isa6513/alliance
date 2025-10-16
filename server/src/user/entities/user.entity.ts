@@ -18,7 +18,6 @@ import {
   BeforeInsert,
   BeforeUpdate,
   Column,
-  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToMany,
@@ -26,11 +25,14 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { Notification } from '../../notifs/entities/notification.entity';
 import { Friend, FriendStatus } from './friend.entity';
 import { Group } from './group.entity';
+import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/datasources/basecolumns';
 
 export enum NotificationPreference {
   All = 'all',
@@ -70,7 +72,7 @@ export class User {
   @ApiProperty()
   phoneNumberValidated: boolean;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   @ApiPropertyOptional()
   sentTextOptInMessageAt?: Date;
 
@@ -150,10 +152,10 @@ export class User {
   @IsNotEmpty()
   password: string;
 
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   updatedAt: Date;
 
   @Column({ default: false })

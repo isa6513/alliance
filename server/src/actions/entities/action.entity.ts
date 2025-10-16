@@ -10,11 +10,11 @@ import {
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { ActionActivity, ActionActivityType } from './action-activity.entity';
 import { ActionEvent, ActionStatus } from './action-event.entity';
 import { Group } from 'src/user/entities/group.entity';
+import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
 
 export enum ActionTaskType {
   Funding = 'Funding', //giving money to a particular cause
@@ -112,7 +112,7 @@ export class Action {
   @Type(() => Date)
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   @ApiProperty({ description: 'Timestamp when the action was last updated' })
   @Allow()
   @Type(() => Date)
