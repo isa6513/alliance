@@ -2,17 +2,19 @@
 
 ## Setup
 
-**client/mobile:**
+Currently, frontend/, admin/, and shared/, are part of a yarn monorepo, while server/ is a separate npm-managed project.
 
-`yarn install`
+**to install frontend deps**
 
-**server:**
+In root dir: `yarn install` (run `sudo npm install -g yarn` if yarn missing)
+
+**server install:**
 
 `cd server`
 
 `npm install`
 
-`cp .env.example .env` (and make any necessary edits)
+`cp .env.example .env` (and make necessary edits)
 
 Set up postgres database running locally with username/password/db name matching .env file
 
@@ -20,14 +22,11 @@ Set up postgres database running locally with username/password/db name matching
 
 ### frontend
 
-dev: `cd apps/frontend && yarn dev`
+dev: `cd apps/frontend && yarn dev` (or `yarn frontend:dev` from root dir)
 
-storybook: `yarn workspace @alliance/frontend storybook`
+### admin
 
-
-### admin 
-
-dev: `cd apps/admin && yarn dev`
+dev: `cd apps/admin && yarn dev` (or `yarn admin:dev` from root dir)
 
 ### server
 
@@ -43,10 +42,10 @@ build: `yarn eas build --platform [ios|android]`
 
 ### Openapi client gen:
 
-`yarn gen-api` (in top level folder, dev server must be running)
+`yarn gen-api` (in root dir, dev server must be running)
 
 ### Server migrations
 
-generate migrations: `npm run migration:generate -- migrations/[name of migration]`
+generate migrations (in server/): `npm run migration:generate -- migrations/[name of migration]`
 
 run migrations `npm run migration:run`
