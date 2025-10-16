@@ -17,6 +17,8 @@ export default [
   route("/progress", "pages/static/ProgressListPage.tsx"),
   route("/progress/:slug", "pages/static/ProgressPostPage.tsx"),
 
+  route("/memberquotes", "pages/static/oneoff/MemberQuotesPage.tsx"),
+
   layout("applayout.tsx", [
     layout("navbar.tsx", [
       ...prefix("/actions", [
