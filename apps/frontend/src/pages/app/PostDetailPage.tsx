@@ -119,7 +119,7 @@ const PostDetailPage: React.FC = () => {
           >
             &larr;
           </Link>
-          {new Date(post.visibleAt) > new Date() && (
+          {post.visibleAt && new Date(post.visibleAt) > new Date() && (
             <Card style={CardStyle.Alert} className="mb-2 border-none">
               <span className="text-zinc-800">
                 Only you can see this post. it is scheduled for{" "}

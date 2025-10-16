@@ -1,5 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react";
 import ActionItemCard from "../components/ActionItemCard";
+import { testActions } from "./testData";
 
 const meta = {
   title: "Alliance/ActionItemCard",
@@ -9,14 +10,7 @@ const meta = {
     layout: "centered",
   },
   args: {
-    id: 1,
-    name: "Boycott Acme Inc.",
-    shortDescription:
-      "Acme. corp has been found to lorem over 160,00 ipsums every single year, causing untold devastation in the placeholder text industry.",
-    category: "Climate Change",
-    status: "gathering_commitments",
-    joinedCount: 10,
-    userRelation: "joined",
+    action: testActions[0],
   },
 } satisfies Meta<typeof ActionItemCard>;
 

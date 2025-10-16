@@ -5,7 +5,6 @@ import LargeActionCard from "../app/LargeActionCard";
 import { ActionWithRelation } from "../../applayout";
 import { ProfileDto, userReferrerProfile } from "@alliance/shared/client";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import UserDisplayName from "../../components/UserDisplayName";
 
 const InvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();

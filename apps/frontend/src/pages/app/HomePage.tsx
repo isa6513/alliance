@@ -233,14 +233,20 @@ const HomePage = () => {
               )}
               {posts && posts.length > 0 && (
                 <div className="flex flex-col *:py-3 -mb-3">
-                  {posts?.slice(0, 2).map((post) => (
-                    <ForumListPost
-                      key={post.id}
-                      post={post}
-                      card={false}
-                      showAction={false}
-                    />
-                  ))}
+                  {posts
+                    .filter(
+                      (post) =>
+                        !post.visibleAt || new Date(post.visibleAt) < new Date()
+                    )
+                    .slice(0, 2)
+                    .map((post) => (
+                      <ForumListPost
+                        key={post.id}
+                        post={post}
+                        card={false}
+                        showAction={false}
+                      />
+                    ))}
                 </div>
               )}
             </div>
