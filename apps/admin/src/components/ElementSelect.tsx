@@ -32,6 +32,7 @@ export function ElementSelect({
     "spacer",
     "html",
     "image",
+    "quote",
   ];
 
   return (

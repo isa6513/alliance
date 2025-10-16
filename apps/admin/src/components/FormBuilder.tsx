@@ -41,6 +41,7 @@ import {
 } from "./form-fields";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useNavigate } from "react-router";
+import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
 
 interface FormBuilderProps {
   onSave?: (schema: FormSchema) => void;
@@ -127,6 +128,7 @@ export function FormBuilder({
       { id: "spacer", name: "Spacer Block", type: "block" as const },
       { id: "html", name: "HTML Block", type: "block" as const },
       { id: "image", name: "Image Block", type: "block" as const },
+      { id: "quote", name: "Quote Block", type: "block" as const },
     ],
     []
   );
@@ -366,7 +368,11 @@ export function FormBuilder({
           src: "https://via.placeholder.com/300x200",
         };
         break;
+      case "quote":
+        newBlock = { kind: "quote", id: blockId, text: "body text" };
+        break;
       default:
+        console.error(`Unknown block kind: ${kind satisfies never}`);
         return;
     }
 
@@ -893,7 +899,17 @@ export function FormBuilder({
                         {...commonProps}
                       />
                     );
+                  case "quote":
+                    return (
+                      <EditableQuoteBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
                   default:
+                    console.error(
+                      `Unknown block kind: ${block satisfies never}`
+                    );
                     return null;
                 }
               })()}

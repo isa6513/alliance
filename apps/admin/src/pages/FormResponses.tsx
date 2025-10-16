@@ -257,16 +257,6 @@ const FormResponses: React.FC = () => {
               >
                 Previous
               </button>
-              <div className="flex items-center gap-2 mx-2 min-w-[300px] justify-center">
-                <span className="text-sm">
-                  Response {page} / {totalPages}:
-                </span>
-                {!!pageItems[0].user && (
-                  <div className="text-black">
-                    {pageItems[0].user?.name || "User"}
-                  </div>
-                )}
-              </div>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
@@ -278,6 +268,16 @@ const FormResponses: React.FC = () => {
               >
                 Next
               </button>
+              <div className="flex items-center gap-2 mx-2 justify-center">
+                <span className="text-sm">
+                  Response {page} / {totalPages}:
+                </span>
+                {!!pageItems[0].user && (
+                  <div className="text-black">
+                    {pageItems[0].user?.name || "User"}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           {form !== null && (

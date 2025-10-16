@@ -103,6 +103,13 @@ export default function RenderDisplayBlock({ block }: Props) {
         />
       );
 
+    case "quote":
+      return (
+        <div className="prose prose-sm max-w-none bg-zinc-100 px-5 py-4">
+          <FormMarkdownWrapper markdownContent={block.text} />
+        </div>
+      );
+
     default:
       return null;
   }

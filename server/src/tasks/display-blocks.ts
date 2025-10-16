@@ -32,6 +32,11 @@ export type TextBlock = BaseBlock & {
   markdown?: boolean; // default false
 };
 
+export type QuoteBlock = BaseBlock & {
+  kind: 'quote';
+  text: string;
+};
+
 export type LabelBlock = BaseBlock & {
   kind: 'label';
   text: string;
@@ -63,6 +68,7 @@ export type ImageBlock = BaseBlock & {
 export type DisplayBlock =
   | HeaderBlock
   | TextBlock
+  | QuoteBlock
   | LabelBlock
   | DividerBlock
   | SpacerBlock

@@ -8,11 +8,11 @@ export type DisplayKind =
   | "divider" // horizontal rule
   | "spacer" // vertical space
   | "html" // controlled/allowlisted HTML snippet
-  | "image"; // decorative image
+  | "image" // decorative image
+  | "quote"; // quote block
 
 interface BaseBlock {
   kind: DisplayKind;
-  /** Optional: display blocks usually don’t need IDs, but you can keep one for analytics/testing */
   id?: string;
   visibleIf?: Condition;
   width?: "full" | "1/2" | "1/3";
@@ -30,6 +30,11 @@ export type TextBlock = BaseBlock & {
   kind: "text";
   text: string;
   markdown?: boolean; // default false
+};
+
+export type QuoteBlock = BaseBlock & {
+  kind: "quote";
+  text: string;
 };
 
 export type LabelBlock = BaseBlock & {
@@ -63,6 +68,7 @@ export type ImageBlock = BaseBlock & {
 export type DisplayBlock =
   | HeaderBlock
   | TextBlock
+  | QuoteBlock
   | LabelBlock
   | DividerBlock
   | SpacerBlock
