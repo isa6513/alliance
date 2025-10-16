@@ -16,9 +16,15 @@ const SearchBar = () => {
   const [items, setItems] = useState<SearchItemDto[]>([]);
   const [itemsByCategory, setItemsByCategory] = useState<
     Record<SearchItemType, SearchItemDto[]>
-  >({ user: [], action: [], post: [], recent: [] });
+  >({ user: [], action: [], post: [], recent: [], other: [] });
   const [selectedItem, setSelectedItem] = useState<SearchItemDto | null>(null);
-  const categories: SearchItemType[] = ["recent", "user", "action", "post"];
+  const categories: SearchItemType[] = [
+    "recent",
+    "user",
+    "action",
+    "post",
+    "other",
+  ];
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const categoryNames: Record<SearchItemType, string> = {
@@ -26,6 +32,7 @@ const SearchBar = () => {
     action: "Actions",
     post: "Posts",
     recent: "Recent Searches",
+    other: "Other",
   };
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,18 +54,19 @@ const SearchBar = () => {
                 acc[item.type] = [...(acc[item.type] || []), item];
                 return acc;
               },
-              { user: [], action: [], post: [], recent: [] } as Record<
-                SearchItemType,
-                SearchItemDto[]
-              >
+              categories.reduce((acc, category) => {
+                acc[category] = [];
+                return acc;
+              }, {} as Record<SearchItemType, SearchItemDto[]>)
             )
-          : { user: [], action: [], post: [], recent: res.data };
+          : { user: [], action: [], post: [], recent: res.data, other: [] };
 
       const itemsInOrder = [
         ...itemsByCategory.recent,
         ...itemsByCategory.user,
         ...itemsByCategory.action,
         ...itemsByCategory.post,
+        ...itemsByCategory.other,
       ];
 
       setItems(itemsInOrder);

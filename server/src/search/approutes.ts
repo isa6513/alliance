@@ -7,6 +7,10 @@ export function profileUrl(userId: number) {
   return `/user/${userId}`;
 }
 
+export function inviteUrl(referralCode: string) {
+  return `/invite?ref=${referralCode}`;
+}
+
 export function actionUrl(actionId: number, full = false) {
   const path = `/actions/${actionId}`;
   return full ? `${process.env.APP_URL}${path}` : path;

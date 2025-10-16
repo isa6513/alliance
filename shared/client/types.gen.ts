@@ -1210,7 +1210,7 @@ export type DeleteRecordsResponseDto = {
     failedIds?: Array<string>;
 };
 
-export type SearchItemType = 'user' | 'action' | 'post' | 'recent';
+export type SearchItemType = 'user' | 'action' | 'post' | 'recent' | 'other';
 
 export type SearchItemDto = {
     id: string;

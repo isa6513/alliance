@@ -33,8 +33,6 @@ const InvitePage: React.FC = () => {
     );
   }
 
-  console.log(inviterProfile);
-
   const exampleTask: ActionWithRelation = {
     name: "Ask your local cafe to switch to compostable cups",
     body: "The Alliance is a global group of people that abide by a process which governs the use of our collective power. We seek to unite millions to billions of people into one cooperative force that represents humanity's collective interests. \n \n Our mission is to build a civilization that serves all individuals in their pursuit of life, liberty, and happiness – a world in which we can take pride. Most pressingly, we seek to resolve ongoing global crises, which include environmental destruction, extreme poverty, democratic dysfunction, and unsafe technological development. It is our aim to end these crises in their entirety in the coming years, not to make incremental improvements \n\n\n The Alliance is a global group of people that abide by a process which governs the use of our collective power. We seek to unite millions to billions of people into one cooperative force that represents humanity's collective interests. \n \n Our mission is to build a civilization that serves all individuals in their pursuit of life, liberty, and happiness – a world in which we can take pride. Most pressingly, we seek to resolve ongoing global crises, which include environmental destruction, extreme poverty, democratic dysfunction, and unsafe technological development. It is our aim to end these crises in their entirety in the coming years, not to make incremental improvements",
@@ -91,9 +89,7 @@ const InvitePage: React.FC = () => {
                 pfp={inviterProfile?.profilePicture ?? null}
                 size="small"
               />
-              <UserDisplayName staff={inviterProfile?.staff}>
-                {" " + inviterProfile?.displayName}
-              </UserDisplayName>
+              {" " + inviterProfile?.displayName}
             </p>
           )}
 

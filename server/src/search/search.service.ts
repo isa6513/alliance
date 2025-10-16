@@ -10,7 +10,7 @@ import { ProfileDto } from 'src/user/user.dto';
 import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
-import { actionUrl, postUrl, profileUrl } from './approutes';
+import { actionUrl, inviteUrl, postUrl, profileUrl } from './approutes';
 import { RecentSearch } from './recentsearch.entity';
 import { SearchItemDto, SearchItemType } from './searchitem.dto';
 
@@ -76,6 +76,8 @@ export class SearchService {
       return recentSearchesItems.filter((item) => item !== null);
     }
 
+    const user = await this.usersService.findOneOrFail(userId);
+
     const users = await this.usersService.findByUsername(query);
     const friends = await this.usersService.findFriends(userId);
     const userItems = users.slice(0, maxItemsPerType).map((user) =>
@@ -96,7 +98,19 @@ export class SearchService {
       .slice(0, maxItemsPerType)
       .map((post) => this.postToSearchItem(post));
 
-    return [...userItems, ...actionItems, ...postItems];
+    const extraItems: SearchItemDto[] = user.staff
+      ? [
+          {
+            id: 'invite',
+            name: 'Personal invite page',
+            type: SearchItemType.Other,
+            webAppLocation: inviteUrl(user.referralCode),
+            secondaryData: [],
+          },
+        ]
+      : [];
+
+    return [...userItems, ...actionItems, ...postItems, ...extraItems];
   }
 
   userToSearchItem(user: User, friends: boolean, self: boolean): SearchItemDto {
@@ -130,6 +144,9 @@ export class SearchService {
   }
 
   async saveSelected(item: SearchItemDto, userId: number): Promise<void> {
+    if (item.type === SearchItemType.Other) {
+      return; //TODO
+    }
     const existing = await this.searchRepository.findOne({
       where: {
         objectId: parseInt(item.id.slice(1)),
