@@ -139,7 +139,9 @@ const ActionsList: React.FC = () => {
     <div className="space-y-4">
       <title>Admin panel</title>
       <ActionTimeline
-        actions={actions.filter((a) => !a.archived)}
+        actions={actions.filter(
+          (a) => !a.archived && !a.everyoneShouldComplete
+        )}
         className="h-full"
       />
       <p className="font-bold my-4 px-5">All actions</p>
