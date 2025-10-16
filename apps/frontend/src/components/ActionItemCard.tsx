@@ -64,6 +64,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
           status={status}
           value={status === "member_action" ? completedCount : joinedCount}
           everyoneShouldComplete={everyoneShouldComplete}
+          className="mt-4"
         />
       )}
     </Link>

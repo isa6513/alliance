@@ -11,6 +11,7 @@ interface ActionCompletedBarWithInfoProps {
   status: ActionStatus;
   value: number;
   everyoneShouldComplete: boolean;
+  className?: string;
 }
 
 const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
@@ -19,6 +20,7 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
   value,
   status,
   everyoneShouldComplete,
+  className,
 }: ActionCompletedBarWithInfoProps) => {
   if (
     everyoneShouldComplete ||
@@ -29,7 +31,7 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
   }
   const safeThreshold = Math.max(threshold, value);
   return (
-    <div>
+    <div className={`${className}`}>
       <div className="flex flex-row items-center justify-between w-full gap-x-2">
         <p className="text-zinc-500 text-sm mb-1">
           {value} / {safeThreshold}{" "}
