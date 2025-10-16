@@ -812,12 +812,15 @@ describe('Forum (e2e)', () => {
         } satisfies CreateCommentDto)
         .expect(201);
 
-      const lastComment = await request(ctx.app.getHttpServer())
-        .get(`/forum/posts/${postId}/last-comment`)
+      const lastCommentResponse = await request(ctx.app.getHttpServer())
+        .get(`/forum/posts/${postId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
         .expect(200);
 
-      expect(lastComment.body.id).toBe(secondComment.body.id);
-      expect(lastComment.body.parentObjectId).toBe(postId);
+      expect(lastCommentResponse.body.lastComment?.id).toBe(
+        secondComment.body.id,
+      );
+      expect(lastCommentResponse.body.lastComment?.parentObjectId).toBe(postId);
     });
 
     it('lists posts and comments authored by a user', async () => {

@@ -1,11 +1,6 @@
-import {
-  CommentDto,
-  forumFindLastCommentForPost,
-  PostDto,
-} from "@alliance/shared/client";
+import { CommentDto, PostDto } from "@alliance/shared/client";
 import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { cx, formatTime } from "../lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
@@ -40,8 +35,8 @@ const ForumListPost = ({
   const lastCommentAuthorClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (lastComment?.author) {
-      navigate(`/user/${lastComment.author.id}`);
+    if (post.lastComment?.author) {
+      navigate(`/user/${post.lastComment.author.id}`);
     }
   };
 
@@ -49,20 +44,6 @@ const ForumListPost = ({
     e.stopPropagation();
     navigate(`/actions/${post.action?.id}`);
   };
-
-  const [lastComment, setLastComment] = useState<CommentDto | undefined>(
-    undefined
-  );
-
-  useEffect(() => {
-    forumFindLastCommentForPost({
-      path: { id: post.id },
-    }).then((res) => {
-      if (res.data && res.data.author) {
-        setLastComment(res.data);
-      }
-    });
-  }, [post.id]);
 
   const isPrivateFuturePost =
     post.visibleAt && new Date(post.visibleAt) > new Date();
@@ -128,17 +109,17 @@ const ForumListPost = ({
             )}
           </div>
 
-          {lastComment && showReply && (
+          {post.lastComment && showReply && (
             <div className="flex items-center gap-x-1">
               <ProfileImage
-                pfp={lastComment.author.profilePicture}
+                pfp={post.lastComment.author.profilePicture}
                 size="mini"
               />
               <span onClick={lastCommentAuthorClick}>
-                <UserDisplayName staff={lastComment.author.staff}>
-                  {lastComment.author.displayName}
+                <UserDisplayName staff={post.lastComment.author.staff}>
+                  {post.lastComment.author.displayName}
                 </UserDisplayName>
-                {` replied ${formatTime(new Date(lastComment.createdAt), {
+                {` replied ${formatTime(new Date(post.lastComment.createdAt), {
                   addSuffix: true,
                 })}`}
               </span>
@@ -154,21 +135,23 @@ const ForumListPost = ({
         className="flex items-start space-x-3 rounded-md border-zinc-200 hover:bg-zinc-100 px-4 -mx-4 cursor-pointer"
         onClick={() => {
           navigate(
-            lastComment && showReply
-              ? `/forum/post/${post.id}?replyId=${lastComment.id}`
+            post.lastComment && showReply
+              ? `/forum/post/${post.id}?replyId=${post.lastComment.id}`
               : `/forum/post/${post.id}`
           );
         }}
       >
         <ActivityFeedItem
           title={post.title}
-          content={`${lastComment ? "replied" : "posted"} ${formatTime(
-            new Date(lastComment ? lastComment.createdAt : post.updatedAt),
+          content={`${post.lastComment ? "replied" : "posted"} ${formatTime(
+            new Date(
+              post.lastComment ? post.lastComment.createdAt : post.updatedAt
+            ),
             {
               addSuffix: true,
             }
           )}`}
-          user={lastComment ? lastComment.author : post.author}
+          user={post.lastComment ? post.lastComment.author : post.author}
         />
       </div>
     );

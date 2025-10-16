@@ -13,6 +13,8 @@ import {
   CreateEditableContentDto,
   EditableContentDto,
 } from './editablecontent.dto';
+import { CommentDto } from './comment.dto';
+import { Comment } from '../entities/comment.entity';
 
 // return object for get requests
 export class PostDto extends PickType(Post, [
@@ -41,14 +43,23 @@ export class PostDto extends PickType(Post, [
   @ApiProperty({ type: () => ProfileDto, isArray: true })
   likes: ProfileDto[];
 
-  constructor(post: Post, commentCount?: number) {
+  @ApiPropertyOptional({ type: () => CommentDto })
+  lastComment?: CommentDto;
+
+  constructor(
+    post: Post,
+    extras?: { commentCount?: number; lastComment?: Comment },
+  ) {
     super();
     Object.assign(this, post);
     this.author = new ProfileDto(post.author);
-    this.commentCount = commentCount;
+    this.commentCount = extras?.commentCount;
     this.likes = post.likes.map((like) => new ProfileDto(like));
     this.editableContent = new EditableContentDto(post.editableContent);
     this.createdAt = post.visibleAt ?? post.createdAt;
+    this.lastComment = extras?.lastComment
+      ? new CommentDto(extras?.lastComment)
+      : undefined;
   }
 }
 

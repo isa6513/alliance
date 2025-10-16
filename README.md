@@ -6,7 +6,7 @@ Currently, frontend/, admin/, and shared/, are part of a yarn monorepo, while se
 
 **to install frontend deps**
 
-In root dir: `yarn install` (run `sudo npm install -g yarn` if yarn missing)
+In root dir: `yarn install` (install yarn version `4.9.1` via corepack if missing)
 
 **server install:**
 
@@ -31,6 +31,8 @@ dev: `cd apps/admin && yarn dev` (or `yarn admin:dev` from root dir)
 ### server
 
 dev: `cd server && npm run start:dev`
+
+When opening the app locally for the first tiem, you can log in with the account specified by `ADMIN_USER` and `ADMIN_PASSWORD` in your .env file (this account will be automatically added to the db on startup)
 
 ### mobile
 

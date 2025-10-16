@@ -240,7 +240,8 @@ export default function AppLayout() {
         setPosts(
           data.sort(
             (a, b) =>
-              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+              new Date(b.lastComment?.createdAt ?? b.updatedAt).getTime() -
+              new Date(a.lastComment?.createdAt ?? a.updatedAt).getTime()
           )
         );
       }

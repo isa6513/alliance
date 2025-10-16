@@ -76,28 +76,31 @@ export class ForumService {
   }
 
   async findAllPosts(userId?: number): Promise<PostDto[]> {
-    const posts = await this.postRepository
-      .find({
-        where: { deleted: false },
-        relations: ['author', 'action', 'editableContent'],
-        order: { updatedAt: 'DESC' },
-      })
-      .then((posts) => {
-        return Promise.all(
-          posts
-            .filter(
-              (post) =>
-                !post.visibleAt ||
-                post.visibleAt < new Date() ||
-                post.authorId === userId,
-            )
-            .map(async (post) => {
-              const commentCount = await this.countCommentsForPost(post.id);
-              return new PostDto(post, commentCount);
-            }),
-        );
-      });
-    return posts;
+    const posts = await this.postRepository.find({
+      where: { deleted: false },
+      relations: ['author', 'action', 'editableContent'],
+      order: { updatedAt: 'DESC' },
+    });
+    const postsWithComments = await Promise.all(
+      posts
+        .filter(
+          (post) =>
+            !post.visibleAt ||
+            post.visibleAt < new Date() ||
+            post.authorId === userId,
+        )
+        .map(async (post) => {
+          return this.postWithCommentCount(post);
+        }),
+    );
+    return postsWithComments;
+  }
+
+  async postWithCommentCount(post: Post): Promise<PostDto> {
+    const commentCount = await this.countCommentsForPost(post.id);
+    const lastComment =
+      (await this.findLastCommentForPost(post.id)) ?? undefined;
+    return new PostDto(post, { commentCount, lastComment });
   }
 
   async countCommentsForPost(postId: number): Promise<number> {
@@ -589,7 +592,6 @@ export class ForumService {
 
   async findPostWithComments(id: number, userId?: number): Promise<PostDto> {
     const post = await this.findOnePost(id, userId);
-    const commentCount = await this.countCommentsForPost(id);
-    return new PostDto(post, commentCount);
+    return this.postWithCommentCount(post);
   }
 }

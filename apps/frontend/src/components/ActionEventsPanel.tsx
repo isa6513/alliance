@@ -3,6 +3,7 @@ import { formatDistance } from "date-fns";
 import Timeline from "./system/Timeline";
 import TimelineItem from "./system/TimelineItem";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
+import { Fragment } from "react";
 
 export interface ActionEventsPanelProps {
   action: ActionDto;
@@ -28,15 +29,14 @@ const ActionEventsPanel = ({ action, events }: ActionEventsPanelProps) => {
 
   return (
     <div className="flex flex-col gap-y-3 w-full">
-      <p className="font-semibold font-serif text-xl text-black">Stage</p>
+      <p className="font-semibold font-serif text-xl text-black">Status</p>
       <Timeline>
         {pastEvents
           .slice()
           .reverse()
           .map((event, idx) => (
-            <>
+            <Fragment key={event.id}>
               <TimelineItem
-                key={event.id}
                 title={event.title}
                 description={event.description}
                 first={idx === 0}
@@ -44,14 +44,12 @@ const ActionEventsPanel = ({ action, events }: ActionEventsPanelProps) => {
                   addSuffix: true,
                 })}
               />
-              {idx === 0 && (
-                <ActionCompletedBarWithInfo
-                  action={action}
-                  friendActivities={null}
-                  className="mt-4"
-                />
-              )}
-            </>
+              <ActionCompletedBarWithInfo
+                action={{ ...action, status: event.newStatus }}
+                friendActivities={null}
+                className="mt-4"
+              />
+            </Fragment>
           ))}
       </Timeline>
     </div>

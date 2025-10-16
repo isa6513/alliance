@@ -72,16 +72,6 @@ export class ForumController {
     return this.forumService.findPostWithComments(+id, req.user?.sub);
   }
 
-  @Get('posts/:id/last-comment')
-  @ApiOperation({ summary: 'Get the last comment for a specific post' })
-  @ApiOkResponse({ type: CommentDto })
-  async findLastCommentForPost(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<CommentDto | null> {
-    const comment = await this.forumService.findLastCommentForPost(id);
-    return comment ? new CommentDto(comment) : null;
-  }
-
   @Get('posts/:id/comments')
   @ApiOperation({ summary: 'Get all comments for a specific post' })
   @ApiOkResponse({ type: [CommentDto] })
