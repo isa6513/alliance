@@ -166,6 +166,70 @@ describe('Forum (e2e)', () => {
       expect(response.body.commentCount).toBeDefined();
     });
 
+    it('should hide future-scheduled posts created by other users', async () => {
+      const futureVisibleAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour from now
+      const createResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          title: 'Future Post From Another User',
+          editableContent: {
+            body: 'Scheduled in the future',
+            attachments: [],
+          },
+          visibleAt: futureVisibleAt,
+        } satisfies CreatePostDto)
+        .expect(201);
+
+      const postsResponse = await request(ctx.app.getHttpServer())
+        .get('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+
+      const visiblePost = postsResponse.body.find(
+        (post) => post.id === createResponse.body.id,
+      );
+      expect(visiblePost).toBeUndefined();
+
+      await request(ctx.app.getHttpServer())
+        .get(`/forum/posts/${createResponse.body.id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(404);
+    });
+
+    it('should allow authors to see their own future-scheduled posts', async () => {
+      const futureVisibleAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour from now
+      const createResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          title: 'Future Post From Author',
+          editableContent: {
+            body: 'Author scheduled in the future',
+            attachments: [],
+          },
+          visibleAt: futureVisibleAt,
+        } satisfies CreatePostDto)
+        .expect(201);
+
+      const postsResponse = await request(ctx.app.getHttpServer())
+        .get('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+
+      const futurePost = postsResponse.body.find(
+        (post) => post.id === createResponse.body.id,
+      );
+
+      expect(futurePost).toBeDefined();
+      expect(futurePost.title).toBe('Future Post From Author');
+
+      await request(ctx.app.getHttpServer())
+        .get(`/forum/posts/${createResponse.body.id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+    });
+
     it('should update a post', async () => {
       // Create a post to update
       const createResponse = await request(ctx.app.getHttpServer())

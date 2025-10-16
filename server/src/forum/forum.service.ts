@@ -143,7 +143,8 @@ export class ForumService {
       !post ||
       post.deleted ||
       (userId !== post.authorId &&
-        (!post.visibleAt || post.visibleAt > new Date()))
+        post.visibleAt &&
+        post.visibleAt > new Date())
     ) {
       throw new NotFoundException(`Post with ID "${id}" not found`);
     }
