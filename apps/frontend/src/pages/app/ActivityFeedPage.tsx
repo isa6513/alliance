@@ -14,9 +14,10 @@ const ActivityFeedPage = () => {
   const [mode, setMode] = useState<Mode>("friends");
 
   const { user } = useAuth();
-  const { activities, handleLikeActivity, updateActivity } = useActivities({
-    list: ActivityList.Global,
-  });
+  const { activities, handleLikeActivity, updateActivity, loading } =
+    useActivities({
+      list: ActivityList.Global,
+    });
 
   const [friendsActivities, setFriendsActivities] = useState<
     ActionActivityDto[]
@@ -78,7 +79,11 @@ const ActivityFeedPage = () => {
           ))}
           {list.length === 0 && (
             <div className="flex flex-col items-center justify-center h-64 text-zinc-500 p-8">
-              <p>No{mode === "friends" ? " friend " : ""}activity yet</p>
+              <p>
+                {loading
+                  ? "Loading..."
+                  : `No ${mode === "friends" ? "friend " : ""}activity yet`}
+              </p>
             </div>
           )}
         </div>

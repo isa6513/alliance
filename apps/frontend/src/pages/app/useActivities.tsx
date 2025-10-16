@@ -30,6 +30,7 @@ export type UseActivitiesProps =
 
 const useActivities = ({ list, objectId }: UseActivitiesProps) => {
   const [activities, setActivities] = useState<ActionActivityDto[]>([]);
+  const [loading, setLoading] = useState(true);
   const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -50,14 +51,18 @@ const useActivities = ({ list, objectId }: UseActivitiesProps) => {
         });
         break;
     }
-    apiCall.then((resp) => {
-      const respActivities = (resp.data ?? []).sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
+    apiCall
+      .then((resp) => {
+        const respActivities = (resp.data ?? []).sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
 
-      setActivities(respActivities);
-    });
+        setActivities(respActivities);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [list, objectId, isAuthenticated]);
 
   const handleLikeActivity = useCallback(
@@ -118,6 +123,7 @@ const useActivities = ({ list, objectId }: UseActivitiesProps) => {
   }, []);
 
   return {
+    loading,
     activities,
     handleLikeActivity,
     setActivities,
