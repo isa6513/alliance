@@ -75,6 +75,15 @@ export class ForumService {
     return this.postRepository.save(post);
   }
 
+  postIsVisible(post: Post, userId?: number): boolean {
+    return (
+      (!post.visibleAt ||
+        post.visibleAt < new Date() ||
+        (userId !== undefined && post.authorId === userId)) &&
+      !post.deleted
+    );
+  }
+
   async findAllPosts(userId?: number): Promise<PostDto[]> {
     const posts = await this.postRepository.find({
       where: { deleted: false },
@@ -83,12 +92,7 @@ export class ForumService {
     });
     const postsWithComments = await Promise.all(
       posts
-        .filter(
-          (post) =>
-            !post.visibleAt ||
-            post.visibleAt < new Date() ||
-            post.authorId === userId,
-        )
+        .filter((post) => this.postIsVisible(post, userId))
         .map(async (post) => {
           return this.postWithCommentCount(post);
         }),
@@ -113,11 +117,14 @@ export class ForumService {
   }
 
   async findPostsByAction(actionId: number): Promise<Post[]> {
-    const posts = await this.postRepository.find({
-      where: { actionId, deleted: false },
-      relations: ['author', 'action', 'editableContent'],
-      order: { updatedAt: 'DESC' },
-    });
+    const posts = (
+      await this.postRepository.find({
+        where: { actionId, deleted: false },
+        relations: ['author', 'action', 'editableContent'],
+        order: { updatedAt: 'DESC' },
+      })
+    ).filter((post) => this.postIsVisible(post));
+
     const postsWithComments = await Promise.all(
       posts.map(async (post) => {
         const comments = await this.commentRepository.find({
@@ -142,13 +149,7 @@ export class ForumService {
       relations: ['author', 'action', 'editableContent'],
     });
 
-    if (
-      !post ||
-      post.deleted ||
-      (userId !== post.authorId &&
-        post.visibleAt &&
-        post.visibleAt > new Date())
-    ) {
+    if (!post || !this.postIsVisible(post, userId)) {
       throw new NotFoundException(`Post with ID "${id}" not found`);
     }
 
@@ -523,10 +524,12 @@ export class ForumService {
   }
 
   async findPostsByUser(userId: number): Promise<Post[]> {
-    return this.postRepository.find({
-      where: { authorId: userId, deleted: false },
-      relations: ['author', 'action'],
-    });
+    return (
+      await this.postRepository.find({
+        where: { authorId: userId, deleted: false },
+        relations: ['author', 'action'],
+      })
+    ).filter((post) => this.postIsVisible(post));
   }
 
   async findCommentsByUser(userId: number): Promise<UserCommentDto[]> {
