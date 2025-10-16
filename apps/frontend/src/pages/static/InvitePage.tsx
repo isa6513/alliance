@@ -1,13 +1,25 @@
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import LargeActionCard from "../app/LargeActionCard";
 import { ActionWithRelation } from "../../applayout";
+import { ProfileDto, userReferrerProfile } from "@alliance/shared/client";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import UserDisplayName from "../../components/UserDisplayName";
 
 const InvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();
 
   const referralCode = searchParams.get("ref");
+
+  const [inviterProfile, setInviterProfile] = useState<ProfileDto | null>(null);
+
+  useEffect(() => {
+    if (!referralCode) return;
+    userReferrerProfile({ path: { code: referralCode } }).then((response) => {
+      setInviterProfile(response.data ?? null);
+    });
+  }, [referralCode]);
 
   if (!referralCode) {
     return (
@@ -20,6 +32,8 @@ const InvitePage: React.FC = () => {
       </div>
     );
   }
+
+  console.log(inviterProfile);
 
   const exampleTask: ActionWithRelation = {
     name: "Ask your local cafe to switch to compostable cups",
@@ -67,19 +81,31 @@ const InvitePage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-page">
       <div className="flex flex-col flex-grow items-center justify-center ">
         <div className="w-full max-w-4xl px-4 md:px-8 py-12 md:py-24">
-          <h2 className="font-serif !text-4xl text-center mb-8 mx-4">
+          <h2 className="font-serif !text-4xl text-center mb-4 mx-4">
             Invitation to the Alliance
           </h2>
+          {inviterProfile !== null && (
+            <p className="text-center">
+              From your friend{" "}
+              <ProfileImage
+                pfp={inviterProfile?.profilePicture ?? null}
+                size="small"
+              />
+              <UserDisplayName staff={inviterProfile?.staff}>
+                {" " + inviterProfile?.displayName}
+              </UserDisplayName>
+            </p>
+          )}
 
           <Card
-            className="p-4 md:p-12 flex flex-col gap-y-6"
+            className="p-4 md:p-12 flex flex-col gap-y-6 mt-8"
             style={CardStyle.White}
           >
             <p>
-              Hi friend, I hope you will join me as a member of the Alliance. I
-              believe you share my concerns about the direction that the world
-              is headed, and I think this is an opportunity to make a
-              significant difference.
+              I hope you will join me as a member of the Alliance. I believe you
+              share my concerns about the direction that the world is headed,
+              and I think this is an opportunity to make a significant
+              difference.
             </p>
 
             <h3 className="font-serif !text-3xl font-bold mt-2">Why join?</h3>

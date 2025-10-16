@@ -79,8 +79,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       ? "var(--color-red-600)"
       : "var(--color-zinc-500)";
 
-  console.log(action);
-
   return (
     <Card
       style={CardStyle.White}

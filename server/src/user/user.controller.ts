@@ -352,4 +352,17 @@ export class UserController {
   async deleteGroup(@Param('groupId', ParseIntPipe) groupId: number) {
     await this.userService.deleteGroup(groupId);
   }
+
+  @Get('referrerProfile/:code')
+  @Public()
+  @ApiOkResponse({ type: ProfileDto })
+  async referrerProfile(
+    @Param('code') code: string,
+  ): Promise<ProfileDto | null> {
+    const user = await this.userService.findOneByReferralCode(code);
+    if (!user) {
+      throw new NotFoundException('Referrer not found');
+    }
+    return new ProfileDto(user);
+  }
 }

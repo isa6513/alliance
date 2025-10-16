@@ -1872,6 +1872,21 @@ export type UserDeleteGroupResponses = {
     200: unknown;
 };
 
+export type UserReferrerProfileData = {
+    body?: never;
+    path: {
+        code: string;
+    };
+    query?: never;
+    url: '/user/referrerProfile/{code}';
+};
+
+export type UserReferrerProfileResponses = {
+    200: ProfileDto;
+};
+
+export type UserReferrerProfileResponse = UserReferrerProfileResponses[keyof UserReferrerProfileResponses];
+
 export type ImagesGetImageData = {
     body?: never;
     path: {

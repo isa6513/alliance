@@ -529,7 +529,7 @@ export class ForumService {
         where: { authorId: userId, deleted: false },
         relations: ['author', 'action'],
       })
-    ).filter((post) => this.postIsVisible(post));
+    ).filter((post) => this.postIsVisible(post, userId));
   }
 
   async findCommentsByUser(userId: number): Promise<UserCommentDto[]> {
