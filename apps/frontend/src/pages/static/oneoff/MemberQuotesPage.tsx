@@ -3,8 +3,9 @@ import MemberQuoteCard from "../../../components/MemberQuoteCard";
 
 const MemberQuotesPage: React.FC = () => {
   // Using this page to showcase member quotes, all + anonymous for members, and selected + some named for supporters
+  // Set forExternalSharing to true to show, then use Chrome GoFullPage or another extension to get pdf/img
 
-  const forExternalSharing = false;
+  const forExternalSharing = true;
 
   const memberQuotes = [
     {
@@ -178,8 +179,13 @@ const MemberQuotesPage: React.FC = () => {
     },
     {
       quote:
+        "There is overwhelming precedent for collective action resulting in societal improvement for those who are organized. Historically, collective action has been confined by geographic location, political ideology, or socioeconomic status—achieving impressive but stratified results. A decentralized organization that focuses on problems which concern all people and holds its members to account is an opportunity to achieve truly widespread human flourishing. There are countless reasons to doubt its potential for success, but unlikelier movements and worse circumstances have reliably bore fruit. We have to try, to become vessels for our nobler ideals and hopes for the world.",
+      author: "Sam Spinner",
+    },
+    {
+      quote:
         "I was so pleased to witness the birth of the Alliance, especially because it was initiated by two young adults in their 20s. Our world is facing tremendous challenges, but the governments are failing to reach a consensus for meaningful and effective solutions. Now the young generation is facing the challenges head-on themselves. I am confident that the Alliance will attract many followers and become a significant force in guiding humanity toward a sustainable future.",
-      author: "Bryan Xu",
+      author: "Anonymous",
     },
     {
       quote:
@@ -190,11 +196,6 @@ const MemberQuotesPage: React.FC = () => {
       quote:
         "On the whole, world is not going in the right direction. We need new ideas to change that, and The Alliance is just that. But it will work only if we all participate.",
       author: "Janos Pasztor",
-    },
-    {
-      quote:
-        "There is overwhelming precedent for collective action resulting in societal improvement for those who are organized. Historically, collective action has been confined by geographic location, political ideology, or socioeconomic status—achieving impressive but stratified results. A decentralized organization that focuses on problems which concern all people and holds its members to account is an opportunity to achieve truly widespread human flourishing. There are countless reasons to doubt its potential for success, but unlikelier movements and worse circumstances have reliably bore fruit. We have to try, to become vessels for our nobler ideals and hopes for the world.",
-      author: "Sam Spinner",
     },
     {
       quote:
@@ -250,7 +251,7 @@ const MemberQuotesPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-page">
-      <div className="flex flex-col flex-grow items-center justify-center ">
+      <div className="flex flex-col flex-grow items-center justify-center">
         <div className="w-full max-w-4xl px-4 md:px-8 py-12 md:py-24">
           {forExternalSharing ? (
             <h2 className="uppercase font-serif !text-4xl text-center mb-10 mx-4">
