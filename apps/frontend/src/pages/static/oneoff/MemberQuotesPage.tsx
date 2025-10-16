@@ -4,6 +4,8 @@ import MemberQuoteCard from "../../../components/MemberQuoteCard";
 const MemberQuotesPage: React.FC = () => {
   // Using this page to showcase member quotes, all + anonymous for members, and selected + some named for supporters
 
+  const forExternalSharing = false;
+
   const memberQuotes = [
     {
       quote:
@@ -174,7 +176,6 @@ const MemberQuotesPage: React.FC = () => {
         "Giving back is good. But giving back through the Alliance's highly optimized model is good, and smart. I'm excited to see my invested effort go such a long way.",
       author: "Anonymous",
     },
-
     {
       quote:
         "I was so pleased to witness the birth of the Alliance, especially because it was initiated by two young adults in their 20s. Our world is facing tremendous challenges, but the governments are failing to reach a consensus for meaningful and effective solutions. Now the young generation is facing the challenges head-on themselves. I am confident that the Alliance will attract many followers and become a significant force in guiding humanity toward a sustainable future.",
@@ -197,23 +198,18 @@ const MemberQuotesPage: React.FC = () => {
     },
     {
       quote:
+        "It seems to me that there is an inability to leverage collective will towards problems that almost everybody agrees exist (severe wealth inequality; climate change; political polarization to name a few). I think this is mostly a function of not individuals not having clear actions that can affect the relevant issue. The Alliance is the natural solution to this, empowering communities to take back control.",
+      author: "Connor Cremers",
+    },
+    {
+      quote:
         "Seeing some actions start to be completed by other members has really given me confidence in the viability of the Alliance to coordinate behavior. I'm looking forward to seeing what happens!",
-      author: "Casey Manning",
-    },
-    {
-      quote:
-        "I'm very worried about the proliferation of crises + the observed inability of current institutions to step up and handle them. I'm excited about the Alliance because it might be able to grow into such an institution, and at the very least might do a lot of good along the way.",
-      author: "Mark Xu",
-    },
-    {
-      quote:
-        "I think the Alliance is a much-needed platform for encouraging positive community building and incremental change for solving the biggest problems facing the world today.",
       author: "Anonymous",
     },
     {
       quote:
-        "Given the world's concerning trajectory and the lack of Internet-enabled collaboration, the Alliance has the opportunity to enact huge positive change.",
-      author: "Grant Hough",
+        "I want to Walk in Love and believe the Alliance cares about this.",
+      author: "Anonymous",
     },
     {
       quote:
@@ -232,12 +228,6 @@ const MemberQuotesPage: React.FC = () => {
     },
     {
       quote:
-        "I want to Walk in Love and believe the Alliance cares about this.",
-      author: "Anonymous",
-    },
-
-    {
-      quote:
         "People often feel disempowered yet yearn for their values and efforts to be realized in a concrete manner. Participation in the Alliance allows members to concretely influence, track, and see results of their own and community efforts.",
       author: "Bob Grand",
     },
@@ -245,11 +235,6 @@ const MemberQuotesPage: React.FC = () => {
       quote:
         "In the past we’ve made progress, as a society, solving certain environmental problems, but I worry about the problem of climate change. Its impacts are so variable and unpredictable that it’s harder to “sell” the need for solutions. I hope the Alliance can be a source of ideas for attacking the problem, as well as a wellspring of positivity, teamwork and persistence.",
       author: "Katherine Elwood Hashimoto",
-    },
-    {
-      quote:
-        "It seems to me that there is an inability to leverage collective will towards problems that almost everybody agrees exist (severe wealth inequality; climate change; political polarization to name a few). I think this is mostly a function of not individuals not having clear actions that can affect the relevant issue. The Alliance is the natural solution to this, empowering communities to take back control.",
-      author: "Connor Cremers",
     },
     {
       quote:
@@ -267,22 +252,39 @@ const MemberQuotesPage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-page">
       <div className="flex flex-col flex-grow items-center justify-center ">
         <div className="w-full max-w-4xl px-4 md:px-8 py-12 md:py-24">
-          <h2 className="font-serif !text-4xl text-center mb-2 mx-4">
-            Quotes from members
-          </h2>
-          <p className="text-center text-lg text-zinc-500 mb-10">
-            October 16, 2025
-          </p>
+          {forExternalSharing ? (
+            <h2 className="uppercase font-serif !text-4xl text-center mb-10 mx-4">
+              Selected quotes
+            </h2>
+          ) : (
+            <>
+              <h2 className="font-serif !text-4xl text-center mb-2 mx-4">
+                Quotes from members
+              </h2>
+              <p className="text-center text-lg text-zinc-500 mb-10">
+                October 16, 2025
+              </p>
+            </>
+          )}
 
           <div className="flex flex-col gap-2">
-            {memberQuotes.map((memberQuote, index) => (
-              <MemberQuoteCard
-                key={index}
-                quote={memberQuote.quote}
-                author={memberQuote.author}
-                showAuthor={false}
-              />
-            ))}
+            {forExternalSharing
+              ? selectedQuotes.map((memberQuote, index) => (
+                  <MemberQuoteCard
+                    key={index}
+                    quote={memberQuote.quote}
+                    author={memberQuote.author}
+                    showAuthor={true}
+                  />
+                ))
+              : memberQuotes.map((memberQuote, index) => (
+                  <MemberQuoteCard
+                    key={index}
+                    quote={memberQuote.quote}
+                    author={memberQuote.author}
+                    showAuthor={false}
+                  />
+                ))}
           </div>
         </div>
       </div>
