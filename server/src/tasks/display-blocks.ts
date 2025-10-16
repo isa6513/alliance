@@ -8,7 +8,8 @@ export type DisplayKind =
   | 'divider' // horizontal rule
   | 'spacer' // vertical space
   | 'html' // controlled/allowlisted HTML snippet
-  | 'image'; // decorative image
+  | 'image' // decorative image
+  | 'quote';
 
 interface BaseBlock {
   kind: DisplayKind;

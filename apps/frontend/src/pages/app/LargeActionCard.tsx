@@ -63,11 +63,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
     [navigate, action]
   );
 
-  const threshold =
-    action.status === "gathering_commitments"
-      ? action.commitmentThreshold
-      : action.usersJoined;
-
   const pastEvents = action.events.filter(
     (event) => new Date(event.date) <= new Date()
   );
@@ -83,6 +78,8 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
     !!nextEvent && new Date(nextEvent.date).getTime() - Date.now() < 172800000 // 2 days
       ? "var(--color-red-600)"
       : "var(--color-zinc-500)";
+
+  console.log(action);
 
   return (
     <Card
@@ -148,25 +145,11 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             </Button>
           )}
         </div>
-        <p>{action.shortDescription}</p>
-
-        {
-          <div className="mt-6">
-            {threshold && (
-              <ActionCompletedBarWithInfo
-                threshold={threshold}
-                friendActivities={friendActivities}
-                everyoneShouldComplete={action.everyoneShouldComplete}
-                status={action.status}
-                value={
-                  action.status === "member_action"
-                    ? action.usersCompleted
-                    : action.usersJoined
-                }
-              />
-            )}
-          </div>
-        }
+        <p className="mb-4">{action.shortDescription}</p>
+        <ActionCompletedBarWithInfo
+          friendActivities={friendActivities}
+          action={action}
+        />
         <div className="mt-6 border-t border-zinc-200 pt-6">
           <ActionTaskPanel
             action={action}

@@ -143,19 +143,13 @@ const HomePage = () => {
                 .map((action) => (
                   <SmallActionCard
                     key={action.id}
-                    {...action}
+                    action={action}
                     showDescription={true}
                     friendActivities={friendActivities.filter(
                       (activity) =>
                         activity.actionId === action.id &&
                         activity.type === "user_completed"
                     )}
-                    joinedCount={
-                      action.status === "member_action"
-                        ? action.usersCompleted
-                        : action.usersJoined
-                    }
-                    neededCount={action.usersJoined}
                   />
                 ))}
               {newActions
@@ -163,16 +157,14 @@ const HomePage = () => {
                 .map((action) => (
                   <SmallActionCard
                     key={action.id}
-                    {...action}
+                    action={action}
                     showDescription={true}
                   />
                 ))}
               {committedActions.map((action) => (
                 <SmallActionCard
                   key={action.id}
-                  {...action}
-                  joinedCount={action.usersJoined}
-                  neededCount={action.commitmentThreshold}
+                  action={action}
                   friendActivities={friendActivities.filter(
                     (activity) =>
                       activity.actionId === action.id &&
@@ -184,9 +176,7 @@ const HomePage = () => {
               {commitmentsReachedActions.map((action) => (
                 <SmallActionCard
                   key={action.id}
-                  {...action}
-                  joinedCount={action.usersJoined}
-                  neededCount={action.commitmentThreshold}
+                  action={action}
                   friendActivities={friendActivities.filter(
                     (activity) =>
                       activity.actionId === action.id &&

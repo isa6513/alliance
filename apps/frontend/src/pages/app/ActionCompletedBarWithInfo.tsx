@@ -1,34 +1,51 @@
 import {
   ActionActivityDto,
-  ActionStatus,
+  ActionDto,
 } from "@alliance/shared/client/types.gen";
 import CompletedBar from "../../components/CompletedBar";
 import UserProfilePicRow from "../../components/UserProfilePicRow";
 
 interface ActionCompletedBarWithInfoProps {
-  threshold: number;
   friendActivities: ActionActivityDto[] | null;
-  status: ActionStatus;
-  value: number;
-  everyoneShouldComplete: boolean;
   className?: string;
+  action: Pick<
+    ActionDto,
+    | "commitmentThreshold"
+    | "status"
+    | "everyoneShouldComplete"
+    | "usersCompleted"
+    | "usersJoined"
+  >;
 }
 
 const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
-  threshold,
+  action,
   friendActivities,
-  value,
-  status,
-  everyoneShouldComplete,
   className,
 }: ActionCompletedBarWithInfoProps) => {
+  const value =
+    action.status === "member_action"
+      ? action.usersCompleted
+      : action.usersJoined;
+
+  const threshold =
+    action.status === "gathering_commitments"
+      ? action.commitmentThreshold
+      : action.usersJoined;
+
+  console.log(threshold);
   if (
-    everyoneShouldComplete ||
+    action.everyoneShouldComplete ||
     !threshold ||
-    !(status === "gathering_commitments" || status === "member_action")
+    !(
+      action.status === "gathering_commitments" ||
+      action.status === "member_action"
+    )
   ) {
+    console.log("returning null");
     return null;
   }
+
   const safeThreshold = Math.max(threshold, value);
   return (
     <div className={`${className}`}>

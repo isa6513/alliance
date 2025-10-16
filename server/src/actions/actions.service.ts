@@ -274,6 +274,10 @@ export class ActionsService {
     return new ActionDto(
       action,
       user ? await this.isEligibleForAction(action, user) : false,
+      undefined,
+      action.commitmentless
+        ? await this.getUsersJoinedForCommitmentlessAction(action)
+        : undefined,
     );
   }
 

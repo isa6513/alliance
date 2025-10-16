@@ -6,8 +6,8 @@ import { ActionWithRelation } from "../../applayout";
 import Tag, { TagStyle } from "../../components/Tag";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 
-export interface SmallActionCardProps
-  extends Pick<
+export interface SmallActionCardProps {
+  action: Pick<
     ActionWithRelation,
     | "name"
     | "shortDescription"
@@ -17,47 +17,44 @@ export interface SmallActionCardProps
     | "status"
     | "everyoneShouldComplete"
     | "relation"
-  > {
+    | "commitmentThreshold"
+    | "status"
+    | "everyoneShouldComplete"
+    | "usersCompleted"
+    | "usersJoined"
+  >;
   className?: string;
-  joinedCount?: number;
-  neededCount?: number;
   friendActivities?: ActionActivityDto[];
   showDescription?: boolean;
 }
 
 const SmallActionCard: React.FC<SmallActionCardProps> = ({
-  name,
-  id,
-  shortDescription,
+  action,
   className,
-  status,
-  commitmentless,
-  everyoneShouldComplete,
-  joinedCount,
-  neededCount,
   friendActivities = [],
-  relation,
 }) => {
   const navigate = useNavigate();
 
   const goToActionPage = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      navigate(`/actions/${id}`);
+      navigate(`/actions/${action.id}`);
     },
-    [navigate, id]
+    [navigate, action.id]
   );
 
   const waitingOnCompletion =
-    status === "member_action" && (relation === "joined" || commitmentless);
+    action.status === "member_action" &&
+    (action.relation === "joined" || action.commitmentless);
 
   const waitingOnCommitment =
-    status === "gathering_commitments" && relation === "none";
+    action.status === "gathering_commitments" && action.relation === "none";
 
-  const waitingForOffice = status === "office_action" && relation === "joined";
+  const waitingForOffice =
+    action.status === "office_action" && action.relation === "joined";
 
   const waitingOnOthers =
-    status === "gathering_commitments" && relation === "joined";
+    action.status === "gathering_commitments" && action.relation === "joined";
 
   return (
     <div className={`relative ${className}`}>
@@ -85,19 +82,14 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
               )}
             </div>
 
-            <p className="font-medium text-black">{name}</p>
-            <p className="text-zinc-500">{shortDescription}</p>
+            <p className="font-medium text-black">{action.name}</p>
+            <p className="text-zinc-500">{action.shortDescription}</p>
           </div>
         </div>
-        {joinedCount !== undefined && neededCount !== undefined && (
-          <ActionCompletedBarWithInfo
-            threshold={neededCount}
-            friendActivities={friendActivities}
-            status={status}
-            value={joinedCount}
-            everyoneShouldComplete={everyoneShouldComplete}
-          />
-        )}
+        <ActionCompletedBarWithInfo
+          action={action}
+          friendActivities={friendActivities}
+        />
       </Card>
     </div>
   );

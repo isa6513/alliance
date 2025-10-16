@@ -51,14 +51,13 @@ const ActionsListPage = () => {
   useGrayBackground();
 
   const filteredActions = [...modeToActions[filterMode]].sort((a, b) => {
+    const pastA = a.events.filter((event) => new Date(event.date) < new Date());
     const latestA =
-      a.events.length > 0
-        ? new Date(a.events[a.events.length - 1].date)
-        : new Date(0);
+      pastA.length > 0 ? new Date(pastA[pastA.length - 1].date) : new Date(0);
+
+    const pastB = b.events.filter((event) => new Date(event.date) < new Date());
     const latestB =
-      b.events.length > 0
-        ? new Date(b.events[b.events.length - 1].date)
-        : new Date(0);
+      pastB.length > 0 ? new Date(pastB[pastB.length - 1].date) : new Date(0);
     return latestB.getTime() - latestA.getTime();
   });
 
@@ -80,10 +79,8 @@ const ActionsListPage = () => {
         {filteredActions.map((action) => (
           <ActionItemCard
             key={action.id}
-            {...action}
+            action={action}
             className="w-full hover:bg-zinc-100"
-            joinedCount={action.usersJoined}
-            completedCount={action.usersCompleted}
           />
         ))}
         {filteredActions.length === 0 && (

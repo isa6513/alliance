@@ -28,6 +28,19 @@ function formatDateToInputValue(date: Date) {
   return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
 }
 
+function toUtcISOString(localDateTime: string | null | undefined) {
+  if (!localDateTime) {
+    return null;
+  }
+  const parsed = new Date(localDateTime);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+  return parsed.toISOString();
+}
+
+const FUTURE_SCHEDULE_THRESHOLD_MS = 60 * 1000;
+
 const PostFormPage: React.FC = () => {
   const { postId } = useParams<{ postId: string }>();
   const [searchParams] = useSearchParams();
@@ -38,10 +51,6 @@ const PostFormPage: React.FC = () => {
     body: "",
     attachments: [],
   });
-  console.log(
-    "new Date().toISOString().split('T')[0]",
-    new Date().toISOString().split("T")[0]
-  );
   const [schedulePostDate, setSchedulePostDate] = useState<string>(
     formatDateToInputValue(new Date())
   );
@@ -58,8 +67,6 @@ const PostFormPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  console.log("schedulePostDate", schedulePostDate);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -72,12 +79,15 @@ const PostFormPage: React.FC = () => {
             setTitle(postResponse.data.title);
             setContent(postResponse.data.editableContent);
             setActionId(postResponse.data.actionId);
+            const visibleAtDate = new Date(postResponse.data.visibleAt);
+            const now = new Date();
+            const isScheduled =
+              visibleAtDate.getTime() - now.getTime() >
+              FUTURE_SCHEDULE_THRESHOLD_MS;
+            setUseSchedulePost(isScheduled);
             setSchedulePostDate(
-              formatDateToInputValue(new Date(postResponse.data.visibleAt))
+              formatDateToInputValue(isScheduled ? visibleAtDate : now)
             );
-            if (postResponse.data.visibleAt) {
-              setUseSchedulePost(true);
-            }
           } else {
             setError("Post not found");
           }
@@ -117,11 +127,22 @@ const PostFormPage: React.FC = () => {
         attachmentKeys = uploads.filter(Boolean) as string[];
       }
 
+      let visibleAt = new Date().toISOString();
+      if (useSchedulePost) {
+        const scheduledIso = toUtcISOString(schedulePostDate);
+        if (!scheduledIso) {
+          setError("Please select a valid date and time to schedule the post.");
+          setIsSubmitting(false);
+          return;
+        }
+        visibleAt = scheduledIso;
+      }
+
       const postData: CreatePostDto = {
         title,
         actionId: actionId,
         editableContent: { body: content.body, attachments: attachmentKeys },
-        visibleAt: schedulePostDate ?? new Date().toISOString(),
+        visibleAt,
       };
 
       let response: { data: PostDto | undefined };
@@ -141,7 +162,6 @@ const PostFormPage: React.FC = () => {
           body: postData,
         });
       }
-      console.log("revalidating");
       setRevalidate();
 
       if (response.data) {
@@ -229,7 +249,12 @@ const PostFormPage: React.FC = () => {
                 <LargeCheckbox
                   label="Schedule post for later"
                   checked={useSchedulePost}
-                  onChange={() => setUseSchedulePost(!useSchedulePost)}
+                  onChange={() => {
+                    setUseSchedulePost(!useSchedulePost);
+                    if (error) {
+                      setError(null);
+                    }
+                  }}
                 />
                 {useSchedulePost && (
                   <div className="flex space-x-3">
@@ -238,7 +263,12 @@ const PostFormPage: React.FC = () => {
                       id="schedulePostDate"
                       name="schedulePostDate"
                       value={schedulePostDate}
-                      onChange={(e) => setSchedulePostDate(e.target.value)}
+                      onChange={(e) => {
+                        setSchedulePostDate(e.target.value);
+                        if (error) {
+                          setError(null);
+                        }
+                      }}
                       className="w-full p-3 py-2 -my-3 border border-zinc-300 rounded-lg focus:outline-none"
                     />
                   </div>
