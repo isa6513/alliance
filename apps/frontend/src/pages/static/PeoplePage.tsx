@@ -85,7 +85,7 @@ const PeoplePage: React.FC = () => {
               Members
             </h2>
             <p>
-              We have 30 members who are participating in early experiments.
+              We have 33 members who are participating in early experiments.
             </p>
           </div>
         </div>

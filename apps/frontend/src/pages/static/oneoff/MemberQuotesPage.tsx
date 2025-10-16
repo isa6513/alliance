@@ -5,7 +5,7 @@ const MemberQuotesPage: React.FC = () => {
   // Using this page to showcase member quotes, all + anonymous for members, and selected + some named for supporters
   // Set forExternalSharing to true to show, then use Chrome GoFullPage or another extension to get pdf/img
 
-  const forExternalSharing = true;
+  const forExternalSharing = false;
 
   const memberQuotes = [
     {
