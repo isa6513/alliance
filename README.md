@@ -32,7 +32,7 @@ dev: `cd apps/admin && yarn dev` (or `yarn admin:dev` from root dir)
 
 dev: `cd server && npm run start:dev`
 
-When opening the app locally for the first tiem, you can log in with the account specified by `ADMIN_USER` and `ADMIN_PASSWORD` in your .env file (this account will be automatically added to the db on startup)
+When opening the app locally for the first time, you can log in with the account specified by `ADMIN_USER` and `ADMIN_PASSWORD` in your .env file (this account will be automatically added to the db on startup)
 
 ### mobile
 
