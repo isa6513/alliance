@@ -2,7 +2,6 @@ import { ActionActivityDto, UserActionRelation } from "@alliance/shared/client";
 import Card from "@alliance/shared/ui/Card";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
-import { useActionLoaderData } from "../pages/app/ActionPage";
 import ActionTaskPanel, { ActionTaskPanelProps } from "./ActionTaskPanel";
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import ActionTaskPanelDeclined from "./ActionTaskPanelDeclined";
@@ -25,7 +24,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 }
 
 export interface TaskPanelContext
-  extends Omit<ActionTaskPanelProps, "action" | "userRelation"> {
+  extends Omit<ActionTaskPanelProps, "userRelation"> {
   userRelation: UserActionRelation | null;
   activities: ActionActivityDto[];
   handleLikeActivity: (activityId: number) => Promise<void>;
@@ -33,9 +32,8 @@ export interface TaskPanelContext
 }
 
 const ActionPageTaskPanel = () => {
-  const { userRelation, ...panelHandlers } =
+  const { userRelation, action, ...panelHandlers } =
     useOutletContext<TaskPanelContext>();
-  const action = useActionLoaderData();
 
   if (!userRelation || !action?.canParticipate || !action) {
     return null;
@@ -51,8 +49,8 @@ const ActionPageTaskPanel = () => {
 
   return (
     <ActionTaskPanel
-      action={action}
       userRelation={userRelation}
+      action={action}
       {...panelHandlers}
       card={true}
     />

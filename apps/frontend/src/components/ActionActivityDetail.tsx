@@ -1,33 +1,24 @@
 import {
   ActionActivityDto,
+  ActionDto,
   actionsUpdateActivity,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useOutletContext, useParams } from "react-router";
+import { Link, useOutletContext, useParams } from "react-router";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
 import { formatTime } from "../lib/utils";
-import { useActionLoaderData } from "../pages/app/ActionPage";
 import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
 import Comments from "./Comments";
 import UserDisplayName from "./UserDisplayName";
 
 export function ErrorBoundary(error: unknown) {
   console.error(error);
-  const action = useActionLoaderData();
 
   return (
     <div className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5">
-      <h1 className="font-serif !font-medium w-full">{action.name}</h1>
-      <Link
-        className="flex flex-row gap-x-3 items-center cursor-pointer border-b border-gray-300 pb-3 hover:underline"
-        to={`/actions/${action.id}`}
-      >
-        <img src={chevronLeft} className="w-4 h-4 rotate-90" />
-        <p className="">Back to action</p>
-      </Link>
       <div className="flex flex-col items-center justify-center h-100 text-red-500">
         <p>Error loading user action</p>
       </div>
@@ -36,17 +27,17 @@ export function ErrorBoundary(error: unknown) {
 }
 
 export interface ActionActivityDetailContext {
+  action: ActionDto;
   activities: ActionActivityDto[];
   handleLikeActivity: (activityId: number) => Promise<void>;
   setActivities: (activities: ActionActivityDto[]) => void;
 }
 
 const ActionActivityDetail = () => {
-  const action = useActionLoaderData();
   const params = useParams();
   const activityId = parseInt(params.activityId!);
   const { user } = useAuth();
-  const { activities, handleLikeActivity, setActivities } =
+  const { action, activities, handleLikeActivity, setActivities } =
     useOutletContext<ActionActivityDetailContext>();
 
   // Find the activity from the shared state

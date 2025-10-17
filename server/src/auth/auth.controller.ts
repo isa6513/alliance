@@ -38,7 +38,6 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Public()
-  @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: SignInResponseDto })
   @ApiUnauthorizedResponse()
   @Post('login')

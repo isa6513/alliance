@@ -1,12 +1,11 @@
 import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import { Outlet, useOutletContext } from "react-router";
-import { useActionLoaderData } from "../pages/app/ActionPage";
 import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();
-  const action = useActionLoaderData();
+  const action = context.action;
   if (!action) {
     return null;
   }
