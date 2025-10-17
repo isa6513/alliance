@@ -13,16 +13,9 @@ import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import { formatDate } from "date-fns";
 import { useEffect, useState } from "react";
 import { formatStatus, getStatusColor } from "../pages/ActionDashboard";
-
-// Helper function to format date for datetime-local input
-const formatDateForInput = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
+import DateTimePicker, {
+  DateTimePickerChange,
+} from "@alliance/shared/ui/DateTimePicker";
 
 // Status options for event creation
 const statusOptions: Record<ActionStatus, string> = {
@@ -61,7 +54,7 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
     newStatus: action.commitmentless
       ? "member_action"
       : "gathering_commitments",
-    date: formatDateForInput(new Date()),
+    date: new Date().toISOString(),
     showInTimeline: true,
     sendNotifsTo: "all",
   });
@@ -143,7 +136,7 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
           title: "",
           description: "",
           newStatus: "gathering_commitments",
-          date: formatDateForInput(new Date()),
+          date: new Date().toISOString(),
           showInTimeline: true,
           sendNotifsTo: "all",
         });
@@ -169,6 +162,13 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
     setEventForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleDateInputChange = (change: DateTimePickerChange) => {
+    setEventForm((prev) => ({
+      ...prev,
+      date: change.utcValue || "",
     }));
   };
 
@@ -331,14 +331,13 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
                     {Intl.DateTimeFormat().resolvedOptions().timeZone}
                     ):
                   </label>
-                  <input
-                    type="datetime-local"
+                  <DateTimePicker
                     id="eventDate"
                     name="date"
                     value={eventForm.date}
-                    onChange={handleEventInputChange}
+                    onChange={handleDateInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="max-w-80"
                   />
                 </div>
               )}

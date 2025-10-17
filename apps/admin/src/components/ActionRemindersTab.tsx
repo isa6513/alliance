@@ -10,6 +10,7 @@ import {
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
 import React, { useEffect, useMemo, useState } from "react";
 
 interface ActionRemindersTabProps {
@@ -252,11 +253,10 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Send At
               </label>
-              <input
-                type="datetime-local"
+              <DateTimePicker
                 value={sendAt}
-                onChange={(event) => setSendAt(event.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                onChange={(change) => setSendAt(change.utcValue || "")}
+                className="w-full !py-1"
                 required
               />
             </div>

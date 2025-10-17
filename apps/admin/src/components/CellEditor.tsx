@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useRef } from "react";
 import type { ColumnMetadataDto } from "@alliance/shared/client/types.gen";
+import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
 
 interface CellEditorProps {
   value: any;
@@ -51,84 +52,10 @@ const CellEditor: React.FC<CellEditorProps> = ({
     handleSave();
   };
 
-  const tryParseDate = (val: unknown): Date | null => {
-    if (val instanceof Date) {
-      return Number.isNaN(val.getTime()) ? null : val;
-    }
-
-    if (typeof val === "string") {
-      const trimmed = val.trim();
-      if (!trimmed) return null;
-
-      const directParse = new Date(trimmed);
-      if (!Number.isNaN(directParse.getTime())) {
-        return directParse;
-      }
-
-      const normalized = trimmed.includes(" ")
-        ? trimmed.replace(" ", "T")
-        : trimmed;
-      const normalizedParse = new Date(normalized);
-      if (!Number.isNaN(normalizedParse.getTime())) {
-        return normalizedParse;
-      }
-    }
-
-    return null;
-  };
-
-  const formatDateParts = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-
-    return { year, month, day };
-  };
-
-  const formatDateInput = (date: Date) => {
-    const { year, month, day } = formatDateParts(date);
-    return `${year}-${month}-${day}`;
-  };
-
-  const formatDateTimeInput = (date: Date, includeSeconds: boolean): string => {
-    const { year, month, day } = formatDateParts(date);
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-
-    return includeSeconds
-      ? `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`
-      : `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
-
   const formatValueForInput = (val: any): string => {
     if (val === null || val === undefined) return "";
     if (column.dataType === "json") {
       return typeof val === "string" ? val : JSON.stringify(val, null, 2);
-    }
-    if (column.dataType === "datetime" || column.dataType === "date") {
-      const date = tryParseDate(val);
-
-      if (date) {
-        if (column.dataType === "date") {
-          return formatDateInput(date);
-        }
-
-        const originalHasSeconds =
-          typeof val === "string" && /:\d{2}:\d{2}/.test(val.replace(" ", "T"));
-        const includeSeconds =
-          originalHasSeconds ||
-          date.getSeconds() !== 0 ||
-          date.getMilliseconds() !== 0;
-
-        return formatDateTimeInput(date, includeSeconds);
-      }
-
-      if (typeof val === "string") {
-        return val;
-      }
-
-      return "";
     }
     return String(val);
   };
@@ -212,21 +139,21 @@ const CellEditor: React.FC<CellEditorProps> = ({
 
       case "date":
         return (
-          <input
+          <DateTimePicker
             {...commonProps}
-            type="date"
             value={formatValueForInput(editValue)}
-            onChange={(e) => setEditValue(parseValueFromInput(e.target.value))}
+            onChange={(change) => setEditValue(change.utcValue || "")}
+            className="!w-80 z-100 -ml-6 -mt-2"
           />
         );
 
       case "datetime":
         return (
-          <input
+          <DateTimePicker
             {...commonProps}
-            type="datetime-local"
             value={formatValueForInput(editValue)}
-            onChange={(e) => setEditValue(parseValueFromInput(e.target.value))}
+            onChange={(change) => setEditValue(change.utcValue || "")}
+            className="!w-80 z-100 -ml-6 -mt-2"
           />
         );
 
