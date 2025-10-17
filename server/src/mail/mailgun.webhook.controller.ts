@@ -51,6 +51,7 @@ function toPostHogEventName(event: string): string {
 export class MailgunWebhookController {
   private readonly posthog: PostHog;
   constructor() {
+    if (process.env.NODE_ENV === 'test') return;
     this.posthog = new PostHog(process.env.POSTHOG_KEY!, {
       host: 'https://us.i.posthog.com',
     });
