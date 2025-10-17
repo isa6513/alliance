@@ -25,7 +25,7 @@ export function useApiCall<F extends AnyFn>(
 } {
   const [data, setData] = useState<ExtractData<F> | null>(null);
   const [error, setError] = useState<ExtractError<F> | Error | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const optionsKey = useMemo(() => JSON.stringify(options ?? {}), [options]);
 
@@ -56,6 +56,7 @@ export function useApiCall<F extends AnyFn>(
       })
       .catch((err) => {
         if (!mounted) return;
+        setData(null);
         setError(err);
       })
       .finally(() => {

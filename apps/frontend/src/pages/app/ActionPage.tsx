@@ -17,17 +17,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../lib/AuthContext";
 import Spinner from "../../components/Spinner";
 
-export function meta({ data }: Route.MetaArgs) {
-  const action = data as ActionDto | undefined;
-  if (!action) {
-    return [{ title: "Alliance" }];
-  }
-  return [
-    { title: action.name },
-    { name: "description", content: action.shortDescription },
-  ];
-}
-
 export default function ActionPage() {
   const { id: idParam } = useParams();
 
