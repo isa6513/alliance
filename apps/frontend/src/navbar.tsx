@@ -27,7 +27,7 @@ function Navbar() {
       <Outlet context={context} />
       {isNavigating && (
         <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-          <Spinner />
+          <Spinner size="large" />
         </div>
       )}
     </>
