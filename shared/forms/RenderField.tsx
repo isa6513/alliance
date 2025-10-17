@@ -45,7 +45,7 @@ export function RenderField({
 
   const composeClassName = (
     base: string,
-    overrides: { normal?: string; error?: string } = {},
+    overrides: { normal?: string; error?: string } = {}
   ) => {
     const normal =
       overrides.normal ??
@@ -78,7 +78,7 @@ export function RenderField({
                   "border border-zinc-300 focus:ring-1 focus:ring-green focus:border-transparent",
                 error:
                   "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent",
-              },
+              }
             )}
             placeholder={field.placeholder}
           />
@@ -91,6 +91,12 @@ export function RenderField({
         <div className="space-y-1">
           <RenderLabel field={field} error={errorMessage} />
           <textarea
+            ref={(el) => {
+              if (el) {
+                el.style.height = "auto";
+                el.style.height = `${el.scrollHeight}px`;
+              }
+            }}
             rows={field.rows || 3}
             maxLength={field.maxLength}
             value={(value as string) ?? ""}
@@ -99,7 +105,7 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none resize-none",
+              "w-full px-3 py-2 rounded-md focus:outline-none resize-none"
             )}
           />
           {renderValidationMessage()}
@@ -123,7 +129,7 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none",
+              "w-full px-3 py-2 rounded-md focus:outline-none"
             )}
             placeholder="Enter email address..."
           />
@@ -152,7 +158,7 @@ export function RenderField({
             pattern={field.pattern}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none",
+              "w-full px-3 py-2 rounded-md focus:outline-none"
             )}
             placeholder={field.placeholder || "Enter phone number"}
           />
@@ -175,7 +181,7 @@ export function RenderField({
               onChange
                 ? (e) =>
                     onChange(
-                      e.target.value === "" ? "" : parseFloat(e.target.value),
+                      e.target.value === "" ? "" : parseFloat(e.target.value)
                     )
                 : undefined
             }
@@ -186,7 +192,7 @@ export function RenderField({
             step={field.step}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none",
+              "w-full px-3 py-2 rounded-md focus:outline-none"
             )}
           />
           {renderValidationMessage()}
@@ -224,7 +230,7 @@ export function RenderField({
                     "border border-zinc-300 focus:ring-blue-500 focus:ring-2",
                   error:
                     "border border-red-500 focus:ring-red-500 focus:ring-2",
-                },
+                }
               )}
             />
             <RenderLabel field={field} error={errorMessage} />
@@ -264,7 +270,7 @@ export function RenderField({
                         "border border-zinc-300 focus:ring-blue-500 focus:ring-2",
                       error:
                         "border border-red-500 focus:ring-red-500 focus:ring-2",
-                    },
+                    }
                   )}
                 />
                 <span className={hasError ? "text-red-600" : "text-gray-700"}>
@@ -288,7 +294,7 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none has-[option.placeholder:checked]:text-gray-400",
+              "w-full px-3 py-2 rounded-md focus:outline-none has-[option.placeholder:checked]:text-gray-400"
             )}
           >
             <option value="" className="placeholder" disabled>
@@ -330,7 +336,7 @@ export function RenderField({
                             onChange([...currentValues, option.value]);
                           } else {
                             onChange(
-                              currentValues.filter((v) => v !== option.value),
+                              currentValues.filter((v) => v !== option.value)
                             );
                           }
                         }
@@ -350,7 +356,7 @@ export function RenderField({
                         "border border-zinc-300 focus:ring-blue-500 focus:ring-2",
                       error:
                         "border border-red-500 focus:ring-red-500 focus:ring-2",
-                    },
+                    }
                   )}
                 />
                 <span className={hasError ? "text-red-600" : "text-gray-700"}>
@@ -376,7 +382,7 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none",
+              "w-full px-3 py-2 rounded-md focus:outline-none"
             )}
           />
           {renderValidationMessage()}
@@ -412,7 +418,7 @@ export function RenderField({
               disabled={disabled || isUploading}
               aria-invalid={hasError}
               className={composeClassName(
-                "flex-1 px-3 py-2 rounded-md focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50",
+                "flex-1 px-3 py-2 rounded-md focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
               )}
             />
             {isUploading && (

@@ -120,12 +120,25 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
       onDrop={onDrop}
     >
       <textarea
+        ref={(el) => {
+          if (el) {
+            // Auto-resize when value changes
+            el.style.height = "auto";
+            el.style.height = `${el.scrollHeight}px`;
+          }
+        }}
         className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-transparent border-none ${
           expanded ? "" : "resize-none"
         }`}
         rows={expanded ? 2 : 1}
         value={value.body}
-        onChange={(e) => onChange({ ...value, body: e.target.value })}
+        onChange={(e) => {
+          const el = e.target;
+          el.style.height = "auto";
+          el.style.height = el.scrollHeight + "px";
+
+          onChange({ ...value, body: e.target.value });
+        }}
         onPaste={onPaste}
         placeholder={placeholder}
         autoFocus={expanded}
