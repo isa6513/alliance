@@ -124,54 +124,46 @@ const UserProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
+      setLoading(true);
 
       const userId = parseInt(id);
 
-      await userFindOne({
-        path: { id: userId },
-      }).then((request) => {
-        if (request.data && request.data.displayName) {
-          setProfile(request.data);
+      try {
+        const userRes = await userFindOne({
+          path: { id: userId },
+        });
+
+        if (!userRes.data) {
+          setLoading(false);
+          return;
+        }
+
+        if (userRes.data && userRes.data.displayName) {
+          setProfile(userRes.data);
           if (isMe) {
-            setEditName(request.data.displayName);
-            setEditBio(request.data.profileDescription || "");
-            setEditAvatarUrl(request.data.profilePicture || null);
+            setEditName(userRes.data.displayName);
+            setEditBio(userRes.data.profileDescription || "");
+            setEditAvatarUrl(userRes.data.profilePicture || null);
           }
         }
-      });
 
-      userMyFriendRelationship({
-        path: { id: userId },
-      }).then((request) => {
-        if (request.data) {
-          setFriendStatus(request.data);
-        }
-      });
+        const [friendRel, posts, comments, friendsList] = await Promise.all([
+          userMyFriendRelationship({ path: { id: userId } }),
+          forumFindPostsByUser({ path: { id: userId } }),
+          forumFindCommentsByUser({ path: { id: userId } }),
+          userListFriends({ path: { id: userId } }),
+        ]);
 
-      forumFindPostsByUser({
-        path: { id: userId },
-      }).then((request) => {
-        if (request.data) {
-          setForumPosts(request.data);
-        }
-      });
-
-      forumFindCommentsByUser({
-        path: { id: userId },
-      }).then((request) => {
-        if (request.data) {
-          setForumComments(request.data);
-        }
-      });
-
-      userListFriends({
-        path: { id: userId },
-      }).then((request) => {
+        setFriendStatus(friendRel.data || null);
+        setForumPosts(posts.data || []);
+        setForumComments(comments.data || []);
+        setFriends(friendsList.data || []);
+      } catch (err) {
+        console.error("Failed to load data:", err);
+        setProfile(null);
+      } finally {
         setLoading(false);
-        if (request.data) {
-          setFriends(request.data);
-        }
-      });
+      }
     };
 
     if (id) {

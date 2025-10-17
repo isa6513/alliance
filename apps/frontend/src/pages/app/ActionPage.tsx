@@ -97,7 +97,7 @@ export default function ActionPage() {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
         <div className="absolute inset-0 flex items-center justify-center">
-          <p className="text-center text-zinc-500">not found</p>
+          <p className="text-center text-zinc-500">Action not found</p>
         </div>
       </div>
     );
