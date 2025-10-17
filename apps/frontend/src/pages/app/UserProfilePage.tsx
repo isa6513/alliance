@@ -147,17 +147,26 @@ const UserProfilePage: React.FC = () => {
           }
         }
 
-        const [friendRel, posts, comments, friendsList] = await Promise.all([
+        const results = await Promise.allSettled([
           userMyFriendRelationship({ path: { id: userId } }),
           forumFindPostsByUser({ path: { id: userId } }),
           forumFindCommentsByUser({ path: { id: userId } }),
           userListFriends({ path: { id: userId } }),
         ]);
 
-        setFriendStatus(friendRel.data || null);
-        setForumPosts(posts.data || []);
-        setForumComments(comments.data || []);
-        setFriends(friendsList.data || []);
+        const friendRel =
+          results[0].status === "fulfilled" ? results[0].value.data : null;
+        const posts =
+          results[1].status === "fulfilled" ? results[1].value.data : [];
+        const comments =
+          results[2].status === "fulfilled" ? results[2].value.data : [];
+        const friendsList =
+          results[3].status === "fulfilled" ? results[3].value.data : [];
+
+        setFriendStatus(friendRel ?? null);
+        setForumPosts(posts ?? []);
+        setForumComments(comments ?? []);
+        setFriends(friendsList ?? []);
       } catch (err) {
         console.error("Failed to load data:", err);
         setProfile(null);
