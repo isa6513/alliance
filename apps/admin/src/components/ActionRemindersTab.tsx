@@ -294,7 +294,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
               onChange={(event) => setCustomEmailMessage(event.target.value)}
               rows={3}
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-              placeholder="Provide a custom email body or leave blank to use the default template. `#{user}` will be replaced with the member's name."
+              placeholder="Provide a custom email body or leave blank to use the default template. '#{user}' will be replaced with the member's name."
             />
           </div>
 
@@ -307,7 +307,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
               onChange={(event) => setCustomTextMessage(event.target.value)}
               rows={2}
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-              placeholder="Provide a custom text message or leave blank for the default reminder. `#{user}` will be replaced with the member's name."
+              placeholder="Provide a custom text message or leave blank for the default reminder. '#{user}' will be replaced with the member's name."
             />
           </div>
 
