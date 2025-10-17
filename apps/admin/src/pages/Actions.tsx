@@ -156,8 +156,14 @@ const ActionsList: React.FC = () => {
             if (b.archived) return -1;
             if (a.events.length === 0) return 1;
             if (b.events.length === 0) return -1;
-            const aEvent = a.events[a.events.length - 1];
-            const bEvent = b.events[b.events.length - 1];
+            const pastAEvents = a.events.filter(
+              (e) => new Date(e.date) < new Date()
+            );
+            const pastBEvents = b.events.filter(
+              (e) => new Date(e.date) < new Date()
+            );
+            const aEvent = pastAEvents[pastAEvents.length - 1];
+            const bEvent = pastBEvents[pastBEvents.length - 1];
 
             const aDate = aEvent ? new Date(aEvent.date) : new Date(0);
             const bDate = bEvent ? new Date(bEvent.date) : new Date(0);
@@ -182,7 +188,13 @@ const ActionsList: React.FC = () => {
                       <p className="text-sm text-zinc-500">
                         Last event{" "}
                         {new Date(
-                          action.events[action.events.length - 1]?.date
+                          action.events.filter(
+                            (e) => new Date(e.date) < new Date()
+                          )[
+                            action.events.filter(
+                              (e) => new Date(e.date) < new Date()
+                            ).length - 1
+                          ]?.date
                         ).toLocaleString()}
                       </p>
                     )}
