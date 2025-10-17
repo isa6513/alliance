@@ -89,6 +89,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
         <ActionCompletedBarWithInfo
           action={action}
           friendActivities={friendActivities}
+          className="mt-4"
         />
       </Card>
     </div>
