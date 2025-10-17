@@ -197,14 +197,14 @@ const InvitePage: React.FC = () => {
             </ol>
 
             <div className="my-4">
-              <div className="p-8 bg-zinc-50 mb-2">
+              <div className="p-4 py-6 bg-zinc-50 mb-2">
                 <LargeActionCard
                   action={exampleTask}
                   userRelation={"joined"}
                   friendActivities={[]}
                   onUpdateActionState={() => {}}
                   showDetails={false}
-                  className="pointer-events-none"
+                  className="pointer-events-none transform-[scale(0.9)]"
                 />
               </div>
               <p className="text-center text-sm">
