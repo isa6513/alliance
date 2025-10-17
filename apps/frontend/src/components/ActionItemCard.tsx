@@ -33,7 +33,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   return (
     <Link
       to={`/actions/${action.id}`}
-      className={`relative ${className} p-4 hover:bg-zinc-50 transition-colors duration-150`}
+      className={`relative ${className} p-4 hover:bg-zinc-50`}
     >
       <div className="flex flex-row items-start gap-x-8">
         <div className="flex-1 flex flex-col">

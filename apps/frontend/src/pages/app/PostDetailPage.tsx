@@ -17,6 +17,7 @@ import UserDisplayName from "../../components/UserDisplayName";
 import EditableContentRenderer from "../../components/forum/EditableContentRenderer";
 import { useAuth } from "../../lib/AuthContext";
 import { formatTime, useCIDFromParams } from "../../lib/utils";
+import Spinner from "../../components/Spinner";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
@@ -100,9 +101,11 @@ const PostDetailPage: React.FC = () => {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
         <div className="absolute inset-0 flex items-center justify-center">
-          <p className="text-center text-zinc-500">
-            {loading ? "Loading data..." : "Post not found"}
-          </p>
+          {loading ? (
+            <Spinner size="large" />
+          ) : (
+            <p className="text-center text-zinc-500">Post not found</p>
+          )}
         </div>
       </div>
     );

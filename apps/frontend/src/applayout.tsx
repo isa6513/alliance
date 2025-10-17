@@ -22,6 +22,7 @@ import {
 import BugReportButton from "./components/BugReportButton";
 import { useAuth } from "./lib/AuthContext";
 import { isFeatureEnabled } from "./lib/config";
+import Spinner from "./components/Spinner";
 
 export interface RouteMatch {
   data: unknown;
@@ -175,7 +176,7 @@ export function useAppLoaderData(): LoaderData {
 export function HydrateFallback() {
   return (
     <div className="flex h-screen w-screen items-center justify-center">
-      <p className="text-zinc-500">Loading data...</p>
+      <Spinner size="large" />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { useGrayBackground } from "../../components/HtmlBackgroundManager";
 import List from "@alliance/shared/ui/List";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
 import { useOutletContext } from "react-router";
+import Spinner from "../../components/Spinner";
 
 export const filterActions = (
   actions: ActionWithRelation[],
@@ -84,9 +85,17 @@ const ActionsListPage = () => {
           />
         ))}
         {filteredActions.length === 0 && (
-          <p className="text-center text-zinc-500 py-5">
-            {loading ? "Loading..." : "No matching actions"}
-          </p>
+          <>
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <Spinner size="large" />
+              </div>
+            ) : (
+              <p className="text-center text-zinc-500 py-5">
+                No matching actions
+              </p>
+            )}
+          </>
         )}
       </List>
     </CenterLayout>

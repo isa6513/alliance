@@ -10,6 +10,7 @@ import SmallActionCard from "./SmallActionCard";
 import useActivities, { ActivityList } from "./useActivities";
 import BasicErrorMessage from "../../components/BasicErrorMessage";
 import { useAuth } from "../../lib/AuthContext";
+import Spinner from "../../components/Spinner";
 
 export function canCompleteAction(action: ActionWithRelation) {
   return (
@@ -48,7 +49,7 @@ const HomePage = () => {
     if (actions === null) {
       return (
         <BasicErrorMessage>
-          {loading ? "Loading..." : "Error loading actions"}
+          {loading ? <Spinner size="large" /> : "Error loading actions"}
         </BasicErrorMessage>
       );
     }

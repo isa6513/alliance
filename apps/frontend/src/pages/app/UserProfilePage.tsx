@@ -34,6 +34,7 @@ import { sharp_allowed_mime_types } from "@alliance/shared/lib/config";
 import List from "@alliance/shared/ui/List";
 import ForumActivityCommentCard from "../../components/ForumActivityCommentCard";
 import ProfileImageEditor from "../../components/ProfileImageEditor";
+import Spinner from "../../components/Spinner";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -275,7 +276,7 @@ const UserProfilePage: React.FC = () => {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
         <div className="absolute inset-0 flex items-center justify-center">
-          <p className="text-center text-zinc-500">Loading profile...</p>
+          <Spinner size="large" />
         </div>
       </div>
     );
