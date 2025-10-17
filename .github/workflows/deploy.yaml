@@ -480,6 +480,7 @@ jobs:
             export TWILIO_AUTH_TOKEN=${{ secrets.TWILIO_AUTH_TOKEN }}
             export POSTHOG_QUERY_KEY=${{ secrets.POSTHOG_QUERY_KEY }}
             export POSTHOG_PROJECT_ID=${{ secrets.POSTHOG_PROJECT_ID }}
+            export MAILGUN_SIGNING_KEY=${{ secrets.MAILGUN_SIGNING_KEY }}
 
             rollback () {
               echo "Deployment failed - rolling back"
