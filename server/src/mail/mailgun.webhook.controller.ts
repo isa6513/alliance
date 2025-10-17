@@ -31,19 +31,19 @@ function verifyMailgunSignature(sig: {
 function toPostHogEventName(event: string): string {
   switch (event) {
     case 'delivered':
-      return 'email delivered';
+      return 'email-delivered';
     case 'opened':
-      return 'email opened';
+      return 'email-opened';
     case 'clicked':
-      return 'email clicked';
+      return 'email-clicked';
     case 'bounced':
-      return 'email bounced';
+      return 'email-bounced';
     case 'complained':
-      return 'email complained';
+      return 'email-complained';
     case 'unsubscribed':
-      return 'email unsubscribed';
+      return 'email-unsubscribed';
     default:
-      return `email ${event}`;
+      return `email-${event}`;
   }
 }
 
@@ -63,6 +63,8 @@ export class MailgunWebhookController {
     @Body() body: MailgunWebhookBody,
     @Headers('user-agent') ua?: string,
   ) {
+    if (process.env.NODE_ENV === 'test') return;
+
     console.log('webhook body', body);
     if (!body?.signature || !verifyMailgunSignature(body.signature)) {
       throw new BadRequestException('invalid signature');
@@ -96,18 +98,6 @@ export class MailgunWebhookController {
       ...e['user-variables'], // your app metadata you added when sending
     };
 
-    // (Optional) set/update person properties for the recipient
-    if (distinctId && distinctId !== 'unknown') {
-      this.posthog.identify({
-        distinctId,
-        properties: {
-          last_email_event: e.event,
-          last_email_subject: properties.subject,
-          last_email_campaign: properties.campaign,
-        },
-      });
-    }
-
     // Capture in PostHog
     this.posthog.capture({
       event: eventName,
@@ -116,6 +106,19 @@ export class MailgunWebhookController {
       timestamp: phTimestamp, // server-side timestamp
       uuid, // aids deduplication in PostHog
     });
+
+    if (distinctId && distinctId !== 'unknown') {
+      await this.posthog.capture({
+        distinctId,
+        event: '$identify',
+        properties: {
+          $set: {
+            email: e.recipient,
+          },
+        },
+        timestamp: phTimestamp,
+      });
+    }
 
     await this.posthog.flush();
   }
