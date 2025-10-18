@@ -31,19 +31,19 @@ function verifyMailgunSignature(sig: {
 function toPostHogEventName(event: string): string {
   switch (event) {
     case 'delivered':
-      return 'email-delivered';
+      return 'emaildelivered';
     case 'opened':
-      return 'email-opened';
+      return 'emailopened';
     case 'clicked':
-      return 'email-clicked';
+      return 'emailclicked';
     case 'bounced':
-      return 'email-bounced';
+      return 'emailbounced';
     case 'complained':
-      return 'email-complained';
+      return 'emailcomplained';
     case 'unsubscribed':
-      return 'email-unsubscribed';
+      return 'emailunsubscribed';
     default:
-      return `email-${event}`;
+      return `email${event}`;
   }
 }
 
@@ -100,9 +100,9 @@ export class MailgunWebhookController {
     const posthogEvent = {
       event: eventName,
       distinctId,
-      properties,
-      timestamp: phTimestamp, // server-side timestamp
-      uuid, // aids deduplication in PostHog
+      //   properties,
+      //   timestamp: phTimestamp, // server-side timestamp
+      //   uuid, // aids deduplication in PostHog
     };
     console.log('posthogEvent', posthogEvent);
 
@@ -121,6 +121,6 @@ export class MailgunWebhookController {
     //   });
     // }
 
-    // await this.posthog.flush();
+    await this.posthog.flush();
   }
 }
