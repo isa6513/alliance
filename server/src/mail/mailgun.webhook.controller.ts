@@ -74,10 +74,9 @@ export class MailgunWebhookController {
     const eventName = toPostHogEventName(e.event);
     const distinctId =
       e.recipient ?? (e['user-variables']?.userId as string) ?? 'unknown';
-    const phTimestamp = e.timestamp ? new Date(e.timestamp * 1000) : new Date();
+    const phTimestamp = e.timestamp ? new Date(e.timestamp * 1000) : undefined;
     const messageId = e.message?.headers?.['message-id'];
 
-    // Use Mailgun event id as a stable UUID for dedupe
     const uuid = e.id;
 
     const properties = {
@@ -98,28 +97,30 @@ export class MailgunWebhookController {
       ...e['user-variables'], // your app metadata you added when sending
     };
 
-    // Capture in PostHog
-    this.posthog.capture({
+    const posthogEvent = {
       event: eventName,
       distinctId,
       properties,
       timestamp: phTimestamp, // server-side timestamp
       uuid, // aids deduplication in PostHog
-    });
+    };
+    console.log('posthogEvent', posthogEvent);
 
-    if (distinctId && distinctId !== 'unknown') {
-      await this.posthog.capture({
-        distinctId,
-        event: '$identify',
-        properties: {
-          $set: {
-            email: e.recipient,
-          },
-        },
-        timestamp: phTimestamp,
-      });
-    }
+    this.posthog.capture(posthogEvent);
 
-    await this.posthog.flush();
+    // if (distinctId && distinctId !== 'unknown') {
+    //   await this.posthog.capture({
+    //     distinctId,
+    //     event: '$identify',
+    //     properties: {
+    //       $set: {
+    //         email: e.recipient,
+    //       },
+    //     },
+    //     timestamp: phTimestamp,
+    //   });
+    // }
+
+    // await this.posthog.flush();
   }
 }
