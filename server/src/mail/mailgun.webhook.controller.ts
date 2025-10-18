@@ -9,6 +9,9 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import * as crypto from 'crypto';
 import { PostHog } from 'posthog-node';
 import { MailgunWebhookBody } from './mailgun';
+import { User } from 'src/user/entities/user.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 function verifyMailgunSignature(sig: {
   timestamp: string;
@@ -50,7 +53,10 @@ function toPostHogEventName(event: string): string {
 @Controller('/mailgun')
 export class MailgunWebhookController {
   private readonly posthog: PostHog;
-  constructor() {
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {
     if (process.env.NODE_ENV === 'test') return;
     this.posthog = new PostHog(process.env.POSTHOG_KEY!, {
       host: 'https://us.i.posthog.com',
@@ -72,34 +78,21 @@ export class MailgunWebhookController {
 
     const e = body['event-data'];
     const eventName = toPostHogEventName(e.event);
-    const distinctId =
-      e.recipient ?? (e['user-variables']?.userId as string) ?? 'unknown';
+    const email = e.recipient ?? 'unknown';
     const phTimestamp = e.timestamp ? new Date(e.timestamp * 1000) : undefined;
     const messageId = e.message?.headers?.['message-id'];
 
-    const uuid = e.id;
-
-    const properties = {
-      message_id: messageId,
-      recipient: e.recipient,
-      subject: e.message?.headers?.subject,
-      campaign: e.campaign ?? e['campaign-id'],
-      tags: e.tags,
-      url: e.url,
-      ip: e.ip,
-      client: e['client-info']?.client_name,
-      client_os: e['client-info']?.client_os,
-      user_agent: e['client-info']?.user_agent || ua,
-      geo: e.geolocation,
-      bounce: e['delivery-status'],
-      mailgun_event: e.event,
-      mailgun_event_id: e.id,
-      ...e['user-variables'], // your app metadata you added when sending
-    };
+    const user = await this.userRepository.findOneBy({ email });
+    const distinctId = user?.id.toString() ?? email;
 
     const posthogEvent = {
       event: eventName,
       distinctId,
+      properties: {
+        recipient: email,
+        timestamp: phTimestamp,
+        subject: e.message?.headers?.subject,
+      },
       //   properties,
       //   timestamp: phTimestamp, // server-side timestamp
       //   uuid, // aids deduplication in PostHog
