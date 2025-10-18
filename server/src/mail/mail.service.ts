@@ -59,12 +59,16 @@ export class MailService {
       cid,
     });
 
+    const tag =
+      process.env.NODE_ENV === 'production' ? 'production' : 'development';
+
     const e = await this.mailerService.sendMail({
       to: recipient,
       from: 'Alliance <alliance@worldalliance.org>',
       subject: subject ?? undefined,
       headers: {
         'o:tag': emailType,
+        'X-Mailgun-Tag': tag,
       },
       template:
         __dirname + `/../../mail/templates/${this.templates[emailType]}`,

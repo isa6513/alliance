@@ -1,10 +1,4 @@
-import {
-  Body,
-  Controller,
-  Headers,
-  Post,
-  BadRequestException,
-} from '@nestjs/common';
+import { Body, Controller, Post, BadRequestException } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import * as crypto from 'crypto';
 import { PostHog } from 'posthog-node';
@@ -65,10 +59,7 @@ export class MailgunWebhookController {
 
   @Post('/handle-event')
   @ApiOkResponse()
-  async handle(
-    @Body() body: MailgunWebhookBody,
-    @Headers('user-agent') ua?: string,
-  ) {
+  async handle(@Body() body: MailgunWebhookBody) {
     if (process.env.NODE_ENV === 'test') return;
 
     console.log('webhook body', body);
@@ -80,10 +71,14 @@ export class MailgunWebhookController {
     const eventName = toPostHogEventName(e.event);
     const email = e.recipient ?? 'unknown';
     const phTimestamp = e.timestamp ? new Date(e.timestamp * 1000) : undefined;
-    const messageId = e.message?.headers?.['message-id'];
 
     const user = await this.userRepository.findOneBy({ email });
     const distinctId = user?.id.toString() ?? email;
+
+    const isProduction = e.tags?.includes('production');
+    if (!isProduction) {
+      return;
+    }
 
     const posthogEvent = {
       event: eventName,
@@ -93,26 +88,10 @@ export class MailgunWebhookController {
         timestamp: phTimestamp,
         subject: e.message?.headers?.subject,
       },
-      //   properties,
-      //   timestamp: phTimestamp, // server-side timestamp
-      //   uuid, // aids deduplication in PostHog
     };
     console.log('posthogEvent', posthogEvent);
 
     this.posthog.capture(posthogEvent);
-
-    // if (distinctId && distinctId !== 'unknown') {
-    //   await this.posthog.capture({
-    //     distinctId,
-    //     event: '$identify',
-    //     properties: {
-    //       $set: {
-    //         email: e.recipient,
-    //       },
-    //     },
-    //     timestamp: phTimestamp,
-    //   });
-    // }
 
     await this.posthog.flush();
   }
