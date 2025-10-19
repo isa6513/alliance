@@ -47,15 +47,15 @@ const HomePage = () => {
 
   const mainContent = () => {
     if (actions === null) {
-      return (
-        <BasicErrorMessage>
-          {loading ? <Spinner size="large" /> : "Error loading actions"}
-        </BasicErrorMessage>
+      return loading ? (
+        <Spinner size="large" />
+      ) : (
+        <BasicErrorMessage>Error loading actions</BasicErrorMessage>
       );
     }
 
     const todoActions = actions.filter((action) =>
-      shouldCompleteAction(action)
+      shouldCompleteAction(action),
     );
     const newActions = actions.filter((action) => canJoinAction(action));
 
@@ -63,12 +63,12 @@ const HomePage = () => {
       (action) =>
         action.relation === "joined" &&
         action.status === "gathering_commitments" &&
-        action.canParticipate
+        action.canParticipate,
     );
 
     const commitmentsReachedActions = actions.filter(
       (action) =>
-        action.relation === "joined" && action.status === "office_action"
+        action.relation === "joined" && action.status === "office_action",
     );
 
     const currentTask = newActions[0] || todoActions[0] || null;
@@ -103,7 +103,7 @@ const HomePage = () => {
               action={currentTask}
               userRelation={currentTask.relation as "joined" | "none"}
               friendActivities={friendActivities.filter(
-                (activity) => activity.actionId === currentTask.id
+                (activity) => activity.actionId === currentTask.id,
               )}
               onUpdateActionState={() => navigate(window.location.pathname)}
             />
@@ -149,7 +149,7 @@ const HomePage = () => {
                     friendActivities={friendActivities.filter(
                       (activity) =>
                         activity.actionId === action.id &&
-                        activity.type === "user_completed"
+                        activity.type === "user_completed",
                     )}
                   />
                 ))}
@@ -169,7 +169,7 @@ const HomePage = () => {
                   friendActivities={friendActivities.filter(
                     (activity) =>
                       activity.actionId === action.id &&
-                      activity.type === "user_joined"
+                      activity.type === "user_joined",
                   )}
                   showDescription={false}
                 />
@@ -181,7 +181,7 @@ const HomePage = () => {
                   friendActivities={friendActivities.filter(
                     (activity) =>
                       activity.actionId === action.id &&
-                      activity.type === "user_joined"
+                      activity.type === "user_joined",
                   )}
                   showDescription={false}
                 />
@@ -237,7 +237,8 @@ const HomePage = () => {
                   {posts
                     .filter(
                       (post) =>
-                        !post.visibleAt || new Date(post.visibleAt) < new Date()
+                        !post.visibleAt ||
+                        new Date(post.visibleAt) < new Date(),
                     )
                     .slice(0, 2)
                     .map((post) => (

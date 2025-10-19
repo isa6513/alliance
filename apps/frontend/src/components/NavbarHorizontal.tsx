@@ -59,7 +59,7 @@ const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
 
   const currentLocation: NavbarPage | null =
     activeLinks.find(
-      (link) => destinations[link] === window.location.pathname
+      (link) => destinations[link] === window.location.pathname,
     ) || null;
 
   return (
@@ -73,7 +73,7 @@ const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
           if (el) {
             document.documentElement.style.setProperty(
               "--nav-height",
-              `${el.offsetHeight}px`
+              `${el.offsetHeight}px`,
             );
           }
         }}
@@ -103,6 +103,7 @@ const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
             ) : (
               <Link
                 to={destinations[link]}
+                prefetch="render"
                 key={link}
                 className={`py-2 md:py-4 px-2 md:px-4 lg:px-6 border-b-2 border-x-zinc-200 space-x-1 flex flex-row items-center ${
                   currentLocation === link
@@ -123,7 +124,7 @@ const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
                   </div>
                 )}
               </Link>
-            )
+            ),
           )}
         </div>
         <div className="flex flex-row gap-x-4 py-2 md:py-0 items-center flex-1 justify-end">
