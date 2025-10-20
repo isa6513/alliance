@@ -1,11 +1,9 @@
 import {
-  ActionDto,
   actionsFindOne,
   actionsMyStatus,
   UserActionRelation,
 } from "@alliance/shared/client";
 import { Outlet, useParams } from "react-router";
-import { Route } from "../../../.react-router/types/src/pages/app/+types/ActionPage";
 import ActionActivityList from "../../components/ActionActivityList";
 import ActionEventsPanel from "../../components/ActionEventsPanel";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";

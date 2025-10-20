@@ -180,9 +180,7 @@ const EventNotifTimeline: React.FC = () => {
                       <div>Time</div>
                       <div>Type</div>
                       <div>Action</div>
-                      <div className="hidden lg:block">
-                        Estimated Recipients
-                      </div>
+                      <div className="hidden lg:block">Recipients</div>
                     </div>
                     <div className="grid gap-4 px-4 py-3 text-sm sm:grid-cols-2 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.9fr)_minmax(0,1.4fr)_minmax(0,0.8fr)] lg:items-center">
                       <div>

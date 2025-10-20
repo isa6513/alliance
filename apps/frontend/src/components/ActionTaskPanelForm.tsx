@@ -11,6 +11,7 @@ import { FormSchema } from "@alliance/shared/forms/formschema";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import posthog from "posthog-js";
 import { useEffect, useState } from "react";
+import Spinner from "./Spinner";
 
 interface ActionTaskPanelActivityProps {
   taskFormId: number;
@@ -31,12 +32,14 @@ const ActionTaskPanelForm = ({
 }: ActionTaskPanelActivityProps) => {
   const [form, setForm] = useState<FormDto | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchForm = async () => {
       const form = await tasksGetForm({
         path: { id: taskFormId },
       });
+      setLoading(false);
       if (!form.data) {
         setError("Unable to load form - please reload");
         throw new Error((form.error as Error).message);
@@ -73,11 +76,36 @@ const ActionTaskPanelForm = ({
             },
           });
           setError(
-            "Failed to submit action. We have been notified of the problem and will take a look. You can also try again later."
+            "Failed to submit action. We have been notified of the problem and will take a look. You can also try again later.",
           );
         }
       }
     : null;
+
+  if (!form) {
+    if (loading) {
+      return (
+        <div
+          className={`flex flex-col justify-center items-center ${
+            card ? "p-6 border border-zinc-200" : ""
+          }`}
+        >
+          <Spinner />
+        </div>
+      );
+    } else {
+      return (
+        <div
+          className={`flex flex-col justify-center items-center text-red-500 ${
+            card ? "p-6 border border-zinc-200" : ""
+          }`}
+        >
+          <p>Error loading form</p>
+          {error && <p>{error}</p>}
+        </div>
+      );
+    }
+  }
 
   return (
     <div
@@ -86,18 +114,16 @@ const ActionTaskPanelForm = ({
       }`}
     >
       <div>
-        {form && (
-          <FormRenderer
-            form={form.schema as unknown as FormSchema}
-            id={form.id}
-            actionId={actionId}
-            onSubmit={handleSubmitForm}
-            persistKey={String(taskFormId)}
-            onFormStarted={onFormStarted}
-            onAbandonAction={onAbandonAction}
-            renderFormAsCompleted={false}
-          />
-        )}
+        <FormRenderer
+          form={form.schema as unknown as FormSchema}
+          id={form.id}
+          actionId={actionId}
+          onSubmit={handleSubmitForm}
+          persistKey={String(taskFormId)}
+          onFormStarted={onFormStarted}
+          onAbandonAction={onAbandonAction}
+          renderFormAsCompleted={false}
+        />
       </div>
       {error && (
         <Card style={CardStyle.White} className="!border-red-400 !bg-red-50">
