@@ -62,12 +62,12 @@ export class MailgunWebhookController {
   async handle(@Body() body: MailgunWebhookBody) {
     if (process.env.NODE_ENV === 'test') return;
 
-    console.log('webhook body', body);
     if (!body?.signature || !verifyMailgunSignature(body.signature)) {
       throw new BadRequestException('invalid signature');
     }
 
     const e = body['event-data'];
+    console.log('message headers', e.message?.headers);
     const eventName = toPostHogEventName(e.event);
     const email = e.recipient ?? 'unknown';
     const phTimestamp = e.timestamp ? new Date(e.timestamp * 1000) : undefined;
@@ -87,6 +87,8 @@ export class MailgunWebhookController {
         recipient: email,
         timestamp: phTimestamp,
         subject: e.message?.headers?.subject,
+        mailgunId: e.id,
+        headers: e.message?.headers,
       },
     };
     console.log('posthogEvent', posthogEvent);
