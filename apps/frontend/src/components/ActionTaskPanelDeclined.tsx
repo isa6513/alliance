@@ -8,7 +8,7 @@ export interface ActionTaskPanelDeclinedProps {
 const ActionTaskPanelDeclined = () => {
   return (
     <Card style={CardStyle.Grey}>
-      <p className="">You declined to participate in this action.</p>
+      <p className="">You withdrew from this action.</p>
     </Card>
   );
 };
