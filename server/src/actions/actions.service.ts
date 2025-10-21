@@ -150,12 +150,7 @@ export class ActionsService {
 
   async findPublic(userId?: number): Promise<ActionDto[]> {
     const actions = await this.actionRepository.find({
-      relations: [
-        'events',
-        'activities',
-        'participatingGroups',
-        'participatingGroups.users',
-      ],
+      relations: ['events', 'activities', 'participatingGroups'],
     });
 
     const user = userId
@@ -708,20 +703,14 @@ export class ActionsService {
   }
 
   async isEligibleForAction(action: Action, user: User): Promise<boolean> {
-    const groups = action.participatingGroups || [];
-    if (groups.length === 0) {
-      return true;
-    }
+    const groups = action.participatingGroups;
     const userGroupIds = new Set((user.groups || []).map((group) => group.id));
     const isMember = groups.some((group) => userGroupIds.has(group.id));
     return isMember;
   }
 
   async ensureUserEligibleForAction(action: Action, userId: number) {
-    const groups = action.participatingGroups || [];
-    if (groups.length === 0) {
-      return;
-    }
+    const groups = action.participatingGroups;
 
     const user = await this.userService.findOne(userId, ['groups']);
     if (!user) {
