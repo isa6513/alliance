@@ -14,10 +14,11 @@ import { setRevalidate } from "../../applayout";
 import Comments from "../../components/Comments";
 import PostLikeButton from "../../components/PostLikeButton";
 import UserDisplayName from "../../components/UserDisplayName";
-import EditableContentRenderer from "../../components/forum/EditableContentRenderer";
+import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
 import { useAuth } from "../../lib/AuthContext";
-import { formatTime, useCIDFromParams } from "../../lib/utils";
+import { formatTime } from "@alliance/shared/lib/utils";
 import Spinner from "../../components/Spinner";
+import { useCIDFromParams } from "../../lib/utils";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();

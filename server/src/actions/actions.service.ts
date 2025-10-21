@@ -30,6 +30,7 @@ import {
   CreateActionDto,
   CreateActionEventDto,
   CreateActionReminderDto,
+  CreateActionUpdateDto,
   LatLonDto,
   PreEventNotifDataDto,
   UpdateActionActivityDto,
@@ -53,6 +54,7 @@ import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ForumService } from 'src/forum/forum.service';
 import { ActionEventNotifType } from 'src/notifs/entities/action-event-notif.entity';
+import { ActionUpdate } from './entities/action-update.entity';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -83,6 +85,8 @@ export class ActionsService {
     private readonly groupRepository: Repository<Group>,
     @InjectRepository(ActionReminder)
     private readonly actionReminderRepository: Repository<ActionReminder>,
+    @InjectRepository(ActionUpdate)
+    private readonly actionUpdateRepository: Repository<ActionUpdate>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly notifsService: NotifsService,
@@ -250,6 +254,7 @@ export class ActionsService {
         'activities',
         'participatingGroups',
         'participatingGroups.users',
+        'updates',
       ],
     });
 
@@ -1061,5 +1066,23 @@ export class ActionsService {
       ],
     });
     return new AdminActionEventDto(event);
+  }
+
+  async createActionUpdate(
+    id: number,
+    createActionUpdateDto: CreateActionUpdateDto,
+  ): Promise<ActionUpdate> {
+    const content = this.editableContentRepository.create({
+      body: createActionUpdateDto.content.body,
+      attachments: createActionUpdateDto.content.attachments ?? [],
+    });
+    await this.editableContentRepository.save(content);
+    const action = await this.actionRepository.findOneOrFail({ where: { id } });
+    const actionUpdate = this.actionUpdateRepository.create({
+      ...createActionUpdateDto,
+      content,
+      action,
+    });
+    return this.actionUpdateRepository.save(actionUpdate);
   }
 }

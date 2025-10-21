@@ -9,11 +9,11 @@ import ActionEventsPanel from "../../components/ActionEventsPanel";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import useActivities, { ActivityList } from "./useActivities";
-import { useCIDFromParams } from "../../lib/utils";
 import { useApiCall } from "@alliance/shared/lib/apiCall";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../lib/AuthContext";
 import Spinner from "../../components/Spinner";
+import { useCIDFromParams } from "../../lib/utils";
 
 export default function ActionPage() {
   const { id: idParam } = useParams();

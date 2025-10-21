@@ -12,8 +12,8 @@ import { formatDistanceToNow } from "date-fns";
 import React, { useEffect, useRef, useState } from "react";
 import CommentLikeButton from "../CommentLikeButton";
 import UserDisplayName from "../UserDisplayName";
-import EditableContentForm from "./EditableContentForm";
-import EditableContentRenderer from "./EditableContentRenderer";
+import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
+import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
 import ReplyForm from "./ReplyForm";
 import { Link } from "react-router";
 
@@ -83,7 +83,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [editAttachments, setEditAttachments] = useState<string[]>(
-    reply.editableContent.attachments
+    reply.editableContent.attachments,
   );
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
             return (res.data as unknown as string) ?? "";
           }
           return img;
-        })
+        }),
       );
       const attachmentKeys = uploads.filter(Boolean) as string[];
 
@@ -248,7 +248,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                 handleLike={() =>
                   onLikeReply(
                     reply.id,
-                    reply.likes.some((like) => like.id === user?.id)
+                    reply.likes.some((like) => like.id === user?.id),
                   )
                 }
               />
@@ -327,7 +327,7 @@ const ReplyComponent = ({
 }: ReplyComponentProps) => {
   const handleUpdateReply = async (
     id: number,
-    content: CreateEditableContentDto
+    content: CreateEditableContentDto,
   ) => {
     if (onUpdateReply) {
       await onUpdateReply(id, content);
@@ -437,7 +437,7 @@ const ReplyComponent = ({
                 {reply.children
                   .filter(
                     (childReply) =>
-                      !childReply.deleted || childReply.children?.length
+                      !childReply.deleted || childReply.children?.length,
                   )
                   .map((childReply) => (
                     <div key={childReply.id}>

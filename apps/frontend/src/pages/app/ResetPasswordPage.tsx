@@ -3,7 +3,7 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import FormInput from "../../components/system/FormInput";
+import FormInput from "@alliance/shared/ui/FormInput";
 
 const ResetPasswordPage = () => {
   const [token, setToken] = useState<string | null>(null);
@@ -48,7 +48,7 @@ const ResetPasswordPage = () => {
 
     if (!reset.response.ok) {
       setError(
-        "error resetting password. Please try again, or request a new token. "
+        "error resetting password. Please try again, or request a new token. ",
       );
       setLoading(false);
       return;

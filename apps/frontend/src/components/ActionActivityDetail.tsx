@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { Link, useOutletContext, useParams } from "react-router";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
-import { formatTime } from "../lib/utils";
+import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
 import Comments from "./Comments";
 import UserDisplayName from "./UserDisplayName";

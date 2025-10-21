@@ -3,7 +3,7 @@ import Button from "@alliance/shared/ui/Button";
 import { SignUpDto } from "@alliance/shared/client";
 import { ButtonColor } from "@alliance/shared/ui/Button";
 import { useCallback, useState } from "react";
-import FormInput from "./system/FormInput";
+import FormInput from "@alliance/shared/ui/FormInput";
 
 export interface SignupFormProps {
   onSubmit: (formData: SignUpDto) => void;
@@ -46,7 +46,7 @@ const SignupForm = ({
         referralCode: referralCode || undefined,
       });
     },
-    [onSubmit, formData, referralCode]
+    [onSubmit, formData, referralCode],
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

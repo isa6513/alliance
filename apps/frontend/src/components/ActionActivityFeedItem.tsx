@@ -1,7 +1,7 @@
 import { ActionActivityDto } from "@alliance/shared/client";
 import { useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
-import { formatTime } from "../lib/utils";
+import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
 import ActivityLikeButton from "./ActivityLikeButton";
 
@@ -66,7 +66,7 @@ const ActionActivityFeedItem = ({
                 new Date(activity.createdAt),
                 {
                   addSuffix: true,
-                }
+                },
               )}`}
               user={activity.user}
               showTitle={showAction}

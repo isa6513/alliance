@@ -156,12 +156,6 @@ img {
   user-select: none;
 }
 
-input,
-textarea,
-select {
-  background-color: white;
-}
-
 .font-hanken {
   font-family: "Hanken Grotesk", sans-serif;
 }

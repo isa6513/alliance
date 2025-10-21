@@ -20,6 +20,7 @@ import { ActionEvent } from './entities/action-event.entity';
 import { Action } from './entities/action.entity';
 import { ForumModule } from 'src/forum/forum.module';
 import { ActionReminder } from './entities/action-reminder.entity';
+import { ActionUpdate } from './entities/action-update.entity';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ActionReminder } from './entities/action-reminder.entity';
     TypeOrmModule.forFeature([EditableContent]),
     TypeOrmModule.forFeature([ActionEventNotif]),
     TypeOrmModule.forFeature([Group]),
+    TypeOrmModule.forFeature([ActionUpdate]),
     UserModule,
     NotifsModule,
     MailModule,

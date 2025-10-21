@@ -13,6 +13,7 @@ import {
 import { Action } from './action.entity';
 import { ActionReminder } from './action-reminder.entity';
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
+import { ActionUpdate } from './action-update.entity';
 
 export enum NotificationType {
   All = 'all',
@@ -152,4 +153,10 @@ export class ActionEvent {
   @Type(() => ActionReminder)
   @Allow()
   customReminders: ActionReminder[];
+
+  @OneToMany(() => ActionUpdate, (update) => update.associatedEvent)
+  @ApiProperty({ type: ActionUpdate, isArray: true })
+  @Type(() => ActionUpdate)
+  @Allow()
+  updates: ActionUpdate[];
 }

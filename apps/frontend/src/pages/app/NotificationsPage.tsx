@@ -1,6 +1,6 @@
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useNotifications } from "../../lib/useNotifications";
-import { formatTime } from "../../lib/utils";
+import { formatTime } from "@alliance/shared/lib/utils";
 import List from "@alliance/shared/ui/List";
 
 const NotificationsPage = () => {
@@ -19,7 +19,7 @@ const NotificationsPage = () => {
               className="hover:bg-zinc-100 p-4 flex cursor-pointer flex-col gap-y-2"
               onClick={handleNotifClick(
                 notification.id,
-                notification.webAppLocation
+                notification.webAppLocation,
               )}
             >
               <div className="flex flex-row items-center gap-x-2">

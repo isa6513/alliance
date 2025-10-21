@@ -25,6 +25,9 @@ const ActionContents = () => {
           )}
         </div>
       </div>
+      {/* {action.updates?.length > 0 && (
+        <ActionUpdatesPanel updates={action.updates} />
+      )} */}
 
       <Outlet context={context} />
 

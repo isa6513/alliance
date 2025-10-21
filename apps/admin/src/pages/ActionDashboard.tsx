@@ -26,6 +26,7 @@ import { getApiUrl } from "../lib/config";
 import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
 import { FormBuilder } from "../components/FormBuilder";
 import ActionRemindersTab from "../components/ActionRemindersTab";
+import ActionUpdatesTab from "../components/ActionUpdatesTab";
 
 // Status color mapping
 export const getStatusColor = (status: ActionDto["status"]) => {
@@ -61,7 +62,7 @@ export const formatStatus = (status: string) => {
     .join(" ");
 };
 
-type Tab = "overview" | "details" | "events" | "form" | "reminders";
+type Tab = "overview" | "details" | "events" | "form" | "reminders" | "updates";
 
 const ActionDashboard: React.FC = () => {
   const { actionId: actionIdParam } = useParams<{ actionId: string }>();
@@ -364,51 +365,18 @@ const ActionDashboard: React.FC = () => {
     }
   };
 
-  //   const uploadImage = async (): Promise<string | null> => {
-  //     if (!imageFile) return null;
-
-  //     try {
-  //       setUploadingImage(true);
-  //       setError(null);
-
-  //       const response = await imagesUploadImage({
-  //         body: { image: imageFile },
-  //       });
-
-  //       if (!response.data) {
-  //         throw new Error("Failed to upload image");
-  //       }
-  //       return response.data;
-  //     } catch (err) {
-  //       console.error("Error uploading image:", err);
-  //       setError("Failed to upload image. Please try again.");
-  //       return null;
-  //     } finally {
-  //       setUploadingImage(false);
-  //     }
-  //   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
 
     try {
-      //   const imageFilename = null;
-      //   if (imageFile) {
-      //     imageFilename = await uploadImage();
-      //     if (!imageFilename) {
-      //       throw new Error("Failed to upload image");
-      //     }
-      //   }
-
       const formData = {
         ...form,
         participatingGroups: selectedGroupIds.map(
           (id) => ({ id } as unknown as Group)
         ),
         image: imageKey ?? undefined,
-        // ...(imageFilename && { image: imageFilename }),
       };
 
       if (isNew) {
@@ -485,7 +453,10 @@ const ActionDashboard: React.FC = () => {
     { key: "overview", label: "Status Overview" },
     { key: "details", label: "Action Details" },
     { key: "events", label: "Event Management" },
-    ...(hasMemberActionEvent ? [{ key: "reminders" as Tab, label: "Reminders" }] : []),
+    { key: "updates", label: "Updates" },
+    ...(hasMemberActionEvent
+      ? [{ key: "reminders" as Tab, label: "Reminders" }]
+      : []),
     ...(action?.type === "Activity"
       ? [{ key: "form" as Tab, label: "Task Form" }]
       : []),
@@ -805,6 +776,14 @@ const ActionDashboard: React.FC = () => {
 
             {activeTab === "events" && action && (
               <EventManagementTab action={action} setAction={setAction} />
+            )}
+
+            {activeTab === "updates" && action && (
+              <ActionUpdatesTab
+                actionId={action.id}
+                updates={action.updates ?? []}
+                setUpdates={(updates) => setAction({ ...action, updates })}
+              />
             )}
           </div>
         </div>

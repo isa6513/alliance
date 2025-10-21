@@ -8,7 +8,7 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ClockIcon from "@alliance/shared/ui/icons/ClockIcon";
 import DeadlineIcon from "@alliance/shared/ui/icons/DeadlineIcon";
 import ActionTaskPanel from "../../components/ActionTaskPanel";
-import { formatTime } from "../../lib/utils";
+import { formatTime } from "@alliance/shared/lib/utils";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 
 export interface LargeActionCardProps {
@@ -41,7 +41,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   const navigate = useNavigate();
 
   const [state, setState] = useState<LargeActionCardState>(
-    LargeActionCardState.Default
+    LargeActionCardState.Default,
   );
 
   useEffect(() => {
@@ -60,15 +60,15 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       e.stopPropagation();
       navigate(`/actions/${action.id}`);
     },
-    [navigate, action]
+    [navigate, action],
   );
 
   const pastEvents = action.events.filter(
-    (event) => new Date(event.date) <= new Date()
+    (event) => new Date(event.date) <= new Date(),
   );
 
   const futureEvents = action.events.filter(
-    (event) => new Date(event.date) > new Date()
+    (event) => new Date(event.date) > new Date(),
   );
 
   const lastEvent = pastEvents[pastEvents.length - 1];

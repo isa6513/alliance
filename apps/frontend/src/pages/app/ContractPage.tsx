@@ -2,7 +2,7 @@ import { userSignContract, userSuspendContract } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import React, { useEffect, useState } from "react";
 import MemberContract from "../../components/MemberContract";
-import FormInput from "../../components/system/FormInput";
+import FormInput from "@alliance/shared/ui/FormInput";
 import { useAuth } from "../../lib/AuthContext";
 
 const ContractPage: React.FC = () => {
@@ -16,7 +16,7 @@ const ContractPage: React.FC = () => {
       setContractDateSigned(
         user.contractDateSigned && !user.contractDateSuspended
           ? new Date(user.contractDateSigned)
-          : null
+          : null,
       );
     }
   }, [user]);

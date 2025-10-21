@@ -186,7 +186,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
             accept="image/*"
             onChange={onImageChange}
             ref={fileInputRef}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           />
 
           {imagePreview && (
@@ -197,7 +197,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
               <img
                 src={imagePreview}
                 alt="Preview"
-                className="w-full max-w-md h-auto rounded-md border border-gray-300"
+                className="w-full max-w-md h-auto rounded-md border border-gray-300 bg-white"
               />
             </div>
           )}
@@ -233,7 +233,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
             value={(form as any)[f.name] ?? ""}
             onChange={onInputChange}
             rows={f.rows || 6}
-            className="!text-base"
+            className="!text-base bg-white"
           />
           {f.helpText && (
             <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>
@@ -257,7 +257,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
             value={(form as any)[f.name] ?? ""}
             onChange={onInputChange}
             rows={f.rows || 3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           />
           {f.helpText && (
             <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>
@@ -281,7 +281,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
             value={(form as any)[f.name] ?? ""}
             onChange={onInputChange}
             required={f.required}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
             {f.options?.map((opt) => (
               <option key={String(opt.value)} value={String(opt.value)}>
@@ -341,7 +341,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
           min={f.name === "commitmentThreshold" ? 1 : undefined}
           step={f.name === "donationAmount" ? 0.01 : undefined}
           placeholder={f.helpText}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
         />
         {f.helpText && (
           <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>

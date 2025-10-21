@@ -9,10 +9,10 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
-import { formatTime } from "../lib/utils";
+import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityLikeButton from "./ActivityLikeButton";
 import Comments from "./Comments";
-import EditableContentForm from "./forum/EditableContentForm";
+import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;
@@ -67,7 +67,7 @@ const UserActivityCard = ({
             return (res.data as unknown as string) ?? "";
           }
           return img;
-        })
+        }),
       );
       const attachmentKeys = uploads.filter(Boolean) as string[];
 

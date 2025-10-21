@@ -13,7 +13,7 @@ import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { setRevalidate } from "../../applayout";
-import EditableContentForm from "../../components/forum/EditableContentForm";
+import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
 import { useAuth } from "../../lib/AuthContext";
 import LargeCheckbox from "../../components/LargeCheckbox";
 
@@ -30,7 +30,7 @@ const PostFormPage: React.FC = () => {
     attachments: [],
   });
   const [scheduledVisibleAt, setScheduledVisibleAt] = useState<string | null>(
-    null
+    null,
   );
   const [useSchedulePost, setUseSchedulePost] = useState<boolean>(false);
 
@@ -40,7 +40,7 @@ const PostFormPage: React.FC = () => {
   const [actionId, setActionId] = useState<number | undefined>(
     searchParams.get("actionId")
       ? Number(searchParams.get("actionId"))
-      : undefined
+      : undefined,
   );
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -112,7 +112,7 @@ const PostFormPage: React.FC = () => {
               return res.data as unknown as string; // returns image key
             }
             return fileB64;
-          })
+          }),
         );
         attachmentKeys = uploads.filter(Boolean) as string[];
       }
@@ -260,7 +260,7 @@ const PostFormPage: React.FC = () => {
                             setScheduledVisibleAt(utcValue);
                             if (!utcValue) {
                               setError(
-                                "Please select a valid date and time to schedule the post."
+                                "Please select a valid date and time to schedule the post.",
                               );
                               return;
                             }
@@ -292,8 +292,8 @@ const PostFormPage: React.FC = () => {
                   {isSubmitting
                     ? "Saving..."
                     : mode === "create"
-                    ? "Create Post"
-                    : "Save Changes"}
+                      ? "Create Post"
+                      : "Save Changes"}
                 </Button>
               </div>
             </div>

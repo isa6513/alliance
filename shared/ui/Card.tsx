@@ -2,6 +2,7 @@ import { PropsWithChildren } from "react";
 
 export enum CardStyle {
   White = "white",
+  LightGreen = "light-green",
   WhiteSolid = "white-solid",
   Outline = "outline",
   Alert = "alert",
@@ -35,7 +36,7 @@ const Card: React.FC<CardProps> = ({
 }: CardProps) => {
   const cardStyle = style ?? CardStyle.White;
 
-  const styleClasses = {
+  const styleClasses: Record<CardStyle, string> = {
     [CardStyle.White]: "bg-white border-zinc-200 border-box",
     [CardStyle.WhiteSolid]: "bg-white border-none",
     [CardStyle.Alert]: "bg-sky-100 border-sky-300",
@@ -47,6 +48,7 @@ const Card: React.FC<CardProps> = ({
     [CardStyle.Green]: "bg-green/20 border-green",
     [CardStyle.Transparent]:
       "bg-transparent border-gray-2 hover:border border-box",
+    [CardStyle.LightGreen]: "bg-green/10 border-green/30",
   };
 
   return (

@@ -41,6 +41,7 @@ import {
   CreateActionDto,
   CreateActionEventDto,
   CreateActionReminderDto,
+  CreateActionUpdateDto,
   DeclineActionDto,
   LatLonDto,
   OptOutActionDto,
@@ -53,6 +54,7 @@ import {
   NotificationScheduleEntryDto,
   NotificationScheduleQueryDto,
 } from './dto/notification-schedule.dto';
+import { ActionUpdate } from './entities/action-update.entity';
 
 @Controller('actions')
 export class ActionsController {
@@ -473,5 +475,15 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<AdminActionEventDto> {
     return this.actionsService.getEventWithReminders(id);
+  }
+
+  @Post('createUpdate/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionUpdate })
+  createUpdate(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() createActionUpdateDto: CreateActionUpdateDto,
+  ): Promise<ActionUpdate> {
+    return this.actionsService.createActionUpdate(id, createActionUpdateDto);
   }
 }

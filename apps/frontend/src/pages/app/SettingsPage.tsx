@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
 import LargeCheckbox from "../../components/LargeCheckbox";
-import FormInput from "../../components/system/FormInput";
+import FormInput from "@alliance/shared/ui/FormInput";
 import { AdminOnly } from "../../lib/AdminOnly";
 import { useAuth } from "../../lib/AuthContext";
 
@@ -49,14 +49,14 @@ const SettingsPage: React.FC = () => {
 
   const [location, setLocation] = useState<City | null>(null);
   const [editableUser, setEditableUser] = useState<EditableUserFields | null>(
-    null
+    null,
   );
   const [initialUser, setInitialUser] = useState<EditableUserFields | null>(
-    null
+    null,
   );
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodDto | null>(
-    null
+    null,
   );
   const [loadingPaymentMethod, setLoadingPaymentMethod] = useState(false);
 
@@ -66,7 +66,7 @@ const SettingsPage: React.FC = () => {
     (updates: Partial<EditableUserFields>) => {
       setEditableUser((prev) => (prev ? { ...prev, ...updates } : prev));
     },
-    []
+    [],
   );
 
   const handleLogout = useCallback(async () => {
@@ -78,7 +78,7 @@ const SettingsPage: React.FC = () => {
     (city: CitySearchDto) => {
       updateEditableUser({ cityId: city.id });
     },
-    [updateEditableUser]
+    [updateEditableUser],
   );
 
   const hasChanges =
@@ -144,10 +144,10 @@ const SettingsPage: React.FC = () => {
         setLocation(city);
         const cityId = city.id;
         setEditableUser((prev) =>
-          prev ? { ...prev, cityId } : { ...editableUser, cityId }
+          prev ? { ...prev, cityId } : { ...editableUser, cityId },
         );
         setInitialUser((prev) =>
-          prev ? { ...prev, cityId } : { ...editableUser, cityId }
+          prev ? { ...prev, cityId } : { ...editableUser, cityId },
         );
       }
     } catch (error) {
@@ -175,10 +175,10 @@ const SettingsPage: React.FC = () => {
         setLocation(city);
         const cityId = city.id;
         setEditableUser((prev) =>
-          prev ? { ...prev, cityId } : { ...mappedUser, cityId }
+          prev ? { ...prev, cityId } : { ...mappedUser, cityId },
         );
         setInitialUser((prev) =>
-          prev ? { ...prev, cityId } : { ...mappedUser, cityId }
+          prev ? { ...prev, cityId } : { ...mappedUser, cityId },
         );
       }
     });

@@ -12,13 +12,17 @@ import {
   ArrayUnique,
   IsArray,
   IsBoolean,
+  IsDefined,
   IsInt,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { CommentDto } from 'src/forum/dto/comment.dto';
-import { EditableContentDto } from 'src/forum/dto/editablecontent.dto';
+import {
+  CreateEditableContentDto,
+  EditableContentDto,
+} from 'src/forum/dto/editablecontent.dto';
 import { ProfileDto, UserDto } from 'src/user/user.dto';
 import { UserActionRelation } from '../actions.service';
 import { ActionActivity } from '../entities/action-activity.entity';
@@ -30,6 +34,7 @@ import {
 import { ActionReminder } from '../entities/action-reminder.entity';
 import { Action } from '../entities/action.entity';
 import { getImageSource } from 'src/images/images.service';
+import { ActionUpdate } from '../entities/action-update.entity';
 
 export class ActionReminderDto {
   @ApiProperty()
@@ -195,6 +200,7 @@ export class CreateActionDto extends OmitType(ActionDto, [
   'taskContents',
   'events',
   'archived',
+  'updates',
 ]) {}
 
 export class UpdateActionDto extends PartialType(CreateActionDto) {}
@@ -323,4 +329,20 @@ export class PreEventNotifDataQueryDto {
   @ApiProperty({ enum: NotificationType, enumName: 'NotificationType' })
   @Allow()
   sendNotifsTo: NotificationType;
+}
+
+export class CreateActionUpdateDto extends PickType(ActionUpdate, [
+  'title',
+  'displayDate',
+  'visibleAt',
+  'notifyType',
+]) {
+  @ApiProperty({ type: () => CreateEditableContentDto })
+  @Type(() => CreateEditableContentDto)
+  @IsDefined()
+  content: CreateEditableContentDto;
+
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  associatedEventId?: number;
 }

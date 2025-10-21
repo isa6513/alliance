@@ -15,6 +15,7 @@ import { ActionActivity, ActionActivityType } from './action-activity.entity';
 import { ActionEvent, ActionStatus } from './action-event.entity';
 import { Group } from 'src/user/entities/group.entity';
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
+import { ActionUpdate } from './action-update.entity';
 
 export enum ActionTaskType {
   Funding = 'Funding', //giving money to a particular cause
@@ -215,4 +216,13 @@ export class Action {
   })
   @Allow()
   archived: boolean;
+
+  @OneToMany(() => ActionUpdate, (update) => update.action)
+  @ApiProperty({
+    type: () => ActionUpdate,
+    isArray: true,
+  })
+  @Allow()
+  @Type(() => ActionUpdate)
+  updates: ActionUpdate[];
 }

@@ -291,6 +291,46 @@ export type ActionReminder = {
     createdAt: string;
 };
 
+export type EditableContent = {
+    /**
+     * Markdown or plain text body
+     */
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
+};
+
+export type ActionUpdateNotifyType = 'none' | 'bell_participants' | 'bell_all_members';
+
+export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update';
+
+export type Notification = {
+    id: number;
+    category: NotificationCategory;
+    message: string;
+    webAppLocation: string | null;
+    mobileAppLocation: string | null;
+    read: boolean;
+    cleared: boolean;
+    createdAt: string;
+    updatedAt: string;
+    actionUpdate?: ActionUpdate;
+};
+
+export type ActionUpdate = {
+    id: number;
+    action: Action;
+    title: string;
+    content: EditableContent;
+    displayDate: string;
+    visibleAt: string;
+    associatedEvent?: ActionEvent;
+    notifyType: ActionUpdateNotifyType;
+    notifs: Array<Notification>;
+};
+
 export type ActionEvent = {
     /**
      * Unique identifier for the action event
@@ -334,17 +374,7 @@ export type ActionEvent = {
     oneDayReminderNotifsSentAt?: string;
     deadlineNotifsSentAt?: string;
     customReminders: Array<ActionReminder>;
-};
-
-export type EditableContent = {
-    /**
-     * Markdown or plain text body
-     */
-    body: string;
-    /**
-     * Image keys attached to the content
-     */
-    attachments: Array<string>;
+    updates: Array<ActionUpdate>;
 };
 
 export type FormResponse = {
@@ -463,6 +493,7 @@ export type Action = {
      */
     everyoneShouldComplete: boolean;
     archived: boolean;
+    updates: Array<ActionUpdate>;
 };
 
 export type Group = {
@@ -586,6 +617,7 @@ export type ActionDto = {
      */
     everyoneShouldComplete: boolean;
     archived: boolean;
+    updates: Array<ActionUpdate>;
     events: Array<ActionEventDto>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
@@ -917,7 +949,14 @@ export type AdminActionEventDto = {
     customReminders: Array<ActionReminder>;
 };
 
-export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted';
+export type CreateActionUpdateDto = {
+    title: string;
+    displayDate: string;
+    visibleAt: string;
+    notifyType: ActionUpdateNotifyType;
+    content: CreateEditableContentDto;
+    associatedEventId?: number;
+};
 
 export type NotificationDto = {
     id: number;
@@ -1930,6 +1969,17 @@ export type ImagesUploadImageResponses = {
 
 export type ImagesUploadImageResponse = ImagesUploadImageResponses[keyof ImagesUploadImageResponses];
 
+export type MailgunWebhookHandleData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/mailgun/handle-event';
+};
+
+export type MailgunWebhookHandleResponses = {
+    200: unknown;
+};
+
 export type ActionsJoinData = {
     body?: never;
     path: {
@@ -2444,6 +2494,21 @@ export type ActionsEventWithRemindersResponses = {
 };
 
 export type ActionsEventWithRemindersResponse = ActionsEventWithRemindersResponses[keyof ActionsEventWithRemindersResponses];
+
+export type ActionsCreateUpdateData = {
+    body: CreateActionUpdateDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/createUpdate/{id}';
+};
+
+export type ActionsCreateUpdateResponses = {
+    200: ActionUpdate;
+};
+
+export type ActionsCreateUpdateResponse = ActionsCreateUpdateResponses[keyof ActionsCreateUpdateResponses];
 
 export type NotifsFindAllData = {
     body?: never;

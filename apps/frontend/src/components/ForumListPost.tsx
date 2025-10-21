@@ -2,9 +2,9 @@ import { CommentDto, PostDto } from "@alliance/shared/client";
 import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { Link, useNavigate } from "react-router";
-import { cx, formatTime } from "../lib/utils";
+import { cx, formatTime } from "@alliance/shared/lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
-import EditableContentRenderer from "./forum/EditableContentRenderer";
+import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
 import UserDisplayName from "./UserDisplayName";
 
 export interface ForumListPostProps {
@@ -56,7 +56,7 @@ const ForumListPost = ({
           "w-full mb-0 !gap-y-1 p-4  cursor-pointer",
           isPrivateFuturePost
             ? "bg-sky-50 hover:bg-sky-100/60"
-            : "hover:bg-zinc-50 bg-white"
+            : "hover:bg-zinc-50 bg-white",
         )}
       >
         <div className="flex flex-col gap-y-0 mb-2">
@@ -137,7 +137,7 @@ const ForumListPost = ({
           navigate(
             post.lastComment && showReply
               ? `/forum/post/${post.id}?replyId=${post.lastComment.id}`
-              : `/forum/post/${post.id}`
+              : `/forum/post/${post.id}`,
           );
         }}
       >
@@ -145,11 +145,11 @@ const ForumListPost = ({
           title={post.title}
           content={`${post.lastComment ? "replied" : "posted"} ${formatTime(
             new Date(
-              post.lastComment ? post.lastComment.createdAt : post.updatedAt
+              post.lastComment ? post.lastComment.createdAt : post.updatedAt,
             ),
             {
               addSuffix: true,
-            }
+            },
           )}`}
           user={post.lastComment ? post.lastComment.author : post.author}
         />

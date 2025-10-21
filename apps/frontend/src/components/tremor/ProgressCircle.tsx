@@ -3,7 +3,7 @@
 import React from "react";
 import { tv, VariantProps } from "tailwind-variants";
 
-import { cx } from "../../lib/utils";
+import { cx } from "@alliance/shared/lib/utils";
 
 const progressCircleVariants = tv({
   slots: {
@@ -63,7 +63,7 @@ const ProgressCircle = React.forwardRef<SVGSVGElement, ProgressCircleProps>(
       children,
       ...props
     }: ProgressCircleProps,
-    forwardedRef
+    forwardedRef,
   ) => {
     const safeValue = Math.min(max, Math.max(value, 0));
     const normalizedRadius = radius - strokeWidth / 2;
@@ -116,7 +116,7 @@ const ProgressCircle = React.forwardRef<SVGSVGElement, ProgressCircleProps>(
                 "transition-colors ease-linear",
                 circle(),
                 showAnimation &&
-                  "transform-gpu transition-all duration-300 ease-in-out"
+                  "transform-gpu transition-all duration-300 ease-in-out",
               )}
             />
           ) : null}
@@ -128,7 +128,7 @@ const ProgressCircle = React.forwardRef<SVGSVGElement, ProgressCircleProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 ProgressCircle.displayName = "ProgressCircle";
