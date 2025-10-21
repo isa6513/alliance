@@ -24,6 +24,12 @@ const ActionActivityFeedItem = ({
   const verb = activity.type === "user_joined" ? "committed to" : "completed";
   const { user } = useAuth();
 
+  if (
+    !(activity.type === "user_joined" || activity.type === "user_completed")
+  ) {
+    return null;
+  }
+
   if (card) {
     return (
       <a href={`/user/${activity.user.id}`} className="text-black">

@@ -1,4 +1,5 @@
 import {
+  ActionDto,
   actionsFindOne,
   actionsMyStatus,
   UserActionRelation,
@@ -10,7 +11,7 @@ import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import useActivities, { ActivityList } from "./useActivities";
 import { useApiCall } from "@alliance/shared/lib/apiCall";
-import { useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../lib/AuthContext";
 import Spinner from "../../components/Spinner";
 import { useCIDFromParams } from "../../lib/utils";
@@ -22,14 +23,34 @@ export default function ActionPage() {
 
   useWhiteBackground();
 
-  const { data: action, loading } = useApiCall(actionsFindOne, {
-    path: { id: actionId },
-  });
+  const { isAuthenticated } = useAuth();
+
+  const [action, setAction] = useState<ActionDto | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAction = useCallback(async () => {
+    try {
+      setLoading(true);
+      const actionResponse = await actionsFindOne({
+        path: { id: actionId },
+      });
+      if (actionResponse.data) {
+        setAction(actionResponse.data);
+      } else {
+        setAction(null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [actionId]);
+
+  useEffect(() => {
+    fetchAction();
+  }, [fetchAction, isAuthenticated]);
 
   const [userRelation, setUserRelation] = useState<UserActionRelation | null>(
     null
   );
-  const { isAuthenticated } = useAuth();
 
   useCIDFromParams();
 

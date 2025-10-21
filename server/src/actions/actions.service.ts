@@ -642,9 +642,14 @@ export class ActionsService {
     limit: number = 20,
     before?: Date,
   ): Promise<ActionActivityDto[]> {
-    const where = before ? { createdAt: LessThan(before) } : {};
     const activities = await this.actionActivityRepository.find({
-      where,
+      where: {
+        ...(before ? { createdAt: LessThan(before) } : {}),
+        type: In([
+          ActionActivityType.USER_JOINED,
+          ActionActivityType.USER_COMPLETED,
+        ]),
+      },
       order: { createdAt: 'DESC' },
       take: limit,
     });
@@ -840,6 +845,10 @@ export class ActionsService {
     const friendActivities = await this.actionActivityRepository.find({
       where: {
         user: { id: In(friends.map((f) => f.id)) },
+        type: In([
+          ActionActivityType.USER_JOINED,
+          ActionActivityType.USER_COMPLETED,
+        ]),
       },
       relations: ['user', 'action'],
       order: { createdAt: 'DESC' },
