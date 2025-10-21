@@ -89,7 +89,11 @@ export class ActionEventRecipientService {
       where: {
         userId: In(users.map((user) => user.id)),
         actionId: event.action.id,
-        type: ActionActivityType.USER_COMPLETED,
+        type: In([
+          ActionActivityType.USER_COMPLETED,
+          ActionActivityType.USER_DECLINED,
+          ActionActivityType.USER_WONT_COMPLETE,
+        ]),
       },
     });
     return users.filter(
