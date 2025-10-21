@@ -67,7 +67,6 @@ export class MailgunWebhookController {
     }
 
     const e = body['event-data'];
-    console.log('message headers', e.message?.headers);
     const eventName = toPostHogEventName(e.event);
     const email = e.recipient ?? 'unknown';
     const phTimestamp = e.timestamp ? new Date(e.timestamp * 1000) : undefined;
@@ -89,9 +88,9 @@ export class MailgunWebhookController {
         subject: e.message?.headers?.subject,
         mailgunId: e.id,
         headers: e.message?.headers,
+        messageId: e.message?.headers?.['message-id'],
       },
     };
-    console.log('posthogEvent', posthogEvent);
 
     this.posthog.capture(posthogEvent);
 
