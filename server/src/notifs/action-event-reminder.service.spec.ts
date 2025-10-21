@@ -47,6 +47,7 @@ const defaultReminderEventAction = {
   usersCompleted: 0,
   everyoneShouldComplete: false,
   archived: false,
+  updates: [],
 } satisfies Action;
 
 const reminderEvent = (overrides: Partial<ActionEvent> = {}): ActionEvent => ({
@@ -61,6 +62,7 @@ const reminderEvent = (overrides: Partial<ActionEvent> = {}): ActionEvent => ({
   action: defaultReminderEventAction,
   date: new Date('2024-01-13T12:00:00Z'),
   newStatus: ActionStatus.Resolution,
+  updates: [],
   ...overrides,
 });
 
