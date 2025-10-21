@@ -226,7 +226,6 @@ const UserActivityCard = ({
             compact
             showForm={showCommentForm}
             autofocus={showCommentForm}
-            initialComments={activity.comments}
           />
         )}
       </div>

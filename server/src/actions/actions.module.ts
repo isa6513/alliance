@@ -18,7 +18,6 @@ import { ActionsService } from './actions.service';
 import { ActionActivity } from './entities/action-activity.entity';
 import { ActionEvent } from './entities/action-event.entity';
 import { Action } from './entities/action.entity';
-import { ForumModule } from 'src/forum/forum.module';
 import { ActionReminder } from './entities/action-reminder.entity';
 import { ActionUpdate } from './entities/action-update.entity';
 
@@ -38,7 +37,6 @@ import { ActionUpdate } from './entities/action-update.entity';
     NotifsModule,
     MailModule,
     MmsModule,
-    ForumModule,
   ],
   controllers: [ActionsController],
   providers: [

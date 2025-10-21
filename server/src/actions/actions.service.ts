@@ -52,7 +52,6 @@ import { UserDto } from 'src/user/user.dto';
 import { NotificationScheduleEntryDto } from './dto/notification-schedule.dto';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { User } from 'src/user/entities/user.entity';
-import { ForumService } from 'src/forum/forum.service';
 import { ActionEventNotifType } from 'src/notifs/entities/action-event-notif.entity';
 import { ActionUpdate } from './entities/action-update.entity';
 
@@ -94,7 +93,6 @@ export class ActionsService {
     public eventEmitter: EventEmitter2,
     private readonly actionEventRecipientService: ActionEventRecipientService,
     private readonly actionEventReminderService: ActionEventReminderService,
-    private readonly forumService: ForumService,
   ) {}
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
@@ -665,12 +663,7 @@ export class ActionsService {
 
     return Promise.all(
       activities.map(async (activity) => {
-        return new ActionActivityDto(
-          activity,
-          (await this.forumService.findCommentsForActivity(activity.id)).map(
-            (comment) => new CommentDto(comment),
-          ),
-        );
+        return new ActionActivityDto(activity);
       }),
     );
   }
@@ -878,11 +871,7 @@ export class ActionsService {
     if (!activity) {
       throw new NotFoundException('Activity not found');
     }
-    const comments = await this.forumService.findCommentsForActivity(id);
-    return new ActionActivityDto(
-      activity,
-      comments.map((comment) => new CommentDto(comment)),
-    );
+    return new ActionActivityDto(activity);
   }
 
   async getEvent(id: number): Promise<ActionEventDto> {
