@@ -470,7 +470,7 @@ export type Action = {
      */
     updatedAt: string;
     events: Array<Array<ActionEvent>>;
-    participatingGroups?: Array<Group>;
+    participatingGroups: Array<Group>;
     /**
      * Whether to show the action to members who are not of participating groups
      */
@@ -594,7 +594,7 @@ export type ActionDto = {
      * Form associated with the action
      */
     taskFormId?: number;
-    participatingGroups?: Array<Group>;
+    participatingGroups: Array<Group>;
     /**
      * Whether to show the action to members who are not of participating groups
      */
@@ -754,7 +754,7 @@ export type CreateActionDto = {
      * Form associated with the action
      */
     taskFormId?: number;
-    participatingGroups?: Array<Group>;
+    participatingGroups: Array<Group>;
     /**
      * Whether to show the action to members who are not of participating groups
      */
@@ -2073,6 +2073,19 @@ export type ActionsFindAllResponses = {
 };
 
 export type ActionsFindAllResponse = ActionsFindAllResponses[keyof ActionsFindAllResponses];
+
+export type ActionsFindAllLoggedInData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/loggedIn';
+};
+
+export type ActionsFindAllLoggedInResponses = {
+    200: Array<ActionDto>;
+};
+
+export type ActionsFindAllLoggedInResponse = ActionsFindAllLoggedInResponses[keyof ActionsFindAllLoggedInResponses];
 
 export type ActionsMyActivityData = {
     body?: never;

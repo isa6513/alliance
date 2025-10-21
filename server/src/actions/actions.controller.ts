@@ -149,6 +149,13 @@ export class ActionsController {
     return this.actionsService.findPublic(req.user?.sub);
   }
 
+  @Get('loggedIn')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [ActionDto] })
+  async findAllLoggedIn(@Request() req: JwtRequest): Promise<ActionDto[]> {
+    return this.actionsService.findPublic(req.user.sub);
+  }
+
   @Get('myActivity')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [ActionActivityDto] })

@@ -1,7 +1,7 @@
 import {
   ActionActivityDto,
   ActionDto,
-  actionsFindAll,
+  actionsFindAllLoggedIn,
   actionsMyActivity,
   authMe,
   forumFindAllPosts,
@@ -69,7 +69,7 @@ export function clientLoader() {
   localStorage.setItem(revalidateKey, "false");
 
   const result: Promise<ActionLoaderData | null> = Promise.all([
-    actionsFindAll(),
+    actionsFindAllLoggedIn(),
     actionsMyActivity(),
   ]).then(([actions, activities]) => {
     if (!activities.data || !actions.data) {
@@ -89,15 +89,15 @@ export function clientLoader() {
       }
     }
     const completionActivities = activityList.filter(
-      (activity) => activity.type === "user_completed"
+      (activity) => activity.type === "user_completed",
     );
     const joinActivities = activityList.filter(
-      (activity) => activity.type === "user_joined"
+      (activity) => activity.type === "user_joined",
     );
     const declineActivities = activityList.filter(
       (activity) =>
         activity.type === "user_declined" ||
-        activity.type === "user_wont_complete"
+        activity.type === "user_wont_complete",
     );
 
     joinActivities.forEach((activity) => {
@@ -242,8 +242,8 @@ export default function AppLayout() {
           data.sort(
             (a, b) =>
               new Date(b.lastComment?.createdAt ?? b.updatedAt).getTime() -
-              new Date(a.lastComment?.createdAt ?? a.updatedAt).getTime()
-          )
+              new Date(a.lastComment?.createdAt ?? a.updatedAt).getTime(),
+          ),
         );
       }
     });
