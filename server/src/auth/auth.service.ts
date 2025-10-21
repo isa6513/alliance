@@ -67,9 +67,12 @@ export class AuthService {
       }
     }
 
+    const defaultGroup = await this.usersService.findGroupByName('All Members');
+
     const user = await this.usersService.create({
       ...signUp,
       referredBy,
+      groups: defaultGroup ? [defaultGroup] : undefined,
     });
 
     if (referredBy) {

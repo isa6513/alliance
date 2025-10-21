@@ -324,7 +324,7 @@ const GroupCard: React.FC<GroupCardProps> = ({
         <div className="flex flex-row items-center justify-between">
           <div className="flex flex-col gap-1">
             <div className="flex flex-row items-center gap-3">
-              <h3 className="text-lg font-semibold">{group.name}</h3>
+              <h3 className="font-semibold">{group.name}</h3>
               <Badge>
                 {memberCount} member{memberCount === 1 ? "" : "s"}
               </Badge>
@@ -359,14 +359,14 @@ const GroupCard: React.FC<GroupCardProps> = ({
               <>
                 <Button
                   type="button"
-                  color={ButtonColor.White}
+                  color={ButtonColor.Light}
                   onClick={() => setIsEditing(true)}
                 >
                   Edit
                 </Button>
                 <Button
                   type="button"
-                  color={ButtonColor.RedOutline}
+                  color={ButtonColor.Red}
                   onClick={confirmAndDelete}
                   disabled={isDeleting}
                 >

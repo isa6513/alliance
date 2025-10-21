@@ -19,6 +19,8 @@ describe('ActionEventRecipientService', () => {
   };
   let service: ActionEventRecipientService;
 
+  const defaultGroup: Group = { id: 0 } as unknown as Group;
+
   const buildAction = (overrides: Partial<Action>): Action =>
     ({
       id: 1,
@@ -29,7 +31,7 @@ describe('ActionEventRecipientService', () => {
 
   const buildUser = (
     id: number,
-    groupIds: number[] = [],
+    groupIds: number[] = [0],
     overrides: Partial<User> = {},
   ): User =>
     ({
@@ -53,7 +55,7 @@ describe('ActionEventRecipientService', () => {
     );
   });
 
-  it('returns joined users when event is in member action with no group restriction', async () => {
+  it('returns no users when event is in member action with no groups set', async () => {
     const action = buildAction({ id: 42 });
     const joinedUsers = [buildUser(1), buildUser(2)];
     findMock.mockResolvedValue(
@@ -73,7 +75,7 @@ describe('ActionEventRecipientService', () => {
       },
       relations: ['user', 'user.groups'],
     });
-    expect(result).toEqual(joinedUsers);
+    expect(result).toEqual([]);
     expect(userServiceMock.findActiveUsers).not.toHaveBeenCalled();
     expect(userServiceMock.findActiveUsersWithGroups).not.toHaveBeenCalled();
   });
@@ -106,12 +108,12 @@ describe('ActionEventRecipientService', () => {
   });
 
   it('excludes users who signed their contract after member action launch', async () => {
-    const action = buildAction({ id: 55 });
+    const action = buildAction({ id: 55, participatingGroups: [defaultGroup] });
     const memberActionDate = new Date('2024-02-01T00:00:00Z');
-    const onTimeUser = buildUser(1, [], {
+    const onTimeUser = buildUser(1, undefined, {
       contractDateSigned: new Date('2024-01-15T00:00:00Z'),
     });
-    const lateSigner = buildUser(2, [], {
+    const lateSigner = buildUser(2, undefined, {
       contractDateSigned: new Date('2024-02-05T00:00:00Z'),
     });
     findMock.mockResolvedValue([
@@ -129,7 +131,10 @@ describe('ActionEventRecipientService', () => {
   });
 
   it('returns active users when commitmentless action has no group restriction', async () => {
-    const action = buildAction({ commitmentless: true });
+    const action = buildAction({
+      commitmentless: true,
+      participatingGroups: [defaultGroup],
+    });
     const activeUsers = [buildUser(5)];
     findMock.mockResolvedValue([]);
     userServiceMock.findActiveUsersWithGroups.mockResolvedValue(activeUsers);
@@ -146,7 +151,10 @@ describe('ActionEventRecipientService', () => {
   });
 
   it('omits users without signed contracts for commitmentless actions', async () => {
-    const action = buildAction({ commitmentless: true });
+    const action = buildAction({
+      commitmentless: true,
+      participatingGroups: [defaultGroup],
+    });
     const activeUsers = [
       buildUser(5),
       buildUser(6, [], { contractDateSigned: null }),

@@ -272,7 +272,7 @@ export class User {
   @JoinColumn({ name: 'welcomeMailId' })
   welcomeMail: Mail | null;
 
-  @ManyToMany(() => Group, (group) => group.users)
+  @ManyToMany(() => Group, (group) => group.users, { onDelete: 'CASCADE' })
   @Type(() => Group)
   groups: Group[];
 }

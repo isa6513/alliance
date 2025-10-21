@@ -48,6 +48,7 @@ describe('Notification schedule (e2e)', () => {
         shortDescription: 'Short',
         type: ActionTaskType.Activity,
         commitmentThreshold: 1,
+        participatingGroups: [ctx.defaultGroup],
       }),
     );
 
@@ -133,6 +134,7 @@ describe('Notification schedule (e2e)', () => {
         type: ActionTaskType.Activity,
         commitmentThreshold: 1,
         commitmentless: false,
+        participatingGroups: [ctx.defaultGroup],
       }),
     );
 
@@ -257,6 +259,7 @@ describe('Notification schedule (e2e)', () => {
         shortDescription: 'Short',
         type: ActionTaskType.Activity,
         commitmentless: true,
+        participatingGroups: [ctx.defaultGroup],
       }),
     );
 

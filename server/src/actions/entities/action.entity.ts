@@ -131,13 +131,13 @@ export class Action {
   events: ActionEvent[];
 
   @ManyToMany(() => Group, (group) => group.participatingIn, {
-    nullable: true,
+    onDelete: 'CASCADE',
   })
-  @ApiPropertyOptional({ type: () => Group, isArray: true })
-  @IsOptional()
+  @ApiProperty({ type: () => Group, isArray: true })
+  @Allow()
   @JoinTable()
   @Type(() => Group)
-  participatingGroups?: Group[];
+  participatingGroups: Group[];
 
   @Column({ default: false })
   @ApiPropertyOptional({

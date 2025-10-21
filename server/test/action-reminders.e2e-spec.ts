@@ -91,6 +91,7 @@ describe('Action reminders (e2e)', () => {
         body: 'Body',
         shortDescription: 'Short',
         type: ActionTaskType.Activity,
+        participatingGroups: [ctx.defaultGroup],
       }),
     );
 

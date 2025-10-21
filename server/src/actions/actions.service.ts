@@ -227,8 +227,14 @@ export class ActionsService {
       return false;
     }
 
-    return action.participatingGroups.some((group) =>
-      group.users.some((groupUser) => groupUser.id === user.id),
+    if (!action.participatingGroups?.length) {
+      return false;
+    }
+
+    return user.groups.some((group) =>
+      action.participatingGroups.some(
+        (participatingGroup) => participatingGroup.id === group.id,
+      ),
     );
   }
 
@@ -237,7 +243,9 @@ export class ActionsService {
     userId?: number,
     serverSide = false,
   ): Promise<Action> {
-    const user = userId ? await this.userService.findOne(userId) : null;
+    const user = userId
+      ? await this.userService.findOne(userId, ['groups'])
+      : null;
     const action = await this.actionRepository.findOne({
       where: { id },
       relations: [
@@ -248,7 +256,6 @@ export class ActionsService {
         'events.customReminders.deadlineEvent',
         'activities',
         'participatingGroups',
-        'participatingGroups.users',
         'updates',
       ],
     });

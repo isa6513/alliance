@@ -33,8 +33,7 @@ export class ActionEventRecipientService {
         user.contractDateSigned <= eventDate &&
         !user.contractDateSuspended) ||
         everyoneShouldComplete) &&
-      (targetGroupIds.size === 0 ||
-        user.groups.some((group) => targetGroupIds.has(group.id)))
+      user.groups.some((group) => targetGroupIds.has(group.id))
     );
   }
 
@@ -44,7 +43,7 @@ export class ActionEventRecipientService {
     eventDate: Date,
   ): Promise<User[]> {
     const targetGroupIds = new Set(
-      (action.participatingGroups || []).map((group) => group.id),
+      action.participatingGroups.map((group) => group.id),
     );
 
     const filterToEligible = (users: User[]) =>

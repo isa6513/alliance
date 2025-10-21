@@ -85,6 +85,7 @@ describe('Tasks (e2e)', () => {
         type: ActionTaskType.Activity,
         commitmentless: true,
         everyoneShouldComplete: false,
+        participatingGroups: [ctx.defaultGroup],
       } satisfies CreateActionDto),
     );
 

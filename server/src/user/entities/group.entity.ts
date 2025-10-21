@@ -22,7 +22,9 @@ export class Group {
   @Allow()
   id: number;
 
-  @ManyToMany(() => User, (user) => user.groups, { eager: true })
+  @ManyToMany(() => User, (user) => user.groups, {
+    onDelete: 'CASCADE',
+  })
   @ApiProperty({ type: () => User, isArray: true })
   @Allow()
   @JoinTable()

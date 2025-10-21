@@ -682,6 +682,10 @@ export class UserService {
     return this.groupRepository.find({ relations: ['users'] });
   }
 
+  async findGroupByName(name: string): Promise<Group | null> {
+    return this.groupRepository.findOne({ where: { name } });
+  }
+
   async addUserToGroup(groupId: number, userId: number): Promise<Group> {
     const group = await this.groupRepository.findOneOrFail({
       where: { id: groupId },

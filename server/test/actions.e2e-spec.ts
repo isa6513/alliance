@@ -48,6 +48,8 @@ describe('Actions (e2e)', () => {
         body: 'Body copy',
         taskContents: 'Task copy',
         shortDescription: `${name} short description`,
+        showToNonparticipating: true,
+        participatingGroups: [ctx.defaultGroup],
         ...options.actionOverrides,
       }),
     );
@@ -81,12 +83,16 @@ describe('Actions (e2e)', () => {
       category: 'Test',
       body: 'Test action for forum tests',
       taskContents: 'Test action for forum tests',
+      showToNonparticipating: true,
+      participatingGroups: [ctx.defaultGroup],
     });
 
     testDraftAction = actionRepo.create({
       name: 'Test Draft Action',
       category: 'Test',
       body: 'Test action for forum tests',
+      showToNonparticipating: true,
+      participatingGroups: [ctx.defaultGroup],
     });
 
     await actionRepo.save(testAction);
@@ -168,6 +174,7 @@ describe('Actions (e2e)', () => {
         type: ActionTaskType.Activity,
         commitmentless: false,
         everyoneShouldComplete: false,
+        participatingGroups: [],
       };
 
       const res = await request(ctx.app.getHttpServer())
@@ -380,7 +387,7 @@ describe('Actions (e2e)', () => {
       ).toBe(false);
     });
 
-    it("excludes shouldComplete flag for users without eligible contracts when everyoneShouldComplete is false", async () => {
+    it('excludes shouldComplete flag for users without eligible contracts when everyoneShouldComplete is false', async () => {
       const { action, event } = await createPublishedAction(
         'Contract Restricted Action',
         {
@@ -395,6 +402,7 @@ describe('Actions (e2e)', () => {
         email: `unsigned-${Date.now()}@example.com`,
         password: 'Password123!',
         name: 'Unsigned User',
+        groups: [ctx.defaultGroup],
       });
 
       const lateSigner = await userService.create({
@@ -402,6 +410,7 @@ describe('Actions (e2e)', () => {
         password: 'Password123!',
         name: 'Late Signer',
         contractDateSigned: new Date(event.date.getTime() + 1000),
+        groups: [ctx.defaultGroup],
       });
 
       const eligibleUser = await userService.create({
@@ -409,6 +418,7 @@ describe('Actions (e2e)', () => {
         password: 'Password123!',
         name: 'Eligible User',
         contractDateSigned: new Date(event.date.getTime() - 1000),
+        groups: [ctx.defaultGroup],
       });
 
       const unsignedToken = ctx.jwtService.sign(
@@ -474,20 +484,18 @@ describe('Actions (e2e)', () => {
     });
 
     it('shows actions with everyoneShouldComplete true to users without contracts', async () => {
-      const { action } = await createPublishedAction(
-        'Onboarding Action',
-        {
-          status: ActionStatus.MemberAction,
-          actionOverrides: {
-            everyoneShouldComplete: true,
-          },
+      const { action } = await createPublishedAction('Onboarding Action', {
+        status: ActionStatus.MemberAction,
+        actionOverrides: {
+          everyoneShouldComplete: true,
         },
-      );
+      });
 
       const contractlessUser = await userService.create({
         email: `contractless-${Date.now()}@example.com`,
         password: 'Password123!',
         name: 'Contractless User',
+        groups: [ctx.defaultGroup],
       });
 
       const contractlessToken = ctx.jwtService.sign(
@@ -504,9 +512,7 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${contractlessToken}`)
         .expect(200);
 
-      const targetAction = res.body.find(
-        (a: ActionDto) => a.id === action.id,
-      );
+      const targetAction = res.body.find((a: ActionDto) => a.id === action.id);
 
       expect(targetAction).toBeDefined();
       expect(targetAction.shouldParticipate).toBe(true);
@@ -563,6 +569,7 @@ describe('Actions (e2e)', () => {
           name: 'Status Test Action',
           category: 'Test',
           body: 'Test action for status computation',
+          participatingGroups: [ctx.defaultGroup],
         });
         await actionRepo.save(newAction);
 
@@ -585,6 +592,7 @@ describe('Actions (e2e)', () => {
           category: 'Test',
           body: 'Test action for status transitions',
           taskContents: 'Test action for status transitions',
+          participatingGroups: [ctx.defaultGroup],
         });
         await actionRepo.save(newAction);
 
@@ -624,6 +632,7 @@ describe('Actions (e2e)', () => {
           category: 'Test',
           body: 'Test action for multiple events',
           taskContents: 'Test action for multiple events',
+          participatingGroups: [ctx.defaultGroup],
         });
         await actionRepo.save(newAction);
 
@@ -678,6 +687,7 @@ describe('Actions (e2e)', () => {
           category: 'Test',
           body: 'Test action for future events',
           taskContents: 'Test action for future events',
+          participatingGroups: [ctx.defaultGroup],
         });
         await actionRepo.save(newAction);
 
@@ -856,6 +866,7 @@ describe('Actions (e2e)', () => {
         category: 'Test',
         body: 'Test action for automatic commitment transitions',
         commitmentThreshold: 2, // Need 2 users to reach threshold
+        participatingGroups: [ctx.defaultGroup],
       });
       await actionRepo.save(newAction);
 
@@ -927,6 +938,7 @@ describe('Actions (e2e)', () => {
         name: 'Auto Transition Test - Completion',
         category: 'Test',
         body: 'Test action for automatic completion transitions',
+        participatingGroups: [ctx.defaultGroup],
       });
       await actionRepo.save(newAction);
 
@@ -1013,6 +1025,7 @@ describe('Actions (e2e)', () => {
         name: 'Auto Transition Test - No Users',
         category: 'Test',
         body: 'Test action with no users joined',
+        participatingGroups: [ctx.defaultGroup],
       });
       await actionRepo.save(newAction);
 
@@ -1165,6 +1178,7 @@ describe('Actions (e2e)', () => {
         name: 'Friend User',
         email: `friend-${Date.now()}@example.com`,
         password: 'Password123!',
+        groups: [ctx.defaultGroup],
       });
 
       await userService.makeFriendsAutomated(ctx.testUserId, friend.id);
@@ -1255,6 +1269,7 @@ describe('Actions (e2e)', () => {
             emailNotifsEnabled: true,
             textNotifsEnabled: true,
             turnedOffAllNotifs: false,
+            groups: [ctx.defaultGroup],
           }),
         ),
       );
@@ -1311,7 +1326,6 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .expect(200);
 
-      //   expect(gatherRes.body.n_emails).toBe(1);
       expect(gatherRes.body.texts.length + gatherRes.body.emails.length).toBe(
         n_users,
       );

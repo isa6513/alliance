@@ -35,6 +35,7 @@ describe('Forum (e2e)', () => {
       category: 'Test',
       body: 'Test action for forum tests',
       status: ActionStatus.GatheringCommitments,
+      participatingGroups: [ctx.defaultGroup],
     });
     await actionRepo.save(testAction);
 

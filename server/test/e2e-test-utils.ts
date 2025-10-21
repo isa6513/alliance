@@ -15,6 +15,7 @@ import * as cookieParser from 'cookie-parser';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { testConnectionOptions } from 'src/datasources/dataSourceTest';
+import { Group } from 'src/user/entities/group.entity';
 
 export interface TestContext {
   app: INestApplication;
@@ -25,6 +26,7 @@ export interface TestContext {
   testUserId: number;
   adminUserId: number;
   agent: TestAgent;
+  defaultGroup: Group;
 }
 
 export async function createTestApp(
@@ -65,13 +67,19 @@ export async function createTestApp(
   await dataSource.synchronize(true);
 
   const userRepo = dataSource.getRepository(User);
+  const groupRepo = dataSource.getRepository(Group);
   const jwtService = moduleFixture.get<JwtService>(JwtService);
+
+  const defaultGroup = await groupRepo.save(
+    groupRepo.create({ name: 'Default Group', description: 'Default Group' }),
+  );
 
   const user = await userRepo.save(
     userRepo.create({
       email: 'user@example.com',
       password: 'pass',
       name: 'User',
+      groups: [defaultGroup],
     }),
   );
 
@@ -81,6 +89,7 @@ export async function createTestApp(
       password: 'pass',
       name: 'Admin',
       admin: true,
+      groups: [defaultGroup],
     }),
   );
 
@@ -113,5 +122,6 @@ export async function createTestApp(
     testUserId: user.id,
     adminUserId: adminUser.id,
     agent,
+    defaultGroup,
   };
 }
