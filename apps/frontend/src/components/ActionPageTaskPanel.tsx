@@ -1,5 +1,5 @@
 import { ActionActivityDto, UserActionRelation } from "@alliance/shared/client";
-import Card from "@alliance/shared/ui/Card";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
 import ActionTaskPanel, { ActionTaskPanelProps } from "./ActionTaskPanel";
@@ -35,7 +35,15 @@ const ActionPageTaskPanel = () => {
   const { userRelation, action, ...panelHandlers } =
     useOutletContext<TaskPanelContext>();
 
-  if (!userRelation || !action?.canParticipate || !action) {
+  if (!action.reqAuthenticated) {
+    return (
+      <Card style={CardStyle.Grey}>
+        Log in or reload to interact with this action
+      </Card>
+    );
+  }
+
+  if (!userRelation || !action || !action.canParticipate) {
     return null;
   }
 

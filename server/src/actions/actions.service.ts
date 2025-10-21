@@ -173,7 +173,7 @@ export class ActionsService {
 
     return await Promise.all(
       filtered.map(async (action) => {
-        let shouldComplete = false;
+        let shouldParticipate = false;
         if (
           user &&
           action.events.some(
@@ -183,7 +183,7 @@ export class ActionsService {
           const targetGroupIds = new Set(
             (action.participatingGroups || []).map((group) => group.id),
           );
-          shouldComplete =
+          shouldParticipate =
             this.actionEventRecipientService.userShouldCompleteEvent(
               user,
               action.events.find(
@@ -193,14 +193,16 @@ export class ActionsService {
               action.everyoneShouldComplete,
             );
         }
-        return new ActionDto(
-          action,
-          user ? await this.isEligibleForAction(action, user) : false,
-          shouldComplete,
-          action.commitmentless
+        return new ActionDto(action, {
+          canParticipate: user
+            ? await this.isEligibleForAction(action, user)
+            : false,
+          shouldParticipate: shouldParticipate,
+          userJoined: action.commitmentless
             ? await this.getUsersJoinedForCommitmentlessAction(action)
             : undefined,
-        );
+          reqAuthenticated: !!user,
+        });
       }),
     );
   }
@@ -276,20 +278,24 @@ export class ActionsService {
     const user = userId
       ? await this.userService.findOne(userId, ['groups'])
       : null;
-    return new ActionDto(
-      action,
-      user ? await this.isEligibleForAction(action, user) : false,
-      undefined,
-      action.commitmentless
+    return new ActionDto(action, {
+      canParticipate: user
+        ? await this.isEligibleForAction(action, user)
+        : false,
+      userJoined: action.commitmentless
         ? await this.getUsersJoinedForCommitmentlessAction(action)
         : undefined,
-    );
+      userRelation: user
+        ? await this.getActionRelation(action.id, user.id)
+        : undefined,
+      reqAuthenticated: !!user,
+    });
   }
 
   async getActionRelation(
     actionId: number,
     userId: number,
-  ): Promise<UserActionRelation | null> {
+  ): Promise<UserActionRelation> {
     const activities = await this.actionActivityRepository.find({
       where: { action: { id: actionId }, user: { id: userId } },
     });

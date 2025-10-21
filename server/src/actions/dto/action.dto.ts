@@ -171,22 +171,37 @@ export class ActionDto extends OmitType(Action, [
   @ApiPropertyOptional()
   shouldParticipate?: boolean;
 
+  @ApiPropertyOptional({
+    enum: UserActionRelation,
+    enumName: 'UserActionRelation',
+  })
+  userRelation?: UserActionRelation;
+
+  @ApiPropertyOptional()
+  reqAuthenticated?: boolean;
+
   constructor(
     action: Partial<Action>,
-    canParticipate?: boolean,
-    shouldParticipate?: boolean,
-    userJoined?: number,
+    extra?: {
+      canParticipate?: boolean;
+      shouldParticipate?: boolean;
+      userJoined?: number;
+      userRelation?: UserActionRelation;
+      reqAuthenticated?: boolean;
+    },
   ) {
     super();
     Object.assign(this, action);
     this.image = action.image ? getImageSource(action.image) : undefined;
-    this.usersJoined = userJoined || action.usersJoined || 0;
+    this.usersJoined = extra?.userJoined || action.usersJoined || 0;
     this.usersCompleted = action.usersCompleted || 0;
     this.status = action.status || ActionStatus.Draft;
     this.events =
       action.events?.map((event) => new ActionEventDto(event)) || [];
-    this.canParticipate = canParticipate ?? false;
-    this.shouldParticipate = shouldParticipate ?? false;
+    this.canParticipate = extra?.canParticipate;
+    this.shouldParticipate = extra?.shouldParticipate;
+    this.userRelation = extra?.userRelation;
+    this.reqAuthenticated = extra?.reqAuthenticated;
   }
 }
 

@@ -1,7 +1,6 @@
 import {
   ActionDto,
   actionsFindOne,
-  actionsMyStatus,
   UserActionRelation,
 } from "@alliance/shared/client";
 import { Outlet, useParams } from "react-router";
@@ -47,28 +46,12 @@ export default function ActionPage() {
     fetchAction();
   }, [fetchAction, isAuthenticated]);
 
-  const [userRelation, setUserRelation] = useState<UserActionRelation | null>(
-    null
-  );
-
   useCIDFromParams();
 
   const { activities, handleLikeActivity, setActivities } = useActivities({
     list: ActivityList.Action,
     objectId: actionId,
   });
-
-  useEffect(() => {
-    if (isAuthenticated && actionId) {
-      actionsMyStatus({
-        path: { id: actionId },
-      }).then((response) => {
-        if (response.data) {
-          setUserRelation(response.data.relation);
-        }
-      });
-    }
-  }, [isAuthenticated, actionId]);
 
   if (!action) {
     return (
@@ -94,11 +77,25 @@ export default function ActionPage() {
           context={
             {
               action,
-              userRelation,
-              onCompleteAction: () => setUserRelation("completed"),
-              onJoinAction: () => setUserRelation("joined"),
-              onDeclineAction: () => setUserRelation("declined"),
-              onOptOutAction: () => setUserRelation("declined"),
+              userRelation:
+                (action.userRelation as UserActionRelation | undefined) ?? null,
+              onCompleteAction: () =>
+                setAction((action) => ({
+                  ...action!,
+                  userRelation: "completed",
+                })),
+              onJoinAction: () =>
+                setAction((action) => ({ ...action!, userRelation: "joined" })),
+              onDeclineAction: () =>
+                setAction((action) => ({
+                  ...action!,
+                  userRelation: "declined",
+                })),
+              onOptOutAction: () =>
+                setAction((action) => ({
+                  ...action!,
+                  userRelation: "declined",
+                })),
               activities,
               handleLikeActivity,
               setActivities,

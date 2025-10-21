@@ -1,7 +1,6 @@
 import { ActionUpdate } from "@alliance/shared/client/types.gen";
 import ActionUpdateCard from "@alliance/shared/ui/ActionUpdateCard";
 import { useState } from "react";
-import Timeline from "./system/Timeline";
 
 const ActionUpdatesPanel = ({ updates }: { updates: ActionUpdate[] }) => {
   const [expanded, setExpanded] = useState(false);

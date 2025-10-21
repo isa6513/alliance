@@ -621,6 +621,8 @@ export type ActionDto = {
     events: Array<ActionEventDto>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
+    userRelation?: string;
+    reqAuthenticated?: boolean;
 };
 
 export type CommentParentObject = 'post' | 'action' | 'activity';
@@ -763,6 +765,8 @@ export type CreateActionDto = {
     everyoneShouldComplete: boolean;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
+    userRelation?: string;
+    reqAuthenticated?: boolean;
 };
 
 export type UpdateActionDto = {
@@ -821,6 +825,8 @@ export type UpdateActionDto = {
     everyoneShouldComplete?: boolean;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
+    userRelation?: string;
+    reqAuthenticated?: boolean;
 };
 
 export type CreateActionEventDto = {
