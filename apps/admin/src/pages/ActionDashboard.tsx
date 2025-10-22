@@ -502,11 +502,11 @@ const ActionDashboard: React.FC = () => {
         Please see{" "}
         <a
           className="text-green underline"
-          href="https://docs.google.com/document/d/1m19_KAO6u_EGnspSji68yoziuPz4MwOQqYDbFez_RpM/edit?usp=sharing"
+          href="https://www.notion.so/Action-public-preparation-guide-28b6915bb8fa80f19306f016ff13ba5d?source=copy_link"
           target="_blank"
           rel="noreferrer"
         >
-          Guide to preparing public actions
+          Action public preparation guide
         </a>
       </p>
       {error && (
