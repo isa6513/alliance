@@ -57,6 +57,12 @@ export function EditableRadioField({
         onChange={(checked) => onUpdate({ required: checked })}
       />
 
+      <RequiredToggle
+        label="Randomize options"
+        checked={!!field.randomizeOptions}
+        onChange={(checked) => onUpdate({ randomizeOptions: checked })}
+      />
+
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-xs font-medium text-gray-700">

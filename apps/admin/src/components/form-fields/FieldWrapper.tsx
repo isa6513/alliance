@@ -148,7 +148,7 @@ export function FieldWrapper<T extends AnyField>({
 
   return (
     <div
-      className={`group relative border rounded-lg transition-all ${
+      className={`group relative border rounded-lg transition-all [&_input,&_textarea]:bg-white ${
         isDragging
           ? "border-blue-400 shadow-lg opacity-50"
           : "border-gray-200 hover:border-gray-300"
@@ -239,7 +239,7 @@ export function FieldWrapper<T extends AnyField>({
         <div className="bg-gray-100 p-4 rounded-t-lg space-y-2">{children}</div>
         {isCurrentFormField && (
           <div className="p-4 pt-0">
-            <RenderField field={field} disabled />
+            <RenderField field={field} disabled randomizationKey="preview" />
           </div>
         )}
         {isCurrentFormField &&

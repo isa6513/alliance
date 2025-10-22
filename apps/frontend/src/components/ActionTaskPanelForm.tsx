@@ -11,6 +11,7 @@ import { FormSchema } from "@alliance/shared/forms/formschema";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import posthog from "posthog-js";
 import { useEffect, useState } from "react";
+import { useAuth } from "../lib/AuthContext";
 import Spinner from "./Spinner";
 
 interface ActionTaskPanelActivityProps {
@@ -33,6 +34,7 @@ const ActionTaskPanelForm = ({
   const [form, setForm] = useState<FormDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchForm = async () => {
@@ -120,6 +122,7 @@ const ActionTaskPanelForm = ({
           actionId={actionId}
           onSubmit={handleSubmitForm}
           persistKey={String(taskFormId)}
+          userId={user?.id}
           onFormStarted={onFormStarted}
           onAbandonAction={onAbandonAction}
           renderFormAsCompleted={false}

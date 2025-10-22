@@ -66,12 +66,19 @@ export type NumberField = BaseField<'number'> & {
 };
 
 export type CheckboxField = BaseField<'checkbox'>;
-export type RadioField = BaseField<'radio'> & { options: Option<string>[] };
+export type RadioField = BaseField<'radio'> & {
+  options: Option<string>[];
+  randomizeOptions?: boolean;
+};
 
-export type SelectField = BaseField<'select'> & { options: Option<string>[] };
+export type SelectField = BaseField<'select'> & {
+  options: Option<string>[];
+  randomizeOptions?: boolean;
+};
 
 export type MultiSelectField = BaseField<'multiselect'> & {
   options: Option<string>[];
+  randomizeOptions?: boolean;
 };
 
 export type DateField = BaseField<'date'>; // ISO date string

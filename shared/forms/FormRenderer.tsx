@@ -18,6 +18,8 @@ type FormRendererProps = {
   id: number;
   actionId: number;
   persistKey?: string | null;
+  userId?: string | number;
+  disableOptionRandomization?: boolean;
   onFormStarted?: () => void;
   onAbandonAction?: (outOfTime: boolean, reason: string) => void;
   renderFormAsCompleted?: boolean;
@@ -54,6 +56,8 @@ const FormRenderer = ({
   id,
   onSubmit,
   persistKey,
+  userId,
+  disableOptionRandomization,
   onFormStarted,
   onAbandonAction,
   renderFormAsCompleted,
@@ -70,6 +74,16 @@ const FormRenderer = ({
     formId: id,
     instanceId: persistKey ?? undefined,
   });
+  const randomizationKey = useMemo(() => {
+    const base = `form:${id}`;
+    if (userId !== undefined && userId !== null && userId !== "") {
+      return `${base}:user:${String(userId)}`;
+    }
+    if (persistKey !== undefined && persistKey !== null && persistKey !== "") {
+      return `${base}:persist:${String(persistKey)}`;
+    }
+    return base;
+  }, [id, userId, persistKey]);
 
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(() => {
     if (readOnly) return 0;
@@ -608,6 +622,10 @@ const FormRenderer = ({
         uploading={uploadingFields.has(field.id)}
         uploadError={uploadErrors[field.id]}
         error={fieldErrors[field.id]}
+        randomizationKey={
+          disableOptionRandomization ? undefined : randomizationKey
+        }
+        disableOptionRandomization={disableOptionRandomization}
       />
     </div>
   );

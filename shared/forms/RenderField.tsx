@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import type { AnyField, FormValue } from "./formschema";
+import { shuffleWithSeed } from "./randomutils";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -11,6 +13,8 @@ export type RenderFieldProps = {
   uploading?: boolean;
   uploadError?: string | null;
   error?: string | null;
+  randomizationKey?: string;
+  disableOptionRandomization?: boolean;
 };
 
 export function RenderLabel({
@@ -38,10 +42,34 @@ export function RenderField({
   uploading,
   uploadError,
   error,
+  randomizationKey,
+  disableOptionRandomization,
 }: RenderFieldProps) {
   const errorMessage =
     typeof error === "string" && error.trim().length > 0 ? error : null;
   const hasError = Boolean(errorMessage);
+  const randomizationSeedBase =
+    randomizationKey && randomizationKey.length > 0
+      ? `${randomizationKey}:${field.id}`
+      : field.id;
+  const randomizedOptions = useMemo(() => {
+    if (
+      field.kind !== "radio" &&
+      field.kind !== "multiselect" &&
+      field.kind !== "select"
+    ) {
+      return null;
+    }
+    const options = field.options ?? [];
+    if (
+      disableOptionRandomization ||
+      !field.randomizeOptions ||
+      options.length <= 1
+    ) {
+      return options;
+    }
+    return shuffleWithSeed(options, randomizationSeedBase);
+  }, [field, randomizationSeedBase, disableOptionRandomization]);
 
   const composeClassName = (
     base: string,
@@ -239,7 +267,8 @@ export function RenderField({
         </div>
       );
 
-    case "radio":
+    case "radio": {
+      const options = randomizedOptions ?? field.options;
       return (
         <div className="space-y-2">
           <RenderLabel field={field} error={errorMessage} />
@@ -248,7 +277,7 @@ export function RenderField({
               hasError ? "border-l-2 border-red-500 pl-3" : ""
             }`}
           >
-            {field.options.map((option, optIndex) => (
+            {options.map((option, optIndex) => (
               <label key={optIndex} className="flex items-start">
                 <input
                   type="radio"
@@ -282,8 +311,10 @@ export function RenderField({
           {renderValidationMessage()}
         </div>
       );
+    }
 
-    case "select":
+    case "select": {
+      const options = randomizedOptions ?? field.options;
       return (
         <div className="space-y-1">
           <RenderLabel field={field} error={errorMessage} />
@@ -300,7 +331,7 @@ export function RenderField({
             <option value="" className="placeholder" disabled>
               Select an option
             </option>
-            {field.options.map((option, optIndex) => (
+            {options.map((option, optIndex) => (
               <option key={optIndex} value={option.value}>
                 {option.label}
               </option>
@@ -309,9 +340,11 @@ export function RenderField({
           {renderValidationMessage()}
         </div>
       );
+    }
 
     case "multiselect": {
       const selectedCount = Array.isArray(value) ? value.length : 0;
+      const options = randomizedOptions ?? field.options;
       return (
         <div className="space-y-2">
           <RenderLabel field={field} error={errorMessage} />
@@ -320,7 +353,7 @@ export function RenderField({
               hasError ? "border-l-2 border-red-500 pl-3" : ""
             }`}
           >
-            {field.options.map((option, optIndex) => (
+            {options.map((option, optIndex) => (
               <label key={optIndex} className="flex items-center">
                 <input
                   type="checkbox"

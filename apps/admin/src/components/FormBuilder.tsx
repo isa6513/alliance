@@ -1156,6 +1156,7 @@ export function FormBuilder({
               form={schema}
               onSubmit={null}
               renderFormAsCompleted={false}
+              userId="preview"
             />
           ) : (
             <div
