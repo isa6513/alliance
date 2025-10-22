@@ -27,7 +27,8 @@ export function getLastAndNextEvent(action: ActionDto) {
     (event) => new Date(event.date) > new Date(),
   );
 
-  const lastEvent = pastEvents[pastEvents.length - 1];
+  const lastEvent =
+    pastEvents.length > 0 ? pastEvents[pastEvents.length - 1] : null;
   const nextEvent = futureEvents.length > 0 ? futureEvents[0] : null;
 
   return { lastEvent, nextEvent };

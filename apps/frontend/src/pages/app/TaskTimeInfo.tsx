@@ -7,7 +7,7 @@ import DeadlineIcon from "@alliance/shared/ui/icons/DeadlineIcon";
 export interface TaskTimeInfoProps {
   action: ActionDto;
   nextEvent: ActionEventDto | null;
-  lastEvent: ActionEventDto;
+  lastEvent: ActionEventDto | null;
 }
 
 const TaskTimeInfo = ({ action, nextEvent, lastEvent }: TaskTimeInfoProps) => {
@@ -37,7 +37,7 @@ const TaskTimeInfo = ({ action, nextEvent, lastEvent }: TaskTimeInfoProps) => {
           </p>
         </div>
       )}
-      {!nextEvent && (
+      {!nextEvent && lastEvent && (
         <p className="text-base text-zinc-500">
           {action.status === "gathering_commitments"
             ? "Opened for member commitment  "
