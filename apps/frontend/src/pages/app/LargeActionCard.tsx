@@ -5,11 +5,9 @@ import { ActionDto, UserActionRelation } from "@alliance/shared/client";
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import ClockIcon from "@alliance/shared/ui/icons/ClockIcon";
-import DeadlineIcon from "@alliance/shared/ui/icons/DeadlineIcon";
 import ActionTaskPanel from "../../components/ActionTaskPanel";
-import { formatTime } from "@alliance/shared/lib/utils";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
+import TaskTimeInfo from "./TaskTimeInfo";
 
 export interface LargeActionCardProps {
   action: ActionDto;
@@ -18,6 +16,21 @@ export interface LargeActionCardProps {
   onUpdateActionState: () => void;
   showDetails?: boolean;
   className?: string;
+}
+
+export function getLastAndNextEvent(action: ActionDto) {
+  const pastEvents = action.events.filter(
+    (event) => new Date(event.date) <= new Date(),
+  );
+
+  const futureEvents = action.events.filter(
+    (event) => new Date(event.date) > new Date(),
+  );
+
+  const lastEvent = pastEvents[pastEvents.length - 1];
+  const nextEvent = futureEvents.length > 0 ? futureEvents[0] : null;
+
+  return { lastEvent, nextEvent };
 }
 
 enum LargeActionCardState {
@@ -63,21 +76,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
     [navigate, action],
   );
 
-  const pastEvents = action.events.filter(
-    (event) => new Date(event.date) <= new Date(),
-  );
-
-  const futureEvents = action.events.filter(
-    (event) => new Date(event.date) > new Date(),
-  );
-
-  const lastEvent = pastEvents[pastEvents.length - 1];
-  const nextEvent = futureEvents.length > 0 ? futureEvents[0] : null;
-
-  const deadlineColor =
-    !!nextEvent && new Date(nextEvent.date).getTime() - Date.now() < 172800000 // 2 days
-      ? "var(--color-red-600)"
-      : "var(--color-zinc-500)";
+  const { lastEvent, nextEvent } = getLastAndNextEvent(action);
 
   return (
     <Card
@@ -101,36 +100,11 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             </Button>
           )}
           <div className="flex flex-col flex-1">
-            <div className="flex flex-row flex-wrap gap-x-4 mb-2">
-              {!!action.timeEstimate &&
-                action.status !== "gathering_commitments" && (
-                  <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
-                    <ClockIcon />
-                    <p className="text-green">{`${action.timeEstimate} minute${
-                      action.timeEstimate === 1 ? "" : "s"
-                    }`}</p>
-                  </div>
-                )}
-              {!!nextEvent && (
-                <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
-                  <DeadlineIcon fill={deadlineColor} />
-                  <p style={{ color: deadlineColor }}>
-                    {`${formatTime(new Date(nextEvent.date), {
-                      addSuffix: false,
-                    })}`}{" "}
-                    left
-                  </p>
-                </div>
-              )}
-              {!nextEvent && (
-                <p className="text-base text-zinc-500">
-                  {action.status === "gathering_commitments"
-                    ? "Opened for member commitment  "
-                    : "Entered action stage "}
-                  {formatTime(new Date(lastEvent.date), { addSuffix: true })}
-                </p>
-              )}
-            </div>
+            <TaskTimeInfo
+              action={action}
+              nextEvent={nextEvent}
+              lastEvent={lastEvent}
+            />
             <p className="font-medium text-lg">{action.name}</p>
           </div>
           {showDetails && (

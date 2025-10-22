@@ -5,6 +5,8 @@ import { Route } from "../../.react-router/types/src/components/+types/ActionPag
 import ActionTaskPanel, { ActionTaskPanelProps } from "./ActionTaskPanel";
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import ActionTaskPanelDeclined from "./ActionTaskPanelDeclined";
+import TaskTimeInfo from "../pages/app/TaskTimeInfo";
+import { getLastAndNextEvent } from "../pages/app/LargeActionCard";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
@@ -55,13 +57,22 @@ const ActionPageTaskPanel = () => {
     return <ActionTaskPanelDeclined />;
   }
 
+  const { lastEvent, nextEvent } = getLastAndNextEvent(action);
+
   return (
-    <ActionTaskPanel
-      userRelation={userRelation}
-      action={action}
-      {...panelHandlers}
-      card={true}
-    />
+    <>
+      <TaskTimeInfo
+        action={action}
+        nextEvent={nextEvent}
+        lastEvent={lastEvent}
+      />
+      <ActionTaskPanel
+        userRelation={userRelation}
+        action={action}
+        {...panelHandlers}
+        card={true}
+      />
+    </>
   );
 };
 
