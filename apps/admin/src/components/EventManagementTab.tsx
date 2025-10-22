@@ -379,7 +379,7 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
                         Date:{" "}
                         {formatDate(
                           new Date(eventForm.date).getTime() + 604800000,
-                          "MM/dd/yyyy HH:mm a"
+                          "MM/dd/yyyy hh:mm a"
                         )}
                       </p>
                     )}
