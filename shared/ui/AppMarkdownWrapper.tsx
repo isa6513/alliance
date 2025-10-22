@@ -39,6 +39,12 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
           ),
           li: ({ ...props }) => <li className="my-1" {...props} />,
           a: ({ ...props }) => <a className="text-link" {...props} />,
+          blockquote: ({ ...props }) => (
+            <blockquote
+              className="border-l-2 border-gray-300 pl-4 my-4"
+              {...props}
+            />
+          ),
           code: ({ className, children, ...props }) => {
             const language = className?.replace("language-", "");
             const value = String(children).trim();
