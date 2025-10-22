@@ -105,7 +105,7 @@ export class ActionsController {
     @Body() body: OptOutActionDto,
   ) {
     return this.actionsService.optoutAction(
-      +id,
+      id,
       req.user.sub,
       body.reason,
       body.outOfTime,

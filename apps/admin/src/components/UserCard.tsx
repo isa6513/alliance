@@ -264,6 +264,8 @@ const UserCard = ({
                 ? "bg-green"
                 : relation?.status === "joined"
                 ? "bg-green/40"
+                : relation?.status === "wont_complete"
+                ? "bg-yellow-400"
                 : relation?.status === "missed_deadline"
                 ? "bg-orange-600"
                 : "bg-zinc-100 text-zinc-500 border border-zinc-200";

@@ -389,7 +389,7 @@ export class ActionsService {
     reason: string,
     isMoral: boolean,
   ): Promise<ActionActivityDto> {
-    const action = await this.findOne(actionId);
+    const action = await this.findOne(actionId, userId);
     await this.ensureUserEligibleForAction(action, userId);
     const user = await this.userService.findOneOrFail(userId);
 
@@ -412,7 +412,7 @@ export class ActionsService {
     reason: string,
     outOfTime: boolean,
   ): Promise<ActionActivityDto> {
-    const action = await this.findOne(actionId);
+    const action = await this.findOne(actionId, userId);
     await this.ensureUserEligibleForAction(action, userId);
     const user = await this.userService.findOneOrFail(userId);
 
