@@ -84,7 +84,7 @@ const ForumListPost = ({
             />
           )}
         </div>
-        <div className="flex justify-between items-end text-sm text-zinc-500">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-end text-sm text-zinc-500 gap-y-1 md:gap-y-0">
           <div className="flex flex-row gap-x-1.5 items-center">
             <ProfileImage pfp={post.author.profilePicture} size="small" />
             <p>
@@ -113,7 +113,7 @@ const ForumListPost = ({
             <div className="flex items-center gap-x-1">
               <ProfileImage
                 pfp={post.lastComment.author.profilePicture}
-                size="mini"
+                size="small"
               />
               <span onClick={lastCommentAuthorClick}>
                 <UserDisplayName staff={post.lastComment.author.staff}>
