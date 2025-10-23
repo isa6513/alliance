@@ -52,6 +52,7 @@ export interface ActionEventNotificationContext {
   cid: string;
   isSecondMiss?: boolean;
   customEmailMessage?: string;
+  customEmailSubject?: string;
   customTextMessage?: string;
   includeActionLinkInCustomMessages?: boolean;
 }
@@ -196,6 +197,7 @@ export class ActionEventNotifWorker {
       action,
       customEmailMessage: reminder?.customEmailMessage ?? undefined,
       customTextMessage: reminder?.customTextMessage ?? undefined,
+      customEmailSubject: reminder?.customEmailSubject ?? undefined,
       includeActionLinkInCustomMessages:
         reminder?.includeActionLinkInMessages ?? false,
     };

@@ -67,12 +67,16 @@ export class ActionReminderDto {
   @Type(() => ProfileDto)
   users: ProfileDto[];
 
+  @ApiPropertyOptional()
+  customEmailSubject?: string;
+
   constructor(reminder: ActionReminder) {
     this.id = reminder.id;
     this.memberActionEventId = reminder.memberActionEvent?.id ?? 0;
     this.deadlineEventId = reminder.deadlineEvent?.id ?? undefined;
     this.customEmailMessage = reminder.customEmailMessage ?? undefined;
     this.customTextMessage = reminder.customTextMessage ?? undefined;
+    this.customEmailSubject = reminder.customEmailSubject ?? undefined;
     this.sendAt = reminder.sendAt;
     this.sentAt = reminder.sentAt ?? undefined;
     this.userIds = reminder.users?.map((user) => user.id) ?? [];
@@ -85,6 +89,7 @@ export class CreateActionReminderDto extends PickType(ActionReminder, [
   'customEmailMessage',
   'customTextMessage',
   'includeActionLinkInMessages',
+  'customEmailSubject',
 ]) {
   @ApiPropertyOptional()
   @IsOptional()

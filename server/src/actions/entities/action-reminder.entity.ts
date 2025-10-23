@@ -50,6 +50,12 @@ export class ActionReminder {
   @ApiPropertyOptional({ type: String })
   @Column({ type: 'text', nullable: true })
   @IsOptional()
+  @Allow()
+  customEmailSubject?: string;
+
+  @ApiPropertyOptional({ type: String })
+  @Column({ type: 'text', nullable: true })
+  @IsOptional()
   customEmailMessage?: string;
 
   @ApiPropertyOptional({ type: String })

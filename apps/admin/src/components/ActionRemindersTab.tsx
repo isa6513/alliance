@@ -45,6 +45,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     formatDateTimeLocal(new Date(Date.now() + 60 * 60 * 1000))
   );
   const [customEmailMessage, setCustomEmailMessage] = useState<string>("");
+  const [customEmailSubject, setCustomEmailSubject] = useState<string>("");
   const [includeActionLinkInMessages, setIncludeActionLinkInMessages] =
     useState<boolean>(false);
   const [customTextMessage, setCustomTextMessage] = useState<string>("");
@@ -160,12 +161,14 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     }
 
     setSubmitting(true);
+    console.log(customEmailSubject);
     const response = await actionsCreateCustomReminder({
       path: { actionId: action.id, eventId: selectedEventId },
       body: {
         sendAt: parsedSendAt.toISOString(),
         customEmailMessage: customEmailMessage || undefined,
         customTextMessage: customTextMessage || undefined,
+        customEmailSubject: customEmailSubject || undefined,
         deadlineEventId:
           deadlineEventId === "" ? undefined : Number(deadlineEventId),
         userIds: selectedUsers.map((user) => user.id),
@@ -287,7 +290,18 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Message (optional)
+              Email Subject
+            </label>
+            <input
+              value={customEmailSubject}
+              onChange={(event) => setCustomEmailSubject(event.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+              placeholder="Provide a custom email subject"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email Message
             </label>
             <textarea
               value={customEmailMessage}

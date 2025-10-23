@@ -207,7 +207,7 @@ export class MailService {
   public async sendActionEventNotificationEmail(
     context: ActionEventNotificationContext,
   ): Promise<Mail> {
-    const subject = this.getSubject(context);
+    const subject = context.customEmailSubject ?? this.getSubject(context);
 
     let emailType: EmailType | null = null;
 

@@ -282,6 +282,7 @@ export type ActionReminder = {
     memberActionEvent: ActionEvent;
     deadlineEvent?: ActionEvent;
     users: Array<Array<unknown>>;
+    customEmailSubject?: string;
     customEmailMessage?: string;
     customTextMessage?: string;
     includeActionLinkInMessages?: boolean;
@@ -857,6 +858,7 @@ export type CreateActionEventDto = {
 };
 
 export type CreateActionReminderDto = {
+    customEmailSubject?: string;
     customEmailMessage?: string;
     customTextMessage?: string;
     includeActionLinkInMessages?: boolean;
@@ -875,6 +877,7 @@ export type ActionReminderDto = {
     sentAt?: string;
     userIds: Array<number>;
     users: Array<ProfileDto>;
+    customEmailSubject?: string;
 };
 
 export type CreateEditableContentDto = {

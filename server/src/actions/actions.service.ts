@@ -550,6 +550,10 @@ export class ActionsService {
         dto.customTextMessage?.trim() !== ''
           ? dto.customTextMessage?.trim()
           : undefined,
+      customEmailSubject:
+        dto.customEmailSubject?.trim() !== ''
+          ? dto.customEmailSubject?.trim()
+          : undefined,
       sendAt,
       includeActionLinkInMessages: dto.includeActionLinkInMessages,
     });
