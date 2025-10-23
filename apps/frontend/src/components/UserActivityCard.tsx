@@ -67,7 +67,7 @@ const UserActivityCard = ({
             return (res.data as unknown as string) ?? "";
           }
           return img;
-        }),
+        })
       );
       const attachmentKeys = uploads.filter(Boolean) as string[];
 

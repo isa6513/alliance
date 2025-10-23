@@ -138,16 +138,25 @@ const PostDetailPage: React.FC = () => {
                 <h1 className="!text-xl !font-medium -mt-1">{post.title}</h1>
               </div>
             </div>
-            <div className="flex flex-row gap-x-2 mb-4 mt-1 items-center">
+            <div className="flex flex-row gap-x-2 mb-2 sm:mb-4 mt-1 items-center text-sm sm:text-base">
               <Link
                 to={`/user/${post.author.id}`}
                 className="flex items-center"
               >
-                <ProfileImage
-                  pfp={post.author.profilePicture}
-                  size="medium"
-                  className="mr-2"
-                />
+                <div className="hidden sm:inline">
+                  <ProfileImage
+                    pfp={post.author.profilePicture}
+                    size="medium"
+                    className="mr-2"
+                  />
+                </div>
+                <div className="inline sm:hidden">
+                  <ProfileImage
+                    pfp={post.author.profilePicture}
+                    size="small"
+                    className="mr-2"
+                  />
+                </div>
                 <UserDisplayName staff={post.author.staff}>
                   {post.author.displayName}
                 </UserDisplayName>
@@ -166,8 +175,10 @@ const PostDetailPage: React.FC = () => {
                 </Link>
               )}
             </div>
-            <EditableContentRenderer content={post.editableContent} />
-            <div className="flex items-center mt-4 gap-x-1.5 -mb-2">
+            <div className="text-sm sm:text-base">
+              <EditableContentRenderer content={post.editableContent} />
+            </div>
+            <div className="flex items-center mt-2 sm:mt-4 gap-x-1.5 -mb-2">
               <div className="">
                 <PostLikeButton
                   liked={post.likes.some((like) => like.id === user?.id)}

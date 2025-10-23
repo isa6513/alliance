@@ -83,7 +83,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [editAttachments, setEditAttachments] = useState<string[]>(
-    reply.editableContent.attachments,
+    reply.editableContent.attachments
   );
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
             return (res.data as unknown as string) ?? "";
           }
           return img;
-        }),
+        })
       );
       const attachmentKeys = uploads.filter(Boolean) as string[];
 
@@ -162,17 +162,25 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
 
       {/* Profile picture column */}
       <Link to={`/user/${reply.author.id}`} className="flex-shrink-0">
-        <ProfileImage
-          pfp={reply.author.profilePicture}
-          size={compact ? "small" : "medium"}
-        />
+        <div className="hidden sm:inline">
+          <ProfileImage
+            pfp={reply.author.profilePicture}
+            size={compact ? "small" : "medium"}
+          />
+        </div>
+        <div className="inline sm:hidden">
+          <ProfileImage
+            pfp={reply.author.profilePicture}
+            size={compact ? "mini" : "small"}
+          />
+        </div>
       </Link>
 
       {/* Content column */}
       <div className="flex-1 ">
         {/* Top row: User name and date with pin icon in top right */}
         <div className="flex justify-between items-center overflow-visible">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
             <a
               href={`/user/${reply.author.id}`}
               className="text-black font-medium"
@@ -181,7 +189,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                 {reply.author.displayName}
               </UserDisplayName>
             </a>
-            <span className="text-zinc-500 text-sm">
+            <span className="text-zinc-500 text-xs sm:text-sm">
               {formatDistanceToNow(new Date(reply.createdAt), {
                 addSuffix: true,
               })}
@@ -198,7 +206,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         </div>
 
         {/* Middle section: Reply content */}
-        <div className={compact ? `mb-1` : `mb-2`}>
+        <div className={`text-sm sm:text-base ${compact ? `mb-1` : `mb-2`}`}>
           {!isEditing && (
             <EditableContentRenderer
               content={reply.editableContent}
@@ -241,14 +249,14 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         ) : (
           /* Bottom row: Likes, reply button, and 3 dots dropdown */
           <div className="flex justify-between items-center text-sm">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3">
               <CommentLikeButton
                 liked={reply.likes.some((like) => like.id === user?.id)}
                 likes={reply.likes.length}
                 handleLike={() =>
                   onLikeReply(
                     reply.id,
-                    reply.likes.some((like) => like.id === user?.id),
+                    reply.likes.some((like) => like.id === user?.id)
                   )
                 }
               />
@@ -257,7 +265,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                   onClick={() => {
                     setReplyingTo(isReplyingToThis ? null : reply.id);
                   }}
-                  className="text-zinc-500 hover:text-zinc-700 hover:underline"
+                  className="text-zinc-500 hover:text-zinc-700 hover:underline text-xs sm:text-sm"
                 >
                   {!isReplyingToThis && "Reply"}
                 </button>
@@ -327,7 +335,7 @@ const ReplyComponent = ({
 }: ReplyComponentProps) => {
   const handleUpdateReply = async (
     id: number,
-    content: CreateEditableContentDto,
+    content: CreateEditableContentDto
   ) => {
     if (onUpdateReply) {
       await onUpdateReply(id, content);
@@ -396,7 +404,7 @@ const ReplyComponent = ({
           <Card
             key={reply.id}
             className={`!display-block transition-colors duration-1000 ${newReplyClass} ${
-              compact && "!p-1 !border-none"
+              compact ? "!p-1 !border-none" : "!p-2 sm:!p-4"
             } ${user && isReplyingToThis && !isCollapsed && "rounded-b-none"}`}
             flex={false}
             style={homeStyle ? CardStyle.Transparent : CardStyle.White}
@@ -437,14 +445,16 @@ const ReplyComponent = ({
                 {reply.children
                   .filter(
                     (childReply) =>
-                      !childReply.deleted || childReply.children?.length,
+                      !childReply.deleted || childReply.children?.length
                   )
                   .map((childReply) => (
                     <div key={childReply.id}>
                       <div
                         className={`${
-                          compact ? "my-3" : "border-t border-gray-200 my-4"
-                        } -mx-4`}
+                          compact
+                            ? "my-3"
+                            : "border-t border-zinc-200 my-2 sm:my-4"
+                        } -mx-2 sm:-mx-4`}
                       ></div>
                       <div>
                         <ReplyComponent
@@ -473,16 +483,28 @@ const ReplyComponent = ({
     );
   }
 
-  const indentStyle = {
-    marginLeft: `${depth * 30}px`,
-  };
+  const depthClasses = [
+    "ml-0 sm:ml-0",
+    "ml-4 sm:ml-6",
+    "ml-8 sm:ml-12",
+    "ml-12 sm:ml-18",
+    "ml-16 sm:ml-24",
+    "ml-20 sm:ml-30",
+    "ml-24 sm:ml-36",
+    "ml-28 sm:ml-42",
+    "ml-32 sm:ml-48",
+    "ml-36 sm:ml-54",
+  ];
+
+  // this is bad and we should do something better later
+  const indentStyle =
+    depthClasses[depth] || depthClasses[depthClasses.length - 1];
 
   return (
     <div>
       <div
-        className={`rounded border-transparent ${newReplyClass} duration-1000`}
+        className={`rounded border-transparent ${newReplyClass} ${indentStyle} duration-1000`}
         id={`reply-${reply.id}`}
-        style={indentStyle}
       >
         <ReplyContent
           reply={reply}
@@ -499,7 +521,7 @@ const ReplyComponent = ({
         />
       </div>
       {user && isReplyingToThis && (
-        <div style={indentStyle} className="mt-2">
+        <div className={`mt-2 ${indentStyle}`}>
           <ReplyForm
             parentId={reply.id}
             onCancel={() => setReplyingTo(null)}
@@ -520,7 +542,11 @@ const ReplyComponent = ({
           {reply.children.map((childReply) => (
             <div key={childReply.id}>
               <div
-                className={compact ? "my-2" : "border-t border-gray-200 my-4"}
+                className={`
+                  ${
+                    compact ? "my-2" : "border-t border-gray-200 my-2 sm:my-4"
+                  } -mx-2 sm:-mx-4
+               `}
               ></div>
               <ReplyComponent
                 reply={childReply}
