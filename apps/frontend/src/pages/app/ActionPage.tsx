@@ -104,18 +104,23 @@ export default function ActionPage() {
         />
       </div>
       <div
-        className="w-[360px] shrink-0 sticky top-[var(--nav-height)] self-start divide-y divide-zinc-200 hidden md:flex flex-col *:py-5 p-10 pt-14 border-l border-zinc-200 overflow-auto"
+        className="sticky w-[360px] shrink-0 top-[var(--nav-height)] self-start divide-y divide-zinc-200 hidden md:flex flex-col"
         style={{ height: `calc(100vh - var(--nav-height))` }}
       >
-        <ActionEventsPanel action={action} events={action.events} />
-        <ActionActivityList
-          actionId={action.id}
-          activities={activities}
-          loading={false}
-          onLikeActivity={handleLikeActivity}
-          setActivities={setActivities}
-          maxN={5}
-        />
+        <div
+          className="fixed w-[360px] shrink-0 top-[var(--nav-height)] self-start divide-y divide-zinc-200 hidden md:flex flex-col *:py-5 p-10 pt-14 border-l border-zinc-200 overflow-auto"
+          style={{ height: `calc(100vh - var(--nav-height))` }}
+        >
+          <ActionEventsPanel action={action} events={action.events} />
+          <ActionActivityList
+            actionId={action.id}
+            activities={activities}
+            loading={false}
+            onLikeActivity={handleLikeActivity}
+            setActivities={setActivities}
+            maxN={5}
+          />
+        </div>
       </div>
     </div>
   );
