@@ -35,6 +35,7 @@ import {
   PreEventNotifDataDto,
   UpdateActionActivityDto,
   UpdateActionDto,
+  UpdateActionReminderDto,
 } from './dto/action.dto';
 import {
   ActionActivity,
@@ -46,7 +47,11 @@ import {
   NotificationType,
 } from './entities/action-event.entity';
 import { Action, ActionTaskType } from './entities/action.entity';
-import { ActionReminder } from './entities/action-reminder.entity';
+import {
+  ActionReminder,
+  ReminderCohortType,
+  ReminderTimingMode,
+} from './entities/action-reminder.entity';
 import { Group } from 'src/user/entities/group.entity';
 import { UserDto } from 'src/user/user.dto';
 import { NotificationScheduleEntryDto } from './dto/notification-schedule.dto';
@@ -110,15 +115,7 @@ export class ActionsService {
   findAll(): Promise<ActionDto[]> {
     return this.actionRepository
       .find({
-        relations: [
-          'events',
-          'events.customReminders',
-          'events.customReminders.users',
-          'events.customReminders.memberActionEvent',
-          'events.customReminders.deadlineEvent',
-          'activities',
-          'participatingGroups',
-        ],
+        relations: ['events', 'activities', 'participatingGroups'],
       })
       .then((actions) => {
         return actions.map((action) => new ActionDto(action));
@@ -248,16 +245,7 @@ export class ActionsService {
       : null;
     const action = await this.actionRepository.findOne({
       where: { id },
-      relations: [
-        'events',
-        'events.customReminders',
-        'events.customReminders.users',
-        'events.customReminders.memberActionEvent',
-        'events.customReminders.deadlineEvent',
-        'activities',
-        'participatingGroups',
-        'updates',
-      ],
+      relations: ['events', 'activities', 'participatingGroups', 'updates'],
     });
 
     if (
@@ -473,7 +461,7 @@ export class ActionsService {
     actionId: number,
     actionEventDto: CreateActionEventDto,
     userId?: number,
-  ): Promise<ActionDto> {
+  ): Promise<ActionEvent> {
     const action = await this.findOne(actionId, userId);
 
     const newEvent = this.actionEventRepository.create({
@@ -481,56 +469,30 @@ export class ActionsService {
       action,
     });
 
-    await this.actionEventRepository.save(newEvent);
+    const savedEvent = await this.actionEventRepository.save(newEvent);
 
-    // re-fetch action from database to get the updated events
-    const newAction = await this.findOne(actionId, userId);
-
-    return new ActionDto(newAction);
+    return savedEvent;
   }
 
-  async createCustomReminder(
+  private sanitizeMessage(value?: string | null): string | undefined {
+    const trimmed = value?.trim();
+    return trimmed ? trimmed : undefined;
+  }
+
+  private async applyReminderChanges(
+    reminder: ActionReminder,
     actionId: number,
-    eventId: number,
-    dto: CreateActionReminderDto,
-  ): Promise<ActionReminderDto> {
-    const event = await this.actionEventRepository.findOneOrFail({
-      where: { id: eventId, action: { id: actionId } },
-      relations: ['action', 'action.participatingGroups'],
-    });
-
-    if (event.newStatus !== ActionStatus.MemberAction) {
-      throw new BadRequestException(
-        'Custom reminders can only be created for member action events',
-      );
+    event: ActionEvent,
+    dto: CreateActionReminderDto | UpdateActionReminderDto,
+  ): Promise<void> {
+    const timingMode = dto.timingMode ?? reminder.timingMode;
+    if (!timingMode) {
+      throw new BadRequestException('Timing mode is required for reminders');
     }
+    reminder.timingMode = timingMode;
 
-    const sendAt =
-      dto.sendAt instanceof Date ? dto.sendAt : new Date(dto.sendAt);
-
-    if (isNaN(sendAt.getTime())) {
-      throw new BadRequestException('Invalid sendAt time provided');
-    }
-
-    const uniqueUserIds = Array.from(new Set(dto.userIds ?? []));
-    if (uniqueUserIds.length === 0) {
-      throw new BadRequestException('At least one user is required');
-    }
-
-    const users = await this.userRepository.find({
-      where: { id: In(uniqueUserIds) },
-      relations: ['groups'],
-    });
-
-    if (users.length !== uniqueUserIds.length) {
-      const foundIds = new Set(users.map((user) => user.id));
-      const missing = uniqueUserIds.filter((id) => !foundIds.has(id));
-      throw new NotFoundException(`User(s) not found: ${missing.join(', ')}`);
-    }
-
-    let deadlineEvent: ActionEvent | null = null;
     if (dto.deadlineEventId !== undefined) {
-      deadlineEvent = await this.actionEventRepository.findOne({
+      const deadlineEvent = await this.actionEventRepository.findOne({
         where: { id: dto.deadlineEventId, action: { id: actionId } },
       });
       if (!deadlineEvent) {
@@ -538,43 +500,195 @@ export class ActionsService {
       }
     }
 
-    const reminder = this.actionReminderRepository.create({
-      memberActionEvent: event,
-      deadlineEvent: deadlineEvent ?? undefined,
-      users,
-      customEmailMessage:
-        dto.customEmailMessage?.trim() !== ''
-          ? dto.customEmailMessage?.trim()
-          : undefined,
-      customTextMessage:
-        dto.customTextMessage?.trim() !== ''
-          ? dto.customTextMessage?.trim()
-          : undefined,
-      customEmailSubject:
-        dto.customEmailSubject?.trim() !== ''
-          ? dto.customEmailSubject?.trim()
-          : undefined,
-      sendAt,
-      includeActionLinkInMessages: dto.includeActionLinkInMessages,
-    });
+    let sendAtAbsolute =
+      dto.sendAtAbsolute ?? reminder.sendAtAbsolute ?? undefined;
+    if (typeof sendAtAbsolute === 'string') {
+      const parsed = new Date(sendAtAbsolute);
+      sendAtAbsolute = Number.isNaN(parsed.getTime()) ? undefined : parsed;
+    }
 
-    const saved = await this.actionReminderRepository.save(reminder);
+    const secondsSource =
+      dto.sendAtSecondsFromDeadline ?? reminder.sendAtSecondsFromDeadline;
+    const sendAtSecondsFromDeadline =
+      secondsSource !== undefined && secondsSource !== null
+        ? Number(secondsSource)
+        : undefined;
 
+    if (timingMode === ReminderTimingMode.Absolute) {
+      if (!sendAtAbsolute) {
+        throw new BadRequestException(
+          'sendAtAbsolute is required when timingMode is absolute',
+        );
+      }
+      reminder.sendAtAbsolute = sendAtAbsolute;
+      reminder.sendAtSecondsFromDeadline = undefined;
+    } else if (timingMode === ReminderTimingMode.FromDeadline) {
+      if (
+        sendAtSecondsFromDeadline === undefined ||
+        Number.isNaN(sendAtSecondsFromDeadline)
+      ) {
+        throw new BadRequestException(
+          'sendAtSecondsFromDeadline is required when timingMode is from deadline',
+        );
+      }
+      reminder.sendAtSecondsFromDeadline = sendAtSecondsFromDeadline;
+      reminder.sendAtAbsolute = undefined;
+    }
+
+    const cohortType =
+      dto.cohortType ??
+      reminder.cohortType ??
+      ReminderCohortType.AllUncompleted;
+    if (!cohortType) {
+      throw new BadRequestException('Cohort type is required for reminders');
+    }
+    reminder.cohortType = cohortType;
+
+    if (cohortType === ReminderCohortType.Custom) {
+      const userIdsSource =
+        dto.userIds ??
+        (reminder.users ? reminder.users.map((user) => user.id) : []);
+      const uniqueUserIds = Array.from(new Set(userIdsSource));
+      if (!uniqueUserIds.length) {
+        throw new BadRequestException(
+          'Custom cohorts require at least one user',
+        );
+      }
+
+      const users = await this.userRepository.find({
+        where: { id: In(uniqueUserIds) },
+        relations: ['groups'],
+      });
+
+      if (users.length !== uniqueUserIds.length) {
+        const foundIds = new Set(users.map((user) => user.id));
+        const missing = uniqueUserIds.filter((id) => !foundIds.has(id));
+        throw new NotFoundException(`User(s) not found: ${missing.join(', ')}`);
+      }
+
+      reminder.users = users;
+    } else {
+      reminder.users = [];
+    }
+
+    if (dto.emailSubject !== undefined) {
+      const trimmedSubject = dto.emailSubject?.trim() ?? '';
+      reminder.emailSubject = trimmedSubject || reminder.emailSubject;
+    }
+
+    if (dto.emailMessage !== undefined) {
+      const sanitized = this.sanitizeMessage(dto.emailMessage);
+      if (sanitized !== undefined) {
+        reminder.emailMessage = sanitized;
+      }
+    }
+
+    if (dto.textMessage !== undefined) {
+      const sanitized = this.sanitizeMessage(dto.textMessage);
+      if (sanitized !== undefined) {
+        reminder.textMessage = sanitized;
+      }
+    }
+
+    reminder.memberActionEvent = event;
+  }
+
+  private async buildReminderDto(
+    reminderId: number,
+  ): Promise<ActionReminderDto> {
     const fullReminder = await this.actionReminderRepository.findOne({
-      where: { id: saved.id },
-      relations: [
-        'memberActionEvent',
-        'memberActionEvent.action',
-        'deadlineEvent',
-        'users',
-      ],
+      where: { id: reminderId },
+      relations: ['memberActionEvent', 'memberActionEvent.action', 'users'],
     });
 
     if (!fullReminder) {
-      throw new NotFoundException('Failed to load created reminder');
+      throw new NotFoundException('Failed to load reminder');
     }
 
     return new ActionReminderDto(fullReminder);
+  }
+
+  async createReminder(
+    actionId: number,
+    eventId: number,
+    dto: CreateActionReminderDto,
+  ): Promise<ActionReminderDto> {
+    const event = await this.actionEventRepository.findOne({
+      where: { id: eventId, action: { id: actionId } },
+      relations: ['action'],
+    });
+
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+
+    if (event.newStatus !== ActionStatus.MemberAction) {
+      throw new BadRequestException(
+        'Custom reminders can only be created for member action events',
+      );
+    }
+
+    const reminder = this.actionReminderRepository.create({
+      memberActionEvent: event,
+      users: [],
+    });
+
+    await this.applyReminderChanges(reminder, actionId, event, dto);
+
+    const saved = await this.actionReminderRepository.save(reminder);
+
+    return this.buildReminderDto(saved.id);
+  }
+
+  async updateReminder(
+    actionId: number,
+    eventId: number,
+    reminderId: number,
+    dto: UpdateActionReminderDto,
+  ): Promise<ActionReminderDto> {
+    const reminder = await this.actionReminderRepository.findOne({
+      where: { id: reminderId },
+      relations: ['memberActionEvent', 'memberActionEvent.action', 'users'],
+    });
+
+    if (!reminder) {
+      throw new NotFoundException('Reminder not found');
+    }
+
+    if (
+      !reminder.memberActionEvent ||
+      reminder.memberActionEvent.id !== eventId ||
+      reminder.memberActionEvent.action?.id !== actionId
+    ) {
+      throw new NotFoundException('Reminder not found');
+    }
+
+    if (reminder.memberActionEvent.newStatus !== ActionStatus.MemberAction) {
+      throw new BadRequestException(
+        'Custom reminders can only be created for member action events',
+      );
+    }
+
+    await this.applyReminderChanges(
+      reminder,
+      actionId,
+      reminder.memberActionEvent,
+      dto,
+    );
+
+    const saved = await this.actionReminderRepository.save(reminder);
+
+    return this.buildReminderDto(saved.id);
+  }
+
+  async deleteReminder(reminderId: number) {
+    const reminder = await this.actionReminderRepository.findOne({
+      where: { id: reminderId },
+    });
+    if (!reminder) {
+      throw new NotFoundException('Reminder not found');
+    }
+    await this.actionReminderRepository.delete(reminderId);
   }
 
   async remove(id: number) {
@@ -877,13 +991,7 @@ export class ActionsService {
   async getEvent(id: number): Promise<ActionEventDto> {
     const event = await this.actionEventRepository.findOne({
       where: { id },
-      relations: [
-        'action',
-        'customReminders',
-        'customReminders.users',
-        'customReminders.memberActionEvent',
-        'customReminders.deadlineEvent',
-      ],
+      relations: ['action'],
     });
     if (!event) {
       throw new NotFoundException('Event not found');
@@ -1063,10 +1171,9 @@ export class ActionsService {
     const event = await this.actionEventRepository.findOneOrFail({
       where: { id },
       relations: [
-        'customReminders',
-        'customReminders.users',
-        'customReminders.memberActionEvent',
-        'customReminders.deadlineEvent',
+        'reminders',
+        'reminders.users',
+        'reminders.memberActionEvent',
       ],
     });
     return new AdminActionEventDto(event);
