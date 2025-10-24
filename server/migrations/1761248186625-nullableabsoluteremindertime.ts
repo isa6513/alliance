@@ -1,9 +1,9 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class Nullableabsoluteremindertime1761089998345
+export class Nullableabsoluteremindertime1761248186625
   implements MigrationInterface
 {
-  name = 'Nullableabsoluteremindertime1761089998345';
+  name = 'Nullableabsoluteremindertime1761248186625';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(

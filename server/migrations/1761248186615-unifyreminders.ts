@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class Unifyreminders1761086336738 implements MigrationInterface {
-  name = 'Unifyreminders1761086336738';
+export class Unifyreminders1761248186615 implements MigrationInterface {
+  name = 'Unifyreminders1761248186615';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
