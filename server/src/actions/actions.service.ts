@@ -337,6 +337,15 @@ export class ActionsService {
     const action = await this.findOne(actionId, userId);
 
     if (
+      type === ActionActivityType.USER_JOINED &&
+      action.status !== ActionStatus.GatheringCommitments
+    ) {
+      throw new BadRequestException(
+        'You can only join an action during the gathering commitments phase',
+      );
+    }
+
+    if (
       type === ActionActivityType.USER_JOINED ||
       type === ActionActivityType.USER_COMPLETED
     ) {
