@@ -98,17 +98,17 @@ describe('Actions (e2e)', () => {
     await actionRepo.save(testAction);
     await actionRepo.save(testDraftAction);
 
-    // Create events to set status for testAction to MemberAction
-    const memberActionEvent = eventRepo.create({
+    // Create event to set status for testAction to GatheringCommitments
+    const gatheringEvent = eventRepo.create({
       title: 'Action Started',
-      description: 'Action is now in member action phase',
-      newStatus: ActionStatus.MemberAction,
+      description: 'Action is now in gathering commitments phase',
+      newStatus: ActionStatus.GatheringCommitments,
       sendNotifsTo: NotificationType.All,
       date: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
       showInTimeline: true,
       action: testAction,
     });
-    await eventRepo.save(memberActionEvent);
+    await eventRepo.save(gatheringEvent);
 
     // testDraftAction has no events, so it defaults to Draft status
 
@@ -142,6 +142,7 @@ describe('Actions (e2e)', () => {
     const { action: restricted } = await createPublishedAction(
       'Group Restricted Action',
       {
+        status: ActionStatus.GatheringCommitments,
         actionOverrides: {
           participatingGroups: [restrictedGroup],
           showToNonparticipating: true,
@@ -150,6 +151,7 @@ describe('Actions (e2e)', () => {
     );
 
     await createPublishedAction('Group Restricted Hidden Action', {
+      status: ActionStatus.GatheringCommitments,
       actionOverrides: {
         participatingGroups: [restrictedGroup],
         showToNonparticipating: false,
@@ -943,11 +945,11 @@ describe('Actions (e2e)', () => {
       });
       await actionRepo.save(newAction);
 
-      // Set action to MemberAction status
-      const memberActionEvent: CreateActionEventDto = {
-        title: 'Member Action Started',
-        description: 'Members can now complete the action',
-        newStatus: ActionStatus.MemberAction,
+      // Set action to GatheringCommitments status for joins
+      const gatheringEvent: CreateActionEventDto = {
+        title: 'Start Gathering Commitments',
+        description: 'Action is now gathering commitments',
+        newStatus: ActionStatus.GatheringCommitments,
         date: new Date(Date.now() - 1000), // 1 second ago
         showInTimeline: true,
         sendNotifsTo: NotificationType.All,
@@ -956,9 +958,19 @@ describe('Actions (e2e)', () => {
       await request(ctx.app.getHttpServer())
         .post(`/actions/${newAction.id}/events`)
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
-        .send(memberActionEvent);
+        .send(gatheringEvent);
 
-      // Two users join the action
+      // Set action to MemberAction status
+      const memberActionEvent: CreateActionEventDto = {
+        title: 'Member Action Started',
+        description: 'Members can now complete the action',
+        newStatus: ActionStatus.MemberAction,
+        date: new Date(), // immediate transition to member action
+        showInTimeline: true,
+        sendNotifsTo: NotificationType.All,
+      };
+
+      // Two users join the action during gathering commitments
       await request(ctx.app.getHttpServer())
         .post(`/actions/join/${newAction.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`);
@@ -966,6 +978,12 @@ describe('Actions (e2e)', () => {
       await request(ctx.app.getHttpServer())
         .post(`/actions/join/${newAction.id}`)
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`);
+
+      // Transition to MemberAction after commitments gathered
+      await request(ctx.app.getHttpServer())
+        .post(`/actions/${newAction.id}/events`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send(memberActionEvent);
 
       // Verify initial state
       let res = await request(ctx.app.getHttpServer())
@@ -975,7 +993,7 @@ describe('Actions (e2e)', () => {
       expect(res.body.status).toBe(ActionStatus.MemberAction);
       expect(res.body.usersJoined).toBe(2);
       expect(res.body.usersCompleted).toBe(0);
-      expect(res.body.events.length).toBe(1);
+      expect(res.body.events.length).toBe(2);
 
       // First user completes - should not trigger transition yet
       await request(ctx.app.getHttpServer())
@@ -989,7 +1007,7 @@ describe('Actions (e2e)', () => {
       expect(res.body.status).toBe(ActionStatus.MemberAction);
       expect(res.body.usersJoined).toBe(2);
       expect(res.body.usersCompleted).toBe(1);
-      expect(res.body.events.length).toBe(1); // No automatic transition yet
+      expect(res.body.events.length).toBe(2); // No automatic transition yet
 
       // Second user completes - should trigger automatic transition
       await request(ctx.app.getHttpServer())
@@ -1003,7 +1021,7 @@ describe('Actions (e2e)', () => {
       expect(res.body.status).toBe(ActionStatus.Resolution);
       expect(res.body.usersJoined).toBe(2);
       expect(res.body.usersCompleted).toBe(2);
-      expect(res.body.events.length).toBe(2); // Automatic transition event created
+      expect(res.body.events.length).toBe(3); // Automatic transition event created
 
       // Check the automatic event details
       const automaticEvent = res.body.events.find(
@@ -1062,7 +1080,9 @@ describe('Actions (e2e)', () => {
 
   describe('Additional endpoints', () => {
     it('allows a user to decline an action with a moral reason', async () => {
-      const { action } = await createPublishedAction('Decline Scenario');
+      const { action } = await createPublishedAction('Decline Scenario', {
+        status: ActionStatus.GatheringCommitments,
+      });
 
       const decline = await request(ctx.app.getHttpServer())
         .post(`/actions/decline/${action.id}`)
@@ -1077,7 +1097,9 @@ describe('Actions (e2e)', () => {
     });
 
     it('allows a user to opt out of completing an action', async () => {
-      const { action } = await createPublishedAction('Optout Scenario');
+      const { action } = await createPublishedAction('Optout Scenario', {
+        status: ActionStatus.GatheringCommitments,
+      });
 
       const optout = await request(ctx.app.getHttpServer())
         .post(`/actions/optout/${action.id}`)
@@ -1090,7 +1112,9 @@ describe('Actions (e2e)', () => {
     });
 
     it('records a completion activity for a user', async () => {
-      const { action } = await createPublishedAction('Completion Scenario');
+      const { action } = await createPublishedAction('Completion Scenario', {
+        status: ActionStatus.GatheringCommitments,
+      });
 
       await request(ctx.app.getHttpServer())
         .post(`/actions/join/${action.id}`)
@@ -1124,7 +1148,9 @@ describe('Actions (e2e)', () => {
     });
 
     it('exposes per-action activities and individual activity details', async () => {
-      const { action } = await createPublishedAction('Activities Scenario');
+      const { action } = await createPublishedAction('Activities Scenario', {
+        status: ActionStatus.GatheringCommitments,
+      });
 
       const join = await request(ctx.app.getHttpServer())
         .post(`/actions/join/${action.id}`)
@@ -1174,6 +1200,7 @@ describe('Actions (e2e)', () => {
     it('returns friend activity for accepted relationships', async () => {
       const { action } = await createPublishedAction(
         'Friend Activity Scenario',
+        { status: ActionStatus.GatheringCommitments },
       );
       const friend = await userService.create({
         name: 'Friend User',
@@ -1209,6 +1236,7 @@ describe('Actions (e2e)', () => {
     it('supports liking, unliking, and commenting on activities', async () => {
       const { action } = await createPublishedAction(
         'Activity Reactions Scenario',
+        { status: ActionStatus.GatheringCommitments },
       );
 
       const join = await request(ctx.app.getHttpServer())
@@ -1287,7 +1315,7 @@ describe('Actions (e2e)', () => {
       const { action: memberAction } = await createPublishedAction(
         'Notif Member Scenario',
         {
-          status: ActionStatus.MemberAction,
+          status: ActionStatus.GatheringCommitments,
         },
       );
 
@@ -1297,6 +1325,18 @@ describe('Actions (e2e)', () => {
           .set('Authorization', `Bearer ${token}`)
           .expect(201);
       }
+
+      await request(ctx.app.getHttpServer())
+        .post(`/actions/${memberAction.id}/events`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          title: 'Move to Member Action',
+          description: 'Members can now complete the action',
+          newStatus: ActionStatus.MemberAction,
+          date: new Date(),
+          showInTimeline: true,
+          sendNotifsTo: NotificationType.All,
+        } satisfies CreateActionEventDto);
 
       const memberRes = await request(ctx.app.getHttpServer())
         .get(`/actions/preEventNotifData/${memberAction.id}`)
