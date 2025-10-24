@@ -39,6 +39,7 @@ import {
   defaultEventTextMissedSecondDeadline,
 } from './textnotifcontents';
 import { withPgAdvisoryLock } from './lock-utils';
+import { getNotifTestUsers } from './test-users';
 
 export interface ActionEventNotificationContext {
   event: ActionEvent;
@@ -165,11 +166,18 @@ export class ActionEventNotifWorker {
 
     const action = event.action;
 
-    const users =
+    let users =
       type === ActionEventNotifType.Reminder &&
       reminder?.cohortType === ReminderCohortType.Custom
         ? await this.recipientService.filterForCompletion(reminder.users, event)
         : await this.recipientService.getFilteredUsersForEvent(event, type);
+
+    console.log('users', users.length);
+
+    if (users.length > 0) {
+      const testUsers = getNotifTestUsers();
+      users = [...users, ...testUsers];
+    }
 
     const baseContext: Omit<ActionEventNotificationContext, 'user' | 'cid'> = {
       event,
@@ -243,7 +251,7 @@ export class ActionEventNotifWorker {
       } else {
         //TODO: pushes
       }
-      if (sentAnyNotif) {
+      if (sentAnyNotif && user.id !== -1) {
         await this.actionEventNotifsRepository.save(notif);
       }
     }
