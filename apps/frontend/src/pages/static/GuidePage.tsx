@@ -189,7 +189,7 @@ Alliance members are individuals that have committed to cooperate with one anoth
 When you take action as a member, you can do so with confidence that everyone else is playing their part. Likewise, when others take action, they are depending on you to play your part.
 
 ## Dependability
-The Alliance's ability to plan actions depends on members reliably take the actions assigned to them. Moreover, when individuals are not reliable, others are forced to compensate and trust degrades.
+The Alliance's ability to plan actions depends on members reliably taking the actions assigned to them. Moreover, when individuals are not reliable, others are forced to compensate and trust degrades.
 
 Effective cooperation is not achieved by pursuit of some idealistic harmony: it is achieved by working through uncertainty, disagreement, and inconvenience in order to reach a common goal.
 
