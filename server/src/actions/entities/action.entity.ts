@@ -153,14 +153,18 @@ export class Action {
     description: 'Number of users who have joined the action',
   })
   get usersJoined(): number {
-    return (
-      this.activities?.filter(
-        (activity) => activity.type === ActionActivityType.USER_JOINED,
-      ).length -
-        this.activities?.filter(
-          (activity) => activity.type === ActionActivityType.USER_WONT_COMPLETE,
-        ).length || 0
-    );
+    return !!this.activities
+      ? Math.max(
+          this.activities.filter(
+            (activity) => activity.type === ActionActivityType.USER_JOINED,
+          ).length -
+            this.activities.filter(
+              (activity) =>
+                activity.type === ActionActivityType.USER_WONT_COMPLETE,
+            ).length,
+          0,
+        )
+      : 0;
   }
 
   @OneToMany(() => ActionActivity, (activity) => activity.action)
