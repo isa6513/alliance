@@ -55,7 +55,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
       >
         THE ALLIANCE
       </h1>
-      <div className="flex flex-row items-center gap-x-10 text-lg">
+      <div className="flex flex-row items-center gap-x-5 sm:gap-x-10 text-base sm:text-lg">
         {links.map((link) => (
           <Link
             to={destinations[link]}

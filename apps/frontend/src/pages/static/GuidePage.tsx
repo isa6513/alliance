@@ -189,9 +189,9 @@ Alliance members are individuals that have committed to cooperate with one anoth
 When you take action as a member, you can do so with confidence that everyone else is playing their part. Likewise, when others take action, they are depending on you to play your part.
 
 ## Dependability
-The Alliance will not work unless members reliably take the actions assigned to them, even when doing so is tedious or inconvenient. When individuals are not reliable, others are forced to compensate, trust degrades, and projects stagnate. Moreover, member reliability is key to the Alliance’s ability to plan effective collective actions.
+The Alliance's ability to plan actions depends on members reliably take the actions assigned to them. Moreover, when individuals are not reliable, others are forced to compensate and trust degrades.
 
-Effective cooperation is not achieved by pursuit of some idealistic harmony: it is achieved by working through uncertainty, disagreement, and discomfort in order to reach a common goal.
+Effective cooperation is not achieved by pursuit of some idealistic harmony: it is achieved by working through uncertainty, disagreement, and inconvenience in order to reach a common goal.
 
 Our common goal is not to create a future that is perfect from the perspective of every member, but to create a future that members agree is significantly better than the future that would occur otherwise. Therefore, members abide by a *democratic process that decides actions* rather than decide individually whether or not to participate in every action. Similarly, a democratic society depends on citizens following every law, not only the laws they agree with.
 
