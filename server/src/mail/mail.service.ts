@@ -267,8 +267,6 @@ export class MailService {
       cid: context.cid,
     };
 
-    console.log('emailContext', emailContext.customMessage);
-
     return this.sendMail(
       context.user.email,
       emailType,

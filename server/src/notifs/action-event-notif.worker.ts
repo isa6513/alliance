@@ -100,8 +100,6 @@ export class ActionEventNotifWorker {
           windowStart,
           now,
         );
-        this.logger.log('duePlans', duePlans.length);
-
         for (const plan of duePlans) {
           await this.processOne(qr, plan);
         }

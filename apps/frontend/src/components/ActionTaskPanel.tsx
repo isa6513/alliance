@@ -21,6 +21,7 @@ import { StripeWrapper } from "./StripeWrapper";
 export interface ActionTaskPanelProps {
   action: ActionDto;
   userRelation: Extract<UserActionRelation, "joined" | "none">;
+  missedDeadline?: boolean;
   onCompleteAction: () => void;
   onJoinAction: () => void;
   onDeclineAction: () => void;
@@ -31,6 +32,7 @@ export interface ActionTaskPanelProps {
 const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   action,
   userRelation,
+  missedDeadline = false,
   onCompleteAction,
   onJoinAction,
   onDeclineAction,
@@ -71,7 +73,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       setRevalidate();
       onCompleteAction();
     },
-    [action, onCompleteAction]
+    [action, onCompleteAction],
   );
 
   const handleJoinAction = useCallback(async () => {
@@ -101,7 +103,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       setRevalidate();
       onDeclineAction();
     },
-    [action, onDeclineAction]
+    [action, onDeclineAction],
   );
 
   const handleAbandonAction = useCallback(
@@ -118,7 +120,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       setRevalidate();
       onOptOutAction();
     },
-    [action, onOptOutAction]
+    [action, onOptOutAction],
   );
 
   const handleFormStarted = useCallback(() => {
@@ -130,8 +132,9 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   }, [action]);
 
   if (
-    action.status === "gathering_commitments" ||
-    action.status === "office_action"
+    (action.status === "gathering_commitments" ||
+      action.status === "office_action") &&
+    !missedDeadline
   ) {
     if (userRelation === "joined") {
       return (

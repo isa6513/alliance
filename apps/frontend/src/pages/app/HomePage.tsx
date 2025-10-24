@@ -11,10 +11,13 @@ import useActivities, { ActivityList } from "./useActivities";
 import BasicErrorMessage from "../../components/BasicErrorMessage";
 import { useAuth } from "../../lib/AuthContext";
 import Spinner from "../../components/Spinner";
+import { getPastEvents } from "@alliance/shared/lib/actionUtils";
 
 export function canCompleteAction(action: ActionWithRelation) {
   return (
-    action.status === "member_action" &&
+    getPastEvents(action).some(
+      (event) => event.newStatus === "member_action",
+    ) &&
     (action.relation === "joined" ||
       (action.commitmentless && action.relation !== "completed")) &&
     action.relation !== "declined" &&

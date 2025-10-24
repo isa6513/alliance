@@ -7,6 +7,7 @@ import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import ActionTaskPanelDeclined from "./ActionTaskPanelDeclined";
 import TaskTimeInfo from "../pages/app/TaskTimeInfo";
 import { getLastAndNextEvent } from "../pages/app/LargeActionCard";
+import { getLatestEvent } from "@alliance/shared/lib/actionUtils";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
@@ -51,26 +52,40 @@ const ActionPageTaskPanel = () => {
 
   if (userRelation === "completed") {
     return <ActionTaskPanelCompleted action={action} />;
-  }
-
-  if (userRelation === "declined") {
+  } else if (userRelation === "declined") {
     return <ActionTaskPanelDeclined />;
   }
+
+  const latestEvent = getLatestEvent(action);
+  const didMissDeadline =
+    action.events.some((event) => event.newStatus === "member_action") &&
+    (latestEvent?.newStatus === "office_action" ||
+      latestEvent?.newStatus === "resolution");
 
   const { lastEvent, nextEvent } = getLastAndNextEvent(action);
 
   return (
     <>
-      <TaskTimeInfo
-        action={action}
-        nextEvent={nextEvent}
-        lastEvent={lastEvent}
-      />
+      {didMissDeadline ? (
+        <Card style={CardStyle.Grey}>
+          <p className="font-bold">
+            You missed the deadline to participate in this action.
+          </p>
+          <p>You can still complete it below if you would like.</p>
+        </Card>
+      ) : (
+        <TaskTimeInfo
+          action={action}
+          nextEvent={nextEvent}
+          lastEvent={lastEvent}
+        />
+      )}
       <ActionTaskPanel
         userRelation={userRelation}
         action={action}
         {...panelHandlers}
         card={true}
+        missedDeadline={didMissDeadline}
       />
     </>
   );
