@@ -7,6 +7,7 @@ export enum CustomValidatorType {
   SignedContract = 'SignedContract',
   AddedProfileDescription = 'AddedProfileDescription',
   RepliedToForumPost = 'RepliedToForumPost',
+  HasPhoneNumber = 'HasPhoneNumber',
 }
 
 export const typeName: Record<CustomValidatorType, string> = {
@@ -14,6 +15,7 @@ export const typeName: Record<CustomValidatorType, string> = {
   [CustomValidatorType.SignedContract]: 'Signed Contract',
   [CustomValidatorType.AddedProfileDescription]: 'Added Profile Description',
   [CustomValidatorType.RepliedToForumPost]: 'Replied to Forum Post',
+  [CustomValidatorType.HasPhoneNumber]: 'Has Phone Number',
 };
 
 export const typeUsesIdArgument: Record<CustomValidatorType, boolean> = {
@@ -21,6 +23,15 @@ export const typeUsesIdArgument: Record<CustomValidatorType, boolean> = {
   [CustomValidatorType.SignedContract]: false,
   [CustomValidatorType.AddedProfileDescription]: false,
   [CustomValidatorType.RepliedToForumPost]: true,
+  [CustomValidatorType.HasPhoneNumber]: false,
+};
+
+export const typeUsableForVisibility: Record<CustomValidatorType, boolean> = {
+  [CustomValidatorType.UploadedPhoto]: false,
+  [CustomValidatorType.SignedContract]: false,
+  [CustomValidatorType.AddedProfileDescription]: false,
+  [CustomValidatorType.RepliedToForumPost]: false,
+  [CustomValidatorType.HasPhoneNumber]: true,
 };
 
 @Entity()

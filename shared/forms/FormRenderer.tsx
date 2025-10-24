@@ -147,6 +147,94 @@ const FormRenderer = ({
     return entries;
   }, [schema]);
 
+  const visibilityValidatorIds = useMemo(() => {
+    const ids = new Set<number>();
+    for (const page of schema.pages) {
+      for (const element of page.fields) {
+        const conditions = Array.isArray(element.visibleIf)
+          ? element.visibleIf
+          : element.visibleIf
+          ? [element.visibleIf]
+          : [];
+        for (const condition of conditions) {
+          if ("validatorId" in condition) {
+            ids.add(condition.validatorId);
+          }
+        }
+      }
+    }
+    return Array.from(ids);
+  }, [schema]);
+
+  const [visibilityValidatorResults, setVisibilityValidatorResults] = useState<
+    Record<number, boolean>
+  >({});
+
+  useEffect(() => {
+    setVisibilityValidatorResults((prev) => {
+      let changed = false;
+      const next: Record<number, boolean> = {};
+      for (const id of visibilityValidatorIds) {
+        if (Object.prototype.hasOwnProperty.call(prev, id)) {
+          next[id] = prev[id];
+        } else {
+          changed = true;
+        }
+      }
+      if (
+        !changed &&
+        Object.keys(prev).length === visibilityValidatorIds.length
+      ) {
+        return prev;
+      }
+      return next;
+    });
+  }, [visibilityValidatorIds]);
+
+  useEffect(() => {
+    const missingIds = visibilityValidatorIds.filter(
+      (id) => !(id in visibilityValidatorResults)
+    );
+    if (!missingIds.length) {
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      const entries = await Promise.all(
+        missingIds.map(async (validatorId) => {
+          try {
+            const response = await tasksRunValidator({
+              path: { id: validatorId },
+            });
+            if (!response.data || response.error) {
+              throw response.error ?? new Error("Missing validator response");
+            }
+            return [validatorId, response.data.isValid] as const;
+          } catch (error) {
+            console.error(
+              `Failed to evaluate visibility validator ${validatorId}`,
+              error
+            );
+            return [validatorId, false] as const;
+          }
+        })
+      );
+      if (cancelled) return;
+      setVisibilityValidatorResults((prev) => {
+        const next = { ...prev };
+        for (const [id, value] of entries) {
+          next[id] = value;
+        }
+        return next;
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [visibilityValidatorIds, visibilityValidatorResults]);
+
   const applyFieldErrorUpdates = useCallback(
     (updates: Record<string, string | null>) => {
       if (!updates || Object.keys(updates).length === 0) return;
@@ -176,6 +264,14 @@ const FormRenderer = ({
       if ("expr" in cond) {
         return true;
       }
+      if ("validatorId" in cond) {
+        const expected = cond.resultEquals ?? true;
+        const actual = visibilityValidatorResults[cond.validatorId];
+        if (actual === undefined) {
+          return false;
+        }
+        return actual === expected;
+      }
       const val = data[cond.when];
       if (typeof cond.equals === "boolean") {
         return Boolean(val) === cond.equals;
@@ -189,7 +285,7 @@ const FormRenderer = ({
       }
       return val === cond.equals;
     },
-    [formData]
+    [formData, visibilityValidatorResults]
   );
 
   const isElementCurrentlyVisible = useCallback(
@@ -197,9 +293,18 @@ const FormRenderer = ({
       element: AnyField | DisplayBlock,
       data?: Record<string, FormValue>
     ): boolean => {
-      const cond = element.visibleIf;
-      if (!cond) return true;
-      return evaluateCondition(cond, data ?? formData);
+      const conditions = Array.isArray(element.visibleIf)
+        ? element.visibleIf
+        : element.visibleIf
+        ? [element.visibleIf]
+        : [];
+      if (conditions.length === 0) {
+        return true;
+      }
+      const targetData = data ?? formData;
+      return conditions.every((condition) =>
+        evaluateCondition(condition, targetData)
+      );
     },
     [evaluateCondition, formData]
   );
@@ -428,7 +533,10 @@ const FormRenderer = ({
     }
   };
 
-  const currentPage = schema.pages[currentPageIndex];
+  const currentPage =
+    currentPageIndex < schema.pages.length
+      ? schema.pages[currentPageIndex]
+      : null;
   const isLastPage = currentPageIndex === schema.pages.length - 1;
   const isFirstPage = currentPageIndex === 0;
 
@@ -666,9 +774,10 @@ const FormRenderer = ({
             readOnly && schema.pages.length === 1 ? "mb-0" : ""
           }`}
         >
-          {currentPage.fields.map((element, index) =>
-            renderElement(element, index)
-          )}
+          {currentPage !== null &&
+            currentPage.fields.map((element, index) =>
+              renderElement(element, index)
+            )}
         </div>
         {/* Navigation */}
         <div className="flex justify-between items-center gap-x-2">

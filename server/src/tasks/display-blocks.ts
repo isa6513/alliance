@@ -15,7 +15,7 @@ interface BaseBlock {
   kind: DisplayKind;
   /** Optional: display blocks usually don’t need IDs, but you can keep one for analytics/testing */
   id?: string;
-  visibleIf?: Condition;
+  visibleIf?: Condition[];
   width?: 'full' | '1/2' | '1/3';
 }
 

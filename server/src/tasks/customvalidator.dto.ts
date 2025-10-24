@@ -17,6 +17,10 @@ export class CustomValidatorTypeDto {
   @ApiProperty()
   @IsNotEmpty()
   withIdField: boolean;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  usableForVisibility: boolean;
 }
 
 export class CreateCustomValidatorDto {

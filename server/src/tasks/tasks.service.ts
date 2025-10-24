@@ -32,6 +32,7 @@ import {
   CustomValidator,
   CustomValidatorType,
   typeName,
+  typeUsableForVisibility,
   typeUsesIdArgument,
 } from './entities/customvalidator.entity';
 
@@ -81,15 +82,50 @@ export class TasksService {
   async validateFormSubmission(
     form: Form,
     submitFormDto: SubmitFormDto,
+    userId: number,
   ): Promise<void> {
     const schema = form.schema as unknown as FormSchema;
+    const validatorIds = new Set<number>();
+
+    for (const page of schema.pages) {
+      for (const element of page.fields) {
+        const conditions = Array.isArray(element.visibleIf)
+          ? element.visibleIf
+          : element.visibleIf
+            ? [element.visibleIf]
+            : [];
+        for (const condition of conditions) {
+          if ('validatorId' in condition) {
+            validatorIds.add(condition.validatorId);
+          }
+        }
+      }
+    }
+
+    let validatorResults: Record<number, boolean> | undefined;
+    if (validatorIds.size > 0) {
+      const results = await Promise.all(
+        Array.from(validatorIds).map(async (validatorId) => {
+          try {
+            const result = await this.runValidator(validatorId, userId);
+            return [validatorId, result.isValid] as const;
+          } catch (error) {
+            this.logger.error(
+              `Failed to evaluate visibility validator ${validatorId}: ${String(error)}`,
+            );
+            return [validatorId, false] as const;
+          }
+        }),
+      );
+      validatorResults = Object.fromEntries(results);
+    }
 
     for (const page of schema.pages) {
       for (const field of page.fields) {
         if (isQuestionField(field)) {
           if (
             field.required &&
-            isQuestionVisible(field, submitFormDto.answers)
+            isQuestionVisible(field, submitFormDto.answers, validatorResults)
           ) {
             if (!submitFormDto.answers[field.id]) {
               throw new BadRequestException(`Field ${field.label} is required`);
@@ -117,7 +153,7 @@ export class TasksService {
     const form = await this.getForm(formId);
     const user = await this.userService.findOneOrFail(userId);
 
-    await this.validateFormSubmission(form, submitFormDto);
+    await this.validateFormSubmission(form, submitFormDto, userId);
 
     const phoneNumber = await this.extractPhoneNumber(
       form,
@@ -245,6 +281,7 @@ export class TasksService {
       name: typeName[type],
       id: type,
       withIdField: typeUsesIdArgument[type],
+      usableForVisibility: typeUsableForVisibility[type],
     }));
   }
 
@@ -321,6 +358,16 @@ export class TasksService {
             isValid: false,
             message:
               "It looks like you haven't replied to the discussion yet - please do that now!",
+          };
+        }
+        break;
+      case CustomValidatorType.HasPhoneNumber:
+        if (!user.phoneNumber) {
+          //TODO: check for validation (but inform the user)
+          return {
+            isValid: false,
+            message:
+              "It looks like you haven't added a phone number yet - please do that now!",
           };
         }
         break;

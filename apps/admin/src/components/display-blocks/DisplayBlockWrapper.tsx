@@ -25,9 +25,9 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
 }: DisplayBlockWrapperProps<T>) {
   const showConditional = Boolean(block && onUpdate);
 
-  const handleConditionalChange = (updates: { visibleIf?: Condition }) => {
+  const handleConditionalChange = (updates: { visibleIf?: Condition[] }) => {
     if (onUpdate) {
-      onUpdate(updates);
+      onUpdate(updates as Partial<T>);
     }
   };
 
@@ -39,7 +39,6 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
           : "border-gray-200 hover:border-gray-300"
       }`}
     >
-      {/* Drag handle */}
       <div
         className="absolute left-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing transition-opacity"
         draggable
@@ -67,8 +66,6 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
           </svg>
         </div>
       </div>
-
-      {/* Remove button */}
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={onRemove}

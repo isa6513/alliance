@@ -30,10 +30,16 @@ export function FieldWrapper<T extends AnyField>({
   const [showCustomValidatorControl, setShowCustomValidatorControl] = useState(
     () => (isCurrentFormField ? Boolean(field.customValidatorId) : false)
   );
+  const initialVisibilityCount =
+    isCurrentFormField && Array.isArray(field.visibleIf)
+      ? field.visibleIf.length
+      : isCurrentFormField && field.visibleIf
+        ? 1
+        : 0;
   const [
     showConditionalVisibilityControl,
     setShowConditionalVisibilityControl,
-  ] = useState(() => (isCurrentFormField ? Boolean(field.visibleIf) : false));
+  ] = useState(() => initialVisibilityCount > 0);
   const extraMenuRef = useRef<HTMLDivElement | null>(null);
 
   const [customValidatorType, setCustomValidatorType] = useState<
@@ -66,7 +72,14 @@ export function FieldWrapper<T extends AnyField>({
       }
     }
 
-    if (field.visibleIf && !showConditionalVisibilityControl) {
+    const conditionCount =
+      isCurrentFormField && Array.isArray(field.visibleIf)
+        ? field.visibleIf.length
+        : isCurrentFormField && field.visibleIf
+          ? 1
+          : 0;
+
+    if (conditionCount > 0 && !showConditionalVisibilityControl) {
       setShowConditionalVisibilityControl(true);
     }
   }, [

@@ -14,7 +14,7 @@ export type DisplayKind =
 interface BaseBlock {
   kind: DisplayKind;
   id?: string;
-  visibleIf?: Condition;
+  visibleIf?: Condition[];
   width?: "full" | "1/2" | "1/3";
 }
 

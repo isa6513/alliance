@@ -1,8 +1,17 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from "react";
 import {
   CustomValidatorType,
   CustomValidatorTypeDto,
+  tasksCreateCustomValidator,
   tasksCustomValidators,
+  tasksFindOneCustomValidator,
 } from "@alliance/shared/client";
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import type {
@@ -55,10 +64,10 @@ export function RequiredAsterisk({
 
 // ---------------- Conditional Visibility ----------------
 type ConditionalVisibilityProps = {
-  field: (AnyField | DisplayBlock) & { visibleIf?: Condition };
+  field: (AnyField | DisplayBlock) & { visibleIf?: Condition[] | Condition };
   previousFields: AnyField[];
   // Only updates the "visibleIf" property for a field
-  onChange: (updates: { visibleIf?: Condition }) => void;
+  onChange: (updates: { visibleIf?: Condition[] }) => void;
 };
 
 type ControllerField =
@@ -76,6 +85,22 @@ function isConditionalController(f: AnyField): f is ControllerField {
   );
 }
 
+type FieldCondition = Extract<Condition, { when: string }>;
+type ValidatorCondition = Extract<Condition, { validatorId: number }>;
+
+function isFieldCondition(cond: Condition): cond is FieldCondition {
+  return "when" in cond;
+}
+
+function isValidatorCondition(cond: Condition): cond is ValidatorCondition {
+  return "validatorId" in cond;
+}
+
+function normalizeConditions(input?: Condition[] | Condition): Condition[] {
+  if (!input) return [];
+  return Array.isArray(input) ? input : [input];
+}
+
 export function ConditionalVisibility({
   field,
   previousFields,
@@ -84,113 +109,348 @@ export function ConditionalVisibility({
   const controllers = (previousFields || []).filter((f): f is ControllerField =>
     isConditionalController(f)
   );
-
-  type SimpleCondition = Exclude<Condition, { expr: string }>;
-
-  const cond = field.visibleIf;
-  const enabled = !!cond && "when" in cond;
-  const selectedControllerId: string | undefined =
-    cond && "when" in cond ? cond.when : undefined;
-  const selectedController = controllers.find(
-    (f) => f.id === selectedControllerId
+  const {
+    validators,
+    loading: validatorsLoading,
+    error: validatorsError,
+  } = useCustomValidators();
+  const usableValidators = useMemo(
+    () => validators.filter((validator) => validator.usableForVisibility),
+    [validators]
   );
-  const equalsValue: SimpleCondition["equals"] | undefined =
-    cond && "when" in cond ? cond.equals : undefined;
 
-  const handleEnableToggle = (checked: boolean) => {
-    if (!checked) {
-      onChange({ visibleIf: undefined });
-      return;
+  const conditions = useMemo(
+    () => normalizeConditions(field.visibleIf),
+    [field.visibleIf]
+  );
+
+  const [isEditorOpen, setIsEditorOpen] = useState<boolean>(
+    () => conditions.length > 0
+  );
+  useEffect(() => {
+    if (conditions.length > 0) {
+      setIsEditorOpen(true);
     }
-    // Enable with first available controller (if any)
+  }, [conditions.length]);
+
+  const [conditionError, setConditionError] = useState<string | null>(null);
+
+  const canUseFieldControllers = controllers.length > 0;
+  const canUseValidators = usableValidators.length > 0;
+  const toggleDisabled = !canUseFieldControllers && !canUseValidators;
+
+  const updateConditions = useCallback(
+    (next: Condition[]) => {
+      setConditionError(null);
+      onChange({ visibleIf: next.length > 0 ? next : undefined });
+    },
+    [onChange]
+  );
+
+  const removeCondition = useCallback(
+    (index: number) => {
+      const next = conditions.filter((_, idx) => idx !== index);
+      updateConditions(next);
+    },
+    [conditions, updateConditions]
+  );
+
+  const createDefaultFieldCondition = useCallback((): FieldCondition | null => {
     const first = controllers[0];
-    if (!first) return;
-    let defaultEquals: SimpleCondition["equals"];
+    if (!first) return null;
+    let defaultEquals: FieldCondition["equals"];
     if (first.kind === "checkbox") {
       defaultEquals = true;
     } else {
       defaultEquals = first.options?.[0]?.value ?? "";
     }
-    onChange({
-      visibleIf: {
-        when: first.id,
-        equals: defaultEquals,
-      },
-    });
-  };
+    return {
+      when: first.id,
+      equals: defaultEquals,
+    };
+  }, [controllers]);
 
-  const handleControllerChange = (id: string) => {
-    const next = controllers.find((f) => f.id === id);
-    if (!next) return;
-    let nextEquals: SimpleCondition["equals"];
-    if (next.kind === "checkbox") {
-      nextEquals = true;
-    } else {
-      nextEquals = next.options?.[0]?.value ?? "";
+  const addFieldCondition = useCallback((): boolean => {
+    const condition = createDefaultFieldCondition();
+    if (!condition) {
+      setConditionError(
+        "Add a checkbox, select, radio, or multiselect field earlier on this page first."
+      );
+      return false;
     }
-    onChange({
-      visibleIf: { when: next.id, equals: nextEquals },
-    });
-  };
+    const next = [...conditions, condition];
+    updateConditions(next);
+    return true;
+  }, [conditions, createDefaultFieldCondition, updateConditions]);
 
-  const handleEqualsChange = (val: string) => {
-    if (!selectedController) return;
-    const equals: SimpleCondition["equals"] =
-      selectedController.kind === "checkbox" ? val === "true" : val;
-    onChange({
-      visibleIf: {
-        when: selectedController.id,
-        equals,
-      },
-    });
-  };
+  const pickDefaultValidatorType = useCallback(():
+    | CustomValidatorType
+    | undefined => {
+    const withoutId = usableValidators.find(
+      (validator) => !validator.withIdField
+    );
+    return withoutId?.id ?? usableValidators[0]?.id;
+  }, [usableValidators]);
 
-  return (
-    <div className=" border-gray-200 pt-2">
-      <div className="flex items-center justify-between">
-        <label className="text-xs font-medium text-gray-700">
-          Conditional visibility
-        </label>
-        <input
-          type="checkbox"
-          className={`h-4 w-4 ${controllers.length === 0 ? "opacity-30" : ""}`}
-          checked={enabled}
-          onChange={(e) => handleEnableToggle(e.target.checked)}
-          disabled={controllers.length === 0}
-          title={
-            controllers.length === 0
-              ? "Add a checkbox/select/radio before this field to enable"
-              : undefined
+  const [validatorConfigs, setValidatorConfigs] = useState<
+    Record<number, { type: CustomValidatorType; idArgument?: number }>
+  >({});
+  const pendingValidatorFetch = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    const missing = conditions
+      .filter(isValidatorCondition)
+      .map((condition) => condition.validatorId)
+      .filter(
+        (id) =>
+          validatorConfigs[id] === undefined &&
+          !pendingValidatorFetch.current.has(id)
+      );
+    if (!missing.length) {
+      return;
+    }
+
+    let cancelled = false;
+    missing.forEach((id) => pendingValidatorFetch.current.add(id));
+    Promise.all(
+      missing.map(async (id) => {
+        try {
+          const response = await tasksFindOneCustomValidator({
+            path: { id },
+          });
+          if (!response.data) {
+            throw new Error("Missing validator data");
           }
-        />
-      </div>
+          return [
+            id,
+            { type: response.data.type, idArgument: response.data.idArgument },
+          ] as const;
+        } catch (error) {
+          console.error("Failed to load visibility validator", error);
+          return [id, undefined] as const;
+        }
+      })
+    )
+      .then((entries) => {
+        if (cancelled) return;
+        setValidatorConfigs((prev) => {
+          const next = { ...prev };
+          for (const [id, config] of entries) {
+            if (config) {
+              next[id] = config;
+            }
+          }
+          return next;
+        });
+      })
+      .finally(() => {
+        missing.forEach((id) => pendingValidatorFetch.current.delete(id));
+      });
 
-      {enabled && selectedController && (
-        <div className="mt-2 space-y-2">
-          <div>
-            <label className="block text-xs text-gray-700 mb-1">
-              Show when field
-            </label>
-            <select
-              className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-              value={selectedControllerId || ""}
-              onChange={(e) => handleControllerChange(e.target.value)}
-            >
-              {controllers.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.label}
-                </option>
-              ))}
-            </select>
-          </div>
+    return () => {
+      cancelled = true;
+    };
+  }, [conditions, validatorConfigs]);
 
+  const ensureValidatorRecord = useCallback(
+    async (type: CustomValidatorType, idArgument?: number) => {
+      const result = await tasksCreateCustomValidator({
+        body: { type, idArgument },
+      });
+      if (!result.data) {
+        throw new Error("createCustomValidator returned no data");
+      }
+      setValidatorConfigs((prev) => ({
+        ...prev,
+        [result.data.id]: { type, idArgument },
+      }));
+      return result.data.id;
+    },
+    []
+  );
+
+  const addValidatorCondition = useCallback(
+    async (opts?: {
+      type?: CustomValidatorType;
+      idArgument?: number;
+      resultEquals?: boolean;
+    }): Promise<boolean> => {
+      const desiredType = opts?.type ?? pickDefaultValidatorType();
+      if (!desiredType) {
+        setConditionError(
+          "No custom validators are available for conditional visibility."
+        );
+        return false;
+      }
+      try {
+        const validatorId = await ensureValidatorRecord(
+          desiredType,
+          opts?.idArgument
+        );
+        const nextCondition: ValidatorCondition = {
+          validatorId,
+          resultEquals: opts?.resultEquals ?? true,
+        };
+        const next = [...conditions, nextCondition];
+        updateConditions(next);
+        return true;
+      } catch (error) {
+        console.error("Failed to configure visibility validator", error);
+        setConditionError(
+          "Unable to configure the selected validator right now."
+        );
+        return false;
+      }
+    },
+    [
+      conditions,
+      ensureValidatorRecord,
+      pickDefaultValidatorType,
+      updateConditions,
+    ]
+  );
+
+  const handleEnableToggle = async (checked: boolean) => {
+    if (!checked) {
+      setIsEditorOpen(false);
+      setConditionError(null);
+      updateConditions([]);
+      return;
+    }
+    setConditionError(null);
+    setIsEditorOpen(true);
+    if (conditions.length === 0 && canUseFieldControllers) {
+      addFieldCondition();
+    }
+  };
+
+  const handleControllerChange = useCallback(
+    (index: number, id: string) => {
+      const nextField = controllers.find((f) => f.id === id);
+      if (!nextField) {
+        return;
+      }
+      let nextEquals: FieldCondition["equals"];
+      if (nextField.kind === "checkbox") {
+        nextEquals = true;
+      } else {
+        nextEquals = nextField.options?.[0]?.value ?? "";
+      }
+      const next = [...conditions];
+      next[index] = {
+        when: nextField.id,
+        equals: nextEquals,
+      };
+      updateConditions(next);
+    },
+    [conditions, controllers, updateConditions]
+  );
+
+  const handleEqualsChange = useCallback(
+    (index: number, value: string) => {
+      const next = [...conditions];
+      const current = next[index];
+      if (!isFieldCondition(current)) {
+        return;
+      }
+      const controller = controllers.find((f) => f.id === current.when);
+      if (!controller) {
+        return;
+      }
+      const equals = controller.kind === "checkbox" ? value === "true" : value;
+      next[index] = {
+        when: current.when,
+        equals,
+      };
+      updateConditions(next);
+    },
+    [conditions, controllers, updateConditions]
+  );
+
+  const handleValidatorSelection = useCallback(
+    async (
+      index: number,
+      validatorType: CustomValidatorType | undefined,
+      idArgument?: number
+    ) => {
+      if (!validatorType) {
+        removeCondition(index);
+        return;
+      }
+      try {
+        const validatorId = await ensureValidatorRecord(
+          validatorType,
+          idArgument
+        );
+        const next = [...conditions];
+        const existing = next[index];
+        const resultEquals = isValidatorCondition(existing)
+          ? existing.resultEquals ?? true
+          : true;
+        next[index] = {
+          validatorId,
+          resultEquals,
+        };
+        updateConditions(next);
+      } catch (error) {
+        console.error("Failed to configure visibility validator", error);
+        setConditionError(
+          "Unable to configure the selected validator right now."
+        );
+      }
+    },
+    [conditions, ensureValidatorRecord, removeCondition, updateConditions]
+  );
+
+  const handleValidatorExpectationChange = useCallback(
+    (index: number, value: string) => {
+      const next = [...conditions];
+      const condition = next[index];
+      if (!isValidatorCondition(condition)) {
+        return;
+      }
+      next[index] = {
+        ...condition,
+        resultEquals: value === "true",
+      };
+      updateConditions(next);
+    },
+    [conditions, updateConditions]
+  );
+
+  const renderFieldCondition = (condition: FieldCondition, index: number) => {
+    const controller = controllers.find((f) => f.id === condition.when);
+    return (
+      <div className="space-y-2">
+        <div>
+          <label className="block text-xs text-gray-700 mb-1">
+            Show when field
+          </label>
+          <select
+            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+            value={controller ? controller.id : controllers[0]?.id ?? ""}
+            onChange={(event) =>
+              handleControllerChange(index, event.target.value)
+            }
+          >
+            {controllers.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {controller ? (
           <div>
             <label className="block text-xs text-gray-700 mb-1">equals</label>
-            {selectedController.kind === "checkbox" ? (
+            {controller.kind === "checkbox" ? (
               <select
                 className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={String(!!equalsValue)}
-                onChange={(e) => handleEqualsChange(e.target.value)}
+                value={String(!!condition.equals)}
+                onChange={(event) =>
+                  handleEqualsChange(index, event.target.value)
+                }
               >
                 <option value="true">Checked</option>
                 <option value="false">Unchecked</option>
@@ -198,10 +458,12 @@ export function ConditionalVisibility({
             ) : (
               <select
                 className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={String(equalsValue ?? "")}
-                onChange={(e) => handleEqualsChange(e.target.value)}
+                value={String(condition.equals ?? "")}
+                onChange={(event) =>
+                  handleEqualsChange(index, event.target.value)
+                }
               >
-                {selectedController.options?.map((opt, idx) => (
+                {controller.options?.map((opt, idx) => (
                   <option key={idx} value={opt.value}>
                     {opt.label}
                   </option>
@@ -209,17 +471,169 @@ export function ConditionalVisibility({
               </select>
             )}
           </div>
+        ) : (
+          <p className="text-[11px] text-gray-400">
+            Select a field to compare before configuring a value.
+          </p>
+        )}
+      </div>
+    );
+  };
+
+  const renderValidatorCondition = (
+    condition: ValidatorCondition,
+    index: number
+  ) => {
+    const config = validatorConfigs[condition.validatorId];
+    return (
+      <div className="space-y-2">
+        <CustomValidatorSelect
+          type={config?.type}
+          idArgument={config?.idArgument}
+          onChange={(validatorType, idArgument) =>
+            void handleValidatorSelection(index, validatorType, idArgument)
+          }
+          filter={(validator) => validator.usableForVisibility}
+          label="Visibility validator"
+        />
+        {!config && !validatorsLoading && (
+          <p className="text-[11px] text-gray-400">
+            Loading validator details…
+          </p>
+        )}
+        <div>
+          <label className="block text-xs text-gray-700 mb-1">
+            Show when validator result is
+          </label>
+          <select
+            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+            value={String(condition.resultEquals ?? true)}
+            onChange={(event) =>
+              handleValidatorExpectationChange(index, event.target.value)
+            }
+          >
+            <option value="true">True</option>
+            <option value="false">False</option>
+          </select>
         </div>
-      )}
-      {controllers.length === 0 && (
+      </div>
+    );
+  };
+
+  return (
+    <div className="border-gray-200 pt-2">
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-medium text-gray-700">
+          Conditional visibility
+        </label>
+        <input
+          type="checkbox"
+          className={`h-4 w-4 ${toggleDisabled ? "opacity-30" : ""}`}
+          checked={isEditorOpen}
+          onChange={(e) => void handleEnableToggle(e.target.checked)}
+          disabled={toggleDisabled}
+          title={
+            toggleDisabled
+              ? "Add an eligible field or configure a validator to enable this feature"
+              : undefined
+          }
+        />
+      </div>
+
+      {toggleDisabled && (
         <p className="mt-1 text-[11px] text-gray-400">
-          No earlier checkbox/select/radio fields available to reference.
+          No earlier checkbox/select/radio fields or visibility validators are
+          available.
         </p>
+      )}
+
+      {conditionError && (
+        <p className="mt-1 text-[11px] text-red-500">{conditionError}</p>
+      )}
+
+      {isEditorOpen && (
+        <div className="mt-2 space-y-3">
+          {conditions.map((condition, index) => (
+            <div
+              key={index}
+              className="rounded border border-gray-200 bg-white p-3 space-y-2"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-700">
+                  Condition {index + 1}
+                </span>
+                <button
+                  type="button"
+                  className="text-[11px] text-gray-500 hover:text-red-500"
+                  onClick={() => removeCondition(index)}
+                >
+                  Remove
+                </button>
+              </div>
+              {isFieldCondition(condition) ? (
+                renderFieldCondition(condition, index)
+              ) : isValidatorCondition(condition) ? (
+                renderValidatorCondition(condition, index)
+              ) : (
+                <p className="text-[11px] text-red-500">
+                  Unsupported condition type. Remove and re-create this rule.
+                </p>
+              )}
+            </div>
+          ))}
+
+          {conditions.length === 0 && (
+            <p className="text-[11px] text-gray-500">
+              No conditions configured yet. Add at least one rule below.
+            </p>
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+              onClick={() => {
+                if (!addFieldCondition()) {
+                  return;
+                }
+              }}
+              disabled={!canUseFieldControllers}
+            >
+              + Field condition
+            </button>
+            <button
+              type="button"
+              className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+              onClick={() => void addValidatorCondition()}
+              disabled={!canUseValidators}
+            >
+              + Validator condition
+            </button>
+          </div>
+          {!canUseFieldControllers && (
+            <p className="text-[11px] text-gray-400">
+              Add a checkbox, select, radio, or multiselect field earlier on
+              this page to use answer-based visibility.
+            </p>
+          )}
+          {!canUseValidators && (
+            <p className="text-[11px] text-gray-400">
+              No custom validators are currently available for visibility.
+            </p>
+          )}
+          {validatorsLoading && (
+            <p className="text-[11px] text-gray-500">
+              Loading visibility validators…
+            </p>
+          )}
+          {validatorsError && !validatorsLoading && (
+            <p className="text-[11px] text-red-500">{validatorsError}</p>
+          )}
+        </div>
       )}
     </div>
   );
 }
-
 // ---------------- Custom Validators ----------------
 
 let cachedValidators: CustomValidatorTypeDto[] | null = null;
@@ -309,6 +723,7 @@ type CustomValidatorSelectProps = {
   ) => void;
   className?: string;
   label?: string;
+  filter?: (validator: CustomValidatorTypeDto) => boolean;
 };
 
 export function CustomValidatorSelect({
@@ -317,8 +732,26 @@ export function CustomValidatorSelect({
   onChange,
   className = "",
   label = "Custom validator",
+  filter,
 }: CustomValidatorSelectProps) {
   const { validators, loading, error } = useCustomValidators();
+  const availableValidators = useMemo(() => {
+    if (!filter) {
+      return validators;
+    }
+    const filtered = validators.filter(filter);
+    if (!type) {
+      return filtered;
+    }
+    const selected = validators.find((validator) => validator.id === type);
+    if (
+      selected &&
+      !filtered.some((validator) => validator.id === selected.id)
+    ) {
+      return [...filtered, selected];
+    }
+    return filtered;
+  }, [validators, filter, type]);
 
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextValue = event.target.value;
@@ -329,7 +762,7 @@ export function CustomValidatorSelect({
     onChange(nextValue as CustomValidatorType, idArgument);
   };
 
-  const hasValidators = validators.length > 0;
+  const hasValidators = availableValidators.length > 0;
 
   return (
     <div className={`space-y-1 ${className}`}>
@@ -342,7 +775,7 @@ export function CustomValidatorSelect({
           disabled={loading || (!hasValidators && !type)}
         >
           <option value="">None</option>
-          {validators.map((validator) => (
+          {availableValidators.map((validator) => (
             <option key={validator.id} value={validator.id}>
               {validator.name}
             </option>

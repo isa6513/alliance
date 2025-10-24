@@ -34,7 +34,7 @@ interface BaseField<TKind extends FieldKind> {
   customValidatorId?: number;
 
   // simple conditions using string IDs
-  visibleIf?: Condition;
+  visibleIf?: Condition[];
   requiredIf?: Condition;
 
   // UI hints
@@ -44,7 +44,8 @@ interface BaseField<TKind extends FieldKind> {
 // Conditions reference other field ids; we type this late with a helper (see defineForm)
 export type Condition =
   | { when: string; equals: string | number | boolean | null }
-  | { expr: string }; // keep an escape hatch; runtime-evaluated safely
+  | { expr: string }
+  | { validatorId: number; resultEquals?: boolean }; // validators default to expecting true
 
 // Specialized fields:
 

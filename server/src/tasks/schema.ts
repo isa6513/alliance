@@ -34,7 +34,7 @@ interface BaseField<TKind extends FieldKind> {
   customValidatorId?: number;
 
   // simple conditions using string IDs
-  visibleIf?: Condition;
+  visibleIf?: Condition[];
   requiredIf?: Condition;
 
   // UI hints
@@ -44,7 +44,8 @@ interface BaseField<TKind extends FieldKind> {
 // Conditions reference other field ids; we type this late with a helper (see defineForm)
 export type Condition =
   | { when: string; equals: string | number | boolean | null }
-  | { expr: string }; // keep an escape hatch; runtime-evaluated safely
+  | { expr: string }
+  | { validatorId: number; resultEquals?: boolean }; // keep validators expecting true by default
 
 // Specialized fields:
 
@@ -135,12 +136,21 @@ export function isQuestionField(
 export function isQuestionVisible(
   element: AnyField | DisplayBlock,
   formData: Record<string, FormValue>,
+  validatorResults?: Record<number, boolean>,
 ): boolean {
-  const cond = element.visibleIf;
-  if (cond) {
+  const raw = element.visibleIf;
+  if (raw && (Array.isArray(raw) ? raw.length > 0 : true)) {
     const evalCond = (c: Condition): boolean => {
       if ('expr' in c) {
         return true;
+      }
+      if ('validatorId' in c) {
+        const expected = c.resultEquals ?? true;
+        const actual = validatorResults?.[c.validatorId];
+        if (actual === undefined) {
+          return false;
+        }
+        return actual === expected;
       }
       const val = formData[c.when];
       // If condition expects a boolean (checkbox controllers), coerce undefined → false
@@ -153,7 +163,12 @@ export function isQuestionVisible(
       }
       return val === c.equals;
     };
-    if (!evalCond(cond)) return false;
+    const conditions = Array.isArray(raw) ? raw : [raw];
+    for (const condition of conditions) {
+      if (!evalCond(condition)) {
+        return false;
+      }
+    }
   }
   return true;
 }
