@@ -355,7 +355,7 @@ export function RenderField({
             }`}
           >
             {options.map((option, optIndex) => (
-              <label key={optIndex} className="flex items-center">
+              <label key={optIndex} className="flex">
                 <input
                   type="checkbox"
                   name={field.id}
@@ -381,6 +381,7 @@ export function RenderField({
                   }
                   disabled={disabled}
                   aria-invalid={hasError}
+                  style={{ marginTop: "4px" }}
                   className={composeClassName(
                     `mr-2 h-4 w-4 ${
                       hasError ? "text-red-600" : "text-blue-600"
