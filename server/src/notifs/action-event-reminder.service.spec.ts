@@ -213,17 +213,30 @@ describe('ActionEventReminderService', () => {
     const windowStart = new Date('2024-01-12T00:00:00Z');
     const windowEnd = new Date('2024-01-12T23:59:59Z');
 
+    const action = { ...defaultReminderEventAction, id: 201 };
+    const nextEvent = reminderEvent({
+      id: 302,
+      action,
+      date: new Date('2024-01-13T12:00:00Z'),
+      reminders: [],
+    });
+    const referenceEvent = reminderEvent({
+      id: 301,
+      action,
+      date: new Date('2024-01-12T09:00:00Z'),
+      newStatus: ActionStatus.MemberAction,
+      reminders: [],
+    });
+    const reminder = customReminder({
+      sendAtAbsolute: new Date('2024-01-12T12:00:00Z'),
+      timingMode: ReminderTimingMode.Absolute,
+    });
+    reminder.memberActionEvent = referenceEvent;
+    referenceEvent.reminders = [reminder];
+
     (repositoryMock.find as jest.Mock)
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]);
-
-    reminderRepositoryMock.find.mockResolvedValueOnce([
-      customReminder({
-        sendAtAbsolute: new Date('2024-01-12T12:00:00Z'),
-        timingMode: ReminderTimingMode.Absolute,
-      }),
-    ]);
+      .mockResolvedValueOnce([referenceEvent, nextEvent]);
 
     jest
       .spyOn(
@@ -245,17 +258,30 @@ describe('ActionEventReminderService', () => {
     const windowStart = new Date('2024-01-12T00:00:00Z');
     const windowEnd = new Date('2024-01-12T23:59:59Z');
 
+    const action = { ...defaultReminderEventAction, id: 202 };
+    const nextEvent = reminderEvent({
+      id: 402,
+      action,
+      date: new Date('2024-01-12T12:30:00Z'),
+      reminders: [],
+    });
+    const referenceEvent = reminderEvent({
+      id: 401,
+      action,
+      date: new Date('2024-01-12T08:00:00Z'),
+      newStatus: ActionStatus.MemberAction,
+      reminders: [],
+    });
+    const reminder = customReminder({
+      sendAtSecondsFromDeadline: 1000,
+      timingMode: ReminderTimingMode.FromDeadline,
+    });
+    reminder.memberActionEvent = referenceEvent;
+    referenceEvent.reminders = [reminder];
+
     (repositoryMock.find as jest.Mock)
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]);
-
-    reminderRepositoryMock.find.mockResolvedValueOnce([
-      customReminder({
-        sendAtSecondsFromDeadline: 1000,
-        timingMode: ReminderTimingMode.FromDeadline,
-      }),
-    ]);
+      .mockResolvedValueOnce([referenceEvent, nextEvent]);
 
     jest
       .spyOn(

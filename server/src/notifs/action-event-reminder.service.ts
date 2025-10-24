@@ -226,7 +226,7 @@ export class ActionEventReminderService {
         'action',
         'action.participatingGroups',
         'reminders',
-        'reminders.users',
+        'reminders.users', //TODO: shouldnt load whole users
       ],
       order: { action: { id: 'ASC' }, date: 'ASC' },
     });
