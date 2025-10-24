@@ -439,7 +439,7 @@ export function RenderField({
         <div className="space-y-1">
           <RenderLabel field={field} error={errorMessage} />
           <select
-            value={(value as string) ?? ""}
+            value={(value as string) ?? "-08:00"}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
@@ -448,14 +448,14 @@ export function RenderField({
               "w-full px-3 py-2 rounded-md focus:outline-none has-[option.placeholder:checked]:text-gray-400"
             )}
           >
-            <option value="-08:00" selected>
-              (GMT -8:00) Pacific Time (US &amp; Canada)
-            </option>
             <option value="-12:00">(GMT -12:00) Eniwetok, Kwajalein</option>
             <option value="-11:00">(GMT -11:00) Midway Island, Samoa</option>
             <option value="-10:00">(GMT -10:00) Hawaii</option>
             <option value="-09:50">(GMT -9:30) Taiohae</option>
             <option value="-09:00">(GMT -9:00) Alaska</option>
+            <option value="-08:00">
+              (GMT -8:00) Pacific Time (US &amp; Canada)
+            </option>
             <option value="-07:00">
               (GMT -7:00) Mountain Time (US &amp; Canada)
             </option>
