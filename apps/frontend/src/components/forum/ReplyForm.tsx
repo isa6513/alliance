@@ -1,6 +1,6 @@
 import { CreateEditableContentDto } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
 
 interface ReplyFormProps {
@@ -29,22 +29,29 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
   startExpanded = false,
 }: ReplyFormProps) => {
   const [expanded, setExpanded] = useState(startExpanded);
+  const [clearDraftSignal, setClearDraftSignal] = useState(0);
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setClearDraftSignal((x) => x + 1);
+      setExpanded(false);
+      onSubmit(editableContent);
+    },
+    [editableContent, onSubmit]
+  );
+
   return (
     <div
       className={`rounded relative bg-black/4 ${className ?? ""} ${
         parentId ? "mt-0" : "mt-3"
       } ${compact ? "p-1 md:p-2" : "p-2 md:p-4"}`}
     >
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          setExpanded(false);
-          onSubmit(editableContent);
-        }}
-      >
+      <form onSubmit={handleSubmit}>
         <EditableContentForm
           value={editableContent}
           expanded={expanded}
+          clearDraftSignal={clearDraftSignal}
           onChange={(val) => {
             setEditableContent(val);
             if ((val.body || val.attachments.length > 0) && !expanded)

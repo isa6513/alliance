@@ -30,7 +30,7 @@ const PostFormPage: React.FC = () => {
     attachments: [],
   });
   const [scheduledVisibleAt, setScheduledVisibleAt] = useState<string | null>(
-    null,
+    null
   );
   const [useSchedulePost, setUseSchedulePost] = useState<boolean>(false);
 
@@ -40,12 +40,13 @@ const PostFormPage: React.FC = () => {
   const [actionId, setActionId] = useState<number | undefined>(
     searchParams.get("actionId")
       ? Number(searchParams.get("actionId"))
-      : undefined,
+      : undefined
   );
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const canSchedulePost = mode === "create" || scheduledVisibleAt !== null;
+  const [clearDraftSignal, setClearDraftSignal] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,7 +113,7 @@ const PostFormPage: React.FC = () => {
               return res.data as unknown as string; // returns image key
             }
             return fileB64;
-          }),
+          })
         );
         attachmentKeys = uploads.filter(Boolean) as string[];
       }
@@ -155,6 +156,7 @@ const PostFormPage: React.FC = () => {
       setRevalidate();
 
       if (response.data) {
+        setClearDraftSignal((x) => x + 1);
         navigate(`/forum/post/${response.data.id}`);
       } else {
         setError("An error occurred while updating the post");
@@ -225,6 +227,7 @@ const PostFormPage: React.FC = () => {
                 <EditableContentForm
                   value={content}
                   onChange={setContent}
+                  clearDraftSignal={clearDraftSignal}
                   expanded={true}
                   placeholder="Write your post content here..."
                 />
@@ -260,7 +263,7 @@ const PostFormPage: React.FC = () => {
                             setScheduledVisibleAt(utcValue);
                             if (!utcValue) {
                               setError(
-                                "Please select a valid date and time to schedule the post.",
+                                "Please select a valid date and time to schedule the post."
                               );
                               return;
                             }
@@ -292,8 +295,8 @@ const PostFormPage: React.FC = () => {
                   {isSubmitting
                     ? "Saving..."
                     : mode === "create"
-                      ? "Create Post"
-                      : "Save Changes"}
+                    ? "Create Post"
+                    : "Save Changes"}
                 </Button>
               </div>
             </div>
