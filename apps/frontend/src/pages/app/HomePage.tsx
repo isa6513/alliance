@@ -26,7 +26,12 @@ export function canCompleteAction(action: ActionWithRelation) {
 }
 
 export function shouldCompleteAction(action: ActionWithRelation) {
-  return canCompleteAction(action) && action.shouldParticipate;
+  return (
+    canCompleteAction(action) &&
+    action.shouldParticipate &&
+    (action.status === "member_action" ||
+      action.status === "gathering_commitments")
+  );
 }
 
 export function canJoinAction(action: ActionWithRelation) {
