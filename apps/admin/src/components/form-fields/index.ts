@@ -8,6 +8,8 @@ export { EditableRadioField } from './EditableRadioField';
 export { EditableChoiceField as EditableSelectField } from './EditableChoiceField';
 export { EditableChoiceField as EditableMultiSelectField } from './EditableChoiceField';
 export { EditableDateField } from './EditableDateField';
+export { EditableTimeField } from './EditableTimeField';
+export { EditableTimezoneField } from './EditableTimezoneField';
 export { EditableFileField } from './EditableFileField';
 export type { BaseFieldProps, FieldWrapperProps } from './types';
 export { FieldWrapper } from './FieldWrapper';

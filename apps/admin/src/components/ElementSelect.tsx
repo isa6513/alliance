@@ -21,6 +21,8 @@ export function ElementSelect({
     "select",
     "multiselect",
     "date",
+    "time",
+    "timezone",
     "file",
   ];
 

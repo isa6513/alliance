@@ -36,6 +36,8 @@ import {
   EditablePhoneField,
   EditableRadioField,
   EditableSelectField,
+  EditableTimeField,
+  EditableTimezoneField,
   EditableTextField,
   EditableTextareaField,
 } from "./form-fields";
@@ -120,6 +122,8 @@ export function FormBuilder({
       { id: "select", name: "Select Field", type: "field" as const },
       { id: "multiselect", name: "Multi-select Field", type: "field" as const },
       { id: "date", name: "Date Field", type: "field" as const },
+      { id: "time", name: "Time Field", type: "field" as const },
+      { id: "timezone", name: "Timezone Field", type: "field" as const },
       { id: "file", name: "File Field", type: "field" as const },
       { id: "header", name: "Header Block", type: "block" as const },
       { id: "text-block", name: "Text Block", type: "block" as const },
@@ -296,6 +300,22 @@ export function FormBuilder({
           id: fieldId,
           kind: "date",
           label: "Date Field",
+          required: false,
+        };
+        break;
+      case "time":
+        newField = {
+          id: fieldId,
+          kind: "time",
+          label: "Time Field",
+          required: false,
+        };
+        break;
+      case "timezone":
+        newField = {
+          id: fieldId,
+          kind: "timezone",
+          label: "Timezone Field",
           required: false,
         };
         break;
@@ -836,6 +856,20 @@ export function FormBuilder({
                         {...commonProps}
                       />
                     );
+                  case "time":
+                    return (
+                      <EditableTimeField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "timezone":
+                    return (
+                      <EditableTimezoneField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
                   case "file":
                     return (
                       <EditableFileField
@@ -1150,17 +1184,19 @@ export function FormBuilder({
 
         <div className="flex-1 p-6 overflow-y-auto min-h-0">
           {isPreviewMode ? (
-            <FormRenderer
-              id={0}
-              actionId={0}
-              form={schema}
-              onSubmit={null}
-              renderFormAsCompleted={false}
-              userId="preview"
-            />
+            <div className="max-w-3xl mx-auto bg-white p-6 border border-gray-200 rounded-lg">
+              <FormRenderer
+                id={0}
+                actionId={0}
+                form={schema}
+                onSubmit={null}
+                renderFormAsCompleted={false}
+                userId="preview"
+              />
+            </div>
           ) : (
             <div
-              className="max-w-2xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8"
+              className="max-w-2xl mx-auto bg-white rounded-lg border border-gray-200 p-6 mb-8"
               onClick={handleClickOutside}
             >
               <div className="mb-6">

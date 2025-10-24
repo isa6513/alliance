@@ -14,12 +14,16 @@ export type FieldKind =
   | 'select'
   | 'multiselect'
   | 'date'
+  | 'time'
+  | 'timezone'
   | 'file';
 
 type Option<V extends string = string> = { label: string; value: V };
 
+// Unified value type for answers (persisted)
 export type FormValue = string | number | boolean | string[];
 
+// Base field for dynamic forms (no generics, runtime-first)
 interface BaseField<TKind extends FieldKind> {
   id: string;
   kind: TKind;
@@ -29,16 +33,18 @@ interface BaseField<TKind extends FieldKind> {
   defaultValue?: FormValue | null;
   customValidatorId?: number;
 
+  // simple conditions using string IDs
   visibleIf?: Condition;
   requiredIf?: Condition;
 
+  // UI hints
   width?: 'full' | '1/2' | '1/3';
 }
 
 // Conditions reference other field ids; we type this late with a helper (see defineForm)
 export type Condition =
   | { when: string; equals: string | number | boolean | null }
-  | { expr: string };
+  | { expr: string }; // keep an escape hatch; runtime-evaluated safely
 
 // Specialized fields:
 
@@ -81,7 +87,15 @@ export type MultiSelectField = BaseField<'multiselect'> & {
   randomizeOptions?: boolean;
 };
 
-export type DateField = BaseField<'date'>; // ISO date string
+export type DateField = BaseField<'date'>; // ISO date string (YYYY-MM-DD)
+export type TimeField = BaseField<'time'>; // Stored as HH:mm (24h) string
+export type TimezoneField = BaseField<'timezone'> & {
+  /**
+   * Optional list of IANA region prefixes (e.g. ["America", "Europe"]) to
+   * restrict the timezone options shown to end users.
+   */
+  regionFilter?: string[];
+};
 // Persist file answers as string URL/key
 export type FileField = BaseField<'file'>;
 
@@ -96,6 +110,8 @@ export type AnyField =
   | SelectField
   | MultiSelectField
   | DateField
+  | TimeField
+  | TimezoneField
   | FileField;
 
 export class Page {

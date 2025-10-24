@@ -1,7 +1,8 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
-import type { AnyField, FormValue } from "./formschema";
+import type { AnyField, FormValue, TimeField } from "./formschema";
 import { shuffleWithSeed } from "./randomutils";
+import { formatTimeForDisplay, parseTimeInput } from "./timeUtils";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -422,6 +423,115 @@ export function RenderField({
         </div>
       );
 
+    case "time":
+      return (
+        <TimeInputField
+          field={field as TimeField}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          baseError={errorMessage}
+        />
+      );
+
+    case "timezone": {
+      return (
+        <div className="space-y-1">
+          <RenderLabel field={field} error={errorMessage} />
+          <select
+            value={(value as string) ?? ""}
+            onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+            required={field.required}
+            disabled={disabled}
+            aria-invalid={hasError}
+            className={composeClassName(
+              "w-full px-3 py-2 rounded-md focus:outline-none has-[option.placeholder:checked]:text-gray-400"
+            )}
+          >
+            <option value="-08:00" selected>
+              (GMT -8:00) Pacific Time (US &amp; Canada)
+            </option>
+            <option value="-12:00">(GMT -12:00) Eniwetok, Kwajalein</option>
+            <option value="-11:00">(GMT -11:00) Midway Island, Samoa</option>
+            <option value="-10:00">(GMT -10:00) Hawaii</option>
+            <option value="-09:50">(GMT -9:30) Taiohae</option>
+            <option value="-09:00">(GMT -9:00) Alaska</option>
+            <option value="-07:00">
+              (GMT -7:00) Mountain Time (US &amp; Canada)
+            </option>
+            <option value="-06:00">
+              (GMT -6:00) Central Time (US &amp; Canada), Mexico City
+            </option>
+            <option value="-05:00">
+              (GMT -5:00) Eastern Time (US &amp; Canada), Bogota, Lima
+            </option>
+            <option value="-04:50">(GMT -4:30) Caracas</option>
+            <option value="-04:00">
+              (GMT -4:00) Atlantic Time (Canada), Caracas, La Paz
+            </option>
+            <option value="-03:50">(GMT -3:30) Newfoundland</option>
+            <option value="-03:00">
+              (GMT -3:00) Brazil, Buenos Aires, Georgetown
+            </option>
+            <option value="-02:00">(GMT -2:00) Mid-Atlantic</option>
+            <option value="-01:00">
+              (GMT -1:00) Azores, Cape Verde Islands
+            </option>
+            <option value="+00:00">
+              (GMT) Western Europe Time, London, Lisbon, Casablanca
+            </option>
+            <option value="+01:00">
+              (GMT +1:00) Brussels, Copenhagen, Madrid, Paris
+            </option>
+            <option value="+02:00">
+              (GMT +2:00) Kaliningrad, South Africa
+            </option>
+            <option value="+03:00">
+              (GMT +3:00) Baghdad, Riyadh, Moscow, St. Petersburg
+            </option>
+            <option value="+03:50">(GMT +3:30) Tehran</option>
+            <option value="+04:00">
+              (GMT +4:00) Abu Dhabi, Muscat, Baku, Tbilisi
+            </option>
+            <option value="+04:50">(GMT +4:30) Kabul</option>
+            <option value="+05:00">
+              (GMT +5:00) Ekaterinburg, Islamabad, Karachi, Tashkent
+            </option>
+            <option value="+05:50">
+              (GMT +5:30) Bombay, Calcutta, Madras, New Delhi
+            </option>
+            <option value="+05:75">(GMT +5:45) Kathmandu, Pokhara</option>
+            <option value="+06:00">(GMT +6:00) Almaty, Dhaka, Colombo</option>
+            <option value="+06:50">(GMT +6:30) Yangon, Mandalay</option>
+            <option value="+07:00">(GMT +7:00) Bangkok, Hanoi, Jakarta</option>
+            <option value="+08:00">
+              (GMT +8:00) Beijing, Perth, Singapore, Hong Kong
+            </option>
+            <option value="+08:75">(GMT +8:45) Eucla</option>
+            <option value="+09:00">
+              (GMT +9:00) Tokyo, Seoul, Osaka, Sapporo, Yakutsk
+            </option>
+            <option value="+09:50">(GMT +9:30) Adelaide, Darwin</option>
+            <option value="+10:00">
+              (GMT +10:00) Eastern Australia, Guam, Vladivostok
+            </option>
+            <option value="+10:50">(GMT +10:30) Lord Howe Island</option>
+            <option value="+11:00">
+              (GMT +11:00) Magadan, Solomon Islands, New Caledonia
+            </option>
+            <option value="+11:50">(GMT +11:30) Norfolk Island</option>
+            <option value="+12:00">
+              (GMT +12:00) Auckland, Wellington, Fiji, Kamchatka
+            </option>
+            <option value="+12:75">(GMT +12:45) Chatham Islands</option>
+            <option value="+13:00">(GMT +13:00) Apia, Nukualofa</option>
+            <option value="+14:00">(GMT +14:00) Line Islands, Tokelau</option>
+          </select>
+          {renderValidationMessage()}
+        </div>
+      );
+    }
+
     case "file": {
       const fileValue = value;
       const isUploading = !!uploading;
@@ -472,3 +582,96 @@ export function RenderField({
 }
 
 export default RenderField;
+
+type TimeInputFieldProps = {
+  field: TimeField;
+  value: FormValue | undefined;
+  onChange?: (value: FormValue) => void;
+  disabled?: boolean;
+  baseError: string | null;
+};
+
+function TimeInputField({
+  field,
+  value,
+  onChange,
+  disabled,
+  baseError,
+}: TimeInputFieldProps) {
+  const normalizedValue = typeof value === "string" && value ? value : "";
+  const [inputValue, setInputValue] = useState<string>(() =>
+    formatTimeForDisplay(normalizedValue)
+  );
+  const [localError, setLocalError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    if (isEditing || localError) return;
+    const nextDisplay = normalizedValue
+      ? formatTimeForDisplay(normalizedValue)
+      : "";
+    setInputValue(nextDisplay);
+  }, [normalizedValue, isEditing, field.id, localError]);
+
+  const commitValue = () => {
+    const raw = inputValue.trim();
+    if (!raw) {
+      setLocalError(field.required ? "Enter a time like 7:30 PM" : null);
+      onChange?.("");
+      return;
+    }
+
+    const parsed = parseTimeInput(raw);
+    if (!parsed) {
+      setLocalError("Enter a time like 7:30 PM");
+      return;
+    }
+
+    setLocalError(null);
+    const normalized = parsed.normalized;
+    onChange?.(normalized);
+    setInputValue(formatTimeForDisplay(normalized));
+  };
+
+  const effectiveError = localError ?? baseError ?? null;
+  const hasError = Boolean(effectiveError);
+
+  return (
+    <div className="space-y-1">
+      <RenderLabel field={field} error={effectiveError} />
+      <input
+        type="text"
+        value={inputValue}
+        onFocus={() => setIsEditing(true)}
+        onBlur={() => {
+          setIsEditing(false);
+          commitValue();
+        }}
+        onChange={(e) => {
+          setInputValue(e.target.value);
+          setLocalError(null);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            setIsEditing(false);
+            commitValue();
+          }
+        }}
+        placeholder="e.g. 7:30 PM"
+        required={field.required}
+        disabled={disabled}
+        aria-invalid={hasError}
+        className={`w-full px-3 py-2 rounded-md focus:outline-none ${
+          hasError
+            ? "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent"
+            : "border border-zinc-300 focus:ring-1 focus:ring-green focus:border-transparent"
+        }`}
+        inputMode="text"
+      />
+      {hasError ? (
+        <p className="text-sm text-red-600">{effectiveError}</p>
+      ) : null}
+    </div>
+  );
+}

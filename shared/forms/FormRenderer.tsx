@@ -12,6 +12,7 @@ import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
 import type { DisplayBlock } from "./display-blocks";
 import type { AnyField, Condition, FormSchema, FormValue } from "./formschema";
+import { parseTimeToMinutes } from "./timeUtils";
 
 type FormRendererProps = {
   form: FormSchema;
@@ -234,12 +235,28 @@ const FormRenderer = ({
         case "email":
         case "phone":
         case "date":
+        case "timezone":
         case "select": {
           if (valueToCheck === undefined || valueToCheck === null) {
             return "This field is required.";
           }
           if (isEmptyString) {
             return "This field is required.";
+          }
+          return null;
+        }
+        case "time": {
+          if (valueToCheck === undefined || valueToCheck === null) {
+            return "This field is required.";
+          }
+          if (isEmptyString) {
+            return "This field is required.";
+          }
+          if (typeof valueToCheck === "string") {
+            const minutes = parseTimeToMinutes(valueToCheck);
+            if (minutes === null) {
+              return "Enter a valid time.";
+            }
           }
           return null;
         }
