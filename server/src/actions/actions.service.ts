@@ -137,8 +137,18 @@ export class ActionsService {
         type: ActionActivityType.USER_COMPLETED,
       },
     });
+    const withdrawalActivities = await this.actionActivityRepository.find({
+      where: {
+        actionId: action.id,
+        type: ActionActivityType.USER_WONT_COMPLETE,
+      },
+    });
+    const baseUsersMinusWithdrawals = baseUsers.filter(
+      (user) =>
+        !withdrawalActivities.some((activity) => activity.userId === user.id),
+    );
     const set = new Set([
-      ...baseUsers.map((user) => user.id),
+      ...baseUsersMinusWithdrawals.map((user) => user.id),
       ...completionActivities.map((activity) => activity.userId),
     ]);
 

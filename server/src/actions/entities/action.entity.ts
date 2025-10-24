@@ -156,7 +156,10 @@ export class Action {
     return (
       this.activities?.filter(
         (activity) => activity.type === ActionActivityType.USER_JOINED,
-      ).length || 0
+      ).length -
+        this.activities?.filter(
+          (activity) => activity.type === ActionActivityType.USER_WONT_COMPLETE,
+        ).length || 0
     );
   }
 
