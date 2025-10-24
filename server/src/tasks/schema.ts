@@ -89,13 +89,7 @@ export type MultiSelectField = BaseField<'multiselect'> & {
 
 export type DateField = BaseField<'date'>; // ISO date string (YYYY-MM-DD)
 export type TimeField = BaseField<'time'>; // Stored as HH:mm (24h) string
-export type TimezoneField = BaseField<'timezone'> & {
-  /**
-   * Optional list of IANA region prefixes (e.g. ["America", "Europe"]) to
-   * restrict the timezone options shown to end users.
-   */
-  regionFilter?: string[];
-};
+export type TimezoneField = BaseField<'timezone'>;
 // Persist file answers as string URL/key
 export type FileField = BaseField<'file'>;
 
