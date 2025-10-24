@@ -344,8 +344,16 @@ export function RenderField({
     }
 
     case "multiselect": {
-      const selectedCount = Array.isArray(value) ? value.length : 0;
-      const options = randomizedOptions ?? field.options;
+      const selections = Array.isArray(value) ? value : [];
+      const selectedCount = selections.length;
+      const options = randomizedOptions ?? field.options ?? [];
+      const maxSelections =
+        typeof field.maxSelections === "number" && field.maxSelections > 0
+          ? field.maxSelections
+          : undefined;
+      const maxReached =
+        maxSelections !== undefined && selectedCount >= maxSelections;
+
       return (
         <div className="space-y-2">
           <RenderLabel field={field} error={errorMessage} />
@@ -359,7 +367,7 @@ export function RenderField({
                 <input
                   type="checkbox"
                   name={field.id}
-                  checked={Array.isArray(value) && value.includes(option.value)}
+                  checked={selections.includes(option.value)}
                   onChange={
                     onChange
                       ? (e) => {
@@ -379,7 +387,10 @@ export function RenderField({
                   required={
                     !!field.required && selectedCount === 0 && optIndex === 0
                   }
-                  disabled={disabled}
+                  disabled={
+                    disabled ||
+                    (!selections.includes(option.value) && maxReached)
+                  }
                   aria-invalid={hasError}
                   style={{ marginTop: "4px" }}
                   className={composeClassName(
@@ -400,6 +411,12 @@ export function RenderField({
               </label>
             ))}
           </div>
+          {maxSelections !== undefined && (
+            <p className={`text-xs text-gray-500`}>
+              Select up to {maxSelections} option
+              {maxSelections === 1 ? "" : "s"}
+            </p>
+          )}
           {renderValidationMessage()}
         </div>
       );

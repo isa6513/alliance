@@ -82,6 +82,34 @@ export function EditableChoiceField({
         />
       )}
 
+      {field.kind === "multiselect" && (
+        <div className="space-y-1">
+          <label className="block text-xs font-medium text-gray-700">
+            Max selections (optional)
+          </label>
+          <input
+            type="number"
+            min={1}
+            value={field.maxSelections ?? ""}
+            onChange={(event) => {
+              const raw = event.target.value;
+              if (!raw) {
+                onUpdate({ maxSelections: undefined });
+                return;
+              }
+              const parsed = Number(raw);
+              if (Number.isNaN(parsed) || parsed < 1) {
+                onUpdate({ maxSelections: undefined });
+                return;
+              }
+              onUpdate({ maxSelections: Math.floor(parsed) });
+            }}
+            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="No limit"
+          />
+        </div>
+      )}
+
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-xs font-medium text-gray-700">

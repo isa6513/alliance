@@ -86,6 +86,7 @@ export type SelectField = BaseField<"select"> & {
 export type MultiSelectField = BaseField<"multiselect"> & {
   options: Option<string>[];
   randomizeOptions?: boolean;
+  maxSelections?: number;
 };
 
 export type DateField = BaseField<"date">; // ISO date string (YYYY-MM-DD)

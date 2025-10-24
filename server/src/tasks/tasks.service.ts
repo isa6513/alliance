@@ -131,6 +131,18 @@ export class TasksService {
               throw new BadRequestException(`Field ${field.label} is required`);
             }
           }
+          if (
+            field.kind === 'multiselect' &&
+            typeof field.maxSelections === 'number' &&
+            field.maxSelections > 0
+          ) {
+            const answer = submitFormDto.answers[field.id];
+            if (Array.isArray(answer) && answer.length > field.maxSelections) {
+              throw new BadRequestException(
+                `Field ${field.label} allows selecting up to ${field.maxSelections} options.`,
+              );
+            }
+          }
         }
       }
     }

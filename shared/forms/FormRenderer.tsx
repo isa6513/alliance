@@ -326,13 +326,31 @@ const FormRenderer = ({
       data?: Record<string, FormValue>
     ): string | null => {
       const required = isFieldConditionallyRequired(field, data);
-      if (!required) {
-        return null;
-      }
 
       const valueToCheck = fieldValue;
       const isEmptyString =
         typeof valueToCheck === "string" && valueToCheck.trim() === "";
+
+      if (field.kind === "multiselect") {
+        const selections = Array.isArray(valueToCheck) ? valueToCheck : [];
+        if (required && selections.length === 0) {
+          return "Select at least one option.";
+        }
+        if (
+          typeof field.maxSelections === "number" &&
+          field.maxSelections > 0 &&
+          selections.length > field.maxSelections
+        ) {
+          return `Select no more than ${field.maxSelections} option${
+            field.maxSelections === 1 ? "" : "s"
+          }.`;
+        }
+        return null;
+      }
+
+      if (!required) {
+        return null;
+      }
 
       switch (field.kind) {
         case "text":
@@ -379,10 +397,6 @@ const FormRenderer = ({
           return valueToCheck === true ? null : "This field is required.";
         case "radio":
           return valueToCheck ? null : "Please select an option.";
-        case "multiselect":
-          return Array.isArray(valueToCheck) && valueToCheck.length > 0
-            ? null
-            : "Select at least one option.";
         case "file":
           return valueToCheck ? null : "Please upload a file.";
         default: {
