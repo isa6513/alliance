@@ -43,7 +43,14 @@ interface ActionReminderFormProps {
 
 const DEFAULT_SEND_AT_OFFSET_MS = 0;
 
-const keywords = ["#{name}", "#{action}", "#{days}", "#{link}"];
+const keywords = [
+  "#{fullname}",
+  "#{firstname}",
+  "#{lastname}",
+  "#{action}",
+  "#{days}",
+  "#{link}",
+];
 
 const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
   memberEvents,
@@ -355,7 +362,7 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
         <button
           type="button"
           onClick={() => setKeywordsHelpExpanded(!keywordsHelpExpanded)}
-          className="text-sm"
+          className="text-sm w-full text-left"
         >
           Keyword replacement syntax{keywordsHelpExpanded ? " " : "..."}
         </button>
@@ -368,9 +375,19 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
                 <th>Description</th>
               </tr>
               <tr>
-                <td>{"#{name}"}</td>
-                <td>John Doe</td>
+                <td>{"#{fullname}"}</td>
+                <td>John Fitzgerald Doe</td>
                 <td>Member&apos;s full name</td>
+              </tr>
+              <tr>
+                <td>{"#{firstname}"}</td>
+                <td>John</td>
+                <td>Member&apos;s first name</td>
+              </tr>
+              <tr>
+                <td>{"#{lastname}"}</td>
+                <td>Doe</td>
+                <td>Member&apos;s last name</td>
               </tr>
               <tr>
                 <td>{"#{action}"}</td>

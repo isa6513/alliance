@@ -59,6 +59,7 @@ export type TextField = BaseField<'text'> & {
 export type TextareaField = BaseField<'textarea'> & {
   rows?: number;
   maxLength?: number;
+  placeholder?: string;
 };
 
 export type EmailField = BaseField<'email'>;

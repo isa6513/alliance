@@ -217,6 +217,12 @@ export class ActionEventNotifWorker {
           context,
         );
       }
+      if (context.customEmailSubject) {
+        context.customEmailSubject = this.processCustomReminderText(
+          context.customEmailSubject,
+          context,
+        );
+      }
 
       if (type === ActionEventNotifType.MissedDeadline) {
         context.isSecondMiss = false; //TODO;

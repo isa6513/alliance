@@ -13,8 +13,20 @@ export function processKeywordReplacements(
   text: string,
   context: ActionEventNotificationContext,
 ): string {
+  const names = context.user.name.split(' ');
+  let firstname = '';
+  let lastname = '';
+  if (names.length < 2) {
+    console.error('User name has less than 2 parts: ' + context.user.name);
+    firstname = context.user.name;
+  } else {
+    firstname = names[0];
+    lastname = names[names.length - 1];
+  }
   return text
-    .replace('#{name}', context.user.name)
+    .replace('#{fullname}', context.user.name)
+    .replace('#{firstname}', firstname)
+    .replace('#{lastname}', lastname)
     .replace('#{action}', context.action.name)
     .replace(
       '#{days}',
@@ -211,10 +223,7 @@ export class MailService {
         'Invalid announcement status: ' + context.event.newStatus,
       );
     } else if (context.type === ActionEventNotifType.Reminder) {
-      return processKeywordReplacements(
-        context.customEmailSubject ?? 'no subject',
-        context,
-      );
+      return context.customEmailSubject ?? 'no subject';
     } else if (context.type === ActionEventNotifType.MissedDeadline) {
       return 'Failed to complete action: ' + context.action.name;
     }
