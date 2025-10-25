@@ -38,6 +38,10 @@ export class Mail {
   @ApiPropertyOptional()
   sentMessageId?: string;
 
+  @Column({ type: 'text', nullable: true })
+  @ApiPropertyOptional()
+  renderedHtml?: string;
+
   @ApiProperty()
   @Column()
   to: string;

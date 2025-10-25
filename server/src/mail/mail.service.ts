@@ -122,6 +122,7 @@ export class MailService {
       mail.status = EmailStatus.Failed;
     }
     mail.sentMessageId = messageId;
+    mail.renderedHtml = html;
     return this.mailRepository.save(mail);
   }
 
