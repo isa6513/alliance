@@ -99,7 +99,7 @@ const FormRenderer = ({
   };
 
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(() => {
-    if (initialPageIndex !== undefined) {
+    if (initialPageIndex !== undefined && !persistKey) {
       return clampPageIndex(initialPageIndex);
     }
     if (readOnly) return 0;

@@ -59,6 +59,21 @@ export function EditableTextareaField({
           min="0"
         />
       </div>
+
+      <div className="space-y-1 w-full">
+        <label className="block text-xs text-gray-700 font-medium">
+          Placeholder
+        </label>
+        <input
+          type="text"
+          value={field.placeholder ?? ""}
+          onChange={(event) =>
+            onUpdate({ placeholder: event.target.value || undefined })
+          }
+          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+          placeholder="Enter placeholder text"
+        />
+      </div>
     </FieldWrapper>
   );
 }

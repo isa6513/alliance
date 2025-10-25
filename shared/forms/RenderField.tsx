@@ -136,6 +136,7 @@ export function RenderField({
             className={composeClassName(
               "w-full px-3 py-2 rounded-md focus:outline-none resize-none"
             )}
+            placeholder={field.placeholder}
           />
           {renderValidationMessage()}
           {field.maxLength && (
