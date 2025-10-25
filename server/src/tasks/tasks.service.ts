@@ -127,7 +127,12 @@ export class TasksService {
             field.required &&
             isQuestionVisible(field, submitFormDto.answers, validatorResults)
           ) {
-            if (!submitFormDto.answers[field.id]) {
+            if (
+              !submitFormDto.answers[field.id] &&
+              !(
+                field.kind === 'number' && submitFormDto.answers[field.id] === 0
+              )
+            ) {
               throw new BadRequestException(`Field ${field.label} is required`);
             }
           }
