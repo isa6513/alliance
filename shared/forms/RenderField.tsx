@@ -72,6 +72,19 @@ export function RenderField({
     return shuffleWithSeed(options, randomizationSeedBase);
   }, [field, randomizationSeedBase, disableOptionRandomization]);
 
+  useEffect(() => {
+    //TODO: less janky way of doing this
+    if (field.kind !== "timezone") return;
+    if (!onChange) return;
+    const hasValue =
+      value !== undefined &&
+      value !== null &&
+      !(typeof value === "string" && value.trim() === "");
+    if (!hasValue) {
+      onChange("-08:00");
+    }
+  }, [field.kind, field.id, onChange, value]);
+
   const composeClassName = (
     base: string,
     overrides: { normal?: string; error?: string } = {}
