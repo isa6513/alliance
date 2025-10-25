@@ -1192,6 +1192,7 @@ export function FormBuilder({
                 onSubmit={null}
                 renderFormAsCompleted={false}
                 userId="preview"
+                initialPageIndex={selectedPageIndex}
               />
             </div>
           ) : (

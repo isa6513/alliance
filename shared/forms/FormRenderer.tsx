@@ -19,6 +19,7 @@ type FormRendererProps = {
   id: number;
   actionId: number;
   persistKey?: string | null;
+  initialPageIndex?: number;
   userId?: string | number;
   disableOptionRandomization?: boolean;
   onFormStarted?: () => void;
@@ -64,6 +65,7 @@ const FormRenderer = ({
   renderFormAsCompleted,
   completedFormResponse,
   actionId,
+  initialPageIndex,
 }: FormRendererProps) => {
   // Compute schema and a namespaced storage key for persistence (if enabled)
   const schema = form as unknown as FormSchema;
@@ -86,7 +88,20 @@ const FormRenderer = ({
     return base;
   }, [id, userId, persistKey]);
 
+  const pageCount = schema.pages?.length ?? 0;
+  const maxPageIndex = Math.max(0, (pageCount || 1) - 1);
+  const clampPageIndex = (idx: number): number => {
+    if (!Number.isFinite(idx)) return 0;
+    const normalized = Math.floor(idx);
+    if (normalized < 0) return 0;
+    if (normalized > maxPageIndex) return maxPageIndex;
+    return normalized;
+  };
+
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(() => {
+    if (initialPageIndex !== undefined) {
+      return clampPageIndex(initialPageIndex);
+    }
     if (readOnly) return 0;
     if (typeof window === "undefined" || !persistKey) return 0;
     try {
@@ -97,8 +112,7 @@ const FormRenderer = ({
         typeof parsed?.currentPageIndex === "number"
           ? parsed.currentPageIndex
           : 0;
-      const maxIdx = Math.max(0, (schema.pages?.length || 1) - 1);
-      return Math.min(Math.max(0, idx), maxIdx);
+      return clampPageIndex(idx);
     } catch {
       return 0;
     }
@@ -743,6 +757,21 @@ const FormRenderer = ({
       setFormData(completedFormResponse.answers as Record<string, FormValue>);
     }
   }, [readOnly, completedFormResponse]);
+
+  useEffect(() => {
+    if (
+      initialPageIndex === undefined ||
+      readOnly ||
+      persistKey ||
+      typeof initialPageIndex !== "number"
+    ) {
+      return;
+    }
+    const maxIdx = Math.max(0, (pageCount || 1) - 1);
+    const normalized = Math.floor(initialPageIndex);
+    const clamped = Math.min(Math.max(0, normalized), maxIdx);
+    setCurrentPageIndex(clamped);
+  }, [initialPageIndex, persistKey, readOnly, pageCount]);
 
   useEffect(() => {
     setFieldErrors({});

@@ -134,7 +134,8 @@ export class TasksService {
           if (
             field.kind === 'multiselect' &&
             typeof field.maxSelections === 'number' &&
-            field.maxSelections > 0
+            field.maxSelections > 0 &&
+            isQuestionVisible(field, submitFormDto.answers, validatorResults)
           ) {
             const answer = submitFormDto.answers[field.id];
             if (Array.isArray(answer) && answer.length > field.maxSelections) {
