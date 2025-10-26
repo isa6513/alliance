@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import type { AnyField, FormValue, TimeField } from "./formschema";
 import { shuffleWithSeed } from "./randomutils";
 import { formatTimeForDisplay, parseTimeInput } from "./timeUtils";
+import DropdownIcon from "../ui/icons/DropdownIcon";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -623,7 +624,7 @@ type TimeInputFieldProps = {
   baseError: string | null;
 };
 
-function TimeInputField({
+export function TimeInputField({
   field,
   value,
   onChange,
@@ -636,6 +637,9 @@ function TimeInputField({
   );
   const [localError, setLocalError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isEditing || localError) return;
@@ -645,20 +649,33 @@ function TimeInputField({
     setInputValue(nextDisplay);
   }, [normalizedValue, isEditing, field.id, localError]);
 
+  // --- Handle clicking outside dropdown ---
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        !inputRef.current?.contains(e.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const commitValue = () => {
     const raw = inputValue.trim();
     if (!raw) {
-      setLocalError(field.required ? "Enter a time like 7:30 PM" : null);
+      setLocalError(field.required ? "Enter a time such as 7:30 PM" : null);
       onChange?.("");
       return;
     }
-
     const parsed = parseTimeInput(raw);
     if (!parsed) {
-      setLocalError("Enter a time like 7:30 PM");
+      setLocalError("Enter a time such as 7:30 PM");
       return;
     }
-
     setLocalError(null);
     const normalized = parsed.normalized;
     onChange?.(normalized);
@@ -668,42 +685,97 @@ function TimeInputField({
   const effectiveError = localError ?? baseError ?? null;
   const hasError = Boolean(effectiveError);
 
+  // --- Generate dropdown time options (every 30 minutes) ---
+  const timeOptions = Array.from({ length: 24 * 2 }, (_, i) => {
+    const hours = Math.floor(i / 2);
+    const minutes = i % 2 === 0 ? "00" : "30";
+    const ampm = hours < 12 ? "AM" : "PM";
+    const displayHours = hours % 12 === 0 ? 12 : hours % 12;
+    return `${displayHours}:${minutes} ${ampm}`;
+  });
+
+  const handleSelectTime = (time: string) => {
+    setInputValue(time);
+    setShowDropdown(false);
+    setIsEditing(false);
+    setLocalError(null);
+    const parsed = parseTimeInput(time);
+    if (parsed) onChange?.(parsed.normalized);
+  };
+
   return (
-    <div className="space-y-1">
+    <div className="space-y-1 relative">
       <RenderLabel field={field} error={effectiveError} />
-      <input
-        type="text"
-        value={inputValue}
-        onFocus={() => setIsEditing(true)}
-        onBlur={() => {
-          setIsEditing(false);
-          commitValue();
-        }}
-        onChange={(e) => {
-          setInputValue(e.target.value);
-          setLocalError(null);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onFocus={() => {
+            setIsEditing(true);
+            setShowDropdown(true);
+          }}
+          onBlur={() => {
             setIsEditing(false);
             commitValue();
-          }
-        }}
-        placeholder="e.g. 7:30 PM"
-        required={field.required}
-        disabled={disabled}
-        aria-invalid={hasError}
-        className={`w-full px-3 py-2 rounded-md focus:outline-none ${
-          hasError
-            ? "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent"
-            : "border border-zinc-300 focus:ring-1 focus:ring-green focus:border-transparent"
-        }`}
-        inputMode="text"
-      />
-      {hasError ? (
-        <p className="text-sm text-red-600">{effectiveError}</p>
-      ) : null}
+          }}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+            setLocalError(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              setIsEditing(false);
+              commitValue();
+              setShowDropdown(false);
+            }
+          }}
+          placeholder="7:30 PM"
+          required={field.required}
+          disabled={disabled}
+          aria-invalid={hasError}
+          className={`w-full px-3 py-2 rounded-md focus:outline-none ${
+            hasError
+              ? "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent"
+              : "border border-zinc-300 focus:ring-1 focus:ring-green focus:border-transparent"
+          }`}
+          inputMode="text"
+        />
+
+        {/* ▼ Dropdown Icon */}
+        <button
+          type="button"
+          onClick={() => setShowDropdown((prev) => !prev)}
+          className="absolute right-3 h-full"
+          tabIndex={-1}
+        >
+          <DropdownIcon size="mini" fill="black" />
+        </button>
+
+        {/* Dropdown List */}
+        {showDropdown && (
+          <div
+            ref={dropdownRef}
+            className="absolute z-20 w-full mt-1 bg-white border border-zinc-300 rounded-md shadow-lg max-h-48 overflow-y-auto"
+          >
+            {timeOptions.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => handleSelectTime(t)}
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 ${
+                  t === inputValue ? "bg-zinc-50 font-medium" : ""
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {hasError && <p className="text-sm text-red-600">{effectiveError}</p>}
     </div>
   );
 }

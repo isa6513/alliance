@@ -823,7 +823,7 @@ const FormRenderer = ({
             )}
         </div>
         {/* Navigation */}
-        <div className="flex justify-between items-center gap-x-2">
+        <div className="flex justify-between items-center gap-x-3">
           {schema.pages.length > 1 && (
             <div>
               <div>
@@ -834,7 +834,7 @@ const FormRenderer = ({
             </div>
           )}
 
-          <div className="flex flex-1 space-x-3 items-center">
+          <div className="flex flex-1 space-x-2 items-center">
             {!isFirstPage && (
               <Button
                 color={ButtonColor.Light}

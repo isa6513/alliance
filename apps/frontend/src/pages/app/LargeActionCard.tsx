@@ -20,11 +20,11 @@ export interface LargeActionCardProps {
 
 export function getLastAndNextEvent(action: ActionDto) {
   const pastEvents = action.events.filter(
-    (event) => new Date(event.date) <= new Date(),
+    (event) => new Date(event.date) <= new Date()
   );
 
   const futureEvents = action.events.filter(
-    (event) => new Date(event.date) > new Date(),
+    (event) => new Date(event.date) > new Date()
   );
 
   const lastEvent =
@@ -55,7 +55,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   const navigate = useNavigate();
 
   const [state, setState] = useState<LargeActionCardState>(
-    LargeActionCardState.Default,
+    LargeActionCardState.Default
   );
 
   useEffect(() => {
@@ -74,7 +74,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       e.stopPropagation();
       navigate(`/actions/${action.id}`);
     },
-    [navigate, action],
+    [navigate, action]
   );
 
   const { lastEvent, nextEvent } = getLastAndNextEvent(action);

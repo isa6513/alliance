@@ -78,7 +78,7 @@ const ActionTaskPanelForm = ({
             },
           });
           setError(
-            "Failed to submit action. We have been notified of the problem and will take a look. You can also try again later.",
+            "Failed to submit action. We have been notified of the problem and will take a look. You can also try again later."
           );
         }
       }
@@ -112,7 +112,7 @@ const ActionTaskPanelForm = ({
   return (
     <div
       className={`flex flex-col gap-y-2 ${
-        card ? "p-6 border border-zinc-200" : ""
+        card ? "p-4 sm:p-6 border border-zinc-200" : ""
       }`}
     >
       <div>
