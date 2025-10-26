@@ -747,7 +747,7 @@ export function TimeInputField({
         <button
           type="button"
           onClick={() => setShowDropdown((prev) => !prev)}
-          className="absolute right-3 h-full"
+          className="absolute right-2 sm:right-3 h-full"
           tabIndex={-1}
         >
           <DropdownIcon size="mini" fill="black" />

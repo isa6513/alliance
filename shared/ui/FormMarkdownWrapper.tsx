@@ -16,19 +16,19 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
       components={{
         h1: ({ ...props }) => (
           <h1
-            className={`!font-semibold first:mt-0 mt-4 ${inlineClass}`}
+            className={`!font-semibold first:mt-0 mt-6 ${inlineClass}`}
             {...props}
           />
         ),
         h2: ({ ...props }) => (
           <h2
-            className={`!font-semibold first:mt-0 mt-4 ${inlineClass}`}
+            className={`!font-semibold first:mt-0 mt-6 ${inlineClass}`}
             {...props}
           />
         ),
         h3: ({ ...props }) => (
           <h3
-            className={`!font-semibold first:mt-0 mt-4 ${inlineClass}`}
+            className={`!font-semibold first:mt-0 mt-6 ${inlineClass}`}
             {...props}
           />
         ),
@@ -37,7 +37,7 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
         ),
         p: ({ ...props }) => (
           <p
-            className={`text-zinc-800 first:mt-0 mt-2 ${inlineClass}`}
+            className={`text-zinc-800 first:mt-0 mt-4 ${inlineClass}`}
             {...props}
           />
         ),
