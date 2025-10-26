@@ -140,6 +140,12 @@ export function RenderField({
                 el.style.height = `${el.scrollHeight}px`;
               }
             }}
+            onInput={(e) => {
+              const target = e.target as HTMLTextAreaElement;
+              target.style.height = "auto";
+              target.style.height = `${target.scrollHeight}px`;
+              onChange?.(target.value);
+            }}
             rows={field.rows || 3}
             maxLength={field.maxLength}
             value={(value as string) ?? ""}
@@ -148,7 +154,7 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none resize-none"
+              "w-full px-3 py-2 rounded-md focus:outline-none resize-none overflow-hidden"
             )}
             placeholder={field.placeholder}
           />
