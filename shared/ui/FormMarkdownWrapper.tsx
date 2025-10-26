@@ -52,7 +52,12 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
         ),
         li: ({ ...props }) => <li className="text-zinc-800 my-1" {...props} />,
         a: ({ ...props }) => (
-          <a className={`text-link ${inlineClass}`} {...props} />
+          <a
+            className={`text-link ${inlineClass}`}
+            {...props}
+            target="_blank"
+            rel="noreferrer"
+          />
         ),
       }}
     >
