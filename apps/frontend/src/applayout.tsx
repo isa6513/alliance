@@ -89,15 +89,15 @@ export function clientLoader() {
       }
     }
     const completionActivities = activityList.filter(
-      (activity) => activity.type === "user_completed",
+      (activity) => activity.type === "user_completed"
     );
     const joinActivities = activityList.filter(
-      (activity) => activity.type === "user_joined",
+      (activity) => activity.type === "user_joined"
     );
     const declineActivities = activityList.filter(
       (activity) =>
         activity.type === "user_declined" ||
-        activity.type === "user_wont_complete",
+        activity.type === "user_wont_complete"
     );
 
     joinActivities.forEach((activity) => {
@@ -190,12 +190,13 @@ const authOnlyRoutes = [
 ];
 
 export function isAuthOnly(path: string) {
-  if (authOnlyRoutes.includes(path)) {
-    return true;
-  }
-  if (path.includes("/forum")) {
-    return true;
-  }
+  //   if (authOnlyRoutes.includes(path)) {
+  //     return true;
+  //   }
+  //   if (path.includes("/forum")) {
+  //     return true;
+  //   }
+  return true;
 }
 export default function AppLayout() {
   const { isAuthenticated, loading: authLoading, logout } = useAuth();
@@ -242,8 +243,8 @@ export default function AppLayout() {
           data.sort(
             (a, b) =>
               new Date(b.lastComment?.createdAt ?? b.updatedAt).getTime() -
-              new Date(a.lastComment?.createdAt ?? a.updatedAt).getTime(),
-          ),
+              new Date(a.lastComment?.createdAt ?? a.updatedAt).getTime()
+          )
         );
       }
     });
