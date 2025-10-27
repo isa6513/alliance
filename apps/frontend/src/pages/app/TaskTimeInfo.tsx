@@ -41,7 +41,7 @@ const TaskTimeInfo = ({ action, nextEvent, lastEvent }: TaskTimeInfoProps) => {
         <p className="text-base text-zinc-500">
           {action.status === "gathering_commitments"
             ? "Opened for member commitment  "
-            : "Entered action stage "}
+            : "Action began "}
           {formatTime(new Date(lastEvent.date), { addSuffix: true })}
         </p>
       )}
