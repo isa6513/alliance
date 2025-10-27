@@ -11,6 +11,7 @@ import React, {
   useState,
 } from "react";
 import ActionTimelineBar from "./ActionTimelineBar";
+import { Link } from "react-router";
 
 interface ActionTimelineProps {
   actions: ActionDto[];
@@ -206,9 +207,12 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
                   className="border-b border-gray-100 py-3 pr-4 flex flex-col justify-center bg-white pl-5"
                   style={{ height: "64px" }}
                 >
-                  <div className="text-sm font-medium text-black truncate">
+                  <Link
+                    to={`/actions/${action.id}`}
+                    className="text-sm font-medium text-black truncate"
+                  >
                     {action.name}
-                  </div>
+                  </Link>
                   <div className="flex items-center justify-between text-xs text-gray-500">
                     <span>{action.status}</span>
                     <button

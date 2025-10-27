@@ -60,7 +60,18 @@ const Sidebar: React.FC = () => {
       name: "Active",
       actions: filteredActions.filter(
         (action) =>
+          (action.status === "member_action" ||
+            action.status === "gathering_commitments") &&
+          !action.everyoneShouldComplete
+      ),
+    },
+    {
+      name: "Pending",
+      actions: filteredActions.filter(
+        (action) =>
           action.status !== "draft" &&
+          action.status !== "member_action" &&
+          action.status !== "gathering_commitments" &&
           !action.everyoneShouldComplete &&
           action.status !== "completed"
       ),
