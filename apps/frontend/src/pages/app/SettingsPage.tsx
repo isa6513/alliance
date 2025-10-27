@@ -343,13 +343,13 @@ const SettingsPage: React.FC = () => {
                   updateEditableUser({ pushNotifsEnabled: checked })
                 }
               />
-              <LargeCheckbox
+              {/* <LargeCheckbox
                 label="Push"
                 checked={editableUser.textNotifsEnabled}
                 onChange={(checked) =>
                   updateEditableUser({ textNotifsEnabled: checked })
                 }
-              />
+              /> */}
               <div className="flex flex-col">
                 <p className="!font-medium mt-2">Platform activity digest</p>
                 <p className="text-sm text-zinc-500 mb-2">
