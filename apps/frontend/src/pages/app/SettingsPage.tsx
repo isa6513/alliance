@@ -49,14 +49,14 @@ const SettingsPage: React.FC = () => {
 
   const [location, setLocation] = useState<City | null>(null);
   const [editableUser, setEditableUser] = useState<EditableUserFields | null>(
-    null,
+    null
   );
   const [initialUser, setInitialUser] = useState<EditableUserFields | null>(
-    null,
+    null
   );
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodDto | null>(
-    null,
+    null
   );
   const [loadingPaymentMethod, setLoadingPaymentMethod] = useState(false);
 
@@ -66,7 +66,7 @@ const SettingsPage: React.FC = () => {
     (updates: Partial<EditableUserFields>) => {
       setEditableUser((prev) => (prev ? { ...prev, ...updates } : prev));
     },
-    [],
+    []
   );
 
   const handleLogout = useCallback(async () => {
@@ -78,7 +78,7 @@ const SettingsPage: React.FC = () => {
     (city: CitySearchDto) => {
       updateEditableUser({ cityId: city.id });
     },
-    [updateEditableUser],
+    [updateEditableUser]
   );
 
   const hasChanges =
@@ -125,14 +125,7 @@ const SettingsPage: React.FC = () => {
     try {
       await userUpdate({
         body: {
-          cityId: editableUser.cityId ?? undefined,
-          name: editableUser.name,
-          anonymous: editableUser.anonymous,
-          emailNotifsEnabled: editableUser.emailNotifsEnabled,
-          pushNotifsEnabled: editableUser.pushNotifsEnabled,
-          textNotifsEnabled: editableUser.textNotifsEnabled,
-          forumDigestPreference: editableUser.forumDigestPreference,
-          phoneNumber: editableUser.phoneNumber ?? undefined,
+          ...editableUser,
         },
       });
 
@@ -144,10 +137,10 @@ const SettingsPage: React.FC = () => {
         setLocation(city);
         const cityId = city.id;
         setEditableUser((prev) =>
-          prev ? { ...prev, cityId } : { ...editableUser, cityId },
+          prev ? { ...prev, cityId } : { ...editableUser, cityId }
         );
         setInitialUser((prev) =>
-          prev ? { ...prev, cityId } : { ...editableUser, cityId },
+          prev ? { ...prev, cityId } : { ...editableUser, cityId }
         );
       }
     } catch (error) {
@@ -175,10 +168,10 @@ const SettingsPage: React.FC = () => {
         setLocation(city);
         const cityId = city.id;
         setEditableUser((prev) =>
-          prev ? { ...prev, cityId } : { ...mappedUser, cityId },
+          prev ? { ...prev, cityId } : { ...mappedUser, cityId }
         );
         setInitialUser((prev) =>
-          prev ? { ...prev, cityId } : { ...mappedUser, cityId },
+          prev ? { ...prev, cityId } : { ...mappedUser, cityId }
         );
       }
     });
@@ -186,7 +179,7 @@ const SettingsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-page pt-20 px-8 md:px-16">
+      <div className="bg-page pt-20 px-2 md:px-16">
         <div className="max-w-4xl mx-auto">
           <h1 className="!text-3xl !font-serif !font-medium mb-2">Account</h1>
           <Card style={CardStyle.White} className="p-8">
@@ -204,7 +197,7 @@ const SettingsPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-page py-20 px-8 md:px-16">
+    <div className="bg-page py-4 md:py-20 px-4 md:px-16">
       <div className="max-w-4xl mx-auto">
         <Card style={CardStyle.White} className="p-8 mb-6 relative gap-y-4">
           <div className="flex justify-between mb-2">
@@ -233,8 +226,8 @@ const SettingsPage: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="flex flex-row w-full items-center gap-x-4 *:gap-x-1">
-            <div className="flex-1 flex flex-col">
+          <div className="flex flex-col md:flex-row w-full items-center gap-4 *:gap-x-1">
+            <div className="flex-1 flex flex-col w-full">
               <p className="mb-1">
                 Name{" "}
                 {editableUser.anonymous ? (
@@ -253,7 +246,7 @@ const SettingsPage: React.FC = () => {
                 placeholder="Enter full name"
               />
             </div>
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col w-full">
               <p className="mb-1">
                 Email <i className="text-gray-500">(Not shown)</i>
               </p>
@@ -267,8 +260,8 @@ const SettingsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-row w-full items-center gap-x-4 *:gap-x-1">
-            <div className="flex-1 flex flex-col">
+          <div className="flex flex-col md:flex-row w-full items-center gap-4 *:gap-x-1">
+            <div className="flex-1 flex flex-col w-full">
               <label className="block mb-1">Location</label>
               <CityAutosuggest
                 onSelect={handleCitySelect}
@@ -276,7 +269,7 @@ const SettingsPage: React.FC = () => {
                 className="flex-1"
               />
             </div>
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col w-full">
               <label className="block mb-1">Phone number</label>
               <FormInput
                 name="phoneNumber"
