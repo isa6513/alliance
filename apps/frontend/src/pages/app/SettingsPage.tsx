@@ -317,7 +317,7 @@ const SettingsPage: React.FC = () => {
             <div className="">
               {!(
                 editableUser.emailNotifsEnabled ||
-                editableUser.pushNotifsEnabled ||
+                // editableUser.pushNotifsEnabled ||
                 editableUser.textNotifsEnabled
               ) && (
                 <p className="text-sm text-zinc-500">
@@ -338,9 +338,9 @@ const SettingsPage: React.FC = () => {
               />
               <LargeCheckbox
                 label="Text/SMS"
-                checked={editableUser.pushNotifsEnabled}
+                checked={editableUser.textNotifsEnabled}
                 onChange={(checked) =>
-                  updateEditableUser({ pushNotifsEnabled: checked })
+                  updateEditableUser({ textNotifsEnabled: checked })
                 }
               />
               {/* <LargeCheckbox
