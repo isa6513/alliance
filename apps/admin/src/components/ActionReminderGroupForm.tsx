@@ -108,7 +108,10 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
 
     setSelectedEventId(initialValues.memberActionEventId);
     onEventChange?.(initialValues.memberActionEventId);
-    setSendDay(new Date().toISOString().split("T")[0]);
+    setSendDay(
+      initialValues.reminderGroup?.sendDayString ??
+        new Date().toISOString().split("T")[0]
+    );
     setSelectedUsers(initialValues.users);
     setUserQuery("");
     setLocalError(null);

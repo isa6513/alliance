@@ -84,7 +84,9 @@ const Sidebar: React.FC = () => {
       name: "Onboarding",
       actions: filteredActions.filter(
         (action) =>
-          action.everyoneShouldComplete && action.status !== "completed"
+          action.everyoneShouldComplete &&
+          action.status !== "completed" &&
+          action.status !== "draft"
       ),
     },
     {
