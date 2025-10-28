@@ -6,7 +6,7 @@ import FormInput from "@alliance/shared/ui/FormInput";
 import { useAuth } from "../../lib/AuthContext";
 
 const ContractPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const [contractDateSigned, setContractDateSigned] = useState<Date | null>();
   const [editName, setEditName] = useState("");
@@ -16,7 +16,7 @@ const ContractPage: React.FC = () => {
       setContractDateSigned(
         user.contractDateSigned && !user.contractDateSuspended
           ? new Date(user.contractDateSigned)
-          : null,
+          : null
       );
     }
   }, [user]);
@@ -47,7 +47,7 @@ const ContractPage: React.FC = () => {
     }
   };
 
-  if (!user) {
+  if (!user && !loading) {
     return <div>Not found</div>;
   }
 
