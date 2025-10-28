@@ -49,7 +49,7 @@ const ActionTaskPanelOptOut = ({
           onClick={handleSubmit}
           className="w-full"
         >
-          Abandon action
+          Withdraw
         </Button>
       </Dropdown>
     </div>

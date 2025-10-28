@@ -823,55 +823,59 @@ const FormRenderer = ({
             )}
         </div>
         {/* Navigation */}
-        <div className="flex justify-between items-center gap-x-3">
-          {schema.pages.length > 1 && (
-            <div>
-              <div>
-                <span className=" text-gray-500">
-                  Page {currentPageIndex + 1} of {schema.pages.length}
-                </span>
+        <div className="flex justify-between items-end gap-x-3">
+          <div className="flex flex-col gap-y-4 flex-1">
+            {schema.pages.length > 1 && (
+              <div className="flex items-center space-x-2">
+                {!isFirstPage && (
+                  <Button
+                    color={ButtonColor.LightHover}
+                    type="button"
+                    size="small"
+                    onClick={handlePrevious}
+                    className=""
+                  >
+                    Previous
+                  </Button>
+                )}
+                <div>
+                  <span className="text-sm text-zinc-500">
+                    Page {currentPageIndex + 1} of {schema.pages.length}
+                  </span>
+                </div>
+                {!isLastPage && (
+                  <Button
+                    color={ButtonColor.LightHover}
+                    type="button"
+                    size="small"
+                    onClick={handleNext}
+                    className=""
+                  >
+                    Next
+                  </Button>
+                )}
               </div>
+            )}
+
+            <div className="flex flex-1 space-x-2 items-center">
+              {readOnly ? null : onSubmit ? (
+                <Button
+                  color={ButtonColor.Black}
+                  type="submit"
+                  className="w-full !py-3 !text-base"
+                >
+                  {schema.submit?.label || "Complete"}
+                </Button>
+              ) : (
+                <Button
+                  color={ButtonColor.Black}
+                  className="!cursor-not-allowed w-full !py-3 !text-base"
+                  onClick={validateForPreview}
+                >
+                  {schema.submit?.label || "Complete"} (Preview Mode)
+                </Button>
+              )}
             </div>
-          )}
-
-          <div className="flex flex-1 space-x-2 items-center">
-            {!isFirstPage && (
-              <Button
-                color={ButtonColor.Light}
-                type="button"
-                onClick={handlePrevious}
-                className=""
-              >
-                Previous
-              </Button>
-            )}
-
-            {!isLastPage ? (
-              <Button
-                color={ButtonColor.Blue}
-                type="button"
-                onClick={handleNext}
-                className=""
-              >
-                Next
-              </Button>
-            ) : readOnly ? null : onSubmit ? (
-              <Button
-                color={ButtonColor.Black}
-                type="submit"
-                className="w-full !py-3 !text-base"
-              >
-                {schema.submit?.label || "Complete"}
-              </Button>
-            ) : (
-              <Button
-                color={ButtonColor.Black}
-                className="!cursor-not-allowed w-full !py-3 !text-base"
-                onClick={validateForPreview}
-              >
-                {schema.submit?.label || "Complete"} (Preview Mode)
-              </Button>
-            )}
           </div>
 
           {onAbandonAction && !readOnly && (
@@ -920,7 +924,7 @@ const FormRenderer = ({
                       onClick={handleAbandon}
                       className="w-full"
                     >
-                      Abandon action
+                      Withdraw
                     </Button>
                   </>
                 )}
