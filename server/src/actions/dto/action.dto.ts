@@ -97,6 +97,10 @@ export class CreateTODReminderGroupDto extends PickType(ReminderGroup, [
   @IsOptional()
   userIds?: number[];
 
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  userGroupId?: number;
+
   @ApiProperty()
   @IsDefined()
   @Type(() => String)

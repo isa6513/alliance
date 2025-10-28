@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Allow, IsDefined } from 'class-validator';
+import { Allow, IsDefined, IsOptional } from 'class-validator';
 import {
   Column,
   Entity,
@@ -13,6 +13,7 @@ import { Temporal } from '@js-temporal/polyfill';
 import { temporalPlainDateTransformer } from 'src/temporal-utils';
 import { PersonalActionReminder } from './personal-action-reminder.entity';
 import { ReminderCohortType } from './action-reminder.entity';
+import { Group } from 'src/user/entities/group.entity';
 
 @Entity()
 export class ReminderGroup {
@@ -45,6 +46,12 @@ export class ReminderGroup {
   @Column({ type: 'enum', enum: ReminderCohortType, nullable: true })
   @Allow()
   cohortType: ReminderCohortType;
+
+  @ManyToOne(() => Group)
+  @ApiPropertyOptional({ type: () => Group })
+  @Type(() => Group)
+  @IsOptional()
+  userGroup?: Group;
 
   @ApiProperty({ type: String })
   @Column({ type: 'text' })

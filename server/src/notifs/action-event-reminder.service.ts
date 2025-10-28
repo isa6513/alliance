@@ -620,15 +620,33 @@ export class ActionEventReminderService {
     event: ActionEvent,
     dto: CreateTODReminderGroupDto,
   ): Promise<void> {
-    const users =
-      dto.cohortType === ReminderCohortType.Custom
-        ? await Promise.all(
-            (dto.userIds ?? []).map((id) => this.userService.findOneOrFail(id)),
-          )
-        : await this.recipientService.getFilteredUsersForEvent(
-            event,
-            ActionEventNotifType.MissedDeadline,
+    let users: User[];
+    switch (dto.cohortType) {
+      case ReminderCohortType.Custom:
+        users = await Promise.all(
+          (dto.userIds ?? []).map((id) => this.userService.findOneOrFail(id)),
+        );
+        break;
+      case ReminderCohortType.AllUncompleted:
+        users = await this.recipientService.getFilteredUsersForEvent(
+          event,
+          ActionEventNotifType.PersonalReminder,
+        );
+        break;
+      case ReminderCohortType.Group:
+        if (!dto.userGroupId) {
+          throw new BadRequestException(
+            'User group ID is required for group cohort type',
           );
+        }
+        const group = await this.userService.findGroupOrFail(dto.userGroupId);
+        users = group.users;
+        break;
+      default:
+        throw new Error(
+          `Invalid cohort type: ${dto.cohortType satisfies never}`,
+        );
+    }
 
     for (const user of users) {
       const crreminder = this.personalActionReminderRepository.create({

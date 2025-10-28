@@ -1,18 +1,19 @@
 import {
   ActionDto,
-  userList,
   AdminActionEventDto,
-  actionsEventWithReminders,
-  ActionReminder,
-  actionsCreateReminder,
-  CreateActionReminderDto,
-  actionsDeleteReminder,
-  actionsCreateReminderGroup,
+  GroupDto,
   PersonalActionReminder,
   ReminderGroup,
+  actionsCreateReminder,
+  actionsCreateReminderGroup,
+  actionsDeleteReminder,
+  actionsDeleteReminderGroup,
+  actionsEventWithReminders,
   actionsUpdateReminder,
   actionsUpdateReminderGroup,
-  actionsDeleteReminderGroup,
+  CreateActionReminderDto,
+  userGetGroups,
+  userList,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -92,7 +93,10 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     () => new Map(users.map((user) => [user.id, user])),
     [users]
   );
+  const [userGroups, setUserGroups] = useState<GroupDto[]>([]);
   const [loadingUsers, setLoadingUsers] = useState<boolean>(false);
+  const [loadingUserGroups, setLoadingUserGroups] = useState<boolean>(false);
+  const [userGroupsError, setUserGroupsError] = useState<string | null>(null);
   const [eventWithReminders, setEventWithReminders] = useState<
     AdminActionEventDto | undefined
   >(undefined);
@@ -143,6 +147,29 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
         setCreateError("Failed to load users.");
       })
       .finally(() => setLoadingUsers(false));
+  }, []);
+
+  useEffect(() => {
+    setLoadingUserGroups(true);
+    setUserGroupsError(null);
+    userGetGroups()
+      .then((response) => {
+        if (response.error) {
+          throw new Error(
+            typeof response.error === "string"
+              ? response.error
+              : "Failed to load user groups."
+          );
+        }
+        setUserGroups(response.data ?? []);
+      })
+      .catch((err) => {
+        console.error(err);
+        setUserGroupsError(
+          err instanceof Error ? err.message : "Failed to load user groups."
+        );
+      })
+      .finally(() => setLoadingUserGroups(false));
   }, []);
 
   const refreshEventReminders = useCallback(
@@ -548,16 +575,15 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     setCreateSubmitting(true);
 
     try {
-      const eventId = payload.memberActionEventId;
+      const { memberActionEventId: eventId, ...body } = payload;
       if (!eventId) {
         throw new Error("Select a member action event first.");
       }
-      console.log("payload", payload);
 
       setSelectedEventId(eventId);
       const response = await actionsCreateReminderGroup({
         path: { eventId },
-        body: payload,
+        body,
       });
 
       if (response.error || !response.data) {
@@ -625,16 +651,14 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       setEditSuccess(null);
       setEditSubmitting(true);
       try {
-        const eventId = payload.memberActionEventId;
+        const { memberActionEventId: eventId, ...body } = payload;
         if (!eventId) {
           throw new Error("Select a member action event first.");
         }
 
-        console.log("payload", payload);
-
         const response = await actionsUpdateReminderGroup({
           path: { actionId: action.id, eventId, groupId },
-          body: payload,
+          body,
         });
 
         if (!response.data) {
@@ -775,6 +799,9 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
                 memberEvents={memberEvents}
                 users={users}
                 loadingUsers={loadingUsers}
+                userGroups={userGroups}
+                loadingUserGroups={loadingUserGroups}
+                userGroupsError={userGroupsError}
                 initialValues={{
                   memberActionEventId: selectedEventId,
                   reminderGroup: null,
@@ -1048,6 +1075,9 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
                   memberEvents={memberEvents}
                   users={users}
                   loadingUsers={loadingUsers}
+                  userGroups={userGroups}
+                  loadingUserGroups={loadingUserGroups}
+                  userGroupsError={userGroupsError}
                   submitting={editSubmitting}
                   initialValues={{
                     memberActionEventId: selectedEventId,

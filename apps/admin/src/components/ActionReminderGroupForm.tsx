@@ -1,6 +1,7 @@
 import {
   ActionEventDto,
   CreateTodReminderGroupDto,
+  GroupDto,
   ReminderCohortType,
   ReminderGroup,
   User,
@@ -29,6 +30,9 @@ interface ActionReminderFormProps {
   memberEvents: ActionEventDto[];
   users: ActionReminderFormUser[];
   loadingUsers: boolean;
+  userGroups: GroupDto[];
+  loadingUserGroups: boolean;
+  userGroupsError?: string | null;
   initialValues: ActionReminderGroupFormInitialValues;
   submitting?: boolean;
   submitLabel?: string;
@@ -42,10 +46,13 @@ interface ActionReminderFormProps {
   ) => Promise<void> | void;
 }
 
-const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
+const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   memberEvents,
   users,
   loadingUsers,
+  userGroups,
+  loadingUserGroups,
+  userGroupsError = null,
   initialValues,
   submitting = false,
   submitLabel = "Create Reminders",
@@ -82,6 +89,9 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
   const [selectedUsers, setSelectedUsers] = useState<ActionReminderFormUser[]>(
     initialValues.users
   );
+  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(
+    initialValues.reminderGroup?.userGroup?.id ?? null
+  );
   const [userQuery, setUserQuery] = useState<string>("");
   const [localError, setLocalError] = useState<string | null>(null);
   const initialSnapshotRef = useRef<string>("");
@@ -95,6 +105,7 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
       reminder: {
         ...initialValues.reminderGroup,
         userIds: userIds,
+        userGroupId: initialValues.reminderGroup?.userGroup?.id ?? null,
       },
       selectedUsers: userIds,
     });
@@ -112,7 +123,19 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
       initialValues.reminderGroup?.sendDayString ??
         new Date().toISOString().split("T")[0]
     );
+    setName(initialValues.reminderGroup?.name ?? "");
+    setEmailSubject(
+      initialValues.reminderGroup?.emailSubject ?? defaultEmailSubject
+    );
+    setEmailMessage(
+      initialValues.reminderGroup?.emailMessage ?? defaultEmailContents
+    );
+    setTextMessage(
+      initialValues.reminderGroup?.textMessage ?? defaultTextMessage
+    );
+    setCohortType(initialValues.reminderGroup?.cohortType ?? "all_uncompleted");
     setSelectedUsers(initialValues.users);
+    setSelectedGroupId(initialValues.reminderGroup?.userGroup?.id ?? null);
     setUserQuery("");
     setLocalError(null);
   }, [
@@ -176,6 +199,16 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
       return;
     }
 
+    if (cohortType === "group" && !selectedGroupId) {
+      setLocalError("Select a user group.");
+      return;
+    }
+
+    const userIds =
+      cohortType === "custom"
+        ? selectedUsers.map((user) => user.id)
+        : undefined;
+
     await onSubmit({
       name,
       cohortType,
@@ -184,7 +217,9 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
       emailMessage,
       textMessage,
       memberActionEventId: selectedEventId,
-      userIds: selectedUsers.map((user) => user.id),
+      userIds,
+      userGroupId:
+        cohortType === "group" ? selectedGroupId ?? undefined : undefined,
     });
   };
 
@@ -353,9 +388,47 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
           className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
         >
           <option value="all_uncompleted">All uncompleted</option>
+          <option value="group">User group</option>
           <option value="custom">Custom</option>
         </select>
       </div>
+
+      {cohortType === "group" && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            User group
+          </label>
+          <select
+            value={selectedGroupId ?? ""}
+            onChange={(event) =>
+              setSelectedGroupId(
+                event.target.value ? Number(event.target.value) : null
+              )
+            }
+            disabled={loadingUserGroups}
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+          >
+            <option value="" disabled>
+              {loadingUserGroups ? "Loading groups…" : "Select a group"}
+            </option>
+            {userGroups.map((group) => (
+              <option key={group.id} value={group.id}>
+                {group.name}
+              </option>
+            ))}
+          </select>
+          {!loadingUserGroups && userGroupsError && (
+            <p className="mt-2 text-xs text-red-600">{userGroupsError}</p>
+          )}
+          {!loadingUserGroups &&
+            !userGroupsError &&
+            userGroups.length === 0 && (
+              <p className="mt-2 text-xs text-gray-500">
+                No groups available. Create a group before scheduling.
+              </p>
+            )}
+        </div>
+      )}
 
       {cohortType === "custom" && (
         <div>
@@ -460,4 +533,4 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
   );
 };
 
-export default ActionReminderForm;
+export default ActionReminderGroupForm;

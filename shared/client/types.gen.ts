@@ -291,7 +291,7 @@ export type ActionEventNotif = {
     sent: boolean;
 };
 
-export type ReminderCohortType = 'all_uncompleted' | 'custom';
+export type ReminderCohortType = 'all_uncompleted' | 'group' | 'custom';
 
 export type ReminderTimingMode = 'absolute' | 'from_deadline';
 
@@ -317,6 +317,7 @@ export type ReminderGroup = {
     reminders: Array<Array<unknown>>;
     memberActionEvent: ActionEvent;
     cohortType: ReminderCohortType;
+    userGroup?: Group;
     emailMessage: string;
     emailSubject: string;
     textMessage: string;
@@ -945,6 +946,7 @@ export type CreateTodReminderGroupDto = {
     emailSubject: string;
     textMessage: string;
     userIds?: Array<number>;
+    userGroupId?: number;
     sendDay: string;
 };
 

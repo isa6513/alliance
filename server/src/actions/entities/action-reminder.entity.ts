@@ -17,6 +17,7 @@ import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity'
 
 export enum ReminderCohortType {
   AllUncompleted = 'all_uncompleted',
+  Group = 'group',
   Custom = 'custom',
 }
 
