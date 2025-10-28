@@ -783,7 +783,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
                 submitting={createSubmitting}
                 serverError={createError}
                 serverSuccess={createSuccess}
-                onCancel={handleCreateToggle}
+                onCancel={() => setCreateGroupExpanded(false)}
                 onEventChange={setSelectedEventId}
                 onSubmit={handleCreateGroupSubmit}
               />

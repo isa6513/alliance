@@ -2456,7 +2456,7 @@ export type ActionsUpdateReminderGroupData = {
 };
 
 export type ActionsUpdateReminderGroupResponses = {
-    200: ActionReminderDto;
+    200: ReminderGroup;
 };
 
 export type ActionsUpdateReminderGroupResponse = ActionsUpdateReminderGroupResponses[keyof ActionsUpdateReminderGroupResponses];
@@ -2484,7 +2484,7 @@ export type ActionsCreateReminderGroupData = {
 };
 
 export type ActionsCreateReminderGroupResponses = {
-    200: ActionReminderDto;
+    200: ReminderGroup;
 };
 
 export type ActionsCreateReminderGroupResponse = ActionsCreateReminderGroupResponses[keyof ActionsCreateReminderGroupResponses];

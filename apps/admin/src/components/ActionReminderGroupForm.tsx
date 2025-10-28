@@ -60,7 +60,8 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
     initialValues.memberActionEventId ?? null
   );
   const [sendDay, setSendDay] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    initialValues.reminderGroup?.sendDayString ??
+      new Date().toISOString().split("T")[0]
   );
   const [name, setName] = useState<string>(
     initialValues.reminderGroup?.name ?? ""

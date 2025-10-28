@@ -402,7 +402,7 @@ export class ActionsController {
 
   @Patch(':actionId/events/:eventId/remindergroups/:groupId')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: ActionReminderDto })
+  @ApiOkResponse({ type: ReminderGroup })
   async updateReminderGroup(
     @Param('actionId', ParseIntPipe) actionId: number,
     @Param('eventId', ParseIntPipe) eventId: number,
@@ -426,7 +426,7 @@ export class ActionsController {
 
   @Post('events/:eventId/createremindergroup')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: ActionReminderDto })
+  @ApiOkResponse({ type: ReminderGroup })
   async createReminderGroup(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: CreateTODReminderGroupDto,
