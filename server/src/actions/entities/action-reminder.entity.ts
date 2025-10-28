@@ -7,7 +7,6 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ActionEvent } from './action-event.entity';
@@ -99,7 +98,6 @@ export class ActionReminder {
   @Type(() => Date)
   sentAt?: Date;
 
-  @OneToMany(() => ActionEventNotif, (notification) => notification.actionEvent)
   @ApiProperty({ type: ActionEventNotif, isArray: true })
   @IsDefined()
   @Type(() => ActionEventNotif)

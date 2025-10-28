@@ -42,6 +42,7 @@ import {
   CreateActionEventDto,
   CreateActionReminderDto,
   CreateActionUpdateDto,
+  CreateTODReminderGroupDto,
   DeclineActionDto,
   LatLonDto,
   OptOutActionDto,
@@ -57,6 +58,7 @@ import {
 } from './dto/notification-schedule.dto';
 import { ActionUpdate } from './entities/action-update.entity';
 import { ActionEvent } from './entities/action-event.entity';
+import { ReminderGroup } from './entities/reminder-group.entity';
 
 @Controller('actions')
 export class ActionsController {
@@ -398,11 +400,48 @@ export class ActionsController {
     );
   }
 
+  @Patch(':actionId/events/:eventId/remindergroups/:groupId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionReminderDto })
+  async updateReminderGroup(
+    @Param('actionId', ParseIntPipe) actionId: number,
+    @Param('eventId', ParseIntPipe) eventId: number,
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Body() body: CreateTODReminderGroupDto,
+  ): Promise<ReminderGroup> {
+    return this.actionsService.updateReminderGroup(
+      actionId,
+      eventId,
+      groupId,
+      body,
+    );
+  }
+
   @Delete('deleteReminder/:reminderId')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
   deleteReminder(@Param('reminderId', ParseIntPipe) reminderId: number) {
     return this.actionsService.deleteReminder(reminderId);
+  }
+
+  @Post('events/:eventId/createremindergroup')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionReminderDto })
+  async createReminderGroup(
+    @Param('eventId', ParseIntPipe) eventId: number,
+    @Body() body: CreateTODReminderGroupDto,
+  ): Promise<ReminderGroup> {
+    return this.actionsService.createdTimedReminderGroup(eventId, body);
+  }
+
+  @Delete('events/:eventId/reminders/:groupId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async deleteReminderGroup(
+    @Param('eventId', ParseIntPipe) eventId: number,
+    @Param('groupId', ParseIntPipe) groupId: number,
+  ) {
+    this.actionsService.deleteReminderGroup(eventId, groupId);
   }
 
   @Post('clearDb')

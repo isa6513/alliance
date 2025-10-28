@@ -5,12 +5,11 @@ import {
   PartialType,
   PickType,
 } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { instanceToPlain, Type } from 'class-transformer';
 import {
   Allow,
   IsBoolean,
   IsDefined,
-  IsInt,
   IsNumber,
   IsOptional,
   IsString,
@@ -32,6 +31,7 @@ import { ActionReminder } from '../entities/action-reminder.entity';
 import { Action } from '../entities/action.entity';
 import { getImageSource } from 'src/images/images.service';
 import { ActionUpdate } from '../entities/action-update.entity';
+import { ReminderGroup } from '../entities/reminder-group.entity';
 
 export class ActionReminderDto extends PickType(ActionReminder, [
   'id',
@@ -80,16 +80,27 @@ export class CreateActionReminderDto extends PickType(ActionReminder, [
   'emailSubject',
   'textMessage',
 ]) {
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  deadlineEventId?: number;
-
   @ApiPropertyOptional({ type: Number, isArray: true })
   @Type(() => Number)
   @IsOptional()
   userIds?: number[];
+}
+
+export class CreateTODReminderGroupDto extends PickType(ReminderGroup, [
+  'name',
+  'emailMessage',
+  'cohortType',
+  'emailSubject',
+  'textMessage',
+]) {
+  @ApiPropertyOptional({ type: Number, isArray: true })
+  @IsOptional()
+  userIds?: number[];
+
+  @ApiProperty()
+  @IsDefined()
+  @Type(() => String)
+  sendDay: string;
 }
 
 export class UpdateActionReminderDto extends PartialType(
@@ -122,13 +133,15 @@ export class AdminActionEventDto extends PickType(ActionEvent, [
   'date',
   'announcementNotifsSentAt',
   'reminders',
+  'reminderGroups',
   'deadlineNotifsSentAt',
   'updatedAt',
   'notifications',
 ]) {
   constructor(event: ActionEvent) {
     super();
-    Object.assign(this, event);
+    const plain = instanceToPlain(event);
+    Object.assign(this, plain);
   }
 }
 

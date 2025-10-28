@@ -2,6 +2,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import type { ColumnMetadataDto } from "@alliance/shared/client/types.gen";
 import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
+import {
+  isTimeOnlyColumn,
+  normalizeTimeValue,
+  parseTimeInputValue,
+  toDatabaseTimeString,
+} from "./dbviewer/timeFieldUtils";
 
 interface CellEditorProps {
   value: any;
@@ -16,7 +22,10 @@ const CellEditor: React.FC<CellEditorProps> = ({
   onSave,
   onCancel,
 }) => {
-  const [editValue, setEditValue] = useState(value);
+  const timeOnlyColumn = isTimeOnlyColumn(column);
+  const [editValue, setEditValue] = useState(() =>
+    timeOnlyColumn ? normalizeTimeValue(value) ?? "" : value
+  );
   const inputRef = useRef<
     HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
   >(null);
@@ -45,7 +54,20 @@ const CellEditor: React.FC<CellEditorProps> = ({
   };
 
   const handleSave = () => {
-    onSave(editValue);
+    const formatted = formatValueForInput(editValue);
+    const parsed = parseValueFromInput(formatted);
+
+    if (timeOnlyColumn) {
+      const databaseValue = toDatabaseTimeString(parsed);
+      if (databaseValue !== null) {
+        onSave(databaseValue);
+        return;
+      }
+      onSave(null);
+      return;
+    }
+
+    onSave(parsed);
   };
 
   const handleBlur = () => {
@@ -56,6 +78,9 @@ const CellEditor: React.FC<CellEditorProps> = ({
     if (val === null || val === undefined) return "";
     if (column.dataType === "json") {
       return typeof val === "string" ? val : JSON.stringify(val, null, 2);
+    }
+    if (timeOnlyColumn) {
+      return normalizeTimeValue(val) ?? "";
     }
     return String(val);
   };
@@ -148,6 +173,26 @@ const CellEditor: React.FC<CellEditorProps> = ({
         );
 
       case "datetime":
+        if (timeOnlyColumn) {
+          return (
+            <input
+              {...commonProps}
+              type="time"
+              step="1"
+              value={formatValueForInput(editValue)}
+              onChange={(e) => {
+                const raw = e.target.value;
+                if (!raw) {
+                  setEditValue("");
+                  return;
+                }
+                const normalized = parseTimeInputValue(raw);
+                setEditValue(normalized ?? raw);
+              }}
+              placeholder="07:00"
+            />
+          );
+        }
         return (
           <DateTimePicker
             {...commonProps}

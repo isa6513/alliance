@@ -8,6 +8,9 @@
     "apps/mobile",
     "shared"
   ],
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "frontend:dev": "yarn workspace @alliance/frontend dev",
     "admin:dev": "yarn workspace @alliance/admin dev",

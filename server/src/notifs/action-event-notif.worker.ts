@@ -40,6 +40,7 @@ import {
 } from './textnotifcontents';
 import { withPgAdvisoryLock } from './lock-utils';
 import { getNotifTestUsers } from './test-users';
+import { PersonalActionReminder } from 'src/actions/entities/personal-action-reminder.entity';
 
 export interface ActionEventNotificationContext {
   event: ActionEvent;
@@ -76,7 +77,9 @@ export class ActionEventNotifWorker {
     private readonly actionEventNotifsRepository: Repository<ActionEventNotif>,
     private readonly recipientService: ActionEventRecipientService,
     private readonly reminderService: ActionEventReminderService,
-  ) {}
+  ) {
+    this.dispatchDueNotifs();
+  }
 
   @Cron('*/3 * * * *')
   async dispatchDueNotifs() {
@@ -129,25 +132,12 @@ export class ActionEventNotifWorker {
 
     if (!event || !event.action) return;
 
-    const type = plan.type;
-
-    let reminder: ActionReminder | null = null;
-
-    if (type === ActionEventNotifType.Reminder) {
-      reminder = await manager.getRepository(ActionReminder).findOne({
-        where: { id: plan.reminder.id },
-        relations: [
-          'memberActionEvent',
-          'memberActionEvent.action',
-          'memberActionEvent.action.participatingGroups',
-          'users',
-        ],
-      });
-      if (!reminder || reminder.sentAt) {
+    if (plan.type === ActionEventNotifType.Reminder) {
+      if (!plan.reminder || plan.reminder.sentAt) {
         return;
       }
     } else {
-      const sentAtField = typeToSentAtField[type];
+      const sentAtField = typeToSentAtField[plan.type];
       if (
         (sentAtField && event[sentAtField]) ||
         event.date > new Date() ||
@@ -157,7 +147,7 @@ export class ActionEventNotifWorker {
       }
 
       if (
-        type === ActionEventNotifType.Announcement &&
+        plan.type === ActionEventNotifType.Announcement &&
         !ANNOUNCEMENT_SUPPORTED_STATUSES.includes(event.newStatus)
       ) {
         return;
@@ -166,26 +156,59 @@ export class ActionEventNotifWorker {
 
     const action = event.action;
 
-    let users =
-      type === ActionEventNotifType.Reminder &&
-      reminder?.cohortType === ReminderCohortType.Custom
-        ? await this.recipientService.filterForCompletion(reminder.users, event)
-        : await this.recipientService.getFilteredUsersForEvent(event, type);
+    let baseUsers: User[];
+    if (plan.type === ActionEventNotifType.PersonalReminder) {
+      baseUsers = [plan.reminder!.user];
+    } else if (
+      plan.type === ActionEventNotifType.Reminder &&
+      plan.reminder.cohortType === ReminderCohortType.Custom
+    ) {
+      baseUsers = plan.reminder.users;
+    } else {
+      baseUsers = await this.recipientService.getBaseUsersForEvent(
+        event.newStatus,
+        action,
+      );
+    }
 
-    console.log('users', users.length);
+    let users = await this.recipientService.filterForShouldRemind(
+      baseUsers,
+      event,
+    );
 
-    if (users.length > 0) {
+    if (
+      plan.type === ActionEventNotifType.PersonalReminder &&
+      baseUsers.length === 1 &&
+      users.length === 0 &&
+      plan.reminder
+    ) {
+      plan.reminder.skippedForCompletion = true;
+      await manager.getRepository(PersonalActionReminder).save(plan.reminder);
+    }
+
+    if (
+      users.length > 0 &&
+      plan.type !== ActionEventNotifType.PersonalReminder
+    ) {
       const testUsers = getNotifTestUsers();
       users = [...users, ...testUsers];
     }
 
     const baseContext: Omit<ActionEventNotificationContext, 'user' | 'cid'> = {
       event,
-      type,
+      type: plan.type,
       action,
-      customEmailMessage: reminder?.emailMessage,
-      customTextMessage: reminder?.textMessage,
-      customEmailSubject: reminder?.emailSubject,
+      ...(plan.type === ActionEventNotifType.PersonalReminder
+        ? {
+            customEmailMessage: plan.reminder?.group.emailMessage,
+            customTextMessage: plan.reminder?.group.textMessage,
+            customEmailSubject: plan.reminder?.group.emailSubject,
+          }
+        : {
+            customEmailMessage: plan.reminder?.emailMessage,
+            customTextMessage: plan.reminder?.textMessage,
+            customEmailSubject: plan.reminder?.emailSubject,
+          }),
     };
 
     const deadlineEvent =
@@ -224,7 +247,7 @@ export class ActionEventNotifWorker {
         );
       }
 
-      if (type === ActionEventNotifType.MissedDeadline) {
+      if (plan.type === ActionEventNotifType.MissedDeadline) {
         context.isSecondMiss = false; //TODO;
       }
 
@@ -233,7 +256,7 @@ export class ActionEventNotifWorker {
       notif.actionEvent = event;
       notif.channel = NotificationChannel.Email;
       notif.sent = false;
-      notif.type = type;
+      notif.type = plan.type;
       let sentAnyNotif = false;
       if (this.notifsService.shouldTextUser(user)) {
         sentAnyNotif = true;
@@ -263,13 +286,28 @@ export class ActionEventNotifWorker {
     }
 
     this.logger.log('notifs sent for event ' + event.id);
-    const sentAtField = typeToSentAtField[type];
+    const sentAtField = typeToSentAtField[plan.type];
     if (sentAtField) {
       (event[sentAtField] as Date | undefined) = new Date();
       await manager.getRepository(ActionEvent).save(event);
-    } else if (type === ActionEventNotifType.Reminder && reminder) {
+    } else if (
+      plan.type === ActionEventNotifType.Reminder ||
+      plan.type === ActionEventNotifType.PersonalReminder
+    ) {
+      const reminder = plan.reminder;
+
+      if (!reminder) {
+        this.logger.error('reminder not found for in worker');
+        return;
+      }
+
       reminder.sentAt = new Date();
-      await manager.getRepository(ActionReminder).save(reminder);
+
+      if (plan.type === ActionEventNotifType.Reminder) {
+        await manager.getRepository(ActionReminder).save(reminder);
+      } else {
+        await manager.getRepository(PersonalActionReminder).save(reminder);
+      }
     }
   }
 
@@ -279,7 +317,10 @@ export class ActionEventNotifWorker {
     let body = '';
     if (context.type === ActionEventNotifType.Announcement) {
       body = defaultEventTextAnnouncement[context.event.newStatus](context);
-    } else if (context.type === ActionEventNotifType.Reminder) {
+    } else if (
+      context.type === ActionEventNotifType.Reminder ||
+      context.type === ActionEventNotifType.PersonalReminder
+    ) {
       if (context.customTextMessage) {
         body = context.customTextMessage;
       } else {

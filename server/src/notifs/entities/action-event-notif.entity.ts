@@ -17,6 +17,7 @@ export enum ActionEventNotifType {
   Announcement = 'announcement',
   MissedDeadline = 'misseddeadline',
   Reminder = 'reminder',
+  PersonalReminder = 'personalreminder',
 }
 
 @Entity()

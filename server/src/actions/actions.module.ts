@@ -20,19 +20,25 @@ import { ActionEvent } from './entities/action-event.entity';
 import { Action } from './entities/action.entity';
 import { ActionReminder } from './entities/action-reminder.entity';
 import { ActionUpdate } from './entities/action-update.entity';
+import { ReminderGroup } from './entities/reminder-group.entity';
+import { PersonalActionReminder } from './entities/personal-action-reminder.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
-    TypeOrmModule.forFeature([Action]),
-    TypeOrmModule.forFeature([ActionEvent]),
-    TypeOrmModule.forFeature([ActionReminder]),
-    TypeOrmModule.forFeature([ActionActivity]),
-    TypeOrmModule.forFeature([Comment]),
-    TypeOrmModule.forFeature([EditableContent]),
-    TypeOrmModule.forFeature([ActionEventNotif]),
-    TypeOrmModule.forFeature([Group]),
-    TypeOrmModule.forFeature([ActionUpdate]),
+    TypeOrmModule.forFeature([
+      User,
+      Action,
+      ActionEvent,
+      ActionReminder,
+      ActionActivity,
+      Comment,
+      EditableContent,
+      Group,
+      ActionUpdate,
+      ReminderGroup,
+      PersonalActionReminder,
+      ActionEventNotif,
+    ]),
     UserModule,
     NotifsModule,
     MailModule,

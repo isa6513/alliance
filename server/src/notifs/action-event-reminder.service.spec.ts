@@ -18,6 +18,9 @@ import {
   ReminderTimingMode,
 } from 'src/actions/entities/action-reminder.entity';
 import { User } from 'src/user/entities/user.entity';
+import { ReminderGroup } from 'src/actions/entities/reminder-group.entity';
+import { UserService } from 'src/user/user.service';
+import { PersonalActionReminder } from 'src/actions/entities/personal-action-reminder.entity';
 
 const announcementEvent = (overrides: Partial<ActionEvent> = {}): ActionEvent =>
   ({
@@ -64,6 +67,8 @@ const reminderEvent = (overrides: Partial<ActionEvent> = {}): ActionEvent => ({
   showInTimeline: false,
   notifications: [],
   reminders: [],
+  reminderGroups: [],
+  personalActionReminders: [],
   action: defaultReminderEventAction,
   date: new Date('2024-01-13T12:00:00Z'),
   newStatus: ActionStatus.Resolution,
@@ -110,6 +115,9 @@ describe('ActionEventReminderService', () => {
   let repositoryMock: { query: jest.Mock; find: jest.Mock };
   let activityRepositoryMock: { find: jest.Mock };
   let reminderRepositoryMock: { find: jest.Mock };
+  let reminderGroupRepositoryMock: { find: jest.Mock };
+  let personalActionReminderRepositoryMock: { find: jest.Mock };
+  let userServiceMock: { findOneOrFail: jest.Mock };
   let recipientServiceMock: {
     getBaseUsersForEvent: jest.Mock;
     getFilteredUsersForEvent: jest.Mock;
@@ -128,17 +136,29 @@ describe('ActionEventReminderService', () => {
     reminderRepositoryMock = {
       find: jest.fn().mockResolvedValue([]),
     };
+    reminderGroupRepositoryMock = {
+      find: jest.fn().mockResolvedValue([]),
+    };
 
     recipientServiceMock = {
       getBaseUsersForEvent: jest.fn().mockResolvedValue([]),
       getFilteredUsersForEvent: jest.fn().mockResolvedValue([]),
+    };
+    userServiceMock = {
+      findOneOrFail: jest.fn().mockResolvedValue({}),
+    };
+    personalActionReminderRepositoryMock = {
+      find: jest.fn().mockResolvedValue([]),
     };
 
     service = new ActionEventReminderService(
       repositoryMock as unknown as Repository<ActionEvent>,
       activityRepositoryMock as unknown as Repository<ActionActivity>,
       reminderRepositoryMock as unknown as Repository<ActionReminder>,
+      reminderGroupRepositoryMock as unknown as Repository<ReminderGroup>,
+      personalActionReminderRepositoryMock as unknown as Repository<PersonalActionReminder>,
       recipientServiceMock as unknown as ActionEventRecipientService,
+      userServiceMock as unknown as UserService,
     );
   });
 
@@ -250,8 +270,10 @@ describe('ActionEventReminderService', () => {
     expect(plans).toHaveLength(1);
     const plan = plans[0];
     expect(plan.type).toBe(ActionEventNotifType.Reminder);
-    expect(plan.reminder?.id).toBe(42);
-    expect(plan.reminder?.users?.length).toBe(1);
+    if (plan.type === ActionEventNotifType.Reminder) {
+      expect(plan.reminder.id).toBe(42);
+      expect(plan.reminder.users?.length).toBe(1);
+    }
   });
 
   it('includes relative reminder plans', async () => {
@@ -295,8 +317,10 @@ describe('ActionEventReminderService', () => {
     expect(plans).toHaveLength(1);
     const plan = plans[0];
     expect(plan.type).toBe(ActionEventNotifType.Reminder);
-    expect(plan.reminder?.id).toBe(42);
-    expect(plan.reminder?.users?.length).toBe(1);
+    if (plan.type === ActionEventNotifType.Reminder) {
+      expect(plan.reminder.id).toBe(42);
+      expect(plan.reminder.users.length).toBe(1);
+    }
   });
 
   describe('getNotificationSchedule', () => {

@@ -14,6 +14,8 @@ import { Action } from './action.entity';
 import { ActionReminder } from './action-reminder.entity';
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
 import { ActionUpdate } from './action-update.entity';
+import { PersonalActionReminder } from './personal-action-reminder.entity';
+import { ReminderGroup } from './reminder-group.entity';
 
 export enum NotificationType {
   All = 'all',
@@ -141,6 +143,21 @@ export class ActionEvent {
   @Type(() => ActionReminder)
   @Allow()
   reminders: ActionReminder[];
+
+  @OneToMany(
+    () => PersonalActionReminder,
+    (reminder) => reminder.memberActionEvent,
+  )
+  @ApiProperty({ type: PersonalActionReminder, isArray: true })
+  @Type(() => PersonalActionReminder)
+  @Allow()
+  personalActionReminders: PersonalActionReminder[];
+
+  @OneToMany(() => ReminderGroup, (group) => group.memberActionEvent)
+  @ApiProperty({ type: ReminderGroup, isArray: true })
+  @Type(() => ReminderGroup)
+  @Allow()
+  reminderGroups: ReminderGroup[];
 
   @OneToMany(() => ActionUpdate, (update) => update.associatedEvent)
   @ApiProperty({ type: ActionUpdate, isArray: true })

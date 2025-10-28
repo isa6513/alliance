@@ -33,6 +33,8 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
+import { Temporal } from '@js-temporal/polyfill';
+import { PersonalActionReminder } from 'src/actions/entities/personal-action-reminder.entity';
 
 export enum NotificationPreference {
   All = 'all',
@@ -79,6 +81,14 @@ export class User {
   @Column({ default: false })
   @ApiProperty()
   emailVerified: boolean;
+
+  @Column({ type: 'time', nullable: true })
+  @ApiPropertyOptional()
+  preferredReminderTime?: Temporal.PlainTime;
+
+  @Column({ type: 'text', nullable: true })
+  @ApiPropertyOptional()
+  timeZone?: Temporal.TimeZoneLike;
 
   @Column({ type: 'timestamptz', nullable: true })
   @ApiProperty({ type: String, format: 'date-time', nullable: true })
@@ -275,4 +285,7 @@ export class User {
   @ManyToMany(() => Group, (group) => group.users, { onDelete: 'CASCADE' })
   @Type(() => Group)
   groups: Group[];
+
+  @OneToMany(() => PersonalActionReminder, (reminder) => reminder.user)
+  personalActionReminders: PersonalActionReminder[];
 }

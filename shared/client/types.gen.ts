@@ -76,6 +76,10 @@ export type OnboardingDto = {
     cityId?: number;
 };
 
+export type PlainTime = {
+    [key: string]: unknown;
+};
+
 export type UpdateProfileDto = {
     id?: number;
     name?: string;
@@ -84,6 +88,10 @@ export type UpdateProfileDto = {
     phoneNumberValidated?: boolean;
     sentTextOptInMessageAt?: string;
     emailVerified?: boolean;
+    preferredReminderTime?: PlainTime;
+    timeZone?: {
+        [key: string]: unknown;
+    };
     contractDateSigned?: string | null;
     contractDateSuspended?: string | null;
     emailNotifsEnabled?: boolean;
@@ -132,6 +140,10 @@ export type User = {
     phoneNumberValidated: boolean;
     sentTextOptInMessageAt?: string;
     emailVerified: boolean;
+    preferredReminderTime?: PlainTime;
+    timeZone?: {
+        [key: string]: unknown;
+    };
     contractDateSigned: string | null;
     contractDateSuspended: string | null;
     emailNotifsEnabled: boolean;
@@ -235,7 +247,7 @@ export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
  */
 export type NotificationType = 'all' | 'joined' | 'none';
 
-export type ActionEventNotifType = 'announcement' | 'misseddeadline' | 'reminder';
+export type ActionEventNotifType = 'announcement' | 'misseddeadline' | 'reminder' | 'personalreminder';
 
 export type NotificationChannel = 'text' | 'email' | 'push';
 
@@ -244,6 +256,7 @@ export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | '
 export type Mail = {
     id: number;
     sentMessageId?: string;
+    renderedHtml?: string;
     to: string;
     status: string;
     emailType: EmailType;
@@ -296,6 +309,32 @@ export type ActionReminder = {
     sentAt?: string;
     notifications: Array<ActionEventNotif>;
     createdAt: string;
+};
+
+export type ReminderGroup = {
+    id: number;
+    name: string;
+    reminders: Array<Array<unknown>>;
+    memberActionEvent: ActionEvent;
+    cohortType: ReminderCohortType;
+    emailMessage: string;
+    emailSubject: string;
+    textMessage: string;
+    sendDay: string;
+    sendDayString: string;
+    allSent?: boolean;
+};
+
+export type PersonalActionReminder = {
+    id: number;
+    memberActionEvent: ActionEvent;
+    user: User;
+    sentAt?: string;
+    skippedForCompletion: boolean;
+    notification?: ActionEventNotif;
+    createdAt: string;
+    group: ReminderGroup;
+    sendTime?: string;
 };
 
 export type EditableContent = {
@@ -379,6 +418,8 @@ export type ActionEvent = {
     announcementNotifsSentAt?: string;
     deadlineNotifsSentAt?: string;
     reminders: Array<ActionReminder>;
+    personalActionReminders: Array<PersonalActionReminder>;
+    reminderGroups: Array<ReminderGroup>;
     updates: Array<ActionUpdate>;
 };
 
@@ -867,7 +908,6 @@ export type CreateActionReminderDto = {
     textMessage: string;
     sendAtAbsolute?: string;
     sendAtSecondsFromDeadline?: number;
-    deadlineEventId?: number;
     userIds?: Array<number>;
 };
 
@@ -895,8 +935,17 @@ export type UpdateActionReminderDto = {
     textMessage?: string;
     sendAtAbsolute?: string;
     sendAtSecondsFromDeadline?: number;
-    deadlineEventId?: number;
     userIds?: Array<number>;
+};
+
+export type CreateTodReminderGroupDto = {
+    name: string;
+    cohortType: ReminderCohortType;
+    emailMessage: string;
+    emailSubject: string;
+    textMessage: string;
+    userIds?: Array<number>;
+    sendDay: string;
 };
 
 export type CreateEditableContentDto = {
@@ -973,6 +1022,7 @@ export type AdminActionEventDto = {
     announcementNotifsSentAt?: string;
     deadlineNotifsSentAt?: string;
     reminders: Array<ActionReminder>;
+    reminderGroups: Array<ReminderGroup>;
 };
 
 export type CreateActionUpdateDto = {
@@ -2394,6 +2444,23 @@ export type ActionsUpdateReminderResponses = {
 
 export type ActionsUpdateReminderResponse = ActionsUpdateReminderResponses[keyof ActionsUpdateReminderResponses];
 
+export type ActionsUpdateReminderGroupData = {
+    body: CreateTodReminderGroupDto;
+    path: {
+        actionId: number;
+        eventId: number;
+        groupId: number;
+    };
+    query?: never;
+    url: '/actions/{actionId}/events/{eventId}/remindergroups/{groupId}';
+};
+
+export type ActionsUpdateReminderGroupResponses = {
+    200: ActionReminderDto;
+};
+
+export type ActionsUpdateReminderGroupResponse = ActionsUpdateReminderGroupResponses[keyof ActionsUpdateReminderGroupResponses];
+
 export type ActionsDeleteReminderData = {
     body?: never;
     path: {
@@ -2404,6 +2471,35 @@ export type ActionsDeleteReminderData = {
 };
 
 export type ActionsDeleteReminderResponses = {
+    200: unknown;
+};
+
+export type ActionsCreateReminderGroupData = {
+    body: CreateTodReminderGroupDto;
+    path: {
+        eventId: number;
+    };
+    query?: never;
+    url: '/actions/events/{eventId}/createremindergroup';
+};
+
+export type ActionsCreateReminderGroupResponses = {
+    200: ActionReminderDto;
+};
+
+export type ActionsCreateReminderGroupResponse = ActionsCreateReminderGroupResponses[keyof ActionsCreateReminderGroupResponses];
+
+export type ActionsDeleteReminderGroupData = {
+    body?: never;
+    path: {
+        eventId: number;
+        groupId: number;
+    };
+    query?: never;
+    url: '/actions/events/{eventId}/reminders/{groupId}';
+};
+
+export type ActionsDeleteReminderGroupResponses = {
     200: unknown;
 };
 

@@ -515,6 +515,13 @@ export class AdminViewerService {
 
       case ColumnDataType.DATE:
       case ColumnDataType.DATETIME:
+        if (this.isTimeOnlyColumn(columnMeta)) {
+          const timeValue = this.normalizeTimeForDatabase(value);
+          if (timeValue === null) {
+            return columnMeta.isNullable ? null : undefined;
+          }
+          return timeValue;
+        }
         if (value instanceof Date) return value;
         const dateValue = new Date(value);
         return isNaN(dateValue.getTime()) ? undefined : dateValue;
@@ -541,6 +548,97 @@ export class AdminViewerService {
       default:
         return value;
     }
+  }
+
+  private isTimeOnlyColumn(columnMeta: ColumnMetadataDto): boolean {
+    const rawType = columnMeta.rawType?.toLowerCase() ?? '';
+    return rawType.startsWith('time') && !rawType.includes('stamp');
+  }
+
+  private normalizeTimeForDatabase(value: any): string | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    if (value instanceof Date) {
+      return this.normalizeTimeParts(
+        value.getUTCHours(),
+        value.getUTCMinutes(),
+        value.getUTCSeconds(),
+      );
+    }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return null;
+      }
+
+      const literalMatch = trimmed.match(/(\d{1,2}):(\d{2})(?::(\d{2})(?:\.\d{1,6})?)?/);
+      if (literalMatch) {
+        return this.normalizeTimeParts(
+          Number(literalMatch[1]),
+          Number(literalMatch[2]),
+          literalMatch[3] ? Number(literalMatch[3]) : 0,
+        );
+      }
+
+      const twelveHourMatch = trimmed.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i);
+      if (twelveHourMatch) {
+        const hours = Number(twelveHourMatch[1]);
+        const minutes = twelveHourMatch[2] ? Number(twelveHourMatch[2]) : 0;
+        if (Number.isNaN(hours) || Number.isNaN(minutes) || hours < 1 || hours > 12) {
+          return null;
+        }
+        const meridiem = twelveHourMatch[3].toLowerCase();
+        let normalizedHours = hours % 12;
+        if (meridiem === 'pm') {
+          normalizedHours += 12;
+        }
+        return this.normalizeTimeParts(normalizedHours, minutes, 0);
+      }
+
+      return null;
+    }
+
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      typeof (value as { toString?: () => string }).toString === 'function'
+    ) {
+      const stringValue = (value as { toString: () => string }).toString();
+      if (stringValue && stringValue !== '[object Object]') {
+        return this.normalizeTimeForDatabase(stringValue);
+      }
+    }
+
+    return null;
+  }
+
+  private normalizeTimeParts(
+    hours: number,
+    minutes: number,
+    seconds: number = 0,
+  ): string | null {
+    if (
+      Number.isNaN(hours) ||
+      Number.isNaN(minutes) ||
+      Number.isNaN(seconds) ||
+      hours < 0 ||
+      hours > 23 ||
+      minutes < 0 ||
+      minutes > 59 ||
+      seconds < 0 ||
+      seconds > 59
+    ) {
+      return null;
+    }
+
+    const pad = (val: number) => String(val).padStart(2, '0');
+    const hh = pad(hours);
+    const mm = pad(minutes);
+    const ss = pad(seconds);
+    return `${hh}:${mm}:${ss}`;
   }
 
   private mapColumnType(typeormType: string): ColumnDataType {

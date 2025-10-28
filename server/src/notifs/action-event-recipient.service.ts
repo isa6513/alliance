@@ -37,26 +37,10 @@ export class ActionEventRecipientService {
     );
   }
 
-  async getBaseUsersForEvent(
+  public async getBaseUsersForEvent(
     eventStatus: ActionStatus,
     action: Action,
-    eventDate: Date,
   ): Promise<User[]> {
-    const targetGroupIds = new Set(
-      action.participatingGroups.map((group) => group.id),
-    );
-
-    const filterToEligible = (users: User[]) =>
-      users.filter(
-        (user) =>
-          this.userShouldCompleteEvent(
-            user,
-            eventDate,
-            targetGroupIds,
-            action.everyoneShouldComplete,
-          ) === true,
-      );
-
     if (eventStatus === ActionStatus.MemberAction && !action.commitmentless) {
       const activities = await this.actionActivityRepository.find({
         where: {
@@ -65,25 +49,38 @@ export class ActionEventRecipientService {
         },
         relations: ['user', 'user.groups'],
       });
-      return filterToEligible(activities.map((activity) => activity.user));
+      return activities.map((activity) => activity.user);
     }
 
     if (
       eventStatus === ActionStatus.GatheringCommitments ||
       eventStatus === ActionStatus.MemberAction
     ) {
-      return filterToEligible(
-        await this.userService.findActiveUsersWithGroups(),
-      );
+      return await this.userService.findActiveUsersWithGroups();
     }
 
     return [];
   }
 
-  async filterForCompletion(
+  async filterForShouldRemind(
     users: User[],
     event: Pick<ActionEvent, 'newStatus' | 'action' | 'date'>,
   ): Promise<User[]> {
+    const targetGroupIds = new Set(
+      event.action.participatingGroups.map((group) => group.id),
+    );
+
+    const filterToEligible = (users: User[]) =>
+      users.filter(
+        (user) =>
+          this.userShouldCompleteEvent(
+            user,
+            event.date,
+            targetGroupIds,
+            event.action.everyoneShouldComplete,
+          ) === true,
+      );
+
     const completionActivities = await this.actionActivityRepository.find({
       where: {
         userId: In(users.map((user) => user.id)),
@@ -95,7 +92,7 @@ export class ActionEventRecipientService {
         ]),
       },
     });
-    return users.filter(
+    return filterToEligible(users).filter(
       (user) =>
         !completionActivities.some((activity) => activity.userId === user.id),
     );
@@ -108,10 +105,9 @@ export class ActionEventRecipientService {
     const users = await this.getBaseUsersForEvent(
       event.newStatus,
       event.action,
-      event.date,
     );
     return type === ActionEventNotifType.Announcement
       ? users
-      : await this.filterForCompletion(users, event);
+      : await this.filterForShouldRemind(users, event);
   }
 }

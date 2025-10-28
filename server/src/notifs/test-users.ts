@@ -35,6 +35,7 @@ export const getNotifTestUsers = (): User[] => {
       notifications: [],
       referredBy: null,
       referredUsers: [],
+      personalActionReminders: [],
       referralCode: '',
       friends: [],
       hashPassword: function (): Promise<void> {
@@ -95,6 +96,7 @@ export const getNotifTestUsers = (): User[] => {
       checkPassword: function (): Promise<boolean> {
         throw new Error('Function not implemented.');
       },
+      personalActionReminders: [],
       stripeCustomerId: '',
       isNotSignedUpPartialProfile: false,
       over18: false,

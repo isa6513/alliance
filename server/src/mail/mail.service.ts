@@ -223,8 +223,11 @@ export class MailService {
       throw new Error(
         'Invalid announcement status: ' + context.event.newStatus,
       );
-    } else if (context.type === ActionEventNotifType.Reminder) {
-      return context.customEmailSubject ?? 'no subject';
+    } else if (
+      context.type === ActionEventNotifType.Reminder ||
+      context.type === ActionEventNotifType.PersonalReminder
+    ) {
+      return context.customEmailSubject ?? 'Alliance reminder';
     } else if (context.type === ActionEventNotifType.MissedDeadline) {
       return 'Failed to complete action: ' + context.action.name;
     }
@@ -245,7 +248,10 @@ export class MailService {
         context.event.newStatus === ActionStatus.GatheringCommitments
           ? EmailType.Commitment
           : EmailType.MemberAction;
-    } else if (context.type === ActionEventNotifType.Reminder) {
+    } else if (
+      context.type === ActionEventNotifType.Reminder ||
+      context.type === ActionEventNotifType.PersonalReminder
+    ) {
       emailType = EmailType.CustomActionReminder;
     } else if (context.type === ActionEventNotifType.MissedDeadline) {
       emailType = context.isSecondMiss

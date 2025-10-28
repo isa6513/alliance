@@ -1,36 +1,35 @@
 import {
   ActionEventDto,
-  CreateActionReminderDto,
+  CreateTodReminderGroupDto,
   ReminderCohortType,
-  ReminderTimingMode,
+  ReminderGroup,
+  User,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import TextareaWithHighlights from "./TextareaWithHighlights";
+import { ActionReminderFormUser, keywords } from "./ActionReminderForm";
+import {
+  defaultEmailContents,
+  defaultEmailSubject,
+  defaultTextMessage,
+} from "./ActionRemindersTab";
 
-export interface ActionReminderFormUser {
-  id: number;
-  name?: string | null;
-  email?: string | null;
-  displayName?: string | null;
-}
-
-export type ActionReminderFormInitialValues = {
+export type ActionReminderGroupFormSubmitPayload = CreateTodReminderGroupDto & {
   memberActionEventId: number;
-  reminder: CreateActionReminderDto;
-  selectedUsers: ActionReminderFormUser[];
 };
 
-export type ActionReminderFormSubmitPayload = CreateActionReminderDto & {
+export type ActionReminderGroupFormInitialValues = {
   memberActionEventId: number;
+  reminderGroup: ReminderGroup | null;
+  users: User[];
 };
 
 interface ActionReminderFormProps {
   memberEvents: ActionEventDto[];
   users: ActionReminderFormUser[];
   loadingUsers: boolean;
-  initialValues: ActionReminderFormInitialValues;
+  initialValues: ActionReminderGroupFormInitialValues;
   submitting?: boolean;
   submitLabel?: string;
   serverError?: string | null;
@@ -38,19 +37,10 @@ interface ActionReminderFormProps {
   disableEventSelection?: boolean;
   onCancel?: () => void;
   onEventChange?: (eventId: number) => void;
-  onSubmit: (payload: ActionReminderFormSubmitPayload) => Promise<void> | void;
+  onSubmit: (
+    payload: ActionReminderGroupFormSubmitPayload
+  ) => Promise<void> | void;
 }
-
-const DEFAULT_SEND_AT_OFFSET_MS = 0;
-
-export const keywords = [
-  "#{fullname}",
-  "#{firstname}",
-  "#{lastname}",
-  "#{action}",
-  "#{days}",
-  "#{link}",
-];
 
 const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
   memberEvents,
@@ -58,7 +48,7 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
   loadingUsers,
   initialValues,
   submitting = false,
-  submitLabel = "Save Reminder",
+  submitLabel = "Create Reminders",
   serverError = null,
   serverSuccess = null,
   disableEventSelection = false,
@@ -69,43 +59,41 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
   const [selectedEventId, setSelectedEventId] = useState<number | null>(
     initialValues.memberActionEventId ?? null
   );
-  const [timingMode, setTimingMode] = useState<ReminderTimingMode>(
-    initialValues.reminder.timingMode
+  const [sendDay, setSendDay] = useState<string>(
+    new Date().toISOString().split("T")[0]
   );
-  const [sendAt, setSendAt] = useState<string>(
-    initialValues.reminder.sendAtAbsolute ??
-      new Date(Date.now() + DEFAULT_SEND_AT_OFFSET_MS).toISOString()
+  const [name, setName] = useState<string>(
+    initialValues.reminderGroup?.name ?? ""
   );
-  const [sendAtSecondsFromDeadline, setSendAtSecondsFromDeadline] =
-    useState<number>(initialValues.reminder.sendAtSecondsFromDeadline ?? 0);
+
   const [emailSubject, setEmailSubject] = useState<string>(
-    initialValues.reminder.emailSubject ?? ""
+    initialValues.reminderGroup?.emailSubject ?? defaultEmailSubject
   );
   const [emailMessage, setEmailMessage] = useState<string>(
-    initialValues.reminder.emailMessage ?? ""
+    initialValues.reminderGroup?.emailMessage ?? defaultEmailContents
   );
   const [textMessage, setTextMessage] = useState<string>(
-    initialValues.reminder.textMessage ?? ""
+    initialValues.reminderGroup?.textMessage ?? defaultTextMessage
   );
   const [cohortType, setCohortType] = useState<ReminderCohortType>(
-    initialValues.reminder.cohortType
+    initialValues.reminderGroup?.cohortType ?? "all_uncompleted"
   );
   const [selectedUsers, setSelectedUsers] = useState<ActionReminderFormUser[]>(
-    initialValues.selectedUsers
+    initialValues.users
   );
   const [userQuery, setUserQuery] = useState<string>("");
   const [localError, setLocalError] = useState<string | null>(null);
   const initialSnapshotRef = useRef<string>("");
 
   const computedInitialSnapshot = useMemo(() => {
-    const userIds = [
-      ...initialValues.selectedUsers.map((user) => user.id),
-    ].sort((a, b) => a - b);
+    const userIds = [...initialValues.users.map((user) => user.id)].sort(
+      (a, b) => a - b
+    );
     return JSON.stringify({
       memberActionEventId: initialValues.memberActionEventId,
       reminder: {
-        ...initialValues.reminder,
-        userIds: initialValues.reminder.userIds ?? [],
+        ...initialValues.reminderGroup,
+        userIds: userIds,
       },
       selectedUsers: userIds,
     });
@@ -119,19 +107,8 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
 
     setSelectedEventId(initialValues.memberActionEventId);
     onEventChange?.(initialValues.memberActionEventId);
-    setTimingMode(initialValues.reminder.timingMode);
-    setSendAt(
-      initialValues.reminder.sendAtAbsolute ??
-        new Date(Date.now() + DEFAULT_SEND_AT_OFFSET_MS).toISOString()
-    );
-    setSendAtSecondsFromDeadline(
-      initialValues.reminder.sendAtSecondsFromDeadline ?? 0
-    );
-    setEmailSubject(initialValues.reminder.emailSubject!);
-    setEmailMessage(initialValues.reminder.emailMessage!);
-    setTextMessage(initialValues.reminder.textMessage!);
-    setCohortType(initialValues.reminder.cohortType);
-    setSelectedUsers(initialValues.selectedUsers);
+    setSendDay(new Date().toISOString().split("T")[0]);
+    setSelectedUsers(initialValues.users);
     setUserQuery("");
     setLocalError(null);
   }, [
@@ -195,50 +172,15 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
       return;
     }
 
-    if (timingMode === "absolute") {
-      if (!sendAt) {
-        setLocalError("Select a send time.");
-        return;
-      }
-      const parsed = new Date(sendAt);
-      if (Number.isNaN(parsed.getTime())) {
-        setLocalError("Invalid send time.");
-        return;
-      }
-    }
-
-    if (timingMode === "from_deadline") {
-      if (
-        sendAtSecondsFromDeadline === null ||
-        Number.isNaN(sendAtSecondsFromDeadline)
-      ) {
-        setLocalError("Enter the number of seconds relative to the deadline.");
-        return;
-      }
-    }
-
-    const baseReminder: CreateActionReminderDto = {
-      ...initialValues.reminder,
-      timingMode,
+    await onSubmit({
+      name,
+      cohortType,
+      sendDay,
       emailSubject,
       emailMessage,
       textMessage,
-      cohortType,
-      sendAtAbsolute:
-        timingMode === "absolute" ? new Date(sendAt).toISOString() : undefined,
-      sendAtSecondsFromDeadline:
-        timingMode === "from_deadline"
-          ? sendAtSecondsFromDeadline ?? 0
-          : undefined,
-      userIds:
-        cohortType === "custom"
-          ? selectedUsers.map((user) => user.id)
-          : undefined,
-    };
-
-    await onSubmit({
       memberActionEventId: selectedEventId,
-      ...baseReminder,
+      userIds: selectedUsers.map((user) => user.id),
     });
   };
 
@@ -247,7 +189,7 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
   const [keywordsHelpExpanded, setKeywordsHelpExpanded] = useState(false);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 w-full">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Member Action Event
@@ -273,49 +215,28 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Timing mode
+            Send date
           </label>
-          <select
-            value={timingMode}
-            onChange={(event) =>
-              setTimingMode(event.target.value as ReminderTimingMode)
-            }
+          <input
+            type="date"
+            value={sendDay}
+            onChange={(event) => setSendDay(event.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-          >
-            <option value="absolute">Absolute</option>
-            <option value="from_deadline">Relative to deadline</option>
-          </select>
+          />
         </div>
 
-        {timingMode === "absolute" && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Send date
-            </label>
-            <DateTimePicker
-              value={sendAt}
-              onChange={(change) => setSendAt(change.utcValue || "")}
-              className="w-full !py-1"
-              required
-            />
-          </div>
-        )}
-
-        {timingMode === "from_deadline" && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Seconds from deadline
-            </label>
-            <input
-              type="number"
-              value={sendAtSecondsFromDeadline}
-              onChange={(event) =>
-                setSendAtSecondsFromDeadline(Number(event.target.value))
-              }
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-            />
-          </div>
-        )}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Reminder name
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+            placeholder="admin-only identifier"
+          />
+        </div>
       </div>
 
       <div>

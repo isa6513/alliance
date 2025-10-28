@@ -1,7 +1,7 @@
 import {
   ActionDto,
   actionsAddEvent,
-  actionsCreateReminder,
+  actionsCreateReminderGroup,
   actionsEventNotifData,
   ActionStatus,
   CreateActionEventDto,
@@ -69,6 +69,9 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
   const [launchNow, setLaunchNow] = useState<boolean>(true);
   const [useDeadlineEvent, setUseDeadlineEvent] = useState<boolean>(false);
   const [createReminders, setCreateReminders] = useState<boolean>(false);
+  const [deadlineEventDate, setDeadlineEventDate] = useState<string>(
+    new Date(new Date().getTime() + 604800000).toISOString()
+  );
   const [notifData, setNotifData] = useState<PreEventNotifDataDto | null>(null);
 
   const [creatingEvent, setCreatingEvent] = useState<boolean>(false);
@@ -111,9 +114,7 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
       ) {
         const officeActionEvent = {
           title: defaultEventNames["office_action"],
-          date: new Date(
-            new Date(eventForm.date).getTime() + 604800000
-          ).toISOString(),
+          date: deadlineEventDate,
           newStatus: "office_action",
           sendNotifsTo: "none",
           showInTimeline: false,
@@ -133,12 +134,26 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
 
         if (createReminders && addedEvent) {
           const newEventId = addedEvent.id;
-          const threeDayReminderResponse = await actionsCreateReminder({
-            path: { actionId: action.id, eventId: newEventId },
+          const threeDayReminderDay = new Date(
+            new Date(deadlineEventDate).getTime() - 3 * 24 * 60 * 60 * 1000
+          )
+            .toISOString()
+            .split("T")[0];
+          const oneDayReminderDay = new Date(
+            new Date(deadlineEventDate).getTime() - 1 * 24 * 60 * 60 * 1000
+          )
+            .toISOString()
+            .split("T")[0];
+
+          console.log(threeDayReminderDay);
+          console.log(oneDayReminderDay);
+
+          const threeDayReminderResponse = await actionsCreateReminderGroup({
+            path: { eventId: newEventId },
             body: {
               cohortType: "all_uncompleted",
-              timingMode: "from_deadline",
-              sendAtSecondsFromDeadline: 3 * 24 * 60 * 60,
+              sendDay: threeDayReminderDay,
+              name: "3 day reminder",
               emailSubject: defaultEmailSubject,
               emailMessage: defaultEmailContents,
               textMessage: defaultTextMessage,
@@ -148,12 +163,12 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
             setError("Failed to add 3 day reminder");
             console.error(threeDayReminderResponse.error);
           }
-          const oneDayReminderResponse = await actionsCreateReminder({
-            path: { actionId: action.id, eventId: newEventId },
+          const oneDayReminderResponse = await actionsCreateReminderGroup({
+            path: { eventId: newEventId },
             body: {
               cohortType: "all_uncompleted",
-              timingMode: "from_deadline",
-              sendAtSecondsFromDeadline: 1 * 24 * 60 * 60,
+              sendDay: oneDayReminderDay,
+              name: "1 day reminder",
               emailSubject: defaultEmailSubject,
               emailMessage: defaultEmailContents,
               textMessage: defaultTextMessage,
@@ -409,18 +424,36 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
                     htmlFor="deadlineExists"
                     className="ml-2 block text-black"
                   >
-                    Automatically create office action transition 1 week after
-                    launch
+                    Automatically create office action transition event
                   </label>
                 </div>
 
                 {useDeadlineEvent && (
                   <div>
                     <p className="text-sm text-gray-600 mb-1">
-                      This will create a second action event timed to one week
-                      after the launch of this one, providing a deadline for
-                      members.
+                      This will create a second action event timed after the
+                      launch of this one, providing a deadline for members.
                     </p>
+                    <div>
+                      <label
+                        htmlFor="eventDate"
+                        className="block text-black mb-1"
+                      >
+                        Deadline event time (
+                        {Intl.DateTimeFormat().resolvedOptions().timeZone}
+                        ):
+                      </label>
+                      <DateTimePicker
+                        id="eventDate"
+                        name="date"
+                        value={deadlineEventDate}
+                        onChange={(change) =>
+                          setDeadlineEventDate(change.utcValue || "")
+                        }
+                        required
+                        className="max-w-80"
+                      />
+                    </div>
                     {eventForm.date && (
                       <p className="text-sm text-gray-600 mb-1">
                         Date:{" "}
@@ -441,6 +474,7 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
                       <label
                         htmlFor="deadlineExists"
                         className="ml-2 block text-black"
+                        onClick={(e) => e.preventDefault()}
                       >
                         Automatically create 3 and 1 day reminders before
                         deadline

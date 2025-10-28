@@ -2,10 +2,11 @@ const CheckIcon = ({
   size = "small",
   fill = "var(--color-green)",
 }: {
-  size?: "small" | "large";
+  size?: "xs" | "small" | "large";
   fill?: string;
 }) => {
   const sizeClass = {
+    xs: "w-3 h-3",
     small: "w-4 h-4",
     large: "w-8 h-8",
   };

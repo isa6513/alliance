@@ -31,6 +31,7 @@ import {
   CreateActionEventDto,
   CreateActionReminderDto,
   CreateActionUpdateDto,
+  CreateTODReminderGroupDto,
   LatLonDto,
   PreEventNotifDataDto,
   UpdateActionActivityDto,
@@ -59,6 +60,7 @@ import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ActionEventNotifType } from 'src/notifs/entities/action-event-notif.entity';
 import { ActionUpdate } from './entities/action-update.entity';
+import { ReminderGroup } from './entities/reminder-group.entity';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -127,9 +129,6 @@ export class ActionsService {
       await this.actionEventRecipientService.getBaseUsersForEvent(
         ActionStatus.MemberAction,
         action,
-        action.events.find(
-          (event) => event.newStatus === ActionStatus.MemberAction,
-        )?.date ?? new Date(),
       );
     const completionActivities = await this.actionActivityRepository.find({
       where: {
@@ -509,15 +508,6 @@ export class ActionsService {
     }
     reminder.timingMode = timingMode;
 
-    if (dto.deadlineEventId !== undefined) {
-      const deadlineEvent = await this.actionEventRepository.findOne({
-        where: { id: dto.deadlineEventId, action: { id: actionId } },
-      });
-      if (!deadlineEvent) {
-        throw new NotFoundException('Deadline event not found');
-      }
-    }
-
     let sendAtAbsolute =
       dto.sendAtAbsolute ?? reminder.sendAtAbsolute ?? undefined;
     if (typeof sendAtAbsolute === 'string') {
@@ -664,14 +654,10 @@ export class ActionsService {
     reminderId: number,
     dto: UpdateActionReminderDto,
   ): Promise<ActionReminderDto> {
-    const reminder = await this.actionReminderRepository.findOne({
+    const reminder = await this.actionReminderRepository.findOneOrFail({
       where: { id: reminderId },
       relations: ['memberActionEvent', 'memberActionEvent.action', 'users'],
     });
-
-    if (!reminder) {
-      throw new NotFoundException('Reminder not found');
-    }
 
     if (
       !reminder.memberActionEvent ||
@@ -707,6 +693,36 @@ export class ActionsService {
       throw new NotFoundException('Reminder not found');
     }
     await this.actionReminderRepository.delete(reminderId);
+  }
+  async deleteReminderGroup(eventId: number, groupId: number) {
+    return this.actionEventReminderService.deleteReminderGroup(
+      eventId,
+      groupId,
+    );
+  }
+
+  async createdTimedReminderGroup(
+    eventId: number,
+    dto: CreateTODReminderGroupDto,
+  ): Promise<ReminderGroup> {
+    return this.actionEventReminderService.computeIndividuallyTimedReminders(
+      eventId,
+      dto,
+    );
+  }
+
+  async updateReminderGroup(
+    actionId: number,
+    eventId: number,
+    groupId: number,
+    dto: CreateTODReminderGroupDto,
+  ): Promise<ReminderGroup> {
+    return this.actionEventReminderService.updateReminderGroup(
+      actionId,
+      eventId,
+      groupId,
+      dto,
+    );
   }
 
   async remove(id: number) {
@@ -1192,6 +1208,10 @@ export class ActionsService {
         'reminders',
         'reminders.users',
         'reminders.memberActionEvent',
+        'reminderGroups',
+        'reminderGroups.reminders',
+        'reminderGroups.reminders.user',
+        'reminderGroups.reminders.group',
       ],
     });
     return new AdminActionEventDto(event);

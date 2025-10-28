@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import type { ColumnMetadataDto } from "@alliance/shared/client/types.gen";
+import { isTimeOnlyColumn } from "./dbviewer/timeFieldUtils";
 
 interface AddRowModalProps {
   isOpen: boolean;
@@ -56,6 +57,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({
 
   const renderedColumns = useMemo(() => {
     return columns.map((column) => {
+      const isTimeColumn = isTimeOnlyColumn(column);
       const value = inputs[column.name] ?? "";
       const hasError = !!fieldErrors[column.name];
       const baseClasses =
@@ -63,6 +65,12 @@ const AddRowModal: React.FC<AddRowModalProps> = ({
       const inputClasses = `${baseClasses} ${
         hasError ? "border-red-500" : "border-gray-300"
       }`;
+
+      const placeholder = isTimeColumn
+        ? "07:00"
+        : column.isNullable
+        ? "Leave blank for NULL"
+        : undefined;
 
       const commonInputProps = {
         value,
@@ -72,56 +80,60 @@ const AddRowModal: React.FC<AddRowModalProps> = ({
           >
         ) => onChange(column.name, e.target.value),
         className: inputClasses,
-        placeholder: column.isNullable ? "Leave blank for NULL" : undefined,
+        placeholder,
       } as const;
 
       let field: React.ReactNode;
 
-      switch (column.dataType) {
-        case "boolean":
-          field = (
-            <select {...commonInputProps}>
-              <option value="">-- Select --</option>
-              <option value="true">true</option>
-              <option value="false">false</option>
-            </select>
-          );
-          break;
-        case "enum":
-          field = (
-            <select {...commonInputProps}>
-              <option value="">-- Select --</option>
-              {column.enumValues?.map((enumValue) => (
-                <option key={enumValue} value={enumValue}>
-                  {enumValue}
-                </option>
-              ))}
-            </select>
-          );
-          break;
-        case "number":
-          field = (
-            <input {...commonInputProps} type="text" inputMode="decimal" />
-          );
-          break;
-        case "date":
-          field = <input {...commonInputProps} type="date" />;
-          break;
-        case "datetime":
-          field = <input {...commonInputProps} type="datetime-local" />;
-          break;
-        case "json":
-          field = (
-            <textarea
-              {...commonInputProps}
-              className={`${inputClasses} h-32 resize-y`}
-              placeholder="Enter JSON"
-            />
-          );
-          break;
-        default:
-          field = <input {...commonInputProps} type="text" />;
-          break;
+      if (isTimeColumn) {
+        field = <input {...commonInputProps} type="time" step="1" />;
+      } else {
+        switch (column.dataType) {
+          case "boolean":
+            field = (
+              <select {...commonInputProps}>
+                <option value="">-- Select --</option>
+                <option value="true">true</option>
+                <option value="false">false</option>
+              </select>
+            );
+            break;
+          case "enum":
+            field = (
+              <select {...commonInputProps}>
+                <option value="">-- Select --</option>
+                {column.enumValues?.map((enumValue) => (
+                  <option key={enumValue} value={enumValue}>
+                    {enumValue}
+                  </option>
+                ))}
+              </select>
+            );
+            break;
+          case "number":
+            field = (
+              <input {...commonInputProps} type="text" inputMode="decimal" />
+            );
+            break;
+          case "date":
+            field = <input {...commonInputProps} type="date" />;
+            break;
+          case "datetime":
+            field = <input {...commonInputProps} type="datetime-local" />;
+            break;
+          case "json":
+            field = (
+              <textarea
+                {...commonInputProps}
+                className={`${inputClasses} h-32 resize-y`}
+                placeholder="Enter JSON"
+              />
+            );
+            break;
+          default:
+            field = <input {...commonInputProps} type="text" />;
+            break;
+        }
       }
 
       return (
@@ -136,7 +148,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({
               {column.name}
             </label>
             <div className="flex items-center space-x-2 text-xs text-gray-400">
-              <span>{column.dataType}</span>
+              <span>{isTimeColumn ? "time" : column.dataType}</span>
               {column.isPrimary && (
                 <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700">
                   PK

@@ -14,6 +14,42 @@ import { useDatabaseViewerState } from "../components/dbviewer/DatabaseViewer.ho
 import DatabaseSidebar from "../components/dbviewer/DatabaseSidebar";
 import DatabaseToolbar from "../components/dbviewer/DatabaseToolbar";
 import DatabaseTable from "../components/dbviewer/DatabaseTable";
+import {
+  formatTimeForDisplayValue,
+  isTimeOnlyColumn,
+  parseTimeInputValue,
+  toDatabaseTimeString,
+} from "../components/dbviewer/timeFieldUtils";
+
+const describeConfirmValue = (
+  raw: unknown,
+  display?: string | null
+): string => {
+  if (display !== undefined) {
+    if (!display) {
+      return "null";
+    }
+    return display;
+  }
+
+  if (raw === null || raw === undefined) {
+    return "null";
+  }
+
+  if (typeof raw === "string") {
+    return raw;
+  }
+
+  if (typeof raw === "number" || typeof raw === "boolean") {
+    return String(raw);
+  }
+
+  try {
+    return JSON.stringify(raw);
+  } catch {
+    return String(raw);
+  }
+};
 
 const DatabaseViewer: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -69,6 +105,8 @@ const DatabaseViewer: React.FC = () => {
     columnName: string;
     newValue: any;
     originalValue: any;
+    originalDisplayValue?: string | null;
+    newDisplayValue?: string | null;
   } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{
     tableName: string;
@@ -222,6 +260,8 @@ const DatabaseViewer: React.FC = () => {
 
       const { rowIndex, columnIndex } = editingCell;
       const column = tableData.columns[columnIndex];
+      const isTimeColumn =
+        column.dataType === "datetime" && isTimeOnlyColumn(column);
       const row = tableData.rows[rowIndex];
       const primaryKeyColumn = tableData.columns.find((col) => col.isPrimary);
 
@@ -237,18 +277,34 @@ const DatabaseViewer: React.FC = () => {
       const primaryKeyValue = row[primaryKeyIndex];
 
       // Check if value actually changed
-      if (newValue === editingCell.originalValue) {
+      const comparableNewValue = isTimeColumn
+        ? toDatabaseTimeString(newValue)
+        : newValue;
+      const comparableOriginalValue = isTimeColumn
+        ? toDatabaseTimeString(editingCell.originalValue)
+        : editingCell.originalValue;
+
+      if (comparableNewValue === comparableOriginalValue) {
         setEditingCell(null);
         return;
       }
+
+      const displayOriginal = isTimeColumn
+        ? formatTimeForDisplayValue(editingCell.originalValue)
+        : undefined;
+      const displayNew = isTimeColumn
+        ? formatTimeForDisplayValue(newValue)
+        : undefined;
 
       // Set up pending update for confirmation
       setPendingUpdate({
         tableName: selectedTable,
         primaryKeyValue,
         columnName: column.name,
-        newValue,
+        newValue: comparableNewValue,
         originalValue: editingCell.originalValue,
+        originalDisplayValue: displayOriginal,
+        newDisplayValue: displayNew,
       });
 
       setEditingCell(null);
@@ -440,7 +496,33 @@ const DatabaseViewer: React.FC = () => {
         }
 
         case "date":
+          if (Number.isNaN(Date.parse(trimmed))) {
+            return {
+              value: undefined,
+              error: `${columnLabel} must be a valid date/time.`,
+            };
+          }
+          return { value: trimmed };
+
         case "datetime":
+          if (isTimeOnlyColumn(column)) {
+            const normalizedTime = parseTimeInputValue(trimmed);
+            if (!normalizedTime) {
+              return {
+                value: undefined,
+                error: `${columnLabel} must be a valid time (e.g., 7:00 AM).`,
+              };
+            }
+            const databaseValue = toDatabaseTimeString(normalizedTime);
+            if (!databaseValue) {
+              return {
+                value: undefined,
+                error: `${columnLabel} must be a valid time (e.g., 7:00 AM).`,
+              };
+            }
+            return { value: databaseValue };
+          }
+
           if (Number.isNaN(Date.parse(trimmed))) {
             return {
               value: undefined,
@@ -679,11 +761,20 @@ const DatabaseViewer: React.FC = () => {
             );
             break;
           case "datetime":
-            element = (
-              <span className={`text-purple-600 ${baseClassName}`}>
-                {new Date(value).toLocaleString()}
-              </span>
-            );
+            if (isTimeOnlyColumn(column)) {
+              const displayTime = formatTimeForDisplayValue(value);
+              element = (
+                <span className={`text-purple-600 ${baseClassName}`}>
+                  {displayTime}
+                </span>
+              );
+            } else {
+              element = (
+                <span className={`text-purple-600 ${baseClassName}`}>
+                  {new Date(value).toLocaleString()}
+                </span>
+              );
+            }
             break;
           case "json":
             element = (
@@ -867,7 +958,13 @@ const DatabaseViewer: React.FC = () => {
         title="Confirm Update"
         message={
           pendingUpdate
-            ? `Are you sure you want to update "${pendingUpdate.columnName}" from "${pendingUpdate.originalValue}" to "${pendingUpdate.newValue}"?`
+            ? `Are you sure you want to update "${pendingUpdate.columnName}" from "${describeConfirmValue(
+                pendingUpdate.originalValue,
+                pendingUpdate.originalDisplayValue
+              )}" to "${describeConfirmValue(
+                pendingUpdate.newValue,
+                pendingUpdate.newDisplayValue
+              )}"?`
             : ""
         }
         confirmText="Update"
