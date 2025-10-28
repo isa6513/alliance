@@ -29,6 +29,7 @@ import { UserService } from 'src/user/user.service';
 import { Temporal } from '@js-temporal/polyfill';
 import { PersonalActionReminder } from 'src/actions/entities/personal-action-reminder.entity';
 import { instanceToPlain } from 'class-transformer';
+import { Group } from 'src/user/entities/group.entity';
 
 export interface MissedDeadlineCandidate {
   actionId: number;
@@ -680,6 +681,11 @@ export class ActionEventReminderService {
       throw new BadRequestException('Event is not a member action event');
     }
 
+    let userGroup: Group | undefined = undefined;
+    if (dto.cohortType === ReminderCohortType.Group && dto.userGroupId) {
+      userGroup = await this.userService.findGroupOrFail(dto.userGroupId);
+    }
+
     const group = await this.reminderGroupRepository.save(
       await this.reminderGroupRepository.create({
         name: dto.name ?? `reminders for action event ${eventId}`,
@@ -689,6 +695,7 @@ export class ActionEventReminderService {
         cohortType: dto.cohortType,
         memberActionEvent: event,
         sendDay: dto.sendDay,
+        userGroup,
         reminders: [],
       }),
     );

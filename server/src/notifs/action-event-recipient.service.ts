@@ -40,7 +40,23 @@ export class ActionEventRecipientService {
   public async getBaseUsersForEvent(
     eventStatus: ActionStatus,
     action: Action,
+    eventDate: Date,
   ): Promise<User[]> {
+    const targetGroupIds = new Set(
+      action.participatingGroups.map((group) => group.id),
+    );
+
+    const filterToEligible = (users: User[]) =>
+      users.filter(
+        (user) =>
+          this.userShouldCompleteEvent(
+            user,
+            eventDate,
+            targetGroupIds,
+            action.everyoneShouldComplete,
+          ) === true,
+      );
+
     if (eventStatus === ActionStatus.MemberAction && !action.commitmentless) {
       const activities = await this.actionActivityRepository.find({
         where: {
@@ -49,14 +65,16 @@ export class ActionEventRecipientService {
         },
         relations: ['user', 'user.groups'],
       });
-      return activities.map((activity) => activity.user);
+      return filterToEligible(activities.map((activity) => activity.user));
     }
 
     if (
       eventStatus === ActionStatus.GatheringCommitments ||
       eventStatus === ActionStatus.MemberAction
     ) {
-      return await this.userService.findActiveUsersWithGroups();
+      return filterToEligible(
+        await this.userService.findActiveUsersWithGroups(),
+      );
     }
 
     return [];
@@ -105,6 +123,7 @@ export class ActionEventRecipientService {
     const users = await this.getBaseUsersForEvent(
       event.newStatus,
       event.action,
+      event.date,
     );
     return type === ActionEventNotifType.Announcement
       ? users

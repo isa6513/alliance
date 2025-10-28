@@ -125,10 +125,14 @@ export class ActionsService {
   }
 
   async getUsersJoinedForCommitmentlessAction(action: Action): Promise<number> {
+    const event = action.events.find(
+      (event) => event.newStatus === ActionStatus.MemberAction,
+    );
     const baseUsers =
       await this.actionEventRecipientService.getBaseUsersForEvent(
         ActionStatus.MemberAction,
         action,
+        event?.date ?? new Date(),
       );
     const completionActivities = await this.actionActivityRepository.find({
       where: {
@@ -1210,6 +1214,7 @@ export class ActionsService {
         'reminders.memberActionEvent',
         'reminderGroups',
         'reminderGroups.reminders',
+        'reminderGroups.userGroup',
         'reminderGroups.reminders.user',
         'reminderGroups.reminders.group',
       ],

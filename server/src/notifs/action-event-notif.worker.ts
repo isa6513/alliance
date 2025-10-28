@@ -166,6 +166,7 @@ export class ActionEventNotifWorker {
       baseUsers = await this.recipientService.getBaseUsersForEvent(
         event.newStatus,
         action,
+        event.date,
       );
     }
 
