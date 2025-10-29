@@ -24,6 +24,7 @@ export class ProfileDto extends PickType(User, [
   'id',
   'profilePicture',
   'profileDescription',
+  'contractDateSigned',
 ]) {
   @ApiProperty()
   displayName: string;
@@ -39,6 +40,7 @@ export class ProfileDto extends PickType(User, [
       | 'anonymous'
       | 'profilePicture'
       | 'profileDescription'
+      | 'contractDateSigned'
     >,
   ) {
     super();
@@ -46,6 +48,7 @@ export class ProfileDto extends PickType(User, [
     this.profileDescription = user.profileDescription;
     this.admin = user.admin;
     this.staff = user.staff;
+    this.contractDateSigned = user.contractDateSigned;
     if (user.anonymous) {
       this.displayName = 'Someone';
     } else {

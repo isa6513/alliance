@@ -12,7 +12,9 @@ import BasicErrorMessage from "../../components/BasicErrorMessage";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
 
 export async function clientLoader() {
-  const members = await userMembersWithFriends();
+  const members = await userMembersWithFriends({
+    query: { requireSignedContract: true },
+  });
   const userSentFriendRequests = await userListSentRequests();
 
   return {

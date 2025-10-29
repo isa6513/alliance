@@ -1,13 +1,16 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   NotFoundException,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Request,
   UnauthorizedException,
   UseGuards,
@@ -257,10 +260,19 @@ export class UserController {
   @Get('membersWithFriends')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [ProfileDtoWithFriends] })
-  async membersWithFriends(): Promise<ProfileDtoWithFriends[]> {
-    return (await this.userService.findAllWithFriendRequests()).map(
-      (user) => new ProfileDtoWithFriends(user),
-    );
+  async membersWithFriends(
+    @Query('requireSignedContract', new DefaultValuePipe(false), ParseBoolPipe)
+    requireSignedContract: boolean,
+  ): Promise<ProfileDtoWithFriends[]> {
+    const users = await this.userService.findAllWithFriendRequests();
+
+    if (requireSignedContract) {
+      return users
+        .filter((user) => user.contractDateSigned !== null)
+        .map((user) => new ProfileDtoWithFriends(user));
+    } else {
+      return users.map((user) => new ProfileDtoWithFriends(user));
+    }
   }
 
   @Get('myprofile')

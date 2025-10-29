@@ -32,6 +32,7 @@ export type ForumDigestPreference = 'off' | 'daily' | 'weekly';
 
 export type ProfileDto = {
     id: number;
+    contractDateSigned: string | null;
     admin: boolean;
     staff: boolean;
     profilePicture: string | null;
@@ -196,6 +197,7 @@ export type UserActionRelationsResponseDto = {
 
 export type ProfileDtoWithFriends = {
     id: number;
+    contractDateSigned: string | null;
     admin: boolean;
     staff: boolean;
     profilePicture: string | null;
@@ -1852,7 +1854,9 @@ export type UserMembersResponse = UserMembersResponses[keyof UserMembersResponse
 export type UserMembersWithFriendsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        requireSignedContract: boolean;
+    };
     url: '/user/membersWithFriends';
 };
 

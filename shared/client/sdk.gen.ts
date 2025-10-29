@@ -318,8 +318,8 @@ export const userMembers = <ThrowOnError extends boolean = false>(options?: Opti
     });
 };
 
-export const userMembersWithFriends = <ThrowOnError extends boolean = false>(options?: Options<UserMembersWithFriendsData, ThrowOnError>) => {
-    return (options?.client ?? _heyApiClient).get<UserMembersWithFriendsResponse, unknown, ThrowOnError>({
+export const userMembersWithFriends = <ThrowOnError extends boolean = false>(options: Options<UserMembersWithFriendsData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).get<UserMembersWithFriendsResponse, unknown, ThrowOnError>({
         url: '/user/membersWithFriends',
         ...options
     });
