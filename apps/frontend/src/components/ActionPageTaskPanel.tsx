@@ -68,10 +68,11 @@ const ActionPageTaskPanel = () => {
     <>
       {didMissDeadline ? (
         <Card style={CardStyle.Grey}>
-          <p className="font-bold">
-            You missed the deadline to participate in this action.
+          <p className="font-bold">The deadline for this action has passed.</p>
+          <p>
+            You do not need to complete this task, but you can still do so below
+            if you would like.
           </p>
-          <p>You can still complete it below if you would like.</p>
         </Card>
       ) : (
         <TaskTimeInfo
