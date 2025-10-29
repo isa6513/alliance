@@ -228,6 +228,20 @@ export type AddUserToGroupDto = {
     userId: number;
 };
 
+export type CreateOnetimeInviteDto = {
+    invitee: string;
+    invitingUserId: number;
+};
+
+export type OnetimeInviteDto = {
+    id: number;
+    invitee: string;
+    code: string;
+    invitingUser: User;
+    createdAt: string;
+    isValid: boolean;
+};
+
 export type StreamableFile = {
     [key: string]: unknown;
 };
@@ -2004,6 +2018,32 @@ export type UserReferrerProfileResponses = {
 };
 
 export type UserReferrerProfileResponse = UserReferrerProfileResponses[keyof UserReferrerProfileResponses];
+
+export type UserCreateOnetimeInviteData = {
+    body: CreateOnetimeInviteDto;
+    path?: never;
+    query?: never;
+    url: '/user/createOnetimeInvite';
+};
+
+export type UserCreateOnetimeInviteResponses = {
+    200: OnetimeInviteDto;
+};
+
+export type UserCreateOnetimeInviteResponse = UserCreateOnetimeInviteResponses[keyof UserCreateOnetimeInviteResponses];
+
+export type UserGetOnetimeInvitesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/onetimeInvites';
+};
+
+export type UserGetOnetimeInvitesResponses = {
+    200: Array<OnetimeInviteDto>;
+};
+
+export type UserGetOnetimeInvitesResponse = UserGetOnetimeInvitesResponses[keyof UserGetOnetimeInvitesResponses];
 
 export type ImagesGetImageData = {
     body?: never;

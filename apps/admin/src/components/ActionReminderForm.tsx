@@ -8,18 +8,12 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import TextareaWithHighlights from "./TextareaWithHighlights";
-
-export interface ActionReminderFormUser {
-  id: number;
-  name?: string | null;
-  email?: string | null;
-  displayName?: string | null;
-}
+import UserSelect, { UserSelectUser } from "./UserSelect";
 
 export type ActionReminderFormInitialValues = {
   memberActionEventId: number;
   reminder: CreateActionReminderDto;
-  selectedUsers: ActionReminderFormUser[];
+  selectedUsers: UserSelectUser[];
 };
 
 export type ActionReminderFormSubmitPayload = CreateActionReminderDto & {
@@ -28,7 +22,7 @@ export type ActionReminderFormSubmitPayload = CreateActionReminderDto & {
 
 interface ActionReminderFormProps {
   memberEvents: ActionEventDto[];
-  users: ActionReminderFormUser[];
+  users: UserSelectUser[];
   loadingUsers: boolean;
   initialValues: ActionReminderFormInitialValues;
   submitting?: boolean;
@@ -90,10 +84,9 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
   const [cohortType, setCohortType] = useState<ReminderCohortType>(
     initialValues.reminder.cohortType
   );
-  const [selectedUsers, setSelectedUsers] = useState<ActionReminderFormUser[]>(
-    initialValues.selectedUsers
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>(
+    initialValues.selectedUsers.map((user) => user.id)
   );
-  const [userQuery, setUserQuery] = useState<string>("");
   const [localError, setLocalError] = useState<string | null>(null);
   const initialSnapshotRef = useRef<string>("");
 
@@ -131,8 +124,7 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
     setEmailMessage(initialValues.reminder.emailMessage!);
     setTextMessage(initialValues.reminder.textMessage!);
     setCohortType(initialValues.reminder.cohortType);
-    setSelectedUsers(initialValues.selectedUsers);
-    setUserQuery("");
+    setSelectedUserIds(initialValues.selectedUsers.map((user) => user.id));
     setLocalError(null);
   }, [
     computedInitialSnapshot,
@@ -142,43 +134,12 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
     disableEventSelection,
   ]);
 
-  const filteredUsers = useMemo(() => {
-    const term = userQuery.trim().toLowerCase();
-    if (!term) {
-      return [];
-    }
-    const selectedIds = new Set(selectedUsers.map((user) => user.id));
-    return users
-      .filter((user) => !selectedIds.has(user.id))
-      .filter((user) => {
-        const haystack = `${user.name ?? ""} ${user.displayName ?? ""} ${
-          user.email ?? ""
-        }`.toLowerCase();
-        return haystack.includes(term);
-      })
-      .slice(0, 8);
-  }, [userQuery, users, selectedUsers]);
-
-  const addUser = (user: ActionReminderFormUser) => {
-    setSelectedUsers((prev) => {
-      if (prev.some((existing) => existing.id === user.id)) {
-        return prev;
-      }
-      return [...prev, user];
-    });
-    setUserQuery("");
-  };
-
   const handleEventSelection = (value: string) => {
     const nextId = value ? Number(value) : null;
     if (nextId) {
       setSelectedEventId(nextId);
       onEventChange?.(nextId);
     }
-  };
-
-  const removeUser = (userId: number) => {
-    setSelectedUsers((prev) => prev.filter((user) => user.id !== userId));
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -190,7 +151,7 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
       return;
     }
 
-    if (cohortType === "custom" && selectedUsers.length === 0) {
+    if (cohortType === "custom" && selectedUserIds.length === 0) {
       setLocalError("Select at least one user.");
       return;
     }
@@ -230,10 +191,7 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
         timingMode === "from_deadline"
           ? sendAtSecondsFromDeadline ?? 0
           : undefined,
-      userIds:
-        cohortType === "custom"
-          ? selectedUsers.map((user) => user.id)
-          : undefined,
+      userIds: cohortType === "custom" ? selectedUserIds : undefined,
     };
 
     await onSubmit({
@@ -433,72 +391,12 @@ const ActionReminderForm: React.FC<ActionReminderFormProps> = ({
       </div>
 
       {cohortType === "custom" && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Recipients
-          </label>
-          <input
-            type="text"
-            value={userQuery}
-            onChange={(event) => setUserQuery(event.target.value)}
-            placeholder={
-              loadingUsers ? "Loading users…" : "Search by name or email"
-            }
-            disabled={loadingUsers}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
-          />
-          {userQuery && filteredUsers.length > 0 && (
-            <div className="mt-2 border border-gray-200 rounded-md shadow-sm bg-white max-h-48 overflow-y-auto">
-              {filteredUsers.map((user) => (
-                <button
-                  type="button"
-                  key={user.id}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
-                  onClick={() => addUser(user)}
-                >
-                  <span className="font-medium">
-                    {user.name ?? user.displayName ?? `User #${user.id}`}
-                  </span>
-                  <span className="text-xs text-gray-500 block">
-                    {user.email}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-          {userQuery && !filteredUsers.length && !loadingUsers && (
-            <p className="mt-2 text-xs text-gray-500">
-              No users match that search.
-            </p>
-          )}
-          <div className="mt-3 space-y-2">
-            {selectedUsers.map((user) => (
-              <div
-                key={user.id}
-                className="flex items-center justify-between border border-gray-200 rounded-md px-3 py-2 text-sm bg-gray-50"
-              >
-                <div>
-                  <p className="font-medium">
-                    {user.name ?? user.displayName ?? `User #${user.id}`}
-                  </p>
-                  <p className="text-xs text-gray-600">{user.email}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeUser(user.id)}
-                  className="text-xs text-red-600 hover:text-red-700"
-                >
-                  Remove ✕
-                </button>
-              </div>
-            ))}
-            {selectedUsers.length === 0 && (
-              <p className="text-xs text-gray-500">
-                Selected users will appear here.
-              </p>
-            )}
-          </div>
-        </div>
+        <UserSelect
+          users={users}
+          selectedUserIds={selectedUserIds}
+          onChange={setSelectedUserIds}
+          loading={loadingUsers}
+        />
       )}
 
       {combinedError && (

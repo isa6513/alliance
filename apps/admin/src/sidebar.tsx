@@ -129,6 +129,12 @@ const Sidebar: React.FC = () => {
             >
               Database Viewer →
             </Link>
+            <Link
+              to="/invites"
+              className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm "
+            >
+              User Invites
+            </Link>
           </div>
           <div className="flex flex-row justify-between items-center mt-3 mx-2">
             <p className="font-bold">Current Actions</p>

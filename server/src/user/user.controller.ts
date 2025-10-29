@@ -36,6 +36,7 @@ import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { AddUserToGroupDto, CreateGroupDto, GroupDto } from './group.dto';
 import { UserActionRelationsResponseDto } from './dto/user-action-relations.dto';
+import { CreateOnetimeInviteDto, OnetimeInviteDto } from './dto/invite.dto';
 
 class VerifyEmailBody {
   @IsString()
@@ -359,10 +360,28 @@ export class UserController {
   async referrerProfile(
     @Param('code') code: string,
   ): Promise<ProfileDto | null> {
+    const invite = await this.userService.findValidInviteByCode(code);
+    if (invite) {
+      return new ProfileDto(invite.invitingUser);
+    }
     const user = await this.userService.findOneByReferralCode(code);
     if (!user) {
       throw new NotFoundException('Referrer not found');
     }
     return new ProfileDto(user);
+  }
+
+  @Post('createOnetimeInvite')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: OnetimeInviteDto })
+  async createOnetimeInvite(@Body() body: CreateOnetimeInviteDto) {
+    return this.userService.createOnetimeInvite(body);
+  }
+
+  @Get('onetimeInvites')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [OnetimeInviteDto] })
+  async getOnetimeInvites() {
+    return this.userService.findAllOnetimeInvites();
   }
 }

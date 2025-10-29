@@ -14,6 +14,7 @@ import {
   CreateActionReminderDto,
   userGetGroups,
   userList,
+  ActionReminder,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -28,12 +29,12 @@ import {
 import ActionReminderForm, {
   ActionReminderFormInitialValues,
   ActionReminderFormSubmitPayload,
-  ActionReminderFormUser,
 } from "./ActionReminderForm";
 import ClockIcon from "@alliance/shared/ui/icons/ClockIcon";
 import ActionReminderGroupForm, {
   ActionReminderGroupFormSubmitPayload,
 } from "./ActionReminderGroupForm";
+import { UserSelectUser } from "./UserSelect";
 
 export const defaultEmailSubject =
   "You have #{days} left to complete #{action}";
@@ -88,7 +89,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
   const [selectedEventId, setSelectedEventId] = useState<number>(
     memberEvents[0].id //TODO: collate or move between events
   );
-  const [users, setUsers] = useState<ActionReminderFormUser[]>([]);
+  const [users, setUsers] = useState<UserSelectUser[]>([]);
   const usersById = useMemo(
     () => new Map(users.map((user) => [user.id, user])),
     [users]
@@ -132,7 +133,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     setLoadingUsers(true);
     userList()
       .then((response) => {
-        const mappedUsers = (response.data ?? []).map<ActionReminderFormUser>(
+        const mappedUsers = (response.data ?? []).map<UserSelectUser>(
           (user) => ({
             id: user.id,
             name: user.name ?? undefined,
@@ -433,7 +434,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
   };
 
   const toFormUsers = useCallback(
-    (rawUsers: unknown[]): ActionReminderFormUser[] => {
+    (rawUsers: unknown[]): UserSelectUser[] => {
       if (!Array.isArray(rawUsers)) {
         return [];
       }
@@ -462,7 +463,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             email,
           };
         })
-        .filter((user): user is ActionReminderFormUser => Boolean(user));
+        .filter((user): user is UserSelectUser => Boolean(user));
     },
     [usersById]
   );

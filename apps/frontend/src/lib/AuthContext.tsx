@@ -98,6 +98,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
     const logout = useCallback(async () => {
       await authLogout();
       window.location.href = "/login";
+      posthog.reset();
       setUser(undefined);
       setRevalidate();
     }, []);

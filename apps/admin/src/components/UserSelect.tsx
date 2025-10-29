@@ -1,0 +1,141 @@
+import { UserDto } from "@alliance/shared/client";
+import React, { useMemo, useState } from "react";
+
+export type UserSelectUser = Pick<UserDto, "id" | "name" | "email">;
+
+interface UserSelectProps {
+  users: UserSelectUser[];
+  selectedUserIds: number[];
+  onChange: (userIds: number[]) => void;
+  loading?: boolean;
+  label?: string;
+  single?: boolean;
+}
+
+const MAX_RESULTS = 8;
+
+const UserSelect: React.FC<UserSelectProps> = ({
+  users,
+  selectedUserIds,
+  onChange,
+  loading = false,
+  label = "Recipients",
+  single = false,
+}) => {
+  const [query, setQuery] = useState<string>("");
+
+  const canSelectMore = !single || selectedUserIds.length === 0;
+
+  const selectedUsers = useMemo(() => {
+    const userMap = new Map(users.map((user) => [user.id, user]));
+    return selectedUserIds.map((userId) => userMap.get(userId)!);
+  }, [users, selectedUserIds]);
+
+  const filteredUsers = useMemo(() => {
+    if (!canSelectMore) {
+      return [];
+    }
+
+    const term = query.trim().toLowerCase();
+    if (!term) {
+      return [];
+    }
+
+    const selectedIds = new Set(selectedUserIds);
+    return users
+      .filter((user) => !selectedIds.has(user.id))
+      .filter((user) => {
+        const haystack = `${user.name ?? ""} ${user.email ?? ""}`.toLowerCase();
+        return haystack.includes(term);
+      })
+      .slice(0, MAX_RESULTS);
+  }, [query, users, selectedUserIds, canSelectMore]);
+
+  const addUser = (userId: number) => {
+    if (selectedUserIds.includes(userId)) {
+      return;
+    }
+    if (single) {
+      onChange([userId]);
+    } else {
+      onChange([...selectedUserIds, userId]);
+    }
+    setQuery("");
+  };
+
+  const removeUser = (userId: number) => {
+    onChange(selectedUserIds.filter((id) => id !== userId));
+  };
+
+  const inputDisabled = loading || !canSelectMore;
+  const placeholder = loading
+    ? "Loading users…"
+    : canSelectMore
+    ? "Search by name or email"
+    : "Remove current selection to choose another";
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </label>
+      <input
+        type="text"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder={placeholder}
+        disabled={inputDisabled}
+        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+      />
+      {query && filteredUsers.length > 0 && (
+        <div className="mt-2 border border-gray-200 rounded-md shadow-sm bg-white max-h-48 overflow-y-auto">
+          {filteredUsers.map((user) => (
+            <button
+              type="button"
+              key={user.id}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+              onClick={() => addUser(user.id)}
+            >
+              <span className="font-medium">
+                {user.name ?? `User #${user.id}`}
+              </span>
+              <span className="text-xs text-gray-500 block">{user.email}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {query && !filteredUsers.length && !loading && (
+        <p className="mt-2 text-xs text-gray-500">
+          No users match that search.
+        </p>
+      )}
+      <div className="mt-3 space-y-2">
+        {selectedUsers.map((user) => (
+          <div
+            key={user.id}
+            className="flex items-center justify-between border border-gray-200 rounded-md px-3 py-2 text-sm bg-gray-50"
+          >
+            <div>
+              <p className="font-medium">{user.name ?? `User #${user.id}`}</p>
+              <p className="text-xs text-gray-600">{user.email}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => removeUser(user.id)}
+              className="text-xs text-red-600 hover:text-red-700"
+            >
+              Remove ✕
+            </button>
+          </div>
+        ))}
+        {selectedUsers.length === 0 && !single && (
+          <p className="text-xs text-gray-500">
+            Selected users will appear here.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default UserSelect;

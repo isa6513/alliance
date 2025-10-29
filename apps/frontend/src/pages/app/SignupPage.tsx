@@ -30,10 +30,12 @@ const SignupPage: React.FC = () => {
             posthog.identify(user.id.toString(), {
               email: user.email,
               name: user.name,
+              referral_code: referralCode,
             });
             posthog.capture("new_user", {
               email: user.email,
               name: user.name,
+              referral_code: referralCode,
             });
           }
           window.location.href = "/tasks";

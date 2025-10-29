@@ -5,6 +5,7 @@ import LargeActionCard from "../app/LargeActionCard";
 import { ActionWithRelation } from "../../applayout";
 import { ProfileDto, userReferrerProfile } from "@alliance/shared/client";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import posthog from "posthog-js";
 
 const InvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -17,6 +18,12 @@ const InvitePage: React.FC = () => {
     if (!referralCode) return;
     userReferrerProfile({ path: { code: referralCode } }).then((response) => {
       setInviterProfile(response.data ?? null);
+    });
+    posthog.register_once({
+      referral_code: referralCode,
+    });
+    posthog.capture("invite_page_opened", {
+      referral_code: referralCode,
     });
   }, [referralCode]);
 
@@ -49,6 +56,8 @@ const InvitePage: React.FC = () => {
     usersCompleted: 68,
     everyoneShouldComplete: false,
     archived: false,
+    participatingGroups: [],
+    updates: [],
     relation: "joined" as const,
     canParticipate: true,
     events: [

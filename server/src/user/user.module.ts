@@ -14,17 +14,21 @@ import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { IsUserAlreadyExist } from './validators/user-already-exists.validator';
 import { Group } from './entities/group.entity';
+import { OnetimeInvite } from './entities/onetime-invite.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
-    TypeOrmModule.forFeature([Action]),
-    TypeOrmModule.forFeature([ActionActivity]),
-    TypeOrmModule.forFeature([Friend]),
-    TypeOrmModule.forFeature([City]),
-    TypeOrmModule.forFeature([Notification]),
-    TypeOrmModule.forFeature([PrefillUser]),
-    TypeOrmModule.forFeature([Group]),
+    TypeOrmModule.forFeature([
+      User,
+      Action,
+      ActionActivity,
+      Friend,
+      City,
+      Notification,
+      PrefillUser,
+      Group,
+      OnetimeInvite,
+    ]),
     JwtModule,
     ImagesModule,
     MailModule,

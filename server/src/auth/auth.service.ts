@@ -61,6 +61,15 @@ export class AuthService {
         signUp.referralCode,
       );
     }
+    if (!referredBy && signUp.referralCode) {
+      const invite = await this.usersService.findValidInviteByCode(
+        signUp.referralCode,
+      );
+      if (invite) {
+        referredBy = invite.invitingUser;
+        await this.usersService.invalidateInvite(invite.id);
+      }
+    }
     if (!referredBy) {
       if (process.env.NODE_ENV !== 'test') {
         throw new UnauthorizedException('invalid referral code'); //TODO: feature flag

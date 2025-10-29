@@ -9,7 +9,8 @@ import {
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import TextareaWithHighlights from "./TextareaWithHighlights";
-import { ActionReminderFormUser, keywords } from "./ActionReminderForm";
+import UserSelect, { UserSelectUser } from "./UserSelect";
+import { keywords } from "./ActionReminderForm";
 import {
   defaultEmailContents,
   defaultEmailSubject,
@@ -28,7 +29,7 @@ export type ActionReminderGroupFormInitialValues = {
 
 interface ActionReminderFormProps {
   memberEvents: ActionEventDto[];
-  users: ActionReminderFormUser[];
+  users: UserSelectUser[];
   loadingUsers: boolean;
   userGroups: GroupDto[];
   loadingUserGroups: boolean;
@@ -86,13 +87,12 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   const [cohortType, setCohortType] = useState<ReminderCohortType>(
     initialValues.reminderGroup?.cohortType ?? "all_uncompleted"
   );
-  const [selectedUsers, setSelectedUsers] = useState<ActionReminderFormUser[]>(
-    initialValues.users
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>(
+    initialValues.users.map((user) => user.id)
   );
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(
     initialValues.reminderGroup?.userGroup?.id ?? null
   );
-  const [userQuery, setUserQuery] = useState<string>("");
   const [localError, setLocalError] = useState<string | null>(null);
   const initialSnapshotRef = useRef<string>("");
 
@@ -134,9 +134,8 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       initialValues.reminderGroup?.textMessage ?? defaultTextMessage
     );
     setCohortType(initialValues.reminderGroup?.cohortType ?? "all_uncompleted");
-    setSelectedUsers(initialValues.users);
+    setSelectedUserIds(initialValues.users.map((user) => user.id));
     setSelectedGroupId(initialValues.reminderGroup?.userGroup?.id ?? null);
-    setUserQuery("");
     setLocalError(null);
   }, [
     computedInitialSnapshot,
@@ -146,43 +145,12 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     disableEventSelection,
   ]);
 
-  const filteredUsers = useMemo(() => {
-    const term = userQuery.trim().toLowerCase();
-    if (!term) {
-      return [];
-    }
-    const selectedIds = new Set(selectedUsers.map((user) => user.id));
-    return users
-      .filter((user) => !selectedIds.has(user.id))
-      .filter((user) => {
-        const haystack = `${user.name ?? ""} ${user.displayName ?? ""} ${
-          user.email ?? ""
-        }`.toLowerCase();
-        return haystack.includes(term);
-      })
-      .slice(0, 8);
-  }, [userQuery, users, selectedUsers]);
-
-  const addUser = (user: ActionReminderFormUser) => {
-    setSelectedUsers((prev) => {
-      if (prev.some((existing) => existing.id === user.id)) {
-        return prev;
-      }
-      return [...prev, user];
-    });
-    setUserQuery("");
-  };
-
   const handleEventSelection = (value: string) => {
     const nextId = value ? Number(value) : null;
     if (nextId) {
       setSelectedEventId(nextId);
       onEventChange?.(nextId);
     }
-  };
-
-  const removeUser = (userId: number) => {
-    setSelectedUsers((prev) => prev.filter((user) => user.id !== userId));
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -194,7 +162,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       return;
     }
 
-    if (cohortType === "custom" && selectedUsers.length === 0) {
+    if (cohortType === "custom" && selectedUserIds.length === 0) {
       setLocalError("Select at least one user.");
       return;
     }
@@ -204,10 +172,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       return;
     }
 
-    const userIds =
-      cohortType === "custom"
-        ? selectedUsers.map((user) => user.id)
-        : undefined;
+    const userIds = cohortType === "custom" ? selectedUserIds : undefined;
 
     await onSubmit({
       name,
@@ -431,72 +396,12 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       )}
 
       {cohortType === "custom" && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Recipients
-          </label>
-          <input
-            type="text"
-            value={userQuery}
-            onChange={(event) => setUserQuery(event.target.value)}
-            placeholder={
-              loadingUsers ? "Loading users…" : "Search by name or email"
-            }
-            disabled={loadingUsers}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
-          />
-          {userQuery && filteredUsers.length > 0 && (
-            <div className="mt-2 border border-gray-200 rounded-md shadow-sm bg-white max-h-48 overflow-y-auto">
-              {filteredUsers.map((user) => (
-                <button
-                  type="button"
-                  key={user.id}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
-                  onClick={() => addUser(user)}
-                >
-                  <span className="font-medium">
-                    {user.name ?? user.displayName ?? `User #${user.id}`}
-                  </span>
-                  <span className="text-xs text-gray-500 block">
-                    {user.email}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-          {userQuery && !filteredUsers.length && !loadingUsers && (
-            <p className="mt-2 text-xs text-gray-500">
-              No users match that search.
-            </p>
-          )}
-          <div className="mt-3 space-y-2">
-            {selectedUsers.map((user) => (
-              <div
-                key={user.id}
-                className="flex items-center justify-between border border-gray-200 rounded-md px-3 py-2 text-sm bg-gray-50"
-              >
-                <div>
-                  <p className="font-medium">
-                    {user.name ?? user.displayName ?? `User #${user.id}`}
-                  </p>
-                  <p className="text-xs text-gray-600">{user.email}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeUser(user.id)}
-                  className="text-xs text-red-600 hover:text-red-700"
-                >
-                  Remove ✕
-                </button>
-              </div>
-            ))}
-            {selectedUsers.length === 0 && (
-              <p className="text-xs text-gray-500">
-                Selected users will appear here.
-              </p>
-            )}
-          </div>
-        </div>
+        <UserSelect
+          users={users}
+          selectedUserIds={selectedUserIds}
+          onChange={setSelectedUserIds}
+          loading={loadingUsers}
+        />
       )}
 
       {combinedError && (

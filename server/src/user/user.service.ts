@@ -39,6 +39,8 @@ import {
   UserActionRelationStatus,
   UserActionSummaryDto,
 } from './dto/user-action-relations.dto';
+import { OnetimeInvite } from './entities/onetime-invite.entity';
+import { CreateOnetimeInviteDto } from './dto/invite.dto';
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -64,6 +66,8 @@ export class UserService {
     private readonly friendRepository: Repository<Friend>,
     @InjectRepository(Group)
     private readonly groupRepository: Repository<Group>,
+    @InjectRepository(OnetimeInvite)
+    private readonly onetimeInviteRepository: Repository<OnetimeInvite>,
     private readonly jwtService: JwtService,
     private readonly imagesService: ImagesService,
     private readonly mailService: MailService,
@@ -721,5 +725,37 @@ export class UserService {
 
   async deleteGroup(groupId: number): Promise<void> {
     await this.groupRepository.delete(groupId);
+  }
+
+  async createOnetimeInvite(
+    body: CreateOnetimeInviteDto,
+  ): Promise<OnetimeInvite> {
+    const code = Math.random().toString(36).substring(2, 15);
+
+    const invitingUser = await this.findOneOrFail(body.invitingUserId);
+
+    const invite = this.onetimeInviteRepository.create({
+      ...body,
+      code,
+      invitingUser,
+    });
+    return this.onetimeInviteRepository.save(invite);
+  }
+
+  async findValidInviteByCode(code: string): Promise<OnetimeInvite | null> {
+    return this.onetimeInviteRepository.findOne({
+      where: { code, isValid: true },
+      relations: ['invitingUser'],
+    });
+  }
+
+  async findAllOnetimeInvites(): Promise<OnetimeInvite[]> {
+    return this.onetimeInviteRepository.find({
+      relations: ['invitingUser'],
+    });
+  }
+
+  async invalidateInvite(inviteId: number): Promise<void> {
+    await this.onetimeInviteRepository.update(inviteId, { isValid: false });
   }
 }

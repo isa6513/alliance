@@ -5,6 +5,7 @@ export default [
     layout("sidebar.tsx", [
       route("/", "pages/Actions.tsx"),
       route("/timeline", "pages/NewTimelinePage.tsx"),
+      route("/invites", "pages/InvitesPage.tsx"),
       route("/actions/:actionId", "pages/ActionDashboard.tsx"),
       route("/forms", "pages/FormsList.tsx"),
       route("/forms/:formId/responses", "pages/FormResponses.tsx"),
