@@ -1,29 +1,17 @@
 import {
+  ProfileDtoWithFriends,
   userListSentRequests,
   userMembersWithFriends,
 } from "@alliance/shared/client";
-import { useLoaderData } from "react-router";
+
 import MembersListItem from "../../components/MembersListItem";
 import List from "@alliance/shared/ui/List";
 import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import { useAuth } from "../../lib/AuthContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BasicErrorMessage from "../../components/BasicErrorMessage";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
-
-export async function clientLoader() {
-  const members = await userMembersWithFriends({
-    query: { requireSignedContract: true },
-  });
-  const userSentFriendRequests = await userListSentRequests();
-
-  return {
-    members: members.data ?? null,
-    userSentFriendRequestIds: userSentFriendRequests.data
-      ? userSentFriendRequests.data.map((req) => req.id)
-      : null,
-  };
-}
+import Spinner from "../../components/Spinner";
 
 export enum MemberFilterMode {
   All = "All",
@@ -32,16 +20,43 @@ export enum MemberFilterMode {
 
 const MembersListPage = () => {
   const { user } = useAuth();
-  const { members, userSentFriendRequestIds } =
-    useLoaderData<typeof clientLoader>();
+
+  const [members, setMembers] = useState<ProfileDtoWithFriends[]>([]);
+  const [userSentFriendRequestIds, setUserSentFriendRequestIds] = useState<
+    number[]
+  >([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const [filterMode, setFilterMode] = useState<MemberFilterMode>(
     MemberFilterMode.All
   );
 
-  if (members === null) {
-    return <BasicErrorMessage>Could not load members</BasicErrorMessage>;
-  }
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [membersRes, sentRequestsRes] = await Promise.all([
+          userMembersWithFriends({
+            query: { requireSignedContract: true },
+          }),
+          userListSentRequests(),
+        ]);
+
+        setMembers(membersRes.data ?? []);
+        setUserSentFriendRequestIds(
+          sentRequestsRes.data ? sentRequestsRes.data.map((req) => req.id) : []
+        );
+      } catch {
+        setError("Could not load members");
+        setMembers([]);
+        setUserSentFriendRequestIds([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const myFriends = user?.friends.map((friend) => friend.id) ?? [];
   const friendsOfFriends = members.filter(
@@ -75,6 +90,13 @@ const MembersListPage = () => {
         />
       </div>
 
+      {loading && (
+        <div className="mx-auto">
+          <Spinner />
+        </div>
+      )}
+      {error && <BasicErrorMessage>{error}</BasicErrorMessage>}
+
       {selectedMembers.length > 0 ? (
         <List>
           {selectedMembers.map((member) => (
@@ -86,7 +108,11 @@ const MembersListPage = () => {
           ))}
         </List>
       ) : (
-        <p className="text-center text-zinc-500 py-5">None found</p>
+        <>
+          {!loading && (
+            <p className="text-center text-zinc-500 py-5">None found</p>
+          )}
+        </>
       )}
     </CenterLayout>
   );
