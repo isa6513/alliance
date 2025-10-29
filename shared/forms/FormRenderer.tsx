@@ -823,7 +823,7 @@ const FormRenderer = ({
             )}
         </div>
         {/* Navigation */}
-        <div className="flex justify-between items-end gap-x-3">
+        <div className="flex flex-row justify-between items-end gap-x-3">
           <div className="flex flex-col gap-y-4 flex-1">
             {schema.pages.length > 1 && (
               <div className="flex items-center space-x-2">
@@ -857,8 +857,8 @@ const FormRenderer = ({
               </div>
             )}
 
-            <div className="flex flex-1 space-x-2 items-center">
-              {readOnly ? null : onSubmit ? (
+            {readOnly ? null : onSubmit ? (
+              <div className="flex flex-1 space-x-2 items-center">
                 <Button
                   color={ButtonColor.Black}
                   type="submit"
@@ -866,7 +866,9 @@ const FormRenderer = ({
                 >
                   {schema.submit?.label || "Complete"}
                 </Button>
-              ) : (
+              </div>
+            ) : (
+              <div className="flex flex-1 space-x-2 items-center">
                 <Button
                   color={ButtonColor.Black}
                   className="!cursor-not-allowed w-full !py-3 !text-base"
@@ -874,8 +876,8 @@ const FormRenderer = ({
                 >
                   {schema.submit?.label || "Complete"} (Preview Mode)
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {onAbandonAction && !readOnly && (
