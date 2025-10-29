@@ -17,11 +17,14 @@ const InvitesPage = () => {
   const [invites, setInvites] = useState<OnetimeInviteDto[]>([]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    if (!selectedUser) {
+      return;
+    }
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
     console.log(formData.get("invitee"));
     const body = {
-      invitingUserId: 1,
+      invitingUserId: selectedUser,
       invitee: formData.get("invitee")?.toString() ?? "",
     } satisfies CreateOnetimeInviteDto;
     const response = await userCreateOnetimeInvite({
