@@ -43,9 +43,9 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
 
   return (
     <div
-      className={`rounded relative bg-black/4 ${className ?? ""} ${
-        parentId ? "mt-0" : "mt-3"
-      } ${compact ? "p-1 md:p-2" : "p-2 md:p-4"}`}
+      className={`rounded relative bg-white border border-zinc-200 ${
+        className ?? ""
+      } ${parentId ? "mt-0" : "mt-3"} ${compact ? "p-1 md:p-2" : "p-2 md:p-4"}`}
     >
       <form onSubmit={handleSubmit}>
         <EditableContentForm

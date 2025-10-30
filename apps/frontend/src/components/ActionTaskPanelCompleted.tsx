@@ -7,6 +7,7 @@ import FormRenderer from "@alliance/shared/forms/FormRenderer";
 import { FormSchema } from "@alliance/shared/forms/formschema";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useEffect, useState } from "react";
+import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
 
 export interface ActionTaskPanelCompletedProps {
   action: ActionDto | null;
@@ -37,9 +38,15 @@ const ActionTaskPanelCompleted = ({
 
   if (action?.taskFormId && formResponse) {
     return (
-      <Card style={CardStyle.Grey} className="inline-block !p-6 space-y-4">
-        <Card style={CardStyle.Green} className="border-none bg-green/30">
-          You&apos;ve completed this action! Thank you for your help.
+      <Card
+        style={CardStyle.Grey}
+        className="inline-block !p-6 space-y-4 border-none"
+      >
+        <Card style={CardStyle.White} className="">
+          <div className="flex items-center gap-x-3">
+            <CheckIcon size="small" />
+            <p>You&apos;ve completed this action.</p>
+          </div>
         </Card>
         <FormRenderer
           form={formResponse.schemaSnapshot as unknown as FormSchema}

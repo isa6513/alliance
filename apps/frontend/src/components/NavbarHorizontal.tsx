@@ -87,7 +87,7 @@ const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
               src={logo}
               alt="logo"
               className={`w-7 h-7 mr-8 ${
-                import.meta.env.MODE === "a" ? "grayscale invert" : ""
+                import.meta.env.MODE === "development" ? "grayscale invert" : ""
               }`}
             />
           </Link>
