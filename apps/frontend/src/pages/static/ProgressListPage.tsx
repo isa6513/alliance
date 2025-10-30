@@ -39,15 +39,15 @@ const ProgressListPage: React.FC = () => {
               <Link
                 to={`/progress/${post.slug}`}
                 key={post.slug}
-                className="hover:bg-zinc-100 p-3 -m-3 flex flex-row justify-between rounded transition-all duration-50"
+                className="bg-zinc-50 hover:bg-zinc-100 p-6 flex flex-row justify-between"
               >
                 {/* <Card
                   style={CardStyle.White}
                   className="hover:border-zinc-400 transition-all duration-100"
                 > */}
-                <div className="p-0.5">
+                <div className="">
                   <div className="flex justify-between">
-                    <p className="text-base md:text-xl">
+                    <p className="text-xl md:text-2xl font-serif font-medium">
                       {post.frontmatter.title}
                     </p>
 
@@ -56,7 +56,7 @@ const ProgressListPage: React.FC = () => {
                     </Tag> */}
                   </div>
 
-                  <p className="text-sm md:text-lg text-zinc-500">
+                  <p className="text-sm md:text-base text-zinc-500">
                     {new Date(post.frontmatter.date).toLocaleDateString(
                       "en-US",
                       {
@@ -67,7 +67,7 @@ const ProgressListPage: React.FC = () => {
                     )}
                   </p>
                 </div>
-                <p className="self-start text-sm md:text-base text-white py-1 px-3 bg-navy rounded">
+                <p className="self-start text-sm text-white py-1 px-3 bg-navy rounded">
                   {post.frontmatter.members} members
                 </p>
                 {/* </Card> */}

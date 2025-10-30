@@ -93,6 +93,13 @@
 }
 
 @font-face {
+  font-family: "Noto Sans";
+  font-display: swap;
+  src: url("/assets/fonts/NotoSans-VariableFont_wdth,wght.ttf")
+    format("truetype");
+}
+
+@font-face {
   font-family: "Hedvig";
   src: url("/assets/fonts/HedvigLettersSerif-Regular-VariableFont_opsz.ttf")
     format("truetype");
@@ -166,7 +173,7 @@ label,
 input,
 textarea,
 button {
-  font-family: "Inter", sans-serif;
+  font-family: "Noto Sans", sans-serif;
 }
 
 img {

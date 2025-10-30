@@ -61,10 +61,11 @@ const ActionTaskPanelCompleted = ({
     );
   } else {
     return (
-      <Card style={CardStyle.Green}>
-        <p className="">
-          You&apos;ve completed this action! Thank you for your help.
-        </p>
+      <Card style={CardStyle.White} className="">
+        <div className="flex items-center gap-x-3">
+          <CheckIcon size="small" />
+          <p>You&apos;ve completed this action.</p>
+        </div>
       </Card>
     );
   }

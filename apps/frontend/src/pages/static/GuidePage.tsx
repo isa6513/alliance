@@ -55,7 +55,7 @@ const GuidePage: React.FC = () => {
             <h2 className="font-serif !font-semibold !text-4xl md:!text-6xl mb-3 text-black">
               Guide to the Alliance
             </h2>
-            <p className="text-base md:text-lg text-zinc-900">
+            <p className="text-base md:text-lg text-zinc-600">
               Information about the Alliance in recommended reading order. If
               you think you are likely to become a member, you do not need to
               read everything—we will walk you through the information when you

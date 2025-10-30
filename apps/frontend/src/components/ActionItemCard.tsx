@@ -2,8 +2,8 @@ import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import React from "react";
 import { Link } from "react-router";
 import { ActionWithRelation } from "../applayout";
-import Tag, { TagStyle } from "./Tag";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
+import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
 
 export interface ActionItemCardProps {
   action: Pick<
@@ -39,11 +39,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
         <div className="flex-1 flex flex-col">
           <div className="flex flex-row items-center justify-between gap-x-2 mb-2">
             <p className="font-medium text-black">{action.name}</p>
-            {action.relation === "completed" && (
-              <Tag style={TagStyle.Green} className="text-green font-medium">
-                Completed
-              </Tag>
-            )}
+            {action.relation === "completed" && <CheckIcon size="mini" />}
           </div>
           <p className="text-zinc-500">{action.shortDescription}</p>
         </div>

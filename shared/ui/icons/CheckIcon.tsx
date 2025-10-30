@@ -1,5 +1,10 @@
-const CheckIcon = ({ size = "small" }: { size?: "small" | "large" }) => {
+const CheckIcon = ({
+  size = "small",
+}: {
+  size?: "small" | "large" | "mini";
+}) => {
   const sizeClass = {
+    mini: "w-5 h-5",
     small: "w-6 h-6",
     large: "w-8 h-8",
   };
