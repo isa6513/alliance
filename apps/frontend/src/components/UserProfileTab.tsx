@@ -18,7 +18,7 @@ const UserProfileTab: React.FC<UserProfileTabProps> = ({
       onClick={onClick}
       className={`flex gap-x-1 items-center rounded py-1.5 px-4 text-sm cursor-pointer ${
         selected
-          ? "bg-navy"
+          ? "bg-black"
           : "bg-white hover:bg-zinc-50 border border-zinc-200"
       }`}
     >

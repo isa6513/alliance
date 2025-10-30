@@ -6,22 +6,23 @@ import MarkdownWrapper from "../../components/MarkdownWrapper";
 
 const PrelaunchLandingPage: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <PrelaunchNavbar transparent={false} absolute={false} />
-      <div className="flex-1 container  mx-auto flex flex-col px-5">
-        <div className="flex flex-col mx-auto py-10 my-auto">
-          {/* <img src={earth} className="mx-auto mb-12 w-50" /> */}
-          <div className="mx-auto">
-            <p className=" max-w-3xl font-semibold text-3xl sm:text-5xl font-serif ">
-              We are individuals coordinating to combat global crises.
-            </p>
-          </div>
+    <>
+      <div className="min-h-screen flex flex-col bg-white">
+        <PrelaunchNavbar transparent={false} absolute={false} />
+        <div className="flex-1 container mx-auto flex flex-col px-5 py-5">
+          <div className="flex flex-col mx-auto my-auto bg-zinc-50 px-6 sm:px-24 lg:px-60 py-12 sm:py-24 lg:py-36">
+            {/* <img src={earth} className="mx-auto mb-12 w-50" /> */}
+            <div className="mx-auto">
+              <p className=" max-w-3xl font-semibold text-3xl sm:text-5xl font-serif ">
+                We are individuals coordinating to combat global crises.
+              </p>
+            </div>
 
-          <div className="mx-auto w-full flex flex-col mt-5 sm:mt-10">
-            <MarkdownWrapper
-              id="introduction"
-              maxWidth="max-w-3xl"
-              markdownContent="
+            <div className="mx-auto w-full flex flex-col mt-6 sm:mt-14">
+              <MarkdownWrapper
+                id="introduction"
+                maxWidth="max-w-3xl"
+                markdownContent="
 
 Humanity faces crises that are causing irreversible and compounding harms. Among them are extreme poverty, environmental destruction, breakdown of democratic institutions, and dangerous technological development.
 
@@ -32,12 +33,13 @@ The bedrock of the Alliance is commitment. Members are expected to contribute a 
 We are in an experimental phase. Membership is by invitation only.
 
 "
-            />
+              />
+            </div>
           </div>
         </div>
       </div>
       <Footer />
-    </div>
+    </>
   );
 };
 

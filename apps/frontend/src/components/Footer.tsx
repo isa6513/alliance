@@ -8,7 +8,7 @@ interface FooterProps {
 const Footer: React.FC<FooterProps> = ({ className }) => {
   return (
     <footer
-      className={`w-full bg-white text-black border-t border-zinc-200 py-5 md:py-12 px-5 ${className}`}
+      className={`w-full bg-navy text-white border-t border-zinc-200 py-5 md:py-12 px-5 ${className}`}
     >
       <div className="container mx-auto flex flex-col">
         <div className="flex flex-row items-start justify-between">
@@ -16,7 +16,7 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
             <p className="text-lg sm:text-2xl font-berlingske uppercase">
               The Alliance
             </p>
-            <p className="text-sm md:text-base text-zinc-500 mt-4 sm:mt-7">
+            <p className="text-sm md:text-base text-white/50 mt-4 sm:mt-32">
               &copy; {new Date().getFullYear()} Alliance Foundation
             </p>
           </div>
