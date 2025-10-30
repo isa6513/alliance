@@ -52,17 +52,17 @@ const GuidePage: React.FC = () => {
         </aside>
         <div className="flex flex-col max-w-[46rem]">
           <div className="mx-auto w-full mb-4 md:mb-16">
-            <h2 className="font-serif text-center !font-semibold !text-4xl md:!text-6xl mb-3 text-black">
+            <h2 className="font-serif !font-semibold !text-4xl md:!text-6xl mb-3 text-black">
               Guide to the Alliance
             </h2>
-            <p className="text-center text-base md:text-lg text-zinc-900">
+            <p className="text-base md:text-lg text-zinc-900">
               Information about the Alliance in recommended reading order. If
               you think you are likely to become a member, you do not need to
               read everything—we will walk you through the information when you
               sign up.
             </p>
           </div>
-          <Card className="mb-6" style={CardStyle.Green}>
+          <Card className="mb-6 p-6" style={CardStyle.Navy}>
             <p>
               This guide was developed and approved by 25 founding members of
               the Alliance. Learn more about the process{" "}

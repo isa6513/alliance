@@ -60,7 +60,7 @@ const ProgressPostPage: React.FC = () => {
               })}
             </p>
           </div>
-          <p className="self-center text-base text-green border border-green py-1 px-2 bg-green/20 rounded mb-16">
+          <p className="self-center text-base text-white py-1 px-3 bg-navy rounded mb-16">
             {frontmatter?.members} members
           </p>
           <MarkdownWrapper id="post-content" markdownContent={content ?? ""} />

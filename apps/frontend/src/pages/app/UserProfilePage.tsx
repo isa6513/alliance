@@ -326,7 +326,7 @@ const UserProfilePage: React.FC = () => {
                   {profile.displayName}
                 </h1>
                 {profile.staff && (
-                  <div className="text-sm bg-staff text-white px-3 py-0.5 rounded self-center mt-2">
+                  <div className="text-sm bg-navy text-white px-3 py-0.5 rounded self-center mt-2">
                     Staff
                   </div>
                 )}

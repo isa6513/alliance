@@ -14,7 +14,7 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
         {children}
       </span>
       {staff && (
-        <span className="ml-1 text-xs !bg-staff text-white rounded-xs px-1.5">
+        <span className="ml-1 text-xs !bg-navy text-white rounded-xs px-1.5">
           Staff
         </span>
       )}

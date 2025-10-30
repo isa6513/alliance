@@ -67,7 +67,7 @@ const ProgressListPage: React.FC = () => {
                     )}
                   </p>
                 </div>
-                <p className="self-start text-sm md:text-base text-green border border-green py-1 px-2 bg-green/20 rounded">
+                <p className="self-start text-sm md:text-base text-white py-1 px-3 bg-navy rounded">
                   {post.frontmatter.members} members
                 </p>
                 {/* </Card> */}
