@@ -839,13 +839,13 @@ const FormRenderer = ({
                   </Button>
                 )}
                 <div>
-                  <span className="text-sm text-zinc-500">
+                  <span className="text-zinc-500">
                     Page {currentPageIndex + 1} of {schema.pages.length}
                   </span>
                 </div>
                 {!isLastPage && (
                   <Button
-                    color={ButtonColor.LightHover}
+                    color={ButtonColor.Black}
                     type="button"
                     size="small"
                     onClick={handleNext}
@@ -857,26 +857,30 @@ const FormRenderer = ({
               </div>
             )}
 
-            {readOnly ? null : onSubmit ? (
-              <div className="flex flex-1 space-x-2 items-center">
-                <Button
-                  color={ButtonColor.Black}
-                  type="submit"
-                  className="w-full !py-3 !text-base"
-                >
-                  {schema.submit?.label || "Complete"}
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-1 space-x-2 items-center">
-                <Button
-                  color={ButtonColor.Black}
-                  className="!cursor-not-allowed w-full !py-3 !text-base"
-                  onClick={validateForPreview}
-                >
-                  {schema.submit?.label || "Complete"} (Preview Mode)
-                </Button>
-              </div>
+            {isLastPage && (
+              <>
+                {readOnly ? null : onSubmit ? (
+                  <div className="flex flex-1 space-x-2 items-center">
+                    <Button
+                      color={ButtonColor.Black}
+                      type="submit"
+                      className="w-full !py-3 !text-base"
+                    >
+                      {schema.submit?.label || "Complete"}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-1 space-x-2 items-center">
+                    <Button
+                      color={ButtonColor.Black}
+                      className="!cursor-not-allowed w-full !py-3 !text-base"
+                      onClick={validateForPreview}
+                    >
+                      {schema.submit?.label || "Complete"} (Preview Mode)
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
 

@@ -52,7 +52,7 @@ const Button: React.FC<ButtonProps> = ({
   const color = colorProp ?? ButtonColor.White;
 
   const sizeClass = {
-    small: "px-2 py-1 text-xs",
+    small: "px-3 py-1.5 text-xs",
     medium: "px-4 py-2 text-sm",
     large: "px-6 py-3 text-base",
   }[size];
