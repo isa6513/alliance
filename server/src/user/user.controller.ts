@@ -383,6 +383,17 @@ export class UserController {
     return new ProfileDto(user);
   }
 
+  @Get('inviteeName/:code')
+  @Public()
+  @ApiOkResponse({ type: String })
+  async inviteeName(@Param('code') code: string): Promise<string | null> {
+    const invite = await this.userService.findValidInviteByCode(code);
+    if (invite) {
+      return invite.invitee;
+    }
+    return null;
+  }
+
   @Post('createOnetimeInvite')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: OnetimeInviteDto })

@@ -2023,6 +2023,21 @@ export type UserReferrerProfileResponses = {
 
 export type UserReferrerProfileResponse = UserReferrerProfileResponses[keyof UserReferrerProfileResponses];
 
+export type UserInviteeNameData = {
+    body?: never;
+    path: {
+        code: string;
+    };
+    query?: never;
+    url: '/user/inviteeName/{code}';
+};
+
+export type UserInviteeNameResponses = {
+    200: string;
+};
+
+export type UserInviteeNameResponse = UserInviteeNameResponses[keyof UserInviteeNameResponses];
+
 export type UserCreateOnetimeInviteData = {
     body: CreateOnetimeInviteDto;
     path?: never;

@@ -3,7 +3,11 @@ import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import LargeActionCard from "../app/LargeActionCard";
 import { ActionWithRelation } from "../../applayout";
-import { ProfileDto, userReferrerProfile } from "@alliance/shared/client";
+import {
+  ProfileDto,
+  userReferrerProfile,
+  userInviteeName,
+} from "@alliance/shared/client";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import posthog from "posthog-js";
 
@@ -13,12 +17,18 @@ const InvitePage: React.FC = () => {
   const referralCode = searchParams.get("ref");
 
   const [inviterProfile, setInviterProfile] = useState<ProfileDto | null>(null);
+  const [inviteeName, setInviteeName] = useState<string | null>(null);
 
   useEffect(() => {
     if (!referralCode) return;
     userReferrerProfile({ path: { code: referralCode } }).then((response) => {
       setInviterProfile(response.data ?? null);
     });
+
+    userInviteeName({ path: { code: referralCode } }).then((response) => {
+      setInviteeName(response.data ?? null);
+    });
+
     posthog.register_once({
       referral_code: referralCode,
     });
@@ -106,10 +116,10 @@ const InvitePage: React.FC = () => {
             style={CardStyle.White}
           >
             <p>
-              I hope you will join me as a member of the Alliance. I believe you
-              share my concerns about the direction that the world is headed,
-              and I think this is an opportunity to make a significant
-              difference.
+              Hi {inviteeName}, I hope you will join me as a member of the
+              Alliance. I believe you share my concerns about the direction that
+              the world is headed, and I think this is an opportunity to make a
+              significant difference.
             </p>
 
             <h3 className="font-serif !text-3xl font-bold mt-2">Why join?</h3>

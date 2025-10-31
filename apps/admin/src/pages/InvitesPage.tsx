@@ -71,7 +71,7 @@ const InvitesPage = () => {
                 <input
                   type="text"
                   name="invitee"
-                  placeholder="preferably an email"
+                  placeholder="preferably a first name capitalized"
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                 />
               </div>
