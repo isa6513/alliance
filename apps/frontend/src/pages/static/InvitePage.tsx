@@ -116,10 +116,10 @@ const InvitePage: React.FC = () => {
             style={CardStyle.White}
           >
             <p>
-              Hi {inviteeName}, I hope you will join me as a member of the
-              Alliance. I believe you share my concerns about the direction that
-              the world is headed, and I think this is an opportunity to make a
-              significant difference.
+              {inviteeName ? `Hi ${inviteeName}, ` : ""}I hope you will join me
+              as a member of the Alliance. I believe you share my concerns about
+              the direction that the world is headed, and I think this is an
+              opportunity to make a significant difference.
             </p>
 
             <h3 className="font-serif !text-3xl font-bold mt-2">Why join?</h3>
