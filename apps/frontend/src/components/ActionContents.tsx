@@ -20,7 +20,7 @@ const ActionContents = () => {
       )}
       <div className="flex flex-row justify-between items-start">
         {action !== undefined && (
-          <div className="flex flex-col gap-y-3 mb-3">
+          <div className="flex flex-col gap-y-2 mb-3">
             <h1 className="font-serif !font-semibold">{action.name}</h1>
             <p className="text-zinc-500">{action.shortDescription}</p>
           </div>
