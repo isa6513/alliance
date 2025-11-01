@@ -388,10 +388,7 @@ export class UserController {
   @ApiOkResponse({ type: String })
   async inviteeName(@Param('code') code: string): Promise<string | null> {
     const invite = await this.userService.findValidInviteByCode(code);
-    if (invite) {
-      return invite.invitee;
-    }
-    return null;
+    return invite ? invite.invitee : null;
   }
 
   @Post('createOnetimeInvite')

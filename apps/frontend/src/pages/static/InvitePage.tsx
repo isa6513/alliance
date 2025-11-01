@@ -26,7 +26,11 @@ const InvitePage: React.FC = () => {
     });
 
     userInviteeName({ path: { code: referralCode } }).then((response) => {
-      setInviteeName(response.data ?? null);
+      if (response.data && typeof response.data === "string") {
+        setInviteeName(response.data);
+      } else {
+        setInviteeName(null);
+      }
     });
 
     posthog.register_once({
