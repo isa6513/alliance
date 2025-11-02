@@ -89,7 +89,7 @@ const MembersListPage = () => {
     <CenterLayout className="gap-y-4" width="3xl">
       <div className="flex flex-row gap-x-6 items-center">
         <p className="text-lg md:text-2xl font-serif font-medium relative w-fit -mt-1">
-          Members ({members.length})
+          Members {!loading && `(${members.length})`}
         </p>
 
         <DropdownSelect
