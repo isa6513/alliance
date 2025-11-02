@@ -8,7 +8,6 @@ import { Action, ActionTaskType } from 'src/actions/entities/action.entity';
 import {
   ActionEvent,
   ActionStatus,
-  NotificationType,
 } from 'src/actions/entities/action-event.entity';
 import { User } from 'src/user/entities/user.entity';
 import { FormSchema } from 'src/tasks/schema';
@@ -86,6 +85,7 @@ describe('Tasks (e2e)', () => {
         commitmentless: true,
         everyoneShouldComplete: false,
         participatingGroups: [ctx.defaultGroup],
+        priority: 0,
       } satisfies CreateActionDto),
     );
 
@@ -94,7 +94,6 @@ describe('Tasks (e2e)', () => {
         title: 'Test Action',
         description: 'Test Action',
         newStatus: ActionStatus.MemberAction,
-        sendNotifsTo: NotificationType.None,
         date: new Date(Date.now() - 1000),
         showInTimeline: true,
         action: testAction,
@@ -179,7 +178,6 @@ describe('Tasks (e2e)', () => {
         title: 'Status Event',
         description: 'Make non-draft',
         newStatus: ActionStatus.MemberAction,
-        sendNotifsTo: NotificationType.All,
         date: new Date(Date.now() - 1000),
         showInTimeline: true,
         action,

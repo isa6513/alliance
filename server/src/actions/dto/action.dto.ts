@@ -5,7 +5,7 @@ import {
   PartialType,
   PickType,
 } from '@nestjs/swagger';
-import { instanceToPlain, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   Allow,
   IsBoolean,
@@ -27,71 +27,23 @@ import {
   ActionStatus,
   NotificationType,
 } from '../entities/action-event.entity';
-import { ActionReminder } from '../entities/action-reminder.entity';
 import { Action } from '../entities/action.entity';
 import { getImageSource } from 'src/images/images.service';
 import { ActionUpdate } from '../entities/action-update.entity';
 import { ReminderGroup } from '../entities/reminder-group.entity';
-
-export class ActionReminderDto extends PickType(ActionReminder, [
-  'id',
-  'emailMessage',
-  'textMessage',
-  'cohortType',
-  'timingMode',
-  'sendAtAbsolute',
-  'sendAtSecondsFromDeadline',
-  'sentAt',
-]) {
-  @ApiProperty()
-  id: number;
-
-  @ApiProperty()
-  memberActionEventId: number;
-
-  @ApiPropertyOptional()
-  deadlineEventId?: number;
-
-  @ApiProperty({ type: Number, isArray: true })
-  userIds: number[];
-
-  @ApiProperty({ type: ProfileDto, isArray: true })
-  @Type(() => ProfileDto)
-  users: ProfileDto[];
-
-  @ApiPropertyOptional()
-  customEmailSubject?: string;
-
-  constructor(reminder: ActionReminder) {
-    super();
-    Object.assign(this, reminder);
-    this.userIds = reminder.users?.map((user) => user.id) ?? [];
-    this.memberActionEventId = reminder.memberActionEvent?.id ?? 0;
-    this.users = reminder.users?.map((user) => new ProfileDto(user)) ?? [];
-  }
-}
-
-export class CreateActionReminderDto extends PickType(ActionReminder, [
-  'cohortType',
-  'timingMode',
-  'sendAtAbsolute',
-  'sendAtSecondsFromDeadline',
-  'emailMessage',
-  'emailSubject',
-  'textMessage',
-]) {
-  @ApiPropertyOptional({ type: Number, isArray: true })
-  @Type(() => Number)
-  @IsOptional()
-  userIds?: number[];
-}
+import { ActionSuite } from '../entities/action-suite.entity';
 
 export class CreateTODReminderGroupDto extends PickType(ReminderGroup, [
   'name',
   'emailMessage',
   'cohortType',
+  'timingMode',
   'emailSubject',
   'textMessage',
+  'sendAtAbsolute',
+  'sendAtSecondsFromDeadline',
+  'send_range_start',
+  'send_range_end',
 ]) {
   @ApiPropertyOptional({ type: Number, isArray: true })
   @IsOptional()
@@ -101,15 +53,10 @@ export class CreateTODReminderGroupDto extends PickType(ReminderGroup, [
   @IsOptional()
   userGroupId?: number;
 
-  @ApiProperty()
-  @IsDefined()
-  @Type(() => String)
-  sendDay: string;
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  suiteId?: number;
 }
-
-export class UpdateActionReminderDto extends PartialType(
-  CreateActionReminderDto,
-) {}
 
 export class ActionEventDto extends PickType(ActionEvent, [
   'id',
@@ -117,9 +64,8 @@ export class ActionEventDto extends PickType(ActionEvent, [
   'description',
   'newStatus',
   'showInTimeline',
-  'sendNotifsTo',
+  'suiteManaged',
   'date',
-  'announcementNotifsSentAt',
 ]) {
   constructor(event: ActionEvent) {
     super();
@@ -127,32 +73,12 @@ export class ActionEventDto extends PickType(ActionEvent, [
   }
 }
 
-export class AdminActionEventDto extends PickType(ActionEvent, [
-  'id',
-  'title',
-  'description',
-  'newStatus',
-  'showInTimeline',
-  'sendNotifsTo',
-  'date',
-  'announcementNotifsSentAt',
-  'reminders',
-  'reminderGroups',
-  'deadlineNotifsSentAt',
-  'updatedAt',
-  'notifications',
-]) {
-  constructor(event: ActionEvent) {
-    super();
-    const plain = instanceToPlain(event);
-    Object.assign(this, plain);
-  }
-}
-
 export class CreateActionEventDto extends OmitType(ActionEventDto, [
   'id',
-  'announcementNotifsSentAt',
+  'suiteManaged',
 ]) {}
+
+export class UpdateActionEventDto extends PartialType(CreateActionEventDto) {}
 
 export class ActionDto extends OmitType(Action, [
   'createdAt',
@@ -220,9 +146,14 @@ export class CreateActionDto extends OmitType(ActionDto, [
   'status',
   'taskContents',
   'events',
+  'suite',
   'archived',
   'updates',
-]) {}
+]) {
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  suiteId?: number;
+}
 
 export class UpdateActionDto extends PartialType(CreateActionDto) {}
 
@@ -366,4 +297,19 @@ export class CreateActionUpdateDto extends PickType(ActionUpdate, [
   @ApiPropertyOptional({ type: Number })
   @IsOptional()
   associatedEventId?: number;
+}
+
+export class CreateActionSuiteDto extends PickType(ActionSuite, ['name']) {}
+
+export class ActionSuiteDto extends OmitType(ActionSuite, ['actions']) {
+  @ApiProperty({ type: () => ActionDto, isArray: true })
+  @Type(() => ActionDto)
+  @Allow()
+  actions: ActionDto[];
+
+  constructor(suite: ActionSuite) {
+    super();
+    Object.assign(this, suite);
+    this.actions = suite.actions.map((action) => new ActionDto(action));
+  }
 }

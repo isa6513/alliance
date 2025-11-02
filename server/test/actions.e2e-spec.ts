@@ -13,7 +13,6 @@ import {
 import {
   ActionEvent,
   ActionStatus,
-  NotificationType,
 } from '../src/actions/entities/action-event.entity';
 import { Action, ActionTaskType } from '../src/actions/entities/action.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
@@ -37,7 +36,6 @@ describe('Actions (e2e)', () => {
     name: string,
     options: {
       status?: ActionStatus;
-      sendNotifsTo?: NotificationType;
       actionOverrides?: Partial<Action>;
     } = {},
   ) => {
@@ -59,7 +57,6 @@ describe('Actions (e2e)', () => {
         title: `${name} launch`,
         description: 'Action live',
         newStatus: options.status ?? ActionStatus.MemberAction,
-        sendNotifsTo: options.sendNotifsTo ?? NotificationType.All,
         date: new Date(Date.now() - 1000),
         showInTimeline: true,
         action,
@@ -103,7 +100,6 @@ describe('Actions (e2e)', () => {
       title: 'Action Started',
       description: 'Action is now in gathering commitments phase',
       newStatus: ActionStatus.GatheringCommitments,
-      sendNotifsTo: NotificationType.All,
       date: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
       showInTimeline: true,
       action: testAction,
@@ -177,6 +173,7 @@ describe('Actions (e2e)', () => {
         commitmentless: false,
         everyoneShouldComplete: false,
         participatingGroups: [],
+        priority: 0,
       };
 
       const res = await request(ctx.app.getHttpServer())
@@ -354,7 +351,6 @@ describe('Actions (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .query({
           type: ActionStatus.MemberAction,
-          sendNotifsTo: NotificationType.All,
         });
 
       expect(res.status).toBe(200);
@@ -534,7 +530,6 @@ describe('Actions (e2e)', () => {
         newStatus: ActionStatus.GatheringCommitments,
         date: new Date(),
         showInTimeline: true,
-        sendNotifsTo: NotificationType.All,
       };
 
       const res = await request(ctx.app.getHttpServer())
@@ -609,7 +604,6 @@ describe('Actions (e2e)', () => {
           newStatus: ActionStatus.GatheringCommitments,
           date: new Date(Date.now() - 1000), // 1 second ago
           showInTimeline: true,
-          sendNotifsTo: NotificationType.All,
         };
 
         res = await request(ctx.app.getHttpServer())
@@ -646,7 +640,6 @@ describe('Actions (e2e)', () => {
           newStatus: ActionStatus.GatheringCommitments,
           date: new Date(Date.now() - 3600000), // 1 hour ago
           showInTimeline: true,
-          sendNotifsTo: NotificationType.All,
         };
 
         await request(ctx.app.getHttpServer())
@@ -661,7 +654,6 @@ describe('Actions (e2e)', () => {
           newStatus: ActionStatus.MemberAction,
           date: new Date(Date.now() - 1800000), // 30 minutes ago
           showInTimeline: true,
-          sendNotifsTo: NotificationType.All,
         };
 
         await request(ctx.app.getHttpServer())
@@ -698,7 +690,6 @@ describe('Actions (e2e)', () => {
           newStatus: ActionStatus.GatheringCommitments,
           date: new Date(Date.now() - 3600000), // 1 hour ago
           showInTimeline: true,
-          sendNotifsTo: NotificationType.All,
         };
 
         await request(ctx.app.getHttpServer())
@@ -713,7 +704,6 @@ describe('Actions (e2e)', () => {
           newStatus: ActionStatus.Completed,
           date: new Date(Date.now() + 3600000), // 1 hour from now
           showInTimeline: true,
-          sendNotifsTo: NotificationType.All,
         };
 
         await request(ctx.app.getHttpServer())
@@ -821,7 +811,6 @@ describe('Actions (e2e)', () => {
             newStatus: event.newStatus,
             date: event.date,
             showInTimeline: true,
-            sendNotifsTo: NotificationType.All,
           };
 
           await request(ctx.app.getHttpServer())
@@ -880,7 +869,6 @@ describe('Actions (e2e)', () => {
         newStatus: ActionStatus.GatheringCommitments,
         date: new Date(Date.now() - 1000), // 1 second ago
         showInTimeline: true,
-        sendNotifsTo: NotificationType.All,
       };
 
       await request(ctx.app.getHttpServer())
@@ -929,7 +917,6 @@ describe('Actions (e2e)', () => {
       expect(automaticEvent).toBeDefined();
       expect(automaticEvent.description).toContain('2 people have committed');
       expect(automaticEvent.newStatus).toBe(ActionStatus.OfficeAction);
-      expect(automaticEvent.sendNotifsTo).toBe(NotificationType.Joined);
 
       // Cleanup
       await actionRepo.delete(newAction.id);
@@ -952,7 +939,6 @@ describe('Actions (e2e)', () => {
         newStatus: ActionStatus.GatheringCommitments,
         date: new Date(Date.now() - 1000), // 1 second ago
         showInTimeline: true,
-        sendNotifsTo: NotificationType.All,
       };
 
       await request(ctx.app.getHttpServer())
@@ -967,7 +953,6 @@ describe('Actions (e2e)', () => {
         newStatus: ActionStatus.MemberAction,
         date: new Date(), // immediate transition to member action
         showInTimeline: true,
-        sendNotifsTo: NotificationType.All,
       };
 
       // Two users join the action during gathering commitments
@@ -1032,7 +1017,6 @@ describe('Actions (e2e)', () => {
         'All 2 committed members have completed',
       );
       expect(automaticEvent.newStatus).toBe(ActionStatus.Resolution);
-      expect(automaticEvent.sendNotifsTo).toBe(NotificationType.Joined);
 
       // Cleanup
       await actionRepo.delete(newAction.id);
@@ -1055,7 +1039,6 @@ describe('Actions (e2e)', () => {
         newStatus: ActionStatus.MemberAction,
         date: new Date(Date.now() - 1000),
         showInTimeline: true,
-        sendNotifsTo: NotificationType.All,
       };
 
       await request(ctx.app.getHttpServer())
@@ -1335,14 +1318,12 @@ describe('Actions (e2e)', () => {
           newStatus: ActionStatus.MemberAction,
           date: new Date(),
           showInTimeline: true,
-          sendNotifsTo: NotificationType.All,
         } satisfies CreateActionEventDto);
 
       const memberRes = await request(ctx.app.getHttpServer())
         .get(`/actions/preEventNotifData/${memberAction.id}`)
         .query({
           type: ActionStatus.MemberAction,
-          sendNotifsTo: NotificationType.Joined,
         })
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .expect(200);
@@ -1362,7 +1343,6 @@ describe('Actions (e2e)', () => {
         .get(`/actions/preEventNotifData/${gatherAction.id}`)
         .query({
           type: ActionStatus.GatheringCommitments,
-          sendNotifsTo: NotificationType.All,
         })
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .expect(200);
@@ -1384,7 +1364,6 @@ describe('Actions (e2e)', () => {
         .get(`/actions/preEventNotifData/${commitmentlessAction.id}`)
         .query({
           type: ActionStatus.MemberAction,
-          sendNotifsTo: NotificationType.All,
         })
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .expect(200);

@@ -4,6 +4,7 @@ import {
   actionsCreate,
   actionsFindOne,
   actionsRemove,
+  actionsSuites,
   actionsUnarchive,
   actionsUpdate,
   CreateActionDto,
@@ -14,7 +15,7 @@ import {
   tasksListForms,
   userGetGroups,
 } from "@alliance/shared/client";
-import type { Group, GroupDto } from "@alliance/shared/client";
+import type { ActionSuite, Group, GroupDto } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
@@ -25,7 +26,6 @@ import EventManagementTab from "../components/EventManagementTab";
 import { getApiUrl } from "../lib/config";
 import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
 import { FormBuilder } from "../components/FormBuilder";
-import ActionRemindersTab from "../components/ActionRemindersTab";
 import ActionUpdatesTab from "../components/ActionUpdatesTab";
 
 // Status color mapping
@@ -62,7 +62,7 @@ export const formatStatus = (status: string) => {
     .join(" ");
 };
 
-type Tab = "overview" | "details" | "events" | "form" | "reminders" | "updates";
+type Tab = "overview" | "details" | "events" | "form" | "updates";
 
 const ActionDashboard: React.FC = () => {
   const { actionId: actionIdParam } = useParams<{ actionId: string }>();
@@ -79,6 +79,8 @@ const ActionDashboard: React.FC = () => {
   const [formsLoading, setFormsLoading] = useState<boolean>(true);
   const [availableGroups, setAvailableGroups] = useState<GroupDto[]>([]);
   const [groupsLoading, setGroupsLoading] = useState<boolean>(true);
+  const [availableSuites, setAvailableSuites] = useState<ActionSuite[]>([]);
+  const [suitesLoading, setSuitesLoading] = useState<boolean>(true);
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -108,6 +110,31 @@ const ActionDashboard: React.FC = () => {
       }
     };
     loadForms();
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadSuites = async () => {
+      try {
+        const response = await actionsSuites();
+        if (!cancelled && response.data) {
+          setAvailableSuites(response.data);
+        }
+      } catch (err) {
+        console.error("Failed to load suites:", err);
+      } finally {
+        if (!cancelled) {
+          setSuitesLoading(false);
+        }
+      }
+    };
+
+    loadSuites();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -147,6 +174,8 @@ const ActionDashboard: React.FC = () => {
     taskFormId: undefined,
     participatingGroups: [],
     everyoneShouldComplete: false,
+    suiteId: undefined,
+    priority: 0,
   });
 
   // Reset form when switching to new action mode
@@ -164,6 +193,8 @@ const ActionDashboard: React.FC = () => {
         taskFormId: undefined,
         participatingGroups: [],
         everyoneShouldComplete: false,
+        suiteId: undefined,
+        priority: 0,
       });
       setImageKey(null);
       setImagePreview(null);
@@ -202,14 +233,26 @@ const ActionDashboard: React.FC = () => {
           throw new Error("Action not found");
         }
         setAction(actionData);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { activities, usersCompleted, usersJoined, events, ...formData } =
-          actionData;
+        const {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          activities,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          usersCompleted,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          usersJoined,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          events,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          updates,
+          suite,
+          ...formData
+        } = actionData;
 
         setForm({
           ...formData,
           taskFormId: actionData.taskFormId,
           participatingGroups: actionData.participatingGroups ?? [],
+          suiteId: suite?.id,
         });
 
         setSelectedGroupIds(
@@ -290,6 +333,14 @@ const ActionDashboard: React.FC = () => {
       setForm((prev) => ({
         ...prev,
         [name]: target.checked,
+      }));
+      return;
+    }
+
+    if (name === "suiteId") {
+      setForm((prev) => ({
+        ...prev,
+        suiteId: value === "" ? undefined : parseInt(value, 10),
       }));
       return;
     }
@@ -445,18 +496,11 @@ const ActionDashboard: React.FC = () => {
 
   const baseUrl = getApiUrl();
 
-  const hasMemberActionEvent = action?.events?.some(
-    (event) => event.newStatus === "member_action"
-  );
-
   const tabData: { key: Tab; label: string }[] = [
     { key: "overview", label: "Status Overview" },
     { key: "details", label: "Action Details" },
     { key: "events", label: "Event Management" },
     { key: "updates", label: "Updates" },
-    ...(hasMemberActionEvent
-      ? [{ key: "reminders" as Tab, label: "Reminders" }]
-      : []),
     ...(action?.type === "Activity"
       ? [{ key: "form" as Tab, label: "Task Form" }]
       : []),
@@ -531,6 +575,8 @@ const ActionDashboard: React.FC = () => {
             formsLoading={formsLoading}
             availableGroups={availableGroups}
             groupsLoading={groupsLoading}
+            availableSuites={availableSuites}
+            suitesLoading={suitesLoading}
             selectedGroupIds={selectedGroupIds}
             onGroupsChange={handleGroupsChange}
           />
@@ -575,6 +621,17 @@ const ActionDashboard: React.FC = () => {
               <div className="space-y-4">
                 {/* Current Status */}
                 <div className="flex flex-row gap-2 flex-wrap">
+                  {action.suite !== undefined && (
+                    <Button
+                      onClick={() => {
+                        navigate(`/suites/${action.suite!.id}`);
+                      }}
+                      color={ButtonColor.White}
+                      className="!px-3 !text-sm gap-x-1"
+                    >
+                      Open Suite
+                    </Button>
+                  )}
                   <Button
                     onClick={() =>
                       window.open(
@@ -757,16 +814,13 @@ const ActionDashboard: React.FC = () => {
                   formsLoading={formsLoading}
                   availableGroups={availableGroups}
                   groupsLoading={groupsLoading}
+                  availableSuites={availableSuites}
+                  suitesLoading={suitesLoading}
                   selectedGroupIds={selectedGroupIds}
                   onGroupsChange={handleGroupsChange}
                 />
               </Card>
             )}
-
-            {activeTab === "reminders" && action && (
-              <ActionRemindersTab action={action} setAction={setAction} />
-            )}
-
             {activeTab === "form" && action && (
               <FormBuilder
                 formId={action.taskFormId}

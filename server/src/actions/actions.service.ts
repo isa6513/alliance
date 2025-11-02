@@ -16,7 +16,11 @@ import {
 } from 'src/forum/entities/comment.entity';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
-import { ActionEventReminderService } from 'src/notifs/action-event-reminder.service';
+import {
+  ActionEventReminderService,
+  NOTIFICATION_LOOKBACK_WINDOW_MS,
+  NotificationPlan,
+} from 'src/notifs/action-event-reminder.service';
 import { NotifsService } from 'src/notifs/notifs.service';
 import { ILike, In, LessThan, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
@@ -24,19 +28,18 @@ import {
   ActionActivityDto,
   ActionDto,
   ActionEventDto,
-  ActionReminderDto,
-  AdminActionEventDto,
+  ActionSuiteDto,
   CreateActionActivityDto,
   CreateActionDto,
   CreateActionEventDto,
-  CreateActionReminderDto,
+  CreateActionSuiteDto,
   CreateActionUpdateDto,
   CreateTODReminderGroupDto,
   LatLonDto,
   PreEventNotifDataDto,
   UpdateActionActivityDto,
   UpdateActionDto,
-  UpdateActionReminderDto,
+  UpdateActionEventDto,
 } from './dto/action.dto';
 import {
   ActionActivity,
@@ -48,11 +51,6 @@ import {
   NotificationType,
 } from './entities/action-event.entity';
 import { Action, ActionTaskType } from './entities/action.entity';
-import {
-  ActionReminder,
-  ReminderCohortType,
-  ReminderTimingMode,
-} from './entities/action-reminder.entity';
 import { Group } from 'src/user/entities/group.entity';
 import { UserDto } from 'src/user/user.dto';
 import { NotificationScheduleEntryDto } from './dto/notification-schedule.dto';
@@ -61,6 +59,8 @@ import { User } from 'src/user/entities/user.entity';
 import { ActionEventNotifType } from 'src/notifs/entities/action-event-notif.entity';
 import { ActionUpdate } from './entities/action-update.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
+import { ActionSuite } from './entities/action-suite.entity';
+import { ActionEventNotifDto } from 'src/notifs/entities/action-event-notif.dto';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -89,12 +89,10 @@ export class ActionsService {
     private readonly editableContentRepository: Repository<EditableContent>,
     @InjectRepository(Group)
     private readonly groupRepository: Repository<Group>,
-    @InjectRepository(ActionReminder)
-    private readonly actionReminderRepository: Repository<ActionReminder>,
     @InjectRepository(ActionUpdate)
     private readonly actionUpdateRepository: Repository<ActionUpdate>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @InjectRepository(ActionSuite)
+    private readonly actionSuiteRepository: Repository<ActionSuite>,
     private readonly notifsService: NotifsService,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
@@ -103,8 +101,15 @@ export class ActionsService {
   ) {}
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
-    const { participatingGroups, ...rest } = createActionDto;
+    const { participatingGroups, suiteId, ...rest } = createActionDto;
     const action = this.actionRepository.create(rest);
+
+    if (suiteId) {
+      const suite = await this.actionSuiteRepository.findOneOrFail({
+        where: { id: suiteId },
+      });
+      action.suite = suite;
+    }
 
     if (participatingGroups && participatingGroups.length > 0) {
       action.participatingGroups =
@@ -117,7 +122,7 @@ export class ActionsService {
   findAll(): Promise<ActionDto[]> {
     return this.actionRepository
       .find({
-        relations: ['events', 'activities', 'participatingGroups'],
+        relations: ['events', 'activities', 'participatingGroups', 'suite'],
       })
       .then((actions) => {
         return actions.map((action) => new ActionDto(action));
@@ -160,7 +165,7 @@ export class ActionsService {
 
   async findPublic(userId?: number): Promise<ActionDto[]> {
     const actions = await this.actionRepository.find({
-      relations: ['events', 'activities', 'participatingGroups'],
+      relations: ['events', 'participatingGroups', 'activities'],
     });
 
     const user = userId
@@ -258,7 +263,13 @@ export class ActionsService {
       : null;
     const action = await this.actionRepository.findOne({
       where: { id },
-      relations: ['events', 'activities', 'participatingGroups', 'updates'],
+      relations: [
+        'events',
+        'activities',
+        'participatingGroups',
+        'updates',
+        'suite',
+      ],
     });
 
     if (
@@ -465,7 +476,14 @@ export class ActionsService {
       throw new NotFoundException('Action not found');
     }
 
-    const { participatingGroups, ...rest } = updateActionDto;
+    const { participatingGroups, suiteId, ...rest } = updateActionDto;
+
+    if (suiteId) {
+      const suite = await this.actionSuiteRepository.findOneOrFail({
+        where: { id: suiteId },
+      });
+      action.suite = suite;
+    }
 
     Object.assign(action, rest);
 
@@ -495,238 +513,33 @@ export class ActionsService {
     return savedEvent;
   }
 
-  private sanitizeMessage(value?: string | null): string | undefined {
-    const trimmed = value?.trim();
-    return trimmed ? trimmed : undefined;
+  async deleteReminderGroup(groupId: number) {
+    return this.actionEventReminderService.deleteReminderGroup(groupId);
   }
-
-  private async applyReminderChanges(
-    reminder: ActionReminder,
-    actionId: number,
-    event: ActionEvent,
-    dto: CreateActionReminderDto | UpdateActionReminderDto,
-  ): Promise<void> {
-    const timingMode = dto.timingMode ?? reminder.timingMode;
-    if (!timingMode) {
-      throw new BadRequestException('Timing mode is required for reminders');
-    }
-    reminder.timingMode = timingMode;
-
-    let sendAtAbsolute =
-      dto.sendAtAbsolute ?? reminder.sendAtAbsolute ?? undefined;
-    if (typeof sendAtAbsolute === 'string') {
-      const parsed = new Date(sendAtAbsolute);
-      sendAtAbsolute = Number.isNaN(parsed.getTime()) ? undefined : parsed;
-    }
-
-    const secondsSource =
-      dto.sendAtSecondsFromDeadline ?? reminder.sendAtSecondsFromDeadline;
-    const sendAtSecondsFromDeadline =
-      secondsSource !== undefined && secondsSource !== null
-        ? Number(secondsSource)
-        : undefined;
-
-    if (timingMode === ReminderTimingMode.Absolute) {
-      if (!sendAtAbsolute) {
-        throw new BadRequestException(
-          'sendAtAbsolute is required when timingMode is absolute',
-        );
-      }
-      reminder.sendAtAbsolute = sendAtAbsolute;
-      reminder.sendAtSecondsFromDeadline = undefined;
-    } else if (timingMode === ReminderTimingMode.FromDeadline) {
-      if (
-        sendAtSecondsFromDeadline === undefined ||
-        Number.isNaN(sendAtSecondsFromDeadline)
-      ) {
-        throw new BadRequestException(
-          'sendAtSecondsFromDeadline is required when timingMode is from deadline',
-        );
-      }
-      reminder.sendAtSecondsFromDeadline = sendAtSecondsFromDeadline;
-      reminder.sendAtAbsolute = undefined;
-    }
-
-    const cohortType =
-      dto.cohortType ??
-      reminder.cohortType ??
-      ReminderCohortType.AllUncompleted;
-    if (!cohortType) {
-      throw new BadRequestException('Cohort type is required for reminders');
-    }
-    reminder.cohortType = cohortType;
-
-    if (cohortType === ReminderCohortType.Custom) {
-      const userIdsSource =
-        dto.userIds ??
-        (reminder.users ? reminder.users.map((user) => user.id) : []);
-      const uniqueUserIds = Array.from(new Set(userIdsSource));
-      if (!uniqueUserIds.length) {
-        throw new BadRequestException(
-          'Custom cohorts require at least one user',
-        );
-      }
-
-      const users = await this.userRepository.find({
-        where: { id: In(uniqueUserIds) },
-        relations: ['groups'],
-      });
-
-      if (users.length !== uniqueUserIds.length) {
-        const foundIds = new Set(users.map((user) => user.id));
-        const missing = uniqueUserIds.filter((id) => !foundIds.has(id));
-        throw new NotFoundException(`User(s) not found: ${missing.join(', ')}`);
-      }
-
-      reminder.users = users;
-    } else {
-      reminder.users = [];
-    }
-
-    if (dto.emailSubject !== undefined) {
-      const trimmedSubject = dto.emailSubject?.trim() ?? '';
-      reminder.emailSubject = trimmedSubject || reminder.emailSubject;
-    }
-
-    if (dto.emailMessage !== undefined) {
-      const sanitized = this.sanitizeMessage(dto.emailMessage);
-      if (sanitized !== undefined) {
-        reminder.emailMessage = sanitized;
-      }
-    }
-
-    if (dto.textMessage !== undefined) {
-      const sanitized = this.sanitizeMessage(dto.textMessage);
-      if (sanitized !== undefined) {
-        reminder.textMessage = sanitized;
-      }
-    }
-
-    reminder.memberActionEvent = event;
-  }
-
-  private async buildReminderDto(
-    reminderId: number,
-  ): Promise<ActionReminderDto> {
-    const fullReminder = await this.actionReminderRepository.findOne({
-      where: { id: reminderId },
-      relations: ['memberActionEvent', 'memberActionEvent.action', 'users'],
-    });
-
-    if (!fullReminder) {
-      throw new NotFoundException('Failed to load reminder');
-    }
-
-    return new ActionReminderDto(fullReminder);
-  }
-
-  async createReminder(
-    actionId: number,
-    eventId: number,
-    dto: CreateActionReminderDto,
-  ): Promise<ActionReminderDto> {
-    const event = await this.actionEventRepository.findOne({
-      where: { id: eventId, action: { id: actionId } },
-      relations: ['action'],
-    });
-
-    if (!event) {
-      throw new NotFoundException('Event not found');
-    }
-
-    if (event.newStatus !== ActionStatus.MemberAction) {
-      throw new BadRequestException(
-        'Custom reminders can only be created for member action events',
-      );
-    }
-
-    const reminder = this.actionReminderRepository.create({
-      memberActionEvent: event,
-      users: [],
-    });
-
-    await this.applyReminderChanges(reminder, actionId, event, dto);
-
-    const saved = await this.actionReminderRepository.save(reminder);
-
-    return this.buildReminderDto(saved.id);
-  }
-
-  async updateReminder(
-    actionId: number,
-    eventId: number,
-    reminderId: number,
-    dto: UpdateActionReminderDto,
-  ): Promise<ActionReminderDto> {
-    const reminder = await this.actionReminderRepository.findOneOrFail({
-      where: { id: reminderId },
-      relations: ['memberActionEvent', 'memberActionEvent.action', 'users'],
-    });
-
-    if (
-      !reminder.memberActionEvent ||
-      reminder.memberActionEvent.id !== eventId ||
-      reminder.memberActionEvent.action?.id !== actionId
-    ) {
-      throw new NotFoundException('Reminder not found');
-    }
-
-    if (reminder.memberActionEvent.newStatus !== ActionStatus.MemberAction) {
-      throw new BadRequestException(
-        'Custom reminders can only be created for member action events',
-      );
-    }
-
-    await this.applyReminderChanges(
-      reminder,
-      actionId,
-      reminder.memberActionEvent,
-      dto,
-    );
-
-    const saved = await this.actionReminderRepository.save(reminder);
-
-    return this.buildReminderDto(saved.id);
-  }
-
-  async deleteReminder(reminderId: number) {
-    const reminder = await this.actionReminderRepository.findOne({
-      where: { id: reminderId },
-    });
-    if (!reminder) {
-      throw new NotFoundException('Reminder not found');
-    }
-    await this.actionReminderRepository.delete(reminderId);
-  }
-  async deleteReminderGroup(eventId: number, groupId: number) {
-    return this.actionEventReminderService.deleteReminderGroup(
-      eventId,
+  async getNotificationPlansForGroup(
+    groupId: number,
+  ): Promise<NotificationPlan[]> {
+    return this.actionEventReminderService.getNotificationPlansForGroup(
       groupId,
     );
+  }
+
+  async getSentNotifsForGroup(groupId: number): Promise<ActionEventNotifDto[]> {
+    return this.actionEventReminderService.getSentNotifsForGroup(groupId);
   }
 
   async createdTimedReminderGroup(
     eventId: number,
     dto: CreateTODReminderGroupDto,
   ): Promise<ReminderGroup> {
-    return this.actionEventReminderService.computeIndividuallyTimedReminders(
-      eventId,
-      dto,
-    );
+    return this.actionEventReminderService.createReminderGroup(eventId, dto);
   }
 
   async updateReminderGroup(
-    actionId: number,
-    eventId: number,
     groupId: number,
     dto: CreateTODReminderGroupDto,
   ): Promise<ReminderGroup> {
-    return this.actionEventReminderService.updateReminderGroup(
-      actionId,
-      eventId,
-      groupId,
-      dto,
-    );
+    return this.actionEventReminderService.updateReminderGroup(groupId, dto);
   }
 
   async remove(id: number) {
@@ -767,7 +580,7 @@ export class ActionsService {
   async findCompletedForUser(userId: number): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
       where: { userId, type: ActionActivityType.USER_COMPLETED },
-      relations: ['action'],
+      relations: ['action', 'user'],
     });
     return activities.map((activity) => new ActionActivityDto(activity));
   }
@@ -812,6 +625,7 @@ export class ActionsService {
           ActionActivityType.USER_COMPLETED,
         ]),
       },
+      relations: ['user'],
       order: { createdAt: 'DESC' },
       take: limit,
     });
@@ -936,7 +750,6 @@ export class ActionsService {
       title,
       description,
       newStatus,
-      sendNotifsTo: NotificationType.Joined, // Notify users who joined the action
       date: new Date(), // Set to current time for immediate transition
       showInTimeline: true,
     };
@@ -1060,7 +873,7 @@ export class ActionsService {
 
     const updatedActivity = await this.actionActivityRepository.findOne({
       where: { id },
-      relations: ['likes'],
+      relations: ['user', 'likes'],
     });
     if (!updatedActivity) {
       throw new NotFoundException('Activity not found');
@@ -1205,23 +1018,6 @@ export class ActionsService {
     return new ActionDto(await this.actionRepository.save(action));
   }
 
-  async getEventWithReminders(id: number): Promise<AdminActionEventDto> {
-    const event = await this.actionEventRepository.findOneOrFail({
-      where: { id },
-      relations: [
-        'reminders',
-        'reminders.users',
-        'reminders.memberActionEvent',
-        'reminderGroups',
-        'reminderGroups.reminders',
-        'reminderGroups.userGroup',
-        'reminderGroups.reminders.user',
-        'reminderGroups.reminders.group',
-      ],
-    });
-    return new AdminActionEventDto(event);
-  }
-
   async createActionUpdate(
     id: number,
     createActionUpdateDto: CreateActionUpdateDto,
@@ -1238,5 +1034,161 @@ export class ActionsService {
       action,
     });
     return this.actionUpdateRepository.save(actionUpdate);
+  }
+
+  async getReminderGroupsForEvent(id: number): Promise<ReminderGroup[]> {
+    return this.actionEventReminderService.getReminderGroupsForEvent(id);
+  }
+
+  async getSuites(): Promise<ActionSuite[]> {
+    return this.actionSuiteRepository.find();
+  }
+
+  async getSuite(id: number): Promise<ActionSuiteDto> {
+    const suite = await this.actionSuiteRepository.findOneOrFail({
+      where: { id },
+      relations: [
+        'actions',
+        'actions.events',
+        'reminderGroups',
+        'reminderGroups.memberActionEvent',
+        'reminderGroups.memberActionEvent',
+        'reminderGroups.deadlineEvent',
+      ],
+    });
+    return new ActionSuiteDto(instanceToPlain(suite) as ActionSuite);
+  }
+
+  async createSuite(
+    createActionSuiteDto: CreateActionSuiteDto,
+  ): Promise<ActionSuiteDto> {
+    const suite = this.actionSuiteRepository.create(createActionSuiteDto);
+    return this.actionSuiteRepository.save(suite);
+  }
+
+  async batchUpdateSuiteEvents(
+    suiteId: number,
+    eventId: number,
+    body: UpdateActionEventDto,
+  ) {
+    const event = await this.actionEventRepository.findOneOrFail({
+      where: { id: eventId },
+      relations: ['action', 'action.events'],
+    });
+    const suite = await this.actionSuiteRepository.findOneOrFail({
+      where: { id: suiteId },
+      relations: ['actions', 'actions.events'],
+    });
+    const eventIdx = event.action.events.findIndex(
+      (event) => event.id === eventId,
+    );
+    const eventsToUpdate = new Set<number>([eventId]);
+
+    for (const action of suite.actions) {
+      const possibleEvent = action.events[eventIdx];
+      if (
+        possibleEvent.newStatus === event.newStatus &&
+        possibleEvent.suiteManaged
+      ) {
+        eventsToUpdate.add(possibleEvent.id);
+      }
+    }
+
+    for (const id of eventsToUpdate) {
+      await this.actionEventRepository.update(id, body);
+    }
+    return this.getSuite(suiteId);
+  }
+
+  async addSuiteEvent(suiteId: number, actionEventDto: CreateActionEventDto) {
+    const suite = await this.actionSuiteRepository.findOneOrFail({
+      where: { id: suiteId },
+      relations: ['actions'],
+    });
+
+    for (const action of suite.actions) {
+      console.log('adding event to action', action.id);
+      const newEvent = this.actionEventRepository.create({
+        ...actionEventDto,
+        action,
+        suiteManaged: true,
+      });
+      await this.actionEventRepository.save(newEvent);
+    }
+    return this.getSuite(suiteId);
+  }
+
+  async deleteSuiteEvent(suiteId: number, eventId: number) {
+    const event = await this.actionEventRepository.findOneOrFail({
+      where: { id: eventId },
+      relations: ['action', 'action.events'],
+    });
+    const suite = await this.actionSuiteRepository.findOneOrFail({
+      where: { id: suiteId },
+      relations: ['actions', 'actions.events'],
+    });
+    const eventIdx = event.action.events.findIndex(
+      (event) => event.id === eventId,
+    );
+
+    for (const action of suite.actions) {
+      const possibleEvent = action.events[eventIdx];
+      if (
+        possibleEvent.newStatus === event.newStatus &&
+        possibleEvent.suiteManaged
+      ) {
+        console.log('deleting event', possibleEvent.id);
+        await this.actionEventRepository.delete(possibleEvent.id);
+      }
+    }
+    return this.getSuite(suiteId);
+  }
+
+  async tentativePlansForGroup(
+    eventId: number,
+    body: CreateTODReminderGroupDto,
+  ): Promise<NotificationPlan[]> {
+    const event = await this.actionEventRepository.findOneOrFail({
+      where: { id: eventId },
+      relations: ['action', 'action.events', 'action.participatingGroups'],
+    });
+
+    let group: Group | undefined = undefined;
+    if (body.userGroupId) {
+      group = await this.groupRepository.findOneOrFail({
+        where: { id: body.userGroupId },
+      });
+    }
+
+    let users: User[] = [];
+    if (body.userIds) {
+      users = await this.userService.findByIds(body.userIds);
+    }
+
+    const fakeGroup = {
+      ...body,
+      id: 0,
+      name: 'Tentative Reminder Group',
+      memberActionEvent: event,
+      notifications: [],
+      users,
+      userGroup: group,
+      allSent: false,
+    } satisfies ReminderGroup;
+
+    return this.actionEventReminderService.getPlansForGroup(
+      await this.actionEventReminderService.attachDeadlineEvent(fakeGroup),
+      new Date(Date.now() - NOTIFICATION_LOOKBACK_WINDOW_MS),
+      new Date(Date.now() + 30 * NOTIFICATION_LOOKBACK_WINDOW_MS),
+    );
+  }
+
+  async getUncompletedTasksCount(userId: number): Promise<number> {
+    const actions = (await this.findPublic(userId)).filter(
+      (action) =>
+        action.shouldParticipate &&
+        action.userRelation !== UserActionRelation.Completed,
+    );
+    return actions.length;
   }
 }

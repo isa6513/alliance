@@ -35,12 +35,11 @@ import {
   ActionActivityDto,
   ActionDto,
   ActionEventDto,
-  ActionReminderDto,
-  AdminActionEventDto,
+  ActionSuiteDto,
   CreateActionActivityDto,
   CreateActionDto,
   CreateActionEventDto,
-  CreateActionReminderDto,
+  CreateActionSuiteDto,
   CreateActionUpdateDto,
   CreateTODReminderGroupDto,
   DeclineActionDto,
@@ -50,7 +49,7 @@ import {
   PreEventNotifDataQueryDto,
   UpdateActionActivityDto,
   UpdateActionDto,
-  UpdateActionReminderDto,
+  UpdateActionEventDto,
 } from './dto/action.dto';
 import {
   NotificationScheduleEntryDto,
@@ -59,6 +58,9 @@ import {
 import { ActionUpdate } from './entities/action-update.entity';
 import { ActionEvent } from './entities/action-event.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
+import { NotificationPlan } from 'src/notifs/action-event-reminder.service';
+import { ActionSuite } from './entities/action-suite.entity';
+import { ActionEventNotifDto } from 'src/notifs/entities/action-event-notif.dto';
 
 @Controller('actions')
 export class ActionsController {
@@ -372,56 +374,14 @@ export class ActionsController {
     return this.actionsService.addEvent(id, actionEventDto, req.user?.sub);
   }
 
-  @Post(':actionId/events/:eventId/reminders')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: ActionReminderDto })
-  async createReminder(
-    @Param('actionId', ParseIntPipe) actionId: number,
-    @Param('eventId', ParseIntPipe) eventId: number,
-    @Body() body: CreateActionReminderDto,
-  ): Promise<ActionReminderDto> {
-    return this.actionsService.createReminder(actionId, eventId, body);
-  }
-
-  @Patch(':actionId/events/:eventId/reminders/:reminderId')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: ActionReminderDto })
-  async updateReminder(
-    @Param('actionId', ParseIntPipe) actionId: number,
-    @Param('eventId', ParseIntPipe) eventId: number,
-    @Param('reminderId', ParseIntPipe) reminderId: number,
-    @Body() body: UpdateActionReminderDto,
-  ): Promise<ActionReminderDto> {
-    return this.actionsService.updateReminder(
-      actionId,
-      eventId,
-      reminderId,
-      body,
-    );
-  }
-
-  @Patch(':actionId/events/:eventId/remindergroups/:groupId')
+  @Patch('remindergroups/:groupId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ReminderGroup })
   async updateReminderGroup(
-    @Param('actionId', ParseIntPipe) actionId: number,
-    @Param('eventId', ParseIntPipe) eventId: number,
     @Param('groupId', ParseIntPipe) groupId: number,
     @Body() body: CreateTODReminderGroupDto,
   ): Promise<ReminderGroup> {
-    return this.actionsService.updateReminderGroup(
-      actionId,
-      eventId,
-      groupId,
-      body,
-    );
-  }
-
-  @Delete('deleteReminder/:reminderId')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse()
-  deleteReminder(@Param('reminderId', ParseIntPipe) reminderId: number) {
-    return this.actionsService.deleteReminder(reminderId);
+    return this.actionsService.updateReminderGroup(groupId, body);
   }
 
   @Post('events/:eventId/createremindergroup')
@@ -434,14 +394,29 @@ export class ActionsController {
     return this.actionsService.createdTimedReminderGroup(eventId, body);
   }
 
-  @Delete('events/:eventId/reminders/:groupId')
+  @Delete('reminders/:groupId')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async deleteReminderGroup(
-    @Param('eventId', ParseIntPipe) eventId: number,
+  async deleteReminderGroup(@Param('groupId', ParseIntPipe) groupId: number) {
+    this.actionsService.deleteReminderGroup(groupId);
+  }
+
+  @Get('plansForGroup/:groupId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: NotificationPlan, isArray: true })
+  async plansForGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
-  ) {
-    this.actionsService.deleteReminderGroup(eventId, groupId);
+  ): Promise<NotificationPlan[]> {
+    return this.actionsService.getNotificationPlansForGroup(groupId);
+  }
+
+  @Get('sentNotifsForGroup/:groupId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionEventNotifDto, isArray: true })
+  async sentNotifsForGroup(
+    @Param('groupId', ParseIntPipe) groupId: number,
+  ): Promise<ActionEventNotifDto[]> {
+    return this.actionsService.getSentNotifsForGroup(groupId);
   }
 
   @Post('clearDb')
@@ -540,13 +515,13 @@ export class ActionsController {
     return this.actionsService.unarchive(id);
   }
 
-  @Get('eventWithReminders/:id')
+  @Get('reminderGroupsForEvent/:id')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: AdminActionEventDto })
-  eventWithReminders(
+  @ApiOkResponse({ type: ReminderGroup, isArray: true })
+  reminderGroupsForEvent(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<AdminActionEventDto> {
-    return this.actionsService.getEventWithReminders(id);
+  ): Promise<ReminderGroup[]> {
+    return this.actionsService.getReminderGroupsForEvent(id);
   }
 
   @Post('createUpdate/:id')
@@ -557,5 +532,69 @@ export class ActionsController {
     @Body() createActionUpdateDto: CreateActionUpdateDto,
   ): Promise<ActionUpdate> {
     return this.actionsService.createActionUpdate(id, createActionUpdateDto);
+  }
+
+  @Get('suites')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionSuite, isArray: true })
+  suites(): Promise<ActionSuite[]> {
+    return this.actionsService.getSuites();
+  }
+
+  @Get('suite/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionSuiteDto })
+  suite(@Param('id', ParseIntPipe) id: number): Promise<ActionSuiteDto> {
+    return this.actionsService.getSuite(id);
+  }
+
+  @Post('createSuite')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionSuiteDto })
+  createSuite(
+    @Body() createActionSuiteDto: CreateActionSuiteDto,
+  ): Promise<ActionSuiteDto> {
+    return this.actionsService.createSuite(createActionSuiteDto);
+  }
+
+  @Patch('suite/:suiteId/batchUpdateSuiteEvents/:eventId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  batchUpdateSuiteEvents(
+    @Param('suiteId', ParseIntPipe) suiteId: number,
+    @Param('eventId', ParseIntPipe) eventId: number,
+    @Body() body: UpdateActionEventDto,
+  ) {
+    return this.actionsService.batchUpdateSuiteEvents(suiteId, eventId, body);
+  }
+
+  @Post('suite/:suiteId/events')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionSuiteDto })
+  async addSuiteEvent(
+    @Param('suiteId', ParseIntPipe) suiteId: number,
+    @Body() actionEventDto: CreateActionEventDto,
+  ): Promise<ActionSuiteDto> {
+    return this.actionsService.addSuiteEvent(suiteId, actionEventDto);
+  }
+
+  @Delete('suite/:suiteId/events/:eventId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionSuiteDto })
+  async deleteSuiteEvent(
+    @Param('suiteId', ParseIntPipe) suiteId: number,
+    @Param('eventId', ParseIntPipe) eventId: number,
+  ): Promise<ActionSuiteDto> {
+    return this.actionsService.deleteSuiteEvent(suiteId, eventId);
+  }
+
+  @Post('events/:eventId/checkTentativePlans')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: NotificationPlan, isArray: true })
+  async tentativePlansForGroup(
+    @Param('eventId', ParseIntPipe) eventId: number,
+    @Body() body: CreateTODReminderGroupDto,
+  ): Promise<NotificationPlan[]> {
+    return this.actionsService.tentativePlansForGroup(eventId, body);
   }
 }

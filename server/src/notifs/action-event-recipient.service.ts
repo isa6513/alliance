@@ -13,6 +13,11 @@ import {
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import { ActionEventNotifType } from './entities/action-event-notif.entity';
+import {
+  ReminderCohortType,
+  ReminderGroup,
+} from 'src/actions/entities/reminder-group.entity';
+import { ActionSuite } from 'src/actions/entities/action-suite.entity';
 
 @Injectable()
 export class ActionEventRecipientService {
@@ -83,26 +88,33 @@ export class ActionEventRecipientService {
   async filterForShouldRemind(
     users: User[],
     event: Pick<ActionEvent, 'newStatus' | 'action' | 'date'>,
+    actionSuite?: ActionSuite,
   ): Promise<User[]> {
     const targetGroupIds = new Set(
       event.action.participatingGroups.map((group) => group.id),
     );
+    const usersWithGroups = await this.userService.findByIds(
+      users.map((user) => user.id),
+      ['groups'],
+    );
+    const idToUser = new Map(usersWithGroups.map((user) => [user.id, user]));
 
     const filterToEligible = (users: User[]) =>
-      users.filter(
-        (user) =>
-          this.userShouldCompleteEvent(
-            user,
-            event.date,
-            targetGroupIds,
-            event.action.everyoneShouldComplete,
-          ) === true,
+      users.filter((user) =>
+        this.userShouldCompleteEvent(
+          idToUser.get(user.id)!,
+          event.date,
+          targetGroupIds,
+          event.action.everyoneShouldComplete,
+        ),
       );
+
+    const actions = actionSuite ? actionSuite.actions : [event.action];
 
     const completionActivities = await this.actionActivityRepository.find({
       where: {
         userId: In(users.map((user) => user.id)),
-        actionId: event.action.id,
+        actionId: In(actions.map((action) => action.id)),
         type: In([
           ActionActivityType.USER_COMPLETED,
           ActionActivityType.USER_DECLINED,
@@ -110,15 +122,29 @@ export class ActionEventRecipientService {
         ]),
       },
     });
+
+    const userToHasCompletedAllActions = new Map<number, boolean>();
+    for (const user of users) {
+      userToHasCompletedAllActions.set(
+        user.id,
+        actions.every((action) =>
+          completionActivities.some(
+            (activity) =>
+              activity.userId === user.id && activity.actionId === action.id,
+          ),
+        ),
+      );
+    }
+
     return filterToEligible(users).filter(
-      (user) =>
-        !completionActivities.some((activity) => activity.userId === user.id),
+      (user) => !(userToHasCompletedAllActions.get(user.id) ?? true),
     );
   }
 
   async getFilteredUsersForEvent(
     event: Pick<ActionEvent, 'newStatus' | 'action' | 'date'>,
     type: ActionEventNotifType,
+    suite?: ActionSuite,
   ): Promise<User[]> {
     const users = await this.getBaseUsersForEvent(
       event.newStatus,
@@ -127,6 +153,43 @@ export class ActionEventRecipientService {
     );
     return type === ActionEventNotifType.Announcement
       ? users
-      : await this.filterForShouldRemind(users, event);
+      : await this.filterForShouldRemind(users, event, suite);
+  }
+
+  async getReminderGroupCohort(group: ReminderGroup): Promise<User[]> {
+    let users: User[];
+    switch (group.cohortType) {
+      case ReminderCohortType.Custom:
+        if (!group.users) {
+          throw new Error('Custom cohort type requires users');
+        }
+        users = group.users;
+        break;
+      case ReminderCohortType.AllUncompleted:
+        users = await this.getFilteredUsersForEvent(
+          group.memberActionEvent,
+          ActionEventNotifType.PersonalReminder,
+          group.actionSuite,
+        );
+        break;
+      case ReminderCohortType.Group:
+        if (!group.userGroup) {
+          throw new Error('Group cohort type requires user group');
+        }
+        const userGroup = await this.userService.findGroupOrFail(
+          group.userGroup.id,
+        );
+        users = userGroup.users;
+        break;
+      default:
+        throw new Error(
+          `Invalid cohort type: ${group.cohortType satisfies never}`,
+        );
+    }
+    return this.filterForShouldRemind(
+      users,
+      group.memberActionEvent,
+      group.actionSuite,
+    );
   }
 }

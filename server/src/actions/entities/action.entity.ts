@@ -1,6 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-import { Allow, IsArray, IsNotEmpty, IsOptional } from 'class-validator';
+import {
+  Allow,
+  IsArray,
+  IsDefined,
+  IsNotEmpty,
+  IsOptional,
+} from 'class-validator';
 import { Form } from 'src/tasks/entities/form.entity';
 import {
   Column,
@@ -8,6 +14,7 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -16,6 +23,7 @@ import { ActionEvent, ActionStatus } from './action-event.entity';
 import { Group } from 'src/user/entities/group.entity';
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
 import { ActionUpdate } from './action-update.entity';
+import { ActionSuite } from './action-suite.entity';
 
 export enum ActionTaskType {
   Funding = 'Funding', //giving money to a particular cause
@@ -122,7 +130,7 @@ export class Action {
   @OneToMany(() => ActionEvent, (event) => event.action)
   @ApiProperty({
     description: 'Events associated with the action',
-    type: () => [ActionEvent],
+    type: () => ActionEvent,
     isArray: true,
   })
   @Allow()
@@ -179,10 +187,7 @@ export class Action {
   activities: ActionActivity[];
 
   @Expose()
-  @ApiProperty({
-    description: 'Number of users who have joined the action',
-    example: 5,
-  })
+  @ApiProperty({ enum: ActionStatus, enumName: 'ActionStatus' })
   get status(): ActionStatus {
     if (!this.events) {
       return ActionStatus.Draft;
@@ -232,4 +237,15 @@ export class Action {
   @Allow()
   @Type(() => ActionUpdate)
   updates: ActionUpdate[];
+
+  @ManyToOne(() => ActionSuite, (suite) => suite.actions, { nullable: true })
+  @ApiPropertyOptional({ type: () => ActionSuite })
+  @Type(() => ActionSuite)
+  @IsOptional()
+  suite?: ActionSuite;
+
+  @Column({ default: 0 })
+  @ApiProperty({ description: 'Priority of the action' })
+  @IsDefined()
+  priority: number;
 }
