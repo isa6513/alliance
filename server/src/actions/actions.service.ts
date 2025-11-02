@@ -1085,6 +1085,11 @@ export class ActionsService {
     const eventsToUpdate = new Set<number>([eventId]);
 
     for (const action of suite.actions) {
+      if (action.events.length <= eventIdx) {
+        throw new BadRequestException(
+          'Events do not have equivalent events to edit',
+        );
+      }
       const possibleEvent = action.events[eventIdx];
       if (
         possibleEvent.newStatus === event.newStatus &&
@@ -1132,6 +1137,11 @@ export class ActionsService {
     );
 
     for (const action of suite.actions) {
+      if (action.events.length <= eventIdx) {
+        throw new BadRequestException(
+          'Events do not have equivalent events to delete',
+        );
+      }
       const possibleEvent = action.events[eventIdx];
       if (
         possibleEvent.newStatus === event.newStatus &&
