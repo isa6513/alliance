@@ -6,11 +6,13 @@ import UserDisplayName from "./UserDisplayName";
 export interface MembersListCardProps {
   profile: ProfileDto;
   sentFriendRequest?: boolean;
+  isFriend?: boolean;
 }
 
 export default function MembersListItem({
   profile,
   sentFriendRequest,
+  isFriend,
 }: MembersListCardProps) {
   return (
     <Link to={`/user/${profile.id}`} className="p-3 hover:bg-zinc-50">
@@ -26,8 +28,13 @@ export default function MembersListItem({
           </UserDisplayName>
         </div>
         {sentFriendRequest && (
-          <div className="text-sm bg-zinc-100 py-1 px-2 rounded">
+          <div className="text-sm text-zinc-500 bg-zinc-100 py-1 px-2 rounded">
             Request sent
+          </div>
+        )}
+        {isFriend && (
+          <div className="text-sm text-zinc-500 bg-zinc-100 py-1 px-2 rounded">
+            Friend
           </div>
         )}
       </div>

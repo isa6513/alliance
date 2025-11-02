@@ -66,8 +66,24 @@ const MembersListPage = () => {
       member.friends.some((friend) => myFriends.includes(friend.id))
   );
 
+  // Put friends of friends at top to make them easier to find
+  const sortedMembers = [...members].sort((a, b) => {
+    const aIsFriendOfFriend =
+      a.id !== user?.id &&
+      !myFriends.includes(a.id) &&
+      a.friends.some((friend) => myFriends.includes(friend.id));
+    const bIsFriendOfFriend =
+      b.id !== user?.id &&
+      !myFriends.includes(b.id) &&
+      b.friends.some((friend) => myFriends.includes(friend.id));
+
+    if (aIsFriendOfFriend && !bIsFriendOfFriend) return -1;
+    if (!aIsFriendOfFriend && bIsFriendOfFriend) return 1;
+    return 0;
+  });
+
   const selectedMembers =
-    filterMode === MemberFilterMode.All ? members : friendsOfFriends;
+    filterMode === MemberFilterMode.All ? sortedMembers : friendsOfFriends;
 
   return (
     <CenterLayout className="gap-y-4" width="3xl">
@@ -104,6 +120,7 @@ const MembersListPage = () => {
               key={member.id}
               profile={member}
               sentFriendRequest={userSentFriendRequestIds?.includes(member.id)}
+              isFriend={myFriends.includes(member.id)}
             />
           ))}
         </List>
