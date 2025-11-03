@@ -28,7 +28,7 @@ export function RenderLabel({
 }) {
   const hasError = Boolean(error);
   return (
-    <label className={`block ${hasError ? "text-red-600" : "text-gray-700"}`}>
+    <label className={`block ${hasError ? "text-red-600" : "text-zinc-700"}`}>
       <FormMarkdownWrapper markdownContent={field.label} inline />
       {field.required && <span className="text-red-500 ml-1">*</span>}
     </label>
@@ -160,7 +160,7 @@ export function RenderField({
           />
           {renderValidationMessage()}
           {field.maxLength && (
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-zinc-500 mt-1">
               Maximum {field.maxLength} characters
             </p>
           )}
@@ -247,7 +247,7 @@ export function RenderField({
           />
           {renderValidationMessage()}
           {field.min !== undefined || field.max !== undefined ? (
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-zinc-500 mt-1">
               {field.min !== undefined && field.max !== undefined
                 ? `Range: ${field.min} - ${field.max}`
                 : field.min !== undefined
@@ -324,8 +324,8 @@ export function RenderField({
                     }
                   )}
                 />
-                <span className={hasError ? "text-red-600" : "text-gray-700"}>
-                  {option.label}
+                <span className={hasError ? "text-red-600" : "text-zinc-700"}>
+                  <FormMarkdownWrapper markdownContent={option.label} inline />
                 </span>
               </label>
             ))}
@@ -347,7 +347,7 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none has-[option.placeholder:checked]:text-gray-400"
+              "w-full px-3 py-2 rounded-md focus:outline-none has-[option.placeholder:checked]:text-zinc-400"
             )}
           >
             <option value="" className="placeholder" disabled>
@@ -426,7 +426,7 @@ export function RenderField({
                     }
                   )}
                 />
-                <span className={hasError ? "text-red-600" : "text-gray-700"}>
+                <span className={hasError ? "text-red-600" : "text-zinc-700"}>
                   {option.label}
                 </span>
               </label>
