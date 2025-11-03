@@ -66,6 +66,7 @@ export type EmailField = BaseField<"email">;
 export type PhoneField = BaseField<"phone"> & {
   placeholder?: string;
   pattern?: string;
+  autoExtractUserData?: boolean;
 };
 export type NumberField = BaseField<"number"> & {
   min?: number;
@@ -91,8 +92,12 @@ export type MultiSelectField = BaseField<"multiselect"> & {
 };
 
 export type DateField = BaseField<"date">; // ISO date string (YYYY-MM-DD)
-export type TimeField = BaseField<"time">; // Stored as HH:mm (24h) string
-export type TimezoneField = BaseField<"timezone">;
+export type TimeField = BaseField<"time"> & {
+  autoExtractUserData?: boolean;
+}; // Stored as HH:mm (24h) string
+export type TimezoneField = BaseField<"timezone"> & {
+  autoExtractUserData?: boolean;
+};
 // Persist file answers as string URL/key
 export type FileField = BaseField<"file">;
 

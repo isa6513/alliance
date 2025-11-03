@@ -82,7 +82,7 @@ export function RenderField({
       value !== null &&
       !(typeof value === "string" && value.trim() === "");
     if (!hasValue) {
-      onChange("-08:00");
+      onChange("America/Los_Angeles");
     }
   }, [field.kind, field.id, onChange, value]);
 
@@ -487,84 +487,103 @@ export function RenderField({
               "w-full px-3 py-2 rounded-md focus:outline-none has-[option.placeholder:checked]:text-gray-400"
             )}
           >
-            <option value="-12:00">(GMT -12:00) Eniwetok, Kwajalein</option>
-            <option value="-11:00">(GMT -11:00) Midway Island, Samoa</option>
-            <option value="-10:00">(GMT -10:00) Hawaii</option>
-            <option value="-09:50">(GMT -9:30) Taiohae</option>
-            <option value="-09:00">(GMT -9:00) Alaska</option>
-            <option value="-08:00">
+            {/* https://en.wikipedia.org/wiki/List_of_tz_database_time_zones */}
+            <option value="Etc/GMT+12">(GMT -12:00) Eniwetok, Kwajalein</option>
+            <option value="Pacific/Midway">
+              (GMT -11:00) Midway Island, Samoa
+            </option>
+            <option value="Pacific/Honolulu">(GMT -10:00) Hawaii</option>
+            <option value="Pacific/Marquesas">(GMT -9:30) Taiohae</option>
+            <option value="America/Anchorage">(GMT -9:00) Alaska</option>
+            <option value="America/Los_Angeles">
               (GMT -8:00) Pacific Time (US &amp; Canada)
             </option>
-            <option value="-07:00">
+            <option value="America/Denver">
               (GMT -7:00) Mountain Time (US &amp; Canada)
             </option>
-            <option value="-06:00">
+            <option value="America/Chicago">
               (GMT -6:00) Central Time (US &amp; Canada), Mexico City
             </option>
-            <option value="-05:00">
+            <option value="America/New_York">
               (GMT -5:00) Eastern Time (US &amp; Canada), Bogota, Lima
             </option>
-            <option value="-04:50">(GMT -4:30) Caracas</option>
-            <option value="-04:00">
+            <option value="America/Caracas">(GMT -4:30) Caracas</option>
+            <option value="America/Halifax">
               (GMT -4:00) Atlantic Time (Canada), Caracas, La Paz
             </option>
-            <option value="-03:50">(GMT -3:30) Newfoundland</option>
-            <option value="-03:00">
+            <option value="America/St_Johns">(GMT -3:30) Newfoundland</option>
+            <option value="America/Sao_Paulo">
               (GMT -3:00) Brazil, Buenos Aires, Georgetown
             </option>
-            <option value="-02:00">(GMT -2:00) Mid-Atlantic</option>
-            <option value="-01:00">
+            <option value="Atlantic/South_Georgia">
+              (GMT -2:00) Mid-Atlantic
+            </option>
+            <option value="Atlantic/Azores">
               (GMT -1:00) Azores, Cape Verde Islands
             </option>
-            <option value="+00:00">
+            <option value="Europe/London">
               (GMT) Western Europe Time, London, Lisbon, Casablanca
             </option>
-            <option value="+01:00">
+            <option value="Europe/Paris">
               (GMT +1:00) Brussels, Copenhagen, Madrid, Paris
             </option>
-            <option value="+02:00">
+            <option value="Africa/Johannesburg">
               (GMT +2:00) Kaliningrad, South Africa
             </option>
-            <option value="+03:00">
+            <option value="Europe/Moscow">
               (GMT +3:00) Baghdad, Riyadh, Moscow, St. Petersburg
             </option>
-            <option value="+03:50">(GMT +3:30) Tehran</option>
-            <option value="+04:00">
+            <option value="Asia/Tehran">(GMT +3:30) Tehran</option>
+            <option value="Asia/Dubai">
               (GMT +4:00) Abu Dhabi, Muscat, Baku, Tbilisi
             </option>
-            <option value="+04:50">(GMT +4:30) Kabul</option>
-            <option value="+05:00">
+            <option value="Asia/Kabul">(GMT +4:30) Kabul</option>
+            <option value="Asia/Karachi">
               (GMT +5:00) Ekaterinburg, Islamabad, Karachi, Tashkent
             </option>
-            <option value="+05:50">
+            <option value="Asia/Kolkata">
               (GMT +5:30) Bombay, Calcutta, Madras, New Delhi
             </option>
-            <option value="+05:75">(GMT +5:45) Kathmandu, Pokhara</option>
-            <option value="+06:00">(GMT +6:00) Almaty, Dhaka, Colombo</option>
-            <option value="+06:50">(GMT +6:30) Yangon, Mandalay</option>
-            <option value="+07:00">(GMT +7:00) Bangkok, Hanoi, Jakarta</option>
-            <option value="+08:00">
+            <option value="Asia/Kathmandu">
+              (GMT +5:45) Kathmandu, Pokhara
+            </option>
+            <option value="Asia/Dhaka">
+              (GMT +6:00) Almaty, Dhaka, Colombo
+            </option>
+            <option value="Asia/Yangon">(GMT +6:30) Yangon, Mandalay</option>
+            <option value="Asia/Bangkok">
+              (GMT +7:00) Bangkok, Hanoi, Jakarta
+            </option>
+            <option value="Asia/Singapore">
               (GMT +8:00) Beijing, Perth, Singapore, Hong Kong
             </option>
-            <option value="+08:75">(GMT +8:45) Eucla</option>
-            <option value="+09:00">
+            <option value="Australia/Eucla">(GMT +8:45) Eucla</option>
+            <option value="Asia/Tokyo">
               (GMT +9:00) Tokyo, Seoul, Osaka, Sapporo, Yakutsk
             </option>
-            <option value="+09:50">(GMT +9:30) Adelaide, Darwin</option>
-            <option value="+10:00">
+            <option value="Australia/Darwin">
+              (GMT +9:30) Adelaide, Darwin
+            </option>
+            <option value="Australia/Sydney">
               (GMT +10:00) Eastern Australia, Guam, Vladivostok
             </option>
-            <option value="+10:50">(GMT +10:30) Lord Howe Island</option>
-            <option value="+11:00">
+            <option value="Australia/Lord_Howe">
+              (GMT +10:30) Lord Howe Island
+            </option>
+            <option value="Pacific/Guadalcanal">
               (GMT +11:00) Magadan, Solomon Islands, New Caledonia
             </option>
-            <option value="+11:50">(GMT +11:30) Norfolk Island</option>
-            <option value="+12:00">
+            <option value="Pacific/Norfolk">(GMT +11:30) Norfolk Island</option>
+            <option value="Pacific/Auckland">
               (GMT +12:00) Auckland, Wellington, Fiji, Kamchatka
             </option>
-            <option value="+12:75">(GMT +12:45) Chatham Islands</option>
-            <option value="+13:00">(GMT +13:00) Apia, Nukualofa</option>
-            <option value="+14:00">(GMT +14:00) Line Islands, Tokelau</option>
+            <option value="Pacific/Chatham">
+              (GMT +12:45) Chatham Islands
+            </option>
+            <option value="Pacific/Apia">(GMT +13:00) Apia, Nukualofa</option>
+            <option value="Pacific/Kiritimati">
+              (GMT +14:00) Line Islands, Tokelau
+            </option>
           </select>
           {renderValidationMessage()}
         </div>

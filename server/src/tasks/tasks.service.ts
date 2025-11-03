@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Temporal } from '@js-temporal/polyfill';
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
 import { Action } from 'src/actions/entities/action.entity';
 import { getImageSource } from 'src/images/images.service';
@@ -181,10 +182,24 @@ export class TasksService {
       userId,
     );
 
-    const phoneNumber = await this.extractPhoneNumber(
+    const phoneNumber = this.getFirstAutoExtractAnswer(
       form,
       submitFormDto.answers,
+      'phone',
     );
+    const preferredReminderTime = this.getFirstAutoExtractAnswer(
+      form,
+      submitFormDto.answers,
+      'time',
+    );
+    const timeZone = this.getFirstAutoExtractAnswer(
+      form,
+      submitFormDto.answers,
+      'timezone',
+    );
+
+    let userNeedsUpdate = false;
+
     if (phoneNumber) {
       this.logger.log(`Extracted phone number: ${phoneNumber}`);
       const parsedNumber = parsePhoneNumberWithError(phoneNumber, 'US'); //TODO: check with non US numbers
@@ -193,6 +208,7 @@ export class TasksService {
         this.logger.log(`Valid phone number: ${parsedNumber.number}`);
         user.phoneNumberValidated = true;
         user.phoneNumber = parsedNumber.number;
+        userNeedsUpdate = true;
 
         if (!user.sentTextOptInMessageAt) {
           await this.mmsService.sendMms(
@@ -201,11 +217,49 @@ export class TasksService {
             [],
           );
           user.sentTextOptInMessageAt = new Date(); //TODO: check if sent successfully?
+          userNeedsUpdate = true;
         }
       } else {
         this.logger.warn(`Parsed an invalid phone number: ${phoneNumber}`);
         user.phoneNumber = phoneNumber;
+        userNeedsUpdate = true;
       }
+    }
+
+    if (preferredReminderTime) {
+      try {
+        const parsedTime = Temporal.PlainTime.from(preferredReminderTime);
+        user.preferredReminderTime = parsedTime;
+        userNeedsUpdate = true;
+      } catch {
+        this.logger.warn(
+          `Failed to parse preferred reminder time: ${preferredReminderTime}`,
+        );
+      }
+    }
+
+    function isTimeZoneValid(timeZoneIdentifier: string): boolean {
+      try {
+        Temporal.Now.instant().toZonedDateTimeISO(timeZoneIdentifier);
+        return true;
+      } catch (error) {
+        if (error instanceof RangeError) {
+          return false;
+        }
+        throw error;
+      }
+    }
+
+    if (timeZone) {
+      if (isTimeZoneValid(timeZone)) {
+        user.timeZone = timeZone;
+        userNeedsUpdate = true;
+      } else {
+        this.logger.warn(`Invalid time zone: ${timeZone}`);
+      }
+    }
+
+    if (userNeedsUpdate) {
       await this.userService.update(user.id, user);
     }
 
@@ -229,32 +283,31 @@ export class TasksService {
     return savedForm;
   }
 
-  async extractPhoneNumber(
+  private getFirstAutoExtractAnswer(
     form: Form,
-    answers: Record<string, string>,
-  ): Promise<string | null> {
+    answers: Record<string, unknown>,
+    kind: 'phone' | 'time' | 'timezone',
+  ): string | null {
     const schema = form.schema as unknown as FormSchema;
 
-    const phoneNumbers: { fieldId: string; label: string; value: string }[] =
-      [];
-
-    for (const page of schema.pages) {
-      if (page.fields) {
-        for (const field of page.fields) {
-          if (field.kind === 'phone' && answers[field.id]) {
-            phoneNumbers.push({
-              fieldId: field.id,
-              label: field.label,
-              value: answers[field.id],
-            });
+    for (const page of schema.pages ?? []) {
+      if (!page.fields) {
+        continue;
+      }
+      for (const field of page.fields) {
+        if (
+          field.kind === kind &&
+          field.autoExtractUserData &&
+          typeof answers[field.id] === 'string'
+        ) {
+          const value = (answers[field.id] as string).trim();
+          if (value) {
+            return value;
           }
         }
       }
     }
 
-    if (phoneNumbers.length > 0) {
-      return phoneNumbers[0].value;
-    }
     return null;
   }
 

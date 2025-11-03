@@ -250,6 +250,7 @@ export function FormBuilder({
           label: "Phone Field",
           required: false,
           placeholder: "Enter phone number",
+          autoExtractUserData: false,
         };
         break;
       case "number":
@@ -309,6 +310,7 @@ export function FormBuilder({
           kind: "time",
           label: "Time Field",
           required: false,
+          autoExtractUserData: false,
         };
         break;
       case "timezone":
@@ -317,6 +319,7 @@ export function FormBuilder({
           kind: "timezone",
           label: "Timezone Field",
           required: false,
+          autoExtractUserData: false,
         };
         break;
       case "file":

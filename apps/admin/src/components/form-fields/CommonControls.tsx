@@ -806,3 +806,23 @@ export function CustomValidatorSelect({
     </div>
   );
 }
+
+export function AutoExtractUserDataToggle({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <label className="flex items-center text-xs text-gray-700 mt-2">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mr-1"
+      />
+      Automatically extract into user data
+    </label>
+  );
+}
