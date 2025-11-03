@@ -36,6 +36,7 @@ const sampleSchema: FormSchema = {
           id: 'phone-number',
           kind: 'phone',
           label: 'Phone Number',
+          autoExtractUserData: true,
         },
       ],
     },
