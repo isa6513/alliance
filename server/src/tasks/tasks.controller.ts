@@ -34,12 +34,12 @@ export class TasksController {
 
   @Post('submitForm/:id')
   @UseGuards(AuthGuard)
-  @ApiOkResponse()
+  @ApiOkResponse({ type: FormResponseDto })
   async submitForm(
     @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: SubmitFormDto,
-  ) {
+  ): Promise<FormResponseDto> {
     return this.tasksService.submitForm(+id, req.user.sub, body);
   }
 

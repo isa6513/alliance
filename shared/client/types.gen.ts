@@ -1328,6 +1328,21 @@ export type SubmitFormDto = {
     };
 };
 
+export type FormResponseDto = {
+    id: number;
+    formId: number;
+    answers: {
+        [key: string]: unknown;
+    };
+    visibilityValidatorResults: {
+        [key: string]: unknown;
+    };
+    user: User;
+    schemaSnapshot: {
+        [key: string]: unknown;
+    };
+};
+
 export type CreateFormDto = {
     title: string;
     schema: {
@@ -1342,21 +1357,6 @@ export type FormDto = {
         [key: string]: unknown;
     };
     usedInAction?: ActionDto;
-};
-
-export type FormResponseDto = {
-    id: number;
-    formId: number;
-    answers: {
-        [key: string]: unknown;
-    };
-    visibilityValidatorResults: {
-        [key: string]: unknown;
-    };
-    user: User;
-    schemaSnapshot: {
-        [key: string]: unknown;
-    };
 };
 
 export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'HasPhoneNumber';
@@ -3422,8 +3422,10 @@ export type TasksSubmitFormData = {
 };
 
 export type TasksSubmitFormResponses = {
-    200: unknown;
+    200: FormResponseDto;
 };
+
+export type TasksSubmitFormResponse = TasksSubmitFormResponses[keyof TasksSubmitFormResponses];
 
 export type TasksCreateFormData = {
     body: CreateFormDto;

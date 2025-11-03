@@ -140,7 +140,7 @@ const FormResponses: React.FC = () => {
   }, [form]);
 
   const formatValue = useCallback((v: unknown): string => {
-    if (v == null) return "";
+    if (v == null || v === undefined) return "NULL";
     if (Array.isArray(v)) return v.map((x) => formatValue(x)).join(", ");
     if (typeof v === "object") {
       const o = v as { name?: string; key: string };

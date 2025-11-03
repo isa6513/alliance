@@ -53,6 +53,23 @@ export function computeFormStorageKey(args: {
   return hasInstance ? `${base}:${String(args.instanceId)}` : base;
 }
 
+function filterAnswersByFieldIds(
+  answers: Record<string, FormValue> | null,
+  allowedFields: Map<string, AnyField>
+): Record<string, FormValue> {
+  if (!answers) {
+    return {};
+  }
+
+  const filtered: Record<string, FormValue> = {};
+  for (const [fieldId, value] of Object.entries(answers)) {
+    if (allowedFields.has(fieldId)) {
+      filtered[fieldId] = value;
+    }
+  }
+  return filtered;
+}
+
 const FormRenderer = ({
   form,
   id,
@@ -87,6 +104,18 @@ const FormRenderer = ({
     }
     return base;
   }, [id, userId, persistKey]);
+
+  const fieldLookup = useMemo(() => {
+    const entries = new Map<string, AnyField>();
+    for (const page of schema.pages) {
+      for (const element of page.fields) {
+        if ("label" in element) {
+          entries.set(element.id, element as AnyField);
+        }
+      }
+    }
+    return entries;
+  }, [schema]);
 
   const pageCount = schema.pages?.length ?? 0;
   const maxPageIndex = Math.max(0, (pageCount || 1) - 1);
@@ -128,9 +157,13 @@ const FormRenderer = ({
       const raw = window.localStorage.getItem(storageKey);
       if (!raw) return {};
       const parsed = JSON.parse(raw);
-      return parsed?.formData && typeof parsed.formData === "object"
-        ? parsed.formData
-        : {};
+      if (parsed?.formData && typeof parsed.formData === "object") {
+        return filterAnswersByFieldIds(
+          parsed.formData as Record<string, FormValue>,
+          fieldLookup
+        );
+      }
+      return {};
     } catch {
       return {};
     }
@@ -148,18 +181,6 @@ const FormRenderer = ({
   const [outOfTimeSelected, setOutOfTimeSelected] = useState(false);
   const [customReason, setCustomReason] = useState("");
   const ref = useOutsideClick(() => setDropdownOpen(false));
-
-  const fieldLookup = useMemo(() => {
-    const entries = new Map<string, AnyField>();
-    for (const page of schema.pages) {
-      for (const element of page.fields) {
-        if ("label" in element) {
-          entries.set(element.id, element as AnyField);
-        }
-      }
-    }
-    return entries;
-  }, [schema]);
 
   const visibilityValidatorIds = useMemo(() => {
     const ids = new Set<number>();
@@ -710,8 +731,11 @@ const FormRenderer = ({
       return;
     }
 
+    console.log(formData);
+    const sanitizedAnswers = filterAnswersByFieldIds(formData, fieldLookup);
+    console.log(sanitizedAnswers);
     const submissionPayload = {
-      answers: formData,
+      answers: sanitizedAnswers,
       schemaSnapshot: form as unknown as Record<string, unknown>,
       actionId,
       visibilityValidatorResults,
@@ -761,22 +785,39 @@ const FormRenderer = ({
     if (!raw) return;
     const parsed = JSON.parse(raw);
     if (parsed?.formData && typeof parsed.formData === "object") {
-      setFormData(parsed.formData);
+      setFormData(
+        filterAnswersByFieldIds(
+          parsed.formData as Record<string, FormValue>,
+          fieldLookup
+        )
+      );
     }
     if (typeof parsed?.currentPageIndex === "number") {
-      const maxIdx = Math.max(0, (schema.pages?.length || 1) - 1);
+      const maxIdx = Math.max(0, (pageCount || 1) - 1);
       const idx = Math.min(Math.max(0, parsed.currentPageIndex), maxIdx);
       setCurrentPageIndex(idx);
     }
-  }, [persistKey, baseStorageKey, readOnly]);
+  }, [
+    persistKey,
+    baseStorageKey,
+    readOnly,
+    fieldLookup,
+    storageKey,
+    pageCount,
+  ]);
 
   // When rendering a completed form, sync provided answers into local state
   useEffect(() => {
     if (!readOnly) return;
     if (completedFormResponse?.answers) {
-      setFormData(completedFormResponse.answers as Record<string, FormValue>);
+      setFormData(
+        filterAnswersByFieldIds(
+          completedFormResponse.answers as Record<string, FormValue>,
+          fieldLookup
+        )
+      );
     }
-  }, [readOnly, completedFormResponse]);
+  }, [readOnly, completedFormResponse, fieldLookup]);
 
   useEffect(() => {
     if (!readOnly) {
