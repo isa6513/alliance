@@ -15,13 +15,13 @@ export const defaultTextMessage =
 
 export const defaultAnnouncementEmailSubject =
   "Action needs completion: #{action}";
-export const defaultAnnouncementEmailContents = `Hi #{firstname}
+export const defaultAnnouncementEmailContents = `Hi #{firstname},
 A new action is ready for you to complete: "#{action}"
 
 Please complete the action at this link: #{link}`;
 
 export const defaultAnnouncementTextMessage =
-  "An Alliance action is ready for you to complete: #{action}. #{link}. You have #{days} left to complete.";
+  "You have #{days} left to complete: #{action} (#{link}).";
 
 // missed deadline
 
