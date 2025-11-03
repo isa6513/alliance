@@ -1,15 +1,15 @@
 // generic reminder
 
 export const defaultEmailSubject =
-  "You have #{days}, #{hours} left to complete an Alliance action";
+  "You have #{days}, #{hours} left to complete #{n} Alliance action(s)";
 export const defaultEmailContents = `Hi #{firstname},
-An Alliance action needs your completion."
 
-You have #{days}, #{hours} left to complete it. Please do so at the below link.
-#{link}`;
+#{n} Alliance action(s) need your completion.
+
+You have #{days}, #{hours} left to complete the action(s). Please do so at this link: #{link}`;
 
 export const defaultTextMessage =
-  "You have #{days}, #{hours} left to complete an Alliance action. #{link}";
+  "You have #{days}, #{hours} left to complete #{n} Alliance action(s). #{link}";
 
 // announcement
 
@@ -21,7 +21,7 @@ A new action is ready for you to complete: "#{action}"
 Please complete the action at this link: #{link}`;
 
 export const defaultAnnouncementTextMessage =
-  "You have #{days} left to complete: #{action} (#{link}).";
+  "You have #{days} left to complete #{n} Alliance action(s). #{link}";
 
 // missed deadline
 
