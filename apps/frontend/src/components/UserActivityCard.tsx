@@ -137,7 +137,7 @@ const UserActivityCard = ({
             className="text-green cursor-pointer hover:underline font-medium"
             onClick={handleClick}
           >
-            {activity.action.name}
+            {activity.actionName}
           </p>
         </div>
         {isEditing ? (

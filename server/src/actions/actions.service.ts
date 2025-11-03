@@ -625,7 +625,7 @@ export class ActionsService {
           ActionActivityType.USER_COMPLETED,
         ]),
       },
-      relations: ['user'],
+      relations: ['user', 'action'],
       order: { createdAt: 'DESC' },
       take: limit,
     });

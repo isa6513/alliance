@@ -249,6 +249,65 @@ export type UploadImageResponseDto = {
     key: string;
 };
 
+export type CommentParentObject = 'post' | 'action' | 'activity';
+
+export type EditableContentDto = {
+    /**
+     * Markdown or plain text body
+     */
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
+};
+
+export type CommentDto = {
+    id: number;
+    parentObjectType: CommentParentObject;
+    parentObjectId: number;
+    deleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+    parentId?: number;
+    pinned: boolean;
+    author: ProfileDto;
+    children?: Array<CommentDto>;
+    likes: Array<ProfileDto>;
+    editableContent: EditableContentDto;
+};
+
+export type ActionActivityDto = {
+    id: number;
+    /**
+     * Type of action activity
+     */
+    type: ActionActivityType;
+    actionId: number;
+    createdAt: string;
+    user: ProfileDto;
+    actionName: string;
+    likes: Array<ProfileDto>;
+    comments: Array<CommentDto>;
+    editableContent: EditableContentDto;
+};
+
+export type DeclineActionDto = {
+    reason: string;
+    moral: boolean;
+};
+
+export type OptOutActionDto = {
+    reason: string;
+    outOfTime: boolean;
+};
+
+export type UserActionRelation = 'joined' | 'completed' | 'none' | 'declined';
+
+export type UserActionRelationDto = {
+    relation: UserActionRelation;
+};
+
 /**
  * Type of the action
  */
@@ -672,66 +731,6 @@ export type ActionDto = {
     shouldParticipate?: boolean;
     userRelation?: string;
     reqAuthenticated?: boolean;
-};
-
-export type CommentParentObject = 'post' | 'action' | 'activity';
-
-export type EditableContentDto = {
-    /**
-     * Markdown or plain text body
-     */
-    body: string;
-    /**
-     * Image keys attached to the content
-     */
-    attachments: Array<string>;
-};
-
-export type CommentDto = {
-    id: number;
-    parentObjectType: CommentParentObject;
-    parentObjectId: number;
-    deleted: boolean;
-    createdAt: string;
-    updatedAt: string;
-    parentId?: number;
-    pinned: boolean;
-    author: ProfileDto;
-    children?: Array<CommentDto>;
-    likes: Array<ProfileDto>;
-    editableContent: EditableContentDto;
-};
-
-export type ActionActivityDto = {
-    id: number;
-    /**
-     * Type of action activity
-     */
-    type: ActionActivityType;
-    createdAt: string;
-    user: ProfileDto;
-    actionId: number;
-    action: ActionDto;
-    actionName: string;
-    likes: Array<ProfileDto>;
-    comments: Array<CommentDto>;
-    editableContent: EditableContentDto;
-};
-
-export type DeclineActionDto = {
-    reason: string;
-    moral: boolean;
-};
-
-export type OptOutActionDto = {
-    reason: string;
-    outOfTime: boolean;
-};
-
-export type UserActionRelation = 'joined' | 'completed' | 'none' | 'declined';
-
-export type UserActionRelationDto = {
-    relation: UserActionRelation;
 };
 
 export type LatLonDto = {

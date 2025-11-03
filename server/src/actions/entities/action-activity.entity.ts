@@ -42,7 +42,7 @@ export class ActionActivity {
   @Allow()
   type: ActionActivityType;
 
-  @ManyToOne(() => Action, { eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => Action, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'actionId' })
   @Allow()
   @Type(() => Action)
@@ -104,7 +104,6 @@ export class ActionActivity {
   @IsOptional()
   @OneToOne(() => FormResponse, {
     cascade: true,
-    eager: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn()

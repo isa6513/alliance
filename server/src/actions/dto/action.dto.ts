@@ -189,20 +189,12 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   'id',
   'type',
   'createdAt',
+  'actionId',
 ]) {
   @ApiProperty({ type: () => ProfileDto })
   @Type(() => ProfileDto)
   @Allow()
   user: ProfileDto;
-
-  @ApiProperty()
-  @Allow()
-  actionId: number;
-
-  @ApiProperty({ type: () => ActionDto })
-  @Type(() => ActionDto)
-  @Allow()
-  action: ActionDto;
 
   @ApiProperty()
   @Allow()
@@ -226,15 +218,13 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   constructor(actionActivity: ActionActivity, comments: CommentDto[] = []) {
     super();
     Object.assign(this, actionActivity);
-    this.actionId = actionActivity.action.id;
-    this.action = new ActionDto(actionActivity.action);
-    this.actionName = actionActivity.action.name;
     this.user = new ProfileDto(actionActivity.user);
     this.likes =
       actionActivity.likes !== undefined
         ? actionActivity.likes.map((like) => new ProfileDto(like))
         : [];
     this.comments = comments;
+    this.actionName = actionActivity.action?.name;
     if (!this.editableContent) {
       this.editableContent = {
         body: '',
