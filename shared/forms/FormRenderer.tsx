@@ -731,9 +731,7 @@ const FormRenderer = ({
       return;
     }
 
-    console.log(formData);
     const sanitizedAnswers = filterAnswersByFieldIds(formData, fieldLookup);
-    console.log(sanitizedAnswers);
     const submissionPayload = {
       answers: sanitizedAnswers,
       schemaSnapshot: form as unknown as Record<string, unknown>,

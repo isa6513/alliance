@@ -263,8 +263,11 @@ export class UserController {
   async membersWithFriends(
     @Query('requireSignedContract', new DefaultValuePipe(false), ParseBoolPipe)
     requireSignedContract: boolean,
+    @Request() req: JwtRequest,
   ): Promise<ProfileDtoWithFriends[]> {
-    const users = await this.userService.findAllWithFriendRequests();
+    const users = await this.userService.findAllWithFriendRequests(
+      req.user.sub,
+    );
 
     if (requireSignedContract) {
       return users

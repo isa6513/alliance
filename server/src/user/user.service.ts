@@ -129,15 +129,24 @@ export class UserService {
     return this.userRepository.find();
   }
 
-  findAllWithFriendRequests(): Promise<User[]> {
-    return this.userRepository.find({
-      relations: [
+  findAllWithFriendRequests(userId: number): Promise<User[]> {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect(
+        'user.sentFriendRequests',
         'sentFriendRequests',
-        'sentFriendRequests.addressee',
+        'sentFriendRequests.addresseeId = :userId',
+        { userId },
+      )
+      .leftJoinAndSelect('sentFriendRequests.addressee', 'addressee')
+      .leftJoinAndSelect(
+        'user.receivedFriendRequests',
         'receivedFriendRequests',
-        'receivedFriendRequests.requester',
-      ],
-    });
+        'receivedFriendRequests.requesterId = :userId',
+        { userId },
+      )
+      .leftJoinAndSelect('receivedFriendRequests.requester', 'requester')
+      .getMany();
   }
 
   findOne(id: number, relations?: string[]): Promise<User | null> {
