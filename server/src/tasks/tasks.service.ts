@@ -83,7 +83,7 @@ export class TasksService {
     form: Form,
     submitFormDto: SubmitFormDto,
     userId: number,
-  ): Promise<void> {
+  ): Promise<Record<number, boolean>> {
     const schema = form.schema as unknown as FormSchema;
     const validatorIds = new Set<number>();
 
@@ -102,7 +102,7 @@ export class TasksService {
       }
     }
 
-    let validatorResults: Record<number, boolean> | undefined;
+    const validatorResults: Record<number, boolean> = {};
     if (validatorIds.size > 0) {
       const results = await Promise.all(
         Array.from(validatorIds).map(async (validatorId) => {
@@ -117,7 +117,9 @@ export class TasksService {
           }
         }),
       );
-      validatorResults = Object.fromEntries(results);
+      for (const [id, value] of results) {
+        validatorResults[id] = value;
+      }
     }
 
     for (const page of schema.pages) {
@@ -152,6 +154,8 @@ export class TasksService {
         }
       }
     }
+
+    return validatorResults;
   }
 
   async updateForm(
@@ -171,7 +175,11 @@ export class TasksService {
     const form = await this.getForm(formId);
     const user = await this.userService.findOneOrFail(userId);
 
-    await this.validateFormSubmission(form, submitFormDto, userId);
+    const validatorResults = await this.validateFormSubmission(
+      form,
+      submitFormDto,
+      userId,
+    );
 
     const phoneNumber = await this.extractPhoneNumber(
       form,
@@ -206,6 +214,8 @@ export class TasksService {
       form,
       formId,
       schemaSnapshot: submitFormDto.schemaSnapshot,
+      visibilityValidatorResults:
+        submitFormDto.visibilityValidatorResults ?? validatorResults,
       user,
     });
     const savedForm = await this.formResponseRepository.save(formResponse);

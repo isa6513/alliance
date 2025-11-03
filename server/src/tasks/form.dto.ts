@@ -3,7 +3,8 @@ import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
 import { ActionDto } from 'src/actions/dto/action.dto';
-import { IsDefined } from 'class-validator';
+import { IsDefined, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateFormDto extends PickType(Form, ['title', 'schema']) {}
 
@@ -14,6 +15,11 @@ export class SubmitFormDto extends PickType(FormResponse, [
   @ApiProperty()
   @IsDefined()
   actionId: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Object)
+  visibilityValidatorResults?: Record<number, boolean>;
 }
 
 export class FormDto extends PickType(Form, ['id', 'title', 'schema']) {
@@ -27,4 +33,5 @@ export class FormResponseDto extends PickType(FormResponse, [
   'formId',
   'user',
   'schemaSnapshot',
+  'visibilityValidatorResults',
 ]) {}

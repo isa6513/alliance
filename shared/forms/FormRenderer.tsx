@@ -182,9 +182,20 @@ const FormRenderer = ({
 
   const [visibilityValidatorResults, setVisibilityValidatorResults] = useState<
     Record<number, boolean>
-  >({});
+  >(() => {
+    if (readOnly && completedFormResponse?.visibilityValidatorResults) {
+      return completedFormResponse.visibilityValidatorResults as Record<
+        number,
+        boolean
+      >;
+    }
+    return {};
+  });
 
   useEffect(() => {
+    if (readOnly) {
+      return;
+    }
     setVisibilityValidatorResults((prev) => {
       let changed = false;
       const next: Record<number, boolean> = {};
@@ -203,9 +214,12 @@ const FormRenderer = ({
       }
       return next;
     });
-  }, [visibilityValidatorIds]);
+  }, [visibilityValidatorIds, readOnly]);
 
   useEffect(() => {
+    if (readOnly) {
+      return;
+    }
     const missingIds = visibilityValidatorIds.filter(
       (id) => !(id in visibilityValidatorResults)
     );
@@ -247,7 +261,7 @@ const FormRenderer = ({
     return () => {
       cancelled = true;
     };
-  }, [visibilityValidatorIds, visibilityValidatorResults]);
+  }, [visibilityValidatorIds, visibilityValidatorResults, readOnly]);
 
   const applyFieldErrorUpdates = useCallback(
     (updates: Record<string, string | null>) => {
@@ -281,6 +295,7 @@ const FormRenderer = ({
       if ("validatorId" in cond) {
         const expected = cond.resultEquals ?? true;
         const actual = visibilityValidatorResults[cond.validatorId];
+        console.log("Actual", actual);
         if (actual === undefined) {
           return false;
         }
@@ -316,6 +331,9 @@ const FormRenderer = ({
         return true;
       }
       const targetData = data ?? formData;
+      if (readOnly && !!targetData[element.id as keyof typeof targetData]) {
+        return true;
+      }
       return conditions.every((condition) =>
         evaluateCondition(condition, targetData)
       );
@@ -693,11 +711,14 @@ const FormRenderer = ({
       return;
     }
 
-    onSubmit({
+    const submissionPayload = {
       answers: formData,
       schemaSnapshot: form as unknown as Record<string, unknown>,
       actionId,
-    });
+      visibilityValidatorResults,
+    };
+
+    onSubmit(submissionPayload);
   };
 
   const validateForPreview = useCallback(async () => {
@@ -757,6 +778,60 @@ const FormRenderer = ({
       setFormData(completedFormResponse.answers as Record<string, FormValue>);
     }
   }, [readOnly, completedFormResponse]);
+
+  useEffect(() => {
+    if (!readOnly) {
+      return;
+    }
+    if (!visibilityValidatorIds.length) {
+      return;
+    }
+    setVisibilityValidatorResults((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const id of visibilityValidatorIds) {
+        if (!(id in next)) {
+          next[id] = true;
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [readOnly, visibilityValidatorIds]);
+
+  useEffect(() => {
+    if (!readOnly) {
+      return;
+    }
+    if (!completedFormResponse?.visibilityValidatorResults) {
+      return;
+    }
+    setVisibilityValidatorResults((prev) => {
+      const normalized =
+        completedFormResponse.visibilityValidatorResults as Record<
+          number,
+          boolean
+        >;
+      const keys = Object.keys(normalized);
+      if (keys.length === Object.keys(prev).length) {
+        let identical = true;
+        for (const key of keys) {
+          const numericKey = Number(key);
+          if (!Number.isFinite(numericKey)) {
+            continue;
+          }
+          if (prev[numericKey] !== normalized[numericKey]) {
+            identical = false;
+            break;
+          }
+        }
+        if (identical) {
+          return prev;
+        }
+      }
+      return normalized;
+    });
+  }, [readOnly, completedFormResponse?.visibilityValidatorResults]);
 
   useEffect(() => {
     if (

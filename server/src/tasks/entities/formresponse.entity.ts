@@ -11,7 +11,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Form } from './form.entity';
-import { FormSchema } from '../schema';
 
 @Entity()
 export class FormResponse {
@@ -37,6 +36,12 @@ export class FormResponse {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   answers: Record<string, any>;
 
+  @Column({ type: 'jsonb', default: () => "'{}'" })
+  @ApiProperty()
+  @Allow()
+  @Type(() => Object)
+  visibilityValidatorResults: Record<string, boolean>;
+
   @ApiProperty({ type: () => User })
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @IsDefined()
@@ -50,7 +55,7 @@ export class FormResponse {
   createdAt: Date;
 
   @Column({ type: 'jsonb' })
-  @ApiProperty({ type: FormSchema })
+  @ApiProperty()
   @IsDefined()
   @Type(() => Object)
   schemaSnapshot: Record<string, unknown>;

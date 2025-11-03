@@ -217,14 +217,16 @@ export class ActionActivityDto extends PickType(ActionActivity, [
 
   constructor(actionActivity: ActionActivity, comments: CommentDto[] = []) {
     super();
-    Object.assign(this, actionActivity);
+    this.actionName = actionActivity.action?.name;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { action, ...rest } = actionActivity;
+    Object.assign(this, rest);
     this.user = new ProfileDto(actionActivity.user);
     this.likes =
       actionActivity.likes !== undefined
         ? actionActivity.likes.map((like) => new ProfileDto(like))
         : [];
     this.comments = comments;
-    this.actionName = actionActivity.action?.name;
     if (!this.editableContent) {
       this.editableContent = {
         body: '',
