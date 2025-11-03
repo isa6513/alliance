@@ -210,7 +210,11 @@ export class ActionsService {
             ? await this.getUsersJoinedForCommitmentlessAction(action)
             : undefined,
           userRelation: user
-            ? await this.getActionRelation(action.id, user.id)
+            ? await this.getActionRelationFromActivities(
+                action.activities.filter(
+                  (activity) => activity.userId === user.id,
+                ),
+              )
             : undefined,
           reqAuthenticated: !!user,
         });
@@ -307,13 +311,10 @@ export class ActionsService {
     });
   }
 
-  async getActionRelation(
-    actionId: number,
-    userId: number,
+  // assumes pre-filtered for one users activities!
+  async getActionRelationFromActivities(
+    activities: ActionActivity[],
   ): Promise<UserActionRelation> {
-    const activities = await this.actionActivityRepository.find({
-      where: { action: { id: actionId }, user: { id: userId } },
-    });
     if (
       activities.some(
         (activity) => activity.type === ActionActivityType.USER_DECLINED,
@@ -343,6 +344,16 @@ export class ActionsService {
       return UserActionRelation.Joined;
     }
     return UserActionRelation.None;
+  }
+
+  async getActionRelation(
+    actionId: number,
+    userId: number,
+  ): Promise<UserActionRelation> {
+    const activities = await this.actionActivityRepository.find({
+      where: { action: { id: actionId }, user: { id: userId } },
+    });
+    return this.getActionRelationFromActivities(activities);
   }
 
   async createActionActivity(
@@ -769,7 +780,6 @@ export class ActionsService {
     if (process.env.NODE_ENV !== 'development') {
       return;
     }
-    // Clear in order to respect foreign key constraints
     await this.actionActivityRepository.delete({});
     await this.actionEventRepository.delete({});
     await this.actionRepository.delete({});
