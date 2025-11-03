@@ -27,7 +27,7 @@ export class ActionUpdate {
   @ApiProperty()
   id: number;
 
-  @ManyToOne(() => Action, (action) => action.updates)
+  @ManyToOne(() => Action, (action) => action.updates, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'actionId' })
   @Type(() => Action)
   @Allow()

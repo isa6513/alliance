@@ -1,7 +1,7 @@
 import { UserDto } from "@alliance/shared/client";
 import React, { useMemo, useState } from "react";
 
-export type UserSelectUser = Pick<UserDto, "id" | "name" | "email">;
+export type UserSelectUser = Pick<UserDto, "id" | "name">;
 
 interface UserSelectProps {
   users: UserSelectUser[];
@@ -45,7 +45,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
     return users
       .filter((user) => !selectedIds.has(user.id))
       .filter((user) => {
-        const haystack = `${user.name ?? ""} ${user.email ?? ""}`.toLowerCase();
+        const haystack = `${user.name ?? ""}`.toLowerCase();
         return haystack.includes(term);
       })
       .slice(0, MAX_RESULTS);
@@ -99,7 +99,6 @@ const UserSelect: React.FC<UserSelectProps> = ({
               <span className="font-medium">
                 {user.name ?? `User #${user.id}`}
               </span>
-              <span className="text-xs text-gray-500 block">{user.email}</span>
             </button>
           ))}
         </div>
@@ -117,7 +116,6 @@ const UserSelect: React.FC<UserSelectProps> = ({
           >
             <div>
               <p className="font-medium">{user.name ?? `User #${user.id}`}</p>
-              <p className="text-xs text-gray-600">{user.email}</p>
             </div>
             <button
               type="button"

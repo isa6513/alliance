@@ -184,18 +184,18 @@ const ActionsList: React.FC = () => {
         const relevantActions =
           nonArchivedActions.length > 0 ? nonArchivedActions : suiteActions;
 
-        const firstActionDate = relevantActions.reduce<Date | null>(
-          (earliest, action) => {
+        const latestEventDate = relevantActions.reduce<Date | null>(
+          (latest, action) => {
             const date = getLastPastEventDate(action);
             if (!date) {
-              return earliest;
+              return latest;
             }
 
-            if (!earliest || date < earliest) {
+            if (!latest || date > latest) {
               return date;
             }
 
-            return earliest;
+            return latest;
           },
           null
         );
@@ -203,7 +203,7 @@ const ActionsList: React.FC = () => {
         return {
           ...suite,
           actions: suiteActions,
-          sortDate: firstActionDate,
+          sortDate: latestEventDate,
           isArchivedOnly: suiteActions.every((action) => action.archived),
         };
       })
@@ -230,7 +230,7 @@ const ActionsList: React.FC = () => {
           return 0;
         }
 
-        return aDate.getTime() - bDate.getTime();
+        return bDate.getTime() - aDate.getTime();
       });
   }, [actions]);
 
@@ -299,8 +299,7 @@ const ActionsList: React.FC = () => {
         </Button>
       </div>
       <p className="text-sm text-zinc-500 px-5">
-        Grouped by suite and ordered by earliest appearing action (earliest last
-        event first)
+        Grouped by suite and ordered by latest event (most recent first)
       </p>
 
       <div className="space-y-5 flex-1 overflow-y-auto p-5 pt-0">

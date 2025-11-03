@@ -1,0 +1,162 @@
+import { DataSource, Repository } from 'typeorm';
+import { ActionEventNotifWorker } from './action-event-notif.worker';
+import { NotificationPlan } from './action-event-reminder.service';
+import { NotifsService } from './notifs.service';
+import { MailService } from 'src/mail/mail.service';
+import { MmsService } from 'src/mms/mms.service';
+import { ActionsService } from 'src/actions/actions.service';
+import { ActionEventNotif } from './entities/action-event-notif.entity';
+import {
+  ReminderCohortType,
+  ReminderGroup,
+  ReminderGroupTimingMode,
+} from 'src/actions/entities/reminder-group.entity';
+import {
+  ActionEvent,
+  ActionStatus,
+} from 'src/actions/entities/action-event.entity';
+import { Action } from 'src/actions/entities/action.entity';
+import { User } from 'src/user/entities/user.entity';
+import { ActionEventReminderService } from './action-event-reminder.service';
+
+describe('ActionEventNotifWorker.processCustomReminderText', () => {
+  let worker: ActionEventNotifWorker;
+  let actionsService: jest.Mocked<ActionsService>;
+  let originalAppUrl: string | undefined;
+
+  beforeAll(() => {
+    originalAppUrl = process.env.APP_URL;
+    process.env.APP_URL = 'https://app.example.org';
+  });
+
+  afterAll(() => {
+    process.env.APP_URL = originalAppUrl;
+  });
+
+  beforeEach(() => {
+    actionsService = {
+      getUncompletedTasksCount: jest.fn(),
+    } as unknown as jest.Mocked<ActionsService>;
+
+    worker = new ActionEventNotifWorker(
+      {} as DataSource,
+      {} as NotifsService,
+      {} as MailService,
+      {} as MmsService,
+      actionsService,
+      {} as Repository<ActionEventNotif>,
+      {} as ActionEventReminderService,
+    );
+  });
+
+  it('replaces all reminder keywords when a deadline event is present', async () => {
+    actionsService.getUncompletedTasksCount.mockResolvedValue(3);
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+
+    try {
+      const action = { id: 42, name: 'Test Action' } as Action;
+      const memberActionEvent = {
+        id: 101,
+        action,
+        date: new Date('2023-12-15T12:00:00Z'),
+        newStatus: ActionStatus.MemberAction,
+      } as ActionEvent;
+      const deadlineEvent = {
+        id: 202,
+        action,
+        date: new Date('2024-01-03T06:00:00Z'),
+        newStatus: ActionStatus.Completed,
+      } as ActionEvent;
+
+      const plan: NotificationPlan = {
+        scheduledFor: new Date('2024-01-02T00:00:00Z'),
+        user: {
+          id: 7,
+          name: 'Alex Example',
+        } as User,
+        group: {
+          id: 5,
+          name: 'Reminder #1',
+          timingMode: ReminderGroupTimingMode.Absolute,
+          cohortType: ReminderCohortType.AllUncompleted,
+          emailMessage: '',
+          emailSubject: '',
+          textMessage: '',
+          memberActionEvent,
+          deadlineEvent,
+        } as ReminderGroup,
+      };
+
+      const template =
+        'Hi #{firstname} #{lastname} (#{fullname}), action #{action} has #{n} tasks due in #{days} and #{hours}. Link: #{link}';
+
+      const result = await worker.processCustomReminderText(
+        template,
+        plan,
+        'cid-123',
+      );
+
+      expect(result).toBe(
+        'Hi Alex Example (Alex Example), action Test Action has 3 tasks due in 2 days and 6 hours. Link: https://app.example.org/tasks?cid=cid-123',
+      );
+      expect(actionsService.getUncompletedTasksCount).toHaveBeenCalledWith(7);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('falls back gracefully when user has a single name and no deadline event', async () => {
+    actionsService.getUncompletedTasksCount.mockResolvedValue(1);
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+
+    const action = { id: 12, name: 'Tree Planting' } as Action;
+    const memberActionEvent = {
+      id: 303,
+      action,
+      date: new Date('2024-02-10T10:00:00Z'),
+      newStatus: ActionStatus.MemberAction,
+    } as ActionEvent;
+
+    const plan: NotificationPlan = {
+      scheduledFor: new Date('2024-02-11T12:00:00Z'),
+      user: {
+        id: 9,
+        name: 'Cher',
+      } as User,
+      group: {
+        id: 6,
+        name: 'Reminder #2',
+        timingMode: ReminderGroupTimingMode.WithinRange,
+        cohortType: ReminderCohortType.AllUncompleted,
+        emailMessage: '',
+        emailSubject: '',
+        textMessage: '',
+        memberActionEvent,
+      } as ReminderGroup,
+    };
+
+    const template =
+      'Hello #{firstname}! Deadline in #{days} / #{hours}. Tasks left: #{n}. Visit #{link}';
+
+    try {
+      const result = await worker.processCustomReminderText(
+        template,
+        plan,
+        'cid-456',
+      );
+
+      expect(result).toBe(
+        'Hello Cher! Deadline in [err] / [err]. Tasks left: 1. Visit https://app.example.org/tasks?cid=cid-456',
+      );
+      expect(actionsService.getUncompletedTasksCount).toHaveBeenCalledWith(9);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'User name has less than 2 parts: Cher',
+      );
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+});

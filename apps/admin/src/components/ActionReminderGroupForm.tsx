@@ -398,6 +398,10 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   );
   const firstTentativePlan = sortedPlans[0];
 
+  const isProd = !(
+    typeof window !== "undefined" && window.location.href.includes("localhost")
+  );
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 w-full">
       <div>
@@ -715,27 +719,24 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       )}
 
       <div className="flex justify-end gap-3">
-        {tentativePlans.length > 0 &&
-          !(
-            typeof window !== "undefined" &&
-            window.location.href.includes("localhost")
-          ) && (
-            <p
-              className={`px-4 py-2 rounded self-start ${
-                tentativePlans.length > 0
-                  ? "bg-yellow-600 text-white"
-                  : "border border-gray-200"
-              }`}
-            >
-              ⚠️ This will send <b>{tentativePlans.length}</b> reminders
-              {firstTentativePlan && (
-                <span>
-                  , starting at{" "}
-                  {new Date(firstTentativePlan.scheduledFor).toLocaleString()}
-                </span>
-              )}
-            </p>
-          )}
+        {tentativePlans.length > 0 && (
+          <p
+            className={`px-4 py-2 rounded self-start ${
+              tentativePlans.length > 0 && isProd
+                ? "bg-yellow-600 text-white"
+                : "border border-gray-200"
+            }`}
+          >
+            {isProd && "⚠️"} This will send <b>{tentativePlans.length}</b>{" "}
+            reminders
+            {firstTentativePlan && (
+              <span>
+                , starting at{" "}
+                {new Date(firstTentativePlan.scheduledFor).toLocaleString()}
+              </span>
+            )}
+          </p>
+        )}
         {onCancel && (
           <Button
             type="button"
