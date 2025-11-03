@@ -295,7 +295,6 @@ const FormRenderer = ({
       if ("validatorId" in cond) {
         const expected = cond.resultEquals ?? true;
         const actual = visibilityValidatorResults[cond.validatorId];
-        console.log("Actual", actual);
         if (actual === undefined) {
           return false;
         }
@@ -338,7 +337,7 @@ const FormRenderer = ({
         evaluateCondition(condition, targetData)
       );
     },
-    [evaluateCondition, formData]
+    [evaluateCondition, formData, readOnly]
   );
 
   const isFieldConditionallyRequired = useCallback(

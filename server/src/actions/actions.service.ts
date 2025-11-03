@@ -209,6 +209,9 @@ export class ActionsService {
           userJoined: action.commitmentless
             ? await this.getUsersJoinedForCommitmentlessAction(action)
             : undefined,
+          userRelation: user
+            ? await this.getActionRelation(action.id, user.id)
+            : undefined,
           reqAuthenticated: !!user,
         });
       }),
