@@ -331,6 +331,19 @@ export type ActionEvent = {
     suiteManaged: boolean;
 };
 
+export type Page = {
+    [key: string]: unknown;
+};
+
+export type FormSchema = {
+    title: string;
+    description?: string;
+    pages: Array<Page>;
+    submit?: {
+        [key: string]: unknown;
+    };
+};
+
 export type FormResponse = {
     id: number;
     formId: number;
@@ -339,9 +352,7 @@ export type FormResponse = {
     };
     user: User;
     createdAt: string;
-    schemaSnapshot: {
-        [key: string]: unknown;
-    };
+    schemaSnapshot: FormSchema;
 };
 
 export type ActionActivity = {
@@ -1317,9 +1328,7 @@ export type SubmitFormDto = {
     answers: {
         [key: string]: unknown;
     };
-    schemaSnapshot: {
-        [key: string]: unknown;
-    };
+    schemaSnapshot: FormSchema;
     actionId: number;
 };
 
@@ -1346,9 +1355,7 @@ export type FormResponseDto = {
         [key: string]: unknown;
     };
     user: User;
-    schemaSnapshot: {
-        [key: string]: unknown;
-    };
+    schemaSnapshot: FormSchema;
 };
 
 export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'HasPhoneNumber';

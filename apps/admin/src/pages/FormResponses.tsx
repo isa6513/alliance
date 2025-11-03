@@ -5,7 +5,11 @@ import {
   type FormDto,
 } from "@alliance/shared/client";
 import FormRenderer from "@alliance/shared/forms/FormRenderer";
-import type { FormSchema, Page } from "@alliance/shared/forms/formschema";
+import type {
+  FieldKind,
+  FormSchema,
+  Page,
+} from "@alliance/shared/forms/formschema";
 import Button from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -19,7 +23,7 @@ type FormWithSchema = Pick<FormDto, "id" | "title"> & {
 const PAGE_SIZE = 1; // show one response per page (step-through)
 
 // Runtime guard: distinguish answer fields from display blocks
-const ANSWER_FIELD_KINDS = new Set([
+const ANSWER_FIELD_KINDS = new Set<FieldKind>([
   "text",
   "textarea",
   "email",
@@ -40,7 +44,7 @@ const isAnswerField = (
   const anyNode = node as { kind: string; id: string; label: string };
   return (
     typeof anyNode.kind === "string" &&
-    ANSWER_FIELD_KINDS.has(anyNode.kind) &&
+    ANSWER_FIELD_KINDS.has(anyNode.kind as FieldKind) &&
     typeof anyNode.id === "string" &&
     typeof anyNode.label === "string"
   );
@@ -285,7 +289,10 @@ const FormResponses: React.FC = () => {
               <FormRenderer
                 id={form.id}
                 actionId={0}
-                form={form.schema as unknown as FormSchema}
+                form={
+                  (pageItems[0].schemaSnapshot as unknown as FormSchema) ??
+                  form.schema
+                }
                 completedFormResponse={pageItems[0]}
                 renderFormAsCompleted
                 onSubmit={null}

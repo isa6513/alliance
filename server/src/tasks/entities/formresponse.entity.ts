@@ -11,6 +11,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Form } from './form.entity';
+import { FormSchema } from '../schema';
 
 @Entity()
 export class FormResponse {
@@ -49,7 +50,7 @@ export class FormResponse {
   createdAt: Date;
 
   @Column({ type: 'jsonb' })
-  @ApiProperty()
+  @ApiProperty({ type: FormSchema })
   @IsDefined()
   @Type(() => Object)
   schemaSnapshot: Record<string, unknown>;
