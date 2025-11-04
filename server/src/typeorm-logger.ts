@@ -35,7 +35,10 @@ export class AppTypeOrmLogger implements TypeOrmLogger {
     const serviceStackLines = stack
       .split('\n')
       .filter((line) => line.includes('.service.ts'))
-      .join('\n');
+      .join('\n')
+      .trim();
+
+    console.log(serviceStackLines);
 
     this.logger.warn({
       event: 'db.slow_query',
