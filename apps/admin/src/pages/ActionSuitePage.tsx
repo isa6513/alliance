@@ -110,7 +110,7 @@ const ActionSuitePage = () => {
         {suite?.actions
           .sort((a, b) => b.priority - a.priority)
           .map((action) => (
-            <ActionListCard key={action.id} action={action} totalUsers={0} />
+            <ActionListCard key={action.id} action={action} />
           ))}
       </div>
       {suite && suite.actions.length > 0 && (

@@ -7,10 +7,9 @@ import { useNavigate } from "react-router";
 
 export interface ActionListCardProps {
   action: ActionDto;
-  totalUsers: number;
 }
 
-const ActionListCard = ({ action, totalUsers }: ActionListCardProps) => {
+const ActionListCard = ({ action }: ActionListCardProps) => {
   const navigate = useNavigate();
   const handleEditAction = useCallback(
     (id: number) => {
@@ -56,7 +55,7 @@ const ActionListCard = ({ action, totalUsers }: ActionListCardProps) => {
 
         <ActionProgressBar
           status={action.status}
-          usersJoined={action.commitmentless ? totalUsers : action.usersJoined}
+          usersJoined={action.usersJoined}
           usersCompleted={action.usersCompleted}
           commitmentThreshold={action.commitmentThreshold}
           actionType={action.type}

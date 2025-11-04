@@ -125,7 +125,15 @@ export class ActionsService {
         relations: ['events', 'activities', 'participatingGroups', 'suite'],
       })
       .then((actions) => {
-        return actions.map((action) => new ActionDto(action));
+        return Promise.all(
+          actions.map(async (action) => {
+            return new ActionDto(action, {
+              userJoined: action.commitmentless
+                ? await this.getUsersJoinedForCommitmentlessAction(action)
+                : undefined,
+            });
+          }),
+        );
       });
   }
 
@@ -1070,9 +1078,23 @@ export class ActionsService {
         'reminderGroups.memberActionEvent',
         'reminderGroups.memberActionEvent',
         'reminderGroups.deadlineEvent',
+        'actions.participatingGroups',
+        'actions.activities',
       ],
     });
-    return new ActionSuiteDto(instanceToPlain(suite) as ActionSuite);
+    const actionsWithUsersJoined = await Promise.all(
+      suite.actions.map(async (action) => {
+        return new ActionDto(action, {
+          userJoined: action.commitmentless
+            ? await this.getUsersJoinedForCommitmentlessAction(action)
+            : undefined,
+        });
+      }),
+    );
+    return new ActionSuiteDto(
+      instanceToPlain(suite) as ActionSuite,
+      actionsWithUsersJoined,
+    );
   }
 
   async createSuite(

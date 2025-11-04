@@ -299,9 +299,10 @@ export class ActionSuiteDto extends OmitType(ActionSuite, ['actions']) {
   @Allow()
   actions: ActionDto[];
 
-  constructor(suite: ActionSuite) {
+  constructor(suite: ActionSuite, actions?: ActionDto[]) {
     super();
     Object.assign(this, suite);
-    this.actions = suite.actions.map((action) => new ActionDto(action));
+    this.actions =
+      actions || suite.actions.map((action) => new ActionDto(action));
   }
 }

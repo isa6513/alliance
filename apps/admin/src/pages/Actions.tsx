@@ -5,7 +5,6 @@ import {
   actionsCreate,
   actionsFindAllWithDrafts,
   actionsSetTestRelations,
-  userList,
 } from "@alliance/shared/client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
@@ -72,7 +71,6 @@ const ActionsList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showPopulateConfirm, setShowPopulateConfirm] = useState(false);
   const [isPopulating, setIsPopulating] = useState(false);
-  const [totalUsers, setTotalUsers] = useState<number>(0);
   const navigate = useNavigate();
 
   const loadActions = useCallback(async () => {
@@ -91,7 +89,6 @@ const ActionsList: React.FC = () => {
 
   useEffect(() => {
     loadActions();
-    userList().then((res) => setTotalUsers(res.data?.length ?? 0));
   }, [loadActions]);
 
   const handlePopulateTestData = useCallback(async () => {
@@ -324,11 +321,7 @@ const ActionsList: React.FC = () => {
             </div>
             <div className="space-y-3 p-4">
               {suite.actions.map((action) => (
-                <ActionListCard
-                  key={action.id}
-                  action={action}
-                  totalUsers={totalUsers}
-                />
+                <ActionListCard key={action.id} action={action} />
               ))}
             </div>
           </div>
