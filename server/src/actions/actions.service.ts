@@ -597,7 +597,7 @@ export class ActionsService {
   async findCompletedForUser(userId: number): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
       where: { userId, type: ActionActivityType.USER_COMPLETED },
-      relations: ['action', 'user'],
+      relations: ['action', 'user', 'likes'],
     });
     return activities.map((activity) => new ActionActivityDto(activity));
   }
@@ -830,7 +830,7 @@ export class ActionsService {
           ActionActivityType.USER_COMPLETED,
         ]),
       },
-      relations: ['user', 'action'],
+      relations: ['user', 'action', 'likes'],
       order: { createdAt: 'DESC' },
     });
     return friendActivities.map((activity) => new ActionActivityDto(activity));
