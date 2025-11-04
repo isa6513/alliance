@@ -34,6 +34,8 @@ const ANSWER_FIELD_KINDS = new Set<FieldKind>([
   "select",
   "multiselect",
   "date",
+  "time",
+  "timezone",
   "file",
 ]);
 
