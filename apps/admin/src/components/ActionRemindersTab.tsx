@@ -592,7 +592,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
               >
                 {createGroupExpanded ? "Hide form" : "New reminder"}
               </Button>
-              {!createGroupExpanded && (
+              {!createGroupExpanded && reminderGroups.length === 0 && (
                 <Button
                   type="button"
                   color={ButtonColor.Green}
