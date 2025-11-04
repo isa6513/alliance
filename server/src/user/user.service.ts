@@ -41,6 +41,11 @@ import {
 } from './dto/user-action-relations.dto';
 import { OnetimeInvite } from './entities/onetime-invite.entity';
 import { CreateOnetimeInviteDto } from './dto/invite.dto';
+import { UserAwayRange } from './entities/user-away-range.entity';
+import { CreateAwayRangeDto } from './dto/away-range.dto';
+import { Temporal } from '@js-temporal/polyfill';
+
+const defaultTimeZone = 'America/Los_Angeles';
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -68,6 +73,8 @@ export class UserService {
     private readonly groupRepository: Repository<Group>,
     @InjectRepository(OnetimeInvite)
     private readonly onetimeInviteRepository: Repository<OnetimeInvite>,
+    @InjectRepository(UserAwayRange)
+    private readonly userAwayRangeRepository: Repository<UserAwayRange>,
     private readonly jwtService: JwtService,
     private readonly imagesService: ImagesService,
     private readonly mailService: MailService,
@@ -703,7 +710,7 @@ export class UserService {
       where: {
         isNotSignedUpPartialProfile: false,
       },
-      relations: ['groups'],
+      relations: ['groups', 'awayRanges'],
     });
   }
 
@@ -740,6 +747,92 @@ export class UserService {
     const user = await this.findOneOrFail(userId);
     user.contractDateSuspended = new Date();
     return this.userRepository.save(user);
+  }
+
+  async createAwayRange(
+    userId: number,
+    data: CreateAwayRangeDto,
+  ): Promise<UserAwayRange> {
+    const startDay = Temporal.PlainDate.from(data.startDay);
+    const endDay = Temporal.PlainDate.from(data.endDay);
+    const user = await this.findOneOrFail(userId);
+    const tz = user.timeZone ?? defaultTimeZone;
+    const now = new Date();
+
+    const startDate = startDay
+      .toZonedDateTime({
+        timeZone: tz,
+        plainTime: Temporal.PlainTime.from({ hour: 0 }),
+      })
+      .toInstant();
+    const endDate = endDay
+      .toZonedDateTime({
+        timeZone: tz,
+        plainTime: Temporal.PlainTime.from({ hour: 23, minute: 59 }),
+      })
+      .toInstant();
+
+    if (startDate.epochMilliseconds >= endDate.epochMilliseconds) {
+      throw new BadRequestException('End date must be after start date.');
+    }
+
+    if (startDate.epochMilliseconds < now.getTime()) {
+      throw new BadRequestException('Start date must be in the future.');
+    }
+
+    const maxDuration = 14 * 24 * 60 * 60 * 1000; // 14 days in milliseconds
+    if (endDate.epochMilliseconds - startDate.epochMilliseconds > maxDuration) {
+      throw new BadRequestException(
+        'Away period cannot exceed 14 days. Please email us if you need to be away for longer.',
+      );
+    }
+
+    const awayRange = this.userAwayRangeRepository.create({
+      userId,
+      startDate: new Date(startDate.epochMilliseconds),
+      endDate: new Date(endDate.epochMilliseconds),
+      note: data.note,
+    });
+
+    return this.userAwayRangeRepository.save(awayRange);
+  }
+
+  async getAwayRanges(userId: number): Promise<UserAwayRange[]> {
+    return this.userAwayRangeRepository.find({
+      where: { userId },
+      order: { startDate: 'DESC' },
+    });
+  }
+
+  async deleteAwayRange(userId: number, awayRangeId: number): Promise<void> {
+    const awayRange = await this.userAwayRangeRepository.findOne({
+      where: { id: awayRangeId, userId },
+    });
+
+    if (!awayRange) {
+      throw new NotFoundException('Away range not found.');
+    }
+
+    await this.userAwayRangeRepository.remove(awayRange);
+  }
+
+  isUserAway(user: User, checkDate: Date = new Date()): boolean {
+    return user.awayRanges.some(
+      (range) => checkDate >= range.startDate && checkDate <= range.endDate,
+    );
+  }
+
+  async isUserIdAway(
+    userId: number,
+    checkDate: Date = new Date(),
+  ): Promise<boolean> {
+    const awayRanges = await this.userAwayRangeRepository.find({
+      where: { userId },
+    });
+
+    return awayRanges.some(
+      (range) => checkDate >= range.startDate && checkDate <= range.endDate,
+    );
   }
 
   async createGroup(body: CreateGroupDto): Promise<Group> {

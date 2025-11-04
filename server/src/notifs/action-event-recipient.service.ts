@@ -59,7 +59,7 @@ export class ActionEventRecipientService {
             eventDate,
             targetGroupIds,
             action.everyoneShouldComplete,
-          ) === true,
+          ) === true && !this.userService.isUserAway(user, eventDate),
       );
 
     if (eventStatus === ActionStatus.MemberAction && !action.commitmentless) {
@@ -68,7 +68,7 @@ export class ActionEventRecipientService {
           actionId: action.id,
           type: ActionActivityType.USER_JOINED,
         },
-        relations: ['user', 'user.groups'],
+        relations: ['user', 'user.groups', 'user.awayRanges'],
       });
       return filterToEligible(activities.map((activity) => activity.user));
     }
@@ -95,7 +95,7 @@ export class ActionEventRecipientService {
     );
     const usersWithGroups = await this.userService.findByIds(
       users.map((user) => user.id),
-      ['groups'],
+      ['groups', 'awayRanges'],
     );
     const idToUser = new Map(usersWithGroups.map((user) => [user.id, user]));
 
