@@ -5,13 +5,15 @@ import { PostHog } from 'posthog-node';
 
 export class AppTypeOrmLogger implements TypeOrmLogger {
   private readonly logger = new NestLogger('TypeORM');
-  private readonly client: PostHog;
+  private readonly client?: PostHog;
 
   constructor() {
+    if (!process.env.POSTHOG_KEY) {
+      return;
+    }
     this.client = new PostHog(process.env.POSTHOG_KEY!, {
       host: 'https://us.i.posthog.com',
     });
-    console.log(this.client.apiKey);
   }
 
   logQuery() {}
@@ -41,6 +43,8 @@ export class AppTypeOrmLogger implements TypeOrmLogger {
       sql: query,
       params: this.safeParams(parameters),
     });
+    if (!this.client) return;
+
     this.client.capture({
       distinctId: 'server',
       event: 'db.slow_query',
