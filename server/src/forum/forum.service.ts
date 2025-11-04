@@ -162,7 +162,7 @@ export class ForumService {
         parentObjectId: postId,
         parentObjectType: CommentParentObject.Post,
       },
-      relations: ['author', 'editableContent'],
+      relations: ['author', 'editableContent', 'likes'],
       order: { createdAt: 'ASC' },
     });
 
@@ -189,7 +189,7 @@ export class ForumService {
         parentObjectId: activityId,
         parentObjectType: CommentParentObject.Activity,
       },
-      relations: ['author', 'editableContent'],
+      relations: ['author', 'editableContent', 'likes'],
       order: { createdAt: 'ASC' },
     });
 
@@ -202,7 +202,7 @@ export class ForumService {
         parentObjectId: actionId,
         parentObjectType: CommentParentObject.Action,
       },
-      relations: ['author', 'editableContent'],
+      relations: ['author', 'editableContent', 'likes'],
       order: { createdAt: 'ASC' },
     });
 
@@ -582,7 +582,7 @@ export class ForumService {
         deleted: false,
         parentObjectType: CommentParentObject.Post,
       },
-      relations: ['author', 'editableContent'],
+      relations: ['author', 'editableContent', 'likes'],
       order: { createdAt: 'DESC' },
     });
   }

@@ -118,7 +118,7 @@ export class Comment {
   @Allow()
   pinned: boolean;
 
-  @ManyToMany(() => User, { onDelete: 'CASCADE', eager: true })
+  @ManyToMany(() => User, { onDelete: 'CASCADE' })
   @ApiProperty({ type: () => User, isArray: true })
   @JoinTable()
   @Allow()
