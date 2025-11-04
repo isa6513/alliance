@@ -33,6 +33,9 @@ const ssrHttpLatency = io.histogram({
 io.init({
   http: true, // enable built-in HTTP metrics (latency, req/sec, etc)
   transactions: true, // enable transaction tracing
+  metrics: {
+    http: true,
+  },
 });
 
 // handle asset requests
