@@ -35,9 +35,10 @@ export function EditableChoiceField({
     index: number,
     updates: { label?: string; value?: string }
   ) => {
-    const updatedOptions = [...(field.options || [])];
+    const previousOptions = field.options || [];
+    const previousValue = previousOptions[index]?.value;
+    const updatedOptions = [...previousOptions];
     updatedOptions[index] = { ...updatedOptions[index], ...updates };
-    const previousValue = field.options?.[index]?.value;
     const nextUpdates: Partial<ChoiceField> = { options: updatedOptions };
     if (
       field.kind === "select" &&
@@ -48,18 +49,44 @@ export function EditableChoiceField({
       nextUpdates.defaultValue =
         updates.value && updates.value.length > 0 ? updates.value : null;
     }
+    if (
+      field.kind === "multiselect" &&
+      updates.value !== undefined &&
+      previousValue
+    ) {
+      const defaults = Array.isArray(field.defaultValue)
+        ? field.defaultValue.slice()
+        : [];
+      if (defaults.includes(previousValue)) {
+        const filtered = defaults.filter((value) => value !== previousValue);
+        if (updates.value && updates.value.length > 0) {
+          filtered.push(updates.value);
+        }
+        nextUpdates.defaultValue = filtered.length > 0 ? filtered : null;
+      }
+    }
     onUpdate(nextUpdates);
   };
 
   const removeOption = (index: number) => {
     const updatedOptions = field.options?.filter((_, i) => i !== index) || [];
     const updates: Partial<ChoiceField> = { options: updatedOptions };
+    const removedValue = field.options?.[index]?.value;
     if (
       field.kind === "select" &&
       field.defaultValue &&
       field.options?.[index]?.value === field.defaultValue
     ) {
       updates.defaultValue = null;
+    }
+    if (
+      field.kind === "multiselect" &&
+      removedValue &&
+      Array.isArray(field.defaultValue) &&
+      field.defaultValue.includes(removedValue)
+    ) {
+      const filtered = field.defaultValue.filter((value) => value !== removedValue);
+      updates.defaultValue = filtered.length > 0 ? filtered : null;
     }
     onUpdate(updates);
   };
@@ -78,6 +105,22 @@ export function EditableChoiceField({
       return;
     }
     onUpdate({ defaultValue: value ?? null });
+  };
+
+  const toggleMultiDefault = (value: string, checked: boolean) => {
+    if (field.kind !== "multiselect") {
+      return;
+    }
+    const defaults = new Set(
+      Array.isArray(field.defaultValue) ? field.defaultValue : []
+    );
+    if (checked) {
+      defaults.add(value);
+    } else {
+      defaults.delete(value);
+    }
+    const next = Array.from(defaults);
+    onUpdate({ defaultValue: next.length > 0 ? next : null });
   };
 
   return (
@@ -164,6 +207,22 @@ export function EditableChoiceField({
                   <span>Default</span>
                 </label>
               )}
+              {field.kind === "multiselect" && (
+                <label className="flex items-center space-x-1 text-xs text-gray-600">
+                  <input
+                    type="checkbox"
+                    checked={
+                      Array.isArray(field.defaultValue) &&
+                      field.defaultValue.includes(option.value)
+                    }
+                    onChange={(event) =>
+                      toggleMultiDefault(option.value, event.target.checked)
+                    }
+                    className="h-3 w-3 text-blue-500 focus:ring-blue-500"
+                  />
+                  <span>Default</span>
+                </label>
+              )}
               <input
                 type="text"
                 value={option.label}
@@ -218,6 +277,17 @@ export function EditableChoiceField({
               className="text-xs text-gray-500 hover:text-gray-700"
             >
               Clear default
+            </button>
+          </div>
+        )}
+        {field.kind === "multiselect" && (
+          <div className="flex items-center justify-end mt-2">
+            <button
+              type="button"
+              onClick={() => onUpdate({ defaultValue: null })}
+              className="text-xs text-gray-500 hover:text-gray-700"
+            >
+              Clear defaults
             </button>
           </div>
         )}

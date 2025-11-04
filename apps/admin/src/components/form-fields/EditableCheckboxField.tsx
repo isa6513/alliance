@@ -34,6 +34,14 @@ export function EditableCheckboxField({
         checked={field.required}
         onChange={(checked) => onUpdate({ required: checked })}
       />
+
+      <RequiredToggle
+        label="Checked by default"
+        checked={field.defaultValue === true}
+        onChange={(checked) =>
+          onUpdate({ defaultValue: checked ? true : null })
+        }
+      />
     </FieldWrapper>
   );
 }
