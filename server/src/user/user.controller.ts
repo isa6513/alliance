@@ -94,7 +94,10 @@ export class UserController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: UserAwayRangeDto })
   @ApiUnauthorizedResponse()
-  async createAwayRange(@Request() req: JwtRequest, @Body() body: CreateAwayRangeDto) {
+  async createAwayRange(
+    @Request() req: JwtRequest,
+    @Body() body: CreateAwayRangeDto,
+  ) {
     return this.userService.createAwayRange(req.user.sub, body);
   }
 
@@ -110,7 +113,10 @@ export class UserController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: String })
   @ApiUnauthorizedResponse()
-  async deleteAwayRange(@Request() req: JwtRequest, @Param('id', ParseIntPipe) id: number) {
+  async deleteAwayRange(
+    @Request() req: JwtRequest,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     await this.userService.deleteAwayRange(req.user.sub, id);
     return { success: true };
   }
@@ -289,11 +295,8 @@ export class UserController {
   async membersWithFriends(
     @Query('requireSignedContract', new DefaultValuePipe(false), ParseBoolPipe)
     requireSignedContract: boolean,
-    @Request() req: JwtRequest,
   ): Promise<ProfileDtoWithFriends[]> {
-    const users = await this.userService.findAllWithFriendRequests(
-      req.user.sub,
-    );
+    const users = await this.userService.findAllWithFriendRequests();
 
     if (requireSignedContract) {
       return users

@@ -136,73 +136,15 @@ export class UserService {
     return this.userRepository.find();
   }
 
-  findAllWithFriendRequests(userId: number): Promise<User[]> {
-    return (
-      this.userRepository
-        .createQueryBuilder('user')
-        // Direct friend requests: user -> userId (sent)
-        .leftJoinAndSelect(
-          'user.sentFriendRequests',
-          'directSent',
-          'directSent.addresseeId = :userId',
-          { userId },
-        )
-        .leftJoinAndSelect('directSent.addressee', 'directSentAddressee')
-
-        // Direct friend requests: userId -> user (received)
-        .leftJoinAndSelect(
-          'user.receivedFriendRequests',
-          'directReceived',
-          'directReceived.requesterId = :userId',
-          { userId },
-        )
-        .leftJoinAndSelect(
-          'directReceived.requester',
-          'directReceivedRequester',
-        )
-
-        // All sent friend requests of the direct friend (so you can see who *they* sent to)
-        .leftJoinAndSelect(
-          'directSentAddressee.sentFriendRequests',
-          'fofFromDirectSent',
-        )
-        .leftJoinAndSelect(
-          'fofFromDirectSent.addressee',
-          'fofFromDirectSentAddressee',
-        )
-
-        // All received friend requests of the direct friend (who sent to them)
-        .leftJoinAndSelect(
-          'directSentAddressee.receivedFriendRequests',
-          'fofToDirectSent',
-        )
-        .leftJoinAndSelect(
-          'fofToDirectSent.requester',
-          'fofToDirectSentRequester',
-        )
-
-        // All sent friend requests of the direct friend
-        .leftJoinAndSelect(
-          'directReceivedRequester.sentFriendRequests',
-          'fofFromDirectReceived',
-        )
-        .leftJoinAndSelect(
-          'fofFromDirectReceived.addressee',
-          'fofFromDirectReceivedAddressee',
-        )
-
-        // All received friend requests of the direct friend
-        .leftJoinAndSelect(
-          'directReceivedRequester.receivedFriendRequests',
-          'fofToDirectReceived',
-        )
-        .leftJoinAndSelect(
-          'fofToDirectReceived.requester',
-          'fofToDirectReceivedRequester',
-        )
-
-        .getMany()
-    );
+  findAllWithFriendRequests(): Promise<User[]> {
+    return this.userRepository.find({
+      relations: [
+        'sentFriendRequests',
+        'sentFriendRequests.addressee',
+        'receivedFriendRequests',
+        'receivedFriendRequests.requester',
+      ],
+    });
   }
 
   findOne(id: number, relations?: string[]): Promise<User | null> {
