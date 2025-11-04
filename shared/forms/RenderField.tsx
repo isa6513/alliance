@@ -73,19 +73,6 @@ export function RenderField({
     return shuffleWithSeed(options, randomizationSeedBase);
   }, [field, randomizationSeedBase, disableOptionRandomization]);
 
-  useEffect(() => {
-    //TODO: less janky way of doing this
-    if (field.kind !== "timezone") return;
-    if (!onChange) return;
-    const hasValue =
-      value !== undefined &&
-      value !== null &&
-      !(typeof value === "string" && value.trim() === "");
-    if (!hasValue) {
-      onChange("America/Los_Angeles");
-    }
-  }, [field.kind, field.id, onChange, value]);
-
   const composeClassName = (
     base: string,
     overrides: { normal?: string; error?: string } = {}
@@ -478,7 +465,7 @@ export function RenderField({
         <div className="space-y-1">
           <RenderLabel field={field} error={errorMessage} />
           <select
-            value={(value as string) ?? "-08:00"}
+            value={value as string}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}

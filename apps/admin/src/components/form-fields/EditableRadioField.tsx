@@ -18,8 +18,11 @@ export function EditableRadioField({
       label: `Option ${(field.options?.length || 0) + 1}`,
       value: `option${(field.options?.length || 0) + 1}`,
     };
+    const shouldSetDefault =
+      field.defaultValue === undefined || field.options?.length === 0;
     onUpdate({
       options: [...(field.options || []), newOption],
+      ...(shouldSetDefault ? { defaultValue: newOption.value } : {}),
     });
   };
 
@@ -27,14 +30,34 @@ export function EditableRadioField({
     index: number,
     updates: { label?: string; value?: string }
   ) => {
-    const updatedOptions = [...(field.options || [])];
+    const previousOptions = field.options || [];
+    const previousValue = previousOptions[index]?.value;
+    const updatedOptions = [...previousOptions];
     updatedOptions[index] = { ...updatedOptions[index], ...updates };
-    onUpdate({ options: updatedOptions });
+    const nextUpdates: Partial<RadioField> = { options: updatedOptions };
+    if (
+      updates.value !== undefined &&
+      previousValue === field.defaultValue &&
+      updates.value !== field.defaultValue
+    ) {
+      nextUpdates.defaultValue =
+        updates.value && updates.value.length > 0 ? updates.value : null;
+    }
+    onUpdate(nextUpdates);
   };
 
   const removeOption = (index: number) => {
     const updatedOptions = field.options?.filter((_, i) => i !== index) || [];
-    onUpdate({ options: updatedOptions });
+    const removedOption = field.options?.[index];
+    const updates: Partial<RadioField> = { options: updatedOptions };
+    if (removedOption?.value && removedOption.value === field.defaultValue) {
+      updates.defaultValue = null;
+    }
+    onUpdate(updates);
+  };
+
+  const setDefaultValue = (value?: string) => {
+    onUpdate({ defaultValue: value ?? null });
   };
 
   return (
@@ -79,6 +102,16 @@ export function EditableRadioField({
         <div className="space-y-2 max-h-32 overflow-y-auto">
           {field.options?.map((option, index) => (
             <div key={index} className="flex items-center space-x-2">
+              <label className="flex items-center space-x-1 text-xs text-gray-600">
+                <input
+                  type="radio"
+                  name={`${field.id}-default`}
+                  checked={field.defaultValue === option.value}
+                  onChange={() => setDefaultValue(option.value)}
+                  className="h-3 w-3 text-blue-500 focus:ring-blue-500"
+                />
+                <span>Default</span>
+              </label>
               <input
                 type="text"
                 value={option.label}
@@ -102,6 +135,15 @@ export function EditableRadioField({
               </button>
             </div>
           ))}
+        </div>
+        <div className="flex items-center justify-end mt-2">
+          <button
+            type="button"
+            onClick={() => setDefaultValue(undefined)}
+            className="text-xs text-gray-500 hover:text-gray-700"
+          >
+            Clear default
+          </button>
         </div>
       </div>
     </FieldWrapper>

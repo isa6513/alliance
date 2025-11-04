@@ -320,6 +320,7 @@ export function FormBuilder({
           label: "Timezone Field",
           required: false,
           autoExtractUserData: false,
+          defaultValue: "America/Los_Angeles",
         };
         break;
       case "file":

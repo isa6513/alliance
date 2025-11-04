@@ -28,6 +28,10 @@ export function EditableChoiceField({
     };
     onUpdate({
       options: [...(field.options || []), newOption],
+      ...(field.kind === "select" &&
+      (field.defaultValue === undefined || (field.options?.length || 0) === 0)
+        ? { defaultValue: newOption.value }
+        : {}),
     });
   };
 
@@ -37,12 +41,31 @@ export function EditableChoiceField({
   ) => {
     const updatedOptions = [...(field.options || [])];
     updatedOptions[index] = { ...updatedOptions[index], ...updates };
-    onUpdate({ options: updatedOptions });
+    const previousValue = field.options?.[index]?.value;
+    const nextUpdates: Partial<ChoiceField> = { options: updatedOptions };
+    if (
+      field.kind === "select" &&
+      updates.value !== undefined &&
+      previousValue === field.defaultValue &&
+      updates.value !== field.defaultValue
+    ) {
+      nextUpdates.defaultValue =
+        updates.value && updates.value.length > 0 ? updates.value : null;
+    }
+    onUpdate(nextUpdates);
   };
 
   const removeOption = (index: number) => {
     const updatedOptions = field.options?.filter((_, i) => i !== index) || [];
-    onUpdate({ options: updatedOptions });
+    const updates: Partial<ChoiceField> = { options: updatedOptions };
+    if (
+      field.kind === "select" &&
+      field.defaultValue &&
+      field.options?.[index]?.value === field.defaultValue
+    ) {
+      updates.defaultValue = null;
+    }
+    onUpdate(updates);
   };
 
   const moveOption = (from: number, to: number) => {
@@ -52,6 +75,13 @@ export function EditableChoiceField({
     const [moved] = updated.splice(from, 1);
     updated.splice(to, 0, moved);
     onUpdate({ options: updated });
+  };
+
+  const setDefaultValue = (value?: string) => {
+    if (field.kind !== "select") {
+      return;
+    }
+    onUpdate({ defaultValue: value ?? null });
   };
 
   return (
@@ -126,6 +156,18 @@ export function EditableChoiceField({
         <div className="space-y-2 max-h-32 overflow-y-auto">
           {field.options?.map((option, index) => (
             <div key={index} className="flex items-center space-x-2">
+              {field.kind === "select" && (
+                <label className="flex items-center space-x-1 text-xs text-gray-600">
+                  <input
+                    type="radio"
+                    name={`${field.id}-default`}
+                    checked={field.defaultValue === option.value}
+                    onChange={() => setDefaultValue(option.value)}
+                    className="h-3 w-3 text-blue-500 focus:ring-blue-500"
+                  />
+                  <span>Default</span>
+                </label>
+              )}
               <input
                 type="text"
                 value={option.label}
@@ -172,6 +214,17 @@ export function EditableChoiceField({
             </div>
           ))}
         </div>
+        {field.kind === "select" && (
+          <div className="flex items-center justify-end mt-2">
+            <button
+              type="button"
+              onClick={() => setDefaultValue(undefined)}
+              className="text-xs text-gray-500 hover:text-gray-700"
+            >
+              Clear default
+            </button>
+          </div>
+        )}
       </div>
     </FieldWrapper>
   );

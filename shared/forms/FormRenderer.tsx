@@ -53,6 +53,92 @@ export function computeFormStorageKey(args: {
   return hasInstance ? `${base}:${String(args.instanceId)}` : base;
 }
 
+const FALLBACK_TIMEZONE = "America/Los_Angeles";
+
+const isNonEmptyString = (value: unknown): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
+function resolveFieldDefaultValue(field: AnyField): FormValue | undefined {
+  const rawDefault = field.defaultValue;
+
+  if (rawDefault === null) {
+    return undefined;
+  }
+
+  if (rawDefault !== undefined) {
+    switch (field.kind) {
+      case "radio":
+      case "select": {
+        if (typeof rawDefault !== "string" || !isNonEmptyString(rawDefault)) {
+          return undefined;
+        }
+        const values = field.options?.map((option) => option.value) ?? [];
+        return values.includes(rawDefault) ? rawDefault : undefined;
+      }
+      case "multiselect": {
+        if (!Array.isArray(rawDefault) || rawDefault.length === 0) {
+          return undefined;
+        }
+        const validValues = field.options?.map((option) => option.value) ?? [];
+        const filtered = rawDefault.filter((value): value is string =>
+          validValues.includes(value)
+        );
+        return filtered.length ? filtered : undefined;
+      }
+      case "checkbox":
+        return typeof rawDefault === "boolean" ? rawDefault : undefined;
+      case "number":
+        return typeof rawDefault === "number" ? rawDefault : undefined;
+      case "time":
+      case "date":
+      case "timezone":
+      case "text":
+      case "textarea":
+      case "email":
+      case "phone":
+      case "file":
+        return isNonEmptyString(rawDefault) ? rawDefault : undefined;
+      default:
+        return isNonEmptyString(rawDefault) ? rawDefault : undefined;
+    }
+  }
+
+  if (field.kind === "timezone") {
+    return FALLBACK_TIMEZONE;
+  }
+
+  return undefined;
+}
+
+function applyDefaultValues(
+  base: Record<string, FormValue> | undefined,
+  defaults: Map<string, FormValue>
+): Record<string, FormValue> {
+  if (!defaults.size) {
+    return base ? base : {};
+  }
+
+  let result = base ?? {};
+  let mutated = false;
+
+  for (const [fieldId, defaultValue] of defaults.entries()) {
+    const current = result[fieldId];
+    if (current === undefined || current === null) {
+      if (!mutated) {
+        result = base ? { ...base } : { ...result };
+        mutated = true;
+      }
+      result[fieldId] = defaultValue;
+    }
+  }
+
+  if (mutated) {
+    return result;
+  }
+
+  return base ? base : {};
+}
+
 function filterAnswersByFieldIds(
   answers: Record<string, FormValue> | null,
   allowedFields: Map<string, AnyField>
@@ -105,16 +191,24 @@ const FormRenderer = ({
     return base;
   }, [id, userId, persistKey]);
 
-  const fieldLookup = useMemo(() => {
-    const entries = new Map<string, AnyField>();
+  const { fieldLookup, defaultValueMap } = useMemo(() => {
+    const lookup = new Map<string, AnyField>();
+    const defaults = new Map<string, FormValue>();
+
     for (const page of schema.pages) {
       for (const element of page.fields) {
         if ("label" in element) {
-          entries.set(element.id, element as AnyField);
+          const field = element as AnyField;
+          lookup.set(field.id, field);
+          const defaultValue = resolveFieldDefaultValue(field);
+          if (defaultValue !== undefined) {
+            defaults.set(field.id, defaultValue);
+          }
         }
       }
     }
-    return entries;
+
+    return { fieldLookup: lookup, defaultValueMap: defaults };
   }, [schema]);
 
   const pageCount = schema.pages?.length ?? 0;
@@ -148,24 +242,35 @@ const FormRenderer = ({
   });
   const [formData, setFormData] = useState<Record<string, FormValue>>(() => {
     if (readOnly) {
-      return (
-        (completedFormResponse?.answers as Record<string, FormValue>) || {}
-      );
+      const answers =
+        (completedFormResponse?.answers as Record<string, FormValue>) || {};
+      return filterAnswersByFieldIds(answers, fieldLookup);
     }
-    if (typeof window === "undefined" || !persistKey) return {};
+
+    if (typeof window === "undefined") {
+      return applyDefaultValues(undefined, defaultValueMap);
+    }
+
+    if (!persistKey) {
+      return applyDefaultValues({}, defaultValueMap);
+    }
+
     try {
       const raw = window.localStorage.getItem(storageKey);
-      if (!raw) return {};
-      const parsed = JSON.parse(raw);
-      if (parsed?.formData && typeof parsed.formData === "object") {
-        return filterAnswersByFieldIds(
-          parsed.formData as Record<string, FormValue>,
-          fieldLookup
-        );
+      if (!raw) {
+        return applyDefaultValues({}, defaultValueMap);
       }
-      return {};
+      const parsed = JSON.parse(raw);
+      const storedFormData =
+        parsed?.formData && typeof parsed.formData === "object"
+          ? (parsed.formData as Record<string, FormValue>)
+          : undefined;
+      const filtered = storedFormData
+        ? filterAnswersByFieldIds(storedFormData, fieldLookup)
+        : {};
+      return applyDefaultValues(filtered, defaultValueMap);
     } catch {
-      return {};
+      return applyDefaultValues({}, defaultValueMap);
     }
   });
   const [uploadingFields, setUploadingFields] = useState<Set<string>>(
@@ -783,12 +888,11 @@ const FormRenderer = ({
     if (!raw) return;
     const parsed = JSON.parse(raw);
     if (parsed?.formData && typeof parsed.formData === "object") {
-      setFormData(
-        filterAnswersByFieldIds(
-          parsed.formData as Record<string, FormValue>,
-          fieldLookup
-        )
+      const filtered = filterAnswersByFieldIds(
+        parsed.formData as Record<string, FormValue>,
+        fieldLookup
       );
+      setFormData(applyDefaultValues(filtered, defaultValueMap));
     }
     if (typeof parsed?.currentPageIndex === "number") {
       const maxIdx = Math.max(0, (pageCount || 1) - 1);
@@ -802,6 +906,7 @@ const FormRenderer = ({
     fieldLookup,
     storageKey,
     pageCount,
+    defaultValueMap,
   ]);
 
   // When rendering a completed form, sync provided answers into local state
@@ -889,6 +994,13 @@ const FormRenderer = ({
   useEffect(() => {
     setFieldErrors({});
   }, [schema]);
+
+  useEffect(() => {
+    if (readOnly) {
+      return;
+    }
+    setFormData((prev) => applyDefaultValues(prev, defaultValueMap));
+  }, [defaultValueMap, readOnly]);
 
   const renderField = (field: AnyField, index: number) => (
     <div key={field.id || index}>
