@@ -13,6 +13,9 @@ export const connectionOptions = (): PostgresConnectionOptions => {
     database: process.env.DB_NAME,
     entities: ['dist/**/*.entity{.ts,.js}'],
     useUTC: true,
+    maxQueryExecutionTime: 300,
+    logging: ['error', 'warn'],
+    logger: new AppTypeOrmLogger(),
   };
 
   return process.env.NODE_ENV === 'production'
@@ -20,9 +23,6 @@ export const connectionOptions = (): PostgresConnectionOptions => {
         ...shared,
         ssl: { rejectUnauthorized: false },
         extra: { ssl: { rejectUnauthorized: false } }, //TODO
-        maxQueryExecutionTime: 200,
-        logging: ['error', 'warn'],
-        logger: new AppTypeOrmLogger(),
       }
     : {
         ...shared,

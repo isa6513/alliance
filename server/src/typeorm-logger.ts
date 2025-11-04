@@ -26,6 +26,15 @@ export class AppTypeOrmLogger implements TypeOrmLogger {
   }
 
   logQuerySlow(time: number, query: string, parameters?: any[]) {
+    const obj: any = {};
+    Error.captureStackTrace(obj, this.logQuerySlow);
+    const stack = obj.stack;
+
+    const serviceStackLines = stack
+      .split('\n')
+      .filter((line) => line.includes('.service.ts'))
+      .join('\n');
+
     this.logger.warn({
       event: 'db.slow_query',
       durationMs: time,
@@ -38,6 +47,8 @@ export class AppTypeOrmLogger implements TypeOrmLogger {
       properties: {
         durationMs: time,
         sql: query,
+        full_trace: stack,
+        service_trace: serviceStackLines,
       },
     });
   }
