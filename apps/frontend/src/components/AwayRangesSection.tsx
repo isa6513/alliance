@@ -98,9 +98,9 @@ const AwayRangesSection: React.FC = () => {
     <div>
       <h2 className="!font-semibold text-lg mb-2">Away Periods</h2>
       <p className="text-sm text-zinc-600 mb-4">
-        You can schedule times here when you know you wont be able to complete
-        Alliance actions. This will let us know not to send you notifications or
-        expect you to complete tasks while you&apos;re away.
+        You can schedule times here when you know you won&apos;t be able to
+        complete Alliance actions. This will let us know not to send you
+        notifications or expect you to complete tasks while you&apos;re away.
       </p>
 
       {awayRanges.length > 0 && (

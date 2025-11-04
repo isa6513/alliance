@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { AppTypeOrmLogger } from 'src/typeorm-logger';
 import { DataSource } from 'typeorm';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
@@ -19,6 +20,9 @@ export const connectionOptions = (): PostgresConnectionOptions => {
         ...shared,
         ssl: { rejectUnauthorized: false },
         extra: { ssl: { rejectUnauthorized: false } }, //TODO
+        maxQueryExecutionTime: 200,
+        logging: ['error', 'warn'],
+        logger: new AppTypeOrmLogger(),
       }
     : {
         ...shared,
