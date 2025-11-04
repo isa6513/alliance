@@ -27,10 +27,10 @@ export class AppTypeOrmLogger implements TypeOrmLogger {
     });
   }
 
-  logQuerySlow(time: number, query: string, parameters?: any[]) {
+  logQuerySlow(time: number, query: string) {
     const obj: any = {};
     Error.captureStackTrace(obj, this.logQuerySlow);
-    const stack = obj.stack;
+    const stack: string = obj.stack;
 
     const serviceStackLines = stack
       .split('\n')
@@ -38,14 +38,12 @@ export class AppTypeOrmLogger implements TypeOrmLogger {
       .join('\n')
       .trim();
 
-    console.log(serviceStackLines);
+    const controllerStackLines = stack
+      .split('\n')
+      .filter((line) => line.includes('controller'))
+      .join('\n')
+      .trim();
 
-    this.logger.warn({
-      event: 'db.slow_query',
-      durationMs: time,
-      sql: query,
-      params: this.safeParams(parameters),
-    });
     if (!this.client) return;
 
     this.client.capture({
@@ -56,6 +54,7 @@ export class AppTypeOrmLogger implements TypeOrmLogger {
         sql: query,
         full_trace: stack,
         service_trace: serviceStackLines,
+        controller_trace: controllerStackLines,
       },
     });
   }
