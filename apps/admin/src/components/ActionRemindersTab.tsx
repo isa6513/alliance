@@ -48,6 +48,7 @@ import {
 } from "./defaultReminderContents";
 import { ActionEventNotifDto } from "@alliance/shared/client";
 import ActionReminderCard from "./ActionReminderCard";
+import { useToast } from "@alliance/shared/ui/ToastProvider";
 
 interface ActionRemindersTabProps {
   suite: ActionSuiteDto;
@@ -99,9 +100,6 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
   const [createError, setCreateError] = useState<string | null>(null);
   const [createSuccess, setCreateSuccess] = useState<string | null>(null);
   const [editingGroupId, setEditingGroupId] = useState<number | null>(null);
-  const [deleteGroupConfirmation, setDeleteGroupConfirmation] = useState<
-    number | null
-  >(null);
   const [editSubmitting, setEditSubmitting] = useState<boolean>(false);
   const [editError, setEditError] = useState<string | null>(null);
   const [editSuccess, setEditSuccess] = useState<string | null>(null);
@@ -187,18 +185,20 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     }
   }, [selectedEventId, refreshReminderGroups]);
 
-  const handleDeleteGroupConfirm = (groupId: number) => {
-    setDeleteGroupConfirmation(groupId);
-  };
-  const handleDeleteGroup = async () => {
-    if (!deleteGroupConfirmation) {
+  const handleDeleteGroup = async (groupId: number) => {
+    const ok = await confirm({
+      message:
+        "Delete reminder group? All planned reminders will no longer be sent.",
+      confirmLabel: "Delete",
+      cancelLabel: "Cancel",
+    });
+    if (!ok) {
       return;
     }
     const resp = await actionsDeleteReminderGroup({
-      path: { groupId: deleteGroupConfirmation },
+      path: { groupId },
     });
     if (resp.response.ok) {
-      setDeleteGroupConfirmation(null);
       if (selectedEventId) {
         refreshReminderGroups(selectedEventId);
       }
@@ -352,9 +352,22 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     };
   };
 
+  const { confirm } = useToast();
+
   const populateDefaultReminders = async () => {
     if (!selectedEventId) {
       setCreateError("add a member action event to the suite first.");
+      return;
+    }
+
+    const ok = await confirm({
+      title: "Populate default reminders?",
+      message:
+        "This will create reminders that will be sent to all members of this action and may be sent immediately if member action is ongoing.",
+      confirmLabel: "Populate Reminders",
+      cancelLabel: "Cancel",
+    });
+    if (!ok) {
       return;
     }
 
@@ -644,14 +657,11 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             group={group}
             highlightedReminder={highlightedReminder}
             ref={ref}
-            deleteGroupConfirmation={deleteGroupConfirmation}
-            setDeleteGroupConfirmation={setDeleteGroupConfirmation}
-            handleDeleteGroup={handleDeleteGroup}
             groupSchedule={groupSchedule}
             editing={editingGroupId === group.id}
             handleEditCancel={handleEditCancel}
             handleEditGroupStart={handleEditGroupStart}
-            handleDeleteGroupConfirm={handleDeleteGroupConfirm}
+            handleDeleteGroup={handleDeleteGroup}
             selectedEventId={selectedEventId}
             memberEvents={memberEvents}
             users={users}

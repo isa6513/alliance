@@ -19,16 +19,11 @@ interface ActionReminderCardProps {
   group: ReminderGroup;
   highlightedReminder: number | undefined;
   ref: React.RefObject<HTMLDivElement | null>;
-  deleteGroupConfirmation: number | null;
-  setDeleteGroupConfirmation: React.Dispatch<
-    React.SetStateAction<number | null>
-  >;
-  handleDeleteGroup: () => Promise<void>;
+  handleDeleteGroup: (groupId: number) => Promise<void>;
   groupSchedule: { primary: string; secondary?: string | null };
   editing: boolean;
   handleEditCancel: () => void;
   handleEditGroupStart: (groupId: number) => void;
-  handleDeleteGroupConfirm: (groupId: number) => void;
   selectedEventId: number | null;
   memberEvents: ActionEventDto[];
   users: UserSelectUser[];
@@ -53,14 +48,11 @@ const ActionReminderCard = ({
   group,
   highlightedReminder,
   ref,
-  deleteGroupConfirmation,
-  setDeleteGroupConfirmation,
-  handleDeleteGroup,
   groupSchedule,
   editing,
   handleEditCancel,
   handleEditGroupStart,
-  handleDeleteGroupConfirm,
+  handleDeleteGroup,
   selectedEventId,
   memberEvents,
   users,
@@ -94,29 +86,6 @@ const ActionReminderCard = ({
         highlightedReminder === group.id ? "!border-red-500" : ""
       }`}
     >
-      {deleteGroupConfirmation === group.id && (
-        <div className="p-4 flex flex-row items-center gap-2">
-          <p className="text-sm text-gray-600">
-            Are you sure you want to delete this reminder group?
-          </p>
-          <div className="flex flex-row gap-2">
-            <Button
-              type="button"
-              color={ButtonColor.White}
-              onClick={() => setDeleteGroupConfirmation(null)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              color={ButtonColor.Red}
-              onClick={handleDeleteGroup}
-            >
-              Delete
-            </Button>
-          </div>
-        </div>
-      )}
       <div className="flex flex-row gap-2 w-full bg-zinc-100 p-4 items-center justify-between">
         <div className="flex flex-row gap-2 items-center">
           <Button
@@ -165,7 +134,7 @@ const ActionReminderCard = ({
           <Button
             type="button"
             color={ButtonColor.Black}
-            onClick={() => handleDeleteGroupConfirm(group.id)}
+            onClick={() => handleDeleteGroup(group.id)}
             className="-my-1"
           >
             Delete
