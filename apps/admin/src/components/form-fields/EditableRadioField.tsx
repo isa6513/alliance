@@ -18,11 +18,8 @@ export function EditableRadioField({
       label: `Option ${(field.options?.length || 0) + 1}`,
       value: `option${(field.options?.length || 0) + 1}`,
     };
-    const shouldSetDefault =
-      field.defaultValue === undefined || field.options?.length === 0;
     onUpdate({
       options: [...(field.options || []), newOption],
-      ...(shouldSetDefault ? { defaultValue: newOption.value } : {}),
     });
   };
 

@@ -28,10 +28,6 @@ export function EditableChoiceField({
     };
     onUpdate({
       options: [...(field.options || []), newOption],
-      ...(field.kind === "select" &&
-      (field.defaultValue === undefined || (field.options?.length || 0) === 0)
-        ? { defaultValue: newOption.value }
-        : {}),
     });
   };
 
@@ -153,7 +149,7 @@ export function EditableChoiceField({
             Add Option
           </button>
         </div>
-        <div className="space-y-2 max-h-32 overflow-y-auto">
+        <div className="space-y-2 overflow-y-auto">
           {field.options?.map((option, index) => (
             <div key={index} className="flex items-center space-x-2">
               {field.kind === "select" && (
