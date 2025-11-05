@@ -592,9 +592,6 @@ export type Action = {
      * Whether to show the action to members who are not of participating groups
      */
     showToNonparticipating?: boolean;
-    /**
-     * Number of users who have joined the action
-     */
     usersJoined: number;
     activities: Array<Array<ActionActivity>>;
     status: ActionStatus;
@@ -712,9 +709,6 @@ export type ActionDto = {
      * Whether to show the action to members who are not of participating groups
      */
     showToNonparticipating?: boolean;
-    /**
-     * Number of users who have joined the action
-     */
     usersJoined: number;
     activities: Array<Array<ActionActivity>>;
     status: ActionStatus;
@@ -1035,10 +1029,12 @@ export type UpdateActionEventDto = {
 export type PreviewEmailHtmlDto = {
     emailMessage: string;
     emailSubject: string;
+    taskCount: number;
 };
 
 export type PreviewTextDto = {
     textMessage: string;
+    taskCount: number;
 };
 
 export type NotificationDto = {
@@ -2866,6 +2862,17 @@ export type ActionsPreviewTextMessageResponses = {
 };
 
 export type ActionsPreviewTextMessageResponse = ActionsPreviewTextMessageResponses[keyof ActionsPreviewTextMessageResponses];
+
+export type ActionsReloadAllActionUsersJoinedData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/reloadAllActionUsersJoined';
+};
+
+export type ActionsReloadAllActionUsersJoinedResponses = {
+    200: unknown;
+};
 
 export type NotifsFindAllData = {
     body?: never;

@@ -57,11 +57,21 @@ export class CreateTODReminderGroupDto extends PickType(ReminderGroup, [
 export class PreviewEmailHtmlDto extends PickType(CreateTODReminderGroupDto, [
   'emailMessage',
   'emailSubject',
-]) {}
+]) {
+  @ApiProperty({ type: Number })
+  @IsDefined()
+  @IsNumber()
+  taskCount: number;
+}
 
 export class PreviewTextDto extends PickType(CreateTODReminderGroupDto, [
   'textMessage',
-]) {}
+]) {
+  @ApiProperty({ type: Number })
+  @IsDefined()
+  @IsNumber()
+  taskCount: number;
+}
 
 export class ActionEventDto extends PickType(ActionEvent, [
   'id',

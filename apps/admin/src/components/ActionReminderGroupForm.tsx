@@ -182,11 +182,20 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   const [localError, setLocalError] = useState<string | null>(null);
   const initialSnapshotRef = useRef<string>("");
 
-  const [previewingEmail, setPreviewingEmail] = useState(false);
-  const [previewEmailHtml, setPreviewEmailHtml] = useState<string | null>(null);
+  const [previewingEmail1Task, setPreviewingEmail1Task] = useState(false);
+  const [previewEmail1TaskHtml, setPreviewEmail1TaskHtml] = useState<
+    string | null
+  >(null);
 
-  const [previewingText, setPreviewingText] = useState(false);
-  const [previewText, setPreviewText] = useState<string | null>(null);
+  const [previewingEmail2Task, setPreviewingEmail2Task] = useState(false);
+  const [previewEmail2TaskHtml, setPreviewEmail2TaskHtml] = useState<
+    string | null
+  >(null);
+
+  const [previewingText1Task, setPreviewingText1Task] = useState(false);
+  const [previewText1Task, setPreviewText1Task] = useState<string | null>(null);
+  const [previewingText2Task, setPreviewingText2Task] = useState(false);
+  const [previewText2Task, setPreviewText2Task] = useState<string | null>(null);
 
   const computedInitialSnapshot = useMemo(() => {
     const userIds = [...initialValues.users.map((user) => user.id)].sort(
@@ -266,7 +275,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   ]);
 
   useEffect(() => {
-    if (previewingEmail) {
+    if (previewingEmail1Task) {
       actionsPreviewEmailHtml({
         path: {
           eventId: selectedEventId ?? 0,
@@ -274,35 +283,78 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         body: {
           emailMessage,
           emailSubject,
+          taskCount: 1,
         },
       }).then((response) => {
         if (response.error) {
           setLocalError((response.error as Error).message);
           return;
         }
-        setPreviewEmailHtml(response.data ?? "");
+        setPreviewEmail1TaskHtml(response.data ?? "");
       });
     }
-  }, [previewingEmail, emailMessage, emailSubject, selectedEventId]);
+    if (previewingEmail2Task) {
+      actionsPreviewEmailHtml({
+        path: {
+          eventId: selectedEventId ?? 0,
+        },
+        body: {
+          emailMessage,
+          emailSubject,
+          taskCount: 2,
+        },
+      }).then((response) => {
+        if (response.error) {
+          setLocalError((response.error as Error).message);
+          return;
+        }
+        setPreviewEmail2TaskHtml(response.data ?? "");
+      });
+    }
+  }, [
+    previewingEmail1Task,
+    previewingEmail2Task,
+    emailMessage,
+    emailSubject,
+    selectedEventId,
+  ]);
 
   useEffect(() => {
-    if (previewingText) {
+    if (previewingText1Task) {
       actionsPreviewTextMessage({
         path: {
           eventId: selectedEventId ?? 0,
         },
         body: {
           textMessage,
+          taskCount: 1,
         },
       }).then((response) => {
         if (response.error) {
           setLocalError((response.error as Error).message);
           return;
         }
-        setPreviewText(response.data ?? "");
+        setPreviewText1Task(response.data ?? "");
       });
     }
-  }, [previewingText, textMessage, selectedEventId]);
+    if (previewingText2Task) {
+      actionsPreviewTextMessage({
+        path: {
+          eventId: selectedEventId ?? 0,
+        },
+        body: {
+          textMessage,
+          taskCount: 2,
+        },
+      }).then((response) => {
+        if (response.error) {
+          setLocalError((response.error as Error).message);
+          return;
+        }
+        setPreviewText2Task(response.data ?? "");
+      });
+    }
+  }, [previewingText1Task, previewingText2Task, textMessage, selectedEventId]);
 
   useEffect(() => {
     if (computedInitialSnapshot === initialSnapshotRef.current) {
@@ -467,6 +519,25 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     typeof window !== "undefined" && window.location.href.includes("localhost")
   );
 
+  const handlePreviewEmail2Task = async () => {
+    setPreviewingEmail2Task(!previewingEmail2Task);
+    setPreviewingEmail1Task(false);
+  };
+
+  const handlePreviewEmail1Task = async () => {
+    setPreviewingEmail1Task(!previewingEmail1Task);
+    setPreviewingEmail2Task(false);
+  };
+
+  const handlePreviewText1Task = async () => {
+    setPreviewingText1Task(!previewingText1Task);
+    setPreviewingText2Task(false);
+  };
+
+  const handlePreviewText2Task = async () => {
+    setPreviewingText2Task(!previewingText2Task);
+    setPreviewingText1Task(false);
+  };
   return (
     <form onSubmit={handleSubmit} className="space-y-4 w-full">
       <div>
@@ -671,17 +742,33 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
             Email Message
           </label>
           <Button
-            onClick={() => setPreviewingEmail(!previewingEmail)}
+            onClick={handlePreviewEmail1Task}
             size={"small"}
-            color={previewingEmail ? ButtonColor.Stone : ButtonColor.Light}
+            color={previewingEmail1Task ? ButtonColor.Stone : ButtonColor.Light}
             className="!px-2 !py-1"
           >
-            Preview Email
+            Preview Email (1 task)
+          </Button>
+          <Button
+            onClick={handlePreviewEmail2Task}
+            size={"small"}
+            color={previewingEmail2Task ? ButtonColor.Stone : ButtonColor.Light}
+            className="!px-2 !py-1"
+          >
+            Preview Email (2 tasks)
           </Button>
         </div>
-        {previewingEmail ? (
+        {previewingEmail1Task ? (
           <Card className="p-4">
-            <div dangerouslySetInnerHTML={{ __html: previewEmailHtml ?? "" }} />
+            <div
+              dangerouslySetInnerHTML={{ __html: previewEmail1TaskHtml ?? "" }}
+            />
+          </Card>
+        ) : previewingEmail2Task ? (
+          <Card className="p-4">
+            <div
+              dangerouslySetInnerHTML={{ __html: previewEmail2TaskHtml ?? "" }}
+            />
           </Card>
         ) : (
           <TextareaWithHighlights
@@ -699,17 +786,29 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
             Text Message
           </label>
           <Button
-            onClick={() => setPreviewingText(!previewingText)}
+            onClick={handlePreviewText1Task}
             size={"small"}
-            color={previewingText ? ButtonColor.Stone : ButtonColor.Light}
+            color={previewingText1Task ? ButtonColor.Stone : ButtonColor.Light}
             className="!px-2 !py-1"
           >
-            Preview Text
+            Preview Text (1 task)
+          </Button>
+          <Button
+            onClick={handlePreviewText2Task}
+            size={"small"}
+            color={previewingText2Task ? ButtonColor.Stone : ButtonColor.Light}
+            className="!px-2 !py-1"
+          >
+            Preview Text (2 tasks)
           </Button>
         </div>
-        {previewingText ? (
+        {previewingText1Task ? (
           <Card className="p-4">
-            <div>{previewText}</div>
+            <div>{previewText1Task}</div>
+          </Card>
+        ) : previewingText2Task ? (
+          <Card className="p-4">
+            <div>{previewText2Task}</div>
           </Card>
         ) : (
           <TextareaWithHighlights

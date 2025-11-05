@@ -15,7 +15,7 @@ export function getHoursFromDeadline(
   dateNow: Date,
 ): string {
   const hours =
-    Math.round(
+    Math.floor(
       (deadlineEvent.date.getTime() - dateNow.getTime()) / (1000 * 60 * 60),
     ) % 24;
   return hours.toString() + ' hour' + (hours === 1 ? '' : 's');

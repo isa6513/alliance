@@ -423,7 +423,7 @@ export class ActionEventReminderService {
       deadlineEvent,
       user: testUser,
       cid: await generateCIDForNotif(),
-      uncompletedTasksCount: 2,
+      uncompletedTasksCount: dto.taskCount,
       dateNow: sendTime,
     });
 
@@ -444,7 +444,7 @@ export class ActionEventReminderService {
       deadlineEvent,
       user: testUser,
       cid: await generateCIDForNotif(),
-      uncompletedTasksCount: 1,
+      uncompletedTasksCount: dto.taskCount,
       dateNow: sendTime,
     });
   }
