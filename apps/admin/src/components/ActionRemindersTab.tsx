@@ -1,7 +1,7 @@
 import {
   ActionSuiteDto,
   GroupDto,
-  NotificationPlan,
+  PreviewNotificationPlan,
   ReminderGroup,
   actionsCreateReminderGroup,
   actionsDeleteReminderGroup,
@@ -241,7 +241,9 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
   const [showSentReminders, setShowSentReminders] = useState<number | null>(
     null
   );
-  const [reminderPlans, setReminderPlans] = useState<NotificationPlan[]>([]);
+  const [reminderPlans, setReminderPlans] = useState<PreviewNotificationPlan[]>(
+    []
+  );
   const [sentReminders, setSentReminders] = useState<ActionEventNotifDto[]>([]);
 
   useEffect(() => {

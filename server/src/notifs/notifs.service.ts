@@ -12,6 +12,24 @@ import { ActionEventNotif } from './entities/action-event-notif.entity';
 import { Notification } from './entities/notification.entity';
 import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
 
+export function shouldEmailUser(user: User) {
+  return (
+    user.emailNotifsEnabled &&
+    !user.turnedOffAllNotifs &&
+    user.contractDateSigned
+  );
+}
+
+export function shouldTextUser(user: User) {
+  return (
+    user.textNotifsEnabled &&
+    !user.turnedOffAllNotifs &&
+    user.phoneNumber &&
+    user.contractDateSigned &&
+    user.phoneNumberValidated
+  );
+}
+
 @Injectable()
 export class NotifsService {
   constructor(
@@ -62,24 +80,6 @@ export class NotifsService {
     return this.notifsRepository.update(
       { user: { id: userId }, cleared: false },
       { cleared: true },
-    );
-  }
-
-  shouldEmailUser(user: User) {
-    return (
-      user.emailNotifsEnabled &&
-      !user.turnedOffAllNotifs &&
-      user.contractDateSigned
-    );
-  }
-
-  shouldTextUser(user: User) {
-    return (
-      user.textNotifsEnabled &&
-      !user.turnedOffAllNotifs &&
-      user.phoneNumber &&
-      user.contractDateSigned &&
-      user.phoneNumberValidated
     );
   }
 

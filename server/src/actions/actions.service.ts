@@ -19,7 +19,7 @@ import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.s
 import {
   ActionEventReminderService,
   NOTIFICATION_LOOKBACK_WINDOW_MS,
-  NotificationPlan,
+  PreviewNotificationPlan,
 } from 'src/notifs/action-event-reminder.service';
 import { ILike, In, LessThan, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
@@ -51,6 +51,7 @@ import { User } from 'src/user/entities/user.entity';
 import { ActionUpdate } from './entities/action-update.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ActionSuite } from './entities/action-suite.entity';
+import { NotifsService, shouldTextUser } from 'src/notifs/notifs.service';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -85,6 +86,7 @@ export class ActionsService {
     private readonly actionSuiteRepository: Repository<ActionSuite>,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
+    private readonly notifService: NotifsService,
     private readonly actionEventRecipientService: ActionEventRecipientService,
     private readonly actionEventReminderService: ActionEventReminderService,
   ) {}
@@ -1094,7 +1096,7 @@ export class ActionsService {
   async tentativePlansForGroup(
     eventId: number,
     body: CreateTODReminderGroupDto,
-  ): Promise<NotificationPlan[]> {
+  ): Promise<PreviewNotificationPlan[]> {
     const event = await this.actionEventRepository.findOneOrFail({
       where: { id: eventId },
       relations: ['action', 'action.events', 'action.participatingGroups'],
@@ -1123,11 +1125,16 @@ export class ActionsService {
       allSent: false,
     } satisfies ReminderGroup;
 
-    return this.actionEventReminderService.getPlansForGroup(
+    const plans = await this.actionEventReminderService.getPlansForGroup(
       await this.actionEventReminderService.attachDeadlineEvent(fakeGroup),
       new Date(Date.now() - NOTIFICATION_LOOKBACK_WINDOW_MS),
       new Date(Date.now() + 30 * NOTIFICATION_LOOKBACK_WINDOW_MS),
     );
+
+    return plans.map((plan) => ({
+      ...plan,
+      channel: shouldTextUser(plan.user) ? 'text' : 'email',
+    }));
   }
 
   async getUncompletedTasksCount(userId: number): Promise<number> {

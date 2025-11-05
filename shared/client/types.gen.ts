@@ -933,9 +933,10 @@ export type CreateTodReminderGroupDto = {
     suiteId?: number;
 };
 
-export type NotificationPlan = {
+export type PreviewNotificationPlan = {
     scheduledFor: string;
     user: User;
+    channel: string;
 };
 
 export type ActionEventNotifDto = {
@@ -2560,7 +2561,7 @@ export type ActionsPlansForGroupData = {
 };
 
 export type ActionsPlansForGroupResponses = {
-    200: Array<NotificationPlan>;
+    200: Array<PreviewNotificationPlan>;
 };
 
 export type ActionsPlansForGroupResponse = ActionsPlansForGroupResponses[keyof ActionsPlansForGroupResponses];
@@ -2831,7 +2832,7 @@ export type ActionsTentativePlansForGroupData = {
 };
 
 export type ActionsTentativePlansForGroupResponses = {
-    200: Array<NotificationPlan>;
+    200: Array<PreviewNotificationPlan>;
 };
 
 export type ActionsTentativePlansForGroupResponse = ActionsTentativePlansForGroupResponses[keyof ActionsTentativePlansForGroupResponses];

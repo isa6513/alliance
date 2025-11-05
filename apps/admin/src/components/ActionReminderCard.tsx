@@ -1,4 +1,7 @@
-import { NotificationPlan, ReminderGroup } from "@alliance/shared/client";
+import {
+  PreviewNotificationPlan,
+  ReminderGroup,
+} from "@alliance/shared/client";
 import Card from "@alliance/shared/ui/Card";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import TextareaWithHighlights from "./TextareaWithHighlights";
@@ -44,7 +47,7 @@ interface ActionReminderCardProps {
   showReminderPlans: number | null;
   setShowSentReminders: React.Dispatch<React.SetStateAction<number | null>>;
   showSentReminders: number | null;
-  reminderPlans: NotificationPlan[];
+  reminderPlans: PreviewNotificationPlan[];
   sentReminders: ActionEventNotifDto[];
 }
 const ActionReminderCard = ({
@@ -235,6 +238,7 @@ const ActionReminderCard = ({
                 <p className="text-xs text-gray-500">
                   {formatDate(plan.scheduledFor, "MM/dd/yyyy hh:mm a")}
                 </p>
+                <p className="text-xs text-gray-500">({plan.channel})</p>
               </div>
             ))}
             {reminderPlans.length === 0 && (

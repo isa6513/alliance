@@ -33,6 +33,7 @@ import { MailService, processKeywordReplacements } from 'src/mail/mail.service';
 import { EmailType } from 'src/mail/mail.entity';
 import { testUser } from './test-users';
 import { generateCIDForNotif } from './notif-utils';
+import { shouldTextUser } from './notifs.service';
 
 export interface MissedDeadlineCandidate {
   actionId: number;
@@ -59,6 +60,11 @@ export class NotificationPlan {
   @ApiProperty()
   user: User;
   group: ReminderGroup;
+}
+
+export class PreviewNotificationPlan extends NotificationPlan {
+  @ApiProperty()
+  channel: 'email' | 'text';
 }
 
 @Injectable()
@@ -271,7 +277,7 @@ export class ActionEventReminderService {
 
   async getNotificationPlansForGroup(
     groupId: number,
-  ): Promise<NotificationPlan[]> {
+  ): Promise<PreviewNotificationPlan[]> {
     const group = await this.reminderGroupRepository.findOneOrFail({
       where: { id: groupId },
       relations: [
@@ -283,11 +289,15 @@ export class ActionEventReminderService {
       ],
     });
 
-    return this.getPlansForGroup(
+    const plans = await this.getPlansForGroup(
       await this.attachDeadlineEvent(group),
       new Date(),
       new Date(Date.now() + 28 * 24 * 60 * 60 * 1000),
     );
+    return plans.map((plan) => ({
+      ...plan,
+      channel: shouldTextUser(plan.user) ? 'text' : 'email',
+    }));
   }
 
   async getSentNotifsForGroup(groupId: number): Promise<ActionEventNotifDto[]> {

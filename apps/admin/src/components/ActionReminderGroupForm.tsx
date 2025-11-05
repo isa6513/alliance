@@ -5,7 +5,7 @@ import {
   type ActionEventDto,
   type CreateTodReminderGroupDto,
   type GroupDto,
-  type NotificationPlan,
+  type PreviewNotificationPlan,
   type ReminderCohortType,
   type ReminderGroup,
   type ReminderGroupTimingMode,
@@ -156,7 +156,9 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     initialValues.reminderGroup?.name ?? ""
   );
 
-  const [tentativePlans, setTentativePlans] = useState<NotificationPlan[]>([]);
+  const [tentativePlans, setTentativePlans] = useState<
+    PreviewNotificationPlan[]
+  >([]);
 
   const [emailSubject, setEmailSubject] = useState<string>(
     initialValues.reminderGroup?.emailSubject ?? defaultEmailSubject

@@ -59,7 +59,7 @@ import { ActionEvent } from './entities/action-event.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import {
   ActionEventReminderService,
-  NotificationPlan,
+  PreviewNotificationPlan,
 } from 'src/notifs/action-event-reminder.service';
 import { ActionSuite } from './entities/action-suite.entity';
 import { ActionEventNotifDto } from 'src/notifs/entities/action-event-notif.dto';
@@ -403,10 +403,10 @@ export class ActionsController {
 
   @Get('plansForGroup/:groupId')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: NotificationPlan, isArray: true })
+  @ApiOkResponse({ type: PreviewNotificationPlan, isArray: true })
   async plansForGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
-  ): Promise<NotificationPlan[]> {
+  ): Promise<PreviewNotificationPlan[]> {
     return this.actionEventReminderService.getNotificationPlansForGroup(
       groupId,
     );
@@ -578,11 +578,11 @@ export class ActionsController {
 
   @Post('events/:eventId/checkTentativePlans')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: NotificationPlan, isArray: true })
+  @ApiOkResponse({ type: PreviewNotificationPlan, isArray: true })
   async tentativePlansForGroup(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: CreateTODReminderGroupDto,
-  ): Promise<NotificationPlan[]> {
+  ): Promise<PreviewNotificationPlan[]> {
     return this.actionsService.tentativePlansForGroup(eventId, body);
   }
 

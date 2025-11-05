@@ -9,7 +9,11 @@ import { User } from 'src/user/entities/user.entity';
 import { DataSource, QueryFailedError, Repository } from 'typeorm';
 import { ActionEvent } from '../actions/entities/action-event.entity';
 import { Action } from '../actions/entities/action.entity';
-import { NotifsService } from '../notifs/notifs.service';
+import {
+  NotifsService,
+  shouldEmailUser,
+  shouldTextUser,
+} from '../notifs/notifs.service';
 import { generateCIDForNotif } from './notif-utils';
 import {
   ActionEventNotif,
@@ -130,7 +134,7 @@ export class ActionEventNotifWorker {
     }
 
     let sentAnyNotif = false;
-    if (this.notifsService.shouldTextUser(plan.user)) {
+    if (shouldTextUser(plan.user)) {
       sentAnyNotif = true;
       const textMessage = await this.processCustomReminderText(
         plan.group.textMessage,
@@ -150,7 +154,7 @@ export class ActionEventNotifWorker {
       notif.channel = NotificationChannel.Text;
       notif.mms = result;
     }
-    if (!notif.sent && this.notifsService.shouldEmailUser(plan.user)) {
+    if (!notif.sent && shouldEmailUser(plan.user)) {
       sentAnyNotif = true;
       notif.channel = NotificationChannel.Email;
 
