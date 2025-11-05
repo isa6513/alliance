@@ -793,6 +793,22 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
                     included
                   </td>
                 </tr>
+                <tr>
+                  <td>{"#{s}"}</td>
+                  <td>s</td>
+                  <td>
+                    Conditionally inserts an s if {`#{n}`} is a value other than
+                    1, or an empty string if {`#{n}`} is 1
+                  </td>
+                </tr>
+                <tr>
+                  <td>{"#{str1|str2}"}</td>
+                  <td>str1</td>
+                  <td>
+                    Inserts the string before the bar if {`#{n}`} is 1,
+                    otherwise inserts the string after the bar
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
