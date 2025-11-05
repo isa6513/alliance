@@ -1,27 +1,31 @@
 // generic reminder
 
 export const defaultEmailSubject =
-  "You have #{days}, #{hours} left to complete #{n} Alliance task(s)";
+  "You have #{days}, #{hours} left to complete #{n} Alliance task#{s}";
 export const defaultEmailContents = `Hi #{firstname},
 
-#{n} Alliance task(s) need your completion.
+#{n} Alliance task#{s} need your completion.
 
-You have #{days}, #{hours} left to complete the task(s). Please do so at this link: #{link}`;
+You have #{days}, #{hours} left to complete the task#{s}. Please do so at this link: #{link}`;
 
 export const defaultTextMessage =
-  "You have #{days}, #{hours} left to complete #{n} Alliance task(s) (#{link})";
+  "You have #{days}, #{hours} left to complete #{n} Alliance task#{s} (#{link})";
 
 // announcement
 
 export const defaultAnnouncementEmailSubject =
-  "#{n} Alliance tasks need completion with #{days}";
+  "#{n} Alliance task#{s} need#{s|} completion within #{days}";
 export const defaultAnnouncementEmailContents = `Hi #{firstname},
-A new task is ready for you to complete: "#{action}"
 
-Please complete the action at this link: #{link}`;
+#{n} Alliance task#{s} #{is|are} ready for you to complete:
+1. ACTION1
+2. ACTION2
+3. ...
+
+Please complete the task#{s} at this link: #{link}`;
 
 export const defaultAnnouncementTextMessage =
-  "You have #{days} left to complete #{n} Alliance task(s) (#{link})";
+  "You have #{days} left to complete #{n} Alliance task#{s} (#{link})";
 
 // missed deadline
 
@@ -41,12 +45,12 @@ export const defaultMissedDeadlineTextMessage =
   If you are no longer interested in being a member of the Alliance, please suspend your contract. If you do not complete the next task, we will suspend your contract on your behalf.`;
 
 export const hoursEmailSubject =
-  "You have #{hours} left to complete #{n} Alliance task(s)";
+  "You have #{hours} left to complete #{n} Alliance task#{s}";
 export const hoursEmailContents = `Hi, #{firstname},
 
-#{n} Alliance task(s) needs your completion.
+#{n} Alliance task#{s} needs your completion.
 
-You have #{hours} left to complete the task(s). Please do so at this link: #{link}`;
+You have #{hours} left to complete the task#{s}. Please do so at this link: #{link}`;
 
 export const hoursTextMessage =
-  "You have #{hours} left to complete #{n} Alliance task(s) (#{link})";
+  "You have #{hours} left to complete #{n} Alliance task#{s} (#{link})";
