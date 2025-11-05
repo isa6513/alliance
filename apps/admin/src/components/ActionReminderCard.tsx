@@ -43,12 +43,8 @@ interface ActionReminderCardProps {
   handleEditGroupSubmit: (
     groupId: number
   ) => (payload: ActionReminderGroupFormSubmitPayload) => Promise<void>;
-  setShowReminderPlans: React.Dispatch<React.SetStateAction<number | null>>;
-  showReminderPlans: number | null;
-  setShowSentReminders: React.Dispatch<React.SetStateAction<number | null>>;
-  showSentReminders: number | null;
-  reminderPlans: PreviewNotificationPlan[];
-  sentReminders: ActionEventNotifDto[];
+  reminderPlans?: PreviewNotificationPlan[];
+  sentReminders?: ActionEventNotifDto[];
 }
 const ActionReminderCard = ({
   group,
@@ -70,14 +66,12 @@ const ActionReminderCard = ({
   editError,
   editSuccess,
   handleEditGroupSubmit,
-  setShowReminderPlans,
-  showReminderPlans,
-  setShowSentReminders,
-  showSentReminders,
   reminderPlans,
   sentReminders,
 }: ActionReminderCardProps) => {
   const [minified, setMinified] = useState(true);
+  const [showPlans, setShowPlans] = useState(false);
+  const [showSentReminders, setShowSentReminders] = useState(false);
 
   const handleEditGroup = () => {
     setMinified(false);
@@ -196,25 +190,15 @@ const ActionReminderCard = ({
           <div className="flex flex-row gap-2">
             <p
               className="text-sm cursor-pointer ml-4 mb-4 text-blue"
-              onClick={() =>
-                setShowReminderPlans((prev) =>
-                  prev === group.id ? null : group.id
-                )
-              }
+              onClick={() => setShowPlans((prev) => !prev)}
             >
-              {showReminderPlans === group.id
-                ? "Hide reminder plans"
-                : "Show reminder plans"}
+              {showPlans ? "Hide reminder plans" : "Show reminder plans"}
             </p>
             <p
               className="text-sm cursor-pointer ml-4 mb-4 text-green"
-              onClick={() =>
-                setShowSentReminders((prev) =>
-                  prev === group.id ? null : group.id
-                )
-              }
+              onClick={() => setShowSentReminders((prev) => !prev)}
             >
-              {showSentReminders === group.id
+              {showSentReminders
                 ? "Hide sent reminders"
                 : "Show sent reminders"}
             </p>
@@ -222,59 +206,65 @@ const ActionReminderCard = ({
           <div
             className={`divide-y divide-gray-200 border-t border-gray-200 
                     overflow-y-auto transition-[max-height] duration-300 ${
-                      showReminderPlans === group.id
-                        ? "max-h-[300px]"
-                        : "max-h-[0px]"
+                      showPlans ? "max-h-[300px]" : "max-h-[0px]"
                     }`}
           >
-            {reminderPlans.map((plan) => (
-              <div
-                key={plan.user.id}
-                className="p-3 flex flex-row gap-2 items-center"
-              >
-                <Link to={`/member/${plan.user.id}`} target="_blank">
-                  {plan.user.name}
-                </Link>
-                <p className="text-xs text-gray-500">
-                  {formatDate(plan.scheduledFor, "MM/dd/yyyy hh:mm a")}
-                </p>
-                <p className="text-xs text-gray-500">({plan.channel})</p>
-              </div>
-            ))}
-            {reminderPlans.length === 0 && (
+            {reminderPlans === undefined ? (
+              <p className="text-sm text-zinc-500 p-5">
+                Loading reminder plans...
+              </p>
+            ) : reminderPlans.length === 0 ? (
               <p className="text-sm text-zinc-500 p-5">No reminder plans</p>
+            ) : (
+              reminderPlans.map((plan) => (
+                <div
+                  key={plan.user.id}
+                  className="p-3 flex flex-row gap-2 items-center"
+                >
+                  <Link to={`/member/${plan.user.id}`} target="_blank">
+                    {plan.user.name}
+                  </Link>
+                  <p className="text-xs text-gray-500">
+                    {formatDate(plan.scheduledFor, "MM/dd/yyyy hh:mm a")}
+                  </p>
+                  <p className="text-xs text-gray-500">({plan.channel})</p>
+                </div>
+              ))
             )}
           </div>
           <div
             className={`divide-y divide-gray-200 border-t border-gray-200 
                     overflow-y-auto transition-[max-height] duration-300 ${
-                      showSentReminders === group.id
-                        ? "max-h-[300px]"
-                        : "max-h-[0px]"
+                      showSentReminders ? "max-h-[300px]" : "max-h-[0px]"
                     }`}
           >
-            {sentReminders.map((notif) => (
-              <div
-                key={notif.id}
-                className="p-3 flex flex-row gap-2 items-center"
-              >
-                <p className="text-zinc-500">({notif.channel})</p>
-                <Link to={`/member/${notif.user.id}`} target="_blank">
-                  {notif.user.displayName}
-                </Link>
-                <p className="text-sm text-zinc-500">
-                  {formatDate(notif.createdAt, "MM/dd/yyyy hh:mm a")}
-                </p>
-                <Link
-                  to={`/database?table=action_event_notif&id=${notif.id}`}
-                  target="_blank"
-                >
-                  <DatabaseIcon size="small" fill="gray" />
-                </Link>
-              </div>
-            ))}
-            {sentReminders.length === 0 && (
+            {sentReminders === undefined ? (
+              <p className="text-sm text-zinc-500 p-5">
+                Loading sent reminders...
+              </p>
+            ) : sentReminders.length === 0 ? (
               <p className="text-sm text-zinc-500 p-5">No sent reminders</p>
+            ) : (
+              sentReminders.map((notif) => (
+                <div
+                  key={notif.id}
+                  className="p-3 flex flex-row gap-2 items-center"
+                >
+                  <p className="text-zinc-500">({notif.channel})</p>
+                  <Link to={`/member/${notif.user.id}`} target="_blank">
+                    {notif.user.displayName}
+                  </Link>
+                  <p className="text-sm text-zinc-500">
+                    {formatDate(notif.createdAt, "MM/dd/yyyy hh:mm a")}
+                  </p>
+                  <Link
+                    to={`/database?table=action_event_notif&id=${notif.id}`}
+                    target="_blank"
+                  >
+                    <DatabaseIcon size="small" fill="gray" />
+                  </Link>
+                </div>
+              ))
             )}
           </div>
         </div>

@@ -6,6 +6,7 @@ import { tasksUrl, withCid } from 'src/search/approutes';
 import { Repository } from 'typeorm';
 import { EmailStatus, EmailType, Mail } from './mail.entity';
 import {
+  getDaysAndHoursFromDeadline,
   getDaysFromDeadline,
   getHoursFromDeadline,
 } from 'src/notifs/textnotifcontents';
@@ -20,9 +21,11 @@ export function processKeywordReplacements(
     deadlineEvent?: ActionEvent;
     cid: string;
     uncompletedTasksCount: number;
+    dateNow?: Date;
   },
 ): string {
   const names = context.user.name.split(' ');
+  const dateNow = context.dateNow ?? new Date();
   let firstname = '';
   let lastname = '';
   if (names.length < 2) {
@@ -42,13 +45,19 @@ export function processKeywordReplacements(
     .replace(
       '#{days}',
       context.deadlineEvent
-        ? getDaysFromDeadline(context.deadlineEvent)
+        ? getDaysFromDeadline(context.deadlineEvent, dateNow)
         : '[err]',
     )
     .replace(
       '#{hours}',
       context.deadlineEvent
-        ? getHoursFromDeadline(context.deadlineEvent)
+        ? getHoursFromDeadline(context.deadlineEvent, dateNow)
+        : '[err]',
+    )
+    .replace(
+      '#{timeremaining}',
+      context.deadlineEvent
+        ? getDaysAndHoursFromDeadline(context.deadlineEvent, dateNow)
         : '[err]',
     )
     .replace('#{link}', withCid(tasksUrl(true), context.cid));

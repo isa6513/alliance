@@ -414,6 +414,7 @@ export class ActionEventReminderService {
   async previewEmailHtml(
     eventId: number,
     dto: PreviewEmailHtmlDto,
+    sendTime?: Date,
   ): Promise<string> {
     const { event, deadlineEvent } = await this.loadEventsForPreview(eventId);
 
@@ -423,6 +424,7 @@ export class ActionEventReminderService {
       user: testUser,
       cid: await generateCIDForNotif(),
       uncompletedTasksCount: 2,
+      dateNow: sendTime,
     });
 
     return this.mailService.renderHtml(EmailType.CustomActionReminder, {
@@ -433,6 +435,7 @@ export class ActionEventReminderService {
   async previewTextMessage(
     eventId: number,
     dto: PreviewTextDto,
+    sendTime?: Date,
   ): Promise<string> {
     const { event, deadlineEvent } = await this.loadEventsForPreview(eventId);
 
@@ -442,6 +445,7 @@ export class ActionEventReminderService {
       user: testUser,
       cid: await generateCIDForNotif(),
       uncompletedTasksCount: 1,
+      dateNow: sendTime,
     });
   }
 }

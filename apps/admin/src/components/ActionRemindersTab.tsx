@@ -107,6 +107,12 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
 
   const [reminderGroups, setReminderGroups] = useState<ReminderGroup[]>([]);
 
+  const [reminderPlansByGroup, setReminderPlansByGroup] = useState<
+    Partial<Record<number, PreviewNotificationPlan[]>>
+  >({});
+  const [sentRemindersByGroup, setSentRemindersByGroup] = useState<
+    Partial<Record<number, ActionEventNotifDto[]>>
+  >({});
   useEffect(() => {
     if (memberEvents.length && selectedEventId == null) {
       setSelectedEventId(memberEvents[0].id);
@@ -177,6 +183,8 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     console.log("fetched reminders", response.data);
 
     setReminderGroups(response.data);
+    setReminderPlansByGroup({});
+    setSentRemindersByGroup({});
   }, []);
 
   useEffect(() => {
@@ -235,37 +243,110 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     return nextEventById.get(memberEventId);
   };
 
-  const [showReminderPlans, setShowReminderPlans] = useState<number | null>(
-    null
-  );
-  const [showSentReminders, setShowSentReminders] = useState<number | null>(
-    null
-  );
-  const [reminderPlans, setReminderPlans] = useState<PreviewNotificationPlan[]>(
-    []
-  );
-  const [sentReminders, setSentReminders] = useState<ActionEventNotifDto[]>([]);
+  useEffect(() => {
+    if (reminderGroups.length === 0) {
+      setReminderPlansByGroup({});
+      setSentRemindersByGroup({});
+      return;
+    }
+
+    const groupIds = new Set(reminderGroups.map((group) => group.id));
+
+    setReminderPlansByGroup((prev) => {
+      const next: Partial<Record<number, PreviewNotificationPlan[]>> = {};
+      groupIds.forEach((id) => {
+        if (prev[id] !== undefined) {
+          next[id] = prev[id];
+        }
+      });
+      if (
+        Object.keys(next).length === Object.keys(prev).length &&
+        reminderGroups.every((group) => prev[group.id] !== undefined)
+      ) {
+        return prev;
+      }
+      return next;
+    });
+
+    setSentRemindersByGroup((prev) => {
+      const next: Partial<Record<number, ActionEventNotifDto[]>> = {};
+      groupIds.forEach((id) => {
+        if (prev[id] !== undefined) {
+          next[id] = prev[id];
+        }
+      });
+      if (
+        Object.keys(next).length === Object.keys(prev).length &&
+        reminderGroups.every((group) => prev[group.id] !== undefined)
+      ) {
+        return prev;
+      }
+      return next;
+    });
+  }, [reminderGroups]);
 
   useEffect(() => {
-    setReminderPlans([]);
-    if (showReminderPlans) {
-      actionsPlansForGroup({
-        path: { groupId: showReminderPlans },
-      }).then((response) => {
-        setReminderPlans(response.data ?? []);
-      });
+    if (!reminderGroups.length) {
+      return;
     }
-  }, [showReminderPlans]);
 
-  useEffect(() => {
-    if (showSentReminders) {
-      actionsSentNotifsForGroup({
-        path: { groupId: showSentReminders },
-      }).then((response) => {
-        setSentReminders(response.data ?? []);
-      });
+    let cancelled = false;
+
+    const loadGroupDetails = async (groupId: number) => {
+      try {
+        const [plansResponse, sentResponse] = await Promise.all([
+          actionsPlansForGroup({
+            path: { groupId },
+          }),
+          actionsSentNotifsForGroup({
+            path: { groupId },
+          }),
+        ]);
+
+        if (cancelled) {
+          return;
+        }
+        setReminderPlansByGroup((prev) => ({
+          ...prev,
+          [groupId]: plansResponse.data ?? [],
+        }));
+
+        setSentRemindersByGroup((prev) => ({
+          ...prev,
+          [groupId]: sentResponse.data ?? [],
+        }));
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) {
+          setLoadError(
+            err instanceof Error
+              ? err.message
+              : "Failed to load reminder details."
+          );
+        }
+      }
+    };
+
+    const pendingGroups = reminderGroups.filter(
+      (group) =>
+        reminderPlansByGroup[group.id] === undefined ||
+        sentRemindersByGroup[group.id] === undefined
+    );
+
+    if (!pendingGroups.length) {
+      return;
     }
-  }, [showSentReminders]);
+
+    setLoadError(null);
+
+    pendingGroups.forEach((group) => {
+      void loadGroupDetails(group.id);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [reminderGroups, reminderPlansByGroup, sentRemindersByGroup]);
 
   const getGroupRange = (group: ReminderGroup) => {
     const start = group.send_range_start ?? null;
@@ -698,12 +779,8 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             editError={editError}
             editSuccess={editSuccess}
             handleEditGroupSubmit={handleEditGroupSubmit}
-            setShowReminderPlans={setShowReminderPlans}
-            showReminderPlans={showReminderPlans}
-            setShowSentReminders={setShowSentReminders}
-            showSentReminders={showSentReminders}
-            reminderPlans={reminderPlans}
-            sentReminders={sentReminders}
+            reminderPlans={reminderPlansByGroup[group.id]}
+            sentReminders={sentRemindersByGroup[group.id]}
           />
         );
       })}

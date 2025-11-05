@@ -68,6 +68,7 @@ export const keywords = [
   "#{link}",
   "#{n}",
   "#{s}",
+  "#{timeremaining}",
 ];
 
 const TIMING_MODE_OPTIONS: Array<{
@@ -785,6 +786,16 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
                     so will not show more than 24 hours. (ie an action due in 25
                     hours will show &quot;1 hour&quot;) to allow rendering
                     &quot;1 day 1 hour remaning&quot;
+                  </td>
+                </tr>
+                <tr>
+                  <td>{"#{timeremaining}"}</td>
+                  <td>2 days, 3 hours</td>
+                  <td>
+                    The number of days and hours until the action is due. In
+                    most cases equivalent to {`#{days}, #{hours}`}, but will
+                    trim &quot;0 days&quot; or &quot;0 hours&quot; from the
+                    message.
                   </td>
                 </tr>
                 <tr>
