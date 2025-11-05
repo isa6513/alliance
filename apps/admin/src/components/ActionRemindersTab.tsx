@@ -483,8 +483,26 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
   };
 
   const handleCreateGroupSubmit = async (
-    payload: ActionReminderGroupFormSubmitPayload
+    payload: ActionReminderGroupFormSubmitPayload,
+    anchor: React.RefObject<HTMLButtonElement | null>,
+    recipientCount: number
   ) => {
+    const mode = import.meta.env.MODE;
+
+    if (mode !== "development") {
+      const ok = await confirm({
+        title: "Create reminder group?",
+        message: `This will send emails or texts to ${recipientCount} members.`,
+        confirmLabel: "Create",
+        cancelLabel: "Cancel",
+        anchorEl: anchor?.current,
+        placement: "topleft",
+      });
+      if (!ok) {
+        return;
+      }
+    }
+
     setCreateError(null);
     setCreateSuccess(null);
     setCreateSubmitting(true);

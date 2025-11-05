@@ -273,6 +273,8 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({
                         className={`rounded-md px-3 py-1 text-sm font-medium hover:bg-zinc-100 ${
                           (t as ToastConfirm).confirmLabel === "Delete"
                             ? "text-red-500"
+                            : (t as ToastConfirm).confirmLabel === "Create"
+                            ? "text-green"
                             : "text-black"
                         }`}
                         onClick={() => handleConfirm(t as ToastConfirm, true)}

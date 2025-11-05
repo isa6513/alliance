@@ -98,7 +98,9 @@ interface ActionReminderFormProps {
   onCancel?: () => void;
   onEventChange?: (eventId: number) => void;
   onSubmit: (
-    payload: ActionReminderGroupFormSubmitPayload
+    payload: ActionReminderGroupFormSubmitPayload,
+    anchor: React.RefObject<HTMLButtonElement | null>,
+    recipientCount: number
   ) => Promise<void> | void;
 }
 
@@ -301,6 +303,8 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     }
   };
 
+  const anchor = useRef<HTMLButtonElement>(null);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLocalError(null);
@@ -394,7 +398,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
 
     console.log(payload);
 
-    await onSubmit(payload);
+    await onSubmit(payload, anchor, tentativePlans.length);
   };
 
   const combinedError = localError ?? serverError ?? null;
@@ -757,6 +761,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
           type="submit"
           disabled={submitting || loadingUsers}
           color={ButtonColor.Black}
+          ref={anchor}
           className="px-4 py-2"
         >
           {submitting ? "Saving…" : submitLabel}
