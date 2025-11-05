@@ -1,15 +1,3 @@
-// generic reminder
-
-export const defaultEmailSubject =
-  "You have #{timeremaining} left to complete #{n} Alliance task#{s}";
-export const defaultEmailContents = `Hi #{firstname},
-
-#{n} Alliance task#{s} need your completion.
-
-You have #{timeremaining} left to complete the task#{s}. Please do so at this link: #{link}`;
-
-export const defaultTextMessage =
-  "You have #{timeremaining} left to complete #{n} Alliance task#{s} (#{link})";
 // announcement
 
 export const defaultAnnouncementEmailSubject =
@@ -24,13 +12,30 @@ export const defaultAnnouncementEmailContents = `Hi #{firstname},
 Please complete the task#{s} at this link: #{link}`;
 
 export const defaultAnnouncementTextMessage =
-  "You have #{days} left to complete #{n} Alliance task#{s} (#{link})";
+  `#{n} Alliance task#{s} need#{s|} completion within #{days} (#{link}):
+      1. ACTION1
+      2. ACTION2
+      3. ...`;
+      
+// generic reminder
+
+export const defaultEmailSubject =
+  "#{timeremaining} left to complete #{n} Alliance task#{s}";
+export const defaultEmailContents = `Hi #{firstname},
+
+#{n} Alliance task#{s} need your completion.
+
+You have #{timeremaining} left to complete the task#{s}. Please do so at this link: #{link}`;
+
+export const defaultTextMessage =
+  "You have #{timeremaining} left to complete #{n} Alliance task#{s} (#{link})";
+
 
 // missed deadline
 
 export const defaultMissedDeadlineEmailSubject =
   "Failed to complete Alliance task by deadline";
-export const defaultMissedDeadlineEmailContents = `Hi #{firstname}
+export const defaultMissedDeadlineEmailContents = `Hi #{firstname},
 
 The deadline for the current task has passed and you have not completed it. If you have completed it, please contact us — we may have made a mistake.
 
