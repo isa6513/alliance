@@ -93,12 +93,12 @@ const ActionReminderCard = ({
       }`}
     >
       <div className="flex flex-row gap-2 w-full bg-zinc-100 p-4 items-center justify-between">
-        <div className="flex flex-row gap-2 items-center">
+        <div className="flex flex-row gap-4 items-center">
           <Button
             type="button"
             color={ButtonColor.Transparent}
             onClick={() => setMinified(!minified)}
-            className={`-my-1 transition-transform duration-100 ${
+            className={`!p-0 -my-1 transition-transform duration-100 ${
               minified ? "rotate-180" : ""
             }`}
           >
@@ -209,7 +209,8 @@ const ActionReminderCard = ({
               className="text-sm cursor-pointer ml-4 mb-4 text-blue"
               onClick={() => setShowPlans((prev) => !prev)}
             >
-              {showPlans ? "Hide reminder plans" : "Show reminder plans"}
+              {showPlans ? "Hide reminder plans" : "Show reminder plans"} (
+              {reminderPlans?.length})
             </p>
             <p
               className="text-sm cursor-pointer ml-4 mb-4 text-green"
@@ -217,7 +218,8 @@ const ActionReminderCard = ({
             >
               {showSentReminders
                 ? "Hide sent reminders"
-                : "Show sent reminders"}
+                : "Show sent reminders"}{" "}
+              ({sentReminders?.length})
             </p>
           </div>
           <div

@@ -1044,7 +1044,7 @@ export class ActionsService {
     }
 
     for (const user of users) {
-      this.notifsService.createActionUpdateNotif(actionUpdate, user);
+      await this.notifsService.createActionUpdateNotif(actionUpdate, user);
     }
   }
 
