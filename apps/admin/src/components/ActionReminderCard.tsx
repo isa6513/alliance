@@ -12,14 +12,17 @@ import ActionReminderGroupForm, {
 import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
 import { Link } from "react-router";
 import { formatDate } from "date-fns";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 
 interface ActionReminderCardProps {
   group: ReminderGroup;
   highlightedReminder: number | undefined;
   ref: React.RefObject<HTMLDivElement | null>;
-  handleDeleteGroup: (groupId: number) => Promise<void>;
+  handleDeleteGroup: (
+    groupId: number,
+    anchor?: HTMLElement | null
+  ) => Promise<void>;
   groupSchedule: { primary: string; secondary?: string | null };
   editing: boolean;
   handleEditCancel: () => void;
@@ -78,6 +81,8 @@ const ActionReminderCard = ({
     handleEditGroupStart(group.id);
   };
 
+  const deleteButtonRef = useRef<HTMLButtonElement>(null);
+
   return (
     <Card
       key={group.id}
@@ -134,8 +139,9 @@ const ActionReminderCard = ({
           <Button
             type="button"
             color={ButtonColor.Black}
-            onClick={() => handleDeleteGroup(group.id)}
+            onClick={() => handleDeleteGroup(group.id, deleteButtonRef.current)}
             className="-my-1"
+            ref={deleteButtonRef}
           >
             Delete
           </Button>

@@ -21,6 +21,16 @@ type ConfirmOptions = {
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  anchorEl?: HTMLElement | null;
+  placement?:
+    | "top"
+    | "bottom"
+    | "left"
+    | "right"
+    | "topleft"
+    | "topright"
+    | "bottomleft"
+    | "bottomright";
 };
 
 type ToastOptions = Omit<ToastBase, "id" | "variant"> & {
@@ -29,6 +39,16 @@ type ToastOptions = Omit<ToastBase, "id" | "variant"> & {
 };
 
 type ToastConfirm = ToastBase & {
+  anchorEl?: HTMLElement | null;
+  placement?:
+    | "top"
+    | "bottom"
+    | "left"
+    | "right"
+    | "topleft"
+    | "topright"
+    | "bottomleft"
+    | "bottomright";
   variant: "confirm";
   confirmLabel: string;
   cancelLabel: string;
@@ -85,6 +105,8 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({
       message,
       confirmLabel = "Confirm",
       cancelLabel = "Cancel",
+      anchorEl,
+      placement,
     }: ConfirmOptions): Promise<boolean> => {
       const id = ++idRef.current;
 
@@ -96,6 +118,8 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({
           message,
           confirmLabel,
           cancelLabel,
+          anchorEl,
+          placement,
           resolve,
         };
         setToasts((prev) => [...prev, toast]);
@@ -144,10 +168,89 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({
               ? "bg-zinc-50 text-black border border-zinc-200"
               : "bg-slate-700 text-white";
 
+          let style: React.CSSProperties = {};
+          const confirmToast = t as ToastConfirm;
+          if (isConfirm && confirmToast.anchorEl) {
+            const rect = confirmToast.anchorEl.getBoundingClientRect();
+            const placement = confirmToast.placement || "bottom";
+
+            style = { position: "fixed" };
+
+            const margin = 8;
+
+            switch (placement) {
+              case "top":
+                style = {
+                  ...style,
+                  top: rect.top - margin,
+                  left: rect.left + rect.width / 2,
+                  transform: "translate(-50%, -100%)",
+                };
+                break;
+              case "bottom":
+                style = {
+                  ...style,
+                  top: rect.bottom + margin,
+                  left: rect.left + rect.width / 2,
+                  transform: "translate(-50%, 0)",
+                };
+                break;
+              case "left":
+                style = {
+                  ...style,
+                  top: rect.top + rect.height / 2,
+                  left: rect.left - margin,
+                  transform: "translate(-100%, -50%)",
+                };
+                break;
+              case "right":
+                style = {
+                  ...style,
+                  top: rect.top + rect.height / 2,
+                  left: rect.right + margin,
+                  transform: "translate(0, -50%)",
+                };
+                break;
+              case "topleft":
+                style = {
+                  ...style,
+                  top: rect.top - margin,
+                  left: rect.right,
+                  transform: "translate(-100%, -100%)",
+                };
+                break;
+              case "topright":
+                style = {
+                  ...style,
+                  top: rect.top - margin,
+                  left: rect.right + margin,
+                  transform: "translate(0, -100%)",
+                };
+                break;
+              case "bottomleft":
+                style = {
+                  ...style,
+                  top: rect.bottom + margin,
+                  left: rect.left - margin,
+                  transform: "translate(-100%, 0)",
+                };
+                break;
+              case "bottomright":
+                style = {
+                  ...style,
+                  top: rect.bottom + margin,
+                  left: rect.right + margin,
+                  transform: "translate(0, 0)",
+                };
+                break;
+            }
+          }
+
           return (
             <div
               key={t.id}
-              className={`pointer-events-auto mb-2 w-full max-w-sm rounded-xl shadow-lg/5 ring-1 ring-black/5 ${colorClasses}`}
+              style={style}
+              className={`pointer-events-auto mb-2 w-full max-w-sm rounded-xl shadow-lg ring-1 ring-black/5 ${colorClasses}`}
             >
               <div className="flex items-start gap-3 px-4 py-3">
                 <div className="flex-1">

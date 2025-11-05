@@ -185,12 +185,17 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     }
   }, [selectedEventId, refreshReminderGroups]);
 
-  const handleDeleteGroup = async (groupId: number) => {
+  const handleDeleteGroup = async (
+    groupId: number,
+    anchor?: HTMLElement | null
+  ) => {
     const ok = await confirm({
       message:
         "Delete reminder group? All planned reminders will no longer be sent.",
       confirmLabel: "Delete",
       cancelLabel: "Cancel",
+      anchorEl: anchor,
+      placement: "topleft",
     });
     if (!ok) {
       return;
