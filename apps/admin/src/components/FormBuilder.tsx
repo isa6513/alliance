@@ -46,26 +46,7 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useNavigate } from "react-router";
 import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
 import { customComponentRegistry } from "@alliance/shared/forms/components";
-import type { UserDto } from "@alliance/shared/client";
-
-export const FORM_BUILDER_PREVIEW_USER: UserDto = {
-  id: 0,
-  name: "Preview User",
-  contractDateSigned: new Date().toISOString(),
-  contractDateSuspended: null,
-  emailNotifsEnabled: false,
-  textNotifsEnabled: false,
-  pushNotifsEnabled: false,
-  socialNotifsPreference: "none",
-  turnedOffAllNotifs: false,
-  forumDigestPreference: "off",
-  admin: false,
-  staff: false,
-  referralCode: null,
-  onboardingComplete: true,
-  anonymous: false,
-  email: "preview@example.com",
-};
+import { FORM_BUILDER_PREVIEW_USER } from "../lib/testData";
 
 interface FormBuilderProps {
   onSave?: (schema: FormSchema) => void;

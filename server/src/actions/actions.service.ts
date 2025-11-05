@@ -36,7 +36,6 @@ import {
   CreateActionUpdateDto,
   CreateTODReminderGroupDto,
   LatLonDto,
-  PreEventNotifDataDto,
   UpdateActionActivityDto,
   UpdateActionDto,
   UpdateActionEventDto,
@@ -45,18 +44,12 @@ import {
   ActionActivity,
   ActionActivityType,
 } from './entities/action-activity.entity';
-import {
-  ActionEvent,
-  ActionStatus,
-  NotificationType,
-} from './entities/action-event.entity';
+import { ActionEvent, ActionStatus } from './entities/action-event.entity';
 import { Action, ActionTaskType } from './entities/action.entity';
 import { Group } from 'src/user/entities/group.entity';
-import { UserDto } from 'src/user/user.dto';
 import { NotificationScheduleEntryDto } from './dto/notification-schedule.dto';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { User } from 'src/user/entities/user.entity';
-import { ActionEventNotifType } from 'src/notifs/entities/action-event-notif.entity';
 import { ActionUpdate } from './entities/action-update.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ActionSuite } from './entities/action-suite.entity';
@@ -971,53 +964,6 @@ export class ActionsService {
       throw new BadRequestException('Action has no funding amount');
     }
     return action.donationAmount;
-  }
-
-  async eventNotifData(
-    actionId: number,
-    type: ActionStatus,
-    sendNotifsTo: NotificationType,
-  ): Promise<PreEventNotifDataDto> {
-    if (sendNotifsTo === NotificationType.None) {
-      return {
-        texts: [],
-        emails: [],
-        pushes: [],
-      };
-    }
-
-    const action = await this.actionRepository.findOne({
-      where: { id: actionId },
-      relations: ['participatingGroups'],
-    });
-    if (!action) {
-      throw new NotFoundException('Action not found');
-    }
-
-    const users =
-      await this.actionEventRecipientService.getFilteredUsersForEvent(
-        {
-          newStatus: type,
-          action,
-          date: new Date(),
-        },
-        ActionEventNotifType.Announcement,
-      );
-
-    const texts = users.filter((user) =>
-      this.notifsService.shouldTextUser(user),
-    );
-    const emails = users
-      .filter((user) => this.notifsService.shouldEmailUser(user))
-      .filter((user) => !texts.includes(user));
-
-    const pushes = [];
-
-    return {
-      texts: texts.map((user) => new UserDto(user)),
-      emails: emails.map((user) => new UserDto(user)),
-      pushes: pushes.map((user) => new UserDto(user)),
-    };
   }
 
   async adminCreateActivity(

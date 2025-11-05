@@ -345,19 +345,6 @@ describe('Actions (e2e)', () => {
       expect(res.status).toBe(403);
     });
 
-    it('only counts eligible participants in pre-event notification data', async () => {
-      const res = await request(ctx.app.getHttpServer())
-        .get(`/actions/preEventNotifData/${groupRestrictedAction.id}`)
-        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
-        .query({
-          type: ActionStatus.MemberAction,
-        });
-
-      expect(res.status).toBe(200);
-      expect(res.body.emails.length).toBe(1);
-      expect(res.body.texts.length).toBe(0);
-    });
-
     it('shows actions to outsider if showToNonparticipating is true', async () => {
       const res = await request(ctx.app.getHttpServer())
         .get('/actions')
@@ -1266,115 +1253,6 @@ describe('Actions (e2e)', () => {
       expect(unlike.body.likes.length).toBe(0);
 
       await actionRepo.delete(action.id);
-    });
-
-    it('allows admins to preview notification counts', async () => {
-      const baseUsers = await Promise.all(
-        ['alice', 'bob', 'carol'].map((name, index) =>
-          userService.create({
-            name: `Notif ${name}`,
-            email: `notif-${name}-${Date.now()}@example.com`,
-            password: 'Password123!',
-            phoneNumber: index === 0 ? undefined : `+14155550${100 + index}`,
-            phoneNumberValidated: true,
-            contractDateSigned: new Date(),
-            emailNotifsEnabled: true,
-            textNotifsEnabled: true,
-            turnedOffAllNotifs: false,
-            groups: [ctx.defaultGroup],
-          }),
-        ),
-      );
-      const n_users = baseUsers.length + 1; // +1 for default sample user
-
-      const tokens = baseUsers.map((user) =>
-        ctx.jwtService.sign({
-          sub: user.id,
-          email: user.email,
-          name: user.name,
-        }),
-      );
-
-      const { action: memberAction } = await createPublishedAction(
-        'Notif Member Scenario',
-        {
-          status: ActionStatus.GatheringCommitments,
-        },
-      );
-
-      for (const token of tokens.slice(0, 2)) {
-        await request(ctx.app.getHttpServer())
-          .post(`/actions/join/${memberAction.id}`)
-          .set('Authorization', `Bearer ${token}`)
-          .expect(201);
-      }
-
-      await request(ctx.app.getHttpServer())
-        .post(`/actions/${memberAction.id}/events`)
-        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
-        .send({
-          title: 'Move to Member Action',
-          description: 'Members can now complete the action',
-          newStatus: ActionStatus.MemberAction,
-          date: new Date(),
-          showInTimeline: true,
-        } satisfies CreateActionEventDto);
-
-      const memberRes = await request(ctx.app.getHttpServer())
-        .get(`/actions/preEventNotifData/${memberAction.id}`)
-        .query({
-          type: ActionStatus.MemberAction,
-        })
-        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
-        .expect(200);
-
-      expect(memberRes.body.emails.length).toBe(1);
-      expect(memberRes.body.texts.length).toBe(1);
-      expect(memberRes.body.pushes.length).toBe(0);
-
-      const { action: gatherAction } = await createPublishedAction(
-        'Notif Gathering Scenario',
-        {
-          status: ActionStatus.GatheringCommitments,
-        },
-      );
-
-      const gatherRes = await request(ctx.app.getHttpServer())
-        .get(`/actions/preEventNotifData/${gatherAction.id}`)
-        .query({
-          type: ActionStatus.GatheringCommitments,
-        })
-        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
-        .expect(200);
-
-      expect(gatherRes.body.texts.length + gatherRes.body.emails.length).toBe(
-        n_users,
-      );
-      expect(gatherRes.body.pushes.length).toBe(0);
-
-      const { action: commitmentlessAction } = await createPublishedAction(
-        'Notif Commitmentless Scenario',
-        {
-          status: ActionStatus.MemberAction,
-          actionOverrides: { commitmentless: true },
-        },
-      );
-
-      const commitmentlessRes = await request(ctx.app.getHttpServer())
-        .get(`/actions/preEventNotifData/${commitmentlessAction.id}`)
-        .query({
-          type: ActionStatus.MemberAction,
-        })
-        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
-        .expect(200);
-
-      expect(commitmentlessRes.body.emails.length).toBe(2);
-      expect(commitmentlessRes.body.texts.length).toBe(2);
-      expect(commitmentlessRes.body.pushes.length).toBe(0);
-
-      await actionRepo.delete(memberAction.id);
-      await actionRepo.delete(gatherAction.id);
-      await actionRepo.delete(commitmentlessAction.id);
     });
   });
 

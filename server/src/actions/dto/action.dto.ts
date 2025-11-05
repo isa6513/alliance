@@ -19,14 +19,10 @@ import {
   CreateEditableContentDto,
   EditableContentDto,
 } from 'src/forum/dto/editablecontent.dto';
-import { ProfileDto, UserDto } from 'src/user/user.dto';
+import { ProfileDto } from 'src/user/user.dto';
 import { UserActionRelation } from '../actions.service';
 import { ActionActivity } from '../entities/action-activity.entity';
-import {
-  ActionEvent,
-  ActionStatus,
-  NotificationType,
-} from '../entities/action-event.entity';
+import { ActionEvent, ActionStatus } from '../entities/action-event.entity';
 import { Action } from '../entities/action.entity';
 import { getImageSource } from 'src/images/images.service';
 import { ActionUpdate } from '../entities/action-update.entity';
@@ -252,27 +248,6 @@ export class UpdateActionActivityDto extends PickType(ActionActivityDto, [
 export class ActionRelationsDto {
   @ApiProperty({ type: () => Map<number, UserActionRelation> })
   relations: Map<number, UserActionRelation>;
-}
-
-export class PreEventNotifDataDto {
-  @ApiProperty({ type: () => UserDto, isArray: true })
-  emails: UserDto[];
-
-  @ApiProperty({ type: () => UserDto, isArray: true })
-  texts: UserDto[];
-
-  @ApiProperty({ type: () => UserDto, isArray: true })
-  pushes: UserDto[];
-}
-
-export class PreEventNotifDataQueryDto {
-  @ApiProperty({ enum: ActionStatus, enumName: 'ActionStatus' })
-  @Allow()
-  type: ActionStatus;
-
-  @ApiProperty({ enum: NotificationType, enumName: 'NotificationType' })
-  @Allow()
-  sendNotifsTo: NotificationType;
 }
 
 export class CreateActionUpdateDto extends PickType(ActionUpdate, [

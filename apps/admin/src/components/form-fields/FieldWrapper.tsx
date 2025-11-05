@@ -8,7 +8,7 @@ import {
   tasksCreateCustomValidator,
   tasksFindOneCustomValidator,
 } from "@alliance/shared/client";
-import { FORM_BUILDER_PREVIEW_USER } from "../FormBuilder";
+import { FORM_BUILDER_PREVIEW_USER } from "../../lib/testData";
 
 function isFormField(field: unknown): field is AnyField {
   return Boolean(

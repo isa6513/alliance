@@ -976,14 +976,6 @@ export type UpdateActionActivityDto = {
     editableContent: EditableContentDto;
 };
 
-export type NotificationType = 'all' | 'joined' | 'none';
-
-export type PreEventNotifDataDto = {
-    emails: Array<UserDto>;
-    texts: Array<UserDto>;
-    pushes: Array<UserDto>;
-};
-
 export type CreateActionActivityDto = {
     /**
      * Type of action activity
@@ -2660,24 +2652,6 @@ export type ActionsUpdateActivityResponses = {
 };
 
 export type ActionsUpdateActivityResponse = ActionsUpdateActivityResponses[keyof ActionsUpdateActivityResponses];
-
-export type ActionsEventNotifDataData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query: {
-        type: ActionStatus;
-        sendNotifsTo: NotificationType;
-    };
-    url: '/actions/preEventNotifData/{id}';
-};
-
-export type ActionsEventNotifDataResponses = {
-    200: PreEventNotifDataDto;
-};
-
-export type ActionsEventNotifDataResponse = ActionsEventNotifDataResponses[keyof ActionsEventNotifDataResponses];
 
 export type ActionsCreateActivityData = {
     body: CreateActionActivityDto;

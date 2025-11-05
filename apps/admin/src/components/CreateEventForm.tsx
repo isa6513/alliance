@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ActionDto,
   actionsAddEvent,
   ActionStatus,
   CreateActionEventDto,
-  actionsEventNotifData,
-  PreEventNotifDataDto,
   actionsAddSuiteEvent,
   ActionEventDto,
   ActionSuiteDto,
@@ -71,7 +69,6 @@ const CreateEventForm = (props: CreateEventFormProps) => {
   const [deadlineEventDate, setDeadlineEventDate] = useState<string>(
     new Date(new Date().getTime() + 604800000).toISOString()
   );
-  const [notifData, setNotifData] = useState<PreEventNotifDataDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [eventForm, setEventForm] = useState<CreateActionEventDto>({
     title: "",
@@ -101,22 +98,6 @@ const CreateEventForm = (props: CreateEventFormProps) => {
       date: change.utcValue || "",
     }));
   };
-
-  useEffect(() => {
-    const loadNotifData = async () => {
-      const response = await actionsEventNotifData({
-        path: { id: action.id },
-        query: {
-          type: eventForm.newStatus,
-          sendNotifsTo: "all",
-        },
-      });
-      if (response.data) {
-        setNotifData(response.data);
-      }
-    };
-    loadNotifData();
-  }, [action.id, eventForm.newStatus]);
 
   const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -485,23 +466,6 @@ const CreateEventForm = (props: CreateEventFormProps) => {
           "Add Event"
         )}
       </button>
-      {!(
-        typeof window !== "undefined" &&
-        window.location.href.includes("localhost")
-      ) && (
-        <div className="flex justify-between items-center">
-          <p
-            className={`px-4 py-2 rounded self-start ${
-              notifData?.emails.length || notifData?.texts.length
-                ? "bg-yellow-600 text-white"
-                : "border border-gray-200"
-            }`}
-          >
-            ⚠️ This will send <b>{notifData?.emails.length}</b> emails and{" "}
-            <b>{notifData?.texts.length}</b> texts
-          </p>
-        </div>
-      )}
     </form>
   );
 };

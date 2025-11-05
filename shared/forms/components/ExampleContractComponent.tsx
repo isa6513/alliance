@@ -11,7 +11,11 @@ const ExampleContractComponent = ({
       <div className="flex flex-row justify-between items-center">
         <p>
           Your contract was signed on:{" "}
-          <b>{new Date(user?.contractDateSigned ?? "").toLocaleDateString()}</b>
+          <b>
+            {new Date(
+              user?.contractDateSigned ?? new Date()
+            ).toLocaleDateString()}
+          </b>
         </p>
         <input
           type="checkbox"
