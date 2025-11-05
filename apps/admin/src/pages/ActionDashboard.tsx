@@ -837,6 +837,8 @@ const ActionDashboard: React.FC = () => {
                 actionId={action.id}
                 updates={action.updates ?? []}
                 setUpdates={(updates) => setAction({ ...action, updates })}
+                events={action.events ?? []}
+                availableGroups={availableGroups}
               />
             )}
           </div>

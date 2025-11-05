@@ -46,6 +46,7 @@ import {
   OptOutActionDto,
   PreviewEmailHtmlDto,
   PreviewTextDto,
+  PreviewTextMessageResponse,
   UpdateActionActivityDto,
   UpdateActionDto,
   UpdateActionEventDto,
@@ -522,6 +523,13 @@ export class ActionsController {
     return this.actionsService.createActionUpdate(id, createActionUpdateDto);
   }
 
+  @Delete('deleteUpdate/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  deleteUpdate(@Param('id', ParseIntPipe) id: number) {
+    return this.actionsService.deleteActionUpdate(id);
+  }
+
   @Get('suites')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionSuite, isArray: true })
@@ -598,12 +606,17 @@ export class ActionsController {
 
   @Post('previewTextMessage/:eventId')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: String })
+  @ApiOkResponse({ type: PreviewTextMessageResponse })
   async previewTextMessage(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: PreviewTextDto,
-  ): Promise<string> {
-    return this.actionEventReminderService.previewTextMessage(eventId, body);
+  ): Promise<PreviewTextMessageResponse> {
+    return {
+      text: await this.actionEventReminderService.previewTextMessage(
+        eventId,
+        body,
+      ),
+    };
   }
 
   @Get('reloadAllActionUsersJoined')

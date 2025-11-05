@@ -1,11 +1,15 @@
 import {
   ActionDto,
+  ActionUpdateNotifyType,
   actionsCreateUpdate,
   CreateActionUpdateDto,
+  GroupDto,
+  actionsDeleteUpdate,
 } from "@alliance/shared/client";
 import ActionUpdateCard from "@alliance/shared/ui/ActionUpdateCard";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card from "@alliance/shared/ui/Card";
+import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
 import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
 import { useState } from "react";
 
@@ -13,6 +17,8 @@ interface ActionUpdatesTabProps {
   actionId: number;
   updates: ActionDto["updates"];
   setUpdates: (updates: ActionDto["updates"]) => unknown;
+  events: ActionDto["events"];
+  availableGroups: GroupDto[];
 }
 
 const defaultNewUpdate: CreateActionUpdateDto = {
@@ -21,21 +27,44 @@ const defaultNewUpdate: CreateActionUpdateDto = {
     body: "",
     attachments: [],
   },
-  displayDate: new Date().toISOString(),
+  date: new Date().toISOString(),
   visibleAt: new Date().toISOString(),
   notifyType: "none",
+  shortNotifString: "",
 };
 
 const ActionUpdatesTab = ({
   actionId,
   updates,
   setUpdates,
+  events,
+  availableGroups,
 }: ActionUpdatesTabProps) => {
   const [newUpdate, setNewUpdate] =
     useState<CreateActionUpdateDto>(defaultNewUpdate);
   const [preview, setPreview] = useState(false);
+  const notifyTypeOptions: ActionUpdateNotifyType[] = [
+    "none",
+    "action_cohort",
+    "all_members",
+    "group",
+  ];
+  const notifyTypeLabels: Record<ActionUpdateNotifyType, string> = {
+    none: "No notification",
+    action_cohort: "Action cohort members",
+    all_members: "All members",
+    group: "Specific group",
+  };
+  const shortNotifString = newUpdate.shortNotifString ?? "";
+  const isSubmitDisabled =
+    !shortNotifString.trim() ||
+    (newUpdate.notifyType === "group" && !newUpdate.groupId);
 
   const handleSubmit = async () => {
+    if (isSubmitDisabled) {
+      return;
+    }
+
     const response = await actionsCreateUpdate({
       path: { id: actionId },
       body: newUpdate,
@@ -45,6 +74,15 @@ const ActionUpdatesTab = ({
       setUpdates([...updates, response.data]);
       setNewUpdate(defaultNewUpdate);
       setPreview(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    const response = await actionsDeleteUpdate({
+      path: { id },
+    });
+    if (response.response.ok) {
+      setUpdates(updates.filter((update) => update.id !== id));
     }
   };
 
@@ -86,11 +124,123 @@ const ActionUpdatesTab = ({
                 });
               }}
             />
+            <label className="flex flex-col text-sm gap-1">
+              <span>Short notification text</span>
+              <input
+                type="text"
+                className="p-2 rounded-md bg-white text-base"
+                placeholder="shows in notification bell message"
+                value={newUpdate.shortNotifString}
+                onChange={(e) =>
+                  setNewUpdate({
+                    ...newUpdate,
+                    shortNotifString: e.target.value,
+                  })
+                }
+                required
+              />
+            </label>
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 mt-3">
+              <label className="flex flex-col text-sm gap-1">
+                <span>Notification audience</span>
+                <select
+                  className="p-2 rounded-md bg-white text-base"
+                  value={newUpdate.notifyType}
+                  onChange={(e) => {
+                    const nextNotifyType = e.target
+                      .value as ActionUpdateNotifyType;
+                    setNewUpdate({
+                      ...newUpdate,
+                      notifyType: nextNotifyType,
+                      groupId:
+                        nextNotifyType === "group"
+                          ? newUpdate.groupId
+                          : undefined,
+                    });
+                  }}
+                >
+                  {notifyTypeOptions.map((option) => {
+                    const label = notifyTypeLabels[option];
+                    return (
+                      <option key={option} value={option}>
+                        {label}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+              <label className="flex flex-col text-sm gap-1">
+                <span>Date</span>
+                <DateTimePicker
+                  value={newUpdate.date}
+                  className="bg-white border-none"
+                  onChange={(date) => {
+                    setNewUpdate({ ...newUpdate, date: date.utcValue ?? "" });
+                  }}
+                />
+              </label>
+              {newUpdate.notifyType === "group" && (
+                <label className="flex flex-col text-sm gap-1 md:col-span-2">
+                  <span>Target group</span>
+                  <select
+                    className="p-2 rounded-md bg-white text-base"
+                    value={newUpdate.groupId ? String(newUpdate.groupId) : ""}
+                    onChange={(e) =>
+                      setNewUpdate({
+                        ...newUpdate,
+                        groupId: e.target.value
+                          ? Number(e.target.value)
+                          : undefined,
+                      })
+                    }
+                  >
+                    <option value="">Select a group</option>
+                    {availableGroups.map((group) => (
+                      <option key={group.id} value={group.id}>
+                        {group.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {events.length > 0 && (
+                <label className="flex flex-col text-sm gap-1 md:col-span-2">
+                  <span>Associated event (optional)</span>
+                  <select
+                    className="p-2 rounded-md bg-white text-base"
+                    value={
+                      newUpdate.associatedEventId
+                        ? String(newUpdate.associatedEventId)
+                        : ""
+                    }
+                    onChange={(e) =>
+                      setNewUpdate({
+                        ...newUpdate,
+                        associatedEventId: e.target.value
+                          ? Number(e.target.value)
+                          : undefined,
+                      })
+                    }
+                  >
+                    <option value="">No associated event</option>
+                    {events.map((event) => (
+                      <option key={event.id} value={event.id}>
+                        {event.title} – {new Date(event.date).toLocaleString()}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+            </div>
           </div>
         </Card>
       )}
       <div className="flex justify-end">
-        <Button onClick={handleSubmit} color={ButtonColor.Black}>
+        <Button
+          onClick={handleSubmit}
+          color={ButtonColor.Black}
+          disabled={isSubmitDisabled}
+        >
           Add update
         </Button>
       </div>
@@ -99,7 +249,11 @@ const ActionUpdatesTab = ({
       </div>
       <div className="space-y-2 bg-white">
         {updates.map((update) => (
-          <ActionUpdateCard key={update.id} update={update} />
+          <ActionUpdateCard
+            key={update.id}
+            update={update}
+            onDelete={() => handleDelete(update.id)}
+          />
         ))}
       </div>
     </div>

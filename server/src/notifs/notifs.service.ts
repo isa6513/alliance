@@ -9,8 +9,13 @@ import { MmsService } from 'src/mms/mms.service';
 import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ActionEventNotif } from './entities/action-event-notif.entity';
-import { Notification } from './entities/notification.entity';
+import {
+  Notification,
+  NotificationCategory,
+} from './entities/notification.entity';
 import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
+import { ActionUpdate } from 'src/actions/entities/action-update.entity';
+import { actionUrl } from 'src/search/approutes';
 
 export function shouldEmailUser(user: User) {
   return (
@@ -97,5 +102,17 @@ export class NotifsService {
     }
     await this.mailService.setClickedLinkByCid(body.cid);
     return { mms: false };
+  }
+
+  async createActionUpdateNotif(actionUpdate: ActionUpdate, user: User) {
+    const notif = this.notifsRepository.create({
+      user,
+      actionUpdate,
+      category: NotificationCategory.ActionUpdate,
+      message: actionUpdate.shortNotifString,
+      webAppLocation: actionUrl(actionUpdate.action.id),
+      mobileAppLocation: actionUrl(actionUpdate.action.id),
+    });
+    return this.notifsRepository.save(notif);
   }
 }

@@ -13,7 +13,7 @@ const ActionUpdatesPanel = ({ updates }: { updates: ActionUpdate[] }) => {
       {updates.length > 1 && (
         <div className="flex flex-row gap-x-2 items-center justify-end w-full">
           <button
-            className="text-blue-500"
+            className="text-blue-500 text-sm"
             onClick={() => setExpanded(!expanded)}
           >
             {expanded ? "Hide old updates" : "Show all updates"}

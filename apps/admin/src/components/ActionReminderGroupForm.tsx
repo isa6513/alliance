@@ -334,7 +334,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
           setLocalError((response.error as Error).message);
           return;
         }
-        setPreviewText1Task(response.data ?? "");
+        setPreviewText1Task(response.data?.text ?? "");
       });
     }
     if (previewingText2Task) {
@@ -351,7 +351,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
           setLocalError((response.error as Error).message);
           return;
         }
-        setPreviewText2Task(response.data ?? "");
+        setPreviewText2Task(response.data?.text ?? "");
       });
     }
   }, [previewingText1Task, previewingText2Task, textMessage, selectedEventId]);
@@ -804,11 +804,19 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         </div>
         {previewingText1Task ? (
           <Card className="p-4">
-            <div>{previewText1Task}</div>
+            <p
+              dangerouslySetInnerHTML={{
+                __html: previewText1Task?.replace(/\n/g, "<br>") ?? "",
+              }}
+            />
           </Card>
         ) : previewingText2Task ? (
           <Card className="p-4">
-            <div>{previewText2Task}</div>
+            <p
+              dangerouslySetInnerHTML={{
+                __html: previewText2Task?.replace(/\n/g, "<br>") ?? "",
+              }}
+            />
           </Card>
         ) : (
           <TextareaWithHighlights

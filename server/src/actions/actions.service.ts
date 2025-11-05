@@ -48,10 +48,13 @@ import { Action, ActionTaskType } from './entities/action.entity';
 import { Group } from 'src/user/entities/group.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { User } from 'src/user/entities/user.entity';
-import { ActionUpdate } from './entities/action-update.entity';
+import {
+  ActionUpdate,
+  ActionUpdateNotifyType,
+} from './entities/action-update.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ActionSuite } from './entities/action-suite.entity';
-import { shouldTextUser } from 'src/notifs/notifs.service';
+import { NotifsService, shouldTextUser } from 'src/notifs/notifs.service';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -86,6 +89,7 @@ export class ActionsService {
     private readonly actionSuiteRepository: Repository<ActionSuite>,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
+    private readonly notifsService: NotifsService,
     private readonly actionEventRecipientService: ActionEventRecipientService,
     private readonly actionEventReminderService: ActionEventReminderService,
   ) {}
@@ -983,13 +987,65 @@ export class ActionsService {
       attachments: createActionUpdateDto.content.attachments ?? [],
     });
     await this.editableContentRepository.save(content);
-    const action = await this.actionRepository.findOneOrFail({ where: { id } });
-    const actionUpdate = this.actionUpdateRepository.create({
-      ...createActionUpdateDto,
-      content,
-      action,
+    const action = await this.actionRepository.findOneOrFail({
+      where: { id },
+      relations: ['participatingGroups'],
     });
-    return this.actionUpdateRepository.save(actionUpdate);
+
+    let group: Group | undefined = undefined;
+    if (createActionUpdateDto.groupId) {
+      group = await this.groupRepository.findOneOrFail({
+        where: { id: createActionUpdateDto.groupId },
+      });
+    }
+
+    const actionUpdate = await this.actionUpdateRepository.save(
+      this.actionUpdateRepository.create({
+        ...createActionUpdateDto,
+        content,
+        action,
+        group,
+      }),
+    );
+
+    if (createActionUpdateDto.notifyType !== ActionUpdateNotifyType.None) {
+      await this.generateNotifsForActionUpdate(actionUpdate);
+    }
+
+    return actionUpdate;
+  }
+
+  async deleteActionUpdate(id: number) {
+    const actionUpdate = await this.actionUpdateRepository.findOneOrFail({
+      where: { id },
+    });
+    await this.actionUpdateRepository.delete(id);
+    return actionUpdate;
+  }
+
+  async generateNotifsForActionUpdate(actionUpdate: ActionUpdate) {
+    const action = actionUpdate.action;
+
+    let users: User[] = [];
+    if (actionUpdate.notifyType === ActionUpdateNotifyType.ActionCohort) {
+      users = await this.userService.findAll();
+    } else if (actionUpdate.notifyType === ActionUpdateNotifyType.Group) {
+      if (!actionUpdate.group) {
+        throw new BadRequestException('Group is required');
+      }
+      users = (await this.userService.findGroupOrFail(actionUpdate.group.id))
+        .users;
+    } else if (actionUpdate.notifyType === ActionUpdateNotifyType.AllMembers) {
+      users = await this.actionEventRecipientService.getBaseUsersForEvent(
+        ActionStatus.MemberAction,
+        action,
+        actionUpdate.associatedEvent?.date ?? actionUpdate.date,
+      );
+    }
+
+    for (const user of users) {
+      this.notifsService.createActionUpdateNotif(actionUpdate, user);
+    }
   }
 
   async getSuites(): Promise<ActionSuite[]> {

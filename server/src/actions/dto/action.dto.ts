@@ -73,6 +73,13 @@ export class PreviewTextDto extends PickType(CreateTODReminderGroupDto, [
   taskCount: number;
 }
 
+export class PreviewTextMessageResponse {
+  @ApiProperty({ type: String })
+  @IsDefined()
+  @IsString()
+  text: string;
+}
+
 export class ActionEventDto extends PickType(ActionEvent, [
   'id',
   'title',
@@ -266,9 +273,10 @@ export class ActionRelationsDto {
 
 export class CreateActionUpdateDto extends PickType(ActionUpdate, [
   'title',
-  'displayDate',
+  'date',
   'visibleAt',
   'notifyType',
+  'shortNotifString',
 ]) {
   @ApiProperty({ type: () => CreateEditableContentDto })
   @Type(() => CreateEditableContentDto)
@@ -278,6 +286,10 @@ export class CreateActionUpdateDto extends PickType(ActionUpdate, [
   @ApiPropertyOptional({ type: Number })
   @IsOptional()
   associatedEventId?: number;
+
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  groupId?: number;
 }
 
 export class CreateActionSuiteDto extends PickType(ActionSuite, ['name']) {}

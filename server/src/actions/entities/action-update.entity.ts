@@ -13,11 +13,13 @@ import { ActionEvent } from './action-event.entity';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Notification } from 'src/notifs/entities/notification.entity';
+import { Group } from 'src/user/entities/group.entity';
 
 export enum ActionUpdateNotifyType {
   None = 'none',
-  BellParticipants = 'bell_participants',
-  BellAllMembers = 'bell_all_members',
+  ActionCohort = 'action_cohort',
+  AllMembers = 'all_members',
+  Group = 'group',
 }
 
 @Entity()
@@ -51,13 +53,18 @@ export class ActionUpdate {
   @IsNotEmpty()
   @Type(() => Date)
   @ApiProperty()
-  displayDate: Date;
+  date: Date;
 
   @Column({ type: 'timestamptz' })
   @IsNotEmpty()
   @Type(() => Date)
   @ApiProperty()
   visibleAt: Date;
+
+  @Column({ type: 'text' })
+  @IsNotEmpty()
+  @ApiProperty()
+  shortNotifString: string;
 
   @ManyToOne(() => ActionEvent, (event) => event.updates, { nullable: true })
   @JoinColumn({ name: 'associatedEventId' })
@@ -84,4 +91,11 @@ export class ActionUpdate {
   @ApiProperty({ type: () => Notification, isArray: true })
   @Allow()
   notifs: Notification[];
+
+  @ManyToOne(() => Group, { nullable: true })
+  @JoinColumn({ name: 'groupId' })
+  @Type(() => Group)
+  @ApiPropertyOptional({ type: () => Group })
+  @IsOptional()
+  group?: Group;
 }

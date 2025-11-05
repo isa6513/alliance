@@ -339,7 +339,7 @@ export type EditableContent = {
     attachments: Array<string>;
 };
 
-export type ActionUpdateNotifyType = 'none' | 'bell_participants' | 'bell_all_members';
+export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 'group';
 
 export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update';
 
@@ -361,11 +361,13 @@ export type ActionUpdate = {
     action: Action;
     title: string;
     content: EditableContent;
-    displayDate: string;
+    date: string;
     visibleAt: string;
+    shortNotifString: string;
     associatedEvent?: ActionEvent;
     notifyType: ActionUpdateNotifyType;
     notifs: Array<Notification>;
+    group?: Group;
 };
 
 export type ActionEvent = {
@@ -982,11 +984,13 @@ export type CreateActionActivityDto = {
 
 export type CreateActionUpdateDto = {
     title: string;
-    displayDate: string;
+    date: string;
     visibleAt: string;
+    shortNotifString: string;
     notifyType: ActionUpdateNotifyType;
     content: CreateEditableContentDto;
     associatedEventId?: number;
+    groupId?: number;
 };
 
 export type ActionSuiteDto = {
@@ -1035,6 +1039,10 @@ export type PreviewEmailHtmlDto = {
 export type PreviewTextDto = {
     textMessage: string;
     taskCount: number;
+};
+
+export type PreviewTextMessageResponse = {
+    text: string;
 };
 
 export type NotificationDto = {
@@ -2732,6 +2740,19 @@ export type ActionsCreateUpdateResponses = {
 
 export type ActionsCreateUpdateResponse = ActionsCreateUpdateResponses[keyof ActionsCreateUpdateResponses];
 
+export type ActionsDeleteUpdateData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/deleteUpdate/{id}';
+};
+
+export type ActionsDeleteUpdateResponses = {
+    200: unknown;
+};
+
 export type ActionsSuitesData = {
     body?: never;
     path?: never;
@@ -2858,7 +2879,7 @@ export type ActionsPreviewTextMessageData = {
 };
 
 export type ActionsPreviewTextMessageResponses = {
-    200: string;
+    200: PreviewTextMessageResponse;
 };
 
 export type ActionsPreviewTextMessageResponse = ActionsPreviewTextMessageResponses[keyof ActionsPreviewTextMessageResponses];

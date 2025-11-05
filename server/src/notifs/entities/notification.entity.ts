@@ -67,7 +67,7 @@ export class Notification {
   @ApiPropertyOptional({ type: () => ActionUpdate })
   @ManyToOne(() => ActionUpdate, (actionUpdate) => actionUpdate.notifs, {
     nullable: true,
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   actionUpdate?: ActionUpdate;
 }
