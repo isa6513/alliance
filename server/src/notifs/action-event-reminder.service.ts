@@ -18,13 +18,21 @@ import {
   ReminderGroup,
   ReminderGroupTimingMode,
 } from 'src/actions/entities/reminder-group.entity';
-import { CreateTODReminderGroupDto } from 'src/actions/dto/action.dto';
+import {
+  CreateTODReminderGroupDto,
+  PreviewEmailHtmlDto,
+  PreviewTextDto,
+} from 'src/actions/dto/action.dto';
 import { UserService } from 'src/user/user.service';
 import { Temporal } from '@js-temporal/polyfill';
 import { Group } from 'src/user/entities/group.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { ActionSuite } from 'src/actions/entities/action-suite.entity';
 import { ActionEventNotifDto } from './entities/action-event-notif.dto';
+import { MailService, processKeywordReplacements } from 'src/mail/mail.service';
+import { EmailType } from 'src/mail/mail.entity';
+import { testUser } from './test-users';
+import { generateCIDForNotif } from './notif-utils';
 
 export interface MissedDeadlineCandidate {
   actionId: number;
@@ -66,6 +74,7 @@ export class ActionEventReminderService {
     private readonly actionEventNotifRepository: Repository<ActionEventNotif>,
     private readonly recipientService: ActionEventRecipientService,
     private readonly userService: UserService,
+    private readonly mailService: MailService,
   ) {}
 
   async getPlansForGroup(
@@ -351,6 +360,63 @@ export class ActionEventReminderService {
     return this.reminderGroupRepository.find({
       where: { memberActionEvent: { id } },
       relations: ['memberActionEvent'],
+    });
+  }
+
+  async loadEventsForPreview(
+    eventId: number,
+  ): Promise<{ deadlineEvent: ActionEvent | undefined; event: ActionEvent }> {
+    const event = await this.eventRepository.findOneOrFail({
+      where: { id: eventId },
+      relations: ['action'],
+    });
+    const deadlineEvents = await this.eventRepository.find({
+      where: {
+        action: { id: event.action.id },
+        date: MoreThan(event.date),
+        newStatus: In(Array.from(POST_MEMBER_ACTION_STATUSES)),
+      },
+      order: {
+        date: 'ASC',
+      },
+      take: 1,
+    });
+    return {
+      event,
+      deadlineEvent: deadlineEvents.length > 0 ? deadlineEvents[0] : undefined,
+    };
+  }
+  async previewEmailHtml(
+    eventId: number,
+    dto: PreviewEmailHtmlDto,
+  ): Promise<string> {
+    const { event, deadlineEvent } = await this.loadEventsForPreview(eventId);
+
+    const replaced = processKeywordReplacements(dto.emailMessage, {
+      action: event.action,
+      deadlineEvent,
+      user: testUser,
+      cid: await generateCIDForNotif(),
+      uncompletedTasksCount: 2,
+    });
+
+    return this.mailService.renderHtml(EmailType.CustomActionReminder, {
+      customMessage: replaced.replace(/\n/g, '<br>'),
+    });
+  }
+
+  async previewTextMessage(
+    eventId: number,
+    dto: PreviewTextDto,
+  ): Promise<string> {
+    const { event, deadlineEvent } = await this.loadEventsForPreview(eventId);
+
+    return processKeywordReplacements(dto.textMessage, {
+      action: event.action,
+      deadlineEvent,
+      user: testUser,
+      cid: await generateCIDForNotif(),
+      uncompletedTasksCount: 2,
     });
   }
 }

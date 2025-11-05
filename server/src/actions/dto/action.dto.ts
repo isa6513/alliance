@@ -54,6 +54,15 @@ export class CreateTODReminderGroupDto extends PickType(ReminderGroup, [
   suiteId?: number;
 }
 
+export class PreviewEmailHtmlDto extends PickType(CreateTODReminderGroupDto, [
+  'emailMessage',
+  'emailSubject',
+]) {}
+
+export class PreviewTextDto extends PickType(CreateTODReminderGroupDto, [
+  'textMessage',
+]) {}
+
 export class ActionEventDto extends PickType(ActionEvent, [
   'id',
   'title',

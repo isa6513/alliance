@@ -1031,6 +1031,15 @@ export type UpdateActionEventDto = {
     showInTimeline?: boolean;
 };
 
+export type PreviewEmailHtmlDto = {
+    emailMessage: string;
+    emailSubject: string;
+};
+
+export type PreviewTextDto = {
+    textMessage: string;
+};
+
 export type NotificationDto = {
     id: number;
     category: NotificationCategory;
@@ -2826,6 +2835,36 @@ export type ActionsTentativePlansForGroupResponses = {
 };
 
 export type ActionsTentativePlansForGroupResponse = ActionsTentativePlansForGroupResponses[keyof ActionsTentativePlansForGroupResponses];
+
+export type ActionsPreviewEmailHtmlData = {
+    body: PreviewEmailHtmlDto;
+    path: {
+        eventId: number;
+    };
+    query?: never;
+    url: '/actions/previewEmailHtml/{eventId}';
+};
+
+export type ActionsPreviewEmailHtmlResponses = {
+    200: string;
+};
+
+export type ActionsPreviewEmailHtmlResponse = ActionsPreviewEmailHtmlResponses[keyof ActionsPreviewEmailHtmlResponses];
+
+export type ActionsPreviewTextMessageData = {
+    body: PreviewTextDto;
+    path: {
+        eventId: number;
+    };
+    query?: never;
+    url: '/actions/previewTextMessage/{eventId}';
+};
+
+export type ActionsPreviewTextMessageResponses = {
+    200: string;
+};
+
+export type ActionsPreviewTextMessageResponse = ActionsPreviewTextMessageResponses[keyof ActionsPreviewTextMessageResponses];
 
 export type NotifsFindAllData = {
     body?: never;

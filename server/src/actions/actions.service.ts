@@ -21,7 +21,6 @@ import {
   NOTIFICATION_LOOKBACK_WINDOW_MS,
   NotificationPlan,
 } from 'src/notifs/action-event-reminder.service';
-import { NotifsService } from 'src/notifs/notifs.service';
 import { ILike, In, LessThan, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import {
@@ -47,13 +46,11 @@ import {
 import { ActionEvent, ActionStatus } from './entities/action-event.entity';
 import { Action, ActionTaskType } from './entities/action.entity';
 import { Group } from 'src/user/entities/group.entity';
-import { NotificationScheduleEntryDto } from './dto/notification-schedule.dto';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ActionUpdate } from './entities/action-update.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ActionSuite } from './entities/action-suite.entity';
-import { ActionEventNotifDto } from 'src/notifs/entities/action-event-notif.dto';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -86,7 +83,6 @@ export class ActionsService {
     private readonly actionUpdateRepository: Repository<ActionUpdate>,
     @InjectRepository(ActionSuite)
     private readonly actionSuiteRepository: Repository<ActionSuite>,
-    private readonly notifsService: NotifsService,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
     private readonly actionEventRecipientService: ActionEventRecipientService,
@@ -223,16 +219,6 @@ export class ActionsService {
           reqAuthenticated: !!user,
         });
       }),
-    );
-  }
-
-  async getNotificationSchedule(
-    windowStart: Date,
-    windowEnd: Date,
-  ): Promise<NotificationScheduleEntryDto[]> {
-    return this.actionEventReminderService.getNotificationSchedule(
-      windowStart,
-      windowEnd,
     );
   }
 
@@ -529,35 +515,6 @@ export class ActionsService {
     const savedEvent = await this.actionEventRepository.save(newEvent);
 
     return savedEvent;
-  }
-
-  async deleteReminderGroup(groupId: number) {
-    return this.actionEventReminderService.deleteReminderGroup(groupId);
-  }
-  async getNotificationPlansForGroup(
-    groupId: number,
-  ): Promise<NotificationPlan[]> {
-    return this.actionEventReminderService.getNotificationPlansForGroup(
-      groupId,
-    );
-  }
-
-  async getSentNotifsForGroup(groupId: number): Promise<ActionEventNotifDto[]> {
-    return this.actionEventReminderService.getSentNotifsForGroup(groupId);
-  }
-
-  async createdTimedReminderGroup(
-    eventId: number,
-    dto: CreateTODReminderGroupDto,
-  ): Promise<ReminderGroup> {
-    return this.actionEventReminderService.createReminderGroup(eventId, dto);
-  }
-
-  async updateReminderGroup(
-    groupId: number,
-    dto: CreateTODReminderGroupDto,
-  ): Promise<ReminderGroup> {
-    return this.actionEventReminderService.updateReminderGroup(groupId, dto);
   }
 
   async remove(id: number) {
@@ -1004,10 +961,6 @@ export class ActionsService {
       action,
     });
     return this.actionUpdateRepository.save(actionUpdate);
-  }
-
-  async getReminderGroupsForEvent(id: number): Promise<ReminderGroup[]> {
-    return this.actionEventReminderService.getReminderGroupsForEvent(id);
   }
 
   async getSuites(): Promise<ActionSuite[]> {

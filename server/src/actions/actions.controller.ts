@@ -26,7 +26,6 @@ import { Observable, from, fromEvent, merge } from 'rxjs';
 import { bufferTime, filter, map, scan, share } from 'rxjs/operators';
 import { AuthOptionalGuard } from 'src/auth/guards/authoptional.guard';
 import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
-import { UserService } from 'src/user/user.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
 import { Public } from '../auth/public.decorator';
@@ -45,6 +44,8 @@ import {
   DeclineActionDto,
   LatLonDto,
   OptOutActionDto,
+  PreviewEmailHtmlDto,
+  PreviewTextDto,
   UpdateActionActivityDto,
   UpdateActionDto,
   UpdateActionEventDto,
@@ -56,7 +57,10 @@ import {
 import { ActionUpdate } from './entities/action-update.entity';
 import { ActionEvent } from './entities/action-event.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
-import { NotificationPlan } from 'src/notifs/action-event-reminder.service';
+import {
+  ActionEventReminderService,
+  NotificationPlan,
+} from 'src/notifs/action-event-reminder.service';
 import { ActionSuite } from './entities/action-suite.entity';
 import { ActionEventNotifDto } from 'src/notifs/entities/action-event-notif.dto';
 
@@ -66,7 +70,7 @@ export class ActionsController {
   constructor(
     private readonly actionsService: ActionsService,
     private readonly eventEmitter: EventEmitter2,
-    private userService: UserService,
+    private readonly actionEventReminderService: ActionEventReminderService,
   ) {
     this.delta$ = fromEvent<{ actionId: number; delta: number }>(
       this.eventEmitter,
@@ -216,10 +220,8 @@ export class ActionsController {
     const start = new Date(query.windowStart);
     const end = new Date(query.windowEnd);
 
-    const schedule = await this.actionsService.getNotificationSchedule(
-      start,
-      end,
-    );
+    const schedule =
+      await this.actionEventReminderService.getNotificationSchedule(start, end);
 
     return schedule.map((entry) => ({
       ...entry,
@@ -379,7 +381,7 @@ export class ActionsController {
     @Param('groupId', ParseIntPipe) groupId: number,
     @Body() body: CreateTODReminderGroupDto,
   ): Promise<ReminderGroup> {
-    return this.actionsService.updateReminderGroup(groupId, body);
+    return this.actionEventReminderService.updateReminderGroup(groupId, body);
   }
 
   @Post('events/:eventId/createremindergroup')
@@ -389,14 +391,14 @@ export class ActionsController {
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: CreateTODReminderGroupDto,
   ): Promise<ReminderGroup> {
-    return this.actionsService.createdTimedReminderGroup(eventId, body);
+    return this.createReminderGroup(eventId, body);
   }
 
   @Delete('reminders/:groupId')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
   async deleteReminderGroup(@Param('groupId', ParseIntPipe) groupId: number) {
-    this.actionsService.deleteReminderGroup(groupId);
+    this.actionEventReminderService.deleteReminderGroup(groupId);
   }
 
   @Get('plansForGroup/:groupId')
@@ -405,7 +407,9 @@ export class ActionsController {
   async plansForGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
   ): Promise<NotificationPlan[]> {
-    return this.actionsService.getNotificationPlansForGroup(groupId);
+    return this.actionEventReminderService.getNotificationPlansForGroup(
+      groupId,
+    );
   }
 
   @Get('sentNotifsForGroup/:groupId')
@@ -414,7 +418,7 @@ export class ActionsController {
   async sentNotifsForGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
   ): Promise<ActionEventNotifDto[]> {
-    return this.actionsService.getSentNotifsForGroup(groupId);
+    return this.actionEventReminderService.getSentNotifsForGroup(groupId);
   }
 
   @Post('clearDb')
@@ -505,7 +509,7 @@ export class ActionsController {
   reminderGroupsForEvent(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ReminderGroup[]> {
-    return this.actionsService.getReminderGroupsForEvent(id);
+    return this.actionEventReminderService.getReminderGroupsForEvent(id);
   }
 
   @Post('createUpdate/:id')
@@ -580,5 +584,25 @@ export class ActionsController {
     @Body() body: CreateTODReminderGroupDto,
   ): Promise<NotificationPlan[]> {
     return this.actionsService.tentativePlansForGroup(eventId, body);
+  }
+
+  @Post('previewEmailHtml/:eventId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: String })
+  async previewEmailHtml(
+    @Param('eventId', ParseIntPipe) eventId: number,
+    @Body() body: PreviewEmailHtmlDto,
+  ): Promise<string> {
+    return this.actionEventReminderService.previewEmailHtml(eventId, body);
+  }
+
+  @Post('previewTextMessage/:eventId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: String })
+  async previewTextMessage(
+    @Param('eventId', ParseIntPipe) eventId: number,
+    @Body() body: PreviewTextDto,
+  ): Promise<string> {
+    return this.actionEventReminderService.previewTextMessage(eventId, body);
   }
 }

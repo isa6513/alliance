@@ -1,4 +1,6 @@
 import {
+  actionsPreviewEmailHtml,
+  actionsPreviewTextMessage,
   actionsTentativePlansForGroup,
   type ActionEventDto,
   type CreateTodReminderGroupDto,
@@ -19,6 +21,7 @@ import {
   defaultEmailSubject,
   defaultTextMessage,
 } from "./defaultReminderContents";
+import Card from "@alliance/shared/ui/Card";
 
 type ReminderGroupContentFields = Pick<
   ReminderGroup,
@@ -64,6 +67,7 @@ export const keywords = [
   "#{hours}",
   "#{link}",
   "#{n}",
+  "#{s}",
 ];
 
 const TIMING_MODE_OPTIONS: Array<{
@@ -175,6 +179,12 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   const [localError, setLocalError] = useState<string | null>(null);
   const initialSnapshotRef = useRef<string>("");
 
+  const [previewingEmail, setPreviewingEmail] = useState(false);
+  const [previewEmailHtml, setPreviewEmailHtml] = useState<string | null>(null);
+
+  const [previewingText, setPreviewingText] = useState(false);
+  const [previewText, setPreviewText] = useState<string | null>(null);
+
   const computedInitialSnapshot = useMemo(() => {
     const userIds = [...initialValues.users.map((user) => user.id)].sort(
       (a, b) => a - b
@@ -251,6 +261,45 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     selectedGroupId,
     selectedUserIds,
   ]);
+
+  useEffect(() => {
+    if (previewingEmail) {
+      actionsPreviewEmailHtml({
+        path: {
+          eventId: selectedEventId ?? 0,
+        },
+        body: {
+          emailMessage,
+          emailSubject,
+        },
+      }).then((response) => {
+        if (response.error) {
+          setLocalError((response.error as Error).message);
+          return;
+        }
+        setPreviewEmailHtml(response.data ?? "");
+      });
+    }
+  }, [previewingEmail, emailMessage, emailSubject, selectedEventId]);
+
+  useEffect(() => {
+    if (previewingText) {
+      actionsPreviewTextMessage({
+        path: {
+          eventId: selectedEventId ?? 0,
+        },
+        body: {
+          textMessage,
+        },
+      }).then((response) => {
+        if (response.error) {
+          setLocalError((response.error as Error).message);
+          return;
+        }
+        setPreviewText(response.data ?? "");
+      });
+    }
+  }, [previewingText, textMessage, selectedEventId]);
 
   useEffect(() => {
     if (computedInitialSnapshot === initialSnapshotRef.current) {
@@ -614,27 +663,59 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Email Message
-        </label>
-        <TextareaWithHighlights
-          keywords={keywords}
-          value={emailMessage}
-          onChange={setEmailMessage}
-          rows={5}
-        />
+        <div className="flex items-center gap-2 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email Message
+          </label>
+          <Button
+            onClick={() => setPreviewingEmail(!previewingEmail)}
+            size={"small"}
+            color={previewingEmail ? ButtonColor.Stone : ButtonColor.Light}
+            className="!px-2 !py-1"
+          >
+            Preview Email
+          </Button>
+        </div>
+        {previewingEmail ? (
+          <Card className="p-4">
+            <div dangerouslySetInnerHTML={{ __html: previewEmailHtml ?? "" }} />
+          </Card>
+        ) : (
+          <TextareaWithHighlights
+            keywords={keywords}
+            value={emailMessage}
+            onChange={setEmailMessage}
+            rows={5}
+          />
+        )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Text Message
-        </label>
-        <TextareaWithHighlights
-          keywords={keywords}
-          value={textMessage}
-          onChange={setTextMessage}
-          rows={2}
-        />
+        <div className="flex items-center gap-2 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Text Message
+          </label>
+          <Button
+            onClick={() => setPreviewingText(!previewingText)}
+            size={"small"}
+            color={previewingText ? ButtonColor.Stone : ButtonColor.Light}
+            className="!px-2 !py-1"
+          >
+            Preview Text
+          </Button>
+        </div>
+        {previewingText ? (
+          <Card className="p-4">
+            <div>{previewText}</div>
+          </Card>
+        ) : (
+          <TextareaWithHighlights
+            keywords={keywords}
+            value={textMessage}
+            onChange={setTextMessage}
+            rows={2}
+          />
+        )}
       </div>
 
       <div

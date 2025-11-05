@@ -32,12 +32,13 @@ export function processKeywordReplacements(
     firstname = names[0];
     lastname = names[names.length - 1];
   }
-  return text
+  let str = text
     .replace('#{fullname}', context.user.name)
     .replace('#{firstname}', firstname)
     .replace('#{lastname}', lastname)
     .replace('#{action}', context.action.name)
     .replace('#{n}', context.uncompletedTasksCount.toString())
+    .replace('#{s}', context.uncompletedTasksCount === 1 ? '' : 's')
     .replace(
       '#{days}',
       context.deadlineEvent
@@ -51,6 +52,21 @@ export function processKeywordReplacements(
         : '[err]',
     )
     .replace('#{link}', withCid(tasksUrl(true), context.cid));
+
+  while (str.includes('|') && str.includes('#{') && str.includes('}')) {
+    const idx_start = str.indexOf('#{');
+    const idx_separator = str.indexOf('|', idx_start);
+    const idx_end = str.indexOf('}', idx_separator);
+    const st_one = str.substring(idx_start, idx_separator);
+    const st_many = str.substring(idx_separator + 1, idx_end);
+    if (context.uncompletedTasksCount === 1) {
+      str = str.substring(0, idx_start) + st_one + str.substring(idx_end + 1);
+    } else {
+      str = str.substring(0, idx_start) + st_many + str.substring(idx_end + 1);
+    }
+  }
+
+  return str;
 }
 
 @Injectable()
@@ -76,6 +92,15 @@ export class MailService {
     [EmailType.MissedSecondDeadline]: 'missedseconddeadline',
     [EmailType.CustomActionReminder]: 'customactionreminder',
   };
+
+  async renderHtml(emailType: EmailType, context: ISendMailOptions['context']) {
+    const pug = await import('pug');
+
+    return pug.renderFile(
+      __dirname + `/../../mail/templates/${this.templates[emailType]}.pug`,
+      { ...context },
+    );
+  }
 
   async sendMail(
     recipient: string,
@@ -103,17 +128,10 @@ export class MailService {
       cid,
     });
 
-    const pug = await import('pug');
-
     const tag =
       process.env.NODE_ENV === 'production' ? 'production' : 'development';
 
-    const html = pug.renderFile(
-      __dirname + `/../../mail/templates/${this.templates[emailType]}.pug`,
-      { ...context },
-    );
-
-    console.log('html', html);
+    const html = await this.renderHtml(emailType, context);
 
     const e = await this.mailerService.sendMail({
       to: recipient,
