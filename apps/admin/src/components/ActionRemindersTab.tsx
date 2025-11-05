@@ -470,15 +470,20 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       return;
     }
 
-    const ok = await confirm({
-      title: "Populate default reminders?",
-      message:
-        "This will create reminders that will be sent to all members of this action and may be sent immediately if member action is ongoing.",
-      confirmLabel: "Populate Reminders",
-      cancelLabel: "Cancel",
-    });
-    if (!ok) {
-      return;
+    const mode = import.meta.env.MODE;
+
+    if (mode !== "development") {
+      const ok = await confirm({
+        title: "Populate default reminders?",
+        message: `This will send reminders to all members participating in this action`,
+        confirmLabel: "Create",
+        cancelLabel: "Cancel",
+        mode: "fullscreen",
+        requiredText: `I am going to notify many real members`,
+      });
+      if (!ok) {
+        return;
+      }
     }
 
     const reminders: Awaited<ReturnType<typeof actionsCreateReminderGroup>>[] =
@@ -600,8 +605,8 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
         message: `This will send emails or texts to ${recipientCount} members.`,
         confirmLabel: "Create",
         cancelLabel: "Cancel",
-        anchorEl: anchor?.current,
-        placement: "topleft",
+        mode: "fullscreen",
+        requiredText: `I am going to notify ${recipientCount} real members`,
       });
       if (!ok) {
         return;
