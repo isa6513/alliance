@@ -13,6 +13,7 @@ import RenderField from "./RenderField";
 import type { DisplayBlock } from "./display-blocks";
 import type { AnyField, Condition, FormSchema, FormValue } from "./formschema";
 import { parseTimeToMinutes } from "./timeUtils";
+import type { UserDto } from "../client";
 
 type FormRendererProps = {
   form: FormSchema;
@@ -21,6 +22,7 @@ type FormRendererProps = {
   persistKey?: string | null;
   initialPageIndex?: number;
   userId?: string | number;
+  user?: Omit<UserDto, "email">;
   disableOptionRandomization?: boolean;
   onFormStarted?: () => void;
   onAbandonAction?: (outOfTime: boolean, reason: string) => void;
@@ -97,6 +99,7 @@ function resolveFieldDefaultValue(field: AnyField): FormValue | undefined {
       case "email":
       case "phone":
       case "file":
+      case "custom":
         return isNonEmptyString(rawDefault) ? rawDefault : undefined;
       default:
         return isNonEmptyString(rawDefault) ? rawDefault : undefined;
@@ -162,6 +165,7 @@ const FormRenderer = ({
   onSubmit,
   persistKey,
   userId,
+  user,
   disableOptionRandomization,
   onFormStarted,
   onAbandonAction,
@@ -182,14 +186,20 @@ const FormRenderer = ({
   });
   const randomizationKey = useMemo(() => {
     const base = `form:${id}`;
-    if (userId !== undefined && userId !== null && userId !== "") {
-      return `${base}:user:${String(userId)}`;
+    const normalizedUserId =
+      user?.id !== undefined && user?.id !== null ? user.id : userId;
+    if (
+      normalizedUserId !== undefined &&
+      normalizedUserId !== null &&
+      normalizedUserId !== ""
+    ) {
+      return `${base}:user:${String(normalizedUserId)}`;
     }
     if (persistKey !== undefined && persistKey !== null && persistKey !== "") {
       return `${base}:persist:${String(persistKey)}`;
     }
     return base;
-  }, [id, userId, persistKey]);
+  }, [id, user?.id, userId, persistKey]);
 
   const { fieldLookup, defaultValueMap } = useMemo(() => {
     const lookup = new Map<string, AnyField>();
@@ -1019,6 +1029,7 @@ const FormRenderer = ({
           disableOptionRandomization ? undefined : randomizationKey
         }
         disableOptionRandomization={disableOptionRandomization}
+        user={user}
       />
     </div>
   );

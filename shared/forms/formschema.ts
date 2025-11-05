@@ -16,7 +16,8 @@ export type FieldKind =
   | "date"
   | "time"
   | "timezone"
-  | "file";
+  | "file"
+  | "custom";
 
 type Option<V extends string = string> = { label: string; value: V };
 
@@ -100,6 +101,10 @@ export type TimezoneField = BaseField<"timezone"> & {
 };
 // Persist file answers as string URL/key
 export type FileField = BaseField<"file">;
+export type CustomComponentField = BaseField<"custom"> & {
+  componentId: string;
+  componentConfig?: Record<string, unknown>;
+};
 
 export type AnyField =
   | TextField
@@ -114,7 +119,8 @@ export type AnyField =
   | DateField
   | TimeField
   | TimezoneField
-  | FileField;
+  | FileField
+  | CustomComponentField;
 
 export interface Page {
   id: string;

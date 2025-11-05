@@ -24,6 +24,7 @@ export function ElementSelect({
     "time",
     "timezone",
     "file",
+    "custom",
   ];
 
   const blockTypes: DisplayKind[] = [
@@ -56,7 +57,9 @@ export function ElementSelect({
                   onClick={() => onAddField(type)}
                   className="w-full text-left px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 rounded-md border border-blue-200 transition-colors"
                 >
-                  {type.charAt(0).toUpperCase() + type.slice(1)} Field
+                  {type === "custom"
+                    ? "Custom Component Field"
+                    : `${type.charAt(0).toUpperCase() + type.slice(1)} Field`}
                 </button>
               ))}
             </div>

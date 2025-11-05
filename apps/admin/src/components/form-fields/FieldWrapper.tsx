@@ -8,6 +8,7 @@ import {
   tasksCreateCustomValidator,
   tasksFindOneCustomValidator,
 } from "@alliance/shared/client";
+import { FORM_BUILDER_PREVIEW_USER } from "../FormBuilder";
 
 function isFormField(field: unknown): field is AnyField {
   return Boolean(
@@ -34,8 +35,8 @@ export function FieldWrapper<T extends AnyField>({
     isCurrentFormField && Array.isArray(field.visibleIf)
       ? field.visibleIf.length
       : isCurrentFormField && field.visibleIf
-        ? 1
-        : 0;
+      ? 1
+      : 0;
   const [
     showConditionalVisibilityControl,
     setShowConditionalVisibilityControl,
@@ -76,8 +77,8 @@ export function FieldWrapper<T extends AnyField>({
       isCurrentFormField && Array.isArray(field.visibleIf)
         ? field.visibleIf.length
         : isCurrentFormField && field.visibleIf
-          ? 1
-          : 0;
+        ? 1
+        : 0;
 
     if (conditionCount > 0 && !showConditionalVisibilityControl) {
       setShowConditionalVisibilityControl(true);
@@ -252,7 +253,12 @@ export function FieldWrapper<T extends AnyField>({
         <div className="bg-gray-100 p-4 rounded-t-lg space-y-2">{children}</div>
         {isCurrentFormField && (
           <div className="p-4 pt-0">
-            <RenderField field={field} disabled randomizationKey="preview" />
+            <RenderField
+              field={field}
+              disabled
+              randomizationKey="preview"
+              user={FORM_BUILDER_PREVIEW_USER}
+            />
           </div>
         )}
         {isCurrentFormField &&

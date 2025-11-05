@@ -299,6 +299,7 @@ const FormResponses: React.FC = () => {
                 renderFormAsCompleted
                 onSubmit={null}
                 userId={pageItems[0]?.user?.id}
+                user={pageItems[0]?.user ?? undefined}
                 disableOptionRandomization
               />
             </div>

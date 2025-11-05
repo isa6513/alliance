@@ -11,5 +11,6 @@ export { EditableDateField } from './EditableDateField';
 export { EditableTimeField } from './EditableTimeField';
 export { EditableTimezoneField } from './EditableTimezoneField';
 export { EditableFileField } from './EditableFileField';
+export { EditableCustomComponentField } from './EditableCustomComponentField';
 export type { BaseFieldProps, FieldWrapperProps } from './types';
 export { FieldWrapper } from './FieldWrapper';

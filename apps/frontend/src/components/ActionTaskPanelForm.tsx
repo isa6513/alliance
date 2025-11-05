@@ -123,6 +123,7 @@ const ActionTaskPanelForm = ({
           onSubmit={handleSubmitForm}
           persistKey={String(taskFormId)}
           userId={user?.id}
+          user={user}
           onFormStarted={onFormStarted}
           onAbandonAction={onAbandonAction}
           renderFormAsCompleted={false}

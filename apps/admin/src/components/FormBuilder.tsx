@@ -40,10 +40,32 @@ import {
   EditableTimezoneField,
   EditableTextField,
   EditableTextareaField,
+  EditableCustomComponentField,
 } from "./form-fields";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useNavigate } from "react-router";
 import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
+import { customComponentRegistry } from "@alliance/shared/forms/components";
+import type { UserDto } from "@alliance/shared/client";
+
+export const FORM_BUILDER_PREVIEW_USER: UserDto = {
+  id: 0,
+  name: "Preview User",
+  contractDateSigned: new Date().toISOString(),
+  contractDateSuspended: null,
+  emailNotifsEnabled: false,
+  textNotifsEnabled: false,
+  pushNotifsEnabled: false,
+  socialNotifsPreference: "none",
+  turnedOffAllNotifs: false,
+  forumDigestPreference: "off",
+  admin: false,
+  staff: false,
+  referralCode: null,
+  onboardingComplete: true,
+  anonymous: false,
+  email: "preview@example.com",
+};
 
 interface FormBuilderProps {
   onSave?: (schema: FormSchema) => void;
@@ -125,6 +147,11 @@ export function FormBuilder({
       { id: "time", name: "Time Field", type: "field" as const },
       { id: "timezone", name: "Timezone Field", type: "field" as const },
       { id: "file", name: "File Field", type: "field" as const },
+      {
+        id: "custom",
+        name: "Custom Component Field",
+        type: "field" as const,
+      },
       { id: "header", name: "Header Block", type: "block" as const },
       { id: "text-block", name: "Text Block", type: "block" as const },
       { id: "label", name: "Label Block", type: "block" as const },
@@ -331,6 +358,17 @@ export function FormBuilder({
           required: false,
         };
         break;
+      case "custom": {
+        const defaultComponent = customComponentRegistry[0];
+        newField = {
+          id: fieldId,
+          kind: "custom",
+          label: "Custom Component",
+          required: false,
+          componentId: defaultComponent?.id ?? "",
+        } as AnyField;
+        break;
+      }
       default:
         return;
     }
@@ -881,6 +919,13 @@ export function FormBuilder({
                         {...commonProps}
                       />
                     );
+                  case "custom":
+                    return (
+                      <EditableCustomComponentField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
                   default:
                     return null;
                 }
@@ -1196,6 +1241,7 @@ export function FormBuilder({
                 onSubmit={null}
                 renderFormAsCompleted={false}
                 userId="preview"
+                user={FORM_BUILDER_PREVIEW_USER}
                 initialPageIndex={selectedPageIndex}
               />
             </div>

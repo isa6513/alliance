@@ -56,6 +56,7 @@ const ActionTaskPanelCompleted = ({
           renderFormAsCompleted
           onSubmit={null}
           userId={formResponse.user?.id}
+          user={formResponse.user ?? undefined}
         />
       </Card>
     );

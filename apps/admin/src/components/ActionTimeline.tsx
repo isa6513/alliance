@@ -70,8 +70,6 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
   } | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  console.log(reminders);
-
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     const target = event.currentTarget;
     setScrollLeft(target.scrollLeft);
@@ -131,8 +129,6 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
     if (!reminderList || reminderList.length === 0) {
       return [];
     }
-
-    console.log(reminderList);
 
     return reminderList
       .map<NormalizedReminder | null>((reminder) => {

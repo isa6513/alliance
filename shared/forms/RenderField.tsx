@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState, useRef } from "react";
+import type { UserDto } from "@alliance/shared/client";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import type { AnyField, FormValue, TimeField } from "./formschema";
 import { shuffleWithSeed } from "./randomutils";
 import { formatTimeForDisplay, parseTimeInput } from "./timeUtils";
 import DropdownIcon from "../ui/icons/DropdownIcon";
+import { getCustomComponentById } from "./components";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -17,6 +19,7 @@ export type RenderFieldProps = {
   error?: string | null;
   randomizationKey?: string;
   disableOptionRandomization?: boolean;
+  user?: Omit<UserDto, "email">;
 };
 
 export function RenderLabel({
@@ -46,6 +49,7 @@ export function RenderField({
   error,
   randomizationKey,
   disableOptionRandomization,
+  user,
 }: RenderFieldProps) {
   const errorMessage =
     typeof error === "string" && error.trim().length > 0 ? error : null;
@@ -617,6 +621,38 @@ export function RenderField({
           {renderValidationMessage()}
 
           {err && <p className=" text-red-600">{err}</p>}
+        </div>
+      );
+    }
+
+    case "custom": {
+      const definition = getCustomComponentById(field.componentId);
+      if (!definition) {
+        return (
+          <div className="space-y-2 border border-red-200 bg-red-50 p-3 rounded">
+            <RenderLabel field={field} error={errorMessage} />
+            <p className="text-sm text-red-700">
+              Unable to render this field because the selected custom component
+              is not registered.
+            </p>
+          </div>
+        );
+      }
+      const CustomComponent = definition.component;
+      return (
+        <div className="space-y-2">
+          <RenderLabel field={field} error={errorMessage} />
+          {definition.description && (
+            <p className="text-xs text-zinc-500">{definition.description}</p>
+          )}
+          <CustomComponent
+            field={field}
+            value={typeof value === "string" ? value : null}
+            onChange={(next) => onChange?.(next)}
+            user={user}
+            disabled={disabled}
+          />
+          {renderValidationMessage()}
         </div>
       );
     }
