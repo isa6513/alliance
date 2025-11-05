@@ -1,4 +1,4 @@
-import { ActionActivityDto } from "@alliance/shared/client";
+import { ActionActivityDto, userListFriends } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import UserActivityCard from "../../components/UserActivityCard";
@@ -19,6 +19,20 @@ const ActivityFeedPage = () => {
       list: ActivityList.Global,
     });
 
+  const [myFriends, setMyFriends] = useState<number[]>([]);
+
+  useEffect(() => {
+    const loadMyFriends = async () => {
+      if (!user) return;
+      const friendsRes = await userListFriends({
+        path: { id: user.id },
+      });
+      if (!friendsRes.data) return;
+      setMyFriends(friendsRes.data.map((friend) => friend.id));
+    };
+    loadMyFriends();
+  }, [user]);
+
   const [friendsActivities, setFriendsActivities] = useState<
     ActionActivityDto[]
   >([]);
@@ -27,11 +41,10 @@ const ActivityFeedPage = () => {
     setFriendsActivities(
       activities.filter(
         (activity) =>
-          activity.user.id === user?.id ||
-          user?.friends.some((friend) => friend.id === activity.user.id)
+          activity.user.id === user?.id || myFriends.includes(activity.user.id)
       )
     );
-  }, [activities, user]);
+  }, [activities, user, myFriends]);
 
   const friendsRef = useRef<HTMLDivElement>(null);
   const everyoneRef = useRef<HTMLDivElement>(null);
