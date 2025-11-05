@@ -1,49 +1,52 @@
 // generic reminder
 
 export const defaultEmailSubject =
-  "You have #{days}, #{hours} left to complete #{n} Alliance action(s)";
+  "You have #{days}, #{hours} left to complete #{n} Alliance task(s)";
 export const defaultEmailContents = `Hi #{firstname},
 
-#{n} Alliance action(s) need your completion.
+#{n} Alliance task(s) need your completion.
 
-You have #{days}, #{hours} left to complete the action(s). Please do so at this link: #{link}`;
+You have #{days}, #{hours} left to complete the task(s). Please do so at this link: #{link}`;
 
 export const defaultTextMessage =
-  "You have #{days}, #{hours} left to complete #{n} Alliance action(s). #{link}";
+  "You have #{days}, #{hours} left to complete #{n} Alliance task(s) (#{link})";
 
 // announcement
 
 export const defaultAnnouncementEmailSubject =
-  "Action needs completion: #{action}";
+  "#{n} Alliance tasks need completion with #{days}";
 export const defaultAnnouncementEmailContents = `Hi #{firstname},
-A new action is ready for you to complete: "#{action}"
+A new task is ready for you to complete: "#{action}"
 
 Please complete the action at this link: #{link}`;
 
 export const defaultAnnouncementTextMessage =
-  "You have #{days} left to complete #{n} Alliance action(s). #{link}";
+  "You have #{days} left to complete #{n} Alliance task(s) (#{link})";
 
 // missed deadline
 
 export const defaultMissedDeadlineEmailSubject =
-  "Failed to complete Alliance action by deadline";
+  "Failed to complete Alliance task by deadline";
 export const defaultMissedDeadlineEmailContents = `Hi #{firstname}
-The deadline for the current action has passed and you have not completed it. If you have in fact completed it, please contact us — we may have made a mistake.
+
+The deadline for the current task has passed and you have not completed it. If you have completed it, please contact us — we may have made a mistake.
 
 The Alliance relies on the dependability of all members. If you are no longer interested in being a member of the Alliance, please suspend your contract.
 
 If you do not complete the next action, we will suspend your contract on your behalf.`;
 
 export const defaultMissedDeadlineTextMessage =
-  "You failed to complete the current Alliance action. The deadline has now passed.";
+  `You failed to complete the current Alliance task. The deadline has now passed. If you have completed it, please contact us — we may have made a mistake. 
+  
+  If you are no longer interested in being a member of the Alliance, please suspend your contract. If you do not complete the next task, we will suspend your contract on your behalf.`;
 
 export const hoursEmailSubject =
-  "You have #{hours} left to complete an Alliance action";
+  "You have #{hours} left to complete #{n} Alliance task(s)";
 export const hoursEmailContents = `Hi, #{firstname},
-An Alliance action needs your completion.
 
-You have #{hours} left to complete it. Please do so at the below link.
-#{link}`;
+#{n} Alliance task(s) needs your completion.
+
+You have #{hours} left to complete the task(s). Please do so at this link: #{link}`;
 
 export const hoursTextMessage =
-  "You have #{hours} left to complete an Alliance action. #{link}";
+  "You have #{hours} left to complete #{n} Alliance task(s) (#{link})";
