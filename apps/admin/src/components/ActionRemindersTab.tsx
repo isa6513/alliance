@@ -42,9 +42,6 @@ import {
   defaultMissedDeadlineEmailSubject,
   defaultMissedDeadlineTextMessage,
   defaultTextMessage,
-  hoursEmailContents,
-  hoursEmailSubject,
-  hoursTextMessage,
 } from "./defaultReminderContents";
 import { ActionEventNotifDto } from "@alliance/shared/client";
 import ActionReminderCard from "./ActionReminderCard";
@@ -537,9 +534,9 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             new Date(deadlineEvent.date).getTime() - 6 * 60 * 60 * 1000
           ).toISOString(),
           cohortType: "all_uncompleted",
-          textMessage: hoursTextMessage,
-          emailSubject: hoursEmailSubject,
-          emailMessage: hoursEmailContents,
+          textMessage: defaultTextMessage,
+          emailSubject: defaultEmailSubject,
+          emailMessage: defaultEmailContents,
           name: "6-24h reminder",
         },
       });
@@ -552,9 +549,9 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           timingMode: "from_deadline",
           sendAtSecondsFromDeadline: 3 * 60 * 60,
           cohortType: "all_uncompleted",
-          textMessage: hoursTextMessage,
-          emailMessage: hoursEmailContents,
-          emailSubject: hoursEmailSubject,
+          textMessage: defaultTextMessage,
+          emailMessage: defaultEmailSubject,
+          emailSubject: defaultEmailContents,
           name: "3 hour reminder",
         },
       });
