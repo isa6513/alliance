@@ -641,10 +641,6 @@ export function RenderField({
       const CustomComponent = definition.component;
       return (
         <div className="space-y-2">
-          <RenderLabel field={field} error={errorMessage} />
-          {definition.description && (
-            <p className="text-xs text-zinc-500">{definition.description}</p>
-          )}
           <CustomComponent
             field={field}
             value={typeof value === "string" ? value : null}
