@@ -17,6 +17,7 @@ import { Link } from "react-router";
 import { formatDate } from "date-fns";
 import { useRef, useState } from "react";
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
+import { GroupScheduleLabels } from "./ActionRemindersTab";
 
 interface ActionReminderCardProps {
   group: ReminderGroup;
@@ -26,7 +27,7 @@ interface ActionReminderCardProps {
     groupId: number,
     anchor?: HTMLElement | null
   ) => Promise<void>;
-  groupSchedule: { primary: string; secondary?: string | null };
+  groupSchedule: GroupScheduleLabels;
   editing: boolean;
   handleEditCancel: () => void;
   handleEditGroupStart: (groupId: number) => void;
@@ -80,6 +81,9 @@ const ActionReminderCard = ({
 
   const deleteButtonRef = useRef<HTMLButtonElement>(null);
 
+  const isFinished =
+    reminderPlans && reminderPlans.length === 0 && sentReminders?.length;
+
   return (
     <Card
       key={group.id}
@@ -102,8 +106,19 @@ const ActionReminderCard = ({
           </Button>
           <div className="flex flex-col gap-1">
             <div className="flex flex-row gap-2">
-              <p className="font-semibold">{group.name}</p>
-              <p className="">{groupSchedule.primary}</p>
+              <p
+                className={`font-semibold ${isFinished ? "text-gray-500" : ""}`}
+              >
+                {group.name}
+              </p>
+              {isFinished ? (
+                <p className="text-green font-semibold">
+                  Sent {sentReminders?.length} reminders{" "}
+                  {groupSchedule.pastTense}
+                </p>
+              ) : (
+                <p className="">{groupSchedule.primary}</p>
+              )}
             </div>
             {groupSchedule.secondary && (
               <p className="text-xs text-gray-500">{groupSchedule.secondary}</p>
@@ -124,14 +139,16 @@ const ActionReminderCard = ({
               Cancel
             </Button>
           ) : (
-            <Button
-              type="button"
-              color={ButtonColor.White}
-              onClick={handleEditGroup}
-              className="-my-1"
-            >
-              Edit
-            </Button>
+            !isFinished && (
+              <Button
+                type="button"
+                color={ButtonColor.White}
+                onClick={handleEditGroup}
+                className="-my-1"
+              >
+                Edit
+              </Button>
+            )
           )}
           <Button
             type="button"

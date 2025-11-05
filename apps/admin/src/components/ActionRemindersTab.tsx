@@ -55,6 +55,12 @@ interface ActionRemindersTabProps {
   highlightedReminder?: number;
 }
 
+export type GroupScheduleLabels = {
+  primary: string;
+  secondary?: string | null;
+  pastTense: string;
+};
+
 const DISPLAY_DATETIME_FORMAT = "PP p";
 
 const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
@@ -354,9 +360,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     return { start: parseDate(start), end: parseDate(end) };
   };
 
-  const describeGroupSchedule = (
-    group: ReminderGroup
-  ): { primary: string; secondary?: string | null } => {
+  const describeGroupSchedule = (group: ReminderGroup): GroupScheduleLabels => {
     if (group.timingMode === "absolute") {
       const sendAtLabel = formatDisplayDate(group.sendAtAbsolute);
       return {
@@ -364,6 +368,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           ? `Sends ${sendAtLabel}`
           : "Absolute schedule configured",
         secondary: sendAtLabel ? "Absolute schedule" : null,
+        pastTense: `at ${sendAtLabel}`,
       };
     }
 
@@ -384,6 +389,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
               sendDate,
               DISPLAY_DATETIME_FORMAT
             )} • Deadline ${format(deadlineDate, DISPLAY_DATETIME_FORMAT)}`,
+            pastTense: `at ${format(sendDate, DISPLAY_DATETIME_FORMAT)}`,
           };
         }
         const distance = formatDistanceStrict(deadlineDate, sendDate, {
@@ -397,11 +403,15 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             sendDate,
             DISPLAY_DATETIME_FORMAT
           )} • Deadline ${format(deadlineDate, DISPLAY_DATETIME_FORMAT)}`,
+          pastTense: `${distance} ${
+            seconds >= 0 ? "before" : "after"
+          } ${referenceTitle}`,
         };
       }
       return {
         primary: "Relative schedule",
         secondary: "Waiting for deadline details",
+        pastTense: "Relative schedule",
       };
     }
 
@@ -414,11 +424,16 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             DISPLAY_DATETIME_FORMAT
           )} and ${format(end, DISPLAY_DATETIME_FORMAT)}`,
           secondary: "Personalized window",
+          pastTense: `between ${format(
+            start,
+            DISPLAY_DATETIME_FORMAT
+          )} and ${format(end, DISPLAY_DATETIME_FORMAT)}`,
         };
       }
       return {
         primary: "Personalized window",
         secondary: "Range not fully configured",
+        pastTense: "Relative schedule",
       };
     }
     if (group.timingMode === "event_launch") {
@@ -431,12 +446,19 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             )})`
           : "Sends when launch event begins",
         secondary: null,
+        pastTense: launchDate
+          ? `when launch event began (${format(
+              launchDate,
+              DISPLAY_DATETIME_FORMAT
+            )})`
+          : "when launch event began",
       };
     }
 
     return {
       primary: "Scheduled group reminder",
       secondary: null,
+      pastTense: "Scheduled group reminder",
     };
   };
 
