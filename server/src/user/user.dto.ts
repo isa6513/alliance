@@ -94,11 +94,6 @@ export class UserDto extends PickType(User, [
   @IsOptional()
   cityId?: number;
 
-  @ApiProperty({ type: ProfileDto, isArray: true })
-  @Type(() => ProfileDto)
-  @Allow()
-  friends: ProfileDto[];
-
   @ApiProperty()
   @Allow()
   email: string;
@@ -106,7 +101,6 @@ export class UserDto extends PickType(User, [
   constructor(user: User) {
     super();
     Object.assign(this, user);
-    this.friends = user.friends.map((friend) => new ProfileDto(friend));
   }
 }
 

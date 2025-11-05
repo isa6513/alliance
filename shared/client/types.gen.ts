@@ -30,16 +30,6 @@ export type NotificationPreference = 'all' | 'digest' | 'none';
 
 export type ForumDigestPreference = 'off' | 'daily' | 'weekly';
 
-export type ProfileDto = {
-    id: number;
-    contractDateSigned: string | null;
-    admin: boolean;
-    staff: boolean;
-    profilePicture: string | null;
-    profileDescription: string | null;
-    displayName: string;
-};
-
 export type UserDto = {
     id: number;
     name: string;
@@ -58,7 +48,6 @@ export type UserDto = {
     onboardingComplete: boolean;
     anonymous: boolean;
     cityId?: number;
-    friends: Array<ProfileDto>;
     email: string;
 };
 
@@ -69,6 +58,16 @@ export type ForgotPasswordDto = {
 export type ResetPasswordDto = {
     token: string;
     password: string;
+};
+
+export type ProfileDto = {
+    id: number;
+    contractDateSigned: string | null;
+    admin: boolean;
+    staff: boolean;
+    profilePicture: string | null;
+    profileDescription: string | null;
+    displayName: string;
 };
 
 export type OnboardingDto = {

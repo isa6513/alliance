@@ -30,14 +30,12 @@ export class Friend {
   /** User who initiated the request */
   @ManyToOne(() => User, (user) => user.sentFriendRequests, {
     onDelete: 'CASCADE',
-    eager: true,
   })
   requester: User;
 
   /** User who received the request */
   @ManyToOne(() => User, (user) => user.receivedFriendRequests, {
     onDelete: 'CASCADE',
-    eager: true,
   })
   addressee: User;
 
@@ -56,7 +54,6 @@ export class Friend {
 
   @OneToOne(() => Notification, {
     cascade: true,
-    eager: true,
     nullable: true,
     onDelete: 'SET NULL',
   })
@@ -65,7 +62,6 @@ export class Friend {
 
   @OneToOne(() => Notification, {
     cascade: true,
-    eager: true,
     nullable: true,
     onDelete: 'SET NULL',
   })

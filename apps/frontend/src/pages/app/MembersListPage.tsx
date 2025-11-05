@@ -1,5 +1,6 @@
 import {
   ProfileDtoWithFriends,
+  userListFriends,
   userListSentRequests,
   userMembersWithFriends,
 } from "@alliance/shared/client";
@@ -27,6 +28,7 @@ const MembersListPage = () => {
   >([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [myFriends, setMyFriends] = useState<number[]>([]);
 
   const [filterMode, setFilterMode] = useState<MemberFilterMode>(
     MemberFilterMode.All
@@ -58,7 +60,18 @@ const MembersListPage = () => {
     loadData();
   }, []);
 
-  const myFriends = user?.friends.map((friend) => friend.id) ?? [];
+  useEffect(() => {
+    const loadMyFriends = async () => {
+      if (!user) return;
+      const friendsRes = await userListFriends({
+        path: { id: user.id },
+      });
+      if (!friendsRes.data) return;
+      setMyFriends(friendsRes.data.map((friend) => friend.id));
+    };
+    loadMyFriends();
+  }, [user]);
+
   const friendsOfFriends = members.filter(
     (member) =>
       member.id !== user?.id &&

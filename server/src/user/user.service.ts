@@ -154,10 +154,13 @@ export class UserService {
     });
   }
 
-  async findOneByEmail(email: string): Promise<User | null> {
+  async findOneByEmail(
+    email: string,
+    relations?: string[],
+  ): Promise<User | null> {
     return this.userRepository.findOne({
       where: { email: ILike(email) },
-      relations: ['sentFriendRequests', 'receivedFriendRequests'],
+      relations,
     });
   }
 
@@ -561,9 +564,11 @@ export class UserService {
     const rel =
       (await this.friendRepository.findOne({
         where: { requester: { id: userId }, addressee: { id: targetUserId } },
+        relations: ['requester', 'addressee'],
       })) ||
       (await this.friendRepository.findOne({
         where: { requester: { id: targetUserId }, addressee: { id: userId } },
+        relations: ['requester', 'addressee'],
       }));
 
     const status = rel ? rel.status : FriendStatus.None;
