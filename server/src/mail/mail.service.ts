@@ -36,31 +36,31 @@ export function processKeywordReplacements(
     lastname = names[names.length - 1];
   }
   let str = text
-    .replace('#{fullname}', context.user.name)
-    .replace('#{firstname}', firstname)
-    .replace('#{lastname}', lastname)
-    .replace('#{action}', context.action.name)
-    .replace('#{n}', context.uncompletedTasksCount.toString())
-    .replace('#{s}', context.uncompletedTasksCount === 1 ? '' : 's')
-    .replace(
+    .replaceAll('#{fullname}', context.user.name)
+    .replaceAll('#{firstname}', firstname)
+    .replaceAll('#{lastname}', lastname)
+    .replaceAll('#{action}', context.action.name)
+    .replaceAll('#{n}', context.uncompletedTasksCount.toString())
+    .replaceAll('#{s}', context.uncompletedTasksCount === 1 ? '' : 's')
+    .replaceAll(
       '#{days}',
       context.deadlineEvent
         ? getDaysFromDeadline(context.deadlineEvent, dateNow)
         : '[err]',
     )
-    .replace(
+    .replaceAll(
       '#{hours}',
       context.deadlineEvent
         ? getHoursFromDeadline(context.deadlineEvent, dateNow)
         : '[err]',
     )
-    .replace(
+    .replaceAll(
       '#{timeremaining}',
       context.deadlineEvent
         ? getDaysAndHoursFromDeadline(context.deadlineEvent, dateNow)
         : '[err]',
     )
-    .replace('#{link}', withCid(tasksUrl(true), context.cid));
+    .replaceAll('#{link}', withCid(tasksUrl(true), context.cid));
 
   while (str.includes('|') && str.includes('#{') && str.includes('}')) {
     const idx_start = str.indexOf('#{');
