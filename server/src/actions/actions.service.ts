@@ -157,7 +157,6 @@ export class ActionsService {
         0,
       );
     }
-    console.log('reloaded usersJoined', joined);
     await this.actionRepository.update(action.id, { usersJoined: joined });
   }
 

@@ -211,19 +211,12 @@ export class ActionEventReminderService {
     windowStart: Date,
     windowEnd: Date,
   ) {
-    return repo
+    const idRows = await repo
       .createQueryBuilder('rg')
-      .leftJoinAndSelect('rg.memberActionEvent', 'event')
-      .leftJoinAndSelect('event.action', 'eventAction')
-      .leftJoinAndSelect('eventAction.participatingGroups', 'eventActionGroups')
-      .leftJoinAndSelect('rg.deadlineEvent', 'deadline')
-      .leftJoinAndSelect('rg.users', 'users')
-      .leftJoinAndSelect('users.groups', 'userGroups')
-      .leftJoinAndSelect('rg.userGroup', 'userGroup')
-      .leftJoinAndSelect('rg.actionSuite', 'actionSuite')
-      .leftJoinAndSelect('actionSuite.actions', 'actionSuiteActions')
-      .andWhere('rg."allSent" = false')
-      .where(
+      .leftJoin('rg.memberActionEvent', 'event')
+      .leftJoin('rg.deadlineEvent', 'deadline')
+      .where('rg."allSent" = false')
+      .andWhere(
         new Brackets((qb) => {
           qb.where(
             '(rg."timingMode" = :abs AND rg."sendAtAbsolute" BETWEEN :ws AND :we)',
@@ -252,6 +245,28 @@ export class ActionEventReminderService {
         ws: windowStart,
         we: windowEnd,
       })
+      .select('rg.id', 'id')
+      .distinct(true)
+      .getRawMany<{ id: number }>();
+
+    const ids = idRows.map((r) => r.id);
+
+    if (ids.length === 0) {
+      return [];
+    }
+
+    return repo
+      .createQueryBuilder('rg')
+      .leftJoinAndSelect('rg.memberActionEvent', 'event')
+      .leftJoinAndSelect('event.action', 'eventAction')
+      .leftJoinAndSelect('eventAction.participatingGroups', 'eventActionGroups')
+      .leftJoinAndSelect('rg.deadlineEvent', 'deadline')
+      .leftJoinAndSelect('rg.users', 'users')
+      .leftJoinAndSelect('users.groups', 'userGroups')
+      .leftJoinAndSelect('rg.userGroup', 'userGroup')
+      .leftJoinAndSelect('rg.actionSuite', 'actionSuite')
+      .leftJoinAndSelect('actionSuite.actions', 'actionSuiteActions')
+      .where('rg.id IN (:...ids)', { ids })
       .getMany();
   }
 
