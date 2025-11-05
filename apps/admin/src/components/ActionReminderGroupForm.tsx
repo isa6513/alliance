@@ -127,7 +127,10 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     initialGroup?.timingMode ?? "within_range";
   const initialSendAtAbsolute =
     initialGroup?.sendAtAbsolute ?? new Date().toISOString();
-  const initialSendAtSeconds = initialGroup?.sendAtSecondsFromDeadline ?? 0;
+  const initialSendAtHours =
+    initialGroup && initialGroup.sendAtSecondsFromDeadline
+      ? initialGroup.sendAtSecondsFromDeadline / 3600
+      : 0;
   const initialRangeStart =
     initialGroup?.send_range_start ?? new Date().toISOString();
   const initialRangeEnd =
@@ -138,8 +141,8 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   const [sendAtAbsolute, setSendAtAbsolute] = useState<string>(
     initialSendAtAbsolute
   );
-  const [sendAtSecondsFromDeadline, setSendAtSecondsFromDeadline] =
-    useState<number>(initialSendAtSeconds);
+  const [sendAtHoursFromDeadline, setSendAtHoursFromDeadline] =
+    useState<number>(initialSendAtHours);
   const [sendRangeStart, setSendRangeStart] =
     useState<string>(initialRangeStart);
   const [sendRangeEnd, setSendRangeEnd] = useState<string>(initialRangeEnd);
@@ -197,6 +200,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         setTentativePlans([]);
         return;
       }
+      const sendAtSecondsFromDeadline = sendAtHoursFromDeadline * 3600;
       actionsTentativePlansForGroup({
         path: {
           eventId: selectedEventId,
@@ -239,7 +243,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     textMessage,
     timingMode,
     sendAtAbsolute,
-    sendAtSecondsFromDeadline,
+    sendAtHoursFromDeadline,
     sendRangeStart,
     sendRangeEnd,
     selectedGroupId,
@@ -257,7 +261,11 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     const nextGroup = initialValues.reminderGroup;
     setTimingMode(nextGroup?.timingMode ?? "within_range");
     setSendAtAbsolute(nextGroup?.sendAtAbsolute ?? new Date().toISOString());
-    setSendAtSecondsFromDeadline(nextGroup?.sendAtSecondsFromDeadline ?? 0);
+    setSendAtHoursFromDeadline(
+      nextGroup?.sendAtSecondsFromDeadline
+        ? nextGroup.sendAtSecondsFromDeadline / 3600
+        : 0
+    );
     setSendRangeStart(nextGroup?.send_range_start ?? new Date().toISOString());
     setSendRangeEnd(
       nextGroup?.send_range_end ??
@@ -331,10 +339,10 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
 
     if (timingMode === "from_deadline") {
       if (
-        sendAtSecondsFromDeadline === null ||
-        Number.isNaN(sendAtSecondsFromDeadline)
+        sendAtHoursFromDeadline === null ||
+        Number.isNaN(sendAtHoursFromDeadline)
       ) {
-        setLocalError("Enter the number of seconds relative to the deadline.");
+        setLocalError("Enter the number of hours relative to the deadline.");
         return;
       }
     }
@@ -360,6 +368,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
 
     const userIds = cohortType === "custom" ? selectedUserIds : undefined;
 
+    const sendAtSecondsFromDeadline = sendAtHoursFromDeadline * 3600;
     const payload = {
       name,
       cohortType,
@@ -476,18 +485,14 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       {timingMode === "from_deadline" && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Seconds to deadline
+            hours to deadline
           </label>
           <input
             type="number"
-            value={
-              Number.isFinite(sendAtSecondsFromDeadline)
-                ? sendAtSecondsFromDeadline
-                : ""
-            }
+            value={sendAtHoursFromDeadline}
             onChange={(event) => {
               const value = event.target.value;
-              setSendAtSecondsFromDeadline(value === "" ? NaN : Number(value));
+              setSendAtHoursFromDeadline(value === "" ? NaN : Number(value));
             }}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
           />
