@@ -605,4 +605,11 @@ export class ActionsController {
   ): Promise<string> {
     return this.actionEventReminderService.previewTextMessage(eventId, body);
   }
+
+  @Get('reloadAllActionUsersJoined')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async reloadAllActionUsersJoined() {
+    return this.actionsService.reloadAllActionUsersJoined();
+  }
 }

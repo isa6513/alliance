@@ -51,7 +51,7 @@ import { User } from 'src/user/entities/user.entity';
 import { ActionUpdate } from './entities/action-update.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ActionSuite } from './entities/action-suite.entity';
-import { NotifsService, shouldTextUser } from 'src/notifs/notifs.service';
+import { shouldTextUser } from 'src/notifs/notifs.service';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -86,7 +86,6 @@ export class ActionsService {
     private readonly actionSuiteRepository: Repository<ActionSuite>,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
-    private readonly notifService: NotifsService,
     private readonly actionEventRecipientService: ActionEventRecipientService,
     private readonly actionEventReminderService: ActionEventReminderService,
   ) {}
@@ -116,16 +115,50 @@ export class ActionsService {
         relations: ['events', 'activities', 'participatingGroups', 'suite'],
       })
       .then((actions) => {
-        return Promise.all(
-          actions.map(async (action) => {
-            return new ActionDto(action, {
-              userJoined: action.commitmentless
-                ? await this.getUsersJoinedForCommitmentlessAction(action)
-                : undefined,
-            });
-          }),
-        );
+        return actions.map((action) => new ActionDto(action));
       });
+  }
+
+  async reloadAllActionUsersJoined(): Promise<void> {
+    const actions = await this.actionRepository.find();
+    for (const action of actions) {
+      console.log('reloading for: ' + action.id);
+      await this.reloadUsersJoinedForAction(action.id);
+    }
+  }
+
+  async reloadUsersJoinedForAction(actionId: number): Promise<void> {
+    const action = await this.actionRepository.findOneOrFail({
+      where: { id: actionId },
+      relations: ['events', 'participatingGroups', 'activities'],
+    });
+
+    let joined = action.usersJoined;
+    if (action.commitmentless) {
+      joined = await this.getUsersJoinedForCommitmentlessAction(action);
+    } else {
+      const activities = await this.actionActivityRepository.find({
+        where: {
+          actionId: action.id,
+          type: In([
+            ActionActivityType.USER_JOINED,
+            ActionActivityType.USER_WONT_COMPLETE,
+          ]),
+        },
+      });
+      joined = Math.max(
+        activities.filter(
+          (activity) => activity.type === ActionActivityType.USER_JOINED,
+        ).length -
+          activities.filter(
+            (activity) =>
+              activity.type === ActionActivityType.USER_WONT_COMPLETE,
+          ).length,
+        0,
+      );
+    }
+    console.log('reloaded usersJoined', joined);
+    await this.actionRepository.update(action.id, { usersJoined: joined });
   }
 
   async getUsersJoinedForCommitmentlessAction(action: Action): Promise<number> {
@@ -208,9 +241,6 @@ export class ActionsService {
             ? await this.isEligibleForAction(action, user)
             : false,
           shouldParticipate: shouldParticipate,
-          userJoined: action.commitmentless
-            ? await this.getUsersJoinedForCommitmentlessAction(action)
-            : undefined,
           userRelation: user
             ? await this.getActionRelationFromActivities(
                 action.activities.filter(
@@ -293,9 +323,6 @@ export class ActionsService {
       canParticipate: user
         ? await this.isEligibleForAction(action, user)
         : false,
-      userJoined: action.commitmentless
-        ? await this.getUsersJoinedForCommitmentlessAction(action)
-        : undefined,
       userRelation: user
         ? await this.getActionRelation(action.id, user.id)
         : undefined,
@@ -353,6 +380,8 @@ export class ActionsService {
     userId: number,
     type: ActionActivityType,
     taskFormResponse?: FormResponse,
+    declineReason?: string,
+    isMoral?: boolean,
   ): Promise<ActionActivityDto> {
     const action = await this.findOne(actionId, userId);
 
@@ -376,6 +405,8 @@ export class ActionsService {
       action: action,
       user: user,
       taskFormResponse,
+      declineReason,
+      isMoral,
     });
     const savedActivity = await this.actionActivityRepository.save(activity);
 
@@ -384,6 +415,8 @@ export class ActionsService {
       actionId,
       activity: activityDto,
     });
+
+    await this.reloadUsersJoinedForAction(actionId);
 
     await this.checkAndProcessAutomaticTransitions(actionId);
 
@@ -438,21 +471,14 @@ export class ActionsService {
     reason: string,
     outOfTime: boolean,
   ): Promise<ActionActivityDto> {
-    const action = await this.findOne(actionId, userId);
-    await this.ensureUserEligibleForAction(action, userId);
-    const user = await this.userService.findOneOrFail(userId);
-
-    const activity = this.actionActivityRepository.create({
-      type: ActionActivityType.USER_WONT_COMPLETE,
-      actionId: actionId,
-      userId: userId,
-      action: action,
-      user: user,
-      declineReason: reason,
+    return this.createActionActivity(
+      actionId,
+      userId,
+      ActionActivityType.USER_WONT_COMPLETE,
+      undefined,
+      reason,
       outOfTime,
-    });
-    const savedActivity = await this.actionActivityRepository.save(activity);
-    return new ActionActivityDto(savedActivity);
+    );
   }
 
   async completeAction(
@@ -515,6 +541,8 @@ export class ActionsService {
     });
 
     const savedEvent = await this.actionEventRepository.save(newEvent);
+
+    await this.reloadUsersJoinedForAction(action.id);
 
     return savedEvent;
   }
@@ -983,18 +1011,10 @@ export class ActionsService {
         'actions.activities',
       ],
     });
-    const actionsWithUsersJoined = await Promise.all(
-      suite.actions.map(async (action) => {
-        return new ActionDto(action, {
-          userJoined: action.commitmentless
-            ? await this.getUsersJoinedForCommitmentlessAction(action)
-            : undefined,
-        });
-      }),
-    );
+
     return new ActionSuiteDto(
       instanceToPlain(suite) as ActionSuite,
-      actionsWithUsersJoined,
+      suite.actions.map((action) => new ActionDto(action)),
     );
   }
 
@@ -1058,6 +1078,8 @@ export class ActionsService {
         suiteManaged: true,
       });
       await this.actionEventRepository.save(newEvent);
+
+      await this.reloadUsersJoinedForAction(action.id);
     }
     return this.getSuite(suiteId);
   }

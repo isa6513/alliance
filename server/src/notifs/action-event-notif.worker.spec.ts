@@ -1,7 +1,6 @@
 import { DataSource, Repository } from 'typeorm';
 import { ActionEventNotifWorker } from './action-event-notif.worker';
 import { NotificationPlan } from './action-event-reminder.service';
-import { NotifsService } from './notifs.service';
 import { MailService } from 'src/mail/mail.service';
 import { MmsService } from 'src/mms/mms.service';
 import { ActionsService } from 'src/actions/actions.service';
@@ -40,7 +39,6 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
 
     worker = new ActionEventNotifWorker(
       {} as DataSource,
-      {} as NotifsService,
       {} as MailService,
       {} as MmsService,
       actionsService,

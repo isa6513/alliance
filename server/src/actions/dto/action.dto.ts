@@ -91,9 +91,6 @@ export class ActionDto extends OmitType(Action, [
   'events',
 ]) {
   @ApiProperty()
-  usersJoined: number;
-
-  @ApiProperty()
   usersCompleted: number;
 
   @ApiProperty({ type: ActionEventDto, isArray: true })
@@ -122,7 +119,6 @@ export class ActionDto extends OmitType(Action, [
     extra?: {
       canParticipate?: boolean;
       shouldParticipate?: boolean;
-      userJoined?: number;
       userRelation?: UserActionRelation;
       reqAuthenticated?: boolean;
     },
@@ -130,7 +126,6 @@ export class ActionDto extends OmitType(Action, [
     super();
     Object.assign(this, action);
     this.image = action.image ? getImageSource(action.image) : undefined;
-    this.usersJoined = extra?.userJoined || action.usersJoined || 0;
     this.usersCompleted = action.usersCompleted || 0;
     this.status = action.status || ActionStatus.Draft;
     this.events =

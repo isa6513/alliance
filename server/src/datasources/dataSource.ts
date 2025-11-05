@@ -32,6 +32,7 @@ export const connectionOptions = (): PostgresConnectionOptions => {
 // verison used for migrations only
 const dataSource = new DataSource({
   ...connectionOptions(),
+  logger: undefined,
   migrations: ['dist/migrations/*{.ts,.js}'],
 });
 export default dataSource;

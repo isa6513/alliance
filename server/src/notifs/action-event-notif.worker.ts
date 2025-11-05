@@ -9,11 +9,7 @@ import { User } from 'src/user/entities/user.entity';
 import { DataSource, QueryFailedError, Repository } from 'typeorm';
 import { ActionEvent } from '../actions/entities/action-event.entity';
 import { Action } from '../actions/entities/action.entity';
-import {
-  NotifsService,
-  shouldEmailUser,
-  shouldTextUser,
-} from '../notifs/notifs.service';
+import { shouldEmailUser, shouldTextUser } from '../notifs/notifs.service';
 import { generateCIDForNotif } from './notif-utils';
 import {
   ActionEventNotif,
@@ -49,7 +45,6 @@ export class ActionEventNotifWorker {
   private readonly logger = new Logger(ActionEventNotifWorker.name);
   constructor(
     private readonly dataSource: DataSource,
-    private readonly notifsService: NotifsService,
     private readonly mailService: MailService,
     private readonly mmsService: MmsService,
     private readonly actionsService: ActionsService,
