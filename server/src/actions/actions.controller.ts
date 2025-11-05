@@ -391,7 +391,7 @@ export class ActionsController {
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: CreateTODReminderGroupDto,
   ): Promise<ReminderGroup> {
-    return this.createReminderGroup(eventId, body);
+    return this.actionEventReminderService.createReminderGroup(eventId, body);
   }
 
   @Delete('reminders/:groupId')

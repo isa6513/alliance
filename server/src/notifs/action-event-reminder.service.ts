@@ -416,7 +416,7 @@ export class ActionEventReminderService {
       deadlineEvent,
       user: testUser,
       cid: await generateCIDForNotif(),
-      uncompletedTasksCount: 2,
+      uncompletedTasksCount: 1,
     });
   }
 }

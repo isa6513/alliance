@@ -57,7 +57,7 @@ export function processKeywordReplacements(
     const idx_start = str.indexOf('#{');
     const idx_separator = str.indexOf('|', idx_start);
     const idx_end = str.indexOf('}', idx_separator);
-    const st_one = str.substring(idx_start, idx_separator);
+    const st_one = str.substring(idx_start + 2, idx_separator);
     const st_many = str.substring(idx_separator + 1, idx_end);
     if (context.uncompletedTasksCount === 1) {
       str = str.substring(0, idx_start) + st_one + str.substring(idx_end + 1);
