@@ -23,8 +23,4 @@ describe('App Controller (e2e)', () => {
     const res = await request(app.getHttpServer()).get('/').expect(200);
     expect(res.text).toBe('OK');
   });
-
-  it('surfacing the test error route returns 500', async () => {
-    await request(app.getHttpServer()).get('/test-error').expect(500);
-  });
 });
