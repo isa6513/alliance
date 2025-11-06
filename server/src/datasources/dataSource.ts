@@ -13,7 +13,7 @@ export const connectionOptions = (): PostgresConnectionOptions => {
     database: process.env.DB_NAME,
     entities: ['dist/**/*.entity{.ts,.js}'],
     useUTC: true,
-    maxQueryExecutionTime: 200,
+    maxQueryExecutionTime: 100,
     logging: ['error', 'warn'],
     logger: new AppTypeOrmLogger(),
   };
