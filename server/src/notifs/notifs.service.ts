@@ -49,7 +49,7 @@ export class NotifsService {
   async findAll(userId: number) {
     const notifs = await this.notifsRepository.find({
       where: { user: { id: userId } },
-      relations: ['user', 'associatedUser'],
+      relations: ['associatedUser'],
     });
     return notifs;
   }
