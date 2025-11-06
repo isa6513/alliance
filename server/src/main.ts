@@ -10,6 +10,7 @@ import { PostHog, setupExpressErrorHandler } from 'posthog-node';
 import { ServerOptions } from 'socket.io';
 import { AppModule } from './app.module';
 import { PosthogExceptionFilter } from './posthog.filter';
+import { MetricsInterceptor } from './metrics';
 
 function validateEnv() {
   const requiredVars = [
@@ -69,6 +70,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidUnknownValues: true }),
   );
+  app.useGlobalInterceptors(new MetricsInterceptor());
   app.use(cookieParser());
   app.enableCors({
     origin: true,

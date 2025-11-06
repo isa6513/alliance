@@ -45,6 +45,10 @@ output "dev_secret_access_key" {
   sensitive   = true
 }
 
+output "app_server_private_ip" {
+  value = aws_instance.app_server.private_ip
+}
+
 # ---------- STAGING ----------
 output "staging_instance_id" {
   description = "ID of the staging EC2 instance"
