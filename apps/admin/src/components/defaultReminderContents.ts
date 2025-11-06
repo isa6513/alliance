@@ -27,7 +27,7 @@ export const defaultEmailSubject =
 export const defaultEmailContents =
 `Hi #{firstname},
 
-#{n} Alliance task#{s} need your completion.
+#{n} Alliance task#{s} need#{s|} your completion.
 
 You have #{timeremaining} left to complete the task#{s}. Please do so at this link: #{link}`;
 
