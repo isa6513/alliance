@@ -2,7 +2,13 @@
 
 ### Infra setup.
 
-We are self-hosting this on a separate ec2 instance. See `monitoring.tf` for this setup. Key thing: Main app server has 3000 and 3005 egress exposed locally on the VPC so the monitoring instance can query /metrics endpoints for both SSR and API servers
+We are self-hosting this on a separate ec2 instance. See `monitoring.tf` for this setup. The main app ec2 instance has 3000 and 3005 ingress exposed locally on the VPC so the monitoring instance can query appropriately. Overall setup is basically:
+
+- Our main app server exposes `/metrics` endpoints that return prometheus structured logs via `prem-client`
+
+- Prometheus (in a docker container) hits the `/metrics` (at the app server ip local to the VPC our main and monitoring instances are on endpoints) every 15 seconds and stores it on disk, then serves the data at `9090`. This is not secured at all so the 9090 port is not exposed publicly!
+
+- Grafana (in another docker container) reads prometheus data from `prometheus:9090` (interal docker container port) and hosts the grafana ui on `:3001`.
 
 ### Monitoring setup on EC2
 
@@ -91,3 +97,15 @@ Now we can run:
 Now `docker ps` should show both prometheus and grafana as running
 
 At this point you should be able to go to [monitoring-ec2-ip]:3001 and see grafana running
+
+## http stuff
+
+We currently have this visible at `metrics.worldalliance.org`. Setting this up basically requires:
+
+- Adding the appropriate dns record in [porkbun](https://porkbun.com) pointing to the ec2 ip
+
+- Installing `nginx` on the ec2 and directing traffic from port 80 -> 3001 where grafana lives
+
+- Installing `certbot` and running it to update the config to allow for 443 https -> 3001 also.
+
+- Note `ingress` blocks in monitoring.tf for 80 and 443 to allow this.
