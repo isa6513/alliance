@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Header, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiOkResponse, ApiProperty } from '@nestjs/swagger';
 import { IsDefined } from 'class-validator';
 import { Public } from './auth/public.decorator';
@@ -23,6 +23,7 @@ export class AppController {
   }
 
   @Get('/metrics')
+  @Header('Content-Type', register.contentType)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: String })
   async metrics(): Promise<string> {
