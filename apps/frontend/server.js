@@ -2,7 +2,7 @@ import { createRequestHandler } from "@react-router/express";
 import compression from "compression";
 import express from "express";
 import morgan from "morgan";
-import io from "@pm2/io";
+import client from "prom-client";
 
 const viteDevServer =
   process.env.NODE_ENV === "production"
@@ -24,19 +24,20 @@ app.use(compression());
 // http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header
 app.disable("x-powered-by");
 
-const ssrHttpLatency = io.histogram({
-  name: "ssr_http_latency",
-  measurement: "duration",
-  unit: "ms",
+const register = new client.Registry();
+
+// collect default Node/process metrics
+client.collectDefaultMetrics({ register });
+
+// histogram for SSR HTTP latency (seconds)
+const ssrHttpRequestDuration = new client.Histogram({
+  name: "ssr_http_request_duration_seconds",
+  help: "Duration of SSR HTTP requests in seconds",
+  labelNames: ["method", "path", "status_code"],
+  buckets: [0.05, 0.1, 0.2, 0.5, 1, 2, 5],
 });
 
-io.init({
-  http: true, // enable built-in HTTP metrics (latency, req/sec, etc)
-  transactions: true, // enable transaction tracing
-  metrics: {
-    http: true,
-  },
-});
+register.registerMetric(ssrHttpRequestDuration);
 
 // handle asset requests
 if (viteDevServer) {
@@ -49,14 +50,23 @@ if (viteDevServer) {
   );
 }
 
+app.get("/metrics", async (_req, res) => {
+  res.set("Content-Type", register.contentType);
+  res.end(await register.metrics());
+});
+
 app.use((req, res, next) => {
   const start = process.hrtime.bigint();
 
   res.on("finish", () => {
-    if (!ssrHttpLatency) return;
     const end = process.hrtime.bigint();
     const ms = Number(end - start) / 1_000_000;
-    ssrHttpLatency.update(ms);
+    const seconds = ms / 1000;
+
+    const path = req.path || "unknown";
+    ssrHttpRequestDuration
+      .labels(req.method, path, String(res.statusCode), "ssr")
+      .observe(seconds);
   });
 
   next();

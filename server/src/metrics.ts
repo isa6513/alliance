@@ -36,7 +36,7 @@ export class MetricsInterceptor implements NestInterceptor {
           const ms = (performance.now() - start) / 1000; // seconds
           const route = req.route?.path || req.path;
           httpRequestDuration
-            .labels(req.method, route, req.res.statusCode)
+            .labels(req.method, route, req.res.statusCode, 'api')
             .observe(ms);
         },
         error: (err: unknown) => {

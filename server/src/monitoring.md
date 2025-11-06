@@ -2,7 +2,7 @@
 
 ### Infra setup.
 
-We are self-hosting this on a separate ec2 instance. See `monitoring.tf` for this setup. Key thing: Main app server has 3000 and 30005 egress exposed locally on the VPC so the monitoring instance can query /metrics endpoints for both SSR and API servers
+We are self-hosting this on a separate ec2 instance. See `monitoring.tf` for this setup. Key thing: Main app server has 3000 and 3005 egress exposed locally on the VPC so the monitoring instance can query /metrics endpoints for both SSR and API servers
 
 ### Monitoring setup on EC2
 
@@ -90,4 +90,4 @@ Now we can run:
 
 Now `docker ps` should show both prometheus and grafana as running
 
-At this point you should be able to go to [monitoring-ec2-ip]:9090 and see grafana running
+At this point you should be able to go to [monitoring-ec2-ip]:3001 and see grafana running
