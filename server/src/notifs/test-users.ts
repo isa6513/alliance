@@ -3,6 +3,7 @@ import {
   NotificationPreference,
   User,
 } from 'src/user/entities/user.entity';
+import { NotificationChannel } from './notif-utils';
 
 export const testUser = {
   id: -1,
@@ -47,6 +48,7 @@ export const testUser = {
   isNotSignedUpPartialProfile: false,
   over18: false,
   onboardingComplete: false,
+  preferredActionReminderChannel: NotificationChannel.Text,
   awayRanges: [],
   anonymous: false,
   actionEventNotifs: [],
@@ -74,6 +76,7 @@ export const getNotifTestUsers = (): User[] => {
       socialNotifsPreference: NotificationPreference.All,
       turnedOffAllNotifs: false,
       forumDigestPreference: ForumDigestPreference.Off,
+      preferredActionReminderChannel: NotificationChannel.Text,
       awayRanges: [],
       password: '',
       createdAt: new Date(),

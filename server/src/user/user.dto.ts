@@ -88,6 +88,7 @@ export class UserDto extends PickType(User, [
   'turnedOffAllNotifs',
   'referralCode',
   'anonymous',
+  'preferredActionReminderChannel',
   'phoneNumber',
 ]) {
   @ApiPropertyOptional()

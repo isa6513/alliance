@@ -35,6 +35,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { Temporal } from '@js-temporal/polyfill';
+import { NotificationChannel } from 'src/notifs/notif-utils';
 
 export enum NotificationPreference {
   All = 'all',
@@ -97,6 +98,17 @@ export class User {
   @ApiProperty({ type: String, format: 'date-time', nullable: true })
   contractDateSuspended: Date | null;
 
+  @Column({
+    type: 'enum',
+    enum: NotificationChannel,
+    default: NotificationChannel.Text,
+  })
+  @ApiProperty({
+    enum: NotificationChannel,
+    enumName: 'NotificationChannel',
+  })
+  preferredActionReminderChannel: NotificationChannel;
+
   // @Column({
   //   type: 'enum',
   //   enum: NotificationChannel,
@@ -109,7 +121,6 @@ export class User {
   // @IsOptional()
   // @IsEnum(NotificationChannel)
   // primaryNotificationChannel: NotificationChannel;
-
   @Column({
     default: true,
   })
