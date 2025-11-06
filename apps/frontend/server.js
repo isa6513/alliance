@@ -65,7 +65,7 @@ app.use((req, res, next) => {
 
     const path = req.path || "unknown";
     ssrHttpRequestDuration
-      .labels(req.method, path, String(res.statusCode), "ssr")
+      .labels(req.method, path, String(res.statusCode))
       .observe(seconds);
   });
 
