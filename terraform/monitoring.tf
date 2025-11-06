@@ -11,16 +11,6 @@ resource "aws_security_group" "monitoring_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Prometheus UI
-  ingress {
-    description = "prometheus ui"
-    from_port   = 9090
-    to_port     = 9090
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    # again, ideally lock this to your IP
-  }
-
   # Grafana UI
   ingress {
     description = "grafana ui"

@@ -1,6 +1,7 @@
 import {
   CallHandler,
   ExecutionContext,
+  HttpException,
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
@@ -30,12 +31,28 @@ export class MetricsInterceptor implements NestInterceptor {
     const start = performance.now();
 
     return next.handle().pipe(
-      tap(() => {
-        const ms = (performance.now() - start) / 1000; // seconds
-        const route = req.route?.path || req.path;
-        httpRequestDuration
-          .labels(req.method, route, req.res.statusCode)
-          .observe(ms);
+      tap({
+        next: () => {
+          const ms = (performance.now() - start) / 1000; // seconds
+          const route = req.route?.path || req.path;
+          httpRequestDuration
+            .labels(req.method, route, req.res.statusCode)
+            .observe(ms);
+        },
+        error: (err: unknown) => {
+          const ms = (performance.now() - start) / 1000; // seconds
+          const route = req.route?.path || req.path;
+
+          let statusCode = req.res.statusCode;
+
+          if (err instanceof HttpException) {
+            statusCode = err.getStatus();
+          }
+
+          httpRequestDuration
+            .labels(req.method, route, statusCode.toString())
+            .observe(ms);
+        },
       }),
     );
   }
