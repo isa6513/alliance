@@ -3,6 +3,7 @@ import { Logger as TypeOrmLogger } from 'typeorm';
 import { Logger as NestLogger } from '@nestjs/common';
 import { PostHog } from 'posthog-node';
 import * as client from 'prom-client';
+import { register } from './metrics';
 
 const dbQueryTotal = new client.Counter({
   name: 'db_query_total',
@@ -17,8 +18,8 @@ const dbSlowQueryDurationSeconds = new client.Histogram({
   buckets: [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 5],
 });
 
-client.register.registerMetric(dbQueryTotal);
-client.register.registerMetric(dbSlowQueryDurationSeconds);
+register.registerMetric(dbQueryTotal);
+register.registerMetric(dbSlowQueryDurationSeconds);
 
 function getQueryType(query: string): string {
   const firstWord = query.trim().split(/\s+/)[0]?.toUpperCase();
