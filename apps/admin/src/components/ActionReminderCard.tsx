@@ -14,13 +14,14 @@ import ActionReminderGroupForm, {
 } from "./ActionReminderGroupForm";
 import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
 import { Link } from "react-router";
-import { formatDate } from "date-fns";
-import { useRef, useState } from "react";
+import { formatDate, formatDistanceToNow } from "date-fns";
+import { useMemo, useRef, useState } from "react";
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import { GroupScheduleLabels } from "./ActionRemindersTab";
 
 interface ActionReminderCardProps {
   group: ReminderGroup;
+  sendStartDate: Date | null;
   highlightedReminder: number | undefined;
   ref: React.RefObject<HTMLDivElement | null>;
   handleDeleteGroup: (
@@ -49,6 +50,7 @@ interface ActionReminderCardProps {
 }
 const ActionReminderCard = ({
   group,
+  sendStartDate,
   highlightedReminder,
   ref,
   groupSchedule,
@@ -83,6 +85,12 @@ const ActionReminderCard = ({
 
   const isFinished =
     reminderPlans && reminderPlans.length === 0 && sentReminders?.length;
+  const relativeSendLabel = useMemo(() => {
+    if (!sendStartDate) {
+      return null;
+    }
+    return formatDistanceToNow(sendStartDate, { addSuffix: true });
+  }, [sendStartDate]);
 
   return (
     <Card
@@ -105,7 +113,10 @@ const ActionReminderCard = ({
             <DropdownIcon size="small" fill="black" />
           </Button>
           <div className="flex flex-col gap-1">
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-row gap-2 items-center">
+              {relativeSendLabel && (
+                <p className="text-sm text-blue-500">{relativeSendLabel}</p>
+              )}
               <p
                 className={`font-semibold ${isFinished ? "text-gray-500" : ""}`}
               >

@@ -221,13 +221,13 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     }
   };
 
-  const parseDate = (value?: string | Date | null) => {
+  const parseDate = useCallback((value?: string | Date | null) => {
     if (!value) {
       return null;
     }
     const date = typeof value === "string" ? parseISO(value) : value;
     return isValid(date) ? date : null;
-  };
+  }, []);
 
   const formatDisplayDate = (value?: string | Date | null) => {
     const date = parseDate(value);
@@ -237,14 +237,17 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
   const getGroupMemberEventId = (group: ReminderGroup) =>
     group.memberActionEvent?.id ?? null;
 
-  const findGroupDeadlineEvent = (group: ReminderGroup) => {
-    const memberEventId = getGroupMemberEventId(group);
+  const findGroupDeadlineEvent = useCallback(
+    (group: ReminderGroup) => {
+      const memberEventId = getGroupMemberEventId(group);
 
-    if (!memberEventId) {
-      return undefined;
-    }
-    return nextEventById.get(memberEventId);
-  };
+      if (!memberEventId) {
+        return undefined;
+      }
+      return nextEventById.get(memberEventId);
+    },
+    [nextEventById]
+  );
 
   useEffect(() => {
     if (reminderGroups.length === 0) {
@@ -356,7 +359,6 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     const end = group.send_range_end ?? null;
     return { start: parseDate(start), end: parseDate(end) };
   };
-
   const describeGroupSchedule = (group: ReminderGroup): GroupScheduleLabels => {
     if (group.timingMode === "absolute") {
       const sendAtLabel = formatDisplayDate(group.sendAtAbsolute);
@@ -708,6 +710,53 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     }
   }, [highlightedReminder]);
 
+  const sortedReminderGroups = useMemo(() => {
+    return reminderGroups
+      .map((group) => {
+        let sendStartDate: Date | null = null;
+        if (group.timingMode === "absolute") {
+          sendStartDate = parseDate(group.sendAtAbsolute);
+        } else if (group.timingMode === "from_deadline") {
+          const deadlineEvent =
+            group.deadlineEvent ?? findGroupDeadlineEvent(group);
+          const deadlineDate = parseDate(deadlineEvent?.date);
+          if (deadlineDate) {
+            const seconds = group.sendAtSecondsFromDeadline ?? 0;
+            sendStartDate = subSeconds(deadlineDate, seconds);
+          }
+        } else if (group.timingMode === "within_range") {
+          const start = parseDate(group.send_range_start);
+          const end = parseDate(group.send_range_end);
+          sendStartDate = start ?? end ?? null;
+        } else if (group.timingMode === "event_launch") {
+          sendStartDate = parseDate(group.memberActionEvent?.date);
+        } else {
+          sendStartDate =
+            parseDate(group.sendAtAbsolute) ??
+            parseDate(group.send_range_start) ??
+            parseDate(group.send_range_end) ??
+            null;
+        }
+
+        return {
+          group,
+          sendStartDate,
+        };
+      })
+      .sort((a, b) => {
+        const timeA = a.sendStartDate
+          ? a.sendStartDate.getTime()
+          : Number.POSITIVE_INFINITY;
+        const timeB = b.sendStartDate
+          ? b.sendStartDate.getTime()
+          : Number.POSITIVE_INFINITY;
+        if (timeA === timeB) {
+          return a.group.id - b.group.id;
+        }
+        return timeA - timeB;
+      });
+  }, [findGroupDeadlineEvent, parseDate, reminderGroups]);
+
   if (!memberEvents.length) {
     return (
       <Card style={CardStyle.White}>
@@ -779,12 +828,13 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           )}
         </div>
       </Card>
-      {reminderGroups.map((group) => {
+      {sortedReminderGroups.map(({ group, sendStartDate }) => {
         const groupSchedule = describeGroupSchedule(group);
         return (
           <ActionReminderCard
             key={group.id}
             group={group}
+            sendStartDate={sendStartDate}
             highlightedReminder={highlightedReminder}
             ref={ref}
             groupSchedule={groupSchedule}
