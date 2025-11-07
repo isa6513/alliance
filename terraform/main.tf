@@ -73,6 +73,15 @@ resource "aws_security_group" "ec2_security_group" {
   }
 
   ingress {
+    description      = "node_exporter from monitoring"
+    from_port        = 9100
+    to_port          = 9100
+    protocol         = "tcp"
+    security_groups  = [aws_security_group.monitoring_sg.id]
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  ingress {
     description = "nest backend"
     from_port   = 3005
     to_port     = 3005

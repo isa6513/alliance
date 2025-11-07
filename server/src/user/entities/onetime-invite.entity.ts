@@ -6,10 +6,11 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from './user.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { Allow } from 'class-validator';
+import { Allow, IsOptional } from 'class-validator';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
+import { Community } from './community.entity';
 
 @Entity()
 export class OnetimeInvite {
@@ -45,4 +46,14 @@ export class OnetimeInvite {
   @ApiProperty()
   @Allow()
   isValid: boolean;
+
+  @ManyToOne(() => Community, (community) => community.invites, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @ApiPropertyOptional({ type: () => Community })
+  @Type(() => Community)
+  @JoinColumn({ name: 'communityId' })
+  @IsOptional()
+  community?: Community;
 }

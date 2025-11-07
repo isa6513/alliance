@@ -26,6 +26,8 @@ export type AccessToken = {
     access_token: string;
 };
 
+export type NotificationChannel = 'text' | 'email' | 'push';
+
 export type NotificationPreference = 'all' | 'digest' | 'none';
 
 export type ForumDigestPreference = 'off' | 'daily' | 'weekly';
@@ -33,9 +35,9 @@ export type ForumDigestPreference = 'off' | 'daily' | 'weekly';
 export type UserDto = {
     id: number;
     name: string;
-    phoneNumber?: string;
     contractDateSigned: string | null;
     contractDateSuspended: string | null;
+    preferredActionReminderChannel: NotificationChannel;
     emailNotifsEnabled: boolean;
     textNotifsEnabled: boolean;
     pushNotifsEnabled: boolean;
@@ -97,7 +99,6 @@ export type PlainTime = {
 export type UpdateProfileDto = {
     id?: number;
     name?: string;
-    phoneNumber?: string;
     phoneNumberValidated?: boolean;
     sentTextOptInMessageAt?: string;
     emailVerified?: boolean;
@@ -107,6 +108,7 @@ export type UpdateProfileDto = {
     };
     contractDateSigned?: string | null;
     contractDateSuspended?: string | null;
+    preferredActionReminderChannel?: NotificationChannel;
     emailNotifsEnabled?: boolean;
     textNotifsEnabled?: boolean;
     pushNotifsEnabled?: boolean;
@@ -148,7 +150,6 @@ export type FriendStatusDto = {
 export type User = {
     id: number;
     name: string;
-    phoneNumber?: string;
     phoneNumberValidated: boolean;
     sentTextOptInMessageAt?: string;
     emailVerified: boolean;
@@ -158,6 +159,7 @@ export type User = {
     };
     contractDateSigned: string | null;
     contractDateSuspended: string | null;
+    preferredActionReminderChannel: NotificationChannel;
     emailNotifsEnabled: boolean;
     textNotifsEnabled: boolean;
     pushNotifsEnabled: boolean;
@@ -446,8 +448,6 @@ export type ReminderGroupTimingMode = 'absolute' | 'from_deadline' | 'within_ran
 export type ReminderCohortType = 'all_uncompleted' | 'group' | 'custom';
 
 export type ActionEventNotifType = 'announcement' | 'misseddeadline' | 'reminder' | 'personalreminder';
-
-export type NotificationChannel = 'text' | 'email' | 'push';
 
 export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder' | 'forum_digest' | 'missed_deadline' | 'missed_second_deadline' | 'custom_action_reminder';
 
@@ -1427,18 +1427,18 @@ export type AppHealthCheckResponses = {
 
 export type AppHealthCheckResponse = AppHealthCheckResponses[keyof AppHealthCheckResponses];
 
-export type AppTestErrorData = {
+export type AppMetricsData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/test-error';
+    url: '/metrics';
 };
 
-export type AppTestErrorResponses = {
+export type AppMetricsResponses = {
     200: string;
 };
 
-export type AppTestErrorResponse = AppTestErrorResponses[keyof AppTestErrorResponses];
+export type AppMetricsResponse = AppMetricsResponses[keyof AppMetricsResponses];
 
 export type AuthLoginData = {
     body: SignInDto;

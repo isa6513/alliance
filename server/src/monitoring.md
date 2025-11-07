@@ -2,13 +2,17 @@
 
 ### Infra setup.
 
-We are self-hosting this on a separate ec2 instance. See `monitoring.tf` for this setup. The main app ec2 instance has 3000 and 3005 ingress exposed locally on the VPC so the monitoring instance can query appropriately. Overall setup is basically:
+We are self-hosting metrics on a separate ec2 instance. See `monitoring.tf` for the setup of that instance. The overall architecture is:
 
-- Our main app server exposes `/metrics` endpoints that return prometheus structured logs via `prem-client`
+- Our api server collects metrics via `prom-client` with a global interceptor, and exposes `/metrics` endpoints locally on the VPC which return prometheus structured logs.
 
-- Prometheus (in a docker container) hits the `/metrics` (at the app server ip local to the VPC our main and monitoring instances are on endpoints) every 15 seconds and stores it on disk, then serves the data at `9090`. This is not secured at all so the 9090 port is not exposed publicly!
+- The frontend ssr server (see `server.js`) similarly captures all requests with `prom-client` and exposes `/metrics`
 
-- Grafana (in another docker container) reads prometheus data from `prometheus:9090` (interal docker container port) and hosts the grafana ui on `:3001`.
+- The ec2 runs `node-exporter` on port 9100 which exposes its own `metrics` for information about the instance itself (memory/cpu usage, etc.)
+
+- Prometheus (in a docker container) hits each `/metrics` every 15 seconds and stores it, then serves the data at `9090` on the monitoring ec2. It retains the stored logs on disk for 15 days right now. The prometheus data endpoint not secured at all so the 9090 port is not exposed publicly.
+
+- Grafana (in another docker container) reads prometheus data from `prometheus:9090` (internal docker container port) and hosts the grafana ui on `:3001`. (This is set up in the Grafana UI data sources panel)
 
 ### Monitoring setup on EC2
 
@@ -51,8 +55,6 @@ scrape_configs:
 `nano docker-compose.yml`
 
 ```
-version: '3.8'
-
 services:
   prometheus:
     image: prom/prometheus
@@ -106,6 +108,41 @@ We currently have this visible at `metrics.worldalliance.org`. Setting this up b
 
 - Installing `nginx` on the ec2 and directing traffic from port 80 -> 3001 where grafana lives
 
-- Installing `certbot` and running it to update the config to allow for 443 https -> 3001 also.
+- Installing `certbot` and running it to update the config to allow for 443 https -> 3001 also. (`sudo yum install -y certbot python3-certbot-nginx && sudo certbot --nginx -d metrics.worldalliance.org`)
 
 - Note `ingress` blocks in monitoring.tf for 80 and 443 to allow this.
+
+### Node-exporter setup
+
+```
+# Get the latest node_exporter (change version if needed)
+cd /tmp
+curl -LO https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz
+tar xzf node_exporter-1.8.2.linux-amd64.tar.gz
+
+sudo mv node_exporter-1.8.2.linux-amd64/node_exporter /usr/local/bin/
+sudo useradd --no-create-home --shell /usr/sbin/nologin node_exporter || true
+sudo chown node_exporter:node_exporter /usr/local/bin/node_exporter
+
+sudo tee /etc/systemd/system/node_exporter.service >/dev/null <<'EOF'
+[Unit]
+Description=Prometheus Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=node_exporter
+Group=node_exporter
+Type=simple
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+sudo systemctl daemon-reload
+sudo systemctl enable node_exporter
+sudo systemctl start node_exporter
+sudo systemctl status node_exporter
+```

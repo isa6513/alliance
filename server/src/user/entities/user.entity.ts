@@ -36,6 +36,7 @@ import {
 } from 'src/datasources/basecolumns';
 import { Temporal } from '@js-temporal/polyfill';
 import { NotificationChannel } from 'src/notifs/notif-utils';
+import { Community } from './community.entity';
 
 export enum NotificationPreference {
   All = 'all',
@@ -66,7 +67,6 @@ export class User {
   email: string;
 
   @Column({ nullable: true })
-  @ApiPropertyOptional()
   @IsOptional()
   phoneNumber?: string;
 
@@ -298,4 +298,16 @@ export class User {
   @ManyToMany(() => Group, (group) => group.users, { onDelete: 'CASCADE' })
   @Type(() => Group)
   groups: Group[];
+
+  @ManyToMany(() => Community, (community) => community.users, {
+    onDelete: 'CASCADE',
+  })
+  @Type(() => Community)
+  communities: Community[];
+
+  @ManyToMany(() => Community, (community) => community.leaders, {
+    onDelete: 'CASCADE',
+  })
+  @Type(() => Community)
+  leaderOf: Community[];
 }
