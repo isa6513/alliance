@@ -170,12 +170,11 @@ export class ActionsService {
     );
     if (!event) return 1;
 
-    const deadlineEvent = action.events[action.events.indexOf(event) + 1];
     const baseUsers =
       await this.actionEventRecipientService.getBaseUsersForEvent(
         ActionStatus.MemberAction,
         action,
-        deadlineEvent?.date ?? event.date,
+        event.date,
       );
     const completionActivities = await this.actionActivityRepository.find({
       where: {
