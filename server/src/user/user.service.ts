@@ -32,6 +32,8 @@ import { User } from './entities/user.entity';
 import { profileUrl } from 'src/search/approutes';
 import { Group } from './entities/group.entity';
 import { CreateGroupDto } from './group.dto';
+import { Community } from './entities/community.entity';
+import { CreateCommunityDto, UpdateCommunityDto } from './community.dto';
 import {
   UserActionRelationDetailDto,
   UserActionRelationsForUserDto,
@@ -46,6 +48,7 @@ import { CreateAwayRangeDto } from './dto/away-range.dto';
 import { Temporal } from '@js-temporal/polyfill';
 
 const defaultTimeZone = 'America/Los_Angeles';
+const communityDefaultRelations = ['users', 'leaders'] as const;
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -71,6 +74,8 @@ export class UserService {
     private readonly friendRepository: Repository<Friend>,
     @InjectRepository(Group)
     private readonly groupRepository: Repository<Group>,
+    @InjectRepository(Community)
+    private readonly communityRepository: Repository<Community>,
     @InjectRepository(OnetimeInvite)
     private readonly onetimeInviteRepository: Repository<OnetimeInvite>,
     @InjectRepository(UserAwayRange)
@@ -782,6 +787,109 @@ export class UserService {
     );
   }
 
+  private get communityRelations(): string[] {
+    return [...communityDefaultRelations];
+  }
+
+  async findCommunityOrFail(
+    id: number,
+    relations?: string[],
+  ): Promise<Community> {
+    return this.communityRepository.findOneOrFail({
+      where: { id },
+      relations: relations ?? this.communityRelations,
+    });
+  }
+
+  async createCommunity(body: CreateCommunityDto): Promise<Community> {
+    const community = this.communityRepository.create(body);
+    return this.communityRepository.save(community);
+  }
+
+  async findAllCommunities(): Promise<Community[]> {
+    return this.communityRepository.find({
+      relations: this.communityRelations,
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async updateCommunity(
+    communityId: number,
+    body: UpdateCommunityDto,
+  ): Promise<Community> {
+    const community = await this.findCommunityOrFail(communityId);
+    Object.assign(community, body);
+    return this.communityRepository.save(community);
+  }
+
+  async deleteCommunity(communityId: number): Promise<void> {
+    await this.communityRepository.delete(communityId);
+  }
+
+  async addUserToCommunity(
+    communityId: number,
+    userId: number,
+  ): Promise<Community> {
+    const community = await this.findCommunityOrFail(communityId);
+    const user = await this.findOneOrFail(userId);
+
+    community.users = community.users ?? [];
+    if (!community.users.some((existing) => existing.id === userId)) {
+      community.users.push(user);
+    }
+
+    return this.communityRepository.save(community);
+  }
+
+  async removeUserFromCommunity(
+    communityId: number,
+    userId: number,
+  ): Promise<Community> {
+    const community = await this.findCommunityOrFail(communityId);
+
+    community.users = (community.users ?? []).filter(
+      (user) => user.id !== userId,
+    );
+    community.leaders = (community.leaders ?? []).filter(
+      (leader) => leader.id !== userId,
+    );
+
+    return this.communityRepository.save(community);
+  }
+
+  async addLeaderToCommunity(
+    communityId: number,
+    userId: number,
+  ): Promise<Community> {
+    const community = await this.findCommunityOrFail(communityId);
+    const user = await this.findOneOrFail(userId);
+
+    community.users = community.users ?? [];
+    if (!community.users.some((existing) => existing.id === userId)) {
+      community.users.push(user);
+    }
+
+    community.leaders = community.leaders ?? [];
+    if (!community.leaders.some((existing) => existing.id === userId)) {
+      community.leaders.push(user);
+    }
+
+    return this.communityRepository.save(community);
+  }
+
+  async removeLeaderFromCommunity(
+    communityId: number,
+    userId: number,
+  ): Promise<Community> {
+    const community = await this.findCommunityOrFail(communityId);
+
+    community.leaders = (community.leaders ?? []).filter(
+      (leader) => leader.id !== userId,
+    );
+
+    return this.communityRepository.save(community);
+  }
+
   async createGroup(body: CreateGroupDto): Promise<Group> {
     const group = this.groupRepository.create(body);
     return this.groupRepository.save(group);
@@ -837,12 +945,24 @@ export class UserService {
   ): Promise<OnetimeInvite> {
     const code = Math.random().toString(36).substring(2, 15);
 
-    const invitingUser = await this.findOneOrFail(body.invitingUserId);
+    const { invitingUserId, communityId, ...rest } = body;
+    const invitingUser = await this.findOneOrFail(invitingUserId);
+
+    let community: Community | undefined;
+    if (communityId !== undefined) {
+      community = await this.communityRepository.findOneOrFail({
+        where: { id: communityId },
+      });
+      if (!community) {
+        throw new NotFoundException(`Community ${communityId} not found`);
+      }
+    }
 
     const invite = this.onetimeInviteRepository.create({
-      ...body,
+      ...rest,
       code,
       invitingUser,
+      community,
     });
     return this.onetimeInviteRepository.save(invite);
   }
@@ -850,13 +970,13 @@ export class UserService {
   async findValidInviteByCode(code: string): Promise<OnetimeInvite | null> {
     return this.onetimeInviteRepository.findOne({
       where: { code, isValid: true },
-      relations: ['invitingUser'],
+      relations: ['invitingUser', 'community'],
     });
   }
 
   async findAllOnetimeInvites(): Promise<OnetimeInvite[]> {
     return this.onetimeInviteRepository.find({
-      relations: ['invitingUser'],
+      relations: ['invitingUser', 'community'],
     });
   }
 

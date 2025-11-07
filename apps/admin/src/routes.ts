@@ -6,6 +6,8 @@ export default [
       route("/", "pages/Actions.tsx"),
       route("/timeline", "pages/NewTimelinePage.tsx"),
       route("/invites", "pages/InvitesPage.tsx"),
+      route("/communities", "pages/CommunitiesPage.tsx"),
+      route("/communities/:id", "pages/CommunityDetailPage.tsx"),
       route("/actions/:actionId", "pages/ActionDashboard.tsx"),
       route("/suites/:suiteId", "pages/ActionSuitePage.tsx"),
       route("/new-suite", "pages/NewActionSuitePage.tsx"),

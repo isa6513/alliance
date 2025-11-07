@@ -16,6 +16,7 @@ import { IsUserAlreadyExist } from './validators/user-already-exists.validator';
 import { Group } from './entities/group.entity';
 import { OnetimeInvite } from './entities/onetime-invite.entity';
 import { UserAwayRange } from './entities/user-away-range.entity';
+import { Community } from './entities/community.entity';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { UserAwayRange } from './entities/user-away-range.entity';
       Group,
       OnetimeInvite,
       UserAwayRange,
+      Community,
     ]),
     JwtModule,
     ImagesModule,

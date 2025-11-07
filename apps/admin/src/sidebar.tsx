@@ -125,6 +125,12 @@ const Sidebar: React.FC = () => {
             >
               User Invites
             </Link>
+            <Link
+              to="/communities"
+              className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm "
+            >
+              Communities
+            </Link>
           </div>
           <div className="flex flex-row justify-between items-center mt-3">
             <p className="font-bold">Current Actions</p>

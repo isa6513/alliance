@@ -61,12 +61,14 @@ export class AuthService {
         signUp.referralCode,
       );
     }
+    let inviteCommunityId: number | null = null;
     if (!referredBy && signUp.referralCode) {
       const invite = await this.usersService.findValidInviteByCode(
         signUp.referralCode,
       );
       if (invite) {
         referredBy = invite.invitingUser;
+        inviteCommunityId = invite.community?.id ?? null;
         await this.usersService.invalidateInvite(invite.id);
       }
     }
@@ -83,6 +85,10 @@ export class AuthService {
       referredBy,
       groups: defaultGroup ? [defaultGroup] : undefined,
     });
+
+    if (inviteCommunityId) {
+      await this.usersService.addUserToCommunity(inviteCommunityId, user.id);
+    }
 
     if (referredBy) {
       await this.usersService.makeFriendsAutomated(referredBy.id, user.id);

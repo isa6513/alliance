@@ -41,6 +41,12 @@ import { AddUserToGroupDto, CreateGroupDto, GroupDto } from './group.dto';
 import { UserActionRelationsResponseDto } from './dto/user-action-relations.dto';
 import { CreateOnetimeInviteDto, OnetimeInviteDto } from './dto/invite.dto';
 import { CreateAwayRangeDto, UserAwayRangeDto } from './dto/away-range.dto';
+import {
+  CommunityDto,
+  CommunityMemberDto,
+  CreateCommunityDto,
+  UpdateCommunityDto,
+} from './community.dto';
 
 class VerifyEmailBody {
   @IsString()
@@ -339,6 +345,94 @@ export class UserController {
   @ApiOkResponse({ type: User })
   async verifyEmail(@Body() body: VerifyEmailBody) {
     return this.userService.verifyEmail(body.token);
+  }
+
+  @Post('communities')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async createCommunity(@Body() body: CreateCommunityDto) {
+    return new CommunityDto(await this.userService.createCommunity(body));
+  }
+
+  @Get('communities')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [CommunityDto] })
+  async getCommunities() {
+    return (await this.userService.findAllCommunities()).map(
+      (community) => new CommunityDto(community),
+    );
+  }
+
+  @Patch('communities/:communityId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async updateCommunity(
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Body() body: UpdateCommunityDto,
+  ) {
+    return new CommunityDto(
+      await this.userService.updateCommunity(communityId, body),
+    );
+  }
+
+  @Delete('communities/:communityId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async deleteCommunity(
+    @Param('communityId', ParseIntPipe) communityId: number,
+  ) {
+    await this.userService.deleteCommunity(communityId);
+  }
+
+  @Post('communities/:communityId/addMember')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async addMemberToCommunity(
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Body() body: CommunityMemberDto,
+  ) {
+    return new CommunityDto(
+      await this.userService.addUserToCommunity(communityId, body.userId),
+    );
+  }
+
+  @Post('communities/:communityId/removeMember')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async removeMemberFromCommunity(
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Body() body: CommunityMemberDto,
+  ) {
+    return new CommunityDto(
+      await this.userService.removeUserFromCommunity(communityId, body.userId),
+    );
+  }
+
+  @Post('communities/:communityId/addLeader')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async addLeaderToCommunity(
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Body() body: CommunityMemberDto,
+  ) {
+    return new CommunityDto(
+      await this.userService.addLeaderToCommunity(communityId, body.userId),
+    );
+  }
+
+  @Post('communities/:communityId/removeLeader')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async removeLeaderFromCommunity(
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Body() body: CommunityMemberDto,
+  ) {
+    return new CommunityDto(
+      await this.userService.removeLeaderFromCommunity(
+        communityId,
+        body.userId,
+      ),
+    );
   }
 
   @Post('createGroup')

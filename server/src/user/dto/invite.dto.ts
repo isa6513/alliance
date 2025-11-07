@@ -1,5 +1,5 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
-import { Allow } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
+import { Allow, IsNumber, IsOptional } from 'class-validator';
 import { OnetimeInvite } from '../entities/onetime-invite.entity';
 
 export class CreateOnetimeInviteDto extends PickType(OnetimeInvite, [
@@ -8,6 +8,11 @@ export class CreateOnetimeInviteDto extends PickType(OnetimeInvite, [
   @ApiProperty()
   @Allow()
   invitingUserId: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  communityId?: number;
 }
 
 export class OnetimeInviteDto extends PickType(OnetimeInvite, [
@@ -17,4 +22,5 @@ export class OnetimeInviteDto extends PickType(OnetimeInvite, [
   'code',
   'isValid',
   'createdAt',
+  'community',
 ]) {}

@@ -13,7 +13,7 @@ type ButtonProps = React.PropsWithChildren & {
       }
     | {
         type?: "button" | "reset";
-        onClick: (e: React.MouseEvent) => void;
+        onClick: (e: React.MouseEvent<HTMLElement>) => void;
       }
   ) &
   Pick<

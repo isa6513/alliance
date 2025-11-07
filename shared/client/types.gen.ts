@@ -223,6 +223,31 @@ export type VerifyEmailBody = {
     [key: string]: unknown;
 };
 
+export type CreateCommunityDto = {
+    name: string;
+    description: string;
+    photo?: string;
+};
+
+export type CommunityDto = {
+    id: number;
+    name: string;
+    description: string;
+    photo?: string;
+    users: Array<ProfileDto>;
+    leaders: Array<ProfileDto>;
+};
+
+export type UpdateCommunityDto = {
+    name?: string;
+    description?: string;
+    photo?: string;
+};
+
+export type CommunityMemberDto = {
+    userId: number;
+};
+
 export type CreateGroupDto = {
     name: string;
     description: string;
@@ -246,6 +271,27 @@ export type AddUserToGroupDto = {
 export type CreateOnetimeInviteDto = {
     invitee: string;
     invitingUserId: number;
+    communityId?: number;
+};
+
+export type OnetimeInvite = {
+    id: number;
+    invitee: string;
+    code: string;
+    invitingUser: User;
+    createdAt: string;
+    isValid: boolean;
+    community?: Community;
+};
+
+export type Community = {
+    id: number;
+    name: string;
+    description: string;
+    photo?: string;
+    users?: Array<User>;
+    leaders?: Array<User>;
+    invites?: Array<OnetimeInvite>;
 };
 
 export type OnetimeInviteDto = {
@@ -255,6 +301,7 @@ export type OnetimeInviteDto = {
     invitingUser: User;
     createdAt: string;
     isValid: boolean;
+    community?: Community;
 };
 
 export type StreamableFile = {
@@ -1963,6 +2010,120 @@ export type UserVerifyEmailResponses = {
 };
 
 export type UserVerifyEmailResponse = UserVerifyEmailResponses[keyof UserVerifyEmailResponses];
+
+export type UserGetCommunitiesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/communities';
+};
+
+export type UserGetCommunitiesResponses = {
+    200: Array<CommunityDto>;
+};
+
+export type UserGetCommunitiesResponse = UserGetCommunitiesResponses[keyof UserGetCommunitiesResponses];
+
+export type UserCreateCommunityData = {
+    body: CreateCommunityDto;
+    path?: never;
+    query?: never;
+    url: '/user/communities';
+};
+
+export type UserCreateCommunityResponses = {
+    200: CommunityDto;
+};
+
+export type UserCreateCommunityResponse = UserCreateCommunityResponses[keyof UserCreateCommunityResponses];
+
+export type UserDeleteCommunityData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/communities/{communityId}';
+};
+
+export type UserDeleteCommunityResponses = {
+    200: unknown;
+};
+
+export type UserUpdateCommunityData = {
+    body: UpdateCommunityDto;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/communities/{communityId}';
+};
+
+export type UserUpdateCommunityResponses = {
+    200: CommunityDto;
+};
+
+export type UserUpdateCommunityResponse = UserUpdateCommunityResponses[keyof UserUpdateCommunityResponses];
+
+export type UserAddMemberToCommunityData = {
+    body: CommunityMemberDto;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/communities/{communityId}/addMember';
+};
+
+export type UserAddMemberToCommunityResponses = {
+    200: CommunityDto;
+};
+
+export type UserAddMemberToCommunityResponse = UserAddMemberToCommunityResponses[keyof UserAddMemberToCommunityResponses];
+
+export type UserRemoveMemberFromCommunityData = {
+    body: CommunityMemberDto;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/communities/{communityId}/removeMember';
+};
+
+export type UserRemoveMemberFromCommunityResponses = {
+    200: CommunityDto;
+};
+
+export type UserRemoveMemberFromCommunityResponse = UserRemoveMemberFromCommunityResponses[keyof UserRemoveMemberFromCommunityResponses];
+
+export type UserAddLeaderToCommunityData = {
+    body: CommunityMemberDto;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/communities/{communityId}/addLeader';
+};
+
+export type UserAddLeaderToCommunityResponses = {
+    200: CommunityDto;
+};
+
+export type UserAddLeaderToCommunityResponse = UserAddLeaderToCommunityResponses[keyof UserAddLeaderToCommunityResponses];
+
+export type UserRemoveLeaderFromCommunityData = {
+    body: CommunityMemberDto;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/communities/{communityId}/removeLeader';
+};
+
+export type UserRemoveLeaderFromCommunityResponses = {
+    200: CommunityDto;
+};
+
+export type UserRemoveLeaderFromCommunityResponse = UserRemoveLeaderFromCommunityResponses[keyof UserRemoveLeaderFromCommunityResponses];
 
 export type UserCreateGroupData = {
     body: CreateGroupDto;
