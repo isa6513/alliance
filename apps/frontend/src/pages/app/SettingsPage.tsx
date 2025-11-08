@@ -1,6 +1,7 @@
 import {
   City,
   CitySearchDto,
+  NotificationChannel,
   PaymentMethodDto,
   paymentsClearPaymentMethods,
   paymentsPaymentMethod,
@@ -30,18 +31,8 @@ type EditableUserFields = Pick<
   | "textNotifsEnabled"
   | "cityId"
   | "forumDigestPreference"
+  | "preferredActionReminderChannel"
 >;
-
-const mapUserToEditable = (source?: Partial<UserDto>): EditableUserFields => ({
-  name: source?.name ?? "",
-  phoneNumber: source?.phoneNumber,
-  anonymous: source?.anonymous ?? false,
-  emailNotifsEnabled: source?.emailNotifsEnabled ?? false,
-  pushNotifsEnabled: source?.pushNotifsEnabled ?? false,
-  textNotifsEnabled: source?.textNotifsEnabled ?? false,
-  cityId: source?.cityId,
-  forumDigestPreference: source?.forumDigestPreference ?? "off",
-});
 
 const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -92,7 +83,10 @@ const SettingsPage: React.FC = () => {
       editableUser.pushNotifsEnabled !== initialUser.pushNotifsEnabled ||
       editableUser.textNotifsEnabled !== initialUser.textNotifsEnabled ||
       editableUser.phoneNumber !== initialUser.phoneNumber ||
-      editableUser.forumDigestPreference !== initialUser.forumDigestPreference);
+      editableUser.forumDigestPreference !==
+        initialUser.forumDigestPreference ||
+      editableUser.preferredActionReminderChannel !==
+        initialUser.preferredActionReminderChannel);
 
   const loadPaymentMethod = useCallback(async () => {
     try {
@@ -157,9 +151,8 @@ const SettingsPage: React.FC = () => {
     }
 
     setLoading(false);
-    const mappedUser = mapUserToEditable(user);
-    setEditableUser(mappedUser);
-    setInitialUser(mappedUser);
+    setEditableUser(user);
+    setInitialUser(user);
 
     loadPaymentMethod();
 
@@ -169,10 +162,10 @@ const SettingsPage: React.FC = () => {
         setLocation(city);
         const cityId = city.id;
         setEditableUser((prev) =>
-          prev ? { ...prev, cityId } : { ...mappedUser, cityId }
+          prev ? { ...prev, cityId } : { ...user, cityId }
         );
         setInitialUser((prev) =>
-          prev ? { ...prev, cityId } : { ...mappedUser, cityId }
+          prev ? { ...prev, cityId } : { ...user, cityId }
         );
       }
     });
@@ -314,7 +307,23 @@ const SettingsPage: React.FC = () => {
           <div>
             <h2 className="!font-semibold text-lg mb-4">Notifications</h2>
 
-            <p className="!font-medium mb-0">Action reminders</p>
+            <div className="flex flex-row gap-x-2 my-2 items-center">
+              <p className="!font-medium mb-0">Send action reminders via:</p>
+              <select
+                className="border border-zinc-300 rounded-md px-3 py-2"
+                value={editableUser.preferredActionReminderChannel}
+                onChange={(event) =>
+                  updateEditableUser({
+                    preferredActionReminderChannel: event.target
+                      .value as NotificationChannel,
+                  })
+                }
+              >
+                <option value={"email"}>Email</option>
+                <option value={"text"}>Text</option>
+              </select>
+            </div>
+            <p className="!font-medium mb-0">Allowed notification channels</p>
             <div className="">
               {!(
                 editableUser.emailNotifsEnabled ||

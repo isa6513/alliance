@@ -16,6 +16,7 @@ import {
 import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
 import { ActionUpdate } from 'src/actions/entities/action-update.entity';
 import { actionUrl } from 'src/search/approutes';
+import { NotificationChannel } from './notif-utils';
 
 export function shouldEmailUser(user: User) {
   return (
@@ -31,7 +32,8 @@ export function shouldTextUser(user: User) {
     !user.turnedOffAllNotifs &&
     user.phoneNumber &&
     user.contractDateSigned &&
-    user.phoneNumberValidated
+    user.phoneNumberValidated &&
+    user.preferredActionReminderChannel === NotificationChannel.Text
   );
 }
 

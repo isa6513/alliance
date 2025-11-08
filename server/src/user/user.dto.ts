@@ -99,6 +99,10 @@ export class UserDto extends PickType(User, [
   @Allow()
   email: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  phoneNumber?: string;
+
   constructor(user: User) {
     super();
     Object.assign(this, user);

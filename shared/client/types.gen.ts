@@ -51,6 +51,7 @@ export type UserDto = {
     anonymous: boolean;
     cityId?: number;
     email: string;
+    phoneNumber?: string;
 };
 
 export type ForgotPasswordDto = {
