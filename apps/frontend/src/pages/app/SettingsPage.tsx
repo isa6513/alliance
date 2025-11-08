@@ -12,7 +12,7 @@ import {
 import Badge from "@alliance/shared/ui/Badge";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
 import LargeCheckbox from "../../components/LargeCheckbox";
@@ -73,20 +73,14 @@ const SettingsPage: React.FC = () => {
     [updateEditableUser]
   );
 
-  const hasChanges =
-    editableUser !== null &&
-    initialUser !== null &&
-    (editableUser.name !== initialUser.name ||
-      editableUser.cityId !== initialUser.cityId ||
-      editableUser.anonymous !== initialUser.anonymous ||
-      editableUser.emailNotifsEnabled !== initialUser.emailNotifsEnabled ||
-      editableUser.pushNotifsEnabled !== initialUser.pushNotifsEnabled ||
-      editableUser.textNotifsEnabled !== initialUser.textNotifsEnabled ||
-      editableUser.phoneNumber !== initialUser.phoneNumber ||
-      editableUser.forumDigestPreference !==
-        initialUser.forumDigestPreference ||
-      editableUser.preferredActionReminderChannel !==
-        initialUser.preferredActionReminderChannel);
+  const hasChanges = useMemo(() => {
+    if (!editableUser || !initialUser) {
+      return false;
+    }
+    const keys = Object.keys(editableUser) as (keyof EditableUserFields)[];
+
+    return keys.some((key) => editableUser[key] !== initialUser[key]);
+  }, [editableUser, initialUser]);
 
   const loadPaymentMethod = useCallback(async () => {
     try {
