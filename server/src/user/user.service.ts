@@ -890,6 +890,18 @@ export class UserService {
     return this.communityRepository.save(community);
   }
 
+  async findUserCommunity(userId: number): Promise<Community | null> {
+    const user = await this.findOneOrFail(userId, ['communities']);
+    const communityId =
+      user.communities.length > 0 ? user.communities[0].id : null;
+
+    if (!communityId) {
+      return null;
+    }
+
+    return this.findCommunityOrFail(communityId, ['users', 'leaders']);
+  }
+
   async createGroup(body: CreateGroupDto): Promise<Group> {
     const group = this.groupRepository.create(body);
     return this.groupRepository.save(group);

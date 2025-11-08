@@ -159,28 +159,6 @@ const CommunitiesPage: React.FC = () => {
               placeholder="What is this community for?"
             />
           </div>
-          <div className="flex flex-col gap-1">
-            <label
-              className="text-sm font-medium text-zinc-700"
-              htmlFor="community-photo"
-            >
-              Photo URL (optional)
-            </label>
-            <input
-              id="community-photo"
-              type="text"
-              className="border border-zinc-300 rounded px-3 py-2 text-sm"
-              value={newCommunity.photo ?? ""}
-              onChange={(event) => {
-                setError(null);
-                setNewCommunity((prev) => ({
-                  ...prev,
-                  photo: event.target.value,
-                }));
-              }}
-              placeholder="https://…"
-            />
-          </div>
           <Button
             type="submit"
             color={ButtonColor.Blue}

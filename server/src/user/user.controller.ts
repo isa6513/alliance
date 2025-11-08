@@ -530,4 +530,15 @@ export class UserController {
   async getOnetimeInvites() {
     return this.userService.findAllOnetimeInvites();
   }
+
+  @Get('myCommunity')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async getMyCommunity(@Request() req: JwtRequest) {
+    const community = await this.userService.findUserCommunity(req.user.sub);
+    if (!community) {
+      return null;
+    }
+    return new CommunityDto(community);
+  }
 }

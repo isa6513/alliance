@@ -2270,6 +2270,19 @@ export type UserGetOnetimeInvitesResponses = {
 
 export type UserGetOnetimeInvitesResponse = UserGetOnetimeInvitesResponses[keyof UserGetOnetimeInvitesResponses];
 
+export type UserGetMyCommunityData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/myCommunity';
+};
+
+export type UserGetMyCommunityResponses = {
+    200: CommunityDto;
+};
+
+export type UserGetMyCommunityResponse = UserGetMyCommunityResponses[keyof UserGetMyCommunityResponses];
+
 export type ImagesGetImageData = {
     body?: never;
     path: {

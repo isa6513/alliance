@@ -440,32 +440,6 @@ const CommunityDetailPage: React.FC = () => {
               }
             />
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-zinc-700">
-              Photo URL (optional)
-            </label>
-            <input
-              type="text"
-              className="border border-zinc-300 rounded px-3 py-2 text-sm"
-              value={formValues.photo}
-              onChange={(event) =>
-                setFormValues((prev) => ({
-                  ...prev,
-                  photo: event.target.value,
-                }))
-              }
-            />
-          </div>
-          {formValues.photo && (
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-zinc-700">Preview</span>
-              <img
-                src={formValues.photo}
-                alt=""
-                className="max-h-48 rounded-md object-cover border border-zinc-200"
-              />
-            </div>
-          )}
           <Button
             type="submit"
             color={ButtonColor.Blue}
