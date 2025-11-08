@@ -63,8 +63,8 @@ export const reminderPresets: Record<
     sendAtSecondsFromDeadline: 3 * 60 * 60,
     cohortType: "all_uncompleted",
     textMessage: defaultTextMessage,
-    emailMessage: defaultEmailSubject,
-    emailSubject: defaultEmailContents,
+    emailSubject: defaultEmailSubject,
+    emailMessage: defaultEmailContents,
     name: "3 hour reminder",
   },
   "Missed Deadline": {

@@ -11,7 +11,7 @@ type Tab = "members" | "about";
 
 const CommunityPage = () => {
   const [community, setCommunity] = useState<CommunityDto | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     userGetMyCommunity().then((resp) => {
