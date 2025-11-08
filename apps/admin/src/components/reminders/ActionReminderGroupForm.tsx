@@ -3,7 +3,7 @@ import {
   actionsPreviewTextMessage,
   actionsTentativePlansForGroup,
   type ActionEventDto,
-  type CreateTodReminderGroupDto,
+  type CreateReminderGroupDto,
   type GroupDto,
   type PreviewNotificationPlan,
   type ReminderCohortType,
@@ -14,8 +14,8 @@ import {
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import TextareaWithHighlights from "./TextareaWithHighlights";
-import UserSelect, { UserSelectUser } from "./UserSelect";
+import TextareaWithHighlights from "../TextareaWithHighlights";
+import UserSelect, { UserSelectUser } from "../UserSelect";
 import {
   defaultEmailContents,
   defaultEmailSubject,
@@ -39,10 +39,12 @@ type ReminderGroupScheduleFields = Pick<
   | "sendAtSecondsFromDeadline"
   | "send_range_start"
   | "send_range_end"
+  | "relative_range_start_seconds_from_deadline"
+  | "relative_range_end_seconds_from_deadline"
 >;
 
 type ReminderGroupUserFields = Pick<
-  CreateTodReminderGroupDto,
+  CreateReminderGroupDto,
   "userIds" | "userGroupId"
 >;
 
@@ -54,7 +56,22 @@ export type ActionReminderGroupFormSubmitPayload = ReminderGroupContentFields &
 
 export type ActionReminderGroupFormInitialValues = {
   memberActionEventId: number;
-  reminderGroup: ReminderGroup | null;
+  reminderGroup: Pick<
+    ReminderGroup,
+    | "name"
+    | "cohortType"
+    | "timingMode"
+    | "emailSubject"
+    | "emailMessage"
+    | "textMessage"
+    | "sendAtAbsolute"
+    | "sendAtSecondsFromDeadline"
+    | "relative_range_start_seconds_from_deadline"
+    | "relative_range_end_seconds_from_deadline"
+    | "send_range_start"
+    | "send_range_end"
+    | "userGroup"
+  > | null;
   users: User[];
 };
 
@@ -78,6 +95,10 @@ const TIMING_MODE_OPTIONS: Array<{
   { value: "within_range", label: "Personalized window" },
   { value: "absolute", label: "Absolute time" },
   { value: "from_deadline", label: "Relative to deadline" },
+  {
+    value: "within_relative_range",
+    label: "Relative personalized window",
+  },
   { value: "event_launch", label: "Event launch" },
 ];
 
@@ -104,7 +125,6 @@ interface ActionReminderFormProps {
   onEventChange?: (eventId: number) => void;
   onSubmit: (
     payload: ActionReminderGroupFormSubmitPayload,
-    anchor: React.RefObject<HTMLButtonElement | null>,
     recipientCount: number
   ) => Promise<void> | void;
 }
@@ -135,8 +155,16 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   const initialSendAtAbsolute =
     initialGroup?.sendAtAbsolute ?? new Date().toISOString();
   const initialSendAtHours =
-    initialGroup && initialGroup.sendAtSecondsFromDeadline
+    initialGroup?.sendAtSecondsFromDeadline != null
       ? initialGroup.sendAtSecondsFromDeadline / 3600
+      : 0;
+  const initialRelativeRangeStartHours =
+    initialGroup?.relative_range_start_seconds_from_deadline != null
+      ? initialGroup.relative_range_start_seconds_from_deadline / 3600
+      : 0;
+  const initialRelativeRangeEndHours =
+    initialGroup?.relative_range_end_seconds_from_deadline != null
+      ? initialGroup.relative_range_end_seconds_from_deadline / 3600
       : 0;
   const initialRangeStart =
     initialGroup?.send_range_start ?? new Date().toISOString();
@@ -150,6 +178,11 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   );
   const [sendAtHoursFromDeadline, setSendAtHoursFromDeadline] =
     useState<number>(initialSendAtHours);
+  const [relativeRangeStartHours, setRelativeRangeStartHours] =
+    useState<number>(initialRelativeRangeStartHours);
+  const [relativeRangeEndHours, setRelativeRangeEndHours] = useState<number>(
+    initialRelativeRangeEndHours
+  );
   const [sendRangeStart, setSendRangeStart] =
     useState<string>(initialRangeStart);
   const [sendRangeEnd, setSendRangeEnd] = useState<string>(initialRangeEnd);
@@ -213,51 +246,76 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         sendAtSecondsFromDeadline: reminder?.sendAtSecondsFromDeadline ?? null,
         sendRangeStart: reminder?.send_range_start ?? null,
         sendRangeEnd: reminder?.send_range_end ?? null,
+        relativeRangeStartSecondsFromDeadline:
+          reminder?.relative_range_start_seconds_from_deadline ?? null,
+        relativeRangeEndSecondsFromDeadline:
+          reminder?.relative_range_end_seconds_from_deadline ?? null,
       },
       selectedUsers: userIds,
     });
   }, [initialValues]);
 
   useEffect(() => {
-    if (selectedEventId) {
-      if (cohortType === "group" && !selectedGroupId) {
-        setTentativePlans([]);
+    if (!selectedEventId) {
+      return;
+    }
+    if (cohortType === "group" && !selectedGroupId) {
+      setTentativePlans([]);
+      return;
+    }
+    if (
+      timingMode === "within_relative_range" &&
+      (Number.isNaN(relativeRangeStartHours) ||
+        Number.isNaN(relativeRangeEndHours) ||
+        relativeRangeStartHours < relativeRangeEndHours)
+    ) {
+      setTentativePlans([]);
+      return;
+    }
+
+    const sendAtSecondsFromDeadline = sendAtHoursFromDeadline * 3600;
+    const relativeRangeStartSeconds = relativeRangeStartHours * 3600;
+    const relativeRangeEndSeconds = relativeRangeEndHours * 3600;
+
+    actionsTentativePlansForGroup({
+      path: {
+        eventId: selectedEventId,
+      },
+      body: {
+        name,
+        cohortType,
+        emailSubject,
+        emailMessage,
+        textMessage,
+        timingMode,
+        userGroupId:
+          cohortType === "group" ? selectedGroupId ?? undefined : undefined,
+        userIds: cohortType === "custom" ? selectedUserIds : undefined,
+        sendAtAbsolute: timingMode === "absolute" ? sendAtAbsolute : undefined,
+        sendAtSecondsFromDeadline:
+          timingMode === "from_deadline"
+            ? sendAtSecondsFromDeadline ?? 0
+            : undefined,
+        send_range_start:
+          timingMode === "within_range" ? sendRangeStart : undefined,
+        send_range_end:
+          timingMode === "within_range" ? sendRangeEnd : undefined,
+        relative_range_start_seconds_from_deadline:
+          timingMode === "within_relative_range"
+            ? relativeRangeStartSeconds
+            : undefined,
+        relative_range_end_seconds_from_deadline:
+          timingMode === "within_relative_range"
+            ? relativeRangeEndSeconds
+            : undefined,
+      },
+    }).then((response) => {
+      if (response.error) {
+        setLocalError((response.error as Error).message);
         return;
       }
-      const sendAtSecondsFromDeadline = sendAtHoursFromDeadline * 3600;
-      actionsTentativePlansForGroup({
-        path: {
-          eventId: selectedEventId,
-        },
-        body: {
-          name,
-          cohortType,
-          emailSubject,
-          emailMessage,
-          textMessage,
-          timingMode,
-          userGroupId:
-            cohortType === "group" ? selectedGroupId ?? undefined : undefined,
-          userIds: cohortType === "custom" ? selectedUserIds : undefined,
-          sendAtAbsolute:
-            timingMode === "absolute" ? sendAtAbsolute : undefined,
-          sendAtSecondsFromDeadline:
-            timingMode === "from_deadline"
-              ? sendAtSecondsFromDeadline ?? 0
-              : undefined,
-          send_range_start:
-            timingMode === "within_range" ? sendRangeStart : undefined,
-          send_range_end:
-            timingMode === "within_range" ? sendRangeEnd : undefined,
-        },
-      }).then((response) => {
-        if (response.error) {
-          setLocalError((response.error as Error).message);
-          return;
-        }
-        setTentativePlans(response.data ?? []);
-      });
-    }
+      setTentativePlans(response.data ?? []);
+    });
   }, [
     selectedEventId,
     name,
@@ -272,6 +330,8 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     sendRangeEnd,
     selectedGroupId,
     selectedUserIds,
+    relativeRangeStartHours,
+    relativeRangeEndHours,
   ]);
 
   useEffect(() => {
@@ -368,7 +428,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     setTimingMode(nextGroup?.timingMode ?? "within_range");
     setSendAtAbsolute(nextGroup?.sendAtAbsolute ?? new Date().toISOString());
     setSendAtHoursFromDeadline(
-      nextGroup?.sendAtSecondsFromDeadline
+      nextGroup?.sendAtSecondsFromDeadline != null
         ? nextGroup.sendAtSecondsFromDeadline / 3600
         : 0
     );
@@ -376,6 +436,16 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     setSendRangeEnd(
       nextGroup?.send_range_end ??
         new Date(Date.now() + 60 * 60 * 1000).toISOString()
+    );
+    setRelativeRangeStartHours(
+      nextGroup?.relative_range_start_seconds_from_deadline != null
+        ? nextGroup.relative_range_start_seconds_from_deadline / 3600
+        : 0
+    );
+    setRelativeRangeEndHours(
+      nextGroup?.relative_range_end_seconds_from_deadline != null
+        ? nextGroup.relative_range_end_seconds_from_deadline / 3600
+        : 0
     );
     setName(initialValues.reminderGroup?.name ?? "");
     setEmailSubject(
@@ -474,9 +544,29 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       normalizedRangeEnd = end.toISOString();
     }
 
+    if (timingMode === "within_relative_range") {
+      if (
+        Number.isNaN(relativeRangeStartHours) ||
+        Number.isNaN(relativeRangeEndHours)
+      ) {
+        setLocalError(
+          "Enter both the start and end hours before the deadline."
+        );
+        return;
+      }
+      if (relativeRangeStartHours < relativeRangeEndHours) {
+        setLocalError(
+          "Window start must be greater than or equal to the window end."
+        );
+        return;
+      }
+    }
+
     const userIds = cohortType === "custom" ? selectedUserIds : undefined;
 
     const sendAtSecondsFromDeadline = sendAtHoursFromDeadline * 3600;
+    const relativeRangeStartSeconds = relativeRangeStartHours * 3600;
+    const relativeRangeEndSeconds = relativeRangeEndHours * 3600;
     const payload = {
       name,
       cohortType,
@@ -498,11 +588,19 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         timingMode === "within_range" ? normalizedRangeStart : undefined,
       send_range_end:
         timingMode === "within_range" ? normalizedRangeEnd : undefined,
+      relative_range_start_seconds_from_deadline:
+        timingMode === "within_relative_range"
+          ? relativeRangeStartSeconds
+          : undefined,
+      relative_range_end_seconds_from_deadline:
+        timingMode === "within_relative_range"
+          ? relativeRangeEndSeconds
+          : undefined,
     } satisfies ActionReminderGroupFormSubmitPayload;
 
     console.log(payload);
 
-    await onSubmit(payload, anchor, tentativePlans.length);
+    await onSubmit(payload, tentativePlans.length);
   };
 
   const combinedError = localError ?? serverError ?? null;
@@ -648,6 +746,41 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
               onChange={(change) => setSendRangeEnd(change.utcValue ?? "")}
               className="w-full !py-1"
               required
+            />
+          </div>
+        </div>
+      )}
+
+      {timingMode === "within_relative_range" && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Window starts (hours before deadline)
+            </label>
+            <input
+              type="number"
+              value={relativeRangeStartHours}
+              min={0}
+              onChange={(event) => {
+                const value = event.target.value;
+                setRelativeRangeStartHours(value === "" ? NaN : Number(value));
+              }}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Window ends (hours before deadline)
+            </label>
+            <input
+              type="number"
+              value={relativeRangeEndHours}
+              min={0}
+              onChange={(event) => {
+                const value = event.target.value;
+                setRelativeRangeEndHours(value === "" ? NaN : Number(value));
+              }}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
             />
           </div>
         </div>

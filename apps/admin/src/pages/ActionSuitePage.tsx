@@ -8,7 +8,7 @@ import {
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import ActionListCard from "../components/ActionListCard";
-import ActionRemindersTab from "../components/ActionRemindersTab";
+import ActionRemindersTab from "../components/reminders/ActionRemindersTab";
 import ActionTimeline from "../components/ActionTimeline";
 import SuiteEventList from "../components/SuiteEventList";
 

@@ -1,3 +1,4 @@
+import { Temporal } from '@js-temporal/polyfill';
 import { DataSource, Repository } from 'typeorm';
 import { ActionEventNotifWorker } from './action-event-notif.worker';
 import { NotificationPlan } from './action-event-reminder.service';
@@ -9,6 +10,7 @@ import {
   ReminderCohortType,
   ReminderGroup,
   ReminderGroupTimingMode,
+  getGroupSendTimeForUser,
 } from 'src/actions/entities/reminder-group.entity';
 import {
   ActionEvent,
@@ -156,5 +158,107 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
     } finally {
       consoleErrorSpy.mockRestore();
     }
+  });
+});
+
+describe('getGroupSendTimeForUser (relative range)', () => {
+  const action = {
+    id: 999,
+    name: 'Relative Range Action',
+  } as Action;
+  const memberActionEvent = {
+    id: 1000,
+    action,
+    date: new Date('2024-04-01T12:00:00Z'),
+    newStatus: ActionStatus.MemberAction,
+  } as ActionEvent;
+
+  const buildGroup = (overrides: Partial<ReminderGroup>): ReminderGroup =>
+    ({
+      id: 500,
+      name: 'Relative Range Reminder',
+      emailMessage: '',
+      emailSubject: '',
+      textMessage: '',
+      cohortType: ReminderCohortType.AllUncompleted,
+      timingMode: ReminderGroupTimingMode.WithinRelativeRange,
+      memberActionEvent,
+      relative_range_start_seconds_from_deadline: 0,
+      relative_range_end_seconds_from_deadline: 0,
+      ...overrides,
+    }) as ReminderGroup;
+
+  it('returns the first personalized reminder time that falls within the relative window', () => {
+    const deadlineEvent = {
+      id: 2000,
+      action,
+      date: new Date('2024-04-15T18:00:00Z'),
+      newStatus: ActionStatus.Completed,
+    } as ActionEvent;
+    const user = {
+      id: 42,
+      name: 'Relative Range User',
+      preferredReminderTime: Temporal.PlainTime.from('10:00:00'),
+      timeZone: 'UTC',
+    } as User;
+
+    const sendTime = getGroupSendTimeForUser(
+      user,
+      buildGroup({
+        deadlineEvent,
+        relative_range_start_seconds_from_deadline: 3 * 24 * 60 * 60,
+        relative_range_end_seconds_from_deadline: 1 * 24 * 60 * 60,
+      }),
+    );
+
+    expect(sendTime?.toISOString()).toBe('2024-04-13T10:00:00.000Z');
+  });
+
+  it('returns null when the preferred reminder time never lands inside the narrow window', () => {
+    const deadlineEvent = {
+      id: 2001,
+      action,
+      date: new Date('2024-05-01T12:00:00Z'),
+      newStatus: ActionStatus.Completed,
+    } as ActionEvent;
+    const user = {
+      id: 43,
+      name: 'Night Owl',
+      preferredReminderTime: Temporal.PlainTime.from('23:00:00'),
+      timeZone: 'UTC',
+    } as User;
+
+    const sendTime = getGroupSendTimeForUser(
+      user,
+      buildGroup({
+        deadlineEvent,
+        relative_range_start_seconds_from_deadline: 6 * 60 * 60,
+        relative_range_end_seconds_from_deadline: 4 * 60 * 60,
+      }),
+    );
+
+    expect(sendTime).toBeNull();
+  });
+
+  it('throws when no deadline event is available for relative range mode', () => {
+    const user = {
+      id: 44,
+      name: 'Missing Deadline Tester',
+      preferredReminderTime: Temporal.PlainTime.from('08:00:00'),
+      timeZone: 'UTC',
+    } as User;
+
+    expect(() =>
+      getGroupSendTimeForUser(
+        user,
+        buildGroup({
+          deadlineEvent: undefined,
+          relative_range_start_seconds_from_deadline: 2 * 24 * 60 * 60,
+          relative_range_end_seconds_from_deadline: 24 * 60 * 60,
+        }),
+      ),
+    ).toThrow(
+      'Deadline event is required for within_relative_range timing mode',
+    );
   });
 });

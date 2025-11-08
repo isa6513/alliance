@@ -31,21 +31,11 @@ import {
 import ActionReminderGroupForm, {
   ActionReminderGroupFormSubmitPayload,
 } from "./ActionReminderGroupForm";
-import { UserSelectUser } from "./UserSelect";
-import {
-  defaultAnnouncementEmailContents,
-  defaultAnnouncementEmailSubject,
-  defaultAnnouncementTextMessage,
-  defaultEmailContents,
-  defaultEmailSubject,
-  defaultMissedDeadlineEmailContents,
-  defaultMissedDeadlineEmailSubject,
-  defaultMissedDeadlineTextMessage,
-  defaultTextMessage,
-} from "./defaultReminderContents";
+import { UserSelectUser } from "../UserSelect";
 import { ActionEventNotifDto } from "@alliance/shared/client";
 import ActionReminderCard from "./ActionReminderCard";
 import { useToast } from "@alliance/shared/ui/ToastProvider";
+import { presetNames, ReminderPresetName, reminderPresets } from "./presets";
 
 interface ActionRemindersTabProps {
   suite: ActionSuiteDto;
@@ -435,6 +425,57 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
         pastTense: "Relative schedule",
       };
     }
+    if (group.timingMode === "within_relative_range") {
+      const startSeconds =
+        group.relative_range_start_seconds_from_deadline ?? null;
+      const endSeconds = group.relative_range_end_seconds_from_deadline ?? null;
+      const deadlineEvent =
+        group.deadlineEvent ?? findGroupDeadlineEvent(group);
+      const deadlineDate = parseDate(deadlineEvent?.date);
+      if (startSeconds === null || endSeconds === null || !deadlineDate) {
+        return {
+          primary: "Relative personalized window",
+          secondary: "Waiting for deadline details",
+          pastTense: "Relative personalized window",
+        };
+      }
+
+      const describeOffset = (seconds: number) => {
+        if (seconds === 0) {
+          return "at the deadline";
+        }
+        const distance = formatDistanceStrict(
+          new Date(0),
+          new Date(Math.abs(seconds) * 1000),
+          { roundingMethod: "floor" }
+        );
+        return `${distance} ${seconds >= 0 ? "before" : "after"}`;
+      };
+
+      const startLabel = describeOffset(startSeconds);
+      const endLabel = describeOffset(endSeconds);
+      const referenceTitle =
+        deadlineEvent?.title?.trim() ||
+        `deadline on ${format(deadlineDate, DISPLAY_DATETIME_FORMAT)}`;
+      const startDate = subSeconds(deadlineDate, startSeconds);
+      const endDate = subSeconds(deadlineDate, endSeconds);
+      const deadlineLabel = format(deadlineDate, DISPLAY_DATETIME_FORMAT);
+
+      return {
+        primary:
+          startSeconds === endSeconds
+            ? `Sends ${startLabel} ${referenceTitle}`
+            : `Sends between ${startLabel} and ${endLabel} ${referenceTitle}`,
+        secondary: `${format(startDate, DISPLAY_DATETIME_FORMAT)} – ${format(
+          endDate,
+          DISPLAY_DATETIME_FORMAT
+        )} • Deadline ${deadlineLabel}`,
+        pastTense:
+          startSeconds === endSeconds
+            ? `${startLabel} ${referenceTitle}`
+            : `between ${startLabel} and ${endLabel} ${referenceTitle}`,
+      };
+    }
     if (group.timingMode === "event_launch") {
       const launchDate = parseDate(group.memberActionEvent?.date);
       return {
@@ -488,38 +529,13 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     const reminders: Awaited<ReturnType<typeof actionsCreateReminderGroup>>[] =
       [];
 
-    const announcement = await actionsCreateReminderGroup({
-      path: { eventId: selectedEventId },
-      body: {
-        suiteId: suite.id,
-        timingMode: "event_launch",
-        cohortType: "all_uncompleted",
-        textMessage: defaultAnnouncementTextMessage,
-        name: "Member Action announcement",
-        emailMessage: defaultAnnouncementEmailContents,
-        emailSubject: defaultAnnouncementEmailSubject,
-      },
-    });
-    reminders.push(announcement);
-
     const deadlineEvent = nextEventById.get(selectedEventId);
     if (deadlineEvent) {
       const twoDay = await actionsCreateReminderGroup({
         path: { eventId: selectedEventId },
         body: {
           suiteId: suite.id,
-          timingMode: "within_range",
-          send_range_start: new Date(
-            new Date(deadlineEvent.date).getTime() - 48 * 60 * 60 * 1000
-          ).toISOString(),
-          send_range_end: new Date(
-            new Date(deadlineEvent.date).getTime() - 24 * 60 * 60 * 1000
-          ).toISOString(),
-          cohortType: "all_uncompleted",
-          textMessage: defaultTextMessage,
-          emailSubject: defaultEmailSubject,
-          emailMessage: defaultEmailContents,
-          name: "24-48h reminder",
+          ...reminderPresets["Two Day Range"],
         },
       });
       reminders.push(twoDay);
@@ -528,18 +544,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
         path: { eventId: selectedEventId },
         body: {
           suiteId: suite.id,
-          timingMode: "within_range",
-          send_range_start: new Date(
-            new Date(deadlineEvent.date).getTime() - 24 * 60 * 60 * 1000
-          ).toISOString(),
-          send_range_end: new Date(
-            new Date(deadlineEvent.date).getTime() - 6 * 60 * 60 * 1000
-          ).toISOString(),
-          cohortType: "all_uncompleted",
-          textMessage: defaultTextMessage,
-          emailSubject: defaultEmailSubject,
-          emailMessage: defaultEmailContents,
-          name: "6-24h reminder",
+          ...reminderPresets["One Day Range"],
         },
       });
       reminders.push(oneDay);
@@ -548,13 +553,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
         path: { eventId: selectedEventId },
         body: {
           suiteId: suite.id,
-          timingMode: "from_deadline",
-          sendAtSecondsFromDeadline: 3 * 60 * 60,
-          cohortType: "all_uncompleted",
-          textMessage: defaultTextMessage,
-          emailMessage: defaultEmailSubject,
-          emailSubject: defaultEmailContents,
-          name: "3 hour reminder",
+          ...reminderPresets["Three Hour"],
         },
       });
       reminders.push(threeHour);
@@ -563,13 +562,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
         path: { eventId: selectedEventId },
         body: {
           suiteId: suite.id,
-          timingMode: "from_deadline",
-          sendAtSecondsFromDeadline: 0,
-          cohortType: "all_uncompleted",
-          textMessage: defaultMissedDeadlineTextMessage,
-          emailMessage: defaultMissedDeadlineEmailContents,
-          emailSubject: defaultMissedDeadlineEmailSubject,
-          name: "Missed deadline message",
+          ...reminderPresets["Missed Deadline"],
         },
       });
       reminders.push(missedDeadline);
@@ -593,7 +586,6 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
 
   const handleCreateGroupSubmit = async (
     payload: ActionReminderGroupFormSubmitPayload,
-    anchor: React.RefObject<HTMLButtonElement | null>,
     recipientCount: number
   ) => {
     const mode = import.meta.env.MODE;
@@ -710,6 +702,10 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     }
   }, [highlightedReminder]);
 
+  const [selectingPreset, setSelectingPreset] = useState<boolean>(false);
+  const [selectedPreset, setSelectedPreset] =
+    useState<ReminderPresetName | null>(null);
+
   const sortedReminderGroups = useMemo(() => {
     return reminderGroups
       .map((group) => {
@@ -728,6 +724,15 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           const start = parseDate(group.send_range_start);
           const end = parseDate(group.send_range_end);
           sendStartDate = start ?? end ?? null;
+        } else if (group.timingMode === "within_relative_range") {
+          const deadlineEvent =
+            group.deadlineEvent ?? findGroupDeadlineEvent(group);
+          const deadlineDate = parseDate(deadlineEvent?.date);
+          const startSeconds =
+            group.relative_range_start_seconds_from_deadline ?? null;
+          if (deadlineDate && startSeconds !== null) {
+            sendStartDate = subSeconds(deadlineDate, startSeconds);
+          }
         } else if (group.timingMode === "event_launch") {
           sendStartDate = parseDate(group.memberActionEvent?.date);
         } else {
@@ -776,6 +781,36 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-base font-semibold">Schedule a notification</h3>
             <div className="flex flex-row gap-2">
+              {createGroupExpanded && (
+                <div className="relative">
+                  <Button
+                    type="button"
+                    color={ButtonColor.Light}
+                    className="px-3 py-1 text-sm"
+                    onClick={() => setSelectingPreset((prev) => !prev)}
+                  >
+                    {createGroupExpanded ? "Load preset..." : ""}
+                  </Button>
+                  {selectingPreset && (
+                    <div className="absolute top-full right-0 p-2 bg-white shadow-md rounded-md">
+                      {presetNames.map((preset) => (
+                        <Button
+                          key={preset}
+                          type="button"
+                          color={ButtonColor.Light}
+                          onClick={() => {
+                            setSelectedPreset(preset);
+                            setSelectingPreset(false);
+                          }}
+                          className="w-full rounded-none !bg-transparent hover:!bg-zinc-200/60"
+                        >
+                          {preset}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               <Button
                 type="button"
                 color={ButtonColor.Black}
@@ -801,10 +836,6 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           )}
           {createGroupExpanded && selectedEventId !== null && (
             <>
-              <p className="text-sm text-gray-600">
-                Creates a personal reminder for each user based on their time
-                zone and reminder time preference.
-              </p>
               <ActionReminderGroupForm
                 memberEvents={memberEvents}
                 users={users}
@@ -814,7 +845,9 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
                 userGroupsError={userGroupsError}
                 initialValues={{
                   memberActionEventId: selectedEventId,
-                  reminderGroup: null,
+                  reminderGroup: selectedPreset
+                    ? reminderPresets[selectedPreset]
+                    : null,
                   users: [],
                 }}
                 submitting={createSubmitting}

@@ -19,7 +19,7 @@ import {
   ReminderGroupTimingMode,
 } from 'src/actions/entities/reminder-group.entity';
 import {
-  CreateTODReminderGroupDto,
+  CreateReminderGroupDto,
   PreviewEmailHtmlDto,
   PreviewTextDto,
 } from 'src/actions/dto/action.dto';
@@ -229,6 +229,14 @@ export class ActionEventReminderService {
             )
             .orWhere(
               `(
+                  rg."timingMode" = :relativerange
+                  AND deadline."date" IS NOT NULL
+                  AND (deadline."date" - (rg."relative_range_start_seconds_from_deadline" * interval '1 second')) <= :we
+                  AND (deadline."date" - (rg."relative_range_end_seconds_from_deadline" * interval '1 second')) >= :ws
+                )`,
+            )
+            .orWhere(
+              `(
                  rg."timingMode" = :from
                  AND deadline."date" IS NOT NULL
                  AND (deadline."date" - (rg."sendAtSecondsFromDeadline" * interval '1 second'))
@@ -241,6 +249,7 @@ export class ActionEventReminderService {
         abs: ReminderGroupTimingMode.Absolute,
         range: ReminderGroupTimingMode.WithinRange,
         from: ReminderGroupTimingMode.FromDeadline,
+        relativerange: ReminderGroupTimingMode.WithinRelativeRange,
         launch: ReminderGroupTimingMode.EventLaunch,
         ws: windowStart,
         we: windowEnd,
@@ -325,7 +334,7 @@ export class ActionEventReminderService {
 
   async createReminderGroup(
     eventId: number,
-    dto: CreateTODReminderGroupDto,
+    dto: CreateReminderGroupDto,
   ): Promise<ReminderGroup> {
     const event = await this.eventRepository.findOneOrFail({
       where: { id: eventId },
@@ -364,7 +373,7 @@ export class ActionEventReminderService {
 
   async updateReminderGroup(
     groupId: number,
-    dto: CreateTODReminderGroupDto,
+    dto: CreateReminderGroupDto,
   ): Promise<ReminderGroup> {
     const group = await this.reminderGroupRepository.findOneOrFail({
       where: { id: groupId },

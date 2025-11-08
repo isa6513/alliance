@@ -40,7 +40,7 @@ import {
   CreateActionEventDto,
   CreateActionSuiteDto,
   CreateActionUpdateDto,
-  CreateTODReminderGroupDto,
+  CreateReminderGroupDto,
   DeclineActionDto,
   LatLonDto,
   OptOutActionDto,
@@ -380,7 +380,7 @@ export class ActionsController {
   @ApiOkResponse({ type: ReminderGroup })
   async updateReminderGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
-    @Body() body: CreateTODReminderGroupDto,
+    @Body() body: CreateReminderGroupDto,
   ): Promise<ReminderGroup> {
     return this.actionEventReminderService.updateReminderGroup(groupId, body);
   }
@@ -390,7 +390,7 @@ export class ActionsController {
   @ApiOkResponse({ type: ReminderGroup })
   async createReminderGroup(
     @Param('eventId', ParseIntPipe) eventId: number,
-    @Body() body: CreateTODReminderGroupDto,
+    @Body() body: CreateReminderGroupDto,
   ): Promise<ReminderGroup> {
     return this.actionEventReminderService.createReminderGroup(eventId, body);
   }
@@ -589,7 +589,7 @@ export class ActionsController {
   @ApiOkResponse({ type: PreviewNotificationPlan, isArray: true })
   async tentativePlansForGroup(
     @Param('eventId', ParseIntPipe) eventId: number,
-    @Body() body: CreateTODReminderGroupDto,
+    @Body() body: CreateReminderGroupDto,
   ): Promise<PreviewNotificationPlan[]> {
     return this.actionsService.tentativePlansForGroup(eventId, body);
   }

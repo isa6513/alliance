@@ -542,6 +542,58 @@ describe('ActionEventNotifWorker (e2e)', () => {
     expect(notifs[0].channel).toBe(NotificationChannel.Text);
   });
 
+  it('aligns relative range reminders with deadline offsets', async () => {
+    const now = Date.now();
+    const sendTime = new Date(now - 5 * 60 * 1000);
+
+    const user = await getPrimaryUser();
+    const preferredTime = Temporal.Instant.from(sendTime.toISOString())
+      .toZonedDateTimeISO('UTC')
+      .toPlainTime();
+
+    await userRepo.update(user.id, {
+      contractDateSigned: new Date(now - 7 * 24 * 60 * 60 * 1000),
+      timeZone: 'UTC',
+      preferredReminderTime: preferredTime,
+    });
+
+    const { action, memberEvent } = await createActionWithMemberEvent({
+      name: uniqueName('relative-range-action'),
+      eventDate: new Date(now - 6 * 60 * 60 * 1000),
+    });
+
+    const offsetSeconds = 2 * 60 * 60;
+
+    const deadlineEvent = await eventRepo.save(
+      eventRepo.create({
+        title: 'Relative deadline',
+        description: 'desc',
+        newStatus: ActionStatus.Resolution,
+        date: new Date(sendTime.getTime() + offsetSeconds * 1000),
+        showInTimeline: false,
+        action,
+      }),
+    );
+
+    const reminderGroup = await createReminderGroup(
+      memberEvent,
+      ReminderGroupTimingMode.WithinRelativeRange,
+      ReminderCohortType.AllUncompleted,
+      {
+        deadlineEvent,
+        relative_range_start_seconds_from_deadline: offsetSeconds,
+        relative_range_end_seconds_from_deadline: offsetSeconds,
+      },
+    );
+
+    await worker.dispatchDueNotifs();
+
+    const notifs = await fetchNotifsForGroup(reminderGroup);
+    expect(notifs).toHaveLength(1);
+    expect(notifs[0].user.id).toBe(user.id);
+    expect(notifs[0].channel).toBe(NotificationChannel.Text);
+  });
+
   it('sends suite reminders to users missing any suite actions', async () => {
     const now = Date.now();
     await userRepo.update(ctx.testUserId, { contractDateSigned: null });

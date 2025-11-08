@@ -22,6 +22,7 @@ export enum ReminderGroupTimingMode {
   Absolute = 'absolute',
   FromDeadline = 'from_deadline',
   WithinRange = 'within_range',
+  WithinRelativeRange = 'within_relative_range',
   EventLaunch = 'event_launch',
 }
 
@@ -36,10 +37,14 @@ export enum ReminderCohortType {
   `("timingMode" = 'absolute' AND "sendAtAbsolute" IS NOT NULL)
      OR ("timingMode" = 'from_deadline' AND "sendAtSecondsFromDeadline" IS NOT NULL)
      OR ("timingMode" = 'within_range' AND "send_range_start" IS NOT NULL AND "send_range_end" IS NOT NULL)
+     OR ("timingMode" = 'within_relative_range' AND "relative_range_start_seconds_from_deadline" IS NOT NULL AND "relative_range_end_seconds_from_deadline" IS NOT NULL)
      OR ("timingMode" = 'event_launch' AND "memberActionEventId" IS NOT NULL)`,
 )
 @Check(
   `send_range_start IS NULL OR send_range_end IS NULL OR send_range_start <= send_range_end`,
+)
+@Check(
+  `relative_range_start_seconds_from_deadline IS NULL OR relative_range_end_seconds_from_deadline IS NULL OR relative_range_start_seconds_from_deadline >= relative_range_end_seconds_from_deadline`,
 )
 export class ReminderGroup {
   @PrimaryGeneratedColumn()
@@ -150,6 +155,18 @@ export class ReminderGroup {
   @Type(() => Number)
   sendAtSecondsFromDeadline?: number;
 
+  @ApiPropertyOptional({ type: Number })
+  @Column({ type: 'integer', nullable: true })
+  @IsOptional()
+  @Type(() => Number)
+  relative_range_start_seconds_from_deadline?: number;
+
+  @ApiPropertyOptional({ type: Number })
+  @Column({ type: 'integer', nullable: true })
+  @IsOptional()
+  @Type(() => Number)
+  relative_range_end_seconds_from_deadline?: number;
+
   @ManyToOne(() => ActionEvent, { nullable: true, onDelete: 'SET NULL' })
   @ApiPropertyOptional({ type: () => ActionEvent })
   @Type(() => ActionEvent)
@@ -191,22 +208,27 @@ export function firstOccurrenceInRange(
   return null;
 }
 
+function offsetTimeFromSeconds(time: Date, seconds: number): Date {
+  return new Date(time.getTime() - seconds * 1000);
+}
+
 export function getGroupSendTimeForUser(
   user: User,
   group: ReminderGroup,
 ): Date | null {
+  const deadlineEvent = group.deadlineEvent;
   switch (group.timingMode) {
     case ReminderGroupTimingMode.Absolute:
       return group.sendAtAbsolute ?? new Date();
     case ReminderGroupTimingMode.FromDeadline:
-      const event = group.deadlineEvent;
-      if (!event) {
+      if (!deadlineEvent) {
         throw new Error(
           'Deadline event is required for from_deadline timing mode',
         );
       }
-      return new Date(
-        event.date.getTime() - group.sendAtSecondsFromDeadline! * 1000,
+      return offsetTimeFromSeconds(
+        deadlineEvent.date,
+        group.sendAtSecondsFromDeadline!,
       );
     case ReminderGroupTimingMode.WithinRange:
       return firstOccurrenceInRange(
@@ -216,6 +238,26 @@ export function getGroupSendTimeForUser(
           group.send_range_start!.getTime(),
         ),
         Temporal.Instant.fromEpochMilliseconds(group.send_range_end!.getTime()),
+      );
+    case ReminderGroupTimingMode.WithinRelativeRange:
+      if (!deadlineEvent) {
+        throw new Error(
+          'Deadline event is required for within_relative_range timing mode',
+        );
+      }
+      const start = offsetTimeFromSeconds(
+        deadlineEvent.date,
+        group.relative_range_start_seconds_from_deadline!,
+      );
+      const end = offsetTimeFromSeconds(
+        deadlineEvent.date,
+        group.relative_range_end_seconds_from_deadline!,
+      );
+      return firstOccurrenceInRange(
+        user.timeZone ?? 'America/Los_Angeles',
+        user.preferredReminderTime ?? Temporal.PlainTime.from('19:00:00'),
+        Temporal.Instant.fromEpochMilliseconds(start.getTime()),
+        Temporal.Instant.fromEpochMilliseconds(end.getTime()),
       );
     case ReminderGroupTimingMode.EventLaunch:
       return group.memberActionEvent.date;

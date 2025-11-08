@@ -490,7 +490,7 @@ export type ActionActivity = {
     outOfTime?: boolean;
 };
 
-export type ReminderGroupTimingMode = 'absolute' | 'from_deadline' | 'within_range' | 'event_launch';
+export type ReminderGroupTimingMode = 'absolute' | 'from_deadline' | 'within_range' | 'within_relative_range' | 'event_launch';
 
 export type ReminderCohortType = 'all_uncompleted' | 'group' | 'custom';
 
@@ -557,6 +557,8 @@ export type ReminderGroup = {
     send_range_end?: string;
     sendAtAbsolute?: string;
     sendAtSecondsFromDeadline?: number;
+    relative_range_start_seconds_from_deadline?: number;
+    relative_range_end_seconds_from_deadline?: number;
     deadlineEvent?: ActionEvent;
     allSent: boolean;
 };
@@ -960,7 +962,7 @@ export type CreateActionEventDto = {
     showInTimeline: boolean;
 };
 
-export type CreateTodReminderGroupDto = {
+export type CreateReminderGroupDto = {
     name: string;
     timingMode: ReminderGroupTimingMode;
     cohortType: ReminderCohortType;
@@ -971,6 +973,8 @@ export type CreateTodReminderGroupDto = {
     send_range_end?: string;
     sendAtAbsolute?: string;
     sendAtSecondsFromDeadline?: number;
+    relative_range_start_seconds_from_deadline?: number;
+    relative_range_end_seconds_from_deadline?: number;
     userIds?: Array<number>;
     userGroupId?: number;
     suiteId?: number;
@@ -2674,7 +2678,7 @@ export type ActionsAddEventResponses = {
 export type ActionsAddEventResponse = ActionsAddEventResponses[keyof ActionsAddEventResponses];
 
 export type ActionsUpdateReminderGroupData = {
-    body: CreateTodReminderGroupDto;
+    body: CreateReminderGroupDto;
     path: {
         groupId: number;
     };
@@ -2689,7 +2693,7 @@ export type ActionsUpdateReminderGroupResponses = {
 export type ActionsUpdateReminderGroupResponse = ActionsUpdateReminderGroupResponses[keyof ActionsUpdateReminderGroupResponses];
 
 export type ActionsCreateReminderGroupData = {
-    body: CreateTodReminderGroupDto;
+    body: CreateReminderGroupDto;
     path: {
         eventId: number;
     };
@@ -3001,7 +3005,7 @@ export type ActionsDeleteSuiteEventResponses = {
 export type ActionsDeleteSuiteEventResponse = ActionsDeleteSuiteEventResponses[keyof ActionsDeleteSuiteEventResponses];
 
 export type ActionsTentativePlansForGroupData = {
-    body: CreateTodReminderGroupDto;
+    body: CreateReminderGroupDto;
     path: {
         eventId: number;
     };

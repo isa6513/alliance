@@ -29,7 +29,7 @@ import { ActionUpdate } from '../entities/action-update.entity';
 import { ReminderGroup } from '../entities/reminder-group.entity';
 import { ActionSuite } from '../entities/action-suite.entity';
 
-export class CreateTODReminderGroupDto extends PickType(ReminderGroup, [
+export class CreateReminderGroupDto extends PickType(ReminderGroup, [
   'name',
   'emailMessage',
   'cohortType',
@@ -40,6 +40,8 @@ export class CreateTODReminderGroupDto extends PickType(ReminderGroup, [
   'sendAtSecondsFromDeadline',
   'send_range_start',
   'send_range_end',
+  'relative_range_start_seconds_from_deadline',
+  'relative_range_end_seconds_from_deadline',
 ]) {
   @ApiPropertyOptional({ type: Number, isArray: true })
   @IsOptional()
@@ -54,7 +56,7 @@ export class CreateTODReminderGroupDto extends PickType(ReminderGroup, [
   suiteId?: number;
 }
 
-export class PreviewEmailHtmlDto extends PickType(CreateTODReminderGroupDto, [
+export class PreviewEmailHtmlDto extends PickType(CreateReminderGroupDto, [
   'emailMessage',
   'emailSubject',
 ]) {
@@ -64,7 +66,7 @@ export class PreviewEmailHtmlDto extends PickType(CreateTODReminderGroupDto, [
   taskCount: number;
 }
 
-export class PreviewTextDto extends PickType(CreateTODReminderGroupDto, [
+export class PreviewTextDto extends PickType(CreateReminderGroupDto, [
   'textMessage',
 ]) {
   @ApiProperty({ type: Number })

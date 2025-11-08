@@ -4,9 +4,9 @@ import {
 } from "@alliance/shared/client";
 import Card from "@alliance/shared/ui/Card";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import TextareaWithHighlights from "./TextareaWithHighlights";
+import TextareaWithHighlights from "../TextareaWithHighlights";
 import { ActionEventDto } from "@alliance/shared/client";
-import { UserSelectUser } from "./UserSelect";
+import { UserSelectUser } from "../UserSelect";
 import { GroupDto } from "@alliance/shared/client";
 import { ActionEventNotifDto } from "@alliance/shared/client";
 import ActionReminderGroupForm, {

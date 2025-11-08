@@ -33,7 +33,7 @@ import {
   CreateActionEventDto,
   CreateActionSuiteDto,
   CreateActionUpdateDto,
-  CreateTODReminderGroupDto,
+  CreateReminderGroupDto,
   LatLonDto,
   UpdateActionActivityDto,
   UpdateActionDto,
@@ -1171,7 +1171,7 @@ export class ActionsService {
 
   async tentativePlansForGroup(
     eventId: number,
-    body: CreateTODReminderGroupDto,
+    body: CreateReminderGroupDto,
   ): Promise<PreviewNotificationPlan[]> {
     const event = await this.actionEventRepository.findOneOrFail({
       where: { id: eventId },
