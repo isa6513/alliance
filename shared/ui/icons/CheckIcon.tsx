@@ -12,7 +12,7 @@ const CheckIcon = ({
   return (
     <svg
       viewBox="0 0 88 88"
-      className={`${sizeClass[size]}`}
+      className={`shrink-0 ${sizeClass[size]}`}
       fill="var(--color-green)"
       aria-label="Done"
       xmlns="http://www.w3.org/2000/svg"
