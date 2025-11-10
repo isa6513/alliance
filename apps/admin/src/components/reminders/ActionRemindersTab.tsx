@@ -399,7 +399,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       }
       return {
         primary: "Relative schedule",
-        secondary: "Waiting for deadline details",
+        secondary: "Error: no deadline event found to schedule from",
         pastTense: "Relative schedule",
       };
     }
@@ -435,7 +435,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       if (startSeconds === null || endSeconds === null || !deadlineDate) {
         return {
           primary: "Relative personalized window",
-          secondary: "Waiting for deadline details",
+          secondary: "Error: no deadline event found to schedule from",
           pastTense: "Relative personalized window",
         };
       }
