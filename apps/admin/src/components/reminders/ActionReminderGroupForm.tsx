@@ -1094,6 +1094,11 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
                 {new Date(firstTentativePlan.scheduledFor).toLocaleString()}
               </span>
             )}
+            {firstTentativePlan &&
+              Date.now() >
+                new Date(firstTentativePlan.scheduledFor).getTime() && (
+                <span className="text-red-500"> (immediately)</span>
+              )}
           </p>
         )}
         {onCancel && (

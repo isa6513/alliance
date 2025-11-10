@@ -802,7 +802,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
                             setSelectedPreset(preset);
                             setSelectingPreset(false);
                           }}
-                          className="w-full rounded-none !bg-transparent hover:!bg-zinc-200/60"
+                          className="w-full rounded-none !bg-transparent hover:!bg-zinc-200/60 text-nowrap justify-start"
                         >
                           {preset}
                         </Button>

@@ -167,9 +167,8 @@ export class ActionEventReminderService {
     );
 
     for (const group of groups) {
-      const withDeadline = await this.attachDeadlineEvent(group);
       const groupPlans = await this.getPlansForGroup(
-        withDeadline,
+        group,
         windowStart,
         windowEnd,
       );
@@ -306,6 +305,7 @@ export class ActionEventReminderService {
       where: { id: groupId },
       relations: [
         'memberActionEvent',
+        'deadlineEvent',
         'memberActionEvent.action',
         'memberActionEvent.action.participatingGroups',
         'users',
@@ -314,7 +314,7 @@ export class ActionEventReminderService {
     });
 
     const plans = await this.getPlansForGroup(
-      await this.attachDeadlineEvent(group),
+      group,
       new Date(),
       new Date(Date.now() + 28 * 24 * 60 * 60 * 1000),
     );
@@ -338,6 +338,7 @@ export class ActionEventReminderService {
   ): Promise<ReminderGroup> {
     const event = await this.eventRepository.findOneOrFail({
       where: { id: eventId },
+      relations: ['action'],
     });
     if (event.newStatus !== ActionStatus.MemberAction) {
       throw new BadRequestException('Event is not a member action event');
@@ -360,15 +361,17 @@ export class ActionEventReminderService {
       });
     }
 
-    return this.reminderGroupRepository.save(
-      await this.reminderGroupRepository.create({
-        ...dto,
-        memberActionEvent: event,
-        actionSuite,
-        userGroup,
-        users,
-      }),
-    );
+    const group = await this.reminderGroupRepository.create({
+      ...dto,
+      memberActionEvent: event,
+      actionSuite,
+      userGroup,
+      users,
+    });
+
+    const withDeadline = await this.attachDeadlineEvent(group);
+
+    return this.reminderGroupRepository.save(withDeadline);
   }
 
   async updateReminderGroup(
@@ -377,11 +380,14 @@ export class ActionEventReminderService {
   ): Promise<ReminderGroup> {
     const group = await this.reminderGroupRepository.findOneOrFail({
       where: { id: groupId },
+      relations: ['memberActionEvent', 'memberActionEvent.action'],
     });
 
     Object.assign(group, dto);
 
-    return this.reminderGroupRepository.save(group);
+    const withDeadline = await this.attachDeadlineEvent(group);
+
+    return this.reminderGroupRepository.save(withDeadline);
   }
 
   async deleteReminderGroup(groupId: number): Promise<void> {

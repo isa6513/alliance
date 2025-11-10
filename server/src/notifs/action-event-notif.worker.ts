@@ -24,19 +24,6 @@ import { NotificationChannel } from './notif-utils';
 import { withPgAdvisoryLock } from './lock-utils';
 import { ActionsService } from 'src/actions/actions.service';
 
-export interface ActionEventNotificationContext {
-  event: ActionEvent;
-  deadlineEvent?: ActionEvent;
-  type: ActionEventNotifType;
-  user: User;
-  action: Action;
-  cid: string;
-  isSecondMiss?: boolean;
-  customEmailMessage?: string;
-  customTextMessage?: string;
-  customEmailSubject?: string;
-}
-
 const PROCESS_ONE_LOCK_KEY1 = 0xa11a;
 const PROCESS_ONE_LOCK_KEY2 = 0xce01;
 

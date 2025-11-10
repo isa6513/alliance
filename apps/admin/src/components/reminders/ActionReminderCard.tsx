@@ -115,13 +115,25 @@ const ActionReminderCard = ({
           <div className="flex flex-col gap-1">
             <div className="flex flex-row gap-2 items-center">
               {relativeSendLabel && (
-                <p className="text-sm text-blue-500">{relativeSendLabel}</p>
+                <p
+                  className={`text-sm ${
+                    isFinished ? "text-gray-500" : "text-blue-500"
+                  }`}
+                >
+                  {relativeSendLabel}
+                </p>
               )}
               <p
                 className={`font-semibold ${isFinished ? "text-gray-500" : ""}`}
               >
                 {group.name}
               </p>
+              <Link
+                to={`/database?table=reminder_group&id=${group.id}`}
+                target="_blank"
+              >
+                <DatabaseIcon size="small" fill="#111" />
+              </Link>
               {isFinished ? (
                 <p className="text-green font-semibold">
                   Sent {sentReminders?.length} reminders{" "}
