@@ -13,7 +13,7 @@ export default function RenderDisplayBlock({ block }: Props) {
       return React.createElement(
         `h${block.level || 2}`,
         {
-          className: `font-medium text-zinc-900 ${
+          className: `!font-semibold text-zinc-900 ${
             (block.level || 2) === 1
               ? "text-3xl"
               : (block.level || 2) === 2
