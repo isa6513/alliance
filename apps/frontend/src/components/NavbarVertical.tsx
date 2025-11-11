@@ -233,13 +233,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                             <p>{item.page}</p>
                             {item.page === NavbarPage.Notifications &&
                               unreadCount > 0 && (
-                                <div className=" text-white bg-red-500 rounded-md w-5 h-5 flex gap-x-1 justify-center items-center">
-                                  {/* <img
-                                    src={notifBell}
-                                    alt="Notifications"
-                                    className="w-3 h-3"
-                                    style={{ filter: "invert(1)" }}
-                                  /> */}
+                                <div className=" text-white bg-red-500 rounded-md w-5 h-5 flex justify-center items-center">
                                   <p className="font-semibold text-xs">
                                     {unreadCount}
                                   </p>
@@ -247,7 +241,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                               )}
                             {item.page === NavbarPage.Tasks &&
                               todoActions > 0 && (
-                                <div className=" text-white bg-red-500 rounded-md w-5 h-5 flex justify-center items-center -mr-1">
+                                <div className=" text-white bg-red-500 rounded-md w-5 h-5 flex justify-center items-center">
                                   <p className="font-semibold text-xs">
                                     {todoActions}
                                   </p>
