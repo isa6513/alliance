@@ -1,8 +1,14 @@
 import { ActionDto, actionsFindAllWithDrafts } from "@alliance/shared/client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { Link, Outlet, useNavigate } from "react-router";
 import { useAuth } from "./lib/AuthContext";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import SidebarIcon from "@alliance/shared/ui/icons/SidebarIcon";
 
 const Sidebar: React.FC = () => {
   const [actions, setActions] = useState<ActionDto[]>([]);
@@ -10,6 +16,8 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
 
   const { logout, user, loading: authLoading } = useAuth();
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
 
   // Only check admin status after loading is complete and we have a user
   useEffect(() => {
@@ -45,6 +53,16 @@ const Sidebar: React.FC = () => {
     },
     [navigate]
   );
+
+  const [sidebarWidth, setSidebarWidth] = useState<number>(320);
+
+  useLayoutEffect(() => {
+    if (isSidebarOpen) {
+      setSidebarWidth(320);
+    } else {
+      setSidebarWidth(64);
+    }
+  }, [isSidebarOpen]);
 
   const filteredActions = actions.filter((action) => !action.archived);
 
@@ -95,8 +113,14 @@ const Sidebar: React.FC = () => {
 
   return (
     <div className="flex flex-row min-h-screen h-fitcontent flex-nowrap bg-pagebg bg-[#fcfcfc]">
-      <div className="overflow-y-auto max-h-screen overflow-x-hidden flex flex-col justify-between bg-[#f4f4f4]">
-        <div className="flex flex-col gap-y-3 w-[320px] min-w-[320px] sticky p-5 py-6">
+      <div
+        className={`overflow-y-auto max-h-screen overflow-x-hidden flex flex-col justify-between bg-[#f4f4f4] relative transition-all duration-100 w-[${sidebarWidth}px]`}
+      >
+        <div
+          className={`flex flex-col gap-y-3 sticky p-5 py-6 w-[320px] ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
           <h1 className="text-black text-[14pt] font-bold pb-0">
             Alliance Admin
           </h1>
@@ -184,9 +208,20 @@ const Sidebar: React.FC = () => {
             Log out
           </Button>
         </div>
+        <div
+          className="absolute top-7 right-6 cursor-pointer"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        >
+          <SidebarIcon size="large" fill="black" />
+        </div>
       </div>
       <div className="flex-1 overflow-y-scroll max-h-screen">
-        <div className="flex flex-col gap-y-5 min-h-0 max-w-[calc(100vw-320px)] flex-1 h-fit">
+        <div
+          className="flex flex-col gap-y-5 min-h-0 flex-1 h-fit"
+          style={{
+            maxWidth: `calc(100vw - ${sidebarWidth}px)`,
+          }}
+        >
           <Outlet />
         </div>
       </div>
