@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
 import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
+import { UserDto } from '../user.dto';
 
 export enum UserActionRelationStatus {
   None = 'none',
@@ -56,4 +57,9 @@ export class UserActionRelationsResponseDto {
 
   @ApiProperty({ type: () => UserActionRelationsForUserDto, isArray: true })
   users: UserActionRelationsForUserDto[];
+}
+
+export class CommunityUserInfoDto extends UserActionRelationsResponseDto {
+  @ApiProperty({ type: () => UserDto, isArray: true })
+  members: UserDto[];
 }

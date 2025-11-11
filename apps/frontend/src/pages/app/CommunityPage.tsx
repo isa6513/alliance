@@ -1,17 +1,28 @@
-import { CommunityDto, userGetMyCommunity } from "@alliance/shared/client";
+import {
+  CommunityDto,
+  UserDto,
+  userGetCommunityMemberInfo,
+  userGetMyCommunity,
+} from "@alliance/shared/client";
 import List from "@alliance/shared/ui/List";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Spinner from "../../components/Spinner";
-import UserDisplayName from "../../components/UserDisplayName";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card from "@alliance/shared/ui/Card";
+import CommunityMemberCard from "../../components/CommunityMemberCard";
+import { useAuth } from "../../lib/AuthContext";
 
 type Tab = "members" | "about";
 
 const CommunityPage = () => {
   const [community, setCommunity] = useState<CommunityDto | null>(null);
+  const [memberInfo, setMemberInfo] = useState<Record<number, UserDto> | null>(
+    null
+  );
+
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     userGetMyCommunity().then((resp) => {
@@ -21,6 +32,25 @@ const CommunityPage = () => {
       setLoading(false);
     });
   }, []);
+
+  const amLeader = useMemo(() => {
+    return community?.leaders.some((leader) => leader.id === user?.id);
+  }, [community, user]);
+
+  useEffect(() => {
+    if (amLeader) {
+      userGetCommunityMemberInfo().then((resp) => {
+        if (resp.data) {
+          setMemberInfo(
+            resp.data.reduce((acc, user) => {
+              acc[user.id] = user;
+              return acc;
+            }, {} as Record<number, UserDto>)
+          );
+        }
+      });
+    }
+  }, [amLeader]);
 
   const [tab, setTab] = useState<Tab>("members");
   const tabs: Tab[] = ["members", "about"];
@@ -65,27 +95,22 @@ const CommunityPage = () => {
           <p className="font-semibold">Leader{leaders.length > 1 ? "s" : ""}</p>
           <List>
             {leaders.map((user) => (
-              <div
+              <CommunityMemberCard
                 key={user.id}
-                className="p-4 flex flex-row items-center gap-x-2"
-              >
-                <UserDisplayName staff={user.staff} underline={false}>
-                  {user.displayName}
-                </UserDisplayName>
-              </div>
+                profile={user}
+                actionRelations={[]}
+              />
             ))}
           </List>
           <p className="font-semibold">Members</p>
           <List>
             {members.map((user) => (
-              <div
+              <CommunityMemberCard
                 key={user.id}
-                className="p-4 flex flex-row items-center gap-x-2"
-              >
-                <UserDisplayName staff={user.staff} underline={false}>
-                  {user.displayName}
-                </UserDisplayName>
-              </div>
+                profile={user}
+                user={memberInfo?.[user.id]}
+                actionRelations={[]}
+              />
             ))}
           </List>
         </div>

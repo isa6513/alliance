@@ -33,6 +33,7 @@ import {
   ProfileDto,
   ProfileDtoWithFriends,
   UpdateProfileDto,
+  UserDto,
   userToDto,
 } from './user.dto';
 import { User } from './entities/user.entity';
@@ -540,5 +541,12 @@ export class UserController {
       return null;
     }
     return new CommunityDto(community);
+  }
+
+  @Get('communityMemberInfo')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: UserDto, isArray: true })
+  async getCommunityMemberInfo(@Request() req: JwtRequest) {
+    return this.userService.getMemberInfo(req.user.sub);
   }
 }

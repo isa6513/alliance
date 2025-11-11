@@ -10,7 +10,7 @@ import { UserService } from '../../user/user.service';
 import { JwtPayload } from './auth.guard';
 
 @Injectable()
-export class AdminGuard implements CanActivate {
+export class CommunityLeaderGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private userService: UserService,
@@ -32,14 +32,10 @@ export class AdminGuard implements CanActivate {
       });
       request['user'] = payload;
 
-      const user = await this.userService.findOneByEmail(payload.email);
+      const isLeader = await this.userService.isCommunityLeader(payload.email);
 
-      if (!user) {
-        console.log('admin guard failed');
-        throw new UnauthorizedException();
-      }
-      if (!user.admin) {
-        console.log('user is not admin');
+      if (!isLeader) {
+        console.log('user is not leader');
         throw new UnauthorizedException();
       }
       return true;

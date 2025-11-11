@@ -44,8 +44,7 @@ export class AuthOptionalGuard implements CanActivate {
         secret: process.env.JWT_SECRET,
       });
       request['user'] = payload;
-    } catch (error) {
-      console.log('jwt verification error: ', error);
+    } catch {
       throw new UnauthorizedException();
     }
     return true;

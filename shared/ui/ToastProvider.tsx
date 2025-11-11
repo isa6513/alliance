@@ -251,7 +251,7 @@ const ConfirmToastItem: FC<ConfirmToastItemProps> = ({ toast, onConfirm }) => {
     confirmLabelTone === "delete"
       ? "bg-red-600 text-white hover:bg-red-700"
       : confirmLabelTone === "create"
-      ? "bg-emerald-600 text-white hover:bg-emerald-700"
+      ? "bg-green text-white hover:bg-green-700"
       : "bg-zinc-900 text-white hover:bg-zinc-800";
   const popoverConfirmTextClass =
     confirmLabelTone === "delete"

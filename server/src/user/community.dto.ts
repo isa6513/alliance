@@ -1,9 +1,4 @@
-import {
-  ApiProperty,
-  OmitType,
-  PartialType,
-  PickType,
-} from '@nestjs/swagger';
+import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsNumber } from 'class-validator';
 import { Community } from './entities/community.entity';

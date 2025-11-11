@@ -2283,6 +2283,19 @@ export type UserGetMyCommunityResponses = {
 
 export type UserGetMyCommunityResponse = UserGetMyCommunityResponses[keyof UserGetMyCommunityResponses];
 
+export type UserGetCommunityMemberInfoData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/communityMemberInfo';
+};
+
+export type UserGetCommunityMemberInfoResponses = {
+    200: Array<UserDto>;
+};
+
+export type UserGetCommunityMemberInfoResponse = UserGetCommunityMemberInfoResponses[keyof UserGetCommunityMemberInfoResponses];
+
 export type ImagesGetImageData = {
     body?: never;
     path: {

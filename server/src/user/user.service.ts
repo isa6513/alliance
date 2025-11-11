@@ -27,6 +27,7 @@ import {
   OnboardingDto,
   ProfileDto,
   UpdateProfileDto,
+  UserDto,
 } from './user.dto';
 import { User } from './entities/user.entity';
 import { profileUrl } from 'src/search/approutes';
@@ -35,6 +36,7 @@ import { CreateGroupDto } from './group.dto';
 import { Community } from './entities/community.entity';
 import { CreateCommunityDto, UpdateCommunityDto } from './community.dto';
 import {
+  CommunityUserInfoDto,
   UserActionRelationDetailDto,
   UserActionRelationsForUserDto,
   UserActionRelationsResponseDto,
@@ -188,14 +190,25 @@ export class UserService {
   }
 
   async getUserActionRelations(): Promise<UserActionRelationsResponseDto> {
-    const actions = await this.actionRepository.find({ relations: ['events'] });
+    const users = await this.userRepository.find({
+      select: ['id'],
+    });
+    return this.getActionRelationsForUsers(users.map((user) => user.id));
+  }
 
-    const activeStatuses = new Set<ActionStatus>([
-      ActionStatus.GatheringCommitments,
-      ActionStatus.OfficeAction,
-      ActionStatus.MemberAction,
-      ActionStatus.Resolution,
-    ]);
+  async getActionRelationsForUsers(
+    userIds: number[],
+  ): Promise<UserActionRelationsResponseDto> {
+    const actions = (
+      await this.actionRepository.find({
+        relations: ['events'],
+      })
+    ).filter(
+      (action) =>
+        action.status !== ActionStatus.Draft &&
+        action.status !== ActionStatus.Completed &&
+        !action.everyoneShouldComplete,
+    );
 
     const actionsSorted = actions.sort((a, b) => {
       const aFirstEvent = (a.events ?? []).reduce(
@@ -215,18 +228,10 @@ export class UserService {
       );
     });
 
-    const relevantActions = actionsSorted
-      .map((action) => ({ action, status: action.status }))
-      .filter(({ status }) => activeStatuses.has(status));
-
-    if (relevantActions.length === 0) {
-      return { actions: [], users: [] };
-    }
-
     const now = new Date();
     const memberActionPhaseEnded = new Map<number, boolean>();
 
-    for (const { action } of relevantActions) {
+    for (const action of actionsSorted) {
       const pastEvents = (action.events ?? [])
         .filter((event) => event.date <= now)
         .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -239,11 +244,11 @@ export class UserService {
       );
     }
 
-    const actionSummaries: UserActionSummaryDto[] = relevantActions.map(
-      ({ action, status }) => ({
+    const actionSummaries: UserActionSummaryDto[] = actionsSorted.map(
+      (action) => ({
         id: action.id,
         name: action.name,
-        status,
+        status: action.status,
       }),
     );
 
@@ -251,7 +256,7 @@ export class UserService {
     const actionOrder = new Map(actionIds.map((id, index) => [id, index]));
 
     const activities = await this.actionActivityRepository.find({
-      where: { actionId: In(actionIds) },
+      where: { actionId: In(actionIds), userId: In(userIds) },
       select: ['actionId', 'userId', 'type', 'createdAt'],
       order: { createdAt: 'ASC' },
     });
@@ -395,6 +400,14 @@ export class UserService {
   async isAdmin(id: number): Promise<boolean> {
     const user = await this.findOneOrFail(id);
     return user.admin;
+  }
+
+  async isCommunityLeader(email: string): Promise<boolean> {
+    const user = await this.findOneByEmail(email, ['leaderOf']);
+    if (!user) {
+      return false;
+    }
+    return user.leaderOf?.length > 0;
   }
 
   async onboarding(userId: number, body: OnboardingDto): Promise<User> {
@@ -900,6 +913,24 @@ export class UserService {
     }
 
     return this.findCommunityOrFail(communityId, ['users', 'leaders']);
+  }
+
+  async getMemberInfo(userId: number): Promise<CommunityUserInfoDto> {
+    const user = await this.findOneOrFail(userId, ['communities']);
+    const communityId =
+      user.communities.length > 0 ? user.communities[0].id : null;
+    if (!communityId) {
+      throw new NotFoundException('User is not a member of any community.');
+    }
+    const community = await this.findCommunityOrFail(communityId, ['users']);
+    const userIds = community.users!.map((user) => user.id);
+    const actionRelations = await this.getActionRelationsForUsers(userIds);
+
+    return {
+      members: community.users!.map((user) => new UserDto(user)),
+      actions: actionRelations.actions,
+      users: actionRelations.users,
+    };
   }
 
   async createGroup(body: CreateGroupDto): Promise<Group> {
