@@ -9,9 +9,14 @@ export interface TaskTimeInfoProps {
   action: ActionDto;
   nextEvent: ActionEventDto | null;
   lastEvent: ActionEventDto | null;
+  absoluteDeadline?: boolean;
 }
 
-const TaskTimeInfo = ({ action, nextEvent }: TaskTimeInfoProps) => {
+const TaskTimeInfo = ({
+  action,
+  nextEvent,
+  absoluteDeadline = false,
+}: TaskTimeInfoProps) => {
   const deadlineColor =
     !!nextEvent && new Date(nextEvent.date).getTime() - Date.now() < 172800000 // 2 days
       ? "var(--color-red-600)"
@@ -28,17 +33,24 @@ const TaskTimeInfo = ({ action, nextEvent }: TaskTimeInfoProps) => {
         </div>
       )}
       {!!nextEvent && (
-        <div className="flex flex-row items-center gap-x-1.5 text-base group">
-          <DeadlineIcon fill={"#000"} />
-          <p className="text-black">
-            {format(new Date(nextEvent.date), "MMM d h:mm a")}
-          </p>
-          <p style={{ color: deadlineColor }} className="ml-3">
-            {`${formatTime(new Date(nextEvent.date), {
-              addSuffix: false,
-            })}`}{" "}
-            left
-          </p>
+        <div className="flex flex-row items-center gap-x-1.5 text-base group text-zinc-500">
+          <DeadlineIcon fill={"#71717b"} />
+          {absoluteDeadline ? (
+            <p className="text-zinc-500">
+              Due {format(new Date(nextEvent.date), "MMMM d h:mm a")} (
+              {`${formatTime(new Date(nextEvent.date), {
+                addSuffix: false,
+              })}`}{" "}
+              left)
+            </p>
+          ) : (
+            <p style={{ color: deadlineColor }}>
+              {`${formatTime(new Date(nextEvent.date), {
+                addSuffix: false,
+              })}`}{" "}
+              left
+            </p>
+          )}
           <div className="group-hover:block"></div>
         </div>
       )}

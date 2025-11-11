@@ -49,6 +49,7 @@ const ActionContents = () => {
               action={action}
               nextEvent={nextEvent}
               lastEvent={lastEvent}
+              absoluteDeadline={true}
             />
           </div>
 
