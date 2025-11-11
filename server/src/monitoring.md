@@ -100,6 +100,22 @@ Now `docker ps` should show both prometheus and grafana as running
 
 At this point you should be able to go to [monitoring-ec2-ip]:3001 and see grafana running
 
+## debugging data sources
+
+You can access the prometheus ui at [monitoring-ec2-ip]:9090, but only after adding the following to `monitoring.tf (resource "aws_security_group" "monitoring_sg")`
+
+```
+ingress {
+    description = "prometheus (temp)"
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+```
+
+This allows totally unsecured access to the server monitoring data, so be sure to remove the ingress after.
+
 ## http stuff
 
 We currently have this visible at `metrics.worldalliance.org`. Setting this up basically requires:
@@ -113,6 +129,8 @@ We currently have this visible at `metrics.worldalliance.org`. Setting this up b
 - Note `ingress` blocks in monitoring.tf for 80 and 443 to allow this.
 
 ### Node-exporter setup
+
+We run this on each ec2 server to export data about the instance to prometheus on :9100s
 
 ```
 # Get the latest node_exporter (change version if needed)
@@ -146,3 +164,5 @@ sudo systemctl enable node_exporter
 sudo systemctl start node_exporter
 sudo systemctl status node_exporter
 ```
+
+For node-exporter, we need to update `prometheus.yml` on the monitoring instance with the ips (local to the network) of all the instances we want to fetch node-exporter data from.

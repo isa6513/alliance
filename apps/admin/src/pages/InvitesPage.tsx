@@ -31,7 +31,8 @@ const InvitesPage = () => {
       body,
     });
     if (response.data) {
-      setInvites([...invites, response.data]);
+      setInvites([response.data, ...invites]);
+      setSelectedUser(null);
     }
   };
 
@@ -45,7 +46,14 @@ const InvitesPage = () => {
 
   useEffect(() => {
     userGetOnetimeInvites().then((response) => {
-      setInvites(response.data ?? []);
+      if (response.data) {
+        setInvites(
+          response.data.sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
+        );
+      }
     });
   }, []);
 
@@ -56,7 +64,7 @@ const InvitesPage = () => {
 
   return (
     <div className="flex flex-row w-full items-center justify-center pt-36">
-      <div className="flex flex-col">
+      <div className="flex flex-col pb-10">
         <Card className="w-200">
           <p className="font-bold">Create an invite</p>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
