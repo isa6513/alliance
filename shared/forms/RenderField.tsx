@@ -804,7 +804,7 @@ export function TimeInputField({
                 key={t}
                 type="button"
                 onClick={() => handleSelectTime(t)}
-                className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 ${
+                className={`w-full text-left px-3 py-2 bg-white text-sm hover:bg-zinc-50 ${
                   t === inputValue ? "bg-zinc-50 font-medium" : ""
                 }`}
               >
