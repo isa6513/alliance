@@ -501,6 +501,10 @@ jobs:
             mkdir -p ~/nest-backend
             unzip -o ~/nest-build.zip -d ~/nest-backend
 
+            if [ -d ~/nest-backend-deploy-backup/node_modules ]; then
+              cp -a ~/nest-backend-deploy-backup/node_modules ~/nest-backend/
+            fi
+
             cd ~/nest-backend
             npm install --omit=dev
 
