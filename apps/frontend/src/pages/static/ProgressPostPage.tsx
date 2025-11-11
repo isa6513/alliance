@@ -48,11 +48,11 @@ const ProgressPostPage: React.FC = () => {
             {frontmatter?.title}
           </h2>
           <div className="flex flex-col gap-y-0.5 text-lg  mb-4">
-            <p className="">
+            <p className="text-zinc-600">
               By{" "}
               {frontmatter?.authors.map((author: string) => author).join(", ")}
             </p>
-            <p className="">
+            <p className="text-zinc-600">
               {new Date(frontmatter?.date).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
