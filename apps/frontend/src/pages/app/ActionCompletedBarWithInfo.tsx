@@ -28,7 +28,7 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
   textColor = "zinc-500",
 }: ActionCompletedBarWithInfoProps) => {
   const value =
-    action.status === "member_action"
+    action.status === "gathering_commitments"
       ? action.usersCompleted
       : action.usersJoined;
 
