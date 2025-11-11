@@ -116,7 +116,9 @@ const HomePage = () => {
   const mainContent = () => {
     if (actions === null) {
       return loading ? (
-        <Spinner size="large" />
+        <div className="flex justify-center items-center h-screen">
+          <Spinner size="large" />
+        </div>
       ) : (
         <BasicErrorMessage>Error loading actions</BasicErrorMessage>
       );

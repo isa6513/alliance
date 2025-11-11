@@ -181,15 +181,15 @@ export function HydrateFallback() {
   );
 }
 
-const authOnlyRoutes = [
-  "/tasks",
-  "/settings",
-  "/profile",
-  "/onboarding",
-  "/members",
-];
+// const authOnlyRoutes = [
+//   "/tasks",
+//   "/settings",
+//   "/profile",
+//   "/onboarding",
+//   "/members",
+// ];
 
-export function isAuthOnly(path: string) {
+export function isAuthOnly() {
   //   if (authOnlyRoutes.includes(path)) {
   //     return true;
   //   }
@@ -272,7 +272,7 @@ export default function AppLayout() {
       if (
         !window.location.pathname.includes("/login") &&
         !isNavigating &&
-        (isAuthOnly(window.location.pathname) || wasLoggedIn)
+        (isAuthOnly() || wasLoggedIn)
       ) {
         console.log("unauthorized, logging out");
         logout();
