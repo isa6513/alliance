@@ -23,6 +23,9 @@ export type RenderFieldProps = {
   user?: Omit<UserDto, "email">;
 };
 
+const sharedInputClasses =
+  "w-full px-3 py-2 rounded-md focus:outline-none disabled:!bg-transparent";
+
 export function RenderLabel({
   field,
   error,
@@ -106,15 +109,12 @@ export function RenderField({
             required={field.required}
             disabled={disabled}
             aria-invalid={hasError}
-            className={composeClassName(
-              "w-full px-3 py-2 rounded focus:outline-none",
-              {
-                normal:
-                  "border border-zinc-300 focus:ring-1 focus:ring-green focus:border-transparent",
-                error:
-                  "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent",
-              }
-            )}
+            className={composeClassName(sharedInputClasses, {
+              normal:
+                "border border-zinc-300 focus:ring-1 focus:ring-green focus:border-transparent",
+              error:
+                "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent",
+            })}
             placeholder={field.placeholder}
           />
           {renderValidationMessage()}
@@ -146,7 +146,7 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none resize-none overflow-hidden bg-white"
+              sharedInputClasses + " resize-none overflow-hidden"
             )}
             placeholder={field.placeholder}
           />
@@ -170,9 +170,7 @@ export function RenderField({
             required={field.required}
             disabled={disabled}
             aria-invalid={hasError}
-            className={composeClassName(
-              "w-full px-3 py-2 rounded focus:outline-none"
-            )}
+            className={composeClassName(sharedInputClasses)}
             placeholder="Enter email address..."
           />
           {renderValidationMessage()}
@@ -199,9 +197,7 @@ export function RenderField({
             disabled={disabled}
             pattern={field.pattern}
             aria-invalid={hasError}
-            className={composeClassName(
-              "w-full px-3 py-2 rounded focus:outline-none"
-            )}
+            className={composeClassName(sharedInputClasses)}
             placeholder={field.placeholder || "Enter phone number"}
           />
           {renderValidationMessage()}
@@ -233,9 +229,7 @@ export function RenderField({
             max={field.max}
             step={field.step}
             aria-invalid={hasError}
-            className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none bg-white"
-            )}
+            className={composeClassName(sharedInputClasses)}
           />
           {renderValidationMessage()}
           {field.min !== undefined || field.max !== undefined ? (
@@ -339,7 +333,8 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none has-[option.placeholder:checked]:text-zinc-400"
+              sharedInputClasses +
+                " has-[option.placeholder:checked]:text-zinc-400"
             )}
           >
             <option value="" className="placeholder" disabled>
@@ -446,9 +441,7 @@ export function RenderField({
             required={field.required}
             disabled={disabled}
             aria-invalid={hasError}
-            className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none bg-white"
-            )}
+            className={composeClassName(sharedInputClasses)}
           />
           {renderValidationMessage()}
         </div>
@@ -476,7 +469,8 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none has-[option.placeholder:checked]:text-gray-400"
+              sharedInputClasses +
+                " has-[option.placeholder:checked]:text-gray-400"
             )}
           >
             {/* https://en.wikipedia.org/wiki/List_of_tz_database_time_zones */}
@@ -611,7 +605,8 @@ export function RenderField({
               disabled={disabled || isUploading}
               aria-invalid={hasError}
               className={composeClassName(
-                "max-w-full flex-1 px-3 py-2 rounded-md focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                sharedInputClasses +
+                  " max-w-full flex-1 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50 disabled:pointer-events-none"
               )}
             />
             {isUploading && (
@@ -780,7 +775,7 @@ export function TimeInputField({
           required={field.required}
           disabled={disabled}
           aria-invalid={hasError}
-          className={`w-full px-3 py-2 rounded-md focus:outline-none bg-white ${
+          className={`w-full px-3 py-2 rounded-md focus:outline-none bg-white disabled:!bg-transparent ${
             hasError
               ? "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent"
               : "border border-zinc-300 focus:ring-1 focus:ring-green focus:border-transparent"
@@ -802,7 +797,7 @@ export function TimeInputField({
         {showDropdown && (
           <div
             ref={dropdownRef}
-            className="absolute z-20 w-full mt-1 bg-white border border-zinc-300 rounded-md shadow-lg max-h-48 overflow-y-auto"
+            className="absolute z-20 w-full mt-1 border border-zinc-300 rounded-md shadow-lg max-h-48 overflow-y-auto"
           >
             {timeOptions.map((t) => (
               <button

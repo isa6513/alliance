@@ -202,15 +202,17 @@ const Sidebar: React.FC = () => {
             )}
           </div>
         </div>
-        <div className="flex flex-row justify-between items-center p-3 px-5">
-          <p className="text-sm text-gray-800">{user?.email}</p>
-          <Button
-            className="bg-zinc-200 hover:bg-zinc-300 border border-zinc-300 text-[#222] !px-3 !py-1 rounded-md text-sm"
-            onClick={logout}
-          >
-            Log out
-          </Button>
-        </div>
+        {isSidebarOpen && (
+          <div className="flex flex-row justify-between items-center p-3 px-5">
+            <p className="text-sm text-gray-800">{user?.email}</p>
+            <Button
+              className="bg-zinc-200 hover:bg-zinc-300 border border-zinc-300 text-[#222] !px-3 !py-1 rounded-md text-sm"
+              onClick={logout}
+            >
+              Log out
+            </Button>
+          </div>
+        )}
         <div
           className="absolute top-7 right-6 cursor-pointer"
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}

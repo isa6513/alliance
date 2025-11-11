@@ -180,15 +180,20 @@ const HomePage = () => {
               {completedActions.map((action) => (
                 <div key={action.id} className="text-zinc-600 flex gap-x-2">
                   <CheckIcon size="line" />
-                  <span className="text-zinc-400 line-through">
+                  <Link
+                    to={`/actions/${action.id}`}
+                    className="text-zinc-400 line-through"
+                  >
                     {action.name}
-                  </span>
+                  </Link>
                 </div>
               ))}
               {currentWeekTodoActions.map((action) => (
                 <div key={action.id} className="text-zinc-600 flex gap-x-2">
                   <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
-                  <span className="text-zinc-600">{action.name}</span>
+                  <Link to={`/actions/${action.id}`} className="text-zinc-600">
+                    {action.name}
+                  </Link>
                 </div>
               ))}
               {nextWeekTodoActions.length > 0 && (
@@ -197,7 +202,12 @@ const HomePage = () => {
                   {nextWeekTodoActions.map((action) => (
                     <div key={action.id} className="text-zinc-600 flex gap-x-2">
                       <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
-                      <span className="text-zinc-600">{action.name}</span>
+                      <Link
+                        to={`/actions/${action.id}`}
+                        className="text-zinc-600"
+                      >
+                        {action.name}
+                      </Link>
                     </div>
                   ))}
                 </>

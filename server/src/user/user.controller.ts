@@ -48,6 +48,7 @@ import {
   CreateCommunityDto,
   UpdateCommunityDto,
 } from './community.dto';
+import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
 
 class VerifyEmailBody {
   @IsString()
@@ -544,7 +545,7 @@ export class UserController {
   }
 
   @Get('communityMemberInfo')
-  @UseGuards(AuthGuard)
+  @UseGuards(CommunityLeaderGuard)
   @ApiOkResponse({ type: UserDto, isArray: true })
   async getCommunityMemberInfo(@Request() req: JwtRequest) {
     return this.userService.getMemberInfo(req.user.sub);
