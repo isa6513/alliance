@@ -18,8 +18,8 @@ export const connectionOptions = (): PostgresConnectionOptions => {
     logger: new AppTypeOrmLogger(),
   };
 
-  return process.env.NODE_ENV === 'production' ||
-    process.env.NODE_ENV === 'staging'
+  return (process.env.NODE_ENV === 'production' ||
+    process.env.NODE_ENV === 'staging')
     ? {
         ...shared,
         ssl: { rejectUnauthorized: false },

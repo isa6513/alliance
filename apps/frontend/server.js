@@ -83,5 +83,7 @@ app.all("{*splat}", reactRouterHandler);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () =>
-  console.log(`Express server listening at http://localhost:${port}`)
+  console.log(
+    `Express server listening at http://localhost:${port} NODE_ENV: ${process.env.NODE_ENV}`
+  )
 );
