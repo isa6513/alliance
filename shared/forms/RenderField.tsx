@@ -146,7 +146,7 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none resize-none overflow-hidden"
+              "w-full px-3 py-2 rounded-md focus:outline-none resize-none overflow-hidden bg-white"
             )}
             placeholder={field.placeholder}
           />
@@ -234,7 +234,7 @@ export function RenderField({
             step={field.step}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none"
+              "w-full px-3 py-2 rounded-md focus:outline-none bg-white"
             )}
           />
           {renderValidationMessage()}
@@ -447,7 +447,7 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(
-              "w-full px-3 py-2 rounded-md focus:outline-none"
+              "w-full px-3 py-2 rounded-md focus:outline-none bg-white"
             )}
           />
           {renderValidationMessage()}
@@ -780,7 +780,7 @@ export function TimeInputField({
           required={field.required}
           disabled={disabled}
           aria-invalid={hasError}
-          className={`w-full px-3 py-2 rounded-md focus:outline-none ${
+          className={`w-full px-3 py-2 rounded-md focus:outline-none bg-white ${
             hasError
               ? "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent"
               : "border border-zinc-300 focus:ring-1 focus:ring-green focus:border-transparent"
