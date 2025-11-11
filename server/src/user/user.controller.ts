@@ -308,7 +308,7 @@ export class UserController {
 
     if (requireSignedContract) {
       return users
-        .filter((user) => user.contractDateSigned !== null)
+        .filter((user) => user.hasActiveContract)
         .map((user) => new ProfileDtoWithFriends(user));
     } else {
       return users.map((user) => new ProfileDtoWithFriends(user));

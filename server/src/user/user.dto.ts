@@ -29,6 +29,9 @@ export class ProfileDto extends PickType(User, [
   @ApiProperty()
   displayName: string;
 
+  @ApiProperty()
+  hasActiveContract: boolean;
+
   constructor(
     user: Pick<
       User,
@@ -41,6 +44,8 @@ export class ProfileDto extends PickType(User, [
       | 'profilePicture'
       | 'profileDescription'
       | 'contractDateSigned'
+      | 'contractDateSuspended'
+      | 'hasActiveContract'
     >,
   ) {
     super();
@@ -49,11 +54,14 @@ export class ProfileDto extends PickType(User, [
     this.admin = user.admin;
     this.staff = user.staff;
     this.contractDateSigned = user.contractDateSigned;
+    this.hasActiveContract = user.hasActiveContract;
+
     if (user.anonymous) {
       this.displayName = 'Someone';
     } else {
       this.displayName = user.name;
     }
+
     if (user.profilePicture) {
       this.profilePicture = getImageSource(user.profilePicture);
     }
@@ -103,6 +111,10 @@ export class UserDto extends PickType(User, [
   @ApiPropertyOptional()
   @IsOptional()
   phoneNumber?: string;
+
+  @ApiProperty()
+  @Allow()
+  hasActiveContract: boolean;
 
   constructor(user: User) {
     super();

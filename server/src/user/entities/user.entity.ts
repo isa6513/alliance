@@ -2,7 +2,7 @@
 /* eslint-disable @darraghor/nestjs-typed/all-properties-are-whitelisted */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import * as bcrypt from 'bcryptjs';
-import { Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import {
   Allow,
   IsEmail,
@@ -97,6 +97,12 @@ export class User {
   @Column({ type: 'timestamptz', nullable: true })
   @ApiProperty({ type: String, format: 'date-time', nullable: true })
   contractDateSuspended: Date | null;
+
+  @Expose()
+  get hasActiveContract(): boolean {
+    // Assumes contract suspension date is cleared when a new contract is signed
+    return !!this.contractDateSigned && !this.contractDateSuspended;
+  }
 
   @Column({
     type: 'enum',

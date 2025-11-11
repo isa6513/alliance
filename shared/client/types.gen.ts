@@ -52,6 +52,7 @@ export type UserDto = {
     cityId?: number;
     email: string;
     phoneNumber?: string;
+    hasActiveContract: boolean;
 };
 
 export type ForgotPasswordDto = {
@@ -71,6 +72,7 @@ export type ProfileDto = {
     profilePicture: string | null;
     profileDescription: string | null;
     displayName: string;
+    hasActiveContract: boolean;
 };
 
 export type OnboardingDto = {
@@ -217,6 +219,7 @@ export type ProfileDtoWithFriends = {
     profilePicture: string | null;
     profileDescription: string | null;
     displayName: string;
+    hasActiveContract: boolean;
     friends: Array<ProfileDto>;
 };
 

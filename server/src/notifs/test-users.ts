@@ -13,6 +13,7 @@ export const testUser = {
   emailVerified: false,
   contractDateSigned: new Date(0),
   contractDateSuspended: null,
+  hasActiveContract: true,
   emailNotifsEnabled: false,
   textNotifsEnabled: true,
   pushNotifsEnabled: false,

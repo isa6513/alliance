@@ -330,7 +330,7 @@ const UserProfilePage: React.FC = () => {
                     Staff
                   </div>
                 )}
-                {!profile.contractDateSigned && (
+                {!profile.hasActiveContract && (
                   <div className="text-sm bg-zinc-100 text-zinc-600 px-3 py-0.5 rounded self-center mt-2">
                     Observer
                   </div>
