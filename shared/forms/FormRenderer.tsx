@@ -1156,7 +1156,7 @@ const FormRenderer = ({
                 {(otherReasonSelected || outOfTimeSelected) && (
                   <>
                     <textarea
-                      className="w-full h-20 border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      className="w-full h-20 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
                       value={customReason}
                       onChange={(e) => setCustomReason(e.target.value)}
                       placeholder="Explain in more detail..."
