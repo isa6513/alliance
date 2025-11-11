@@ -73,12 +73,17 @@ const HomePage = () => {
   const { user } = useAuth();
 
   const todoActions =
-    actions?.filter((action) => shouldCompleteAction(action)) || [];
+    actions
+      ?.filter((action) => shouldCompleteAction(action))
+      .sort((a, b) => {
+        return b.priority - a.priority;
+      }) || [];
+
   const newActions =
     actions
       ?.filter((action) => canJoinAction(action))
       .sort((a, b) => {
-        return a.priority - b.priority;
+        return b.priority - a.priority;
       }) || [];
 
   const currentTask = newActions[0] || todoActions[0] || null;
