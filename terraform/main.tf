@@ -17,12 +17,6 @@ provider "aws" {
   #shared_credentials_files = [".aws/credentials"]
 }
 
-resource "aws_default_vpc" "default_vpc" {
-  tags = {
-    Name = "default vpc"
-  }
-}
-
 resource "aws_key_pair" "ssh-key" {
   key_name   = "ssh-key"
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOz1KSgclpafFCsqUAoZLv8hkOFTXzNCFRNOLx9kyKdy"
