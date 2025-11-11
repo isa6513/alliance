@@ -419,7 +419,7 @@ export function RenderField({
                   )}
                 />
                 <span className={hasError ? "text-red-600" : "text-zinc-700"}>
-                  {option.label}
+                  <FormMarkdownWrapper markdownContent={option.label} inline />
                 </span>
               </label>
             ))}
