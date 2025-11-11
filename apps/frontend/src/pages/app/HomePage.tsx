@@ -118,7 +118,7 @@ const HomePage = () => {
     return (
       <div
         className={
-          "flex flex-col py-8 sm:py-18 px-4 max-w-2xl mx-auto min-h-full justify-center"
+          "flex flex-col py-8 sm:py-18 px-4 max-w-3xl mx-auto min-h-full justify-center"
         }
       >
         {currentTask && currentTask.relation ? (
@@ -285,9 +285,7 @@ const HomePage = () => {
         <TwoColumnLayout main={mainContent()} sidebar={sidebarContent()} />
       </div>
 
-      <div className="lg:hidden">
-        <TwoColumnLayout main={mainContent()} />
-      </div>
+      <div className="lg:hidden">{mainContent()}</div>
     </>
   );
 };
