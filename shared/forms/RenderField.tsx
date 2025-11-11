@@ -6,6 +6,7 @@ import { shuffleWithSeed } from "./randomutils";
 import { formatTimeForDisplay, parseTimeInput } from "./timeUtils";
 import DropdownIcon from "../ui/icons/DropdownIcon";
 import { getCustomComponentById } from "./components";
+import { getApiUrl } from "../lib/config";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -591,9 +592,9 @@ export function RenderField({
           {typeof fileValue === "string" && fileValue && (
             <div className="mb-2">
               <img
-                src={fileValue}
+                src={getApiUrl() + "/images/" + fileValue}
                 alt="Uploaded file"
-                className="max-w-full h-auto max-h-32 rounded border"
+                className="max-w-full h-auto max-h-32 rounded"
               />
             </div>
           )}
