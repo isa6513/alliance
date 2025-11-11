@@ -93,7 +93,7 @@ jobs:
         working-directory: ./
 
       - name: Build React App
-        run: corepack yarn workspace @alliance/frontend build --mode "production"
+        run: corepack yarn workspace @alliance/frontend build --mode "$env_name"
         working-directory: ./
 
       - name: Inject & upload source maps to PostHog
