@@ -114,7 +114,10 @@ const Sidebar: React.FC = () => {
   return (
     <div className="flex flex-row min-h-screen h-fitcontent flex-nowrap bg-pagebg bg-[#fcfcfc]">
       <div
-        className={`overflow-y-auto max-h-screen overflow-x-hidden flex flex-col justify-between bg-[#f4f4f4] relative transition-all duration-100 w-[${sidebarWidth}px]`}
+        className={`overflow-y-auto max-h-screen overflow-x-hidden flex flex-col justify-between bg-[#f4f4f4] relative transition-all duration-100 `}
+        style={{
+          width: `${sidebarWidth}px`,
+        }}
       >
         <div
           className={`flex flex-col gap-y-3 sticky p-5 py-6 w-[320px] ${
