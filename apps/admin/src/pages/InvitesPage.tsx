@@ -12,6 +12,7 @@ import UserSelect, { UserSelectUser } from "../components/UserSelect";
 import List from "@alliance/shared/ui/List";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
+import { getBaseUrl } from "@alliance/shared/lib/config";
 
 const InvitesPage = () => {
   const [invites, setInvites] = useState<OnetimeInviteDto[]>([]);
@@ -58,7 +59,8 @@ const InvitesPage = () => {
   }, []);
 
   const copyToClipboard = (text: string) => {
-    const url = `https://worldalliance.org/invite?ref=${text}`;
+    const baseUrl = getBaseUrl();
+    const url = `${baseUrl}/invite?ref=${text}`;
     navigator.clipboard.writeText(url);
   };
 

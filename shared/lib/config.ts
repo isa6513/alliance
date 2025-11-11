@@ -9,6 +9,17 @@ export const getWebSocketUrl = (mode: string): string => {
   }
 };
 
+export const getBaseUrl = (): string => {
+  if (
+    (import.meta as unknown as { env: { MODE: string } }).env.MODE ===
+    "development"
+  ) {
+    return "http://localhost:5173";
+  } else {
+    return prod_url;
+  }
+};
+
 export const getApiUrl = (): string => {
   if (
     (import.meta as unknown as { env: { MODE: string } }).env.MODE ===

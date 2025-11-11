@@ -40,7 +40,7 @@ class SocketIoAdapter extends IoAdapter {
         origin: [
           'http://localhost:5173', //TODO: any localhost in dev
           'http://localhost:5174',
-          'https://worldalliance.org',
+          process.env.APP_URL,
           'https://admin.worldalliance.org',
         ],
         methods: ['GET', 'POST'],
