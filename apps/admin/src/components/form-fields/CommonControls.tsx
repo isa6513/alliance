@@ -124,15 +124,6 @@ export function ConditionalVisibility({
     [field.visibleIf]
   );
 
-  const [isEditorOpen, setIsEditorOpen] = useState<boolean>(
-    () => conditions.length > 0
-  );
-  useEffect(() => {
-    if (conditions.length > 0) {
-      setIsEditorOpen(true);
-    }
-  }, [conditions.length]);
-
   const [conditionError, setConditionError] = useState<string | null>(null);
 
   const canUseFieldControllers = controllers.length > 0;
@@ -309,20 +300,6 @@ export function ConditionalVisibility({
       updateConditions,
     ]
   );
-
-  const handleEnableToggle = async (checked: boolean) => {
-    if (!checked) {
-      setIsEditorOpen(false);
-      setConditionError(null);
-      updateConditions([]);
-      return;
-    }
-    setConditionError(null);
-    setIsEditorOpen(true);
-    if (conditions.length === 0 && canUseFieldControllers) {
-      addFieldCondition();
-    }
-  };
 
   const handleControllerChange = useCallback(
     (index: number, id: string) => {
@@ -526,18 +503,6 @@ export function ConditionalVisibility({
         <label className="text-xs font-medium text-gray-700">
           Conditional visibility
         </label>
-        <input
-          type="checkbox"
-          className={`h-4 w-4 ${toggleDisabled ? "opacity-30" : ""}`}
-          checked={isEditorOpen}
-          onChange={(e) => void handleEnableToggle(e.target.checked)}
-          disabled={toggleDisabled}
-          title={
-            toggleDisabled
-              ? "Add an eligible field or configure a validator to enable this feature"
-              : undefined
-          }
-        />
       </div>
 
       {toggleDisabled && (
@@ -551,86 +516,84 @@ export function ConditionalVisibility({
         <p className="mt-1 text-[11px] text-red-500">{conditionError}</p>
       )}
 
-      {isEditorOpen && (
-        <div className="mt-2 space-y-3">
-          {conditions.map((condition, index) => (
-            <div
-              key={index}
-              className="rounded border border-gray-200 bg-white p-3 space-y-2"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-gray-700">
-                  Condition {index + 1}
-                </span>
-                <button
-                  type="button"
-                  className="text-[11px] text-gray-500 hover:text-red-500"
-                  onClick={() => removeCondition(index)}
-                >
-                  Remove
-                </button>
-              </div>
-              {isFieldCondition(condition) ? (
-                renderFieldCondition(condition, index)
-              ) : isValidatorCondition(condition) ? (
-                renderValidatorCondition(condition, index)
-              ) : (
-                <p className="text-[11px] text-red-500">
-                  Unsupported condition type. Remove and re-create this rule.
-                </p>
-              )}
+      <div className="mt-2 space-y-3">
+        {conditions.map((condition, index) => (
+          <div
+            key={index}
+            className="rounded border border-gray-200 bg-white p-3 space-y-2"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-700">
+                Condition {index + 1}
+              </span>
+              <button
+                type="button"
+                className="text-[11px] text-gray-500 hover:text-red-500"
+                onClick={() => removeCondition(index)}
+              >
+                Remove
+              </button>
             </div>
-          ))}
-
-          {conditions.length === 0 && (
-            <p className="text-[11px] text-gray-500">
-              No conditions configured yet. Add at least one rule below.
-            </p>
-          )}
-
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:opacity-40"
-              onClick={() => {
-                if (!addFieldCondition()) {
-                  return;
-                }
-              }}
-              disabled={!canUseFieldControllers}
-            >
-              + Field condition
-            </button>
-            <button
-              type="button"
-              className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:opacity-40"
-              onClick={() => void addValidatorCondition()}
-              disabled={!canUseValidators}
-            >
-              + Validator condition
-            </button>
+            {isFieldCondition(condition) ? (
+              renderFieldCondition(condition, index)
+            ) : isValidatorCondition(condition) ? (
+              renderValidatorCondition(condition, index)
+            ) : (
+              <p className="text-[11px] text-red-500">
+                Unsupported condition type. Remove and re-create this rule.
+              </p>
+            )}
           </div>
-          {!canUseFieldControllers && (
-            <p className="text-[11px] text-gray-400">
-              Add a checkbox, select, radio, or multiselect field earlier on
-              this page to use answer-based visibility.
-            </p>
-          )}
-          {!canUseValidators && (
-            <p className="text-[11px] text-gray-400">
-              No custom validators are currently available for visibility.
-            </p>
-          )}
-          {validatorsLoading && (
-            <p className="text-[11px] text-gray-500">
-              Loading visibility validators…
-            </p>
-          )}
-          {validatorsError && !validatorsLoading && (
-            <p className="text-[11px] text-red-500">{validatorsError}</p>
-          )}
+        ))}
+
+        {conditions.length === 0 && (
+          <p className="text-[11px] text-gray-500">
+            No conditions configured yet. Add at least one rule below.
+          </p>
+        )}
+
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+            onClick={() => {
+              if (!addFieldCondition()) {
+                return;
+              }
+            }}
+            disabled={!canUseFieldControllers}
+          >
+            + Field condition
+          </button>
+          <button
+            type="button"
+            className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+            onClick={() => void addValidatorCondition()}
+            disabled={!canUseValidators}
+          >
+            + Validator condition
+          </button>
         </div>
-      )}
+        {!canUseFieldControllers && (
+          <p className="text-[11px] text-gray-400">
+            Add a checkbox, select, radio, or multiselect field earlier on this
+            page to use answer-based visibility.
+          </p>
+        )}
+        {!canUseValidators && (
+          <p className="text-[11px] text-gray-400">
+            No custom validators are currently available for visibility.
+          </p>
+        )}
+        {validatorsLoading && (
+          <p className="text-[11px] text-gray-500">
+            Loading visibility validators…
+          </p>
+        )}
+        {validatorsError && !validatorsLoading && (
+          <p className="text-[11px] text-red-500">{validatorsError}</p>
+        )}
+      </div>
     </div>
   );
 }
