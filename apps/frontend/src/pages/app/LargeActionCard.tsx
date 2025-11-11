@@ -101,7 +101,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             </Button>
           )}
           <div className="flex flex-col flex-1 gap-y-2">
-            <p className="font-medium text-2xl md:text-3xl font-serif">
+            <p className="font-semibold text-2xl md:text-3xl font-serif">
               {action.name}
             </p>
             <TaskTimeInfo
