@@ -80,7 +80,7 @@ export class AppModule {
   }
 
   async onModuleInit() {
-    if (process.env.ADMIN_USER && process.env.NODE_ENV === 'development') {
+    if (process.env.ADMIN_USER && process.env.NODE_ENV !== 'production') {
       const user = await this.userService.findOneByEmail(
         process.env.ADMIN_USER,
       );
