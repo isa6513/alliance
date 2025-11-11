@@ -99,7 +99,7 @@ const HomePage = () => {
   const nextWeekTodoActions = todoActions.filter((action) => {
     return !isActionInCurrentWeek(action);
   });
-  console.log(currentWeekTodoActions, nextWeekTodoActions);
+
   const remainingTasksEstimatedTimeCurrentWeek = currentWeekTodoActions.reduce(
     (sum, action) => {
       if (action.timeEstimate) {

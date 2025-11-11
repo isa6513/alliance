@@ -161,7 +161,8 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
         >
           <div className="relative text-4xl -mt-1">
             ☰
-            {(unreadCount > 0 || todoActions > 0) && (
+            {(unreadCount > 0 ||
+              (todoActions > 0 && currentLocation !== NavbarPage.Tasks)) && (
               <div className="absolute -right-0.5 top-1.5 w-2 h-2 bg-red-500 rounded-full"></div>
             )}
           </div>
