@@ -52,6 +52,13 @@ export function canJoinAction(action: ActionWithRelation) {
   );
 }
 
+export function isActionInCurrentWeek(action: ActionWithRelation) {
+  return (
+    new Date(action.events[action.events.length - 1].date) <
+    new Date(new Date().setDate(new Date().getDate() + 7))
+  );
+}
+
 const HomePage = () => {
   const navigate = useNavigate();
   const { actions, posts, loading } =
@@ -75,12 +82,21 @@ const HomePage = () => {
       }) || [];
 
   const currentTask = newActions[0] || todoActions[0] || null;
-  const remainingTasksEstimatedTime = todoActions.reduce((sum, action) => {
-    if (action.timeEstimate) {
-      return sum + action.timeEstimate;
-    }
-    return sum;
-  }, 0);
+  const currentWeekTodoActions = todoActions.filter((action) => {
+    return isActionInCurrentWeek(action);
+  });
+  const nextWeekTodoActions = todoActions.filter((action) => {
+    return !isActionInCurrentWeek(action);
+  });
+  const remainingTasksEstimatedTimeCurrentWeek = currentWeekTodoActions.reduce(
+    (sum, action) => {
+      if (action.timeEstimate) {
+        return sum + action.timeEstimate;
+      }
+      return sum;
+    },
+    0
+  );
 
   const completedActions =
     actions?.filter((action) => isCurrentlyCompletedAction(action)) || [];
@@ -138,16 +154,14 @@ const HomePage = () => {
             <p className="font-semibold text-xl font-serif text-black">
               Progress
             </p>
-            {todoActions.length + newActions.length > 0 && (
+            {currentWeekTodoActions.length + newActions.length > 0 && (
               <p className="text-zinc-600 mb-2">
                 <span className="text-green font-medium mr-0.5">
-                  {todoActions.length + newActions.length} task
-                  {todoActions.length + newActions.length !== 1
-                    ? "s"
-                    : ""} left{" "}
+                  {currentWeekTodoActions.length} task
+                  {currentWeekTodoActions.length !== 1 ? "s" : ""} left{" "}
                 </span>
                 {todoActions.length > 0 &&
-                  `for a total of ${remainingTasksEstimatedTime} minutes`}
+                  `for a total of ${remainingTasksEstimatedTimeCurrentWeek} minutes`}
               </p>
             )}
             <ul className="space-y-2 list-disc">
@@ -159,7 +173,14 @@ const HomePage = () => {
                   </span>
                 </div>
               ))}
-              {todoActions.map((action) => (
+              {currentWeekTodoActions.map((action) => (
+                <div key={action.id} className="text-zinc-600 flex gap-x-2">
+                  <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
+                  <span className="text-zinc-600">{action.name}</span>
+                </div>
+              ))}
+              <p className="text-zinc-500 mt-3 font-medium">Next week</p>
+              {nextWeekTodoActions.map((action) => (
                 <div key={action.id} className="text-zinc-600 flex gap-x-2">
                   <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
                   <span className="text-zinc-600">{action.name}</span>
