@@ -5,7 +5,7 @@ import morgan from "morgan";
 import client from "prom-client";
 
 const viteDevServer =
-  process.env.NODE_ENV === "production"
+  process.env.NODE_ENV in ["production", "staging"]
     ? undefined
     : await import("vite").then((vite) =>
         vite.createServer({

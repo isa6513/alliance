@@ -4,7 +4,7 @@ import express from "express";
 import morgan from "morgan";
 
 const viteDevServer =
-  process.env.NODE_ENV === "production"
+  process.env.NODE_ENV in ["production", "staging"]
     ? undefined
     : await import("vite").then((vite) =>
         vite.createServer({
