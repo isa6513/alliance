@@ -198,6 +198,61 @@ describe('ActionEventNotifWorker (e2e)', () => {
     expect(notifs[0].channel).toBe(NotificationChannel.Text);
   });
 
+  it('does not send reminders older than the 3 hour lookback window', async () => {
+    const now = Date.now();
+    const user = await getPrimaryUser();
+    await userRepo.update(user.id, {
+      contractDateSigned: new Date(now - 24 * 60 * 60 * 1000),
+    });
+
+    const { memberEvent } = await createActionWithMemberEvent({
+      name: uniqueName('lookback-blocked'),
+      eventDate: new Date(now - 7 * 60 * 60 * 1000),
+    });
+
+    const reminderGroup = await createReminderGroup(
+      memberEvent,
+      ReminderGroupTimingMode.Absolute,
+      ReminderCohortType.AllUncompleted,
+      {
+        sendAtAbsolute: new Date(now - 6 * 60 * 60 * 1000),
+      },
+    );
+
+    await worker.dispatchDueNotifs();
+
+    const notifs = await fetchNotifsForGroup(reminderGroup);
+    expect(notifs).toHaveLength(0);
+  });
+
+  it('sends reminders that are within the 3 hour lookback window', async () => {
+    const now = Date.now();
+    const user = await getPrimaryUser();
+    await userRepo.update(user.id, {
+      contractDateSigned: new Date(now - 24 * 60 * 60 * 1000),
+    });
+
+    const { memberEvent } = await createActionWithMemberEvent({
+      name: uniqueName('lookback-allowed'),
+      eventDate: new Date(now - 3 * 60 * 60 * 1000),
+    });
+
+    const reminderGroup = await createReminderGroup(
+      memberEvent,
+      ReminderGroupTimingMode.Absolute,
+      ReminderCohortType.AllUncompleted,
+      {
+        sendAtAbsolute: new Date(now - 2 * 60 * 60 * 1000),
+      },
+    );
+
+    await worker.dispatchDueNotifs();
+
+    const notifs = await fetchNotifsForGroup(reminderGroup);
+    expect(notifs.map((notif) => notif.user.id)).toHaveLength(1);
+    expect(notifs[0].user.id).toBe(user.id);
+  });
+
   it('guards against duplicate reminders via idempotency keys', async () => {
     const now = Date.now();
     const user = await getPrimaryUser();

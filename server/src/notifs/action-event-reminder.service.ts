@@ -44,7 +44,7 @@ export interface MissedDeadlineCandidate {
   resolutionDate: Date;
 }
 
-export const NOTIFICATION_LOOKBACK_WINDOW_MS = 1 * 24 * 60 * 60 * 1000;
+export const NOTIFICATION_LOOKBACK_WINDOW_MS = 3 * 60 * 60 * 1000; // 3 hours
 
 export const POST_MEMBER_ACTION_STATUSES = new Set<ActionStatus>([
   ActionStatus.OfficeAction,
