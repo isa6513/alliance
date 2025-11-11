@@ -3,14 +3,13 @@ import compression from "compression";
 import express from "express";
 import morgan from "morgan";
 
-const viteDevServer =
-  process.env.NODE_ENV in ["production", "staging"]
-    ? undefined
-    : await import("vite").then((vite) =>
-        vite.createServer({
-          server: { middlewareMode: true },
-        })
-      );
+const viteDevServer = ["production", "staging"].includes(process.env.NODE_ENV)
+  ? undefined
+  : await import("vite").then((vite) =>
+      vite.createServer({
+        server: { middlewareMode: true },
+      })
+    );
 
 const reactRouterHandler = createRequestHandler({
   build: await import("./build/server/index.js"),
