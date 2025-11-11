@@ -9,15 +9,15 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
-  env_name: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+  env_name: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
   CI: ""
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+  group: ${{ github.workflow }}-${{ github.ref_name == 'production' && 'production' || 'staging' }}
 
 jobs:
   test-backend-e2e:
-    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -50,7 +50,7 @@ jobs:
         working-directory: ./server
 
   test-backend-unit:
-    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -71,7 +71,7 @@ jobs:
 
   build-react-app:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -133,7 +133,7 @@ jobs:
 
   build-admin-frontend:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -175,7 +175,7 @@ jobs:
       - test-backend-e2e
       - test-backend-unit
       - migrations-drift-check
-    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: SSH and Deploy frontend SSR on EC2
         uses: appleboy/ssh-action@v1.0.0
@@ -201,7 +201,7 @@ jobs:
             yarn install --omit=dev
 
             pm2 delete client-ssr || true
-            pm2 start "NODE_ENV=${{ github.ref_name == 'staging' && 'staging' || 'production' }} node server.js" --name client-ssr
+            pm2 start "NODE_ENV=${{ github.ref_name == 'production' && 'production' || 'staging' }} node server.js" --name client-ssr
             pm2 save
 
             if [ ! -f /etc/nginx/conf.d/alliance.conf ]; then
@@ -279,7 +279,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-admin-frontend
-    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: Download Admin Build Artifact
         uses: actions/download-artifact@v4
@@ -333,7 +333,7 @@ jobs:
 
   build-nest-backend:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -422,7 +422,7 @@ jobs:
       - test-backend-e2e
       - test-backend-unit
       - migrations-drift-check
-    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: Download NestJS Build Artifact
         uses: actions/download-artifact@v4
@@ -465,7 +465,7 @@ jobs:
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             export JWT_SECRET=${{ secrets.JWT_SECRET }}
             export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
-            export NODE_ENV=${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+            export NODE_ENV=${{ github.ref_name == 'production' && 'production' || 'staging' }}
             export DB_NAME="alliance"
             export SMTP_HOST=${{ secrets.SMTP_HOST }}
             export SMTP_USER=${{ secrets.SMTP_USER }}
@@ -525,7 +525,7 @@ jobs:
       - deploy-react-app
       - deploy-admin-app
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: Check main app
         run: |
@@ -544,7 +544,7 @@ jobs:
       - deploy-react-app
       - deploy-admin-app
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: Check main app
         run: |
@@ -564,7 +564,7 @@ jobs:
       - deploy-react-app
       - deploy-admin-app
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: Check API health
         run: |
@@ -580,13 +580,13 @@ jobs:
       - verify-https
       - verify-api
     if: always()
-    environment: ${{ github.ref_name == 'staging' && 'staging' || 'production' }}
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: Post webhook if any upstream failed/cancelled
         if: ${{ contains(join(needs.*.result, ','), 'failure') || contains(join(needs.*.result, ','), 'skipped') }}
         run: |
           curl -X POST -H 'Content-type: application/json' \
-            --data "{\"text\":\"Deploy ${{ github.ref_name == 'staging' && 'staging' || 'production' }} failed for ${{ github.event.head_commit.message }}. <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Open run>\"}" \
+            --data "{\"text\":\"Deploy ${{ github.ref_name == 'production' && 'production' || 'staging' }} failed for ${{ github.event.head_commit.message }}. <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Open run>\"}" \
             ${{ secrets.SLACK_WEBHOOK_URL }}
   # build-mobile-app:
   #   runs-on: ubuntu-latest
