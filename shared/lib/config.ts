@@ -9,6 +9,13 @@ export const getWebSocketUrl = (mode: string): string => {
   }
 };
 
+export const isProduction = (): boolean => {
+  return (
+    (import.meta as unknown as { env: { MODE: string } }).env.MODE ===
+    "production"
+  );
+};
+
 export const getBaseUrl = (): string => {
   if (
     (import.meta as unknown as { env: { MODE: string } }).env.MODE ===

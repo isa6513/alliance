@@ -9,6 +9,7 @@ import { Link, Outlet, useNavigate } from "react-router";
 import { useAuth } from "./lib/AuthContext";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import SidebarIcon from "@alliance/shared/ui/icons/SidebarIcon";
+import { isProduction } from "@alliance/shared/lib/config";
 
 const Sidebar: React.FC = () => {
   const [actions, setActions] = useState<ActionDto[]>([]);
@@ -111,6 +112,8 @@ const Sidebar: React.FC = () => {
     },
   ];
 
+  const isProd = isProduction();
+
   return (
     <div className="flex flex-row min-h-screen h-fitcontent flex-nowrap bg-pagebg bg-[#fcfcfc]">
       <div
@@ -124,7 +127,11 @@ const Sidebar: React.FC = () => {
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <h1 className="text-black text-[14pt] font-bold pb-0">
+          <h1
+            className={`text-[14pt] font-bold pb-0 ${
+              isProd ? "text-red-500" : "text-gray-900"
+            }`}
+          >
             Alliance Admin
           </h1>
           <div className="flex flex-col gap-y-2">
