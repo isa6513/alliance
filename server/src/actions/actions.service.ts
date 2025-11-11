@@ -1204,7 +1204,7 @@ export class ActionsService {
     const plans = await this.actionEventReminderService.getPlansForGroup(
       await this.actionEventReminderService.attachDeadlineEvent(fakeGroup),
       new Date(Date.now() - NOTIFICATION_LOOKBACK_WINDOW_MS),
-      new Date(Date.now() + 30 * NOTIFICATION_LOOKBACK_WINDOW_MS),
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
     );
 
     return plans.map((plan) => ({
