@@ -264,7 +264,7 @@ export function RenderField({
               disabled={disabled}
               aria-invalid={hasError}
               className={composeClassName(
-                `mt-1 mr-2 h-4 w-4 ${
+                `shrink-0 mt-1 mr-2 h-4 w-4 ${
                   hasError ? "text-red-600" : "text-blue-600"
                 } focus:outline-none rounded`,
                 {
@@ -305,7 +305,7 @@ export function RenderField({
                   disabled={disabled}
                   aria-invalid={hasError}
                   className={composeClassName(
-                    `mt-1 mr-2 h-4 w-4 ${
+                    `shrink-0 mt-1 mr-2 h-4 w-4 ${
                       hasError ? "text-red-600" : "text-blue-600"
                     } focus:outline-none`,
                     {
