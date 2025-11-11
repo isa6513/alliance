@@ -19,7 +19,7 @@ interface TimelineProps {
 const Timeline: React.FC<TimelineProps> = ({
   children,
   lineWidth = 2,
-  dotSize = 16,
+  dotSize = 12,
   lineColor = "var(--color-zinc-200)",
   className,
 }) => {
@@ -48,12 +48,13 @@ const Timeline: React.FC<TimelineProps> = ({
   }, [bottomElementRef, lineWidth, lineColor, halfDot]);
 
   const dotBaseStyle: CSSProperties = {
-    width: dotSize,
-    height: dotSize,
+    width: dotSize + 6,
+    height: dotSize + 6,
+    border: `3px solid white`,
     aspectRatio: 1,
     borderRadius: "50%",
     position: "absolute",
-    left: `-${dotSize / 2}px`,
+    left: `-${dotSize / 2 + 3}px`,
     top: 0,
     bottom: 0,
   };
@@ -78,7 +79,7 @@ const Timeline: React.FC<TimelineProps> = ({
               } mt-1 flex items-center justify-center`}
             ></div>
             {/* content */}
-            <div className="pl-5">{child}</div>
+            <div className="pl-6">{child}</div>
           </li>
         ))}
       </ul>

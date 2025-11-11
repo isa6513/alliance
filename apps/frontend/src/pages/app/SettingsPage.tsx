@@ -187,10 +187,12 @@ const SettingsPage: React.FC = () => {
   return (
     <div className="bg-page py-4 md:py-20 px-4 md:px-16">
       <div className="max-w-4xl mx-auto">
-        <Card style={CardStyle.White} className="p-8 mb-6 relative gap-y-4">
+        <div className="mb-6 relative flex flex-col gap-y-4">
           <div className="flex justify-between mb-2">
             <div className="gap-x-2">
-              <h1 className="text-3xl font-serif !font-medium mb-2">Account</h1>
+              <h1 className="!text-2xl sm:!text-4xl font-serif !font-medium mb-2">
+                Account
+              </h1>
               <AdminOnly>
                 <Badge className="!bg-yellow-600 text-white">Admin</Badge>
               </AdminOnly>
@@ -235,9 +237,7 @@ const SettingsPage: React.FC = () => {
               />
             </div>
             <div className="flex-1 flex flex-col w-full">
-              <p className="mb-1">
-                Email <i className="text-gray-500">(Not shown)</i>
-              </p>
+              <p className="mb-1">Email</p>
               <FormInput
                 name="email"
                 type="email"
@@ -354,8 +354,8 @@ const SettingsPage: React.FC = () => {
                   updateEditableUser({ textNotifsEnabled: checked })
                 }
               /> */}
-              <div className="flex flex-col">
-                <p className="!font-medium mt-2">Platform activity digest</p>
+              <div className="flex flex-col mt-4">
+                <p className="!font-medium">Platform activity digest</p>
                 <p className="text-sm text-zinc-500 mb-2">
                   This includes replies to your posts, friend requests, and
                   other updates.
@@ -386,60 +386,54 @@ const SettingsPage: React.FC = () => {
             <AwayRangesSection />
           </div>
 
-          <hr className="border-zinc-300 mt-4" />
-
-          <div>
-            <h2 className="!font-semibold text-lg mb-4">Payment Methods</h2>
-
-            {paymentMethod !== null ? (
-              <>
-                <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center justify-center p-2 h-5 bg-blue-500 text-white text-xs font-semibold rounded">
-                      {paymentMethod.brand?.toUpperCase() || "CARD"}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        •••• •••• •••• {paymentMethod.last4}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Expires{" "}
-                        {paymentMethod.exp_month?.toString().padStart(2, "0")}/
-                        {paymentMethod.exp_year}
-                      </p>
-                    </div>
+          {paymentMethod !== null && (
+            <div>
+              <hr className="border-zinc-300 mt-4" />
+              <h2 className="!font-semibold text-lg mb-4">Payment methods</h2>
+              <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center p-2 h-5 bg-blue-500 text-white text-xs font-semibold rounded">
+                    {paymentMethod.brand?.toUpperCase() || "CARD"}
                   </div>
-                  <button
-                    onClick={handleClearPaymentMethod}
-                    disabled={loadingPaymentMethod}
-                    className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                    title="Remove payment method"
-                  >
-                    {loadingPaymentMethod ? (
-                      <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-                    ) : (
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    )}
-                  </button>
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      •••• •••• •••• {paymentMethod.last4}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Expires{" "}
+                      {paymentMethod.exp_month?.toString().padStart(2, "0")}/
+                      {paymentMethod.exp_year}
+                    </p>
+                  </div>
                 </div>
-              </>
-            ) : (
-              <p className="text-zinc-500">No payment methods set up yet</p>
-            )}
-          </div>
-        </Card>
+                <button
+                  onClick={handleClearPaymentMethod}
+                  disabled={loadingPaymentMethod}
+                  className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                  title="Remove payment method"
+                >
+                  {loadingPaymentMethod ? (
+                    <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                  ) : (
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

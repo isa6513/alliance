@@ -52,18 +52,22 @@ const PeoplePage: React.FC = () => {
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex-1 container mx-auto pt-16 md:pt-28 pb-56 flex flex-col px-5">
         <div className="mx-auto w-full max-w-3xl flex flex-col gap-4 md:gap-12">
-          <h2 className="text-center font-serif !font-semibold !text-4xl md:!text-6xl">
+          <h2 className="text-center font-serif !font-medium !text-4xl md:!text-6xl">
             People
           </h2>
 
           <div className="flex flex-col text-base md:text-lg">
             <p>
-              The Alliance has a full-time strategic office that plans
-              collective actions and a body of members that participate in
-              collective actions.
+              The Alliance has a body of members committed to taking actions and
+              a full-time strategic office that plans actions.
             </p>
 
-            <h2 className="!font-semibold !text-lg md:!text-xl !mt-8 mb-2">
+            <h2 className="!font-medium !text-xl md:!text-2xl !mt-8 mb-3">
+              Members
+            </h2>
+            <p>40 members are participating in early experiments.</p>
+
+            <h2 className="!font-medium !text-xl md:!text-2xl !mt-8 mb-3">
               Strategic Office
             </h2>
 
@@ -80,13 +84,6 @@ const PeoplePage: React.FC = () => {
                 </p>
               ))}
             </div>
-
-            <h2 className="!font-semibold !text-lg md:!text-xl !mt-8 mb-2">
-              Members
-            </h2>
-            <p>
-              We have 39 members who are participating in early experiments.
-            </p>
           </div>
         </div>
       </div>

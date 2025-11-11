@@ -114,15 +114,20 @@ const ActivityFeedPage = () => {
               key={m}
               onClick={() => setMode(m)}
               aria-pressed={m === mode}
-              className={`!border-b-[1.5px] rounded-none ${
-                m === mode ? "!border-b-green" : "!border-b-transparent"
+              className={`!border-b-[2px] rounded-none ${
+                m === mode
+                  ? "!border-b-green text-black"
+                  : "!border-b-transparent hover:!border-b-zinc-200 text-zinc-500"
               }`}
             >
               <p className="capitalize">{m}</p>
             </Button>
           ))}
         </div>
-        <Link to="/members" className="text-link text-sm">
+        <Link
+          to="/members"
+          className="text-zinc-800 hover:underline rounded text-sm font-medium"
+        >
           Member list
         </Link>
       </div>

@@ -36,39 +36,38 @@ const ActionTaskPanelCompleted = ({
 
   console.log("formResponse", formResponse);
 
+  const completedCard = (
+    <Card style={CardStyle.White} className="mb-2">
+      <div className="flex items-center gap-x-3">
+        <CheckIcon size="small" />
+        <p>You&apos;ve completed this task.</p>
+      </div>
+    </Card>
+  );
+
   if (action?.taskFormId && formResponse) {
     return (
-      <Card
-        style={CardStyle.Grey}
-        className="inline-block !p-6 space-y-4 border-none"
-      >
-        <Card style={CardStyle.White} className="">
-          <div className="flex items-center gap-x-3">
-            <CheckIcon size="small" />
-            <p>You&apos;ve completed this action.</p>
-          </div>
+      <>
+        {completedCard}
+        <Card
+          style={CardStyle.Grey}
+          className="inline-block !p-6 space-y-4 border-none -mt-3 rounded-t-none"
+        >
+          <FormRenderer
+            form={formResponse.schemaSnapshot as unknown as FormSchema}
+            id={formResponse.formId}
+            actionId={action.id}
+            completedFormResponse={formResponse}
+            renderFormAsCompleted
+            onSubmit={null}
+            userId={formResponse.user?.id}
+            user={formResponse.user ?? undefined}
+          />
         </Card>
-        <FormRenderer
-          form={formResponse.schemaSnapshot as unknown as FormSchema}
-          id={formResponse.formId}
-          actionId={action.id}
-          completedFormResponse={formResponse}
-          renderFormAsCompleted
-          onSubmit={null}
-          userId={formResponse.user?.id}
-          user={formResponse.user ?? undefined}
-        />
-      </Card>
+      </>
     );
   } else {
-    return (
-      <Card style={CardStyle.White} className="">
-        <div className="flex items-center gap-x-3">
-          <CheckIcon size="small" />
-          <p>You&apos;ve completed this action.</p>
-        </div>
-      </Card>
-    );
+    return completedCard;
   }
 };
 

@@ -5,8 +5,6 @@ import { Route } from "../../.react-router/types/src/components/+types/ActionPag
 import ActionTaskPanel, { ActionTaskPanelProps } from "./ActionTaskPanel";
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import ActionTaskPanelDeclined from "./ActionTaskPanelDeclined";
-import TaskTimeInfo from "../pages/app/TaskTimeInfo";
-import { getLastAndNextEvent } from "../pages/app/LargeActionCard";
 import { getLatestEvent } from "@alliance/shared/lib/actionUtils";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
@@ -62,31 +60,25 @@ const ActionPageTaskPanel = () => {
     (latestEvent?.newStatus === "office_action" ||
       latestEvent?.newStatus === "resolution");
 
-  const { lastEvent, nextEvent } = getLastAndNextEvent(action);
-
   return (
     <>
-      {didMissDeadline ? (
-        <Card style={CardStyle.Grey}>
-          <p className="font-bold">The deadline for this action has passed.</p>
+      {didMissDeadline && (
+        <Card style={CardStyle.Grey} className="mb-2">
+          <p className="font-medium">
+            The deadline for member action has passed.
+          </p>
           <p>
             You do not need to complete this task, but you can still do so below
             if you would like.
           </p>
         </Card>
-      ) : (
-        <TaskTimeInfo
-          action={action}
-          nextEvent={nextEvent}
-          lastEvent={lastEvent}
-        />
       )}
       <ActionTaskPanel
         userRelation={userRelation}
         action={action}
         {...panelHandlers}
-        card={true}
         missedDeadline={didMissDeadline}
+        card={true}
       />
     </>
   );

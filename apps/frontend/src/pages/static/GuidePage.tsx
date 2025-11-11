@@ -10,9 +10,9 @@ const GuidePage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
-      <div className="flex flex-col md:flex-row md:mx-20 md:mr-40 gap-8 md:gap-18 pt-8 md:pt-32 pb-56 px-5 justify-center">
+      <div className="flex flex-col md:flex-row mx-6 md:mx-12 lg:mr-40 gap-8 lg:gap-18 pt-8 md:pt-32 pb-56 justify-center">
         <aside className="min-w-80">
-          <div className="flex flex-col md:sticky top-12 md:pr-18 md:border-r border-zinc-200">
+          <div className="flex flex-col md:sticky top-12 pr-8 lg:pr-18 md:border-r border-zinc-200">
             <h2 className="font-serif !font-semibold !text-xl md:!text-2xl max-w-2xl mb-4">
               Table of Contents
             </h2>
@@ -52,7 +52,7 @@ const GuidePage: React.FC = () => {
         </aside>
         <div className="flex flex-col max-w-[46rem]">
           <div className="mx-auto w-full mb-4 md:mb-16">
-            <h2 className="font-serif !font-semibold !text-4xl md:!text-6xl mb-3 text-black">
+            <h2 className="font-serif !font-medium !text-4xl md:!text-6xl mb-3 text-black">
               Guide to the Alliance
             </h2>
             <p className="text-base md:text-lg text-zinc-600">
@@ -94,7 +94,7 @@ Therefore, as a starting point, we seek to address urgent global crises that har
 
 # Structure
 
-Our current structure has two key components:
+Our structure has two key components:
 1. **Commitment-based membership.** We each dependably make a small amount of our time and resources available to the Alliance.
 2. **Central strategy.** We are served by a strategic office that designs collective actions to ensure they are effective. The strategic office breaks actions into easy-to-follow steps and communicates with members over an online platform.
 

@@ -3,9 +3,8 @@ import {
   actionsFindOne,
   UserActionRelation,
 } from "@alliance/shared/client";
-import { Outlet, useParams } from "react-router";
+import { Outlet, useNavigate, useParams } from "react-router";
 import ActionActivityList from "../../components/ActionActivityList";
-import ActionEventsPanel from "../../components/ActionEventsPanel";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import useActivities, { ActivityList } from "./useActivities";
@@ -13,9 +12,11 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../lib/AuthContext";
 import Spinner from "../../components/Spinner";
 import { useCIDFromParams } from "../../lib/utils";
+import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 
 export default function ActionPage() {
   const { id: idParam } = useParams();
+  const navigate = useNavigate();
 
   const actionId = parseInt(idParam!);
 
@@ -68,34 +69,46 @@ export default function ActionPage() {
   }
 
   return (
-    <div
-      className="max-w-[1250px] mx-auto flex bg-white min-h-[calc(100vh-var(--nav-height))]"
-      style={{ boxSizing: "border-box" }}
-    >
-      <div className="flex-1 p-3 sm:p-10">
+    <div className="w-full flex flex-row justify-between py-10 sm:py-20 px-4 md:px-8 lg:px-18">
+      <div className="flex flex-col pr-0 sm:pr-12 max-w-2xl lg:max-w-3xl mx-auto w-full">
         <Outlet
           context={
             {
               action,
               userRelation:
                 (action.userRelation as UserActionRelation | undefined) ?? null,
-              onCompleteAction: () =>
+              onCompleteAction: () => {
                 setAction((action) => ({
                   ...action!,
                   userRelation: "completed",
-                })),
+                }));
+
+                // TODO need better way to update number of remaining tasks
+                navigate(window.location.pathname);
+              },
               onJoinAction: () =>
-                setAction((action) => ({ ...action!, userRelation: "joined" })),
-              onDeclineAction: () =>
+                setAction((action) => ({
+                  ...action!,
+                  userRelation: "joined",
+                })),
+              onDeclineAction: () => {
                 setAction((action) => ({
                   ...action!,
                   userRelation: "declined",
-                })),
-              onOptOutAction: () =>
+                }));
+
+                // TODO need better way to update number of remaining tasks
+                navigate(window.location.pathname);
+              },
+              onOptOutAction: () => {
                 setAction((action) => ({
                   ...action!,
                   userRelation: "declined",
-                })),
+                }));
+
+                // TODO need better way to update number of remaining tasks
+                navigate(window.location.pathname);
+              },
               activities,
               handleLikeActivity,
               setActivities,
@@ -103,24 +116,21 @@ export default function ActionPage() {
           }
         />
       </div>
-      <div
-        className="sticky w-[360px] shrink-0 top-[var(--nav-height)] self-start divide-y divide-zinc-200 hidden md:flex flex-col"
-        style={{ height: `calc(100vh - var(--nav-height))` }}
-      >
-        <div
-          className="fixed w-[360px] shrink-0 top-[var(--nav-height)] self-start divide-y divide-zinc-200 hidden md:flex flex-col *:py-5 p-10 pt-14 border-l border-zinc-200 overflow-auto"
-          style={{ height: `calc(100vh - var(--nav-height))` }}
-        >
-          <ActionEventsPanel action={action} events={action.events} />
-          <ActionActivityList
-            actionId={action.id}
-            activities={activities}
-            loading={false}
-            onLikeActivity={handleLikeActivity}
-            setActivities={setActivities}
-            maxN={5}
-          />
-        </div>
+      <div className="hidden lg:flex flex-col max-w-[320px] xl:max-w-[380px] rounded gap-y-12 border-l border-zinc-200 pl-4 lg:pl-12">
+        <ActionCompletedBarWithInfo
+          friendActivities={[]}
+          action={action}
+          textSize="base"
+          textColor="zinc-800"
+        />
+        <ActionActivityList
+          actionId={action.id}
+          activities={activities}
+          loading={false}
+          onLikeActivity={handleLikeActivity}
+          setActivities={setActivities}
+          maxN={5}
+        />
       </div>
     </div>
   );

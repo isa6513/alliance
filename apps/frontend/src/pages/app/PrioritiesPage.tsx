@@ -1,18 +1,16 @@
 import React from "react";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import { Link } from "react-router";
+import CenterLayout from "@alliance/shared/ui/CenterLayout";
 
 const PrioritiesPage: React.FC = () => {
   useWhiteBackground();
 
   return (
-    <div className="flex flex-col max-w-3xl mx-auto p-3 pt-6 md:pt-24">
-      <div className="gap-y-2 flex flex-col text-base md:text-lg">
-        <p className="font-serif text-3xl md:text-5xl font-semibold">
+    <CenterLayout>
+      <div className="md:mt-8 gap-y-4 flex flex-col text-base md:text-lg">
+        <p className="font-serif text-3xl md:text-4xl font-medium">
           Our priorities
-        </p>
-        <p className="text-zinc-500 mb-4 md:mb-8 ">
-          Last updated August 27, 2025
         </p>
 
         <p>At this early stage, we are planning collective actions that:</p>
@@ -63,7 +61,7 @@ const PrioritiesPage: React.FC = () => {
           .
         </p>
       </div>
-    </div>
+    </CenterLayout>
   );
 };
 
