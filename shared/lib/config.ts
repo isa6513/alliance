@@ -1,11 +1,11 @@
-export const base_url = "https://worldalliance.org";
-export const prod_api_url = base_url + "/api";
+const prod_url = (import.meta as unknown as { env: { VITE_API_URL: string } })
+  .env.VITE_API_URL;
 
 export const getWebSocketUrl = (mode: string): string => {
   if (mode === "development") {
     return "http://localhost:3005";
   } else {
-    return base_url;
+    return prod_url;
   }
 };
 
@@ -16,7 +16,7 @@ export const getApiUrl = (): string => {
   ) {
     return "http://localhost:3005";
   } else {
-    return prod_api_url;
+    return prod_url + "/api";
   }
 };
 

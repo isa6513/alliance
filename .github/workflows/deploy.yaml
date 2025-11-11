@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
 
 env:
   AWS_REGION: us-west-2
@@ -93,7 +93,7 @@ jobs:
         working-directory: ./
 
       - name: Build React App
-        run: corepack yarn workspace @alliance/frontend build
+        run: corepack yarn workspace @alliance/frontend build --mode "$env_name"
         working-directory: ./
 
       - name: Inject & upload source maps to PostHog
@@ -102,7 +102,7 @@ jobs:
         with:
           directory: ./apps/frontend/build/client/assets/
           env-id: ${{ secrets.POSTHOG_PROJECT_ID }}
-          cli-token: ${{ secrets.POSTHOG_CLI_TOKEN }}
+          cli-token: ${{ secrets.POSTHOG_SOURCEMAP_KEY }}
 
       - name: create output folder
         run: |
@@ -155,7 +155,7 @@ jobs:
         working-directory: ./
 
       - name: Build React App
-        run: corepack yarn workspace @alliance/admin build
+        run: corepack yarn workspace @alliance/admin build --mode "$env_name"
         working-directory: ./
 
       - name: Zip Build Output
@@ -465,7 +465,7 @@ jobs:
             export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             export JWT_SECRET=${{ secrets.JWT_SECRET }}
             export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
-            export NODE_ENV=production
+            export NODE_ENV=${{ github.ref_name == 'staging' && 'staging' || 'production' }}
             export DB_NAME="alliance"
             export SMTP_HOST=${{ secrets.SMTP_HOST }}
             export SMTP_USER=${{ secrets.SMTP_USER }}

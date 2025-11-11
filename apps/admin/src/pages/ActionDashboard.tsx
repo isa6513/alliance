@@ -23,10 +23,10 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import ActionForm from "../components/ActionForm";
 import EventManagementTab from "../components/EventManagementTab";
-import { getApiUrl } from "../lib/config";
 import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
 import { FormBuilder } from "../components/FormBuilder";
 import ActionUpdatesTab from "../components/ActionUpdatesTab";
+import { getApiUrl } from "@alliance/shared/lib/config";
 
 // Status color mapping
 export const getStatusColor = (status: ActionDto["status"]) => {
