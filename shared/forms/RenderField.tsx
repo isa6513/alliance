@@ -24,7 +24,7 @@ export type RenderFieldProps = {
 };
 
 const sharedInputClasses =
-  "w-full px-3 py-2 rounded-md focus:outline-none disabled:!bg-transparent";
+  "w-full px-3 py-2 rounded-md focus:outline-none bg-white disabled:!bg-transparent";
 
 export function RenderLabel({
   field,
