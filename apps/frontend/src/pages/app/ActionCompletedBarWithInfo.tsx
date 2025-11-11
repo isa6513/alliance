@@ -29,8 +29,8 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
 }: ActionCompletedBarWithInfoProps) => {
   const value =
     action.status === "gathering_commitments"
-      ? action.usersCompleted
-      : action.usersJoined;
+      ? action.usersJoined
+      : action.usersCompleted;
 
   const threshold =
     action.status === "gathering_commitments"
