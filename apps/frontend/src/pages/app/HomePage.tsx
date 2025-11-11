@@ -53,8 +53,14 @@ export function canJoinAction(action: ActionWithRelation) {
 }
 
 export function isActionInCurrentWeek(action: ActionWithRelation) {
+  const deadlineEvent = action.events.find(
+    (event) => event.newStatus === "office_action"
+  );
+  if (!deadlineEvent) {
+    return true;
+  }
   return (
-    new Date(action.events[action.events.length - 1].date) <
+    new Date(deadlineEvent.date) <
     new Date(new Date().setDate(new Date().getDate() + 7))
   );
 }
@@ -93,6 +99,7 @@ const HomePage = () => {
   const nextWeekTodoActions = todoActions.filter((action) => {
     return !isActionInCurrentWeek(action);
   });
+  console.log(currentWeekTodoActions, nextWeekTodoActions);
   const remainingTasksEstimatedTimeCurrentWeek = currentWeekTodoActions.reduce(
     (sum, action) => {
       if (action.timeEstimate) {
@@ -184,13 +191,17 @@ const HomePage = () => {
                   <span className="text-zinc-600">{action.name}</span>
                 </div>
               ))}
-              <p className="text-zinc-500 mt-3 font-medium">Next week</p>
-              {nextWeekTodoActions.map((action) => (
-                <div key={action.id} className="text-zinc-600 flex gap-x-2">
-                  <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
-                  <span className="text-zinc-600">{action.name}</span>
-                </div>
-              ))}
+              {nextWeekTodoActions.length > 0 && (
+                <>
+                  <p className="text-zinc-500 mt-3 font-medium">Next week</p>
+                  {nextWeekTodoActions.map((action) => (
+                    <div key={action.id} className="text-zinc-600 flex gap-x-2">
+                      <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
+                      <span className="text-zinc-600">{action.name}</span>
+                    </div>
+                  ))}
+                </>
+              )}
             </ul>
           </div>
         )}

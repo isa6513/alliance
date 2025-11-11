@@ -159,12 +159,12 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
           className="p-2 text-xl rounded-md hover:bg-gray-100 focus:outline-none"
           aria-label="Toggle navigation"
         >
-          <p className="relative text-4xl">
+          <div className="relative text-4xl -mt-1">
             ☰
             {(unreadCount > 0 || todoActions > 0) && (
               <div className="absolute -right-0.5 top-1.5 w-2 h-2 bg-red-500 rounded-full"></div>
             )}
-          </p>
+          </div>
         </button>
 
         <Link
