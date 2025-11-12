@@ -117,9 +117,7 @@ const Sidebar: React.FC = () => {
   return (
     <div className="flex flex-row min-h-screen h-fitcontent flex-nowrap bg-pagebg bg-[#fcfcfc]">
       <div
-        className={`overflow-y-auto max-h-screen overflow-x-hidden flex flex-col justify-between relative transition-all duration-100 ${
-          isProd ? "bg-red-100" : "bg-[#f4f4f4]"
-        }`}
+        className={`overflow-y-auto max-h-screen overflow-x-hidden flex flex-col justify-between relative transition-all duration-100 bg-[#f4f4f4]`}
         style={{
           width: `${sidebarWidth}px`,
         }}

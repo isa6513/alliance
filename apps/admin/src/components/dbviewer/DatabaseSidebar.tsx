@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import type { TableMetadataDto } from "@alliance/shared/client/types.gen";
+import { isProduction } from "@alliance/shared/lib/config";
 
 interface DatabaseSidebarProps {
   tables: TableMetadataDto[];
@@ -28,9 +29,6 @@ const DatabaseSidebar: React.FC<DatabaseSidebarProps> = ({
     });
   }, [tables]);
 
-  const isLocalhost =
-    typeof window !== "undefined" && window.location.href.includes("localhost");
-
   return (
     <div className="w-75 border-r border-gray-200 flex flex-col">
       <div className="p-6 border-b border-gray-200 bg-white">
@@ -56,7 +54,7 @@ const DatabaseSidebar: React.FC<DatabaseSidebarProps> = ({
           </button>
           <h1
             className={`!text-xl font-bold ${
-              isLocalhost ? "text-gray-900" : "text-red-500"
+              isProduction() ? "text-red-500" : "text-gray-900"
             }`}
           >
             Database Viewer
