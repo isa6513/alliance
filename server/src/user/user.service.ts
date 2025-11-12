@@ -460,7 +460,7 @@ export class UserService {
         category: NotificationCategory.FriendRequest,
         message: `${requester.name} wants to be friends`,
         webAppLocation: profileUrl(requesterId),
-        associatedUser: requester,
+        associatedUsers: [requester],
       });
 
       rel = this.friendRepository.create({
@@ -500,7 +500,7 @@ export class UserService {
         category: NotificationCategory.FriendRequestAccepted,
         message: `${rel.addressee.name} accepted your friend request`,
         webAppLocation: `/profile`,
-        associatedUser: rel.addressee,
+        associatedUsers: [rel.addressee],
       });
     }
     return this.friendRepository.save(rel);

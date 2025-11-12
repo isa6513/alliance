@@ -1,4 +1,4 @@
-import { ApiPropertyOptional, PickType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { ProfileDto } from 'src/user/user.dto';
 import { Notification } from '../entities/notification.entity';
 
@@ -13,14 +13,14 @@ export class NotificationDto extends PickType(Notification, [
   'cleared',
   'updatedAt',
 ]) {
-  @ApiPropertyOptional({ type: ProfileDto })
-  associatedUser?: ProfileDto;
+  @ApiProperty({ type: ProfileDto, isArray: true })
+  associatedUsers: ProfileDto[];
 
   constructor(notification: Notification) {
     super();
     Object.assign(this, notification);
-    this.associatedUser = notification.associatedUser
-      ? new ProfileDto(notification.associatedUser)
-      : undefined;
+    this.associatedUsers = notification.associatedUsers
+      ? notification.associatedUsers.map((user) => new ProfileDto(user))
+      : [];
   }
 }

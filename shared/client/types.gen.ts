@@ -394,7 +394,7 @@ export type EditableContent = {
 
 export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 'group';
 
-export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update';
+export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes';
 
 export type Notification = {
     id: number;
@@ -406,6 +406,8 @@ export type Notification = {
     cleared: boolean;
     createdAt: string;
     updatedAt: string;
+    groupingKey?: string;
+    groupingCount?: number;
     actionUpdate?: ActionUpdate;
 };
 
@@ -1126,7 +1128,7 @@ export type NotificationDto = {
     cleared: boolean;
     createdAt: string;
     updatedAt: string;
-    associatedUser?: ProfileDto;
+    associatedUsers: Array<ProfileDto>;
 };
 
 export type NotifClickDto = {

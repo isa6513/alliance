@@ -18,6 +18,10 @@ import { Action, ActionTaskType } from '../src/actions/entities/action.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { Group } from '../src/user/entities/group.entity';
 import { User } from '../src/user/entities/user.entity';
+import {
+  Notification,
+  NotificationCategory,
+} from 'src/notifs/entities/notification.entity';
 
 describe('Actions (e2e)', () => {
   let ctx: TestContext;
@@ -28,6 +32,7 @@ describe('Actions (e2e)', () => {
   let userService: UserService;
   let groupRepo: Repository<Group>;
   let userRepo: Repository<User>;
+  let notifRepo: Repository<Notification>;
   let restrictedGroup: Group;
   let groupRestrictedAction: Action;
   let outsiderToken: string;
@@ -73,6 +78,7 @@ describe('Actions (e2e)', () => {
     userService = ctx.app.get(UserService);
     groupRepo = ctx.dataSource.getRepository(Group);
     userRepo = ctx.dataSource.getRepository(User);
+    notifRepo = ctx.dataSource.getRepository(Notification);
 
     // Create test action with MemberAction status
     testAction = actionRepo.create({
@@ -1252,6 +1258,40 @@ describe('Actions (e2e)', () => {
         .expect(201);
 
       expect(unlike.body.likes.length).toBe(0);
+
+      await actionRepo.delete(action.id);
+    });
+
+    it('notifies activity owners when their updates receive likes', async () => {
+      const { action } = await createPublishedAction('Activity Like Notice', {
+        status: ActionStatus.GatheringCommitments,
+      });
+
+      const join = await request(ctx.app.getHttpServer())
+        .post(`/actions/join/${action.id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      const activityId = join.body.id;
+
+      await request(ctx.app.getHttpServer())
+        .post(`/actions/likeActivity/${activityId}`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .expect(201);
+
+      const likeNotifs = await notifRepo.find({
+        where: {
+          user: { id: ctx.testUserId },
+          category: NotificationCategory.Likes,
+          groupingKey: `activity_like:${activityId}`,
+        },
+      });
+
+      expect(likeNotifs).toHaveLength(1);
+      expect(likeNotifs[0].message).toBe(
+        'Test Admin liked your activity update',
+      );
+      expect(likeNotifs[0].webAppLocation).toBe(`/actions/${action.id}`);
 
       await actionRepo.delete(action.id);
     });

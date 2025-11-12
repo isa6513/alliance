@@ -1,5 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import {
   CreateDateColumnTz,
@@ -13,6 +20,7 @@ export enum NotificationCategory {
   FriendRequest = 'friend_request',
   FriendRequestAccepted = 'friend_request_accepted',
   ActionUpdate = 'action_update',
+  Likes = 'likes',
 }
 
 @Entity()
@@ -26,11 +34,9 @@ export class Notification {
   })
   user: User;
 
-  @ManyToOne(() => User, (user) => user.notifications, {
-    nullable: true,
-    onDelete: 'SET NULL',
-  })
-  associatedUser?: User;
+  @ManyToMany(() => User)
+  @JoinTable({ name: 'notification_associated_users' })
+  associatedUsers?: User[];
 
   @Column({ type: 'enum', enum: NotificationCategory })
   @ApiProperty({ enum: NotificationCategory, enumName: 'NotificationCategory' })
@@ -63,6 +69,14 @@ export class Notification {
   @UpdateDateColumnTz()
   @ApiProperty()
   updatedAt: Date;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  groupingKey?: string;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  groupingCount?: number;
 
   @ApiPropertyOptional({ type: () => ActionUpdate })
   @ManyToOne(() => ActionUpdate, (actionUpdate) => actionUpdate.notifs, {

@@ -7,6 +7,7 @@ import { ActionEventNotif } from './entities/action-event-notif.entity';
 import { Notification } from './entities/notification.entity';
 import { NotifsController } from './notifs.controller';
 import { NotifsService } from './notifs.service';
+import { LikeNotificationService } from './like-notification.service';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { NotifsService } from './notifs.service';
     UserModule,
   ],
   controllers: [NotifsController],
-  providers: [NotifsService],
-  exports: [NotifsService],
+  providers: [NotifsService, LikeNotificationService],
+  exports: [NotifsService, LikeNotificationService],
 })
 export class NotifsModule {}

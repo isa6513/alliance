@@ -13,6 +13,7 @@ import { ForumModule } from '../src/forum/forum.module';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { Notification } from 'src/notifs/entities/notification.entity';
+import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 
 describe('Forum (e2e)', () => {
   let ctx: TestContext;
@@ -21,6 +22,30 @@ describe('Forum (e2e)', () => {
   let userRepo: Repository<User>;
   let notifRepo: Repository<Notification>;
   let eventRepo: Repository<ActionEvent>;
+  let activityRepo: Repository<ActionActivity>;
+  let likerCounter = 0;
+
+  const createExtraUserAndToken = async () => {
+    likerCounter += 1;
+    const extraUser = userRepo.create({
+      email: `liker${likerCounter}@example.com`,
+      password: 'pass',
+      name: `Extra Liker ${likerCounter}`,
+      groups: [ctx.defaultGroup],
+    });
+    await userRepo.save(extraUser);
+    const token = ctx.jwtService.sign(
+      {
+        sub: extraUser.id,
+        email: extraUser.email,
+        name: extraUser.name,
+      },
+      {
+        secret: process.env.JWT_SECRET,
+      },
+    );
+    return { user: extraUser, token };
+  };
 
   beforeAll(async () => {
     ctx = await createTestApp([ForumModule]);
@@ -28,6 +53,7 @@ describe('Forum (e2e)', () => {
     userRepo = ctx.dataSource.getRepository(User);
     notifRepo = ctx.dataSource.getRepository(Notification);
     eventRepo = ctx.dataSource.getRepository(ActionEvent);
+    activityRepo = ctx.dataSource.getRepository(ActionActivity);
     // Create test action
     testAction = actionRepo.create({
       name: 'Test Action',
@@ -961,6 +987,190 @@ describe('Forum (e2e)', () => {
         .post(`/forum/comments/${commentResponse.body.id}/unlike`)
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .expect(201);
+    });
+
+    it('groups unread like notifications for forum posts', async () => {
+      const postResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          title: 'Post To Get Likes',
+          editableContent: {
+            body: 'Body',
+            attachments: [],
+          },
+          visibleAt: new Date(),
+        } satisfies CreatePostDto)
+        .expect(201);
+
+      const postId = postResponse.body.id;
+      const groupingKey = `forum_like:post:${postId}`;
+
+      await request(ctx.app.getHttpServer())
+        .post(`/forum/posts/${postId}/like`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .expect(201);
+
+      let likeNotifs = await notifRepo.find({
+        where: {
+          user: { id: ctx.testUserId },
+          category: NotificationCategory.Likes,
+          groupingKey,
+        },
+      });
+
+      expect(likeNotifs).toHaveLength(1);
+      expect(likeNotifs[0].message).toBe('Test Admin liked your post');
+      expect(likeNotifs[0].groupingCount).toBe(1);
+      expect(likeNotifs[0].groupingKey).toBe(groupingKey);
+      expect(likeNotifs[0].webAppLocation).toBe(`/forum/post/${postId}`);
+
+      const { token: likerToken } = await createExtraUserAndToken();
+
+      await request(ctx.app.getHttpServer())
+        .post(`/forum/posts/${postId}/like`)
+        .set('Authorization', `Bearer ${likerToken}`)
+        .expect(201);
+
+      likeNotifs = await notifRepo.find({
+        where: {
+          user: { id: ctx.testUserId },
+          category: NotificationCategory.Likes,
+          groupingKey,
+        },
+      });
+
+      expect(likeNotifs).toHaveLength(1);
+      expect(likeNotifs[0].message).toBe('2 people liked your post');
+      expect(likeNotifs[0].groupingCount).toBe(2);
+    });
+
+    it('creates a new comment like notification after the previous one is read', async () => {
+      const postResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          title: 'Post With Comment Likes',
+          editableContent: {
+            body: 'Body',
+            attachments: [],
+          },
+          visibleAt: new Date(),
+        } satisfies CreatePostDto)
+        .expect(201);
+
+      const commentResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/comments')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          editableContent: { body: 'Comment to Like', attachments: [] },
+          parentObjectId: postResponse.body.id,
+          parentObjectType: CommentParentObject.Post,
+        } satisfies CreateCommentDto)
+        .expect(201);
+
+      const commentId = commentResponse.body.id;
+      const groupingKey = `forum_like:comment:${commentId}`;
+
+      await request(ctx.app.getHttpServer())
+        .post(`/forum/comments/${commentId}/like`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .expect(201);
+
+      const { token: secondLikerToken } = await createExtraUserAndToken();
+
+      await request(ctx.app.getHttpServer())
+        .post(`/forum/comments/${commentId}/like`)
+        .set('Authorization', `Bearer ${secondLikerToken}`)
+        .expect(201);
+
+      let commentLikeNotifs = await notifRepo.find({
+        where: {
+          user: { id: ctx.testUserId },
+          category: NotificationCategory.Likes,
+          groupingKey,
+        },
+        order: { createdAt: 'ASC' },
+      });
+
+      expect(commentLikeNotifs).toHaveLength(1);
+      expect(commentLikeNotifs[0].message).toBe('2 people liked your comment');
+      expect(commentLikeNotifs[0].groupingCount).toBe(2);
+
+      await request(ctx.app.getHttpServer())
+        .post(`/notifs/read/${commentLikeNotifs[0].id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      const { token: thirdLikerToken, user: thirdUser } =
+        await createExtraUserAndToken();
+
+      await request(ctx.app.getHttpServer())
+        .post(`/forum/comments/${commentId}/like`)
+        .set('Authorization', `Bearer ${thirdLikerToken}`)
+        .expect(201);
+
+      commentLikeNotifs = await notifRepo.find({
+        where: {
+          user: { id: ctx.testUserId },
+          category: NotificationCategory.Likes,
+          groupingKey,
+        },
+        order: { createdAt: 'ASC' },
+      });
+
+      expect(commentLikeNotifs).toHaveLength(2);
+      const latestNotif = commentLikeNotifs[1];
+      expect(latestNotif.groupingCount).toBe(1);
+      expect(latestNotif.message).toBe(`${thirdUser.name} liked your comment`);
+      expect(latestNotif.read).toBe(false);
+    });
+
+    it('creates notifications when activity comments receive likes', async () => {
+      await activityRepo.delete({
+        user: { id: ctx.testUserId },
+        actionId: testAction.id,
+      });
+
+      const joinResponse = await request(ctx.app.getHttpServer())
+        .post(`/actions/join/${testAction.id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      const activityId = joinResponse.body.id;
+
+      const commentResponse = await request(ctx.app.getHttpServer())
+        .post(`/actions/addActivityComment/${activityId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          editableContent: { body: 'Activity thread comment', attachments: [] },
+          parentObjectId: activityId,
+          parentObjectType: CommentParentObject.Activity,
+        } satisfies CreateCommentDto)
+        .expect(201);
+
+      const commentId = commentResponse.body.id;
+
+      await request(ctx.app.getHttpServer())
+        .post(`/forum/comments/${commentId}/like`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .expect(201);
+
+      const activityCommentNotifs = await notifRepo.find({
+        where: {
+          user: { id: ctx.testUserId },
+          category: NotificationCategory.Likes,
+          groupingKey: `forum_like:comment:${commentId}`,
+        },
+      });
+
+      expect(activityCommentNotifs).toHaveLength(1);
+      expect(activityCommentNotifs[0].message).toBe(
+        'Test Admin liked your comment',
+      );
+      expect(activityCommentNotifs[0].webAppLocation).toBe(
+        `/actions/${testAction.id}/activity/${activityId}?replyId=${commentId}`,
+      );
     });
   });
 });

@@ -55,6 +55,8 @@ import {
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ActionSuite } from './entities/action-suite.entity';
 import { NotifsService, shouldTextUser } from 'src/notifs/notifs.service';
+import { LikeNotificationService } from 'src/notifs/like-notification.service';
+import { actionActivityUrl } from 'src/search/approutes';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -92,6 +94,7 @@ export class ActionsService {
     private readonly notifsService: NotifsService,
     private readonly actionEventRecipientService: ActionEventRecipientService,
     private readonly actionEventReminderService: ActionEventReminderService,
+    private readonly likeNotificationService: LikeNotificationService,
   ) {}
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
@@ -878,18 +881,34 @@ export class ActionsService {
       .relation(ActionActivity, 'likes')
       .of(activity);
 
+    let createdLike = false;
     if (unlike) {
       await qb.remove(user);
     } else if (!activity.likes.some((like) => like.id === user.id)) {
       await qb.add(user);
+      createdLike = true;
     }
 
     const updatedActivity = await this.actionActivityRepository.findOne({
       where: { id },
-      relations: ['user', 'likes'],
+      relations: ['user', 'action', 'likes'],
     });
     if (!updatedActivity) {
       throw new NotFoundException('Activity not found');
+    }
+
+    if (createdLike && updatedActivity.user) {
+      await this.likeNotificationService.createOrUpdate({
+        owner: updatedActivity.user,
+        liker: user,
+        targetType: 'activity',
+        targetId: updatedActivity.id,
+        webAppLocation: actionActivityUrl(
+          updatedActivity.action?.id ?? updatedActivity.actionId,
+          updatedActivity.id,
+        ),
+        groupingKey: `activity_like:${updatedActivity.id}`,
+      });
     }
 
     return new ActionActivityDto(updatedActivity);

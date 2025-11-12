@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
-import { commentUrl } from 'src/search/approutes';
+import { commentUrl, postUrl } from 'src/search/approutes';
 import { ProfileDto } from 'src/user/user.dto';
 import { ILike, In, Not, Repository } from 'typeorm';
 import {
@@ -24,6 +24,7 @@ import { Comment, CommentParentObject } from './entities/comment.entity';
 import { EditableContent } from './entities/editablecontent.entity';
 import { Post } from './entities/post.entity';
 import { Action } from 'src/actions/entities/action.entity';
+import { LikeNotificationService } from 'src/notifs/like-notification.service';
 
 @Injectable()
 export class ForumService {
@@ -42,6 +43,7 @@ export class ForumService {
     private actionActivityRepository: Repository<ActionActivity>,
     @InjectRepository(EditableContent)
     private editableContentRepository: Repository<EditableContent>,
+    private readonly likeNotificationService: LikeNotificationService,
   ) {}
 
   async createPost(
@@ -347,12 +349,7 @@ export class ForumService {
 
     this.sendNotifsForNewComment(replyWithAuthor);
 
-    const loadedReply = await this.commentRepository.findOneOrFail({
-      where: { id: reply.id },
-      relations: ['author', 'editableContent'],
-    });
-
-    return new CommentDto(loadedReply);
+    return new CommentDto(replyWithAuthor);
   }
 
   async sendNotifsForNewComment(comment: Comment): Promise<void> {
@@ -400,7 +397,7 @@ export class ForumService {
             ? actionIds.get(comment.parentObjectId)
             : undefined,
         ),
-        associatedUser: comment.author,
+        associatedUsers: [comment.author],
       });
       notifications.push(notif);
     }
@@ -491,7 +488,57 @@ export class ForumService {
       ? this.commentRepository.save(object)
       : this.postRepository.save(object));
 
+    if (!unlike) {
+      if (type === 'comment') {
+        await this.sendCommentLikeNotification(object as Comment, user);
+      } else {
+        await this.sendPostLikeNotification(object as Post, user);
+      }
+    }
+
     return obj;
+  }
+
+  private async sendPostLikeNotification(post: Post, liker: User) {
+    if (!post.author || post.authorId === liker.id) {
+      return;
+    }
+    await this.likeNotificationService.createOrUpdate({
+      owner: post.author,
+      liker,
+      targetType: 'post',
+      targetId: post.id,
+      webAppLocation: postUrl(post.id),
+      groupingKey: `forum_like:post:${post.id}`,
+    });
+  }
+
+  private async sendCommentLikeNotification(comment: Comment, liker: User) {
+    if (!comment.author || comment.authorId === liker.id) {
+      return;
+    }
+    let actionIdForActivity: number | undefined;
+    if (comment.parentObjectType === CommentParentObject.Activity) {
+      const activity = await this.actionActivityRepository.findOne({
+        where: { id: comment.parentObjectId },
+      });
+      if (!activity) {
+        return;
+      }
+      actionIdForActivity = activity.actionId;
+    }
+    const webAppLocation = commentUrl(comment, actionIdForActivity);
+    if (!webAppLocation) {
+      return;
+    }
+    await this.likeNotificationService.createOrUpdate({
+      owner: comment.author,
+      liker,
+      targetType: 'comment',
+      targetId: comment.id,
+      webAppLocation,
+      groupingKey: `forum_like:comment:${comment.id}`,
+    });
   }
 
   async deleteReply(id: number, userId: number): Promise<void> {
