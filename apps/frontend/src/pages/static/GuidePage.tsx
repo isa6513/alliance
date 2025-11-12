@@ -18,8 +18,8 @@ const GuidePage: React.FC = () => {
             </h2>
             <ol className="flex flex-col gap-y-1 *:hover:underline">
               <li>
-                <a href="#goals" className="">
-                  Goals
+                <a href="#priorities" className="">
+                  Priorities
                 </a>
               </li>
               <li>
@@ -51,42 +51,49 @@ const GuidePage: React.FC = () => {
           </div>
         </aside>
         <div className="flex flex-col max-w-[46rem]">
-          <div className="mx-auto w-full mb-4 md:mb-16">
-            <h2 className="font-serif !font-medium !text-4xl md:!text-6xl mb-3 text-black">
+          <div className="mx-auto w-full mb-4 md:mb-6">
+            <h2 className="font-serif !font-semibold !text-4xl md:!text-6xl mb-3 text-black">
               Guide to the Alliance
             </h2>
-            <p className="text-base md:text-lg text-zinc-600">
-              Information about the Alliance in recommended reading order. If
-              you think you are likely to become a member, you do not need to
-              read everything—we will walk you through the information when you
-              sign up.
-            </p>
           </div>
-          <Card className="mb-6 p-6" style={CardStyle.Navy}>
-            <p>
-              This guide was developed and approved by 25 founding members of
-              the Alliance. Learn more about the process{" "}
-              <a href="/progress/early-governance" className="underline">
-                here
-              </a>
-              .
-            </p>
-          </Card>
 
           <MarkdownWrapper
-            id="goals"
+            id="introduction"
             className=""
             markdownContent="
-# Goals
+The Alliance is a global group of individuals coordinating to combat global crises. Members spend a small fraction of time each week completing tasks that add up to effective collective actions.
 
-The Alliance is nonideological. The goals, structure, membership expectations, and process we describe in this guide all derive from the wants and needs expressed by members and from robust evidence about the wants and needs of humanity.
+Our commitment-based structure is designed to unite millions of people behind a global, expert-developed plan of action. Today, we are running small experiments to prepare for future growth.
+"
+          />
 
-We believe that the chief purpose of civilization is to serve individuals and future generations in their pursuit of fulfillment and happiness. We want to create a world in which every individual has the resources and freedom to achieve happiness and fulfillment, humanity’s most important decisions are made with democratic input, and people live free of political, economic, and environmental insecurity.
+          <MarkdownWrapper
+            id="priorities"
+            className="mt-6"
+            markdownContent="
+            
+# Priorities
 
-Therefore, as a starting point, we seek to address urgent global crises that harm or will harm billions of current and future people.
+We aim to end global crises that harm or will harm billions of current and future people. We are focused on:
+1. Extreme poverty
+2. Environmental destruction
+3. Breakdown of democratic institutions
+4. Dangerous technological development
 
 "
           />
+
+          <Card
+            style={CardStyle.White}
+            className="mt-6 p-4 md:p-6 my-4 text-lg cursor-pointer hover:bg-zinc-50"
+          >
+            <p className="font-semibold">Statement of Purpose</p>
+            <p>
+              Our statement of purpose describes our founding principle and how
+              it determines our goals.
+            </p>
+          </Card>
+
           <MarkdownWrapper
             id="structure"
             className="mt-6"

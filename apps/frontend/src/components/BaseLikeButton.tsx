@@ -8,6 +8,7 @@ export interface BaseLikeButtonProps {
   labelText?: boolean;
   size?: "small" | "medium" | "large";
   border?: boolean;
+  backgroundColor?: string;
 }
 
 const BaseLikeButton = ({
@@ -18,6 +19,7 @@ const BaseLikeButton = ({
   labelText = false,
   size = "medium",
   border = false,
+  backgroundColor = "transparent",
 }: BaseLikeButtonProps) => {
   const [scaled, setScaled] = useState(false);
   useEffect(() => {
@@ -37,7 +39,7 @@ const BaseLikeButton = ({
 
   return (
     <div
-      className={`flex flex-row gap-x-1 items-center ${
+      className={`flex flex-row gap-x-1 items-center bg-${backgroundColor} ${
         border
           ? "border border-zinc-300 rounded hover:bg-zinc-100 px-2 py-1.5"
           : ""

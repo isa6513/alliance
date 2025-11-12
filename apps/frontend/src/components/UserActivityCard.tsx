@@ -36,11 +36,29 @@ const UserActivityCard = ({
   });
   const [isSaving, setIsSaving] = useState(false);
 
+  const [showCommentForm, setShowCommentForm] = useState(false);
+
   const completed = activity.type === "user_completed";
 
-  const handleClick = useCallback(() => {
-    navigate(`/actions/${activity.actionId}`);
-  }, [activity.actionId, navigate]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      navigate(`/actions/${activity.actionId}`);
+    },
+    [activity.actionId, navigate]
+  );
+
+  const handleActivityClick = useCallback(() => {
+    if (isEditing || isSaving || showCommentForm) return;
+    navigate(`/actions/${activity.actionId}/activity/${activity.id}`);
+  }, [
+    activity.actionId,
+    activity.id,
+    navigate,
+    isEditing,
+    isSaving,
+    showCommentForm,
+  ]);
 
   const timeSinceCompleted = formatTime(new Date(activity.createdAt), {
     addSuffix: true,
@@ -113,20 +131,29 @@ const UserActivityCard = ({
     setIsEditing(false);
   }, [activity.editableContent]);
 
-  const [showCommentForm, setShowCommentForm] = useState(false);
-
   return (
-    <div className="flex flex-row justify-stretch items-center space-x-4">
-      <div className="block bg-white text-[11pt] flex-1 gap-y-2">
+    <div className="flex flex-col">
+      <div
+        className={`block p-2 -m-2 text-[11pt] flex-1 gap-y-2 bg-white ${
+          !(isEditing || isSaving || showCommentForm) &&
+          "hover:bg-zinc-50 cursor-pointer"
+        }`}
+        onClick={handleActivityClick}
+      >
         <div className="*:inline">
           <div className="flex-shrink-0 inline">
-            <Link to={`/user/${activity.user.id}`} className="mr-2">
+            <Link
+              to={`/user/${activity.user.id}`}
+              className="mr-2"
+              onClick={(e) => e.stopPropagation()}
+            >
               <ProfileImage pfp={activity.user.profilePicture} size="small" />
             </Link>
           </div>
           <Link
             to={`/user/${activity.user.id}`}
             className="text-zinc-900 hover:underline"
+            onClick={(e) => e.stopPropagation()}
           >
             {activity.user.displayName}
           </Link>
@@ -178,6 +205,7 @@ const UserActivityCard = ({
                   liked={activity.likes.some((like) => like.id === self?.id)}
                   likes={activity.likes.length}
                   handleLike={() => handleLike(activity.id)}
+                  backgroundColor="white"
                 />
                 {canEdit && (
                   <Button
@@ -218,17 +246,16 @@ const UserActivityCard = ({
             </div>
           </div>
         )}
-
-        {completed && (
-          <Comments
-            objectId={activity.id}
-            type="activity"
-            compact
-            showForm={showCommentForm}
-            autofocus={showCommentForm}
-          />
-        )}
       </div>
+      {completed && (
+        <Comments
+          objectId={activity.id}
+          type="activity"
+          compact
+          showForm={showCommentForm}
+          autofocus={showCommentForm}
+        />
+      )}
     </div>
   );
 };
