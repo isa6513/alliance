@@ -199,51 +199,46 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
           <div className="flex flex-col w-full divide-y divide-zinc-200">
             {navSections.map((section) => (
               <nav key={section.title} className="flex flex-col py-4 w-full">
-                {section.items.map((item) => (
-                  <>
-                    {item.page === NavbarPage.Profile ? (
-                      <Link
-                        to={destinations[NavbarPage.Profile]}
-                        prefetch="render"
-                        key={NavbarPage.Profile}
-                        className={`hidden md:flex p-3 hover:bg-zinc-100 rounded items-center justify-between w-full`}
-                      >
-                        <div className="text-zinc-700 flex items-center gap-x-3">
-                          <ProfileImage pfp={profilePicture} size="small" />
-                          <span>{profile?.displayName}</span>
+                {section.items.map((item) =>
+                  item.page === NavbarPage.Profile ? (
+                    <Link
+                      key={item.page}
+                      to={destinations[NavbarPage.Profile]}
+                      prefetch="render"
+                      className={`hidden md:flex p-3 hover:bg-zinc-100 rounded items-center justify-between w-full`}
+                    >
+                      <div className="text-zinc-700 flex items-center gap-x-3">
+                        <ProfileImage pfp={profilePicture} size="small" />
+                        <span>{profile?.displayName}</span>
+                      </div>
+                    </Link>
+                  ) : (
+                    <Link
+                      key={item.page}
+                      to={item.destination}
+                      prefetch="render"
+                      className={`px-3 py-1.5 rounded flex items-center justify-between w-full pr-2 ${
+                        currentLocation === item.page
+                          ? "bg-zinc-200/80 text-black"
+                          : "text-zinc-700 hover:bg-zinc-100"
+                      }`}
+                      onClick={() => setOpen(false)}
+                    >
+                      <p>{item.page}</p>
+                      {item.page === NavbarPage.Notifications &&
+                        unreadCount > 0 && (
+                          <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-5 h-5">
+                            {unreadCount}
+                          </div>
+                        )}
+                      {item.page === NavbarPage.Tasks && todoActions > 0 && (
+                        <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-5 h-5">
+                          {todoActions}
                         </div>
-                      </Link>
-                    ) : (
-                      <>
-                        <Link
-                          to={item.destination}
-                          prefetch="render"
-                          key={item.page}
-                          className={`px-3 py-1.5 rounded flex items-center justify-between w-full pr-2 ${
-                            currentLocation === item.page
-                              ? "bg-zinc-200/80 text-black"
-                              : "text-zinc-700 hover:bg-zinc-100"
-                          }`}
-                          onClick={() => setOpen(false)}
-                        >
-                          <p>{item.page}</p>
-                          {item.page === NavbarPage.Notifications &&
-                            unreadCount > 0 && (
-                              <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-5 h-5">
-                                {unreadCount}
-                              </div>
-                            )}
-                          {item.page === NavbarPage.Tasks &&
-                            todoActions > 0 && (
-                              <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-5 h-5">
-                                {todoActions}
-                              </div>
-                            )}
-                        </Link>
-                      </>
-                    )}
-                  </>
-                ))}
+                      )}
+                    </Link>
+                  )
+                )}
               </nav>
             ))}
           </div>
