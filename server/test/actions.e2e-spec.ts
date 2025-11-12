@@ -1289,9 +1289,11 @@ describe('Actions (e2e)', () => {
 
       expect(likeNotifs).toHaveLength(1);
       expect(likeNotifs[0].message).toBe(
-        'Test Admin liked your activity update',
+        'Test Admin liked your action activity',
       );
-      expect(likeNotifs[0].webAppLocation).toBe(`/actions/${action.id}`);
+      expect(likeNotifs[0].webAppLocation).toBe(
+        `/actions/${action.id}/activity/${activityId}`,
+      );
 
       await actionRepo.delete(action.id);
     });

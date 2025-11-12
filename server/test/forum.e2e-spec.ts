@@ -651,7 +651,7 @@ describe('Forum (e2e)', () => {
           user: { id: ctx.testUserId },
           category: NotificationCategory.ForumReply,
         },
-        relations: ['associatedUser', 'user'],
+        relations: ['associatedUsers', 'user'],
       });
 
       expect(
@@ -659,7 +659,7 @@ describe('Forum (e2e)', () => {
           (notif) =>
             notif.webAppLocation ===
               `/forum/post/${testPostId}?replyId=${childResponse.body.id}` &&
-            notif.associatedUser?.id === ctx.adminUserId,
+            notif.associatedUsers?.some((user) => user.id === ctx.adminUserId),
         ),
       ).toBe(true);
     });
@@ -699,7 +699,7 @@ describe('Forum (e2e)', () => {
           user: { id: ctx.testUserId },
           category: NotificationCategory.ForumReply,
         },
-        relations: ['associatedUser', 'user'],
+        relations: ['associatedUsers', 'user'],
       });
 
       expect(
@@ -707,7 +707,7 @@ describe('Forum (e2e)', () => {
           (notif) =>
             notif.webAppLocation ===
               `/actions/${testAction.id}?replyId=${childResponse.body.id}` &&
-            notif.associatedUser?.id === ctx.adminUserId,
+            notif.associatedUsers?.some((user) => user.id === ctx.adminUserId),
         ),
       ).toBe(true);
     });
