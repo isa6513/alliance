@@ -712,6 +712,10 @@ export class ActionsService {
         'This action is not available to your groups.',
       );
     }
+
+    if (action.preventCompletion) {
+      throw new ForbiddenException('This action is no longer available');
+    }
   }
 
   async checkAndProcessAutomaticTransitions(actionId: number) {
