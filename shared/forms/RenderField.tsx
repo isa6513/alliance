@@ -778,7 +778,7 @@ export function TimeInputField({
           className={`w-full px-3 py-2 rounded-md focus:outline-none bg-white disabled:!bg-transparent ${
             hasError
               ? "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent"
-              : "border border-zinc-300 focus:ring-1 focus:ring-green focus:border-transparent"
+              : "border border-zinc-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           }`}
           inputMode="text"
         />

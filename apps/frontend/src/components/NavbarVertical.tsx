@@ -222,32 +222,26 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                           to={item.destination}
                           prefetch="render"
                           key={item.page}
-                          className={`px-3 py-1.5 rounded flex items-center justify-between w-full ${
+                          className={`px-3 py-1.5 rounded flex items-center justify-between w-full pr-2 ${
                             currentLocation === item.page
                               ? "bg-zinc-200/80 text-black"
                               : "text-zinc-700 hover:bg-zinc-100"
                           }`}
                           onClick={() => setOpen(false)}
                         >
-                          <div className="flex flex-row items-center justify-between w-full">
-                            <p>{item.page}</p>
-                            {item.page === NavbarPage.Notifications &&
-                              unreadCount > 0 && (
-                                <div className=" text-white bg-red-500 rounded-md w-5 h-5 flex justify-center items-center">
-                                  <p className="font-semibold text-xs">
-                                    {unreadCount}
-                                  </p>
-                                </div>
-                              )}
-                            {item.page === NavbarPage.Tasks &&
-                              todoActions > 0 && (
-                                <div className=" text-white bg-red-500 rounded-md w-5 h-5 flex justify-center items-center">
-                                  <p className="font-semibold text-xs">
-                                    {todoActions}
-                                  </p>
-                                </div>
-                              )}
-                          </div>
+                          <p>{item.page}</p>
+                          {item.page === NavbarPage.Notifications &&
+                            unreadCount > 0 && (
+                              <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-5 h-5">
+                                {unreadCount}
+                              </div>
+                            )}
+                          {item.page === NavbarPage.Tasks &&
+                            todoActions > 0 && (
+                              <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-5 h-5">
+                                {todoActions}
+                              </div>
+                            )}
                         </Link>
                       </>
                     )}
