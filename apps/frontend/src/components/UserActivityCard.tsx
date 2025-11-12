@@ -30,10 +30,10 @@ const UserActivityCard = ({
   const navigate = useNavigate();
   const { user: self } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState<CreateEditableContentDto>({
-    body: activity.editableContent.body,
-    attachments: activity.editableContent.attachments,
-  });
+  const [editContent, setEditContent] = useState<CreateEditableContentDto>(
+    activity.editableContent ?? { body: "", attachments: [] }
+  );
+
   const [isSaving, setIsSaving] = useState(false);
 
   const [showCommentForm, setShowCommentForm] = useState(false);
@@ -173,6 +173,7 @@ const UserActivityCard = ({
             <div className="rounded p-3 bg-zinc-100">
               <EditableContentForm
                 value={editContent}
+                restoreDraft={false}
                 onChange={setEditContent}
                 placeholder="Add a description..."
               />
@@ -201,7 +202,11 @@ const UserActivityCard = ({
             )}
             <div className="flex flex-row justify-between w-full items-end">
               <p className="text-zinc-500 text-sm">{timeSinceCompleted}</p>
-              <div className="flex items-center space-x-2 self-end mt-2">
+              <div
+                className={`flex items-center space-x-2 self-end ${
+                  !activity.editableContent.body ? "mt-2" : ""
+                }`}
+              >
                 <ActivityLikeButton
                   liked={activity.likes.some((like) => like.id === self?.id)}
                   likes={activity.likes.length}
