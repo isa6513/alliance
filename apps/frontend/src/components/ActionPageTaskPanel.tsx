@@ -52,6 +52,12 @@ const ActionPageTaskPanel = () => {
     return null;
   }
 
+  if (userRelation === "completed") {
+    return <ActionTaskPanelCompleted action={action} />;
+  } else if (userRelation === "declined") {
+    return <ActionTaskPanelDeclined />;
+  }
+
   if (!action.canParticipate) {
     return (
       <div>
@@ -73,12 +79,6 @@ const ActionPageTaskPanel = () => {
         </Card>
       </div>
     );
-  }
-
-  if (userRelation === "completed") {
-    return <ActionTaskPanelCompleted action={action} />;
-  } else if (userRelation === "declined") {
-    return <ActionTaskPanelDeclined />;
   }
 
   const latestEvent = getLatestEvent(action);
