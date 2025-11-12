@@ -1075,7 +1075,6 @@ const FormRenderer = ({
                   <Button
                     color={ButtonColor.Black}
                     type="button"
-                    size="small"
                     onClick={handleNext}
                     className=""
                   >
@@ -1116,14 +1115,14 @@ const FormRenderer = ({
             <div className="relative">
               <Button
                 color={ButtonColor.White}
-                className="px-4 flex items-center !pb-3 !h-[45px] cursor-pointer"
+                className="px-4 flex items-center cursor-pointer justify-center mt-0 text-zinc-800 !h-[45px]"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
-                <p className="text-gray-500">...</p>
+                ⋯
               </Button>
               <Dropdown
                 isOpen={dropdownOpen}
-                className="absolute top-[55px] right-0 gap-y-2 *:w-full w-[300px]"
+                className="absolute top-[100%] right-0 gap-y-2 *:w-full w-[300px]"
                 ref={ref}
               >
                 <p className="mb-1 text-center">Withdrawal options</p>
