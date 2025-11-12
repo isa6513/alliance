@@ -1,7 +1,8 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
 import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
-import { UserDto } from '../user.dto';
+import { User } from '../entities/user.entity';
+import { Temporal } from '@js-temporal/polyfill';
 
 export enum UserActionRelationStatus {
   None = 'none',
@@ -59,7 +60,59 @@ export class UserActionRelationsResponseDto {
   users: UserActionRelationsForUserDto[];
 }
 
-export class CommunityUserInfoDto extends UserActionRelationsResponseDto {
-  @ApiProperty({ type: () => UserDto, isArray: true })
-  members: UserDto[];
+export class CommunityUserInfoDto extends UserActionRelationsResponseDto {}
+
+export class CommunityMemberContactInfoDto extends PickType(User, [
+  'id',
+  'timeZone',
+  'preferredActionReminderChannel',
+]) {
+  @ApiProperty()
+  email: string;
+
+  @ApiPropertyOptional()
+  phoneNumber?: string;
+
+  @ApiPropertyOptional({ type: 'string' })
+  preferredReminderTimeUserTz?: string;
+
+  @ApiPropertyOptional({ type: 'string' })
+  preferredReminderTimeLeaderTz?: string;
+
+  constructor(user: User, viewerTz?: Temporal.TimeZoneLike) {
+    super(user);
+    this.id = user.id;
+    this.email = user.email;
+    this.phoneNumber = user.phoneNumber;
+    this.timeZone = user.timeZone?.toString();
+    this.preferredActionReminderChannel = user.preferredActionReminderChannel;
+
+    if (!user.preferredReminderTime) {
+      return;
+    }
+
+    this.preferredReminderTimeUserTz = Temporal.PlainTime.from(
+      user.preferredReminderTime,
+    ).toLocaleString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+
+    if (!user.timeZone || !viewerTz) {
+      return;
+    }
+
+    const today = Temporal.Now.plainDateISO(user.timeZone);
+    const dateTime = today.toPlainDateTime(user.preferredReminderTime);
+    const zoned = dateTime.toZonedDateTime(user.timeZone);
+    const inTarget = zoned.withTimeZone(viewerTz);
+    const result = inTarget.toPlainTime();
+
+    this.preferredReminderTimeLeaderTz = result.toLocaleString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
 }

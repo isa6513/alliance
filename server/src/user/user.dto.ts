@@ -98,6 +98,7 @@ export class UserDto extends PickType(User, [
   'anonymous',
   'preferredActionReminderChannel',
   'phoneNumber',
+  'communities',
   'profilePicture',
   'activities',
 ]) {

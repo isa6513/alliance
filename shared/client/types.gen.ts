@@ -32,6 +32,57 @@ export type NotificationPreference = 'all' | 'digest' | 'none';
 
 export type ForumDigestPreference = 'off' | 'daily' | 'weekly';
 
+export type User = {
+    id: number;
+    name: string;
+    phoneNumberValidated: boolean;
+    sentTextOptInMessageAt?: string;
+    emailVerified: boolean;
+    preferredReminderTime?: string;
+    timeZone?: string;
+    contractDateSigned: string | null;
+    contractDateSuspended: string | null;
+    preferredActionReminderChannel: NotificationChannel;
+    emailNotifsEnabled: boolean;
+    textNotifsEnabled: boolean;
+    pushNotifsEnabled: boolean;
+    socialNotifsPreference: NotificationPreference;
+    turnedOffAllNotifs: boolean;
+    forumDigestPreference: ForumDigestPreference;
+    password: string;
+    admin: boolean;
+    staff: boolean;
+    profilePicture: string | null;
+    profileDescription: string | null;
+    referralCode: string | null;
+    stripeCustomerId: string | null;
+    isNotSignedUpPartialProfile: boolean;
+    over18: boolean | null;
+    onboardingComplete: boolean;
+    anonymous: boolean;
+    communities: Array<Community>;
+};
+
+export type OnetimeInvite = {
+    id: number;
+    invitee: string;
+    code: string;
+    invitingUser: User;
+    createdAt: string;
+    isValid: boolean;
+    community?: Community;
+};
+
+export type Community = {
+    id: number;
+    name: string;
+    description: string;
+    photo?: string;
+    users?: Array<User>;
+    leaders?: Array<User>;
+    invites?: Array<OnetimeInvite>;
+};
+
 export type UserDto = {
     id: number;
     name: string;
@@ -50,6 +101,7 @@ export type UserDto = {
     referralCode: string | null;
     onboardingComplete: boolean;
     anonymous: boolean;
+    communities: Array<Community>;
     cityId?: number;
     email: string;
     phoneNumber?: string;
@@ -96,20 +148,14 @@ export type UserAwayRangeDto = {
     note?: string | null;
 };
 
-export type PlainTime = {
-    [key: string]: unknown;
-};
-
 export type UpdateProfileDto = {
     id?: number;
     name?: string;
     phoneNumberValidated?: boolean;
     sentTextOptInMessageAt?: string;
     emailVerified?: boolean;
-    preferredReminderTime?: PlainTime;
-    timeZone?: {
-        [key: string]: unknown;
-    };
+    preferredReminderTime?: string;
+    timeZone?: string;
     contractDateSigned?: string | null;
     contractDateSuspended?: string | null;
     preferredActionReminderChannel?: NotificationChannel;
@@ -130,6 +176,7 @@ export type UpdateProfileDto = {
     over18?: boolean | null;
     onboardingComplete?: boolean;
     anonymous?: boolean;
+    communities?: Array<Community>;
     cityId?: number;
 };
 
@@ -196,38 +243,6 @@ export type VerifyEmailBody = {
     [key: string]: unknown;
 };
 
-export type User = {
-    id: number;
-    name: string;
-    phoneNumberValidated: boolean;
-    sentTextOptInMessageAt?: string;
-    emailVerified: boolean;
-    preferredReminderTime?: PlainTime;
-    timeZone?: {
-        [key: string]: unknown;
-    };
-    contractDateSigned: string | null;
-    contractDateSuspended: string | null;
-    preferredActionReminderChannel: NotificationChannel;
-    emailNotifsEnabled: boolean;
-    textNotifsEnabled: boolean;
-    pushNotifsEnabled: boolean;
-    socialNotifsPreference: NotificationPreference;
-    turnedOffAllNotifs: boolean;
-    forumDigestPreference: ForumDigestPreference;
-    password: string;
-    admin: boolean;
-    staff: boolean;
-    profilePicture: string | null;
-    profileDescription: string | null;
-    referralCode: string | null;
-    stripeCustomerId: string | null;
-    isNotSignedUpPartialProfile: boolean;
-    over18: boolean | null;
-    onboardingComplete: boolean;
-    anonymous: boolean;
-};
-
 export type CreateCommunityDto = {
     name: string;
     description: string;
@@ -279,26 +294,6 @@ export type CreateOnetimeInviteDto = {
     communityId?: number;
 };
 
-export type OnetimeInvite = {
-    id: number;
-    invitee: string;
-    code: string;
-    invitingUser: User;
-    createdAt: string;
-    isValid: boolean;
-    community?: Community;
-};
-
-export type Community = {
-    id: number;
-    name: string;
-    description: string;
-    photo?: string;
-    users?: Array<User>;
-    leaders?: Array<User>;
-    invites?: Array<OnetimeInvite>;
-};
-
 export type OnetimeInviteDto = {
     id: number;
     invitee: string;
@@ -307,6 +302,21 @@ export type OnetimeInviteDto = {
     createdAt: string;
     isValid: boolean;
     community?: Community;
+};
+
+export type CommunityUserInfoDto = {
+    actions: Array<UserActionSummaryDto>;
+    users: Array<UserActionRelationsForUserDto>;
+};
+
+export type CommunityMemberContactInfoDto = {
+    id: number;
+    timeZone?: string;
+    preferredActionReminderChannel: NotificationChannel;
+    email: string;
+    phoneNumber?: string;
+    preferredReminderTimeUserTz?: string;
+    preferredReminderTimeLeaderTz?: string;
 };
 
 export type StreamableFile = {
@@ -2313,10 +2323,23 @@ export type UserGetCommunityMemberInfoData = {
 };
 
 export type UserGetCommunityMemberInfoResponses = {
-    200: Array<UserDto>;
+    200: CommunityUserInfoDto;
 };
 
 export type UserGetCommunityMemberInfoResponse = UserGetCommunityMemberInfoResponses[keyof UserGetCommunityMemberInfoResponses];
+
+export type UserGetCommunityMemberContactInfoData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/communityMemberContactInfo';
+};
+
+export type UserGetCommunityMemberContactInfoResponses = {
+    200: Array<CommunityMemberContactInfoDto>;
+};
+
+export type UserGetCommunityMemberContactInfoResponse = UserGetCommunityMemberContactInfoResponses[keyof UserGetCommunityMemberContactInfoResponses];
 
 export type ImagesGetImageData = {
     body?: never;

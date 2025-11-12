@@ -27,7 +27,6 @@ import {
   OnboardingDto,
   ProfileDto,
   UpdateProfileDto,
-  UserDto,
 } from './user.dto';
 import { User } from './entities/user.entity';
 import { profileUrl } from 'src/search/approutes';
@@ -36,6 +35,7 @@ import { CreateGroupDto } from './group.dto';
 import { Community } from './entities/community.entity';
 import { CreateCommunityDto, UpdateCommunityDto } from './community.dto';
 import {
+  CommunityMemberContactInfoDto,
   CommunityUserInfoDto,
   UserActionRelationDetailDto,
   UserActionRelationsForUserDto,
@@ -915,7 +915,7 @@ export class UserService {
     return this.findCommunityOrFail(communityId, ['users', 'leaders']);
   }
 
-  async getMemberInfo(userId: number): Promise<CommunityUserInfoDto> {
+  async getUserIdsForUserCommunity(userId: number): Promise<number[]> {
     const user = await this.findOneOrFail(userId, ['communities']);
     const communityId =
       user.communities.length > 0 ? user.communities[0].id : null;
@@ -924,13 +924,32 @@ export class UserService {
     }
     const community = await this.findCommunityOrFail(communityId, ['users']);
     const userIds = community.users!.map((user) => user.id);
+    return userIds;
+  }
+
+  async getMemberInfo(userId: number): Promise<CommunityUserInfoDto> {
+    const userIds = await this.getUserIdsForUserCommunity(userId);
     const actionRelations = await this.getActionRelationsForUsers(userIds);
 
     return {
-      members: community.users!.map((user) => new UserDto(user)),
       actions: actionRelations.actions,
       users: actionRelations.users,
     };
+  }
+
+  async getMemberContactInfo(
+    userId: number,
+  ): Promise<CommunityMemberContactInfoDto[]> {
+    const leader = await this.findOneOrFail(userId);
+    const userIds = await this.getUserIdsForUserCommunity(userId);
+    const contactInfos: CommunityMemberContactInfoDto[] = [];
+    for (const userId of userIds) {
+      const user = await this.findOneOrFail(userId);
+      contactInfos.push(
+        new CommunityMemberContactInfoDto(user, leader.timeZone),
+      );
+    }
+    return contactInfos;
   }
 
   async createGroup(body: CreateGroupDto): Promise<Group> {

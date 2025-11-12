@@ -156,7 +156,7 @@ export class AuthService {
   }
 
   async getProfile(email: string): Promise<User> {
-    const user = await this.usersService.findOneByEmail(email);
+    const user = await this.usersService.findOneByEmail(email, ['communities']);
     if (!user) {
       throw new UnauthorizedException();
     }

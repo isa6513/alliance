@@ -225,7 +225,7 @@ const UserCard = ({
       </div>
       {actions.length > 0 && (
         <div className="border-b pb-2 mb-2 border-zinc-200">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-2">
             <p className="font-semibold">Actions</p>
             <button
               type="button"

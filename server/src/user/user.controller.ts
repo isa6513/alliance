@@ -39,7 +39,11 @@ import {
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { AddUserToGroupDto, CreateGroupDto, GroupDto } from './group.dto';
-import { UserActionRelationsResponseDto } from './dto/user-action-relations.dto';
+import {
+  CommunityMemberContactInfoDto,
+  CommunityUserInfoDto,
+  UserActionRelationsResponseDto,
+} from './dto/user-action-relations.dto';
 import { CreateOnetimeInviteDto, OnetimeInviteDto } from './dto/invite.dto';
 import { CreateAwayRangeDto, UserAwayRangeDto } from './dto/away-range.dto';
 import {
@@ -545,9 +549,16 @@ export class UserController {
   }
 
   @Get('communityMemberInfo')
-  @UseGuards(CommunityLeaderGuard)
-  @ApiOkResponse({ type: UserDto, isArray: true })
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CommunityUserInfoDto })
   async getCommunityMemberInfo(@Request() req: JwtRequest) {
     return this.userService.getMemberInfo(req.user.sub);
+  }
+
+  @Get('communityMemberContactInfo')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
+  async getCommunityMemberContactInfo(@Request() req: JwtRequest) {
+    return this.userService.getMemberContactInfo(req.user.sub);
   }
 }

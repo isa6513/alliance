@@ -1,6 +1,9 @@
 import {
   CommunityDto,
-  UserDto,
+  CommunityMemberContactInfoDto,
+  UserActionRelationDetailDto,
+  UserActionSummaryDto,
+  userGetCommunityMemberContactInfo,
   userGetCommunityMemberInfo,
   userGetMyCommunity,
 } from "@alliance/shared/client";
@@ -12,14 +15,24 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card from "@alliance/shared/ui/Card";
 import CommunityMemberCard from "../../components/CommunityMemberCard";
 import { useAuth } from "../../lib/AuthContext";
+import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 
 type Tab = "members" | "about";
 
 const CommunityPage = () => {
   const [community, setCommunity] = useState<CommunityDto | null>(null);
-  const [memberInfo, setMemberInfo] = useState<Record<number, UserDto> | null>(
-    null
-  );
+  const [memberContactInfo, setMemberContactInfo] = useState<Record<
+    number,
+    CommunityMemberContactInfoDto
+  > | null>(null);
+  const [userActionRelations, setUserActionRelations] = useState<Record<
+    number,
+    UserActionRelationDetailDto[]
+  > | null>(null);
+
+  const [actionSummaries, setActionSummaries] = useState<
+    UserActionSummaryDto[]
+  >([]);
 
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -41,11 +54,22 @@ const CommunityPage = () => {
     if (amLeader) {
       userGetCommunityMemberInfo().then((resp) => {
         if (resp.data) {
-          setMemberInfo(
-            resp.data.reduce((acc, user) => {
-              acc[user.id] = user;
+          setActionSummaries(resp.data.actions);
+          setUserActionRelations(
+            resp.data.users.reduce((acc, user) => {
+              acc[user.userId] = user.relations;
               return acc;
-            }, {} as Record<number, UserDto>)
+            }, {} as Record<number, UserActionRelationDetailDto[]>)
+          );
+        }
+      });
+      userGetCommunityMemberContactInfo().then((resp) => {
+        if (resp.data) {
+          setMemberContactInfo(
+            resp.data.reduce((acc, contactInfo) => {
+              acc[contactInfo.id] = contactInfo;
+              return acc;
+            }, {} as Record<number, CommunityMemberContactInfoDto>)
           );
         }
       });
@@ -73,6 +97,8 @@ const CommunityPage = () => {
     (user) => !leaders.some((leader) => leader.id === user.id)
   );
 
+  console.log(members);
+
   return (
     <CenterLayout>
       <div className=" flex flex-row gap-x-2 justify-start mb-4">
@@ -92,13 +118,17 @@ const CommunityPage = () => {
       </div>
       {tab === "members" && (
         <div className="flex flex-col gap-y-2">
-          <p className="font-semibold">Leader{leaders.length > 1 ? "s" : ""}</p>
+          <p className="font-semibold">
+            Organizer{leaders.length > 1 ? "s" : ""}
+          </p>
           <List>
             {leaders.map((user) => (
               <CommunityMemberCard
                 key={user.id}
                 profile={user}
-                actionRelations={[]}
+                contactInfo={memberContactInfo?.[user.id]}
+                actionRelations={userActionRelations?.[user.id] ?? []}
+                actions={actionSummaries}
               />
             ))}
           </List>
@@ -107,9 +137,11 @@ const CommunityPage = () => {
             {members.map((user) => (
               <CommunityMemberCard
                 key={user.id}
+                canExpand={amLeader}
                 profile={user}
-                user={memberInfo?.[user.id]}
-                actionRelations={[]}
+                contactInfo={memberContactInfo?.[user.id]}
+                actionRelations={userActionRelations?.[user.id] ?? []}
+                actions={actionSummaries}
               />
             ))}
           </List>
@@ -117,7 +149,7 @@ const CommunityPage = () => {
       )}
       {tab === "about" && (
         <Card>
-          <p>{community.description}</p>
+          <AppMarkdownWrapper markdownContent={community.description} />
         </Card>
       )}
     </CenterLayout>

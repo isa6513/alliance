@@ -83,11 +83,11 @@ export class User {
   emailVerified: boolean;
 
   @Column({ type: 'time', nullable: true })
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ type: 'string' })
   preferredReminderTime?: Temporal.PlainTime;
 
   @Column({ type: 'text', nullable: true })
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ type: 'string' })
   timeZone?: Temporal.TimeZoneLike;
 
   @Column({ type: 'timestamptz', nullable: true })
@@ -308,6 +308,7 @@ export class User {
   @ManyToMany(() => Community, (community) => community.users, {
     onDelete: 'CASCADE',
   })
+  @ApiProperty({ type: () => Community, isArray: true })
   @Type(() => Community)
   communities: Community[];
 

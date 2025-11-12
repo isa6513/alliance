@@ -3,6 +3,7 @@ import { AppLayoutOutletContext } from "../applayout";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useNotifications } from "../lib/useNotifications";
+import { useAuth } from "../lib/AuthContext";
 
 export enum NavbarPage {
   Tasks = "Tasks",
@@ -15,6 +16,7 @@ export enum NavbarPage {
   Contract = "Contract",
   Settings = "Settings",
   Search = "Search",
+  Community = "Community",
 }
 
 export const destinations: Record<NavbarPage, string> = {
@@ -28,6 +30,7 @@ export const destinations: Record<NavbarPage, string> = {
   [NavbarPage.Profile]: "/profile",
   [NavbarPage.Contract]: "/contract",
   [NavbarPage.Settings]: "/settings",
+  [NavbarPage.Community]: "/community",
 };
 
 const navSections = [
@@ -67,6 +70,10 @@ const navSections = [
         page: NavbarPage.Search,
         destination: destinations[NavbarPage.Search],
       },
+      {
+        page: NavbarPage.Community,
+        destination: destinations[NavbarPage.Community],
+      },
     ],
   },
   {
@@ -94,6 +101,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
   todoActions: number;
 }) => {
   const { profile } = useOutletContext<AppLayoutOutletContext>();
+  const { user } = useAuth();
 
   const { unreadCount } = useNotifications();
 
@@ -212,6 +220,22 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                         <span>{profile?.displayName}</span>
                       </div>
                     </Link>
+                  ) : item.page === NavbarPage.Community ? (
+                    user && user.communities?.length > 0 ? (
+                      <Link
+                        key={item.page}
+                        to={item.destination}
+                        prefetch="render"
+                        className={`px-3 py-1.5 rounded flex items-center justify-between w-full pr-2 ${
+                          currentLocation === item.page
+                            ? "bg-zinc-200/80 text-black"
+                            : "text-zinc-700 hover:bg-zinc-100"
+                        }`}
+                        onClick={() => setOpen(false)}
+                      >
+                        <p>{item.page}</p>
+                      </Link>
+                    ) : null
                   ) : (
                     <Link
                       key={item.page}

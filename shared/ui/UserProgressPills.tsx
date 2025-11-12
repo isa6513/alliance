@@ -28,14 +28,16 @@ export const formatRelationStatus = (
 export interface UserProgressPillsProps {
   actions: UserActionSummaryDto[];
   relationByActionId: Record<number, UserActionRelationDetailDto>;
+  pillHeight?: string;
 }
 
 const UserProgressPills = ({
   actions,
   relationByActionId,
+  pillHeight = "h-3",
 }: UserProgressPillsProps) => {
   return (
-    <div className="mt-2 flex flex-wrap gap-1 w-full">
+    <div className="flex flex-wrap gap-1 w-full">
       {actions.map((action) => {
         const relation = relationByActionId[action.id] ?? {
           status: "none",
@@ -53,7 +55,7 @@ const UserProgressPills = ({
         return relation ? (
           <div key={action.id} className="relative group flex-1">
             <div
-              className={`h-3 w-full rounded flex items-center justify-center text-xs font-semibold ${className}`}
+              className={`w-full rounded flex items-center justify-center text-xs font-semibold ${className} ${pillHeight}`}
               aria-label={`${action.name} – ${formatRelationStatus(
                 relation.status
               )}`}
