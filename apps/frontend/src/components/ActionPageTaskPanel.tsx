@@ -65,7 +65,7 @@ const ActionPageTaskPanel = () => {
           style={CardStyle.Grey}
           className=" !bg-zinc-200 rounded-b-none border-t-0 border-x-0"
         >
-          This is an old action that no longer needs member participation.
+          This action no longer requires member participation.
         </Card>
         <Card style={CardStyle.Grey} className="rounded-t-none">
           <ActionTaskPanel
