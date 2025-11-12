@@ -134,9 +134,10 @@ const UserActivityCard = ({
   return (
     <div className="flex flex-col">
       <div
-        className={`block p-2 -m-2 text-[11pt] flex-1 gap-y-2 bg-white ${
-          !(isEditing || isSaving || showCommentForm) &&
-          "hover:bg-zinc-50 cursor-pointer"
+        className={`block p-4 -m-4 text-[11pt] transition-colors duration-100 flex-1 gap-y-2 bg-white ${
+          !(isEditing || isSaving || showCommentForm)
+            ? "hover:bg-zinc-50 cursor-pointer"
+            : ""
         }`}
         onClick={handleActivityClick}
       >
@@ -168,7 +169,7 @@ const UserActivityCard = ({
           </p>
         </div>
         {isEditing ? (
-          <div className="flex-1 space-y-2 my-2">
+          <div className="flex-1 space-y-2 -m-4 mt-4 border-t border-zinc-200">
             <div className="rounded p-3 bg-zinc-100">
               <EditableContentForm
                 value={editContent}
@@ -184,7 +185,7 @@ const UserActivityCard = ({
                   {isSaving ? "Saving..." : "Save"}
                 </Button>
                 <Button
-                  color={ButtonColor.Light}
+                  color={ButtonColor.White}
                   onClick={handleCancel}
                   disabled={isSaving}
                 >
@@ -196,7 +197,7 @@ const UserActivityCard = ({
         ) : (
           <div>
             {activity.editableContent?.body && (
-              <p className="my-3">{activity.editableContent.body}</p>
+              <p className="mt-3">{activity.editableContent.body}</p>
             )}
             <div className="flex flex-row justify-between w-full items-end">
               <p className="text-zinc-500 text-sm">{timeSinceCompleted}</p>

@@ -133,7 +133,7 @@ const ActivityFeedPage = () => {
       </div>
 
       <div
-        className="relative overflow-hidden border border-zinc-200 rounded transition-[height] duration-100 ease-out bg-white"
+        className="relative overflow-hidden border border-zinc-200 rounded bg-white"
         style={{
           height: activeHeight ?? "auto",
         }}

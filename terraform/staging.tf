@@ -10,7 +10,7 @@ variable "staging_db_password" {
 # --------------------------
 resource "aws_instance" "app_server_staging" {
   ami                         = "ami-05572e392e80aee89"
-  instance_type               = "t3a.medium"
+  instance_type               = "t3a.small"
   subnet_id                   = module.vpc.public_subnets[0]
   vpc_security_group_ids      = [aws_security_group.ec2_security_group.id] # reuse shared EC2 SG
   iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name  # reuse same profile
