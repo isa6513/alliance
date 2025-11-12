@@ -24,11 +24,12 @@ const ActionEventsPanel = ({ action, events }: ActionEventsPanelProps) => {
 
   const chronologicallySortedEvents = events
     .slice()
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const currentEventId = chronologicallySortedEvents.filter(
     (event) => new Date(event.date).getTime() <= new Date().getTime()
   )[0].id;
+
   const currentEventIndex = chronologicallySortedEvents.findIndex(
     (event) => event.id === currentEventId
   );
@@ -36,21 +37,18 @@ const ActionEventsPanel = ({ action, events }: ActionEventsPanelProps) => {
   return (
     <div className="flex flex-col gap-y-3 w-full">
       <Timeline currentIdx={currentEventIndex}>
-        {chronologicallySortedEvents
-          .slice()
-          .reverse()
-          .map((event) => (
-            <Fragment key={event.id}>
-              <TimelineItem
-                title={event.title}
-                description={event.description}
-                current={event.id === currentEventId}
-                time={formatDistance(event.date, new Date(), {
-                  addSuffix: true,
-                })}
-              />
-            </Fragment>
-          ))}
+        {chronologicallySortedEvents.slice().map((event) => (
+          <Fragment key={event.id}>
+            <TimelineItem
+              title={event.title}
+              description={event.description}
+              current={event.id === currentEventId}
+              time={formatDistance(event.date, new Date(), {
+                addSuffix: true,
+              })}
+            />
+          </Fragment>
+        ))}
       </Timeline>
     </div>
   );
