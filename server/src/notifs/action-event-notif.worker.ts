@@ -5,10 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EmailStatus } from 'src/mail/mail.entity';
 import { MailService, processKeywordReplacements } from 'src/mail/mail.service';
 import { MmsService } from 'src/mms/mms.service';
-import { User } from 'src/user/entities/user.entity';
 import { DataSource, QueryFailedError, Repository } from 'typeorm';
-import { ActionEvent } from '../actions/entities/action-event.entity';
-import { Action } from '../actions/entities/action.entity';
 import { shouldEmailUser, shouldTextUser } from '../notifs/notifs.service';
 import { generateCIDForNotif } from './notif-utils';
 import {
@@ -46,6 +43,9 @@ export class ActionEventNotifWorker {
       process.env.NODE_ENV === 'development' &&
       process.env.SEND_DEV_NOTIFS !== '1'
     ) {
+      return;
+    }
+    if (process.env.NODE_ENV === 'staging') {
       return;
     }
 
