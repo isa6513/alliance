@@ -276,9 +276,9 @@ export class UserController {
 
   @Get('list')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: [User] })
-  async list(): Promise<User[]> {
-    return this.userService.findAll();
+  @ApiOkResponse({ type: UserDto, isArray: true })
+  async list(): Promise<UserDto[]> {
+    return (await this.userService.findAll()).map((user) => new UserDto(user));
   }
 
   @Get('action-relations')

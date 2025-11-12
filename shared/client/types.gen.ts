@@ -46,6 +46,7 @@ export type UserDto = {
     forumDigestPreference: ForumDigestPreference;
     admin: boolean;
     staff: boolean;
+    profilePicture: string | null;
     referralCode: string | null;
     onboardingComplete: boolean;
     anonymous: boolean;
@@ -150,38 +151,6 @@ export type FriendStatusDto = {
     didReceiveRequest: boolean;
 };
 
-export type User = {
-    id: number;
-    name: string;
-    phoneNumberValidated: boolean;
-    sentTextOptInMessageAt?: string;
-    emailVerified: boolean;
-    preferredReminderTime?: PlainTime;
-    timeZone?: {
-        [key: string]: unknown;
-    };
-    contractDateSigned: string | null;
-    contractDateSuspended: string | null;
-    preferredActionReminderChannel: NotificationChannel;
-    emailNotifsEnabled: boolean;
-    textNotifsEnabled: boolean;
-    pushNotifsEnabled: boolean;
-    socialNotifsPreference: NotificationPreference;
-    turnedOffAllNotifs: boolean;
-    forumDigestPreference: ForumDigestPreference;
-    password: string;
-    admin: boolean;
-    staff: boolean;
-    profilePicture: string | null;
-    profileDescription: string | null;
-    referralCode: string | null;
-    stripeCustomerId: string | null;
-    isNotSignedUpPartialProfile: boolean;
-    over18: boolean | null;
-    onboardingComplete: boolean;
-    anonymous: boolean;
-};
-
 export type ActionStatus = 'draft' | 'upcoming' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
 
 export type UserActionSummaryDto = {
@@ -225,6 +194,38 @@ export type ProfileDtoWithFriends = {
 
 export type VerifyEmailBody = {
     [key: string]: unknown;
+};
+
+export type User = {
+    id: number;
+    name: string;
+    phoneNumberValidated: boolean;
+    sentTextOptInMessageAt?: string;
+    emailVerified: boolean;
+    preferredReminderTime?: PlainTime;
+    timeZone?: {
+        [key: string]: unknown;
+    };
+    contractDateSigned: string | null;
+    contractDateSuspended: string | null;
+    preferredActionReminderChannel: NotificationChannel;
+    emailNotifsEnabled: boolean;
+    textNotifsEnabled: boolean;
+    pushNotifsEnabled: boolean;
+    socialNotifsPreference: NotificationPreference;
+    turnedOffAllNotifs: boolean;
+    forumDigestPreference: ForumDigestPreference;
+    password: string;
+    admin: boolean;
+    staff: boolean;
+    profilePicture: string | null;
+    profileDescription: string | null;
+    referralCode: string | null;
+    stripeCustomerId: string | null;
+    isNotSignedUpPartialProfile: boolean;
+    over18: boolean | null;
+    onboardingComplete: boolean;
+    anonymous: boolean;
 };
 
 export type CreateCommunityDto = {
@@ -1933,7 +1934,7 @@ export type UserListData = {
 };
 
 export type UserListResponses = {
-    200: Array<User>;
+    200: Array<UserDto>;
 };
 
 export type UserListResponse = UserListResponses[keyof UserListResponses];

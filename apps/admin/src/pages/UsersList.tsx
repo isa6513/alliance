@@ -10,10 +10,10 @@ import {
 import {
   GroupDto,
   TimeSpentForUserDto,
-  User,
   UserActionRelationDetailDto,
   UserActionRelationsResponseDto,
   UserActionSummaryDto,
+  UserDto,
 } from "@alliance/shared/client/types.gen";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import UserCard from "../components/UserCard";
@@ -25,7 +25,7 @@ const USER_FILTER_MODES = ["All", "Signed", "Suspended", "Not signed"] as const;
 type UserFilterMode = (typeof USER_FILTER_MODES)[number];
 
 const UsersList: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserDto[]>([]);
   const [timeSpentPerUserLast7, setTimeSpentPerUserLast7] = useState<
     TimeSpentForUserDto[]
   >([]);
@@ -141,7 +141,7 @@ const UsersList: React.FC = () => {
         return !user.contractDateSigned;
       });
       return acc;
-    }, {} as Record<UserFilterMode, User[]>);
+    }, {} as Record<UserFilterMode, UserDto[]>);
   }, [filteredByGroups]);
 
   const selectedGroupNames = useMemo(() => {

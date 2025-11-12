@@ -1,9 +1,9 @@
 import {
   GroupDto,
-  User,
   UserActionRelationDetailDto,
   UserActionSummaryDto,
   UserActionRelationStatus,
+  UserDto,
 } from "@alliance/shared/client/types.gen";
 import { getApiUrl } from "@alliance/shared/lib/config";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -20,7 +20,7 @@ import UserProgressPills, {
 } from "@alliance/shared/ui/UserProgressPills";
 
 export interface UserCardProps {
-  user: User;
+  user: UserDto;
   timeSpent: number;
   timeSpentTotal: number;
   groups: GroupDto[];
