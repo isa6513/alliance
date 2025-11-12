@@ -1054,12 +1054,11 @@ const FormRenderer = ({
         <div className="flex flex-row justify-between items-end gap-x-3">
           <div className="flex flex-col gap-y-4 flex-1">
             {schema.pages.length > 1 && (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 {!isFirstPage && (
                   <Button
                     color={ButtonColor.LightHover}
                     type="button"
-                    size="small"
                     onClick={handlePrevious}
                     className=""
                   >
