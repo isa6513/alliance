@@ -1,5 +1,4 @@
 import { Link, useOutletContext } from "react-router";
-import { useAuth } from "../lib/AuthContext";
 import { AppLayoutOutletContext } from "../applayout";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
@@ -94,8 +93,6 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
 }: {
   todoActions: number;
 }) => {
-  const { isAuthenticated, loading } = useAuth();
-
   const { profile } = useOutletContext<AppLayoutOutletContext>();
 
   const { unreadCount } = useNotifications();
@@ -139,7 +136,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
 
   const profilePicture = profile?.profilePicture || null;
 
-  if (!isAuthenticated && !loading) return null;
+  //   if (!isAuthenticated && !loading) return null;
 
   const currentLocation: NavbarPage | null =
     navSections
