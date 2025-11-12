@@ -11,6 +11,7 @@ import {
 } from "@alliance/shared/client";
 import { Outlet, useRouteLoaderData } from "react-router";
 import { useAuth } from "./lib/AuthContext";
+import { isStaging } from "@alliance/shared/lib/config";
 
 export interface RouteMatch {
   data: unknown;
@@ -119,5 +120,18 @@ export default function AdminLayout() {
     logout();
   }
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      {isStaging() && (
+        <div className="fixed top-0 left-0 right-0 h-6 bg-green z-50 flex flex-row gap-1">
+          {[...Array(100)].map((_, index) => (
+            <span key={index} className="text-white text-sm !font-mono">
+              staging
+            </span>
+          ))}
+        </div>
+      )}
+    </>
+  );
 }
