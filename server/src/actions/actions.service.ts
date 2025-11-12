@@ -52,7 +52,10 @@ import {
   ActionUpdate,
   ActionUpdateNotifyType,
 } from './entities/action-update.entity';
-import { ReminderGroup } from './entities/reminder-group.entity';
+import {
+  ReminderGroup,
+  ReminderGroupTimingMode,
+} from './entities/reminder-group.entity';
 import { ActionSuite } from './entities/action-suite.entity';
 import { NotifsService, shouldTextUser } from 'src/notifs/notifs.service';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
@@ -1227,8 +1230,34 @@ export class ActionsService {
       allSent: false,
     } satisfies ReminderGroup;
 
+    const withDeadlineEvent =
+      await this.actionEventReminderService.attachDeadlineEvent(fakeGroup);
+
+    if (
+      fakeGroup.timingMode === ReminderGroupTimingMode.FromDeadline ||
+      fakeGroup.timingMode === ReminderGroupTimingMode.WithinRelativeRange
+    ) {
+      if (!withDeadlineEvent.deadlineEvent) {
+        throw new BadRequestException(
+          'Deadline event is required for relative timing modes',
+        );
+      }
+    }
+    if (fakeGroup.timingMode === ReminderGroupTimingMode.WithinRange) {
+      if (
+        fakeGroup.send_range_start &&
+        fakeGroup.send_range_end &&
+        new Date(fakeGroup.send_range_start).getTime() >
+          new Date(fakeGroup.send_range_end).getTime()
+      ) {
+        throw new BadRequestException(
+          'Send range start must be before the end',
+        );
+      }
+    }
+
     const plans = await this.actionEventReminderService.getPlansForGroup(
-      await this.actionEventReminderService.attachDeadlineEvent(fakeGroup),
+      withDeadlineEvent,
       new Date(Date.now() - NOTIFICATION_LOOKBACK_WINDOW_MS),
       new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
     );

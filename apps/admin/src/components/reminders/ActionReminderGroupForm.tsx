@@ -190,6 +190,14 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     initialValues.reminderGroup?.name ?? ""
   );
 
+  useEffect(() => {
+    if (timingMode === "within_relative_range") {
+      if (relativeRangeStartHours < relativeRangeEndHours) {
+        setLocalError("Window start must be before the window end.");
+      }
+    }
+  }, [timingMode, relativeRangeStartHours, relativeRangeEndHours]);
+
   const [tentativePlans, setTentativePlans] = useState<
     PreviewNotificationPlan[]
   >([]);
@@ -312,8 +320,10 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     }).then((response) => {
       if (response.error) {
         setLocalError((response.error as Error).message);
+        setTentativePlans([]);
         return;
       }
+      setLocalError(null);
       setTentativePlans(response.data ?? []);
     });
   }, [
@@ -638,6 +648,11 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   };
   return (
     <form onSubmit={handleSubmit} className="space-y-4 w-full">
+      {combinedError && (
+        <p className="text-red-600 text-sm" role="alert">
+          {combinedError}
+        </p>
+      )}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Member Action Event
@@ -1068,11 +1083,6 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         )}
       </div>
 
-      {combinedError && (
-        <p className="text-red-600 text-sm" role="alert">
-          {combinedError}
-        </p>
-      )}
       {serverSuccess && (
         <p className="text-green-600 text-sm">{serverSuccess}</p>
       )}
