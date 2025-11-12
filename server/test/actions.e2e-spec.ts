@@ -174,6 +174,7 @@ describe('Actions (e2e)', () => {
         everyoneShouldComplete: false,
         participatingGroups: [],
         priority: 0,
+        preventCompletion: false,
       };
 
       const res = await request(ctx.app.getHttpServer())
