@@ -26,9 +26,9 @@ const ActionEventsPanel = ({ action, events }: ActionEventsPanelProps) => {
     .slice()
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  const currentEventId = chronologicallySortedEvents.filter(
-    (event) => new Date(event.date).getTime() <= new Date().getTime()
-  )[0].id;
+  const currentEventId = chronologicallySortedEvents
+    .filter((event) => new Date(event.date).getTime() <= new Date().getTime())
+    .pop()?.id;
 
   const currentEventIndex = chronologicallySortedEvents.findIndex(
     (event) => event.id === currentEventId
