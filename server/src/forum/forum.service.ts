@@ -503,13 +503,25 @@ export class ForumService {
     if (!post.author || post.authorId === liker.id) {
       return;
     }
+    const groupingKey = `forum_like:post:${post.id}`;
+    const existingNotif =
+      await this.likeNotificationService.getActiveLikeNotification({
+        ownerId: post.authorId,
+        targetType: 'post',
+        targetId: post.id,
+        groupingKey,
+      });
+    if (this.notificationIncludesUser(existingNotif, liker.id)) {
+      return;
+    }
     await this.likeNotificationService.createOrUpdate({
       owner: post.author,
       liker,
       targetType: 'post',
       targetId: post.id,
       webAppLocation: postUrl(post.id),
-      groupingKey: `forum_like:post:${post.id}`,
+      groupingKey,
+      existingNotification: existingNotif ?? undefined,
     });
   }
 
@@ -531,14 +543,38 @@ export class ForumService {
     if (!webAppLocation) {
       return;
     }
+    const groupingKey = `forum_like:comment:${comment.id}`;
+    const existingNotif =
+      await this.likeNotificationService.getActiveLikeNotification({
+        ownerId: comment.authorId,
+        targetType: 'comment',
+        targetId: comment.id,
+        groupingKey,
+      });
+    if (this.notificationIncludesUser(existingNotif, liker.id)) {
+      return;
+    }
     await this.likeNotificationService.createOrUpdate({
       owner: comment.author,
       liker,
       targetType: 'comment',
       targetId: comment.id,
       webAppLocation,
-      groupingKey: `forum_like:comment:${comment.id}`,
+      groupingKey,
+      existingNotification: existingNotif ?? undefined,
     });
+  }
+
+  private notificationIncludesUser(
+    notification: Notification | null,
+    userId: number,
+  ): boolean {
+    if (!notification) {
+      return false;
+    }
+    return (notification.associatedUsers ?? []).some(
+      (associatedUser) => associatedUser.id === userId,
+    );
   }
 
   async deleteReply(id: number, userId: number): Promise<void> {
