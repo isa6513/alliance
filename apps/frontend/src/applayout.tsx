@@ -23,6 +23,7 @@ import BugReportButton from "./components/BugReportButton";
 import { useAuth } from "./lib/AuthContext";
 import { isFeatureEnabled } from "./lib/config";
 import Spinner from "./components/Spinner";
+import { isStaging } from "@alliance/shared/lib/config";
 
 export interface RouteMatch {
   data: unknown;
@@ -302,6 +303,15 @@ export default function AppLayout() {
         }
       />
       {isFeatureEnabled(Features.BugReporting) && <BugReportButton />}
+      {isStaging() && (
+        <div className="fixed top-0 left-0 right-0 h-6 bg-green z-50 flex flex-row gap-1">
+          {[...Array(100)].map((_, index) => (
+            <span key={index} className="text-white text-sm !font-mono">
+              staging
+            </span>
+          ))}
+        </div>
+      )}
     </>
   );
 }

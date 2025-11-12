@@ -1,3 +1,5 @@
+const mode = (import.meta as unknown as { env: { MODE: string } }).env.MODE;
+
 const prod_url = (import.meta as unknown as { env: { VITE_API_URL: string } })
   .env.VITE_API_URL;
 
@@ -10,17 +12,15 @@ export const getWebSocketUrl = (mode: string): string => {
 };
 
 export const isProduction = (): boolean => {
-  return (
-    (import.meta as unknown as { env: { MODE: string } }).env.MODE ===
-    "production"
-  );
+  return mode === "production";
+};
+
+export const isStaging = (): boolean => {
+  return mode === "staging";
 };
 
 export const getBaseUrl = (): string => {
-  if (
-    (import.meta as unknown as { env: { MODE: string } }).env.MODE ===
-    "development"
-  ) {
+  if (mode === "development") {
     return "http://localhost:5173";
   } else {
     return prod_url;
@@ -28,10 +28,7 @@ export const getBaseUrl = (): string => {
 };
 
 export const getApiUrl = (): string => {
-  if (
-    (import.meta as unknown as { env: { MODE: string } }).env.MODE ===
-    "development"
-  ) {
+  if (mode === "development") {
     return "http://localhost:3005";
   } else {
     return prod_url + "/api";
