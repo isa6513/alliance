@@ -1,7 +1,8 @@
 name: commit review
 on:
   push:
-    branches: ["**"]
+    branches-ignore:
+      - production
 
 permissions:
   contents: read
