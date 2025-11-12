@@ -14,6 +14,7 @@ interface TimelineProps {
   lineColor?: string;
   dotColor?: string;
   className?: string;
+  currentIdx?: number;
 }
 
 const Timeline: React.FC<TimelineProps> = ({
@@ -22,6 +23,7 @@ const Timeline: React.FC<TimelineProps> = ({
   dotSize = 12,
   lineColor = "var(--color-zinc-200)",
   className,
+  currentIdx = 0,
 }) => {
   const halfDot = useMemo(() => dotSize / 2, [dotSize]);
 
@@ -75,7 +77,7 @@ const Timeline: React.FC<TimelineProps> = ({
             <div
               style={{ ...dotBaseStyle }}
               className={`relative ${
-                index === 0 ? "bg-green" : "bg-zinc-200"
+                index === currentIdx ? "bg-green" : "bg-zinc-200"
               } mt-1 flex items-center justify-center`}
             ></div>
             {/* content */}

@@ -1,5 +1,5 @@
 import { ActionDto } from "@alliance/shared/client";
-import { format, formatDistance } from "date-fns";
+import { formatDistance } from "date-fns";
 import Timeline from "./system/Timeline";
 import TimelineItem from "./system/TimelineItem";
 import { Fragment } from "react";
@@ -22,18 +22,29 @@ const ActionEventsPanel = ({ action, events }: ActionEventsPanelProps) => {
     });
   }
 
+  const chronologicallySortedEvents = events
+    .slice()
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const currentEventId = chronologicallySortedEvents.filter(
+    (event) => new Date(event.date).getTime() <= new Date().getTime()
+  )[0].id;
+  const currentEventIndex = chronologicallySortedEvents.findIndex(
+    (event) => event.id === currentEventId
+  );
+
   return (
     <div className="flex flex-col gap-y-3 w-full">
-      <Timeline>
-        {events
+      <Timeline currentIdx={currentEventIndex}>
+        {chronologicallySortedEvents
           .slice()
           .reverse()
-          .map((event, idx) => (
+          .map((event) => (
             <Fragment key={event.id}>
               <TimelineItem
                 title={event.title}
                 description={event.description}
-                first={idx === 0}
+                current={event.id === currentEventId}
                 time={formatDistance(event.date, new Date(), {
                   addSuffix: true,
                 })}

@@ -1,21 +1,21 @@
 interface TimelineItemProps {
+  current?: boolean;
   title?: string;
   description: string;
   time?: string;
-  first?: boolean;
 }
 
 const TimelineItem: React.FC<TimelineItemProps> = ({
+  current = false,
   title,
   description,
   time,
-  first = false,
 }: TimelineItemProps) => {
   return (
     <span>
       <div className="flex flex-col gap-x-2">
         <div className="flex flex-row items-center gap-x-2 mt-px">
-          <p className={`${first ? "font-medium text-green" : "text-black"}`}>
+          <p className={`${current ? "font-medium text-green" : "text-black"}`}>
             {title}
           </p>
           <p className="text-zinc-500">{time}</p>

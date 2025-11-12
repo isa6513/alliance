@@ -51,7 +51,7 @@ const defaultEventNames: Record<ActionStatus, string> = {
   completed: "Action successful",
   failed: "Action failed",
   abandoned: "Action dropped",
-  upcoming: "",
+  upcoming: "Upcoming",
 };
 
 const CreateEventForm = (props: CreateEventFormProps) => {

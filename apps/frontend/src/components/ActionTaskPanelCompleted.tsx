@@ -34,8 +34,6 @@ const ActionTaskPanelCompleted = ({
     }
   }, [action]);
 
-  console.log("formResponse", formResponse);
-
   const completedCard = (
     <Card style={CardStyle.White} className="mb-2">
       <div className="flex items-center gap-x-3">
