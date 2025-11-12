@@ -234,4 +234,11 @@ export class Action {
   @ApiProperty({ description: 'Priority of the action' })
   @IsDefined()
   priority: number;
+
+  @Column({ default: false })
+  @ApiProperty({
+    description: 'Prevent completion of the action (for old actions)',
+  })
+  @Allow()
+  preventCompletion: boolean;
 }

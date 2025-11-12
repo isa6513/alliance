@@ -27,6 +27,7 @@ export interface ActionTaskPanelProps {
   onDeclineAction: () => void;
   onOptOutAction: () => void;
   card?: boolean;
+  disabled?: boolean;
 }
 
 const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
@@ -38,6 +39,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   onDeclineAction,
   onOptOutAction,
   card = false,
+  disabled = false,
 }: ActionTaskPanelProps) => {
   const { isAuthenticated } = useAuth();
   const [actionError, setActionError] = useState<string | null>(null);
@@ -73,7 +75,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       setRevalidate();
       onCompleteAction();
     },
-    [action, onCompleteAction],
+    [action, onCompleteAction]
   );
 
   const handleJoinAction = useCallback(async () => {
@@ -103,7 +105,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       setRevalidate();
       onDeclineAction();
     },
-    [action, onDeclineAction],
+    [action, onDeclineAction]
   );
 
   const handleAbandonAction = useCallback(
@@ -120,7 +122,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       setRevalidate();
       onOptOutAction();
     },
-    [action, onOptOutAction],
+    [action, onOptOutAction]
   );
 
   const handleFormStarted = useCallback(() => {
@@ -130,6 +132,20 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       actionName: action.name,
     });
   }, [action]);
+
+  if (disabled && action.taskFormId) {
+    return (
+      <ActionTaskPanelForm
+        taskFormId={action.taskFormId}
+        onCompleteAction={null}
+        onFormStarted={handleFormStarted}
+        onAbandonAction={handleAbandonAction}
+        card={card}
+        actionId={action.id}
+        disabled={true}
+      />
+    );
+  }
 
   if (
     (action.status === "gathering_commitments" ||

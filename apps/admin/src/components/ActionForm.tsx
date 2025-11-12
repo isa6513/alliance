@@ -202,6 +202,12 @@ const ActionForm: React.FC<ActionFormProps> = ({
         required: false,
         inGrid: true,
       },
+      {
+        name: "preventCompletion",
+        label: "Prevent Completion",
+        type: "checkbox",
+        inGrid: true,
+      },
       { name: "body", label: "Body", type: "markdowntextarea", required: true },
       { name: "image", label: "Image", type: "file" },
     ],

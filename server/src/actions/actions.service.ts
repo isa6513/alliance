@@ -687,6 +687,9 @@ export class ActionsService {
   }
 
   async isEligibleForAction(action: Action, user: User): Promise<boolean> {
+    if (action.preventCompletion) {
+      return false;
+    }
     const groups = action.participatingGroups;
     const userGroupIds = new Set((user.groups || []).map((group) => group.id));
     const isMember = groups.some((group) => userGroupIds.has(group.id));

@@ -5,6 +5,7 @@ import { FormResponse } from './entities/formresponse.entity';
 import { ActionDto } from 'src/actions/dto/action.dto';
 import { IsDefined, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
+import { UserDto } from 'src/user/user.dto';
 
 export class CreateFormDto extends PickType(Form, ['title', 'schema']) {}
 
@@ -31,7 +32,9 @@ export class FormResponseDto extends PickType(FormResponse, [
   'id',
   'answers',
   'formId',
-  'user',
   'schemaSnapshot',
   'visibilityValidatorResults',
-]) {}
+]) {
+  @ApiProperty()
+  user: UserDto;
+}

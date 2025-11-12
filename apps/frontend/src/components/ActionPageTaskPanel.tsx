@@ -44,8 +44,35 @@ const ActionPageTaskPanel = () => {
     );
   }
 
-  if (!userRelation || !action || !action.canParticipate) {
+  if (
+    !userRelation ||
+    !action ||
+    (!action.canParticipate && !action.preventCompletion)
+  ) {
     return null;
+  }
+
+  if (!action.canParticipate) {
+    return (
+      <div>
+        <Card
+          style={CardStyle.Grey}
+          className=" !bg-zinc-200 rounded-b-none border-t-0 border-x-0"
+        >
+          This is an old action that no longer needs member participation.
+        </Card>
+        <Card style={CardStyle.Grey} className="rounded-t-none">
+          <ActionTaskPanel
+            userRelation={"none"}
+            action={action}
+            {...panelHandlers}
+            missedDeadline={false}
+            disabled={true}
+            card={false}
+          />
+        </Card>
+      </div>
+    );
   }
 
   if (userRelation === "completed") {

@@ -21,6 +21,7 @@ interface ActionTaskPanelActivityProps {
   onAbandonAction: (outOfTime: boolean, reason: string) => void;
   card?: boolean;
   actionId: number;
+  disabled?: boolean;
 }
 
 const ActionTaskPanelForm = ({
@@ -30,6 +31,7 @@ const ActionTaskPanelForm = ({
   onAbandonAction,
   card = false,
   actionId,
+  disabled = false,
 }: ActionTaskPanelActivityProps) => {
   const [form, setForm] = useState<FormDto | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -124,7 +126,7 @@ const ActionTaskPanelForm = ({
           user={user}
           onFormStarted={onFormStarted}
           onAbandonAction={onAbandonAction}
-          renderFormAsCompleted={false}
+          renderFormAsCompleted={disabled}
         />
       </div>
       {error && (

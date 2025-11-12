@@ -665,6 +665,10 @@ export type Action = {
      * Priority of the action
      */
     priority: number;
+    /**
+     * Prevent completion of the action (for old actions)
+     */
+    preventCompletion: boolean;
 };
 
 export type Group = {
@@ -782,6 +786,10 @@ export type ActionDto = {
      * Priority of the action
      */
     priority: number;
+    /**
+     * Prevent completion of the action (for old actions)
+     */
+    preventCompletion: boolean;
     events: Array<ActionEventDto>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
@@ -871,6 +879,10 @@ export type CreateActionDto = {
      * Priority of the action
      */
     priority: number;
+    /**
+     * Prevent completion of the action (for old actions)
+     */
+    preventCompletion: boolean;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
     userRelation?: string;
@@ -936,6 +948,10 @@ export type UpdateActionDto = {
      * Priority of the action
      */
     priority?: number;
+    /**
+     * Prevent completion of the action (for old actions)
+     */
+    preventCompletion?: boolean;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
     userRelation?: string;
@@ -1413,10 +1429,10 @@ export type FormResponseDto = {
     visibilityValidatorResults: {
         [key: string]: unknown;
     };
-    user: User;
     schemaSnapshot: {
         [key: string]: unknown;
     };
+    user: UserDto;
 };
 
 export type CreateFormDto = {

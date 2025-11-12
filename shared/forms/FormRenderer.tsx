@@ -29,15 +29,7 @@ type FormRendererProps = {
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
   onSubmit: ((data: SubmitFormDto) => void) | null; // null for admin preview
-} & (
-  | {
-      renderFormAsCompleted: true;
-      completedFormResponse: FormResponseDto;
-    }
-  | {
-      renderFormAsCompleted: false;
-    }
-);
+};
 
 /**
  * Compute a stable localStorage key for a form draft.
