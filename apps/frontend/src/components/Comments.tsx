@@ -127,9 +127,9 @@ const Comments = ({
           contentDto.attachments.map(async (fileB64: string) => {
             if (fileB64.startsWith("data:")) {
               const res = await imagesUploadImage({ body: { file: fileB64 } });
-              return res.data as unknown as string; // API returns key
+              return res.data!.key;
             }
-            return fileB64; // already a key
+            return fileB64;
           })
         );
         attachmentKeys = uploads.filter(Boolean);

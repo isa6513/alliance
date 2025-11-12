@@ -294,7 +294,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                     </svg>
                   </button>
                   {showDropdown && (
-                    <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                    <div className="absolute right-0 bottom-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10">
                       <button
                         onClick={handleStartEdit}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
