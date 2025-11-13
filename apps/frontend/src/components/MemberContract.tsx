@@ -1,5 +1,4 @@
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import { Link } from "react-router";
 
 interface MemberContractProps {
   id?: string;
@@ -34,12 +33,8 @@ const MemberContract = ({ id }: MemberContractProps) => {
           </ol>
           <li>
             I understand that I am considered an active member, and am therefore
-            able to participate in Alliance{" "}
-            <Link to="/guide#governance" className="text-link">
-              governance
-            </Link>
-            , if I have completed at least 8 of the last 10 tasks I was
-            assigned.
+            able to participate in Alliance governance, if I have completed at
+            least 8 of the last 10 tasks I was assigned.
           </li>
         </ol>
       </div>

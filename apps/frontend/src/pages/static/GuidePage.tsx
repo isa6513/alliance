@@ -24,27 +24,17 @@ const GuidePage: React.FC = () => {
               </li>
               <li>
                 <a href="#structure" className="">
-                  Structure
-                </a>
-              </li>
-              <li>
-                <a href="#priorities" className="">
-                  How do we determine priorities?
-                </a>
-              </li>
-              <li>
-                <a href="#membership" className="">
-                  What does it mean to be a member?
-                </a>
-              </li>
-              <li className="ml-4">
-                <a href="#contract" className="">
-                  Contract
+                  How we cooperate
                 </a>
               </li>
               <li>
                 <a href="#governance" className="">
-                  Governance
+                  How we make decisions
+                </a>
+              </li>
+              <li>
+                <a href="#membership" className="">
+                  Member expectations
                 </a>
               </li>
             </ol>
@@ -61,9 +51,9 @@ const GuidePage: React.FC = () => {
             id="introduction"
             className=""
             markdownContent="
-The Alliance is a global group of individuals coordinating to combat global crises. Members spend a small fraction of time each week completing tasks that add up to effective collective actions.
+The Alliance is a group of individuals cooperating to end global crises. Members spend a small fraction of their time completing tasks that are designed to be effective and straightforward.
 
-Our commitment-based structure is designed to unite millions of people behind a global, expert-developed plan of action. Today, we are running small experiments to prepare for future growth.
+Our vision is to unite millions of people behind a global, expert-developed strategy. We are currently running experiments to prepare for future growth.
 "
           />
 
@@ -74,50 +64,45 @@ Our commitment-based structure is designed to unite millions of people behind a 
             
 # Priorities
 
-We aim to end global crises that harm or will harm billions of current and future people. We are focused on:
-1. Extreme poverty
-2. Environmental destruction
-3. Breakdown of democratic institutions
-4. Dangerous technological development
+We aim to end global crises that harm or will harm billions of current and future people. In no particular order, we are focused on:
+
+1. The decline of democratic institutions
+2. Extreme poverty
+3. Dangerous technological development
+4. Environmental destruction
 
 "
           />
 
-          <Card
+          {/* <Card
             style={CardStyle.White}
             className="mt-6 p-4 md:p-6 my-4 text-lg cursor-pointer hover:bg-zinc-50"
           >
-            <p className="font-semibold">Statement of Purpose</p>
-            <p>
-              Our statement of purpose describes our founding principle and how
-              it determines our goals.
+            <p className="text-base font-semibold">Statement of Purpose</p>
+            <p className="text-base">
+              Our statement of purpose describes how we arrived at our goals.
             </p>
-          </Card>
+          </Card> */}
 
           <MarkdownWrapper
             id="structure"
             className="mt-6"
             markdownContent="
 
-# Structure
+# How we cooperate
 
-Our structure has two key components:
-1. **Commitment-based membership.** We each dependably make a small amount of our time and resources available to the Alliance.
-2. **Central strategy.** We are served by a strategic office that designs collective actions to ensure they are effective. The strategic office breaks actions into easy-to-follow steps and communicates with members over an online platform.
+Members spend a small amount of time (currently 15 minutes per week) completing tasks on our online platform. Every task advances a specific plan designed by a full-time office.
 
-These two components are mutually dependent. Without a strategic office, members do not have concrete plans to act on. Without members that can be counted upon, the strategic office cannot make concrete plans.
+**The foundation of the Alliance is member reliability.** Each member commits a small, consistent fraction of their time and resources. This commitment enables the office to plan effectively and helps members build trust in one another.
 
-Analogously, companies require:
-1. Leadership to track the big picture and coordinate employee activity.
-2. Employees that can be counted on to perform the tasks requested of them.
+**The office unlocks collective potential by developing high-leverage actions.** As the Alliance grows, we plan to bring together experts from diverse fields to make increasingly impactful, complex plans.
 
-When either component is missing, individuals are only able to take isolated actions or simple, one-off collective actions.
+For now, we are taking small-scale actions focused on learning, not direct impact. Examples of actions we’ve taken recently:
+- We provided actionable feedback on the websites of three non-profits.
+- We voted on proposals for a small grant.
+- We requested news coverage of a coalition of businesses that adopted an environmentally-friendly policy.
 
-In return for their commitment, members’ contributions have a massively amplified impact. The Alliance will be able to plan in advance, coordinate flexibly, wield clear leverage, act proactively rather than reactively, and learn from experience.
-
-Simply put, our structure enables the same tight cooperation that makes corporations, governments, and other formal organizations coherent and effective.
-
-We are capable of working together in many possible arrangements for many purposes. A few broad categories of collective actions we can take together include:
+Our flexible structure means we are capable of working together in many possible arrangements for many purposes. A few broad categories of actions we can take together include:
 
 "
           />
@@ -148,105 +133,53 @@ We are capable of working together in many possible arrangements for many purpos
             />
           </div>
           <MarkdownWrapper
-            id="priorities"
+            id="governance"
             className="mt-2"
             markdownContent="
 
-# How do we determine priorities?
+# How we make decisions
 
-We balance foundational moral principles, democratic input, and pragmatic considerations in determination of priorities.
+The office has the freedom to make any plans that advance our high-level priorities and make effective use of members’ time and resources.
 
-## Morality
-We believe that the establishment of an explicit moral foundation is important for priority-setting, is necessary to avoid risks associated with majority decision-making, and establishes a shared framework that will prevent members from talking past one another in deliberation.
+Meanwhile, members provide input and participate in governance processes that ensure approval of the overall direction of the Alliance.
 
-In assessment of morality, we hew to a universal and unbiased principle that nearly all cultures share: that one should not treat others as one would not like to be treated by them. This includes respecting other’s preferred way of being treated, within reasonable limits.
+## Action planning
+Planning actions is a creative, open-ended process that searches for levers of change which members can pull.
 
-More concretely, we believe that a fundamental tradeoff in civilization is one between individual autonomy and individual protections from the actions of others. In an ideal civilization, everyone would be free to do anything except to impose unwanted influences on others.
+In ideation for and development of action plans, the office weighs many considerations. For instance:
+- How does the action relate to the priorities of the Alliance?
+- Will the action produce a tangible impact on the world?
+- Will the action have any compounding effects – for instance, by providing an educational opportunity or growing the Alliance’s network?
 
-For example, this shared morality is violated in global crises such as environmental destruction, which involves parties non-consensually imposing heavy costs on billions of current and future people.
+## Member input
+Given common recognition of the urgency of global crises, we bias towards action. Our common goal is to end these crises; it is not to create a world that is perfect for every member.
 
-## Democratic input
-We plan actions that satisfy both:
-1. The collective interests of humanity, as we can best determine using unbiased data about global preferences and the aforementioned moral reasoning.
-2. The collective interests of members, as we can determine through internal democratic processes.
+As a result, the office does not restrict itself to actions with unanimous agreement, and it does not necessarily pursue the most popular priorities. Our cooperation requires that members agree to a shared process that decides actions, rather than opt into each individual action, which means members will sometimes be asked to take actions they do not personally endorse.
 
-We expect nearly complete overlap between these two categories. However, we will not pursue member interests that we perceive to negatively impact humanity at large. And, conversely, we will not pursue general human interests to which a majority of members are opposed.
+However, our governance guarantees that the **majority of members find the majority of actions acceptable** — that is, believe that the Alliance overall produces more benefit than harm. This result is achieved with a membership-wide survey that occurs on a regular basis, or whenever it is requested by a majority of members.
 
-To determine member interests, the strategic office will solicit input by running polls and deliberations, soliciting proposals, and so on.
-
-The Alliance will also undergo a periodic [course adjustment](#governance) process to check that members feel their contributions are well-utilized and their voices are heard.
-
-## Pragmatic considerations
-The Alliance aims to address urgent problems faced by civilization. This work involves unavoidable tradeoffs:
-1. We will often need to prioritize issues based on their scale, tractability, and time-sensitivity.
-2. It will not be possible to consult and satisfy every stakeholder in every action that we take.
-3. It will not be possible for every decision to be made with full member consensus. The strategic office will address serious operational concerns with its plans, but our mission would be severely impeded by extensive debate about every action.
-
-We accept our decision-making process will inevitably contain imperfections and we will seek to minimize their harm.
+The office also incorporates member input by other means. For instance, the office hosts discussions, asks members for action proposals, solicits open-ended feedback, and so on.
 "
           />
           <MarkdownWrapper
             id="membership"
             className="mt-6"
             markdownContent="
-# What does it mean to be a member?
+# Member expectations
 
-Alliance members are individuals that have committed to cooperate with one another to build a better future for all.
+Membership is defined by commitment. Like any team, we can enact precise, complex plans only if we can depend on each other. On the other hand, if someone fails to complete a task, others’ efforts may go to waste.
 
-When you take action as a member, you can do so with confidence that everyone else is playing their part. Likewise, when others take action, they are depending on you to play your part.
+Our expectation of reliability means that every member meaningfully expands what we are capable of accomplishing. Each member is a valued individual contributor; we respect their time when planning actions and designing the platform, as well as strive to answer every question and meet every need we can observe.
 
-## Dependability
-The Alliance's ability to plan actions depends on members reliably taking the actions assigned to them. Moreover, when individuals are not reliable, others are forced to compensate and trust degrades.
+Membership is formalized by a contract:
 
-Effective cooperation is not achieved by pursuit of some idealistic harmony: it is achieved by working through uncertainty, disagreement, and inconvenience in order to reach a common goal.
-
-Our common goal is not to create a future that is perfect from the perspective of every member, but to create a future that members agree is significantly better than the future that would occur otherwise. Therefore, members abide by a *democratic process that decides actions* rather than decide individually whether or not to participate in every action. Similarly, a democratic society depends on citizens following every law, not only the laws they agree with.
-
-We recognize the risks associated with collective decision-making. To mitigate these risks, we put limits on the total amount of time and resources required from members, and our governance procedures ensure that members approve of the overall goals and direction of the Alliance.
-
-## Contract
-The following constitutes the basic promise that current members make to one another:
 "
           />
 
-          <div className="my-4">
+          <div className="my-6">
             <MemberContract id="contract" />
           </div>
-          <MarkdownWrapper
-            id="required-investment"
-            markdownContent="
-
-## Example actions
-Eventually, we will focus on actions that achieve direct impact. Today, we are in an experimental phase in which we are learning from members and refining the early shape of the Alliance.
-
-Early members may take part in:
-- Shaping early governance processes.
-- Talking to friends and family about the Alliance.
-- Testing the Alliance online platform.
-- Reading about and discussing Alliance priorities with other members.
-- Participating in small-scale (less than $1/day) donation-pooling experiments.
-"
-          />
-          <MarkdownWrapper
-            id="governance"
-            className="mt-6"
-            markdownContent="
-# Governance
-Our governance depends on a periodic “course adjustment” process:
-1. In course adjustment, we will ask members what they think about the direction of the Alliance and whether or not they have any major concerns. We will collect common feedback, respond publicly with our plans to address the feedback, collect more feedback, and continue to iterate until the majority of members are satisfied.
-2. Course adjustment will re-occur once 10 actions have been taken and 3 months have passed since the last course adjustment
-3. As a backstop, course adjustment can occur at any time if requested by more than 50% of members.
-
-The specific goal of course adjustment is to have more than 75% of members believe that:
-1. 80% of their contributions to the Alliance will advance causes they support after course adjustment.
-2. Their major concerns will be addressed after course adjustment.
-
-This governance procedure will be in effect prior to public launch. When we are close to our public launch, we will collectively develop a set of more complex and formal procedures.
-
-"
-          />
         </div>
-        {/* <aside className="w-80"></aside> */}
       </div>
       <Footer />
     </div>
