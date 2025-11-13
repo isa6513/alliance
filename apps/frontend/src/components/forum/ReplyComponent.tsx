@@ -111,7 +111,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         editAttachments.map(async (img) => {
           if (img.startsWith("data:")) {
             const res = await imagesUploadImage({ body: { file: img } });
-            return res.data?.key ?? "";
+            return res.data?.key;
           }
           return img;
         })
