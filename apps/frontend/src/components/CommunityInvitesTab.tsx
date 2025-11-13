@@ -6,7 +6,6 @@ import {
   userGetOnetimeInvitesByCommunity,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { useEffect, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import List from "@alliance/shared/ui/List";
@@ -74,13 +73,16 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
     });
   };
   return (
-    <div className="flex flex-col gap-y-4">
-      <Card style={CardStyle.White} className="gap-y-1">
-        <p className="font-medium">
-          Invite a new member to the Alliance and your community
+    <div className="flex flex-col gap-y-8">
+      <div className="flex flex-col gap-y-1">
+        <p className="font-semibold text-xl">Invite someone to the Alliance</p>
+        <p className="text-zinc-500">
+          This will create a personalized invite page that explains what the
+          Alliance is and how to sign up.
         </p>
-        <p className="text-sm text-zinc-500">
-          Invited members will automatically be added.
+        <p className="text-zinc-500">
+          When the new member signs up, they will automatically be added to your
+          group.
         </p>
         <div className="flex flex-row gap-x-2 mt-2">
           <input
@@ -96,43 +98,44 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
             className="!h-10"
             disabled={creatingInvite || !name}
           >
-            {creatingInvite
-              ? "Creating invite..."
-              : "Create personalized invite"}
+            {creatingInvite ? "Creating invite..." : "Create invite"}
           </Button>
         </div>
-      </Card>
+      </div>
 
-      <List>
-        {invites.map((invite) => (
-          <div
-            key={invite.id}
-            className="flex flex-row gap-x-2 p-4 justify-between items-center"
-          >
-            <p>{invite.invitee}</p>
-            <div className="flex flex-row gap-3 items-center">
-              <p className="text-gray-500">{invite.code}</p>
-              {invite.isValid ? (
-                <p className="text-green">Active</p>
-              ) : (
-                <p className="text-gray-500">used</p>
-              )}
-              <div
-                className="cursor-pointer active:scale-85 transition-all duration-100 hover:brightness-50"
-                onClick={() => copyToClipboard(invite.code)}
-              >
-                <CopyIcon size="medium" fill="gray" />
-              </div>
-              <div
-                className="cursor-pointer active:scale-85 transition-all duration-100 hover:brightness-50"
-                onClick={() => handleDeleteInvite(invite.id)}
-              >
-                <DeleteIcon size="medium" fill="gray" />
+      <div className="flex flex-col gap-y-2">
+        <p className="font-semibold text-xl">Past invites</p>
+        <List>
+          {invites.map((invite) => (
+            <div
+              key={invite.id}
+              className="flex flex-row gap-x-2 p-4 justify-between items-center"
+            >
+              <p>{invite.invitee}</p>
+              <div className="flex flex-row gap-3 items-center">
+                <p className="text-gray-500">{invite.code}</p>
+                {invite.isValid ? (
+                  <p className="text-green">Active</p>
+                ) : (
+                  <p className="text-gray-500">used</p>
+                )}
+                <div
+                  className="cursor-pointer active:scale-85 transition-all duration-100 hover:brightness-50"
+                  onClick={() => copyToClipboard(invite.code)}
+                >
+                  <CopyIcon size="medium" fill="gray" />
+                </div>
+                <div
+                  className="cursor-pointer active:scale-85 transition-all duration-100 hover:brightness-50"
+                  onClick={() => handleDeleteInvite(invite.id)}
+                >
+                  <DeleteIcon size="medium" fill="gray" />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </List>
+          ))}
+        </List>
+      </div>
     </div>
   );
 };

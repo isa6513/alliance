@@ -8,11 +8,13 @@ import { useCallback, useState } from "react";
 
 export interface CommunityEditFormProps {
   initialValue: CommunityDto;
+  onCancel: () => void;
   onSuccess: () => void;
 }
 
 const CommunityEditForm = ({
   initialValue,
+  onCancel,
   onSuccess,
 }: CommunityEditFormProps) => {
   const [formValues, setFormValues] =
@@ -34,16 +36,16 @@ const CommunityEditForm = ({
   }, [formValues]);
 
   return (
-    <div className="flex flex-col gap-y-1">
-      <label className="text-black text-sm font-medium" htmlFor="name">
-        Community name
+    <div className="flex flex-col gap-y-2">
+      <label className="text-black text-sm font-semibold" htmlFor="name">
+        Name
       </label>
       <input
         value={formValues.name}
         onChange={(e) => setFormValues({ ...formValues, name: e.target.value })}
         className="border border-zinc-300 rounded px-3 py-2 w-full"
       />
-      <label className="text-black text-sm font-medium mt-3" htmlFor="name">
+      <label className="text-black text-sm font-semibold mt-3" htmlFor="name">
         Description
       </label>
       <textarea
@@ -53,10 +55,10 @@ const CommunityEditForm = ({
         }
         className="border border-zinc-300 rounded px-3 py-2 w-full bg-white"
       />
-      <p className="text-xs text-zinc-500 mt-1">
-        content will be displayed as markdown
-      </p>
-      <div className="flex justify-end">
+      <div className="flex gap-x-1 justify-end">
+        <Button onClick={onCancel} className="mt-1" color={ButtonColor.Grey}>
+          Cancel
+        </Button>
         <Button
           onClick={handleSubmit}
           className="mt-1"

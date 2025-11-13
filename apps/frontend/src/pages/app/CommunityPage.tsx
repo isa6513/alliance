@@ -18,12 +18,14 @@ import { useAuth } from "../../lib/AuthContext";
 import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import CompletedBar from "../../components/CompletedBar";
 import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
-import GroupOrganizerGuidelines from "../../components/GroupOrganizerGuidelines";
-import StatusIcon from "@alliance/shared/ui/icons/StatusIcon";
+import {
+  GroupMemberGuidelines,
+  GroupOrganizerGuidelines,
+} from "../../components/GroupGuidelines";
 import CommunityEditForm from "../../components/CommunityEditForm";
 import CommunityInvitesTab from "../../components/CommunityInvitesTab";
 
-type Tab = "members" | "about" | "invites" | "edit";
+type Tab = "members" | "invites" | "about" | "edit";
 
 export enum FilterMode {
   All = "All",
@@ -123,7 +125,7 @@ const CommunityPage = () => {
 
   const [tab, setTab] = useState<Tab>("members");
   const tabs: Tab[] = amLeader
-    ? ["members", "about", "invites"]
+    ? ["members", "invites", "about"]
     : ["members", "about"];
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
@@ -153,10 +155,14 @@ const CommunityPage = () => {
   return (
     <CenterLayout>
       <div className="flex flex-col gap-y-2 my-8">
-        <div className="flex flex-row gap-x-2 items-center justify-between">
-          <p className="font-serif font-semibold text-3xl md:text-4xl mb-4">
-            {community.name}
-          </p>
+        <div className="flex flex-row gap-x-2 items-start justify-between">
+          <div className="flex flex-col gap-y-4 mb-8">
+            <p className="font-serif font-semibold text-3xl md:text-5xl">
+              {community.name}
+            </p>
+            <AppMarkdownWrapper markdownContent={community.description} />
+          </div>
+
           {amLeader && (
             <Button color={ButtonColor.Light} onClick={() => setTab("edit")}>
               Edit
@@ -166,8 +172,8 @@ const CommunityPage = () => {
 
         <div className="w-1/2">
           <p className="text-sm">
-            {nCompleted} of {community.users.length} members have completed
-            current actions
+            {nCompleted} / {community.users.length} have completed current
+            actions
           </p>
           <CompletedBar
             percentage={(nCompleted / community.users.length) * 100}
@@ -193,7 +199,7 @@ const CommunityPage = () => {
       </div>
       {tab === "members" && (
         <div className="flex flex-col gap-y-4">
-          <p className="font-semibold">
+          <p className="font-semibold text-lg md:text-xl">
             Organizer{leaders.length > 1 ? "s" : ""}
           </p>
           <List>
@@ -208,10 +214,11 @@ const CommunityPage = () => {
               />
             ))}
           </List>
-          <div className="flex flex-col gap-y-2 mt-4">
-            <p className="font-semibold">Members</p>
-            <div className="flex flex-row justify-start items-center mb-2">
-              <p className="mr-4">Filter by:</p>
+          <div className="flex flex-col gap-y-4 mt-4">
+            <div className="flex flex-row gap-x-4 justify-start items-center">
+              <p className="font-semibold text-lg md:text-xl">
+                Members ({community.users.length})
+              </p>
               <DropdownSelect
                 options={Object.values(FilterMode)}
                 secondaryLabels={Object.values(FilterMode).map((mode) =>
@@ -245,25 +252,7 @@ const CommunityPage = () => {
       )}
       {tab === "about" && (
         <div className="flex flex-col gap-y-4">
-          <div className="flex flex-col gap-y-2">
-            <p className="font-semibold">Description</p>
-            <AppMarkdownWrapper markdownContent={community.description} />
-          </div>
-          <div className="flex flex-row items-center">
-            <StatusIcon
-              status="gathering_commitments"
-              size="large"
-              fill="var(--color-zinc-400)"
-            />
-            <p className="text-sm text-zinc-500 font-medium">
-              {community.users.length} members
-            </p>
-          </div>
-          {amLeader && (
-            <Card style={CardStyle.Grey}>
-              <GroupOrganizerGuidelines />
-            </Card>
-          )}
+          {amLeader ? <GroupOrganizerGuidelines /> : <GroupMemberGuidelines />}
         </div>
       )}
       {tab === "invites" && <CommunityInvitesTab communityId={community.id} />}
@@ -271,6 +260,7 @@ const CommunityPage = () => {
         <Card style={CardStyle.Grey}>
           <CommunityEditForm
             initialValue={community}
+            onCancel={() => setTab("members")}
             onSuccess={() => {
               window.location.reload();
             }}

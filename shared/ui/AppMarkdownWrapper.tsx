@@ -16,7 +16,10 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
       <ReactMarkdown
         components={{
           h1: ({ ...props }) => (
-            <h1 className="first:mt-0 mt-6 !font-medium !text-xl" {...props} />
+            <h1
+              className="first:mt-0 mt-6 !font-semibold !text-xl"
+              {...props}
+            />
           ),
           h2: ({ ...props }) => (
             <h2
