@@ -169,7 +169,7 @@ const UserActivityCard = ({
           </p>
         </div>
         {isEditing ? (
-          <div className="flex-1 space-y-2 -m-4 mt-4 border-t border-zinc-200">
+          <div className="flex-1 space-y-2 -m-4 mt-4 mb-0 border-t border-zinc-200">
             <div className="rounded p-3 bg-zinc-100">
               <EditableContentForm
                 value={editContent}
