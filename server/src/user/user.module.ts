@@ -17,6 +17,7 @@ import { Group } from './entities/group.entity';
 import { OnetimeInvite } from './entities/onetime-invite.entity';
 import { UserAwayRange } from './entities/user-away-range.entity';
 import { Community } from './entities/community.entity';
+import { CommunityInvite } from './entities/community-invite.entity';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { Community } from './entities/community.entity';
       OnetimeInvite,
       UserAwayRange,
       Community,
+      CommunityInvite,
     ]),
     JwtModule,
     ImagesModule,

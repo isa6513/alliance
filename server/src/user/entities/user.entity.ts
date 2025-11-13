@@ -5,6 +5,7 @@ import * as bcrypt from 'bcryptjs';
 import { Expose, Type } from 'class-transformer';
 import {
   Allow,
+  IsDefined,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -37,6 +38,7 @@ import {
 import { Temporal } from '@js-temporal/polyfill';
 import { NotificationChannel } from 'src/notifs/notif-utils';
 import { Community } from './community.entity';
+import { CommunityInvite } from './community-invite.entity';
 
 export enum NotificationPreference {
   All = 'all',
@@ -317,4 +319,10 @@ export class User {
   })
   @Type(() => Community)
   leaderOf: Community[];
+
+  @OneToMany(() => CommunityInvite, (invite) => invite.invitedUser)
+  @ApiProperty({ type: () => CommunityInvite, isArray: true })
+  @Type(() => CommunityInvite)
+  @IsDefined()
+  invitedCommunities: CommunityInvite[];
 }

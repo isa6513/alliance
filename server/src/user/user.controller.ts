@@ -44,7 +44,12 @@ import {
   CommunityUserInfoDto,
   UserActionRelationsResponseDto,
 } from './dto/user-action-relations.dto';
-import { CreateOnetimeInviteDto, OnetimeInviteDto } from './dto/invite.dto';
+import {
+  CommunityInviteDto,
+  CreateCommunityInviteDto,
+  CreateOnetimeInviteDto,
+  OnetimeInviteDto,
+} from './dto/invite.dto';
 import { CreateAwayRangeDto, UserAwayRangeDto } from './dto/away-range.dto';
 import {
   CommunityDto,
@@ -531,6 +536,27 @@ export class UserController {
     return this.userService.createOnetimeInvite(body);
   }
 
+  @Post('createCommunityInvite')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse({ type: CommunityInviteDto })
+  async createCommunityInvite(
+    @Body() body: CreateCommunityInviteDto,
+    @Request() req: JwtRequest,
+  ): Promise<CommunityInviteDto> {
+    return new CommunityInviteDto(
+      await this.userService.createCommunityInvite(body, req.user.sub),
+    );
+  }
+
+  @Get('communityInvites/:communityId')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse({ type: [CommunityInviteDto] })
+  async getCommunityInvites(
+    @Param('communityId', ParseIntPipe) communityId: number,
+  ): Promise<CommunityInviteDto[]> {
+    return this.userService.findCommunityInvites(communityId);
+  }
+
   @Delete('onetimeInvites/:inviteId')
   @UseGuards(CommunityLeaderGuard)
   @ApiOkResponse()
@@ -539,6 +565,23 @@ export class UserController {
     @Request() req: JwtRequest,
   ) {
     await this.userService.deleteOnetimeInvite(inviteId, req.user.sub);
+  }
+
+  @Delete('communityInvites/:inviteId')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse()
+  async deleteCommunityInvite(
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @Request() req: JwtRequest,
+  ) {
+    await this.userService.deleteCommunityInvite(inviteId, req.user.sub);
+  }
+
+  @Get('communityInvites')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [CommunityInviteDto] })
+  async getCommunityInvitesForUser(@Request() req: JwtRequest) {
+    return this.userService.findCommunityInvitesForUser(req.user.sub);
   }
 
   @Get('onetimeInvites')
@@ -580,5 +623,25 @@ export class UserController {
   @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
   async getCommunityMemberContactInfo(@Request() req: JwtRequest) {
     return this.userService.getMemberContactInfo(req.user.sub);
+  }
+
+  @Post('communityInvites/:inviteId/accept')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async acceptCommunityInvite(
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @Request() req: JwtRequest,
+  ) {
+    await this.userService.acceptCommunityInvite(inviteId, req.user.sub);
+  }
+
+  @Post('communityInvites/:inviteId/reject')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async rejectCommunityInvite(
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @Request() req: JwtRequest,
+  ) {
+    await this.userService.rejectCommunityInvite(inviteId, req.user.sub);
   }
 }

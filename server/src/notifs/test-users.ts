@@ -56,4 +56,5 @@ export const testUser = {
   groups: [],
   communities: [],
   leaderOf: [],
+  invitedCommunities: [],
 };

@@ -15,7 +15,7 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import TextareaWithHighlights from "../TextareaWithHighlights";
-import UserSelect, { UserSelectUser } from "../UserSelect";
+import UserSelect, { UserSelectUser } from "@alliance/shared/ui/UserSelect";
 import {
   defaultEmailContents,
   defaultEmailSubject,

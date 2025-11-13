@@ -56,10 +56,6 @@ export function computeFormStorageKey(args: {
 const FALLBACK_TIMEZONE = "America/Los_Angeles";
 const DEFAULT_DEVICE_TYPE: DeviceVisibilityTarget = "desktop";
 
-type FormResponseWithDeviceType = FormResponseDto & {
-  deviceType?: DeviceVisibilityTarget | null;
-};
-
 const detectDeviceType = (): DeviceVisibilityTarget => {
   if (typeof window === "undefined") {
     return DEFAULT_DEVICE_TYPE;
@@ -331,9 +327,10 @@ const FormRenderer = ({
     };
   }, [readOnly]);
 
-  const savedDeviceType =
-    (completedFormResponse as FormResponseWithDeviceType | undefined)
-      ?.deviceType ?? null;
+  const savedDeviceType = completedFormResponse?.deviceType as
+    | DeviceVisibilityTarget
+    | undefined;
+
   const effectiveDeviceType = readOnly
     ? savedDeviceType ?? deviceType
     : deviceType;

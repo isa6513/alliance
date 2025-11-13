@@ -1,14 +1,15 @@
-import { UserDto } from "@alliance/shared/client";
-import React, { useMemo, useState } from "react";
+import { UserDto, userMembers } from "@alliance/shared/client";
+import React, { useEffect, useMemo, useState } from "react";
+import ProfileImage from "./ProfileImage";
 
-export type UserSelectUser = Pick<UserDto, "id" | "name">;
+export type UserSelectUser = Pick<UserDto, "id" | "name" | "profilePicture">;
 
 interface UserSelectProps {
   users: UserSelectUser[];
   selectedUserIds: number[];
   onChange: (userIds: number[]) => void;
   loading?: boolean;
-  label?: string;
+  label?: string | null;
   single?: boolean;
 }
 
@@ -71,22 +72,26 @@ const UserSelect: React.FC<UserSelectProps> = ({
   const placeholder = loading
     ? "Loading users…"
     : canSelectMore
-    ? "Search by name or email"
+    ? "Search by name"
     : "Remove current selection to choose another";
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
-      </label>
-      <input
-        type="text"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder={placeholder}
-        disabled={inputDisabled}
-        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
-      />
+      {label && (
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {label}
+        </label>
+      )}
+      {canSelectMore && (
+        <input
+          type="text"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={placeholder}
+          disabled={inputDisabled}
+          className="w-full border border-gray-300 rounded-md px-3 py-3 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+        />
+      )}
       {query && filteredUsers.length > 0 && (
         <div className="mt-2 border border-gray-200 rounded-md shadow-sm bg-white max-h-48 overflow-y-auto">
           {filteredUsers.map((user) => (
@@ -108,13 +113,14 @@ const UserSelect: React.FC<UserSelectProps> = ({
           No users match that search.
         </p>
       )}
-      <div className="mt-3 space-y-2">
+      <div className="mb-3 space-y-2">
         {selectedUsers.map((user) => (
           <div
             key={user.id}
             className="flex items-center justify-between border border-gray-200 rounded-md px-3 py-2 text-sm bg-gray-50"
           >
-            <div>
+            <div className="flex items-center gap-x-2">
+              <ProfileImage pfp={user.profilePicture} size="medium" />
               <p className="font-medium">{user.name ?? `User #${user.id}`}</p>
             </div>
             <button
@@ -137,3 +143,19 @@ const UserSelect: React.FC<UserSelectProps> = ({
 };
 
 export default UserSelect;
+
+export const useSelectableUserIds = () => {
+  const [users, setUsers] = useState<UserSelectUser[]>([]);
+  useEffect(() => {
+    userMembers().then((response) => {
+      setUsers(
+        response.data?.map((user) => ({
+          id: user.id,
+          name: user.displayName,
+          profilePicture: user.profilePicture,
+        })) ?? []
+      );
+    });
+  }, []);
+  return users;
+};

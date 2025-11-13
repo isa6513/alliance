@@ -8,7 +8,7 @@ import {
   userGetMyCommunity,
 } from "@alliance/shared/client";
 import List from "@alliance/shared/ui/List";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Spinner from "../../components/Spinner";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
@@ -24,6 +24,7 @@ import {
 } from "../../components/GroupGuidelines";
 import CommunityEditForm from "../../components/CommunityEditForm";
 import CommunityInvitesTab from "../../components/CommunityInvitesTab";
+import { useSearchParams } from "react-router";
 
 type Tab = "members" | "invites" | "about" | "edit";
 
@@ -46,6 +47,10 @@ const CommunityPage = () => {
   const [actionSummaries, setActionSummaries] = useState<
     UserActionSummaryDto[]
   >([]);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const tab = searchParams.get("tab") ?? "members";
 
   const [activeActions, setActiveActions] = useState<UserActionSummaryDto[]>(
     []
@@ -123,10 +128,21 @@ const CommunityPage = () => {
     }
   }, [amLeader]);
 
-  const [tab, setTab] = useState<Tab>("members");
+  const setTab = useCallback(
+    (tab: Tab) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set("tab", tab);
+        return next;
+      });
+    },
+    [setSearchParams]
+  );
+
   const tabs: Tab[] = amLeader
     ? ["members", "invites", "about"]
     : ["members", "about"];
+
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
   if (!community) {

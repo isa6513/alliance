@@ -46,7 +46,8 @@ export class FormResponse {
   @Column({ type: 'text', nullable: true })
   @ApiPropertyOptional()
   @IsOptional()
-  deviceType?: DeviceVisibilityTarget | null;
+  @Type(() => String)
+  deviceType?: DeviceVisibilityTarget;
 
   @ApiProperty({ type: () => User })
   @ManyToOne(() => User, { onDelete: 'CASCADE' })

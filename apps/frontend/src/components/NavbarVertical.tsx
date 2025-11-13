@@ -1,8 +1,9 @@
 import { Link, useOutletContext } from "react-router";
 import { AppLayoutOutletContext } from "../applayout";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useNotifications } from "../lib/useNotifications";
+import { useAuth } from "../lib/AuthContext";
 
 export enum NavbarPage {
   Tasks = "Tasks",
@@ -15,6 +16,7 @@ export enum NavbarPage {
   Contract = "Contract",
   Settings = "Settings",
   Search = "Search",
+  Community = "Community",
 }
 
 export const destinations: Record<NavbarPage, string> = {
@@ -28,6 +30,7 @@ export const destinations: Record<NavbarPage, string> = {
   [NavbarPage.Profile]: "/profile",
   [NavbarPage.Contract]: "/contract",
   [NavbarPage.Settings]: "/settings",
+  [NavbarPage.Community]: "/community",
 };
 
 const navSections = [
@@ -66,6 +69,10 @@ const navSections = [
       {
         page: NavbarPage.Search,
         destination: destinations[NavbarPage.Search],
+      },
+      {
+        page: NavbarPage.Community,
+        destination: destinations[NavbarPage.Community],
       },
     ],
   },
@@ -143,6 +150,22 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
       .flatMap((section) => section.items)
       .find((item) => item.destination === window.location.pathname)?.page ||
     null;
+
+  const { user } = useAuth();
+
+  const unreadNotifsForPage = useMemo((): Partial<
+    Record<NavbarPage, number>
+  > => {
+    return {
+      [NavbarPage.Notifications]: unreadCount,
+      [NavbarPage.Tasks]: todoActions,
+      [NavbarPage.Community]: user?.communities.length
+        ? 0
+        : user?.invitedCommunities.filter(
+            (invite) => invite.status === "pending"
+          ).length,
+    };
+  }, [unreadCount, todoActions, user]);
 
   return (
     <>
@@ -225,15 +248,9 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                       onClick={() => setOpen(false)}
                     >
                       <p>{item.page}</p>
-                      {item.page === NavbarPage.Notifications &&
-                        unreadCount > 0 && (
-                          <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-5 h-5">
-                            {unreadCount}
-                          </div>
-                        )}
-                      {item.page === NavbarPage.Tasks && todoActions > 0 && (
+                      {!!unreadNotifsForPage[item.page] && (
                         <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-5 h-5">
-                          {todoActions}
+                          {unreadNotifsForPage[item.page]}
                         </div>
                       )}
                     </Link>

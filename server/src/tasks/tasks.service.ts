@@ -280,7 +280,7 @@ export class TasksService {
       schemaSnapshot: submitFormDto.schemaSnapshot,
       visibilityValidatorResults:
         submitFormDto.visibilityValidatorResults ?? validatorResults,
-      deviceType: submitFormDto.deviceType ?? null,
+      deviceType: submitFormDto.deviceType,
       user,
     });
     const savedForm = await this.formResponseRepository.save(formResponse);

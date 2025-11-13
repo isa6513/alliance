@@ -17,7 +17,7 @@ import type {
 } from "@alliance/shared/client/types.gen";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import UserSelect, { UserSelectUser } from "../components/UserSelect";
+import UserSelect, { UserSelectUser } from "@alliance/shared/ui/UserSelect";
 import { useToast } from "@alliance/shared/ui/ToastProvider";
 
 const CommunityDetailPage: React.FC = () => {

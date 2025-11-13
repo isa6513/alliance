@@ -31,7 +31,7 @@ import {
 import ActionReminderGroupForm, {
   ActionReminderGroupFormSubmitPayload,
 } from "./ActionReminderGroupForm";
-import { UserSelectUser } from "../UserSelect";
+import { UserSelectUser } from "@alliance/shared/ui/UserSelect";
 import { ActionEventNotifDto } from "@alliance/shared/client";
 import ActionReminderCard from "./ActionReminderCard";
 import { useToast } from "@alliance/shared/ui/ToastProvider";
@@ -121,6 +121,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             id: user.id,
             name: user.name ?? undefined,
             displayName: user.name ?? undefined,
+            profilePicture: user.profilePicture ?? null,
           })
         );
         setUsers(mappedUsers);

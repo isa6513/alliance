@@ -94,6 +94,7 @@ export class UserDto extends PickType(User, [
   'socialNotifsPreference',
   'forumDigestPreference',
   'turnedOffAllNotifs',
+  'invitedCommunities',
   'referralCode',
   'anonymous',
   'preferredActionReminderChannel',

@@ -32,6 +32,18 @@ export type NotificationPreference = 'all' | 'digest' | 'none';
 
 export type ForumDigestPreference = 'off' | 'daily' | 'weekly';
 
+export type CommunityInviteStatus = 'pending' | 'accepted' | 'rejected' | 'cancelled';
+
+export type CommunityInvite = {
+    id: number;
+    invitingUser?: User;
+    invitedUser: User;
+    status: CommunityInviteStatus;
+    createdAt: string;
+    updatedAt: string;
+    community: Community;
+};
+
 export type User = {
     id: number;
     name: string;
@@ -61,6 +73,7 @@ export type User = {
     onboardingComplete: boolean;
     anonymous: boolean;
     communities: Array<Community>;
+    invitedCommunities: Array<CommunityInvite>;
 };
 
 export type OnetimeInvite = {
@@ -81,6 +94,7 @@ export type Community = {
     users?: Array<User>;
     leaders?: Array<User>;
     invites?: Array<OnetimeInvite>;
+    internalInvites: Array<CommunityInvite>;
 };
 
 export type UserDto = {
@@ -102,6 +116,7 @@ export type UserDto = {
     onboardingComplete: boolean;
     anonymous: boolean;
     communities: Array<Community>;
+    invitedCommunities: Array<CommunityInvite>;
     cityId?: number;
     email: string;
     phoneNumber?: string;
@@ -177,6 +192,7 @@ export type UpdateProfileDto = {
     onboardingComplete?: boolean;
     anonymous?: boolean;
     communities?: Array<Community>;
+    invitedCommunities?: Array<CommunityInvite>;
     cityId?: number;
 };
 
@@ -254,6 +270,7 @@ export type CommunityDto = {
     name: string;
     description: string;
     photo?: string;
+    internalInvites: Array<CommunityInvite>;
     users: Array<ProfileDto>;
     leaders: Array<ProfileDto>;
 };
@@ -302,6 +319,21 @@ export type OnetimeInviteDto = {
     createdAt: string;
     isValid: boolean;
     community?: Community;
+};
+
+export type CreateCommunityInviteDto = {
+    invitedUserId: number;
+    communityId: number;
+};
+
+export type CommunityInviteDto = {
+    id: number;
+    status: CommunityInviteStatus;
+    createdAt: string;
+    updatedAt: string;
+    community: Community;
+    invitedUser?: ProfileDto;
+    invitingUser?: ProfileDto;
 };
 
 export type CommunityUserInfoDto = {
@@ -405,7 +437,7 @@ export type EditableContent = {
 
 export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 'group';
 
-export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes';
+export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'community_invite_rejected' | 'community_invite_accepted';
 
 export type Notification = {
     id: number;
@@ -482,9 +514,7 @@ export type FormResponse = {
     visibilityValidatorResults: {
         [key: string]: unknown;
     };
-    deviceType?: {
-        [key: string]: unknown;
-    };
+    deviceType?: string;
     user: User;
     createdAt: string;
     schemaSnapshot: {
@@ -1446,9 +1476,7 @@ export type FormResponseDto = {
     visibilityValidatorResults: {
         [key: string]: unknown;
     };
-    deviceType?: {
-        [key: string]: unknown;
-    };
+    deviceType?: string;
     schemaSnapshot: {
         [key: string]: unknown;
     };
@@ -2296,6 +2324,34 @@ export type UserCreateOnetimeInviteResponses = {
 
 export type UserCreateOnetimeInviteResponse = UserCreateOnetimeInviteResponses[keyof UserCreateOnetimeInviteResponses];
 
+export type UserCreateCommunityInviteData = {
+    body: CreateCommunityInviteDto;
+    path?: never;
+    query?: never;
+    url: '/user/createCommunityInvite';
+};
+
+export type UserCreateCommunityInviteResponses = {
+    200: CommunityInviteDto;
+};
+
+export type UserCreateCommunityInviteResponse = UserCreateCommunityInviteResponses[keyof UserCreateCommunityInviteResponses];
+
+export type UserGetCommunityInvitesData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/communityInvites/{communityId}';
+};
+
+export type UserGetCommunityInvitesResponses = {
+    200: Array<CommunityInviteDto>;
+};
+
+export type UserGetCommunityInvitesResponse = UserGetCommunityInvitesResponses[keyof UserGetCommunityInvitesResponses];
+
 export type UserDeleteOnetimeInviteData = {
     body?: never;
     path: {
@@ -2308,6 +2364,32 @@ export type UserDeleteOnetimeInviteData = {
 export type UserDeleteOnetimeInviteResponses = {
     200: unknown;
 };
+
+export type UserDeleteCommunityInviteData = {
+    body?: never;
+    path: {
+        inviteId: number;
+    };
+    query?: never;
+    url: '/user/communityInvites/{inviteId}';
+};
+
+export type UserDeleteCommunityInviteResponses = {
+    200: unknown;
+};
+
+export type UserGetCommunityInvitesForUserData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/communityInvites';
+};
+
+export type UserGetCommunityInvitesForUserResponses = {
+    200: Array<CommunityInviteDto>;
+};
+
+export type UserGetCommunityInvitesForUserResponse = UserGetCommunityInvitesForUserResponses[keyof UserGetCommunityInvitesForUserResponses];
 
 export type UserGetOnetimeInvitesData = {
     body?: never;
@@ -2375,6 +2457,32 @@ export type UserGetCommunityMemberContactInfoResponses = {
 };
 
 export type UserGetCommunityMemberContactInfoResponse = UserGetCommunityMemberContactInfoResponses[keyof UserGetCommunityMemberContactInfoResponses];
+
+export type UserAcceptCommunityInviteData = {
+    body?: never;
+    path: {
+        inviteId: number;
+    };
+    query?: never;
+    url: '/user/communityInvites/{inviteId}/accept';
+};
+
+export type UserAcceptCommunityInviteResponses = {
+    200: unknown;
+};
+
+export type UserRejectCommunityInviteData = {
+    body?: never;
+    path: {
+        inviteId: number;
+    };
+    query?: never;
+    url: '/user/communityInvites/{inviteId}/reject';
+};
+
+export type UserRejectCommunityInviteResponses = {
+    200: unknown;
+};
 
 export type ImagesGetImageData = {
     body?: never;

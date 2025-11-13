@@ -1,4 +1,4 @@
-import { Allow, IsOptional } from 'class-validator';
+import { Allow, IsDefined, IsOptional } from 'class-validator';
 import {
   Column,
   Entity,
@@ -15,6 +15,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { OnetimeInvite } from './onetime-invite.entity';
+import { CommunityInvite } from './community-invite.entity';
 
 @Entity()
 export class Community {
@@ -67,4 +68,10 @@ export class Community {
   @Type(() => OnetimeInvite)
   @IsOptional()
   invites?: OnetimeInvite[];
+
+  @OneToMany(() => CommunityInvite, (invite) => invite.community)
+  @ApiProperty({ type: () => CommunityInvite, isArray: true })
+  @Type(() => CommunityInvite)
+  @IsDefined()
+  internalInvites: CommunityInvite[];
 }

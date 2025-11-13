@@ -8,7 +8,7 @@ import {
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card from "@alliance/shared/ui/Card";
 import { useEffect, useState } from "react";
-import UserSelect, { UserSelectUser } from "../components/UserSelect";
+import UserSelect, { UserSelectUser } from "@alliance/shared/ui/UserSelect";
 import List from "@alliance/shared/ui/List";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
