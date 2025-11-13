@@ -9,7 +9,6 @@ import * as request from 'supertest';
 import { Repository } from 'typeorm';
 import { Action } from '../src/actions/entities/action.entity';
 import { CreatePostDto } from '../src/forum/dto/post.dto';
-import { ForumModule } from '../src/forum/forum.module';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { Notification } from 'src/notifs/entities/notification.entity';
@@ -48,7 +47,7 @@ describe('Forum (e2e)', () => {
   };
 
   beforeAll(async () => {
-    ctx = await createTestApp([ForumModule]);
+    ctx = await createTestApp([]);
     actionRepo = ctx.dataSource.getRepository(Action);
     userRepo = ctx.dataSource.getRepository(User);
     notifRepo = ctx.dataSource.getRepository(Notification);

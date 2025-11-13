@@ -16,6 +16,7 @@ import { NotifsModule } from 'src/notifs/notifs.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { testConnectionOptions } from 'src/datasources/dataSourceTest';
 import { Group } from 'src/user/entities/group.entity';
+import { ForumModule } from 'src/forum/forum.module';
 
 export interface TestContext {
   app: INestApplication;
@@ -49,6 +50,7 @@ export async function createTestApp(
       EventEmitterModule.forRoot(),
       TypeOrmModule.forRoot(testConnectionOptions()),
       AuthModule,
+      ForumModule,
       ActionsModule,
       NotifsModule,
       UserModule,
