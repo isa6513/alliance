@@ -19,8 +19,10 @@ import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import CompletedBar from "../../components/CompletedBar";
 import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import GroupOrganizerGuidelines from "../../components/GroupOrganizerGuidelines";
+import StatusIcon from "@alliance/shared/ui/icons/StatusIcon";
+import CommunityEditForm from "../../components/CommunityEditForm";
 
-type Tab = "members" | "about";
+type Tab = "members" | "about" | "settings" | "edit";
 
 export enum FilterMode {
   All = "All",
@@ -119,7 +121,9 @@ const CommunityPage = () => {
   }, [amLeader]);
 
   const [tab, setTab] = useState<Tab>("members");
-  const tabs: Tab[] = ["members", "about"];
+  const tabs: Tab[] = amLeader
+    ? ["members", "about", "settings"]
+    : ["members", "about"];
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
   if (!community) {
@@ -148,7 +152,14 @@ const CommunityPage = () => {
   return (
     <CenterLayout>
       <div className="my-5">
-        <p className="font-semibold mb-4">Your Community</p>
+        <div className="flex flex-row gap-x-2 items-center justify-between">
+          <p className="font-semibold mb-4">{community.name}</p>
+          {amLeader && (
+            <Button color={ButtonColor.Light} onClick={() => setTab("edit")}>
+              Edit
+            </Button>
+          )}
+        </div>
         <p className="text-sm">
           {nCompleted} of {community.users.length} members have completed
           current actions
@@ -159,7 +170,7 @@ const CommunityPage = () => {
           dark
         />
       </div>
-      <div className=" flex flex-row gap-x-2 justify-start mb-4">
+      <div className="flex flex-row gap-x-2 justify-start mb-4 border-b border-zinc-200">
         {tabs.map((m) => (
           <Button
             color={ButtonColor.Transparent}
@@ -200,7 +211,7 @@ const CommunityPage = () => {
                 mode === FilterMode.All
                   ? members.length.toString()
                   : members
-                      .filter((user) => completedAllCurrentActions[user.id])
+                      .filter((user) => !completedAllCurrentActions[user.id])
                       .length.toString()
               )}
               value={filterMode}
@@ -224,15 +235,33 @@ const CommunityPage = () => {
       )}
       {tab === "about" && (
         <div className="flex flex-col gap-y-4">
-          <Card>
-            <AppMarkdownWrapper markdownContent={community.description} />
-          </Card>
-          {amLeader && (
-            <Card style={CardStyle.Grey}>
-              <GroupOrganizerGuidelines />
-            </Card>
-          )}
+          <AppMarkdownWrapper markdownContent={community.description} />
+          <div className="flex flex-row items-center">
+            <StatusIcon
+              status="gathering_commitments"
+              size="large"
+              fill="var(--color-zinc-400)"
+            />
+            <p className="text-sm text-zinc-500 font-medium">
+              {community.users.length} members
+            </p>
+          </div>
         </div>
+      )}
+      {amLeader && tab === "settings" && (
+        <Card style={CardStyle.Grey}>
+          <GroupOrganizerGuidelines />
+        </Card>
+      )}
+      {tab === "edit" && (
+        <Card style={CardStyle.Grey}>
+          <CommunityEditForm
+            initialValue={community}
+            onSuccess={() => {
+              window.location.reload();
+            }}
+          />
+        </Card>
       )}
     </CenterLayout>
   );

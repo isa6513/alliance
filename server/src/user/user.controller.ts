@@ -370,7 +370,7 @@ export class UserController {
   }
 
   @Patch('communities/:communityId')
-  @UseGuards(AdminGuard)
+  @UseGuards(CommunityLeaderGuard)
   @ApiOkResponse({ type: CommunityDto })
   async updateCommunity(
     @Param('communityId', ParseIntPipe) communityId: number,
