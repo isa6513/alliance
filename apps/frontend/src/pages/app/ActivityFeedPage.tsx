@@ -17,6 +17,7 @@ const ActivityFeedPage = () => {
   const { activities, handleLikeActivity, updateActivity, loading } =
     useActivities({
       list: ActivityList.Global,
+      comments: true,
     });
 
   const [myFriends, setMyFriends] = useState<number[]>([]);

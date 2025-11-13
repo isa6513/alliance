@@ -189,13 +189,14 @@ export class ActionsController {
   async getActivityFeed(
     @Query('limit') limit?: string,
     @Query('before') before?: string,
+    @Query('comments') comments?: boolean,
   ): Promise<ActionActivityDto[]> {
     const limitNum = limit ? parseInt(limit) : 20;
     const beforeDate = before ? new Date(before) : undefined;
     if (before && isNaN(beforeDate!.getTime())) {
       throw new BadRequestException('Invalid "before" cursor');
     }
-    return this.actionsService.getActivityFeed(limitNum, beforeDate);
+    return this.actionsService.getActivityFeed(limitNum, beforeDate, comments);
   }
 
   @Get('activities/:id')
@@ -316,8 +317,11 @@ export class ActionsController {
   @Get('friendActivity')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [ActionActivityDto] })
-  async friendActivity(@Request() req: JwtRequest) {
-    return this.actionsService.friendActivity(req.user.sub);
+  async friendActivity(
+    @Request() req: JwtRequest,
+    @Query('comments') comments?: boolean,
+  ) {
+    return this.actionsService.friendActivity(req.user.sub, comments);
   }
 
   @Get('slug/:id')
@@ -360,8 +364,9 @@ export class ActionsController {
   @ApiOkResponse({ type: [ActionActivityDto] })
   async findCompletedForUser(
     @Param('id', ParseIntPipe) id: number,
+    @Query('comments') comments?: boolean,
   ): Promise<ActionActivityDto[]> {
-    return this.actionsService.findCompletedForUser(+id);
+    return this.actionsService.findCompletedForUser(+id, comments);
   }
 
   @Post(':id/events')

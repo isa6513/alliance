@@ -257,6 +257,7 @@ const UserActivityCard = ({
         <Comments
           objectId={activity.id}
           type="activity"
+          initialComments={activity.comments}
           compact
           showForm={showCommentForm}
           autofocus={showCommentForm}

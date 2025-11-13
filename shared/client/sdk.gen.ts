@@ -761,8 +761,8 @@ export const actionsLiveList = <ThrowOnError extends boolean = false>(options: O
     });
 };
 
-export const actionsFriendActivity = <ThrowOnError extends boolean = false>(options?: Options<ActionsFriendActivityData, ThrowOnError>) => {
-    return (options?.client ?? _heyApiClient).get<ActionsFriendActivityResponse, unknown, ThrowOnError>({
+export const actionsFriendActivity = <ThrowOnError extends boolean = false>(options: Options<ActionsFriendActivityData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).get<ActionsFriendActivityResponse, unknown, ThrowOnError>({
         url: '/actions/friendActivity',
         ...options
     });

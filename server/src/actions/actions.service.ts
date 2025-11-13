@@ -60,6 +60,7 @@ import { ActionSuite } from './entities/action-suite.entity';
 import { NotifsService, shouldTextUser } from 'src/notifs/notifs.service';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
 import { actionActivityUrl } from 'src/search/approutes';
+import { ForumService } from 'src/forum/forum.service';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -98,6 +99,7 @@ export class ActionsService {
     private readonly actionEventRecipientService: ActionEventRecipientService,
     private readonly actionEventReminderService: ActionEventReminderService,
     private readonly likeNotificationService: LikeNotificationService,
+    private readonly forumService: ForumService,
   ) {}
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
@@ -590,11 +592,17 @@ export class ActionsService {
     return map;
   }
 
-  async findCompletedForUser(userId: number): Promise<ActionActivityDto[]> {
+  async findCompletedForUser(
+    userId: number,
+    comments?: boolean,
+  ): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
       where: { userId, type: ActionActivityType.USER_COMPLETED },
       relations: ['action', 'user', 'likes'],
     });
+    if (comments) {
+      return this.attachComments(activities);
+    }
     return activities.map((activity) => new ActionActivityDto(activity));
   }
 
@@ -626,9 +634,25 @@ export class ActionsService {
     return activities.map((activity) => new ActionActivityDto(activity));
   }
 
+  async attachComments(
+    activities: ActionActivity[],
+  ): Promise<ActionActivityDto[]> {
+    return Promise.all(
+      activities.map(async (activity) => {
+        return new ActionActivityDto(
+          activity,
+          (await this.forumService.findCommentsForActivity(activity.id)).map(
+            (comment) => new CommentDto(comment),
+          ),
+        );
+      }),
+    );
+  }
+
   async getActivityFeed(
     limit: number = 20,
     before?: Date,
+    comments?: boolean,
   ): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
       where: {
@@ -644,6 +668,10 @@ export class ActionsService {
     });
     if (activities.length === 0) {
       return [];
+    }
+
+    if (comments) {
+      return this.attachComments(activities);
     }
 
     return Promise.all(
@@ -816,7 +844,10 @@ export class ActionsService {
     return activities.map((activity) => new ActionActivityDto(activity));
   }
 
-  async friendActivity(userId: number): Promise<ActionActivityDto[]> {
+  async friendActivity(
+    userId: number,
+    comments?: boolean,
+  ): Promise<ActionActivityDto[]> {
     const user = await this.userService.findOne(userId, [
       'sentFriendRequests',
       'receivedFriendRequests',
@@ -836,6 +867,11 @@ export class ActionsService {
       relations: ['user', 'action', 'likes'],
       order: { createdAt: 'DESC' },
     });
+
+    if (comments) {
+      return this.attachComments(friendActivities);
+    }
+
     return friendActivities.map((activity) => new ActionActivityDto(activity));
   }
 

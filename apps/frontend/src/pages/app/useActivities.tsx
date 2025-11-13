@@ -18,7 +18,7 @@ export enum ActivityList {
   Global = "global",
 }
 
-export type UseActivitiesProps =
+export type UseActivitiesProps = { comments?: boolean } & (
   | {
       list: ActivityList.User | ActivityList.Action;
       objectId: number;
@@ -26,9 +26,14 @@ export type UseActivitiesProps =
   | {
       list: ActivityList.Global | ActivityList.Friends;
       objectId?: never;
-    };
+    }
+);
 
-const useActivities = ({ list, objectId }: UseActivitiesProps) => {
+const useActivities = ({
+  list,
+  objectId,
+  comments = false,
+}: UseActivitiesProps) => {
   const [activities, setActivities] = useState<ActionActivityDto[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, isAuthenticated } = useAuth();
@@ -37,17 +42,20 @@ const useActivities = ({ list, objectId }: UseActivitiesProps) => {
     let apiCall;
     switch (list) {
       case ActivityList.Friends:
-        apiCall = actionsFriendActivity();
+        apiCall = actionsFriendActivity({ query: { comments } });
         break;
       case ActivityList.User:
-        apiCall = actionsFindCompletedForUser({ path: { id: objectId } });
+        apiCall = actionsFindCompletedForUser({
+          path: { id: objectId },
+          query: { comments },
+        });
         break;
       case ActivityList.Action:
         apiCall = actionsGetActionActivities({ path: { id: objectId } });
         break;
       case ActivityList.Global:
         apiCall = actionsGetActivityFeed({
-          query: { limit: "50", before: new Date().toISOString() },
+          query: { limit: "50", before: new Date().toISOString(), comments },
         });
         break;
     }
@@ -63,7 +71,7 @@ const useActivities = ({ list, objectId }: UseActivitiesProps) => {
       .finally(() => {
         setLoading(false);
       });
-  }, [list, objectId, isAuthenticated]);
+  }, [list, objectId, isAuthenticated, comments]);
 
   const handleLikeActivity = useCallback(
     async (activityId: number) => {

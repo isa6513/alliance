@@ -21,6 +21,7 @@ import { Action } from './entities/action.entity';
 import { ActionUpdate } from './entities/action-update.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ActionSuite } from './entities/action-suite.entity';
+import { ForumModule } from 'src/forum/forum.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ActionSuite } from './entities/action-suite.entity';
     NotifsModule,
     MailModule,
     MmsModule,
+    ForumModule,
   ],
   controllers: [ActionsController],
   providers: [

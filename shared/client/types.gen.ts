@@ -2558,6 +2558,7 @@ export type ActionsGetActivityFeedData = {
     query: {
         limit: string;
         before: string;
+        comments: boolean;
     };
     url: '/actions/activities/feed';
 };
@@ -2677,7 +2678,9 @@ export type ActionsLiveListResponses = {
 export type ActionsFriendActivityData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        comments: boolean;
+    };
     url: '/actions/friendActivity';
 };
 
@@ -2752,7 +2755,9 @@ export type ActionsFindCompletedForUserData = {
     path: {
         id: number;
     };
-    query?: never;
+    query: {
+        comments: boolean;
+    };
     url: '/actions/completed/{id}';
 };
 
