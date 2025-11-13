@@ -42,7 +42,7 @@ export default [
       route("forum/edit/:postId", "pages/app/PostFormPage.tsx"),
 
       route("/tasks", "pages/app/HomePage.tsx"),
-      route("/community", "pages/app/CommunityPage.tsx"),
+      route("/community", "pages/app/CommunityRoute.tsx"),
       route("/notifications", "pages/app/NotificationsPage.tsx"),
       route("/search", "pages/app/SearchPage.tsx"),
       route("/settings", "pages/app/SettingsPage.tsx"),

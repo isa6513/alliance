@@ -224,7 +224,8 @@ export class UserService {
         undefined as (typeof b.events)[0] | undefined,
       );
       return (
-        (aFirstEvent?.date.getTime() ?? 0) - (bFirstEvent?.date.getTime() ?? 0)
+        (aFirstEvent?.date.getTime() ?? 0) -
+          (bFirstEvent?.date.getTime() ?? 0) || a.priority - b.priority
       );
     });
 

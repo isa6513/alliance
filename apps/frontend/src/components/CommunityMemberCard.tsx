@@ -59,6 +59,7 @@ const CommunityMemberCard = ({
             <UserProgressPills
               actions={actions}
               relationByActionId={relationByActionId}
+              pillHeight="h-4"
             />
           )}
         </div>
