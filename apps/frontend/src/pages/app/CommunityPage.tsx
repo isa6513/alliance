@@ -17,8 +17,15 @@ import CommunityMemberCard from "../../components/CommunityMemberCard";
 import { useAuth } from "../../lib/AuthContext";
 import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import CompletedBar from "../../components/CompletedBar";
+import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
+import GroupOrganizerGuidelines from "../../components/GroupOrganizerGuidelines";
 
 type Tab = "members" | "about";
+
+export enum FilterMode {
+  All = "All",
+  NotYetCompleted = "Not yet completed",
+}
 
 const CommunityPage = () => {
   const [community, setCommunity] = useState<CommunityDto | null>(null);
@@ -81,23 +88,23 @@ const CommunityPage = () => {
   }, [community, user]);
 
   useEffect(() => {
+    userGetCommunityMemberInfo().then((resp) => {
+      if (resp.data) {
+        setActionSummaries(resp.data.actions);
+        setActiveActions(
+          resp.data.actions.filter(
+            (action) => action.status === "member_action"
+          )
+        );
+        setUserActionRelations(
+          resp.data.users.reduce((acc, user) => {
+            acc[user.userId] = user.relations;
+            return acc;
+          }, {} as Record<number, UserActionRelationDetailDto[]>)
+        );
+      }
+    });
     if (amLeader) {
-      userGetCommunityMemberInfo().then((resp) => {
-        if (resp.data) {
-          setActionSummaries(resp.data.actions);
-          setActiveActions(
-            resp.data.actions.filter(
-              (action) => action.status === "member_action"
-            )
-          );
-          setUserActionRelations(
-            resp.data.users.reduce((acc, user) => {
-              acc[user.userId] = user.relations;
-              return acc;
-            }, {} as Record<number, UserActionRelationDetailDto[]>)
-          );
-        }
-      });
       userGetCommunityMemberContactInfo().then((resp) => {
         if (resp.data) {
           setMemberContactInfo(
@@ -113,6 +120,7 @@ const CommunityPage = () => {
 
   const [tab, setTab] = useState<Tab>("members");
   const tabs: Tab[] = ["members", "about"];
+  const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
   if (!community) {
     if (loading) {
@@ -132,10 +140,16 @@ const CommunityPage = () => {
     (user) => !leaders.some((leader) => leader.id === user.id)
   );
 
+  const filteredMembers =
+    filterMode === FilterMode.All
+      ? members
+      : members.filter((user) => !completedAllCurrentActions[user.id]);
+
   return (
     <CenterLayout>
-      <Card className="my-5" style={CardStyle.Grey}>
-        <p className="text-sm font-semibold">
+      <div className="my-5">
+        <p className="font-semibold mb-4">Your Community</p>
+        <p className="text-sm">
           {nCompleted} of {community.users.length} members have completed
           current actions
         </p>
@@ -144,7 +158,7 @@ const CommunityPage = () => {
           height="h-5"
           dark
         />
-      </Card>
+      </div>
       <div className=" flex flex-row gap-x-2 justify-start mb-4">
         {tabs.map((m) => (
           <Button
@@ -177,9 +191,24 @@ const CommunityPage = () => {
               />
             ))}
           </List>
-          <p className="font-semibold">Members</p>
+          <p className="font-semibold mt-4">Members</p>
+          <div className="flex flex-row justify-start items-center mb-4">
+            <p className="mr-4">Filter by:</p>
+            <DropdownSelect
+              options={Object.values(FilterMode)}
+              secondaryLabels={Object.values(FilterMode).map((mode) =>
+                mode === FilterMode.All
+                  ? members.length.toString()
+                  : members
+                      .filter((user) => completedAllCurrentActions[user.id])
+                      .length.toString()
+              )}
+              value={filterMode}
+              onChange={(mode) => setFilterMode(mode as FilterMode)}
+            />
+          </div>
           <List>
-            {members.map((user) => (
+            {filteredMembers.map((user) => (
               <CommunityMemberCard
                 key={user.id}
                 canExpand={amLeader}
@@ -194,9 +223,16 @@ const CommunityPage = () => {
         </div>
       )}
       {tab === "about" && (
-        <Card>
-          <AppMarkdownWrapper markdownContent={community.description} />
-        </Card>
+        <div className="flex flex-col gap-y-4">
+          <Card>
+            <AppMarkdownWrapper markdownContent={community.description} />
+          </Card>
+          {amLeader && (
+            <Card style={CardStyle.Grey}>
+              <GroupOrganizerGuidelines />
+            </Card>
+          )}
+        </div>
       )}
     </CenterLayout>
   );
