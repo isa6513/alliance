@@ -1043,7 +1043,7 @@ export class UserService {
   async deleteOnetimeInvite(inviteId: number, userId: number): Promise<void> {
     const invite = await this.onetimeInviteRepository.findOneOrFail({
       where: { id: inviteId },
-      relations: ['invitingUser'],
+      relations: ['invitingUser', 'community'],
     });
     const user = await this.findOneOrFail(userId, ['leaderOf']);
     if (
