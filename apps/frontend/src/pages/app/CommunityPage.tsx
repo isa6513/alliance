@@ -12,10 +12,11 @@ import { useEffect, useMemo, useState } from "react";
 import Spinner from "../../components/Spinner";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card from "@alliance/shared/ui/Card";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import CommunityMemberCard from "../../components/CommunityMemberCard";
 import { useAuth } from "../../lib/AuthContext";
 import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
+import CompletedBar from "../../components/CompletedBar";
 
 type Tab = "members" | "about";
 
@@ -33,6 +34,35 @@ const CommunityPage = () => {
   const [actionSummaries, setActionSummaries] = useState<
     UserActionSummaryDto[]
   >([]);
+
+  const [activeActions, setActiveActions] = useState<UserActionSummaryDto[]>(
+    []
+  );
+
+  const [completedAllCurrentActions, setCompletedAllCurrentActions] = useState<
+    Record<number, boolean>
+  >({});
+
+  const nCompleted = useMemo(() => {
+    if (!community?.users || !userActionRelations) {
+      return 0;
+    }
+    const completedall: Record<number, boolean> = {};
+    const completedUsers = new Set<number>();
+    for (const action of activeActions) {
+      for (const member of community?.users ?? []) {
+        const relation = userActionRelations?.[member.id]?.find(
+          (relation) => relation.actionId === action.id
+        );
+        if (relation?.status === "completed") {
+          completedUsers.add(member.id);
+          completedall[member.id] = true;
+        }
+      }
+    }
+    setCompletedAllCurrentActions(completedall);
+    return completedUsers.size;
+  }, [activeActions, community, userActionRelations]);
 
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -55,6 +85,11 @@ const CommunityPage = () => {
       userGetCommunityMemberInfo().then((resp) => {
         if (resp.data) {
           setActionSummaries(resp.data.actions);
+          setActiveActions(
+            resp.data.actions.filter(
+              (action) => action.status === "member_action"
+            )
+          );
           setUserActionRelations(
             resp.data.users.reduce((acc, user) => {
               acc[user.userId] = user.relations;
@@ -97,10 +132,19 @@ const CommunityPage = () => {
     (user) => !leaders.some((leader) => leader.id === user.id)
   );
 
-  console.log(members);
-
   return (
     <CenterLayout>
+      <Card className="my-5" style={CardStyle.Grey}>
+        <p className="text-sm font-semibold">
+          {nCompleted} of {community.users.length} members have completed
+          current actions
+        </p>
+        <CompletedBar
+          percentage={(nCompleted / community.users.length) * 100}
+          height="h-5"
+          dark
+        />
+      </Card>
       <div className=" flex flex-row gap-x-2 justify-start mb-4">
         {tabs.map((m) => (
           <Button
@@ -129,6 +173,7 @@ const CommunityPage = () => {
                 contactInfo={memberContactInfo?.[user.id]}
                 actionRelations={userActionRelations?.[user.id] ?? []}
                 actions={actionSummaries}
+                completedAllCurrentActions={completedAllCurrentActions[user.id]}
               />
             ))}
           </List>
@@ -142,6 +187,7 @@ const CommunityPage = () => {
                 contactInfo={memberContactInfo?.[user.id]}
                 actionRelations={userActionRelations?.[user.id] ?? []}
                 actions={actionSummaries}
+                completedAllCurrentActions={completedAllCurrentActions[user.id]}
               />
             ))}
           </List>

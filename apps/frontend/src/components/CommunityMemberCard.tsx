@@ -10,6 +10,7 @@ import UserProgressPills from "@alliance/shared/ui/UserProgressPills";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
+import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
 
 const CommunityMemberCard = ({
   profile,
@@ -17,12 +18,14 @@ const CommunityMemberCard = ({
   actionRelations,
   actions,
   canExpand = false,
+  completedAllCurrentActions = false,
 }: {
   profile: ProfileDto;
   contactInfo?: CommunityMemberContactInfoDto;
   actions?: UserActionSummaryDto[];
   actionRelations: UserActionRelationDetailDto[];
   canExpand?: boolean;
+  completedAllCurrentActions?: boolean;
 }) => {
   const relationByActionId = useMemo(() => {
     return actionRelations.reduce((acc, relation) => {
@@ -49,6 +52,7 @@ const CommunityMemberCard = ({
           <UserDisplayName staff={profile.staff} underline={false}>
             {profile.displayName}
           </UserDisplayName>
+          {completedAllCurrentActions && <CheckIcon size="mini" />}
         </div>
         <div className="flex-1 mx-2">
           {!!actions && (
