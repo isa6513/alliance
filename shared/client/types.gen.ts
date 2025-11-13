@@ -2289,6 +2289,19 @@ export type UserCreateOnetimeInviteResponses = {
 
 export type UserCreateOnetimeInviteResponse = UserCreateOnetimeInviteResponses[keyof UserCreateOnetimeInviteResponses];
 
+export type UserDeleteOnetimeInviteData = {
+    body?: never;
+    path: {
+        inviteId: number;
+    };
+    query?: never;
+    url: '/user/onetimeInvites/{inviteId}';
+};
+
+export type UserDeleteOnetimeInviteResponses = {
+    200: unknown;
+};
+
 export type UserGetOnetimeInvitesData = {
     body?: never;
     path?: never;

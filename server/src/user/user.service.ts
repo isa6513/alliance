@@ -1040,6 +1040,25 @@ export class UserService {
     return this.onetimeInviteRepository.save(invite);
   }
 
+  async deleteOnetimeInvite(inviteId: number, userId: number): Promise<void> {
+    const invite = await this.onetimeInviteRepository.findOneOrFail({
+      where: { id: inviteId },
+      relations: ['invitingUser'],
+    });
+    const user = await this.findOneOrFail(userId, ['leaderOf']);
+    if (
+      !(
+        invite.invitingUser.id === userId ||
+        user.leaderOf.some((leader) => leader.id === invite.community?.id) ||
+        user.admin
+      )
+    ) {
+      throw new UnauthorizedException();
+    }
+
+    await this.onetimeInviteRepository.delete(inviteId);
+  }
+
   async findValidInviteByCode(code: string): Promise<OnetimeInvite | null> {
     return this.onetimeInviteRepository.findOne({
       where: { code, isValid: true },

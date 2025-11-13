@@ -531,6 +531,16 @@ export class UserController {
     return this.userService.createOnetimeInvite(body);
   }
 
+  @Delete('onetimeInvites/:inviteId')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse()
+  async deleteOnetimeInvite(
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @Request() req: JwtRequest,
+  ) {
+    await this.userService.deleteOnetimeInvite(inviteId, req.user.sub);
+  }
+
   @Get('onetimeInvites')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [OnetimeInviteDto] })

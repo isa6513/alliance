@@ -2,6 +2,7 @@ import {
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
   userCreateOnetimeInvite,
+  userDeleteOnetimeInvite,
   userGetOnetimeInvitesByCommunity,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
@@ -11,6 +12,7 @@ import { useAuth } from "../lib/AuthContext";
 import List from "@alliance/shared/ui/List";
 import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
 import { getBaseUrl } from "@alliance/shared/lib/config";
+import DeleteIcon from "@alliance/shared/ui/icons/DeleteIcon";
 
 export interface CommunityInvitesTabProps {
   communityId: number;
@@ -56,7 +58,7 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
         if (response.data) {
           console.log("Invite created", response.data);
           setName("");
-          setInvites([response.data, ...invites]);
+          setInvites((prev) => [response.data, ...prev]);
         }
       })
       .finally(() => {
@@ -64,6 +66,13 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
       });
   };
 
+  const handleDeleteInvite = (inviteId: number) => {
+    userDeleteOnetimeInvite({ path: { inviteId } }).then((response) => {
+      if (response.data) {
+        setInvites((prev) => prev.filter((invite) => invite.id !== inviteId));
+      }
+    });
+  };
   return (
     <div className="flex flex-col gap-y-4">
       <Card style={CardStyle.White} className="gap-y-1">
@@ -109,10 +118,16 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
                 <p className="text-gray-500">used</p>
               )}
               <div
-                className="cursor-pointer active:scale-85 transition-all duration-100"
+                className="cursor-pointer active:scale-85 transition-all duration-100 hover:brightness-50"
                 onClick={() => copyToClipboard(invite.code)}
               >
                 <CopyIcon size="medium" fill="gray" />
+              </div>
+              <div
+                className="cursor-pointer active:scale-85 transition-all duration-100 hover:brightness-50"
+                onClick={() => handleDeleteInvite(invite.id)}
+              >
+                <DeleteIcon size="medium" fill="gray" />
               </div>
             </div>
           </div>
