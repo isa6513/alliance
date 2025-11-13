@@ -1196,7 +1196,7 @@ export class UserService {
     const notif = this.notifRepository.create({
       user: invite.invitingUser,
       category: NotificationCategory.CommunityInviteAccepted,
-      message: `${invite.invitingUser?.name} has joined your community`,
+      message: `${invite.invitedUser?.name} has joined your community`,
       webAppLocation: `/community?tab=invites`,
       associatedUsers: [invite.invitedUser],
     });
@@ -1220,7 +1220,7 @@ export class UserService {
     const notif = this.notifRepository.create({
       user: invite.invitingUser,
       category: NotificationCategory.CommunityInviteRejected,
-      message: `${invite.invitingUser?.name} declined your community invitation`,
+      message: `${invite.invitedUser?.name} declined your community invitation`,
       webAppLocation: `/community?tab=invites`,
       associatedUsers: [invite.invitedUser],
     });

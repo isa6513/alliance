@@ -33,68 +33,6 @@ export const destinations: Record<NavbarPage, string> = {
   [NavbarPage.Community]: "/community",
 };
 
-const navSections = [
-  {
-    title: "",
-    items: [
-      {
-        page: NavbarPage.Tasks,
-        destination: destinations[NavbarPage.Tasks],
-      },
-      {
-        page: NavbarPage.Notifications,
-        destination: destinations[NavbarPage.Notifications],
-      },
-    ],
-  },
-  {
-    title: "Platform",
-    items: [
-      {
-        page: NavbarPage.CurrentActions,
-        destination: destinations[NavbarPage.CurrentActions],
-      },
-      {
-        page: NavbarPage.Activity,
-        destination: destinations[NavbarPage.Activity],
-      },
-      {
-        page: NavbarPage.Forum,
-        destination: destinations[NavbarPage.Forum],
-      },
-      {
-        page: NavbarPage.Priorities,
-        destination: destinations[NavbarPage.Priorities],
-      },
-      {
-        page: NavbarPage.Search,
-        destination: destinations[NavbarPage.Search],
-      },
-      {
-        page: NavbarPage.Community,
-        destination: destinations[NavbarPage.Community],
-      },
-    ],
-  },
-  {
-    title: "Profile",
-    items: [
-      {
-        page: NavbarPage.Profile,
-        destination: destinations[NavbarPage.Profile],
-      },
-      {
-        page: NavbarPage.Contract,
-        destination: destinations[NavbarPage.Contract],
-      },
-      {
-        page: NavbarPage.Settings,
-        destination: destinations[NavbarPage.Settings],
-      },
-    ],
-  },
-];
-
 const NavbarVertical: React.FC<{ todoActions: number }> = ({
   todoActions,
 }: {
@@ -107,6 +45,74 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
   const [open, setOpen] = useState(false);
   const navRef = useRef<HTMLDivElement | null>(null);
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
+
+  const { user } = useAuth();
+
+  const navSections = [
+    {
+      title: "",
+      items: [
+        {
+          page: NavbarPage.Tasks,
+          destination: destinations[NavbarPage.Tasks],
+        },
+        {
+          page: NavbarPage.Notifications,
+          destination: destinations[NavbarPage.Notifications],
+        },
+      ],
+    },
+    {
+      title: "Platform",
+      items: [
+        {
+          page: NavbarPage.CurrentActions,
+          destination: destinations[NavbarPage.CurrentActions],
+        },
+        {
+          page: NavbarPage.Activity,
+          destination: destinations[NavbarPage.Activity],
+        },
+        {
+          page: NavbarPage.Forum,
+          destination: destinations[NavbarPage.Forum],
+        },
+        {
+          page: NavbarPage.Priorities,
+          destination: destinations[NavbarPage.Priorities],
+        },
+        {
+          page: NavbarPage.Search,
+          destination: destinations[NavbarPage.Search],
+        },
+        ...(user?.communities.length
+          ? [
+              {
+                page: NavbarPage.Community,
+                destination: destinations[NavbarPage.Community],
+              },
+            ]
+          : []),
+      ],
+    },
+    {
+      title: "Profile",
+      items: [
+        {
+          page: NavbarPage.Profile,
+          destination: destinations[NavbarPage.Profile],
+        },
+        {
+          page: NavbarPage.Contract,
+          destination: destinations[NavbarPage.Contract],
+        },
+        {
+          page: NavbarPage.Settings,
+          destination: destinations[NavbarPage.Settings],
+        },
+      ],
+    },
+  ];
 
   const updateNavWidth = useCallback(() => {
     if (navRef.current) {
@@ -150,8 +156,6 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
       .flatMap((section) => section.items)
       .find((item) => item.destination === window.location.pathname)?.page ||
     null;
-
-  const { user } = useAuth();
 
   const unreadNotifsForPage = useMemo((): Partial<
     Record<NavbarPage, number>
