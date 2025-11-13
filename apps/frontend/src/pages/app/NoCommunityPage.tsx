@@ -6,7 +6,6 @@ import {
   userRejectCommunityInvite,
 } from "@alliance/shared/client";
 import Spinner from "../../components/Spinner";
-import CommunityInviteListItem from "../../components/CommunityInviteListItem";
 import List from "@alliance/shared/ui/List";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";

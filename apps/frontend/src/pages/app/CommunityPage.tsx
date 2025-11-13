@@ -233,7 +233,7 @@ const CommunityPage = () => {
           <div className="flex flex-col gap-y-4 mt-4">
             <div className="flex flex-row gap-x-4 justify-start items-center">
               <p className="font-semibold text-lg md:text-xl">
-                Members ({community.users.length})
+                Members ({members.length})
               </p>
               <DropdownSelect
                 options={Object.values(FilterMode)}

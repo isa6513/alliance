@@ -165,16 +165,13 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
         </div>
         {inviteMode === InviteMode.NewMember ? (
           <Card style={CardStyle.Grey}>
-            <p className="font-semibold text-xl">
+            <p className="font-semibold text-lg mb-2">
               Invite someone to the Alliance
             </p>
-            <p className="text-zinc-500">
+            <p className="text-zinc-500 mb-2">
               This will create a personalized invite page that explains what the
-              Alliance is and how to sign up.
-            </p>
-            <p className="text-zinc-500">
-              When the new member signs up, they will automatically be added to
-              your group.
+              Alliance is and how to sign up. When the new member signs up, they
+              will automatically be added to your group.
             </p>
             <div className="flex flex-row gap-x-2 mt-2">
               <input
@@ -195,17 +192,13 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
             </div>
           </Card>
         ) : (
-          <Card>
-            <p className="font-semibold text-xl">
+          <Card style={CardStyle.Grey}>
+            <p className="font-semibold text-lg mb-2">
               Invite an existing Alliance member to your community
             </p>
             <p className="text-zinc-500">
-              This will create a personalized invite page that explains what the
-              Alliance is and how to sign up.
-            </p>
-            <p className="text-zinc-500">
-              When the new member signs up, they will automatically be added to
-              your group.
+              The member will recieve a notification inviting them to join the
+              community.
             </p>
             <div className="flex flex-row gap-x-2 mt-2">
               <div className="flex-1 max-w-72">
