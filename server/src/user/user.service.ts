@@ -112,7 +112,7 @@ export class UserService {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { cityId, profilePicture, ...updateData } = data;
+    const { cityId, profilePicture, hasActiveContract, ...updateData } = data;
 
     if (profilePicture && profilePicture.length > 100) {
       //TODO: differentiate between file and url
