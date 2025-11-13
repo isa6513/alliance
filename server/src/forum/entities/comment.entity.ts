@@ -124,4 +124,9 @@ export class Comment {
   @Allow()
   @Type(() => User)
   likes: User[];
+
+  @Column({ default: 0 })
+  @ApiProperty()
+  @Allow()
+  likesCount: number;
 }

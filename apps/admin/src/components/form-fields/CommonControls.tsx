@@ -14,14 +14,22 @@ import {
   tasksFindOneCustomValidator,
 } from "@alliance/shared/client";
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
-import type {
-  AnyField,
-  CheckboxField,
-  Condition,
-  MultiSelectField,
-  RadioField,
-  SelectField,
+import {
+  DEVICE_VISIBILITY_TARGETS,
+  type AnyField,
+  type CheckboxField,
+  type Condition,
+  type DeviceVisibilityTarget,
+  type MultiSelectField,
+  type RadioField,
+  type SelectField,
 } from "@alliance/shared/forms/formschema";
+
+const DEVICE_LABELS: Record<DeviceVisibilityTarget, string> = {
+  mobile: "Mobile",
+  tablet: "Tablet",
+  desktop: "Desktop",
+};
 
 type RequiredToggleProps = {
   checked: boolean | undefined;
@@ -87,6 +95,10 @@ function isConditionalController(f: AnyField): f is ControllerField {
 
 type FieldCondition = Extract<Condition, { when: string }>;
 type ValidatorCondition = Extract<Condition, { validatorId: number }>;
+type DeviceCondition = Extract<
+  Condition,
+  { deviceType: DeviceVisibilityTarget[] }
+>;
 
 function isFieldCondition(cond: Condition): cond is FieldCondition {
   return "when" in cond;
@@ -94,6 +106,10 @@ function isFieldCondition(cond: Condition): cond is FieldCondition {
 
 function isValidatorCondition(cond: Condition): cond is ValidatorCondition {
   return "validatorId" in cond;
+}
+
+function isDeviceCondition(cond: Condition): cond is DeviceCondition {
+  return "deviceType" in cond;
 }
 
 function normalizeConditions(input?: Condition[] | Condition): Condition[] {
@@ -128,7 +144,8 @@ export function ConditionalVisibility({
 
   const canUseFieldControllers = controllers.length > 0;
   const canUseValidators = usableValidators.length > 0;
-  const toggleDisabled = !canUseFieldControllers && !canUseValidators;
+  const noControllerOrValidatorOptions =
+    !canUseFieldControllers && !canUseValidators;
 
   const updateConditions = useCallback(
     (next: Condition[]) => {
@@ -299,6 +316,37 @@ export function ConditionalVisibility({
       pickDefaultValidatorType,
       updateConditions,
     ]
+  );
+
+  const addDeviceCondition = useCallback(() => {
+    const defaultCondition: DeviceCondition = {
+      deviceType: [...DEVICE_VISIBILITY_TARGETS],
+    };
+    const next = [...conditions, defaultCondition];
+    updateConditions(next);
+  }, [conditions, updateConditions]);
+
+  const handleDeviceConditionChange = useCallback(
+    (index: number, target: DeviceVisibilityTarget, enabled: boolean) => {
+      const next = [...conditions];
+      const condition = next[index];
+      if (!isDeviceCondition(condition)) {
+        return;
+      }
+      const currentSelection = new Set(condition.deviceType ?? []);
+      if (enabled) {
+        currentSelection.add(target);
+      } else {
+        currentSelection.delete(target);
+      }
+      next[index] = {
+        deviceType: DEVICE_VISIBILITY_TARGETS.filter((type) =>
+          currentSelection.has(type)
+        ),
+      };
+      updateConditions(next);
+    },
+    [conditions, updateConditions]
   );
 
   const handleControllerChange = useCallback(
@@ -497,6 +545,46 @@ export function ConditionalVisibility({
     );
   };
 
+  const renderDeviceCondition = (condition: DeviceCondition, index: number) => {
+    const selected = new Set(condition.deviceType ?? []);
+    return (
+      <div className="space-y-2">
+        <div>
+          <label className="block text-xs text-gray-700 mb-1">
+            Show on device types
+          </label>
+          <div className="space-y-1">
+            {DEVICE_VISIBILITY_TARGETS.map((target) => (
+              <label
+                key={target}
+                className="flex items-center text-xs text-gray-700"
+              >
+                <input
+                  type="checkbox"
+                  className="mr-2"
+                  checked={selected.has(target)}
+                  onChange={(event) =>
+                    handleDeviceConditionChange(
+                      index,
+                      target,
+                      event.target.checked
+                    )
+                  }
+                />
+                {DEVICE_LABELS[target]}
+              </label>
+            ))}
+          </div>
+        </div>
+        {selected.size === 0 && (
+          <p className="text-[11px] text-red-500">
+            Select at least one device type to make this rule effective.
+          </p>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="border-gray-200 pt-2">
       <div className="flex items-center justify-between">
@@ -505,10 +593,10 @@ export function ConditionalVisibility({
         </label>
       </div>
 
-      {toggleDisabled && (
+      {noControllerOrValidatorOptions && (
         <p className="mt-1 text-[11px] text-gray-400">
           No earlier checkbox/select/radio fields or visibility validators are
-          available.
+          available. You can still add device type rules below.
         </p>
       )}
 
@@ -538,6 +626,8 @@ export function ConditionalVisibility({
               renderFieldCondition(condition, index)
             ) : isValidatorCondition(condition) ? (
               renderValidatorCondition(condition, index)
+            ) : isDeviceCondition(condition) ? (
+              renderDeviceCondition(condition, index)
             ) : (
               <p className="text-[11px] text-red-500">
                 Unsupported condition type. Remove and re-create this rule.
@@ -573,11 +663,19 @@ export function ConditionalVisibility({
           >
             + Validator condition
           </button>
+          <button
+            type="button"
+            className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100"
+            onClick={addDeviceCondition}
+          >
+            + Device condition
+          </button>
         </div>
         {!canUseFieldControllers && (
           <p className="text-[11px] text-gray-400">
             Add a checkbox, select, radio, or multiselect field earlier on this
-            page to use answer-based visibility.
+            page to use answer-based visibility. Device-type rules are always
+            available.
           </p>
         )}
         {!canUseValidators && (

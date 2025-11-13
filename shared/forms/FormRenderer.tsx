@@ -11,7 +11,13 @@ import Dropdown from "../ui/Dropdown";
 import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
 import type { DisplayBlock } from "./display-blocks";
-import type { AnyField, Condition, FormSchema, FormValue } from "./formschema";
+import type {
+  AnyField,
+  Condition,
+  DeviceVisibilityTarget,
+  FormSchema,
+  FormValue,
+} from "./formschema";
 import { parseTimeToMinutes } from "./timeUtils";
 import type { UserDto } from "../client";
 
@@ -48,6 +54,25 @@ export function computeFormStorageKey(args: {
 }
 
 const FALLBACK_TIMEZONE = "America/Los_Angeles";
+const DEFAULT_DEVICE_TYPE: DeviceVisibilityTarget = "desktop";
+
+type FormResponseWithDeviceType = FormResponseDto & {
+  deviceType?: DeviceVisibilityTarget | null;
+};
+
+const detectDeviceType = (): DeviceVisibilityTarget => {
+  if (typeof window === "undefined") {
+    return DEFAULT_DEVICE_TYPE;
+  }
+  const width = window.innerWidth;
+  if (width < 640) {
+    return "mobile";
+  }
+  if (width < 1024) {
+    return "tablet";
+  }
+  return "desktop";
+};
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
@@ -281,6 +306,9 @@ const FormRenderer = ({
   const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [hasEmittedStart, setHasEmittedStart] = useState(false);
+  const [deviceType, setDeviceType] = useState<DeviceVisibilityTarget>(() =>
+    detectDeviceType()
+  );
 
   // Dropdown state for "decline to participate" options
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -288,6 +316,27 @@ const FormRenderer = ({
   const [outOfTimeSelected, setOutOfTimeSelected] = useState(false);
   const [customReason, setCustomReason] = useState("");
   const ref = useOutsideClick(() => setDropdownOpen(false));
+
+  useEffect(() => {
+    if (readOnly || typeof window === "undefined") {
+      return;
+    }
+    const updateDeviceType = () => {
+      setDeviceType(detectDeviceType());
+    };
+    updateDeviceType();
+    window.addEventListener("resize", updateDeviceType);
+    return () => {
+      window.removeEventListener("resize", updateDeviceType);
+    };
+  }, [readOnly]);
+
+  const savedDeviceType =
+    (completedFormResponse as FormResponseWithDeviceType | undefined)
+      ?.deviceType ?? null;
+  const effectiveDeviceType = readOnly
+    ? savedDeviceType ?? deviceType
+    : deviceType;
 
   const visibilityValidatorIds = useMemo(() => {
     const ids = new Set<number>();
@@ -420,6 +469,12 @@ const FormRenderer = ({
       if ("expr" in cond) {
         return true;
       }
+      if ("deviceType" in cond) {
+        if (!Array.isArray(cond.deviceType) || cond.deviceType.length === 0) {
+          return false;
+        }
+        return cond.deviceType.includes(effectiveDeviceType);
+      }
       if ("validatorId" in cond) {
         const expected = cond.resultEquals ?? true;
         const actual = visibilityValidatorResults[cond.validatorId];
@@ -441,7 +496,7 @@ const FormRenderer = ({
       }
       return val === cond.equals;
     },
-    [formData, visibilityValidatorResults]
+    [effectiveDeviceType, formData, visibilityValidatorResults]
   );
 
   const isElementCurrentlyVisible = useCallback(
@@ -844,7 +899,8 @@ const FormRenderer = ({
       schemaSnapshot: form as unknown as Record<string, unknown>,
       actionId,
       visibilityValidatorResults,
-    };
+      deviceType,
+    } satisfies SubmitFormDto;
 
     onSubmit(submissionPayload);
   };

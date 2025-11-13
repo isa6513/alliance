@@ -1,7 +1,7 @@
 // src/forms/form-response.entity.ts
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { Allow, IsDefined } from 'class-validator';
+import { Allow, IsDefined, IsOptional } from 'class-validator';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
@@ -11,6 +11,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Form } from './form.entity';
+import type { DeviceVisibilityTarget } from '../schema';
 
 @Entity()
 export class FormResponse {
@@ -41,6 +42,11 @@ export class FormResponse {
   @Allow()
   @Type(() => Object)
   visibilityValidatorResults: Record<string, boolean>;
+
+  @Column({ type: 'text', nullable: true })
+  @ApiPropertyOptional()
+  @IsOptional()
+  deviceType?: DeviceVisibilityTarget | null;
 
   @ApiProperty({ type: () => User })
   @ManyToOne(() => User, { onDelete: 'CASCADE' })

@@ -446,6 +446,15 @@ export class ForumService {
     return updatedReply;
   }
 
+  async refreshLikesCount(comment: Comment): Promise<void> {
+    const withLikes = await this.commentRepository.findOneOrFail({
+      where: { id: comment.id },
+      relations: ['likes'],
+    });
+    const likesCount = withLikes.likes.length;
+    await this.commentRepository.update(comment.id, { likesCount });
+  }
+
   async likePostOrComment(
     id: number,
     userId: number,

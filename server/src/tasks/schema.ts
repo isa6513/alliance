@@ -23,6 +23,14 @@ type Option<V extends string = string> = { label: string; value: V };
 // Unified value type for answers (persisted)
 export type FormValue = string | number | boolean | string[];
 
+export const DEVICE_VISIBILITY_TARGETS = [
+  'mobile',
+  'tablet',
+  'desktop',
+] as const;
+export type DeviceVisibilityTarget =
+  (typeof DEVICE_VISIBILITY_TARGETS)[number];
+
 // Base field for dynamic forms (no generics, runtime-first)
 interface BaseField<TKind extends FieldKind> {
   id: string;
@@ -45,7 +53,8 @@ interface BaseField<TKind extends FieldKind> {
 export type Condition =
   | { when: string; equals: string | number | boolean | null }
   | { expr: string }
-  | { validatorId: number; resultEquals?: boolean }; // keep validators expecting true by default
+  | { validatorId: number; resultEquals?: boolean } // keep validators expecting true by default
+  | { deviceType: DeviceVisibilityTarget[] };
 
 // Specialized fields:
 
@@ -144,12 +153,21 @@ export function isQuestionVisible(
   element: AnyField | DisplayBlock,
   formData: Record<string, FormValue>,
   validatorResults?: Record<number, boolean>,
+  deviceType?: DeviceVisibilityTarget,
 ): boolean {
+  const normalizedDeviceType: DeviceVisibilityTarget =
+    deviceType ?? 'desktop';
   const raw = element.visibleIf;
   if (raw && (Array.isArray(raw) ? raw.length > 0 : true)) {
     const evalCond = (c: Condition): boolean => {
       if ('expr' in c) {
         return true;
+      }
+      if ('deviceType' in c) {
+        if (!Array.isArray(c.deviceType) || c.deviceType.length === 0) {
+          return false;
+        }
+        return c.deviceType.includes(normalizedDeviceType);
       }
       if ('validatorId' in c) {
         const expected = c.resultEquals ?? true;

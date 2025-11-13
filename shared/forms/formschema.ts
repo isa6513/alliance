@@ -24,6 +24,14 @@ type Option<V extends string = string> = { label: string; value: V };
 // Unified value type for answers (persisted)
 export type FormValue = string | number | boolean | string[];
 
+export const DEVICE_VISIBILITY_TARGETS = [
+  "mobile",
+  "tablet",
+  "desktop",
+] as const;
+export type DeviceVisibilityTarget =
+  (typeof DEVICE_VISIBILITY_TARGETS)[number];
+
 // Base field for dynamic forms (no generics, runtime-first)
 interface BaseField<TKind extends FieldKind> {
   id: string;
@@ -46,7 +54,8 @@ interface BaseField<TKind extends FieldKind> {
 export type Condition =
   | { when: string; equals: string | number | boolean | null }
   | { expr: string }
-  | { validatorId: number; resultEquals?: boolean }; // validators default to expecting true
+  | { validatorId: number; resultEquals?: boolean } // validators default to expecting true
+  | { deviceType: DeviceVisibilityTarget[] };
 
 // Specialized fields:
 

@@ -128,7 +128,12 @@ export class TasksService {
         if (isQuestionField(field)) {
           if (
             field.required &&
-            isQuestionVisible(field, submitFormDto.answers, validatorResults)
+            isQuestionVisible(
+              field,
+              submitFormDto.answers,
+              validatorResults,
+              submitFormDto.deviceType,
+            )
           ) {
             if (
               !submitFormDto.answers[field.id] &&
@@ -143,7 +148,12 @@ export class TasksService {
             field.kind === 'multiselect' &&
             typeof field.maxSelections === 'number' &&
             field.maxSelections > 0 &&
-            isQuestionVisible(field, submitFormDto.answers, validatorResults)
+            isQuestionVisible(
+              field,
+              submitFormDto.answers,
+              validatorResults,
+              submitFormDto.deviceType,
+            )
           ) {
             const answer = submitFormDto.answers[field.id];
             if (Array.isArray(answer) && answer.length > field.maxSelections) {
@@ -270,6 +280,7 @@ export class TasksService {
       schemaSnapshot: submitFormDto.schemaSnapshot,
       visibilityValidatorResults:
         submitFormDto.visibilityValidatorResults ?? validatorResults,
+      deviceType: submitFormDto.deviceType ?? null,
       user,
     });
     const savedForm = await this.formResponseRepository.save(formResponse);

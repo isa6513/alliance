@@ -482,6 +482,9 @@ export type FormResponse = {
     visibilityValidatorResults: {
         [key: string]: unknown;
     };
+    deviceType?: {
+        [key: string]: unknown;
+    };
     user: User;
     createdAt: string;
     schemaSnapshot: {
@@ -1431,6 +1434,7 @@ export type SubmitFormDto = {
     visibilityValidatorResults?: {
         [key: string]: unknown;
     };
+    deviceType?: 'mobile' | 'tablet' | 'desktop';
 };
 
 export type FormResponseDto = {
@@ -1440,6 +1444,9 @@ export type FormResponseDto = {
         [key: string]: unknown;
     };
     visibilityValidatorResults: {
+        [key: string]: unknown;
+    };
+    deviceType?: {
         [key: string]: unknown;
     };
     schemaSnapshot: {
