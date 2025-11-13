@@ -1,6 +1,6 @@
 import { ActionActivityDto, userListFriends } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import UserActivityCard from "../../components/UserActivityCard";
 import { useAuth } from "../../lib/AuthContext";
 import useActivities, { ActivityList } from "./useActivities";
@@ -48,6 +48,31 @@ const ActivityFeedPage = () => {
 
   const friendsRef = useRef<HTMLDivElement>(null);
   const everyoneRef = useRef<HTMLDivElement>(null);
+
+  const [activeHeight, setActiveHeight] = useState<number | undefined>(
+    undefined
+  );
+
+  const updateHeight = useCallback(() => {
+    const el = mode === "friends" ? friendsRef.current : everyoneRef.current;
+    if (el) setActiveHeight(el.offsetHeight);
+  }, [mode]);
+
+  useEffect(() => {
+    const roFriends = new ResizeObserver(updateHeight);
+    const roEveryone = new ResizeObserver(updateHeight);
+    if (friendsRef.current) roFriends.observe(friendsRef.current);
+    if (everyoneRef.current) roEveryone.observe(everyoneRef.current);
+
+    window.addEventListener("resize", updateHeight);
+    requestAnimationFrame(updateHeight);
+
+    return () => {
+      roFriends.disconnect();
+      roEveryone.disconnect();
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, [mode, updateHeight]);
 
   const renderActivityColumn = (mode: Mode) => {
     const list = mode === "friends" ? friendsActivities : activities;
@@ -108,7 +133,10 @@ const ActivityFeedPage = () => {
         </Link>
       </div>
 
-      <div className="relative overflow-hidden overflow-y-visible border border-zinc-200 rounded bg-white">
+      <div
+        className="relative overflow-hidden border border-zinc-200 rounded bg-white"
+        style={{ height: activeHeight }}
+      >
         <div
           className="flex w-[200%] transition-transform duration-200 ease-out motion-reduce:transition-none"
           style={{
