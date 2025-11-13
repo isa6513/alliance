@@ -152,26 +152,31 @@ const CommunityPage = () => {
 
   return (
     <CenterLayout>
-      <div className="my-5">
+      <div className="flex flex-col gap-y-2 my-8">
         <div className="flex flex-row gap-x-2 items-center justify-between">
-          <p className="font-semibold mb-4">{community.name}</p>
+          <p className="font-serif font-semibold text-3xl md:text-4xl mb-4">
+            {community.name}
+          </p>
           {amLeader && (
             <Button color={ButtonColor.Light} onClick={() => setTab("edit")}>
               Edit
             </Button>
           )}
         </div>
-        <p className="text-sm">
-          {nCompleted} of {community.users.length} members have completed
-          current actions
-        </p>
-        <CompletedBar
-          percentage={(nCompleted / community.users.length) * 100}
-          height="h-5"
-          dark
-        />
+
+        <div className="w-1/2">
+          <p className="text-sm">
+            {nCompleted} of {community.users.length} members have completed
+            current actions
+          </p>
+          <CompletedBar
+            percentage={(nCompleted / community.users.length) * 100}
+            height="h-4"
+            dark
+          />
+        </div>
       </div>
-      <div className="flex flex-row gap-x-2 justify-start mb-4 border-b border-zinc-200">
+      <div className="flex flex-row gap-x-2 justify-start mb-8 border-b border-zinc-200">
         {tabs.map((m) => (
           <Button
             color={ButtonColor.Transparent}
@@ -187,7 +192,7 @@ const CommunityPage = () => {
         ))}
       </div>
       {tab === "members" && (
-        <div className="flex flex-col gap-y-2">
+        <div className="flex flex-col gap-y-4">
           <p className="font-semibold">
             Organizer{leaders.length > 1 ? "s" : ""}
           </p>
@@ -203,40 +208,47 @@ const CommunityPage = () => {
               />
             ))}
           </List>
-          <p className="font-semibold mt-4">Members</p>
-          <div className="flex flex-row justify-start items-center mb-4">
-            <p className="mr-4">Filter by:</p>
-            <DropdownSelect
-              options={Object.values(FilterMode)}
-              secondaryLabels={Object.values(FilterMode).map((mode) =>
-                mode === FilterMode.All
-                  ? members.length.toString()
-                  : members
-                      .filter((user) => !completedAllCurrentActions[user.id])
-                      .length.toString()
-              )}
-              value={filterMode}
-              onChange={(mode) => setFilterMode(mode as FilterMode)}
-            />
-          </div>
-          <List>
-            {filteredMembers.map((user) => (
-              <CommunityMemberCard
-                key={user.id}
-                canExpand={amLeader}
-                profile={user}
-                contactInfo={memberContactInfo?.[user.id]}
-                actionRelations={userActionRelations?.[user.id] ?? []}
-                actions={actionSummaries}
-                completedAllCurrentActions={completedAllCurrentActions[user.id]}
+          <div className="flex flex-col gap-y-2 mt-4">
+            <p className="font-semibold">Members</p>
+            <div className="flex flex-row justify-start items-center mb-2">
+              <p className="mr-4">Filter by:</p>
+              <DropdownSelect
+                options={Object.values(FilterMode)}
+                secondaryLabels={Object.values(FilterMode).map((mode) =>
+                  mode === FilterMode.All
+                    ? members.length.toString()
+                    : members
+                        .filter((user) => !completedAllCurrentActions[user.id])
+                        .length.toString()
+                )}
+                value={filterMode}
+                onChange={(mode) => setFilterMode(mode as FilterMode)}
               />
-            ))}
-          </List>
+            </div>
+            <List>
+              {filteredMembers.map((user) => (
+                <CommunityMemberCard
+                  key={user.id}
+                  canExpand={amLeader}
+                  profile={user}
+                  contactInfo={memberContactInfo?.[user.id]}
+                  actionRelations={userActionRelations?.[user.id] ?? []}
+                  actions={actionSummaries}
+                  completedAllCurrentActions={
+                    completedAllCurrentActions[user.id]
+                  }
+                />
+              ))}
+            </List>
+          </div>
         </div>
       )}
       {tab === "about" && (
         <div className="flex flex-col gap-y-4">
-          <AppMarkdownWrapper markdownContent={community.description} />
+          <div className="flex flex-col gap-y-2">
+            <p className="font-semibold">Description</p>
+            <AppMarkdownWrapper markdownContent={community.description} />
+          </div>
           <div className="flex flex-row items-center">
             <StatusIcon
               status="gathering_commitments"

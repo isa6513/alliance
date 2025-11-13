@@ -5,6 +5,7 @@ import Footer from "../../components/Footer";
 import MarkdownWrapper from "../../components/MarkdownWrapper";
 import MemberContract from "../../components/MemberContract";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import chevronRight from "../../assets/icons8-expand-arrow-96.png";
 
 const GuidePage: React.FC = () => {
   return (
@@ -13,7 +14,7 @@ const GuidePage: React.FC = () => {
       <div className="flex flex-col md:flex-row mx-6 md:mx-12 lg:mr-40 gap-8 lg:gap-18 pt-8 md:pt-32 pb-56 justify-center">
         <aside className="min-w-80">
           <div className="flex flex-col md:sticky top-12 pr-8 lg:pr-18 md:border-r border-zinc-200">
-            <h2 className="font-serif !font-semibold !text-xl md:!text-2xl max-w-2xl mb-4">
+            <h2 className=" !font-semibold !text-xl md:!text-xl max-w-2xl mb-4">
               Table of Contents
             </h2>
             <ol className="flex flex-col gap-y-1 *:hover:underline">
@@ -47,20 +48,21 @@ const GuidePage: React.FC = () => {
             </h2>
           </div>
 
-          <MarkdownWrapper
-            id="introduction"
-            className=""
-            markdownContent="
+          <div className="flex flex-col gap-y-6">
+            <MarkdownWrapper
+              id="introduction"
+              className=""
+              markdownContent="
 The Alliance is a group of individuals cooperating to end global crises. Members spend a small fraction of their time completing tasks that are designed to be effective and straightforward.
 
 Our vision is to unite millions of people behind a global, expert-developed strategy. We are currently running experiments to prepare for future growth.
 "
-          />
+            />
 
-          <MarkdownWrapper
-            id="priorities"
-            className="mt-6"
-            markdownContent="
+            <div>
+              <MarkdownWrapper
+                id="priorities"
+                markdownContent="
             
 # Priorities
 
@@ -72,22 +74,24 @@ We aim to end global crises that harm or will harm billions of current and futur
 4. Environmental destruction
 
 "
-          />
+              />
 
-          {/* <Card
-            style={CardStyle.White}
-            className="mt-6 p-4 md:p-6 my-4 text-lg cursor-pointer hover:bg-zinc-50"
-          >
-            <p className="text-base font-semibold">Statement of Purpose</p>
-            <p className="text-base">
-              Our statement of purpose describes how we arrived at our goals.
-            </p>
-          </Card> */}
+              <Card
+                style={CardStyle.White}
+                className="mt-6 p-4 md:p-4 text-lg cursor-pointer hover:bg-zinc-50 flex flex-row items-center justify-between"
+              >
+                <p className="text-base">
+                  Our statement of purpose describes how we developed these
+                  priorities.
+                </p>
+                <img src={chevronRight} className="w-4 h-4 rotate-270" />
+              </Card>
+            </div>
 
-          <MarkdownWrapper
-            id="structure"
-            className="mt-6"
-            markdownContent="
+            <div>
+              <MarkdownWrapper
+                id="structure"
+                markdownContent="
 
 # How we cooperate
 
@@ -102,53 +106,53 @@ For now, we are taking small-scale actions focused on learning, not direct impac
 - We voted on proposals for a small grant.
 - We requested news coverage of a coalition of businesses that adopted an environmentally-friendly policy.
 
-Our flexible structure means we are capable of working together in many possible arrangements for many purposes. A few broad categories of actions we can take together include:
+Our flexible structure means we are capable of working together in many possible arrangements for many purposes. A few broad categories of actions include:
 
 "
-          />
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-3 my-6 w-full max-w-4xl mx-auto">
-            <ExampleActionCategoryCard
-              title="Collective funding"
-              description="We pool funding for specific initiatives and projects within the Alliance and with our partners."
-            />
-            <ExampleActionCategoryCard
-              title="Economic pressure"
-              description="We coordinate shifts in our consumer behavior to encourage ethical practices and eliminate harmful practices."
-            />
-            <ExampleActionCategoryCard
-              title="Social pressure"
-              description="We target messages at decision-makers and direct public attention to important issues."
-            />
-            <ExampleActionCategoryCard
-              title="Synced communication"
-              description="We learn from and deliberate with one another through a central channel that builds a base of common knowledge."
-            />
-            <ExampleActionCategoryCard
-              title="Direct action"
-              description="We use our time and skills to advance certain causes, improve local and online communities, and more."
-            />
-            <ExampleActionCategoryCard
-              title="Collective governance"
-              description="We maintain and improve the Alliance by engaging in deliberations and other processes for feedback."
-            />
-          </div>
-          <MarkdownWrapper
-            id="governance"
-            className="mt-2"
-            markdownContent="
+              />
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-3 mt-6 w-full max-w-4xl mx-auto">
+                <ExampleActionCategoryCard
+                  title="Collective funding"
+                  description="We pool funding for specific initiatives and projects within the Alliance and with our partners."
+                />
+                <ExampleActionCategoryCard
+                  title="Economic pressure"
+                  description="We coordinate shifts in our consumer behavior to encourage ethical practices and eliminate harmful practices."
+                />
+                <ExampleActionCategoryCard
+                  title="Social pressure"
+                  description="We target messages at decision-makers and direct public attention to important issues."
+                />
+                <ExampleActionCategoryCard
+                  title="Synced communication"
+                  description="We learn from and deliberate with one another to build a base of common knowledge."
+                />
+                <ExampleActionCategoryCard
+                  title="Direct action"
+                  description="We use our time and skills to advance certain causes, improve local and online communities, and more."
+                />
+                <ExampleActionCategoryCard
+                  title="Collective governance"
+                  description="We maintain and improve the Alliance by engaging in deliberations and other processes for feedback."
+                />
+              </div>
+            </div>
+
+            <MarkdownWrapper
+              id="governance"
+              markdownContent="
 
 # How we make decisions
 
-The office has the freedom to make any plans that advance our high-level priorities and make effective use of members’ time and resources.
-
-Meanwhile, members provide input and participate in governance processes that ensure approval of the overall direction of the Alliance.
+The office has the freedom to make any plans that advance our high-level priorities. Meanwhile, members provide input that ensures approval of the overall direction of the Alliance.
 
 ## Action planning
 Planning actions is a creative, open-ended process that searches for levers of change which members can pull.
 
-In ideation for and development of action plans, the office weighs many considerations. For instance:
+In the ideation for and development of an action plan, the office weighs many considerations. For instance:
 - How does the action relate to the priorities of the Alliance?
 - Will the action produce a tangible impact on the world?
+- Will the action make effective use of members’ time?
 - Will the action have any compounding effects – for instance, by providing an educational opportunity or growing the Alliance’s network?
 
 ## Member input
@@ -158,13 +162,14 @@ As a result, the office does not restrict itself to actions with unanimous agree
 
 However, our governance guarantees that the **majority of members find the majority of actions acceptable** — that is, believe that the Alliance overall produces more benefit than harm. This result is achieved with a membership-wide survey that occurs on a regular basis, or whenever it is requested by a majority of members.
 
-The office also incorporates member input by other means. For instance, the office hosts discussions, asks members for action proposals, solicits open-ended feedback, and so on.
+Member input is also incorporated by other means. For instance, the office hosts discussions, asks members for action proposals, and solicits open-ended feedback.
 "
-          />
-          <MarkdownWrapper
-            id="membership"
-            className="mt-6"
-            markdownContent="
+            />
+            <div>
+              <MarkdownWrapper
+                id="membership"
+                className="mt-6"
+                markdownContent="
 # Member expectations
 
 Membership is defined by commitment. Like any team, we can enact precise, complex plans only if we can depend on each other. On the other hand, if someone fails to complete a task, others’ efforts may go to waste.
@@ -174,10 +179,12 @@ Our expectation of reliability means that every member meaningfully expands what
 Membership is formalized by a contract:
 
 "
-          />
+              />
 
-          <div className="my-6">
-            <MemberContract id="contract" />
+              <div className="mt-6">
+                <MemberContract id="contract" />
+              </div>
+            </div>
           </div>
         </div>
       </div>

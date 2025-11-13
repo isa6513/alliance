@@ -11,6 +11,7 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
+import { Link } from "react-router";
 
 const CommunityMemberCard = ({
   profile,
@@ -48,10 +49,14 @@ const CommunityMemberCard = ({
               <DropdownIcon size="mini" fill="black" />
             </button>
           )}
-          <ProfileImage pfp={profile.profilePicture} size="medium" />
-          <UserDisplayName staff={profile.staff} underline={false}>
-            {profile.displayName}
-          </UserDisplayName>
+          <Link to={`/user/${profile.id}`}>
+            <ProfileImage pfp={profile.profilePicture} size="medium" />
+          </Link>
+          <Link to={`/user/${profile.id}`}>
+            <UserDisplayName staff={profile.staff} underline={false}>
+              {profile.displayName}
+            </UserDisplayName>
+          </Link>
           {completedAllCurrentActions && <CheckIcon size="mini" />}
         </div>
         <div className="flex-1 mx-2">
@@ -62,6 +67,13 @@ const CommunityMemberCard = ({
               pillHeight="h-4"
             />
           )}
+        </div>
+        <div>
+          <p>
+            {contactInfo?.preferredReminderTimeLeaderTz
+              ? contactInfo.preferredReminderTimeLeaderTz
+              : "Anytime"}
+          </p>
         </div>
       </div>
       {expanded && (
