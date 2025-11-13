@@ -129,7 +129,7 @@ const InvitesPage = () => {
                   className="cursor-pointer active:scale-85 transition-all duration-100"
                   onClick={() => copyToClipboard(invite.code)}
                 >
-                  <CopyIcon size="large" fill="gray" />
+                  <CopyIcon size="medium" fill="gray" />
                 </div>
               </div>
             </div>

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -830,7 +831,16 @@ export class UserService {
   async updateCommunity(
     communityId: number,
     body: UpdateCommunityDto,
+    userId: number,
   ): Promise<Community> {
+    const user = await this.findOneOrFail(userId, ['leaderOf']);
+    if (
+      !user.leaderOf.some((leader) => leader.id === communityId) &&
+      !user.admin
+    ) {
+      throw new UnauthorizedException();
+    }
+
     const community = await this.findCommunityOrFail(communityId);
     Object.assign(community, body);
     return this.communityRepository.save(community);
@@ -1040,6 +1050,12 @@ export class UserService {
   async findAllOnetimeInvites(): Promise<OnetimeInvite[]> {
     return this.onetimeInviteRepository.find({
       relations: ['invitingUser', 'community'],
+    });
+  }
+
+  async findOnetimeInvites(communityId: number): Promise<OnetimeInvite[]> {
+    return this.onetimeInviteRepository.find({
+      where: { community: { id: communityId } },
     });
   }
 

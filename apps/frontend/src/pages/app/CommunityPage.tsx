@@ -21,8 +21,9 @@ import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import GroupOrganizerGuidelines from "../../components/GroupOrganizerGuidelines";
 import StatusIcon from "@alliance/shared/ui/icons/StatusIcon";
 import CommunityEditForm from "../../components/CommunityEditForm";
+import CommunityInvitesTab from "../../components/CommunityInvitesTab";
 
-type Tab = "members" | "about" | "settings" | "edit";
+type Tab = "members" | "about" | "invites" | "edit";
 
 export enum FilterMode {
   All = "All",
@@ -122,7 +123,7 @@ const CommunityPage = () => {
 
   const [tab, setTab] = useState<Tab>("members");
   const tabs: Tab[] = amLeader
-    ? ["members", "about", "settings"]
+    ? ["members", "about", "invites"]
     : ["members", "about"];
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
@@ -246,13 +247,14 @@ const CommunityPage = () => {
               {community.users.length} members
             </p>
           </div>
+          {amLeader && (
+            <Card style={CardStyle.Grey}>
+              <GroupOrganizerGuidelines />
+            </Card>
+          )}
         </div>
       )}
-      {amLeader && tab === "settings" && (
-        <Card style={CardStyle.Grey}>
-          <GroupOrganizerGuidelines />
-        </Card>
-      )}
+      {tab === "invites" && <CommunityInvitesTab communityId={community.id} />}
       {tab === "edit" && (
         <Card style={CardStyle.Grey}>
           <CommunityEditForm

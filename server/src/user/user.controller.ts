@@ -375,9 +375,10 @@ export class UserController {
   async updateCommunity(
     @Param('communityId', ParseIntPipe) communityId: number,
     @Body() body: UpdateCommunityDto,
+    @Request() req: JwtRequest,
   ) {
     return new CommunityDto(
-      await this.userService.updateCommunity(communityId, body),
+      await this.userService.updateCommunity(communityId, body, req.user.sub),
     );
   }
 
@@ -524,7 +525,7 @@ export class UserController {
   }
 
   @Post('createOnetimeInvite')
-  @UseGuards(AdminGuard)
+  @UseGuards(CommunityLeaderGuard)
   @ApiOkResponse({ type: OnetimeInviteDto })
   async createOnetimeInvite(@Body() body: CreateOnetimeInviteDto) {
     return this.userService.createOnetimeInvite(body);
@@ -535,6 +536,15 @@ export class UserController {
   @ApiOkResponse({ type: [OnetimeInviteDto] })
   async getOnetimeInvites() {
     return this.userService.findAllOnetimeInvites();
+  }
+
+  @Get('onetimeInvites/:communityId')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse({ type: [OnetimeInviteDto] })
+  async getOnetimeInvitesByCommunity(
+    @Param('communityId', ParseIntPipe) communityId: number,
+  ) {
+    return this.userService.findOnetimeInvites(communityId);
   }
 
   @Get('myCommunity')

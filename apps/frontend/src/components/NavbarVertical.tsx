@@ -3,7 +3,6 @@ import { AppLayoutOutletContext } from "../applayout";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useNotifications } from "../lib/useNotifications";
-import { useAuth } from "../lib/AuthContext";
 
 export enum NavbarPage {
   Tasks = "Tasks",
@@ -101,7 +100,6 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
   todoActions: number;
 }) => {
   const { profile } = useOutletContext<AppLayoutOutletContext>();
-  const { user } = useAuth();
 
   const { unreadCount } = useNotifications();
 

@@ -1,16 +1,6 @@
-const CopyIcon = ({
-  size = "small",
-  fill = "black",
-}: {
-  size?: "mini" | "small" | "large";
-  fill?: string;
-}) => {
-  const sizeClass = {
-    mini: "w-2.5 h-2.5",
-    small: "w-3 h-3",
-    large: "w-4 h-4",
-  };
+import { DefaultIconProps, sizeClass } from "./icons";
 
+const CopyIcon = ({ size = "small", fill = "black" }: DefaultIconProps) => {
   return (
     <svg
       className={`${sizeClass[size]}`}

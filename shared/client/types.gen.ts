@@ -2302,6 +2302,21 @@ export type UserGetOnetimeInvitesResponses = {
 
 export type UserGetOnetimeInvitesResponse = UserGetOnetimeInvitesResponses[keyof UserGetOnetimeInvitesResponses];
 
+export type UserGetOnetimeInvitesByCommunityData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/onetimeInvites/{communityId}';
+};
+
+export type UserGetOnetimeInvitesByCommunityResponses = {
+    200: Array<OnetimeInviteDto>;
+};
+
+export type UserGetOnetimeInvitesByCommunityResponse = UserGetOnetimeInvitesByCommunityResponses[keyof UserGetOnetimeInvitesByCommunityResponses];
+
 export type UserGetMyCommunityData = {
     body?: never;
     path?: never;
