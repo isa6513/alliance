@@ -13,6 +13,59 @@ import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
 import { Link } from "react-router";
 
+export const CommunityMemberGridRow = ({
+  profile,
+  contactInfo,
+  actionRelations,
+  actions,
+  completedAllCurrentActions,
+}: {
+  profile: ProfileDto;
+  contactInfo?: CommunityMemberContactInfoDto;
+  actions?: UserActionSummaryDto[];
+  actionRelations: UserActionRelationDetailDto[];
+  completedAllCurrentActions: boolean;
+}) => {
+  const relationByActionId = useMemo(() => {
+    return actionRelations.reduce((acc, relation) => {
+      acc[relation.actionId] = relation;
+      return acc;
+    }, {} as Record<number, UserActionRelationDetailDto>);
+  }, [actionRelations]);
+
+  return (
+    <>
+      <div className="min-w-[50%] flex flex-row items-center gap-x-3">
+        <Link to={`/user/${profile.id}`}>
+          <ProfileImage pfp={profile.profilePicture} size="medium" />
+        </Link>
+        <Link to={`/user/${profile.id}`}>
+          <UserDisplayName staff={profile.staff} underline={false}>
+            {profile.displayName}
+          </UserDisplayName>
+        </Link>
+        {completedAllCurrentActions && <CheckIcon size="mini" />}
+      </div>
+      <div className="flex-1 mx-2">
+        {!!actions && (
+          <UserProgressPills
+            actions={actions}
+            relationByActionId={relationByActionId}
+            pillHeight="h-4"
+          />
+        )}
+      </div>
+      <div>
+        <p>
+          {contactInfo?.preferredReminderTimeLeaderTz
+            ? contactInfo.preferredReminderTimeLeaderTz
+            : "Anytime"}
+        </p>
+      </div>
+    </>
+  );
+};
+
 const CommunityMemberCard = ({
   profile,
   contactInfo,

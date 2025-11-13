@@ -11,7 +11,7 @@ const GuidePage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
-      <div className="flex flex-col md:flex-row mx-6 md:mx-12 lg:mr-40 gap-8 lg:gap-18 pt-8 md:pt-32 pb-56 justify-center">
+      <div className="flex flex-col md:flex-row mx-2 sm:mx-4 md:mx-12 lg:mr-40 gap-8 lg:gap-18 pt-8 md:pt-32 pb-56 justify-center">
         <aside className="min-w-80">
           <div className="flex flex-col md:sticky top-12 pr-8 lg:pr-18 md:border-r border-zinc-200">
             <h2 className=" !font-semibold !text-xl md:!text-xl max-w-2xl mb-4">
@@ -76,7 +76,7 @@ We aim to end global crises that harm or will harm billions of current and futur
 "
               />
 
-              <Card
+              {/* <Card
                 style={CardStyle.White}
                 className="mt-6 p-4 md:p-4 text-lg cursor-pointer hover:bg-zinc-50 flex flex-row items-center justify-between"
               >
@@ -85,7 +85,7 @@ We aim to end global crises that harm or will harm billions of current and futur
                   priorities.
                 </p>
                 <img src={chevronRight} className="w-4 h-4 rotate-270" />
-              </Card>
+              </Card> */}
             </div>
 
             <div>

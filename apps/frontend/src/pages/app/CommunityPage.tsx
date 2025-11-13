@@ -247,6 +247,9 @@ const CommunityPage = () => {
                 />
               ))}
             </List>
+            {/* <div className="grid grid-cols-3">
+              {filteredMembers.map((user) => (}
+            </div> */}
           </div>
         </div>
       )}
