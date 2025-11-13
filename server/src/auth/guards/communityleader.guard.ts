@@ -33,9 +33,9 @@ export class CommunityLeaderGuard implements CanActivate {
       request['user'] = payload;
 
       const isLeader = await this.userService.isCommunityLeader(payload.email);
+      const isAdmin = await this.userService.isAdmin(payload.sub);
 
-      if (!isLeader) {
-        console.log('user is not leader');
+      if (!isLeader && !isAdmin) {
         throw new UnauthorizedException();
       }
       return true;
