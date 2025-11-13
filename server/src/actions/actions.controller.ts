@@ -7,6 +7,7 @@ import {
   MessageEvent,
   NotFoundException,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -189,7 +190,7 @@ export class ActionsController {
   async getActivityFeed(
     @Query('limit') limit?: string,
     @Query('before') before?: string,
-    @Query('comments') comments?: boolean,
+    @Query('comments', ParseBoolPipe) comments?: boolean,
   ): Promise<ActionActivityDto[]> {
     const limitNum = limit ? parseInt(limit) : 20;
     const beforeDate = before ? new Date(before) : undefined;
@@ -319,7 +320,7 @@ export class ActionsController {
   @ApiOkResponse({ type: [ActionActivityDto] })
   async friendActivity(
     @Request() req: JwtRequest,
-    @Query('comments') comments?: boolean,
+    @Query('comments', ParseBoolPipe) comments?: boolean,
   ) {
     return this.actionsService.friendActivity(req.user.sub, comments);
   }
@@ -364,7 +365,7 @@ export class ActionsController {
   @ApiOkResponse({ type: [ActionActivityDto] })
   async findCompletedForUser(
     @Param('id', ParseIntPipe) id: number,
-    @Query('comments') comments?: boolean,
+    @Query('comments', ParseBoolPipe) comments?: boolean,
   ): Promise<ActionActivityDto[]> {
     return this.actionsService.findCompletedForUser(+id, comments);
   }
