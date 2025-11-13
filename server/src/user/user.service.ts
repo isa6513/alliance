@@ -207,8 +207,7 @@ export class UserService {
     ).filter(
       (action) =>
         action.status !== ActionStatus.Draft &&
-        action.status !== ActionStatus.Completed &&
-        !action.everyoneShouldComplete,
+        action.status !== ActionStatus.Completed,
     );
 
     const actionsSorted = actions.sort((a, b) => {
