@@ -136,7 +136,8 @@ const UsersList: React.FC = () => {
     return USER_FILTER_MODES.reduce((acc, mode) => {
       acc[mode] = filteredByGroups.filter((user) => {
         if (mode === "All") return true;
-        if (mode === "Signed") return user.contractDateSigned;
+        if (mode === "Signed")
+          return user.contractDateSigned && !user.contractDateSuspended;
         if (mode === "Suspended") return user.contractDateSuspended;
         return !user.contractDateSigned;
       });
