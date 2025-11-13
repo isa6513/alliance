@@ -118,7 +118,7 @@ export class MailService {
     context: ISendMailOptions['context'],
     cid?: string,
   ): Promise<Mail> {
-    if (process.env.NODE_ENV === 'test') {
+    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'staging') {
       return {
         id: Math.floor(Math.random() * 1000000),
         sentMessageId: 'test',
