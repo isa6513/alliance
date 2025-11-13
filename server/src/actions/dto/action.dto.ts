@@ -246,12 +246,9 @@ export class ActionActivityDto extends PickType(ActionActivity, [
         ? actionActivity.likes.map((like) => new ProfileDto(like))
         : [];
     this.comments = comments;
-    if (!this.editableContent) {
-      this.editableContent = {
-        body: '',
-        attachments: [],
-      };
-    }
+    this.editableContent = actionActivity.editableContent
+      ? new EditableContentDto(actionActivity.editableContent)
+      : { body: '', attachments: [] };
   }
 }
 

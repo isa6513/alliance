@@ -13,6 +13,7 @@ import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityLikeButton from "./ActivityLikeButton";
 import Comments from "./Comments";
 import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
+import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;
@@ -77,17 +78,16 @@ const UserActivityCard = ({
 
     setIsSaving(true);
     try {
-      // Upload new base64 images while preserving existing keys
       const uploads = await Promise.all(
         (editContent.attachments || []).map(async (img) => {
           if (img.startsWith("data:")) {
             const res = await imagesUploadImage({ body: { file: img } });
-            return (res.data as unknown as string) ?? "";
+            return res.data?.key;
           }
           return img;
         })
       );
-      const attachmentKeys = uploads.filter(Boolean) as string[];
+      const attachmentKeys = uploads.filter((key) => key !== undefined);
 
       const response = await actionsUpdateActivity({
         path: { id: activity.id },
@@ -197,9 +197,13 @@ const UserActivityCard = ({
           </div>
         ) : (
           <div>
-            {activity.editableContent?.body && (
-              <p className="mt-3">{activity.editableContent.body}</p>
+            {(!!activity.editableContent.body ||
+              activity.editableContent.attachments.length > 0) && (
+              <div className="mt-3">
+                <EditableContentRenderer content={activity.editableContent} />
+              </div>
             )}
+
             <div className="flex flex-row justify-between w-full items-end">
               <p className="text-zinc-500 text-sm">{timeSinceCompleted}</p>
               <div

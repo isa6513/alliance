@@ -8,7 +8,7 @@ interface ReplyFormProps {
   onCancel?: () => void;
   editableContent: CreateEditableContentDto;
   setEditableContent: (val: CreateEditableContentDto) => void;
-  onSubmit: (content: CreateEditableContentDto) => void;
+  onSubmit: (content: CreateEditableContentDto, onSuccess?: () => void) => void;
   isSubmitting: boolean;
   setReplyingTo: (id: number | null) => void;
   compact?: boolean;
@@ -35,8 +35,9 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setClearDraftSignal((x) => x + 1);
-      setExpanded(false);
-      onSubmit(editableContent);
+      onSubmit(editableContent, () => {
+        setExpanded(false);
+      });
     },
     [editableContent, onSubmit]
   );

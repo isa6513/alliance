@@ -242,8 +242,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
           <div className="text-white font-medium">Drop images to attach</div>
         </div>
       )}
-      {/* Image attachments preview */}
-      {expanded && value.attachments && value.attachments.length > 0 && (
+      {value.attachments && value.attachments.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
           {value.attachments.map((img, idx) => (
             <div key={idx} className="relative inline-block">

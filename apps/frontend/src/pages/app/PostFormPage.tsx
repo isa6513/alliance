@@ -110,7 +110,7 @@ const PostFormPage: React.FC = () => {
           content.attachments.map(async (fileB64) => {
             if (fileB64.startsWith("data:")) {
               const res = await imagesUploadImage({ body: { file: fileB64 } });
-              return res.data as unknown as string; // returns image key
+              return res.data?.key;
             }
             return fileB64;
           })

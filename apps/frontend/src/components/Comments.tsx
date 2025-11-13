@@ -117,7 +117,10 @@ const Comments = ({
     }
   }, [searchParams, setSearchParams]);
 
-  const handleSubmitReply = async (contentDto: CreateEditableContentDto) => {
+  const handleSubmitReply = async (
+    contentDto: CreateEditableContentDto,
+    onSuccess?: () => void
+  ) => {
     try {
       setIsSubmitting(true);
       // Upload attachments first (if any) to get keys
@@ -160,6 +163,7 @@ const Comments = ({
         }, 3000);
 
         fetchComments();
+        onSuccess?.();
       }
 
       setEditableContent({ body: "", attachments: [] });

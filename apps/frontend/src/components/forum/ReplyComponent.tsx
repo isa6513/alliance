@@ -111,12 +111,12 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         editAttachments.map(async (img) => {
           if (img.startsWith("data:")) {
             const res = await imagesUploadImage({ body: { file: img } });
-            return (res.data as unknown as string) ?? "";
+            return res.data?.key ?? "";
           }
           return img;
         })
       );
-      const attachmentKeys = uploads.filter(Boolean) as string[];
+      const attachmentKeys = uploads.filter((key) => key !== undefined);
 
       await forumUpdateComment({
         path: { id: reply.id },
