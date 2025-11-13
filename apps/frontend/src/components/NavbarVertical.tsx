@@ -15,7 +15,6 @@ export enum NavbarPage {
   Contract = "Contract",
   Settings = "Settings",
   Search = "Search",
-  Community = "Community",
 }
 
 export const destinations: Record<NavbarPage, string> = {
@@ -29,7 +28,6 @@ export const destinations: Record<NavbarPage, string> = {
   [NavbarPage.Profile]: "/profile",
   [NavbarPage.Contract]: "/contract",
   [NavbarPage.Settings]: "/settings",
-  [NavbarPage.Community]: "/community",
 };
 
 const navSections = [
@@ -68,10 +66,6 @@ const navSections = [
       {
         page: NavbarPage.Search,
         destination: destinations[NavbarPage.Search],
-      },
-      {
-        page: NavbarPage.Community,
-        destination: destinations[NavbarPage.Community],
       },
     ],
   },
