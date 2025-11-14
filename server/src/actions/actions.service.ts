@@ -1395,10 +1395,25 @@ export class ActionsService {
       action.events = newEvents;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, ...strippedAction } = action;
+    if (action.participatingGroups) {
+      const existingGroups: Group[] = [];
+      for (const group of action.participatingGroups) {
+        const found = await this.groupRepository.findOne({
+          where: {
+            id: group.id,
+          },
+        });
+        if (found) {
+          existingGroups.push(found);
+        }
+      }
+      action.participatingGroups = existingGroups;
+    }
 
-    const newAction = this.actionRepository.create(strippedAction);
+    const newAction = this.actionRepository.create({
+      ...action,
+      id: undefined,
+    });
     await this.actionRepository.save(newAction);
 
     return new ActionDto(newAction);
