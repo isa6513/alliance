@@ -102,6 +102,8 @@ export class UserDto extends PickType(User, [
   'communities',
   'profilePicture',
   'activities',
+  'shareEmailWithCommunityLead',
+  'sharePhoneNumberWithCommunityLead',
 ]) {
   @ApiPropertyOptional()
   @IsOptional()

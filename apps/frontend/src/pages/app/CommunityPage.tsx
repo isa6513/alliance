@@ -161,7 +161,7 @@ const CommunityPage = () => {
     }
 
     userLeaveCommunity({ path: { communityId: community.id } }).then((resp) => {
-      if (resp.data) {
+      if (resp.response.ok) {
         navigate("/tasks");
       }
     });

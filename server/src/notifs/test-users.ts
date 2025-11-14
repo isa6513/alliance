@@ -33,6 +33,8 @@ export const testUser = {
   notifications: [],
   referredBy: null,
   referredUsers: [],
+  shareEmailWithCommunityLead: true,
+  sharePhoneNumberWithCommunityLead: true,
   referralCode: '',
   friends: [],
   hashPassword: function (): Promise<void> {

@@ -138,12 +138,15 @@ const CommunityMemberCard = ({
             >
               <div className="flex flex-col gap-y-3">
                 <p>
-                  <b>Email:</b> {contactInfo.email}
+                  <b>Email:</b>{" "}
+                  {contactInfo.email ?? (
+                    <span className="text-zinc-500">Not shared</span>
+                  )}
                 </p>
                 <p>
                   <b>Phone:</b>{" "}
                   {contactInfo.phoneNumber ?? (
-                    <span className="text-zinc-500">Not provided</span>
+                    <span className="text-zinc-500">Not shared</span>
                   )}
                 </p>
               </div>
@@ -165,14 +168,14 @@ const CommunityMemberCard = ({
                     <p>Preferred Contact Time:</p>
                     <p>
                       {contactInfo.preferredReminderTimeUserTz}
-                      <span className="text-zinc-500">
+                      <span className="text-green">
                         {" "}
                         in {profile.displayName}&apos;s time zone
                       </span>
                     </p>
                     <p>
                       {contactInfo.preferredReminderTimeLeaderTz}
-                      <span className="text-zinc-500"> in your time zone</span>
+                      <span className="text-green"> in your time zone</span>
                     </p>
                   </div>
                 )}

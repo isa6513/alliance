@@ -67,8 +67,8 @@ export class CommunityMemberContactInfoDto extends PickType(User, [
   'timeZone',
   'preferredActionReminderChannel',
 ]) {
-  @ApiProperty()
-  email: string;
+  @ApiPropertyOptional()
+  email?: string;
 
   @ApiPropertyOptional()
   phoneNumber?: string;
@@ -82,8 +82,10 @@ export class CommunityMemberContactInfoDto extends PickType(User, [
   constructor(user: User, viewerTz?: Temporal.TimeZoneLike) {
     super(user);
     this.id = user.id;
-    this.email = user.email;
-    this.phoneNumber = user.phoneNumber;
+    this.email = user.shareEmailWithCommunityLead ? user.email : undefined;
+    this.phoneNumber = user.sharePhoneNumberWithCommunityLead
+      ? user.phoneNumber
+      : undefined;
     this.timeZone = user.timeZone?.toString();
     this.preferredActionReminderChannel = user.preferredActionReminderChannel;
 

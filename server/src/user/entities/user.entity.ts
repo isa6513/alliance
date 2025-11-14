@@ -148,6 +148,18 @@ export class User {
   pushNotifsEnabled: boolean;
 
   @Column({
+    default: true,
+  })
+  @ApiProperty()
+  shareEmailWithCommunityLead: boolean;
+
+  @Column({
+    default: true,
+  })
+  @ApiProperty()
+  sharePhoneNumberWithCommunityLead: boolean;
+
+  @Column({
     type: 'enum',
     enum: NotificationPreference,
     default: NotificationPreference.All,

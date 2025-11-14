@@ -58,6 +58,8 @@ export type User = {
     emailNotifsEnabled: boolean;
     textNotifsEnabled: boolean;
     pushNotifsEnabled: boolean;
+    shareEmailWithCommunityLead: boolean;
+    sharePhoneNumberWithCommunityLead: boolean;
     socialNotifsPreference: NotificationPreference;
     turnedOffAllNotifs: boolean;
     forumDigestPreference: ForumDigestPreference;
@@ -106,6 +108,8 @@ export type UserDto = {
     emailNotifsEnabled: boolean;
     textNotifsEnabled: boolean;
     pushNotifsEnabled: boolean;
+    shareEmailWithCommunityLead: boolean;
+    sharePhoneNumberWithCommunityLead: boolean;
     socialNotifsPreference: NotificationPreference;
     turnedOffAllNotifs: boolean;
     forumDigestPreference: ForumDigestPreference;
@@ -177,6 +181,8 @@ export type UpdateProfileDto = {
     emailNotifsEnabled?: boolean;
     textNotifsEnabled?: boolean;
     pushNotifsEnabled?: boolean;
+    shareEmailWithCommunityLead?: boolean;
+    sharePhoneNumberWithCommunityLead?: boolean;
     socialNotifsPreference?: NotificationPreference;
     turnedOffAllNotifs?: boolean;
     forumDigestPreference?: ForumDigestPreference;
@@ -345,7 +351,7 @@ export type CommunityMemberContactInfoDto = {
     id: number;
     timeZone?: string;
     preferredActionReminderChannel: NotificationChannel;
-    email: string;
+    email?: string;
     phoneNumber?: string;
     preferredReminderTimeUserTz?: string;
     preferredReminderTimeLeaderTz?: string;

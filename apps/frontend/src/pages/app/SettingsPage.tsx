@@ -29,6 +29,8 @@ type EditableUserFields = Pick<
   | "emailNotifsEnabled"
   | "pushNotifsEnabled"
   | "textNotifsEnabled"
+  | "shareEmailWithCommunityLead"
+  | "sharePhoneNumberWithCommunityLead"
   | "cityId"
   | "forumDigestPreference"
   | "preferredActionReminderChannel"
@@ -299,7 +301,7 @@ const SettingsPage: React.FC = () => {
           <hr className="border-zinc-300 mt-4" />
 
           <div>
-            <h2 className="!font-semibold text-lg mb-4">Notifications</h2>
+            <p className="!font-semibold text-lg mb-4">Notifications</p>
 
             <div className="flex flex-row gap-x-2 my-2 items-center">
               <p className="!font-medium mb-0">Send action reminders via:</p>
@@ -379,6 +381,30 @@ const SettingsPage: React.FC = () => {
               </div>
             </div>
           </div>
+          {user.communities.length > 0 && (
+            <div>
+              <p className="!font-semibold text-lg mb-4">Community settings</p>
+              <p>Share contact info with your community lead?</p>
+              <div className="flex flex-col gap-y-2 my-2">
+                <LargeCheckbox
+                  label="Email"
+                  checked={editableUser.shareEmailWithCommunityLead}
+                  onChange={(checked) =>
+                    updateEditableUser({ shareEmailWithCommunityLead: checked })
+                  }
+                />
+                <LargeCheckbox
+                  label="Phone number"
+                  checked={editableUser.sharePhoneNumberWithCommunityLead}
+                  onChange={(checked) =>
+                    updateEditableUser({
+                      sharePhoneNumberWithCommunityLead: checked,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          )}
 
           <hr className="border-zinc-300 mt-4" />
 
