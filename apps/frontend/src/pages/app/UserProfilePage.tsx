@@ -120,6 +120,7 @@ const UserProfilePage: React.FC = () => {
   } = useActivities({
     list: ActivityList.User,
     objectId: parseInt(id!),
+    comments: true,
   });
 
   useEffect(() => {
