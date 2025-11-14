@@ -85,7 +85,9 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
           page: NavbarPage.Search,
           destination: destinations[NavbarPage.Search],
         },
-        ...(user?.communities.length
+        ...(user?.communities.length ||
+        user?.invitedCommunities.filter((invite) => invite.status === "pending")
+          .length
           ? [
               {
                 page: NavbarPage.Community,

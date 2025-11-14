@@ -2484,6 +2484,19 @@ export type UserRejectCommunityInviteResponses = {
     200: unknown;
 };
 
+export type UserLeaveCommunityData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/communities/{communityId}/leave';
+};
+
+export type UserLeaveCommunityResponses = {
+    200: unknown;
+};
+
 export type ImagesGetImageData = {
     body?: never;
     path: {

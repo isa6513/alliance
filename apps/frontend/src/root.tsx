@@ -12,6 +12,7 @@ import {
 import { Route } from "../.react-router/types/src/+types/root";
 import { HtmlBackgroundManager } from "./components/HtmlBackgroundManager";
 import { AuthProvider } from "./lib/AuthContext";
+import { ToastProvider } from "@alliance/shared/ui/ToastProvider";
 
 const options: Partial<PostHogConfig> = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
@@ -100,12 +101,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
             options={options}
           >
             <AuthProvider>
-              <HtmlBackgroundManager>{children}</HtmlBackgroundManager>
+              <ToastProvider>
+                <HtmlBackgroundManager>{children}</HtmlBackgroundManager>
+              </ToastProvider>
             </AuthProvider>
           </PostHogProvider>
         ) : (
           <AuthProvider>
-            <HtmlBackgroundManager>{children}</HtmlBackgroundManager>
+            <ToastProvider>
+              <HtmlBackgroundManager>{children}</HtmlBackgroundManager>
+            </ToastProvider>
           </AuthProvider>
         )}
         <ScrollRestoration />

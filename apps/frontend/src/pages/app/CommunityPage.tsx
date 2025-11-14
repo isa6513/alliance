@@ -6,6 +6,7 @@ import {
   userGetCommunityMemberContactInfo,
   userGetCommunityMemberInfo,
   userGetMyCommunity,
+  userLeaveCommunity,
 } from "@alliance/shared/client";
 import List from "@alliance/shared/ui/List";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -24,7 +25,8 @@ import {
 } from "../../components/GroupGuidelines";
 import CommunityEditForm from "../../components/CommunityEditForm";
 import CommunityInvitesTab from "../../components/CommunityInvitesTab";
-import { useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
+import { useToast } from "@alliance/shared/ui/ToastProvider";
 
 type Tab = "members" | "invites" | "about" | "edit";
 
@@ -139,6 +141,32 @@ const CommunityPage = () => {
     [setSearchParams]
   );
 
+  const navigate = useNavigate();
+
+  const { confirm } = useToast();
+
+  const handleLeave = useCallback(async () => {
+    if (!community) {
+      return;
+    }
+    const ok = await confirm({
+      title: "Leave community",
+      message:
+        "Are you sure you want to leave this community? You will not be able to rejoin unless you are invited again.",
+      confirmLabel: "Leave",
+      cancelLabel: "Cancel",
+    });
+    if (!ok) {
+      return;
+    }
+
+    userLeaveCommunity({ path: { communityId: community.id } }).then((resp) => {
+      if (resp.data) {
+        navigate("/tasks");
+      }
+    });
+  }, [community, navigate, confirm]);
+
   const tabs: Tab[] = amLeader
     ? ["members", "invites", "about"]
     : ["members", "about"];
@@ -179,9 +207,13 @@ const CommunityPage = () => {
             <AppMarkdownWrapper markdownContent={community.description} />
           </div>
 
-          {amLeader && (
+          {amLeader ? (
             <Button color={ButtonColor.Light} onClick={() => setTab("edit")}>
               Edit
+            </Button>
+          ) : (
+            <Button color={ButtonColor.Light} onClick={handleLeave}>
+              Leave community
             </Button>
           )}
         </div>
