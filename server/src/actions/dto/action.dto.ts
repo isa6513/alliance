@@ -28,6 +28,7 @@ import { getImageSource } from 'src/images/images.service';
 import { ActionUpdate } from '../entities/action-update.entity';
 import { ReminderGroup } from '../entities/reminder-group.entity';
 import { ActionSuite } from '../entities/action-suite.entity';
+import { Form } from 'src/tasks/entities/form.entity';
 
 export class CreateReminderGroupDto extends PickType(ReminderGroup, [
   'name',
@@ -305,4 +306,26 @@ export class ActionSuiteDto extends OmitType(ActionSuite, ['actions']) {
     this.actions =
       actions || suite.actions.map((action) => new ActionDto(action));
   }
+}
+
+export class ExportActionDto extends OmitType(Action, [
+  'status',
+  'usersJoined',
+  'usersCompleted',
+]) {
+  @ApiPropertyOptional({ type: () => Form })
+  @Type(() => Form)
+  @IsOptional()
+  taskForm?: Form;
+
+  @ApiPropertyOptional({ type: () => ReminderGroup, isArray: true })
+  @Type(() => ReminderGroup)
+  @IsOptional()
+  reminderGroups?: ReminderGroup[];
+}
+
+export class PasteJsonDto {
+  @ApiProperty()
+  @IsString()
+  body: string;
 }

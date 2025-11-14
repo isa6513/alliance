@@ -1,4 +1,8 @@
-import { ActionDto, actionsFindAllWithDrafts } from "@alliance/shared/client";
+import {
+  ActionDto,
+  actionsFindAllWithDrafts,
+  actionsPasteJson,
+} from "@alliance/shared/client";
 import React, {
   useCallback,
   useEffect,
@@ -10,6 +14,8 @@ import { useAuth } from "./lib/AuthContext";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import SidebarIcon from "@alliance/shared/ui/icons/SidebarIcon";
 import { isProduction } from "@alliance/shared/lib/config";
+import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
+import Dropdown from "@alliance/shared/ui/Dropdown";
 
 const Sidebar: React.FC = () => {
   const [actions, setActions] = useState<ActionDto[]>([]);
@@ -66,6 +72,25 @@ const Sidebar: React.FC = () => {
   }, [isSidebarOpen]);
 
   const filteredActions = actions.filter((action) => !action.archived);
+
+  const [createActionDropdownOpen, setCreateActionDropdownOpen] =
+    useState<boolean>(false);
+
+  const handleCreateActionDropdown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      setCreateActionDropdownOpen(!createActionDropdownOpen);
+      e.stopPropagation();
+    },
+    [createActionDropdownOpen]
+  );
+
+  const handlePasteJson = useCallback(async () => {
+    const json = await navigator.clipboard.readText();
+    const response = await actionsPasteJson({ body: { body: json } });
+    if (response.data) {
+      navigate(`/actions/${response.data.id}`);
+    }
+  }, [navigate]);
 
   const groups: {
     name: string;
@@ -166,15 +191,42 @@ const Sidebar: React.FC = () => {
               Communities
             </Link>
           </div>
-          <div className="flex flex-row justify-between items-center mt-3">
+          <div className="flex flex-row justify-between items-center mt-3 relative">
             <p className="font-bold">Current Actions</p>
             <Button
               onClick={() => navigate("/actions/new")}
-              className="bg-green-3 hover:bg-green-2 text-white !px-3 !py-1 rounded-md text-sm"
+              className="bg-green-3 text-white !px-3 !py-1 rounded-md text-sm hover:bg-green-3"
               color={ButtonColor.Green}
             >
               Create
+              <div
+                className="mt-px ml-1 hover:bg-white/20 rounded-full p-1"
+                onClick={handleCreateActionDropdown}
+              >
+                <DropdownIcon size="mini" fill="white" />
+              </div>
             </Button>
+            {createActionDropdownOpen && (
+              <Dropdown
+                isOpen={createActionDropdownOpen}
+                className="absolute top-[100%] right-0 gap-y-2 min-w-[150px]"
+              >
+                <Button
+                  color={ButtonColor.Light}
+                  className="w-full"
+                  onClick={() => navigate("/actions/new")}
+                >
+                  New Action
+                </Button>
+                <Button
+                  color={ButtonColor.Black}
+                  className="w-full"
+                  onClick={handlePasteJson}
+                >
+                  Paste JSON
+                </Button>
+              </Dropdown>
+            )}
           </div>
           <div className="flex flex-col gap-px">
             {actionsLoading ? (

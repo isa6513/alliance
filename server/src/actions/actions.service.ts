@@ -34,6 +34,7 @@ import {
   CreateActionSuiteDto,
   CreateActionUpdateDto,
   CreateReminderGroupDto,
+  ExportActionDto,
   LatLonDto,
   UpdateActionActivityDto,
   UpdateActionDto,
@@ -61,6 +62,7 @@ import { NotifsService, shouldTextUser } from 'src/notifs/notifs.service';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
 import { actionActivityUrl } from 'src/search/approutes';
 import { ForumService } from 'src/forum/forum.service';
+import { Form } from 'src/tasks/entities/form.entity';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -93,6 +95,8 @@ export class ActionsService {
     private readonly actionUpdateRepository: Repository<ActionUpdate>,
     @InjectRepository(ActionSuite)
     private readonly actionSuiteRepository: Repository<ActionSuite>,
+    @InjectRepository(Form)
+    private readonly formRepository: Repository<Form>,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
     private readonly notifsService: NotifsService,
@@ -1311,5 +1315,92 @@ export class ActionsService {
         action.userRelation !== UserActionRelation.Completed,
     );
     return actions.length;
+  }
+
+  async exportAction(
+    id: number,
+    events?: boolean,
+    reminders?: boolean,
+    taskForm?: boolean,
+    suite?: boolean,
+  ): Promise<ExportActionDto> {
+    const relations = [
+      'participatingGroups',
+      ...(events ? ['events'] : []),
+      ...(suite ? ['suite'] : []),
+    ];
+    const action = await this.actionRepository.findOneOrFail({
+      where: { id },
+      relations,
+    });
+
+    const actionWithExtras: ExportActionDto = {
+      ...action,
+      taskForm: taskForm
+        ? await this.formRepository.findOneOrFail({
+            where: { id: action.taskFormId },
+          })
+        : undefined,
+      reminderGroups: reminders
+        ? await this.actionEventReminderService.getReminderGroupsForEvent(
+            action.id,
+          )
+        : undefined,
+    };
+
+    return actionWithExtras;
+  }
+
+  async importAction(json: string): Promise<ActionDto> {
+    const importaction = JSON.parse(json) as ExportActionDto;
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { taskForm, reminderGroups, ...action } = importaction;
+
+    if (action.suite) {
+      const suite = await this.actionSuiteRepository.findOne({
+        where: { name: action.suite.name },
+      });
+      if (suite) {
+        action.suite = suite;
+      } else {
+        const newSuite = this.actionSuiteRepository.create({
+          name: action.suite.name,
+        });
+        await this.actionSuiteRepository.save(newSuite);
+        action.suite = newSuite;
+      }
+    }
+
+    if (taskForm) {
+      const newTaskForm = this.formRepository.create({
+        ...taskForm,
+        id: undefined,
+      });
+      await this.formRepository.save(newTaskForm);
+      action.taskFormId = newTaskForm.id;
+    }
+
+    if (action.events) {
+      const newEvents: ActionEvent[] = [];
+      for (const event of action.events) {
+        const newEvent = this.actionEventRepository.create({
+          ...event,
+          id: undefined,
+          action: undefined,
+        });
+        newEvents.push(newEvent);
+      }
+      await this.actionEventRepository.save(newEvents);
+      action.events = newEvents;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, ...strippedAction } = action;
+
+    const newAction = this.actionRepository.create(strippedAction);
+    await this.actionRepository.save(newAction);
+
+    return new ActionDto(newAction);
   }
 }

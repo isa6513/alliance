@@ -2,6 +2,7 @@ import {
   ActionDto,
   actionsArchive,
   actionsCreate,
+  actionsExportAction,
   actionsFindOne,
   actionsRemove,
   actionsSuites,
@@ -27,6 +28,8 @@ import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
 import { FormBuilder } from "../components/FormBuilder";
 import ActionUpdatesTab from "../components/ActionUpdatesTab";
 import { getApiUrl } from "@alliance/shared/lib/config";
+import Dropdown from "@alliance/shared/ui/Dropdown";
+import LargeCheckbox from "@alliance/shared/ui/LargeCheckbox";
 
 // Status color mapping
 export const getStatusColor = (status: ActionDto["status"]) => {
@@ -467,6 +470,37 @@ const ActionDashboard: React.FC = () => {
     }
   };
 
+  const [exportActionOpen, setExportActionOpen] = useState(false);
+  const [exportActionEvents, setExportActionEvents] = useState(false);
+  const [exportActionTaskForm, setExportActionTaskForm] = useState(true);
+  const [exportActionSuite, setExportActionSuite] = useState(false);
+  const [jsonCopied, setJsonCopied] = useState(false);
+
+  const handleExportActionOpen = async () => {
+    setExportActionOpen((prev) => !prev);
+  };
+
+  const handleExportAction = async () => {
+    if (actionId) {
+      const response = await actionsExportAction({
+        path: { id: actionId },
+        query: {
+          events: exportActionEvents,
+          reminders: false,
+          taskForm: exportActionTaskForm,
+          suite: exportActionSuite,
+        },
+      });
+      if (response.data) {
+        navigator.clipboard.writeText(JSON.stringify(response.data));
+        setJsonCopied(true);
+        setTimeout(() => {
+          setJsonCopied(false);
+        }, 2000);
+      }
+    }
+  };
+
   const handleDelete = async () => {
     if (isNew || !actionId) return;
 
@@ -655,13 +689,52 @@ const ActionDashboard: React.FC = () => {
                     <CopyIcon size="large" />
                     Duplicate Action
                   </Button>
-                  <Button
-                    onClick={() => {}}
-                    color={ButtonColor.White}
-                    className="!px-3 !text-sm gap-x-1 disabled"
-                  >
-                    Export JSON
-                  </Button>
+                  <div className="relative">
+                    <Button
+                      onClick={handleExportActionOpen}
+                      color={ButtonColor.White}
+                      className="!px-3 !text-sm gap-x-1 disabled"
+                    >
+                      Export JSON
+                    </Button>
+                    {exportActionOpen && (
+                      <Dropdown
+                        isOpen={exportActionOpen}
+                        className="absolute top-[100%] right-0 gap-y-2 min-w-[150px]"
+                      >
+                        <div className="flex flex-col gap-y-2">
+                          <LargeCheckbox
+                            label="Events"
+                            checked={exportActionEvents}
+                            onChange={(checked) =>
+                              setExportActionEvents(checked)
+                            }
+                          />
+                          <LargeCheckbox
+                            label="Task Form"
+                            checked={exportActionTaskForm}
+                            onChange={(checked) =>
+                              setExportActionTaskForm(checked)
+                            }
+                          />
+                          <LargeCheckbox
+                            label="Suite"
+                            checked={exportActionSuite}
+                            onChange={(checked) =>
+                              setExportActionSuite(checked)
+                            }
+                          />
+                        </div>
+                        <Button
+                          color={ButtonColor.Black}
+                          onClick={handleExportAction}
+                          disabled={jsonCopied}
+                        >
+                          {jsonCopied ? "in clipboard" : "Export JSON"}
+                        </Button>
+                      </Dropdown>
+                    )}
+                  </div>
                   <Button
                     onClick={() => handleArchive()}
                     color={ButtonColor.RedOutline}

@@ -43,8 +43,10 @@ import {
   CreateActionUpdateDto,
   CreateReminderGroupDto,
   DeclineActionDto,
+  ExportActionDto,
   LatLonDto,
   OptOutActionDto,
+  PasteJsonDto,
   PreviewEmailHtmlDto,
   PreviewTextDto,
   PreviewTextMessageResponse,
@@ -633,5 +635,33 @@ export class ActionsController {
   @ApiOkResponse()
   async reloadAllActionUsersJoined() {
     return this.actionsService.reloadAllActionUsersJoined();
+  }
+
+  @Get('export/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ExportActionDto })
+  async exportAction(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('events', new ParseBoolPipe({ optional: true })) events?: boolean,
+    @Query('taskForm', new ParseBoolPipe({ optional: true }))
+    taskForm?: boolean,
+    @Query('reminders', new ParseBoolPipe({ optional: true }))
+    reminders?: boolean,
+    @Query('suite', new ParseBoolPipe({ optional: true })) suite?: boolean,
+  ): Promise<ExportActionDto> {
+    return this.actionsService.exportAction(
+      id,
+      events,
+      reminders,
+      taskForm,
+      suite,
+    );
+  }
+
+  @Post('pasteJson')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionDto })
+  pasteJson(@Body() body: PasteJsonDto): Promise<ActionDto> {
+    return this.actionsService.importAction(body.body);
   }
 }

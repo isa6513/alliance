@@ -15,7 +15,7 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { setRevalidate } from "../../applayout";
 import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
 import { useAuth } from "../../lib/AuthContext";
-import LargeCheckbox from "../../components/LargeCheckbox";
+import LargeCheckbox from "@alliance/shared/ui/LargeCheckbox";
 
 type FormMode = "create" | "edit";
 

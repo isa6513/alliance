@@ -1168,6 +1168,110 @@ export type PreviewTextMessageResponse = {
     text: string;
 };
 
+export type Form = {
+    id: number;
+    title: string;
+    schema: {
+        [key: string]: unknown;
+    };
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type ExportActionDto = {
+    /**
+     * Unique identifier for the action
+     */
+    id: number;
+    /**
+     * Name of the action
+     */
+    name: string;
+    /**
+     * Category of the action
+     */
+    category: string;
+    /**
+     * Image URL for the action
+     */
+    image?: string;
+    /**
+     * Number of commitments needed to start the action
+     */
+    commitmentThreshold?: number;
+    /**
+     * Suggested donation amount (cents)
+     */
+    donationAmount?: number;
+    /**
+     * e.g. onboarding
+     */
+    commitmentless: boolean;
+    /**
+     * markdown page body
+     */
+    body: string;
+    /**
+     * markdown contents for activity task card (instructions)
+     */
+    taskContents?: string;
+    /**
+     * Short description shown in cards
+     */
+    shortDescription: string;
+    /**
+     * Time estimate in minutes
+     */
+    timeEstimate?: number;
+    /**
+     * Type of the action
+     */
+    type: ActionTaskType;
+    /**
+     * Form associated with the action
+     */
+    taskFormId?: number;
+    /**
+     * Timestamp when the action was created
+     */
+    createdAt: string;
+    /**
+     * Timestamp when the action was last updated
+     */
+    updatedAt: string;
+    /**
+     * Events associated with the action
+     */
+    events: Array<ActionEvent>;
+    participatingGroups: Array<Group>;
+    /**
+     * Whether to show the action to members who are not of participating groups
+     */
+    showToNonparticipating?: boolean;
+    activities: Array<Array<ActionActivity>>;
+    /**
+     * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
+     */
+    everyoneShouldComplete: boolean;
+    archived: boolean;
+    updates: Array<ActionUpdate>;
+    suite?: ActionSuite;
+    /**
+     * Priority of the action
+     */
+    priority: number;
+    /**
+     * Prevent completion of the action (for old actions)
+     */
+    preventCompletion: boolean;
+    taskForm?: Form;
+    reminderGroups?: Array<ReminderGroup>;
+};
+
+export type PasteJsonDto = {
+    body: string;
+};
+
 export type NotificationDto = {
     id: number;
     category: NotificationCategory;
@@ -3298,6 +3402,39 @@ export type ActionsReloadAllActionUsersJoinedData = {
 export type ActionsReloadAllActionUsersJoinedResponses = {
     200: unknown;
 };
+
+export type ActionsExportActionData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query: {
+        events: boolean;
+        taskForm: boolean;
+        reminders: boolean;
+        suite: boolean;
+    };
+    url: '/actions/export/{id}';
+};
+
+export type ActionsExportActionResponses = {
+    200: ExportActionDto;
+};
+
+export type ActionsExportActionResponse = ActionsExportActionResponses[keyof ActionsExportActionResponses];
+
+export type ActionsPasteJsonData = {
+    body: PasteJsonDto;
+    path?: never;
+    query?: never;
+    url: '/actions/pasteJson';
+};
+
+export type ActionsPasteJsonResponses = {
+    200: ActionDto;
+};
+
+export type ActionsPasteJsonResponse = ActionsPasteJsonResponses[keyof ActionsPasteJsonResponses];
 
 export type NotifsFindAllData = {
     body?: never;

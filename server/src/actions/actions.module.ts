@@ -22,6 +22,7 @@ import { ActionUpdate } from './entities/action-update.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ActionSuite } from './entities/action-suite.entity';
 import { ForumModule } from 'src/forum/forum.module';
+import { Form } from 'src/tasks/entities/form.entity';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ForumModule } from 'src/forum/forum.module';
       ReminderGroup,
       ActionEventNotif,
       ActionSuite,
+      Form,
     ]),
     UserModule,
     NotifsModule,

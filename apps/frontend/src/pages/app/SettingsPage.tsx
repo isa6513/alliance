@@ -15,7 +15,7 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
-import LargeCheckbox from "../../components/LargeCheckbox";
+import LargeCheckbox from "@alliance/shared/ui/LargeCheckbox";
 import FormInput from "@alliance/shared/ui/FormInput";
 import { AdminOnly } from "../../lib/AdminOnly";
 import { useAuth } from "../../lib/AuthContext";
