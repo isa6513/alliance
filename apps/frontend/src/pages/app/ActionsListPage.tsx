@@ -20,12 +20,10 @@ export const filterActions = (
       return actions.filter(
         (action) => action.status === "gathering_commitments"
       );
-    case FilterMode.OfficeAction:
+    case FilterMode.PendingOfficeResolution:
       return actions.filter((action) => action.status === "office_action");
     case FilterMode.MemberAction:
       return actions.filter((action) => action.status === "member_action");
-    case FilterMode.PendingOfficeResolution:
-      return actions.filter((action) => action.status === "resolution");
     case FilterMode.Past:
       return actions.filter(
         (action) => action.status === "completed" || action.status === "failed"
@@ -54,13 +52,13 @@ const ActionsListPage = () => {
   const filteredActions = [...modeToActions[filterMode]].sort((a, b) => {
     const pastA = a.events
       .filter((event) => new Date(event.date) < new Date())
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const latestA =
       pastA.length > 0 ? new Date(pastA[pastA.length - 1].date) : new Date(0);
 
     const pastB = b.events
       .filter((event) => new Date(event.date) < new Date())
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const latestB =
       pastB.length > 0 ? new Date(pastB[pastB.length - 1].date) : new Date(0);
     return latestB.getTime() - latestA.getTime();
