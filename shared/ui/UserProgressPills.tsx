@@ -37,7 +37,7 @@ const UserProgressPills = ({
   pillHeight = "h-3",
 }: UserProgressPillsProps) => {
   return (
-    <div className="flex flex-wrap gap-1 w-full">
+    <div className="flex gap-1 w-full">
       {actions.map((action) => {
         const relation = relationByActionId[action.id] ?? {
           status: "none",
@@ -55,7 +55,7 @@ const UserProgressPills = ({
         return relation ? (
           <div key={action.id} className="relative group flex-1">
             <div
-              className={`w-full rounded flex items-center justify-center text-xs font-semibold ${className} ${pillHeight}`}
+              className={`rounded flex items-center justify-center text-xs font-semibold min-w-2 ${className} ${pillHeight}`}
               aria-label={`${action.name} – ${formatRelationStatus(
                 relation.status
               )}`}

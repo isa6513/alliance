@@ -155,24 +155,28 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
   return (
     <div className="flex flex-col gap-y-8">
       <div className="flex flex-col gap-y-1">
-        <div className="flex flex-row gap-x-4 justify-start items-center mb-4">
-          <p className="font-semibold text-sm">Invite:</p>
-          <DropdownSelect
-            options={Object.values(InviteMode)}
-            value={inviteMode}
-            onChange={(mode) => setInviteMode(mode as InviteMode)}
-          />
-        </div>
+        <p className="font-semibold text-xl">Invites</p>
+        <DropdownSelect
+          options={Object.values(InviteMode)}
+          value={inviteMode}
+          onChange={(mode) => setInviteMode(mode as InviteMode)}
+        />
+
         {inviteMode === InviteMode.NewMember ? (
           <Card style={CardStyle.Grey}>
             <p className="font-semibold text-lg mb-2">
               Invite someone to the Alliance
             </p>
-            <p className="text-zinc-500 mb-2">
-              This will create a personalized invite page that explains what the
-              Alliance is and how to sign up. When the new member signs up, they
-              will automatically be added to your group.
+
+            <p className="text-zinc-500">
+              This will create a personalized invite page that explains the
+              Alliance and how to sign up.
             </p>
+            <p className="text-zinc-500">
+              When the new member signs up, they will automatically be added to
+              your group.
+            </p>
+
             <div className="flex flex-row gap-x-2 mt-2">
               <input
                 type="text"

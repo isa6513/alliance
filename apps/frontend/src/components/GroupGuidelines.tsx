@@ -4,41 +4,32 @@ const GroupOrganizerGuidelines = () => {
   return (
     <div className="flex flex-col gap-y-2">
       <p className="font-semibold text-xl md:text-2xl mb-4 ">
-        Guide for group leaders
+        Group lead guide
       </p>
       <AppMarkdownWrapper
         markdownContent="
-# Purpose
-It can be difficult for members to remember to complete their tasks. Members respond positively when another member reminds them that they did not make an abstract promise, but a promise to real people.
-
 # Responsibilities
 
-**Your responsibility is to ensure that members in your group complete their tasks on time.** You can make this happen however you want.
+**Your main responsibility is to ensure that members in your group complete their tasks on time.** You can make this happen however you see fit given the relationship you have with each member.
 
-**Recommendations:**
+The goal is not for members to rely on you, but to feel accountable to you and the group. As with any leadership role, it’s important to strike a balance between being supportive and firm about expectations.
+
+The Alliance is about cooperation, and cooperation relies on keeping promises. By leading your group effectively, you are helping the Alliance build a culture of trust and reliability, which is ultimately what will allow us to make complex, ambitious plans.
+
+# Recommendations
 
 When someone joins your group:
-- Add them as a friend.
-- Add them as a contact.
-- Send them a message introducing yourself.
+1. Add them as a friend.
+2. Add them as a contact.
+3. Send them a message introducing yourself.
 
-In general:
- - Try to upvote your members’ activities.
+During the week, check in on the group page to see who has and hasn’t completed the action. We recommend upvoting and possibly commenting on the activities of members who have completed the action to encourage them.
 
-The day before deadline:
- - Contact everyone in the group who still has not completed the action.
- - Text.
+For those who have not completed the action, we recommend the following schedule:
+1. The day before the deadline, text them a reminder at their preferred contact time.
+2. The day of the deadline, call them at their preferred contact time.
 
- The day of deadline:
- - Contact everyone in the group who still has not completed the action.  
- - Call.
-
-The day after the deadline:
- - Reach out to those who did not complete the action.
- - Ask them if they encountered any difficulties completing the action and offer to pass along feedback.
- - If helpful, point them towards resources such as our “away feature” in settings if they are going to be offline for an extended period of time, or the “withdraw” option if they spent too long trying to complete the task.
-
-Be aware of members’ timezones – try to text/call at convenient times (generally after work).
+The day after the deadline, reach out to anyone who did not complete the action and gently remind them of the importance of their commitment. You can ask them if they encountered any difficulties completing the action and offer to pass along feedback. You can also point them towards resources such as our “away feature” in settings if they are going to be offline for an extended period of time, or the “withdraw” option if they spent too long trying to complete the task.
 
 # Sample messages
 
@@ -59,10 +50,20 @@ Hi Alice, I noticed that you missed last week’s action – I wanted to check i
 const GroupMemberGuidelines = () => {
   return (
     <div className="flex flex-col gap-y-2">
-      <p className="font-semibold text-lg md:text-xl">
-        Guide for group members
+      <p className="font-semibold text-xl md:text-2xl mb-4 ">About</p>
+      <p>
+        Alliance groups exist so that members can hold one another accountable
+        and engage with a smaller community. Your group lead will remind you of
+        deadlines and answer any questions you have about your tasks.
       </p>
-      <p>This group exists so that members can hold each other accountable.</p>
+
+      <p>
+        By default, your group lead will only reach out to you if a deadline is
+        approaching. However, if you have particular preferences, you can let
+        your group lead know. For example, you can ask them to call in the
+        middle of the week, or to send you a text earlier than the deadline if
+        you’re going to go on vacation.
+      </p>
     </div>
   );
 };

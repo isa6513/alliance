@@ -8,13 +8,12 @@ import {
   userGetMyCommunity,
   userLeaveCommunity,
 } from "@alliance/shared/client";
-import List from "@alliance/shared/ui/List";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Spinner from "../../components/Spinner";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import CommunityMemberCard from "../../components/CommunityMemberCard";
+import CommunityMemberTableRow from "../../components/CommunityMemberTableRow";
 import { useAuth } from "../../lib/AuthContext";
 import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import CompletedBar from "../../components/CompletedBar";
@@ -246,58 +245,109 @@ const CommunityPage = () => {
         ))}
       </div>
       {tab === "members" && (
-        <div className="flex flex-col gap-y-4">
-          <p className="font-semibold text-lg md:text-xl">
-            Organizer{leaders.length > 1 ? "s" : ""}
-          </p>
-          <List>
-            {leaders.map((user) => (
-              <CommunityMemberCard
-                key={user.id}
-                profile={user}
-                contactInfo={memberContactInfo?.[user.id]}
-                actionRelations={userActionRelations?.[user.id] ?? []}
-                actions={actionSummaries}
-                completedAllCurrentActions={completedAllCurrentActions[user.id]}
-              />
-            ))}
-          </List>
-          <div className="flex flex-col gap-y-4 mt-4">
-            <div className="flex flex-row gap-x-4 justify-start items-center">
-              <p className="font-semibold text-lg md:text-xl">
-                Members ({members.length})
-              </p>
-              <DropdownSelect
-                options={Object.values(FilterMode)}
-                secondaryLabels={Object.values(FilterMode).map((mode) =>
-                  mode === FilterMode.All
-                    ? members.length.toString()
-                    : members
-                        .filter((user) => !completedAllCurrentActions[user.id])
-                        .length.toString()
-                )}
-                value={filterMode}
-                onChange={(mode) => setFilterMode(mode as FilterMode)}
-              />
-            </div>
-            <List>
-              {filteredMembers.map((user) => (
-                <CommunityMemberCard
-                  key={user.id}
-                  canExpand={amLeader}
-                  profile={user}
-                  contactInfo={memberContactInfo?.[user.id]}
-                  actionRelations={userActionRelations?.[user.id] ?? []}
-                  actions={actionSummaries}
-                  completedAllCurrentActions={
-                    completedAllCurrentActions[user.id]
-                  }
-                />
-              ))}
-            </List>
-            {/* <div className="grid grid-cols-3">
-              {filteredMembers.map((user) => (}
-            </div> */}
+        <div className="flex flex-col">
+          <div className="">
+            <table className="w-full border-collapse">
+              <thead className="text-left bg-white">
+                <tr>
+                  <td colSpan={3} className="px-0 pb-6">
+                    <p className="text-xl md:text-2xl font-semibold">
+                      Lead{leaders.length !== 1 ? "s" : ""}
+                    </p>
+                  </td>
+                </tr>
+              </thead>
+              <thead className="text-left bg-zinc-50">
+                <tr className="*:py-4 *:px-2 *:md:px-4 border border-zinc-200 text-xs md:text-sm text-zinc-600">
+                  <th scope="col" className="font-medium">
+                    Name
+                  </th>
+                  <th scope="col" className="font-medium">
+                    Action history
+                  </th>
+                  {amLeader && (
+                    <th
+                      scope="col"
+                      className="font-medium md:whitespace-nowrap"
+                    >
+                      Preferred contact time
+                    </th>
+                  )}
+                </tr>
+              </thead>
+              <tbody className="border border-zinc-200">
+                {leaders.map((user) => (
+                  <CommunityMemberTableRow
+                    key={user.id}
+                    profile={user}
+                    canExpand={amLeader}
+                    amLeader={amLeader}
+                    contactInfo={memberContactInfo?.[user.id]}
+                    actionRelations={userActionRelations?.[user.id] ?? []}
+                    actions={actionSummaries}
+                  />
+                ))}
+              </tbody>
+              <thead className="text-left bg-white">
+                <tr>
+                  <td
+                    colSpan={3}
+                    className="px-0 pt-10 pb-6 border-y border-zinc-200"
+                  >
+                    <div className="flex flex-row items-center gap-x-4">
+                      <p className="text-xl md:text-2xl font-semibold">
+                        Members
+                      </p>
+                      <DropdownSelect
+                        options={Object.values(FilterMode)}
+                        secondaryLabels={Object.values(FilterMode).map((mode) =>
+                          mode === FilterMode.All
+                            ? members.length.toString()
+                            : members
+                                .filter(
+                                  (user) => !completedAllCurrentActions[user.id]
+                                )
+                                .length.toString()
+                        )}
+                        value={filterMode}
+                        onChange={(mode) => setFilterMode(mode as FilterMode)}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              </thead>
+              <thead className="text-left bg-zinc-50">
+                <tr className="*:py-4 *:px-2 *:md:px-4 border border-zinc-200 text-xs md:text-sm text-zinc-600">
+                  <th scope="col" className="font-medium">
+                    Name
+                  </th>
+                  <th scope="col" className="font-medium">
+                    Action history
+                  </th>
+                  {amLeader && (
+                    <th
+                      scope="col"
+                      className="font-medium md:whitespace-nowrap"
+                    >
+                      Preferred contact time
+                    </th>
+                  )}
+                </tr>
+              </thead>
+              <tbody className="border border-zinc-200">
+                {filteredMembers.map((user) => (
+                  <CommunityMemberTableRow
+                    key={user.id}
+                    profile={user}
+                    canExpand={amLeader}
+                    amLeader={amLeader}
+                    contactInfo={memberContactInfo?.[user.id]}
+                    actionRelations={userActionRelations?.[user.id] ?? []}
+                    actions={actionSummaries}
+                  />
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
