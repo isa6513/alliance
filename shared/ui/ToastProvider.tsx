@@ -204,7 +204,7 @@ const DefaultToastItem: FC<DefaultToastItemProps> = ({ toast, onDismiss }) => {
     toast.variant === "success"
       ? "bg-emerald-600 text-white"
       : toast.variant === "error"
-      ? "bg-red-600 text-white"
+      ? "bg-white text-red-500 border border-red-500"
       : toast.variant === "warning"
       ? "bg-amber-500 text-white"
       : "bg-slate-700 text-white";
@@ -216,9 +216,9 @@ const DefaultToastItem: FC<DefaultToastItemProps> = ({ toast, onDismiss }) => {
       <div className="flex items-start gap-3 px-4 py-3">
         <div className="flex-1">
           {toast.title && (
-            <h3 className="text-sm font-semibold">{toast.title}</h3>
+            <h3 className="text-sm font-semibold mb-1">{toast.title}</h3>
           )}
-          <p className="mt-1 text-sm">{toast.message}</p>
+          <p className="text-sm">{toast.message}</p>
         </div>
 
         <button

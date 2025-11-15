@@ -16,6 +16,7 @@ import SidebarIcon from "@alliance/shared/ui/icons/SidebarIcon";
 import { isProduction } from "@alliance/shared/lib/config";
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import Dropdown from "@alliance/shared/ui/Dropdown";
+import { useToast } from "@alliance/shared/ui/ToastProvider";
 
 const Sidebar: React.FC = () => {
   const [actions, setActions] = useState<ActionDto[]>([]);
@@ -76,6 +77,8 @@ const Sidebar: React.FC = () => {
   const [createActionDropdownOpen, setCreateActionDropdownOpen] =
     useState<boolean>(false);
 
+  const [pasteJsonLoading, setPasteJsonLoading] = useState<boolean>(false);
+
   const handleCreateActionDropdown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       setCreateActionDropdownOpen(!createActionDropdownOpen);
@@ -84,13 +87,22 @@ const Sidebar: React.FC = () => {
     [createActionDropdownOpen]
   );
 
+  const { error, success } = useToast();
+
   const handlePasteJson = useCallback(async () => {
+    setPasteJsonLoading(true);
     const json = await navigator.clipboard.readText();
+
     const response = await actionsPasteJson({ body: { body: json } });
     if (response.data) {
       navigate(`/actions/${response.data.id}`);
+      setCreateActionDropdownOpen(false);
+      success("Action pasted successfully");
+    } else {
+      error("Could not paste action");
     }
-  }, [navigate]);
+    setPasteJsonLoading(false);
+  }, [navigate, error, success]);
 
   const groups: {
     name: string;
@@ -222,6 +234,7 @@ const Sidebar: React.FC = () => {
                   color={ButtonColor.Black}
                   className="w-full"
                   onClick={handlePasteJson}
+                  disabled={pasteJsonLoading}
                 >
                   Paste JSON
                 </Button>

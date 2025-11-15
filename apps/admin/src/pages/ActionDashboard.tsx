@@ -496,6 +496,7 @@ const ActionDashboard: React.FC = () => {
         setJsonCopied(true);
         setTimeout(() => {
           setJsonCopied(false);
+          setExportActionOpen(false);
         }, 2000);
       }
     }
