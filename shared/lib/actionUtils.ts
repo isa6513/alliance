@@ -3,7 +3,6 @@ import { ActionDto } from "../client";
 export enum FilterMode {
   All = "All",
   GatheringCommitments = "Gathering commitments",
-  OfficeAction = "Office action",
   MemberAction = "Members taking action",
   PendingOfficeResolution = "Pending office resolution",
   Past = "Past",
@@ -22,12 +21,10 @@ export const filterActions = (
       return actions.filter(
         (action) => action.status === "gathering_commitments"
       );
-    case FilterMode.OfficeAction:
-      return actions.filter((action) => action.status === "office_action");
     case FilterMode.MemberAction:
       return actions.filter((action) => action.status === "member_action");
     case FilterMode.PendingOfficeResolution:
-      return actions.filter((action) => action.status === "resolution");
+      return actions.filter((action) => action.status === "office_action");
     case FilterMode.Past:
       return actions.filter(
         (action) => action.status === "completed" || action.status === "failed"
