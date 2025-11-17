@@ -78,7 +78,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
   return (
     <div>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-zinc-700 mb-1">
           {label}
         </label>
       )}
@@ -89,16 +89,16 @@ const UserSelect: React.FC<UserSelectProps> = ({
           onChange={(event) => setQuery(event.target.value)}
           placeholder={placeholder}
           disabled={inputDisabled}
-          className="w-full border border-gray-300 rounded-md px-3 py-3 text-sm disabled:bg-gray-100 disabled:text-gray-500"
+          className="w-full border border-zinc-300 rounded px-3 py-3 text-sm disabled:bg-zinc-100 disabled:text-zinc-500"
         />
       )}
       {query && filteredUsers.length > 0 && (
-        <div className="mt-2 border border-gray-200 rounded-md shadow-sm bg-white max-h-48 overflow-y-auto">
+        <div className="mt-2 border border-zinc-200 rounded shadow-sm bg-white max-h-48 overflow-y-auto">
           {filteredUsers.map((user) => (
             <button
               type="button"
               key={user.id}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-zinc-50"
               onClick={() => addUser(user.id)}
             >
               <span className="font-medium">
@@ -109,7 +109,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
         </div>
       )}
       {query && !filteredUsers.length && !loading && (
-        <p className="mt-2 text-xs text-gray-500">
+        <p className="mt-2 text-xs text-zinc-500">
           No users match that search.
         </p>
       )}
@@ -117,7 +117,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
         {selectedUsers.map((user) => (
           <div
             key={user.id}
-            className="flex items-center justify-between border border-gray-200 rounded-md px-3 py-2 text-sm bg-gray-50"
+            className="flex items-center justify-between border border-zinc-200 rounded px-3 py-2 text-sm bg-zinc-50"
           >
             <div className="flex items-center gap-x-2">
               <ProfileImage pfp={user.profilePicture} size="medium" />
@@ -133,7 +133,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
           </div>
         ))}
         {selectedUsers.length === 0 && !single && (
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-zinc-500">
             Selected users will appear here.
           </p>
         )}

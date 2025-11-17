@@ -28,8 +28,8 @@ export interface CommunityInvitesTabProps {
 }
 
 export enum InviteMode {
+  NewMember = "New Alliance member",
   CurrentMember = "Current Alliance member",
-  NewMember = "New member",
 }
 
 const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
@@ -47,7 +47,7 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
   const [selectedUser, setSelectedUser] = useState<UserSelectUser | null>(null);
 
   const [inviteMode, setInviteMode] = useState<InviteMode>(
-    InviteMode.CurrentMember
+    InviteMode.NewMember
   );
 
   const [error, setError] = useState<string | null>(null);
@@ -154,8 +154,10 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
 
   return (
     <div className="flex flex-col gap-y-8">
-      <div className="flex flex-col gap-y-1">
-        <p className="font-semibold text-xl">Invites</p>
+      <div className="flex flex-col gap-y-3">
+        <p className="font-semibold text-xl md:text-2xl">
+          Invite someone to your group
+        </p>
         <DropdownSelect
           options={Object.values(InviteMode)}
           value={inviteMode}
@@ -164,69 +166,72 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
 
         {inviteMode === InviteMode.NewMember ? (
           <Card style={CardStyle.Grey}>
-            <p className="font-semibold text-lg mb-2">
-              Invite someone to the Alliance
-            </p>
-
-            <p className="text-zinc-500">
-              This will create a personalized invite page that explains the
-              Alliance and how to sign up.
-            </p>
-            <p className="text-zinc-500">
-              When the new member signs up, they will automatically be added to
-              your group.
-            </p>
-
-            <div className="flex flex-row gap-x-2 mt-2">
-              <input
-                type="text"
-                className="border border-zinc-300 rounded px-3 h-10 flex-1"
-                placeholder="Enter the invitee's first name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <Button
-                color={ButtonColor.Black}
-                onClick={handleInvite}
-                className="!h-10"
-                disabled={creatingInvite || !name}
-              >
-                {creatingInvite ? "Creating invite..." : "Create invite"}
-              </Button>
+            <div className="flex flex-col gap-y-2">
+              <p className="font-semibold">
+                Invite a new member to the Alliance and your group
+              </p>
+              <p className="text-zinc-500">
+                This will create a personalized invite page that explains the
+                Alliance and how to sign up.
+              </p>
+              <p className="text-zinc-500">
+                When the new member signs up, they will automatically be added
+                to your group.
+              </p>
+              <div className="flex flex-row gap-x-2 mt-2">
+                <input
+                  type="text"
+                  className="border border-zinc-300 rounded px-3 h-10 flex-1"
+                  placeholder="Enter the invitee's first name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <Button
+                  color={ButtonColor.Black}
+                  onClick={handleInvite}
+                  className="!h-10"
+                  disabled={creatingInvite || !name}
+                >
+                  {creatingInvite ? "Creating invite..." : "Create invite"}
+                </Button>
+              </div>
             </div>
           </Card>
         ) : (
           <Card style={CardStyle.Grey}>
-            <p className="font-semibold text-lg mb-2">
-              Invite an existing Alliance member to your group
-            </p>
-            <p className="text-zinc-500">
-              The member will recieve a notification inviting them to join the
-              group.
-            </p>
-            <div className="flex flex-row gap-x-2 mt-2">
-              <div className="flex-1 max-w-72">
-                <UserSelect
-                  users={selectableUsers}
-                  selectedUserIds={selectedUser?.id ? [selectedUser.id] : []}
-                  onChange={(userIds) =>
-                    setSelectedUser(
-                      selectableUsers.find((user) => user.id === userIds[0]) ??
-                        null
-                    )
-                  }
-                  label={null}
-                  single={true}
-                />
+            <div className="flex flex-col gap-y-2">
+              <p className="font-semibold">
+                Invite an existing Alliance member to your group
+              </p>
+              <p className="text-zinc-500">
+                The member will recieve a notification inviting them to join the
+                group.
+              </p>
+              <div className="flex flex-row gap-x-2 mt-2">
+                <div className="flex-1">
+                  <UserSelect
+                    users={selectableUsers}
+                    selectedUserIds={selectedUser?.id ? [selectedUser.id] : []}
+                    onChange={(userIds) =>
+                      setSelectedUser(
+                        selectableUsers.find(
+                          (user) => user.id === userIds[0]
+                        ) ?? null
+                      )
+                    }
+                    label={null}
+                    single={true}
+                  />
+                </div>
               </div>
+              <Button
+                color={ButtonColor.Black}
+                onClick={handleInviteExistingMember}
+                disabled={creatingInvite || !selectedUser}
+              >
+                {creatingInvite ? "Creating invite..." : "Invite"}
+              </Button>
             </div>
-            <Button
-              color={ButtonColor.Black}
-              onClick={handleInviteExistingMember}
-              disabled={creatingInvite || !selectedUser}
-            >
-              {creatingInvite ? "Creating invite..." : "Invite"}
-            </Button>
           </Card>
         )}
         {error && <p className="text-red-500 text-sm">{error}</p>}
