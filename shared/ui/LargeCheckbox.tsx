@@ -13,7 +13,7 @@ const LargeCheckbox: React.FC<LargeCheckboxProps> = ({
     <label className="flex items-center">
       <input
         type="checkbox"
-        className="w-6 h-6 accent-black cursor-pointer"
+        className="w-5 h-5 accent-black cursor-pointer"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
       />

@@ -1197,7 +1197,7 @@ export class UserService {
       user: invite.invitingUser,
       category: NotificationCategory.CommunityInviteAccepted,
       message: `${invite.invitedUser?.name} has joined your community`,
-      webAppLocation: `/community?tab=invites`,
+      webAppLocation: `/groups?tab=invites`,
       associatedUsers: [invite.invitedUser],
     });
     await this.notifRepository.save(notif);

@@ -171,7 +171,7 @@ const SettingsPage: React.FC = () => {
     return (
       <div className="bg-page pt-20 px-2 md:px-16">
         <div className="max-w-4xl mx-auto">
-          <h1 className="!text-3xl !font-serif !font-medium mb-2">Account</h1>
+          <h1 className="!text-3xl !font-serif !font-semibold mb-2">Account</h1>
           <Card style={CardStyle.White} className="p-8">
             <p className="text-center text-zinc-500">
               Loading your account information...
@@ -192,7 +192,7 @@ const SettingsPage: React.FC = () => {
         <div className="mb-6 relative flex flex-col gap-y-4">
           <div className="flex justify-between mb-2">
             <div className="gap-x-2">
-              <h1 className="!text-2xl sm:!text-4xl font-serif !font-medium mb-2">
+              <h1 className="!text-2xl sm:!text-4xl font-serif !font-semibold mb-2">
                 Account
               </h1>
               <AdminOnly>
@@ -275,7 +275,11 @@ const SettingsPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block font-medium  mb-2">Anonymous Account</label>
+            <label className="block font-medium mb-2">Anonymous account</label>
+            <p className="text-zinc-500 text-sm mb-4">
+              With an anonymous account, other members will not be able to see
+              your name.
+            </p>
             <div className="flex flex-row gap-x-2">
               <Button
                 color={
@@ -301,12 +305,12 @@ const SettingsPage: React.FC = () => {
           <hr className="border-zinc-300 mt-4" />
 
           <div>
-            <p className="!font-semibold text-lg mb-4">Notifications</p>
+            <h2 className="!font-semibold !text-xl mb-4">Notifications</h2>
 
-            <div className="flex flex-row gap-x-2 my-2 items-center">
+            <div className="flex flex-col gap-y-2 mb-4">
               <p className="!font-medium mb-0">Send action reminders via:</p>
               <select
-                className="border border-zinc-300 rounded-md px-3 py-2"
+                className="border border-zinc-300 rounded px-3 py-2 self-start"
                 value={editableUser.preferredActionReminderChannel}
                 onChange={(event) =>
                   updateEditableUser({
@@ -319,7 +323,7 @@ const SettingsPage: React.FC = () => {
                 <option value={"text"}>Text</option>
               </select>
             </div>
-            <p className="!font-medium mb-0">Allowed notification channels</p>
+            <p className="!font-medium mb-0">Allowed notification channels:</p>
             <div className="">
               {!(
                 editableUser.emailNotifsEnabled ||
@@ -356,36 +360,15 @@ const SettingsPage: React.FC = () => {
                   updateEditableUser({ textNotifsEnabled: checked })
                 }
               /> */}
-              <div className="flex flex-col mt-4">
-                <p className="!font-medium">Platform activity digest</p>
-                <p className="text-sm text-zinc-500 mb-2">
-                  This includes replies to your posts, friend requests, and
-                  other updates.
-                </p>
-                <select
-                  className="border border-zinc-300 rounded-md px-3 py-2"
-                  value={editableUser.forumDigestPreference}
-                  onChange={(event) =>
-                    updateEditableUser({
-                      forumDigestPreference: event.target.value as
-                        | "off"
-                        | "daily"
-                        | "weekly",
-                    })
-                  }
-                >
-                  <option value={"off"}>Off</option>
-                  <option value={"daily"}>Daily</option>
-                  <option value={"weekly"}>Weekly</option>
-                </select>
-              </div>
             </div>
           </div>
+          <hr className="border-zinc-300 mt-4" />
+
           {user.communities.length > 0 && (
             <div>
-              <p className="!font-semibold text-lg mb-4">Community settings</p>
-              <p>Share contact info with your community lead?</p>
-              <div className="flex flex-col gap-y-2 my-2">
+              <h2 className="!font-semibold !text-xl mb-4">Groups</h2>
+              <p>Contact info shared with your group lead:</p>
+              <div className="flex flex-col gap-y-2 mt-2">
                 <LargeCheckbox
                   label="Email"
                   checked={editableUser.shareEmailWithCommunityLead}
