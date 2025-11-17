@@ -263,3 +263,9 @@ button {
 hr {
   border-color: var(--color-zinc-200);
 }
+
+@media (max-height: 500px) {
+  .h-sm {
+    margin-bottom: 0;
+  }
+}
