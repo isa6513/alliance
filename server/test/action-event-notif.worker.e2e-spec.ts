@@ -819,6 +819,103 @@ describe('ActionEventNotifWorker (e2e)', () => {
     await userRepo.delete({ id: completeUser.id });
   });
 
+  it('uses suite-aware #{n} counts when configured', async () => {
+    const now = Date.now();
+    const user = await getPrimaryUser();
+
+    const suite = await actionSuiteRepo.save(
+      actionSuiteRepo.create({
+        name: uniqueName('suite-count-primary'),
+      }),
+    );
+
+    const otherSuite = await actionSuiteRepo.save(
+      actionSuiteRepo.create({
+        name: uniqueName('suite-count-secondary'),
+      }),
+    );
+
+    const eventDate = new Date(now - 30 * 60 * 1000);
+
+    const { memberEvent } = await createActionWithMemberEvent({
+      name: uniqueName('suite-count-one'),
+      eventDate,
+      suite,
+      suiteManaged: true,
+    });
+
+    await createActionWithMemberEvent({
+      name: uniqueName('suite-count-two'),
+      eventDate,
+      suite,
+      suiteManaged: true,
+    });
+
+    await createActionWithMemberEvent({
+      name: uniqueName('suite-count-other-suite'),
+      eventDate,
+      suite: otherSuite,
+      suiteManaged: true,
+    });
+
+    const suiteWithActions = await actionSuiteRepo.findOneOrFail({
+      where: { id: suite.id },
+      relations: ['actions'],
+    });
+
+    const suiteReminderGroup = await createReminderGroup(
+      memberEvent,
+      ReminderGroupTimingMode.Absolute,
+      ReminderCohortType.AllUncompleted,
+      {
+        sendAtAbsolute: new Date(now - 5 * 60 * 1000),
+        actionSuite: suiteWithActions,
+        useSuiteTaskCount: true,
+        textMessage: 'Suite reminder #{n}',
+        emailMessage: 'Suite reminder #{n}',
+        emailSubject: 'Suite reminder #{n}',
+      },
+    );
+
+    const suiteText = await worker.processCustomReminderText(
+      suiteReminderGroup.textMessage,
+      {
+        user,
+        group: suiteReminderGroup,
+        scheduledFor: new Date(),
+      },
+      'cid-suite-count',
+    );
+
+    expect(suiteText).toBe('Suite reminder 2');
+
+    const totalReminderGroup = await createReminderGroup(
+      memberEvent,
+      ReminderGroupTimingMode.Absolute,
+      ReminderCohortType.AllUncompleted,
+      {
+        sendAtAbsolute: new Date(now - 4 * 60 * 1000),
+        actionSuite: suiteWithActions,
+        useSuiteTaskCount: false,
+        textMessage: 'Total reminder #{n}',
+        emailMessage: 'Total reminder #{n}',
+        emailSubject: 'Total reminder #{n}',
+      },
+    );
+
+    const totalText = await worker.processCustomReminderText(
+      totalReminderGroup.textMessage,
+      {
+        user,
+        group: totalReminderGroup,
+        scheduledFor: new Date(),
+      },
+      'cid-total-count',
+    );
+
+    expect(totalText).toBe('Total reminder 3');
+  });
+
   it('replaces placeholders in custom reminder text', async () => {
     const now = Date.now();
     const user = await getPrimaryUser();

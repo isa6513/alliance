@@ -1308,13 +1308,27 @@ export class ActionsService {
     }));
   }
 
-  async getUncompletedTasksCount(userId: number): Promise<number> {
+  async getUncompletedTasksCount(
+    userId: number,
+    suiteId?: number,
+  ): Promise<number> {
     const actions = (await this.findPublic(userId)).filter(
       (action) =>
         action.shouldParticipate &&
         action.userRelation !== UserActionRelation.Completed,
     );
-    return actions.length;
+    if (!suiteId) {
+      return actions.length;
+    }
+
+    const suite = await this.actionSuiteRepository.findOneOrFail({
+      where: { id: suiteId },
+      relations: ['actions'],
+    });
+
+    return actions.filter((action) =>
+      suite.actions.some((a) => a.id === action.id),
+    ).length;
   }
 
   async exportAction(

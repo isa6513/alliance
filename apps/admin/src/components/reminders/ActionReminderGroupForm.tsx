@@ -2,6 +2,7 @@ import {
   actionsPreviewEmailHtml,
   actionsPreviewTextMessage,
   actionsTentativePlansForGroup,
+  Group,
   type ActionEventDto,
   type CreateReminderGroupDto,
   type GroupDto,
@@ -22,6 +23,7 @@ import {
   defaultTextMessage,
 } from "./defaultReminderContents";
 import Card from "@alliance/shared/ui/Card";
+import LargeCheckbox from "@alliance/shared/ui/LargeCheckbox";
 
 type ReminderGroupContentFields = Pick<
   ReminderGroup,
@@ -31,6 +33,7 @@ type ReminderGroupContentFields = Pick<
   | "emailSubject"
   | "emailMessage"
   | "textMessage"
+  | "useSuiteTaskCount"
 >;
 
 type ReminderGroupScheduleFields = Pick<
@@ -56,22 +59,7 @@ export type ActionReminderGroupFormSubmitPayload = ReminderGroupContentFields &
 
 export type ActionReminderGroupFormInitialValues = {
   memberActionEventId: number;
-  reminderGroup: Pick<
-    ReminderGroup,
-    | "name"
-    | "cohortType"
-    | "timingMode"
-    | "emailSubject"
-    | "emailMessage"
-    | "textMessage"
-    | "sendAtAbsolute"
-    | "sendAtSecondsFromDeadline"
-    | "relative_range_start_seconds_from_deadline"
-    | "relative_range_end_seconds_from_deadline"
-    | "send_range_start"
-    | "send_range_end"
-    | "userGroup"
-  > | null;
+  reminderGroup: (CreateReminderGroupDto & { userGroup?: Group }) | null;
   users: User[];
 };
 
@@ -190,6 +178,10 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     initialValues.reminderGroup?.name ?? ""
   );
 
+  const [useSuiteTaskCount, setUseSuiteTaskCount] = useState<boolean>(
+    initialValues.reminderGroup?.useSuiteTaskCount ?? true
+  );
+
   useEffect(() => {
     if (timingMode === "within_relative_range") {
       if (relativeRangeStartHours < relativeRangeEndHours) {
@@ -296,6 +288,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         emailMessage,
         textMessage,
         timingMode,
+        useSuiteTaskCount,
         userGroupId:
           cohortType === "group" ? selectedGroupId ?? undefined : undefined,
         userIds: cohortType === "custom" ? selectedUserIds : undefined,
@@ -342,6 +335,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     selectedUserIds,
     relativeRangeStartHours,
     relativeRangeEndHours,
+    useSuiteTaskCount,
   ]);
 
   useEffect(() => {
@@ -606,6 +600,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         timingMode === "within_relative_range"
           ? relativeRangeEndSeconds
           : undefined,
+      useSuiteTaskCount,
     } satisfies ActionReminderGroupFormSubmitPayload;
 
     console.log(payload);
@@ -975,6 +970,13 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
           />
         )}
       </div>
+      <div>
+        <LargeCheckbox
+          label="Use suite task count"
+          checked={useSuiteTaskCount}
+          onChange={(checked) => setUseSuiteTaskCount(checked)}
+        />
+      </div>
 
       <div
         className={`p-2 border border-gray-200 rounded-md bg-zinc-100 ${
@@ -1079,6 +1081,13 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
                 </tr>
               </tbody>
             </table>
+            <p className="text-sm text-zinc-600 m-3">
+              If you are using the suite task count, all task count related
+              values will be based on the number of uncompleted tasks only in
+              this action suite. If the reminder group is not associated with an
+              action suite, the flag has no effect (global count will always be
+              used).
+            </p>
           </div>
         )}
       </div>

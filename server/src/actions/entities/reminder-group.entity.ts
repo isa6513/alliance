@@ -174,6 +174,12 @@ export class ReminderGroup {
   deadlineEvent?: ActionEvent;
 
   @ApiProperty({ type: Boolean })
+  @Column({ type: 'boolean', default: true })
+  @IsDefined()
+  @Allow()
+  useSuiteTaskCount: boolean;
+
+  @ApiProperty({ type: Boolean })
   @Column({ type: 'boolean', default: false })
   @IsDefined()
   @Allow()

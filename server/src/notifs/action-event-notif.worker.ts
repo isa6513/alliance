@@ -86,6 +86,7 @@ export class ActionEventNotifWorker {
       cid,
       uncompletedTasksCount: await this.actionsService.getUncompletedTasksCount(
         plan.user.id,
+        plan.group.useSuiteTaskCount ? plan.group.actionSuite?.id : undefined,
       ),
     });
   }
