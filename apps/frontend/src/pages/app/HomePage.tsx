@@ -12,6 +12,7 @@ import Spinner from "../../components/Spinner";
 import { getPastEvents } from "@alliance/shared/lib/actionUtils";
 import { useCIDFromParams } from "../../lib/utils";
 import TwoColumnLayout from "../../components/TwoColumnLayout";
+import { useCallback, useMemo } from "react";
 
 export function canCompleteAction(action: ActionWithRelation) {
   return (
@@ -52,19 +53,6 @@ export function canJoinAction(action: ActionWithRelation) {
   );
 }
 
-export function isActionInCurrentWeek(action: ActionWithRelation) {
-  const deadlineEvent = action.events.find(
-    (event) => event.newStatus === "office_action"
-  );
-  if (!deadlineEvent) {
-    return true;
-  }
-  return (
-    new Date(deadlineEvent.date) <
-    new Date(new Date().setDate(new Date().getDate() + 7))
-  );
-}
-
 const HomePage = () => {
   const navigate = useNavigate();
   const { actions, posts, loading } =
@@ -78,12 +66,15 @@ const HomePage = () => {
 
   const { user } = useAuth();
 
-  const todoActions =
-    actions
-      ?.filter((action) => shouldCompleteAction(action))
-      .sort((a, b) => {
-        return b.priority - a.priority;
-      }) || [];
+  const todoActions = useMemo(() => {
+    return (
+      actions
+        ?.filter((action) => shouldCompleteAction(action))
+        .sort((a, b) => {
+          return b.priority - a.priority;
+        }) || []
+    );
+  }, [actions]);
 
   const newActions =
     actions
@@ -91,6 +82,41 @@ const HomePage = () => {
       .sort((a, b) => {
         return b.priority - a.priority;
       }) || [];
+
+  const isActionDeadlineWithinDays = useCallback(
+    (action: ActionWithRelation, days: number) => {
+      const deadlineEvent = action.events.find(
+        (event) => event.newStatus === "office_action"
+      );
+      if (!deadlineEvent) {
+        return true;
+      }
+      return (
+        new Date(deadlineEvent.date) <
+        new Date(new Date().setDate(new Date().getDate() + days))
+      );
+    },
+    []
+  );
+
+  const doesCurrentWeekHaveActions = useMemo(
+    () =>
+      todoActions.some((action) => {
+        return isActionDeadlineWithinDays(action, 7);
+      }),
+    [todoActions, isActionDeadlineWithinDays]
+  );
+
+  const isActionInCurrentWeek = useCallback(
+    (action: ActionWithRelation) => {
+      if (doesCurrentWeekHaveActions) {
+        return isActionDeadlineWithinDays(action, 7);
+      } else {
+        return isActionDeadlineWithinDays(action, 14);
+      }
+    },
+    [doesCurrentWeekHaveActions, isActionDeadlineWithinDays]
+  );
 
   const currentTask = newActions[0] || todoActions[0] || null;
   const currentWeekTodoActions = todoActions.filter((action) => {
