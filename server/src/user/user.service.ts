@@ -124,6 +124,10 @@ export class UserService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { cityId, profilePicture, hasActiveContract, ...updateData } = data;
 
+    if (!updateData.preferredReminderTime) {
+      throw new BadRequestException('Preferred reminder time is required');
+    }
+
     if (profilePicture && profilePicture.length > 100) {
       //TODO: differentiate between file and url
       const key = profilePicture
