@@ -37,6 +37,7 @@ export const reminderPresets: Record<
     name: "Member Action announcement",
     emailMessage: defaultAnnouncementEmailContents,
     emailSubject: defaultAnnouncementEmailSubject,
+    useSuiteTaskCount: true,
   },
   "Two Day Range": {
     timingMode: "within_relative_range",
@@ -47,6 +48,7 @@ export const reminderPresets: Record<
     emailSubject: defaultEmailSubject,
     emailMessage: defaultEmailContents,
     name: "24-48h reminder",
+    useSuiteTaskCount: true,
   },
   "One Day Range": {
     timingMode: "within_relative_range",
@@ -57,6 +59,7 @@ export const reminderPresets: Record<
     emailSubject: defaultEmailSubject,
     emailMessage: defaultEmailContents,
     name: "6-24h reminder",
+    useSuiteTaskCount: true,
   },
   "Three Hour": {
     timingMode: "from_deadline",
@@ -66,6 +69,7 @@ export const reminderPresets: Record<
     emailSubject: defaultEmailSubject,
     emailMessage: defaultEmailContents,
     name: "3 hour reminder",
+    useSuiteTaskCount: true,
   },
   "Missed Deadline": {
     timingMode: "from_deadline",
@@ -75,5 +79,6 @@ export const reminderPresets: Record<
     emailMessage: defaultMissedDeadlineEmailContents,
     emailSubject: defaultMissedDeadlineEmailSubject,
     name: "Missed deadline message",
+    useSuiteTaskCount: true,
   },
 };
