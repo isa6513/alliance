@@ -125,7 +125,7 @@ export class UserService {
     const { cityId, profilePicture, hasActiveContract, ...updateData } = data;
 
     if (!updateData.preferredReminderTime) {
-      throw new BadRequestException('Preferred reminder time is required');
+      updateData.preferredReminderTime = undefined;
     }
 
     if (profilePicture && profilePicture.length > 100) {

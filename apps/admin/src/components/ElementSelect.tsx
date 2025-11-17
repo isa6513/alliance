@@ -11,7 +11,6 @@ export function ElementSelect({
   onAddDisplayBlock,
 }: ElementSelectProps) {
   const fieldTypes: FieldKind[] = [
-    "text",
     "textarea",
     "email",
     "phone",
@@ -59,6 +58,8 @@ export function ElementSelect({
                 >
                   {type === "custom"
                     ? "Custom Component Field"
+                    : type === "textarea"
+                    ? "Text Field"
                     : `${type.charAt(0).toUpperCase() + type.slice(1)} Field`}
                 </button>
               ))}
