@@ -65,21 +65,24 @@ const CommunityPage = () => {
     if (!community?.users || !userActionRelations) {
       return 0;
     }
+
     const completedall: Record<number, boolean> = {};
-    const completedUsers = new Set<number>();
+    for (const member of community.users) {
+      completedall[member.id] = true;
+    }
+
     for (const action of activeActions) {
       for (const member of community?.users ?? []) {
         const relation = userActionRelations?.[member.id]?.find(
           (relation) => relation.actionId === action.id
         );
-        if (relation?.status === "completed") {
-          completedUsers.add(member.id);
-          completedall[member.id] = true;
+        if (relation?.status !== "completed") {
+          completedall[member.id] = false;
         }
       }
     }
     setCompletedAllCurrentActions(completedall);
-    return completedUsers.size;
+    return Object.values(completedall).filter((completed) => completed).length;
   }, [activeActions, community, userActionRelations]);
 
   const [loading, setLoading] = useState(true);
