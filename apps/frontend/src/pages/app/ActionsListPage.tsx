@@ -65,9 +65,9 @@ const ActionsListPage = () => {
           );
 
         if (futureA.length > 0 && futureB.length > 0) {
-          const latestFutureA = new Date(futureA[futureA.length - 1].date);
-          const latestFutureB = new Date(futureB[futureB.length - 1].date);
-          return latestFutureA.getTime() - latestFutureB.getTime();
+          const soonestFutureA = new Date(futureA[0].date);
+          const soonestFutureB = new Date(futureB[0].date);
+          return soonestFutureA.getTime() - soonestFutureB.getTime();
         }
 
         if (futureA.length > 0) {
