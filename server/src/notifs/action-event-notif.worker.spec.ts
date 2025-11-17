@@ -100,7 +100,10 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
       expect(result).toBe(
         'Hi Alex Example (Alex Example), action Test Action has 3 tasks due in 2 days and 6 hours. Link: https://app.example.org/tasks?cid=cid-123',
       );
-      expect(actionsService.getUncompletedTasksCount).toHaveBeenCalledWith(7);
+      expect(actionsService.getUncompletedTasksCount).toHaveBeenCalledWith(
+        7,
+        undefined,
+      );
     } finally {
       jest.useRealTimers();
     }
@@ -151,7 +154,10 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
       expect(result).toBe(
         'Hello Cher! Deadline in [err] / [err]. Tasks left: 1. Visit https://app.example.org/tasks?cid=cid-456',
       );
-      expect(actionsService.getUncompletedTasksCount).toHaveBeenCalledWith(9);
+      expect(actionsService.getUncompletedTasksCount).toHaveBeenCalledWith(
+        9,
+        undefined,
+      );
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'User name has less than 2 parts: Cher',
       );
