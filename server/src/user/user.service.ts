@@ -510,7 +510,7 @@ export class UserService {
         user: rel.requester,
         category: NotificationCategory.FriendRequestAccepted,
         message: `${rel.addressee.name} accepted your friend request`,
-        webAppLocation: `/profile`,
+        webAppLocation: profileUrl(rel.addressee.id),
         associatedUsers: [rel.addressee],
       });
     }
