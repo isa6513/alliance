@@ -20,6 +20,7 @@ import FormInput from "@alliance/shared/ui/FormInput";
 import { AdminOnly } from "../../lib/AdminOnly";
 import { useAuth } from "../../lib/AuthContext";
 import AwayRangesSection from "../../components/AwayRangesSection";
+import TimeZoneSelect from "@alliance/shared/forms/TimeZoneSelect";
 
 type EditableUserFields = Pick<
   UserDto,
@@ -34,6 +35,8 @@ type EditableUserFields = Pick<
   | "cityId"
   | "forumDigestPreference"
   | "preferredActionReminderChannel"
+  | "preferredReminderTime"
+  | "timeZone"
 >;
 
 const SettingsPage: React.FC = () => {
@@ -324,7 +327,7 @@ const SettingsPage: React.FC = () => {
               </select>
             </div>
             <p className="!font-medium mb-0">Allowed notification channels:</p>
-            <div className="">
+            <div>
               {!(
                 editableUser.emailNotifsEnabled ||
                 // editableUser.pushNotifsEnabled ||
@@ -337,7 +340,6 @@ const SettingsPage: React.FC = () => {
                 </p>
               )}
             </div>
-
             <div className="flex flex-col gap-y-2 mt-2">
               <LargeCheckbox
                 label="Email"
@@ -362,6 +364,30 @@ const SettingsPage: React.FC = () => {
               /> */}
             </div>
           </div>
+          <div>
+            <p className="!font-medium mb-2">Preferred reminder time:</p>
+            <input
+              type="time"
+              className="border border-zinc-300 rounded px-3 py-2 self-start"
+              value={editableUser.preferredReminderTime}
+              onChange={(event) =>
+                updateEditableUser({
+                  preferredReminderTime: event.target.value,
+                })
+              }
+            />
+            <p className="!font-medium mt-4 mb-2">
+              Your time zone for reminders:
+            </p>
+            <TimeZoneSelect
+              value={editableUser.timeZone}
+              className="border border-zinc-300 rounded px-3 py-3 self-start"
+              onChange={(event) =>
+                updateEditableUser({ timeZone: event.target.value })
+              }
+            />
+          </div>
+
           <hr className="border-zinc-300 mt-4" />
 
           {user.communities.length > 0 && (

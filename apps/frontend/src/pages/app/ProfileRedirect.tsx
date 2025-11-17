@@ -10,7 +10,7 @@ const ProfileRedirectInner = () => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      navigate(`/user/${user.id}`, { state });
+      navigate(`/user/${user.id}`, { replace: true, state });
     }
   }, [isAuthenticated, user, navigate, state]);
 

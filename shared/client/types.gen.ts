@@ -102,6 +102,8 @@ export type Community = {
 export type UserDto = {
     id: number;
     name: string;
+    preferredReminderTime?: string;
+    timeZone?: string;
     contractDateSigned: string | null;
     contractDateSuspended: string | null;
     preferredActionReminderChannel: NotificationChannel;

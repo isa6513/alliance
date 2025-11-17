@@ -104,6 +104,8 @@ export class UserDto extends PickType(User, [
   'activities',
   'shareEmailWithCommunityLead',
   'sharePhoneNumberWithCommunityLead',
+  'preferredReminderTime',
+  'timeZone',
 ]) {
   @ApiPropertyOptional()
   @IsOptional()
