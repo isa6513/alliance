@@ -49,41 +49,57 @@ const ActionsListPage = () => {
 
   useGrayBackground();
 
-  const filteredActions = [...modeToActions[filterMode]].sort((a, b) => {
-    const futureA = a.events
-      .filter((event) => new Date(event.date) > new Date())
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const filteredActions = useMemo(
+    () =>
+      [...modeToActions[filterMode]].sort((a, b) => {
+        const futureA = a.events
+          .filter((event) => new Date(event.date) > new Date())
+          .sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
 
-    const futureB = b.events
-      .filter((event) => new Date(event.date) > new Date())
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        const futureB = b.events
+          .filter((event) => new Date(event.date) > new Date())
+          .sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
 
-    if (futureA.length > 0 && futureB.length > 0) {
-      const latestFutureA = new Date(futureA[futureA.length - 1].date);
-      const latestFutureB = new Date(futureB[futureB.length - 1].date);
-      return latestFutureA.getTime() - latestFutureB.getTime();
-    }
+        if (futureA.length > 0 && futureB.length > 0) {
+          const latestFutureA = new Date(futureA[futureA.length - 1].date);
+          const latestFutureB = new Date(futureB[futureB.length - 1].date);
+          return latestFutureA.getTime() - latestFutureB.getTime();
+        }
 
-    if (futureA.length > 0) {
-      return -1;
-    }
-    if (futureB.length > 0) {
-      return 1;
-    }
+        if (futureA.length > 0) {
+          return -1;
+        }
+        if (futureB.length > 0) {
+          return 1;
+        }
 
-    const pastA = a.events
-      .filter((event) => new Date(event.date) < new Date())
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    const latestA =
-      pastA.length > 0 ? new Date(pastA[pastA.length - 1].date) : new Date(0);
+        const pastA = a.events
+          .filter((event) => new Date(event.date) < new Date())
+          .sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
+        const latestA =
+          pastA.length > 0
+            ? new Date(pastA[pastA.length - 1].date)
+            : new Date(0);
 
-    const pastB = b.events
-      .filter((event) => new Date(event.date) < new Date())
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    const latestB =
-      pastB.length > 0 ? new Date(pastB[pastB.length - 1].date) : new Date(0);
-    return latestB.getTime() - latestA.getTime();
-  });
+        const pastB = b.events
+          .filter((event) => new Date(event.date) < new Date())
+          .sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
+        const latestB =
+          pastB.length > 0
+            ? new Date(pastB[pastB.length - 1].date)
+            : new Date(0);
+        return latestB.getTime() - latestA.getTime();
+      }),
+    [modeToActions, filterMode]
+  );
 
   return (
     <CenterLayout className="gap-y-4" width="3xl">
