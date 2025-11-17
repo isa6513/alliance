@@ -51,7 +51,6 @@ const TaskTimeInfo = ({
               left
             </p>
           )}
-          <div className="group-hover:block"></div>
         </div>
       )}
     </div>

@@ -42,8 +42,8 @@ const ActionContents = () => {
           <ActionEventsPanel action={action} events={action.events} />
         </div>
         <div className="flex flex-col">
-          <div className="flex flex-col md:flex-row justify-between md:items-center mb-4">
-            <p className="font-semibold text-xl">Task</p>
+          <div className="flex flex-col lg:flex-row justify-between lg:items-center mb-4 gap-x-4">
+            <p className="font-semibold text-xl flex-1">Task</p>
 
             <TaskTimeInfo
               action={action}
