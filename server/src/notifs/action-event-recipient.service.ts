@@ -137,7 +137,7 @@ export class ActionEventRecipientService {
     }
 
     return filterToEligible(users).filter(
-      (user) => !(userToHasCompletedAllActions.get(user.id) ?? true),
+      (user) => !userToHasCompletedAllActions.get(user.id),
     );
   }
 
