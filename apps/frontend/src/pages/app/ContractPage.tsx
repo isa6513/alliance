@@ -58,13 +58,13 @@ const ContractPage: React.FC = () => {
         <p className="font-serif text-3xl md:text-4xl font-medium mb-1">
           Contract
         </p>
-        <p className="text-zinc-900 mb-4">
+        <div className="text-zinc-900 mb-4">
           Below is your membership contract.
           <ul className="list-disc list-inside mt-2">
             <li>We will post any updates to your contract here.</li>
             <li>You can terminate your membership at any time.</li>
           </ul>
-        </p>
+        </div>
         <MemberContract />
 
         {!contractDateSigned && (
