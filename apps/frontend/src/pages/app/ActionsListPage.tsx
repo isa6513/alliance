@@ -50,6 +50,27 @@ const ActionsListPage = () => {
   useGrayBackground();
 
   const filteredActions = [...modeToActions[filterMode]].sort((a, b) => {
+    const futureA = a.events
+      .filter((event) => new Date(event.date) > new Date())
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    const futureB = b.events
+      .filter((event) => new Date(event.date) > new Date())
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    if (futureA.length > 0 && futureB.length > 0) {
+      const latestFutureA = new Date(futureA[futureA.length - 1].date);
+      const latestFutureB = new Date(futureB[futureB.length - 1].date);
+      return latestFutureA.getTime() - latestFutureB.getTime();
+    }
+
+    if (futureA.length > 0) {
+      return -1;
+    }
+    if (futureB.length > 0) {
+      return 1;
+    }
+
     const pastA = a.events
       .filter((event) => new Date(event.date) < new Date())
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
