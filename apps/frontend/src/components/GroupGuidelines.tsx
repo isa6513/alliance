@@ -52,17 +52,21 @@ const GroupMemberGuidelines = () => {
     <div className="flex flex-col gap-y-2">
       <p className="font-semibold text-xl md:text-2xl mb-4 ">About</p>
       <p>
-        Alliance groups exist so that members can hold one another accountable
-        and engage with a smaller community. Your group lead will remind you of
-        deadlines and answer any questions you have about your tasks.
+        Your Alliance group consists of members who hold one another accountable
+        and can convene for smaller-scale activities, such as discussions.
       </p>
 
       <p>
-        By default, your group lead will only reach out to you if a deadline is
-        approaching. However, if you have particular preferences, you can let
-        your group lead know. For example, you can ask them to call in the
-        middle of the week, or to send you a text earlier than the deadline if
-        you’re going to go on vacation.
+        Your group lead will remind you of deadlines and answer any questions
+        you have about your tasks.
+      </p>
+
+      <p>
+        Your group lead will likely only reach out to you if a deadline is
+        approaching. However, if you have particular preferences or needs, you
+        can let your group lead know. For example, you can ask them to call in
+        the middle of the week, or to send you a text earlier than the deadline
+        if you’re going to go on vacation.
       </p>
     </div>
   );
