@@ -9,7 +9,7 @@ const PrioritiesPage: React.FC = () => {
   return (
     <CenterLayout>
       <div className="md:mt-8 gap-y-4 flex flex-col text-base md:text-lg">
-        <p className="font-serif text-3xl md:text-4xl font-medium">
+        <p className="font-serif text-3xl md:text-4xl font-semibold">
           Our priorities
         </p>
 

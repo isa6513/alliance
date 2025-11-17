@@ -8,7 +8,7 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
-const SearchBar = () => {
+const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
@@ -111,6 +111,10 @@ const SearchBar = () => {
   );
 
   useEffect(() => {
+    if (autofocus) {
+      inputRef.current?.focus();
+    }
+
     window.addEventListener("click", (event) => {
       if (divRef.current && !divRef.current.contains(event.target as Node)) {
         setOpen(false);
