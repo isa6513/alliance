@@ -34,7 +34,7 @@ const TaskTimeInfo = ({
       )}
       {!!nextEvent && (
         <div className="flex flex-row items-center gap-x-1.5 text-base group text-zinc-500">
-          <DeadlineIcon fill={"#71717b"} />
+          <DeadlineIcon fill={deadlineColor} />
           {absoluteDeadline ? (
             <p className="text-zinc-500">
               Due {format(new Date(nextEvent.date), "MMMM d h:mm a")} (
