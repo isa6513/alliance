@@ -110,20 +110,16 @@ const SettingsPage: React.FC = () => {
     }
   }, []);
 
-  const handleSave = useCallback(async () => {
-    if (!editableUser) {
-      return;
-    }
-
+  const handleSave = useCallback(async (userPayload: EditableUserFields) => {
     setSaving(true);
     try {
       await userUpdate({
         body: {
-          ...editableUser,
+          ...userPayload,
         },
       });
 
-      setInitialUser({ ...editableUser });
+      setInitialUser({ ...userPayload });
 
       const locationResponse = await userMyLocation();
       if (locationResponse.data) {
@@ -131,10 +127,10 @@ const SettingsPage: React.FC = () => {
         setLocation(city);
         const cityId = city.id;
         setEditableUser((prev) =>
-          prev ? { ...prev, cityId } : { ...editableUser, cityId }
+          prev ? { ...prev, cityId } : { ...userPayload, cityId }
         );
         setInitialUser((prev) =>
-          prev ? { ...prev, cityId } : { ...editableUser, cityId }
+          prev ? { ...prev, cityId } : { ...userPayload, cityId }
         );
       }
     } catch (error) {
@@ -142,7 +138,7 @@ const SettingsPage: React.FC = () => {
     } finally {
       setSaving(false);
     }
-  }, [editableUser]);
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -169,6 +165,18 @@ const SettingsPage: React.FC = () => {
       }
     });
   }, [user, loadPaymentMethod]);
+
+  useEffect(() => {
+    if (!editableUser || !initialUser || !hasChanges) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      handleSave(editableUser);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [editableUser, initialUser, hasChanges, handleSave]);
 
   if (loading) {
     return (
@@ -202,7 +210,14 @@ const SettingsPage: React.FC = () => {
                 <Badge className="!bg-yellow-600 text-white">Admin</Badge>
               </AdminOnly>
             </div>
-            <div className="flex flex-row gap-x-2">
+            <div className="flex flex-row gap-x-4 items-center">
+              <p className="text-sm text-zinc-500">
+                {saving
+                  ? "Saving..."
+                  : hasChanges
+                  ? "Unsaved changes"
+                  : "All changes saved"}
+              </p>
               <Button
                 onClick={handleLogout}
                 color={ButtonColor.Stone}
@@ -210,15 +225,6 @@ const SettingsPage: React.FC = () => {
               >
                 Log Out
               </Button>
-              {hasChanges && (
-                <Button
-                  color={ButtonColor.Green}
-                  onClick={handleSave}
-                  disabled={saving}
-                >
-                  {saving ? "Saving..." : "Save Changes"}
-                </Button>
-              )}
             </div>
           </div>
           <div className="flex flex-col md:flex-row w-full items-center gap-4 *:gap-x-1">
