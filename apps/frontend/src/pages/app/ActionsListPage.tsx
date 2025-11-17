@@ -78,7 +78,11 @@ const ActionsListPage = () => {
         }
 
         const pastA = a.events
-          .filter((event) => new Date(event.date) < new Date())
+          .filter(
+            (event) =>
+              new Date(event.date) < new Date() &&
+              event.newStatus === "member_action"
+          )
           .sort(
             (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
           );
@@ -88,7 +92,11 @@ const ActionsListPage = () => {
             : new Date(0);
 
         const pastB = b.events
-          .filter((event) => new Date(event.date) < new Date())
+          .filter(
+            (event) =>
+              new Date(event.date) < new Date() &&
+              event.newStatus === "member_action"
+          )
           .sort(
             (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
           );
