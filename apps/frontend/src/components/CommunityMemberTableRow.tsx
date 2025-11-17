@@ -58,7 +58,7 @@ const CommunityMemberTableRow = ({
             </Link>
             <Link
               to={`/user/${profile.id}`}
-              className="text-sm md:text-base md:whitespace-nowrap mr-2 md:mr-6"
+              className="text-sm md:text-base min-[400px]:whitespace-nowrap mr-2 md:mr-6"
             >
               <UserDisplayName staff={profile.staff} underline={false}>
                 {profile.displayName}

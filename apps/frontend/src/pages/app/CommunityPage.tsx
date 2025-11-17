@@ -30,7 +30,7 @@ import { useToast } from "@alliance/shared/ui/ToastProvider";
 type Tab = "members" | "invites" | "about" | "edit";
 
 export enum FilterMode {
-  All = "All",
+  All = "All members",
   NotYetCompleted = "Not yet completed",
 }
 
@@ -294,9 +294,12 @@ const CommunityPage = () => {
                     colSpan={3}
                     className="px-0 pt-10 pb-6 border-y border-zinc-200"
                   >
-                    <div className="flex flex-row items-center gap-x-4">
+                    <div className="flex flex-col gap-y-2">
                       <p className="text-xl md:text-2xl font-semibold">
                         Members
+                      </p>
+                      <p className="text-zinc-500 text-sm">
+                        Sort by completion of current actions
                       </p>
                       <DropdownSelect
                         options={Object.values(FilterMode)}
