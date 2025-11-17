@@ -198,11 +198,11 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
         ) : (
           <Card style={CardStyle.Grey}>
             <p className="font-semibold text-lg mb-2">
-              Invite an existing Alliance member to your community
+              Invite an existing Alliance member to your group
             </p>
             <p className="text-zinc-500">
               The member will recieve a notification inviting them to join the
-              community.
+              group.
             </p>
             <div className="flex flex-row gap-x-2 mt-2">
               <div className="flex-1 max-w-72">

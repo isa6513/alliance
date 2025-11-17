@@ -16,7 +16,7 @@ export enum NavbarPage {
   Contract = "Contract",
   Settings = "Settings",
   Search = "Search",
-  Community = "Community",
+  Groups = "Groups",
 }
 
 export const destinations: Record<NavbarPage, string> = {
@@ -30,7 +30,7 @@ export const destinations: Record<NavbarPage, string> = {
   [NavbarPage.Profile]: "/profile",
   [NavbarPage.Contract]: "/contract",
   [NavbarPage.Settings]: "/settings",
-  [NavbarPage.Community]: "/community",
+  [NavbarPage.Groups]: "/groups",
 };
 
 const NavbarVertical: React.FC<{ todoActions: number }> = ({
@@ -90,8 +90,8 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
           .length
           ? [
               {
-                page: NavbarPage.Community,
-                destination: destinations[NavbarPage.Community],
+                page: NavbarPage.Groups,
+                destination: destinations[NavbarPage.Groups],
               },
             ]
           : []),
@@ -165,7 +165,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     return {
       [NavbarPage.Notifications]: unreadCount,
       [NavbarPage.Tasks]: todoActions,
-      [NavbarPage.Community]: user?.communities.length
+      [NavbarPage.Groups]: user?.communities.length
         ? 0
         : user?.invitedCommunities.filter(
             (invite) => invite.status === "pending"
