@@ -259,7 +259,7 @@ const HomePage = () => {
                   (post) =>
                     !post.visibleAt || new Date(post.visibleAt) < new Date()
                 )
-                .slice(0, 2)
+                .slice(0, 1)
                 .map((post) => (
                   <ForumListPost
                     key={post.id}
