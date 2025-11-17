@@ -310,6 +310,8 @@ export class ActionEventReminderService {
         'memberActionEvent.action.participatingGroups',
         'users',
         'userGroup',
+        'actionSuite',
+        'actionSuite.actions',
       ],
     });
 
