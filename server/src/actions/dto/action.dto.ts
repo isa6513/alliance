@@ -29,6 +29,7 @@ import { ActionUpdate } from '../entities/action-update.entity';
 import { ReminderGroup } from '../entities/reminder-group.entity';
 import { ActionSuite } from '../entities/action-suite.entity';
 import { Form } from 'src/tasks/entities/form.entity';
+import { SubmitFormDto } from 'src/tasks/form.dto';
 
 export class CreateReminderGroupDto extends PickType(ReminderGroup, [
   'name',
@@ -197,6 +198,11 @@ export class DeclineActionDto {
 }
 
 export class OptOutActionDto {
+  @ApiProperty({ type: Number })
+  @IsDefined()
+  @IsNumber()
+  actionId: number;
+
   @ApiProperty()
   @IsString()
   reason: string;
@@ -204,6 +210,11 @@ export class OptOutActionDto {
   @ApiProperty()
   @IsBoolean()
   outOfTime: boolean;
+
+  @ApiPropertyOptional({ type: Object })
+  @Type(() => Object)
+  @IsOptional()
+  partialFormData?: SubmitFormDto;
 }
 
 export class ActionActivityDto extends PickType(ActionActivity, [

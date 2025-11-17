@@ -398,6 +398,7 @@ export class ForumService {
             : undefined,
         ),
         associatedUsers: [comment.author],
+        comment,
       });
       notifications.push(notif);
     }
@@ -589,6 +590,7 @@ export class ForumService {
   async deleteReply(id: number, userId: number): Promise<void> {
     const reply = await this.commentRepository.findOne({
       where: { id },
+      relations: ['notifications'],
     });
 
     if (!reply) {
@@ -599,17 +601,8 @@ export class ForumService {
       throw new NotFoundException('You can only delete your own replies');
     }
 
-    // Clear notifications that point to this deleted reply
-    // For forum comments, the parentObjectId is the post ID when parentObjectType is 'post'
-    if (reply.parentObjectType === CommentParentObject.Post) {
-      const replyNotificationUrl = commentUrl(reply);
-      await this.notifRepository.update(
-        {
-          webAppLocation: replyNotificationUrl,
-          category: NotificationCategory.ForumReply,
-        },
-        { cleared: true },
-      );
+    for (const notification of reply.notifications) {
+      await this.notifRepository.delete(notification.id);
     }
 
     await this.commentRepository.update(id, { deleted: true });

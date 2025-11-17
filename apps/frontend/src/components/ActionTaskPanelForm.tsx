@@ -18,7 +18,11 @@ interface ActionTaskPanelActivityProps {
   taskFormId: number;
   onCompleteAction: ((sendComplete: boolean) => void) | null;
   onFormStarted: () => void;
-  onAbandonAction: (outOfTime: boolean, reason: string) => void;
+  onAbandonAction: (
+    outOfTime: boolean,
+    reason: string,
+    partialFormData: SubmitFormDto
+  ) => void;
   card?: boolean;
   actionId: number;
   disabled?: boolean;

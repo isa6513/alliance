@@ -3,7 +3,8 @@ import {
   actionsComplete,
   actionsDecline,
   actionsJoin,
-  actionsOptout,
+  SubmitFormDto,
+  tasksOptout,
   UserActionRelation,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -109,10 +110,14 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   );
 
   const handleAbandonAction = useCallback(
-    async (outOfTime: boolean, reason: string) => {
-      const req = await actionsOptout({
-        path: { id: action.id },
-        body: { reason, outOfTime },
+    async (
+      outOfTime: boolean,
+      reason: string,
+      partialFormData: SubmitFormDto
+    ) => {
+      const req = await tasksOptout({
+        path: { id: action.taskFormId! },
+        body: { actionId: action.id, reason, outOfTime, partialFormData },
       });
       if (req.error) {
         setActionError("Something went wrong. Please try again.");

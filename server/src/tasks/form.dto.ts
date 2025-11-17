@@ -31,7 +31,7 @@ export class SubmitFormDto extends PickType(FormResponse, [
 }
 
 export class FormDto extends PickType(Form, ['id', 'title', 'schema']) {
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ type: () => ActionDto })
   usedInAction?: ActionDto;
 }
 

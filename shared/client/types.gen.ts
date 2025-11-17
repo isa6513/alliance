@@ -417,8 +417,12 @@ export type DeclineActionDto = {
 };
 
 export type OptOutActionDto = {
+    actionId: number;
     reason: string;
     outOfTime: boolean;
+    partialFormData?: {
+        [key: string]: unknown;
+    };
 };
 
 export type UserActionRelation = 'joined' | 'completed' | 'none' | 'declined';
@@ -447,6 +451,24 @@ export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 
 
 export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'community_invite_rejected' | 'community_invite_accepted';
 
+export type Comment = {
+    id: number;
+    editableContent: EditableContent;
+    author: User;
+    authorId: number;
+    parentObjectType: CommentParentObject;
+    parentObjectId: number;
+    deleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+    parent?: Comment;
+    parentId?: number;
+    children?: Array<Comment>;
+    pinned: boolean;
+    likes: Array<User>;
+    likesCount: number;
+};
+
 export type Notification = {
     id: number;
     category: NotificationCategory;
@@ -460,6 +482,7 @@ export type Notification = {
     groupingKey?: string;
     groupingCount?: number;
     actionUpdate?: ActionUpdate;
+    comment?: Comment;
 };
 
 export type ActionUpdate = {
@@ -4236,6 +4259,21 @@ export type TasksCreateCustomValidatorResponses = {
 };
 
 export type TasksCreateCustomValidatorResponse = TasksCreateCustomValidatorResponses[keyof TasksCreateCustomValidatorResponses];
+
+export type TasksOptoutData = {
+    body: OptOutActionDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/optout/{id}';
+};
+
+export type TasksOptoutResponses = {
+    200: ActionActivityDto;
+};
+
+export type TasksOptoutResponse = TasksOptoutResponses[keyof TasksOptoutResponses];
 
 export type AnalyticsGetTimeSpentPerUserData = {
     body?: never;

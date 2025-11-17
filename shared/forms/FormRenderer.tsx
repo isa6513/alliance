@@ -31,7 +31,11 @@ type FormRendererProps = {
   user?: Omit<UserDto, "email">;
   disableOptionRandomization?: boolean;
   onFormStarted?: () => void;
-  onAbandonAction?: (outOfTime: boolean, reason: string) => void;
+  onAbandonAction?: (
+    outOfTime: boolean,
+    reason: string,
+    partialFormData: SubmitFormDto
+  ) => void;
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
   onSubmit: ((data: SubmitFormDto) => void) | null; // null for admin preview
@@ -921,7 +925,15 @@ const FormRenderer = ({
   };
 
   const handleAbandon = () => {
-    onAbandonAction?.(outOfTimeSelected, customReason);
+    const submissionPayload = {
+      answers: formData,
+      schemaSnapshot: form as unknown as Record<string, unknown>,
+      actionId,
+      visibilityValidatorResults,
+      deviceType,
+    } satisfies SubmitFormDto;
+
+    onAbandonAction?.(outOfTimeSelected, customReason, submissionPayload);
     setDropdownOpen(false);
   };
 

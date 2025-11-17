@@ -13,6 +13,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { ActionUpdate } from 'src/actions/entities/action-update.entity';
+import { Comment } from 'src/forum/entities/comment.entity';
 
 export enum NotificationCategory {
   ActionEvent = 'action_event',
@@ -86,4 +87,11 @@ export class Notification {
     onDelete: 'CASCADE',
   })
   actionUpdate?: ActionUpdate;
+
+  @ApiPropertyOptional({ type: () => Comment })
+  @ManyToOne(() => Comment, (comment) => comment.notifications, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  comment?: Comment;
 }

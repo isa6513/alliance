@@ -36,6 +36,7 @@ import {
   typeUsableForVisibility,
   typeUsesIdArgument,
 } from './entities/customvalidator.entity';
+import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
 
 @Injectable()
 export class TasksService {
@@ -292,6 +293,39 @@ export class TasksService {
     );
 
     return savedForm;
+  }
+
+  async optoutForm(
+    formId: number,
+    actionId: number,
+    userId: number,
+    reason: string,
+    outOfTime: boolean,
+    partialFormData: SubmitFormDto,
+  ) {
+    const form = await this.getForm(formId);
+    const user = await this.userService.findOneOrFail(userId);
+
+    const formResponse = this.formResponseRepository.create({
+      ...partialFormData,
+      form,
+      formId,
+      schemaSnapshot: partialFormData.schemaSnapshot,
+      visibilityValidatorResults:
+        partialFormData?.visibilityValidatorResults ?? {},
+      deviceType: partialFormData.deviceType,
+      user,
+    });
+    const savedForm = await this.formResponseRepository.save(formResponse);
+
+    return this.actionsService.createActionActivity(
+      actionId,
+      userId,
+      ActionActivityType.USER_WONT_COMPLETE,
+      savedForm,
+      reason,
+      outOfTime,
+    );
   }
 
   private getFirstAutoExtractAnswer(

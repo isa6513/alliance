@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -27,6 +28,7 @@ import {
   CreateCustomValidatorResponseDto,
   CustomValidatorDto,
 } from './customvalidator.dto';
+import { ActionActivityDto, OptOutActionDto } from 'src/actions/dto/action.dto';
 
 @Controller('tasks')
 export class TasksController {
@@ -132,5 +134,26 @@ export class TasksController {
       body.idArgument,
     );
     return { id };
+  }
+
+  @Post('optout/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ActionActivityDto })
+  optout(
+    @Request() req: JwtRequest,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: OptOutActionDto,
+  ) {
+    if (!body.partialFormData) {
+      throw new BadRequestException('Partial form data is required');
+    }
+    return this.tasksService.optoutForm(
+      id,
+      body.actionId,
+      req.user.sub,
+      body.reason,
+      body.outOfTime,
+      body.partialFormData,
+    );
   }
 }

@@ -105,13 +105,10 @@ export class Comment {
   @Type(() => Comment)
   children: Comment[];
 
-  @OneToOne(() => Notification, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn()
+  @OneToMany(() => Notification, (notification) => notification.comment)
   @Allow()
   @Type(() => Notification)
-  notification: Notification;
+  notifications: Notification[];
 
   @Column({ default: false })
   @ApiProperty()
