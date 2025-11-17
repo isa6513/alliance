@@ -48,7 +48,7 @@ const defaultEventNames: Record<ActionStatus, string> = {
   office_action: "Pending office action",
   member_action: "Members taking action",
   resolution: "Pending office resolution",
-  completed: "Action successful",
+  completed: "Action completed",
   failed: "Action failed",
   abandoned: "Action dropped",
   upcoming: "Upcoming",
