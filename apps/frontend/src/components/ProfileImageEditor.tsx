@@ -692,6 +692,7 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
     }
     return previewSrc ?? imageSrc ?? undefined;
   }, [hasCustomImage, imageSrc, previewSrc]);
+  const showMobileOverlay = !hasCustomImage && Boolean(previewImage);
 
   const containerClassName = useMemo(() => {
     return ["relative w-fit", className].filter(Boolean).join(" ");
@@ -718,7 +719,11 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
             type="button"
             onClick={triggerFileSelect}
             disabled={isUploading}
-            className="absolute inset-0 flex items-center justify-center bg-white/80 text-xs text-zinc-600 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100 disabled:opacity-40"
+            className={`absolute inset-0 flex items-center justify-center bg-white/80 text-xs text-zinc-600 transition-opacity disabled:opacity-40 focus-visible:opacity-100 ${
+              showMobileOverlay
+                ? "opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                : "opacity-0 group-hover:opacity-100"
+            }`}
           >
             {previewImage ? "Change photo" : "Upload photo"}
           </button>
