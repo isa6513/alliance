@@ -34,7 +34,7 @@ const InvitePage: React.FC = () => {
       console.log(response);
       if (response.data) {
         setInviteeName(response.data.invitee);
-        setCommunityId(response.data.community.id);
+        setCommunityId(response.data.community?.id ?? null);
       }
     });
 
@@ -73,6 +73,8 @@ const InvitePage: React.FC = () => {
       "We've negotiated a discount with a compostable cup supplier for all cafes that members can convince to use their cups.",
     type: "Activity" as const,
     usersCompleted: 68,
+    priority: 0,
+    preventCompletion: false,
     everyoneShouldComplete: false,
     archived: false,
     participatingGroups: [],
@@ -157,9 +159,9 @@ const InvitePage: React.FC = () => {
             </h3>
             <p>
               We’re a global group of individuals coordinating to solve the
-              world's largest problems, including extreme poverty, environmental
-              destruction, the breakdown of democratic institutions, and
-              dangerous technological development.
+              world&apos;s largest problems, including extreme poverty,
+              environmental destruction, the breakdown of democratic
+              institutions, and dangerous technological development.
             </p>
             <p>
               Each week, every member of the Alliance spends a small amount of
@@ -219,8 +221,8 @@ const InvitePage: React.FC = () => {
               <span className="font-bold">
                 We have the potential to become a major global force.
               </span>{" "}
-              Right now, we're running small experiments to test our model and
-              strategies. One day, we could call on millions of members to
+              Right now, we&apos;re running small experiments to test our model
+              and strategies. One day, we could call on millions of members to
               boycott a corporation acting unethically, or simultaneously make
               lifestyle changes to curtail waste, or fund new scientific
               research neglected by governments and markets.
