@@ -1053,7 +1053,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
                     The number of days and hours until the action is due. In
                     most cases equivalent to {`#{days}, #{hours}`}, but will
                     trim &quot;0 days&quot; or &quot;0 hours&quot; from the
-                    message.
+                    message. (days is floored, hours is rounded)
                   </td>
                 </tr>
                 <tr>
