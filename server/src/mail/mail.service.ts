@@ -5,11 +5,7 @@ import { ActionEvent } from 'src/actions/entities/action-event.entity';
 import { tasksUrl, withCid } from 'src/search/approutes';
 import { Repository } from 'typeorm';
 import { EmailStatus, EmailType, Mail } from './mail.entity';
-import {
-  getDaysAndHoursFromDeadline,
-  getDaysFromDeadline,
-  getHoursFromDeadline,
-} from 'src/notifs/textnotifcontents';
+import { getTimeLeftString } from 'src/notifs/textnotifcontents';
 import { User } from 'src/user/entities/user.entity';
 import { Action } from 'src/actions/entities/action.entity';
 
@@ -47,19 +43,19 @@ export function processKeywordReplacements(
     .replaceAll(
       '#{days}',
       context.deadlineEvent
-        ? getDaysFromDeadline(context.deadlineEvent, dateNow)
+        ? getTimeLeftString(context.deadlineEvent, dateNow, 'days')
         : '[err]',
     )
     .replaceAll(
       '#{hours}',
       context.deadlineEvent
-        ? getHoursFromDeadline(context.deadlineEvent, dateNow)
+        ? getTimeLeftString(context.deadlineEvent, dateNow, 'hours')
         : '[err]',
     )
     .replaceAll(
       '#{timeremaining}',
       context.deadlineEvent
-        ? getDaysAndHoursFromDeadline(context.deadlineEvent, dateNow)
+        ? getTimeLeftString(context.deadlineEvent, dateNow)
         : '[err]',
     )
     .replaceAll('#{link}', withCid(tasksUrl(true), context.cid));
