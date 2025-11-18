@@ -218,11 +218,7 @@ export class UserService {
       await this.actionRepository.find({
         relations: ['events'],
       })
-    ).filter(
-      (action) =>
-        action.status !== ActionStatus.Draft &&
-        action.status !== ActionStatus.Completed,
-    );
+    ).filter((action) => action.status !== ActionStatus.Draft);
 
     const actionsSorted = actions.sort((a, b) => {
       const aFirstEvent = (a.events ?? []).reduce(
@@ -373,6 +369,8 @@ export class UserService {
         relations,
       } satisfies UserActionRelationsForUserDto;
     });
+
+    console.log(actionSummaries);
 
     return {
       actions: actionSummaries,
