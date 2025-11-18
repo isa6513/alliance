@@ -291,6 +291,8 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
   const lastGeneratedRef = useRef<string | null>(initialImageUrl);
   const lastSelectionRef = useRef<PixelCrop | null>(null);
   const isDraggingRef = useRef(false);
+  const activePointerIdRef = useRef<number | null>(null);
+  const activePointerElementRef = useRef<HTMLElement | null>(null);
 
   const rotatedDimensions = useMemo(() => {
     if (!sourceDimensions) return null;
@@ -503,6 +505,12 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
 
     const handleMove = (event: PointerEvent) => {
       const state = dragStateRef.current;
+      if (
+        activePointerIdRef.current !== null &&
+        event.pointerId !== activePointerIdRef.current
+      ) {
+        return;
+      }
       if (!state || !imageLayout) return;
 
       event.preventDefault();
@@ -532,6 +540,20 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
     };
 
     const stopDragging = () => {
+      if (
+        activePointerElementRef.current &&
+        activePointerIdRef.current !== null
+      ) {
+        try {
+          activePointerElementRef.current.releasePointerCapture(
+            activePointerIdRef.current
+          );
+        } catch {
+          // ignore release errors
+        }
+      }
+      activePointerElementRef.current = null;
+      activePointerIdRef.current = null;
       if (isDraggingRef.current) {
         isDraggingRef.current = false;
         setCropCommitVersion((value) => value + 1);
@@ -614,6 +636,15 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
       if (!cropRect || isUploading) return;
       event.preventDefault();
       isDraggingRef.current = true;
+      activePointerIdRef.current = event.pointerId;
+      activePointerElementRef.current = event.currentTarget;
+      if (event.currentTarget.setPointerCapture) {
+        try {
+          event.currentTarget.setPointerCapture(event.pointerId);
+        } catch {
+          // ignore capture errors
+        }
+      }
       dragStateRef.current = {
         type: "move",
         startPointer: { x: event.clientX, y: event.clientY },
@@ -629,6 +660,15 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
       event.preventDefault();
       event.stopPropagation();
       isDraggingRef.current = true;
+      activePointerIdRef.current = event.pointerId;
+      activePointerElementRef.current = event.currentTarget;
+      if (event.currentTarget.setPointerCapture) {
+        try {
+          event.currentTarget.setPointerCapture(event.pointerId);
+        } catch {
+          // ignore capture errors
+        }
+      }
       dragStateRef.current = {
         type: "resize",
         handle,
@@ -779,7 +819,7 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
 
               {cropRect && (
                 <div
-                  className="absolute border-2 border-white"
+                  className="absolute border-2 border-white touch-none"
                   style={{
                     left: `${cropRect.x}px`,
                     top: `${cropRect.y}px`,
@@ -802,7 +842,7 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
                       key={handle}
                       type="button"
                       aria-label={`Resize ${handle}`}
-                      className="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/80 bg-white shadow-[0_0_6px_rgba(0,0,0,0.45)] focus-visible:outline-2 focus-visible:outline-white"
+                      className="absolute h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/90 bg-white shadow-[0_0_8px_rgba(0,0,0,0.55)] focus-visible:outline-2 focus-visible:outline-white touch-none"
                       style={{
                         left: handle.includes("Right") ? "100%" : "0%",
                         top: handle.startsWith("top") ? "0%" : "100%",
