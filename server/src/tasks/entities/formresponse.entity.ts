@@ -9,11 +9,13 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { Form } from './form.entity';
 import type { DeviceVisibilityTarget } from '../schema';
 
 @Entity()
+@Unique(['user', 'formId'])
 export class FormResponse {
   @PrimaryGeneratedColumn()
   @ApiProperty()
