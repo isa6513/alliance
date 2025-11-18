@@ -81,6 +81,7 @@ export default function ActionPage() {
                 setAction((action) => ({
                   ...action!,
                   userRelation: "completed",
+                  usersCompleted: action!.usersCompleted + 1,
                 }));
 
                 // TODO need better way to update number of remaining tasks
