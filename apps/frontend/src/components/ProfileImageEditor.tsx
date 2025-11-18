@@ -10,6 +10,7 @@ import {
 } from "react";
 import Cropper, { Area } from "react-easy-crop";
 import "react-easy-crop/react-easy-crop.css";
+import Spinner from "./Spinner";
 
 type ProfileImageEditorProps = {
   initialImageUrl: string | null;
@@ -17,9 +18,10 @@ type ProfileImageEditorProps = {
   allowedMimeTypes: string[];
   maxFileSizeMb?: number;
   className?: string;
+  isUploading?: boolean;
 };
 
-const DEFAULT_MAX_FILE_SIZE_MB = 20;
+const DEFAULT_MAX_FILE_SIZE_MB = 10;
 
 const getRadianAngle = (degreeValue: number) => (degreeValue * Math.PI) / 180;
 
@@ -95,6 +97,7 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
   allowedMimeTypes,
   maxFileSizeMb = DEFAULT_MAX_FILE_SIZE_MB,
   className,
+  isUploading = false,
 }) => {
   const [imageSrc, setImageSrc] = useState<string | null>(initialImageUrl);
   const [error, setError] = useState<string | null>(null);
@@ -309,10 +312,17 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
                 accept={allowedMimeTypes.join(",")}
                 className="hidden"
                 onChange={handleFileChange}
+                disabled={isUploading}
               />
               Change photo
             </label>
           </>
+        )}
+
+        {isUploading && (
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center">
+            <Spinner size="large" />
+          </div>
         )}
       </div>
 
@@ -327,6 +337,7 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
               step={0.1}
               value={zoom}
               onChange={handleZoomSliderChange}
+              disabled={isUploading}
             />
             <span>{zoomLabel}x</span>
           </label>
@@ -334,7 +345,7 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
             type="button"
             className="px-2 py-1 border border-zinc-300 rounded hover:bg-zinc-100"
             onClick={() => handleRotate("left")}
-            disabled={isGenerating}
+            disabled={isGenerating || isUploading}
           >
             Rotate left
           </button>
@@ -342,7 +353,7 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
             type="button"
             className="px-2 py-1 border border-zinc-300 rounded hover:bg-zinc-100"
             onClick={() => handleRotate("right")}
-            disabled={isGenerating}
+            disabled={isGenerating || isUploading}
           >
             Rotate right
           </button>

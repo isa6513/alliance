@@ -92,6 +92,9 @@ const UserProfilePage: React.FC = () => {
   const [avatarEditorKey, setAvatarEditorKey] = useState(0);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [loading, setLoading] = useState(true);
+  const currentProfilePicture = profile?.profilePicture ?? null;
+  const isProfileImageUploadPending =
+    isSavingProfile && editAvatarUrl !== currentProfilePicture;
 
   const forumActivityItems = useMemo(() => {
     const postItems = forumPosts.map((post) => ({
@@ -298,6 +301,11 @@ const UserProfilePage: React.FC = () => {
       <div className="mx-2 space-y-2">
         <div className="w-full h-[50px] md:h-[100px]"></div>
         <Card className="px-8 pb-6 relative gap-y-2">
+          {/* {isProfileImageUploadPending && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 backdrop-blur-[1px] rounded-[inherit]">
+              <Spinner />
+            </div>
+          )} */}
           {isEditing ? (
             <ProfileImageEditor
               key={avatarEditorKey}
@@ -305,6 +313,7 @@ const UserProfilePage: React.FC = () => {
               initialImageUrl={editAvatarUrl}
               onChange={setEditAvatarUrl}
               allowedMimeTypes={sharp_allowed_mime_types}
+              isUploading={isProfileImageUploadPending}
             />
           ) : (
             <ProfileImage
