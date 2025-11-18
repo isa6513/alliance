@@ -1,15 +1,17 @@
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams, useNavigate } from "react-router";
 import LargeActionCard from "../app/LargeActionCard";
 import { ActionWithRelation } from "../../applayout";
 import {
   ProfileDto,
   userReferrerProfile,
-  userInviteeName,
+  userOnetimeInvite,
 } from "@alliance/shared/client";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import posthog from "posthog-js";
+import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 
 const InvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -18,6 +20,9 @@ const InvitePage: React.FC = () => {
 
   const [inviterProfile, setInviterProfile] = useState<ProfileDto | null>(null);
   const [inviteeName, setInviteeName] = useState<string | null>(null);
+  const [communityId, setCommunityId] = useState<number | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!referralCode) return;
@@ -25,11 +30,11 @@ const InvitePage: React.FC = () => {
       setInviterProfile(response.data ?? null);
     });
 
-    userInviteeName({ path: { code: referralCode } }).then((response) => {
-      if (response.data && typeof response.data === "string") {
-        setInviteeName(response.data);
-      } else {
-        setInviteeName(null);
+    userOnetimeInvite({ path: { code: referralCode } }).then((response) => {
+      console.log(response);
+      if (response.data) {
+        setInviteeName(response.data.invitee);
+        setCommunityId(response.data.community.id);
       }
     });
 
@@ -97,126 +102,84 @@ const InvitePage: React.FC = () => {
     commitmentless: false,
   };
 
+  const memberQuotes = [
+    {
+      quote:
+        "On the whole, the world is not going in the right direction. We need new ideas to change that, and the Alliance is just that. But it will work only if we all participate.",
+      author: "Anonymous",
+    },
+
+    {
+      quote:
+        "I often worry about the future, and the Alliance provides a platform where I can address these fears by taking direct actions for meaningful change.",
+      author: "Anonymous",
+    },
+    {
+      quote:
+        "There are countless reasons to doubt its potential for success, but unlikelier movements and worse circumstances have reliably bore fruit. We have to try, to become vessels for our nobler ideals and hopes for the world.",
+      author: "Anonymous",
+    },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-page">
+      <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex flex-col flex-grow items-center justify-center ">
-        <div className="w-full max-w-4xl px-4 md:px-8 py-12 md:py-24">
-          <h2 className="font-serif !text-4xl text-center mb-4 mx-4">
-            Invitation to the Alliance
-          </h2>
-          {inviterProfile !== null && (
-            <p className="text-center">
-              From your friend{" "}
-              <ProfileImage
-                pfp={inviterProfile?.profilePicture ?? null}
-                size="small"
-              />
-              {" " + inviterProfile?.displayName}
-            </p>
-          )}
-
+        <div className="w-full max-w-4xl px-4 md:px-8 py-12 md:py-12">
           <Card
-            className="p-4 md:p-12 flex flex-col gap-y-6 mt-8"
+            className="p-4 md:p-18 flex flex-col gap-y-6"
             style={CardStyle.White}
           >
+            <div className="mb-4">
+              <h2 className="font-serif !text-4xl md:!text-5xl text-center mb-4">
+                Invitation to the Alliance
+              </h2>
+              {inviterProfile !== null && (
+                <p className="text-center">
+                  From {" "}
+                  <ProfileImage
+                    pfp={inviterProfile?.profilePicture ?? null}
+                    size="small"
+                  />
+                  {" " + inviterProfile?.displayName}
+                </p>
+              )}
+            </div>
             <p>
-              {inviteeName ? `Hi ${inviteeName}, ` : ""}I hope you will join me
+              {inviteeName ? `Hi ${inviteeName}, ` : ""}I invite you to join me
               as a member of the Alliance. I believe you share my concerns about
-              the direction that the world is headed, and I think this is an
-              opportunity to make a significant difference.
-            </p>
-
-            <h3 className="font-serif !text-3xl font-bold mt-2">Why join?</h3>
-
-            <p>
-              <span className="font-bold">
-                We’re a global group of individuals
-              </span>{" "}
-              learning to coordinate to advance humanity’s interests. We plan to
-              fight extreme poverty, environmental destruction, the breakdown of
-              democratic institutions, and dangerous technological development.
-              Today, we are in an experimental phase focused on learning rather
-              than growth.
-            </p>
-            <p>
-              <span className="font-bold">Our unique model</span> is designed to
-              enable durable, strategic cooperation that can start small,
-              iterate quickly, and grow over time.
-            </p>
-            <ol className="list-decimal list-inside space-y-3 ">
-              <li>
-                Members commit to give a reliable fraction of their time. Right
-                now, this is 15 minutes per week.
-              </li>
-              <li>
-                A strategic office prepares high-impact collective actions
-                following a democratic assessment of priorities.
-              </li>
-            </ol>
-            <p>
-              <span className="font-bold">Imagine if millions of people</span>{" "}
-              could instantly boycott a corporation acting unethically, or
-              collectively make lifestyle changes to curtail waste, or fund new
-              scientific research neglected by governments and markets. This is
-              the kind of flexible power we hope to build together.
-            </p>
-            <p>
-              <span className="font-bold">
-                This is an important time to join.
-              </span>{" "}
-              If we eventually succeed, it will be because friends and family
-              were willing to step up before success was guaranteed. In
-              addition, early members will have an outsized influence on our
-              approach and culture.
+              the direction the world is headed, and membership in the Alliance
+              is a straightforward, effective way to take action.
             </p>
 
             <h3 className="font-serif !text-3xl font-bold mt-2">
-              What do you need?
-            </h3>
-            <ol className="list-decimal list-inside space-y-3">
-              <li>
-                <span className="font-bold">
-                  A willingness to take our world&apos;s problems seriously.
-                </span>{" "}
-                We need a shared belief that these problems are not right, and
-                therefore a readiness to take actions that require meaningful
-                effort. This shared belief will allow us to address
-                disagreements with respect and reasoned deliberation.
-              </li>
-              <li>
-                <span className="font-bold">
-                  A willingness to make and keep a promise.
-                </span>{" "}
-                If we can trust every member to follow through on their
-                commitments, we can make ambitious and complex plans that rely
-                on one another.
-              </li>
-            </ol>
-            <h3 className="font-serif !text-3xl font-bold mt-2">
-              What would you do?
+              What is the Alliance?
             </h3>
             <p>
-              <span className="font-bold">
-                Every week, you would log into our online platform to complete
-                collective actions
-              </span>
-              .
+              We’re a global group of individuals coordinating to solve the
+              world's largest problems, including extreme poverty, environmental
+              destruction, the breakdown of democratic institutions, and
+              dangerous technological development.
+            </p>
+            <p>
+              Each week, every member of the Alliance spends a small amount of
+              time completing tasks on our online platform. These tasks are
+              planned by a full-time office that ensures our work results in
+              high collective impact.
             </p>
 
-            <p>
-              For instance, we recently signed a letter requesting news coverage
-              of a coalition of businesses that took environmental action at the
-              request of our strategic office. Other example actions include:
-            </p>
+            <p>Here are some examples of actions we have taken recently:</p>
             <ol className="list-decimal list-inside space-y-1">
               <li>
-                Providing actionable feedback on the website of a partner
-                non-profit.
+                We signed a letter requesting news coverage of a coalition of
+                businesses that took environmental action at the request of our
+                office.
               </li>
               <li>
-                Reading about global problems and discussing with each other.
+                We provided actionable feedback on the websites of three
+                potential partner non-profits.
               </li>
-              <li>Editing Alliance communications materials.</li>
+              <li>We voted on proposals for a small grant.</li>
             </ol>
 
             <div className="my-4">
@@ -227,7 +190,7 @@ const InvitePage: React.FC = () => {
                   friendActivities={[]}
                   onUpdateActionState={() => {}}
                   showDetails={false}
-                  className="pointer-events-none transform-[scale(0.9)]"
+                  className="pointer-events-none transform-[scale(0.9)] bg-white"
                 />
               </div>
               <p className="text-center text-sm">
@@ -236,39 +199,82 @@ const InvitePage: React.FC = () => {
             </div>
 
             <h3 className="font-serif !text-3xl font-bold mt-2">
+              Why should you join?
+            </h3>
+            <p>
+              <span className="font-bold">Our model is effective.</span> Members
+              make a commitment to complete tasks on time. Since we can trust
+              one another to show up, we can make optimized, complex action
+              plans.
+            </p>
+            <p>
+              <span className="font-bold">
+                Participation is straightforward.
+              </span>{" "}
+              Tasks only require 15 minutes per week. The platform breaks down
+              each task into simple steps, and you can complete them at your own
+              pace.
+            </p>
+            <p>
+              <span className="font-bold">
+                We have the potential to become a major global force.
+              </span>{" "}
+              Right now, we're running small experiments to test our model and
+              strategies. One day, we could call on millions of members to
+              boycott a corporation acting unethically, or simultaneously make
+              lifestyle changes to curtail waste, or fund new scientific
+              research neglected by governments and markets.
+            </p>
+
+            <h3 className="font-serif !text-3xl font-bold mt-2">
+              What do members say?
+            </h3>
+            <div className="flex flex-col gap-y-2">
+              {memberQuotes.map((memberQuote, index) => (
+                <div className="border border-zinc-200 p-4 md:p-6" key={index}>
+                  <p>{memberQuote.quote}</p>
+                </div>
+              ))}
+            </div>
+            <h3 className="font-serif !text-3xl font-bold mt-2">
               How do you join?
             </h3>
             <ol className="list-decimal list-inside space-y-3">
               <li>
-                Skim our
-                <Link to="/guide" target="_blank">
-                  <div className="inline-block py-0.5 px-2 mx-2 border border-green hover:bg-zinc-50 rounded-md font-medium shadow mx-1 text-green">
-                    guide
-                  </div>
-                </Link>
+                Skim our{" "}
+                <Link to="/guide" target="_blank" className="text-link">
+                  guide
+                </Link>{" "}
                 to understand our structure, process, and governance.
               </li>
               <li>
-                Create an account with my
-                <Link to={`/signup?ref=${referralCode}`} target="_blank">
-                  <div className="inline-block py-0.5 px-2 mx-2 border border-green hover:bg-zinc-50 rounded-md font-medium shadow mx-1 text-green">
-                    personal sign-up link
-                  </div>
+                Create an account with my{" "}
+                <Link
+                  to={`/signup?ref=${referralCode}`}
+                  target="_blank"
+                  className="text-link"
+                >
+                  personal sign-up link
                 </Link>
                 . We will be automatically added as friends.
               </li>
               <li>
                 Go through the onboarding tasks on your{" "}
-                <Link to="/tasks" target="_blank">
-                  <div className="inline-block py-0.5 px-2 mx-2 border border-green hover:bg-zinc-50 rounded-md font-medium shadow mx-1 text-green">
-                    tasks page
-                  </div>
+                <Link to="/tasks" target="_blank" className="text-link">
+                  tasks page
                 </Link>
                 , which explain how our online process works and what is
                 expected of members. Please let me know if you have any
-                questions!
+                questions.
               </li>
             </ol>
+            <Button
+              color={ButtonColor.Black}
+              onClick={() => navigate(`/signup?ref=${referralCode}`)}
+              className="w-full !h-16 !text-lg"
+            >
+              Sign up
+            </Button>
           </Card>
         </div>
       </div>

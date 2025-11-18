@@ -313,12 +313,6 @@ export type AddUserToGroupDto = {
     userId: number;
 };
 
-export type CreateOnetimeInviteDto = {
-    invitee: string;
-    invitingUserId: number;
-    communityId?: number;
-};
-
 export type OnetimeInviteDto = {
     id: number;
     invitee: string;
@@ -327,6 +321,12 @@ export type OnetimeInviteDto = {
     createdAt: string;
     isValid: boolean;
     community?: Community;
+};
+
+export type CreateOnetimeInviteDto = {
+    invitee: string;
+    invitingUserId: number;
+    communityId?: number;
 };
 
 export type CreateCommunityInviteDto = {
@@ -2447,6 +2447,21 @@ export type UserInviteeNameResponses = {
 };
 
 export type UserInviteeNameResponse = UserInviteeNameResponses[keyof UserInviteeNameResponses];
+
+export type UserOnetimeInviteData = {
+    body?: never;
+    path: {
+        code: string;
+    };
+    query?: never;
+    url: '/user/onetimeInvite/{code}';
+};
+
+export type UserOnetimeInviteResponses = {
+    200: OnetimeInviteDto;
+};
+
+export type UserOnetimeInviteResponse = UserOnetimeInviteResponses[keyof UserOnetimeInviteResponses];
 
 export type UserCreateOnetimeInviteData = {
     body: CreateOnetimeInviteDto;

@@ -95,9 +95,9 @@ We aim to end global crises that harm or will harm billions of current and futur
 
 # How we cooperate
 
-Members spend a small amount of time (currently 15 minutes per week) completing tasks on our online platform. Every task advances a specific plan designed by a full-time office.
+Members spend a small amount of time (currently 15 minutes per week) completing tasks on our online platform. These tasks are designed by a full-time office to have high collective impact.
 
-**The foundation of the Alliance is member reliability.** Each member commits a small, consistent fraction of their time and resources. This commitment enables the office to plan effectively and helps members build trust in one another.
+**The foundation of the Alliance is member reliability.** Each member commits a small, consistent fraction of their time and resources. This commitment enables the office to plan in advance and helps members build trust in one another.
 
 **The office unlocks collective potential by developing high-leverage actions.** As the Alliance grows, we plan to bring together experts from diverse fields to make increasingly impactful, complex plans.
 
@@ -144,7 +144,7 @@ Our flexible structure means we are capable of working together in many possible
 
 # How we make decisions
 
-The office has the freedom to make any plans that advance our high-level priorities. Meanwhile, members provide input that ensures approval of the overall direction of the Alliance.
+The office has the freedom to make any plans that advance Alliance priorities. Meanwhile, members provide input that ensures approval of the overall direction of the Alliance.
 
 ## Action planning
 Planning actions is a creative, open-ended process that searches for levers of change which members can pull.

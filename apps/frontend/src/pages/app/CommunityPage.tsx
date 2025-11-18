@@ -152,9 +152,9 @@ const CommunityPage = () => {
       return;
     }
     const ok = await confirm({
-      title: "Leave community",
+      title: "Leave group",
       message:
-        "Are you sure you want to leave this community? You will not be able to rejoin unless you are invited again.",
+        "Are you sure you want to leave this group? You will not be able to rejoin unless you are invited again.",
       confirmLabel: "Leave",
       cancelLabel: "Cancel",
     });
@@ -182,7 +182,7 @@ const CommunityPage = () => {
     return (
       <div className="flex justify-center items-center h-[calc(100vh-var(--nav-height))]">
         <p className="text-zinc-500 pb-20">
-          You are not a member of a community yet.
+          You are not a member of a group yet.
         </p>
       </div>
     );
