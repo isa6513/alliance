@@ -879,6 +879,7 @@ const FormRenderer = ({
     setSubmitting(true);
 
     if (readOnly || !onSubmit) {
+      setSubmitting(false);
       return;
     }
 
@@ -887,6 +888,7 @@ const FormRenderer = ({
       if (result.isValid) {
         setCurrentPageIndex((prev) => prev + 1);
       }
+      setSubmitting(false);
       return;
     }
 
@@ -898,6 +900,7 @@ const FormRenderer = ({
       ) {
         setCurrentPageIndex(firstInvalidPageIndex);
       }
+      setSubmitting(false);
       return;
     }
 
