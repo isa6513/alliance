@@ -4,6 +4,7 @@ import {
   actionsFriendActivity,
   actionsGetActionActivities,
   actionsGetActivityFeed,
+  actionsCommunityActivity,
   actionsLikeActivity,
   actionsUnlikeActivity,
 } from "@alliance/shared/client";
@@ -16,11 +17,12 @@ export enum ActivityList {
   User = "user",
   Action = "action",
   Global = "global",
+  Community = "community",
 }
 
 export type UseActivitiesProps = { comments?: boolean } & (
   | {
-      list: ActivityList.User | ActivityList.Action;
+      list: ActivityList.User | ActivityList.Action | ActivityList.Community;
       objectId: number;
     }
   | {
@@ -52,6 +54,16 @@ const useActivities = ({
         break;
       case ActivityList.Action:
         apiCall = actionsGetActionActivities({ path: { id: objectId } });
+        break;
+      case ActivityList.Community:
+        apiCall = actionsCommunityActivity({
+          query: {
+            limit: "50",
+            before: new Date().toISOString(),
+            comments,
+            communityId: objectId,
+          },
+        });
         break;
       case ActivityList.Global:
         apiCall = actionsGetActivityFeed({

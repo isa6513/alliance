@@ -882,6 +882,37 @@ export class ActionsService {
     return friendActivities.map((activity) => new ActionActivityDto(activity));
   }
 
+  async communityActivity(
+    limitNum: number = 20,
+    beforeDate: Date | undefined,
+    communityId: number,
+    comments?: boolean,
+  ) {
+    const community = await this.userService.findCommunityOrFail(communityId);
+
+    const members = community.users ?? [];
+
+    const memberActivities = await this.actionActivityRepository.find({
+      where: {
+        ...(beforeDate ? { createdAt: LessThan(beforeDate) } : {}),
+        user: { id: In(members.map((m) => m.id)) },
+        type: In([
+          ActionActivityType.USER_JOINED,
+          ActionActivityType.USER_COMPLETED,
+        ]),
+      },
+      relations: ['user', 'action', 'likes'],
+      order: { createdAt: 'DESC' },
+      take: limitNum,
+    });
+
+    if (comments) {
+      return this.attachComments(memberActivities);
+    }
+
+    return memberActivities.map((activity) => new ActionActivityDto(activity));
+  }
+
   async findByName(name: string): Promise<Action[]> {
     const actions = await this.actionRepository.find({
       where: { name: ILike(`%${name}%`) },

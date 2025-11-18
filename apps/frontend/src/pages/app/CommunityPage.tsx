@@ -26,8 +26,9 @@ import CommunityEditForm from "../../components/CommunityEditForm";
 import CommunityInvitesTab from "../../components/CommunityInvitesTab";
 import { useNavigate, useSearchParams } from "react-router";
 import { useToast } from "@alliance/shared/ui/ToastProvider";
+import CommunityActivityTab from "../../components/CommunityActivityTab";
 
-type Tab = "members" | "invites" | "about" | "edit";
+type Tab = "activity" | "members" | "invites" | "about" | "edit";
 
 export enum FilterMode {
   All = "All members",
@@ -51,7 +52,7 @@ const CommunityPage = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const tab = searchParams.get("tab") ?? "members";
+  const tab = searchParams.get("tab") ?? "activity";
 
   const [activeActions, setActiveActions] = useState<UserActionSummaryDto[]>(
     []
@@ -170,8 +171,8 @@ const CommunityPage = () => {
   }, [community, navigate, confirm]);
 
   const tabs: Tab[] = amLeader
-    ? ["members", "invites", "about"]
-    : ["members", "about"];
+    ? ["activity", "members", "invites", "about"]
+    : ["activity", "members", "about"];
 
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
@@ -215,7 +216,7 @@ const CommunityPage = () => {
             </Button>
           ) : (
             <Button color={ButtonColor.Light} onClick={handleLeave}>
-              Leave community
+              Leave group
             </Button>
           )}
         </div>
@@ -232,7 +233,7 @@ const CommunityPage = () => {
           />
         </div>
       </div>
-      <div className="flex flex-row gap-x-2 justify-start mb-8 border-b border-zinc-200">
+      <div className="flex flex-row gap-x-2 justify-start mb-4 border-b border-zinc-200">
         {tabs.map((m) => (
           <Button
             color={ButtonColor.Transparent}
@@ -247,8 +248,11 @@ const CommunityPage = () => {
           </Button>
         ))}
       </div>
+      {tab === "activity" && (
+        <CommunityActivityTab communityId={community.id} userId={user?.id} />
+      )}
       {tab === "members" && (
-        <div className="flex flex-col">
+        <div className="flex flex-col py-4">
           <div className="">
             <table className="w-full border-collapse">
               <thead className="text-left bg-white">
@@ -358,7 +362,7 @@ const CommunityPage = () => {
         </div>
       )}
       {tab === "about" && (
-        <div className="flex flex-col gap-y-4">
+        <div className="flex flex-col gap-y-4 py-4">
           {amLeader ? <GroupOrganizerGuidelines /> : <GroupMemberGuidelines />}
         </div>
       )}

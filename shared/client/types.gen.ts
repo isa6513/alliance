@@ -2959,6 +2959,24 @@ export type ActionsFriendActivityResponses = {
 
 export type ActionsFriendActivityResponse = ActionsFriendActivityResponses[keyof ActionsFriendActivityResponses];
 
+export type ActionsCommunityActivityData = {
+    body?: never;
+    path?: never;
+    query: {
+        communityId: number;
+        limit: string;
+        before: string;
+        comments: boolean;
+    };
+    url: '/actions/communityActivity';
+};
+
+export type ActionsCommunityActivityResponses = {
+    200: Array<ActionActivityDto>;
+};
+
+export type ActionsCommunityActivityResponse = ActionsCommunityActivityResponses[keyof ActionsCommunityActivityResponses];
+
 export type ActionsFindOneData = {
     body?: never;
     path: {

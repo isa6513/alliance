@@ -153,7 +153,7 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
   }, [newUserInvites, existingMemberInvites]);
 
   return (
-    <div className="flex flex-col gap-y-8">
+    <div className="flex flex-col gap-y-8 py-4">
       <div className="flex flex-col gap-y-3">
         <p className="font-semibold text-xl md:text-2xl">
           Invite someone to your group

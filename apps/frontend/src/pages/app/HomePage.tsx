@@ -245,32 +245,7 @@ const HomePage = () => {
         )}
 
         <div className="flex">{bulletinCard}</div>
-        <div>
-          <p className="font-semibold text-xl font-serif text-black">
-            Forum activity
-          </p>
-          {posts && posts.length === 0 && (
-            <p className="text-zinc-400 mt-3">No activity yet.</p>
-          )}
-          {posts && posts.length > 0 && (
-            <div className="flex flex-col *:py-3 -mb-3">
-              {posts
-                .filter(
-                  (post) =>
-                    !post.visibleAt || new Date(post.visibleAt) < new Date()
-                )
-                .slice(0, 1)
-                .map((post) => (
-                  <ForumListPost
-                    key={post.id}
-                    post={post}
-                    card={false}
-                    showAction={false}
-                  />
-                ))}
-            </div>
-          )}
-        </div>
+
         <div className="">
           <div className="flex flex-row justify-between items-center mb-3">
             <p className="font-semibold text-xl font-serif text-black">
@@ -305,6 +280,32 @@ const HomePage = () => {
               />
             ))}
           </div>
+        </div>
+        <div>
+          <p className="font-semibold text-xl font-serif text-black">
+            Forum activity
+          </p>
+          {posts && posts.length === 0 && (
+            <p className="text-zinc-400 mt-3">No activity yet.</p>
+          )}
+          {posts && posts.length > 0 && (
+            <div className="flex flex-col *:py-3 -mb-3">
+              {posts
+                .filter(
+                  (post) =>
+                    !post.visibleAt || new Date(post.visibleAt) < new Date()
+                )
+                .slice(0, 1)
+                .map((post) => (
+                  <ForumListPost
+                    key={post.id}
+                    post={post}
+                    card={false}
+                    showAction={false}
+                  />
+                ))}
+            </div>
+          )}
         </div>
       </div>
     );

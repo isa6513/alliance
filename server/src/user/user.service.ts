@@ -370,8 +370,6 @@ export class UserService {
       } satisfies UserActionRelationsForUserDto;
     });
 
-    console.log(actionSummaries);
-
     return {
       actions: actionSummaries,
       users,

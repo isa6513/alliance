@@ -329,6 +329,30 @@ export class ActionsController {
     return this.actionsService.friendActivity(req.user.sub, comments);
   }
 
+  @Get('communityActivity')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [ActionActivityDto] })
+  async communityActivity(
+    @Query('communityId', ParseIntPipe) communityId: number,
+    @Query('limit') limit?: string,
+    @Query('before') before?: string,
+    @Query('comments', new ParseBoolPipe({ optional: true }))
+    comments?: boolean,
+  ) {
+    const limitNum = limit ? parseInt(limit) : 20;
+    const beforeDate = before ? new Date(before) : undefined;
+    if (before && isNaN(beforeDate!.getTime())) {
+      throw new BadRequestException('Invalid "before" cursor');
+    }
+
+    return this.actionsService.communityActivity(
+      limitNum,
+      beforeDate,
+      communityId,
+      comments,
+    );
+  }
+
   @Get('slug/:id')
   @UseGuards(AuthOptionalGuard)
   @ApiOkResponse({ type: ActionDto })
