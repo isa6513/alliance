@@ -1636,7 +1636,7 @@ export type FormDto = {
     usedInAction?: ActionDto;
 };
 
-export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'HasPhoneNumber' | 'IsPhoneNumberValid';
+export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'HasPhoneNumber' | 'IsPhoneNumberValid' | 'MemberGroup';
 
 export type CustomValidatorTypeDto = {
     name: string;

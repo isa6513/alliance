@@ -203,6 +203,7 @@ export function ConditionalVisibility({
   const [validatorConfigs, setValidatorConfigs] = useState<
     Record<number, { type: CustomValidatorType; idArgument?: number }>
   >({});
+
   const pendingValidatorFetch = useRef<Set<number>>(new Set());
 
   useEffect(() => {
@@ -218,7 +219,6 @@ export function ConditionalVisibility({
       return;
     }
 
-    let cancelled = false;
     missing.forEach((id) => pendingValidatorFetch.current.add(id));
     Promise.all(
       missing.map(async (id) => {
@@ -226,6 +226,7 @@ export function ConditionalVisibility({
           const response = await tasksFindOneCustomValidator({
             path: { id },
           });
+          console.log(response.data);
           if (!response.data) {
             throw new Error("Missing validator data");
           }
@@ -240,7 +241,6 @@ export function ConditionalVisibility({
       })
     )
       .then((entries) => {
-        if (cancelled) return;
         setValidatorConfigs((prev) => {
           const next = { ...prev };
           for (const [id, config] of entries) {
@@ -254,10 +254,6 @@ export function ConditionalVisibility({
       .finally(() => {
         missing.forEach((id) => pendingValidatorFetch.current.delete(id));
       });
-
-    return () => {
-      cancelled = true;
-    };
   }, [conditions, validatorConfigs]);
 
   const ensureValidatorRecord = useCallback(
@@ -853,7 +849,7 @@ export function CustomValidatorSelect({
                 e.target.value === "" ? undefined : Number(e.target.value)
               )
             }
-            className="px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100 w-24"
+            className="px-2 py-1 text-xs border border-gray-300 rounded bg-white w-24"
           />
         )}
       </div>

@@ -9,6 +9,7 @@ export enum CustomValidatorType {
   RepliedToForumPost = 'RepliedToForumPost',
   HasPhoneNumber = 'HasPhoneNumber',
   IsPhoneNumberValid = 'IsPhoneNumberValid',
+  MemberGroup = 'MemberGroup',
 }
 
 export const typeName: Record<CustomValidatorType, string> = {
@@ -18,6 +19,7 @@ export const typeName: Record<CustomValidatorType, string> = {
   [CustomValidatorType.RepliedToForumPost]: 'Replied to Forum Post',
   [CustomValidatorType.HasPhoneNumber]: 'Has Phone Number',
   [CustomValidatorType.IsPhoneNumberValid]: 'Entered phone number is valid',
+  [CustomValidatorType.MemberGroup]: 'Is member of group',
 };
 
 export const typeUsesIdArgument: Record<CustomValidatorType, boolean> = {
@@ -27,6 +29,7 @@ export const typeUsesIdArgument: Record<CustomValidatorType, boolean> = {
   [CustomValidatorType.RepliedToForumPost]: true,
   [CustomValidatorType.HasPhoneNumber]: false,
   [CustomValidatorType.IsPhoneNumberValid]: false,
+  [CustomValidatorType.MemberGroup]: true,
 };
 
 export const typeUsableForVisibility: Record<CustomValidatorType, boolean> = {
@@ -36,6 +39,7 @@ export const typeUsableForVisibility: Record<CustomValidatorType, boolean> = {
   [CustomValidatorType.RepliedToForumPost]: false,
   [CustomValidatorType.HasPhoneNumber]: true,
   [CustomValidatorType.IsPhoneNumberValid]: false,
+  [CustomValidatorType.MemberGroup]: true,
 };
 
 @Entity()

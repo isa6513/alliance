@@ -441,7 +441,7 @@ export class TasksService {
     const validator = await this.customValidatorRepository.findOneOrFail({
       where: { id },
     });
-    const user = await this.userService.findOneOrFail(userId);
+    const user = await this.userService.findOneOrFail(userId, ['groups']);
 
     switch (validator.type) {
       case CustomValidatorType.UploadedPhoto:
@@ -516,6 +516,17 @@ export class TasksService {
             isValid: false,
             message: 'Could not validate phone number',
           };
+        }
+      case CustomValidatorType.MemberGroup:
+        if (!validator.idArgument) {
+          throw new BadRequestException('Validator has no id argument');
+        }
+        if (user.groups.some((group) => group.id === validator.idArgument)) {
+          return {
+            isValid: true,
+          };
+        } else {
+          return { isValid: false };
         }
       default:
         console.warn(
