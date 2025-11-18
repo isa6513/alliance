@@ -14,7 +14,7 @@ const GroupOrganizerGuidelines = () => {
 
 The goal is not for members to rely on you, but to feel accountable to you and the group. As with any leadership role, it’s important to strike a balance between being supportive and firm about expectations.
 
-The Alliance is about cooperation, and cooperation relies on keeping promises. By leading your group effectively, you are helping the Alliance build a culture of trust and reliability, which is ultimately what will allow us to make complex, ambitious plans.
+By leading your group effectively, you are helping the Alliance build a culture of trust and reliability, which is ultimately what will allow us to make complex, ambitious plans.
 
 # Recommendations
 

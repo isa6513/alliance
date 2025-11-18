@@ -238,7 +238,7 @@ const UserActivityCard = ({
                     <span className="text-sm text-zinc-800">Edit</span>
                   </Button>
                 )}
-                {completed && activity.comments.length === 0 && (
+                {completed && (
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
