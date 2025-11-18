@@ -27,6 +27,7 @@ import {
   CreateCustomValidatorDto,
   CreateCustomValidatorResponseDto,
   CustomValidatorDto,
+  RunValidatorDto,
 } from './customvalidator.dto';
 import { ActionActivityDto, OptOutActionDto } from 'src/actions/dto/action.dto';
 
@@ -106,14 +107,15 @@ export class TasksController {
     return this.tasksService.customValidators();
   }
 
-  @Get('runValidator/:id')
+  @Post('runValidator/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: CustomValidatorResponseDto })
   async runValidator(
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
+    @Body() body: RunValidatorDto,
   ) {
-    return this.tasksService.runValidator(id, req.user.sub);
+    return this.tasksService.runValidator(id, req.user.sub, body.fieldValue);
   }
 
   @Get('findOneCustomValidator/:id')

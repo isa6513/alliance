@@ -50,3 +50,9 @@ export class CustomValidatorResponseDto {
   @IsOptional()
   message?: string;
 }
+
+export class RunValidatorDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  fieldValue?: string;
+}

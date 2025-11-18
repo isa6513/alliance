@@ -413,6 +413,7 @@ const FormRenderer = ({
           try {
             const response = await tasksRunValidator({
               path: { id: validatorId },
+              body: {},
             });
             if (!response.data || response.error) {
               throw response.error ?? new Error("Missing validator response");
@@ -646,6 +647,7 @@ const FormRenderer = ({
           try {
             const response = await tasksRunValidator({
               path: { id: field.customValidatorId },
+              body: { fieldValue: formData[field.id].toString() },
             });
 
             if (response.error || !response.data) {
@@ -669,7 +671,7 @@ const FormRenderer = ({
 
       return Object.fromEntries(results);
     },
-    [readOnly]
+    [readOnly, formData]
   );
 
   const validatePage = useCallback(

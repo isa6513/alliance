@@ -1636,13 +1636,17 @@ export type FormDto = {
     usedInAction?: ActionDto;
 };
 
-export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'HasPhoneNumber';
+export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'HasPhoneNumber' | 'IsPhoneNumberValid';
 
 export type CustomValidatorTypeDto = {
     name: string;
     id: CustomValidatorType;
     withIdField: boolean;
     usableForVisibility: boolean;
+};
+
+export type RunValidatorDto = {
+    fieldValue?: string;
 };
 
 export type CustomValidatorResponseDto = {
@@ -2432,21 +2436,6 @@ export type UserReferrerProfileResponses = {
 };
 
 export type UserReferrerProfileResponse = UserReferrerProfileResponses[keyof UserReferrerProfileResponses];
-
-export type UserInviteeNameData = {
-    body?: never;
-    path: {
-        code: string;
-    };
-    query?: never;
-    url: '/user/inviteeName/{code}';
-};
-
-export type UserInviteeNameResponses = {
-    200: string;
-};
-
-export type UserInviteeNameResponse = UserInviteeNameResponses[keyof UserInviteeNameResponses];
 
 export type UserOnetimeInviteData = {
     body?: never;
@@ -4233,7 +4222,7 @@ export type TasksCustomValidatorsResponses = {
 export type TasksCustomValidatorsResponse = TasksCustomValidatorsResponses[keyof TasksCustomValidatorsResponses];
 
 export type TasksRunValidatorData = {
-    body?: never;
+    body: RunValidatorDto;
     path: {
         id: number;
     };

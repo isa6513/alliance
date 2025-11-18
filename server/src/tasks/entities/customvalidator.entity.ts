@@ -8,6 +8,7 @@ export enum CustomValidatorType {
   AddedProfileDescription = 'AddedProfileDescription',
   RepliedToForumPost = 'RepliedToForumPost',
   HasPhoneNumber = 'HasPhoneNumber',
+  IsPhoneNumberValid = 'IsPhoneNumberValid',
 }
 
 export const typeName: Record<CustomValidatorType, string> = {
@@ -16,6 +17,7 @@ export const typeName: Record<CustomValidatorType, string> = {
   [CustomValidatorType.AddedProfileDescription]: 'Added Profile Description',
   [CustomValidatorType.RepliedToForumPost]: 'Replied to Forum Post',
   [CustomValidatorType.HasPhoneNumber]: 'Has Phone Number',
+  [CustomValidatorType.IsPhoneNumberValid]: 'Entered phone number is valid',
 };
 
 export const typeUsesIdArgument: Record<CustomValidatorType, boolean> = {
@@ -24,6 +26,7 @@ export const typeUsesIdArgument: Record<CustomValidatorType, boolean> = {
   [CustomValidatorType.AddedProfileDescription]: false,
   [CustomValidatorType.RepliedToForumPost]: true,
   [CustomValidatorType.HasPhoneNumber]: false,
+  [CustomValidatorType.IsPhoneNumberValid]: false,
 };
 
 export const typeUsableForVisibility: Record<CustomValidatorType, boolean> = {
@@ -32,6 +35,7 @@ export const typeUsableForVisibility: Record<CustomValidatorType, boolean> = {
   [CustomValidatorType.AddedProfileDescription]: false,
   [CustomValidatorType.RepliedToForumPost]: false,
   [CustomValidatorType.HasPhoneNumber]: true,
+  [CustomValidatorType.IsPhoneNumberValid]: false,
 };
 
 @Entity()

@@ -37,6 +37,7 @@ import {
   typeUsesIdArgument,
 } from './entities/customvalidator.entity';
 import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
+import { parsePhoneNumber } from 'libphonenumber-js/max';
 
 @Injectable()
 export class TasksService {
@@ -435,6 +436,7 @@ export class TasksService {
   async runValidator(
     id: number,
     userId: number,
+    fieldValue?: string,
   ): Promise<CustomValidatorResponseDto> {
     const validator = await this.customValidatorRepository.findOneOrFail({
       where: { id },
@@ -497,6 +499,28 @@ export class TasksService {
           };
         }
         break;
+      case CustomValidatorType.IsPhoneNumberValid:
+        if (!fieldValue) {
+          return {
+            isValid: false,
+            message:
+              "It looks like you haven't entered a phone number yet - please do that now!",
+          };
+        }
+        try {
+          parsePhoneNumber(fieldValue, 'US');
+          return { isValid: true };
+        } catch (error) {
+          console.log('Error parsing phone number: ', error);
+          return {
+            isValid: false,
+            message: 'Could not validate phone number',
+          };
+        }
+      default:
+        console.warn(
+          `Unknown validator type: ${validator.type satisfies never}`,
+        );
     }
     return { isValid: true };
   }
