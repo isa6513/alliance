@@ -1002,15 +1002,15 @@ export function FormBuilder({
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <div className="bg-white shadow-sm border-b border-gray-200 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center space-x-4 flex-1">
               <input
                 type="text"
                 value={schema.title}
                 onChange={(e) =>
                   updateSchema({ ...schema, title: e.target.value })
                 }
-                className="font-bold px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="font-bold px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                 placeholder="Form title"
               />
             </div>
