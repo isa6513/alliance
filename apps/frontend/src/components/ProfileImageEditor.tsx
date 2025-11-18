@@ -292,7 +292,6 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
   const lastSelectionRef = useRef<PixelCrop | null>(null);
   const isDraggingRef = useRef(false);
   const activePointerIdRef = useRef<number | null>(null);
-  const activePointerElementRef = useRef<HTMLElement | null>(null);
 
   const rotatedDimensions = useMemo(() => {
     if (!sourceDimensions) return null;
@@ -546,19 +545,6 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
       ) {
         return;
       }
-      if (
-        activePointerElementRef.current &&
-        activePointerIdRef.current !== null
-      ) {
-        try {
-          activePointerElementRef.current.releasePointerCapture(
-            activePointerIdRef.current
-          );
-        } catch {
-          // ignore release errors
-        }
-      }
-      activePointerElementRef.current = null;
       activePointerIdRef.current = null;
       if (isDraggingRef.current) {
         isDraggingRef.current = false;
@@ -645,14 +631,6 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
       event.preventDefault();
       isDraggingRef.current = true;
       activePointerIdRef.current = event.pointerId;
-      activePointerElementRef.current = event.currentTarget;
-      if (event.currentTarget.setPointerCapture) {
-        try {
-          event.currentTarget.setPointerCapture(event.pointerId);
-        } catch {
-          // ignore capture errors
-        }
-      }
       dragStateRef.current = {
         type: "move",
         startPointer: { x: event.clientX, y: event.clientY },
@@ -669,14 +647,6 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
       event.stopPropagation();
       isDraggingRef.current = true;
       activePointerIdRef.current = event.pointerId;
-      activePointerElementRef.current = event.currentTarget;
-      if (event.currentTarget.setPointerCapture) {
-        try {
-          event.currentTarget.setPointerCapture(event.pointerId);
-        } catch {
-          // ignore capture errors
-        }
-      }
       dragStateRef.current = {
         type: "resize",
         handle,
