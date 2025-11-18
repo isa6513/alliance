@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import type { AnyField, Condition } from "@alliance/shared/forms/formschema";
 import { ConditionalVisibility } from "../form-fields/CommonControls";
@@ -24,12 +25,69 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
   previousFields,
 }: DisplayBlockWrapperProps<T>) {
   const showConditional = Boolean(block && onUpdate);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const optionsMenuRef = useRef<HTMLDivElement | null>(null);
+  const [showConditionalVisibilityControl, setShowConditionalVisibilityControl] =
+    useState(() => {
+      if (!block) return false;
+      const conditions = Array.isArray(block.visibleIf)
+        ? block.visibleIf.length
+        : block?.visibleIf
+        ? 1
+        : 0;
+      return conditions > 0;
+    });
 
   const handleConditionalChange = (updates: { visibleIf?: Condition[] }) => {
     if (onUpdate) {
       onUpdate(updates as Partial<T>);
     }
   };
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (optionsMenuRef.current?.contains(event.target as Node)) return;
+      setIsMenuOpen(false);
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    const conditionCount = Array.isArray(block?.visibleIf)
+      ? block?.visibleIf.length
+      : block?.visibleIf
+      ? 1
+      : 0;
+
+    if (conditionCount > 0 && !showConditionalVisibilityControl) {
+      setShowConditionalVisibilityControl(true);
+    }
+  }, [block, showConditionalVisibilityControl]);
+
+  const handleConditionalVisibilityToggle = (checked: boolean) => {
+    setShowConditionalVisibilityControl(checked);
+    if (!checked) {
+      handleConditionalChange({ visibleIf: undefined });
+    }
+  };
+
+  const showConditionalControls =
+    showConditionalVisibilityControl && showConditional;
 
   return (
     <div
@@ -66,7 +124,46 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
           </svg>
         </div>
       </div>
-      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {showConditional && (
+          <div className="relative" ref={optionsMenuRef}>
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+              className="text-gray-500 hover:text-gray-700 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+              aria-haspopup="menu"
+              aria-expanded={isMenuOpen}
+            >
+              <span className="sr-only">Display block options</span>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <circle cx="3.5" cy="8" r="1.2" />
+                <circle cx="8" cy="8" r="1.2" />
+                <circle cx="12.5" cy="8" r="1.2" />
+              </svg>
+            </button>
+            {isMenuOpen && (
+              <div className="absolute right-0 mt-1 w-56 rounded-lg border border-gray-200 bg-white py-2 text-sm shadow-lg">
+                <label className="flex cursor-pointer items-center px-3 py-1.5 text-gray-700">
+                  <input
+                    type="checkbox"
+                    className="mr-2"
+                    checked={showConditionalVisibilityControl}
+                    onChange={(event) =>
+                      handleConditionalVisibilityToggle(event.target.checked)
+                    }
+                  />
+                  Use conditional visibility
+                </label>
+              </div>
+            )}
+          </div>
+        )}
         <button
           onClick={onRemove}
           className="text-gray-400 hover:text-red-500 w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-50"
@@ -75,14 +172,16 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
           ×
         </button>
       </div>
-      <div className={showConditional ? "space-y-3" : undefined}>
+      <div className={showConditionalControls ? "space-y-3" : undefined}>
         {children}
-        {showConditional && (
-          <ConditionalVisibility
-            field={block as DisplayBlock}
-            previousFields={previousFields || []}
-            onChange={handleConditionalChange}
-          />
+        {showConditionalControls && (
+          <div className="border-t border-gray-200 pt-4">
+            <ConditionalVisibility
+              field={block as DisplayBlock}
+              previousFields={previousFields || []}
+              onChange={handleConditionalChange}
+            />
+          </div>
         )}
       </div>
     </div>
