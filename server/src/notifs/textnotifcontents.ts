@@ -9,6 +9,9 @@ export function getTimeLeftString(
   dateNow: Date,
   mode: 'both' | 'days' | 'hours' = 'both',
 ): string {
+  if (dateNow.getTime() > deadlineEvent.date.getTime()) {
+    return '0 ' + (mode === 'days' ? 'days' : 'hours');
+  }
   let days = Math.floor(
     (deadlineEvent.date.getTime() - dateNow.getTime()) / (1000 * 60 * 60 * 24),
   );
