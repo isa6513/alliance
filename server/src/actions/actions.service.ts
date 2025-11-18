@@ -396,12 +396,15 @@ export class ActionsService {
     taskFormResponse?: FormResponse,
     declineReason?: string,
     isMoral?: boolean,
+    adminCreated?: boolean,
   ): Promise<ActionActivityDto> {
     const action = await this.findOne(actionId, userId);
 
+    console.log('adminCreated: ', adminCreated);
     if (
-      type === ActionActivityType.USER_JOINED ||
-      type === ActionActivityType.USER_COMPLETED
+      (type === ActionActivityType.USER_JOINED ||
+        type === ActionActivityType.USER_COMPLETED) &&
+      !adminCreated
     ) {
       await this.ensureUserEligibleForAction(action, userId);
     }
@@ -1031,6 +1034,10 @@ export class ActionsService {
       activityDto.actionId,
       activityDto.userId,
       activityDto.type,
+      undefined,
+      undefined,
+      undefined,
+      true,
     );
   }
 
