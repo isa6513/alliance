@@ -38,7 +38,7 @@ type FormRendererProps = {
   ) => void;
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
-  onSubmit: ((data: SubmitFormDto) => void) | null; // null for admin preview
+  onSubmit: ((data: SubmitFormDto) => Promise<void>) | null; // null for admin preview
 };
 
 /**
@@ -309,6 +309,7 @@ const FormRenderer = ({
   const [deviceType, setDeviceType] = useState<DeviceVisibilityTarget>(() =>
     detectDeviceType()
   );
+  const [submitting, setSubmitting] = useState(false);
 
   // Dropdown state for "decline to participate" options
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -871,6 +872,12 @@ const FormRenderer = ({
     e.preventDefault();
     e.stopPropagation();
 
+    if (submitting) {
+      return;
+    }
+
+    setSubmitting(true);
+
     if (readOnly || !onSubmit) {
       return;
     }
@@ -903,7 +910,9 @@ const FormRenderer = ({
       deviceType,
     } satisfies SubmitFormDto;
 
-    onSubmit(submissionPayload);
+    onSubmit(submissionPayload).finally(() => {
+      setSubmitting(false);
+    });
   };
 
   const validateForPreview = useCallback(async () => {
@@ -1156,6 +1165,7 @@ const FormRenderer = ({
                       color={ButtonColor.Black}
                       type="submit"
                       className="w-full !py-3 !text-base"
+                      disabled={submitting}
                     >
                       {schema.submit?.label || "Complete"}
                     </Button>
