@@ -128,6 +128,8 @@ const LoginPage: React.FC = () => {
                   required
                   name="email"
                   autoComplete="email"
+                  className="text-[16px]"
+                  inputClassName="text-[16px]"
                 />
               </div>
               <div className="relative">
@@ -139,10 +141,12 @@ const LoginPage: React.FC = () => {
                   autoComplete="current-password"
                   required
                   name="password"
+                  className="text-[16px]"
+                  inputClassName="text-[16px]"
                 />
                 <button
                   type="button"
-                  className="absolute right-0 top-2 text-xs text-green hover:underline"
+                  className="absolute right-0 top-1 text-sm text-green hover:underline"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? "Hide" : "Show"}
@@ -152,7 +156,7 @@ const LoginPage: React.FC = () => {
               <div className="pt-2">
                 <Button
                   color={ButtonColor.Black}
-                  className="w-full flex justify-center text-center py-3"
+                  className="w-full flex justify-center text-center py-3 text-[16px]"
                   type="submit"
                   disabled={loading}
                 >

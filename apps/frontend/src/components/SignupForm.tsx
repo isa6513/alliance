@@ -46,7 +46,7 @@ const SignupForm = ({
         referralCode: referralCode || undefined,
       });
     },
-    [onSubmit, formData, referralCode],
+    [onSubmit, formData, referralCode]
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +72,8 @@ const SignupForm = ({
         required
         name="name"
         error={fieldErrors.name}
+        className="text-[16px]"
+        inputClassName="text-[16px]"
       />
 
       <FormInput
@@ -83,6 +85,8 @@ const SignupForm = ({
         required
         name="email"
         error={fieldErrors.email}
+        className="text-[16px]"
+        inputClassName="text-[16px]"
       />
 
       <FormInput
@@ -93,6 +97,8 @@ const SignupForm = ({
         required
         name="password"
         error={fieldErrors.password}
+        className="text-[16px]"
+        inputClassName="text-[16px]"
       />
 
       <FormInput
@@ -103,12 +109,14 @@ const SignupForm = ({
         required
         name="confirmPassword"
         error={fieldErrors.confirmPassword}
+        className="text-[16px]"
+        inputClassName="text-[16px]"
       />
 
       <div className="pt-2">
         <Button
           color={ButtonColor.Black}
-          className="w-full flex justify-center text-center  justify-self-center pb-2"
+          className="w-full flex justify-center text-center  justify-self-center pb-2 text-[16px]"
           type="submit"
           disabled={loading}
         >

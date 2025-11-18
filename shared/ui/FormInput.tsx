@@ -16,6 +16,7 @@ interface FormInputProps
   label?: string;
   error?: string;
   name: string;
+  inputClassName?: string;
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -31,6 +32,7 @@ const FormInput: React.FC<FormInputProps> = ({
   disabled = false,
   className,
   min,
+  inputClassName,
 }) => {
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
@@ -57,7 +59,9 @@ const FormInput: React.FC<FormInputProps> = ({
             ? "bg-page text-zinc-500 cursor-not-allowed"
             : "hover:border-zinc-300"
         } 
-        ${error ? "focus:border-red-500" : "focus:border-green"}`}
+        ${
+          error ? "focus:border-red-500" : "focus:border-green"
+        } ${inputClassName}`}
         autoComplete={autoComplete}
         min={min}
       />
