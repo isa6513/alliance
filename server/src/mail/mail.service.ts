@@ -21,6 +21,7 @@ export function processKeywordReplacements(
     deadlineEvent?: ActionEvent;
     cid: string;
     uncompletedTasksCount: number;
+    uncompletedTasksTime: string;
     dateNow?: Date;
   },
 ): string {
@@ -41,6 +42,7 @@ export function processKeywordReplacements(
     .replaceAll('#{lastname}', lastname)
     .replaceAll('#{action}', context.action.name)
     .replaceAll('#{n}', context.uncompletedTasksCount.toString())
+    .replaceAll('#{tasktime}', context.uncompletedTasksTime)
     .replaceAll('#{s}', context.uncompletedTasksCount === 1 ? '' : 's')
     .replaceAll(
       '#{days}',

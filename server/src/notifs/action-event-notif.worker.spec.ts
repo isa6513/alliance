@@ -19,6 +19,7 @@ import {
 import { Action } from 'src/actions/entities/action.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ActionEventReminderService } from './action-event-reminder.service';
+import { ActionDto } from 'src/actions/dto/action.dto';
 
 describe('ActionEventNotifWorker.processCustomReminderText', () => {
   let worker: ActionEventNotifWorker;
@@ -36,7 +37,7 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
 
   beforeEach(() => {
     actionsService = {
-      getUncompletedTasksCount: jest.fn(),
+      getUncompletedTasks: jest.fn(),
     } as unknown as jest.Mocked<ActionsService>;
 
     worker = new ActionEventNotifWorker(
@@ -50,7 +51,11 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
   });
 
   it('replaces all reminder keywords when a deadline event is present', async () => {
-    actionsService.getUncompletedTasksCount.mockResolvedValue(3);
+    actionsService.getUncompletedTasks.mockResolvedValue([
+      { id: 1, name: 'Task 1', timeEstimate: 15 } as unknown as ActionDto,
+      { id: 2, name: 'Task 2', timeEstimate: 30 } as unknown as ActionDto,
+      { id: 3, name: 'Task 3', timeEstimate: 45 } as unknown as ActionDto,
+    ]);
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2024-01-01T00:00:00Z'));
 
@@ -100,7 +105,7 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
       expect(result).toBe(
         'Hi Alex Example (Alex Example), action Test Action has 3 tasks due in 2 days and 6 hours. Link: https://app.example.org/tasks?cid=cid-123',
       );
-      expect(actionsService.getUncompletedTasksCount).toHaveBeenCalledWith(
+      expect(actionsService.getUncompletedTasks).toHaveBeenCalledWith(
         7,
         undefined,
       );
@@ -110,7 +115,9 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
   });
 
   it('falls back gracefully when user has a single name and no deadline event', async () => {
-    actionsService.getUncompletedTasksCount.mockResolvedValue(1);
+    actionsService.getUncompletedTasks.mockResolvedValue([
+      { id: 1, name: 'Task 1', timeEstimate: 15 } as unknown as ActionDto,
+    ]);
     const consoleErrorSpy = jest
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
@@ -154,7 +161,7 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
       expect(result).toBe(
         'Hello Cher! Deadline in [err] / [err]. Tasks left: 1. Visit https://app.example.org/tasks?cid=cid-456',
       );
-      expect(actionsService.getUncompletedTasksCount).toHaveBeenCalledWith(
+      expect(actionsService.getUncompletedTasks).toHaveBeenCalledWith(
         9,
         undefined,
       );

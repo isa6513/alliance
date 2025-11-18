@@ -79,15 +79,22 @@ export class ActionEventNotifWorker {
     plan: NotificationPlan,
     cid: string,
   ): Promise<string> {
+    const uncompletedTasks = await this.actionsService.getUncompletedTasks(
+      plan.user.id,
+      plan.group.useSuiteTaskCount ? plan.group.actionSuite?.id : undefined,
+    );
+
     return processKeywordReplacements(text, {
       user: plan.user,
       action: plan.group.memberActionEvent.action,
       deadlineEvent: plan.group.deadlineEvent,
       cid,
-      uncompletedTasksCount: await this.actionsService.getUncompletedTasksCount(
-        plan.user.id,
-        plan.group.useSuiteTaskCount ? plan.group.actionSuite?.id : undefined,
-      ),
+      uncompletedTasksCount: uncompletedTasks.length,
+      uncompletedTasksTime:
+        uncompletedTasks.reduce(
+          (acc, task) => acc + (task.timeEstimate ?? 0),
+          0,
+        ) + ' minutes',
     });
   }
 

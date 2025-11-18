@@ -1308,17 +1308,17 @@ export class ActionsService {
     }));
   }
 
-  async getUncompletedTasksCount(
+  async getUncompletedTasks(
     userId: number,
     suiteId?: number,
-  ): Promise<number> {
+  ): Promise<ActionDto[]> {
     const actions = (await this.findPublic(userId)).filter(
       (action) =>
         action.shouldParticipate &&
         action.userRelation !== UserActionRelation.Completed,
     );
     if (!suiteId) {
-      return actions.length;
+      return actions;
     }
 
     const suite = await this.actionSuiteRepository.findOneOrFail({
@@ -1328,7 +1328,7 @@ export class ActionsService {
 
     return actions.filter((action) =>
       suite.actions.some((a) => a.id === action.id),
-    ).length;
+    );
   }
 
   async exportAction(

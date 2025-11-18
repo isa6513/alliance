@@ -74,6 +74,7 @@ export const keywords = [
   "#{n}",
   "#{s}",
   "#{timeremaining}",
+  "#{tasktime}",
 ];
 
 const TIMING_MODE_OPTIONS: Array<{
@@ -1053,6 +1054,14 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
                     most cases equivalent to {`#{days}, #{hours}`}, but will
                     trim &quot;0 days&quot; or &quot;0 hours&quot; from the
                     message.
+                  </td>
+                </tr>
+                <tr>
+                  <td>{"#{tasktime}"}</td>
+                  <td>15 minutes</td>
+                  <td>
+                    The total estimated minutes it will take for the user to
+                    finish all uncompleted tasks.
                   </td>
                 </tr>
                 <tr>

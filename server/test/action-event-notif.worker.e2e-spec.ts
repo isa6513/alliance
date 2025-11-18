@@ -85,12 +85,14 @@ describe('ActionEventNotifWorker (e2e)', () => {
     participatingGroups,
     suite,
     suiteManaged,
+    timeEstimate,
   }: {
     name: string;
     eventDate: Date;
     participatingGroups?: Group[];
     suite?: ActionSuite;
     suiteManaged?: boolean;
+    timeEstimate?: number;
   }) => {
     const action = await actionRepo.save(
       actionRepo.create({
@@ -103,6 +105,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         everyoneShouldComplete: false,
         participatingGroups: participatingGroups ?? [ctx.defaultGroup],
         suite,
+        timeEstimate,
       }),
     );
 
@@ -819,7 +822,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
     await userRepo.delete({ id: completeUser.id });
   });
 
-  it('uses suite-aware #{n} counts when configured', async () => {
+  it('uses suite-aware #{n} and #{tasktime} counts when configured', async () => {
     const now = Date.now();
     const user = await getPrimaryUser();
 
@@ -842,6 +845,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
       eventDate,
       suite,
       suiteManaged: true,
+      timeEstimate: 7,
     });
 
     await createActionWithMemberEvent({
@@ -849,6 +853,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
       eventDate,
       suite,
       suiteManaged: true,
+      timeEstimate: 15,
     });
 
     await createActionWithMemberEvent({
@@ -856,6 +861,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
       eventDate,
       suite: otherSuite,
       suiteManaged: true,
+      timeEstimate: 23,
     });
 
     const suiteWithActions = await actionSuiteRepo.findOneOrFail({
@@ -871,7 +877,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         sendAtAbsolute: new Date(now - 5 * 60 * 1000),
         actionSuite: suiteWithActions,
         useSuiteTaskCount: true,
-        textMessage: 'Suite reminder #{n}',
+        textMessage: 'Suite reminder #{n} with #{tasktime}',
         emailMessage: 'Suite reminder #{n}',
         emailSubject: 'Suite reminder #{n}',
       },
@@ -887,7 +893,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
       'cid-suite-count',
     );
 
-    expect(suiteText).toBe('Suite reminder 2');
+    expect(suiteText).toBe('Suite reminder 2 with 22 minutes');
 
     const totalReminderGroup = await createReminderGroup(
       memberEvent,
