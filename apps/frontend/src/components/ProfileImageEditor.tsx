@@ -539,7 +539,13 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
       }
     };
 
-    const stopDragging = () => {
+    const stopDragging = (event: PointerEvent) => {
+      if (
+        activePointerIdRef.current !== null &&
+        event.pointerId !== activePointerIdRef.current
+      ) {
+        return;
+      }
       if (
         activePointerElementRef.current &&
         activePointerIdRef.current !== null
@@ -563,10 +569,12 @@ const ProfileImageEditor: FC<ProfileImageEditorProps> = ({
 
     window.addEventListener("pointermove", handleMove);
     window.addEventListener("pointerup", stopDragging);
+    window.addEventListener("pointercancel", stopDragging);
 
     return () => {
       window.removeEventListener("pointermove", handleMove);
       window.removeEventListener("pointerup", stopDragging);
+      window.removeEventListener("pointercancel", stopDragging);
     };
   }, [imageLayout, isCropModalOpen, isUploading]);
 
