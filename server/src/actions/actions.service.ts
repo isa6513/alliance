@@ -28,6 +28,7 @@ import {
   ActionDto,
   ActionEventDto,
   ActionSuiteDto,
+  ActionUpdateDto,
   CreateActionActivityDto,
   CreateActionDto,
   CreateActionEventDto,
@@ -1220,7 +1221,7 @@ export class ActionsService {
   async createActionUpdate(
     id: number,
     createActionUpdateDto: CreateActionUpdateDto,
-  ): Promise<ActionUpdate> {
+  ): Promise<ActionUpdateDto> {
     const content = this.editableContentRepository.create({
       body: createActionUpdateDto.content.body,
       attachments: createActionUpdateDto.content.attachments ?? [],

@@ -100,7 +100,7 @@ const ActionUpdatesTab = ({
         </div>
       </div>
       {preview ? (
-        <ActionUpdateCard update={newUpdate} />
+        <ActionUpdateCard update={{ ...newUpdate, id: 0 }} />
       ) : (
         <Card className="space-y-2">
           <div className="p-2 bg-zinc-100 rounded-md">
@@ -253,6 +253,7 @@ const ActionUpdatesTab = ({
             key={update.id}
             update={update}
             onDelete={() => handleDelete(update.id)}
+            admin
           />
         ))}
       </div>

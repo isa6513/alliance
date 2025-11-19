@@ -219,6 +219,7 @@ __metadata:
     "@hey-api/client-fetch": "npm:^0.10.0"
     "@hey-api/openapi-ts": "npm:^0.67.3"
     eslint-plugin-react-refresh: "npm:^0.4.20"
+    react-router: "npm:7.6.2"
     typescript: "npm:~5.7.2"
   peerDependencies:
     react: "*"
@@ -15354,7 +15355,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:^7.6.2":
+"react-router@npm:7.6.2, react-router@npm:^7.6.2":
   version: 7.6.2
   resolution: "react-router@npm:7.6.2"
   dependencies:

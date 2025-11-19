@@ -111,6 +111,7 @@ export class ActionDto extends OmitType(Action, [
   'createdAt',
   'updatedAt',
   'events',
+  'updates',
 ]) {
   @ApiProperty()
   usersCompleted: number;
@@ -120,6 +121,10 @@ export class ActionDto extends OmitType(Action, [
 
   @ApiProperty({ enum: ActionStatus, enumName: 'ActionStatus' })
   status: ActionStatus;
+
+  @ApiProperty({ type: () => ActionUpdateDto, isArray: true })
+  @Type(() => ActionUpdateDto)
+  updates: ActionUpdateDto[];
 
   @ApiPropertyOptional()
   canParticipate?: boolean;
@@ -309,6 +314,18 @@ export class ActionRelationsDto {
   @ApiProperty({ type: () => Map<number, UserActionRelation> })
   relations: Map<number, UserActionRelation>;
 }
+
+export class ActionUpdateDto extends PickType(ActionUpdate, [
+  'id',
+  'title',
+  'date',
+  'visibleAt',
+  'notifyType',
+  'shortNotifString',
+  'content',
+  'associatedEvent',
+  'group',
+]) {}
 
 export class CreateActionUpdateDto extends PickType(ActionUpdate, [
   'title',

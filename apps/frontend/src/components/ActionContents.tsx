@@ -5,6 +5,7 @@ import Comments from "./Comments";
 import { getLastAndNextEvent } from "../pages/app/LargeActionCard";
 import TaskTimeInfo from "../pages/app/TaskTimeInfo";
 import ActionEventsPanel from "./ActionEventsPanel";
+import ActionUpdatesPanel from "./ActionUpdatesPanel";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();
@@ -38,9 +39,11 @@ const ActionContents = () => {
       </div>
 
       <div className="flex flex-col gap-y-8 sm:gap-y-12">
-        <div className="">
-          <ActionEventsPanel action={action} events={action.events} />
-        </div>
+        <ActionEventsPanel
+          action={action}
+          events={action.events}
+          updates={action.updates}
+        />
         <div className="flex flex-col">
           <div className="flex flex-col lg:flex-row justify-between lg:items-center mb-4 gap-x-4">
             <p className="font-semibold text-xl flex-1">Task</p>

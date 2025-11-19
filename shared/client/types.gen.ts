@@ -783,6 +783,18 @@ export type ActionEventDto = {
     suiteManaged: boolean;
 };
 
+export type ActionUpdateDto = {
+    id: number;
+    title: string;
+    content: EditableContent;
+    date: string;
+    visibleAt: string;
+    shortNotifString: string;
+    associatedEvent?: ActionEvent;
+    notifyType: ActionUpdateNotifyType;
+    group?: Group;
+};
+
 export type ActionDto = {
     /**
      * Unique identifier for the action
@@ -853,7 +865,6 @@ export type ActionDto = {
      */
     everyoneShouldComplete: boolean;
     archived: boolean;
-    updates: Array<ActionUpdate>;
     suite?: ActionSuite;
     /**
      * Priority of the action
@@ -864,6 +875,7 @@ export type ActionDto = {
      */
     preventCompletion: boolean;
     events: Array<ActionEventDto>;
+    updates: Array<ActionUpdateDto>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
     userRelation?: string;
@@ -3291,7 +3303,7 @@ export type ActionsCreateUpdateData = {
 };
 
 export type ActionsCreateUpdateResponses = {
-    200: ActionUpdate;
+    200: ActionUpdateDto;
 };
 
 export type ActionsCreateUpdateResponse = ActionsCreateUpdateResponses[keyof ActionsCreateUpdateResponses];

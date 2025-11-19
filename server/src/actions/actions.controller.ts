@@ -36,6 +36,7 @@ import {
   ActionDto,
   ActionEventDto,
   ActionSuiteDto,
+  ActionUpdateDto,
   CreateActionActivityDto,
   CreateActionDto,
   CreateActionEventDto,
@@ -58,7 +59,6 @@ import {
   NotificationScheduleEntryDto,
   NotificationScheduleQueryDto,
 } from './dto/notification-schedule.dto';
-import { ActionUpdate } from './entities/action-update.entity';
 import { ActionEvent } from './entities/action-event.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import {
@@ -557,11 +557,11 @@ export class ActionsController {
 
   @Post('createUpdate/:id')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: ActionUpdate })
+  @ApiOkResponse({ type: ActionUpdateDto })
   createUpdate(
     @Param('id', ParseIntPipe) id: number,
     @Body() createActionUpdateDto: CreateActionUpdateDto,
-  ): Promise<ActionUpdate> {
+  ): Promise<ActionUpdateDto> {
     return this.actionsService.createActionUpdate(id, createActionUpdateDto);
   }
 

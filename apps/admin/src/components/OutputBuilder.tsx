@@ -673,6 +673,9 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                           formId: 0,
                           answers: previewAnswers,
                           visibilityValidatorResults: {},
+                          publicAnswers: Object.fromEntries(
+                            outputFields.map((field) => [field.id, true])
+                          ),
                           schemaSnapshot: schema as unknown as Record<
                             string,
                             unknown

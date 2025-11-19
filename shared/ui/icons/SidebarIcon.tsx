@@ -1,6 +1,6 @@
 import { DefaultIconProps, sizeClass } from "./icons";
 
-const DatabaseIcon = ({ size = "small", fill = "black" }: DefaultIconProps) => {
+const SidebarIcon = ({ size = "small", fill = "black" }: DefaultIconProps) => {
   return (
     <svg
       width="20"
@@ -15,4 +15,4 @@ const DatabaseIcon = ({ size = "small", fill = "black" }: DefaultIconProps) => {
   );
 };
 
-export default DatabaseIcon;
+export default SidebarIcon;
