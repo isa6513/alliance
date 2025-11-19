@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/mail/mail.service';
 import { MmsService } from 'src/mms/mms.service';
 import { User } from 'src/user/entities/user.entity';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import { ActionEventNotif } from './entities/action-event-notif.entity';
 import {
   Notification,
@@ -50,7 +50,7 @@ export class NotifsService {
 
   async findAll(userId: number) {
     const notifs = await this.notifsRepository.find({
-      where: { user: { id: userId } },
+      where: { user: { id: userId }, sendTime: LessThan(new Date()) },
       relations: ['associatedUsers'],
     });
     return notifs;
@@ -114,6 +114,7 @@ export class NotifsService {
       message: actionUpdate.shortNotifString,
       webAppLocation: actionUrl(actionUpdate.action.id),
       mobileAppLocation: actionUrl(actionUpdate.action.id),
+      sendTime: actionUpdate.date,
     });
     return this.notifsRepository.save(notif);
   }

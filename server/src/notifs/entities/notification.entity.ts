@@ -14,6 +14,7 @@ import {
 } from 'src/datasources/basecolumns';
 import { ActionUpdate } from 'src/actions/entities/action-update.entity';
 import { Comment } from 'src/forum/entities/comment.entity';
+import { Type } from 'class-transformer';
 
 export enum NotificationCategory {
   ActionEvent = 'action_event',
@@ -72,6 +73,11 @@ export class Notification {
   @UpdateDateColumnTz()
   @ApiProperty()
   updatedAt: Date;
+
+  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  @ApiProperty({ type: Date })
+  @Type(() => Date)
+  sendTime: Date;
 
   @Column({ nullable: true })
   @ApiPropertyOptional()

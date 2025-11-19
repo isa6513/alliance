@@ -479,6 +479,7 @@ export type Notification = {
     cleared: boolean;
     createdAt: string;
     updatedAt: string;
+    sendTime: string;
     groupingKey?: string;
     groupingCount?: number;
     actionUpdate?: ActionUpdate;
@@ -1338,6 +1339,7 @@ export type NotificationDto = {
     cleared: boolean;
     createdAt: string;
     updatedAt: string;
+    sendTime: string;
     associatedUsers: Array<ProfileDto>;
 };
 

@@ -30,14 +30,10 @@ const ActionEventsPanel = ({ action }: ActionEventsPanelProps) => {
 
   const interleaved: (ActionEventDto | ActionUpdateDto)[] = [
     ...events,
-    ...updates,
+    ...updates.filter(
+      (update) => new Date(update.date).getTime() <= new Date().getTime()
+    ),
   ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-  console.log(events);
-  console.log(updates);
-  console.log(
-    interleaved.map((event) => ("newStatus" in event ? "event" : "update"))
-  );
 
   const currentEventId = interleaved
     .filter((event): event is ActionEventDto => "newStatus" in event)

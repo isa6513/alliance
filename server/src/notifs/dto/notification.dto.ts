@@ -12,6 +12,7 @@ export class NotificationDto extends PickType(Notification, [
   'createdAt',
   'cleared',
   'updatedAt',
+  'sendTime',
 ]) {
   @ApiProperty({ type: ProfileDto, isArray: true })
   associatedUsers: ProfileDto[];

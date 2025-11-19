@@ -247,7 +247,7 @@ const ActionUpdatesTab = ({
       <div className="flex flex-col gap-2">
         <h2 className="font-bold">Existing updates</h2>
       </div>
-      <div className="space-y-2 bg-white">
+      <div className="space-y-2 bg-white pb-5">
         {updates.map((update) => (
           <ActionUpdateCard
             key={update.id}

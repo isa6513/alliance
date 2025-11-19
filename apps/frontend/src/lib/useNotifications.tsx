@@ -54,10 +54,12 @@ export const NotificationsProvider = ({
     const { data } = await notifsFindAll();
     if (!data) return;
 
-    const sorted = data.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    const sorted = data
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+      .filter((n) => new Date(n.sendTime).getTime() <= new Date().getTime());
 
     setAllNotifications(sorted);
     setNotifications(sorted.filter((n) => !n.cleared));
