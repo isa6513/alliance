@@ -38,7 +38,9 @@ const UserProgressPills = ({
 }: UserProgressPillsProps) => {
   return (
     <div className="flex gap-1 w-full">
-      {actions.map((action) => {
+      {actions.map((_, i) => {
+        // most recent action on the right
+        const action = actions[actions.length - 1 - i];
         const relation = relationByActionId[action.id] ?? {
           status: "none",
         };

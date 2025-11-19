@@ -1616,35 +1616,16 @@ export class ActionsService {
 
   async getActionRelationsForUsers(
     userIds: number[],
-    actionLimit: number = 7,
+    actionLimit: number = 8,
   ): Promise<UserActionRelationsResponseDto> {
     const actions = (await this.findAllSorted(['events'], actionLimit)).filter(
       (action) => action.status !== ActionStatus.Draft,
     );
 
-    const actionsSorted = actions.sort((a, b) => {
-      const aFirstEvent = (a.events ?? []).reduce(
-        (first, event) => {
-          return !first || event.date < first.date ? event : first;
-        },
-        undefined as (typeof a.events)[0] | undefined,
-      );
-      const bFirstEvent = (b.events ?? []).reduce(
-        (first, event) => {
-          return !first || event.date < first.date ? event : first;
-        },
-        undefined as (typeof b.events)[0] | undefined,
-      );
-      return (
-        (aFirstEvent?.date.getTime() ?? 0) -
-          (bFirstEvent?.date.getTime() ?? 0) || a.priority - b.priority
-      );
-    });
-
     const now = new Date();
     const memberActionPhaseEnded = new Map<number, boolean>();
 
-    for (const action of actionsSorted) {
+    for (const action of actions) {
       const pastEvents = (action.events ?? [])
         .filter((event) => event.date <= now)
         .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -1657,13 +1638,11 @@ export class ActionsService {
       );
     }
 
-    const actionSummaries: UserActionSummaryDto[] = actionsSorted.map(
-      (action) => ({
-        id: action.id,
-        name: action.name,
-        status: action.status,
-      }),
-    );
+    const actionSummaries: UserActionSummaryDto[] = actions.map((action) => ({
+      id: action.id,
+      name: action.name,
+      status: action.status,
+    }));
 
     const actionIds = actionSummaries.map((summary) => summary.id);
     const actionOrder = new Map(actionIds.map((id, index) => [id, index]));
