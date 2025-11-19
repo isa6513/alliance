@@ -51,6 +51,14 @@ const ActionActivityDetail = () => {
   const [activity, setActivity] = useState<ActionActivityDto | null>(
     origactivity
   );
+  useEffect(() => {
+    if (!origactivity) {
+      return;
+    }
+    setActivity((prev) =>
+      !!prev ? { ...prev, likes: origactivity.likes } : prev
+    );
+  }, [origactivity]);
 
   useEffect(() => {
     actionsGetActivity({ path: { id: activityId } }).then((resp) => {
@@ -133,9 +141,9 @@ const ActionActivityDetail = () => {
         <h1 className="font-serif !font-medium w-full">{action.name}</h1>
         {activity !== null && (
           <>
-            <div className="flex flex-row items-center justify-between mt-4">
-              <div className="flex flex-row items-center">
-                <div className="flex flex-row items-center gap-x-2">
+            <div className="flex flex-row items-center justify-between mt-4 flex-wrap gap-y-4">
+              <div className="flex flex-row flex-wrap items-center">
+                <div className="flex flex-row items-center gap-x-2 min-w-[200px]">
                   {activity.user.profilePicture !== null && (
                     <Link to={`/user/${activity.user.id}`}>
                       <ProfileImage
@@ -153,22 +161,24 @@ const ActionActivityDetail = () => {
                     {verb} this action
                   </p>
                 </div>
+              </div>
+              <div className="flex flex-row items-center gap-x-2">
                 {isOwner && !editing && (
                   <button
                     onClick={() => setEditing(true)}
-                    className="text-green text-sm underline ml-2"
+                    className="text-green text-sm underline text-nowrap"
                   >
                     {activity.editableContent?.body
                       ? "Edit details"
                       : "Add details"}
                   </button>
                 )}
+                <p className="text-gray-500 text-sm text-nowrap">
+                  {formatTime(new Date(activity?.createdAt), {
+                    addSuffix: true,
+                  })}
+                </p>
               </div>
-              <p className="text-gray-500 text-sm">
-                {formatTime(new Date(activity?.createdAt), {
-                  addSuffix: true,
-                })}
-              </p>
             </div>
             {editing ? (
               <div className="flex-1 space-y-2 -m-4 mt-4 mb-0 border-t border-zinc-200">
