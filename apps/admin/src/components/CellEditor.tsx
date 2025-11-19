@@ -23,8 +23,9 @@ const CellEditor: React.FC<CellEditorProps> = ({
   onCancel,
 }) => {
   const timeOnlyColumn = isTimeOnlyColumn(column);
+  const isJsonColumn = column.dataType === "json";
   const [editValue, setEditValue] = useState(() => {
-    if (column.dataType === "json") {
+    if (isJsonColumn) {
       if (value === null || value === undefined) {
         return "";
       }
@@ -111,7 +112,7 @@ const CellEditor: React.FC<CellEditorProps> = ({
 
   const formatValueForInput = (val: any): string => {
     if (val === null || val === undefined) return "";
-    if (column.dataType === "json") {
+    if (isJsonColumn) {
       if (typeof val === "string") {
         return val;
       }
@@ -150,6 +151,10 @@ const CellEditor: React.FC<CellEditorProps> = ({
         return inputVal;
     }
   };
+
+  const instructionText = isJsonColumn
+    ? "Ctrl+Enter or click outside to save, Esc to cancel"
+    : "Enter to save, Esc to cancel";
 
   // Render different input types based on column data type
   const renderInput = () => {
@@ -240,12 +245,17 @@ const CellEditor: React.FC<CellEditorProps> = ({
           />
         );
 
-      case "json":
+      case "json": {
+        const jsonValue = formatValueForInput(editValue);
+        const lineCount = Math.min(
+          Math.max(3, jsonValue.split("\n").length || 1),
+          60
+        );
         return (
           <textarea
             {...commonProps}
-            rows={3}
-            value={formatValueForInput(editValue)}
+            rows={lineCount}
+            value={jsonValue}
             onChange={(e) => {
               if (jsonError) {
                 setJsonError(null);
@@ -264,6 +274,7 @@ const CellEditor: React.FC<CellEditorProps> = ({
             }}
           />
         );
+      }
       case "uuid":
       case "string":
         if (editValue && editValue.length > 100) {
@@ -309,7 +320,7 @@ const CellEditor: React.FC<CellEditorProps> = ({
         {jsonError ? (
           <span className="text-red-600">{jsonError}</span>
         ) : (
-          "Enter to save, Esc to cancel"
+          instructionText
         )}
       </div>
     </div>
