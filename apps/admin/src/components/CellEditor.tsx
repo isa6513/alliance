@@ -23,9 +23,17 @@ const CellEditor: React.FC<CellEditorProps> = ({
   onCancel,
 }) => {
   const timeOnlyColumn = isTimeOnlyColumn(column);
-  const [editValue, setEditValue] = useState(() =>
-    timeOnlyColumn ? normalizeTimeValue(value) ?? "" : value
-  );
+  const [editValue, setEditValue] = useState(() => {
+    if (column.dataType === "json") {
+      if (value === null || value === undefined) {
+        return "";
+      }
+      return typeof value === "string" ? value : JSON.stringify(value, null, 2);
+    }
+
+    return timeOnlyColumn ? normalizeTimeValue(value) ?? "" : value;
+  });
+  const [jsonError, setJsonError] = useState<string | null>(null);
   const inputRef = useRef<
     HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
   >(null);
@@ -53,9 +61,36 @@ const CellEditor: React.FC<CellEditorProps> = ({
     }
   };
 
+  const getCurrentInputValue = () => {
+    if (
+      column.dataType === "json" &&
+      inputRef.current instanceof HTMLTextAreaElement
+    ) {
+      return inputRef.current.value;
+    }
+
+    return formatValueForInput(editValue);
+  };
+
   const handleSave = () => {
-    const formatted = formatValueForInput(editValue);
-    const parsed = parseValueFromInput(formatted);
+    const formatted = getCurrentInputValue();
+    let parsed: any;
+
+    try {
+      parsed = parseValueFromInput(formatted);
+    } catch (error) {
+      if (column.dataType === "json") {
+        setJsonError("Value must be valid JSON.");
+        // keep the editor open so the user can correct the value
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 0);
+        return;
+      }
+      throw error;
+    }
+
+    setJsonError(null);
 
     if (timeOnlyColumn) {
       const databaseValue = toDatabaseTimeString(parsed);
@@ -77,7 +112,14 @@ const CellEditor: React.FC<CellEditorProps> = ({
   const formatValueForInput = (val: any): string => {
     if (val === null || val === undefined) return "";
     if (column.dataType === "json") {
-      return typeof val === "string" ? val : JSON.stringify(val, null, 2);
+      if (typeof val === "string") {
+        return val;
+      }
+      try {
+        return JSON.stringify(val, null, 2);
+      } catch {
+        return String(val);
+      }
     }
     if (timeOnlyColumn) {
       return normalizeTimeValue(val) ?? "";
@@ -98,11 +140,7 @@ const CellEditor: React.FC<CellEditorProps> = ({
         return inputVal === "true";
 
       case "json":
-        try {
-          return JSON.parse(inputVal);
-        } catch {
-          return inputVal;
-        }
+        return JSON.parse(inputVal);
 
       case "date":
       case "datetime":
@@ -208,7 +246,12 @@ const CellEditor: React.FC<CellEditorProps> = ({
             {...commonProps}
             rows={3}
             value={formatValueForInput(editValue)}
-            onChange={(e) => setEditValue(parseValueFromInput(e.target.value))}
+            onChange={(e) => {
+              if (jsonError) {
+                setJsonError(null);
+              }
+              setEditValue(e.target.value);
+            }}
             onKeyDown={(e) => {
               // Allow Enter in textarea unless Ctrl+Enter is pressed
               if (e.key === "Enter" && e.ctrlKey) {
@@ -263,7 +306,11 @@ const CellEditor: React.FC<CellEditorProps> = ({
     <div className="absolute top-0 w-full z-10">
       {renderInput()}
       <div className="absolute -bottom-6 left-0 text-xs text-gray-700 bg-white">
-        Enter to save, Esc to cancel
+        {jsonError ? (
+          <span className="text-red-600">{jsonError}</span>
+        ) : (
+          "Enter to save, Esc to cancel"
+        )}
       </div>
     </div>
   );
