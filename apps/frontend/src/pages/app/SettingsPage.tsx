@@ -433,8 +433,8 @@ const SettingsPage: React.FC = () => {
             <h2 className="!font-semibold !text-xl mb-4 mt-2">Privacy</h2>
             <div className="flex flex-col gap-y-2 mb-4">
               <p className="mb-0">
-                Allow some action responses to be shared with other members in
-                your action activity by default?
+                Some parts of your completed tasks can be visible to other
+                members. Would you like for these to be visible by default?
               </p>
               <select
                 className="border border-zinc-300 rounded px-3 py-2 self-start"
@@ -446,9 +446,12 @@ const SettingsPage: React.FC = () => {
                   })
                 }
               >
-                <option value={"public"}>Default to public</option>
-                <option value={"private"}>Default to private</option>
+                <option value={"public"}>Default to visible</option>
+                <option value={"private"}>Default to hidden</option>
               </select>
+              <p className="text-sm text-zinc-500">
+                You will still be able to control visibility for specific tasks.
+              </p>
             </div>
           </div>
 
