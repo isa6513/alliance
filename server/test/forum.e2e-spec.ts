@@ -68,7 +68,6 @@ describe('Forum (e2e)', () => {
       description: 'Action is now in gathering commitments phase',
       newStatus: ActionStatus.GatheringCommitments,
       date: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-      showInTimeline: true,
       action: testAction,
     });
     await eventRepo.save(event);

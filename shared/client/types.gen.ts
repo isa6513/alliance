@@ -525,10 +525,6 @@ export type ActionEvent = {
      */
     updatedAt: string;
     /**
-     * Indicates whether the event should be shown in the timeline
-     */
-    showInTimeline: boolean;
-    /**
      * The action associated with this event
      */
     action: Action;
@@ -784,10 +780,6 @@ export type ActionEventDto = {
      * time of the event (for display)
      */
     date: string;
-    /**
-     * Indicates whether the event should be shown in the timeline
-     */
-    showInTimeline: boolean;
     suiteManaged: boolean;
 };
 
@@ -1057,10 +1049,6 @@ export type CreateActionEventDto = {
      * time of the event (for display)
      */
     date: string;
-    /**
-     * Indicates whether the event should be shown in the timeline
-     */
-    showInTimeline: boolean;
 };
 
 export type CreateReminderGroupDto = {
@@ -1177,10 +1165,6 @@ export type UpdateActionEventDto = {
      * time of the event (for display)
      */
     date?: string;
-    /**
-     * Indicates whether the event should be shown in the timeline
-     */
-    showInTimeline?: boolean;
 };
 
 export type PreviewEmailHtmlDto = {

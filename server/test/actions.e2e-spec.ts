@@ -63,7 +63,6 @@ describe('Actions (e2e)', () => {
         description: 'Action live',
         newStatus: options.status ?? ActionStatus.MemberAction,
         date: new Date(Date.now() - 1000),
-        showInTimeline: true,
         action,
       }),
     );
@@ -107,7 +106,6 @@ describe('Actions (e2e)', () => {
       description: 'Action is now in gathering commitments phase',
       newStatus: ActionStatus.GatheringCommitments,
       date: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-      showInTimeline: true,
       action: testAction,
     });
     await eventRepo.save(gatheringEvent);
@@ -523,7 +521,6 @@ describe('Actions (e2e)', () => {
         description: 'Test Event',
         newStatus: ActionStatus.GatheringCommitments,
         date: new Date(),
-        showInTimeline: true,
       };
 
       const res = await request(ctx.app.getHttpServer())
@@ -597,7 +594,6 @@ describe('Actions (e2e)', () => {
           description: 'Action is now gathering commitments',
           newStatus: ActionStatus.GatheringCommitments,
           date: new Date(Date.now() - 1000), // 1 second ago
-          showInTimeline: true,
         };
 
         res = await request(ctx.app.getHttpServer())
@@ -633,7 +629,6 @@ describe('Actions (e2e)', () => {
           description: 'Action launched',
           newStatus: ActionStatus.GatheringCommitments,
           date: new Date(Date.now() - 3600000), // 1 hour ago
-          showInTimeline: true,
         };
 
         await request(ctx.app.getHttpServer())
@@ -647,7 +642,6 @@ describe('Actions (e2e)', () => {
           description: 'Action now in member action phase',
           newStatus: ActionStatus.MemberAction,
           date: new Date(Date.now() - 1800000), // 30 minutes ago
-          showInTimeline: true,
         };
 
         await request(ctx.app.getHttpServer())
@@ -683,7 +677,6 @@ describe('Actions (e2e)', () => {
           description: 'Action launched',
           newStatus: ActionStatus.GatheringCommitments,
           date: new Date(Date.now() - 3600000), // 1 hour ago
-          showInTimeline: true,
         };
 
         await request(ctx.app.getHttpServer())
@@ -697,7 +690,6 @@ describe('Actions (e2e)', () => {
           description: 'Action will be completed',
           newStatus: ActionStatus.Completed,
           date: new Date(Date.now() + 3600000), // 1 hour from now
-          showInTimeline: true,
         };
 
         await request(ctx.app.getHttpServer())
@@ -804,7 +796,6 @@ describe('Actions (e2e)', () => {
             description: `Event: ${event.title}`,
             newStatus: event.newStatus,
             date: event.date,
-            showInTimeline: true,
           };
 
           await request(ctx.app.getHttpServer())
@@ -862,7 +853,6 @@ describe('Actions (e2e)', () => {
         description: 'Action is now gathering commitments',
         newStatus: ActionStatus.GatheringCommitments,
         date: new Date(Date.now() - 1000), // 1 second ago
-        showInTimeline: true,
       };
 
       await request(ctx.app.getHttpServer())
@@ -932,7 +922,6 @@ describe('Actions (e2e)', () => {
         description: 'Action is now gathering commitments',
         newStatus: ActionStatus.GatheringCommitments,
         date: new Date(Date.now() - 1000), // 1 second ago
-        showInTimeline: true,
       };
 
       await request(ctx.app.getHttpServer())
@@ -946,7 +935,6 @@ describe('Actions (e2e)', () => {
         description: 'Members can now complete the action',
         newStatus: ActionStatus.MemberAction,
         date: new Date(), // immediate transition to member action
-        showInTimeline: true,
       };
 
       // Two users join the action during gathering commitments
@@ -1032,7 +1020,6 @@ describe('Actions (e2e)', () => {
         description: 'Members can now complete the action',
         newStatus: ActionStatus.MemberAction,
         date: new Date(Date.now() - 1000),
-        showInTimeline: true,
       };
 
       await request(ctx.app.getHttpServer())

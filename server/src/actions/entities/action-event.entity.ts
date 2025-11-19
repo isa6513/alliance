@@ -81,14 +81,6 @@ export class ActionEvent {
   @Allow()
   updatedAt: Date;
 
-  @Column({ default: false })
-  @ApiProperty({
-    description: 'Indicates whether the event should be shown in the timeline',
-    default: false,
-  })
-  @IsNotEmpty()
-  showInTimeline: boolean;
-
   @ManyToOne(() => Action, (action) => action.events, {
     onDelete: 'CASCADE',
   })

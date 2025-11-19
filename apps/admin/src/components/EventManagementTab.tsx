@@ -90,9 +90,6 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
                       timeZoneName: "short",
                     })}
                   </div>
-                  <div>
-                    Timeline: {event.showInTimeline ? "Visible" : "Hidden"}
-                  </div>
                 </div>
 
                 <div className="pt-2 mt-2 flex flex-row gap-x-2">

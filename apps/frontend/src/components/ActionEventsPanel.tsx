@@ -17,7 +17,6 @@ const ActionEventsPanel = ({ action, events }: ActionEventsPanelProps) => {
       description: "This action is being viewed as a draft preview",
       date: new Date().toISOString(),
       newStatus: "draft",
-      showInTimeline: true,
       suiteManaged: false,
     });
   }

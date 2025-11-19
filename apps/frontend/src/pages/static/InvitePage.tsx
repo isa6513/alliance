@@ -88,7 +88,6 @@ const InvitePage: React.FC = () => {
         description: "Event 1 description",
         date: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
         newStatus: "member_action",
-        showInTimeline: true,
         suiteManaged: false,
       },
       {
@@ -97,7 +96,6 @@ const InvitePage: React.FC = () => {
         description: "Event 2 description",
         date: new Date(Date.now() - 1000 * 60 * 60 * 49).toISOString(),
         newStatus: "member_action",
-        showInTimeline: true,
         suiteManaged: false,
       },
     ],

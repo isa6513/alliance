@@ -148,7 +148,7 @@ export class ActionsService {
   }
 
   async findAllSorted(
-    relations: string[] = [],
+    relations: (keyof Omit<Action, 'usersCompleted' | 'status'>)[] = [],
     limit?: number,
   ): Promise<Action[]> {
     // Sort by:
@@ -202,7 +202,7 @@ export class ActionsService {
               .of(action)
               .loadMany();
 
-            (action as any)[rel] = loaded;
+            (action as Record<keyof Action, unknown>)[rel] = loaded;
           }
         }),
       );
@@ -938,7 +938,6 @@ export class ActionsService {
       description,
       newStatus,
       date: new Date(), // Set to current time for immediate transition
-      showInTimeline: true,
     };
 
     const newEvent = this.actionEventRepository.create({

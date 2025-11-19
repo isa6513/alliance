@@ -77,7 +77,6 @@ const CreateEventForm = (props: CreateEventFormProps) => {
       ? "member_action"
       : "gathering_commitments",
     date: new Date().toISOString(),
-    showInTimeline: true,
   });
 
   const handleEventInputChange = (
@@ -145,7 +144,6 @@ const CreateEventForm = (props: CreateEventFormProps) => {
           title: defaultEventNames["office_action"],
           date: deadlineEventDate,
           newStatus: "office_action",
-          showInTimeline: false,
           description: "",
         } satisfies CreateActionEventDto;
 
@@ -204,7 +202,6 @@ const CreateEventForm = (props: CreateEventFormProps) => {
             ? "member_action"
             : "gathering_commitments",
           date: new Date().toISOString(),
-          showInTimeline: true,
         });
         setUseCustomName(false);
         setLaunchNow(true);
@@ -395,22 +392,6 @@ const CreateEventForm = (props: CreateEventFormProps) => {
           )}
         </div>
       )}
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="showInTimeline"
-            name="showInTimeline"
-            checked={eventForm.showInTimeline}
-            onChange={handleEventInputChange}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded ml-10"
-          />
-          <label htmlFor="showInTimeline" className="ml-2 block text-black">
-            Show in public timeline
-          </label>
-        </div>
-      </div>
 
       <button
         type="submit"

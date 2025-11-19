@@ -98,7 +98,6 @@ describe('Tasks (e2e)', () => {
         description: 'Test Action',
         newStatus: ActionStatus.MemberAction,
         date: new Date(Date.now() - 1000),
-        showInTimeline: true,
         action: testAction,
       }),
     );
@@ -182,7 +181,6 @@ describe('Tasks (e2e)', () => {
         description: 'Make non-draft',
         newStatus: ActionStatus.MemberAction,
         date: new Date(Date.now() - 1000),
-        showInTimeline: true,
         action,
       }),
     );

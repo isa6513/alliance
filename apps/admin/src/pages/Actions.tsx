@@ -109,7 +109,6 @@ const ActionsList: React.FC = () => {
                 "Action is now live and gathering commitments from the community.",
               newStatus: "gathering_commitments",
               date: new Date(Date.now() - 86400000).toISOString(),
-              showInTimeline: true,
             },
           });
           if (i % 2 === 0) {
@@ -120,7 +119,6 @@ const ActionsList: React.FC = () => {
                 description: "Enough people have committed! Time for action.",
                 newStatus: "member_action",
                 date: new Date(Date.now() - 26400000).toISOString(),
-                showInTimeline: true,
               },
             });
           }

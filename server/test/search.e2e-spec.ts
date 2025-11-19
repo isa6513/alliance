@@ -57,7 +57,6 @@ describe('Search (e2e)', () => {
         description: 'Action is live',
         newStatus: ActionStatus.GatheringCommitments,
         date: new Date(Date.now() - 1000),
-        showInTimeline: true,
         action: targetAction,
       }),
     );

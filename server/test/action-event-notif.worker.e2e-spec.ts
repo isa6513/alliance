@@ -115,7 +115,6 @@ describe('ActionEventNotifWorker (e2e)', () => {
         description: 'desc',
         newStatus: ActionStatus.MemberAction,
         date: eventDate,
-        showInTimeline: true,
         action,
         suiteManaged: suiteManaged ?? false,
       }),
@@ -538,7 +537,6 @@ describe('ActionEventNotifWorker (e2e)', () => {
         description: 'desc',
         newStatus: ActionStatus.Resolution,
         date: new Date(now + 30 * 60 * 1000),
-        showInTimeline: false,
         action,
       }),
     );
@@ -628,7 +626,6 @@ describe('ActionEventNotifWorker (e2e)', () => {
         description: 'desc',
         newStatus: ActionStatus.Resolution,
         date: new Date(sendTime.getTime() + offsetSeconds * 1000),
-        showInTimeline: false,
         action,
       }),
     );
