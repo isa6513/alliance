@@ -4,7 +4,7 @@ import {
   userAddUserToGroup,
   userGetGroups,
   userList,
-  userActionRelations as userGetActionRelations,
+  actionsActionRelations as userGetActionRelations,
   userRemoveUserFromGroup,
 } from "@alliance/shared/client";
 import {

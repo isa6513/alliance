@@ -67,6 +67,10 @@ import {
 } from 'src/notifs/action-event-reminder.service';
 import { ActionSuite } from './entities/action-suite.entity';
 import { ActionEventNotifDto } from 'src/notifs/entities/action-event-notif.dto';
+import {
+  CommunityUserInfoDto,
+  UserActionRelationsResponseDto,
+} from 'src/user/dto/user-action-relations.dto';
 
 @Controller('actions')
 export class ActionsController {
@@ -691,4 +695,22 @@ export class ActionsController {
   pasteJson(@Body() body: PasteJsonDto): Promise<ActionDto> {
     return this.actionsService.importAction(body.body);
   }
+
+  // TODO move ====================================
+
+  @Get('action-relations')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: UserActionRelationsResponseDto })
+  async actionRelations(): Promise<UserActionRelationsResponseDto> {
+    return this.actionsService.getUserActionRelations();
+  }
+
+  @Get('communityMemberInfo')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CommunityUserInfoDto })
+  async getCommunityMemberInfo(@Request() req: JwtRequest) {
+    return this.actionsService.getMemberInfo(req.user.sub);
+  }
+
+  // ====================================
 }

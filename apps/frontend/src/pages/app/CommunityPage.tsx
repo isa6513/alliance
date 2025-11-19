@@ -4,7 +4,7 @@ import {
   UserActionRelationDetailDto,
   UserActionSummaryDto,
   userGetCommunityMemberContactInfo,
-  userGetCommunityMemberInfo,
+  actionsGetCommunityMemberInfo,
   userGetMyCommunity,
   userLeaveCommunity,
 } from "@alliance/shared/client";
@@ -103,7 +103,7 @@ const CommunityPage = () => {
   }, [community, user]);
 
   useEffect(() => {
-    userGetCommunityMemberInfo().then((resp) => {
+    actionsGetCommunityMemberInfo().then((resp) => {
       if (resp.data) {
         setActionSummaries(resp.data.actions);
         setActiveActions(

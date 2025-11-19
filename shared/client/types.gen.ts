@@ -227,35 +227,6 @@ export type FriendStatusDto = {
     didReceiveRequest: boolean;
 };
 
-export type ActionStatus = 'draft' | 'upcoming' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
-
-export type UserActionSummaryDto = {
-    id: number;
-    name: string;
-    status: ActionStatus;
-};
-
-export type UserActionRelationStatus = 'none' | 'joined' | 'completed' | 'declined' | 'wont_complete' | 'missed_deadline';
-
-export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete';
-
-export type UserActionRelationDetailDto = {
-    actionId: number;
-    status: UserActionRelationStatus;
-    latestActivityType?: ActionActivityType;
-    latestActivityAt?: string;
-};
-
-export type UserActionRelationsForUserDto = {
-    userId: number;
-    relations: Array<UserActionRelationDetailDto>;
-};
-
-export type UserActionRelationsResponseDto = {
-    actions: Array<UserActionSummaryDto>;
-    users: Array<UserActionRelationsForUserDto>;
-};
-
 export type ProfileDtoWithFriends = {
     id: number;
     contractDateSigned: string | null;
@@ -349,11 +320,6 @@ export type CommunityInviteDto = {
     invitingUser?: ProfileDto;
 };
 
-export type CommunityUserInfoDto = {
-    actions: Array<UserActionSummaryDto>;
-    users: Array<UserActionRelationsForUserDto>;
-};
-
 export type CommunityMemberContactInfoDto = {
     id: number;
     timeZone?: string;
@@ -372,6 +338,11 @@ export type UploadImageResponseDto = {
     url: string;
     key: string;
 };
+
+/**
+ * Type of action activity
+ */
+export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete';
 
 export type CommentParentObject = 'post' | 'action' | 'activity';
 
@@ -459,6 +430,11 @@ export type UserActionRelationDto = {
  * Type of the action
  */
 export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
+
+/**
+ * New status of the action after the event
+ */
+export type ActionStatus = 'draft' | 'upcoming' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
 
 export type EditableContent = {
     /**
@@ -1326,6 +1302,36 @@ export type PasteJsonDto = {
     body: string;
 };
 
+export type UserActionSummaryDto = {
+    id: number;
+    name: string;
+    status: ActionStatus;
+};
+
+export type UserActionRelationStatus = 'none' | 'joined' | 'completed' | 'declined' | 'wont_complete' | 'missed_deadline';
+
+export type UserActionRelationDetailDto = {
+    actionId: number;
+    status: UserActionRelationStatus;
+    latestActivityType?: ActionActivityType;
+    latestActivityAt?: string;
+};
+
+export type UserActionRelationsForUserDto = {
+    userId: number;
+    relations: Array<UserActionRelationDetailDto>;
+};
+
+export type UserActionRelationsResponseDto = {
+    actions: Array<UserActionSummaryDto>;
+    users: Array<UserActionRelationsForUserDto>;
+};
+
+export type CommunityUserInfoDto = {
+    actions: Array<UserActionSummaryDto>;
+    users: Array<UserActionRelationsForUserDto>;
+};
+
 export type NotificationDto = {
     id: number;
     category: NotificationCategory;
@@ -2158,19 +2164,6 @@ export type UserListResponses = {
 
 export type UserListResponse = UserListResponses[keyof UserListResponses];
 
-export type UserActionRelationsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/user/action-relations';
-};
-
-export type UserActionRelationsResponses = {
-    200: UserActionRelationsResponseDto;
-};
-
-export type UserActionRelationsResponse = UserActionRelationsResponses[keyof UserActionRelationsResponses];
-
 export type UserMembersData = {
     body?: never;
     path?: never;
@@ -2605,19 +2598,6 @@ export type UserGetMyCommunityResponses = {
 };
 
 export type UserGetMyCommunityResponse = UserGetMyCommunityResponses[keyof UserGetMyCommunityResponses];
-
-export type UserGetCommunityMemberInfoData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/user/communityMemberInfo';
-};
-
-export type UserGetCommunityMemberInfoResponses = {
-    200: CommunityUserInfoDto;
-};
-
-export type UserGetCommunityMemberInfoResponse = UserGetCommunityMemberInfoResponses[keyof UserGetCommunityMemberInfoResponses];
 
 export type UserGetCommunityMemberContactInfoData = {
     body?: never;
@@ -3519,6 +3499,32 @@ export type ActionsPasteJsonResponses = {
 };
 
 export type ActionsPasteJsonResponse = ActionsPasteJsonResponses[keyof ActionsPasteJsonResponses];
+
+export type ActionsActionRelationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/action-relations';
+};
+
+export type ActionsActionRelationsResponses = {
+    200: UserActionRelationsResponseDto;
+};
+
+export type ActionsActionRelationsResponse = ActionsActionRelationsResponses[keyof ActionsActionRelationsResponses];
+
+export type ActionsGetCommunityMemberInfoData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/communityMemberInfo';
+};
+
+export type ActionsGetCommunityMemberInfoResponses = {
+    200: CommunityUserInfoDto;
+};
+
+export type ActionsGetCommunityMemberInfoResponse = ActionsGetCommunityMemberInfoResponses[keyof ActionsGetCommunityMemberInfoResponses];
 
 export type NotifsFindAllData = {
     body?: never;

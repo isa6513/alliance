@@ -2,7 +2,7 @@ import {
   analyticsGetTimeSpentPerUser,
   analyticsGetTimeSpentPerUserTotal,
   notifsNotifsForUser,
-  userActionRelations as userGetActionRelations,
+  actionsActionRelations as userGetActionRelations,
   userAddUserToGroup,
   userGetGroups,
   userList,

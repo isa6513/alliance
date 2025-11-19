@@ -16,11 +16,7 @@ import {
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
 import { ILike, In, Repository } from 'typeorm';
 import { Action } from 'src/actions/entities/action.entity';
-import {
-  ActionActivity,
-  ActionActivityType,
-} from 'src/actions/entities/action-activity.entity';
-import { ActionStatus } from 'src/actions/entities/action-event.entity';
+import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { Friend, FriendStatus } from './entities/friend.entity';
 import { PrefillUser } from './entities/prefill-user.entity';
 import {
@@ -35,15 +31,7 @@ import { Group } from './entities/group.entity';
 import { CreateGroupDto } from './group.dto';
 import { Community } from './entities/community.entity';
 import { CreateCommunityDto, UpdateCommunityDto } from './community.dto';
-import {
-  CommunityMemberContactInfoDto,
-  CommunityUserInfoDto,
-  UserActionRelationDetailDto,
-  UserActionRelationsForUserDto,
-  UserActionRelationsResponseDto,
-  UserActionRelationStatus,
-  UserActionSummaryDto,
-} from './dto/user-action-relations.dto';
+import { CommunityMemberContactInfoDto } from './dto/user-action-relations.dto';
 import { OnetimeInvite } from './entities/onetime-invite.entity';
 import {
   CommunityInviteDto,
@@ -202,180 +190,6 @@ export class UserService {
     return this.userRepository.count({
       where: { isNotSignedUpPartialProfile: false },
     });
-  }
-
-  async getUserActionRelations(): Promise<UserActionRelationsResponseDto> {
-    const users = await this.userRepository.find({
-      select: ['id'],
-    });
-    return this.getActionRelationsForUsers(users.map((user) => user.id));
-  }
-
-  async getActionRelationsForUsers(
-    userIds: number[],
-    actionLimit: number = 7,
-  ): Promise<UserActionRelationsResponseDto> {
-    const actions = (
-      await this.actionRepository.find({
-        relations: ['events'],
-        take: actionLimit,
-      })
-    ).filter((action) => action.status !== ActionStatus.Draft);
-
-    const actionsSorted = actions.sort((a, b) => {
-      const aFirstEvent = (a.events ?? []).reduce(
-        (first, event) => {
-          return !first || event.date < first.date ? event : first;
-        },
-        undefined as (typeof a.events)[0] | undefined,
-      );
-      const bFirstEvent = (b.events ?? []).reduce(
-        (first, event) => {
-          return !first || event.date < first.date ? event : first;
-        },
-        undefined as (typeof b.events)[0] | undefined,
-      );
-      return (
-        (aFirstEvent?.date.getTime() ?? 0) -
-          (bFirstEvent?.date.getTime() ?? 0) || a.priority - b.priority
-      );
-    });
-
-    const now = new Date();
-    const memberActionPhaseEnded = new Map<number, boolean>();
-
-    for (const action of actionsSorted) {
-      const pastEvents = (action.events ?? [])
-        .filter((event) => event.date <= now)
-        .sort((a, b) => a.date.getTime() - b.date.getTime());
-      const memberActionIndex = pastEvents.findIndex(
-        (event) => event.newStatus === ActionStatus.MemberAction,
-      );
-      memberActionPhaseEnded.set(
-        action.id,
-        memberActionIndex !== -1 && memberActionIndex < pastEvents.length - 1,
-      );
-    }
-
-    const actionSummaries: UserActionSummaryDto[] = actionsSorted.map(
-      (action) => ({
-        id: action.id,
-        name: action.name,
-        status: action.status,
-      }),
-    );
-
-    const actionIds = actionSummaries.map((summary) => summary.id);
-    const actionOrder = new Map(actionIds.map((id, index) => [id, index]));
-
-    const activities = await this.actionActivityRepository.find({
-      where: { actionId: In(actionIds), userId: In(userIds) },
-      select: ['actionId', 'userId', 'type', 'createdAt'],
-      order: { createdAt: 'ASC' },
-    });
-
-    const statusPriority: Record<UserActionRelationStatus, number> = {
-      [UserActionRelationStatus.Completed]: 5,
-      [UserActionRelationStatus.WontComplete]: 4,
-      [UserActionRelationStatus.Declined]: 3,
-      [UserActionRelationStatus.MissedDeadline]: 2,
-      [UserActionRelationStatus.Joined]: 1,
-      [UserActionRelationStatus.None]: 0,
-    };
-
-    const typeToStatus = (
-      type: ActionActivityType,
-    ): UserActionRelationStatus => {
-      switch (type) {
-        case ActionActivityType.USER_COMPLETED:
-          return UserActionRelationStatus.Completed;
-        case ActionActivityType.USER_WONT_COMPLETE:
-          return UserActionRelationStatus.WontComplete;
-        case ActionActivityType.USER_DECLINED:
-          return UserActionRelationStatus.Declined;
-        case ActionActivityType.USER_JOINED:
-          return UserActionRelationStatus.Joined;
-        default:
-          return UserActionRelationStatus.None;
-      }
-    };
-
-    const perUser = new Map<
-      number,
-      Map<
-        number,
-        {
-          status: UserActionRelationStatus;
-          priority: number;
-          latestActivityType?: ActionActivityType;
-          latestActivityAt?: Date;
-        }
-      >
-    >();
-
-    for (const activity of activities) {
-      const status = typeToStatus(activity.type);
-      if (status === UserActionRelationStatus.None) {
-        continue;
-      }
-
-      const userRelations = perUser.get(activity.userId) ?? new Map();
-      const existing = userRelations.get(activity.actionId);
-      const priority = statusPriority[status];
-
-      if (!existing || priority >= existing.priority) {
-        userRelations.set(activity.actionId, {
-          status,
-          priority,
-          latestActivityType: activity.type,
-          latestActivityAt: activity.createdAt,
-        });
-      }
-
-      perUser.set(activity.userId, userRelations);
-    }
-
-    for (const [, actionMap] of perUser) {
-      for (const [actionId, detail] of actionMap) {
-        if (
-          detail.status === UserActionRelationStatus.Joined &&
-          memberActionPhaseEnded.get(actionId)
-        ) {
-          detail.status = UserActionRelationStatus.MissedDeadline;
-          detail.priority =
-            statusPriority[UserActionRelationStatus.MissedDeadline];
-        }
-      }
-    }
-
-    const users: UserActionRelationsForUserDto[] = Array.from(
-      perUser.entries(),
-    ).map(([userId, actionMap]) => {
-      const relations: UserActionRelationDetailDto[] = Array.from(
-        actionMap.entries(),
-      )
-        .map(([actionId, detail]) => ({
-          actionId,
-          status: detail.status,
-          latestActivityType: detail.latestActivityType,
-          latestActivityAt: detail.latestActivityAt?.toISOString(),
-        }))
-        .sort(
-          (a, b) =>
-            (actionOrder.get(a.actionId) ?? 0) -
-            (actionOrder.get(b.actionId) ?? 0),
-        );
-
-      return {
-        userId,
-        relations,
-      } satisfies UserActionRelationsForUserDto;
-    });
-
-    return {
-      actions: actionSummaries,
-      users,
-    };
   }
 
   async sendWelcomeEmail(userId: number) {
@@ -947,16 +761,6 @@ export class UserService {
     const community = await this.findCommunityOrFail(communityId, ['users']);
     const userIds = community.users!.map((user) => user.id);
     return userIds;
-  }
-
-  async getMemberInfo(userId: number): Promise<CommunityUserInfoDto> {
-    const userIds = await this.getUserIdsForUserCommunity(userId);
-    const actionRelations = await this.getActionRelationsForUsers(userIds);
-
-    return {
-      actions: actionRelations.actions,
-      users: actionRelations.users,
-    };
   }
 
   async getMemberContactInfo(

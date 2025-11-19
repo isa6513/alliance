@@ -39,11 +39,7 @@ import {
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { AddUserToGroupDto, CreateGroupDto, GroupDto } from './group.dto';
-import {
-  CommunityMemberContactInfoDto,
-  CommunityUserInfoDto,
-  UserActionRelationsResponseDto,
-} from './dto/user-action-relations.dto';
+import { CommunityMemberContactInfoDto } from './dto/user-action-relations.dto';
 import {
   CommunityInviteDto,
   CreateCommunityInviteDto,
@@ -290,12 +286,12 @@ export class UserController {
     return (await this.userService.findAll()).map((user) => new UserDto(user));
   }
 
-  @Get('action-relations')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: UserActionRelationsResponseDto })
-  async actionRelations(): Promise<UserActionRelationsResponseDto> {
-    return this.userService.getUserActionRelations();
-  }
+  // @Get('action-relations')
+  // @UseGuards(AdminGuard)
+  // @ApiOkResponse({ type: UserActionRelationsResponseDto })
+  // async actionRelations(): Promise<UserActionRelationsResponseDto> {
+  //   return this.actionsService.getUserActionRelations();
+  // }
 
   @Get('members')
   @UseGuards(AuthGuard)
@@ -610,12 +606,12 @@ export class UserController {
     return new CommunityDto(community);
   }
 
-  @Get('communityMemberInfo')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: CommunityUserInfoDto })
-  async getCommunityMemberInfo(@Request() req: JwtRequest) {
-    return this.userService.getMemberInfo(req.user.sub);
-  }
+  // @Get('communityMemberInfo')
+  // @UseGuards(AuthGuard)
+  // @ApiOkResponse({ type: CommunityUserInfoDto })
+  // async getCommunityMemberInfo(@Request() req: JwtRequest) {
+  //   return this.actionsService.getMemberInfo(req.user.sub);
+  // }
 
   @Get('communityMemberContactInfo')
   @UseGuards(CommunityLeaderGuard)
