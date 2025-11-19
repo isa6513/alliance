@@ -1,4 +1,4 @@
-import * as request from 'supertest';
+import request from 'supertest';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { AnalyticsModule } from 'src/analytics/analytics.module';
 

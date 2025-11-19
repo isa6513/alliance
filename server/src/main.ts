@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as bodyParser from 'body-parser';
+import bodyParser from 'body-parser';
 import { useContainer } from 'class-validator';
 import cookieParser from 'cookie-parser';
 import { PostHog, setupExpressErrorHandler } from 'posthog-node';

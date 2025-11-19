@@ -30,10 +30,10 @@ export class ActionSuite {
   actions: Ty<Action>[];
 
   @OneToMany(() => ReminderGroup, (reminderGroup) => reminderGroup.actionSuite)
-  @ApiProperty({ type: ReminderGroup, isArray: true })
+  @ApiProperty({ type: () => ReminderGroup, isArray: true })
   @Allow()
   @Type(() => ReminderGroup)
-  reminderGroups: ReminderGroup[];
+  reminderGroups: Ty<ReminderGroup>[];
 
   @CreateDateColumnTz()
   @ApiProperty()
@@ -48,7 +48,7 @@ export class ActionSuite {
   updatedAt: Date;
 
   @Expose()
-  @ApiProperty({ type: ActionEvent, isArray: true })
+  @ApiProperty({ type: () => ActionEvent, isArray: true })
   get events(): ActionEvent[] {
     return this.actions?.length
       ? this.actions[0].events.filter((event) => event.suiteManaged)

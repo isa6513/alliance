@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import * as request from 'supertest';
+import request from 'supertest';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { ImagesModule } from '../src/images/images.module';
 import { Repository } from 'typeorm';
@@ -69,7 +69,11 @@ describe('Images (e2e)', () => {
 
   it('deletes stored image metadata and S3 object', async () => {
     const image = await imageRepo.save(
-      imageRepo.create({ key: 'delete-me.webp', mime: 'image/webp', size: 123 }),
+      imageRepo.create({
+        key: 'delete-me.webp',
+        mime: 'image/webp',
+        size: 123,
+      }),
     );
 
     await request(ctx.app.getHttpServer())
@@ -83,8 +87,6 @@ describe('Images (e2e)', () => {
   });
 
   it('returns 404 when deleting a non-existent image', async () => {
-    await request(ctx.app.getHttpServer())
-      .delete('/images/99999')
-      .expect(404);
+    await request(ctx.app.getHttpServer()).delete('/images/99999').expect(404);
   });
 });

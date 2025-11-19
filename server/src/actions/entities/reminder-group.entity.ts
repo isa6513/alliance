@@ -83,7 +83,7 @@ export class ReminderGroup {
   @ApiProperty({ type: () => ActionEvent })
   @Type(() => ActionEvent)
   @IsDefined()
-  memberActionEvent: ActionEvent;
+  memberActionEvent: Ty<ActionEvent>;
 
   @ApiProperty({
     enum: ReminderCohortType,
@@ -123,14 +123,14 @@ export class ReminderGroup {
   @IsDefined()
   textMessage: string;
 
-  @ApiProperty({ type: ActionEventNotif, isArray: true })
+  @ApiProperty({ type: () => ActionEventNotif, isArray: true })
   @OneToMany(
     () => ActionEventNotif,
     (notification) => notification.reminderGroup,
   )
   @Allow()
   @Type(() => ActionEventNotif)
-  notifications: ActionEventNotif[];
+  notifications: Ty<ActionEventNotif>[];
 
   @ApiPropertyOptional({ type: Date })
   @Column({ type: 'timestamptz', nullable: true })
@@ -172,7 +172,7 @@ export class ReminderGroup {
   @ApiPropertyOptional({ type: () => ActionEvent })
   @Type(() => ActionEvent)
   @IsOptional()
-  deadlineEvent?: ActionEvent;
+  deadlineEvent?: Ty<ActionEvent>;
 
   @ApiProperty({ type: Boolean })
   @Column({ type: 'boolean', default: true })

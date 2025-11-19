@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import { AppTypeOrmLogger } from 'src/typeorm-logger';
 import { DataSource } from 'typeorm';
+import { AppTypeOrmLogger } from '../typeorm-logger';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
 export const connectionOptions = (): PostgresConnectionOptions => {
@@ -18,8 +18,8 @@ export const connectionOptions = (): PostgresConnectionOptions => {
     logger: new AppTypeOrmLogger(),
   };
 
-  return (process.env.NODE_ENV === 'production' ||
-    process.env.NODE_ENV === 'staging')
+  return process.env.NODE_ENV === 'production' ||
+    process.env.NODE_ENV === 'staging'
     ? {
         ...shared,
         ssl: { rejectUnauthorized: false },
@@ -34,6 +34,6 @@ export const connectionOptions = (): PostgresConnectionOptions => {
 const dataSource = new DataSource({
   ...connectionOptions(),
   logger: undefined,
-  migrations: ['dist/migrations/*{.ts,.js}'],
+  migrations: ['migrations/*{.ts,.js}'],
 });
 export default dataSource;

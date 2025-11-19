@@ -1,5 +1,5 @@
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
-import * as request from 'supertest';
+import request from 'supertest';
 import { Repository } from 'typeorm';
 import { City } from '../src/geo/city.entity';
 import { GeoModule } from '../src/geo/geo.module';

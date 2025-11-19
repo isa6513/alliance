@@ -10,10 +10,10 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Action } from './action.entity';
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
-import { ActionUpdate } from './action-update.entity';
 import { Ty } from 'src/tasks/entities/type';
+import { ActionUpdate } from './action-update.entity';
+import { Action } from './action.entity';
 
 export enum NotificationType {
   All = 'all',
@@ -103,7 +103,7 @@ export class ActionEvent {
   @ApiProperty({ type: ActionUpdate, isArray: true })
   @Type(() => ActionUpdate)
   @Allow()
-  updates: ActionUpdate[];
+  updates: Ty<ActionUpdate>[];
 
   @ApiProperty()
   @Column({ default: false })

@@ -1,5 +1,5 @@
 import { createTestApp, TestContext } from './e2e-test-utils';
-import * as request from 'supertest';
+import request from 'supertest';
 
 describe('Auth via Http-Only cookies (e2e)', () => {
   let ctx: TestContext;

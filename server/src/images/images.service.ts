@@ -5,7 +5,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as sharp from 'sharp';
+import sharp from 'sharp';
 import { Repository } from 'typeorm';
 import { Image } from './entities/image.entity';
 

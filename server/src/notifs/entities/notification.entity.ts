@@ -37,11 +37,11 @@ export class Notification {
   @ManyToOne(() => User, (user) => user.notifications, {
     onDelete: 'CASCADE',
   })
-  user: User;
+  user: Ty<User>;
 
   @ManyToMany(() => User)
   @JoinTable({ name: 'notification_associated_users' })
-  associatedUsers?: User[];
+  associatedUsers?: Ty<User>[];
 
   @Column({ type: 'enum', enum: NotificationCategory })
   @ApiProperty({ enum: NotificationCategory, enumName: 'NotificationCategory' })
@@ -93,7 +93,7 @@ export class Notification {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  actionUpdate?: ActionUpdate;
+  actionUpdate?: Ty<ActionUpdate>;
 
   @ApiPropertyOptional({ type: () => Comment })
   @ManyToOne(() => Comment, (comment) => comment.notifications, {

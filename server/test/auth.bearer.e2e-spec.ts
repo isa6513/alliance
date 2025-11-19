@@ -1,4 +1,4 @@
-import * as request from 'supertest';
+import request from 'supertest';
 import { User } from '../src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { AuthTokens } from '../src/auth/dto/authtokens.dto';

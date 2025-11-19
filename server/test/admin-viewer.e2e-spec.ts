@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Repository } from 'typeorm';
-import * as request from 'supertest';
+import request from 'supertest';
 import { User } from '../src/user/entities/user.entity';
 import { Action } from '../src/actions/entities/action.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';

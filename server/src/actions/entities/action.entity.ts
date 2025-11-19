@@ -7,7 +7,6 @@ import {
   IsNotEmpty,
   IsOptional,
 } from 'class-validator';
-import { Form } from 'src/tasks/entities/form.entity';
 import {
   Column,
   CreateDateColumn,
@@ -24,6 +23,7 @@ import { Group } from 'src/user/entities/group.entity';
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
 import { ActionUpdate } from './action-update.entity';
 import { ActionSuite } from './action-suite.entity';
+import { Ty } from 'src/tasks/entities/type';
 
 export enum ActionTaskType {
   Funding = 'Funding', //giving money to a particular cause
@@ -112,7 +112,6 @@ export class Action {
   @Column({ nullable: true })
   @ApiPropertyOptional({ description: 'Form associated with the action' })
   @IsOptional()
-  @Type(() => Form)
   taskFormId?: number;
 
   @CreateDateColumn()
@@ -136,7 +135,7 @@ export class Action {
   @Allow()
   @IsArray()
   @Type(() => ActionEvent)
-  events: ActionEvent[];
+  events: Ty<ActionEvent>[];
 
   @ManyToMany(() => Group, (group) => group.participatingIn, {
     onDelete: 'CASCADE',

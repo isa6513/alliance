@@ -1,4 +1,4 @@
-import * as request from 'supertest';
+import request from 'supertest';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { GeoModule } from 'src/geo/geo.module';
 describe.skip('Geo (e2e)', () => {

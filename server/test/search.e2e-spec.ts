@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import * as request from 'supertest';
+import request from 'supertest';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { SearchModule } from 'src/search/search.module';
 import { User } from 'src/user/entities/user.entity';

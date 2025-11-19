@@ -1,4 +1,4 @@
-import * as request from 'supertest';
+import request from 'supertest';
 import { Repository } from 'typeorm';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { TasksModule } from 'src/tasks/tasks.module';

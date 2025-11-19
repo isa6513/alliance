@@ -47,7 +47,7 @@ export class ActionActivity {
   @JoinColumn({ name: 'actionId' })
   @Allow()
   @Type(() => Action)
-  action: Action;
+  action: Ty<Action>;
 
   @Column()
   @ApiProperty()
@@ -98,7 +98,7 @@ export class ActionActivity {
   @Allow()
   @ApiProperty({ type: () => User, isArray: true })
   @Type(() => User)
-  likes: User[];
+  likes: Ty<User>[];
 
   @ApiPropertyOptional({ type: () => FormResponse })
   @Type(() => FormResponse)
@@ -108,7 +108,7 @@ export class ActionActivity {
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  taskFormResponse?: FormResponse;
+  taskFormResponse?: Ty<FormResponse>;
 
   @Column({ nullable: true })
   @ApiPropertyOptional()
