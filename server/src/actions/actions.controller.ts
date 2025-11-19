@@ -164,8 +164,11 @@ export class ActionsController {
   @Get('loggedIn')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [ActionDto] })
-  async findAllLoggedIn(@Request() req: JwtRequest): Promise<ActionDto[]> {
-    return this.actionsService.findPublic(req.user.sub);
+  async findAllLoggedIn(
+    @Request() req: JwtRequest,
+    @Query('sorted', new ParseBoolPipe({ optional: true })) sorted?: boolean,
+  ): Promise<ActionDto[]> {
+    return this.actionsService.findPublic(req.user.sub, sorted);
   }
 
   @Get('myActivity')

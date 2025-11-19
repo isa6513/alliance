@@ -24,13 +24,13 @@ const CommunityInviteListItem = ({
       )}
       <div className="flex flex-row gap-3 items-center">
         {invite.status === "pending" ? (
-          <p className="text-green">Active</p>
+          <p className="text-green">Pending</p>
         ) : invite.status === "accepted" ? (
-          <p className="text-blue-500">Accepted</p>
+          <p className="text-zinc-500">Accepted</p>
         ) : invite.status === "rejected" ? (
           <p className="text-red">Rejected</p>
         ) : (
-          <p className="text-gray-500">Cancelled</p>
+          <p className="text-zinc-500">Cancelled</p>
         )}
         <div
           className="cursor-pointer active:scale-85 transition-all duration-100 hover:brightness-50"

@@ -213,10 +213,12 @@ export class UserService {
 
   async getActionRelationsForUsers(
     userIds: number[],
+    actionLimit: number = 7,
   ): Promise<UserActionRelationsResponseDto> {
     const actions = (
       await this.actionRepository.find({
         relations: ['events'],
+        take: actionLimit,
       })
     ).filter((action) => action.status !== ActionStatus.Draft);
 

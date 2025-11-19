@@ -725,8 +725,8 @@ export const actionsFindAll = <ThrowOnError extends boolean = false>(options?: O
     });
 };
 
-export const actionsFindAllLoggedIn = <ThrowOnError extends boolean = false>(options?: Options<ActionsFindAllLoggedInData, ThrowOnError>) => {
-    return (options?.client ?? _heyApiClient).get<ActionsFindAllLoggedInResponse, unknown, ThrowOnError>({
+export const actionsFindAllLoggedIn = <ThrowOnError extends boolean = false>(options: Options<ActionsFindAllLoggedInData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).get<ActionsFindAllLoggedInResponse, unknown, ThrowOnError>({
         url: '/actions/loggedIn',
         ...options
     });

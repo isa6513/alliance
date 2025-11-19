@@ -2816,7 +2816,9 @@ export type ActionsFindAllResponse = ActionsFindAllResponses[keyof ActionsFindAl
 export type ActionsFindAllLoggedInData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        sorted: boolean;
+    };
     url: '/actions/loggedIn';
 };
 

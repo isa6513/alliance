@@ -50,62 +50,7 @@ const ActionsListPage = () => {
   useGrayBackground();
 
   const filteredActions = useMemo(
-    () =>
-      [...modeToActions[filterMode]].sort((a, b) => {
-        const futureA = a.events
-          .filter((event) => new Date(event.date) > new Date())
-          .sort(
-            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-          );
-
-        const futureB = b.events
-          .filter((event) => new Date(event.date) > new Date())
-          .sort(
-            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-          );
-
-        if (futureA.length > 0 && futureB.length > 0) {
-          const soonestFutureA = new Date(futureA[0].date);
-          const soonestFutureB = new Date(futureB[0].date);
-          return soonestFutureA.getTime() - soonestFutureB.getTime();
-        }
-
-        if (futureA.length > 0) {
-          return -1;
-        }
-        if (futureB.length > 0) {
-          return 1;
-        }
-
-        const pastA = a.events
-          .filter(
-            (event) =>
-              new Date(event.date) < new Date() &&
-              event.newStatus === "member_action"
-          )
-          .sort(
-            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-          );
-        const latestA =
-          pastA.length > 0
-            ? new Date(pastA[pastA.length - 1].date)
-            : new Date(0);
-
-        const pastB = b.events
-          .filter(
-            (event) =>
-              new Date(event.date) < new Date() &&
-              event.newStatus === "member_action"
-          )
-          .sort(
-            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-          );
-        const latestB =
-          pastB.length > 0
-            ? new Date(pastB[pastB.length - 1].date)
-            : new Date(0);
-        return latestB.getTime() - latestA.getTime();
-      }),
+    () => [...modeToActions[filterMode]],
     [modeToActions, filterMode]
   );
 

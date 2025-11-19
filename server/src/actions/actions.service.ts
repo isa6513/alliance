@@ -137,6 +137,70 @@ export class ActionsService {
       });
   }
 
+  async findAllSorted(
+    relations: string[] = [],
+    limit?: number,
+  ): Promise<Action[]> {
+    // Sort by:
+    // 1. Soonest upcoming event (sooner first)
+    // 2. Latest past member action event (later first)
+    // 3. Priority (higher priority first)
+
+    const qb = this.actionRepository
+      .createQueryBuilder('a')
+      .leftJoin('a.events', 'e')
+      .addSelect(
+        `
+    MIN(CASE WHEN e.date > NOW() THEN e.date END)
+  `,
+        'soonest_future_event_date',
+      )
+      .addSelect(
+        `
+    MAX(CASE 
+      WHEN e.newStatus = :memberAction THEN e.date 
+    END)
+  `,
+        'latest_memberaction_event_date',
+      )
+      .setParameter('memberAction', ActionStatus.MemberAction)
+      .groupBy('a.id')
+      .orderBy(
+        'CASE WHEN MIN(CASE WHEN e.date > NOW() THEN e.date END) IS NULL THEN 1 ELSE 0 END',
+        'ASC',
+      ) // actions with future events first
+      .addOrderBy('soonest_future_event_date', 'ASC') // earliest future event first
+      .addOrderBy(
+        'CASE WHEN MAX(CASE WHEN e.newStatus = :memberAction THEN e.date END) IS NULL THEN 1 ELSE 0 END',
+        'ASC',
+      ) // actions with past member-action events next
+      .addOrderBy('latest_memberaction_event_date', 'DESC') // latest member-action event first
+      .addOrderBy('a.priority', 'ASC'); // higher priority first
+
+    if (limit) {
+      qb.limit(limit);
+    }
+    const actions = await qb.getMany();
+
+    if (relations.length > 0) {
+      await Promise.all(
+        actions.map(async (action) => {
+          for (const rel of relations) {
+            const loaded = await this.actionRepository
+              .createQueryBuilder()
+              .relation(Action, rel)
+              .of(action)
+              .loadMany();
+
+            (action as any)[rel] = loaded;
+          }
+        }),
+      );
+    }
+
+    return actions;
+  }
+
   async reloadAllActionUsersJoined(): Promise<void> {
     const actions = await this.actionRepository.find();
     for (const action of actions) {
@@ -214,10 +278,16 @@ export class ActionsService {
     return set.size;
   }
 
-  async findPublic(userId?: number): Promise<ActionDto[]> {
-    const actions = await this.actionRepository.find({
-      relations: ['events', 'participatingGroups', 'activities'],
-    });
+  async findPublic(userId?: number, sorted?: boolean): Promise<ActionDto[]> {
+    const actions = sorted
+      ? await this.findAllSorted([
+          'events',
+          'participatingGroups',
+          'activities',
+        ])
+      : await this.actionRepository.find({
+          relations: ['events', 'participatingGroups', 'activities'],
+        });
 
     const user = userId
       ? await this.userService.findOne(userId, ['groups', 'awayRanges'])
@@ -252,6 +322,7 @@ export class ActionsService {
               action.everyoneShouldComplete,
             );
         }
+
         return new ActionDto(action, {
           canParticipate: user
             ? await this.isEligibleForAction(action, user)

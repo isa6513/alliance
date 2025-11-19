@@ -73,6 +73,16 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
           page: NavbarPage.Activity,
           destination: destinations[NavbarPage.Activity],
         },
+        ...(user?.communities.length ||
+        user?.invitedCommunities.filter((invite) => invite.status === "pending")
+          .length
+          ? [
+              {
+                page: NavbarPage.Groups,
+                destination: destinations[NavbarPage.Groups],
+              },
+            ]
+          : []),
         {
           page: NavbarPage.Forum,
           destination: destinations[NavbarPage.Forum],
@@ -85,16 +95,6 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
           page: NavbarPage.Search,
           destination: destinations[NavbarPage.Search],
         },
-        ...(user?.communities.length ||
-        user?.invitedCommunities.filter((invite) => invite.status === "pending")
-          .length
-          ? [
-              {
-                page: NavbarPage.Groups,
-                destination: destinations[NavbarPage.Groups],
-              },
-            ]
-          : []),
       ],
     },
     {

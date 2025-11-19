@@ -22,9 +22,9 @@ const OneTimeInviteListItem = ({
       <div className="flex flex-row gap-3 items-center">
         <p className="text-gray-500">{invite.code}</p>
         {invite.isValid ? (
-          <p className="text-green">Active</p>
+          <p className="text-green">Pending</p>
         ) : (
-          <p className="text-gray-500">used</p>
+          <p className="text-gray-500">Accepted</p>
         )}
         <div
           className="cursor-pointer active:scale-85 transition-all duration-100 hover:brightness-50"

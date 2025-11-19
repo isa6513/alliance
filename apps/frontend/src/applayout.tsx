@@ -70,7 +70,7 @@ export function clientLoader() {
   localStorage.setItem(revalidateKey, "false");
 
   const result: Promise<ActionLoaderData | null> = Promise.all([
-    actionsFindAllLoggedIn(),
+    actionsFindAllLoggedIn({ query: { sorted: true } }),
     actionsMyActivity(),
   ]).then(([actions, activities]) => {
     if (!activities.data || !actions.data) {
@@ -136,19 +136,8 @@ export function clientLoader() {
         relation: actionToRelationMap.get(action.id),
       }));
 
-    // Sort so that actions with the earliest last event come first
-    const actionsSortedByDate = actionsWithRelation?.sort((a, b) => {
-      const aEvent = a.events[a.events.length - 1];
-      const bEvent = b.events[b.events.length - 1];
-
-      const aDate = aEvent ? new Date(aEvent.date) : new Date(0);
-      const bDate = bEvent ? new Date(bEvent.date) : new Date(0);
-
-      return aDate.getTime() - bDate.getTime();
-    });
-
     return {
-      actions: actionsSortedByDate,
+      actions: actionsWithRelation,
       relations: actionToRelationMap,
       activities: activitiesForAction,
       loading: false,

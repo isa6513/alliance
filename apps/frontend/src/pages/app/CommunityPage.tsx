@@ -224,7 +224,7 @@ const CommunityPage = () => {
         <div className="w-1/2">
           <p className="text-sm">
             {nCompleted} / {community.users.length} have completed current
-            actions
+            action{activeActions.length !== 1 ? "s" : ""}
           </p>
           <CompletedBar
             percentage={(nCompleted / community.users.length) * 100}
