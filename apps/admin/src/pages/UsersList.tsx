@@ -78,6 +78,10 @@ const UsersList: React.FC = () => {
       if (!data) {
         return;
       }
+
+      // latest on the right
+      data.actions.reverse();
+
       setActionSummaries(data.actions ?? []);
       const relationMap: Record<number, UserActionRelationDetailDto[]> = {};
       for (const entry of data.users ?? []) {

@@ -105,6 +105,9 @@ const CommunityPage = () => {
   useEffect(() => {
     actionsGetCommunityMemberInfo().then((resp) => {
       if (resp.data) {
+        // Most recent actions first
+        resp.data.actions.reverse();
+
         setActionSummaries(resp.data.actions);
         setActiveActions(
           resp.data.actions.filter(

@@ -130,7 +130,7 @@ export default function ActionPage() {
           loading={false}
           onLikeActivity={handleLikeActivity}
           setActivities={setActivities}
-          maxN={5}
+          maxN={10}
         />
       </div>
     </div>

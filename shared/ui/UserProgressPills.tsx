@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   UserActionRelationDetailDto,
   UserActionRelationStatus,
@@ -38,9 +39,7 @@ const UserProgressPills = ({
 }: UserProgressPillsProps) => {
   return (
     <div className="flex gap-1 w-full">
-      {actions.map((_, i) => {
-        // most recent action on the right
-        const action = actions[actions.length - 1 - i];
+      {actions.map((action) => {
         const relation = relationByActionId[action.id] ?? {
           status: "none",
         };
