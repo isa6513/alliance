@@ -8,6 +8,7 @@ import { Type } from 'class-transformer';
 import { UserDto } from 'src/user/user.dto';
 import { DEVICE_VISIBILITY_TARGETS } from './schema';
 import type { DeviceVisibilityTarget } from './schema';
+import { Ty } from './entities/type';
 
 export class CreateFormDto extends PickType(Form, ['title', 'schema']) {}
 
@@ -37,7 +38,7 @@ export class SubmitFormDto extends PickType(FormResponse, [
 
 export class FormDto extends PickType(Form, ['id', 'title', 'schema']) {
   @ApiPropertyOptional({ type: () => ActionDto })
-  usedInAction?: ActionDto;
+  usedInAction?: Ty<ActionDto>;
 }
 
 export class FormResponseDto extends PickType(FormResponse, [

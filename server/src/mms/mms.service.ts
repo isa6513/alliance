@@ -5,7 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as Twilio from 'twilio'; // Use wildcard import for Twilio namespace
+import Twilio from 'twilio';
 import { Repository } from 'typeorm';
 import { Mms } from './mms.entity';
 

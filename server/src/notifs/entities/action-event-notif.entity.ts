@@ -15,6 +15,7 @@ import { NotificationChannel } from '../notif-utils';
 import { ReminderGroup } from 'src/actions/entities/reminder-group.entity';
 import { Type } from 'class-transformer';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
+import { Ty } from 'src/tasks/entities/type';
 
 export enum ActionEventNotifType {
   Announcement = 'announcement',
@@ -71,13 +72,13 @@ export class ActionEventNotif {
   @JoinColumn({ name: 'reminderGroupId' })
   @ApiPropertyOptional({ type: () => ReminderGroup })
   @Type(() => ReminderGroup)
-  reminderGroup?: ReminderGroup;
+  reminderGroup?: Ty<ReminderGroup>;
 
   @ManyToOne(() => User, (user) => user.actionEventNotifs, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user: Ty<User>;
 
   @Column({ default: false })
   @ApiProperty({

@@ -17,6 +17,7 @@ import { ActionSuite } from './action-suite.entity';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { Temporal } from '@js-temporal/polyfill';
 import { User } from 'src/user/entities/user.entity';
+import { Ty } from 'src/tasks/entities/type';
 
 export enum ReminderGroupTimingMode {
   Absolute = 'absolute',
@@ -76,7 +77,7 @@ export class ReminderGroup {
   @ApiPropertyOptional({ type: () => ActionSuite })
   @Type(() => ActionSuite)
   @IsOptional()
-  actionSuite?: ActionSuite;
+  actionSuite?: Ty<ActionSuite>;
 
   @ManyToOne(() => ActionEvent, { onDelete: 'CASCADE' })
   @ApiProperty({ type: () => ActionEvent })

@@ -15,6 +15,7 @@ import {
 import { ActionUpdate } from 'src/actions/entities/action-update.entity';
 import { Comment } from 'src/forum/entities/comment.entity';
 import { Type } from 'class-transformer';
+import { Ty } from 'src/tasks/entities/type';
 
 export enum NotificationCategory {
   ActionEvent = 'action_event',
@@ -99,5 +100,5 @@ export class Notification {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  comment?: Comment;
+  comment?: Ty<Comment>;
 }

@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Type } from 'class-transformer';
+import { Ty } from 'src/tasks/entities/type';
 
 @Entity()
 export class UserAwayRange {
@@ -22,7 +23,7 @@ export class UserAwayRange {
   @JoinColumn({ name: 'userId' })
   @Allow()
   @Type(() => User)
-  user: User;
+  user: Ty<User>;
 
   @Column()
   @ApiProperty()

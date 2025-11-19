@@ -14,6 +14,7 @@ import { EditableContent } from 'src/forum/entities/editablecontent.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Notification } from 'src/notifs/entities/notification.entity';
 import { Group } from 'src/user/entities/group.entity';
+import { Ty } from 'src/tasks/entities/type';
 
 export enum ActionUpdateNotifyType {
   None = 'none',
@@ -34,7 +35,7 @@ export class ActionUpdate {
   @Type(() => Action)
   @Allow()
   @ApiProperty({ type: () => Action })
-  action: Action;
+  action: Ty<Action>;
 
   @Column({ type: 'text' })
   @IsNotEmpty()
@@ -71,7 +72,7 @@ export class ActionUpdate {
   @Type(() => ActionEvent)
   @ApiPropertyOptional({ type: () => ActionEvent })
   @IsOptional()
-  associatedEvent?: ActionEvent;
+  associatedEvent?: Ty<ActionEvent>;
 
   @Column({
     type: 'enum',
@@ -90,7 +91,7 @@ export class ActionUpdate {
   @Type(() => Notification)
   @ApiProperty({ type: () => Notification, isArray: true })
   @Allow()
-  notifs: Notification[];
+  notifs: Ty<Notification>[];
 
   @ManyToOne(() => Group, { nullable: true })
   @JoinColumn({ name: 'groupId' })

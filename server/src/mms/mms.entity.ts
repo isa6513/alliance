@@ -24,7 +24,7 @@ export class Mms {
   @ApiProperty()
   body: string;
 
-  @Column()
+  @Column({ type: 'text' })
   @ApiProperty()
   status: MessageStatus;
 

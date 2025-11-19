@@ -25,6 +25,7 @@ import { SearchModule } from './search/search.module';
 import { TasksModule } from './tasks/tasks.module';
 import { UserModule } from './user/user.module';
 import { UserService } from './user/user.service';
+import { MessagingModule } from './messaging/messaging.module';
 
 @Module({
   imports: [
@@ -70,9 +71,9 @@ import { UserService } from './user/user.service';
     TasksModule,
     MmsModule,
     AnalyticsModule,
+    MessagingModule,
   ],
   controllers: [AppController],
-  providers: [],
 })
 export class AppModule {
   constructor(private userService: UserService) {

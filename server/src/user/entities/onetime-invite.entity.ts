@@ -11,6 +11,7 @@ import { Type } from 'class-transformer';
 import { Allow, IsOptional } from 'class-validator';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
 import { Community } from './community.entity';
+import { Ty } from 'src/tasks/entities/type';
 
 @Entity()
 export class OnetimeInvite {
@@ -34,7 +35,7 @@ export class OnetimeInvite {
   @Type(() => User)
   @JoinColumn({ name: 'invitingUserId' })
   @Allow()
-  invitingUser: User;
+  invitingUser: Ty<User>;
 
   @CreateDateColumnTz()
   @ApiProperty()
@@ -55,5 +56,5 @@ export class OnetimeInvite {
   @Type(() => Community)
   @JoinColumn({ name: 'communityId' })
   @IsOptional()
-  community?: Community;
+  community?: Ty<Community>;
 }

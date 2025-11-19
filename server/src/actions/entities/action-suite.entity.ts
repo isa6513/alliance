@@ -9,6 +9,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { ActionEvent } from './action-event.entity';
+import { Ty } from 'src/tasks/entities/type';
 
 @Entity()
 export class ActionSuite {
@@ -23,10 +24,10 @@ export class ActionSuite {
   name: string;
 
   @OneToMany(() => Action, (action) => action.suite)
-  @ApiProperty({ type: Action, isArray: true })
+  @ApiProperty({ type: () => Action, isArray: true })
   @Allow()
   @Type(() => Action)
-  actions: Action[];
+  actions: Ty<Action>[];
 
   @OneToMany(() => ReminderGroup, (reminderGroup) => reminderGroup.actionSuite)
   @ApiProperty({ type: ReminderGroup, isArray: true })

@@ -14,6 +14,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { Community } from './community.entity';
+import { Ty } from 'src/tasks/entities/type';
 
 export enum CommunityInviteStatus {
   Pending = 'pending',
@@ -34,14 +35,14 @@ export class CommunityInvite {
   @Type(() => User)
   @JoinColumn({ name: 'invitingUserId' })
   @IsOptional()
-  invitingUser?: User;
+  invitingUser?: Ty<User>;
 
   @ManyToOne(() => User, (user) => user.invitedCommunities)
   @ApiProperty({ type: () => User })
   @Type(() => User)
   @JoinColumn({ name: 'invitedUserId' })
   @Allow()
-  invitedUser: User;
+  invitedUser: Ty<User>;
 
   @Column({
     type: 'enum',
@@ -74,5 +75,5 @@ export class CommunityInvite {
   @Type(() => Community)
   @JoinColumn({ name: 'communityId' })
   @IsDefined()
-  community: Community;
+  community: Ty<Community>;
 }

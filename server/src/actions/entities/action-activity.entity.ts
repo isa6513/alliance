@@ -17,6 +17,7 @@ import {
 import { User } from '../../user/entities/user.entity';
 import { Action } from './action.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import { Ty } from 'src/tasks/entities/type';
 
 export enum ActionActivityType {
   USER_JOINED = 'user_joined',
@@ -57,7 +58,7 @@ export class ActionActivity {
   @JoinColumn({ name: 'userId' })
   @Allow()
   @Type(() => User)
-  user: User;
+  user: Ty<User>;
 
   @Column()
   @Allow()

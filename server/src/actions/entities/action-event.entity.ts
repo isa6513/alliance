@@ -13,6 +13,7 @@ import {
 import { Action } from './action.entity';
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
 import { ActionUpdate } from './action-update.entity';
+import { Ty } from 'src/tasks/entities/type';
 
 export enum NotificationType {
   All = 'all',
@@ -96,7 +97,7 @@ export class ActionEvent {
   @IsDefined()
   @Allow()
   @Type(() => Action)
-  action: Action;
+  action: Ty<Action>;
 
   @OneToMany(() => ActionUpdate, (update) => update.associatedEvent)
   @ApiProperty({ type: ActionUpdate, isArray: true })

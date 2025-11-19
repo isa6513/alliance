@@ -5,7 +5,7 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
 import { useContainer } from 'class-validator';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import { PostHog, setupExpressErrorHandler } from 'posthog-node';
 import { ServerOptions } from 'socket.io';
 import { AppModule } from './app.module';

@@ -14,6 +14,7 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
+import { Ty } from 'src/tasks/entities/type';
 export enum FriendStatus {
   Pending = 'pending',
   Accepted = 'accepted',
@@ -31,13 +32,13 @@ export class Friend {
   @ManyToOne(() => User, (user) => user.sentFriendRequests, {
     onDelete: 'CASCADE',
   })
-  requester: User;
+  requester: Ty<User>;
 
   /** User who received the request */
   @ManyToOne(() => User, (user) => user.receivedFriendRequests, {
     onDelete: 'CASCADE',
   })
-  addressee: User;
+  addressee: Ty<User>;
 
   @Column({ type: 'enum', enum: FriendStatus, default: FriendStatus.None })
   @ApiProperty({ enum: FriendStatus, enumName: 'FriendStatus' })

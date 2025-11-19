@@ -13,6 +13,7 @@ import {
 } from 'typeorm';
 import { Form } from './form.entity';
 import type { DeviceVisibilityTarget } from '../schema';
+import { Ty } from './type';
 
 @Entity()
 @Unique(['user', 'formId'])
@@ -30,7 +31,7 @@ export class FormResponse {
   @ManyToOne(() => Form, (f) => f.responses, { onDelete: 'CASCADE' })
   @IsDefined()
   @Type(() => Form)
-  form: Form;
+  form: Ty<Form>;
 
   @Column({ type: 'jsonb' })
   @ApiProperty()
@@ -61,7 +62,7 @@ export class FormResponse {
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @IsDefined()
   @Type(() => User)
-  user: User;
+  user: Ty<User>;
 
   @CreateDateColumn()
   @ApiProperty()
