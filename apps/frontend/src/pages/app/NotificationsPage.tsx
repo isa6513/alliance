@@ -52,9 +52,12 @@ const NotificationsPage = () => {
                 <h3>{notification.message}</h3>
               </div>
               <p className=" text-zinc-500 text-sm">
-                {formatTime(new Date(notification.createdAt), {
-                  addSuffix: true,
-                })}
+                {formatTime(
+                  new Date(notification.sendTime || notification.createdAt),
+                  {
+                    addSuffix: true,
+                  }
+                )}
               </p>
             </div>
           ))}

@@ -57,7 +57,8 @@ export const NotificationsProvider = ({
     const sorted = data
       .sort(
         (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          new Date(b.sendTime || b.createdAt).getTime() -
+          new Date(a.sendTime || a.createdAt).getTime()
       )
       .filter((n) => new Date(n.sendTime).getTime() <= new Date().getTime());
 
