@@ -130,7 +130,7 @@ const ActionActivityDetail = () => {
 
   return (
     <>
-      <div className="flex flex-col gap-y-3 flex-2 px-5 pl-10 pt-5 w-full">
+      <div className="flex flex-col gap-y-3 flex-2 pr-0 sm:pr-5 xl:pl-10 pt-5 w-full">
         <Link
           className="flex flex-row gap-x-2 items-center cursor-pointer hover:bg-zinc-50 self-start px-2 py-1 rounded border border-zinc-200"
           to={`/actions/${action.id}`}
@@ -141,11 +141,14 @@ const ActionActivityDetail = () => {
         <h1 className="font-serif !font-medium w-full">{action.name}</h1>
         {activity !== null && (
           <>
-            <div className="flex flex-row items-center justify-between mt-4 flex-wrap gap-y-4">
-              <div className="flex flex-row flex-wrap items-center">
-                <div className="flex flex-row items-center gap-x-2 min-w-[200px]">
+            <div className="flex flex-col gap-y-2 lg:gap-y-0 lg:flex-row lg:items-center lg:gap-x-2 justify-between mt-4">
+              <div className="flex flex-col gap-y-2 lg:gap-y-0 lg:flex-row items-start lg:items-center">
+                <div className="flex flex-row items-center gap-x-2">
                   {activity.user.profilePicture !== null && (
-                    <Link to={`/user/${activity.user.id}`}>
+                    <Link
+                      to={`/user/${activity.user.id}`}
+                      className="flex-shrink-0"
+                    >
                       <ProfileImage
                         pfp={activity.user.profilePicture}
                         size="medium"
@@ -166,7 +169,7 @@ const ActionActivityDetail = () => {
                 {isOwner && !editing && (
                   <button
                     onClick={() => setEditing(true)}
-                    className="text-green text-sm underline text-nowrap"
+                    className="text-green text-sm underline md:ml-2 text-nowrap"
                   >
                     {activity.editableContent?.body
                       ? "Edit details"
