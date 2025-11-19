@@ -5,6 +5,7 @@ import {
   PaymentMethodDto,
   paymentsClearPaymentMethods,
   paymentsPaymentMethod,
+  PublicFormResponseDefault,
   UserDto,
   userMyLocation,
   userUpdate,
@@ -37,6 +38,7 @@ type EditableUserFields = Pick<
   | "preferredActionReminderChannel"
   | "preferredReminderTime"
   | "timeZone"
+  | "formDataPreference"
 >;
 
 const SettingsPage: React.FC = () => {
@@ -425,6 +427,29 @@ const SettingsPage: React.FC = () => {
 
           <div>
             <AwayRangesSection />
+          </div>
+
+          <div>
+            <h2 className="!font-semibold !text-xl mb-4 mt-2">Privacy</h2>
+            <div className="flex flex-col gap-y-2 mb-4">
+              <p className="mb-0">
+                Allow some action responses to be shared with other members in
+                your action activity by default?
+              </p>
+              <select
+                className="border border-zinc-300 rounded px-3 py-2 self-start"
+                value={editableUser.formDataPreference}
+                onChange={(event) =>
+                  updateEditableUser({
+                    formDataPreference: event.target
+                      .value as PublicFormResponseDefault,
+                  })
+                }
+              >
+                <option value={"public"}>Default to public</option>
+                <option value={"private"}>Default to private</option>
+              </select>
+            </div>
           </div>
 
           {paymentMethod !== null && (

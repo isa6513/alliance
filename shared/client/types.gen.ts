@@ -44,6 +44,8 @@ export type CommunityInvite = {
     community: Community;
 };
 
+export type PublicFormResponseDefault = 'public' | 'private';
+
 export type User = {
     id: number;
     name: string;
@@ -76,6 +78,7 @@ export type User = {
     anonymous: boolean;
     communities: Array<Community>;
     invitedCommunities: Array<CommunityInvite>;
+    formDataPreference: PublicFormResponseDefault;
 };
 
 export type OnetimeInvite = {
@@ -123,6 +126,7 @@ export type UserDto = {
     anonymous: boolean;
     communities: Array<Community>;
     invitedCommunities: Array<CommunityInvite>;
+    formDataPreference: PublicFormResponseDefault;
     cityId?: number;
     email: string;
     phoneNumber?: string;
@@ -201,6 +205,7 @@ export type UpdateProfileDto = {
     anonymous?: boolean;
     communities?: Array<Community>;
     invitedCommunities?: Array<CommunityInvite>;
+    formDataPreference?: PublicFormResponseDefault;
     cityId?: number;
 };
 

@@ -1,6 +1,7 @@
 import {
   ForumDigestPreference,
   NotificationPreference,
+  PublicFormResponseDefault,
 } from 'src/user/entities/user.entity';
 import { NotificationChannel } from './notif-utils';
 
@@ -28,6 +29,7 @@ export const testUser = {
   activities: [],
   createdAt: new Date(),
   updatedAt: new Date(),
+  formDataPreference: PublicFormResponseDefault.Public,
   sentFriendRequests: [],
   receivedFriendRequests: [],
   notifications: [],

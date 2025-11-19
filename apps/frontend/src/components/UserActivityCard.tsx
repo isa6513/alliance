@@ -132,8 +132,6 @@ const UserActivityCard = ({
     setIsEditing(false);
   }, [activity.editableContent]);
 
-  console.log(activity.formResponseOutput);
-
   return (
     <div className="flex flex-col">
       <div

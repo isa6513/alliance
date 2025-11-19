@@ -52,6 +52,11 @@ export enum ForumDigestPreference {
   Weekly = 'weekly',
 }
 
+export enum PublicFormResponseDefault {
+  Public = 'public',
+  Private = 'private',
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -337,4 +342,15 @@ export class User {
   @Type(() => CommunityInvite)
   @IsDefined()
   invitedCommunities: CommunityInvite[];
+
+  @Column({
+    type: 'enum',
+    enum: PublicFormResponseDefault,
+    default: PublicFormResponseDefault.Public,
+  })
+  @ApiProperty({
+    enum: PublicFormResponseDefault,
+    enumName: 'PublicFormResponseDefault',
+  })
+  formDataPreference: PublicFormResponseDefault;
 }
