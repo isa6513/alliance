@@ -394,7 +394,7 @@ jobs:
           echo "NODE_ENV=test" >> $GITHUB_ENV
 
       - name: Run migrations on blank DB
-        run: npx typeorm-ts-node-commonjs --dataSource dist/src/datasources/dataSource.js migration:run
+        run: npx typeorm-ts-node-commonjs --dataSource src/datasources/dataSource.ts migration:run
         working-directory: ./server
 
       - name: Schema drift check
@@ -402,7 +402,7 @@ jobs:
         run: |
           set -e
 
-          OUT="$(npx typeorm-ts-node-commonjs --dataSource dist/src/datasources/dataSource.js schema:log || true)"
+          OUT="$(npx typeorm-ts-node-commonjs --dataSource src/datasources/dataSource.ts schema:log || true)"
           echo "$OUT"
 
           if echo "$OUT" | grep -Eiq '^\s*(ALTER|CREATE|DROP|COMMENT|RENAME|TRUNCATE|INSERT INTO|UPDATE |DELETE FROM)\b'; then
