@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { DisplayBlock } from './display-blocks';
+import type { DisplayBlock } from './display-blocks';
 
 // field-kinds.ts
 export type FieldKind =

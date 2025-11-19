@@ -77,6 +77,19 @@ export function EditableImageBlock({
 
         {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
 
+        <div className="space-y-1">
+          <label className="block text-xs font-medium text-gray-600">
+            Caption
+          </label>
+          <input
+            type="text"
+            value={block.caption ?? ""}
+            onChange={(e) => onUpdate({ caption: e.target.value })}
+            placeholder="Add an optional caption"
+            className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
         {/* Preview */}
         <div className="pt-2 border-t border-gray-200">
           <RenderDisplayBlock block={block} />

@@ -85,23 +85,31 @@ export default function RenderDisplayBlock({ block }: Props) {
     case "html":
       return <div dangerouslySetInnerHTML={{ __html: block.html }} />;
 
-    case "image":
+    case "image": {
+      const resolvedSrc = block.src.includes("/")
+        ? block.src
+        : `${getApiUrl()}/images/${block.src}`;
+      const hasCaption = Boolean(block.caption && block.caption.trim().length);
       return (
-        <img
-          src={
-            block.src.includes("/")
-              ? block.src
-              : `${getApiUrl()}/images/${block.src}` //TODO: right now this is only needed for when we upload a new image in the form builder and it uses the key without transformation
-          }
-          alt={block.alt}
-          className="mx-auto max-h-80 w-auto rounded"
-          style={{
-            aspectRatio: block.aspectRatio
-              ? block.aspectRatio.toString()
-              : undefined,
-          }}
-        />
+        <figure className="mx-auto max-w-full text-center">
+          <img
+            src={resolvedSrc}
+            alt={block.alt}
+            className="mx-auto max-h-80 w-auto rounded"
+            style={{
+              aspectRatio: block.aspectRatio
+                ? block.aspectRatio.toString()
+                : undefined,
+            }}
+          />
+          {hasCaption && (
+            <figcaption className="mt-2 text-sm text-gray-600">
+              {block.caption}
+            </figcaption>
+          )}
+        </figure>
       );
+    }
 
     case "quote":
       return (

@@ -64,6 +64,7 @@ export type ImageBlock = BaseBlock & {
   alt: string;
   src: string; // or { key: string } if you want S3 keys
   aspectRatio?: number; // e.g., 16/9
+  caption?: string;
 };
 
 export type DisplayBlock =
