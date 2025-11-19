@@ -30,6 +30,7 @@ import { ReminderGroup } from '../entities/reminder-group.entity';
 import { ActionSuite } from '../entities/action-suite.entity';
 import { Form } from 'src/tasks/entities/form.entity';
 import { SubmitFormDto } from 'src/tasks/form.dto';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 
 export class CreateReminderGroupDto extends PickType(ReminderGroup, [
   'name',
@@ -217,6 +218,20 @@ export class OptOutActionDto {
   partialFormData?: SubmitFormDto;
 }
 
+export class FormResponseOutputDto extends PickType(FormResponse, [
+  'id',
+  'answers',
+  'formId',
+  'schemaSnapshot',
+  'visibilityValidatorResults',
+  'deviceType',
+]) {
+  constructor(formResponse: FormResponse) {
+    super();
+    Object.assign(this, formResponse);
+  }
+}
+
 export class ActionActivityDto extends PickType(ActionActivity, [
   'id',
   'type',
@@ -242,12 +257,23 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   @Allow()
   comments: CommentDto[];
 
+  @ApiPropertyOptional({ type: () => FormResponseOutputDto })
+  @Type(() => FormResponseOutputDto)
+  @IsOptional()
+  formResponseOutput?: FormResponseOutputDto;
+
   @ApiProperty({ type: () => EditableContentDto })
   @Type(() => EditableContentDto)
   @Allow()
   editableContent: EditableContentDto;
 
-  constructor(actionActivity: ActionActivity, comments: CommentDto[] = []) {
+  constructor(
+    actionActivity: ActionActivity,
+    extra?: {
+      comments?: CommentDto[];
+      formResponseOutput?: FormResponseOutputDto;
+    },
+  ) {
     super();
     this.actionName = actionActivity.action?.name;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -258,7 +284,8 @@ export class ActionActivityDto extends PickType(ActionActivity, [
       actionActivity.likes !== undefined
         ? actionActivity.likes.map((like) => new ProfileDto(like))
         : [];
-    this.comments = comments;
+    this.comments = extra?.comments ?? [];
+    this.formResponseOutput = extra?.formResponseOutput;
     this.editableContent = actionActivity.editableContent
       ? new EditableContentDto(actionActivity.editableContent)
       : { body: '', attachments: [] };

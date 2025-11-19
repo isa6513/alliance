@@ -29,14 +29,17 @@ export const DEVICE_VISIBILITY_TARGETS = [
   "tablet",
   "desktop",
 ] as const;
-export type DeviceVisibilityTarget =
-  (typeof DEVICE_VISIBILITY_TARGETS)[number];
+export type DeviceVisibilityTarget = (typeof DEVICE_VISIBILITY_TARGETS)[number];
+
+export interface FieldOutputConfig {
+  output?: boolean;
+}
 
 // Base field for dynamic forms (no generics, runtime-first)
 interface BaseField<TKind extends FieldKind> {
   id: string;
   kind: TKind;
-  label: string;
+  label: string | null;
   description?: string;
   required?: boolean;
   defaultValue?: FormValue | null;
@@ -48,6 +51,8 @@ interface BaseField<TKind extends FieldKind> {
 
   // UI hints
   width?: "full" | "1/2" | "1/3";
+
+  output?: FieldOutputConfig;
 }
 
 // Conditions reference other field ids; we type this late with a helper (see defineForm)
@@ -143,4 +148,25 @@ export interface FormSchema {
   description?: string;
   pages: Page[];
   submit?: { label?: string };
+
+  outputViews: OutputViewSchema[];
+}
+
+export type OutputBlock = DisplayBlock | OutputFieldBlock;
+
+export interface OutputFieldBlock {
+  id: string;
+  fieldId: string;
+  showLabel?: boolean;
+  labelOverride?: string;
+  format?: "field" | "textonly" | "card";
+  visibleIf?: Condition[];
+}
+
+export interface OutputViewSchema {
+  type: "default" | "page" | "card" | "personal";
+  id: string;
+  title?: string;
+  description?: string;
+  blocks: OutputBlock[];
 }

@@ -5,6 +5,7 @@ import {
   type FormDto,
 } from "@alliance/shared/client";
 import FormRenderer from "@alliance/shared/forms/FormRenderer";
+import OutputRenderer from "@alliance/shared/forms/OutputRenderer";
 import type {
   FieldKind,
   FormSchema,
@@ -287,21 +288,40 @@ const FormResponses: React.FC = () => {
             </div>
           </div>
           {form !== null && (
-            <div className="max-w-[600px] mx-auto pt-10">
-              <FormRenderer
-                id={form.id}
-                actionId={0}
-                form={
+            <div className="max-w-[600px] mx-auto pt-10 space-y-4">
+              {(() => {
+                const responseSchema =
                   (pageItems[0].schemaSnapshot as unknown as FormSchema) ??
-                  form.schema
+                  form.schema;
+                const hasOutputViews =
+                  Array.isArray(responseSchema.outputViews) &&
+                  responseSchema.outputViews.length > 0;
+                if (hasOutputViews) {
+                  return (
+                    <div className="bg-white p-6 border border-gray-200 rounded-lg">
+                      <OutputRenderer
+                        schema={responseSchema}
+                        submission={pageItems[0]}
+                      />
+                    </div>
+                  );
                 }
-                completedFormResponse={pageItems[0]}
-                renderFormAsCompleted
-                onSubmit={null}
-                userId={pageItems[0]?.user?.id}
-                user={pageItems[0]?.user ?? undefined}
-                disableOptionRandomization
-              />
+                return (
+                  <div className="bg-white p-6 border border-gray-200 rounded-lg">
+                    <FormRenderer
+                      id={form.id}
+                      actionId={0}
+                      form={responseSchema}
+                      completedFormResponse={pageItems[0]}
+                      renderFormAsCompleted
+                      onSubmit={null}
+                      userId={pageItems[0]?.user?.id}
+                      user={pageItems[0]?.user ?? undefined}
+                      disableOptionRandomization
+                    />
+                  </div>
+                );
+              })()}
             </div>
           )}
         </>

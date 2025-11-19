@@ -15,7 +15,7 @@ import type {
   FormSchema,
   Page,
 } from "@alliance/shared/forms/formschema";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   EditableDividerBlock,
   EditableHeaderBlock,
@@ -43,10 +43,11 @@ import {
   EditableCustomComponentField,
 } from "./form-fields";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
 import { customComponentRegistry } from "@alliance/shared/forms/components";
 import { FORM_BUILDER_PREVIEW_USER } from "../lib/testData";
+import { OutputBuilder } from "./OutputBuilder";
 
 interface FormBuilderProps {
   onSave?: (schema: FormSchema) => void;
@@ -55,6 +56,11 @@ interface FormBuilderProps {
   setFormId: (formId: number) => void;
 }
 
+const ensureOutputViews = (schema: FormSchema): FormSchema => ({
+  ...schema,
+  outputViews: schema.outputViews ?? [],
+});
+
 export function FormBuilder({
   onSave,
   initialSchema,
@@ -62,18 +68,36 @@ export function FormBuilder({
   setFormId,
 }: FormBuilderProps) {
   const [schema, setSchema] = useState<FormSchema>(
-    initialSchema || {
-      title: "Untitled Form",
-      description: "",
-      pages: [
-        {
-          id: "page-1",
-          title: "Page 1",
-          fields: [],
-        },
-      ],
-      submit: { label: "Complete" },
-    }
+    initialSchema
+      ? ensureOutputViews(initialSchema)
+      : {
+          title: "Untitled Form",
+          description: "",
+          pages: [
+            {
+              id: "page-1",
+              title: "Page 1",
+              fields: [],
+            },
+          ],
+          submit: { label: "Complete" },
+          outputViews: [],
+        }
+  );
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeEditor = searchParams.get("editor") ?? "form";
+
+  const setActiveEditor = useCallback(
+    (editor: "form" | "outputs") => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set("editor", editor);
+        return next;
+      });
+    },
+    [setSearchParams]
   );
 
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
@@ -205,7 +229,9 @@ export function FormBuilder({
             // Convert the form entity back to FormSchema
             const form = response.data as any;
             if (form.schema) {
-              setSchema(form.schema as unknown as FormSchema);
+              setSchema(
+                ensureOutputViews(form.schema as unknown as FormSchema)
+              );
             }
           }
         })
@@ -432,8 +458,14 @@ export function FormBuilder({
   };
 
   const updateSchema = (newSchema: FormSchema) => {
-    setSchema(newSchema);
+    setSchema(ensureOutputViews(newSchema));
   };
+
+  useEffect(() => {
+    if (activeEditor === "outputs" && isPreviewMode) {
+      setIsPreviewMode(false);
+    }
+  }, [activeEditor, isPreviewMode]);
 
   const addPage = () => {
     const newPage: Page = {
@@ -680,7 +712,7 @@ export function FormBuilder({
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => handleSearchKeyDown(e, insertIndex)}
               placeholder="Type to search for elements (text, header, divider...)"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
               autoFocus
               onClick={(e) => e.stopPropagation()}
             />
@@ -991,7 +1023,7 @@ export function FormBuilder({
 
   return (
     <div className="flex h-[calc(100vh-40px)] bg-gray-50">
-      {!isPreviewMode && (
+      {!isPreviewMode && activeEditor === "form" && (
         <ElementSelect
           onAddField={addField}
           onAddDisplayBlock={addDisplayBlock}
@@ -1001,7 +1033,7 @@ export function FormBuilder({
       {/* Main content area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="bg-white shadow-sm border-b border-gray-200 p-4">
+        <div className="bg-white border-b border-gray-200 p-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center space-x-4 flex-1">
               <input
@@ -1021,12 +1053,14 @@ export function FormBuilder({
               >
                 View Responses
               </Button>
-              <Button
-                onClick={() => setIsPreviewMode(!isPreviewMode)}
-                color={ButtonColor.Light}
-              >
-                {isPreviewMode ? "Edit Form" : "Preview Form"}
-              </Button>
+              {activeEditor === "form" && (
+                <Button
+                  onClick={() => setIsPreviewMode(!isPreviewMode)}
+                  color={ButtonColor.Light}
+                >
+                  {isPreviewMode ? "Edit Form" : "Preview Form"}
+                </Button>
+              )}
               <Button
                 onClick={handleSaveForm}
                 disabled={isSaving || isLoading}
@@ -1035,10 +1069,34 @@ export function FormBuilder({
                 {isSaving ? "Saving..." : "Save Form"}
               </Button>
             </div>
+            <div className="inline-flex rounded-md bg-gray-100 p-1 text-sm font-medium text-gray-600">
+              <button
+                type="button"
+                className={`px-3 py-1 rounded-md text-nowrap ${
+                  activeEditor === "form"
+                    ? "bg-white shadow text-gray-900"
+                    : "text-gray-600"
+                }`}
+                onClick={() => setActiveEditor("form")}
+              >
+                Form builder
+              </button>
+              <button
+                type="button"
+                className={`px-3 py-1 rounded-md text-nowrap ${
+                  activeEditor === "outputs"
+                    ? "bg-white shadow text-gray-900"
+                    : "text-gray-600"
+                }`}
+                onClick={() => setActiveEditor("outputs")}
+              >
+                Output views
+              </button>
+            </div>
           </div>
 
           {/* Page tabs - only show in edit mode */}
-          {!isPreviewMode && (
+          {!isPreviewMode && activeEditor === "form" && (
             <div
               className="flex space-x-1 mt-4 items-center"
               onDragOver={(e) => {
@@ -1213,7 +1271,9 @@ export function FormBuilder({
         </div>
 
         <div className="flex-1 p-6 overflow-y-auto min-h-0">
-          {isPreviewMode ? (
+          {activeEditor === "outputs" ? (
+            <OutputBuilder schema={schema} onSchemaChange={updateSchema} />
+          ) : isPreviewMode ? (
             <div className="max-w-3xl mx-auto bg-white p-6 border border-gray-200 rounded-lg">
               <FormRenderer
                 id={0}

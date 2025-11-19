@@ -35,6 +35,7 @@ import {
   CreateActionUpdateDto,
   CreateReminderGroupDto,
   ExportActionDto,
+  FormResponseOutputDto,
   LatLonDto,
   UpdateActionActivityDto,
   UpdateActionDto,
@@ -63,6 +64,7 @@ import { LikeNotificationService } from 'src/notifs/like-notification.service';
 import { actionActivityUrl } from 'src/search/approutes';
 import { ForumService } from 'src/forum/forum.service';
 import { Form } from 'src/tasks/entities/form.entity';
+import { FormSchema } from 'src/tasks/schema';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -400,7 +402,6 @@ export class ActionsService {
   ): Promise<ActionActivityDto> {
     const action = await this.findOne(actionId, userId);
 
-    console.log('adminCreated: ', adminCreated);
     if (
       (type === ActionActivityType.USER_JOINED ||
         type === ActionActivityType.USER_COMPLETED) &&
@@ -605,7 +606,7 @@ export class ActionsService {
   ): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
       where: { userId, type: ActionActivityType.USER_COMPLETED },
-      relations: ['action', 'user', 'likes'],
+      relations: ['action', 'user', 'likes', 'taskFormResponse'],
     });
     if (comments) {
       return this.attachComments(activities);
@@ -632,10 +633,49 @@ export class ActionsService {
       }));
   }
 
+  buildOutputFormResponse(
+    activity: ActionActivity,
+  ): FormResponseOutputDto | undefined {
+    if (!activity.taskFormResponse) {
+      return undefined;
+    }
+
+    const schema = activity.taskFormResponse
+      .schemaSnapshot as unknown as FormSchema;
+
+    const answerToIsPublic = (answer: string) => {
+      return schema.pages.some((page) =>
+        page.fields.some(
+          (field) =>
+            field.id === answer &&
+            'label' in field &&
+            field.output?.output === true,
+        ),
+      );
+    };
+
+    const answers = activity.taskFormResponse.answers;
+
+    const answersPrunedObj = Object.fromEntries(
+      Object.entries(answers).filter(([key]) => answerToIsPublic(key)),
+    );
+
+    if (!Object.keys(answersPrunedObj).length) {
+      return undefined;
+    }
+
+    const responseWithPruned = {
+      ...activity.taskFormResponse,
+      answers: answersPrunedObj,
+    } as FormResponse;
+
+    return new FormResponseOutputDto(responseWithPruned);
+  }
+
   async getActionActivities(actionId: number): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
       where: { actionId },
-      relations: ['user', 'likes'],
+      relations: ['user', 'likes', 'taskFormResponse'],
       order: { createdAt: 'DESC' },
     });
     return activities.map((activity) => new ActionActivityDto(activity));
@@ -646,12 +686,14 @@ export class ActionsService {
   ): Promise<ActionActivityDto[]> {
     return Promise.all(
       activities.map(async (activity) => {
-        return new ActionActivityDto(
-          activity,
-          (await this.forumService.findCommentsForActivity(activity.id)).map(
-            (comment) => new CommentDto(comment),
-          ),
-        );
+        return new ActionActivityDto(activity, {
+          comments: (
+            await this.forumService.findCommentsForActivity(activity.id)
+          ).map((comment) => new CommentDto(comment)),
+          formResponseOutput: activity.taskFormResponse
+            ? this.buildOutputFormResponse(activity)
+            : undefined,
+        });
       }),
     );
   }
@@ -669,7 +711,7 @@ export class ActionsService {
           ActionActivityType.USER_COMPLETED,
         ]),
       },
-      relations: ['user', 'action', 'likes'],
+      relations: ['user', 'action', 'likes', 'taskFormResponse'],
       order: { createdAt: 'DESC' },
       take: limit,
     });
@@ -871,7 +913,7 @@ export class ActionsService {
           ActionActivityType.USER_COMPLETED,
         ]),
       },
-      relations: ['user', 'action', 'likes'],
+      relations: ['user', 'action', 'likes', 'taskFormResponse'],
       order: { createdAt: 'DESC' },
     });
 
@@ -901,7 +943,7 @@ export class ActionsService {
           ActionActivityType.USER_COMPLETED,
         ]),
       },
-      relations: ['user', 'action', 'likes'],
+      relations: ['user', 'action', 'likes', 'taskFormResponse'],
       order: { createdAt: 'DESC' },
       take: limitNum,
     });
@@ -924,12 +966,14 @@ export class ActionsService {
   async getActivity(id: number): Promise<ActionActivityDto> {
     const activity = await this.actionActivityRepository.findOne({
       where: { id },
-      relations: ['user', 'action', 'likes'],
+      relations: ['user', 'action', 'likes', 'taskFormResponse'],
     });
     if (!activity) {
       throw new NotFoundException('Activity not found');
     }
-    return new ActionActivityDto(activity);
+    return new ActionActivityDto(activity, {
+      formResponseOutput: this.buildOutputFormResponse(activity),
+    });
   }
 
   async getEvent(id: number): Promise<ActionEventDto> {
@@ -1021,7 +1065,7 @@ export class ActionsService {
   ): Promise<ActionActivityDto> {
     const activity = await this.actionActivityRepository.findOne({
       where: { id },
-      relations: ['editableContent'],
+      relations: ['editableContent', 'taskFormResponse'],
     });
     if (!activity) {
       throw new NotFoundException('Activity not found');

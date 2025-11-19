@@ -70,6 +70,30 @@ export function RequiredAsterisk({
   return <span className={className}>*</span>;
 }
 
+type OutputFieldToggleProps = {
+  checked?: boolean;
+  onChange: (checked: boolean) => void;
+  className?: string;
+};
+
+export function OutputFieldToggle({
+  checked,
+  onChange,
+  className = "",
+}: OutputFieldToggleProps) {
+  return (
+    <label className={`flex items-center text-xs text-gray-700 ${className}`}>
+      <input
+        type="checkbox"
+        checked={!!checked}
+        onChange={(event) => onChange(event.target.checked)}
+        className="mr-2"
+      />
+      Set as output field
+    </label>
+  );
+}
+
 // ---------------- Conditional Visibility ----------------
 type ConditionalVisibilityProps = {
   field: (AnyField | DisplayBlock) & { visibleIf?: Condition[] | Condition };

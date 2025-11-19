@@ -85,7 +85,9 @@ export function EditableChoiceField({
       Array.isArray(field.defaultValue) &&
       field.defaultValue.includes(removedValue)
     ) {
-      const filtered = field.defaultValue.filter((value) => value !== removedValue);
+      const filtered = field.defaultValue.filter(
+        (value) => value !== removedValue
+      );
       updates.defaultValue = filtered.length > 0 ? filtered : null;
     }
     onUpdate(updates);
@@ -192,7 +194,7 @@ export function EditableChoiceField({
             Add Option
           </button>
         </div>
-        <div className="space-y-2 overflow-y-auto">
+        <div className="space-y-2 overflow-y-auto py-1">
           {field.options?.map((option, index) => (
             <div key={index} className="flex items-center space-x-2">
               {field.kind === "select" && (

@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { AnyField } from "@alliance/shared/forms/formschema";
-import { ConditionalVisibility, CustomValidatorSelect } from "./CommonControls";
+import {
+  ConditionalVisibility,
+  CustomValidatorSelect,
+  OutputFieldToggle,
+} from "./CommonControls";
 import type { FieldWrapperProps } from "./types";
 import RenderField from "@alliance/shared/forms/RenderField";
 import {
@@ -160,6 +164,29 @@ export function FieldWrapper<T extends AnyField>({
     }
   };
 
+  const handleOutputFieldToggle = (checked: boolean) => {
+    if (!isFormField(field)) {
+      return;
+    }
+    if (checked) {
+      onUpdate({
+        output: { ...(field.output ?? {}), output: true },
+      } as Partial<T>);
+      return;
+    }
+    const currentOutput = field.output;
+    if (!currentOutput) {
+      onUpdate({ output: undefined } as Partial<T>);
+      return;
+    }
+    const nextConfig = { ...currentOutput };
+    delete (nextConfig as { output?: boolean }).output;
+    const hasOtherKeys = Object.keys(nextConfig).length > 0;
+    onUpdate({
+      output: hasOtherKeys ? nextConfig : undefined,
+    } as Partial<T>);
+  };
+
   return (
     <div
       className={`group relative border rounded-lg transition-all [&_input,&_textarea]:bg-white ${
@@ -250,7 +277,16 @@ export function FieldWrapper<T extends AnyField>({
       </div>
 
       <div className="space-y-3">
-        <div className="bg-gray-100 p-4 rounded-t-lg space-y-2">{children}</div>
+        <div className="bg-gray-100 p-4 rounded-t-lg space-y-2">
+          {children}
+          {isCurrentFormField && (
+            <OutputFieldToggle
+              checked={Boolean(field.output?.output)}
+              onChange={handleOutputFieldToggle}
+              className="mt-2"
+            />
+          )}
+        </div>
         {isCurrentFormField && (
           <div className="p-4 pt-0">
             <RenderField

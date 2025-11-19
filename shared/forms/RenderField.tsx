@@ -37,7 +37,9 @@ export function RenderLabel({
   const hasError = Boolean(error);
   return (
     <label className={`block ${hasError ? "text-red-600" : "text-zinc-700"}`}>
-      <FormMarkdownWrapper markdownContent={field.label} inline />
+      {field.label !== null && (
+        <FormMarkdownWrapper markdownContent={field.label} inline />
+      )}
       {field.required && <span className="text-red-500 ml-1">*</span>}
     </label>
   );
@@ -495,27 +497,29 @@ export function RenderField({
               />
             </div>
           )}
-          <div className="flex items-center space-x-2">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file || disabled) return;
-                if (onFileSelected) onFileSelected(file);
-              }}
-              required={field.required && !fileValue}
-              disabled={disabled || isUploading}
-              aria-invalid={hasError}
-              className={composeClassName(
-                sharedInputClasses +
-                  " max-w-full flex-1 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+          {!(disabled && fileValue) && (
+            <div className="flex items-center space-x-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file || disabled) return;
+                  if (onFileSelected) onFileSelected(file);
+                }}
+                required={field.required && !fileValue}
+                disabled={disabled || isUploading}
+                aria-invalid={hasError}
+                className={composeClassName(
+                  sharedInputClasses +
+                    " max-w-full flex-1 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+                )}
+              />
+              {isUploading && (
+                <span className=" text-blue-600">Uploading...</span>
               )}
-            />
-            {isUploading && (
-              <span className=" text-blue-600">Uploading...</span>
-            )}
-          </div>
+            </div>
+          )}
 
           {renderValidationMessage()}
 

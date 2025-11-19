@@ -14,6 +14,7 @@ import ActivityLikeButton from "./ActivityLikeButton";
 import Comments from "./Comments";
 import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
 import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
+import OutputRenderer from "@alliance/shared/forms/OutputRenderer";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;
@@ -131,6 +132,8 @@ const UserActivityCard = ({
     setIsEditing(false);
   }, [activity.editableContent]);
 
+  console.log(activity.formResponseOutput);
+
   return (
     <div className="flex flex-col">
       <div
@@ -203,6 +206,13 @@ const UserActivityCard = ({
                 <EditableContentRenderer content={activity.editableContent} />
               </div>
             )}
+            <>
+              {activity.formResponseOutput && (
+                <div className="my-3">
+                  <OutputRenderer submission={activity.formResponseOutput} />
+                </div>
+              )}
+            </>
 
             <div className="flex flex-row justify-between w-full items-end">
               <p className="text-zinc-500 text-sm">{timeSinceCompleted}</p>

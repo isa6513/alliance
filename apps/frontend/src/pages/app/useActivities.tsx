@@ -138,7 +138,9 @@ const useActivities = ({
 
   const updateActivity = useCallback((updatedActivity: ActionActivityDto) => {
     setActivities((prev) =>
-      prev.map((a) => (a.id === updatedActivity.id ? updatedActivity : a))
+      prev.map((a) =>
+        a.id === updatedActivity.id ? { ...a, ...updatedActivity } : a
+      )
     );
   }, []);
 

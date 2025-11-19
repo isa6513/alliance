@@ -1,7 +1,9 @@
 import {
   ActionActivityDto,
   ActionDto,
+  actionsGetActivity,
   actionsUpdateActivity,
+  CreateEditableContentDto,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
@@ -13,6 +15,9 @@ import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
 import Comments from "./Comments";
 import UserDisplayName from "./UserDisplayName";
+import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
+import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
+import { OutputRenderer } from "@alliance/shared/forms/OutputRenderer";
 
 export function ErrorBoundary(error: unknown) {
   console.error(error);
@@ -41,7 +46,20 @@ const ActionActivityDetail = () => {
     useOutletContext<ActionActivityDetailContext>();
 
   // Find the activity from the shared state
-  const activity = activities.find((a) => a.id === activityId) || null;
+  const origactivity = activities.find((a) => a.id === activityId) || null;
+
+  const [activity, setActivity] = useState<ActionActivityDto | null>(
+    origactivity
+  );
+
+  useEffect(() => {
+    actionsGetActivity({ path: { id: activityId } }).then((resp) => {
+      if (resp.data) {
+        setActivity(resp.data);
+      }
+    });
+  }, [activityId]);
+
   const verb = activity?.type === "user_joined" ? "committed to" : "completed";
 
   const handleLike = async () => {
@@ -55,17 +73,18 @@ const ActionActivityDetail = () => {
 
   const isOwner = activity?.user.id === user?.id;
   const [editing, setEditing] = useState(false);
-  const [activityDescription, setActivityDescription] = useState(
-    activity?.editableContent?.body || ""
-  );
+  const [editContent, setEditContent] =
+    useState<CreateEditableContentDto | null>(
+      activity?.editableContent ?? null
+    );
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setActivityDescription(activity?.editableContent?.body || "");
+    setEditContent(activity?.editableContent ?? null);
   }, [activity]);
 
   const handleSave = async () => {
-    if (!user || !activity || isSaving) {
+    if (!user || !activity || isSaving || !editContent) {
       return;
     }
 
@@ -76,7 +95,7 @@ const ActionActivityDetail = () => {
           id: activity.id,
         },
         body: {
-          editableContent: { body: activityDescription, attachments: [] },
+          editableContent: editContent,
         },
       });
       if (resp.error) {
@@ -87,7 +106,7 @@ const ActionActivityDetail = () => {
       setActivities(
         activities.map((a) => (a.id === activity.id ? newActivity : a))
       );
-      setActivityDescription(newActivity.editableContent?.body || "");
+      setActivity(newActivity);
       setEditing(false);
     } catch (error) {
       console.error("Error updating activity:", error);
@@ -97,9 +116,12 @@ const ActionActivityDetail = () => {
   };
 
   const handleCancel = () => {
-    setActivityDescription(activity?.editableContent?.body || "");
+    setEditContent(activity?.editableContent ?? null);
     setEditing(false);
   };
+
+  console.log(activity);
+  console.log(activity?.formResponseOutput);
 
   return (
     <>
@@ -152,41 +174,48 @@ const ActionActivityDetail = () => {
               </p>
             </div>
             {editing ? (
-              <div className="space-y-2">
-                <textarea
-                  value={activityDescription}
-                  onChange={(e) => setActivityDescription(e.target.value)}
-                  placeholder="Add any details you want to share about this activity..."
-                  className="w-full border border-zinc-300 focus:outline-none p-2 rounded"
-                  rows={4}
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") {
-                      handleCancel();
-                    }
-                  }}
-                />
-                <div className="flex space-x-2">
-                  <Button
-                    color={ButtonColor.Light}
-                    onClick={handleCancel}
-                    className="text-xs py-1 px-2"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    color={ButtonColor.Blue}
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="text-xs py-1 px-2"
-                  >
-                    {isSaving ? "Saving..." : "Save"}
-                  </Button>
+              <div className="flex-1 space-y-2 -m-4 mt-4 mb-0 border-t border-zinc-200">
+                <div className="rounded p-3 bg-zinc-100">
+                  <EditableContentForm
+                    value={editContent ?? { body: "", attachments: [] }}
+                    restoreDraft={false}
+                    onChange={setEditContent}
+                    placeholder="Add a description..."
+                  />
+                  <div className="mt-2 flex justify-end items-center gap-2">
+                    <Button
+                      color={ButtonColor.Blue}
+                      onClick={handleSave}
+                      disabled={isSaving}
+                    >
+                      {isSaving ? "Saving..." : "Save"}
+                    </Button>
+                    <Button
+                      color={ButtonColor.White}
+                      onClick={handleCancel}
+                      disabled={isSaving}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
               </div>
             ) : (
-              activity.editableContent?.body && (
-                <p>{activity.editableContent.body}</p>
-              )
+              <>
+                {(!!activity.editableContent.body ||
+                  activity.editableContent.attachments.length > 0) && (
+                  <div className="mt-3">
+                    <EditableContentRenderer
+                      content={activity.editableContent}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+            {activity.formResponseOutput && (
+              <div className="my-3">
+                <OutputRenderer submission={activity.formResponseOutput} />
+              </div>
             )}
             {activity.editableContent?.attachments?.map((attachment) => (
               <img

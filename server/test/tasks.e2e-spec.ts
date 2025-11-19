@@ -41,6 +41,7 @@ const sampleSchema: FormSchema = {
       ],
     },
   ],
+  outputViews: [],
 };
 
 describe('Tasks (e2e)', () => {

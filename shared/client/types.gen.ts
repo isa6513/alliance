@@ -396,6 +396,21 @@ export type CommentDto = {
     editableContent: EditableContentDto;
 };
 
+export type FormResponseOutputDto = {
+    id: number;
+    formId: number;
+    answers: {
+        [key: string]: unknown;
+    };
+    visibilityValidatorResults: {
+        [key: string]: unknown;
+    };
+    deviceType?: string;
+    schemaSnapshot: {
+        [key: string]: unknown;
+    };
+};
+
 export type ActionActivityDto = {
     id: number;
     /**
@@ -408,6 +423,7 @@ export type ActionActivityDto = {
     actionName: string;
     likes: Array<ProfileDto>;
     comments: Array<CommentDto>;
+    formResponseOutput?: FormResponseOutputDto;
     editableContent: EditableContentDto;
 };
 
