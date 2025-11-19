@@ -484,6 +484,20 @@ jobs:
             export NOTIF_TEST_PHONE_NUMBER=${{ secrets.NOTIF_TEST_PHONE_NUMBER }}
             export NOTIF_TEST_EMAIL=${{ secrets.NOTIF_TEST_EMAIL }}
 
+            rollback () {
+              echo "Deployment failed - rolling back"
+              cd ~/
+              pm2 delete nest-app || true
+              if [ -d "nest-backend-deploy-backup" ]; then
+                rm -rf nest-backend
+                mv nest-backend-deploy-backup nest-backend
+                cd nest-backend
+                pm2 start dist/main.js --name nest-app || pm2 start dist/src/main.js --name nest-app
+              fi
+              exit 1
+            }
+            trap rollback ERR
+
             mkdir -p ~/nest-backend
             unzip -o ~/nest-build.zip -d ~/nest-backend
 

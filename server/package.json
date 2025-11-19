@@ -24,7 +24,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
     "typeorm": "npx typeorm-ts-node-commonjs --dataSource src/datasources/dataSource.ts",
     "migration:generate": "npm run migration:run && npm run typeorm -- migration:generate",
-    "migration:runprod": "npx typeorm --dataSource dist/src/datasources/dataSource.js migration:run",
+    "migration:runprod": "npx typeorm-ts-node-commonjs --dataSource dist/src/datasources/dataSource.js migration:run",
     "migration:run": "npm run build && npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert"
   },
