@@ -2,7 +2,6 @@ import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
 import { Link, useNavigate, useOutletContext } from "react-router";
 import { ActionWithRelation, AppLayoutOutletContext } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
-import ForumListPost from "../../components/ForumListPost";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import LargeActionCard from "./LargeActionCard";
 import useActivities, { ActivityList } from "./useActivities";
@@ -55,8 +54,7 @@ export function canJoinAction(action: ActionWithRelation) {
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { actions, posts, loading } =
-    useOutletContext<AppLayoutOutletContext>();
+  const { actions, loading } = useOutletContext<AppLayoutOutletContext>();
 
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
@@ -269,7 +267,7 @@ const HomePage = () => {
                 </a>
               </div>
             )}
-            {friendActivities.slice(0, 2).map((activity) => (
+            {friendActivities.slice(0, 3).map((activity) => (
               <ActionActivityFeedItem
                 key={activity.id}
                 activity={activity}
@@ -280,32 +278,6 @@ const HomePage = () => {
               />
             ))}
           </div>
-        </div>
-        <div>
-          <p className="font-semibold text-xl font-serif text-black">
-            Forum activity
-          </p>
-          {posts && posts.length === 0 && (
-            <p className="text-zinc-400 mt-3">No activity yet.</p>
-          )}
-          {posts && posts.length > 0 && (
-            <div className="flex flex-col *:py-3 -mb-3">
-              {posts
-                .filter(
-                  (post) =>
-                    !post.visibleAt || new Date(post.visibleAt) < new Date()
-                )
-                .slice(0, 1)
-                .map((post) => (
-                  <ForumListPost
-                    key={post.id}
-                    post={post}
-                    card={false}
-                    showAction={false}
-                  />
-                ))}
-            </div>
-          )}
         </div>
       </div>
     );
