@@ -485,14 +485,15 @@ const DatabaseViewer: React.FC = () => {
         }
 
         case "json": {
-          try {
-            return { value: JSON.parse(trimmed) };
-          } catch {
-            return {
-              value: undefined,
-              error: `${columnLabel} must be valid JSON.`,
-            };
-          }
+          return { value: rawValue };
+          //   try {
+          //     return { value: JSON.parse(trimmed) };
+          //   } catch {
+          //     return {
+          //       value: undefined,
+          //       error: `${columnLabel} must be valid JSON.`,
+          //     };
+          //   }
         }
 
         case "date":
