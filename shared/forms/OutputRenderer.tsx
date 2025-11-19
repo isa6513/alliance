@@ -243,7 +243,7 @@ export function OutputRenderer({
 
   return (
     <Card style={CardStyle.Grey}>
-      <div className={`space-y-4 ${className}`}>
+      <div className={`space-y-2 ${className}`}>
         {visibleBlocks.map((block, index) => {
           const key =
             "kind" in block ? block.id ?? `${block.kind}-${index}` : block.id;
