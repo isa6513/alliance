@@ -4,6 +4,7 @@ import { Allow, IsDefined, IsNotEmpty } from 'class-validator';
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -44,6 +45,8 @@ export const readableActionStatus: Record<ActionStatus, string> = {
 };
 
 @Entity()
+@Index(['action', 'date'])
+@Index(['action', 'newStatus', 'date'])
 export class ActionEvent {
   @PrimaryGeneratedColumn()
   @ApiProperty({ description: 'Unique identifier for the action event' })

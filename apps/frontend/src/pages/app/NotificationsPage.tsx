@@ -40,13 +40,15 @@ const NotificationsPage = () => {
               )}
             >
               <div className="flex flex-row items-center gap-x-2">
-                {notification.associatedUsers.map((user) => (
-                  <ProfileImage
-                    key={user.id}
-                    pfp={user.profilePicture}
-                    size="small"
-                  />
-                ))}
+                <div className="flex flex-row items-center gap-x-0.5">
+                  {notification.associatedUsers.map((user) => (
+                    <ProfileImage
+                      key={user.id}
+                      pfp={user.profilePicture}
+                      size="small"
+                    />
+                  ))}
+                </div>
                 <h3>{notification.message}</h3>
               </div>
               <p className=" text-zinc-500 text-sm">
