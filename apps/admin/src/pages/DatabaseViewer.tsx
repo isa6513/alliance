@@ -122,6 +122,7 @@ const DatabaseViewer: React.FC = () => {
   const [newRecordFieldErrors, setNewRecordFieldErrors] = useState<
     Record<string, string>
   >({});
+  const isInteractionBlocked = !!pendingUpdate || !!pendingDelete;
   const editableColumns = useMemo(() => {
     if (!tableData) return [] as ColumnMetadataDto[];
 
@@ -241,6 +242,10 @@ const DatabaseViewer: React.FC = () => {
       cellValue: any,
       column: ColumnMetadataDto
     ) => {
+      if (isInteractionBlocked) {
+        return;
+      }
+
       if (column.isPrimary || column.dataType === "relation") {
         return;
       }
@@ -251,7 +256,7 @@ const DatabaseViewer: React.FC = () => {
         originalValue: cellValue,
       });
     },
-    []
+    [isInteractionBlocked]
   );
 
   const handleCellSave = useCallback(
@@ -485,15 +490,14 @@ const DatabaseViewer: React.FC = () => {
         }
 
         case "json": {
-          return { value: rawValue };
-          //   try {
-          //     return { value: JSON.parse(trimmed) };
-          //   } catch {
-          //     return {
-          //       value: undefined,
-          //       error: `${columnLabel} must be valid JSON.`,
-          //     };
-          //   }
+          try {
+            return { value: JSON.parse(trimmed) };
+          } catch {
+            return {
+              value: undefined,
+              error: `${columnLabel} must be valid JSON.`,
+            };
+          }
         }
 
         case "date":
@@ -710,7 +714,10 @@ const DatabaseViewer: React.FC = () => {
       }
 
       // Add edit cursor for editable cells
-      const isEditable = !column.isPrimary && column.dataType !== "relation";
+      const isEditable =
+        !isInteractionBlocked &&
+        !column.isPrimary &&
+        column.dataType !== "relation";
       const baseClassName = isEditable
         ? "cursor-pointer hover:bg-gray-100 p-1 rounded"
         : "";
@@ -832,7 +839,13 @@ const DatabaseViewer: React.FC = () => {
         </div>
       );
     },
-    [editingCell, handleCellSave, handleCellCancel, navigateToRelatedRow]
+    [
+      editingCell,
+      handleCellSave,
+      handleCellCancel,
+      navigateToRelatedRow,
+      isInteractionBlocked,
+    ]
   );
 
   return (
