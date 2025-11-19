@@ -225,6 +225,7 @@ export class FormResponseOutputDto extends PickType(FormResponse, [
   'schemaSnapshot',
   'visibilityValidatorResults',
   'deviceType',
+  'publicAnswers',
 ]) {
   constructor(formResponse: FormResponse) {
     super();

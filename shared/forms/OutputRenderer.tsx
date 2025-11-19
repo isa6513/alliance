@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { FormResponseOutputDto } from "../client";
+import type { FormResponseDto, FormResponseOutputDto } from "../client";
 import RenderDisplayBlock from "./RenderDisplayBlock";
 import type {
   AnyField,
@@ -14,12 +14,17 @@ import RenderField from "./RenderField";
 import { getApiUrl } from "../lib/config";
 
 type OutputRendererProps = {
-  submission: FormResponseOutputDto;
+  schema?: FormSchema;
+  submission?: FormResponseOutputDto | FormResponseDto | null;
+  answers?: Record<string, FormValue>;
   viewId?: string;
   validatorResults?: Record<number, boolean>;
   deviceType?: DeviceVisibilityTarget;
   className?: string;
 };
+type SubmissionWithPublicAnswers =
+  | (FormResponseOutputDto & { publicAnswers?: Record<string, boolean> })
+  | (FormResponseDto & { publicAnswers?: Record<string, boolean> });
 
 const normalizeConditions = (
   conditions?: Condition[] | Condition
@@ -172,29 +177,43 @@ const renderOutputFieldValue = (
 };
 
 export function OutputRenderer({
+  schema,
   submission,
+  answers,
   viewId,
   validatorResults,
   deviceType,
   className = "",
 }: OutputRendererProps) {
-  const schema = submission?.schemaSnapshot as unknown as FormSchema;
-  const selectedView = resolveView(schema, viewId);
-  const fieldLookup = useMemo(() => collectFieldMap(schema), [schema]);
+  const effectiveSchema =
+    schema ?? (submission?.schemaSnapshot as unknown as FormSchema | undefined);
+  const fieldLookup = useMemo(
+    () => (effectiveSchema ? collectFieldMap(effectiveSchema) : new Map()),
+    [effectiveSchema]
+  );
+  const selectedView = effectiveSchema
+    ? resolveView(effectiveSchema, viewId)
+    : null;
   const resolvedAnswers = useMemo((): Record<string, FormValue> => {
+    if (answers) {
+      return answers;
+    }
     if (submission?.answers) {
       return submission.answers as Record<string, FormValue>;
     }
     return {};
-  }, [submission]);
+  }, [answers, submission]);
   const resolvedValidatorResults =
     validatorResults ??
     (submission?.visibilityValidatorResults as Record<number, boolean>) ??
     undefined;
   const resolvedDeviceType =
     deviceType ?? (submission?.deviceType as DeviceVisibilityTarget);
+  const resolvedPublicAnswers = (
+    submission as SubmissionWithPublicAnswers | undefined
+  )?.publicAnswers;
 
-  if (!selectedView) {
+  if (!selectedView || !effectiveSchema) {
     return (
       <div className={className}>
         <p className="text-sm text-gray-500">
@@ -206,25 +225,32 @@ export function OutputRenderer({
 
   const blocks = selectedView.blocks ?? [];
 
+  const visibleBlocks = blocks.filter(
+    (block) =>
+      isBlockVisible(
+        block,
+        resolvedAnswers,
+        resolvedValidatorResults,
+        resolvedDeviceType
+      ) &&
+      ("kind" in block ||
+        (resolvedPublicAnswers &&
+          resolvedPublicAnswers[block.fieldId] === true))
+  );
+  if (visibleBlocks.length === 0) {
+    return null;
+  }
+
   return (
     <Card style={CardStyle.Grey}>
       <div className={`space-y-4 ${className}`}>
-        {blocks.map((block, index) => {
-          if (
-            !isBlockVisible(
-              block,
-              resolvedAnswers,
-              resolvedValidatorResults,
-              resolvedDeviceType
-            )
-          ) {
-            return null;
-          }
+        {visibleBlocks.map((block, index) => {
           const key =
             "kind" in block ? block.id ?? `${block.kind}-${index}` : block.id;
           if ("kind" in block) {
             return <RenderDisplayBlock block={block} key={key} />;
           }
+
           const field = fieldLookup.get(block.fieldId);
           const label = block.labelOverride ?? field?.label ?? "Missing field";
           const showLabel = block.showLabel ?? true;

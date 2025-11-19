@@ -240,6 +240,22 @@ const FormRenderer = ({
 
   const pageCount = schema.pages?.length ?? 0;
   const maxPageIndex = Math.max(0, (pageCount || 1) - 1);
+
+  const outputFieldIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const page of schema.pages ?? []) {
+      for (const element of page.fields ?? []) {
+        if ("label" in element) {
+          const field = element as AnyField;
+          if (field.output?.output) {
+            ids.add(field.id);
+          }
+        }
+      }
+    }
+    return ids;
+  }, [schema]);
+
   const clampPageIndex = (idx: number): number => {
     if (!Number.isFinite(idx)) return 0;
     const normalized = Math.floor(idx);
@@ -300,6 +316,57 @@ const FormRenderer = ({
       return applyDefaultValues({}, defaultValueMap);
     }
   });
+
+  const [publicAnswers, setPublicAnswers] = useState<Record<string, boolean>>(
+    () => {
+      if (readOnly) {
+        const snapshot = (
+          completedFormResponse as {
+            publicAnswers?: Record<string, boolean>;
+          }
+        )?.publicAnswers;
+        return snapshot ?? {};
+      }
+
+      if (typeof window === "undefined") {
+        return {};
+      }
+
+      if (!persistKey) {
+        return {};
+      }
+
+      try {
+        const raw = window.localStorage.getItem(storageKey);
+        if (!raw) {
+          return {};
+        }
+        const parsed = JSON.parse(raw);
+        const storedPublicAnswers =
+          parsed?.publicAnswers && typeof parsed.publicAnswers === "object"
+            ? (parsed.publicAnswers as Record<string, boolean>)
+            : undefined;
+        return storedPublicAnswers ?? {};
+      } catch {
+        return {};
+      }
+    }
+  );
+  useEffect(() => {
+    if (!publicAnswers || Object.keys(publicAnswers).length === 0) {
+      console.log("setting public answers");
+      setPublicAnswers(() => {
+        const next: Record<string, boolean> = {};
+        for (const fieldId of outputFieldIds) {
+          console.log("fieldId", fieldId);
+          console.log("user?.formDataPreference", user?.formDataPreference);
+          next[fieldId] = user?.formDataPreference === "public" ? true : false;
+        }
+        return next;
+      });
+    }
+  }, [publicAnswers]);
+
   const [uploadingFields, setUploadingFields] = useState<Set<string>>(
     new Set()
   );
@@ -907,13 +974,15 @@ const FormRenderer = ({
     }
 
     const sanitizedAnswers = filterAnswersByFieldIds(formData, fieldLookup);
+
     const submissionPayload = {
       answers: sanitizedAnswers,
       schemaSnapshot: form as unknown as Record<string, unknown>,
       actionId,
       visibilityValidatorResults,
       deviceType,
-    } satisfies SubmitFormDto;
+      publicAnswers,
+    } as SubmitFormDto;
 
     onSubmit(submissionPayload).finally(() => {
       setSubmitting(false);
@@ -939,13 +1008,14 @@ const FormRenderer = ({
   };
 
   const handleAbandon = () => {
-    const submissionPayload = {
+    const submissionPayload: SubmitFormDto = {
       answers: formData,
       schemaSnapshot: form as unknown as Record<string, unknown>,
       actionId,
       visibilityValidatorResults,
       deviceType,
-    } satisfies SubmitFormDto;
+      publicAnswers,
+    };
 
     onAbandonAction?.(outOfTimeSelected, customReason, submissionPayload);
     setDropdownOpen(false);
@@ -957,9 +1027,21 @@ const FormRenderer = ({
     if (!persistKey || typeof window === "undefined") return;
     window.localStorage.setItem(
       storageKey,
-      JSON.stringify({ formData, currentPageIndex, updatedAt: Date.now() })
+      JSON.stringify({
+        formData,
+        publicAnswers,
+        currentPageIndex,
+        updatedAt: Date.now(),
+      })
     );
-  }, [formData, currentPageIndex, persistKey, storageKey, readOnly]);
+  }, [
+    formData,
+    publicAnswers,
+    currentPageIndex,
+    persistKey,
+    storageKey,
+    readOnly,
+  ]);
 
   // If key changes (different form/version/instance), attempt to restore
   useEffect(() => {
@@ -974,6 +1056,9 @@ const FormRenderer = ({
         fieldLookup
       );
       setFormData(applyDefaultValues(filtered, defaultValueMap));
+    }
+    if (parsed?.publicAnswers && typeof parsed.publicAnswers === "object") {
+      setPublicAnswers(parsed.publicAnswers as Record<string, boolean>);
     }
     if (typeof parsed?.currentPageIndex === "number") {
       const maxIdx = Math.max(0, (pageCount || 1) - 1);
@@ -1002,6 +1087,33 @@ const FormRenderer = ({
       );
     }
   }, [readOnly, completedFormResponse, fieldLookup]);
+
+  useEffect(() => {
+    if (!readOnly) {
+      return;
+    }
+    const snapshot = (
+      completedFormResponse as {
+        publicAnswers?: Record<string, boolean>;
+      }
+    )?.publicAnswers;
+    if (snapshot) {
+      setPublicAnswers(snapshot);
+      return;
+    }
+    setPublicAnswers((prev) => {
+      const next: Record<string, boolean> = {};
+      for (const fieldId of outputFieldIds) {
+        next[fieldId] =
+          fieldId in prev
+            ? prev[fieldId]
+            : user?.formDataPreference === "public"
+            ? true
+            : false;
+      }
+      return next;
+    });
+  }, [completedFormResponse, fieldLookup, outputFieldIds, readOnly]);
 
   useEffect(() => {
     if (!readOnly) {
@@ -1083,27 +1195,82 @@ const FormRenderer = ({
     setFormData((prev) => applyDefaultValues(prev, defaultValueMap));
   }, [defaultValueMap, readOnly]);
 
-  const renderField = (field: AnyField, index: number) => (
-    <div key={field.id || index}>
-      <RenderField
-        field={field}
-        value={formData[field.id]}
-        onChange={readOnly ? undefined : (val) => updateField(field.id, val)}
-        onFileSelected={
-          readOnly ? undefined : (file) => handleFileUpload(field.id, file)
-        }
-        disabled={readOnly}
-        uploading={uploadingFields.has(field.id)}
-        uploadError={uploadErrors[field.id]}
-        error={fieldErrors[field.id]}
-        randomizationKey={
-          disableOptionRandomization ? undefined : randomizationKey
-        }
-        disableOptionRandomization={disableOptionRandomization}
-        user={user}
-      />
-    </div>
-  );
+  const handlePublicToggleChange = (fieldId: string, checked: boolean) => {
+    setPublicAnswers((prev) => ({
+      ...prev,
+      [fieldId]: checked,
+    }));
+  };
+
+  const renderField = (field: AnyField, index: number) => {
+    const isOutputField = Boolean(field.output?.output);
+    const sharePublicly =
+      publicAnswers[field.id] ?? user?.formDataPreference === "public";
+    return (
+      <div key={field.id || index}>
+        <RenderField
+          field={field}
+          value={formData[field.id]}
+          onChange={readOnly ? undefined : (val) => updateField(field.id, val)}
+          onFileSelected={
+            readOnly ? undefined : (file) => handleFileUpload(field.id, file)
+          }
+          disabled={readOnly}
+          uploading={uploadingFields.has(field.id)}
+          uploadError={uploadErrors[field.id]}
+          error={fieldErrors[field.id]}
+          randomizationKey={
+            disableOptionRandomization ? undefined : randomizationKey
+          }
+          disableOptionRandomization={disableOptionRandomization}
+          user={user}
+        />
+        {isOutputField && (
+          <>
+            {user?.formDataPreference === "public" ? (
+              <label className="mt-2 flex items-center text-sm text-gray-500">
+                <input
+                  type="checkbox"
+                  className="mr-2 h-4 w-4"
+                  checked={!sharePublicly}
+                  disabled={readOnly}
+                  onChange={
+                    readOnly
+                      ? undefined
+                      : (event) =>
+                          handlePublicToggleChange(
+                            field.id,
+                            !event.target.checked
+                          )
+                  }
+                />
+                Hide my response from others
+              </label>
+            ) : (
+              <label className="mt-2 flex items-center text-sm text-gray-500">
+                <input
+                  type="checkbox"
+                  className="mr-2 h-4 w-4"
+                  checked={sharePublicly}
+                  disabled={readOnly}
+                  onChange={
+                    readOnly
+                      ? undefined
+                      : (event) =>
+                          handlePublicToggleChange(
+                            field.id,
+                            event.target.checked
+                          )
+                  }
+                />
+                Show my response to others
+              </label>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
 
   const renderElement = (element: AnyField | DisplayBlock, index: number) => {
     if (!isElementCurrentlyVisible(element)) {

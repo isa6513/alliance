@@ -45,6 +45,12 @@ export class FormResponse {
   @Type(() => Object)
   visibilityValidatorResults: Record<string, boolean>;
 
+  @Column({ type: 'jsonb', default: () => "'{}'" })
+  @ApiProperty()
+  @Allow()
+  @Type(() => Object)
+  publicAnswers: Record<string, boolean>;
+
   @Column({ type: 'text', nullable: true })
   @ApiPropertyOptional()
   @IsOptional()

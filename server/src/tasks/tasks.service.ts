@@ -283,6 +283,7 @@ export class TasksService {
       visibilityValidatorResults:
         submitFormDto.visibilityValidatorResults ?? validatorResults,
       deviceType: submitFormDto.deviceType,
+      publicAnswers: submitFormDto.publicAnswers ?? {},
       user,
     });
     const savedForm = await this.formResponseRepository.save(formResponse);
@@ -315,6 +316,7 @@ export class TasksService {
       visibilityValidatorResults:
         partialFormData?.visibilityValidatorResults ?? {},
       deviceType: partialFormData.deviceType,
+      publicAnswers: partialFormData.publicAnswers ?? {},
       user,
     });
     const savedForm = await this.formResponseRepository.save(formResponse);

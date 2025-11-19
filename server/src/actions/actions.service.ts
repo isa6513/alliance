@@ -643,7 +643,13 @@ export class ActionsService {
     const schema = activity.taskFormResponse
       .schemaSnapshot as unknown as FormSchema;
 
-    const answerToIsPublic = (answer: string) => {
+    const answerToIsPublic = (
+      answer: string,
+      selections: Record<string, boolean>,
+    ) => {
+      if (selections?.[answer] === false) {
+        return false;
+      }
       return schema.pages.some((page) =>
         page.fields.some(
           (field) =>
@@ -655,9 +661,12 @@ export class ActionsService {
     };
 
     const answers = activity.taskFormResponse.answers;
+    const publicAnswers = activity.taskFormResponse.publicAnswers ?? {};
 
     const answersPrunedObj = Object.fromEntries(
-      Object.entries(answers).filter(([key]) => answerToIsPublic(key)),
+      Object.entries(answers).filter(([key]) =>
+        answerToIsPublic(key, publicAnswers),
+      ),
     );
 
     if (!Object.keys(answersPrunedObj).length) {

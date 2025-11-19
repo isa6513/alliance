@@ -28,6 +28,11 @@ export class SubmitFormDto extends PickType(FormResponse, [
   @IsEnum(DEVICE_VISIBILITY_TARGETS)
   @IsOptional()
   deviceType?: DeviceVisibilityTarget;
+
+  @ApiPropertyOptional({ type: Object })
+  @Type(() => Object)
+  @IsOptional()
+  publicAnswers?: Record<string, boolean>;
 }
 
 export class FormDto extends PickType(Form, ['id', 'title', 'schema']) {
@@ -42,6 +47,7 @@ export class FormResponseDto extends PickType(FormResponse, [
   'schemaSnapshot',
   'visibilityValidatorResults',
   'deviceType',
+  'publicAnswers',
 ]) {
   @ApiProperty()
   user: UserDto;

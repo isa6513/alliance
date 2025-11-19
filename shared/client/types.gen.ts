@@ -410,6 +410,9 @@ export type FormResponseOutputDto = {
     visibilityValidatorResults: {
         [key: string]: unknown;
     };
+    publicAnswers: {
+        [key: string]: unknown;
+    };
     deviceType?: string;
     schemaSnapshot: {
         [key: string]: unknown;
@@ -564,6 +567,9 @@ export type FormResponse = {
         [key: string]: unknown;
     };
     visibilityValidatorResults: {
+        [key: string]: unknown;
+    };
+    publicAnswers: {
         [key: string]: unknown;
     };
     deviceType?: string;
@@ -1623,6 +1629,9 @@ export type SubmitFormDto = {
         [key: string]: unknown;
     };
     deviceType?: 'mobile' | 'tablet' | 'desktop';
+    publicAnswers?: {
+        [key: string]: unknown;
+    };
 };
 
 export type FormResponseDto = {
@@ -1632,6 +1641,9 @@ export type FormResponseDto = {
         [key: string]: unknown;
     };
     visibilityValidatorResults: {
+        [key: string]: unknown;
+    };
+    publicAnswers: {
         [key: string]: unknown;
     };
     deviceType?: string;
