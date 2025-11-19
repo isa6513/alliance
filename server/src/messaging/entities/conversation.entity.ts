@@ -5,6 +5,7 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
+import { Ty } from 'src/tasks/entities/type';
 
 @Entity()
 export class Conversation {
