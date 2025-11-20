@@ -27,7 +27,7 @@ import EventManagementTab from "../components/EventManagementTab";
 import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
 import { FormBuilder } from "../components/FormBuilder";
 import ActionUpdatesTab from "../components/ActionUpdatesTab";
-import { getApiUrl } from "@alliance/shared/lib/config";
+import { getApiUrl, getBaseUrl } from "@alliance/shared/lib/config";
 import Dropdown from "@alliance/shared/ui/Dropdown";
 import LargeCheckbox from "@alliance/shared/ui/LargeCheckbox";
 
@@ -638,11 +638,7 @@ const ActionDashboard: React.FC = () => {
                 </button>
               ))}
               <a
-                href={
-                  window.location.origin.includes("localhost")
-                    ? `http://localhost:5173/actions/${action?.id}`
-                    : `https://worldalliance.org/actions/${action?.id}`
-                }
+                href={getBaseUrl() + `/actions/${action?.id}`}
                 target="_blank"
                 rel="noreferrer"
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${"border-transparent text-blue-500 hover:text-blue-600 hover:border-blue-300"}`}
