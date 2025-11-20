@@ -1,0 +1,209 @@
+import {
+  ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Server, Socket } from 'socket.io';
+import { ConversationService } from './conversation.service';
+import { MessagingEvents } from './messaging.events';
+import { ConversationDto, MessageDto } from './dto/messaging.dto';
+import { JwtPayload } from 'src/auth/guards/auth.guard';
+import { AuthService } from 'src/auth/auth.service';
+
+@WebSocketGateway({
+  cors: {
+    origin: true,
+    credentials: true,
+  },
+  namespace: '/messaging',
+})
+export class MessagingGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
+  @WebSocketServer()
+  server: Server;
+
+  private readonly logger = new Logger(MessagingGateway.name);
+  private readonly clientRooms = new Map<string, Set<number>>();
+
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly conversationService: ConversationService,
+  ) {
+    this.eventEmitter.on(
+      MessagingEvents.MessageCreated,
+      this.handleMessageCreated.bind(this),
+    );
+    this.eventEmitter.on(
+      MessagingEvents.ConversationUpdated,
+      this.handleConversationUpdated.bind(this),
+    );
+  }
+
+  async handleConnection(client: Socket) {
+    try {
+      const token = this.extractToken(client);
+      if (!token) {
+        this.logger.warn('Missing token for messaging gateway connection.');
+        client.disconnect(true);
+        return;
+      }
+
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
+        secret: process.env.JWT_SECRET,
+      });
+
+      client.data.userId = payload.sub;
+      this.clientRooms.set(client.id, new Set());
+    } catch (error) {
+      this.logger.warn(`Messaging gateway auth failed: ${error.message}`);
+      client.disconnect(true);
+    }
+  }
+
+  handleDisconnect(client: Socket) {
+    this.clientRooms.delete(client.id);
+  }
+
+  @SubscribeMessage('join-conversation')
+  async handleJoinConversation(
+    @MessageBody() data: { conversationId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const conversationId = Number(data?.conversationId);
+    if (!conversationId || Number.isNaN(conversationId)) {
+      client.emit('messaging:error', { message: 'Invalid conversation id.' });
+      return;
+    }
+
+    const userId = client.data.userId as number | undefined;
+    if (!userId) {
+      client.emit('messaging:error', { message: 'Unauthorized.' });
+      client.disconnect(true);
+      return;
+    }
+
+    const allowed = await this.conversationService.isParticipant(
+      conversationId,
+      userId,
+    );
+    if (!allowed) {
+      client.emit('messaging:error', { message: 'Access denied.' });
+      return;
+    }
+
+    client.join(this.roomName(conversationId));
+    this.trackClientRoom(client.id, conversationId);
+    client.emit('conversation-joined', { conversationId });
+  }
+
+  @SubscribeMessage('leave-conversation')
+  handleLeaveConversation(
+    @MessageBody() data: { conversationId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const conversationId = Number(data?.conversationId);
+    if (!conversationId || Number.isNaN(conversationId)) {
+      client.emit('messaging:error', { message: 'Invalid conversation id.' });
+      return;
+    }
+
+    client.leave(this.roomName(conversationId));
+    this.untrackClientRoom(client.id, conversationId);
+    client.emit('conversation-left', { conversationId });
+  }
+
+  private handleMessageCreated(payload: {
+    conversationId: number;
+    message: MessageDto;
+  }) {
+    this.server
+      .to(this.roomName(payload.conversationId))
+      .emit('message:new', payload.message);
+  }
+
+  private handleConversationUpdated(payload: {
+    conversationId: number;
+    conversation: ConversationDto;
+  }) {
+    this.server
+      .to(this.roomName(payload.conversationId))
+      .emit('conversation:updated', payload.conversation);
+  }
+
+  private extractToken(client: Socket): string | undefined {
+    const authToken = client.handshake?.auth?.token as string | undefined;
+    if (authToken) {
+      return authToken;
+    }
+
+    const header = client.handshake?.headers?.authorization;
+    if (typeof header === 'string') {
+      const [type, token] = header.split(' ');
+      if (type === 'Bearer' && token) {
+        return token;
+      }
+    }
+
+    const cookieHeader = client.handshake?.headers?.cookie;
+    if (typeof cookieHeader === 'string') {
+      const cookies = this.parseCookies(cookieHeader);
+      const cookieToken = cookies[AuthService.ACCESS_COOKIE];
+      if (cookieToken) {
+        return cookieToken;
+      }
+    }
+
+    const queryToken = client.handshake?.query?.token;
+    if (typeof queryToken === 'string') {
+      return queryToken;
+    }
+
+    return undefined;
+  }
+
+  private parseCookies(cookieHeader: string): Record<string, string> {
+    return cookieHeader
+      .split(';')
+      .reduce<Record<string, string>>((acc, part) => {
+        const [name, ...rest] = part.split('=');
+        if (!name || !rest.length) {
+          return acc;
+        }
+        acc[name.trim()] = rest.join('=').trim();
+        return acc;
+      }, {});
+  }
+
+  private trackClientRoom(clientId: string, conversationId: number) {
+    const rooms = this.clientRooms.get(clientId) ?? new Set<number>();
+    rooms.add(conversationId);
+    this.clientRooms.set(clientId, rooms);
+  }
+
+  private untrackClientRoom(clientId: string, conversationId: number) {
+    const rooms = this.clientRooms.get(clientId);
+    if (!rooms) {
+      return;
+    }
+
+    rooms.delete(conversationId);
+    if (!rooms.size) {
+      this.clientRooms.delete(clientId);
+    } else {
+      this.clientRooms.set(clientId, rooms);
+    }
+  }
+
+  private roomName(conversationId: number) {
+    return `conversation:${conversationId}`;
+  }
+}

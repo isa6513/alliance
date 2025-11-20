@@ -39,6 +39,8 @@ import { Temporal } from '@js-temporal/polyfill';
 import { NotificationChannel } from 'src/notifs/notif-utils';
 import { Community } from './community.entity';
 import { CommunityInvite } from './community-invite.entity';
+import { Participant } from 'src/messaging/entities/participant.entity';
+import { Ty } from 'src/tasks/entities/type';
 
 export enum NotificationPreference {
   All = 'all',
@@ -353,4 +355,9 @@ export class User {
     enumName: 'PublicFormResponseDefault',
   })
   formDataPreference: PublicFormResponseDefault;
+
+  @OneToMany(() => Participant, (participant) => participant.user)
+  @ApiProperty({ type: () => Participant, isArray: true })
+  @Type(() => Participant)
+  participants: Ty<Participant>[];
 }

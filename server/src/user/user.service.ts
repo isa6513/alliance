@@ -45,6 +45,7 @@ import {
   CommunityInvite,
   CommunityInviteStatus,
 } from './entities/community-invite.entity';
+import { ConversationService } from 'src/messaging/conversation.service';
 
 const defaultTimeZone = 'America/Los_Angeles';
 const communityDefaultRelations = ['users', 'leaders'] as const;
@@ -84,6 +85,7 @@ export class UserService {
     private readonly jwtService: JwtService,
     private readonly imagesService: ImagesService,
     private readonly mailService: MailService,
+    private readonly conversationService: ConversationService,
   ) {}
 
   async create(data: Partial<User>): Promise<User> {
@@ -643,7 +645,11 @@ export class UserService {
 
   async createCommunity(body: CreateCommunityDto): Promise<Community> {
     const community = this.communityRepository.create(body);
-    return this.communityRepository.save(community);
+    const savedCommunity = await this.communityRepository.save(community);
+    await this.conversationService.syncCommunityConversationMembers(
+      savedCommunity.id,
+    );
+    return savedCommunity;
   }
 
   async findAllCommunities(): Promise<Community[]> {
@@ -668,7 +674,11 @@ export class UserService {
 
     const community = await this.findCommunityOrFail(communityId);
     Object.assign(community, body);
-    return this.communityRepository.save(community);
+    const updated = await this.communityRepository.save(community);
+    await this.conversationService.syncCommunityConversationMembers(
+      updated.id,
+    );
+    return updated;
   }
 
   async deleteCommunity(communityId: number): Promise<void> {
@@ -687,7 +697,11 @@ export class UserService {
       community.users.push(user);
     }
 
-    return this.communityRepository.save(community);
+    const updated = await this.communityRepository.save(community);
+    await this.conversationService.syncCommunityConversationMembers(
+      updated.id,
+    );
+    return updated;
   }
 
   async removeUserFromCommunity(
@@ -703,7 +717,11 @@ export class UserService {
       (leader) => leader.id !== userId,
     );
 
-    return this.communityRepository.save(community);
+    const updated = await this.communityRepository.save(community);
+    await this.conversationService.syncCommunityConversationMembers(
+      updated.id,
+    );
+    return updated;
   }
 
   async addLeaderToCommunity(
@@ -723,7 +741,11 @@ export class UserService {
       community.leaders.push(user);
     }
 
-    return this.communityRepository.save(community);
+    const updated = await this.communityRepository.save(community);
+    await this.conversationService.syncCommunityConversationMembers(
+      updated.id,
+    );
+    return updated;
   }
 
   async removeLeaderFromCommunity(
@@ -736,7 +758,11 @@ export class UserService {
       (leader) => leader.id !== userId,
     );
 
-    return this.communityRepository.save(community);
+    const updated = await this.communityRepository.save(community);
+    await this.conversationService.syncCommunityConversationMembers(
+      updated.id,
+    );
+    return updated;
   }
 
   async findUserCommunity(userId: number): Promise<Community | null> {

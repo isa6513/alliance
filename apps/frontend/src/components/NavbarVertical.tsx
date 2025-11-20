@@ -4,6 +4,8 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useNotifications } from "../lib/useNotifications";
 import { useAuth } from "../lib/AuthContext";
+import { Features } from "@alliance/shared/lib/features";
+import { isFeatureEnabled } from "../lib/config";
 
 export enum NavbarPage {
   Tasks = "Tasks",
@@ -17,6 +19,7 @@ export enum NavbarPage {
   Settings = "Settings",
   Search = "Search",
   Groups = "Groups",
+  Messages = "Messages",
 }
 
 export const destinations: Record<NavbarPage, string> = {
@@ -31,6 +34,7 @@ export const destinations: Record<NavbarPage, string> = {
   [NavbarPage.Contract]: "/contract",
   [NavbarPage.Settings]: "/settings",
   [NavbarPage.Groups]: "/groups",
+  [NavbarPage.Messages]: "/messages",
 };
 
 const NavbarVertical: React.FC<{ todoActions: number }> = ({
@@ -65,6 +69,14 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     {
       title: "Platform",
       items: [
+        ...(isFeatureEnabled(Features.Messaging)
+          ? [
+              {
+                page: NavbarPage.Messages,
+                destination: destinations[NavbarPage.Messages],
+              },
+            ]
+          : []),
         {
           page: NavbarPage.CurrentActions,
           destination: destinations[NavbarPage.CurrentActions],

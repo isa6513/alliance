@@ -1,15 +1,35 @@
-import { Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Check,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Message } from './message.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { Ty } from 'src/tasks/entities/type';
+import { Participant } from './participant.entity';
+import { Community } from 'src/user/entities/community.entity';
+
+export enum ConversationType {
+  Direct = 'direct',
+  Multiple = 'multiple',
+  Community = 'community',
+}
 
 @Entity()
+@Check(
+  `("type" = 'direct' AND "communityId" IS NULL) OR ("type" = 'multiple' AND "communityId" IS NULL) OR ("type" = 'community' AND "communityId" IS NOT NULL)`,
+)
 export class Conversation {
   @PrimaryGeneratedColumn()
+  @ApiProperty({ type: Number })
   id: number;
 
   @OneToMany(() => Message, (message) => message.conversation)
@@ -21,4 +41,29 @@ export class Conversation {
 
   @UpdateDateColumnTz()
   updatedAt: Date;
+
+  @OneToMany(() => Participant, (participant) => participant.conversation)
+  @ApiProperty({ type: () => Participant, isArray: true })
+  participants: Ty<Participant>[];
+
+  @Column({
+    type: 'enum',
+    enum: ConversationType,
+    enumName: 'ConversationType',
+  })
+  @ApiProperty({ enum: ConversationType, enumName: 'ConversationType' })
+  type: ConversationType;
+
+  @Column()
+  @ApiProperty({ type: String })
+  title: string;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional({ type: String })
+  photo?: string;
+
+  @ManyToOne(() => Community, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'communityId' })
+  @ApiPropertyOptional({ type: () => Community })
+  community?: Ty<Community>;
 }

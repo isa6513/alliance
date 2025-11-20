@@ -61,4 +61,5 @@ export const testUser = {
   communities: [],
   leaderOf: [],
   invitedCommunities: [],
+  participants: [],
 };

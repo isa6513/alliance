@@ -134,7 +134,7 @@ export class ActionDto extends OmitType(Action, [
 
   @ApiPropertyOptional({
     enum: UserActionRelation,
-    enumName: 'UserActionRelation',
+    type: 'string',
   })
   userRelation?: UserActionRelation;
 

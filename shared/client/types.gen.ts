@@ -46,6 +46,25 @@ export type CommunityInvite = {
 
 export type PublicFormResponseDefault = 'public' | 'private';
 
+export type ParticipantRole = 'admin' | 'member' | 'owner';
+
+export type Message = {
+    id: string;
+    body: string;
+    author: User;
+    createdAt: string;
+    deletedAt?: string;
+    replyTo?: Message;
+};
+
+export type ParticipantState = 'invited' | 'joined';
+
+export type Participant = {
+    role: ParticipantRole;
+    lastReadMessage?: Message;
+    state: ParticipantState;
+};
+
 export type User = {
     id: number;
     name: string;
@@ -79,6 +98,7 @@ export type User = {
     communities: Array<Community>;
     invitedCommunities: Array<CommunityInvite>;
     formDataPreference: PublicFormResponseDefault;
+    participants: Array<Participant>;
 };
 
 export type OnetimeInvite = {
@@ -206,6 +226,7 @@ export type UpdateProfileDto = {
     communities?: Array<Community>;
     invitedCommunities?: Array<CommunityInvite>;
     formDataPreference?: PublicFormResponseDefault;
+    participants?: Array<Participant>;
     cityId?: number;
 };
 
@@ -339,6 +360,61 @@ export type UploadImageResponseDto = {
     key: string;
 };
 
+export type ConversationType = 'direct' | 'multiple' | 'community';
+
+export type MessageReferenceDto = {
+    id: string;
+    body: string;
+    createdAt: string;
+    author: ProfileDto;
+};
+
+export type ParticipantDto = {
+    role: ParticipantRole;
+    state: ParticipantState;
+    user: ProfileDto;
+    lastReadMessage?: MessageReferenceDto;
+};
+
+export type MessageDto = {
+    id: string;
+    body: string;
+    createdAt: string;
+    deletedAt?: string;
+    author: ProfileDto;
+    conversationId: number;
+    replyTo?: MessageReferenceDto;
+};
+
+export type ConversationDto = {
+    id: number;
+    type: ConversationType;
+    title: string;
+    photo?: string;
+    participants: Array<ParticipantDto>;
+    lastMessage?: MessageDto;
+    community?: CommunityDto;
+    hasUnread: boolean;
+    isMessageRequest: boolean;
+};
+
+export type CreateDirectConversationDto = {
+    targetUserId: number;
+    title?: string;
+};
+
+export type CreateGroupConversationDto = {
+    title: string;
+    photo?: string;
+    participantIds: Array<number>;
+};
+
+export type CreateMessageDto = {
+    conversationId: number;
+    body: string;
+    replyToId?: string;
+};
+
 /**
  * Type of action activity
  */
@@ -454,7 +530,9 @@ export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_requ
 export type Comment = {
     id: number;
     editableContent: EditableContent;
-    author: User;
+    author: {
+        [key: string]: unknown;
+    };
     authorId: number;
     parentObjectType: CommentParentObject;
     parentObjectId: number;
@@ -597,7 +675,9 @@ export type Mms = {
     to: string;
     from: string;
     body: string;
-    status: string;
+    status: {
+        [key: string]: unknown;
+    };
     twilioSid: string;
     errorCode?: number;
     errorMessage?: string;
@@ -649,7 +729,7 @@ export type ReminderGroup = {
 export type ActionSuite = {
     id: number;
     name: string;
-    actions: Array<Array<unknown>>;
+    actions: Array<Action>;
     reminderGroups: Array<ReminderGroup>;
     createdAt: string;
     updatedAt: string;
@@ -2704,6 +2784,106 @@ export type MailgunWebhookHandleData = {
 export type MailgunWebhookHandleResponses = {
     200: unknown;
 };
+
+export type ConversationGetMyConversationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/messaging/conversations';
+};
+
+export type ConversationGetMyConversationsResponses = {
+    200: Array<ConversationDto>;
+};
+
+export type ConversationGetMyConversationsResponse = ConversationGetMyConversationsResponses[keyof ConversationGetMyConversationsResponses];
+
+export type ConversationCreateDirectConversationData = {
+    body: CreateDirectConversationDto;
+    path?: never;
+    query?: never;
+    url: '/messaging/conversations/direct';
+};
+
+export type ConversationCreateDirectConversationResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationCreateDirectConversationResponse = ConversationCreateDirectConversationResponses[keyof ConversationCreateDirectConversationResponses];
+
+export type ConversationCreateGroupConversationData = {
+    body: CreateGroupConversationDto;
+    path?: never;
+    query?: never;
+    url: '/messaging/conversations/group';
+};
+
+export type ConversationCreateGroupConversationResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationCreateGroupConversationResponse = ConversationCreateGroupConversationResponses[keyof ConversationCreateGroupConversationResponses];
+
+export type ConversationAcceptInviteData = {
+    body?: never;
+    path: {
+        conversationId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/accept';
+};
+
+export type ConversationAcceptInviteResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationAcceptInviteResponse = ConversationAcceptInviteResponses[keyof ConversationAcceptInviteResponses];
+
+export type ConversationDeclineInviteData = {
+    body?: never;
+    path: {
+        conversationId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/decline';
+};
+
+export type ConversationDeclineInviteResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationDeclineInviteResponse = ConversationDeclineInviteResponses[keyof ConversationDeclineInviteResponses];
+
+export type MessageSendMessageData = {
+    body: CreateMessageDto;
+    path?: never;
+    query?: never;
+    url: '/messaging/messages';
+};
+
+export type MessageSendMessageResponses = {
+    200: MessageDto;
+};
+
+export type MessageSendMessageResponse = MessageSendMessageResponses[keyof MessageSendMessageResponses];
+
+export type MessageGetMessagesData = {
+    body?: never;
+    path: {
+        conversationId: number;
+    };
+    query?: {
+        before?: string;
+        limit?: number;
+    };
+    url: '/messaging/messages/{conversationId}';
+};
+
+export type MessageGetMessagesResponses = {
+    200: Array<MessageDto>;
+};
+
+export type MessageGetMessagesResponse = MessageGetMessagesResponses[keyof MessageGetMessagesResponses];
 
 export type ActionsJoinData = {
     body?: never;

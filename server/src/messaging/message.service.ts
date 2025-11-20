@@ -1,0 +1,148 @@
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from 'src/user/entities/user.entity';
+import { Conversation } from './entities/conversation.entity';
+import { Message } from './entities/message.entity';
+import { Participant, ParticipantState } from './entities/participant.entity';
+import {
+  ConversationMessagesQueryDto,
+  CreateMessageDto,
+  MessageDto,
+} from './dto/messaging.dto';
+import { MessagingEvents } from './messaging.events';
+
+@Injectable()
+export class MessageService {
+  constructor(
+    @InjectRepository(Message)
+    private readonly messageRepository: Repository<Message>,
+    @InjectRepository(Conversation)
+    private readonly conversationRepository: Repository<Conversation>,
+    @InjectRepository(Participant)
+    private readonly participantRepository: Repository<Participant>,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
+
+  async sendMessage(
+    userId: number,
+    dto: CreateMessageDto,
+  ): Promise<MessageDto> {
+    const participant = await this.participantRepository.findOne({
+      where: {
+        conversation: { id: dto.conversationId },
+        user: { id: userId },
+      },
+      relations: ['conversation'],
+    });
+
+    if (!participant) {
+      throw new ForbiddenException('You are not part of this conversation.');
+    }
+
+    if (participant.state !== ParticipantState.Joined) {
+      participant.state = ParticipantState.Joined;
+      participant.joinedAt = new Date();
+      await this.participantRepository.save(participant);
+    }
+
+    const trimmedBody = dto.body.trim();
+    if (!trimmedBody.length) {
+      throw new BadRequestException('Message body cannot be empty.');
+    }
+
+    let replyTo: Message | undefined;
+    if (dto.replyToId) {
+      replyTo =
+        (await this.messageRepository.findOne({
+          where: { id: dto.replyToId },
+          relations: ['conversation'],
+        })) ?? undefined;
+
+      if (!replyTo || replyTo.conversation.id !== participant.conversation.id) {
+        throw new BadRequestException('Invalid reply target.');
+      }
+    }
+
+    const message = this.messageRepository.create({
+      body: trimmedBody,
+      author: { id: userId } as User,
+      conversation: participant.conversation,
+      replyTo,
+    });
+
+    const savedMessage = await this.messageRepository.save(message);
+    participant.lastReadMessage = savedMessage;
+    await this.participantRepository.save(participant);
+    await this.conversationRepository.update(participant.conversation.id, {
+      updatedAt: new Date(),
+    });
+
+    const hydratedMessage = await this.messageRepository.findOneOrFail({
+      where: { id: savedMessage.id },
+      relations: ['author', 'replyTo', 'replyTo.author', 'conversation'],
+    });
+
+    const dtoMessage = new MessageDto(
+      hydratedMessage,
+      hydratedMessage.conversation?.id ?? participant.conversation.id,
+    );
+
+    this.eventEmitter.emit(MessagingEvents.MessageCreated, {
+      conversationId: dto.conversationId,
+      message: dtoMessage,
+    });
+
+    return dtoMessage;
+  }
+
+  async getConversationMessages(
+    userId: number,
+    conversationId: number,
+    query: ConversationMessagesQueryDto,
+  ): Promise<MessageDto[]> {
+    await this.assertParticipant(conversationId, userId);
+
+    const limit = Math.min(query.limit ?? 50, 100);
+    const qb = this.messageRepository
+      .createQueryBuilder('message')
+      .leftJoinAndSelect('message.author', 'author')
+      .leftJoinAndSelect('message.replyTo', 'replyTo')
+      .leftJoinAndSelect('replyTo.author', 'replyToAuthor')
+      .where('message.conversationId = :conversationId', { conversationId })
+      .orderBy('message.createdAt', 'DESC')
+      .take(limit);
+
+    if (query.before) {
+      qb.andWhere('message.createdAt < :before', {
+        before: new Date(query.before),
+      });
+    }
+
+    const messages = await qb.getMany();
+    return messages
+      .reverse()
+      .map((message) => new MessageDto(message, conversationId));
+  }
+
+  private async assertParticipant(
+    conversationId: number,
+    userId: number,
+  ): Promise<void> {
+    const count = await this.participantRepository.count({
+      where: {
+        conversation: { id: conversationId },
+        user: { id: userId },
+      },
+    });
+
+    if (!count) {
+      throw new ForbiddenException('You are not part of this conversation.');
+    }
+  }
+}

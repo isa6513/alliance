@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   Column,
   Entity,
@@ -18,9 +18,11 @@ import { Ty } from 'src/tasks/entities/type';
 @Entity()
 export class Message {
   @PrimaryGeneratedColumn('uuid')
+  @ApiProperty()
   id: string;
 
   @Column()
+  @ApiProperty()
   body: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
@@ -28,15 +30,22 @@ export class Message {
   @ApiProperty({ type: () => User })
   author: Ty<User>;
 
-  @ManyToOne(() => Conversation, (conversation) => conversation.messages)
+  @ManyToOne(() => Conversation, (conversation) => conversation.messages, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'conversationId' })
   conversation: Ty<Conversation>;
 
   @CreateDateColumnTz()
+  @ApiProperty({ type: Date })
   createdAt: Date;
 
   @UpdateDateColumnTz()
   updatedAt: Date;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiPropertyOptional({ type: Date })
+  deletedAt?: Date;
 
   @ManyToOne(() => Message, (message) => message.replies)
   @JoinColumn({ name: 'replyToId' })

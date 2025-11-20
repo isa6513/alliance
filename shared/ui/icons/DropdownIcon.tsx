@@ -15,7 +15,7 @@ const DropdownIcon = ({
     <svg
       width="57"
       height="57"
-      viewBox="0 0 57 57"
+      viewBox="0 0 57 60"
       fill={fill}
       className={`${sizeClass[size]}`}
       xmlns="http://www.w3.org/2000/svg"

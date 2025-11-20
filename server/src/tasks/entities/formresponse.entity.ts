@@ -53,7 +53,7 @@ export class FormResponse {
   publicAnswers: Record<string, boolean>;
 
   @Column({ type: 'text', nullable: true })
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ type: 'string' })
   @IsOptional()
   @Type(() => String)
   deviceType?: DeviceVisibilityTarget;

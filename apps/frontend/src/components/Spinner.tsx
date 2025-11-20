@@ -2,9 +2,13 @@ import React from "react";
 
 interface SpinnerProps {
   size?: "small" | "medium" | "large";
+  color?: string;
 }
 
-const Spinner: React.FC<SpinnerProps> = ({ size = "medium" }) => {
+const Spinner: React.FC<SpinnerProps> = ({
+  size = "medium",
+  color = "fill-green",
+}) => {
   const sizeClass = {
     small: "w-6 h-6",
     medium: "w-9 h-9",
@@ -15,7 +19,7 @@ const Spinner: React.FC<SpinnerProps> = ({ size = "medium" }) => {
     <div role="status">
       <svg
         aria-hidden="true"
-        className={`inline ${sizeClass[size]} text-zinc-200 animate-spin fill-green`}
+        className={`inline ${sizeClass[size]} text-zinc-200 animate-spin ${color}`}
         viewBox="0 0 100 101"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

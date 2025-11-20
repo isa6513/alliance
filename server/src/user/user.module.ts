@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ImagesModule } from 'src/images/images.module';
+import { MessagingModule } from 'src/messaging/messaging.module';
 import { MailModule } from 'src/mail/mail.module';
 import { ActionActivity } from '../actions/entities/action-activity.entity';
 import { Action } from '../actions/entities/action.entity';
@@ -38,6 +39,7 @@ import { CommunityInvite } from './entities/community-invite.entity';
     JwtModule,
     ImagesModule,
     MailModule,
+    MessagingModule,
   ],
   controllers: [UserController],
   providers: [UserService, IsUserAlreadyExist],
