@@ -352,6 +352,7 @@ const FormRenderer = ({
       }
     }
   );
+
   useEffect(() => {
     if (!publicAnswers || Object.keys(publicAnswers).length === 0) {
       console.log("setting public answers");
@@ -365,7 +366,7 @@ const FormRenderer = ({
         return next;
       });
     }
-  }, [publicAnswers]);
+  }, []);
 
   const [uploadingFields, setUploadingFields] = useState<Set<string>>(
     new Set()
@@ -1226,47 +1227,21 @@ const FormRenderer = ({
           user={user}
         />
         {isOutputField && (
-          <>
-            {user?.formDataPreference === "public" ? (
-              <label className="mt-2 flex items-center text-sm text-gray-500">
-                <input
-                  type="checkbox"
-                  className="mr-2 h-4 w-4"
-                  checked={!sharePublicly}
-                  disabled={readOnly}
-                  onChange={
-                    readOnly
-                      ? undefined
-                      : (event) =>
-                          handlePublicToggleChange(
-                            field.id,
-                            !event.target.checked
-                          )
-                  }
-                />
-                Hide my response from others
-              </label>
-            ) : (
-              <label className="mt-2 flex items-center text-sm text-gray-500">
-                <input
-                  type="checkbox"
-                  className="mr-2 h-4 w-4"
-                  checked={sharePublicly}
-                  disabled={readOnly}
-                  onChange={
-                    readOnly
-                      ? undefined
-                      : (event) =>
-                          handlePublicToggleChange(
-                            field.id,
-                            event.target.checked
-                          )
-                  }
-                />
-                Show my response to others
-              </label>
-            )}
-          </>
+          <label className="mt-2 flex items-center text-sm text-gray-500">
+            <input
+              type="checkbox"
+              className="mr-2 h-4 w-4"
+              checked={sharePublicly}
+              disabled={readOnly}
+              onChange={
+                readOnly
+                  ? undefined
+                  : (event) =>
+                      handlePublicToggleChange(field.id, event.target.checked)
+              }
+            />
+            Show my response to others
+          </label>
         )}
       </div>
     );

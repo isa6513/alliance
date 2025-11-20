@@ -1239,12 +1239,20 @@ export class ActionsService {
       });
     }
 
+    let associatedEvent: ActionEvent | undefined = undefined;
+    if (createActionUpdateDto.associatedEventId) {
+      associatedEvent = await this.actionEventRepository.findOneOrFail({
+        where: { id: createActionUpdateDto.associatedEventId },
+      });
+    }
+
     const actionUpdate = await this.actionUpdateRepository.save(
       this.actionUpdateRepository.create({
         ...createActionUpdateDto,
         content,
         action,
         group,
+        associatedEvent,
       }),
     );
 

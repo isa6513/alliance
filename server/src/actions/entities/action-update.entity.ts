@@ -5,6 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  RelationId,
 } from 'typeorm';
 import { Action } from './action.entity';
 import { Type } from 'class-transformer';
@@ -73,6 +74,12 @@ export class ActionUpdate {
   @ApiPropertyOptional({ type: () => ActionEvent })
   @IsOptional()
   associatedEvent?: Ty<ActionEvent>;
+
+  @RelationId((update: ActionUpdate) => update.associatedEvent)
+  @Type(() => Number)
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  associatedEventId?: number | null;
 
   @Column({
     type: 'enum',

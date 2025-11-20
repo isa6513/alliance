@@ -428,7 +428,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
 
   if (timelineData.length === 0 && normalizedReminders.length === 0) {
     return (
-      <div className={`p-8 text-center text-gray-500 ${className || ""}`}>
+      <div className={`p-8 text-center text-zinc-500 ${className || ""}`}>
         No actions with timeline events found.
       </div>
     );
@@ -440,10 +440,10 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
         {/* Gantt chart area with frozen action names */}
         <div className="flex flex-1 min-h-0">
           {/* Fixed action names column */}
-          <div className="w-80 flex-shrink-0 bg-white border-r border-gray-200">
+          <div className="w-80 flex-shrink-0 bg-white border-r border-zinc-200">
             {/* Actions header - fixed */}
             <div
-              className="sticky top-0 bg-gray-50 border-b border-gray-200 py-3 pr-4 text-xs font-medium text-gray-700 z-20"
+              className="sticky top-0 bg-zinc-50 border-b border-zinc-200 py-3 pr-4 text-xs font-medium text-zinc-700 z-20"
               style={{ height: "50px" }}
             >
               {title ? (
@@ -462,7 +462,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
               {timelineData.map(({ action }) => (
                 <div
                   key={action.id}
-                  className="border-b border-gray-100 py-3 pr-4 flex flex-col justify-center bg-white pl-5"
+                  className="border-b border-zinc-100 py-3 pr-4 flex flex-col justify-center bg-white pl-5"
                   style={{ height: "64px" }}
                 >
                   <Link
@@ -471,7 +471,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
                   >
                     {action.name}
                   </Link>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center justify-between text-xs text-zinc-500">
                     <span>{action.status}</span>
                     <button
                       onClick={(e) => {
@@ -481,11 +481,11 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
                           "_blank"
                         );
                       }}
-                      className="flex-shrink-0 ml-2 hover:bg-gray-200 rounded p-1 cursor-pointer"
+                      className="flex-shrink-0 ml-2 hover:bg-zinc-200 rounded p-1 cursor-pointer"
                       title="Edit in Database"
                     >
                       <svg
-                        className="w-3 h-3 text-gray-500"
+                        className="w-3 h-3 text-zinc-500"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"

@@ -324,6 +324,7 @@ export class ActionUpdateDto extends PickType(ActionUpdate, [
   'shortNotifString',
   'content',
   'associatedEvent',
+  'associatedEventId',
   'group',
 ]) {}
 

@@ -213,14 +213,14 @@ const ActionUpdatesTab = ({
                         ? String(newUpdate.associatedEventId)
                         : ""
                     }
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setNewUpdate({
                         ...newUpdate,
                         associatedEventId: e.target.value
                           ? Number(e.target.value)
                           : undefined,
-                      })
-                    }
+                      });
+                    }}
                   >
                     <option value="">No associated event</option>
                     {events.map((event) => (
