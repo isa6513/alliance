@@ -1199,7 +1199,7 @@ const FormRenderer = ({
   const handlePublicToggleChange = (fieldId: string, checked: boolean) => {
     setPublicAnswers((prev) => ({
       ...prev,
-      [fieldId]: checked,
+      [fieldId]: !checked,
     }));
   };
 
