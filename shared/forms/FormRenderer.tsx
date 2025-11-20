@@ -1231,7 +1231,7 @@ const FormRenderer = ({
             <input
               type="checkbox"
               className="mr-2 h-4 w-4"
-              checked={sharePublicly}
+              checked={!sharePublicly}
               disabled={readOnly}
               onChange={
                 readOnly
@@ -1240,7 +1240,7 @@ const FormRenderer = ({
                       handlePublicToggleChange(field.id, event.target.checked)
               }
             />
-            Show my response to others
+            Hide my response from others
           </label>
         )}
       </div>
