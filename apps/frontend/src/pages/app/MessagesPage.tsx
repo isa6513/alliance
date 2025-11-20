@@ -119,7 +119,6 @@ const MessagesPage = () => {
 
   useEffect(() => {
     if (!user) return;
-    if (friends) return;
     userListFriends({ path: { id: user.id } }).then((response) => {
       if (response.data) {
         const notmessagedYet = response.data.filter(
@@ -135,7 +134,7 @@ const MessagesPage = () => {
         setFriends(notmessagedYet);
       }
     });
-  }, [user, conversations, friends]);
+  }, [user, conversations]);
 
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
 

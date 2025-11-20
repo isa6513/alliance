@@ -22,7 +22,7 @@ const BugReportButton = () => {
 
   return (
     <>
-      <div className="fixed bottom-4 left-4">
+      <div className="fixed bottom-4 left-4 z-50">
         {isOpen ? (
           <div className="p-2 bg-white border border-zinc-300 rounded-md">
             <textarea

@@ -109,7 +109,7 @@ const ConversationDetailPanel = ({
         </div>
       </div>
       <div
-        className="overflow-y-auto px-8 justify-end mt-auto"
+        className="overflow-y-auto px-8 justify-end mt-auto pb-3"
         ref={messagesContainerRef}
       >
         {selectedConvo.type === "direct" &&
@@ -138,8 +138,14 @@ const ConversationDetailPanel = ({
           </div>
         ) : (
           <div>
-            {convoMessages.map((message) => (
-              <Message key={message.id} message={message} className="my-2" />
+            {convoMessages.map((message, idx, arr) => (
+              <Message
+                key={message.id}
+                message={message}
+                isFirstInGroup={
+                  idx === 0 || arr[idx - 1].author.id !== message.author.id
+                }
+              />
             ))}
           </div>
         )}
@@ -156,8 +162,8 @@ const ConversationDetailPanel = ({
                   {
                     selectedConvo.participants.find(
                       (participant) =>
-                        participant.user.id === user?.id &&
-                        participant.state === "invited"
+                        participant.user.id !== user?.id &&
+                        participant.state === "joined"
                     )?.user.displayName
                   }
                 </p>
