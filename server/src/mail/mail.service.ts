@@ -104,7 +104,7 @@ export class MailService {
     const pug = await import('pug');
 
     return pug.renderFile(
-      __dirname + `/../../mail/templates/${this.templates[emailType]}.pug`,
+      __dirname + `/templates/${this.templates[emailType]}.pug`,
       { ...context },
     );
   }
