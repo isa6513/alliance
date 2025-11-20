@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
-} from 'src/datasources/basecolumns';
+} from '../datasources/basecolumns';
 import { MessageStatus } from 'twilio/lib/rest/api/v2010/account/message';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 

@@ -1,15 +1,11 @@
 {
   "$schema": "https://swc.rs/schema.json",
   "jsc": {
-    "target": "es2020",
+    "target": "es2023",
     "parser": {
       "syntax": "typescript",
       "tsx": false,
       "decorators": true
-    },
-    "transform": {
-      "legacyDecorator": true,
-      "decoratorMetadata": true
     }
   },
   "minify": false,

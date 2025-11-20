@@ -512,7 +512,7 @@ jobs:
 
             npm install -g pm2
             pm2 delete nest-app || true
-            pm2 start dist/src/main.js --name nest-app
+            pm2 start dist/main.js --name nest-app
             pm2 save
 
             sleep 10

@@ -5,6 +5,16 @@
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.(t|j)s$": "@swc/jest"
+    "^.+\\.(t|j)s$": [
+      "@swc/jest",
+      {
+        "jsc": {
+          "transform": {
+            "legacyDecorator": true,
+            "decoratorMetadata": true
+          }
+        }
+      }
+    ]
   }
 }
