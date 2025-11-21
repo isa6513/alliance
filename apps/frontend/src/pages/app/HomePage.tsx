@@ -11,7 +11,7 @@ import Spinner from "../../components/Spinner";
 import { getPastEvents } from "@alliance/shared/lib/actionUtils";
 import { useCIDFromParams } from "../../lib/utils";
 import TwoColumnLayout from "../../components/TwoColumnLayout";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function canCompleteAction(action: ActionWithRelation) {
   return (
@@ -59,6 +59,10 @@ const HomePage = () => {
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
   });
+  const [visibleFriendActivityCount, setVisibleFriendActivityCount] =
+    useState<number>(3);
+  const friendActivityListRef = useRef<HTMLDivElement | null>(null);
+  const firstFriendActivityRef = useRef<HTMLDivElement | null>(null);
 
   useCIDFromParams();
 
@@ -137,6 +141,53 @@ const HomePage = () => {
   const completedActions =
     actions?.filter((action) => isCurrentlyCompletedAction(action)) || [];
 
+  const updateFriendActivityCount = useCallback(() => {
+    if (typeof window === "undefined" || !friendActivityListRef.current) {
+      return;
+    }
+
+    if (friendActivities.length === 0) {
+      setVisibleFriendActivityCount(0);
+      return;
+    }
+
+    const availableHeight =
+      window.innerHeight -
+      friendActivityListRef.current.getBoundingClientRect().top -
+      16;
+    const firstActivityHeight =
+      firstFriendActivityRef.current?.getBoundingClientRect().height;
+
+    if (!firstActivityHeight || availableHeight <= 0) {
+      setVisibleFriendActivityCount(1);
+      return;
+    }
+
+    const maxItems = Math.max(
+      1,
+      Math.floor(availableHeight / firstActivityHeight)
+    );
+
+    setVisibleFriendActivityCount(Math.min(maxItems, friendActivities.length));
+  }, [friendActivities.length]);
+
+  useEffect(() => {
+    updateFriendActivityCount();
+  }, [
+    updateFriendActivityCount,
+    completedActions.length,
+    currentWeekTodoActions.length,
+    newActions.length,
+    nextWeekTodoActions.length,
+  ]);
+
+  useEffect(() => {
+    window.addEventListener("resize", updateFriendActivityCount);
+    return () => {
+      window.removeEventListener("resize", updateFriendActivityCount);
+    };
+  }, [updateFriendActivityCount]);
+
   const mainContent = () => {
     if (actions === null) {
       return loading ? (
@@ -186,7 +237,7 @@ const HomePage = () => {
 
   const sidebarContent = () => {
     return (
-      <div className="px-4 py-12 flex flex-col divide-y *:py-6 *:px-2 divide-zinc-200">
+      <div className="px-4 pt-12 flex flex-col divide-y *:py-6 *:px-2 divide-zinc-200">
         {todoActions.length + newActions.length > 0 && (
           <div className="flex flex-col gap-y-2">
             <p className="font-semibold text-xl font-serif text-black">
@@ -258,7 +309,10 @@ const HomePage = () => {
               </Link>
             )}
           </div>
-          <div className="flex flex-col *:py-3 -my-3">
+          <div
+            className="flex flex-col *:py-3 -my-3"
+            ref={friendActivityListRef}
+          >
             {friendActivities.length === 0 && (
               <div className="space-x-1">
                 <span className="text-zinc-400 mb-3">No activity yet.</span>
@@ -267,16 +321,27 @@ const HomePage = () => {
                 </a>
               </div>
             )}
-            {friendActivities.slice(0, 3).map((activity) => (
-              <ActionActivityFeedItem
-                key={activity.id}
-                activity={activity}
-                showTime={false}
-                card={false}
-                showAction={true}
-                handleLike={() => handleLikeActivity(activity.id)}
-              />
-            ))}
+            {friendActivities
+              .slice(
+                0,
+                friendActivities.length === 0
+                  ? 0
+                  : Math.max(visibleFriendActivityCount, 1)
+              )
+              .map((activity, index) => (
+                <div
+                  key={activity.id}
+                  ref={index === 0 ? firstFriendActivityRef : undefined}
+                >
+                  <ActionActivityFeedItem
+                    activity={activity}
+                    showTime={false}
+                    card={false}
+                    showAction={true}
+                    handleLike={() => handleLikeActivity(activity.id)}
+                  />
+                </div>
+              ))}
           </div>
         </div>
       </div>
