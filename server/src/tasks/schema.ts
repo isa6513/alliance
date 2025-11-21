@@ -56,6 +56,7 @@ interface BaseField<TKind extends FieldKind> {
 // Conditions reference other field ids; we type this late with a helper (see defineForm)
 export type Condition =
   | { when: string; equals: string | number | boolean | null }
+  | { when: string; includesOption: string }
   | { expr: string }
   | { validatorId: number; resultEquals?: boolean } // keep validators expecting true by default
   | { deviceType: DeviceVisibilityTarget[] };
@@ -202,11 +203,20 @@ export function isQuestionVisible(
         return actual === expected;
       }
       const val = formData[c.when];
+      if ('includesOption' in c) {
+        if (!c.includesOption) {
+          return false;
+        }
+        return Array.isArray(val) && val.includes(c.includesOption);
+      }
+      if (!('equals' in c)) {
+        return true;
+      }
       // If condition expects a boolean (checkbox controllers), coerce undefined → false
       if (typeof c.equals === 'boolean') {
         return Boolean(val) === c.equals;
       }
-      if (Array.isArray(val) && c.equals) {
+      if (Array.isArray(val) && c.equals !== null && c.equals !== undefined) {
         // multiselect: treat equals as "includes"
         return val.includes(c.equals as string);
       }

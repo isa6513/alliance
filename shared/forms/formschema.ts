@@ -56,6 +56,7 @@ interface BaseField<TKind extends FieldKind> {
 // Conditions reference other field ids; we type this late with a helper (see defineForm)
 export type Condition =
   | { when: string; equals: string | number | boolean | null }
+  | { when: string; includesOption: string }
   | { expr: string }
   | { validatorId: number; resultEquals?: boolean } // validators default to expecting true
   | { deviceType: DeviceVisibilityTarget[] };

@@ -136,6 +136,21 @@ function isDeviceCondition(cond: Condition): cond is DeviceCondition {
   return "deviceType" in cond;
 }
 
+function isIncludesOptionCondition(
+  condition: Condition
+): condition is Extract<Condition, { includesOption: string }> {
+  return "includesOption" in condition;
+}
+
+function isEqualsCondition(
+  condition: Condition
+): condition is Extract<
+  Condition,
+  { equals: string | number | boolean | null }
+> {
+  return "equals" in condition;
+}
+
 function normalizeConditions(input?: Condition[] | Condition): Condition[] {
   if (!input) return [];
   return Array.isArray(input) ? input : [input];
@@ -164,6 +179,31 @@ export function ConditionalVisibility({
     [field.visibleIf]
   );
 
+  const buildConditionForField = useCallback(
+    (controller: ControllerField | undefined): FieldCondition | null => {
+      if (!controller) {
+        return null;
+      }
+      if (controller.kind === "checkbox") {
+        return {
+          when: controller.id,
+          equals: true,
+        };
+      }
+      if (controller.kind === "multiselect") {
+        return {
+          when: controller.id,
+          includesOption: controller.options?.[0]?.value ?? "",
+        };
+      }
+      return {
+        when: controller.id,
+        equals: controller.options?.[0]?.value ?? "",
+      };
+    },
+    []
+  );
+
   const [conditionError, setConditionError] = useState<string | null>(null);
 
   const canUseFieldControllers = controllers.length > 0;
@@ -188,19 +228,8 @@ export function ConditionalVisibility({
   );
 
   const createDefaultFieldCondition = useCallback((): FieldCondition | null => {
-    const first = controllers[0];
-    if (!first) return null;
-    let defaultEquals: FieldCondition["equals"];
-    if (first.kind === "checkbox") {
-      defaultEquals = true;
-    } else {
-      defaultEquals = first.options?.[0]?.value ?? "";
-    }
-    return {
-      when: first.id,
-      equals: defaultEquals,
-    };
-  }, [controllers]);
+    return buildConditionForField(controllers[0]);
+  }, [buildConditionForField, controllers]);
 
   const addFieldCondition = useCallback((): boolean => {
     const condition = createDefaultFieldCondition();
@@ -374,23 +403,18 @@ export function ConditionalVisibility({
       if (!nextField) {
         return;
       }
-      let nextEquals: FieldCondition["equals"];
-      if (nextField.kind === "checkbox") {
-        nextEquals = true;
-      } else {
-        nextEquals = nextField.options?.[0]?.value ?? "";
+      const nextCondition = buildConditionForField(nextField);
+      if (!nextCondition) {
+        return;
       }
       const next = [...conditions];
-      next[index] = {
-        when: nextField.id,
-        equals: nextEquals,
-      };
+      next[index] = nextCondition;
       updateConditions(next);
     },
-    [conditions, controllers, updateConditions]
+    [buildConditionForField, conditions, controllers, updateConditions]
   );
 
-  const handleEqualsChange = useCallback(
+  const handleConditionValueChange = useCallback(
     (index: number, value: string) => {
       const next = [...conditions];
       const current = next[index];
@@ -401,11 +425,22 @@ export function ConditionalVisibility({
       if (!controller) {
         return;
       }
-      const equals = controller.kind === "checkbox" ? value === "true" : value;
-      next[index] = {
-        when: current.when,
-        equals,
-      };
+      if (controller.kind === "checkbox") {
+        next[index] = {
+          when: controller.id,
+          equals: value === "true",
+        };
+      } else if (controller.kind === "multiselect") {
+        next[index] = {
+          when: controller.id,
+          includesOption: value,
+        };
+      } else {
+        next[index] = {
+          when: controller.id,
+          equals: value,
+        };
+      }
       updateConditions(next);
     },
     [conditions, controllers, updateConditions]
@@ -464,6 +499,14 @@ export function ConditionalVisibility({
 
   const renderFieldCondition = (condition: FieldCondition, index: number) => {
     const controller = controllers.find((f) => f.id === condition.when);
+    const multiSelectValue =
+      controller?.kind === "multiselect"
+        ? isIncludesOptionCondition(condition)
+          ? condition.includesOption ?? ""
+          : isEqualsCondition(condition) && typeof condition.equals === "string"
+          ? condition.equals
+          : ""
+        : "";
     return (
       <div className="space-y-2">
         <div>
@@ -487,24 +530,47 @@ export function ConditionalVisibility({
 
         {controller ? (
           <div>
-            <label className="block text-xs text-gray-700 mb-1">equals</label>
+            <label className="block text-xs text-gray-700 mb-1">
+              {controller.kind === "multiselect" ? "includes option" : "equals"}
+            </label>
             {controller.kind === "checkbox" ? (
               <select
                 className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={String(!!condition.equals)}
+                value={String(
+                  isEqualsCondition(condition) &&
+                    typeof condition.equals === "boolean"
+                    ? condition.equals
+                    : false
+                )}
                 onChange={(event) =>
-                  handleEqualsChange(index, event.target.value)
+                  handleConditionValueChange(index, event.target.value)
                 }
               >
                 <option value="true">Checked</option>
                 <option value="false">Unchecked</option>
               </select>
+            ) : controller.kind === "multiselect" ? (
+              <select
+                className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                value={multiSelectValue}
+                onChange={(event) =>
+                  handleConditionValueChange(index, event.target.value)
+                }
+              >
+                {controller.options?.map((opt, idx) => (
+                  <option key={idx} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
             ) : (
               <select
                 className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={String(condition.equals ?? "")}
+                value={String(
+                  isEqualsCondition(condition) ? condition.equals ?? "" : ""
+                )}
                 onChange={(event) =>
-                  handleEqualsChange(index, event.target.value)
+                  handleConditionValueChange(index, event.target.value)
                 }
               >
                 {controller.options?.map((opt, idx) => (

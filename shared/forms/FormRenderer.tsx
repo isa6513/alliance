@@ -555,17 +555,23 @@ const FormRenderer = ({
         return actual === expected;
       }
       const val = data[cond.when];
-      if (typeof cond.equals === "boolean") {
-        return Boolean(val) === cond.equals;
+      if ("includesOption" in cond) {
+        if (!cond.includesOption) {
+          return false;
+        }
+        return Array.isArray(val) && val.includes(cond.includesOption);
       }
-      if (
-        Array.isArray(val) &&
-        cond.equals !== null &&
-        cond.equals !== undefined
-      ) {
-        return val.includes(cond.equals as string);
+      if (!("equals" in cond)) {
+        return true;
       }
-      return val === cond.equals;
+      const equals = cond.equals;
+      if (typeof equals === "boolean") {
+        return Boolean(val) === equals;
+      }
+      if (Array.isArray(val) && equals !== null && equals !== undefined) {
+        return val.includes(equals as string);
+      }
+      return val === equals;
     },
     [effectiveDeviceType, formData, visibilityValidatorResults]
   );

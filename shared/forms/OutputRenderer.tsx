@@ -69,10 +69,23 @@ const isBlockVisible = (
     }
 
     const value = answers[condition.when];
+    if ("includesOption" in condition) {
+      if (!condition.includesOption) {
+        return false;
+      }
+      return Array.isArray(value) && value.includes(condition.includesOption);
+    }
+    if (!("equals" in condition)) {
+      return true;
+    }
     if (typeof condition.equals === "boolean") {
       return Boolean(value) === condition.equals;
     }
-    if (Array.isArray(value) && condition.equals) {
+    if (
+      Array.isArray(value) &&
+      condition.equals !== null &&
+      condition.equals !== undefined
+    ) {
       return value.includes(condition.equals as string);
     }
     return value === condition.equals;

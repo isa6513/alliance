@@ -2,12 +2,13 @@ const DropdownIcon = ({
   size = "small",
   fill = "var(--color-green)",
 }: {
-  size?: "mini" | "small" | "large";
+  size?: "mini" | "small" | "medium" | "large";
   fill?: string;
 }) => {
   const sizeClass = {
     mini: "w-2.5 h-2.5",
-    small: "w-4 h-4",
+    small: "w-3 h-3",
+    medium: "w-4 h-4",
     large: "w-8 h-8",
   };
 
