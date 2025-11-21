@@ -93,7 +93,6 @@ export class LikeNotificationService {
         user: { id: params.ownerId },
         groupingKey,
         category: NotificationCategory.Likes,
-        read: false,
         cleared: false,
       },
       relations: ['associatedUsers'],
