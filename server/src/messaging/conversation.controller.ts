@@ -113,9 +113,8 @@ export class ConversationController {
     @Param('conversationId', ParseIntPipe) conversationId: number,
     @Request() req: JwtRequest,
   ): Promise<ConversationDto> {
-    return this.conversationService.removeParticipantFromConversation(
+    return this.conversationService.leaveConversation(
       conversationId,
-      req.user.sub,
       req.user.sub,
     );
   }

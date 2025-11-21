@@ -317,7 +317,8 @@ export class ConversationService {
 
     await this.participantRepository.save(participant);
     await this.touchConversation(conversationId);
-    const updatedConversation = await this.getConversationEntity(conversationId);
+    const updatedConversation =
+      await this.getConversationEntity(conversationId);
     await this.emitConversationUpdate(updatedConversation);
     return new ConversationDto(updatedConversation, {
       contextUserId: actingUserId,
@@ -355,10 +356,25 @@ export class ConversationService {
 
     await this.participantRepository.remove(targetParticipant);
     await this.touchConversation(conversationId);
-    const updatedConversation = await this.getConversationEntity(conversationId);
+    const updatedConversation =
+      await this.getConversationEntity(conversationId);
     await this.emitConversationUpdate(updatedConversation);
     return new ConversationDto(updatedConversation, {
       contextUserId: actingUserId,
+    });
+  }
+
+  async leaveConversation(
+    conversationId: number,
+    userId: number,
+  ): Promise<ConversationDto> {
+    const participant = await this.getParticipantOrFail(conversationId, userId);
+    await this.participantRepository.remove(participant);
+    const updatedConversation =
+      await this.getConversationEntity(conversationId);
+    await this.emitConversationUpdate(updatedConversation);
+    return new ConversationDto(updatedConversation, {
+      contextUserId: userId,
     });
   }
 
