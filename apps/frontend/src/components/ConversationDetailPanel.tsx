@@ -64,7 +64,7 @@ const ConversationDetailPanel = ({
         if (response.data) {
           setMessage("");
         }
-        if (selectedConvo.type === "direct" && amInvited) {
+        if (amInvited) {
           handleConversationUpdated({
             ...selectedConvo,
             participants: selectedConvo.participants.map((participant) => {
@@ -110,13 +110,21 @@ const ConversationDetailPanel = ({
     const response = await conversationRemoveParticipant({
       path: { conversationId: selectedConvo.id, userId },
     });
+    if (response.data) {
+      handleConversationUpdated({
+        ...selectedConvo,
+        participants: selectedConvo.participants.filter(
+          (participant) => participant.user.id !== userId
+        ),
+      });
+    }
   };
 
   return (
     <div className="flex flex-col h-full overflow-x-hidden">
       {groupInfoOpen ? (
-        <div className="flex-1 relative flex flex-col items-center">
-          <div className="flex flex-col items-center px-8 pt-20 w-full gap-y-2">
+        <div className="flex-1 relative flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center px-8 w-full gap-y-2">
             <ProfileImage
               pfp={selectedConvo.photo ?? null}
               size="huge"
@@ -166,17 +174,25 @@ const ConversationDetailPanel = ({
                       />
                       <p>{participant.user.displayName}</p>
                     </div>
-                    {isAdmin && participant.user.id !== user?.id && (
-                      <Button
-                        color={ButtonColor.Transparent}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleRemoveParticipant(participant.user.id);
-                        }}
-                        className="hover:!bg-zinc-200 !px-2"
-                      >
-                        <DeleteIcon size="large" fill="var(--color-red-400)" />
-                      </Button>
+                    {isAdmin &&
+                      participant.user.id !== user?.id &&
+                      selectedConvo.type === "multiple" && (
+                        <Button
+                          color={ButtonColor.Transparent}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleRemoveParticipant(participant.user.id);
+                          }}
+                          className="hover:!bg-zinc-200 !px-2"
+                        >
+                          <DeleteIcon
+                            size="large"
+                            fill="var(--color-red-400)"
+                          />
+                        </Button>
+                      )}
+                    {participant.state == "invited" && (
+                      <p className="text-sm text-zinc-500">Invited</p>
                     )}
                   </Link>
                 ))}
