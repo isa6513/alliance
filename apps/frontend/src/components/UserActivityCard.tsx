@@ -162,12 +162,16 @@ const UserActivityCard = ({
           <p className="text-zinc-900">
             {completed ? " completed " : " committed to "}
           </p>
-          <p
-            className="text-green cursor-pointer hover:underline font-medium"
-            onClick={handleClick}
-          >
-            {activity.actionName}
-          </p>
+          {activity.actionName ? (
+            <p
+              className="text-green cursor-pointer hover:underline font-medium"
+              onClick={handleClick}
+            >
+              {activity.actionName}
+            </p>
+          ) : (
+            <p>this action</p>
+          )}
         </div>
         {isEditing ? (
           <div className="flex-1 space-y-2 -m-4 mt-4 mb-0 border-t border-zinc-200">

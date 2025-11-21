@@ -29,6 +29,7 @@ export type UseActivitiesProps = { comments?: boolean } & (
   | {
       list: ActivityList.Global | ActivityList.Friends;
       objectId?: never;
+      limit?: number;
     }
 );
 
@@ -57,7 +58,7 @@ const useActivities = ({
       case ActivityList.Action:
         apiCall = actionsGetActionActivities({
           path: { id: objectId },
-          query: { limit: limit.toString(), comments },
+          query: { limit: limit, comments },
         });
         break;
       case ActivityList.Community:
