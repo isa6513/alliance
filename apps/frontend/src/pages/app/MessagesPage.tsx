@@ -48,7 +48,11 @@ const MessagesPage = () => {
   }, [params]);
 
   const setSelectedConvoId = useCallback(
-    (convoId: number) => {
+    (convoId: number | null) => {
+      if (!convoId) {
+        setParams({});
+        return;
+      }
       setParams({ chat: convoId.toString() });
     },
     [setParams]
@@ -484,6 +488,10 @@ const MessagesPage = () => {
           <ConversationDetailPanel
             showCloseButton={isSmall}
             onClose={() => setMessagesOpen(false)}
+            onLeave={() => {
+              setSelectedConvoId(null);
+              setMessagesOpen(false);
+            }}
             selectedConvo={selectedConvo}
             convoMessages={convoMessages}
             messagesContainerRef={messagesContainerRef}

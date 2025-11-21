@@ -464,9 +464,7 @@ export type FormResponseOutputDto = {
     publicAnswers: {
         [key: string]: unknown;
     };
-    deviceType?: {
-        [key: string]: unknown;
-    };
+    deviceType?: string;
     schemaSnapshot: {
         [key: string]: unknown;
     };
@@ -630,9 +628,7 @@ export type FormResponse = {
     publicAnswers: {
         [key: string]: unknown;
     };
-    deviceType?: {
-        [key: string]: unknown;
-    };
+    deviceType?: string;
     user: User;
     createdAt: string;
     schemaSnapshot: {
@@ -969,9 +965,7 @@ export type ActionDto = {
     updates: Array<ActionUpdateDto>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
-    userRelation?: {
-        [key: string]: unknown;
-    };
+    userRelation?: string;
     reqAuthenticated?: boolean;
 };
 
@@ -1063,9 +1057,7 @@ export type CreateActionDto = {
     preventCompletion: boolean;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
-    userRelation?: {
-        [key: string]: unknown;
-    };
+    userRelation?: string;
     reqAuthenticated?: boolean;
     suiteId?: number;
 };
@@ -1134,9 +1126,7 @@ export type UpdateActionDto = {
     preventCompletion?: boolean;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
-    userRelation?: {
-        [key: string]: unknown;
-    };
+    userRelation?: string;
     reqAuthenticated?: boolean;
     suiteId?: number;
 };
@@ -1746,9 +1736,7 @@ export type FormResponseDto = {
     publicAnswers: {
         [key: string]: unknown;
     };
-    deviceType?: {
-        [key: string]: unknown;
-    };
+    deviceType?: string;
     schemaSnapshot: {
         [key: string]: unknown;
     };
@@ -2900,6 +2888,21 @@ export type ConversationRemoveParticipantResponses = {
 };
 
 export type ConversationRemoveParticipantResponse = ConversationRemoveParticipantResponses[keyof ConversationRemoveParticipantResponses];
+
+export type ConversationLeaveData = {
+    body?: never;
+    path: {
+        conversationId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/leave';
+};
+
+export type ConversationLeaveResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationLeaveResponse = ConversationLeaveResponses[keyof ConversationLeaveResponses];
 
 export type MessageSendMessageData = {
     body: CreateMessageDto;

@@ -106,6 +106,20 @@ export class ConversationController {
     );
   }
 
+  @Post(':conversationId/leave')
+  @ApiOkResponse({ type: ConversationDto })
+  @UseGuards(AuthGuard)
+  leave(
+    @Param('conversationId', ParseIntPipe) conversationId: number,
+    @Request() req: JwtRequest,
+  ): Promise<ConversationDto> {
+    return this.conversationService.removeParticipantFromConversation(
+      conversationId,
+      req.user.sub,
+      req.user.sub,
+    );
+  }
+
   private async ensureParticipantAndRun<T>(
     conversationId: number,
     userId: number,

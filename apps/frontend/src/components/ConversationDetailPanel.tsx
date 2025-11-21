@@ -1,6 +1,7 @@
 import StatusIcon from "@alliance/shared/ui/icons/StatusIcon";
 import {
   ConversationDto,
+  conversationLeave,
   conversationRemoveParticipant,
   MessageDto,
   messageSendMessage,
@@ -25,6 +26,7 @@ interface ConversationDetailPanelProps {
   handleConversationUpdated: (conversation: ConversationDto) => void;
   showCloseButton: boolean;
   onClose: () => void;
+  onLeave: () => void;
 }
 const ConversationDetailPanel = ({
   selectedConvo,
@@ -35,6 +37,7 @@ const ConversationDetailPanel = ({
   handleConversationUpdated,
   showCloseButton,
   onClose,
+  onLeave,
 }: ConversationDetailPanelProps) => {
   const { user } = useAuth();
 
@@ -111,12 +114,16 @@ const ConversationDetailPanel = ({
       path: { conversationId: selectedConvo.id, userId },
     });
     if (response.data) {
-      handleConversationUpdated({
-        ...selectedConvo,
-        participants: selectedConvo.participants.filter(
-          (participant) => participant.user.id !== userId
-        ),
-      });
+      handleConversationUpdated(response.data);
+    }
+  };
+
+  const handleLeaveGroup = async () => {
+    const response = await conversationLeave({
+      path: { conversationId: selectedConvo.id },
+    });
+    if (response.data) {
+      onLeave();
     }
   };
 
@@ -156,11 +163,11 @@ const ConversationDetailPanel = ({
             )}
           </div>
           {selectedConvo.type !== "direct" && (
-            <div className="flex flex-col p-2 px-5 gap-4 w-full items-center">
+            <div className="flex flex-col p-2 px-5 gap-4 w-full items-center  max-w-[500px]">
               <p className="text-center">
                 {selectedConvo.participants.length} members
               </p>
-              <List className="max-h-[300px] overflow-y-auto w-full max-w-[500px]">
+              <List className="max-h-[300px] overflow-y-auto w-full">
                 {selectedConvo.participants.map((participant) => (
                   <Link
                     key={participant.user.id}
@@ -192,11 +199,20 @@ const ConversationDetailPanel = ({
                         </Button>
                       )}
                     {participant.state == "invited" && (
-                      <p className="text-sm text-zinc-500">Invited</p>
+                      <p className="text-sm text-zinc-500 mr-2">Invited</p>
                     )}
                   </Link>
                 ))}
               </List>
+              {selectedConvo.type === "multiple" && (
+                <Button
+                  color={ButtonColor.Transparent}
+                  onClick={handleLeaveGroup}
+                  className="self-end text-zinc-500"
+                >
+                  Leave group
+                </Button>
+              )}
             </div>
           )}
           <Button
