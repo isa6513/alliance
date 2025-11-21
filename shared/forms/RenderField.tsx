@@ -495,7 +495,7 @@ export function RenderField({
                   aria-invalid={hasError}
                   style={{ marginTop: "4px" }}
                   className={composeClassName(
-                    `mr-2 h-4 w-4 disabled:ring-1 disabled:ring-zinc-400 ${
+                    `shrink-0 mr-2 h-4 w-4 disabled:ring-1 disabled:ring-zinc-400 ${
                       hasError ? "text-red-600" : "text-blue-600"
                     } focus:outline-none rounded`,
                     {
