@@ -267,7 +267,13 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                     >
                       <p>{item.page}</p>
                       {!!unreadNotifsForPage[item.page] && (
-                        <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-5 h-5">
+                        <div
+                          className={`font-semibold text-xs text-white ${
+                            item.page === NavbarPage.Tasks
+                              ? "bg-red-500"
+                              : "bg-zinc-500"
+                          } rounded-md flex justify-center items-center w-5 h-5`}
+                        >
                           {unreadNotifsForPage[item.page]}
                         </div>
                       )}
