@@ -763,12 +763,20 @@ export class ActionsService {
     return new FormResponseOutputDto(responseWithPruned);
   }
 
-  async getActionActivities(actionId: number): Promise<ActionActivityDto[]> {
+  async getActionActivities(
+    actionId: number,
+    limit?: number,
+    comments?: boolean,
+  ): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
       where: { actionId },
       relations: ['user', 'likes', 'taskFormResponse'],
       order: { createdAt: 'DESC' },
+      take: limit,
     });
+    if (comments) {
+      return this.attachComments(activities);
+    }
     return activities.map((activity) => new ActionActivityDto(activity));
   }
 

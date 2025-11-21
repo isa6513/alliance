@@ -35,6 +35,7 @@ export default [
       route("/profile", "pages/app/ProfileRedirect.tsx"),
       route("/feed", "pages/app/ActivityFeedPage.tsx"),
       route("/messages", "pages/app/MessagesPage.tsx"),
+      route("/feed/:actionId", "pages/app/ActionActivityFeedPage.tsx"),
       route("/user/:id", "pages/app/UserProfilePage.tsx"),
       route("/verifyEmail", "pages/app/VerifyEmailPage.tsx"),
 

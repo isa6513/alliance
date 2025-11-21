@@ -52,6 +52,7 @@ export default function ActionPage() {
   const { activities, handleLikeActivity, setActivities } = useActivities({
     list: ActivityList.Action,
     objectId: actionId,
+    limit: 10,
   });
 
   if (!action) {

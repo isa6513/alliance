@@ -2,6 +2,7 @@ import { ActionActivityDto } from "@alliance/shared/client";
 import { useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import ActionActivityFeedItem from "./ActionActivityFeedItem";
+import { Link } from "react-router";
 
 interface ActionActivityListProps {
   actionId: number;
@@ -57,6 +58,14 @@ const ActionActivityList = ({
 
   return (
     <div className="space-y-3 w-full">
+      <div className="mb-2">
+        <Link
+          to={`/feed/${activities[0]?.actionId}`}
+          className="text-black hover:underline mt-3 font-medium"
+        >
+          See all
+        </Link>
+      </div>
       <div className="flex flex-col *:py-3 -my-3">
         {displayedActivities.map((activity) => (
           <ActionActivityFeedItem
@@ -74,7 +83,7 @@ const ActionActivityList = ({
           onClick={() => setShowAll(true)}
           className="text-green hover:text-green/70 mt-3 font-medium"
         >
-          See all ({allActivities.length})
+          See more ({allActivities.length})
         </button>
       )}
     </div>

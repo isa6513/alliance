@@ -460,7 +460,9 @@ export type FormResponseOutputDto = {
     publicAnswers: {
         [key: string]: unknown;
     };
-    deviceType?: string;
+    deviceType?: {
+        [key: string]: unknown;
+    };
     schemaSnapshot: {
         [key: string]: unknown;
     };
@@ -624,7 +626,9 @@ export type FormResponse = {
     publicAnswers: {
         [key: string]: unknown;
     };
-    deviceType?: string;
+    deviceType?: {
+        [key: string]: unknown;
+    };
     user: User;
     createdAt: string;
     schemaSnapshot: {
@@ -961,7 +965,9 @@ export type ActionDto = {
     updates: Array<ActionUpdateDto>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
-    userRelation?: string;
+    userRelation?: {
+        [key: string]: unknown;
+    };
     reqAuthenticated?: boolean;
 };
 
@@ -1053,7 +1059,9 @@ export type CreateActionDto = {
     preventCompletion: boolean;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
-    userRelation?: string;
+    userRelation?: {
+        [key: string]: unknown;
+    };
     reqAuthenticated?: boolean;
     suiteId?: number;
 };
@@ -1122,7 +1130,9 @@ export type UpdateActionDto = {
     preventCompletion?: boolean;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
-    userRelation?: string;
+    userRelation?: {
+        [key: string]: unknown;
+    };
     reqAuthenticated?: boolean;
     suiteId?: number;
 };
@@ -1732,7 +1742,9 @@ export type FormResponseDto = {
     publicAnswers: {
         [key: string]: unknown;
     };
-    deviceType?: string;
+    deviceType?: {
+        [key: string]: unknown;
+    };
     schemaSnapshot: {
         [key: string]: unknown;
     };
@@ -3090,7 +3102,10 @@ export type ActionsGetActionActivitiesData = {
     path: {
         id: number;
     };
-    query?: never;
+    query: {
+        limit: number;
+        comments: boolean;
+    };
     url: '/actions/{id}/activities';
 };
 

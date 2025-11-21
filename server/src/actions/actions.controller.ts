@@ -248,8 +248,11 @@ export class ActionsController {
   @ApiOperation({ summary: 'Get recent activities for an action' })
   async getActionActivities(
     @Param('id', ParseIntPipe) id: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('comments', new ParseBoolPipe({ optional: true }))
+    comments?: boolean,
   ): Promise<ActionActivityDto[]> {
-    return this.actionsService.getActionActivities(id);
+    return this.actionsService.getActionActivities(id, limit, comments);
   }
 
   @Get('all')

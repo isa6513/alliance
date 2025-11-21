@@ -24,6 +24,7 @@ export type UseActivitiesProps = { comments?: boolean } & (
   | {
       list: ActivityList.User | ActivityList.Action | ActivityList.Community;
       objectId: number;
+      limit?: number;
     }
   | {
       list: ActivityList.Global | ActivityList.Friends;
@@ -34,6 +35,7 @@ export type UseActivitiesProps = { comments?: boolean } & (
 const useActivities = ({
   list,
   objectId,
+  limit = 50,
   comments = false,
 }: UseActivitiesProps) => {
   const [activities, setActivities] = useState<ActionActivityDto[]>([]);
@@ -53,12 +55,15 @@ const useActivities = ({
         });
         break;
       case ActivityList.Action:
-        apiCall = actionsGetActionActivities({ path: { id: objectId } });
+        apiCall = actionsGetActionActivities({
+          path: { id: objectId },
+          query: { limit: limit.toString(), comments },
+        });
         break;
       case ActivityList.Community:
         apiCall = actionsCommunityActivity({
           query: {
-            limit: "50",
+            limit: limit.toString(),
             before: new Date().toISOString(),
             comments,
             communityId: objectId,
@@ -67,7 +72,11 @@ const useActivities = ({
         break;
       case ActivityList.Global:
         apiCall = actionsGetActivityFeed({
-          query: { limit: "50", before: new Date().toISOString(), comments },
+          query: {
+            limit: limit.toString(),
+            before: new Date().toISOString(),
+            comments,
+          },
         });
         break;
     }

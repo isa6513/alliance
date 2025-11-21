@@ -252,7 +252,7 @@ const HomePage = () => {
             {friendActivities.length > 0 && (
               <Link
                 to="/feed"
-                className="text-zinc-800 font-medium hover:underline text-sm mt-0"
+                className="text-zinc-800 font-medium hover:underline mt-0"
               >
                 See all
               </Link>
