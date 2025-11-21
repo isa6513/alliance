@@ -202,44 +202,31 @@ const CommunityPage = () => {
     filterMode === FilterMode.All
       ? members
       : members.filter((user) => !completedAllCurrentActions[user.id])
-  )
-    .sort((a, b) => {
-      // Sort by completion (uncompleted first)
-      // Then, if leader, by preferred contact time in leader's time zone
+  ).sort((a, b) => {
+    // if leader, sort by preferred contact time in leader's time zone
 
-      const uncompletedA = !completedAllCurrentActions[a.id];
-      const uncompletedB = !completedAllCurrentActions[b.id];
-      if (uncompletedA && !uncompletedB) {
+    if (amLeader) {
+      const preferredTimeA =
+        memberContactInfo?.[a.id]?.preferredReminderTimeLeaderTz ?? "";
+      const preferredTimeB =
+        memberContactInfo?.[b.id]?.preferredReminderTimeLeaderTz ?? "";
+
+      const timeA = parseTimeInput(preferredTimeA);
+      const timeB = parseTimeInput(preferredTimeB);
+
+      if (timeA && timeB) {
+        return timeA.minutes - timeB.minutes;
+      }
+
+      if (!timeA && timeB) {
         return -1;
       }
-      if (!uncompletedA && uncompletedB) {
+      if (timeA && !timeB) {
         return 1;
       }
-      return 0;
-    })
-    .sort((a, b) => {
-      if (amLeader) {
-        const preferredTimeA =
-          memberContactInfo?.[a.id]?.preferredReminderTimeLeaderTz ?? "";
-        const preferredTimeB =
-          memberContactInfo?.[b.id]?.preferredReminderTimeLeaderTz ?? "";
-
-        const timeA = parseTimeInput(preferredTimeA);
-        const timeB = parseTimeInput(preferredTimeB);
-
-        if (timeA && timeB) {
-          return timeA.minutes - timeB.minutes;
-        }
-
-        if (!timeA && timeB) {
-          return -1;
-        }
-        if (timeA && !timeB) {
-          return 1;
-        }
-      }
-      return 0;
-    });
+    }
+    return 0;
+  });
 
   return (
     <CenterLayout>
