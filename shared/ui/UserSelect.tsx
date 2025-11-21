@@ -113,7 +113,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
           No users match that search.
         </p>
       )}
-      <div className="mb-3 space-y-2">
+      <div className="my-3 space-y-2">
         {selectedUsers.map((user) => (
           <div
             key={user.id}

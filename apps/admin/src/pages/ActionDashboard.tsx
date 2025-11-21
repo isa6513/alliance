@@ -15,12 +15,18 @@ import {
   tasksGetForm,
   tasksListForms,
   userGetGroups,
+  userMembers,
 } from "@alliance/shared/client";
-import type { ActionSuite, Group, GroupDto } from "@alliance/shared/client";
+import type {
+  ActionSuite,
+  Group,
+  GroupDto,
+  User,
+} from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import ActionForm from "../components/ActionForm";
 import EventManagementTab from "../components/EventManagementTab";
@@ -30,6 +36,7 @@ import ActionUpdatesTab from "../components/ActionUpdatesTab";
 import { getApiUrl, getBaseUrl } from "@alliance/shared/lib/config";
 import Dropdown from "@alliance/shared/ui/Dropdown";
 import LargeCheckbox from "@alliance/shared/ui/LargeCheckbox";
+import { UserSelectUser } from "@alliance/shared/ui/UserSelect";
 
 // Status color mapping
 export const getStatusColor = (status: ActionDto["status"]) => {
@@ -85,6 +92,9 @@ const ActionDashboard: React.FC = () => {
   const [availableSuites, setAvailableSuites] = useState<ActionSuite[]>([]);
   const [suitesLoading, setSuitesLoading] = useState<boolean>(true);
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
+  const [availableUsers, setAvailableUsers] = useState<UserSelectUser[]>([]);
+  const [usersLoading, setUsersLoading] = useState<boolean>(true);
+  const [manualCohortUserIds, setManualCohortUserIds] = useState<number[]>([]);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -165,6 +175,36 @@ const ActionDashboard: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadUsers = async () => {
+      try {
+        const response = await userMembers();
+        if (!cancelled && response.data) {
+          const mappedUsers = response.data.map<UserSelectUser>((user) => ({
+            id: user.id,
+            name: user.displayName,
+            profilePicture: user.profilePicture,
+          }));
+          setAvailableUsers(mappedUsers);
+        }
+      } catch (err) {
+        console.error("Failed to load users:", err);
+      } finally {
+        if (!cancelled) {
+          setUsersLoading(false);
+        }
+      }
+    };
+
+    loadUsers();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const [form, setForm] = useState<CreateActionDto & { taskFormId?: number }>({
     name: "",
     category: "",
@@ -180,6 +220,8 @@ const ActionDashboard: React.FC = () => {
     everyoneShouldComplete: false,
     suiteId: undefined,
     priority: 0,
+    manualCohortUsers: [],
+    useManualCohort: false,
   });
 
   // Reset form when switching to new action mode
@@ -200,11 +242,14 @@ const ActionDashboard: React.FC = () => {
         everyoneShouldComplete: false,
         suiteId: undefined,
         priority: 0,
+        manualCohortUsers: [],
+        useManualCohort: false,
       });
       setImageKey(null);
       setImagePreview(null);
       setError(null);
       setSelectedGroupIds([]);
+      setManualCohortUserIds([]);
     }
   }, [isNew]);
 
@@ -253,16 +298,36 @@ const ActionDashboard: React.FC = () => {
           ...formData
         } = actionData;
 
+        const manualCohortUsers = actionData.manualCohortUsers ?? [];
+
         setForm({
           ...formData,
           taskFormId: actionData.taskFormId,
           participatingGroups: actionData.participatingGroups ?? [],
           suiteId: suite?.id,
+          manualCohortUsers,
+          useManualCohort: actionData.useManualCohort ?? false,
         });
 
         setSelectedGroupIds(
           (actionData.participatingGroups || []).map((group) => group.id)
         );
+        setManualCohortUserIds(manualCohortUsers.map((user) => user.id));
+        setAvailableUsers((prev) => {
+          const existingIds = new Set(prev.map((user) => user.id));
+          const manualUsers = manualCohortUsers.map<UserSelectUser>((user) => ({
+            id: user.id,
+            name:
+              (user as unknown as { displayName?: string }).displayName ??
+              user.name ??
+              `User #${user.id}`,
+            profilePicture: user.profilePicture,
+          }));
+          const additions = manualUsers.filter(
+            (user) => !existingIds.has(user.id)
+          );
+          return additions.length ? [...prev, ...additions] : prev;
+        });
 
         setImageKey(actionData.image ?? null);
         setImagePreview(actionData.image ?? null);
@@ -335,8 +400,15 @@ const ActionDashboard: React.FC = () => {
     const { name, value, type } = target;
 
     if (type === "checkbox") {
+      if (name === "useManualCohort" && !target.checked) {
+        setManualCohortUserIds([]);
+      }
       setForm((prev) => ({
         ...prev,
+        manualCohortUsers:
+          name === "useManualCohort" && !target.checked
+            ? []
+            : prev.manualCohortUsers,
         [name]: target.checked,
       }));
       return;
@@ -400,6 +472,14 @@ const ActionDashboard: React.FC = () => {
     }));
   }, []);
 
+  const handleManualCohortChange = useCallback((ids: number[]) => {
+    setManualCohortUserIds(ids);
+    setForm((prev) => ({
+      ...prev,
+      manualCohortUsers: ids.map((id) => ({ id } as unknown as User)),
+    }));
+  }, []);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -433,6 +513,9 @@ const ActionDashboard: React.FC = () => {
           (id) => ({ id } as unknown as Group)
         ),
         image: imageKey ?? undefined,
+        manualCohortUsers: form.useManualCohort
+          ? manualCohortUserIds.map((id) => ({ id } as unknown as User))
+          : [],
       };
 
       if (isNew) {
@@ -527,10 +610,23 @@ const ActionDashboard: React.FC = () => {
     }
   };
 
+  const manualCohortSelectableUsers = useMemo(() => {
+    const manualUsers =
+      form.manualCohortUsers?.map<UserSelectUser>((user) => ({
+        id: user.id,
+        name: user.name,
+        profilePicture: user.profilePicture,
+      })) ?? [];
+
+    const merged = new Map<number, UserSelectUser>();
+    manualUsers.forEach((user) => merged.set(user.id, user));
+    availableUsers.forEach((user) => merged.set(user.id, user));
+    return Array.from(merged.values());
+  }, [availableUsers, form.manualCohortUsers]);
+
   if (loading) {
     return <div className="p-8">Loading action...</div>;
   }
-
   const baseUrl = getApiUrl();
 
   const tabData: { key: Tab; label: string }[] = [
@@ -616,6 +712,10 @@ const ActionDashboard: React.FC = () => {
             suitesLoading={suitesLoading}
             selectedGroupIds={selectedGroupIds}
             onGroupsChange={handleGroupsChange}
+            availableUsers={manualCohortSelectableUsers}
+            usersLoading={usersLoading}
+            manualCohortUserIds={manualCohortUserIds}
+            onManualCohortChange={handleManualCohortChange}
           />
         </div>
       ) : (
@@ -890,6 +990,10 @@ const ActionDashboard: React.FC = () => {
                   suitesLoading={suitesLoading}
                   selectedGroupIds={selectedGroupIds}
                   onGroupsChange={handleGroupsChange}
+                  availableUsers={manualCohortSelectableUsers}
+                  usersLoading={usersLoading}
+                  manualCohortUserIds={manualCohortUserIds}
+                  onManualCohortChange={handleManualCohortChange}
                 />
               </Card>
             )}

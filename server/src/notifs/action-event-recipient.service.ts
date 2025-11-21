@@ -32,7 +32,12 @@ export class ActionEventRecipientService {
     eventDate: Date,
     targetGroupIds: Set<number>,
     everyoneShouldComplete: boolean,
+    useManualCohort: boolean,
+    manualCohortUsers?: User[],
   ): boolean {
+    if (useManualCohort) {
+      return manualCohortUsers?.some((m) => m.id === user.id) ?? false;
+    }
     return (
       ((!!user.contractDateSigned &&
         user.contractDateSigned <= eventDate &&
@@ -59,6 +64,8 @@ export class ActionEventRecipientService {
             eventDate,
             targetGroupIds,
             action.everyoneShouldComplete,
+            action.useManualCohort,
+            action.manualCohortUsers,
           ) === true && !this.userService.isUserAway(user, eventDate),
       );
 
@@ -106,6 +113,8 @@ export class ActionEventRecipientService {
           event.date,
           targetGroupIds,
           event.action.everyoneShouldComplete,
+          event.action.useManualCohort,
+          event.action.manualCohortUsers,
         ),
       );
 

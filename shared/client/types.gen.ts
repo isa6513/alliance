@@ -555,6 +555,7 @@ export type Notification = {
     id: number;
     category: NotificationCategory;
     message: string;
+    targetContent?: string;
     webAppLocation: string | null;
     mobileAppLocation: string | null;
     read: boolean;
@@ -807,6 +808,11 @@ export type Action = {
     events: Array<ActionEvent>;
     participatingGroups: Array<Group>;
     /**
+     * Whether to use a manual cohort for the action
+     */
+    useManualCohort?: boolean;
+    manualCohortUsers?: Array<User>;
+    /**
      * Whether to show the action to members who are not of participating groups
      */
     showToNonparticipating?: boolean;
@@ -937,6 +943,11 @@ export type ActionDto = {
     taskFormId?: number;
     participatingGroups: Array<Group>;
     /**
+     * Whether to use a manual cohort for the action
+     */
+    useManualCohort?: boolean;
+    manualCohortUsers?: Array<User>;
+    /**
      * Whether to show the action to members who are not of participating groups
      */
     showToNonparticipating?: boolean;
@@ -1040,6 +1051,11 @@ export type CreateActionDto = {
     taskFormId?: number;
     participatingGroups: Array<Group>;
     /**
+     * Whether to use a manual cohort for the action
+     */
+    useManualCohort?: boolean;
+    manualCohortUsers?: Array<User>;
+    /**
      * Whether to show the action to members who are not of participating groups
      */
     showToNonparticipating?: boolean;
@@ -1108,6 +1124,11 @@ export type UpdateActionDto = {
      */
     taskFormId?: number;
     participatingGroups?: Array<Group>;
+    /**
+     * Whether to use a manual cohort for the action
+     */
+    useManualCohort?: boolean;
+    manualCohortUsers?: Array<User>;
     /**
      * Whether to show the action to members who are not of participating groups
      */
@@ -1357,6 +1378,11 @@ export type ExportActionDto = {
      */
     events: Array<ActionEvent>;
     participatingGroups: Array<Group>;
+    /**
+     * Whether to use a manual cohort for the action
+     */
+    useManualCohort?: boolean;
+    manualCohortUsers?: Array<User>;
     /**
      * Whether to show the action to members who are not of participating groups
      */

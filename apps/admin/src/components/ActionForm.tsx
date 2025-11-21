@@ -6,6 +6,7 @@ import {
   GroupDto,
 } from "@alliance/shared/client";
 import React, { useMemo, useRef } from "react";
+import UserSelect, { UserSelectUser } from "@alliance/shared/ui/UserSelect";
 import { MarkdownTextArea } from "./MarkdownTextArea";
 
 interface ActionFormProps {
@@ -31,6 +32,10 @@ interface ActionFormProps {
   suitesLoading: boolean;
   selectedGroupIds: number[];
   onGroupsChange: (ids: number[]) => void;
+  availableUsers?: UserSelectUser[];
+  usersLoading?: boolean;
+  manualCohortUserIds: number[];
+  onManualCohortChange: (ids: number[]) => void;
   actionId?: number;
 }
 
@@ -51,6 +56,10 @@ const ActionForm: React.FC<ActionFormProps> = ({
   suitesLoading = false,
   selectedGroupIds,
   onGroupsChange,
+  availableUsers = [],
+  usersLoading = false,
+  manualCohortUserIds = [],
+  onManualCohortChange,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -479,6 +488,37 @@ const ActionForm: React.FC<ActionFormProps> = ({
         ) : (
           <p className="text-sm text-gray-500">
             No groups available yet. Create one in the Groups dashboard.
+          </p>
+        )}
+      </div>
+
+      <div className="border border-gray-200 rounded-md p-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-3">
+          <div>
+            <p className="text-sm font-medium text-black">Manual user cohort</p>
+          </div>
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <input
+              type="checkbox"
+              name="useManualCohort"
+              checked={Boolean(form.useManualCohort)}
+              onChange={onInputChange}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            Use manual cohort
+          </label>
+        </div>
+        {form.useManualCohort ? (
+          <UserSelect
+            users={availableUsers}
+            selectedUserIds={manualCohortUserIds}
+            onChange={onManualCohortChange}
+            loading={usersLoading}
+            label="Select users"
+          />
+        ) : (
+          <p className="text-sm text-gray-500">
+            Enable manual cohorts to search for users and add them directly.
           </p>
         )}
       </div>

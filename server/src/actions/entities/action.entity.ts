@@ -24,6 +24,7 @@ import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
 import { ActionUpdate } from './action-update.entity';
 import { ActionSuite } from './action-suite.entity';
 import { Ty } from 'src/tasks/entities/type';
+import { User } from 'src/user/entities/user.entity';
 
 export enum ActionTaskType {
   Funding = 'Funding', //giving money to a particular cause
@@ -145,6 +146,20 @@ export class Action {
   @JoinTable()
   @Type(() => Group)
   participatingGroups: Group[];
+
+  @Column({ default: false })
+  @ApiProperty({
+    description: 'Whether to use a manual cohort for the action',
+  })
+  @IsDefined()
+  useManualCohort: boolean;
+
+  @ManyToMany(() => User)
+  @JoinTable()
+  @ApiPropertyOptional({ type: () => User, isArray: true })
+  @Type(() => User)
+  @IsOptional()
+  manualCohortUsers?: Ty<User>[];
 
   @Column({ default: false })
   @ApiPropertyOptional({

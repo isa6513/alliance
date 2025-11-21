@@ -141,7 +141,13 @@ export class ActionsService {
   findAll(): Promise<ActionDto[]> {
     return this.actionRepository
       .find({
-        relations: ['events', 'activities', 'participatingGroups', 'suite'],
+        relations: [
+          'events',
+          'activities',
+          'participatingGroups',
+          'suite',
+          'manualCohortUsers',
+        ],
       })
       .then((actions) => {
         return actions.map((action) => new ActionDto(action));
@@ -290,14 +296,16 @@ export class ActionsService {
   }
 
   async findPublic(userId?: number, sorted?: boolean): Promise<ActionDto[]> {
+    const relations: (keyof Omit<Action, 'usersCompleted' | 'status'>)[] = [
+      'events',
+      'participatingGroups',
+      'activities',
+      'manualCohortUsers',
+    ];
     const actions = sorted
-      ? await this.findAllSorted([
-          'events',
-          'participatingGroups',
-          'activities',
-        ])
+      ? await this.findAllSorted(relations)
       : await this.actionRepository.find({
-          relations: ['events', 'participatingGroups', 'activities'],
+          relations: relations,
         });
 
     const user = userId
@@ -331,6 +339,8 @@ export class ActionsService {
               )!.date,
               targetGroupIds,
               action.everyoneShouldComplete,
+              action.useManualCohort,
+              action.manualCohortUsers,
             );
         }
 
@@ -394,6 +404,7 @@ export class ActionsService {
         'events',
         'activities',
         'participatingGroups',
+        'manualCohortUsers',
         'updates',
         'suite',
       ],
@@ -601,7 +612,7 @@ export class ActionsService {
   ): Promise<Action | null> {
     const action = await this.actionRepository.findOne({
       where: { id },
-      relations: ['participatingGroups'],
+      relations: ['participatingGroups', 'manualCohortUsers'],
     });
 
     if (!action) {
@@ -871,6 +882,9 @@ export class ActionsService {
   async isEligibleForAction(action: Action, user: User): Promise<boolean> {
     if (action.preventCompletion) {
       return false;
+    }
+    if (action.useManualCohort) {
+      return action.manualCohortUsers?.some((m) => m.id === user.id) ?? false;
     }
     const groups = action.participatingGroups;
     const userGroupIds = new Set((user.groups || []).map((group) => group.id));
@@ -1433,7 +1447,12 @@ export class ActionsService {
   ): Promise<PreviewNotificationPlan[]> {
     const event = await this.actionEventRepository.findOneOrFail({
       where: { id: eventId },
-      relations: ['action', 'action.events', 'action.participatingGroups'],
+      relations: [
+        'action',
+        'action.events',
+        'action.participatingGroups',
+        'action.manualCohortUsers',
+      ],
     });
 
     let group: Group | undefined = undefined;

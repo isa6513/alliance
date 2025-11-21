@@ -247,6 +247,7 @@ export function FormBuilder({
           setIsLoading(false);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formId, initialSchema]);
 
   const addField = (kind: FieldKind, insertIndex?: number) => {

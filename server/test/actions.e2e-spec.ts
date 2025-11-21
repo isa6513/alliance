@@ -177,6 +177,7 @@ describe('Actions (e2e)', () => {
         commitmentless: false,
         everyoneShouldComplete: false,
         participatingGroups: [],
+        useManualCohort: false,
         priority: 0,
         preventCompletion: false,
       };
@@ -375,6 +376,95 @@ describe('Actions (e2e)', () => {
             action.name === 'Group Restricted Hidden Action',
         ),
       ).toBe(false);
+    });
+
+    it('returns canParticipate=true for manual cohort members and false otherwise', async () => {
+      const cohortMember = await userService.create({
+        email: `cohort-${Date.now()}@example.com`,
+        password: 'Password123!',
+        name: 'Cohort Member',
+      });
+
+      const nonCohortUser = await userService.create({
+        email: `noncohort-${Date.now()}@example.com`,
+        password: 'Password123!',
+        name: 'Non Cohort User',
+      });
+
+      const manualAction = await actionRepo.save(
+        actionRepo.create({
+          name: `Manual Cohort Action ${Date.now()}`,
+          category: 'Test',
+          body: 'Manual cohort body',
+          shortDescription: 'Manual cohort short description',
+          taskContents: 'Manual cohort task',
+          commitmentless: false,
+          participatingGroups: [ctx.defaultGroup],
+          manualCohortUsers: [cohortMember],
+          useManualCohort: true,
+          showToNonparticipating: true,
+          priority: 0,
+          preventCompletion: false,
+          type: ActionTaskType.Activity,
+        }),
+      );
+
+      const manualActionEvent = await eventRepo.save(
+        eventRepo.create({
+          title: 'Manual cohort launch',
+          description: 'Manual cohort action live',
+          newStatus: ActionStatus.MemberAction,
+          date: new Date(Date.now() - 1000),
+          action: manualAction,
+        }),
+      );
+
+      const cohortToken = ctx.jwtService.sign(
+        {
+          sub: cohortMember.id,
+          email: cohortMember.email,
+          name: cohortMember.name,
+        },
+        { secret: process.env.JWT_SECRET },
+      );
+
+      const nonCohortToken = ctx.jwtService.sign(
+        {
+          sub: nonCohortUser.id,
+          email: nonCohortUser.email,
+          name: nonCohortUser.name,
+        },
+        { secret: process.env.JWT_SECRET },
+      );
+
+      const [cohortRes, nonCohortRes] = await Promise.all([
+        request(ctx.app.getHttpServer())
+          .get('/actions/loggedIn')
+          .set('Authorization', `Bearer ${cohortToken}`)
+          .expect(200),
+        request(ctx.app.getHttpServer())
+          .get('/actions/loggedIn')
+          .set('Authorization', `Bearer ${nonCohortToken}`)
+          .expect(200),
+      ]);
+
+      const findManualAction = (res: request.Response) =>
+        res.body.find((action: ActionDto) => action.id === manualAction.id);
+
+      const cohortAction = findManualAction(cohortRes);
+      const nonCohortAction = findManualAction(nonCohortRes);
+
+      expect(cohortAction).toBeDefined();
+      expect(cohortAction.canParticipate).toBe(true);
+      expect(cohortAction.shouldParticipate).toBe(true);
+      expect(nonCohortAction).toBeDefined();
+      expect(nonCohortAction.canParticipate).toBe(false);
+      expect(nonCohortAction.shouldParticipate).toBe(false);
+
+      await eventRepo.delete(manualActionEvent.id);
+      await actionRepo.delete(manualAction.id);
+      await userRepo.delete(cohortMember.id);
+      await userRepo.delete(nonCohortUser.id);
     });
 
     it('excludes shouldComplete flag for users without eligible contracts when everyoneShouldComplete is false', async () => {
