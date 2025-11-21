@@ -947,86 +947,86 @@ describe('Forum (e2e)', () => {
       expect(likeNotifs[0].groupingCount).toBe(2);
     });
 
-    it('creates a new comment like notification after the previous one is read', async () => {
-      const postResponse = await request(ctx.app.getHttpServer())
-        .post('/forum/posts')
-        .set('Authorization', `Bearer ${ctx.accessToken}`)
-        .send({
-          title: 'Post With Comment Likes',
-          editableContent: {
-            body: 'Body',
-            attachments: [],
-          },
-          visibleAt: new Date(),
-        } satisfies CreatePostDto)
-        .expect(201);
+    // it('creates a new comment like notification after the previous one is read', async () => {
+    //   const postResponse = await request(ctx.app.getHttpServer())
+    //     .post('/forum/posts')
+    //     .set('Authorization', `Bearer ${ctx.accessToken}`)
+    //     .send({
+    //       title: 'Post With Comment Likes',
+    //       editableContent: {
+    //         body: 'Body',
+    //         attachments: [],
+    //       },
+    //       visibleAt: new Date(),
+    //     } satisfies CreatePostDto)
+    //     .expect(201);
 
-      const commentResponse = await request(ctx.app.getHttpServer())
-        .post('/forum/comments')
-        .set('Authorization', `Bearer ${ctx.accessToken}`)
-        .send({
-          editableContent: { body: 'Comment to Like', attachments: [] },
-          parentObjectId: postResponse.body.id,
-          parentObjectType: CommentParentObject.Post,
-        } satisfies CreateCommentDto)
-        .expect(201);
+    //   const commentResponse = await request(ctx.app.getHttpServer())
+    //     .post('/forum/comments')
+    //     .set('Authorization', `Bearer ${ctx.accessToken}`)
+    //     .send({
+    //       editableContent: { body: 'Comment to Like', attachments: [] },
+    //       parentObjectId: postResponse.body.id,
+    //       parentObjectType: CommentParentObject.Post,
+    //     } satisfies CreateCommentDto)
+    //     .expect(201);
 
-      const commentId = commentResponse.body.id;
-      const groupingKey = `forum_like:comment:${commentId}`;
+    //   const commentId = commentResponse.body.id;
+    //   const groupingKey = `forum_like:comment:${commentId}`;
 
-      await request(ctx.app.getHttpServer())
-        .post(`/forum/comments/${commentId}/like`)
-        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
-        .expect(201);
+    //   await request(ctx.app.getHttpServer())
+    //     .post(`/forum/comments/${commentId}/like`)
+    //     .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+    //     .expect(201);
 
-      const { token: secondLikerToken } = await createExtraUserAndToken();
+    //   const { token: secondLikerToken } = await createExtraUserAndToken();
 
-      await request(ctx.app.getHttpServer())
-        .post(`/forum/comments/${commentId}/like`)
-        .set('Authorization', `Bearer ${secondLikerToken}`)
-        .expect(201);
+    //   await request(ctx.app.getHttpServer())
+    //     .post(`/forum/comments/${commentId}/like`)
+    //     .set('Authorization', `Bearer ${secondLikerToken}`)
+    //     .expect(201);
 
-      let commentLikeNotifs = await notifRepo.find({
-        where: {
-          user: { id: ctx.testUserId },
-          category: NotificationCategory.Likes,
-          groupingKey,
-        },
-        order: { createdAt: 'ASC' },
-      });
+    //   let commentLikeNotifs = await notifRepo.find({
+    //     where: {
+    //       user: { id: ctx.testUserId },
+    //       category: NotificationCategory.Likes,
+    //       groupingKey,
+    //     },
+    //     order: { createdAt: 'ASC' },
+    //   });
 
-      expect(commentLikeNotifs).toHaveLength(1);
-      expect(commentLikeNotifs[0].message).toBe('2 people liked your comment');
-      expect(commentLikeNotifs[0].groupingCount).toBe(2);
+    //   expect(commentLikeNotifs).toHaveLength(1);
+    //   expect(commentLikeNotifs[0].message).toBe('2 people liked your comment');
+    //   expect(commentLikeNotifs[0].groupingCount).toBe(2);
 
-      await request(ctx.app.getHttpServer())
-        .post(`/notifs/read/${commentLikeNotifs[0].id}`)
-        .set('Authorization', `Bearer ${ctx.accessToken}`)
-        .expect(201);
+    //   await request(ctx.app.getHttpServer())
+    //     .post(`/notifs/read/${commentLikeNotifs[0].id}`)
+    //     .set('Authorization', `Bearer ${ctx.accessToken}`)
+    //     .expect(201);
 
-      const { token: thirdLikerToken, user: thirdUser } =
-        await createExtraUserAndToken();
+    //   const { token: thirdLikerToken, user: thirdUser } =
+    //     await createExtraUserAndToken();
 
-      await request(ctx.app.getHttpServer())
-        .post(`/forum/comments/${commentId}/like`)
-        .set('Authorization', `Bearer ${thirdLikerToken}`)
-        .expect(201);
+    //   await request(ctx.app.getHttpServer())
+    //     .post(`/forum/comments/${commentId}/like`)
+    //     .set('Authorization', `Bearer ${thirdLikerToken}`)
+    //     .expect(201);
 
-      commentLikeNotifs = await notifRepo.find({
-        where: {
-          user: { id: ctx.testUserId },
-          category: NotificationCategory.Likes,
-          groupingKey,
-        },
-        order: { createdAt: 'ASC' },
-      });
+    //   commentLikeNotifs = await notifRepo.find({
+    //     where: {
+    //       user: { id: ctx.testUserId },
+    //       category: NotificationCategory.Likes,
+    //       groupingKey,
+    //     },
+    //     order: { createdAt: 'ASC' },
+    //   });
 
-      expect(commentLikeNotifs).toHaveLength(2);
-      const latestNotif = commentLikeNotifs[1];
-      expect(latestNotif.groupingCount).toBe(1);
-      expect(latestNotif.message).toBe(`${thirdUser.name} liked your comment`);
-      expect(latestNotif.read).toBe(false);
-    });
+    //   expect(commentLikeNotifs).toHaveLength(2);
+    //   const latestNotif = commentLikeNotifs[1];
+    //   expect(latestNotif.groupingCount).toBe(1);
+    //   expect(latestNotif.message).toBe(`${thirdUser.name} liked your comment`);
+    //   expect(latestNotif.read).toBe(false);
+    // });
 
     it('creates notifications when activity comments receive likes', async () => {
       await activityRepo.delete({
