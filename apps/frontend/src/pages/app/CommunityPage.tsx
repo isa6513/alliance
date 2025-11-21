@@ -27,6 +27,7 @@ import CommunityInvitesTab from "../../components/CommunityInvitesTab";
 import { useNavigate, useSearchParams } from "react-router";
 import { useToast } from "@alliance/shared/ui/ToastProvider";
 import CommunityActivityTab from "../../components/CommunityActivityTab";
+import { parseTimeInput } from "@alliance/shared/forms/timeUtils";
 
 type Tab = "activity" | "members" | "invites" | "about" | "edit";
 
@@ -197,10 +198,48 @@ const CommunityPage = () => {
     (user) => !leaders.some((leader) => leader.id === user.id)
   );
 
-  const filteredMembers =
+  const filteredSortedMembers = (
     filterMode === FilterMode.All
       ? members
-      : members.filter((user) => !completedAllCurrentActions[user.id]);
+      : members.filter((user) => !completedAllCurrentActions[user.id])
+  )
+    .sort((a, b) => {
+      // Sort by completion (uncompleted first)
+      // Then, if leader, by preferred contact time in leader's time zone
+
+      const uncompletedA = !completedAllCurrentActions[a.id];
+      const uncompletedB = !completedAllCurrentActions[b.id];
+      if (uncompletedA && !uncompletedB) {
+        return -1;
+      }
+      if (!uncompletedA && uncompletedB) {
+        return 1;
+      }
+      return 0;
+    })
+    .sort((a, b) => {
+      if (amLeader) {
+        const preferredTimeA =
+          memberContactInfo?.[a.id]?.preferredReminderTimeLeaderTz ?? "";
+        const preferredTimeB =
+          memberContactInfo?.[b.id]?.preferredReminderTimeLeaderTz ?? "";
+
+        const timeA = parseTimeInput(preferredTimeA);
+        const timeB = parseTimeInput(preferredTimeB);
+
+        if (timeA && timeB) {
+          return timeA.minutes - timeB.minutes;
+        }
+
+        if (!timeA && timeB) {
+          return -1;
+        }
+        if (timeA && !timeB) {
+          return 1;
+        }
+      }
+      return 0;
+    });
 
   return (
     <CenterLayout>
@@ -348,7 +387,7 @@ const CommunityPage = () => {
                 </tr>
               </thead>
               <tbody className="border border-zinc-200">
-                {filteredMembers.map((user) => (
+                {filteredSortedMembers.map((user) => (
                   <CommunityMemberTableRow
                     key={user.id}
                     profile={user}
