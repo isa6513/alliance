@@ -409,6 +409,10 @@ export type CreateGroupConversationDto = {
     participantIds: Array<number>;
 };
 
+export type ConversationParticipantDto = {
+    userId: number;
+};
+
 export type CreateMessageDto = {
     conversationId: number;
     body: string;
@@ -2865,6 +2869,37 @@ export type ConversationDeclineInviteResponses = {
 };
 
 export type ConversationDeclineInviteResponse = ConversationDeclineInviteResponses[keyof ConversationDeclineInviteResponses];
+
+export type ConversationAddParticipantData = {
+    body: ConversationParticipantDto;
+    path: {
+        conversationId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/participants';
+};
+
+export type ConversationAddParticipantResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationAddParticipantResponse = ConversationAddParticipantResponses[keyof ConversationAddParticipantResponses];
+
+export type ConversationRemoveParticipantData = {
+    body?: never;
+    path: {
+        conversationId: number;
+        userId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/participants/{userId}';
+};
+
+export type ConversationRemoveParticipantResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationRemoveParticipantResponse = ConversationRemoveParticipantResponses[keyof ConversationRemoveParticipantResponses];
 
 export type MessageSendMessageData = {
     body: CreateMessageDto;

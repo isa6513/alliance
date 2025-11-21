@@ -140,7 +140,8 @@ export class TasksService {
             if (
               !submitFormDto.answers[field.id] &&
               !(
-                field.kind === 'number' && submitFormDto.answers[field.id] === 0
+                (field.kind === 'number' || field.kind === 'range') &&
+                submitFormDto.answers[field.id] === 0
               )
             ) {
               throw new BadRequestException(`Field ${field.label} is required`);

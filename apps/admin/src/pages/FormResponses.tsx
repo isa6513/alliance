@@ -29,6 +29,7 @@ const ANSWER_FIELD_KINDS = new Set<FieldKind>([
   "textarea",
   "email",
   "number",
+  "range",
   "phone",
   "checkbox",
   "radio",

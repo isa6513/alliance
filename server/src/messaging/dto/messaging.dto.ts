@@ -262,3 +262,10 @@ export class ConversationMessagesQueryDto {
   @Max(100)
   limit?: number;
 }
+
+export class ConversationParticipantDto {
+  @ApiProperty({ type: Number })
+  @IsInt()
+  @Min(1)
+  userId: number;
+}

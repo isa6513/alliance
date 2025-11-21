@@ -150,6 +150,9 @@ const formatValue = (field: AnyField, value: FormValue | undefined): string => {
         })
         .join(", ");
     }
+    case "range": {
+      return value ? String(value) : "";
+    }
     default:
       return Array.isArray(value)
         ? value.join(", ")

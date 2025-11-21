@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
   Param,
@@ -16,6 +17,7 @@ import {
   ConversationDto,
   CreateDirectConversationDto,
   CreateGroupConversationDto,
+  ConversationParticipantDto,
 } from './dto/messaging.dto';
 
 @ApiTags('messaging')
@@ -71,6 +73,36 @@ export class ConversationController {
   ): Promise<ConversationDto> {
     return this.ensureParticipantAndRun(conversationId, req.user.sub, () =>
       this.conversationService.declineInvite(conversationId, req.user.sub),
+    );
+  }
+
+  @Post(':conversationId/participants')
+  @ApiOkResponse({ type: ConversationDto })
+  @UseGuards(AuthGuard)
+  addParticipant(
+    @Param('conversationId', ParseIntPipe) conversationId: number,
+    @Body() body: ConversationParticipantDto,
+    @Request() req: JwtRequest,
+  ): Promise<ConversationDto> {
+    return this.conversationService.addParticipantToConversation(
+      conversationId,
+      req.user.sub,
+      body,
+    );
+  }
+
+  @Delete(':conversationId/participants/:userId')
+  @ApiOkResponse({ type: ConversationDto })
+  @UseGuards(AuthGuard)
+  removeParticipant(
+    @Param('conversationId', ParseIntPipe) conversationId: number,
+    @Param('userId', ParseIntPipe) targetUserId: number,
+    @Request() req: JwtRequest,
+  ): Promise<ConversationDto> {
+    return this.conversationService.removeParticipantFromConversation(
+      conversationId,
+      req.user.sub,
+      targetUserId,
     );
   }
 

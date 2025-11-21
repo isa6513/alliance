@@ -17,6 +17,7 @@ import type {
   DeviceVisibilityTarget,
   FormSchema,
   FormValue,
+  RangeField,
 } from "./formschema";
 import { parseTimeToMinutes } from "./timeUtils";
 import type { UserDto } from "../client";
@@ -59,6 +60,9 @@ export function computeFormStorageKey(args: {
 
 const FALLBACK_TIMEZONE = "America/Los_Angeles";
 const DEFAULT_DEVICE_TYPE: DeviceVisibilityTarget = "desktop";
+const DEFAULT_RANGE_OPTION_COUNT = 10;
+const MIN_RANGE_OPTION_COUNT = 2;
+const MAX_RANGE_OPTION_COUNT = 50;
 
 const detectDeviceType = (): DeviceVisibilityTarget => {
   if (typeof window === "undefined") {
@@ -76,6 +80,31 @@ const detectDeviceType = (): DeviceVisibilityTarget => {
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
+
+function getRangeOptionCount(field: RangeField): number {
+  const desired = field.optionCount ?? DEFAULT_RANGE_OPTION_COUNT;
+  const normalized = Number.isFinite(desired)
+    ? Math.floor(desired)
+    : DEFAULT_RANGE_OPTION_COUNT;
+  return Math.min(
+    MAX_RANGE_OPTION_COUNT,
+    Math.max(MIN_RANGE_OPTION_COUNT, normalized)
+  );
+}
+
+function isValidRangeSelection(
+  field: RangeField,
+  value: unknown
+): value is number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return false;
+  }
+  if (field.kind !== "range") {
+    return false;
+  }
+  const max = getRangeOptionCount(field);
+  return value >= 1 && value <= max;
+}
 
 function resolveFieldDefaultValue(field: AnyField): FormValue | undefined {
   const rawDefault = field.defaultValue;
@@ -108,6 +137,10 @@ function resolveFieldDefaultValue(field: AnyField): FormValue | undefined {
         return typeof rawDefault === "boolean" ? rawDefault : undefined;
       case "number":
         return typeof rawDefault === "number" ? rawDefault : undefined;
+      case "range":
+        return field.kind === "range" && isValidRangeSelection(field, rawDefault)
+          ? rawDefault
+          : undefined;
       case "time":
       case "date":
       case "timezone":
@@ -681,6 +714,22 @@ const FormRenderer = ({
             valueToCheck === ""
           ) {
             return "Please enter a number.";
+          }
+          return null;
+        }
+        case "range": {
+          if (
+            valueToCheck === undefined ||
+            valueToCheck === null ||
+            valueToCheck === ""
+          ) {
+            return "Please select a value.";
+          }
+          if (field.kind !== "range") {
+            return "Please select a value.";
+          }
+          if (!isValidRangeSelection(field, valueToCheck)) {
+            return "Please select a value.";
           }
           return null;
         }

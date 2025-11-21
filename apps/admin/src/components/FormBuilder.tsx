@@ -41,6 +41,7 @@ import {
   EditableTextField,
   EditableTextareaField,
   EditableCustomComponentField,
+  EditableRangeField,
 } from "./form-fields";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useNavigate, useSearchParams } from "react-router";
@@ -144,6 +145,7 @@ export function FormBuilder({
       { id: "email", name: "Email Field", type: "field" as const },
       { id: "phone", name: "Phone Field", type: "field" as const },
       { id: "number", name: "Number Field", type: "field" as const },
+      { id: "range", name: "Range Field", type: "field" as const },
       { id: "checkbox", name: "Checkbox Field", type: "field" as const },
       { id: "radio", name: "Radio Field", type: "field" as const },
       { id: "select", name: "Select Field", type: "field" as const },
@@ -293,6 +295,17 @@ export function FormBuilder({
           kind: "number",
           label: "Number Field",
           required: false,
+        };
+        break;
+      case "range":
+        newField = {
+          id: fieldId,
+          kind: "range",
+          label: "Range Field",
+          required: false,
+          optionCount: 10,
+          startLabel: "",
+          endLabel: "",
         };
         break;
       case "checkbox":
@@ -872,6 +885,13 @@ export function FormBuilder({
                   case "number":
                     return (
                       <EditableNumberField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "range":
+                    return (
+                      <EditableRangeField
                         field={formField as any}
                         {...commonProps}
                       />

@@ -21,6 +21,7 @@ import {
   type Condition,
   type DeviceVisibilityTarget,
   type MultiSelectField,
+  type RangeField,
   type RadioField,
   type SelectField,
 } from "@alliance/shared/forms/formschema";
@@ -29,6 +30,21 @@ const DEVICE_LABELS: Record<DeviceVisibilityTarget, string> = {
   mobile: "Mobile",
   tablet: "Tablet",
   desktop: "Desktop",
+};
+const DEFAULT_RANGE_OPTIONS = 10;
+const MIN_RANGE_OPTIONS = 2;
+const MAX_RANGE_OPTIONS = 50;
+
+const getRangeValues = (field: RangeField): number[] => {
+  const desired = field.optionCount ?? DEFAULT_RANGE_OPTIONS;
+  const normalized = Number.isFinite(desired)
+    ? Math.floor(desired)
+    : DEFAULT_RANGE_OPTIONS;
+  const count = Math.min(
+    MAX_RANGE_OPTIONS,
+    Math.max(MIN_RANGE_OPTIONS, normalized)
+  );
+  return Array.from({ length: count }, (_, index) => index + 1);
 };
 
 type RequiredToggleProps = {
@@ -106,14 +122,16 @@ type ControllerField =
   | CheckboxField
   | RadioField
   | SelectField
-  | MultiSelectField;
+  | MultiSelectField
+  | RangeField;
 
 function isConditionalController(f: AnyField): f is ControllerField {
   return (
     f.kind === "checkbox" ||
     f.kind === "radio" ||
     f.kind === "select" ||
-    f.kind === "multiselect"
+    f.kind === "multiselect" ||
+    f.kind === "range"
   );
 }
 
@@ -194,6 +212,13 @@ export function ConditionalVisibility({
         return {
           when: controller.id,
           includesOption: controller.options?.[0]?.value ?? "",
+        };
+      }
+      if (controller.kind === "range") {
+        const values = getRangeValues(controller);
+        return {
+          when: controller.id,
+          equals: values[0] ?? 1,
         };
       }
       return {
@@ -435,6 +460,11 @@ export function ConditionalVisibility({
           when: controller.id,
           includesOption: value,
         };
+      } else if (controller.kind === "range") {
+        next[index] = {
+          when: controller.id,
+          equals: Number(value),
+        };
       } else {
         next[index] = {
           when: controller.id,
@@ -507,6 +537,8 @@ export function ConditionalVisibility({
           ? condition.equals
           : ""
         : "";
+    const rangeValues =
+      controller?.kind === "range" ? getRangeValues(controller) : [];
     return (
       <div className="space-y-2">
         <div>
@@ -560,6 +592,22 @@ export function ConditionalVisibility({
                 {controller.options?.map((opt, idx) => (
                   <option key={idx} value={opt.value}>
                     {opt.label}
+                  </option>
+                ))}
+              </select>
+            ) : controller.kind === "range" ? (
+              <select
+                className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                value={String(
+                  isEqualsCondition(condition) ? condition.equals ?? "" : ""
+                )}
+                onChange={(event) =>
+                  handleConditionValueChange(index, event.target.value)
+                }
+              >
+                {rangeValues.map((value) => (
+                  <option key={value} value={value}>
+                    {value}
                   </option>
                 ))}
               </select>
@@ -680,8 +728,8 @@ export function ConditionalVisibility({
 
       {noControllerOrValidatorOptions && (
         <p className="mt-1 text-[11px] text-gray-400">
-          No earlier checkbox/select/radio fields or visibility validators are
-          available. You can still add device type rules below.
+          No earlier checkbox/select/radio/range fields or visibility validators
+          are available. You can still add device type rules below.
         </p>
       )}
 
@@ -758,9 +806,9 @@ export function ConditionalVisibility({
         </div>
         {!canUseFieldControllers && (
           <p className="text-[11px] text-gray-400">
-            Add a checkbox, select, radio, or multiselect field earlier on this
-            page to use answer-based visibility. Device-type rules are always
-            available.
+            Add a checkbox, select, radio, range, or multiselect field earlier
+            on this page to use answer-based visibility. Device-type rules are
+            always available.
           </p>
         )}
         {!canUseValidators && (

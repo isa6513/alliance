@@ -1,6 +1,7 @@
 import StatusIcon from "@alliance/shared/ui/icons/StatusIcon";
 import {
   ConversationDto,
+  conversationRemoveParticipant,
   MessageDto,
   messageSendMessage,
 } from "@alliance/shared/client";
@@ -105,6 +106,12 @@ const ConversationDetailPanel = ({
     );
   }, [selectedConvo, user]);
 
+  const handleRemoveParticipant = async (userId: number) => {
+    const response = await conversationRemoveParticipant({
+      path: { conversationId: selectedConvo.id, userId },
+    });
+  };
+
   return (
     <div className="flex flex-col h-full overflow-x-hidden">
       {groupInfoOpen ? (
@@ -162,9 +169,11 @@ const ConversationDetailPanel = ({
                     {isAdmin && participant.user.id !== user?.id && (
                       <Button
                         color={ButtonColor.Transparent}
-                        onClick={() =>
-                          handleRemoveParticipant(participant.user.id)
-                        }
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleRemoveParticipant(participant.user.id);
+                        }}
+                        className="hover:!bg-zinc-200 !px-2"
                       >
                         <DeleteIcon size="large" fill="var(--color-red-400)" />
                       </Button>

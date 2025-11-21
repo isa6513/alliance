@@ -7,6 +7,7 @@ export type FieldKind =
   | 'textarea'
   | 'email'
   | 'number'
+  | 'range'
   | 'phone'
   | 'checkbox'
   | 'radio'
@@ -87,6 +88,11 @@ export type NumberField = BaseField<'number'> & {
   max?: number;
   step?: number;
 };
+export type RangeField = BaseField<'range'> & {
+  optionCount?: number;
+  startLabel?: string;
+  endLabel?: string;
+};
 
 export type CheckboxField = BaseField<'checkbox'>;
 export type RadioField = BaseField<'radio'> & {
@@ -121,6 +127,7 @@ export type AnyField =
   | EmailField
   | PhoneField
   | NumberField
+  | RangeField
   | CheckboxField
   | RadioField
   | SelectField

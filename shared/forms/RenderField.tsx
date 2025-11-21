@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import type { UserDto } from "@alliance/shared/client";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
-import type { AnyField, FormValue, TimeField } from "./formschema";
+import type { AnyField, FormValue, RangeField, TimeField } from "./formschema";
 import { shuffleWithSeed } from "./randomutils";
 import { formatTimeForDisplay, parseTimeInput } from "./timeUtils";
 import DropdownIcon from "../ui/icons/DropdownIcon";
@@ -26,6 +26,21 @@ export type RenderFieldProps = {
 
 const sharedInputClasses =
   "w-full px-3 py-2 rounded-md focus:outline-none bg-white disabled:!bg-transparent";
+const DEFAULT_RANGE_OPTION_COUNT = 10;
+const MIN_RANGE_OPTION_COUNT = 2;
+const MAX_RANGE_OPTION_COUNT = 50;
+
+const getRangeValues = (field: RangeField): number[] => {
+  const desired = field.optionCount ?? DEFAULT_RANGE_OPTION_COUNT;
+  const normalized = Number.isFinite(desired)
+    ? Math.floor(desired)
+    : DEFAULT_RANGE_OPTION_COUNT;
+  const optionCount = Math.min(
+    MAX_RANGE_OPTION_COUNT,
+    Math.max(MIN_RANGE_OPTION_COUNT, normalized)
+  );
+  return Array.from({ length: optionCount }, (_, index) => index + 1);
+};
 
 export function RenderLabel({
   field,
@@ -246,6 +261,81 @@ export function RenderField({
           ) : null}
         </div>
       );
+
+    case "range": {
+      const values = getRangeValues(field);
+      const numericValue =
+        typeof value === "number"
+          ? value
+          : typeof value === "string" && value.trim().length > 0
+          ? Number(value)
+          : undefined;
+      const normalizedValue = Number.isFinite(numericValue)
+        ? Number(numericValue)
+        : undefined;
+
+      return (
+        <div className="space-y-2">
+          <RenderLabel field={field} error={errorMessage} />
+          <div className="flex items-center justify-between text-xs text-zinc-500">
+            <span className="text-black">{field.startLabel}</span>
+            <span className="text-black">{field.endLabel}</span>
+          </div>
+          <div className="flex w-full divide-x divide-zinc-300 border-x border-zinc-300">
+            {values.map((optionValue) => {
+              const checked = normalizedValue === optionValue;
+              return (
+                <label
+                  key={optionValue}
+                  className={`flex flex-col items-center text-xs font-medium  flex-1 w-[${
+                    100 / values.length
+                  }%] ${
+                    disabled
+                      ? "opacity-60 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={field.id}
+                    value={optionValue}
+                    className="sr-only"
+                    checked={checked}
+                    onChange={
+                      onChange && !disabled
+                        ? () => onChange(optionValue)
+                        : undefined
+                    }
+                    disabled={disabled}
+                  />
+                  <span
+                    className={`w-full rounded-none border-y  px-3 py-1 text-center ${
+                      checked
+                        ? "bg-green text-white border-green"
+                        : hasError
+                        ? "border-red-500 text-red-600"
+                        : "border-zinc-300 text-zinc-700"
+                    }`}
+                  >
+                    {optionValue}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+          {!field.required && normalizedValue !== undefined && onChange && (
+            <button
+              type="button"
+              onClick={() => onChange("")}
+              className="text-xs text-zinc-600 hover:text-zinc-800"
+            >
+              Clear selection
+            </button>
+          )}
+          {renderValidationMessage()}
+        </div>
+      );
+    }
 
     case "checkbox":
       return (

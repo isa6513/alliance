@@ -20,6 +20,7 @@ import {
   ConversationDto,
   CreateDirectConversationDto,
   CreateGroupConversationDto,
+  ConversationParticipantDto,
 } from './dto/messaging.dto';
 import { MessagingEvents } from './messaging.events';
 
@@ -280,6 +281,87 @@ export class ConversationService {
     return new ConversationDto(conversation, { contextUserId: userId });
   }
 
+  async addParticipantToConversation(
+    conversationId: number,
+    actingUserId: number,
+    dto: ConversationParticipantDto,
+  ): Promise<ConversationDto> {
+    const adminParticipant = await this.ensureConversationAdmin(
+      conversationId,
+      actingUserId,
+    );
+
+    const alreadyParticipant = adminParticipant.conversation.participants?.some(
+      (participant) => participant.user.id === dto.userId,
+    );
+
+    if (alreadyParticipant) {
+      return this.buildConversationDto(conversationId, actingUserId);
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: dto.userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    const participant = this.participantRepository.create({
+      conversation: adminParticipant.conversation,
+      user,
+      role: ParticipantRole.Member,
+      state: ParticipantState.Invited,
+      joinedAt: new Date(),
+    });
+
+    await this.participantRepository.save(participant);
+    await this.touchConversation(conversationId);
+    const updatedConversation = await this.getConversationEntity(conversationId);
+    await this.emitConversationUpdate(updatedConversation);
+    return new ConversationDto(updatedConversation, {
+      contextUserId: actingUserId,
+    });
+  }
+
+  async removeParticipantFromConversation(
+    conversationId: number,
+    actingUserId: number,
+    targetUserId: number,
+  ): Promise<ConversationDto> {
+    const adminParticipant = await this.ensureConversationAdmin(
+      conversationId,
+      actingUserId,
+    );
+
+    const targetParticipant = await this.participantRepository.findOne({
+      where: {
+        conversation: { id: conversationId },
+        user: { id: targetUserId },
+      },
+      relations: ['user'],
+    });
+
+    if (!targetParticipant) {
+      throw new NotFoundException('Participant not found.');
+    }
+
+    if (
+      targetParticipant.role === ParticipantRole.Owner &&
+      adminParticipant.user.id !== targetParticipant.user.id
+    ) {
+      throw new ForbiddenException('Only owners can remove other owners.');
+    }
+
+    await this.participantRepository.remove(targetParticipant);
+    await this.touchConversation(conversationId);
+    const updatedConversation = await this.getConversationEntity(conversationId);
+    await this.emitConversationUpdate(updatedConversation);
+    return new ConversationDto(updatedConversation, {
+      contextUserId: actingUserId,
+    });
+  }
+
   async syncCommunityConversationMembers(
     communityId: number,
   ): Promise<Conversation> {
@@ -396,6 +478,17 @@ export class ConversationService {
     return count > 0;
   }
 
+  private async ensureConversationAdmin(
+    conversationId: number,
+    userId: number,
+  ): Promise<Participant> {
+    const participant = await this.getParticipantOrFail(conversationId, userId);
+    if (!this.isConversationAdmin(participant)) {
+      throw new ForbiddenException('Admin access required.');
+    }
+    return participant;
+  }
+
   private async ensureCommunityMembershipForUser(userId: number) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
@@ -507,5 +600,11 @@ export class ConversationService {
     await this.conversationRepository.update(conversationId, {
       updatedAt: new Date(),
     });
+  }
+
+  private isConversationAdmin(participant: Participant): boolean {
+    return [ParticipantRole.Admin, ParticipantRole.Owner].includes(
+      participant.role,
+    );
   }
 }

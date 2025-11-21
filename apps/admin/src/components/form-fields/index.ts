@@ -3,6 +3,7 @@ export { EditableTextareaField } from './EditableTextareaField';
 export { EditableEmailField } from './EditableEmailField';
 export { EditablePhoneField } from './EditablePhoneField';
 export { EditableNumberField } from './EditableNumberField';
+export { EditableRangeField } from './EditableRangeField';
 export { EditableCheckboxField } from './EditableCheckboxField';
 export { EditableRadioField } from './EditableRadioField';
 export { EditableChoiceField as EditableSelectField } from './EditableChoiceField';
