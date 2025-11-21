@@ -154,7 +154,7 @@ const HomePage = () => {
     const availableHeight =
       window.innerHeight -
       friendActivityListRef.current.getBoundingClientRect().top -
-      16;
+      12;
     const firstActivityHeight =
       firstFriendActivityRef.current?.getBoundingClientRect().height;
 
