@@ -9,6 +9,7 @@ import {
   UserDto,
   userMyLocation,
   userUpdate,
+  authForgotPassword,
 } from "@alliance/shared/client";
 import Badge from "@alliance/shared/ui/Badge";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
@@ -58,6 +59,13 @@ const SettingsPage: React.FC = () => {
     null
   );
   const [loadingPaymentMethod, setLoadingPaymentMethod] = useState(false);
+  const [passwordResetMessage, setPasswordResetMessage] = useState<
+    string | null
+  >(null);
+  const [passwordResetError, setPasswordResetError] = useState<string | null>(
+    null
+  );
+  const [passwordResetLoading, setPasswordResetLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -111,6 +119,38 @@ const SettingsPage: React.FC = () => {
       setLoadingPaymentMethod(false);
     }
   }, []);
+
+  const handlePasswordReset = useCallback(async () => {
+    if (!user?.email) {
+      setPasswordResetMessage(null);
+      setPasswordResetError("No email available for password reset.");
+      return;
+    }
+
+    setPasswordResetMessage(null);
+    setPasswordResetError(null);
+    setPasswordResetLoading(true);
+
+    try {
+      const resp = await authForgotPassword({
+        body: { email: user.email },
+      });
+
+      if (resp.error) {
+        setPasswordResetError("Error sending password reset email.");
+        console.error(resp.error);
+      } else {
+        setPasswordResetMessage(
+          "A link to reset your password has been sent to your email address."
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      setPasswordResetError("Error sending password reset email.");
+    } finally {
+      setPasswordResetLoading(false);
+    }
+  }, [user?.email]);
 
   const handleSave = useCallback(async (userPayload: EditableUserFields) => {
     setSaving(true);
@@ -260,7 +300,6 @@ const SettingsPage: React.FC = () => {
               />
             </div>
           </div>
-
           <div className="flex flex-col md:flex-row w-full items-center gap-4 *:gap-x-1">
             <div className="flex-1 flex flex-col w-full">
               <label className="block mb-1">Location</label>
@@ -452,6 +491,39 @@ const SettingsPage: React.FC = () => {
               <p className="text-sm text-zinc-500">
                 You will still be able to control visibility for specific tasks.
               </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row w-full items-start gap-4 *:gap-x-1">
+            <div className="flex-1 flex flex-col w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <Button
+                  color={ButtonColor.Black}
+                  className="sm:self-start"
+                  onClick={handlePasswordReset}
+                  disabled={passwordResetLoading}
+                >
+                  {passwordResetLoading
+                    ? "Sending reset link..."
+                    : "Reset password"}
+                </Button>
+                {!passwordResetMessage && (
+                  <p className="text-sm text-zinc-500">
+                    We&apos;ll send the reset link to{" "}
+                    {user.email || "your account email"}.
+                  </p>
+                )}
+              </div>
+              {passwordResetMessage && (
+                <p className="text-sm text-green mt-2">
+                  {passwordResetMessage}
+                </p>
+              )}
+              {passwordResetError && (
+                <p className="text-sm text-red-700 mt-2">
+                  {passwordResetError}
+                </p>
+              )}
             </div>
           </div>
 
