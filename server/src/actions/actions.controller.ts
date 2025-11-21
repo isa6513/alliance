@@ -72,6 +72,7 @@ import {
   UserActionRelationsResponseDto,
 } from 'src/user/dto/user-action-relations.dto';
 import { Action } from './entities/action.entity';
+import { instanceToPlain } from 'class-transformer';
 
 @Controller('actions')
 export class ActionsController {
@@ -260,7 +261,9 @@ export class ActionsController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [Action] })
   async findAllWithDrafts() {
-    return this.actionsService.findAll();
+    return this.actionsService
+      .findAll()
+      .then((actions) => instanceToPlain(actions));
   }
 
   @Sse('live/:id')

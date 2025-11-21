@@ -1239,7 +1239,7 @@ describe('Actions (e2e)', () => {
       await actionRepo.delete(action.id);
     });
 
-    it('shows draft actions only to admins', async () => {
+    it('shows draft actions to admins', async () => {
       const res = await request(ctx.app.getHttpServer())
         .get('/actions/all')
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
