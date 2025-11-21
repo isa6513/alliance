@@ -4,6 +4,7 @@ import {
   actionsCreate,
   actionsExportAction,
   actionsFindOne,
+  actionsFindOneAdmin,
   actionsRemove,
   actionsSuites,
   actionsUnarchive,
@@ -275,7 +276,7 @@ const ActionDashboard: React.FC = () => {
 
     const loadAction = async () => {
       try {
-        const response = await actionsFindOne({
+        const response = await actionsFindOneAdmin({
           path: { id: actionId },
         });
         const actionData = response.data;

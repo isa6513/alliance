@@ -71,6 +71,7 @@ import {
   CommunityUserInfoDto,
   UserActionRelationsResponseDto,
 } from 'src/user/dto/user-action-relations.dto';
+import { Action } from './entities/action.entity';
 
 @Controller('actions')
 export class ActionsController {
@@ -257,7 +258,7 @@ export class ActionsController {
 
   @Get('all')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: [ActionDto] })
+  @ApiOkResponse({ type: [Action] })
   async findAllWithDrafts() {
     return this.actionsService.findAll();
   }
@@ -372,6 +373,17 @@ export class ActionsController {
     @Request() req: JwtRequest,
   ): Promise<ActionDto | null> {
     return this.actionsService.findOneDto(id, req.user?.sub);
+  }
+
+  @Get('adminslug/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: Action })
+  @ApiUnauthorizedResponse()
+  async findOneAdmin(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: JwtRequest,
+  ): Promise<Action> {
+    return this.actionsService.findOne(id, req.user.sub);
   }
 
   @Post('create')

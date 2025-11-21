@@ -810,7 +810,7 @@ export type Action = {
     /**
      * Whether to use a manual cohort for the action
      */
-    useManualCohort?: boolean;
+    useManualCohort: boolean;
     manualCohortUsers?: Array<User>;
     /**
      * Whether to show the action to members who are not of participating groups
@@ -945,7 +945,7 @@ export type ActionDto = {
     /**
      * Whether to use a manual cohort for the action
      */
-    useManualCohort?: boolean;
+    useManualCohort: boolean;
     manualCohortUsers?: Array<User>;
     /**
      * Whether to show the action to members who are not of participating groups
@@ -1053,7 +1053,7 @@ export type CreateActionDto = {
     /**
      * Whether to use a manual cohort for the action
      */
-    useManualCohort?: boolean;
+    useManualCohort: boolean;
     manualCohortUsers?: Array<User>;
     /**
      * Whether to show the action to members who are not of participating groups
@@ -1381,7 +1381,7 @@ export type ExportActionDto = {
     /**
      * Whether to use a manual cohort for the action
      */
-    useManualCohort?: boolean;
+    useManualCohort: boolean;
     manualCohortUsers?: Array<User>;
     /**
      * Whether to show the action to members who are not of participating groups
@@ -3187,7 +3187,7 @@ export type ActionsFindAllWithDraftsData = {
 };
 
 export type ActionsFindAllWithDraftsResponses = {
-    200: Array<ActionDto>;
+    200: Array<Action>;
 };
 
 export type ActionsFindAllWithDraftsResponse = ActionsFindAllWithDraftsResponses[keyof ActionsFindAllWithDraftsResponses];
@@ -3269,6 +3269,25 @@ export type ActionsFindOneResponses = {
 };
 
 export type ActionsFindOneResponse = ActionsFindOneResponses[keyof ActionsFindOneResponses];
+
+export type ActionsFindOneAdminData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/adminslug/{id}';
+};
+
+export type ActionsFindOneAdminErrors = {
+    401: unknown;
+};
+
+export type ActionsFindOneAdminResponses = {
+    200: Action;
+};
+
+export type ActionsFindOneAdminResponse = ActionsFindOneAdminResponses[keyof ActionsFindOneAdminResponses];
 
 export type ActionsCreateData = {
     body: CreateActionDto;

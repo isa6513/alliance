@@ -152,6 +152,7 @@ export class ActionDto extends OmitType(Action, [
   ) {
     super();
     Object.assign(this, action);
+    this.manualCohortUsers = undefined;
     this.image = action.image ? getImageSource(action.image) : undefined;
     this.usersCompleted = action.usersCompleted || 0;
     this.status = action.status || ActionStatus.Draft;

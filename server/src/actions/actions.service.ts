@@ -138,20 +138,16 @@ export class ActionsService {
     return this.actionRepository.save(action);
   }
 
-  findAll(): Promise<ActionDto[]> {
-    return this.actionRepository
-      .find({
-        relations: [
-          'events',
-          'activities',
-          'participatingGroups',
-          'suite',
-          'manualCohortUsers',
-        ],
-      })
-      .then((actions) => {
-        return actions.map((action) => new ActionDto(action));
-      });
+  findAll(): Promise<Action[]> {
+    return this.actionRepository.find({
+      relations: [
+        'events',
+        'activities',
+        'participatingGroups',
+        'suite',
+        'manualCohortUsers',
+      ],
+    });
   }
 
   async findAllSorted(
@@ -898,6 +894,12 @@ export class ActionsService {
     const user = await this.userService.findOne(userId, ['groups']);
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    if (action.useManualCohort) {
+      if (!action.manualCohortUsers?.some((m) => m.id === userId)) {
+        throw new ForbiddenException('This action is not available to you');
+      }
     }
 
     const userGroupIds = new Set((user.groups || []).map((group) => group.id));
