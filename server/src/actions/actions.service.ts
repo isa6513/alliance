@@ -896,6 +896,10 @@ export class ActionsService {
       throw new NotFoundException('User not found');
     }
 
+    if (action.preventCompletion) {
+      throw new ForbiddenException('This action is no longer available');
+    }
+
     if (action.useManualCohort) {
       if (action.manualCohortUsers?.some((m) => m.id === userId)) {
         return;
@@ -911,10 +915,6 @@ export class ActionsService {
       throw new ForbiddenException(
         'This action is not available to your groups.',
       );
-    }
-
-    if (action.preventCompletion) {
-      throw new ForbiddenException('This action is no longer available');
     }
   }
 
