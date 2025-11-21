@@ -24,9 +24,17 @@ export class LikeNotificationService {
     targetId: number;
     webAppLocation: string;
     groupingKey?: string;
+    targetContent?: string;
     existingNotification?: Notification | null;
   }): Promise<void> {
-    const { owner, liker, targetType, targetId, webAppLocation } = params;
+    const {
+      owner,
+      liker,
+      targetType,
+      targetId,
+      webAppLocation,
+      targetContent,
+    } = params;
 
     if (!owner || owner.id === liker.id) {
       return;
@@ -71,7 +79,12 @@ export class LikeNotificationService {
       user: owner,
       associatedUsers: [liker],
       category: NotificationCategory.Likes,
-      message: this.buildMessage(targetType, 1, likerProfile.displayName),
+      message: this.buildMessage(
+        targetType,
+        1,
+        targetContent,
+        likerProfile.displayName,
+      ),
       webAppLocation,
       groupingKey,
       groupingCount: 1,
@@ -112,6 +125,7 @@ export class LikeNotificationService {
       notification.message = this.buildMessage(
         params.targetType,
         dedupedUsers.length,
+        notification.targetContent,
         dedupedUsers.length === 1
           ? new ProfileDto(dedupedUsers[0]).displayName
           : undefined,
@@ -125,14 +139,23 @@ export class LikeNotificationService {
   private buildMessage(
     targetType: LikeNotificationTarget,
     count: number,
+    targetContent?: string,
     likerName?: string,
   ): string {
-    const label =
-      targetType === 'post'
-        ? 'post'
-        : targetType === 'comment'
-          ? 'comment'
+    let label;
+    switch (targetType) {
+      case 'post':
+        label = targetContent ? `post: ${targetContent}` : 'post';
+        break;
+      case 'comment':
+        label = targetContent ? `comment: ${targetContent}` : 'comment';
+        break;
+      case 'activity':
+        label = targetContent
+          ? `completion of: ${targetContent}`
           : 'action activity';
+        break;
+    }
 
     if (count === 1 && likerName) {
       return `${likerName} liked your ${label}`;

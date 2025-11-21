@@ -922,7 +922,9 @@ describe('Forum (e2e)', () => {
       });
 
       expect(likeNotifs).toHaveLength(1);
-      expect(likeNotifs[0].message).toBe('Test Admin liked your post');
+      expect(likeNotifs[0].message).toBe(
+        'Test Admin liked your post: Post To Get Likes',
+      );
       expect(likeNotifs[0].groupingCount).toBe(1);
       expect(likeNotifs[0].groupingKey).toBe(groupingKey);
       expect(likeNotifs[0].webAppLocation).toBe(`/forum/post/${postId}`);
@@ -1068,7 +1070,7 @@ describe('Forum (e2e)', () => {
 
       expect(activityCommentNotifs).toHaveLength(1);
       expect(activityCommentNotifs[0].message).toBe(
-        'Test Admin liked your comment',
+        'Test Admin liked your comment: Activity thread comment',
       );
       expect(activityCommentNotifs[0].webAppLocation).toBe(
         `/actions/${testAction.id}/activity/${activityId}?replyId=${commentId}`,

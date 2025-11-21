@@ -1276,7 +1276,7 @@ describe('Actions (e2e)', () => {
 
       expect(likeNotifs).toHaveLength(1);
       expect(likeNotifs[0].message).toBe(
-        'Test Admin liked your action activity',
+        'Test Admin liked your completion of: Activity Like Notice',
       );
       expect(likeNotifs[0].webAppLocation).toBe(
         `/actions/${action.id}/activity/${activityId}`,

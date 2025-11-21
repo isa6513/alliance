@@ -1121,6 +1121,7 @@ export class ActionsService {
         owner: updatedActivity.user,
         liker: user,
         targetType: 'activity',
+        targetContent: updatedActivity.action.name,
         targetId: updatedActivity.id,
         webAppLocation: actionActivityUrl(
           updatedActivity.action?.id ?? updatedActivity.actionId,
