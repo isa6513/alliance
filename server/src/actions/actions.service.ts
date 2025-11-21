@@ -897,7 +897,9 @@ export class ActionsService {
     }
 
     if (action.useManualCohort) {
-      if (!action.manualCohortUsers?.some((m) => m.id === userId)) {
+      if (action.manualCohortUsers?.some((m) => m.id === userId)) {
+        return;
+      } else {
         throw new ForbiddenException('This action is not available to you');
       }
     }
