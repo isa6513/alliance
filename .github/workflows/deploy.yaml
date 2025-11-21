@@ -352,7 +352,7 @@ jobs:
         working-directory: ./server
 
       - name: Zip Build Output
-        run: zip -r nest-build.zip dist package.json package-lock.json
+        run: zip -r nest-build.zip dist package.json package-lock.json migrations
         working-directory: ./server
 
       - name: Upload Artifact
