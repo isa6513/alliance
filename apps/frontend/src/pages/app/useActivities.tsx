@@ -88,9 +88,9 @@ const useActivities = ({
           const extraFriendActivity = await actionsFriendActivity({
             query: { comments },
           });
-          const set = new Set(data.map((a) => a.user.id));
+          const set = new Set(data.map((a) => a.id));
           extraFriendActivity.data?.forEach((a) => {
-            if (!set.has(a.user.id)) {
+            if (!set.has(a.id)) {
               data.push(a);
             }
           });
