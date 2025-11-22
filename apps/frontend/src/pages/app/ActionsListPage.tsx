@@ -23,7 +23,10 @@ export const filterActions = (
     case FilterMode.PendingOfficeResolution:
       return actions.filter((action) => action.status === "office_action");
     case FilterMode.MemberAction:
-      return actions.filter((action) => action.status === "member_action");
+      return actions.filter(
+        (action) =>
+          action.status === "member_action" && !action.everyoneShouldComplete
+      );
     case FilterMode.Past:
       return actions.filter(
         (action) => action.status === "completed" || action.status === "failed"
