@@ -82,8 +82,20 @@ const useActivities = ({
         break;
     }
     apiCall
-      .then((resp) => {
-        const respActivities = (resp.data ?? []).sort(
+      .then(async (resp) => {
+        const data = resp.data ?? [];
+        if (list === ActivityList.Global) {
+          const extraFriendActivity = await actionsFriendActivity({
+            query: { comments },
+          });
+          const set = new Set(data.map((a) => a.user.id));
+          extraFriendActivity.data?.forEach((a) => {
+            if (!set.has(a.user.id)) {
+              data.push(a);
+            }
+          });
+        }
+        const respActivities = data.sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
@@ -93,7 +105,7 @@ const useActivities = ({
       .finally(() => {
         setLoading(false);
       });
-  }, [list, objectId, isAuthenticated, comments]);
+  }, [list, objectId, isAuthenticated, comments, limit]);
 
   const handleLikeActivity = useCallback(
     async (activityId: number) => {
