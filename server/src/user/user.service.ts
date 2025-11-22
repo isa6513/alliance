@@ -195,7 +195,7 @@ export class UserService {
   }
 
   async sendWelcomeEmail(userId: number) {
-    if (process.env.NODE_ENV === 'test') {
+    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'staging') {
       return;
     }
 
@@ -675,9 +675,7 @@ export class UserService {
     const community = await this.findCommunityOrFail(communityId);
     Object.assign(community, body);
     const updated = await this.communityRepository.save(community);
-    await this.conversationService.syncCommunityConversationMembers(
-      updated.id,
-    );
+    await this.conversationService.syncCommunityConversationMembers(updated.id);
     return updated;
   }
 
@@ -698,9 +696,7 @@ export class UserService {
     }
 
     const updated = await this.communityRepository.save(community);
-    await this.conversationService.syncCommunityConversationMembers(
-      updated.id,
-    );
+    await this.conversationService.syncCommunityConversationMembers(updated.id);
     return updated;
   }
 
@@ -718,9 +714,7 @@ export class UserService {
     );
 
     const updated = await this.communityRepository.save(community);
-    await this.conversationService.syncCommunityConversationMembers(
-      updated.id,
-    );
+    await this.conversationService.syncCommunityConversationMembers(updated.id);
     return updated;
   }
 
@@ -742,9 +736,7 @@ export class UserService {
     }
 
     const updated = await this.communityRepository.save(community);
-    await this.conversationService.syncCommunityConversationMembers(
-      updated.id,
-    );
+    await this.conversationService.syncCommunityConversationMembers(updated.id);
     return updated;
   }
 
@@ -759,9 +751,7 @@ export class UserService {
     );
 
     const updated = await this.communityRepository.save(community);
-    await this.conversationService.syncCommunityConversationMembers(
-      updated.id,
-    );
+    await this.conversationService.syncCommunityConversationMembers(updated.id);
     return updated;
   }
 
