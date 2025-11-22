@@ -209,11 +209,13 @@ const UserActivityCard = ({
               </div>
             )}
             <>
-              {activity.formResponseOutput && (
-                <div className="my-3">
-                  <OutputRenderer submission={activity.formResponseOutput} />
-                </div>
-              )}
+              {activity.formResponseOutput &&
+                Object.keys(activity.formResponseOutput.publicAnswers ?? {})
+                  .length > 0 && (
+                  <div className="my-3">
+                    <OutputRenderer submission={activity.formResponseOutput} />
+                  </div>
+                )}
             </>
 
             <div className="flex flex-row justify-between w-full items-end">
