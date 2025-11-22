@@ -395,7 +395,12 @@ const CommunityPage = () => {
           {amLeader ? <GroupOrganizerGuidelines /> : <GroupMemberGuidelines />}
         </div>
       )}
-      {tab === "invites" && <CommunityInvitesTab communityId={community.id} />}
+      {tab === "invites" && (
+        <CommunityInvitesTab
+          communityId={community.id}
+          existingMembers={community.users}
+        />
+      )}
       {tab === "edit" && (
         <Card style={CardStyle.Grey}>
           <CommunityEditForm

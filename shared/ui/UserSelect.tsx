@@ -93,14 +93,15 @@ const UserSelect: React.FC<UserSelectProps> = ({
         />
       )}
       {query && filteredUsers.length > 0 && (
-        <div className="mt-2 border border-zinc-200 rounded shadow-sm bg-white max-h-48 overflow-y-auto">
+        <div className="border border-zinc-200 rounded bg-white max-h-48 overflow-y-auto">
           {filteredUsers.map((user) => (
             <button
               type="button"
               key={user.id}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-zinc-50"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 flex flex-row items-center gap-x-2"
               onClick={() => addUser(user.id)}
             >
+              <ProfileImage pfp={user.profilePicture} size="medium" />
               <span className="font-medium">
                 {user.name ?? `User #${user.id}`}
               </span>

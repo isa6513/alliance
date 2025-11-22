@@ -2,6 +2,7 @@ import {
   CommunityInviteDto,
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
+  ProfileDto,
   userCreateCommunityInvite,
   userCreateOnetimeInvite,
   userDeleteCommunityInvite,
@@ -25,6 +26,7 @@ import CommunityInviteListItem from "./CommunityInviteListItem";
 
 export interface CommunityInvitesTabProps {
   communityId: number;
+  existingMembers: ProfileDto[];
 }
 
 export enum InviteMode {
@@ -32,7 +34,10 @@ export enum InviteMode {
   CurrentMember = "Current Alliance member",
 }
 
-const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
+const CommunityInvitesTab = ({
+  communityId,
+  existingMembers,
+}: CommunityInvitesTabProps) => {
   const [name, setName] = useState("");
   const { user } = useAuth();
 
@@ -43,7 +48,20 @@ const CommunityInvitesTab = ({ communityId }: CommunityInvitesTabProps) => {
     CommunityInviteDto[]
   >([]);
 
-  const selectableUsers = useSelectableUserIds();
+  const allUsers = useSelectableUserIds();
+
+  const selectableUsers = useMemo(
+    () =>
+      allUsers.filter(
+        (user) =>
+          !existingMembers.some((member) => member.id === user.id) &&
+          !existingMemberInvites
+            .filter((invite) => invite.status === "pending")
+            .some((invite) => invite.invitedUser?.id === user.id)
+      ),
+    [allUsers, existingMembers, existingMemberInvites]
+  );
+
   const [selectedUser, setSelectedUser] = useState<UserSelectUser | null>(null);
 
   const [inviteMode, setInviteMode] = useState<InviteMode>(
