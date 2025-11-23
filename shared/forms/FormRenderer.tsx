@@ -138,7 +138,8 @@ function resolveFieldDefaultValue(field: AnyField): FormValue | undefined {
       case "number":
         return typeof rawDefault === "number" ? rawDefault : undefined;
       case "range":
-        return field.kind === "range" && isValidRangeSelection(field, rawDefault)
+        return field.kind === "range" &&
+          isValidRangeSelection(field, rawDefault)
           ? rawDefault
           : undefined;
       case "time":
@@ -387,19 +388,27 @@ const FormRenderer = ({
   );
 
   useEffect(() => {
-    if (!publicAnswers || Object.keys(publicAnswers).length === 0) {
-      console.log("setting public answers");
-      setPublicAnswers(() => {
-        const next: Record<string, boolean> = {};
-        for (const fieldId of outputFieldIds) {
-          console.log("fieldId", fieldId);
-          console.log("user?.formDataPreference", user?.formDataPreference);
-          next[fieldId] = user?.formDataPreference === "public" ? true : false;
-        }
-        return next;
-      });
-    }
-  }, []);
+    if (!outputFieldIds || outputFieldIds.size === 0) return;
+
+    setPublicAnswers((prev) => {
+      if (prev && Object.keys(prev).length > 0) {
+        // already modified elsewhere, leave it alone
+        return prev;
+      }
+
+      // initialize
+      const next: Record<string, boolean> = {};
+      for (const fieldId of outputFieldIds) {
+        next[fieldId] = user?.formDataPreference === "public" ? true : false;
+      }
+
+      return next;
+    });
+  }, [outputFieldIds, user?.formDataPreference]);
+
+  useEffect(() => {
+    console.log("publicAnswers updated", publicAnswers);
+  }, [publicAnswers]);
 
   const [uploadingFields, setUploadingFields] = useState<Set<string>>(
     new Set()
