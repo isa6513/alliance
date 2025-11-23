@@ -406,10 +406,6 @@ const FormRenderer = ({
     });
   }, [outputFieldIds, user?.formDataPreference]);
 
-  useEffect(() => {
-    console.log("publicAnswers updated", publicAnswers);
-  }, [publicAnswers]);
-
   const [uploadingFields, setUploadingFields] = useState<Set<string>>(
     new Set()
   );
