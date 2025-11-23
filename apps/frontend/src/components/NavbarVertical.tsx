@@ -69,14 +69,6 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     {
       title: "Platform",
       items: [
-        ...(isFeatureEnabled(Features.Messaging)
-          ? [
-              {
-                page: NavbarPage.Messages,
-                destination: destinations[NavbarPage.Messages],
-              },
-            ]
-          : []),
         {
           page: NavbarPage.CurrentActions,
           destination: destinations[NavbarPage.CurrentActions],
@@ -85,16 +77,6 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
           page: NavbarPage.Activity,
           destination: destinations[NavbarPage.Activity],
         },
-        ...(user?.communities.length ||
-        user?.invitedCommunities.filter((invite) => invite.status === "pending")
-          .length
-          ? [
-              {
-                page: NavbarPage.Groups,
-                destination: destinations[NavbarPage.Groups],
-              },
-            ]
-          : []),
         {
           page: NavbarPage.Forum,
           destination: destinations[NavbarPage.Forum],
@@ -107,6 +89,24 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
           page: NavbarPage.Search,
           destination: destinations[NavbarPage.Search],
         },
+        ...(user?.communities.length ||
+        user?.invitedCommunities.filter((invite) => invite.status === "pending")
+          .length
+          ? [
+              {
+                page: NavbarPage.Groups,
+                destination: destinations[NavbarPage.Groups],
+              },
+            ]
+          : []),
+        ...(isFeatureEnabled(Features.Messaging)
+          ? [
+              {
+                page: NavbarPage.Messages,
+                destination: destinations[NavbarPage.Messages],
+              },
+            ]
+          : []),
       ],
     },
     {
@@ -194,7 +194,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
       >
         <button
           onClick={() => setOpen(!open)}
-          className="p-2 text-xl rounded-md hover:bg-gray-100 focus:outline-none"
+          className="p-2 text-xl rounded-md hover:bg-zinc-100 focus:outline-none"
           aria-label="Toggle navigation"
         >
           <div className="relative text-4xl -mt-1">
@@ -226,7 +226,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
         <div className="md:hidden flex justify-end p-4">
           <button
             onClick={() => setOpen(false)}
-            className="text-gray-500 hover:text-black focus:outline-none text-3xl"
+            className="text-zinc-500 hover:text-black focus:outline-none text-3xl"
           >
             ✕
           </button>

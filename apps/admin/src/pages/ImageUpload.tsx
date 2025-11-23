@@ -32,7 +32,11 @@ const ImageUpload: React.FC = () => {
 
   return (
     <div>
-      <input type="file" onChange={handleFileChange} />
+      <input
+        type="file"
+        onChange={handleFileChange}
+        className="border bg-zinc-200 rounded cursor-pointer"
+      />
       <button onClick={handleUpload}>Upload</button>
       {key && <img src={key} alt="uploaded image" />}
     </div>

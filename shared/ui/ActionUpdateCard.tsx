@@ -18,10 +18,10 @@ const ActionUpdateCard = ({
   admin = false,
 }: ActionUpdateCardProps) => {
   return (
-    <Card className="!py-2 !px-3.5 w-full" style={CardStyle.White}>
+    <Card className="!py-3 !px-4 w-full gap-y-1" style={CardStyle.White}>
       <div className="flex flex-row justify-between items-center">
         <div className="flex flex-row gap-x-2 items-center">
-          <p className="font-medium">{update.title}</p>
+          <p className="font-semibold">{update.title}</p>
           {admin && (
             <Link to={`/database?table=action_update&id=${update.id}`}>
               <DatabaseIcon size="small" />
