@@ -34,6 +34,7 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
             />
           ),
           p: ({ ...props }) => <p className="first:mt-0 mt-4" {...props} />,
+          img: ({ ...props }) => <img className="first:mt-0 mt-4" {...props} />,
           strong: ({ ...props }) => (
             <strong className="!font-semibold" {...props} />
           ),
