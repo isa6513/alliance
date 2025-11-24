@@ -164,8 +164,8 @@ const InvitePage: React.FC = () => {
             <p>
               Each week, every member of the Alliance spends a small amount of
               time completing tasks on our online platform. These tasks are
-              planned by a full-time office that ensures our work results in
-              high collective impact.
+              planned by a full-time office that ensures our time is used
+              effectively.
             </p>
 
             <p>Here are some examples of actions we have taken recently:</p>
@@ -204,7 +204,7 @@ const InvitePage: React.FC = () => {
             <p>
               <span className="font-bold">Our model is effective.</span> Members
               make a commitment to complete tasks on time. Since we can trust
-              one another to show up, we can make optimized, complex action
+              one another to show up, we can execute optimized, complex action
               plans.
             </p>
             <p>
@@ -220,10 +220,11 @@ const InvitePage: React.FC = () => {
                 We have the potential to become a major global force.
               </span>{" "}
               Right now, we&apos;re running small experiments to test our model
-              and strategies. One day, we could call on millions of members to
-              boycott a corporation acting unethically, or simultaneously make
-              lifestyle changes to curtail waste, or fund new scientific
-              research neglected by governments and markets.
+              and strategies. One day, we could have enormous collective power:
+              for instance, we could call on millions of members to boycott a
+              corporation acting unethically, simultaneously make lifestyle
+              changes to curtail waste, or fund new scientific research
+              neglected by governments and markets.
             </p>
 
             <h3 className="font-serif !text-3xl font-bold mt-2">
@@ -256,7 +257,10 @@ const InvitePage: React.FC = () => {
                 >
                   personal sign-up link
                 </Link>
-                . We will be automatically added as friends.
+                . We will be added as friends automatically.
+                {communityId
+                  ? ` You will also be added to my smaller Alliance group.`
+                  : ""}
               </li>
               <li>
                 Go through the onboarding tasks on your{" "}

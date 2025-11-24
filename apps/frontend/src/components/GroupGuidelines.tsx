@@ -39,8 +39,7 @@ Hi Alice! Texting to remind you to complete this week’s action by midnight PST
 
 **Sample didn’t-complete message**
 
-Hi Alice, I noticed that you missed last week’s action – I wanted to check in to make sure you didn’t bump into any difficulties while completing the task. I’m happy to pass along any feedback in case anything was confusing, or you encountered any bugs, etc.
-
+Hi Alice, I noticed that last week’s action wasn’t completed. The Alliance depends on everyone following through on their commitments, so I wanted to check in and understand what happened. If you ran into any confusion, bugs, etc., I’m happy to help get this resolved.
       "
       />
     </div>
