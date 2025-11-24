@@ -18,6 +18,7 @@ const ActivityFeedPage = () => {
     useActivities({
       list: ActivityList.Global,
       comments: true,
+      limit: 50,
     });
 
   const [myFriends, setMyFriends] = useState<number[]>([]);
