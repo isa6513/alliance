@@ -53,6 +53,7 @@ const ActionActivityFeedPage = () => {
       list: ActivityList.Action,
       objectId: parseInt(actionId!),
       comments: true,
+      limit: 50,
     });
 
   const [myFriends, setMyFriends] = useState<number[]>([]);
