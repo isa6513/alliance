@@ -209,6 +209,7 @@ export class ActionsController {
     if (before && isNaN(beforeDate!.getTime())) {
       throw new BadRequestException('Invalid "before" cursor');
     }
+
     return this.actionsService.getActivityFeed(limitNum, beforeDate, comments);
   }
 
@@ -339,8 +340,11 @@ export class ActionsController {
     @Request() req: JwtRequest,
     @Query('comments', new ParseBoolPipe({ optional: true }))
     comments?: boolean,
+    @Query('limit', new ParseIntPipe({ optional: true }))
+    limit?: string,
   ) {
-    return this.actionsService.friendActivity(req.user.sub, comments);
+    const limitNum = limit ? parseInt(limit) : 20;
+    return this.actionsService.friendActivity(req.user.sub, comments, limitNum);
   }
 
   @Get('communityActivity')

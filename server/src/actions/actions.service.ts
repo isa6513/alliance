@@ -821,6 +821,7 @@ export class ActionsService {
       order: { createdAt: 'DESC' },
       take: limit,
     });
+
     if (activities.length === 0) {
       return [];
     }
@@ -1012,6 +1013,7 @@ export class ActionsService {
   async friendActivity(
     userId: number,
     comments?: boolean,
+    limit?: number,
   ): Promise<ActionActivityDto[]> {
     const user = await this.userService.findOne(userId, [
       'sentFriendRequests',
@@ -1031,6 +1033,7 @@ export class ActionsService {
       },
       relations: ['user', 'action', 'likes', 'taskFormResponse'],
       order: { createdAt: 'DESC' },
+      take: limit,
     });
 
     if (comments) {

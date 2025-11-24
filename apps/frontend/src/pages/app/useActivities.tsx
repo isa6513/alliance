@@ -47,7 +47,9 @@ const useActivities = ({
     let apiCall;
     switch (list) {
       case ActivityList.Friends:
-        apiCall = actionsFriendActivity({ query: { comments } });
+        apiCall = actionsFriendActivity({
+          query: { comments, limit: limit.toString() },
+        });
         break;
       case ActivityList.User:
         apiCall = actionsFindCompletedForUser({
@@ -86,7 +88,7 @@ const useActivities = ({
         const data = resp.data ?? [];
         if (list === ActivityList.Global) {
           const extraFriendActivity = await actionsFriendActivity({
-            query: { comments },
+            query: { comments, limit: limit.toString() },
           });
           const set = new Set(data.map((a) => a.id));
           extraFriendActivity.data?.forEach((a) => {

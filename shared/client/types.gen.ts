@@ -3223,6 +3223,7 @@ export type ActionsFriendActivityData = {
     path?: never;
     query: {
         comments: boolean;
+        limit: string;
     };
     url: '/actions/friendActivity';
 };
