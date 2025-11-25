@@ -58,6 +58,7 @@ const HomePage = () => {
 
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
+    limit: 8,
   });
   const [visibleFriendActivityCount, setVisibleFriendActivityCount] =
     useState<number>(3);
@@ -292,8 +293,6 @@ const HomePage = () => {
             </ul>
           </div>
         )}
-
-        <div className="flex">{bulletinCard}</div>
 
         <div className="">
           <div className="flex flex-row justify-between items-center mb-3">
