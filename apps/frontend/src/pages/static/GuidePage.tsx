@@ -56,7 +56,7 @@ const GuidePage: React.FC = () => {
               markdownContent="
 The Alliance is a group of individuals cooperating to improve the world. Each member spends a small fraction of their time completing tasks that advance our long-term strategy.
 
-We aim to unite humanity behind a global, expert-developed strategy to end global crises. We are currently running experiments to prepare for future growth.
+We aim to unite humanity behind a global, expert-developed plan to end global crises. We are currently running experiments to prepare for future growth.
 "
             />
 
@@ -195,7 +195,7 @@ This procedure achieves two goals:
 1. Members determine the high-level priorities that the Alliance can undertake.
 2. The office retains the freedom to plan any action that advances approved Alliance priorities. It is not required to do what is most popular, nor do actions need unanimous support.
 
-It is inevitable, though rare, that some members are assigned tasks whose justifications they do not agree with. In light of the urgency of global crises, it is important to both the office and members that we prioritize action over perfect consensus.
+It is inevitable, though rare, that some members are assigned tasks whose justifications they do not agree with. Given the urgency of global crises, it is important that we collectively prioritize action over perfect consensus.
 
 In addition to formal governance, the office incorporates member input by other means. For instance, the office hosts discussions, asks members for action proposals, solicits open-ended feedback, and so on.
 "
