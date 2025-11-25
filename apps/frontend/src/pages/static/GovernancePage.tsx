@@ -1,10 +1,11 @@
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React from "react";
-import ExampleActionCategoryCard from "../../components/ExampleActionCategoryCard";
 import Footer from "../../components/Footer";
 import MarkdownWrapper from "../../components/MarkdownWrapper";
 import MemberContract from "../../components/MemberContract";
+import chevronRight from "../../assets/icons8-expand-arrow-96.png";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import { Link } from "react-router";
 
 const GovernancePage: React.FC = () => {
   return (
@@ -12,11 +13,24 @@ const GovernancePage: React.FC = () => {
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex flex-col md:flex-row mx-2 sm:mx-4 md:mx-12 pt-8 md:pt-32 pb-56 justify-center">
         <div className="flex flex-col max-w-[46rem]">
-          <div className="mx-auto w-full mb-4 md:mb-6">
-            <h2 className="font-serif !font-semibold !text-4xl md:!text-6xl mb-3 text-black">
+          <div className="mx-auto w-full mb-2">
+            <h2 className="font-serif !font-semibold !text-4xl md:!text-6xl text-black">
               Governance
             </h2>
           </div>
+
+          <Link to="/progress/early-governance" className="mb-6">
+            <Card
+              style={CardStyle.White}
+              className="mt-4 p-4 md:p-4 text-lg cursor-pointer hover:bg-zinc-50 flex flex-row gap-x-4 items-center justify-between"
+            >
+              <p className="text-base">
+                The following governance procedures were developed and approved
+                by 25 founding members of the Alliance.
+              </p>
+              <img src={chevronRight} className="w-4 h-4 rotate-270" />
+            </Card>
+          </Link>
 
           <div className="flex flex-col gap-y-6">
             <MarkdownWrapper
@@ -39,7 +53,7 @@ This membership contract may be revised with signed members’ consent.
 
 Additional membership contracts can be offered at the office’s discretion.
 
-# Office
+# Strategic office
 The office of the Alliance is the set of members responsible for ensuring the Alliance will fulfill its purpose given that members abide by their contracts.
 
 In particular, the office is responsible for:

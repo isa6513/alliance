@@ -44,7 +44,7 @@ const ProgressPostPage: React.FC = () => {
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex-1 container mx-auto pt-16 md:pt-28 pb-56 flex flex-col px-5">
         <div className="mx-auto w-full max-w-3xl flex flex-col">
-          <h2 className="font-serif !font-medium !text-2xl md:!text-5xl mb-4">
+          <h2 className="font-serif !font-semibold !text-2xl md:!text-5xl mb-4">
             {frontmatter?.title}
           </h2>
           <div className="flex flex-col gap-y-0.5 text-lg  mb-4">
