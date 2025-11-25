@@ -10,6 +10,8 @@ export default [
   route("/", "pages/static/PrelaunchLanding.tsx"),
   route("/people", "pages/static/PeoplePage.tsx"),
   route("/guide", "pages/static/GuidePage.tsx"),
+  route("/foundation", "pages/static/FoundationPage.tsx"),
+  route("/governance", "pages/static/GovernancePage.tsx"),
   route("/invite", "pages/static/InvitePage.tsx"),
   route("/privacypolicy", "pages/static/PrivacyPolicyPage.tsx"),
   route("/terms", "pages/static/TermsPage.tsx"),
