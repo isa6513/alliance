@@ -51,7 +51,7 @@ export function RenderLabel({
 }) {
   const hasError = Boolean(error);
   return (
-    <label className={`flex ${hasError ? "text-red-600" : "text-zinc-700"}`}>
+    <label className={`block ${hasError ? "text-red-600" : "text-zinc-700"}`}>
       {field.label !== null && (
         <FormMarkdownWrapper markdownContent={field.label} inline />
       )}
