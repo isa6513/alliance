@@ -907,12 +907,22 @@ const FormRenderer = ({
       const next = { ...prev, [fieldId]: value };
       const fieldDefinition = fieldLookup.get(fieldId);
       if (fieldDefinition) {
-        const requiredError = validateFieldValue(
-          fieldDefinition,
-          next[fieldId],
-          next
-        );
-        applyFieldErrorUpdates({ [fieldId]: requiredError });
+        const nextValue = next[fieldId];
+        if (fieldDefinition.kind === "multiselect") {
+          const selections = Array.isArray(nextValue) ? nextValue : [];
+          const validationResult =
+            selections.length === 0
+              ? null
+              : validateFieldValue(fieldDefinition, nextValue, next);
+          applyFieldErrorUpdates({ [fieldId]: validationResult });
+        } else {
+          const requiredError = validateFieldValue(
+            fieldDefinition,
+            nextValue,
+            next
+          );
+          applyFieldErrorUpdates({ [fieldId]: requiredError });
+        }
       } else {
         applyFieldErrorUpdates({ [fieldId]: null });
       }

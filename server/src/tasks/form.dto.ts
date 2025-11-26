@@ -45,6 +45,7 @@ export class FormResponseDto extends PickType(FormResponse, [
   'id',
   'answers',
   'formId',
+  'createdAt',
   'schemaSnapshot',
   'visibilityValidatorResults',
   'deviceType',

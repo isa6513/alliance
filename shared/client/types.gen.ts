@@ -1763,6 +1763,7 @@ export type FormResponseDto = {
         [key: string]: unknown;
     };
     deviceType?: string;
+    createdAt: string;
     schemaSnapshot: {
         [key: string]: unknown;
     };

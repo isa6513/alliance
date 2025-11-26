@@ -54,6 +54,13 @@ const isAnswerField = (
   );
 };
 
+const sortResponsesByCreatedAtDesc = (
+  list: FormResponseDto[]
+): FormResponseDto[] => {
+  return [...list].sort((a, b) => {
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  });
+};
 const FormResponses: React.FC = () => {
   const { formId } = useParams<{ formId: string }>();
   const navigate = useNavigate();
@@ -82,7 +89,7 @@ const FormResponses: React.FC = () => {
       const formData = formRes.data as unknown as FormWithSchema;
       setForm(formData);
       if (respRes.data) {
-        setResponses(respRes.data);
+        setResponses(sortResponsesByCreatedAtDesc(respRes.data));
       }
     } catch (e) {
       console.error(e);
@@ -302,9 +309,12 @@ const FormResponses: React.FC = () => {
                 <span className="text-sm">
                   Response {page} / {totalPages}:
                 </span>
-                {!!pageItems[0].user && (
-                  <div className="text-black">
-                    {pageItems[0].user?.name || "User"}
+                {pageItems[0] && (
+                  <div className="text-black flex items-center gap-3">
+                    <span>{pageItems[0].user.name}</span>
+                    <span className="text-gray-500 text-sm">
+                      {new Date(pageItems[0].createdAt).toLocaleString()}
+                    </span>
                   </div>
                 )}
               </div>
