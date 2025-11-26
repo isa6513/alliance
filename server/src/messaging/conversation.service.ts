@@ -291,11 +291,11 @@ export class ConversationService {
     await this.participantRepository.remove(participant);
     await this.touchConversation(conversationId);
     const conversation = await this.getConversationEntity(conversationId);
+    await this.emitConversationUpdate(conversation);
     if (conversation.type === ConversationType.Direct) {
-      this.conversationRepository.delete(conversationId);
+      await this.conversationRepository.delete(conversationId);
       return new ConversationDto(conversation, { contextUserId: userId }); // return with info despite delete so decliner sees declined state
     }
-    await this.emitConversationUpdate(conversation);
     return new ConversationDto(conversation, { contextUserId: userId });
   }
 
