@@ -152,8 +152,7 @@ export function FormBuilder({
   // Available elements for search
   const availableElements = useMemo(
     () => [
-      { id: "text", name: "Text Field", type: "field" as const },
-      { id: "textarea", name: "Textarea Field", type: "field" as const },
+      { id: "textarea", name: "Text Area Field", type: "field" as const },
       { id: "email", name: "Email Field", type: "field" as const },
       { id: "phone", name: "Phone Field", type: "field" as const },
       { id: "number", name: "Number Field", type: "field" as const },
