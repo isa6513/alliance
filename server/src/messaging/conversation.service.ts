@@ -301,10 +301,19 @@ export class ConversationService {
     dto: UpdateConversationDto,
   ): Promise<ConversationDto> {
     const conversation = await this.getConversationEntity(conversationId);
+    if (
+      !conversation.participants.some(
+        (participant) => participant.user.id === userId,
+      )
+    ) {
+      throw new ForbiddenException(
+        'You are not authorized to update this conversation.',
+      );
+    }
     if (conversation.type !== ConversationType.Direct) {
       conversation.title = dto.title ?? conversation.title;
 
-      if (dto.photo && dto.photo.length > 100) {
+      if (dto.photo && dto.photo.length > 200) {
         const key = dto.photo
           ? await this.imagesService.processAndUploadProfileImage(dto.photo)
           : conversation.photo;
