@@ -372,7 +372,7 @@ const MessagesPage = () => {
                 <Button
                   color={ButtonColor.Transparent}
                   onClick={handleCreateGroup}
-                  className="w-full justify-start rounded-md !py-3 border border-zinc-300"
+                  className="w-full justify-start rounded-md !py-3 border border-zinc-300 mb-2"
                 >
                   Create a group
                 </Button>
@@ -506,6 +506,7 @@ const MessagesPage = () => {
             handleAcceptMessageRequest={handleAcceptMessageRequest}
             handleDeclineMessageRequest={handleDeclineMessageRequest}
             handleConversationUpdated={handleConversationUpdated}
+            friends={friends}
           />
         )}
       </div>

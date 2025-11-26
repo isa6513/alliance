@@ -1,10 +1,12 @@
 import StatusIcon from "@alliance/shared/ui/icons/StatusIcon";
 import {
+  conversationAddParticipant,
   ConversationDto,
   conversationLeave,
   conversationRemoveParticipant,
   MessageDto,
   messageSendMessage,
+  ProfileDto,
 } from "@alliance/shared/client";
 import Spinner from "./Spinner";
 import Message from "./Message";
@@ -16,6 +18,7 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { Link } from "react-router";
 import List from "@alliance/shared/ui/List";
 import DeleteIcon from "@alliance/shared/ui/icons/DeleteIcon";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 
 interface ConversationDetailPanelProps {
   selectedConvo: ConversationDto;
@@ -27,6 +30,7 @@ interface ConversationDetailPanelProps {
   showCloseButton: boolean;
   onClose: () => void;
   onLeave: () => void;
+  friends: ProfileDto[] | null;
 }
 const ConversationDetailPanel = ({
   selectedConvo,
@@ -38,12 +42,20 @@ const ConversationDetailPanel = ({
   showCloseButton,
   onClose,
   onLeave,
+  friends,
 }: ConversationDetailPanelProps) => {
   const { user } = useAuth();
 
   const [message, setMessage] = useState<string>("");
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [groupInfoOpen, setGroupInfoOpen] = useState(false);
+  const [addMemberSearch, setAddMemberSearch] = useState<string>("");
+
+  const participantMe = useMemo(() => {
+    return selectedConvo.participants.find(
+      (participant) => participant.user.id === user?.id
+    );
+  }, [selectedConvo, user]);
 
   const amInvited = useMemo(() => {
     return selectedConvo.participants.some(
@@ -127,6 +139,49 @@ const ConversationDetailPanel = ({
     }
   };
 
+  const filteredFriends = useMemo(() => {
+    if (addMemberSearch.length === 0) return [];
+    return friends?.filter(
+      (friend) =>
+        friend.displayName
+          .toLowerCase()
+          .includes(addMemberSearch.toLowerCase()) &&
+        !selectedConvo.participants.some(
+          (participant) => participant.user.id === friend.id
+        )
+    );
+  }, [friends, addMemberSearch, selectedConvo.participants]);
+
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [justAddedMember, setJustAddedMember] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (justAddedMember) {
+      setTimeout(() => {
+        setJustAddedMember(null);
+      }, 2000);
+    }
+  }, [justAddedMember]);
+
+  const onSearchFocus = () => {
+    setIsSearchFocused(true);
+  };
+  const onSearchBlur = () => {
+    setIsSearchFocused(false);
+  };
+
+  const handleAddMember = async (userId: number) => {
+    const response = await conversationAddParticipant({
+      path: { conversationId: selectedConvo.id },
+      body: { userId },
+    });
+    if (response.data) {
+      handleConversationUpdated(response.data);
+      setAddMemberSearch("");
+      setJustAddedMember(userId);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full overflow-x-hidden">
       {groupInfoOpen ? (
@@ -167,7 +222,50 @@ const ConversationDetailPanel = ({
               <p className="text-center">
                 {selectedConvo.participants.length} members
               </p>
-              <List className="max-h-[300px] overflow-y-auto w-full">
+              {selectedConvo.type === "multiple" &&
+                (participantMe?.role === "admin" ||
+                  participantMe?.role === "owner") && (
+                  <Card
+                    style={CardStyle.Outline}
+                    className="w-full !p-0 relative group"
+                  >
+                    <input
+                      type="text"
+                      onFocus={onSearchFocus}
+                      onBlur={onSearchBlur}
+                      placeholder="Add member..."
+                      className="text-zinc-800 !bg-transparent p-4 active:outline-none focus:outline-none"
+                      value={addMemberSearch}
+                      onChange={(e) => setAddMemberSearch(e.target.value)}
+                    />
+                    {filteredFriends && filteredFriends.length > 0 && (
+                      <div className="absolute top-full bg-white w-full border border-zinc-200 rounded rounded-t-none">
+                        {filteredFriends.map((friend) => (
+                          <div
+                            key={friend.id}
+                            className="flex flex-row items-center gap-x-3 cursor-pointer hover:bg-zinc-100 p-4 rounded-md"
+                            onClick={() => {
+                              handleAddMember(friend.id);
+                            }}
+                          >
+                            <ProfileImage
+                              pfp={friend.profilePicture}
+                              size="large"
+                            />
+                            <p>{friend.displayName}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </Card>
+                )}
+              <List
+                className={`max-h-[300px] overflow-y-auto w-full ${
+                  filteredFriends?.length && isSearchFocused
+                    ? "opacity-0 pointer-events-none"
+                    : "opacity-100 pointer-events-auto"
+                }`}
+              >
                 {selectedConvo.participants.map((participant) => (
                   <Link
                     key={participant.user.id}
@@ -198,12 +296,23 @@ const ConversationDetailPanel = ({
                           />
                         </Button>
                       )}
-                    {participant.state == "invited" && (
-                      <p className="text-sm text-zinc-500 mr-2">Invited</p>
-                    )}
+                    {participant.state == "invited" &&
+                      (justAddedMember === participant.user.id ? (
+                        <p className="text-sm text-green">Invite sent!</p>
+                      ) : (
+                        <p className="text-sm text-zinc-500 mr-2">Invited</p>
+                      ))}
                   </Link>
                 ))}
               </List>
+              {selectedConvo.type === "community" && (
+                <p className="text-sm center">
+                  This is a chat with everyone in your member group:{" "}
+                  <Link to={`/groups`} className="text-green">
+                    {selectedConvo.community?.name}
+                  </Link>
+                </p>
+              )}
               {selectedConvo.type === "multiple" && (
                 <Button
                   color={ButtonColor.Transparent}
