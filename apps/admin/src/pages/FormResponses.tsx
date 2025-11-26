@@ -256,6 +256,17 @@ const FormResponses: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 disabled={page <= 1}
+                onClick={() => setPage(1)}
+                className={`px-3 py-2 rounded-md text-sm ${
+                  page <= 1
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-100 hover:bg-gray-200"
+                }`}
+              >
+                First
+              </button>
+              <button
+                disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 className={`px-3 py-2 rounded-md text-sm ${
                   page <= 1
@@ -275,6 +286,17 @@ const FormResponses: React.FC = () => {
                 }`}
               >
                 Next
+              </button>
+              <button
+                disabled={page >= totalPages}
+                onClick={() => setPage(totalPages)}
+                className={`px-3 py-2 rounded-md text-sm ${
+                  page >= totalPages
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-100 hover:bg-gray-200"
+                }`}
+              >
+                Last
               </button>
               <div className="flex items-center gap-2 mx-2 justify-center">
                 <span className="text-sm">
