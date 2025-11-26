@@ -37,9 +37,11 @@ export class Conversation {
   messages: Ty<Message>[];
 
   @CreateDateColumnTz()
+  @ApiProperty({ type: Date })
   createdAt: Date;
 
   @UpdateDateColumnTz()
+  @ApiProperty({ type: Date })
   updatedAt: Date;
 
   @OneToMany(() => Participant, (participant) => participant.conversation)

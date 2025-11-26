@@ -15,8 +15,6 @@ import {
 } from 'src/notifs/entities/notification.entity';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
 import { ILike, In, Repository } from 'typeorm';
-import { Action } from 'src/actions/entities/action.entity';
-import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { Friend, FriendStatus } from './entities/friend.entity';
 import { PrefillUser } from './entities/prefill-user.entity';
 import {
@@ -66,10 +64,6 @@ export class UserService {
     private cityRepository: Repository<City>,
     @InjectRepository(Notification)
     private notifRepository: Repository<Notification>,
-    @InjectRepository(Action)
-    private readonly actionRepository: Repository<Action>,
-    @InjectRepository(ActionActivity)
-    private readonly actionActivityRepository: Repository<ActionActivity>,
     @InjectRepository(Friend)
     private readonly friendRepository: Repository<Friend>,
     @InjectRepository(Group)

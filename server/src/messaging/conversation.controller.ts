@@ -19,6 +19,7 @@ import {
   CreateGroupConversationDto,
   ConversationParticipantDto,
   UnreadMessagesDto,
+  UpdateConversationDto,
 } from './dto/messaging.dto';
 
 @ApiTags('messaging')
@@ -51,6 +52,21 @@ export class ConversationController {
     @Request() req: JwtRequest,
   ): Promise<ConversationDto> {
     return this.conversationService.createGroupConversation(req.user.sub, dto);
+  }
+
+  @Post(':conversationId/update')
+  @ApiOkResponse({ type: ConversationDto })
+  @UseGuards(AuthGuard)
+  updateInfo(
+    @Param('conversationId', ParseIntPipe) conversationId: number,
+    @Body() body: UpdateConversationDto,
+    @Request() req: JwtRequest,
+  ): Promise<ConversationDto> {
+    return this.conversationService.updateConversation(
+      conversationId,
+      req.user.sub,
+      body,
+    );
   }
 
   @Post(':conversationId/accept')

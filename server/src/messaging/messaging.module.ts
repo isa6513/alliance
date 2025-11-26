@@ -10,6 +10,7 @@ import { Participant } from './entities/participant.entity';
 import { MessageController } from './message.controller';
 import { MessageService } from './message.service';
 import { MessagingGateway } from './messaging.gateway';
+import { ImagesModule } from 'src/images/images.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MessagingGateway } from './messaging.gateway';
       Community,
       User,
     ]),
+    ImagesModule,
   ],
   controllers: [ConversationController, MessageController],
   providers: [ConversationService, MessageService, MessagingGateway],

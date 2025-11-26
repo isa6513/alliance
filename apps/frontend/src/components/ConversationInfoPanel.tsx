@@ -3,6 +3,7 @@ import {
   ConversationDto,
   conversationLeave,
   conversationRemoveParticipant,
+  conversationUpdateInfo,
   ProfileDto,
 } from "@alliance/shared/client";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
@@ -14,6 +15,9 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import DeleteIcon from "@alliance/shared/ui/icons/DeleteIcon";
 import { useAuth } from "../lib/AuthContext";
 import { useEffect, useMemo, useState } from "react";
+import CreateIcon from "@alliance/shared/ui/icons/CreateIcon";
+import { sharp_allowed_mime_types } from "@alliance/shared/lib/config";
+import ProfileImageEditor from "./ProfileImageEditor";
 
 export interface ConversationInfoPanelProps {
   selectedConvo: ConversationDto;
@@ -41,6 +45,13 @@ const ConversationInfoPanel = ({
   }, [selectedConvo, user]);
 
   const [addMemberSearch, setAddMemberSearch] = useState<string>("");
+  const [isEditingGroup, setIsEditingGroup] = useState<boolean>(false);
+  const [editingGroupTitle, setEditingGroupTitle] = useState<string>(
+    selectedConvo.title
+  );
+  const [editingGroupPhoto, setEditingGroupPhoto] = useState<string | null>(
+    selectedConvo.photo ?? null
+  );
 
   const handleRemoveParticipant = async (userId: number) => {
     const response = await conversationRemoveParticipant({
@@ -91,6 +102,19 @@ const ConversationInfoPanel = ({
     setIsSearchFocused(false);
   };
 
+  const handleSaveGroup = async () => {
+    const response = await conversationUpdateInfo({
+      path: { conversationId: selectedConvo.id },
+      body: { title: editingGroupTitle, photo: editingGroupPhoto ?? undefined },
+    });
+    if (response.data) {
+      handleConversationUpdated(response.data);
+      setIsEditingGroup(false);
+      setEditingGroupTitle(response.data.title);
+      setEditingGroupPhoto(response.data.photo ?? null);
+    }
+  };
+
   const handleAddMember = async (userId: number) => {
     const response = await conversationAddParticipant({
       path: { conversationId: selectedConvo.id },
@@ -106,11 +130,21 @@ const ConversationInfoPanel = ({
   return (
     <div className="flex-1 relative flex flex-col items-center justify-center">
       <div className="flex flex-col items-center px-8 w-full gap-y-2">
-        <ProfileImage
-          pfp={selectedConvo.photo ?? null}
-          size="huge"
-          className="mb-2"
-        />
+        {isEditingGroup ? (
+          <ProfileImageEditor
+            key={0}
+            className="mt-[-55px]"
+            initialImageUrl={editingGroupPhoto}
+            onChange={setEditingGroupPhoto}
+            allowedMimeTypes={sharp_allowed_mime_types}
+          />
+        ) : (
+          <ProfileImage
+            pfp={selectedConvo.photo ?? null}
+            size="huge"
+            className="mb-2"
+          />
+        )}
         {selectedConvo.type === "direct" ? (
           <>
             <Link
@@ -130,10 +164,35 @@ const ConversationInfoPanel = ({
             </Link>
             <p className="text-sm text-zinc-500">Direct message</p>
           </>
+        ) : isEditingGroup ? (
+          <div className="flex flex-row items-center gap-x-5">
+            <input
+              type="text"
+              className="font-semibold text-xl text-center active:outline-none focus:outline-none border-b border-zinc-200 pb-1"
+              disabled={selectedConvo.type === "community"}
+              value={editingGroupTitle}
+              onChange={(e) => setEditingGroupTitle(e.target.value)}
+            />
+            <Button
+              color={ButtonColor.Light}
+              onClick={handleSaveGroup}
+              className=""
+            >
+              Save
+            </Button>
+          </div>
         ) : (
-          <p className="font-semibold text-xl text-center">
-            {selectedConvo.title}
-          </p>
+          <div className="flex flex-row items-center gap-x-1">
+            <p className="font-semibold text-xl text-center">
+              {selectedConvo.title}
+            </p>
+            <div
+              className="cursor-pointer hover:bg-zinc-100 rounded-md p-2"
+              onClick={() => setIsEditingGroup(true)}
+            >
+              <CreateIcon size="medium" fill="var(--color-zinc-500)" />
+            </div>
+          </div>
         )}
       </div>
       {selectedConvo.type !== "direct" && (

@@ -12,6 +12,7 @@ import { useAuth } from "../lib/AuthContext";
 import { useEffect, useMemo, useState } from "react";
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import ConversationInfoPanel from "./ConversationInfoPanel";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 
 interface ConversationDetailPanelProps {
   selectedConvo: ConversationDto;
@@ -124,7 +125,7 @@ const ConversationDetailPanel = ({
             className="flex flex-row gap-y-2 border-b border-zinc-200 p-4 px-8 hover:bg-zinc-100 cursor-pointer"
             onClick={() => setGroupInfoOpen(true)}
           >
-            <div className="flex flex-row gap-x-2">
+            <div className="flex flex-row gap-x-3 items-center">
               {showCloseButton && (
                 <Button
                   color={ButtonColor.Transparent}
@@ -134,6 +135,13 @@ const ConversationDetailPanel = ({
                 >
                   <DropdownIcon size="small" fill="var(--color-zinc-700)" />
                 </Button>
+              )}
+              {selectedConvo.photo && (
+                <ProfileImage
+                  pfp={selectedConvo.photo}
+                  size="large"
+                  className="mt-1"
+                />
               )}
               <div className="flex flex-col justify-center">
                 <p className="font-semibold text-lg">{selectedConvo.title}</p>

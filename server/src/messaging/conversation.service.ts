@@ -22,8 +22,10 @@ import {
   CreateGroupConversationDto,
   ConversationParticipantDto,
   UnreadMessagesDto,
+  UpdateConversationDto,
 } from './dto/messaging.dto';
 import { MessagingEvents } from './messaging.events';
+import { ImagesService } from 'src/images/images.service';
 
 @Injectable()
 export class ConversationService {
@@ -58,6 +60,7 @@ export class ConversationService {
     @InjectRepository(Community)
     private readonly communityRepository: Repository<Community>,
     private readonly eventEmitter: EventEmitter2,
+    private readonly imagesService: ImagesService,
   ) {}
 
   async getUserConversations(userId: number): Promise<ConversationDto[]> {
@@ -292,6 +295,28 @@ export class ConversationService {
     return new ConversationDto(conversation, { contextUserId: userId });
   }
 
+  async updateConversation(
+    conversationId: number,
+    userId: number,
+    dto: UpdateConversationDto,
+  ): Promise<ConversationDto> {
+    const conversation = await this.getConversationEntity(conversationId);
+    if (conversation.type !== ConversationType.Direct) {
+      conversation.title = dto.title ?? conversation.title;
+
+      if (dto.photo && dto.photo.length > 100) {
+        const key = dto.photo
+          ? await this.imagesService.processAndUploadProfileImage(dto.photo)
+          : conversation.photo;
+
+        conversation.photo = key;
+      }
+    }
+
+    await this.conversationRepository.save(conversation);
+    return new ConversationDto(conversation, { contextUserId: userId });
+  }
+
   async addParticipantToConversation(
     conversationId: number,
     actingUserId: number,
@@ -416,12 +441,9 @@ export class ConversationService {
         }),
       );
     } else {
-      const needsUpdate =
-        conversation.title !== community.name ||
-        conversation.photo !== community.photo;
+      const needsUpdate = conversation.title !== community.name;
       if (needsUpdate) {
         conversation.title = community.name;
-        conversation.photo = community.photo;
         await this.conversationRepository.save(conversation);
       }
     }

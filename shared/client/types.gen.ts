@@ -388,6 +388,8 @@ export type MessageDto = {
 
 export type ConversationDto = {
     id: number;
+    createdAt: string;
+    updatedAt: string;
     type: ConversationType;
     title: string;
     photo?: string;
@@ -408,6 +410,11 @@ export type CreateGroupConversationDto = {
     title: string;
     photo?: string;
     participantIds: Array<number>;
+};
+
+export type UpdateConversationDto = {
+    title?: string;
+    photo?: string;
 };
 
 export type ConversationParticipantDto = {
@@ -2859,6 +2866,21 @@ export type ConversationCreateGroupConversationResponses = {
 };
 
 export type ConversationCreateGroupConversationResponse = ConversationCreateGroupConversationResponses[keyof ConversationCreateGroupConversationResponses];
+
+export type ConversationUpdateInfoData = {
+    body: UpdateConversationDto;
+    path: {
+        conversationId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/update';
+};
+
+export type ConversationUpdateInfoResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationUpdateInfoResponse = ConversationUpdateInfoResponses[keyof ConversationUpdateInfoResponses];
 
 export type ConversationAcceptInviteData = {
     body?: never;

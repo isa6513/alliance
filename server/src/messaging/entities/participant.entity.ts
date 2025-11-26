@@ -4,6 +4,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { Conversation } from './conversation.entity';
 import { Ty } from 'src/tasks/entities/type';
@@ -27,6 +28,7 @@ export enum ParticipantState {
 }
 
 @Entity()
+@Unique(['conversation', 'user'])
 export class Participant {
   @PrimaryGeneratedColumn()
   id: number;

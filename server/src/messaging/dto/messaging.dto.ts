@@ -25,6 +25,7 @@ import {
 } from '../entities/conversation.entity';
 import { Message } from '../entities/message.entity';
 import { Participant, ParticipantState } from '../entities/participant.entity';
+import { getImageSource } from 'src/images/images.service';
 
 export class MessageReferenceDto extends PickType(Message, [
   'id',
@@ -147,12 +148,11 @@ export class ConversationDto extends OmitType(Conversation, [
         this.title = directTitle;
       }
     }
-
-    this.photo =
-      conversation.photo ??
-      (conversation.type === ConversationType.Direct
+    this.photo = conversation.photo
+      ? getImageSource(conversation.photo)
+      : conversation.type === ConversationType.Direct
         ? this.resolveDirectPhoto(extras?.contextUserId)
-        : undefined);
+        : undefined;
 
     if (extras?.contextUserId) {
       const currentParticipant = conversation.participants?.find(
@@ -265,6 +265,19 @@ export class CreateMessageDto {
   @IsOptional()
   @IsUUID()
   replyToId?: string;
+}
+
+export class UpdateConversationDto {
+  @ApiPropertyOptional({ type: String })
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  title?: string;
+
+  @ApiPropertyOptional({ type: String })
+  @IsOptional()
+  @IsString()
+  photo?: string;
 }
 
 export class ConversationMessagesQueryDto {

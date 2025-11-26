@@ -21,6 +21,13 @@ import useLiveConvoMessages from "./messages";
 import { useSearchParams } from "react-router";
 import ConversationDetailPanel from "../../components/ConversationDetailPanel";
 
+function sortConversations(a: ConversationDto, b: ConversationDto) {
+  return (
+    new Date(b.lastMessage?.createdAt ?? b.createdAt).getTime() -
+    new Date(a.lastMessage?.createdAt ?? a.createdAt).getTime()
+  );
+}
+
 const MessagesPage = () => {
   const [conversations, setConversations] = useState<ConversationDto[] | null>(
     null
@@ -31,13 +38,7 @@ const MessagesPage = () => {
     conversationGetMyConversations()
       .then((response) => {
         if (response.data) {
-          setConversations(
-            response.data.sort(
-              (a, b) =>
-                new Date(b.lastMessage?.createdAt ?? new Date()).getTime() -
-                new Date(a.lastMessage?.createdAt ?? new Date()).getTime()
-            )
-          );
+          setConversations(response.data.sort(sortConversations));
         }
       })
       .catch((error) => {
@@ -100,9 +101,7 @@ const MessagesPage = () => {
         }
         const merged = { ...existing, ...updatedConversation };
         return [merged, ...prev.filter((convo) => convo.id !== merged.id)].sort(
-          (a, b) =>
-            new Date(b.lastMessage?.createdAt ?? new Date()).getTime() -
-            new Date(a.lastMessage?.createdAt ?? new Date()).getTime()
+          sortConversations
         );
       });
     },
