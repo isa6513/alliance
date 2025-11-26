@@ -62,10 +62,12 @@ export class ConversationController {
     @Body() body: UpdateConversationDto,
     @Request() req: JwtRequest,
   ): Promise<ConversationDto> {
-    return this.conversationService.updateConversation(
-      conversationId,
-      req.user.sub,
-      body,
+    return this.ensureParticipantAndRun(conversationId, req.user.sub, () =>
+      this.conversationService.updateConversation(
+        conversationId,
+        req.user.sub,
+        body,
+      ),
     );
   }
 

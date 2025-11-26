@@ -291,6 +291,10 @@ export class ConversationService {
     await this.participantRepository.remove(participant);
     await this.touchConversation(conversationId);
     const conversation = await this.getConversationEntity(conversationId);
+    if (conversation.type === ConversationType.Direct) {
+      this.conversationRepository.delete(conversationId);
+      return new ConversationDto(conversation, { contextUserId: userId }); // return with info despite delete so decliner sees declined state
+    }
     await this.emitConversationUpdate(conversation);
     return new ConversationDto(conversation, { contextUserId: userId });
   }
@@ -301,15 +305,7 @@ export class ConversationService {
     dto: UpdateConversationDto,
   ): Promise<ConversationDto> {
     const conversation = await this.getConversationEntity(conversationId);
-    if (
-      !conversation.participants.some(
-        (participant) => participant.user.id === userId,
-      )
-    ) {
-      throw new ForbiddenException(
-        'You are not authorized to update this conversation.',
-      );
-    }
+
     if (conversation.type !== ConversationType.Direct) {
       conversation.title = dto.title ?? conversation.title;
 
