@@ -34,8 +34,8 @@ const MessagesPage = () => {
           setConversations(
             response.data.sort(
               (a, b) =>
-                new Date(b.lastMessage?.createdAt ?? "").getTime() -
-                new Date(a.lastMessage?.createdAt ?? "").getTime()
+                new Date(b.lastMessage?.createdAt ?? new Date()).getTime() -
+                new Date(a.lastMessage?.createdAt ?? new Date()).getTime()
             )
           );
         }
@@ -101,8 +101,8 @@ const MessagesPage = () => {
         const merged = { ...existing, ...updatedConversation };
         return [merged, ...prev.filter((convo) => convo.id !== merged.id)].sort(
           (a, b) =>
-            new Date(b.lastMessage?.createdAt ?? "").getTime() -
-            new Date(a.lastMessage?.createdAt ?? "").getTime()
+            new Date(b.lastMessage?.createdAt ?? new Date()).getTime() -
+            new Date(a.lastMessage?.createdAt ?? new Date()).getTime()
         );
       });
     },
