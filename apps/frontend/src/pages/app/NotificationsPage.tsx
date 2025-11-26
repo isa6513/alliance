@@ -51,7 +51,13 @@ const NotificationsPage = () => {
                     ))}
                   </div>
                 )}
-                <h3 className="line-clamp-2">{notification.message}</h3>
+
+                <h3 className="line-clamp-2">
+                  {notification.category === "action_update" && (
+                    <span className="font-semibold">Action update: </span>
+                  )}
+                  {notification.message}
+                </h3>
               </div>
               <p className=" text-zinc-500 text-sm">
                 {formatTime(
