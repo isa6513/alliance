@@ -497,10 +497,7 @@ export class ConversationService {
     userId: number,
   ): Promise<ConversationDto> {
     const participant = await this.getParticipantOrFail(conversationId, userId);
-    if (participant.state !== ParticipantState.Joined) {
-      participant.state = ParticipantState.Joined;
-      participant.joinedAt = new Date();
-    }
+
     const lastMessage = await this.findLastMessage(conversationId);
 
     if (lastMessage) {
@@ -691,7 +688,6 @@ export class ConversationService {
       where: {
         conversation: { id: conversationId },
         user: { id: userId },
-        state: ParticipantState.Joined,
       },
       relations: ['lastReadMessage'],
     });
