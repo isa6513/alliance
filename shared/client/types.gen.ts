@@ -396,6 +396,7 @@ export type ConversationDto = {
     community?: CommunityDto;
     hasUnread: boolean;
     isMessageRequest: boolean;
+    unreadCount: number;
 };
 
 export type CreateDirectConversationDto = {
@@ -411,6 +412,10 @@ export type CreateGroupConversationDto = {
 
 export type ConversationParticipantDto = {
     userId: number;
+};
+
+export type UnreadMessagesDto = {
+    count: number;
 };
 
 export type CreateMessageDto = {
@@ -2915,6 +2920,34 @@ export type ConversationRemoveParticipantResponses = {
 };
 
 export type ConversationRemoveParticipantResponse = ConversationRemoveParticipantResponses[keyof ConversationRemoveParticipantResponses];
+
+export type ConversationMarkReadData = {
+    body?: never;
+    path: {
+        conversationId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/read';
+};
+
+export type ConversationMarkReadResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationMarkReadResponse = ConversationMarkReadResponses[keyof ConversationMarkReadResponses];
+
+export type ConversationGetUnreadMessagesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/messaging/conversations/unread';
+};
+
+export type ConversationGetUnreadMessagesResponses = {
+    200: UnreadMessagesDto;
+};
+
+export type ConversationGetUnreadMessagesResponse = ConversationGetUnreadMessagesResponses[keyof ConversationGetUnreadMessagesResponses];
 
 export type ConversationLeaveData = {
     body?: never;

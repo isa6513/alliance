@@ -18,6 +18,7 @@ import {
   CreateDirectConversationDto,
   CreateGroupConversationDto,
   ConversationParticipantDto,
+  UnreadMessagesDto,
 } from './dto/messaging.dto';
 
 @ApiTags('messaging')
@@ -104,6 +105,28 @@ export class ConversationController {
       req.user.sub,
       targetUserId,
     );
+  }
+
+  @Post(':conversationId/read')
+  @ApiOkResponse({ type: ConversationDto })
+  @UseGuards(AuthGuard)
+  markRead(
+    @Param('conversationId', ParseIntPipe) conversationId: number,
+    @Request() req: JwtRequest,
+  ): Promise<ConversationDto> {
+    return this.conversationService.markConversationRead(
+      conversationId,
+      req.user.sub,
+    );
+  }
+
+  @Get('unread')
+  @ApiOkResponse({ type: UnreadMessagesDto })
+  @UseGuards(AuthGuard)
+  async getUnreadMessages(
+    @Request() req: JwtRequest,
+  ): Promise<UnreadMessagesDto> {
+    return this.conversationService.getUnreadMessages(req.user.sub);
   }
 
   @Post(':conversationId/leave')

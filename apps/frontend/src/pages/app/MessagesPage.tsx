@@ -5,6 +5,7 @@ import {
   conversationDeclineInvite,
   ConversationDto,
   conversationGetMyConversations,
+  conversationMarkRead,
   MessageDto,
   ProfileDto,
   userListFriends,
@@ -30,7 +31,13 @@ const MessagesPage = () => {
     conversationGetMyConversations()
       .then((response) => {
         if (response.data) {
-          setConversations(response.data);
+          setConversations(
+            response.data.sort(
+              (a, b) =>
+                new Date(b.lastMessage?.createdAt ?? "").getTime() -
+                new Date(a.lastMessage?.createdAt ?? "").getTime()
+            )
+          );
         }
       })
       .catch((error) => {
@@ -92,7 +99,11 @@ const MessagesPage = () => {
           return prev;
         }
         const merged = { ...existing, ...updatedConversation };
-        return [merged, ...prev.filter((convo) => convo.id !== merged.id)];
+        return [merged, ...prev.filter((convo) => convo.id !== merged.id)].sort(
+          (a, b) =>
+            new Date(b.lastMessage?.createdAt ?? "").getTime() -
+            new Date(a.lastMessage?.createdAt ?? "").getTime()
+        );
       });
     },
     []
@@ -278,6 +289,14 @@ const MessagesPage = () => {
     setCreatingGroup(true);
   }, [setSelectedConvoId]);
 
+  useEffect(() => {
+    if (selectedConvoId) {
+      conversationMarkRead({
+        path: { conversationId: selectedConvoId },
+      });
+    }
+  }, [selectedConvoId]);
+
   if (!conversations && loading) {
     return (
       <div>
@@ -420,27 +439,42 @@ const MessagesPage = () => {
               {filteredConversations?.map((conversation) => (
                 <div
                   key={conversation.id}
-                  className={`p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row items-center gap-x-3 ${
+                  className={`p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row justify-between items-center gap-x-3 ${
                     selectedConvoId === conversation.id
                       ? "bg-zinc-100"
                       : "bg-white"
                   }`}
                   onClick={handleConversationClick(conversation.id)}
                 >
-                  <ProfileImage pfp={conversation.photo ?? null} size="large" />
-                  <div className="flex flex-col">
-                    <span className="font-medium">{conversation.title}</span>
-                    <span className="text-sm text-zinc-500 line-clamp-1">
-                      {!!conversation.lastMessage
-                        ? conversation.type === "direct"
-                          ? conversation.lastMessage.author.id === user?.id
-                            ? "you: " + conversation.lastMessage.body
-                            : conversation.lastMessage.body
-                          : conversation.lastMessage.author.displayName +
-                            ": " +
-                            conversation.lastMessage.body
-                        : "No messages yet"}
-                    </span>
+                  <div className="flex flex-row items-center gap-x-3">
+                    <ProfileImage
+                      pfp={conversation.photo ?? null}
+                      size="large"
+                    />
+                    <div className="flex flex-col">
+                      <span className="font-medium">{conversation.title}</span>
+                      <span className="text-sm text-zinc-500 line-clamp-1">
+                        {!!conversation.lastMessage
+                          ? conversation.type === "direct"
+                            ? conversation.lastMessage.author.id === user?.id
+                              ? "you: " + conversation.lastMessage.body
+                              : conversation.lastMessage.body
+                            : conversation.lastMessage.author.displayName +
+                              ": " +
+                              conversation.lastMessage.body
+                          : "No messages yet"}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    {conversation.unreadCount > 0 && (
+                      <div
+                        className={`font-semibold text-xs text-white bg-red-500
+                    } rounded-md flex justify-center items-center w-6 h-6`}
+                      >
+                        {conversation.unreadCount}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

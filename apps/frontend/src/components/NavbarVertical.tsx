@@ -1,11 +1,19 @@
 import { Link, useOutletContext } from "react-router";
 import { AppLayoutOutletContext } from "../applayout";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useNotifications } from "../lib/useNotifications";
 import { useAuth } from "../lib/AuthContext";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../lib/config";
+import { conversationGetUnreadMessages } from "@alliance/shared/client";
 
 export enum NavbarPage {
   Tasks = "Tasks",
@@ -45,6 +53,13 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
   const { profile } = useOutletContext<AppLayoutOutletContext>();
 
   const { unreadCount } = useNotifications();
+
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  const loadUnreadMessages = useCallback(async () => {
+    const { data } = await conversationGetUnreadMessages();
+    setUnreadMessages(data?.count ?? 0);
+  }, []);
 
   const [open, setOpen] = useState(false);
   const navRef = useRef<HTMLDivElement | null>(null);
@@ -171,6 +186,14 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
       .find((item) => item.destination === window.location.pathname)?.page ||
     null;
 
+  useEffect(() => {
+    if (currentLocation === NavbarPage.Messages) {
+      setUnreadMessages(0);
+    } else {
+      loadUnreadMessages();
+    }
+  }, [loadUnreadMessages, currentLocation, unreadMessages]);
+
   const unreadNotifsForPage = useMemo((): Partial<
     Record<NavbarPage, number>
   > => {
@@ -182,8 +205,10 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
         : user?.invitedCommunities.filter(
             (invite) => invite.status === "pending"
           ).length,
+      [NavbarPage.Messages]:
+        currentLocation !== NavbarPage.Messages ? unreadMessages : 0,
     };
-  }, [unreadCount, todoActions, user]);
+  }, [unreadCount, todoActions, user, unreadMessages, currentLocation]);
 
   return (
     <>

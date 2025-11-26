@@ -13,7 +13,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Server, Socket } from 'socket.io';
 import { ConversationService } from './conversation.service';
 import { MessagingEvents } from './messaging.events';
-import { ConversationDto, MessageDto } from './dto/messaging.dto';
+import { MessageDto } from './dto/messaging.dto';
 import { JwtPayload } from 'src/auth/guards/auth.guard';
 import { AuthService } from 'src/auth/auth.service';
 
@@ -130,13 +130,31 @@ export class MessagingGateway
       .emit('message:new', payload.message);
   }
 
-  private handleConversationUpdated(payload: {
-    conversationId: number;
-    conversation: ConversationDto;
-  }) {
-    this.server
-      .to(this.roomName(payload.conversationId))
-      .emit('conversation:updated', payload.conversation);
+  private handleConversationUpdated(payload: { conversationId: number }) {
+    const room = this.roomName(payload.conversationId);
+    void this.server
+      .in(room)
+      .fetchSockets()
+      .then(async (sockets) => {
+        for (const socket of sockets) {
+          const userId = socket.data.userId as number | undefined;
+          if (!userId) {
+            continue;
+          }
+          try {
+            const conversation =
+              await this.conversationService.getConversationForUser(
+                payload.conversationId,
+                userId,
+              );
+            socket.emit('conversation:updated', conversation);
+          } catch (error) {
+            this.logger.warn(
+              `Failed to build conversation dto for socket ${socket.id}: ${error.message}`,
+            );
+          }
+        }
+      });
   }
 
   private extractToken(client: Socket): string | undefined {

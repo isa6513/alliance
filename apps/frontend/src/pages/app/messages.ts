@@ -1,5 +1,6 @@
 import {
   ConversationDto,
+  conversationMarkRead,
   MessageDto,
   messageGetMessages,
 } from "@alliance/shared/client";
@@ -55,6 +56,10 @@ const useLiveConvoMessages = (
           return prev;
         }
         return [...prev, incoming];
+      });
+
+      conversationMarkRead({
+        path: { conversationId: incoming.conversationId },
       });
     });
 

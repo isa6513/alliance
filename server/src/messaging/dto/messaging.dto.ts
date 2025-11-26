@@ -117,9 +117,16 @@ export class ConversationDto extends OmitType(Conversation, [
   @ApiProperty({ type: Boolean })
   isMessageRequest: boolean;
 
+  @ApiProperty({ type: Number })
+  unreadCount: number;
+
   constructor(
     conversation: Conversation,
-    extras?: { lastMessage?: Message | null; contextUserId?: number },
+    extras?: {
+      lastMessage?: Message | null;
+      contextUserId?: number;
+      unreadCount?: number;
+    },
   ) {
     super();
     Object.assign(this, conversation);
@@ -132,6 +139,7 @@ export class ConversationDto extends OmitType(Conversation, [
     this.lastMessage = extras?.lastMessage
       ? new MessageDto(extras.lastMessage, conversation.id)
       : undefined;
+    this.unreadCount = extras?.unreadCount ?? 0;
 
     if (conversation.type === ConversationType.Direct) {
       const directTitle = this.resolveDirectTitle(extras?.contextUserId);
@@ -152,32 +160,27 @@ export class ConversationDto extends OmitType(Conversation, [
       );
       this.isMessageRequest =
         currentParticipant?.state === ParticipantState.Invited;
-      if (this.lastMessage && currentParticipant) {
-        const lastRead =
-          currentParticipant.lastReadMessage?.createdAt ??
-          currentParticipant.joinedAt;
-        this.hasUnread = lastRead
-          ? this.lastMessage.createdAt > lastRead
-          : true;
-      } else {
-        this.hasUnread = Boolean(this.lastMessage);
-      }
+      this.hasUnread =
+        this.unreadCount > 0 ||
+        (this.lastMessage
+          ? this.isUnreadFromTimestamps(
+              currentParticipant
+                ? new ParticipantDto(currentParticipant)
+                : undefined,
+            )
+          : false);
     } else {
       this.isMessageRequest = false;
-      this.hasUnread = false;
+      this.hasUnread = this.unreadCount > 0;
     }
   }
 
-  private resolveDirectTitle(
-    contextUserId?: number,
-  ): string | undefined {
+  private resolveDirectTitle(contextUserId?: number): string | undefined {
     const participant = this.findOtherParticipant(contextUserId);
     return participant?.user.displayName;
   }
 
-  private resolveDirectPhoto(
-    contextUserId?: number,
-  ): string | undefined {
+  private resolveDirectPhoto(contextUserId?: number): string | undefined {
     return this.findOtherParticipant(contextUserId)?.user.profilePicture;
   }
 
@@ -195,6 +198,21 @@ export class ConversationDto extends OmitType(Conversation, [
     return this.participants.find(
       (participant) => participant.user.id !== contextUserId,
     );
+  }
+
+  private isUnreadFromTimestamps(currentParticipant?: ParticipantDto): boolean {
+    if (!this.lastMessage) {
+      return false;
+    }
+    if (!currentParticipant) {
+      return false;
+    }
+
+    const lastRead =
+      currentParticipant.lastReadMessage?.createdAt ??
+      currentParticipant.joinedAt;
+
+    return lastRead ? this.lastMessage.createdAt > lastRead : true;
   }
 }
 
@@ -268,4 +286,10 @@ export class ConversationParticipantDto {
   @IsInt()
   @Min(1)
   userId: number;
+}
+
+export class UnreadMessagesDto {
+  @ApiProperty({ type: Number })
+  @IsInt()
+  count: number;
 }

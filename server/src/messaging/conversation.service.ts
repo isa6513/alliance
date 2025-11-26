@@ -21,6 +21,7 @@ import {
   CreateDirectConversationDto,
   CreateGroupConversationDto,
   ConversationParticipantDto,
+  UnreadMessagesDto,
 } from './dto/messaging.dto';
 import { MessagingEvents } from './messaging.events';
 
@@ -85,17 +86,27 @@ export class ConversationService {
       return [];
     }
 
-    const lastMessages = await this.loadLastMessages(
-      conversations.map((conversation) => conversation.id),
+    const conversationIds = conversations.map(
+      (conversation) => conversation.id,
     );
+    const lastMessages = await this.loadLastMessages(conversationIds);
+    const unreadCounts = await this.loadUnreadCounts(conversationIds, userId);
 
     return conversations.map(
       (conversation) =>
         new ConversationDto(conversation, {
           contextUserId: userId,
           lastMessage: lastMessages.get(conversation.id),
+          unreadCount: unreadCounts.get(conversation.id) ?? 0,
         }),
     );
+  }
+
+  async getConversationForUser(
+    conversationId: number,
+    userId: number,
+  ): Promise<ConversationDto> {
+    return this.buildConversationDto(conversationId, userId);
   }
 
   async createDirectConversation(
@@ -481,6 +492,36 @@ export class ConversationService {
     return updatedConversation;
   }
 
+  async markConversationRead(
+    conversationId: number,
+    userId: number,
+  ): Promise<ConversationDto> {
+    const participant = await this.getParticipantOrFail(conversationId, userId);
+    if (participant.state !== ParticipantState.Joined) {
+      participant.state = ParticipantState.Joined;
+      participant.joinedAt = new Date();
+    }
+    const lastMessage = await this.findLastMessage(conversationId);
+
+    if (lastMessage) {
+      participant.lastReadMessage = lastMessage;
+      await this.participantRepository.save(participant);
+    }
+
+    const conversation = await this.getConversationEntity(conversationId);
+    const unreadCount = await this.countUnreadForConversation(
+      conversationId,
+      userId,
+    );
+    await this.emitConversationUpdate(conversation);
+
+    return new ConversationDto(conversation, {
+      contextUserId: userId,
+      lastMessage,
+      unreadCount,
+    });
+  }
+
   async isParticipant(
     conversationId: number,
     userId: number,
@@ -554,9 +595,13 @@ export class ConversationService {
   ): Promise<ConversationDto> {
     const conversation = await this.getConversationEntity(conversationId);
     const lastMessage = await this.findLastMessage(conversationId);
+    const unreadCount = contextUserId
+      ? await this.countUnreadForConversation(conversationId, contextUserId)
+      : 0;
     return new ConversationDto(conversation, {
       contextUserId,
       lastMessage,
+      unreadCount,
     });
   }
 
@@ -604,11 +649,31 @@ export class ConversationService {
     return map;
   }
 
+  private async loadUnreadCounts(
+    conversationIds: number[],
+    userId: number,
+  ): Promise<Map<number, number>> {
+    const map = new Map<number, number>();
+    if (!conversationIds.length) {
+      return map;
+    }
+
+    await Promise.all(
+      conversationIds.map(async (conversationId) => {
+        const count = await this.countUnreadForConversation(
+          conversationId,
+          userId,
+        );
+        map.set(conversationId, count);
+      }),
+    );
+
+    return map;
+  }
+
   private async emitConversationUpdate(conversation: Conversation) {
-    const dto = new ConversationDto(conversation);
     this.eventEmitter.emit(MessagingEvents.ConversationUpdated, {
       conversationId: conversation.id,
-      conversation: dto,
     });
   }
 
@@ -618,9 +683,52 @@ export class ConversationService {
     });
   }
 
+  private async countUnreadForConversation(
+    conversationId: number,
+    userId: number,
+  ): Promise<number> {
+    const participant = await this.participantRepository.findOneOrFail({
+      where: {
+        conversation: { id: conversationId },
+        user: { id: userId },
+        state: ParticipantState.Joined,
+      },
+      relations: ['lastReadMessage'],
+    });
+
+    const since =
+      participant.lastReadMessage?.createdAt ??
+      participant.joinedAt ??
+      new Date(0);
+
+    const qb = this.messageRepository
+      .createQueryBuilder('message')
+      .where('message.conversationId = :conversationId', { conversationId })
+      .andWhere('message.authorId != :userId', { userId })
+      .andWhere('message.createdAt > :since', { since })
+      .andWhere('message.id != :lastReadMessageId', {
+        lastReadMessageId: participant.lastReadMessage?.id,
+      });
+
+    return qb.getCount();
+  }
+
   private isConversationAdmin(participant: Participant): boolean {
     return [ParticipantRole.Admin, ParticipantRole.Owner].includes(
       participant.role,
     );
+  }
+
+  async getUnreadMessages(userId: number): Promise<UnreadMessagesDto> {
+    const conversations = await this.getUserConversations(userId);
+    const conversationIds = conversations.map(
+      (conversation) => conversation.id,
+    );
+    const counts = await this.loadUnreadCounts(conversationIds, userId);
+    const count = Array.from(counts.values()).reduce(
+      (sum, c) => sum + (!!c ? 1 : 0),
+      0,
+    );
+    return { count };
   }
 }
