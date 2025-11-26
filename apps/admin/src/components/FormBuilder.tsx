@@ -44,11 +44,17 @@ import {
   EditableRangeField,
 } from "./form-fields";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import { useNavigate, useSearchParams } from "react-router";
+import {
+  useBeforeUnload,
+  useBlocker,
+  useNavigate,
+  useSearchParams,
+} from "react-router";
 import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
 import { customComponentRegistry } from "@alliance/shared/forms/components";
 import { FORM_BUILDER_PREVIEW_USER } from "../lib/testData";
 import { OutputBuilder } from "./OutputBuilder";
+import { useToast } from "@alliance/shared/ui/ToastProvider";
 
 interface FormBuilderProps {
   onSave?: (schema: FormSchema) => void;
@@ -68,7 +74,7 @@ export function FormBuilder({
   formId,
   setFormId,
 }: FormBuilderProps) {
-  const [schema, setSchema] = useState<FormSchema>(
+  const buildInitialSchema = () =>
     initialSchema
       ? ensureOutputViews(initialSchema)
       : {
@@ -83,8 +89,13 @@ export function FormBuilder({
           ],
           submit: { label: "Complete" },
           outputViews: [],
-        }
+        };
+
+  const [schema, setSchema] = useState<FormSchema>(buildInitialSchema);
+  const [lastSavedSchemaJSON, setLastSavedSchemaJSON] = useState<string>(() =>
+    JSON.stringify(buildInitialSchema())
   );
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -122,7 +133,6 @@ export function FormBuilder({
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(
@@ -136,6 +146,7 @@ export function FormBuilder({
   const currentPage = schema.pages[selectedPageIndex];
 
   const navigate = useNavigate();
+  const { success: showSuccessToast, error: showErrorToast } = useToast();
 
   // Available elements for search
   const availableElements = useMemo(
@@ -231,9 +242,12 @@ export function FormBuilder({
             // Convert the form entity back to FormSchema
             const form = response.data as any;
             if (form.schema) {
-              setSchema(
-                ensureOutputViews(form.schema as unknown as FormSchema)
+              const nextSchema = ensureOutputViews(
+                form.schema as unknown as FormSchema
               );
+              setSchema(nextSchema);
+              setLastSavedSchemaJSON(JSON.stringify(nextSchema));
+              setHasUnsavedChanges(false);
             }
           }
         })
@@ -247,7 +261,6 @@ export function FormBuilder({
           setIsLoading(false);
         });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formId, initialSchema]);
 
   const addField = (kind: FieldKind, insertIndex?: number) => {
@@ -476,6 +489,38 @@ export function FormBuilder({
   };
 
   useEffect(() => {
+    const currentSchemaJSON = JSON.stringify(schema);
+    setHasUnsavedChanges(currentSchemaJSON !== lastSavedSchemaJSON);
+  }, [schema, lastSavedSchemaJSON]);
+
+  useBeforeUnload(
+    useCallback(
+      (event) => {
+        if (!hasUnsavedChanges) return;
+        event.preventDefault();
+        event.returnValue = "";
+      },
+      [hasUnsavedChanges]
+    )
+  );
+
+  const navigationBlocker = useBlocker(hasUnsavedChanges);
+
+  useEffect(() => {
+    if (navigationBlocker.state === "blocked") {
+      const confirmExit = window.confirm(
+        "You have unsaved changes. Are you sure you want to leave this page?"
+      );
+
+      if (confirmExit) {
+        navigationBlocker.proceed?.();
+      } else {
+        navigationBlocker.reset?.();
+      }
+    }
+  }, [navigationBlocker]);
+
+  useEffect(() => {
     if (activeEditor === "outputs" && isPreviewMode) {
       setIsPreviewMode(false);
     }
@@ -504,10 +549,9 @@ export function FormBuilder({
     }
   };
 
-  const handleSaveForm = async () => {
+  const handleSaveForm = useCallback(async () => {
     setIsSaving(true);
     setSaveError(null);
-    setSaveSuccess(false);
 
     try {
       let response;
@@ -532,10 +576,14 @@ export function FormBuilder({
       }
 
       if (response.response.ok && response.data) {
-        setSaveSuccess(true);
         setFormId(response.data.id);
+        setLastSavedSchemaJSON(JSON.stringify(schema));
+        setHasUnsavedChanges(false);
+        showSuccessToast("Form saved successfully");
       } else {
-        setSaveError("Could not save form");
+        const fallbackMessage = "Could not save form";
+        setSaveError(fallbackMessage);
+        showErrorToast(fallbackMessage);
       }
 
       // Call the optional onSave callback if provided
@@ -544,16 +592,35 @@ export function FormBuilder({
       }
 
       // Clear success message after 3 seconds
-      setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {
       console.error("Failed to save form:", error);
-      setSaveError(
-        error instanceof Error ? error.message : "Failed to save form"
-      );
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to save form";
+      setSaveError(errorMessage);
+      showErrorToast(errorMessage);
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [formId, onSave, schema, setFormId, showErrorToast, showSuccessToast]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+
+        if (!hasUnsavedChanges || isSaving || isLoading) {
+          return;
+        }
+        void handleSaveForm();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleSaveForm, hasUnsavedChanges, isLoading, isSaving]);
 
   const handleDragStart = (index: number) => (e: React.DragEvent) => {
     setDraggedItem({
@@ -1072,22 +1139,26 @@ export function FormBuilder({
                 onClick={() => navigate(`/forms/${formId}/responses`)}
                 color={ButtonColor.Light}
               >
-                View Responses
+                Responses
               </Button>
               {activeEditor === "form" && (
                 <Button
                   onClick={() => setIsPreviewMode(!isPreviewMode)}
                   color={ButtonColor.Light}
                 >
-                  {isPreviewMode ? "Edit Form" : "Preview Form"}
+                  {isPreviewMode ? "Edit" : "Preview"}
                 </Button>
               )}
               <Button
                 onClick={handleSaveForm}
-                disabled={isSaving || isLoading}
+                disabled={isSaving || isLoading || !hasUnsavedChanges}
                 color={ButtonColor.Blue}
               >
-                {isSaving ? "Saving..." : "Save Form"}
+                {isSaving
+                  ? "Saving..."
+                  : hasUnsavedChanges
+                  ? "Save Form"
+                  : "No unsaved changes"}
               </Button>
             </div>
             <div className="inline-flex rounded-md bg-gray-100 p-1 text-sm font-medium text-gray-600">
@@ -1275,11 +1346,6 @@ export function FormBuilder({
               <span className="block sm:inline">
                 Error loading form: {loadError}
               </span>
-            </div>
-          )}
-          {saveSuccess && (
-            <div className="bg-green/20 text-green-700 px-4 py-3 mb-2 rounded-sm">
-              <span className="block sm:inline">Form saved successfully!</span>
             </div>
           )}
           {saveError && (
