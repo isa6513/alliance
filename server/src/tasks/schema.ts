@@ -211,6 +211,12 @@ export function isQuestionVisible(
         return actual === expected;
       }
       const val = formData[c.when];
+      if ('anySelected' in c) {
+        const selections = Array.isArray(val) ? val : [];
+        return c.anySelected
+          ? selections.length > 0
+          : selections.length === 0;
+      }
       if ('includesOption' in c) {
         if (!c.includesOption) {
           return false;

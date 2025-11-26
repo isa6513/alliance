@@ -349,22 +349,6 @@ const HomePage = () => {
 
   useWhiteBackground();
 
-  const bulletinCard = (
-    <div>
-      <p className="font-semibold text-xl text-black mb-2 font-serif">
-        Bulletin
-      </p>
-      <p className="text-black mb-2">
-        Right now, we are focused on small-scale experiments that test
-        collective action strategies. Learn more about our current{" "}
-        <Link to="/priorities" className="text-link">
-          priorities
-        </Link>
-        .
-      </p>
-    </div>
-  );
-
   return (
     <>
       <div className="hidden lg:block">

@@ -154,6 +154,12 @@ const MessagesPage = () => {
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
+  const searchFilteredFriends = useMemo(() => {
+    return friends?.filter((friend) =>
+      friend.displayName.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [friends, search]);
+
   useEffect(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop =
@@ -257,6 +263,7 @@ const MessagesPage = () => {
     setCreatingNewConversation(true);
     setCreatingGroup(false);
     setSelectedFriendsForGroup([]);
+    setSearch("");
   }, []);
 
   const filteredConversations = useMemo(() => {
@@ -267,6 +274,7 @@ const MessagesPage = () => {
 
   const handleCreateGroup = useCallback(() => {
     setSelectedConvoId(0);
+    setSearch("");
     setCreatingGroup(true);
   }, [setSelectedConvoId]);
 
@@ -323,8 +331,8 @@ const MessagesPage = () => {
                   Select friends to add:
                 </p>
                 <div className="max-h-[300px] overflow-y-auto">
-                  {friends && friends.length > 0 ? (
-                    friends.map((friend) => (
+                  {searchFilteredFriends && searchFilteredFriends.length > 0 ? (
+                    searchFilteredFriends.map((friend) => (
                       <div
                         key={friend.id}
                         className="flex flex-row items-center justify-between gap-x-2 hover:bg-zinc-100 p-4 rounded-md cursor-pointer"
