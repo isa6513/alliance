@@ -69,6 +69,12 @@ const isBlockVisible = (
     }
 
     const value = answers[condition.when];
+    if ("anySelected" in condition) {
+      const selections = Array.isArray(value) ? value : [];
+      return condition.anySelected
+        ? selections.length > 0
+        : selections.length === 0;
+    }
     if ("includesOption" in condition) {
       if (!condition.includesOption) {
         return false;

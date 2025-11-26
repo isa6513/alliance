@@ -593,6 +593,10 @@ const FormRenderer = ({
         return actual === expected;
       }
       const val = data[cond.when];
+      if ("anySelected" in cond) {
+        const selections = Array.isArray(val) ? val : [];
+        return cond.anySelected ? selections.length > 0 : selections.length === 0;
+      }
       if ("includesOption" in cond) {
         if (!cond.includesOption) {
           return false;

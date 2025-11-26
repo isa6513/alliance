@@ -160,6 +160,12 @@ function isIncludesOptionCondition(
   return "includesOption" in condition;
 }
 
+function isAnySelectedCondition(
+  condition: Condition
+): condition is Extract<Condition, { anySelected: boolean }> {
+  return "anySelected" in condition;
+}
+
 function isEqualsCondition(
   condition: Condition
 ): condition is Extract<
@@ -179,6 +185,7 @@ export function ConditionalVisibility({
   previousFields,
   onChange,
 }: ConditionalVisibilityProps) {
+  const ANY_SELECTED_VALUE = "__ANY_SELECTED__";
   const controllers = (previousFields || []).filter((f): f is ControllerField =>
     isConditionalController(f)
   );
@@ -456,10 +463,16 @@ export function ConditionalVisibility({
           equals: value === "true",
         };
       } else if (controller.kind === "multiselect") {
-        next[index] = {
-          when: controller.id,
-          includesOption: value,
-        };
+        next[index] =
+          value === ANY_SELECTED_VALUE
+            ? {
+                when: controller.id,
+                anySelected: true,
+              }
+            : {
+                when: controller.id,
+                includesOption: value,
+              };
       } else if (controller.kind === "range") {
         next[index] = {
           when: controller.id,
@@ -531,7 +544,9 @@ export function ConditionalVisibility({
     const controller = controllers.find((f) => f.id === condition.when);
     const multiSelectValue =
       controller?.kind === "multiselect"
-        ? isIncludesOptionCondition(condition)
+        ? isAnySelectedCondition(condition)
+          ? ANY_SELECTED_VALUE
+          : isIncludesOptionCondition(condition)
           ? condition.includesOption ?? ""
           : isEqualsCondition(condition) && typeof condition.equals === "string"
           ? condition.equals
@@ -589,6 +604,7 @@ export function ConditionalVisibility({
                   handleConditionValueChange(index, event.target.value)
                 }
               >
+                <option value={ANY_SELECTED_VALUE}>Any option selected</option>
                 {controller.options?.map((opt, idx) => (
                   <option key={idx} value={opt.value}>
                     {opt.label}

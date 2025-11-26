@@ -58,8 +58,9 @@ interface BaseField<TKind extends FieldKind> {
 export type Condition =
   | { when: string; equals: string | number | boolean | null }
   | { when: string; includesOption: string }
+  | { when: string; anySelected: boolean }
   | { expr: string }
-  | { validatorId: number; resultEquals?: boolean } // keep validators expecting true by default
+  | { validatorId: number; resultEquals?: boolean } // validators default to expecting true
   | { deviceType: DeviceVisibilityTarget[] };
 
 // Specialized fields:
