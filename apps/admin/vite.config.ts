@@ -19,6 +19,7 @@ export default defineConfig({
     exclude: ["@alliance/shared"],
   },
   server: {
+    port: 5174,
     watch: {
       usePolling: true,
       interval: 100,

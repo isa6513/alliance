@@ -257,9 +257,10 @@ const MessagesPage = () => {
     }).then((response) => {
       if (response.data) {
         handleConversationUpdated(response.data);
+        setSelectedConvoId(null);
       }
     });
-  }, [selectedConvo, handleConversationUpdated]);
+  }, [selectedConvo, handleConversationUpdated, setSelectedConvoId]);
 
   const handleConversationClick = useCallback(
     (conversationId: number) => () => {
