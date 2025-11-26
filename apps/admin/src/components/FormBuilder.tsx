@@ -15,7 +15,7 @@ import type {
   FormSchema,
   Page,
 } from "@alliance/shared/forms/formschema";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   EditableDividerBlock,
   EditableHeaderBlock,
@@ -142,6 +142,7 @@ export function FormBuilder({
   const [searchResults, setSearchResults] = useState<
     Array<{ id: string; name: string; type: "field" | "block" }>
   >([]);
+  const contentScrollRef = useRef<HTMLDivElement | null>(null);
 
   const currentPage = schema.pages[selectedPageIndex];
 
@@ -525,6 +526,13 @@ export function FormBuilder({
       setIsPreviewMode(false);
     }
   }, [activeEditor, isPreviewMode]);
+
+  useEffect(() => {
+    const scrollContainer = contentScrollRef.current;
+    if (scrollContainer) {
+      scrollContainer.scrollTo({ top: 0, behavior: "auto" });
+    }
+  }, [selectedPageIndex]);
 
   const addPage = () => {
     const newPage: Page = {
@@ -1357,7 +1365,10 @@ export function FormBuilder({
           )}
         </div>
 
-        <div className="flex-1 p-6 overflow-y-auto min-h-0">
+        <div
+          ref={contentScrollRef}
+          className="flex-1 p-6 overflow-y-auto min-h-0"
+        >
           {activeEditor === "outputs" ? (
             <OutputBuilder schema={schema} onSchemaChange={updateSchema} />
           ) : isPreviewMode ? (
