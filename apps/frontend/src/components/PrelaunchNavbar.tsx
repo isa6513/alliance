@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router";
+import { Link, href, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 
 enum NavbarPage {
@@ -30,10 +30,10 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
   const navigate = useNavigate();
 
   const destinations: Record<NavbarPage, string> = {
-    [NavbarPage.People]: "/people",
-    [NavbarPage.Guide]: "/guide",
-    [NavbarPage.Progress]: "/progress",
-    [NavbarPage.LogIn]: isAuthenticated ? "/tasks" : "/login",
+    [NavbarPage.People]: href("/people"),
+    [NavbarPage.Guide]: href("/guide"),
+    [NavbarPage.Progress]: href("/progress"),
+    [NavbarPage.LogIn]: isAuthenticated ? href("/tasks") : href("/login"),
   };
 
   return (
@@ -50,7 +50,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
       <h1
         className="font-bold font-berlingske !text-[18pt] md:!text-[20pt] cursor-pointer text-nowrap"
         onClick={() => {
-          navigate("/");
+          navigate(href("/"));
         }}
       >
         THE ALLIANCE

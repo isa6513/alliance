@@ -1,6 +1,6 @@
 import { MessageDto } from "@alliance/shared/client";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 
 const Message = ({
   message,
@@ -19,7 +19,7 @@ const Message = ({
     >
       <div className="w-8 shrink-0 mt-1">
         {isFirstInGroup && (
-          <Link to={`/user/${message.author.id}`}>
+          <Link to={href("/user/:id", { id: message.author.id.toString() })}>
             <ProfileImage pfp={message.author.profilePicture} size="medium" />
           </Link>
         )}

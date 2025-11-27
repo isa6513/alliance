@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { useNavigate, useOutletContext } from "react-router";
+import { href, useNavigate, useOutletContext } from "react-router";
 import ForumListPost from "../../components/ForumListPost";
 import { useGrayBackground } from "../../components/HtmlBackgroundManager";
 import List from "@alliance/shared/ui/List";
@@ -13,7 +13,7 @@ const ForumPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleCreatePost = useCallback(() => {
-    navigate("/forum/edit/new");
+    navigate(href("/forum/edit/:postId", { postId: "new" }));
   }, [navigate]);
 
   useGrayBackground();

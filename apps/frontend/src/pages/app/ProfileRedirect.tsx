@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { href, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../lib/AuthContext";
 
 const ProfileRedirectInner = () => {
@@ -10,7 +10,10 @@ const ProfileRedirectInner = () => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      navigate(`/user/${user.id}`, { replace: true, state });
+      navigate(href("/user/:id", { id: user.id.toString() }), {
+        replace: true,
+        state,
+      });
     }
   }, [isAuthenticated, user, navigate, state]);
 

@@ -8,7 +8,7 @@ import {
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useEffect, useState } from "react";
-import { Link, useOutletContext, useParams } from "react-router";
+import { Link, href, useOutletContext, useParams } from "react-router";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
 import { formatTime } from "@alliance/shared/lib/utils";
@@ -133,7 +133,7 @@ const ActionActivityDetail = () => {
       <div className="flex flex-col gap-y-3 flex-2 pr-0 sm:pr-5 xl:pl-10 pt-5 w-full">
         <Link
           className="flex flex-row gap-x-2 items-center cursor-pointer hover:bg-zinc-50 self-start px-2 py-1 rounded border border-zinc-200"
-          to={`/actions/${action.id}`}
+          to={href("/actions/:id", { id: action.id.toString() })}
         >
           <img src={chevronLeft} className="w-3 h-3 rotate-90" />
           Back to action
@@ -146,7 +146,7 @@ const ActionActivityDetail = () => {
                 <div className="flex flex-row items-center gap-x-2">
                   {activity.user.profilePicture !== null && (
                     <Link
-                      to={`/user/${activity.user.id}`}
+                      to={href("/user/:id", { id: activity.user.id.toString() })}
                       className="flex-shrink-0"
                     >
                       <ProfileImage
@@ -156,7 +156,11 @@ const ActionActivityDetail = () => {
                     </Link>
                   )}
                   <p className="font-medium">
-                    <Link to={`/user/${activity.user.id}`}>
+                    <Link
+                      to={href("/user/:id", {
+                        id: activity.user.id.toString(),
+                      })}
+                    >
                       <UserDisplayName staff={activity.user.staff}>
                         {activity.user.displayName}
                       </UserDisplayName>

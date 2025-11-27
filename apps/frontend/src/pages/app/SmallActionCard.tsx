@@ -1,7 +1,7 @@
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback } from "react";
-import { useNavigate } from "react-router";
+import { href, useNavigate } from "react-router";
 import { ActionWithRelation } from "../../applayout";
 import Tag, { TagStyle } from "../../components/Tag";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
@@ -38,7 +38,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
   const goToActionPage = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      navigate(`/actions/${action.id}`);
+      navigate(href("/actions/:id", { id: action.id.toString() }));
     },
     [navigate, action.id]
   );

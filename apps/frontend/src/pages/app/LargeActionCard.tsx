@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { href, useNavigate } from "react-router";
 
 import { ActionDto, UserActionRelation } from "@alliance/shared/client";
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
@@ -72,7 +72,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   const goToActionPage = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      navigate(`/actions/${action.id}`);
+      navigate(href("/actions/:id", { id: action.id.toString() }));
     },
     [navigate, action]
   );

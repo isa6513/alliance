@@ -9,7 +9,7 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, href, useNavigate, useParams } from "react-router";
 import { setRevalidate } from "../../applayout";
 import Comments from "../../components/Comments";
 import PostLikeButton from "../../components/PostLikeButton";
@@ -64,7 +64,7 @@ const PostDetailPage: React.FC = () => {
           path: { id: post.id },
         });
         setRevalidate();
-        navigate("/forum");
+        navigate(href("/forum"));
       } catch (err) {
         console.error("Error deleting post:", err);
         setError("Failed to delete post");
@@ -117,7 +117,7 @@ const PostDetailPage: React.FC = () => {
       <div className="container max-w-4xl mx-auto px-4 py-4 md:py-8">
         <div className="relative">
           <Link
-            to="/forum"
+            to={href("/forum")}
             className="absolute -left-10 top-6 text-blue text-lg"
             title="Back to Forum"
           >
@@ -140,7 +140,7 @@ const PostDetailPage: React.FC = () => {
             </div>
             <div className="flex flex-row gap-x-2 mb-2 sm:mb-4 mt-1 items-center text-sm sm:text-base">
               <Link
-                to={`/user/${post.author.id}`}
+                to={href("/user/:id", { id: post.author.id.toString() })}
                 className="flex items-center"
               >
                 <div className="hidden sm:inline">
@@ -168,7 +168,7 @@ const PostDetailPage: React.FC = () => {
               </span>
               {post.action && (
                 <Link
-                  to={`/actions/${post.action.id}`}
+                  to={href("/actions/:id", { id: post.action.id.toString() })}
                   className="inline-block bg-green/20 text-green hover:bg-green/40 px-3 py-1 rounded-lg text-sm"
                 >
                   {post.action.name}
@@ -186,10 +186,12 @@ const PostDetailPage: React.FC = () => {
                   handleLike={handleLike}
                 />
               </div>
-              {post.author.id === user?.id && (
+                  {post.author.id === user?.id && (
                 <>
                   <Link
-                    to={`/forum/edit/${post.id}`}
+                    to={href("/forum/edit/:postId", {
+                      postId: post.id.toString(),
+                    })}
                     className="px-4 py-2 text-sm bg-zinc-100 text-gray-700 rounded hover:bg-zinc-200"
                   >
                     Edit

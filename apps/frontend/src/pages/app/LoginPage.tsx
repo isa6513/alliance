@@ -8,7 +8,13 @@ import { Features } from "@alliance/shared/lib/features";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
+import {
+  Link,
+  href,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router";
 import FormInput from "@alliance/shared/ui/FormInput";
 import { useAuth } from "../../lib/AuthContext";
 import { isFeatureEnabled } from "../../lib/config";
@@ -35,7 +41,7 @@ const LoginPage: React.FC = () => {
   const returnUrl = useMemo((): string => {
     const qp = searchParams.get("redirect");
     if (qp && qp.startsWith("/")) return qp;
-    return "/tasks";
+    return href("/tasks");
   }, [searchParams]);
 
   useEffect(() => {
@@ -69,7 +75,7 @@ const LoginPage: React.FC = () => {
     if (loginResponse.response.ok) {
       setRevalidate();
       onLogin();
-      navigate(returnUrl || "/tasks");
+      navigate(returnUrl || href("/tasks"));
     } else {
       setError("Invalid email or password");
       setLoading(false);
@@ -169,7 +175,7 @@ const LoginPage: React.FC = () => {
             <div className="mt-6 text-center">
               <p className="text-[11pt] text-zinc-600">
                 Don&apos;t have an account?{" "}
-                <Link to="/signup" className="text-blue hover:underline">
+                <Link to={href("/signup")} className="text-blue hover:underline">
                   Register
                 </Link>
               </p>

@@ -1,7 +1,7 @@
 import { forumFindPostsByAction, PostDto } from "@alliance/shared/client";
 import Button from "@alliance/shared/ui/Button";
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, href, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ForumListPost from "./ForumListPost";
 
@@ -37,7 +37,7 @@ const ActionForumPosts: React.FC<ActionForumPostsProps> = ({
   }, [actionId]);
 
   const handleCreatePost = () => {
-    navigate(`/forum/edit/new?actionId=${actionId}`);
+    navigate(`${href("/forum/edit/:postId", { postId: "new" })}?actionId=${actionId}`);
   };
 
   if (error) {
@@ -70,7 +70,7 @@ const ActionForumPosts: React.FC<ActionForumPostsProps> = ({
           {posts.length > 3 && (
             <div className="text-center pt-2">
               <Link
-                to={`/forum?actionId=${actionId}`}
+                to={`${href("/forum")}?actionId=${actionId}`}
                 className="text-blue-600 hover:underline text-sm"
               >
                 View all {posts.length} discussions

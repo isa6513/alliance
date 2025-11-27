@@ -3,7 +3,7 @@ import {
   actionsFindOne,
   UserActionRelation,
 } from "@alliance/shared/client";
-import { Outlet, useNavigate, useParams } from "react-router";
+import { Outlet, href, useNavigate, useParams } from "react-router";
 import ActionActivityList from "../../components/ActionActivityList";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
@@ -86,7 +86,7 @@ export default function ActionPage() {
                 }));
 
                 // TODO need better way to update number of remaining tasks
-                navigate(window.location.pathname);
+                navigate(href("/actions/:id", { id: actionId.toString() }));
               },
               onJoinAction: () =>
                 setAction((action) => ({
@@ -100,7 +100,7 @@ export default function ActionPage() {
                 }));
 
                 // TODO need better way to update number of remaining tasks
-                navigate(window.location.pathname);
+                navigate(href("/actions/:id", { id: actionId.toString() }));
               },
               onOptOutAction: () => {
                 setAction((action) => ({
@@ -109,7 +109,7 @@ export default function ActionPage() {
                 }));
 
                 // TODO need better way to update number of remaining tasks
-                navigate(window.location.pathname);
+                navigate(href("/actions/:id", { id: actionId.toString() }));
               },
               activities,
               handleLikeActivity,

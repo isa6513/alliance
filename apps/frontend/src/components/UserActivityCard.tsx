@@ -7,7 +7,7 @@ import {
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, href, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityLikeButton from "./ActivityLikeButton";
@@ -45,14 +45,21 @@ const UserActivityCard = ({
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      navigate(`/actions/${activity.actionId}`);
+      navigate(
+        href("/actions/:id", { id: activity.actionId.toString() })
+      );
     },
     [activity.actionId, navigate]
   );
 
   const handleActivityClick = useCallback(() => {
     if (isEditing || isSaving || showCommentForm) return;
-    navigate(`/actions/${activity.actionId}/activity/${activity.id}`);
+    navigate(
+      href("/actions/:id/activity/:activityId", {
+        id: activity.actionId.toString(),
+        activityId: activity.id.toString(),
+      })
+    );
   }, [
     activity.actionId,
     activity.id,
@@ -145,7 +152,7 @@ const UserActivityCard = ({
         <div className="*:inline">
           <div className="flex-shrink-0 inline">
             <Link
-              to={`/user/${activity.user.id}`}
+              to={href("/user/:id", { id: activity.user.id.toString() })}
               className="mr-2"
               onClick={(e) => e.stopPropagation()}
             >
@@ -153,7 +160,7 @@ const UserActivityCard = ({
             </Link>
           </div>
           <Link
-            to={`/user/${activity.user.id}`}
+            to={href("/user/:id", { id: activity.user.id.toString() })}
             className="text-zinc-900 hover:underline"
             onClick={(e) => e.stopPropagation()}
           >

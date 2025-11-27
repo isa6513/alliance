@@ -1,5 +1,5 @@
 import { ActionActivityDto } from "@alliance/shared/client";
-import { useNavigate } from "react-router";
+import { Link, href, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
@@ -32,11 +32,13 @@ const ActionActivityFeedItem = ({
 
   if (card) {
     return (
-      <a href={`/user/${activity.user.id}`} className="text-black">
-        <a
-          className="hover:underline font-medium"
-          href={`/user/${activity.user.id}`}
-        >{`${activity.user.displayName}`}</a>
+      <Link
+        to={href("/user/:id", { id: activity.user.id.toString() })}
+        className="text-black"
+      >
+        <span className="hover:underline font-medium">
+          {`${activity.user.displayName}`}
+        </span>
         <span className="text-gray-600"> {verb}</span>
         <span className="font-medium"> {activity.actionName}</span>
         {showTime && (
@@ -46,7 +48,7 @@ const ActionActivityFeedItem = ({
             })}{" "}
           </p>
         )}
-      </a>
+      </Link>
     );
   } else {
     return (
@@ -61,7 +63,12 @@ const ActionActivityFeedItem = ({
             return;
           }
 
-          navigate(`/actions/${activity.actionId}/activity/${activity.id}`);
+          navigate(
+            href("/actions/:id/activity/:activityId", {
+              id: activity.actionId.toString(),
+              activityId: activity.id.toString(),
+            })
+          );
         }}
       >
         <div className="flex flex-row gap-x-3 items-center">
@@ -76,7 +83,9 @@ const ActionActivityFeedItem = ({
               )}`}
               user={activity.user}
               showTitle={showAction}
-              titleLink={`/actions/${activity.actionId}`}
+              titleLink={href("/actions/:id", {
+                id: activity.actionId.toString(),
+              })}
             />
           </div>
 

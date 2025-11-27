@@ -2,7 +2,7 @@ import { ActionActivityDto } from "@alliance/shared/client";
 import { useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import ActionActivityFeedItem from "./ActionActivityFeedItem";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 
 interface ActionActivityListProps {
   actionId: number;
@@ -60,7 +60,9 @@ const ActionActivityList = ({
     <div className="space-y-3 w-full">
       <div className="mb-2">
         <Link
-          to={`/feed/${activities[0]?.actionId}`}
+          to={href("/feed/:actionId", {
+            actionId: (activities[0]?.actionId ?? "").toString(),
+          })}
           className="text-black hover:underline mt-3 font-medium"
         >
           See all

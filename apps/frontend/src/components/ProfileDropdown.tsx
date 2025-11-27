@@ -1,7 +1,7 @@
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useState } from "react";
-import { Link, useNavigate, useOutletContext } from "react-router";
+import { Link, href, useNavigate, useOutletContext } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import { AppLayoutOutletContext } from "../applayout";
 
@@ -15,11 +15,13 @@ const ProfileDropdown = () => {
 
   const profilePicture = profile?.profilePicture || null;
   const userId = profile?.id || null;
-  const profileUrl = userId ? `/user/${userId}` : "/profile";
+  const profileUrl = userId
+    ? href("/user/:id", { id: userId.toString() })
+    : href("/profile");
 
   const handleLogout = useCallback(async () => {
     await logout();
-    navigate("/tasks");
+    navigate(href("/tasks"));
   }, [logout, navigate]);
 
   return (
@@ -48,10 +50,10 @@ const ProfileDropdown = () => {
           <Link to={profileUrl} onClick={() => setIsOpen(false)}>
             Profile
           </Link>
-          <Link to="/contract" onClick={() => setIsOpen(false)}>
+          <Link to={href("/contract")} onClick={() => setIsOpen(false)}>
             Contract
           </Link>
-          <Link to="/settings" onClick={() => setIsOpen(false)}>
+          <Link to={href("/settings")} onClick={() => setIsOpen(false)}>
             Settings
           </Link>
           <p

@@ -24,7 +24,7 @@ import {
 } from "../../components/GroupGuidelines";
 import CommunityEditForm from "../../components/CommunityEditForm";
 import CommunityInvitesTab from "../../components/CommunityInvitesTab";
-import { useNavigate, useSearchParams } from "react-router";
+import { href, useNavigate, useSearchParams } from "react-router";
 import { useToast } from "@alliance/shared/ui/ToastProvider";
 import CommunityActivityTab from "../../components/CommunityActivityTab";
 import { parseTimeInput } from "@alliance/shared/forms/timeUtils";
@@ -169,7 +169,7 @@ const CommunityPage = () => {
 
     userLeaveCommunity({ path: { communityId: community.id } }).then((resp) => {
       if (resp.response.ok) {
-        navigate("/tasks");
+        navigate(href("/tasks"));
       }
     });
   }, [community, navigate, confirm]);

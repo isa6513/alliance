@@ -1,5 +1,5 @@
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import { useNavigate } from "react-router";
+import { href, useNavigate } from "react-router";
 import StatusIndicator, { Status } from "./StatusIndicator";
 
 export interface ActionPromptCardProps {
@@ -23,7 +23,7 @@ const ActionPromptCard: React.FC<ActionPromptCardProps> = ({
         style={CardStyle.Alert}
         className="block space-y-2 "
         onClick={() => {
-          navigate(`/actions/${id}`);
+          navigate(href("/actions/:id", { id }));
         }}
       >
         <div className="flex items-center justify-start w-[100%] space-x-3">

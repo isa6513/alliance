@@ -10,7 +10,7 @@ import UserActivityCard from "../../components/UserActivityCard";
 import { useAuth } from "../../lib/AuthContext";
 import useActivities, { ActivityList } from "./useActivities";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
-import { Link, useParams } from "react-router";
+import { Link, href, useParams } from "react-router";
 import chevronLeft from "../../assets/icons8-expand-arrow-96.png";
 
 type Mode = "friends" | "everyone";
@@ -148,7 +148,7 @@ const ActionActivityFeedPage = () => {
         <div className="flex flex-col gap-y-4 mb-8 pt-5">
           <Link
             className="flex flex-row gap-x-2 items-center cursor-pointer hover:bg-zinc-50 self-start px-2 py-1 rounded border border-zinc-200"
-            to={`/actions/${action.id}`}
+            to={href("/actions/:id", { id: action.id.toString() })}
           >
             <img src={chevronLeft} className="w-3 h-3 rotate-90" />
             Back to action

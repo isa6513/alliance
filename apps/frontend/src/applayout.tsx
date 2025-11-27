@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import {
   Outlet,
   useLoaderData,
+  href,
   useNavigate,
   useNavigation,
   useRouteLoaderData,
@@ -266,7 +267,7 @@ export default function AppLayout() {
       ) {
         console.log("unauthorized, logging out");
         logout();
-        navigate("/login?redirect=" + window.location.pathname);
+        navigate(`${href("/login")}?redirect=${window.location.pathname}`);
       }
     };
 

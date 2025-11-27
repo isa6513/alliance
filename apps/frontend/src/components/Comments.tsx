@@ -15,7 +15,7 @@ import {
 } from "@alliance/shared/client";
 import posthog from "posthog-js";
 import { useCallback, useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router";
+import { Link, href, useSearchParams } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ReplyComponent from "./forum/ReplyComponent";
 import ReplyForm from "./forum/ReplyForm";
@@ -279,7 +279,7 @@ const Comments = ({
         <div className="text-center py-6 bg-zinc-50 rounded border border-zinc-200">
           <p className="text-zinc-600">
             Please{" "}
-            <Link to="/login" className="text-green hover:underline">
+            <Link to={href("/login")} className="text-green hover:underline">
               log in
             </Link>{" "}
             to post a reply.

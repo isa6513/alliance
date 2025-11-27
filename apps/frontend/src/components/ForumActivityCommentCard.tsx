@@ -1,5 +1,5 @@
 import { UserCommentDto } from "@alliance/shared/client";
-import { Link, useNavigate } from "react-router";
+import { Link, href, useNavigate } from "react-router";
 import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import UserDisplayName from "./UserDisplayName";
@@ -14,9 +14,13 @@ const ForumActivityCommentCard = ({
 }: ForumActivityCommentCardProps) => {
   const url =
     comment.parentObjectType === "post"
-      ? `/forum/post/${comment.parentObjectId}?replyId=${comment.id}`
+      ? `${href("/forum/post/:id", {
+          id: comment.parentObjectId.toString(),
+        })}?replyId=${comment.id}`
       : comment.parentObjectType === "action"
-        ? `/actions/${comment.parentObjectId}?replyId=${comment.id}`
+        ? `${href("/actions/:id", {
+            id: comment.parentObjectId.toString(),
+          })}?replyId=${comment.id}`
         : null;
 
   const navigate = useNavigate();
@@ -43,7 +47,11 @@ const ForumActivityCommentCard = ({
           <span
             className="!text-green font-medium"
             onClick={() => {
-              navigate(`/forum/post/${comment.parentObjectId}`);
+              navigate(
+                href("/forum/post/:id", {
+                  id: comment.parentObjectId.toString(),
+                })
+              );
             }}
           >
             {comment.parentTitle}

@@ -1,5 +1,5 @@
 import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
-import { Link, useNavigate, useOutletContext } from "react-router";
+import { Link, href, useNavigate, useOutletContext } from "react-router";
 import { ActionWithRelation, AppLayoutOutletContext } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
@@ -213,7 +213,9 @@ const HomePage = () => {
             friendActivities={friendActivities.filter(
               (activity) => activity.actionId === currentTask.id
             )}
-            onUpdateActionState={() => navigate(window.location.pathname)}
+            onUpdateActionState={() =>
+              navigate(href("/tasks"))
+            }
           />
         ) : (
           <div className="mt-4 px-2 py-2 mx-auto flex flex-col items-center gap-y-4 h-full justify-center">
@@ -259,7 +261,7 @@ const HomePage = () => {
                 <div key={action.id} className="text-zinc-600 flex gap-x-2">
                   <CheckIcon size="line" />
                   <Link
-                    to={`/actions/${action.id}`}
+                    to={href("/actions/:id", { id: action.id.toString() })}
                     className="text-zinc-400 line-through"
                   >
                     {action.name}
@@ -269,7 +271,10 @@ const HomePage = () => {
               {currentWeekTodoActions.map((action) => (
                 <div key={action.id} className="text-zinc-600 flex gap-x-2">
                   <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
-                  <Link to={`/actions/${action.id}`} className="text-zinc-600">
+                  <Link
+                    to={href("/actions/:id", { id: action.id.toString() })}
+                    className="text-zinc-600"
+                  >
                     {action.name}
                   </Link>
                 </div>
@@ -281,7 +286,7 @@ const HomePage = () => {
                     <div key={action.id} className="text-zinc-600 flex gap-x-2">
                       <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
                       <Link
-                        to={`/actions/${action.id}`}
+                        to={href("/actions/:id", { id: action.id.toString() })}
                         className="text-zinc-600"
                       >
                         {action.name}
@@ -301,7 +306,7 @@ const HomePage = () => {
             </p>
             {friendActivities.length > 0 && (
               <Link
-                to="/feed"
+                to={href("/feed")}
                 className="text-zinc-800 font-medium hover:underline mt-0"
               >
                 See all

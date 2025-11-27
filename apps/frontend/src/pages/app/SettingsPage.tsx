@@ -15,7 +15,7 @@ import Badge from "@alliance/shared/ui/Badge";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { href, useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
 import LargeCheckbox from "@alliance/shared/ui/LargeCheckbox";
 import FormInput from "@alliance/shared/ui/FormInput";
@@ -78,7 +78,7 @@ const SettingsPage: React.FC = () => {
 
   const handleLogout = useCallback(async () => {
     await logout();
-    navigate("/login");
+    navigate(href("/login"));
   }, [logout, navigate]);
 
   const handleCitySelect = useCallback(

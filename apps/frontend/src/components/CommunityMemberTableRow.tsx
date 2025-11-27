@@ -9,7 +9,7 @@ import { useMemo, useState } from "react";
 import UserProgressPills from "@alliance/shared/ui/UserProgressPills";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 
 const CommunityMemberTableRow = ({
   profile,
@@ -48,7 +48,10 @@ const CommunityMemberTableRow = ({
                 <DropdownIcon size="mini" fill="black" />
               </div>
             )}
-            <Link to={`/user/${profile.id}`} className="flex-shrink-0">
+            <Link
+              to={href("/user/:id", { id: profile.id.toString() })}
+              className="flex-shrink-0"
+            >
               <div className="hidden md:block">
                 <ProfileImage pfp={profile.profilePicture} size="medium" />
               </div>
@@ -57,7 +60,7 @@ const CommunityMemberTableRow = ({
               </div>
             </Link>
             <Link
-              to={`/user/${profile.id}`}
+              to={href("/user/:id", { id: profile.id.toString() })}
               className="text-sm md:text-base min-[400px]:whitespace-nowrap mr-2 md:mr-6"
             >
               <UserDisplayName staff={profile.staff} underline={false}>

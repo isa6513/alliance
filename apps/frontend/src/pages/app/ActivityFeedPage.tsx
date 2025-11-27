@@ -5,7 +5,7 @@ import UserActivityCard from "../../components/UserActivityCard";
 import { useAuth } from "../../lib/AuthContext";
 import useActivities, { ActivityList } from "./useActivities";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 
 type Mode = "friends" | "everyone";
 
@@ -128,7 +128,7 @@ const ActivityFeedPage = () => {
           ))}
         </div>
         <Link
-          to="/members"
+          to={href("/members")}
           className="text-zinc-800 hover:underline rounded text-sm font-medium"
         >
           Member list

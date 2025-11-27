@@ -1,6 +1,6 @@
 import { userVerifyEmail } from "@alliance/shared/client";
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 
 const VerifyEmailPage = () => {
   const token = new URLSearchParams(window.location.search).get("token");
@@ -29,7 +29,7 @@ const VerifyEmailPage = () => {
       ) : (
         <p>Verifying email...</p>
       )}
-      <Link to="/tasks" className="text-blue-500">
+      <Link to={href("/tasks")} className="text-blue-500">
         go home
       </Link>
     </div>

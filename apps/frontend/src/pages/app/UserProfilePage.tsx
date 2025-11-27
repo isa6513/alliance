@@ -20,7 +20,7 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card from "@alliance/shared/ui/Card";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router";
+import { href, useLocation, useNavigate, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
 import { setRevalidate, useAppLoaderData } from "../../applayout";
 import ForumListPost from "../../components/ForumListPost";
@@ -253,11 +253,11 @@ const UserProfilePage: React.FC = () => {
         body: payload,
       });
 
-      if (response.data) {
+      if (response.data && id) {
         setProfile(response.data);
         setIsEditing(false);
         setRevalidate();
-        navigate(`/user/${id}`); // to make navbar pfp reload
+        navigate(href("/user/:id", { id })); // to make navbar pfp reload
       }
     } catch (err: unknown) {
       console.error(err);

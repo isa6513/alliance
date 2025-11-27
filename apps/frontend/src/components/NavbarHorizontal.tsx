@@ -1,5 +1,5 @@
 import { Features } from "@alliance/shared/lib/features";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 import logo from "../assets/planet-earth.png";
 import { useAuth } from "../lib/AuthContext";
 import { isFeatureEnabled } from "../lib/config";
@@ -27,12 +27,12 @@ export const links: NavbarPage[] = [
 ];
 
 export const destinations: Record<NavbarPage, string> = {
-  [NavbarPage.Dashboard]: "/tasks",
-  [NavbarPage.CurrentActions]: "/actions",
-  [NavbarPage.Activity]: "/feed",
+  [NavbarPage.Dashboard]: href("/tasks"),
+  [NavbarPage.CurrentActions]: href("/actions"),
+  [NavbarPage.Activity]: href("/feed"),
   [NavbarPage.Announcements]: "/announcements",
-  [NavbarPage.Forum]: "/forum",
-  [NavbarPage.Priorities]: "/priorities",
+  [NavbarPage.Forum]: href("/forum"),
+  [NavbarPage.Priorities]: href("/priorities"),
   [NavbarPage.Platform]: "/platform",
 };
 

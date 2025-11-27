@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 
 interface FooterProps {
   className?: string;
@@ -22,21 +22,21 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
           </div>
           <div className="flex flex-row gap-4 md:gap-10 text-sm sm:text-base">
             <div className="flex flex-col gap-y-2 *:hover:underline">
-              <Link to="/people" className="">
+              <Link to={href("/people")} className="">
                 People
               </Link>
-              <Link to="/guide" className="">
+              <Link to={href("/guide")} className="">
                 Guide
               </Link>
-              <Link to="/progress" className="">
+              <Link to={href("/progress")} className="">
                 Progress
               </Link>
             </div>
             <div className="flex flex-col gap-y-2 *:hover:underline">
-              <Link to="/privacypolicy" className="">
+              <Link to={href("/privacypolicy")} className="">
                 Privacy
               </Link>
-              <Link to="/terms" className="">
+              <Link to={href("/terms")} className="">
                 Terms
               </Link>
               <a href="mailto:contact@worldalliance.org" className="">

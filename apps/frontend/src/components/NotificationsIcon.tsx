@@ -3,7 +3,7 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { formatDate } from "date-fns";
 import { useCallback, useState } from "react";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 import notifBell from "../assets/notif-bell.svg";
 import { useNotifications } from "../lib/useNotifications";
 
@@ -49,7 +49,7 @@ const NotificationsIcon = () => {
         >
           <div className="flex flex-row border-b border-zinc-200 justify-between">
             <Link
-              to="/notifications"
+              to={href("/notifications")}
               className="text-black hover:bg-zinc-100 p-2 rounded-md flex cursor-pointer flex-col text-sm"
             >
               See all

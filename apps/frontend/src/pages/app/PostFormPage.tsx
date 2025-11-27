@@ -11,7 +11,7 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card from "@alliance/shared/ui/Card";
 import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router";
+import { Link, href, useNavigate, useParams, useSearchParams } from "react-router";
 import { setRevalidate } from "../../applayout";
 import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
 import { useAuth } from "../../lib/AuthContext";
@@ -157,7 +157,9 @@ const PostFormPage: React.FC = () => {
 
       if (response.data) {
         setClearDraftSignal((x) => x + 1);
-        navigate(`/forum/post/${response.data.id}`);
+        navigate(
+          href("/forum/post/:id", { id: response.data.id.toString() })
+        );
       } else {
         setError("An error occurred while updating the post");
         console.error(response);
@@ -183,7 +185,7 @@ const PostFormPage: React.FC = () => {
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8 mt-4">
       <div className="mb-6">
-        <Link to="/forum" className="text-blue hover:underline">
+        <Link to={href("/forum")} className="text-blue hover:underline">
           &larr; Back to Forum
         </Link>
       </div>
@@ -280,7 +282,7 @@ const PostFormPage: React.FC = () => {
               </div>
               <div className="flex space-x-3">
                 <Button
-                  onClick={() => navigate("/forum")}
+                  onClick={() => navigate(href("/forum"))}
                   color={ButtonColor.Light}
                 >
                   Cancel

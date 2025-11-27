@@ -1,6 +1,6 @@
 import { ProfileDto } from "@alliance/shared/client";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 import UserDisplayName from "./UserDisplayName";
 
 export interface MembersListCardProps {
@@ -15,7 +15,10 @@ export default function MembersListItem({
   isFriend,
 }: MembersListCardProps) {
   return (
-    <Link to={`/user/${profile.id}`} className="p-3 hover:bg-zinc-50">
+    <Link
+      to={href("/user/:id", { id: profile.id.toString() })}
+      className="p-3 hover:bg-zinc-50"
+    >
       <div className="flex flex-row items-center justify-between space-x-2">
         <div className="flex flex-row items-center">
           <ProfileImage

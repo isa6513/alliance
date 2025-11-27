@@ -1,4 +1,4 @@
-import { Link, useOutletContext } from "react-router";
+import { Link, href, useOutletContext } from "react-router";
 import { AppLayoutOutletContext } from "../applayout";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import {
@@ -31,18 +31,18 @@ export enum NavbarPage {
 }
 
 export const destinations: Record<NavbarPage, string> = {
-  [NavbarPage.Tasks]: "/tasks",
-  [NavbarPage.Notifications]: "/notifications",
-  [NavbarPage.CurrentActions]: "/actions",
-  [NavbarPage.Search]: "/search",
-  [NavbarPage.Activity]: "/feed",
-  [NavbarPage.Forum]: "/forum",
-  [NavbarPage.Priorities]: "/priorities",
-  [NavbarPage.Profile]: "/profile",
-  [NavbarPage.Contract]: "/contract",
-  [NavbarPage.Settings]: "/settings",
-  [NavbarPage.Groups]: "/groups",
-  [NavbarPage.Messages]: "/messages",
+  [NavbarPage.Tasks]: href("/tasks"),
+  [NavbarPage.Notifications]: href("/notifications"),
+  [NavbarPage.CurrentActions]: href("/actions"),
+  [NavbarPage.Search]: href("/search"),
+  [NavbarPage.Activity]: href("/feed"),
+  [NavbarPage.Forum]: href("/forum"),
+  [NavbarPage.Priorities]: href("/priorities"),
+  [NavbarPage.Profile]: href("/profile"),
+  [NavbarPage.Contract]: href("/contract"),
+  [NavbarPage.Settings]: href("/settings"),
+  [NavbarPage.Groups]: href("/groups"),
+  [NavbarPage.Messages]: href("/messages"),
 };
 
 const NavbarVertical: React.FC<{ todoActions: number }> = ({

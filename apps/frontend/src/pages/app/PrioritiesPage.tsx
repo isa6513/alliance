@@ -1,6 +1,6 @@
 import React from "react";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
 
 const PrioritiesPage: React.FC = () => {
@@ -31,9 +31,9 @@ const PrioritiesPage: React.FC = () => {
         </ul>
         <p>
           Per our{" "}
-          <a href="/guide" target="_blank" className="text-link underline">
+          <Link to={href("/guide")} target="_blank" className="text-link underline">
             process
-          </a>{" "}
+          </Link>{" "}
           for determining priorities, we are currently focused on the following
           crises:
         </p>
@@ -52,12 +52,12 @@ const PrioritiesPage: React.FC = () => {
 
         <p>
           If you have questions or feedback, you can schedule a call with a{" "}
-          <Link
-            to="https://calendly.com/d/ctcw-j4f-bp3/talk-to-a-staff-member"
+          <a
+            href="https://calendly.com/d/ctcw-j4f-bp3/talk-to-a-staff-member"
             className="text-link"
           >
             staff member
-          </Link>
+          </a>
           .
         </p>
       </div>

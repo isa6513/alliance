@@ -1,6 +1,6 @@
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useEffect, useState } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router";
+import { Link, href, useSearchParams, useNavigate } from "react-router";
 import LargeActionCard from "../app/LargeActionCard";
 import { ActionWithRelation } from "../../applayout";
 import {
@@ -244,7 +244,7 @@ const InvitePage: React.FC = () => {
             <ol className="list-decimal list-inside space-y-3">
               <li>
                 Skim our{" "}
-                <Link to="/guide" target="_blank" className="text-link">
+                <Link to={href("/guide")} target="_blank" className="text-link">
                   guide
                 </Link>{" "}
                 to understand our structure, process, and governance.
@@ -252,7 +252,7 @@ const InvitePage: React.FC = () => {
               <li>
                 Create an account with my{" "}
                 <Link
-                  to={`/signup?ref=${referralCode}`}
+                  to={`${href("/signup")}?ref=${referralCode}`}
                   target="_blank"
                   className="text-link"
                 >
@@ -265,7 +265,7 @@ const InvitePage: React.FC = () => {
               </li>
               <li>
                 Go through the onboarding tasks on your{" "}
-                <Link to="/tasks" target="_blank" className="text-link">
+                <Link to={href("/tasks")} target="_blank" className="text-link">
                   tasks page
                 </Link>
                 , which explain how our online process works and what is
@@ -275,7 +275,7 @@ const InvitePage: React.FC = () => {
             </ol>
             <Button
               color={ButtonColor.Black}
-              onClick={() => navigate(`/signup?ref=${referralCode}`)}
+              onClick={() => navigate(`${href("/signup")}?ref=${referralCode}`)}
               className="w-full !h-16 !text-lg"
             >
               Sign up

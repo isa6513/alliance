@@ -1,6 +1,6 @@
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import React from "react";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 import { ActionWithRelation } from "../applayout";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
@@ -32,7 +32,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
 }) => {
   return (
     <Link
-      to={`/actions/${action.id}`}
+      to={href("/actions/:id", { id: action.id.toString() })}
       className={`relative ${className} p-4 hover:bg-zinc-50`}
     >
       <div className="flex flex-row items-start gap-x-8">

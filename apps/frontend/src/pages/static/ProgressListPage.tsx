@@ -1,6 +1,6 @@
 import matter from "gray-matter";
 import React from "react";
-import { Link, useLoaderData } from "react-router";
+import { Link, href, useLoaderData } from "react-router";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 
@@ -37,7 +37,7 @@ const ProgressListPage: React.FC = () => {
           <div className="flex flex-col gap-y-4">
             {posts.map((post) => (
               <Link
-                to={`/progress/${post.slug}`}
+                to={href("/progress/:slug", { slug: post.slug })}
                 key={post.slug}
                 className="group flex flex-row justify-between"
               >

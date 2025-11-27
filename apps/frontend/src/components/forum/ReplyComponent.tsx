@@ -15,7 +15,7 @@ import UserDisplayName from "../UserDisplayName";
 import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
 import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
 import ReplyForm from "./ReplyForm";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 
 const countAllReplies = (replies: CommentDto[]): number => {
   let count = 0;
@@ -161,7 +161,10 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
       )}
 
       {/* Profile picture column */}
-      <Link to={`/user/${reply.author.id}`} className="flex-shrink-0">
+      <Link
+        to={href("/user/:id", { id: reply.author.id.toString() })}
+        className="flex-shrink-0"
+      >
         <div className="hidden sm:inline">
           <ProfileImage
             pfp={reply.author.profilePicture}
@@ -181,14 +184,14 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         {/* Top row: User name and date with pin icon in top right */}
         <div className="flex justify-between items-center overflow-visible">
           <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
-            <a
-              href={`/user/${reply.author.id}`}
+            <Link
+              to={href("/user/:id", { id: reply.author.id.toString() })}
               className="text-black font-medium"
             >
               <UserDisplayName staff={reply.author.staff}>
                 {reply.author.displayName}
               </UserDisplayName>
-            </a>
+            </Link>
             <span className="text-zinc-500 text-xs sm:text-sm">
               {formatDistanceToNow(new Date(reply.createdAt), {
                 addSuffix: true,

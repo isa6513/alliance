@@ -3,7 +3,7 @@ import { Features } from "@alliance/shared/lib/features";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import posthog from "posthog-js";
 import React, { useState } from "react";
-import { Link, useSearchParams } from "react-router";
+import { Link, href, useSearchParams } from "react-router";
 import SignupForm from "../../components/SignupForm";
 import { isFeatureEnabled } from "../../lib/config";
 
@@ -38,7 +38,7 @@ const SignupPage: React.FC = () => {
               referral_code: referralCode,
             });
           }
-          window.location.href = "/tasks";
+          window.location.href = href("/tasks");
         } else {
           setError("please try again");
         }
@@ -94,7 +94,7 @@ const SignupPage: React.FC = () => {
           <div className="mt-6 text-center">
             <p className="text-[11pt] text-zinc-600">
               Already have an account?{" "}
-              <Link to="/login" className="text-green hover:underline">
+              <Link to={href("/login")} className="text-green hover:underline">
                 Log in
               </Link>
             </p>

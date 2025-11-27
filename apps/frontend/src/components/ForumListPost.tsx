@@ -1,7 +1,7 @@
 import { CommentDto, PostDto } from "@alliance/shared/client";
 import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import { Link, useNavigate } from "react-router";
+import { Link, href, useNavigate } from "react-router";
 import { cx, formatTime } from "@alliance/shared/lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
 import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
@@ -29,20 +29,25 @@ const ForumListPost = ({
   const authorClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    navigate(`/user/${post.author?.id}`);
+    if (!post.author?.id) return;
+    navigate(href("/user/:id", { id: post.author.id.toString() }));
   };
 
   const lastCommentAuthorClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     if (post.lastComment?.author) {
-      navigate(`/user/${post.lastComment.author.id}`);
+      navigate(
+        href("/user/:id", { id: post.lastComment.author.id.toString() })
+      );
     }
   };
 
   const actionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/actions/${post.action?.id}`);
+    if (post.action?.id !== undefined) {
+      navigate(href("/actions/:id", { id: post.action.id.toString() }));
+    }
   };
 
   const isPrivateFuturePost =
@@ -51,7 +56,7 @@ const ForumListPost = ({
   if (card) {
     return (
       <Link
-        to={`/forum/post/${post.id}`}
+        to={href("/forum/post/:id", { id: post.id.toString() })}
         className={cx(
           "w-full mb-0 !gap-y-1 p-4  cursor-pointer",
           isPrivateFuturePost
@@ -136,8 +141,10 @@ const ForumListPost = ({
         onClick={() => {
           navigate(
             post.lastComment && showReply
-              ? `/forum/post/${post.id}?replyId=${post.lastComment.id}`
-              : `/forum/post/${post.id}`,
+              ? `${href("/forum/post/:id", {
+                  id: post.id.toString(),
+                })}?replyId=${post.lastComment.id}`
+              : href("/forum/post/:id", { id: post.id.toString() }),
           );
         }}
       >

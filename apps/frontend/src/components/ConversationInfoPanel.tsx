@@ -7,7 +7,7 @@ import {
   ProfileDto,
 } from "@alliance/shared/client";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import List from "@alliance/shared/ui/List";
@@ -148,11 +148,11 @@ const ConversationInfoPanel = ({
         {selectedConvo.type === "direct" ? (
           <>
             <Link
-              to={`/user/${
-                selectedConvo.participants.find(
-                  (participant) => participant.user.id !== user?.id
-                )?.user.id
-              }`}
+              to={href(`/user/:id`, {
+                id: selectedConvo.participants
+                  .find((participant) => participant.user.id !== user?.id)!
+                  .user.id.toString(),
+              })}
               className="flex flex-row p-2 gap-4 hover:bg-zinc-100 rounded-md pl-4"
             >
               <p className="font-semibold text-xl text-center">
@@ -247,7 +247,7 @@ const ConversationInfoPanel = ({
             {selectedConvo.participants.map((participant) => (
               <Link
                 key={participant.user.id}
-                to={`/user/${participant.user.id}`}
+                to={href("/user/:id", { id: participant.user.id.toString() })}
                 className="p-4 hover:bg-zinc-100 flex flex-row items-center gap-x-3 justify-between"
               >
                 <div className="flex flex-row items-center gap-x-3">
@@ -283,7 +283,7 @@ const ConversationInfoPanel = ({
           {selectedConvo.type === "community" && (
             <p className="text-sm center">
               This is a chat with everyone in your member group:{" "}
-              <Link to={`/groups`} className="text-green">
+              <Link to={href("/groups")} className="text-green">
                 {selectedConvo.community?.name}
               </Link>
             </p>

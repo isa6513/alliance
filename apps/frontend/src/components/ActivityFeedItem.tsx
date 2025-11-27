@@ -1,6 +1,6 @@
 import { ProfileDto } from "@alliance/shared/client";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 import UserDisplayName from "./UserDisplayName";
 
 export interface ActivityFeedItem {
@@ -21,7 +21,7 @@ const ActivityFeedItem = ({
   return (
     <div className="flex flex-row gap-x-2">
       <div className="flex-shrink-0 mt-1">
-        <Link to={`/user/${user.id}`}>
+        <Link to={href("/user/:id", { id: user.id.toString() })}>
           <ProfileImage pfp={user.profilePicture} size="small" />
         </Link>
       </div>
@@ -38,7 +38,10 @@ const ActivityFeedItem = ({
           </>
         )}
         <p className="text-sm lg:text-base text-zinc-900">
-          <Link to={`/user/${user.id}`} onClick={(e) => e.stopPropagation()}>
+          <Link
+            to={href("/user/:id", { id: user.id.toString() })}
+            onClick={(e) => e.stopPropagation()}
+          >
             <UserDisplayName staff={user.staff}>
               {user.displayName}
             </UserDisplayName>

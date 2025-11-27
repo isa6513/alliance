@@ -12,7 +12,7 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import List from "@alliance/shared/ui/List";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import React, { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 import { setRevalidate } from "../applayout";
 
 interface FriendsTabProps {
@@ -159,7 +159,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
             <Link
               key={friend.id}
               className="flex items-center p-3 hover:bg-zinc-100"
-              to={`/user/${friend.id}`}
+              to={href("/user/:id", { id: friend.id.toString() })}
             >
               <ProfileImage className="mr-3" pfp={friend.profilePicture} />
               <div className="flex-grow">
@@ -248,7 +248,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
                     className="flex items-center p-3 justify-between"
                   >
                     <Link
-                      to={`/user/${request.id}`}
+                      to={href("/user/:id", { id: request.id.toString() })}
                       className="flex flex-row flex-2 items-center hover:underline gap-x-3"
                     >
                       <ProfileImage pfp={request.profilePicture} />

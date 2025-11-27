@@ -6,7 +6,7 @@ import MarkdownWrapper from "../../components/MarkdownWrapper";
 import MemberContract from "../../components/MemberContract";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import chevronRight from "../../assets/icons8-expand-arrow-96.png";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 
 const GuidePage: React.FC = () => {
   return (
@@ -210,7 +210,7 @@ In addition to formal governance, the office incorporates member input by other 
 
 "
               />
-              <Link to="/foundation">
+              <Link to={href("/foundation")}>
                 <Card
                   style={CardStyle.White}
                   className="mt-4 p-4 md:p-4 text-lg cursor-pointer hover:bg-zinc-50 flex flex-row items-center justify-between"
@@ -222,7 +222,7 @@ In addition to formal governance, the office incorporates member input by other 
                   <img src={chevronRight} className="w-4 h-4 rotate-270" />
                 </Card>
               </Link>
-              <Link to="/governance">
+              <Link to={href("/governance")}>
                 <Card
                   style={CardStyle.White}
                   className="p-4 md:p-4 text-lg cursor-pointer hover:bg-zinc-50 flex flex-row items-center justify-between"

@@ -5,7 +5,7 @@ import MarkdownWrapper from "../../components/MarkdownWrapper";
 import MemberContract from "../../components/MemberContract";
 import chevronRight from "../../assets/icons8-expand-arrow-96.png";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
-import { Link } from "react-router";
+import { Link, href } from "react-router";
 
 const GovernancePage: React.FC = () => {
   return (
@@ -19,7 +19,10 @@ const GovernancePage: React.FC = () => {
             </h2>
           </div>
 
-          <Link to="/progress/early-governance" className="mb-6">
+          <Link
+            to={href("/progress/:slug", { slug: "early-governance" })}
+            className="mb-6"
+          >
             <Card
               style={CardStyle.White}
               className="mt-4 p-4 md:p-4 text-lg cursor-pointer hover:bg-zinc-50 flex flex-row gap-x-4 items-center justify-between"

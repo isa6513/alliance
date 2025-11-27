@@ -1,5 +1,5 @@
 import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
-import { Link, Outlet, useOutletContext } from "react-router";
+import { Link, Outlet, href, useOutletContext } from "react-router";
 import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
 import { getLastAndNextEvent } from "../pages/app/LargeActionCard";
@@ -41,7 +41,7 @@ const ActionContents = () => {
       <div className="flex flex-col gap-y-8 sm:gap-y-12">
         <ActionEventsPanel action={action} />
         <Link
-          to={`/feed/${action.id}`}
+          to={href("/feed/:actionId", { actionId: action.id.toString() })}
           className="self-start flex flex-row items-center gap-x-1 md:hidden border border-zinc-200 hover:bg-zinc-50 px-2 py-1 rounded"
         >
           <p className="font-medium text-sm">Activity</p>
