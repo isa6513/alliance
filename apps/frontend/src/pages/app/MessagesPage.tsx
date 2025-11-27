@@ -509,7 +509,9 @@ const MessagesPage = () => {
                                 : conversation.lastMessage.author.displayName +
                                   ": " +
                                   conversation.lastMessage.body
-                              : "Wants to start a conversation"}
+                              : conversation.type === "direct"
+                              ? "Wants to start a conversation"
+                              : "You were invited to a group"}
                           </span>
                         </div>
                       </div>
