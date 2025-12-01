@@ -50,6 +50,10 @@ export class MessagingOverviewGateway
       MessagingEvents.MessageCreated,
       this.handleMessageCreated.bind(this),
     );
+    this.eventEmitter.on(
+      MessagingEvents.ConversationUpdated,
+      this.handleConversationUpdated.bind(this),
+    );
   }
 
   async handleConnection(@ConnectedSocket() client: Socket) {
@@ -111,6 +115,40 @@ export class MessagingOverviewGateway
         } catch (error) {
           this.logger.warn(
             `Failed to emit unread update to user ${userId} for conversation ${payload.conversationId}: ${
+              (error as Error).message ?? error
+            }`,
+          );
+        }
+      }),
+    );
+  }
+
+  private async handleConversationUpdated(payload: { conversationId: number }) {
+    const participants = await this.participantRepository.find({
+      where: { conversation: { id: payload.conversationId } },
+      relations: ['user'],
+    });
+
+    await Promise.all(
+      participants.map(async (participant) => {
+        const userId = participant.user?.id;
+        if (!userId) return;
+        try {
+          const conversation =
+            await this.conversationService.getConversationForUser(
+              payload.conversationId,
+              userId,
+            );
+
+          this.server.to(this.userRoom(userId)).emit('conversation:unread', {
+            conversationId: payload.conversationId,
+            unreadCount: conversation.unreadCount,
+            conversation,
+            lastMessage: conversation.lastMessage,
+          });
+        } catch (error) {
+          this.logger.warn(
+            `Failed to emit conversation update to user ${userId} for conversation ${payload.conversationId}: ${
               (error as Error).message ?? error
             }`,
           );
