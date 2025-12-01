@@ -11,6 +11,7 @@ import { MessageController } from './message.controller';
 import { MessageService } from './message.service';
 import { MessagingGateway } from './messaging.gateway';
 import { ImagesModule } from 'src/images/images.module';
+import { MessagingOverviewGateway } from './messaging.overview.gateway';
 
 @Module({
   imports: [
@@ -24,7 +25,12 @@ import { ImagesModule } from 'src/images/images.module';
     ImagesModule,
   ],
   controllers: [ConversationController, MessageController],
-  providers: [ConversationService, MessageService, MessagingGateway],
+  providers: [
+    ConversationService,
+    MessageService,
+    MessagingGateway,
+    MessagingOverviewGateway,
+  ],
   exports: [ConversationService],
 })
 export class MessagingModule {}

@@ -1,17 +1,148 @@
 import {
   ConversationDto,
+  conversationGetMyConversations,
   conversationMarkRead,
   MessageDto,
   messageGetMessages,
 } from "@alliance/shared/client";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { io, Socket } from "socket.io-client";
 import { getWebSocketUrl } from "../../lib/config";
+
+type ConversationUnreadPayload = {
+  conversationId: number;
+  unreadCount: number;
+  lastMessage?: MessageDto;
+  conversation?: ConversationDto;
+};
 
 interface UseLiveConvoMessagesOptions {
   onIncomingMessage?: (message: MessageDto) => void;
   onConversationUpdated?: (conversation: ConversationDto) => void;
 }
+
+export const sortConversations = (
+  a: ConversationDto,
+  b: ConversationDto
+): number => {
+  return (
+    new Date(b.lastMessage?.createdAt ?? b.createdAt).getTime() -
+    new Date(a.lastMessage?.createdAt ?? a.createdAt).getTime()
+  );
+};
+
+export const useConversations = (activeConversationId?: number | null) => {
+  const [conversations, setConversations] = useState<ConversationDto[] | null>(
+    null
+  );
+  const [loading, setLoading] = useState(true);
+  const activeConversationRef = useRef<number | null>(
+    activeConversationId ?? null
+  );
+
+  useEffect(() => {
+    activeConversationRef.current = activeConversationId ?? null;
+  }, [activeConversationId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    conversationGetMyConversations()
+      .then((response) => {
+        if (cancelled) return;
+        if (response.data) {
+          setConversations(response.data.sort(sortConversations));
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load conversations", error);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = io(`${getWebSocketUrl()}/messaging/overview`, {
+      transports: ["websocket"],
+      withCredentials: true,
+    });
+
+    socket.on(
+      "conversation:unread",
+      (payload: ConversationUnreadPayload) => {
+        setConversations((prev) => {
+          const isActive =
+            activeConversationRef.current === payload.conversationId;
+
+          const mergePayload = (
+            base: ConversationDto | undefined | null
+          ): ConversationDto | undefined => {
+            if (!base && !payload.conversation) return undefined;
+            const mergedBase = base ?? payload.conversation!;
+            return {
+              ...mergedBase,
+              ...(payload.conversation ?? {}),
+              lastMessage:
+                payload.lastMessage ??
+                payload.conversation?.lastMessage ??
+                mergedBase.lastMessage,
+              unreadCount: isActive
+                ? 0
+                : payload.unreadCount ??
+                  payload.conversation?.unreadCount ??
+                  mergedBase.unreadCount,
+            };
+          };
+
+          if (!prev) {
+            const merged = mergePayload(null);
+            return merged ? [merged] : prev;
+          }
+
+          const existingIndex = prev.findIndex(
+            (conversation) => conversation.id === payload.conversationId
+          );
+          if (existingIndex === -1) {
+            const merged = mergePayload(payload.conversation ?? null);
+            if (!merged) return prev;
+            const updated = [merged, ...prev];
+            return updated.sort(sortConversations);
+          }
+
+          const existing = prev[existingIndex];
+          const merged = mergePayload(existing);
+          if (!merged) return prev;
+
+          const updated = [
+            merged,
+            ...prev.filter((c) => c.id !== payload.conversationId),
+          ];
+          return updated.sort(sortConversations);
+        });
+      }
+    );
+
+    socket.on("messaging:error", (error) => {
+      console.error("Messaging overview socket error", error);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  return { conversations, setConversations, loading };
+};
 
 const useLiveConvoMessages = (
   conversationId: number | null,

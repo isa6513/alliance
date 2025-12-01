@@ -4,7 +4,6 @@ import {
   conversationCreateGroupConversation,
   conversationDeclineInvite,
   ConversationDto,
-  conversationGetMyConversations,
   conversationMarkRead,
   MessageDto,
   ProfileDto,
@@ -15,44 +14,23 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Spinner from "../../components/Spinner";
 import { useAuth } from "../../lib/AuthContext";
-import useLiveConvoMessages from "./messages";
+import useLiveConvoMessages, {
+  sortConversations,
+  useConversations,
+} from "./messages";
 import { useSearchParams } from "react-router";
 import ConversationDetailPanel from "../../components/ConversationDetailPanel";
 import { ChevronLeft, Plus } from "lucide-react";
 
-function sortConversations(a: ConversationDto, b: ConversationDto) {
-  return (
-    new Date(b.lastMessage?.createdAt ?? b.createdAt).getTime() -
-    new Date(a.lastMessage?.createdAt ?? a.createdAt).getTime()
-  );
-}
-
 const MessagesPage = () => {
-  const [conversations, setConversations] = useState<ConversationDto[] | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    conversationGetMyConversations()
-      .then((response) => {
-        if (response.data) {
-          setConversations(response.data.sort(sortConversations));
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to load conversations", error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
-
   const [params, setParams] = useSearchParams();
   const selectedConvoId = useMemo(() => {
     const convoId = params.get("chat");
     return convoId ? parseInt(convoId) : null;
   }, [params]);
+
+  const { conversations, setConversations, loading } =
+    useConversations(selectedConvoId);
 
   const setSelectedConvoId = useCallback(
     (convoId: number | null) => {
@@ -72,19 +50,22 @@ const MessagesPage = () => {
 
   const { user } = useAuth();
 
-  const setConvoLastMessage = useCallback((message: MessageDto) => {
-    setConversations((prev) => {
-      if (!prev) return null;
-      const existing = prev.find(
-        (convo) => convo.id === message.conversationId
-      );
-      if (!existing) {
-        return prev;
-      }
-      const updated = { ...existing, lastMessage: message };
-      return [updated, ...prev.filter((convo) => convo.id !== updated.id)];
-    });
-  }, []);
+  const setConvoLastMessage = useCallback(
+    (message: MessageDto) => {
+      setConversations((prev) => {
+        if (!prev) return null;
+        const existing = prev.find(
+          (convo) => convo.id === message.conversationId
+        );
+        if (!existing) {
+          return prev;
+        }
+        const updated = { ...existing, lastMessage: message };
+        return [updated, ...prev.filter((convo) => convo.id !== updated.id)];
+      });
+    },
+    [setConversations]
+  );
 
   const handleConversationUpdated = useCallback(
     (updatedConversation: ConversationDto) => {
@@ -104,7 +85,7 @@ const MessagesPage = () => {
         );
       });
     },
-    []
+    [setConversations]
   );
 
   const [convoMessages] = useLiveConvoMessages(selectedConvoId, {
@@ -218,7 +199,7 @@ const MessagesPage = () => {
       setSelectedFriendsForGroup([]);
       setCreatingNewConversation(false);
     }
-  }, [selectedFriendsForGroup, setSelectedConvoId]);
+  }, [selectedFriendsForGroup, setSelectedConvoId, setConversations]);
 
   const joinedConversations = useMemo(() => {
     return conversations?.filter((convo) =>
@@ -491,7 +472,7 @@ const MessagesPage = () => {
                             ? "bg-zinc-100"
                             : "bg-green/10"
                         }`}
-                        onClick={() => setSelectedConvoId(conversation.id)}
+                        onClick={handleConversationClick(conversation.id)}
                       >
                         <ProfileImage
                           pfp={conversation.photo ?? null}
