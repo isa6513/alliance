@@ -22,6 +22,7 @@ interface MessageInputProps {
   isSending?: boolean;
   replyingTo?: MessageDto;
   clearReplyingTo: () => void;
+  inputRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
 const MessageInput = ({
@@ -33,6 +34,7 @@ const MessageInput = ({
   isSending,
   replyingTo,
   clearReplyingTo,
+  inputRef,
 }: MessageInputProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const dragCounterRef = useRef(0);
@@ -202,7 +204,9 @@ const MessageInput = ({
 
       <div className="relative border border-zinc-200 rounded-md bg-gray-200/80 focus-within:ring-1 focus-within:ring-zinc-400">
         <textarea
+          ref={inputRef}
           value={message}
+          autoFocus
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}

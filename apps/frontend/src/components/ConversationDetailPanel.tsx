@@ -52,6 +52,8 @@ const ConversationDetailPanel = ({
 
   const focusedMessageRef = useRef<HTMLDivElement | null>(null);
 
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
+
   useEffect(() => {
     if (focusedMessageId) {
       setTimeout(() => {
@@ -125,6 +127,13 @@ const ConversationDetailPanel = ({
     setIsDraggingPanel(false);
     await handleFilesSelected(e.dataTransfer?.files ?? null);
   };
+
+  const handleSetReplyingTo = useCallback((messageId: string) => {
+    setReplyingTo(messageId);
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
   const replyingToMessage = useMemo(() => {
     return convoMessages?.find((message) => message.id === replyingTo);
@@ -314,7 +323,7 @@ const ConversationDetailPanel = ({
                   <Message
                     key={message.id}
                     message={message}
-                    setReplyingTo={setReplyingTo}
+                    setReplyingTo={handleSetReplyingTo}
                     handleFocusReply={handleFocusReply}
                     ref={
                       focusedMessageId === message.id ? focusedMessageRef : null
@@ -370,12 +379,14 @@ const ConversationDetailPanel = ({
           <MessageInput
             message={message}
             setMessage={setMessage}
+            key={selectedConvo.id}
             attachments={attachments}
             setAttachments={setAttachments}
             onSend={handleSendMessage}
             isSending={isSendingMessage}
             replyingTo={replyingToMessage}
             clearReplyingTo={() => setReplyingTo(null)}
+            inputRef={inputRef}
           />
         </>
       )}
