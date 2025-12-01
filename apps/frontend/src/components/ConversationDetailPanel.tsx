@@ -46,7 +46,25 @@ const ConversationDetailPanel = ({
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [groupInfoOpen, setGroupInfoOpen] = useState(false);
   const [isDraggingPanel, setIsDraggingPanel] = useState(false);
+  const [focusedMessageId, setFocusedMessageId] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const panelDragCounterRef = useRef(0);
+
+  const focusedMessageRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (focusedMessageId) {
+      setTimeout(() => {
+        setFocusedMessageId(null);
+      }, 1000);
+    }
+  }, [focusedMessageId, convoMessages]);
+
+  useEffect(() => {
+    if (focusedMessageRef.current) {
+      focusedMessageRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [focusedMessageId]);
 
   const readImagesFromFiles = useCallback(async (files: File[]) => {
     const readers: Promise<string>[] = [];
@@ -108,12 +126,20 @@ const ConversationDetailPanel = ({
     await handleFilesSelected(e.dataTransfer?.files ?? null);
   };
 
+  const replyingToMessage = useMemo(() => {
+    return convoMessages?.find((message) => message.id === replyingTo);
+  }, [convoMessages, replyingTo]);
+
   const amInvited = useMemo(() => {
     return selectedConvo.participants.some(
       (participant) =>
         participant.user.id === user?.id && participant.state === "invited"
     );
   }, [selectedConvo, user]);
+
+  const handleFocusReply = useCallback((messageId: string) => {
+    setFocusedMessageId(messageId);
+  }, []);
 
   const handleSendMessage = useCallback(async () => {
     if (isSendingMessage || !selectedConvo) {
@@ -131,6 +157,7 @@ const ConversationDetailPanel = ({
         conversationId: selectedConvo.id,
         body: message,
         attachments,
+        replyToId: replyingTo ?? undefined,
       };
       const response = await messageSendMessage({
         body: payload,
@@ -138,6 +165,7 @@ const ConversationDetailPanel = ({
       if (response.data) {
         setMessage("");
         setAttachments([]);
+        setReplyingTo(null);
       }
       if (amInvited) {
         handleConversationUpdated({
@@ -160,6 +188,7 @@ const ConversationDetailPanel = ({
     attachments,
     handleConversationUpdated,
     isSendingMessage,
+    replyingTo,
     message,
     selectedConvo,
     user?.id,
@@ -285,9 +314,19 @@ const ConversationDetailPanel = ({
                   <Message
                     key={message.id}
                     message={message}
+                    setReplyingTo={setReplyingTo}
+                    handleFocusReply={handleFocusReply}
+                    ref={
+                      focusedMessageId === message.id ? focusedMessageRef : null
+                    }
                     isFirstInGroup={
                       idx === 0 || arr[idx - 1].author.id !== message.author.id
                     }
+                    isFirstInReplyGroup={
+                      idx === 0 ||
+                      arr[idx - 1].replyTo?.id !== message.replyTo?.id
+                    }
+                    isFocused={focusedMessageId === message.id}
                   />
                 ))}
               </div>
@@ -335,6 +374,8 @@ const ConversationDetailPanel = ({
             setAttachments={setAttachments}
             onSend={handleSendMessage}
             isSending={isSendingMessage}
+            replyingTo={replyingToMessage}
+            clearReplyingTo={() => setReplyingTo(null)}
           />
         </>
       )}

@@ -1,18 +1,28 @@
 import type { MessageDto } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Reply, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, href } from "react-router";
 
 const Message = ({
   message,
   className,
   isFirstInGroup,
+  isFocused,
+  setReplyingTo,
+  isFirstInReplyGroup,
+  handleFocusReply,
+  ref,
 }: {
   message: MessageDto;
   className?: string;
   isFirstInGroup?: boolean;
+  isFirstInReplyGroup?: boolean;
+  isFocused?: boolean;
+  setReplyingTo: (messageId: string) => void;
+  handleFocusReply: (messageId: string) => void;
+  ref: React.RefObject<HTMLDivElement | null> | null;
 }) => {
   const attachments = message.attachments ?? [];
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -38,12 +48,17 @@ const Message = ({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [attachments.length, lightboxIndex]);
 
+  const handleReplyTo = useCallback(() => {
+    setReplyingTo(message.id);
+  }, [message.id, setReplyingTo]);
+
   return (
     <>
       <div
-        className={`${className} bg-white hover:bg-zinc-100 rounded-md flex flex-row gap-x-3 px-2 py-1 ${
+        className={`${className} bg-white hover:bg-zinc-100 rounded-md flex flex-row gap-x-3 px-2 py-1 group relative transition-colors duration-100 ${
           isFirstInGroup ? "pt-2" : "pt-1"
-        }`}
+        } ${isFocused ? "!bg-green/20" : ""}`}
+        ref={ref}
       >
         <div className="w-8 shrink-0 mt-1">
           {isFirstInGroup && (
@@ -53,6 +68,19 @@ const Message = ({
           )}
         </div>
         <div className="flex flex-col -mt-1">
+          {message.replyTo && isFirstInReplyGroup && (
+            <div
+              className="text-zinc-500 text-sm flex flex-row items-center gap-x-1 my-1 cursor-pointer"
+              onClick={() => handleFocusReply(message.replyTo!.id)}
+            >
+              <Reply size={15} />
+              <ProfileImage
+                pfp={message.replyTo.author.profilePicture}
+                size="mini"
+              />
+              Replying to: {message.replyTo.body}
+            </div>
+          )}
           {isFirstInGroup && (
             <span className="font-semibold">{message.author.displayName}</span>
           )}
@@ -69,6 +97,16 @@ const Message = ({
               ))}
             </div>
           )}
+        </div>
+        <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            color={ButtonColor.Transparent}
+            onClick={handleReplyTo}
+            size="small"
+            className="!px-2"
+          >
+            <Reply size={15} />
+          </Button>
         </div>
       </div>
 

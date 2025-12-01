@@ -8,8 +8,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import { MessageDto } from "@alliance/shared/client";
+import Card from "@alliance/shared/ui/Card";
 
 interface MessageInputProps {
   message: string;
@@ -18,6 +20,8 @@ interface MessageInputProps {
   setAttachments: Dispatch<SetStateAction<string[]>>;
   onSend: () => void;
   isSending?: boolean;
+  replyingTo?: MessageDto;
+  clearReplyingTo: () => void;
 }
 
 const MessageInput = ({
@@ -27,6 +31,8 @@ const MessageInput = ({
   setAttachments,
   onSend,
   isSending,
+  replyingTo,
+  clearReplyingTo,
 }: MessageInputProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const dragCounterRef = useRef(0);
@@ -131,6 +137,9 @@ const MessageInput = ({
         onSend();
       }
     }
+    if (e.key === "Escape") {
+      clearReplyingTo();
+    }
   };
 
   const triggerFilePicker = () => {
@@ -139,12 +148,32 @@ const MessageInput = ({
 
   return (
     <div
-      className="flex flex-col gap-y-3 px-8 bg-white pt-1 pb-17 md:pb-4 relative"
+      className="flex flex-col gap-y-3 px-8 bg-white pb-17 md:pb-4 relative"
       onDragEnter={onDragEnter}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
+      {replyingTo && (
+        <Card className="p-3 flex flex-row items-center justify-between">
+          <div className="flex flex-row gap-x-2 text-zinc-500 text-sm">
+            <div>Replying to:</div>
+            {replyingTo.body && (
+              <div className="text-black">{replyingTo.body}</div>
+            )}
+            {!replyingTo.body && replyingTo.attachments.length && (
+              <div className="text-black">[img]</div>
+            )}
+          </div>
+          <Button
+            color={ButtonColor.Transparent}
+            onClick={clearReplyingTo}
+            className="!p-2 -m-2"
+          >
+            <X size={18} />
+          </Button>
+        </Card>
+      )}
       {attachments.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {attachments.map((img, idx) => (
