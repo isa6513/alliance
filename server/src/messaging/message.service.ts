@@ -16,6 +16,7 @@ import {
   MessageDto,
 } from './dto/messaging.dto';
 import { MessagingEvents } from './messaging.events';
+import { ImagesService } from 'src/images/images.service';
 
 @Injectable()
 export class MessageService {
@@ -27,6 +28,7 @@ export class MessageService {
     @InjectRepository(Participant)
     private readonly participantRepository: Repository<Participant>,
     private readonly eventEmitter: EventEmitter2,
+    private readonly imagesService: ImagesService,
   ) {}
 
   async sendMessage(
@@ -51,9 +53,13 @@ export class MessageService {
       await this.participantRepository.save(participant);
     }
 
-    const trimmedBody = dto.body.trim();
-    if (!trimmedBody.length) {
-      throw new BadRequestException('Message body cannot be empty.');
+    const trimmedBody = dto.body?.trim?.() ?? '';
+    const attachments = await this.saveAttachments(dto.attachments);
+
+    if (!trimmedBody.length && attachments.length === 0) {
+      throw new BadRequestException(
+        'Message must include text or at least one attachment.',
+      );
     }
 
     let replyTo: Message | undefined;
@@ -71,6 +77,7 @@ export class MessageService {
 
     const message = this.messageRepository.create({
       body: trimmedBody,
+      attachments,
       author: { id: userId } as User,
       conversation: participant.conversation,
       replyTo,
@@ -144,5 +151,43 @@ export class MessageService {
     if (!count) {
       throw new ForbiddenException('You are not part of this conversation.');
     }
+  }
+
+  private async saveAttachments(
+    attachments: string[] | undefined,
+  ): Promise<string[]> {
+    if (!attachments?.length) {
+      return [];
+    }
+
+    if (attachments.length > 10) {
+      throw new BadRequestException('Too many attachments (max 10).');
+    }
+
+    const storedKeys: string[] = [];
+    for (const attachment of attachments) {
+      if (!attachment) {
+        continue;
+      }
+      const trimmed = attachment.trim();
+      if (!trimmed) {
+        continue;
+      }
+
+      if (trimmed.startsWith('data:image')) {
+        const key = await this.imagesService.uploadImage(trimmed, {
+          width: 1024,
+          height: 1024,
+        });
+        storedKeys.push(key);
+        continue;
+      } else if (trimmed.length < 200) {
+        storedKeys.push(trimmed);
+      } else {
+        console.warn('unknown attachment ', trimmed);
+      }
+    }
+
+    return storedKeys;
   }
 }

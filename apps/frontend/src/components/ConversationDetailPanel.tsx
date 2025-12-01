@@ -1,6 +1,6 @@
 import {
   ConversationDto,
-  MessageDto,
+  CreateMessageDto,
   messageSendMessage,
   ProfileDto,
 } from "@alliance/shared/client";
@@ -8,10 +8,12 @@ import Spinner from "./Spinner";
 import Message from "./Message";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useAuth } from "../lib/AuthContext";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ConversationInfoPanel from "./ConversationInfoPanel";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { ChevronLeft, Users } from "lucide-react";
+import MessageInput from "./MessageInput";
+import type { MessageDto } from "@alliance/shared/client";
 
 interface ConversationDetailPanelProps {
   selectedConvo: ConversationDto;
@@ -40,6 +42,7 @@ const ConversationDetailPanel = ({
   const { user } = useAuth();
 
   const [message, setMessage] = useState<string>("");
+  const [attachments, setAttachments] = useState<string[]>([]);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [groupInfoOpen, setGroupInfoOpen] = useState(false);
 
@@ -50,42 +53,62 @@ const ConversationDetailPanel = ({
     );
   }, [selectedConvo, user]);
 
-  const handleMessageKeyDown = async (
-    e: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (e.key === "Enter" && !isSendingMessage && selectedConvo) {
-      setIsSendingMessage(true);
-      try {
-        const response = await messageSendMessage({
-          body: {
-            conversationId: selectedConvo?.id ?? 0,
-            body: message,
-          },
-        });
-        if (response.data) {
-          setMessage("");
-        }
-        if (amInvited) {
-          handleConversationUpdated({
-            ...selectedConvo,
-            participants: selectedConvo.participants.map((participant) => {
-              if (participant.user.id === user?.id) {
-                return { ...participant, state: "joined" };
-              }
-              return participant;
-            }),
-          });
-        }
-      } catch (err) {
-        console.error("Failed to send message", err);
-      } finally {
-        setIsSendingMessage(false);
-      }
+  const handleSendMessage = useCallback(async () => {
+    if (isSendingMessage || !selectedConvo) {
+      return;
     }
-  };
+
+    const trimmed = message.trim();
+    if (!trimmed && attachments.length === 0) {
+      return;
+    }
+
+    setIsSendingMessage(true);
+    try {
+      const payload: CreateMessageDto & { attachments?: string[] } = {
+        conversationId: selectedConvo.id,
+        body: message,
+        attachments,
+      };
+      const response = await messageSendMessage({
+        body: payload,
+      });
+      if (response.data) {
+        setMessage("");
+        setAttachments([]);
+      }
+      if (amInvited) {
+        handleConversationUpdated({
+          ...selectedConvo,
+          participants: selectedConvo.participants.map((participant) => {
+            if (participant.user.id === user?.id) {
+              return { ...participant, state: "joined" };
+            }
+            return participant;
+          }),
+        });
+      }
+    } catch (err) {
+      console.error("Failed to send message", err);
+    } finally {
+      setIsSendingMessage(false);
+    }
+  }, [
+    amInvited,
+    attachments,
+    handleConversationUpdated,
+    isSendingMessage,
+    message,
+    selectedConvo,
+    user?.id,
+  ]);
 
   useEffect(() => {
     if (selectedConvo.id !== null) setGroupInfoOpen(false);
+  }, [selectedConvo.id]);
+
+  useEffect(() => {
+    setAttachments([]);
   }, [selectedConvo.id]);
 
   useEffect(() => {
@@ -232,15 +255,14 @@ const ConversationDetailPanel = ({
                 </div>
               )}
           </div>
-          <div className="flex flex-row gap-x-2 px-8 bg-white pt-1 pb-17 md:pb-6">
-            <input
-              placeholder="Message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleMessageKeyDown}
-              className="w-full border border-zinc-200 rounded-md p-3 !bg-gray-200/80 text-black"
-            />
-          </div>
+          <MessageInput
+            message={message}
+            setMessage={setMessage}
+            attachments={attachments}
+            setAttachments={setAttachments}
+            onSend={handleSendMessage}
+            isSending={isSendingMessage}
+          />
         </>
       )}
     </div>

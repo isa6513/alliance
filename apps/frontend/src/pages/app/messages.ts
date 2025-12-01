@@ -127,7 +127,11 @@ const useLiveConvoMessages = (
     })
       .then((response) => {
         if (cancelled) return;
-        const initialMessages = response.data ?? [];
+        let initialMessages = response.data;
+        if (!initialMessages) {
+          console.error("Failed to load messages", response.error);
+          initialMessages = [];
+        }
         const ids = new Set(initialMessages.map((msg) => msg.id));
         messageIdsRef.current = ids;
         const pending = pendingMessagesRef.current.filter(

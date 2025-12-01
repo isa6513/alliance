@@ -25,6 +25,14 @@ export class Message {
   @ApiProperty()
   body: string;
 
+  @Column({ type: 'jsonb', default: [] })
+  @ApiProperty({
+    type: String,
+    isArray: true,
+    description: 'Image keys attached to the content',
+  })
+  attachments: string[];
+
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn()
   @ApiProperty({ type: () => User })

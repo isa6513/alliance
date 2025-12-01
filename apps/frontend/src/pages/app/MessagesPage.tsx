@@ -304,10 +304,10 @@ const MessagesPage = () => {
     );
   }
 
-  if (!conversations) {
+  if (conversations === null) {
     return (
-      <div>
-        <p>No conversations found</p>
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-zinc-500">Could not load conversations</p>
       </div>
     );
   }

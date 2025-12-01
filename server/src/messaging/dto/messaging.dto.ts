@@ -66,6 +66,9 @@ export class MessageDto extends OmitType(Message, [
     this.author = new ProfileDto(message.author);
     this.conversationId =
       conversationId ?? message.conversation?.id ?? this.conversationId;
+    this.attachments = (message.attachments ?? []).map((attachment) =>
+      getImageSource(attachment),
+    );
     this.replyTo = message.replyTo
       ? new MessageReferenceDto(message.replyTo)
       : undefined;
@@ -260,6 +263,16 @@ export class CreateMessageDto {
   @IsString()
   @MaxLength(10000)
   body: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    isArray: true,
+    description: 'Image attachments encoded as data URLs or existing keys',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  attachments?: string[];
 
   @ApiPropertyOptional({ type: String })
   @IsOptional()

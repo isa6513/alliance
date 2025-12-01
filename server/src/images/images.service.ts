@@ -75,20 +75,27 @@ export class ImagesService {
     return key;
   }
 
-  async uploadImage(file: string): Promise<string> {
+  async uploadImage(
+    file: string,
+    resize?: { width: number; height: number },
+  ): Promise<string> {
     const spliced = file.substring(file.indexOf(',') + 1);
     const imgBuffer = Buffer.from(spliced, 'base64');
-    const processed = await sharp(imgBuffer)
-      .rotate()
-      .webp({ effort: 3 })
-      .toBuffer();
+    let processed = await sharp(imgBuffer).rotate().webp({ effort: 3 });
+
+    if (resize) {
+      processed = await processed.resize(resize.width, resize.height, {
+        fit: 'inside',
+      });
+    }
+    const buffer = await processed.toBuffer();
 
     const key = `${Date.now()}.webp`;
     await this.s3.send(
       new PutObjectCommand({
         Bucket: this.bucket,
         Key: key,
-        Body: processed,
+        Body: buffer,
         ContentType: 'image/webp',
       }),
     );

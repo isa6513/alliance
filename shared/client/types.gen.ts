@@ -51,6 +51,10 @@ export type ParticipantRole = 'admin' | 'member' | 'owner';
 export type Message = {
     id: string;
     body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
     author: User;
     createdAt: string;
     deletedAt?: string;
@@ -379,6 +383,10 @@ export type ParticipantDto = {
 export type MessageDto = {
     id: string;
     body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
     createdAt: string;
     deletedAt?: string;
     author: ProfileDto;
@@ -428,6 +436,10 @@ export type UnreadMessagesDto = {
 export type CreateMessageDto = {
     conversationId: number;
     body: string;
+    /**
+     * Image attachments encoded as data URLs or existing keys
+     */
+    attachments?: Array<string>;
     replyToId?: string;
 };
 
