@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useOutsideClick } from "../lib/useOutsideClick";
-import DropdownIcon from "./icons/DropdownIcon";
+import { ChevronDown } from "lucide-react";
 
 interface DropdownSelectProps {
   options: string[];
@@ -27,7 +27,7 @@ const DropdownSelect = ({
         }}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span>{value}</span> <DropdownIcon size="mini" fill="black" />
+        <span>{value}</span> <ChevronDown size="15" />
       </button>
       <div
         className={`absolute z-10 top-[calc(100% - 30px)] mt-0.5 left-0 w-[220px] bg-white border border-gray-2 overflow-hidden rounded ${

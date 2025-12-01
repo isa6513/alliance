@@ -7,7 +7,7 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import ActionTaskPanel from "../../components/ActionTaskPanel";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 import TaskTimeInfo from "./TaskTimeInfo";
-import chevronRight from "../../assets/icons8-expand-arrow-96.png";
+import { ChevronRight } from "lucide-react";
 
 export interface LargeActionCardProps {
   action: ActionDto;
@@ -89,17 +89,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
          ${state === LargeActionCardState.Minified ? "pb-4" : ""}`}
     >
       <div className="p-0 sm:p-2">
-        <div className="flex flex-col sm:flex-row gap-x-4 items-start mb-4">
-          {showDetails && (
-            <Button
-              color={ButtonColor.Transparent}
-              onClick={goToActionPage}
-              className="!px-4 flex gap-x-1 mb-4 sm:hidden text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
-            >
-              Details
-              <img src={chevronRight} className="w-3 h-3 rotate-270" />
-            </Button>
-          )}
+        <div className="flex sm:flex-row gap-4 items-start mb-4 flex-col-reverse">
           <div className="flex flex-col flex-1 gap-y-2">
             <p className="font-semibold text-2xl md:text-3xl font-serif">
               {action.name}
@@ -114,10 +104,10 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             <Button
               color={ButtonColor.Transparent}
               onClick={goToActionPage}
-              className="!px-4 hidden sm:flex gap-x-1 text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
+              className="!px-4 flex gap-x-1 text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
             >
               Details
-              <img src={chevronRight} className="w-3 h-3 rotate-270" />
+              <ChevronRight size="15" className="-mr-1" />
             </Button>
           )}
         </div>

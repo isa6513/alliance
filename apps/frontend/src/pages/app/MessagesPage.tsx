@@ -11,15 +11,14 @@ import {
   userListFriends,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import CreateIcon from "@alliance/shared/ui/icons/CreateIcon";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Spinner from "../../components/Spinner";
-import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import { useAuth } from "../../lib/AuthContext";
 import useLiveConvoMessages from "./messages";
 import { useSearchParams } from "react-router";
 import ConversationDetailPanel from "../../components/ConversationDetailPanel";
+import { ChevronLeft, Plus } from "lucide-react";
 
 function sortConversations(a: ConversationDto, b: ConversationDto) {
   return (
@@ -331,9 +330,9 @@ const MessagesPage = () => {
                 <Button
                   color={ButtonColor.Transparent}
                   onClick={() => setCreatingNewConversation(false)}
-                  className="!px-2 !py-2 rotate-90"
+                  className="!px-2 !py-2"
                 >
-                  <DropdownIcon size="medium" fill="var(--color-gray-700)" />
+                  <ChevronLeft size="20" />
                 </Button>
                 <p className="font-medium">Start a conversation...</p>
               </div>
@@ -423,9 +422,9 @@ const MessagesPage = () => {
                   color={ButtonColor.Transparent}
                   size="small"
                   onClick={handleCreateNewConversation}
-                  className="!px-1"
+                  className="!px-2"
                 >
-                  <CreateIcon size="large" fill="var(--color-gray-700)" />
+                  <Plus size="18" />
                 </Button>
               </div>
               <input

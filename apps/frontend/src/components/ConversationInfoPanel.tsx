@@ -8,7 +8,6 @@ import {
 } from "@alliance/shared/client";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { Link, href } from "react-router";
-import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import List from "@alliance/shared/ui/List";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
@@ -18,6 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 import CreateIcon from "@alliance/shared/ui/icons/CreateIcon";
 import { sharp_allowed_mime_types } from "@alliance/shared/lib/config";
 import ProfileImageEditor from "./ProfileImageEditor";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export interface ConversationInfoPanelProps {
   selectedConvo: ConversationDto;
@@ -153,13 +153,13 @@ const ConversationInfoPanel = ({
                   .find((participant) => participant.user.id !== user?.id)!
                   .user.id.toString(),
               })}
-              className="flex flex-row p-2 gap-4 hover:bg-zinc-100 rounded-md pl-4"
+              className="flex flex-row p-2 gap-2 hover:bg-zinc-100 rounded-md pl-4 items-center"
             >
               <p className="font-semibold text-xl text-center">
                 {selectedConvo.title}
               </p>
-              <div className="rotate-270">
-                <DropdownIcon size="small" fill="var(--color-zinc-700)" />
+              <div>
+                <ChevronRight size="20" />
               </div>
             </Link>
             <p className="text-sm text-zinc-500">Direct message</p>
@@ -302,9 +302,9 @@ const ConversationInfoPanel = ({
       <Button
         color={ButtonColor.Transparent}
         onClick={onClose}
-        className="!px-2 !py-2 mx-auto absolute top-5 left-5 rotate-90"
+        className="!px-2 !py-2 mx-auto absolute top-5 left-5"
       >
-        <DropdownIcon size="medium" fill="var(--color-zinc-700)" />
+        <ChevronLeft size="20" />
       </Button>
     </div>
   );

@@ -1,4 +1,3 @@
-import StatusIcon from "@alliance/shared/ui/icons/StatusIcon";
 import {
   ConversationDto,
   MessageDto,
@@ -10,9 +9,9 @@ import Message from "./Message";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useAuth } from "../lib/AuthContext";
 import { useEffect, useMemo, useState } from "react";
-import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import ConversationInfoPanel from "./ConversationInfoPanel";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import { ChevronLeft, Users } from "lucide-react";
 
 interface ConversationDetailPanelProps {
   selectedConvo: ConversationDto;
@@ -122,7 +121,7 @@ const ConversationDetailPanel = ({
       ) : (
         <>
           <div
-            className="flex flex-row gap-y-2 border-b border-zinc-200 p-4 px-8 hover:bg-zinc-100 cursor-pointer"
+            className="flex flex-row gap-y-2 border-b border-zinc-200 p-4 lg:px-8 hover:bg-zinc-100 cursor-pointer"
             onClick={() => setGroupInfoOpen(true)}
           >
             <div className="flex flex-row gap-x-3 items-center">
@@ -131,9 +130,9 @@ const ConversationDetailPanel = ({
                   color={ButtonColor.Transparent}
                   size="medium"
                   onClick={onClose}
-                  className="!px-2 !py-2 rotate-90"
+                  className="!px-2 !py-2"
                 >
-                  <DropdownIcon size="small" fill="var(--color-zinc-700)" />
+                  <ChevronLeft size="20" />
                 </Button>
               )}
               {selectedConvo.photo && (
@@ -146,13 +145,9 @@ const ConversationDetailPanel = ({
               <div className="flex flex-col justify-center">
                 <p className="font-semibold text-lg">{selectedConvo.title}</p>
                 {selectedConvo.type !== "direct" && (
-                  <div className="flex flex-row items-center">
-                    <StatusIcon
-                      status={"gathering_commitments"}
-                      fill="var(--color-zinc-400)"
-                      size="large"
-                    />
-                    <p className="text-sm text-zinc-500">
+                  <div className="flex flex-row items-center gap-x-1 text-zinc-500">
+                    <Users size="17" />
+                    <p className="text-sm">
                       {selectedConvo.participants.length} members
                     </p>
                   </div>

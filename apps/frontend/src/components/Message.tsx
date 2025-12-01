@@ -13,7 +13,7 @@ const Message = ({
 }) => {
   return (
     <div
-      className={`${className} flex flex-row gap-x-3 px-2 py-1 ${
+      className={`${className} bg-white hover:bg-zinc-100 rounded-md flex flex-row gap-x-3 px-2 py-1 ${
         isFirstInGroup ? "pt-2" : "pt-1"
       }`}
     >
