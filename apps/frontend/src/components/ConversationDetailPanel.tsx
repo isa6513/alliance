@@ -8,7 +8,7 @@ import Spinner from "./Spinner";
 import Message from "./Message";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useAuth } from "../lib/AuthContext";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ConversationInfoPanel from "./ConversationInfoPanel";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { ChevronLeft, Users } from "lucide-react";
@@ -45,6 +45,68 @@ const ConversationDetailPanel = ({
   const [attachments, setAttachments] = useState<string[]>([]);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [groupInfoOpen, setGroupInfoOpen] = useState(false);
+  const [isDraggingPanel, setIsDraggingPanel] = useState(false);
+  const panelDragCounterRef = useRef(0);
+
+  const readImagesFromFiles = useCallback(async (files: File[]) => {
+    const readers: Promise<string>[] = [];
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) continue;
+      readers.push(
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        })
+      );
+    }
+    return Promise.all(readers);
+  }, []);
+
+  const handleFilesSelected = useCallback(
+    async (files: FileList | File[] | null) => {
+      if (!files || files.length === 0) return;
+      try {
+        const base64s = await readImagesFromFiles(Array.from(files));
+        if (base64s.length > 0) {
+          setAttachments((prev) => [...prev, ...base64s]);
+        }
+      } catch (err) {
+        console.error("Failed reading image file(s)", err);
+      }
+    },
+    [readImagesFromFiles]
+  );
+
+  const onDragEnterCapture = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    panelDragCounterRef.current += 1;
+    setIsDraggingPanel(true);
+  };
+
+  const onDragOverCapture = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const onDragLeaveCapture = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    panelDragCounterRef.current -= 1;
+    if (panelDragCounterRef.current <= 0) {
+      setIsDraggingPanel(false);
+    }
+  };
+
+  const onDropCapture = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    panelDragCounterRef.current = 0;
+    setIsDraggingPanel(false);
+    await handleFilesSelected(e.dataTransfer?.files ?? null);
+  };
 
   const amInvited = useMemo(() => {
     return selectedConvo.participants.some(
@@ -131,7 +193,18 @@ const ConversationDetailPanel = ({
   }, [selectedConvo, user]);
 
   return (
-    <div className="flex flex-col h-full overflow-x-hidden">
+    <div
+      className="flex flex-col h-full overflow-x-hidden relative"
+      onDragEnterCapture={onDragEnterCapture}
+      onDragOverCapture={onDragOverCapture}
+      onDragLeaveCapture={onDragLeaveCapture}
+      onDropCapture={onDropCapture}
+    >
+      {isDraggingPanel && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 text-white font-medium pointer-events-none">
+          Drop images to attach
+        </div>
+      )}
       {groupInfoOpen ? (
         <ConversationInfoPanel
           selectedConvo={selectedConvo}

@@ -53,15 +53,6 @@ export class MessageService {
       await this.participantRepository.save(participant);
     }
 
-    const trimmedBody = dto.body?.trim?.() ?? '';
-    const attachments = await this.saveAttachments(dto.attachments);
-
-    if (!trimmedBody.length && attachments.length === 0) {
-      throw new BadRequestException(
-        'Message must include text or at least one attachment.',
-      );
-    }
-
     let replyTo: Message | undefined;
     if (dto.replyToId) {
       replyTo =
@@ -73,6 +64,15 @@ export class MessageService {
       if (!replyTo || replyTo.conversation.id !== participant.conversation.id) {
         throw new BadRequestException('Invalid reply target.');
       }
+    }
+
+    const trimmedBody = dto.body?.trim?.() ?? '';
+    const attachments = await this.saveAttachments(dto.attachments);
+
+    if (!trimmedBody.length && attachments.length === 0) {
+      throw new BadRequestException(
+        'Message must include text or at least one attachment.',
+      );
     }
 
     const message = this.messageRepository.create({

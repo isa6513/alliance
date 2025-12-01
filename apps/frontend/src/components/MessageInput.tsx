@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Image as ImageIcon, Plus, Send } from "lucide-react";
+import { Plus } from "lucide-react";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 
 interface MessageInputProps {
