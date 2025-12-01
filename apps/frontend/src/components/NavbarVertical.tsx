@@ -13,7 +13,7 @@ import { useNotifications } from "../lib/useNotifications";
 import { useAuth } from "../lib/AuthContext";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../lib/config";
-import { conversationGetUnreadMessages } from "@alliance/shared/client";
+import { useMessagingUnread } from "../pages/app/messages";
 
 export enum NavbarPage {
   Tasks = "Tasks",
@@ -54,12 +54,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
 
   const { unreadCount } = useNotifications();
 
-  const [unreadMessages, setUnreadMessages] = useState(0);
-
-  const loadUnreadMessages = useCallback(async () => {
-    const { data } = await conversationGetUnreadMessages();
-    setUnreadMessages(data?.count ?? 0);
-  }, []);
+  const { unread: unreadMessages, clearUnread } = useMessagingUnread();
 
   const [open, setOpen] = useState(false);
   const navRef = useRef<HTMLDivElement | null>(null);
@@ -188,11 +183,9 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
 
   useEffect(() => {
     if (currentLocation === NavbarPage.Messages) {
-      setUnreadMessages(0);
-    } else {
-      loadUnreadMessages();
+      clearUnread();
     }
-  }, [loadUnreadMessages, currentLocation, unreadMessages]);
+  }, [clearUnread, currentLocation]);
 
   const unreadNotifsForPage = useMemo((): Partial<
     Record<NavbarPage, number>

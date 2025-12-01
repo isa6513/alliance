@@ -1,17 +1,12 @@
 import {
   ConversationDto,
   conversationGetMyConversations,
+  conversationGetUnreadMessages,
   conversationMarkRead,
   MessageDto,
   messageGetMessages,
 } from "@alliance/shared/client";
-import {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { getWebSocketUrl } from "../../lib/config";
 
@@ -77,60 +72,57 @@ export const useConversations = (activeConversationId?: number | null) => {
       withCredentials: true,
     });
 
-    socket.on(
-      "conversation:unread",
-      (payload: ConversationUnreadPayload) => {
-        setConversations((prev) => {
-          const isActive =
-            activeConversationRef.current === payload.conversationId;
+    socket.on("conversation:unread", (payload: ConversationUnreadPayload) => {
+      setConversations((prev) => {
+        const isActive =
+          activeConversationRef.current === payload.conversationId;
 
-          const mergePayload = (
-            base: ConversationDto | undefined | null
-          ): ConversationDto | undefined => {
-            if (!base && !payload.conversation) return undefined;
-            const mergedBase = base ?? payload.conversation!;
-            return {
-              ...mergedBase,
-              ...(payload.conversation ?? {}),
-              lastMessage:
-                payload.lastMessage ??
-                payload.conversation?.lastMessage ??
-                mergedBase.lastMessage,
-              unreadCount: isActive
-                ? 0
-                : payload.unreadCount ??
-                  payload.conversation?.unreadCount ??
-                  mergedBase.unreadCount,
-            };
+        const mergePayload = (
+          base: ConversationDto | undefined | null
+        ): ConversationDto | undefined => {
+          if (!base && !payload.conversation) return undefined;
+          const mergedBase = base ?? payload.conversation!;
+          return {
+            ...mergedBase,
+            ...(payload.conversation ?? {}),
+            lastMessage:
+              payload.lastMessage ??
+              payload.conversation?.lastMessage ??
+              mergedBase.lastMessage,
+            unreadCount: isActive
+              ? 0
+              : payload.unreadCount ??
+                payload.conversation?.unreadCount ??
+                mergedBase.unreadCount,
           };
+        };
 
-          if (!prev) {
-            const merged = mergePayload(null);
-            return merged ? [merged] : prev;
-          }
+        if (!prev) {
+          const merged = mergePayload(null);
+          return merged ? [merged] : prev;
+        }
 
-          const existingIndex = prev.findIndex(
-            (conversation) => conversation.id === payload.conversationId
-          );
-          if (existingIndex === -1) {
-            const merged = mergePayload(payload.conversation ?? null);
-            if (!merged) return prev;
-            const updated = [merged, ...prev];
-            return updated.sort(sortConversations);
-          }
-
-          const existing = prev[existingIndex];
-          const merged = mergePayload(existing);
+        const existingIndex = prev.findIndex(
+          (conversation) => conversation.id === payload.conversationId
+        );
+        if (existingIndex === -1) {
+          const merged = mergePayload(payload.conversation ?? null);
           if (!merged) return prev;
-
-          const updated = [
-            merged,
-            ...prev.filter((c) => c.id !== payload.conversationId),
-          ];
+          const updated = [merged, ...prev];
           return updated.sort(sortConversations);
-        });
-      }
-    );
+        }
+
+        const existing = prev[existingIndex];
+        const merged = mergePayload(existing);
+        if (!merged) return prev;
+
+        const updated = [
+          merged,
+          ...prev.filter((c) => c.id !== payload.conversationId),
+        ];
+        return updated.sort(sortConversations);
+      });
+    });
 
     socket.on("messaging:error", (error) => {
       console.error("Messaging overview socket error", error);
@@ -292,3 +284,117 @@ const useLiveConvoMessages = (
 };
 
 export default useLiveConvoMessages;
+
+interface UnreadPayload {
+  conversationId: number;
+  unreadCount: number;
+}
+
+/**
+ * Lightweight unread counter for messaging; listens for overview socket updates
+ * and increments/decrements local unread count without loading conversation lists.
+ */
+const useMessagingUnread = (activeConversationId?: number | null) => {
+  const [unread, setUnread] = useState<number>(0);
+  const socketRef = useRef<Socket | null>(null);
+  const unreadByConversationRef = useRef<Map<number, number>>(new Map());
+  const unknownUnreadRef = useRef<number>(0);
+  const activeConversationRef = useRef<number | null>(
+    activeConversationId ?? null
+  );
+
+  useEffect(() => {
+    activeConversationRef.current =
+      typeof activeConversationId === "number"
+        ? activeConversationId
+        : activeConversationId ?? null;
+  }, [activeConversationId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    conversationGetUnreadMessages()
+      .then((res) => {
+        if (!cancelled) {
+          const count = res.data?.count ?? 0;
+          setUnread(count);
+          unknownUnreadRef.current = count;
+          unreadByConversationRef.current = new Map();
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load unread messages count", err);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = io(`${getWebSocketUrl()}/messaging/overview`, {
+      transports: ["websocket"],
+      withCredentials: true,
+    });
+    socketRef.current = socket;
+
+    socket.on("conversation:unread", (payload: UnreadPayload) => {
+      const newCountRaw =
+        typeof payload.unreadCount === "number" ? payload.unreadCount : null;
+
+      if (newCountRaw === null) {
+        return;
+      }
+
+      const newCount =
+        activeConversationRef.current === payload.conversationId
+          ? 0
+          : newCountRaw;
+
+      setUnread((prevTotal) => {
+        const map = unreadByConversationRef.current;
+        const prevForConvo = map.get(payload.conversationId) ?? 0;
+
+        map.set(payload.conversationId, newCount);
+
+        const hadUnread = prevForConvo > 0;
+        const hasUnread = newCount > 0;
+
+        if (!hadUnread && hasUnread) {
+          if (unknownUnreadRef.current > 0) {
+            unknownUnreadRef.current = Math.max(
+              unknownUnreadRef.current - 1,
+              0
+            );
+            return prevTotal;
+          }
+          return prevTotal + 1;
+        }
+
+        if (hadUnread && !hasUnread) {
+          return Math.max(prevTotal - 1, 0);
+        }
+
+        return prevTotal;
+      });
+    });
+
+    socket.on("messaging:error", (error) => {
+      console.error("Messaging overview socket error", error);
+    });
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, []);
+
+  const clearUnread = () => {
+    unreadByConversationRef.current.clear();
+    unknownUnreadRef.current = 0;
+    setUnread(0);
+  };
+
+  return { unread, setUnread, clearUnread };
+};
+
+export { useMessagingUnread };
