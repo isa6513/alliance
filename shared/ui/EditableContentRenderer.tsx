@@ -100,7 +100,7 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
           onClick={closeLightbox}
         >
           <div
-            className="relative max-w-5xl w-full px-6"
+            className="relative max-w-5xl px-6"
             onClick={(e) => e.stopPropagation()}
           >
             <img
