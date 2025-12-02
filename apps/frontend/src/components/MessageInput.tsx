@@ -12,13 +12,14 @@ import { Plus, X } from "lucide-react";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { MessageDto } from "@alliance/shared/client";
 import Card from "@alliance/shared/ui/Card";
+import Spinner from "./Spinner";
 
 interface MessageInputProps {
   message: string;
   setMessage: Dispatch<SetStateAction<string>>;
   attachments: string[];
   setAttachments: Dispatch<SetStateAction<string[]>>;
-  onSend: () => void;
+  onSend: () => Promise<void>;
   isSending?: boolean;
   replyingTo?: MessageDto;
   clearReplyingTo: () => void;
@@ -228,13 +229,19 @@ const MessageInput = ({
               }
             }}
           />
-          <Button
-            onClick={triggerFilePicker}
-            color={ButtonColor.Transparent}
-            className="!px-2"
-          >
-            <Plus size={18} />
-          </Button>
+          {isSending ? (
+            <div className="pr-2">
+              <Spinner size="small" />
+            </div>
+          ) : (
+            <Button
+              onClick={triggerFilePicker}
+              color={ButtonColor.Transparent}
+              className="!px-2"
+            >
+              <Plus size={18} />
+            </Button>
+          )}
         </div>
       </div>
       {isDragging && (
