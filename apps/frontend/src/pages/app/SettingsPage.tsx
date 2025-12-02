@@ -188,13 +188,16 @@ const SettingsPage: React.FC = () => {
       return;
     }
 
-    authMe().then((response) => {
-      if (response.data) {
-        setEditableUser(response.data);
-        setInitialUser(response.data);
+    authMe()
+      .then((response) => {
+        if (response.data) {
+          setEditableUser(response.data);
+          setInitialUser(response.data);
+        }
+      })
+      .finally(() => {
         setLoading(false);
-      }
-    });
+      });
 
     loadPaymentMethod();
 
