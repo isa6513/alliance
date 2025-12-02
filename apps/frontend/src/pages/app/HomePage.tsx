@@ -52,6 +52,73 @@ export function canJoinAction(action: ActionWithRelation) {
   );
 }
 
+function getDeadlineTimestamp(action: ActionWithRelation): number {
+  let i = 0;
+  // Find first 'member_action' or 'gathering_commitments' event
+  while (
+    action.events[i] &&
+    action.events[i].newStatus !== "member_action" &&
+    action.events[i].newStatus !== "gathering_commitments"
+  ) {
+    i++;
+  }
+
+  // Find next non-'member_action' or 'gathering_commitments' event
+  while (
+    action.events[i] &&
+    (action.events[i].newStatus === "member_action" ||
+      action.events[i].newStatus === "gathering_commitments")
+  ) {
+    i++;
+  }
+
+  const nextEvent = action.events[i];
+  if (!nextEvent) {
+    return Infinity;
+  }
+
+  return new Date(nextEvent.date).getTime();
+}
+
+function actionPriorityComparator(
+  actionA: ActionWithRelation,
+  actionB: ActionWithRelation
+): number {
+  // Sort by priority
+  if (actionA.priority !== actionB.priority) {
+    return actionB.priority - actionA.priority;
+  }
+
+  // Sort by earliest deadline first
+  const deadlineA = getDeadlineTimestamp(actionA);
+  const deadlineB = getDeadlineTimestamp(actionB);
+  if (deadlineA !== Infinity || deadlineB !== Infinity) {
+    return deadlineA - deadlineB;
+  }
+
+  // Both do not have deadlines: sort by earliest member action
+  const memberActionA = actionA.events.find(
+    (event) =>
+      event.newStatus === "member_action" ||
+      event.newStatus === "gathering_commitments"
+  );
+  if (!memberActionA) {
+    return 1;
+  }
+  const memberActionB = actionB.events.find(
+    (event) =>
+      event.newStatus === "member_action" ||
+      event.newStatus === "gathering_commitments"
+  );
+  if (!memberActionB) {
+    return -1;
+  }
+  return (
+    new Date(memberActionA.date).getTime() -
+    new Date(memberActionB.date).getTime()
+  );
+}
+
 const HomePage = () => {
   const navigate = useNavigate();
   const { actions, loading } = useOutletContext<AppLayoutOutletContext>();
@@ -73,9 +140,7 @@ const HomePage = () => {
     return (
       actions
         ?.filter((action) => shouldCompleteAction(action))
-        .sort((a, b) => {
-          return b.priority - a.priority;
-        }) || []
+        .sort(actionPriorityComparator) || []
     );
   }, [actions]);
 
@@ -121,7 +186,8 @@ const HomePage = () => {
     [doesCurrentWeekHaveActions, isActionDeadlineWithinDays]
   );
 
-  const currentTask = newActions[0] || todoActions[0] || null;
+  const currentTask: ActionWithRelation | null =
+    newActions[0] || todoActions[0] || null;
   const currentWeekTodoActions = todoActions.filter((action) => {
     return isActionInCurrentWeek(action);
   });
@@ -213,9 +279,7 @@ const HomePage = () => {
             friendActivities={friendActivities.filter(
               (activity) => activity.actionId === currentTask.id
             )}
-            onUpdateActionState={() =>
-              navigate(href("/tasks"))
-            }
+            onUpdateActionState={() => navigate(href("/tasks"))}
           />
         ) : (
           <div className="mt-4 px-2 py-2 mx-auto flex flex-col items-center gap-y-4 h-full justify-center">
