@@ -35,6 +35,7 @@ import List from "@alliance/shared/ui/List";
 import ForumActivityCommentCard from "../../components/ForumActivityCommentCard";
 import ProfileImageEditor from "../../components/ProfileImageEditor";
 import Spinner from "../../components/Spinner";
+import { MessageCircle } from "lucide-react";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -394,22 +395,26 @@ const UserProfilePage: React.FC = () => {
           {/* button row */}
           <div className="absolute right-0 top-0 space-x-3 flex flex-row p-5">
             {isAuthenticated && !isMe && friendStatus !== null && (
-              <>
-                <FriendRequestButton
-                  friendStatus={friendStatus}
-                  handleSendFriendRequest={handleSendFriendRequest}
-                  handleRemoveFriend={handleRemoveFriend}
-                  handleAcceptFriendRequest={handleAcceptFriendRequest}
-                />
-                {/* <Button
-                  color={ButtonColor.Light}
-                  onClick={() => {}}
-                  className="!p-[8px] rounded-full"
-                >
-                  <img src={dots} alt="send" className="w-7 h-7" />
-                </Button> */}
-              </>
+              <FriendRequestButton
+                friendStatus={friendStatus}
+                handleSendFriendRequest={handleSendFriendRequest}
+                handleRemoveFriend={handleRemoveFriend}
+                handleAcceptFriendRequest={handleAcceptFriendRequest}
+              />
             )}
+            {/* {isAuthenticated &&
+              !isMe &&
+              friendStatus &&
+              friendStatus.status === "accepted" && (
+                <Button
+                  color={ButtonColor.Black}
+                  onClick={() => navigate(href("/messages"))}
+                  className="flex flex-row items-center gap-x-2"
+                >
+                  <MessageCircle size={16} />
+                  Message
+                </Button>
+              )} */}
             {isMe && (
               <div className="space-x-3 flex">
                 {isEditing ? (

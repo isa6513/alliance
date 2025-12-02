@@ -144,6 +144,12 @@ const MessagesPage = () => {
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
+  const filteredNotmessagedFriends = useMemo(() => {
+    return notmessagedFriends?.filter((friend) =>
+      friend.displayName.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [notmessagedFriends, search]);
+
   const searchFilteredFriends = useMemo(() => {
     return friends?.filter((friend) =>
       friend.displayName.toLowerCase().includes(search.toLowerCase())
@@ -371,12 +377,13 @@ const MessagesPage = () => {
                 <Button
                   color={ButtonColor.Transparent}
                   onClick={handleCreateGroup}
-                  className="w-full justify-start rounded-md !py-3 border border-zinc-300 mb-2"
+                  className="w-full justify-start rounded-md !py-3 border border-zinc-300 mb-2 !px-4"
                 >
                   Create a group
                 </Button>
-                {notmessagedFriends && notmessagedFriends.length > 0 ? (
-                  notmessagedFriends.map((friend) => (
+                {filteredNotmessagedFriends &&
+                filteredNotmessagedFriends.length > 0 ? (
+                  filteredNotmessagedFriends.map((friend) => (
                     <div
                       key={friend.id}
                       className="flex flex-row items-center gap-x-2 hover:bg-zinc-100 p-4 rounded-md cursor-pointer"

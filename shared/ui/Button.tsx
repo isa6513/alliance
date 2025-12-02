@@ -36,7 +36,7 @@ export enum ButtonColor {
   Grey = "bg-zinc-200 !text-black",
   Outline = "border border-gray-2 text-black",
   White = "border border-gray-2 text-black bg-white hover:bg-zinc-50",
-  Black = "bg-zinc-800 hover:bg-zinc-900 text-white",
+  Black = "bg-zinc-800 hover:bg-zinc-900 text-white border border-zinc-800",
 }
 
 const Button: React.FC<ButtonProps> = ({

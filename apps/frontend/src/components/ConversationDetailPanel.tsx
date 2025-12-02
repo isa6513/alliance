@@ -255,7 +255,7 @@ const ConversationDetailPanel = ({
       ) : (
         <>
           <div
-            className="flex flex-row gap-y-2 border-b border-zinc-200 p-4 lg:px-8 hover:bg-zinc-100 cursor-pointer"
+            className="flex flex-row gap-y-2 border-b border-zinc-200 p-4 md:px-8 hover:bg-zinc-100 cursor-pointer"
             onClick={() => setGroupInfoOpen(true)}
           >
             <div className="flex flex-row gap-x-3 items-center">
