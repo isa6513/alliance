@@ -1144,14 +1144,14 @@ export function FormBuilder({
             <div className="flex items-center space-x-2">
               <Button
                 onClick={() => navigate(`/forms/${formId}/responses`)}
-                color={ButtonColor.Light}
+                color={ButtonColor.Stone}
               >
                 Responses
               </Button>
               {activeEditor === "form" && (
                 <Button
                   onClick={() => setIsPreviewMode(!isPreviewMode)}
-                  color={ButtonColor.Light}
+                  color={ButtonColor.Stone}
                 >
                   {isPreviewMode ? "Edit" : "Preview"}
                 </Button>
@@ -1168,10 +1168,10 @@ export function FormBuilder({
                   : "No unsaved changes"}
               </Button>
             </div>
-            <div className="inline-flex rounded-md bg-gray-100 p-1 text-sm font-medium text-gray-600">
+            <div className="inline-flex rounded-md bg-gray-200 p-0.5 text-sm font-medium text-gray-600">
               <button
                 type="button"
-                className={`px-3 py-1 rounded-md text-nowrap ${
+                className={`px-3 py-2 rounded-md text-nowrap ${
                   activeEditor === "form"
                     ? "bg-white shadow text-gray-900"
                     : "text-gray-600"
