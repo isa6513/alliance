@@ -38,7 +38,8 @@ export default [
       route("/feed", "pages/app/ActivityFeedPage.tsx"),
       route("/messages", "pages/app/MessagesPage.tsx"),
       route("/feed/:actionId", "pages/app/ActionActivityFeedPage.tsx"),
-      route("/user/:id", "pages/app/UserProfilePage.tsx"),
+      route("/member/:id", "pages/app/UserProfilePage.tsx"),
+      route("/user/:id", "pages/app/UserRedirect.tsx"),
       route("/verifyEmail", "pages/app/VerifyEmailPage.tsx"),
 
       route("forum", "pages/app/ForumPage.tsx"),

@@ -16,7 +16,7 @@ const ProfileDropdown = () => {
   const profilePicture = profile?.profilePicture || null;
   const userId = profile?.id || null;
   const profileUrl = userId
-    ? href("/user/:id", { id: userId.toString() })
+    ? href("/member/:id", { id: userId.toString() })
     : href("/profile");
 
   const handleLogout = useCallback(async () => {

@@ -1,6 +1,7 @@
 import { ProfileDto } from "@alliance/shared/client";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { useState } from "react";
+import { href } from "react-router";
 
 const UserProfilePicRow = ({ users }: { users: ProfileDto[] }) => {
   const unique = users.filter(function (item, pos, self) {
@@ -21,7 +22,7 @@ const UserProfilePicRow = ({ users }: { users: ProfileDto[] }) => {
     >
       {(expanded ? unique : unique.slice(0, 5)).map((user) => (
         <a
-          href={`/user/${user.id}`}
+          href={href("/member/:id", { id: user.id.toString() })}
           onClick={(e) => {
             e.stopPropagation();
           }}

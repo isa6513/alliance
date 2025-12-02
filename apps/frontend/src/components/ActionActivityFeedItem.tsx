@@ -33,7 +33,7 @@ const ActionActivityFeedItem = ({
   if (card) {
     return (
       <Link
-        to={href("/user/:id", { id: activity.user.id.toString() })}
+        to={href("/member/:id", { id: activity.user.id.toString() })}
         className="text-black"
       >
         <span className="hover:underline font-medium">
@@ -79,7 +79,7 @@ const ActionActivityFeedItem = ({
                 new Date(activity.createdAt),
                 {
                   addSuffix: true,
-                },
+                }
               )}`}
               user={activity.user}
               showTitle={showAction}

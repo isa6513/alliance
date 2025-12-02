@@ -49,7 +49,7 @@ const CommunityMemberTableRow = ({
               </div>
             )}
             <Link
-              to={href("/user/:id", { id: profile.id.toString() })}
+              to={href("/member/:id", { id: profile.id.toString() })}
               className="flex-shrink-0"
             >
               <div className="hidden md:block">
@@ -60,7 +60,7 @@ const CommunityMemberTableRow = ({
               </div>
             </Link>
             <Link
-              to={href("/user/:id", { id: profile.id.toString() })}
+              to={href("/member/:id", { id: profile.id.toString() })}
               className="text-sm md:text-base min-[400px]:whitespace-nowrap mr-2 md:mr-6"
             >
               <UserDisplayName staff={profile.staff} underline={false}>

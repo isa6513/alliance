@@ -16,7 +16,7 @@ export default function MembersListItem({
 }: MembersListCardProps) {
   return (
     <Link
-      to={href("/user/:id", { id: profile.id.toString() })}
+      to={href("/member/:id", { id: profile.id.toString() })}
       className="p-3 hover:bg-zinc-50"
     >
       <div className="flex flex-row items-center justify-between space-x-2">

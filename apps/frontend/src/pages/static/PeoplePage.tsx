@@ -19,7 +19,7 @@ const PeoplePage: React.FC = () => {
       "Mark Xu": "https://markxu.com/",
       "Sidney Hough": "https://sidney.com/",
       "Casey Manning": "https://caseymanning.github.io/",
-      "Eamon OCearuil": "https://worldalliance.org/user/24",
+      "Eamon OCearuil": "https://worldalliance.org/member/24",
     };
   }, []);
 

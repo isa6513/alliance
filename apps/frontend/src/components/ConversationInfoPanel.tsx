@@ -148,7 +148,7 @@ const ConversationInfoPanel = ({
         {selectedConvo.type === "direct" ? (
           <>
             <Link
-              to={href(`/user/:id`, {
+              to={href(`/member/:id`, {
                 id: selectedConvo.participants
                   .find((participant) => participant.user.id !== user?.id)!
                   .user.id.toString(),
@@ -247,7 +247,7 @@ const ConversationInfoPanel = ({
             {selectedConvo.participants.map((participant) => (
               <Link
                 key={participant.user.id}
-                to={href("/user/:id", { id: participant.user.id.toString() })}
+                to={href("/member/:id", { id: participant.user.id.toString() })}
                 className="p-4 hover:bg-zinc-100 flex flex-row items-center gap-x-3 justify-between"
               >
                 <div className="flex flex-row items-center gap-x-3">

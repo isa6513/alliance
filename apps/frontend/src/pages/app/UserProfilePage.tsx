@@ -257,7 +257,7 @@ const UserProfilePage: React.FC = () => {
         setProfile(response.data);
         setIsEditing(false);
         setRevalidate();
-        navigate(href("/user/:id", { id })); // to make navbar pfp reload
+        navigate(href("/member/:id", { id })); // to make navbar pfp reload
       }
     } catch (err: unknown) {
       console.error(err);

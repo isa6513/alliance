@@ -162,7 +162,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
 
       {/* Profile picture column */}
       <Link
-        to={href("/user/:id", { id: reply.author.id.toString() })}
+        to={href("/member/:id", { id: reply.author.id.toString() })}
         className="flex-shrink-0"
       >
         <div className="hidden sm:inline">
@@ -185,7 +185,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         <div className="flex justify-between items-center overflow-visible">
           <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
             <Link
-              to={href("/user/:id", { id: reply.author.id.toString() })}
+              to={href("/member/:id", { id: reply.author.id.toString() })}
               className="text-black font-medium"
             >
               <UserDisplayName staff={reply.author.staff}>

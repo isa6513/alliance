@@ -146,7 +146,9 @@ const ActionActivityDetail = () => {
                 <div className="flex flex-row items-center gap-x-2">
                   {activity.user.profilePicture !== null && (
                     <Link
-                      to={href("/user/:id", { id: activity.user.id.toString() })}
+                      to={href("/member/:id", {
+                        id: activity.user.id.toString(),
+                      })}
                       className="flex-shrink-0"
                     >
                       <ProfileImage
@@ -157,7 +159,7 @@ const ActionActivityDetail = () => {
                   )}
                   <p className="font-medium">
                     <Link
-                      to={href("/user/:id", {
+                      to={href("/member/:id", {
                         id: activity.user.id.toString(),
                       })}
                     >

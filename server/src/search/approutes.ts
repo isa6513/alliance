@@ -4,7 +4,7 @@ import {
 } from 'src/forum/entities/comment.entity';
 
 export function profileUrl(userId: number) {
-  return `/user/${userId}`;
+  return `/member/${userId}`;
 }
 
 export function inviteUrl(referralCode: string) {

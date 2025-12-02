@@ -21,7 +21,7 @@ const ActivityFeedItem = ({
   return (
     <div className="flex flex-row gap-x-2">
       <div className="flex-shrink-0 mt-1">
-        <Link to={href("/user/:id", { id: user.id.toString() })}>
+        <Link to={href("/member/:id", { id: user.id.toString() })}>
           <ProfileImage pfp={user.profilePicture} size="small" />
         </Link>
       </div>
@@ -39,7 +39,7 @@ const ActivityFeedItem = ({
         )}
         <p className="text-sm lg:text-base text-zinc-900">
           <Link
-            to={href("/user/:id", { id: user.id.toString() })}
+            to={href("/member/:id", { id: user.id.toString() })}
             onClick={(e) => e.stopPropagation()}
           >
             <UserDisplayName staff={user.staff}>

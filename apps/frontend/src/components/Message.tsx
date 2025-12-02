@@ -62,7 +62,9 @@ const Message = ({
       >
         <div className="w-8 shrink-0 mt-1">
           {isFirstInGroup && (
-            <Link to={href("/user/:id", { id: message.author.id.toString() })}>
+            <Link
+              to={href("/member/:id", { id: message.author.id.toString() })}
+            >
               <ProfileImage pfp={message.author.profilePicture} size="medium" />
             </Link>
           )}

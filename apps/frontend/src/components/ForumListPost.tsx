@@ -30,7 +30,7 @@ const ForumListPost = ({
     e.stopPropagation();
     e.preventDefault();
     if (!post.author?.id) return;
-    navigate(href("/user/:id", { id: post.author.id.toString() }));
+    navigate(href("/member/:id", { id: post.author.id.toString() }));
   };
 
   const lastCommentAuthorClick = (e: React.MouseEvent) => {
@@ -38,7 +38,7 @@ const ForumListPost = ({
     e.preventDefault();
     if (post.lastComment?.author) {
       navigate(
-        href("/user/:id", { id: post.lastComment.author.id.toString() })
+        href("/member/:id", { id: post.lastComment.author.id.toString() })
       );
     }
   };
@@ -61,7 +61,7 @@ const ForumListPost = ({
           "w-full mb-0 !gap-y-1 p-4  cursor-pointer",
           isPrivateFuturePost
             ? "bg-sky-50 hover:bg-sky-100/60"
-            : "hover:bg-zinc-50 bg-white",
+            : "hover:bg-zinc-50 bg-white"
         )}
       >
         <div className="flex flex-col gap-y-0 mb-2">
@@ -144,7 +144,7 @@ const ForumListPost = ({
               ? `${href("/forum/post/:id", {
                   id: post.id.toString(),
                 })}?replyId=${post.lastComment.id}`
-              : href("/forum/post/:id", { id: post.id.toString() }),
+              : href("/forum/post/:id", { id: post.id.toString() })
           );
         }}
       >
@@ -152,11 +152,11 @@ const ForumListPost = ({
           title={post.title}
           content={`${post.lastComment ? "replied" : "posted"} ${formatTime(
             new Date(
-              post.lastComment ? post.lastComment.createdAt : post.updatedAt,
+              post.lastComment ? post.lastComment.createdAt : post.updatedAt
             ),
             {
               addSuffix: true,
-            },
+            }
           )}`}
           user={post.lastComment ? post.lastComment.author : post.author}
         />

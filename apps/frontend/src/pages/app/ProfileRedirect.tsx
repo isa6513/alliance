@@ -10,7 +10,7 @@ const ProfileRedirectInner = () => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      navigate(href("/user/:id", { id: user.id.toString() }), {
+      navigate(href("/member/:id", { id: user.id.toString() }), {
         replace: true,
         state,
       });

@@ -140,7 +140,7 @@ const PostDetailPage: React.FC = () => {
             </div>
             <div className="flex flex-row gap-x-2 mb-2 sm:mb-4 mt-1 items-center text-sm sm:text-base">
               <Link
-                to={href("/user/:id", { id: post.author.id.toString() })}
+                to={href("/member/:id", { id: post.author.id.toString() })}
                 className="flex items-center"
               >
                 <div className="hidden sm:inline">
@@ -186,7 +186,7 @@ const PostDetailPage: React.FC = () => {
                   handleLike={handleLike}
                 />
               </div>
-                  {post.author.id === user?.id && (
+              {post.author.id === user?.id && (
                 <>
                   <Link
                     to={href("/forum/edit/:postId", {
