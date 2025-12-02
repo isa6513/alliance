@@ -198,11 +198,13 @@ const CommunityPage = () => {
     (user) => !leaders.some((leader) => leader.id === user.id)
   );
 
-  const filteredSortedMembers = (
-    filterMode === FilterMode.All
-      ? members
-      : members.filter((user) => !completedAllCurrentActions[user.id])
-  ).sort((a, b) => {
+  const membersByFilterMode = {
+    [FilterMode.All]: members.filter((user) => user.hasActiveContract),
+    [FilterMode.NotYetCompleted]: members.filter(
+      (user) => !completedAllCurrentActions[user.id] && user.hasActiveContract
+    ),
+  };
+  const filteredSortedMembers = membersByFilterMode[filterMode].sort((a, b) => {
     // if leader, sort by preferred contact time in leader's time zone
 
     if (amLeader) {
@@ -340,13 +342,7 @@ const CommunityPage = () => {
                       <DropdownSelect
                         options={Object.values(FilterMode)}
                         secondaryLabels={Object.values(FilterMode).map((mode) =>
-                          mode === FilterMode.All
-                            ? members.length.toString()
-                            : members
-                                .filter(
-                                  (user) => !completedAllCurrentActions[user.id]
-                                )
-                                .length.toString()
+                          membersByFilterMode[mode].length.toString()
                         )}
                         value={filterMode}
                         onChange={(mode) => setFilterMode(mode as FilterMode)}
