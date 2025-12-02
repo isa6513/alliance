@@ -35,7 +35,6 @@ import List from "@alliance/shared/ui/List";
 import ForumActivityCommentCard from "../../components/ForumActivityCommentCard";
 import ProfileImageEditor from "../../components/ProfileImageEditor";
 import Spinner from "../../components/Spinner";
-import { MessageCircle } from "lucide-react";
 
 enum ProfileTabs {
   Activity = "Actions",

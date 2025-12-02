@@ -10,6 +10,7 @@ import {
   userMyLocation,
   userUpdate,
   authForgotPassword,
+  authMe,
 } from "@alliance/shared/client";
 import Badge from "@alliance/shared/ui/Badge";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
@@ -187,9 +188,13 @@ const SettingsPage: React.FC = () => {
       return;
     }
 
-    setLoading(false);
-    setEditableUser(user);
-    setInitialUser(user);
+    authMe().then((response) => {
+      if (response.data) {
+        setEditableUser(response.data);
+        setInitialUser(response.data);
+        setLoading(false);
+      }
+    });
 
     loadPaymentMethod();
 
@@ -215,7 +220,7 @@ const SettingsPage: React.FC = () => {
 
     const timeoutId = setTimeout(() => {
       handleSave(editableUser);
-    }, 500);
+    }, 250);
 
     return () => clearTimeout(timeoutId);
   }, [editableUser, initialUser, hasChanges, handleSave]);
