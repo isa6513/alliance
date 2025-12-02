@@ -172,10 +172,10 @@ const InvitePage: React.FC = () => {
             <p>Here are some examples of actions we have taken recently:</p>
             <ol className="list-decimal list-inside space-y-1">
               <li>
-                The office asked a coalition of business to take environmental
-                action, promising that we would help them attain media coverage
+                The office asked a coalition of businesses to take environmental
+                action, promising that we would help them attain a media feature
                 if they did. After they took action, we signed a letter to
-                journalists requesting news coverage.
+                journalists requesting a feature of the businesses.
               </li>
               <li>
                 We provided actionable feedback on the websites of three
