@@ -132,7 +132,7 @@ const MessagesPage = () => {
         setFriends(response.data);
       }
     });
-  }, [user, conversations]);
+  }, [user]);
 
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
 
@@ -203,7 +203,7 @@ const MessagesPage = () => {
 
   const joinedConversations = useMemo(() => {
     return conversations?.filter((convo) =>
-      convo.participants.some(
+      convo.participants?.some(
         (participant) =>
           participant.user.id === user?.id && participant.state === "joined"
       )
@@ -212,7 +212,7 @@ const MessagesPage = () => {
 
   const pendingInvites = useMemo(() => {
     return conversations?.filter((convo) =>
-      convo.participants.some(
+      convo.participants?.some(
         (participant) =>
           participant.user.id === user?.id && participant.state === "invited"
       )
@@ -279,7 +279,7 @@ const MessagesPage = () => {
 
   if (!conversations && loading) {
     return (
-      <div>
+      <div className="flex justify-center items-center h-screen w-full">
         <Spinner size="large" />
       </div>
     );

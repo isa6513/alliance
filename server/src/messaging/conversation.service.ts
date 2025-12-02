@@ -707,7 +707,7 @@ export class ConversationService {
     });
   }
 
-  private async countUnreadForConversation(
+  async countUnreadForConversation(
     conversationId: number,
     userId: number,
   ): Promise<number> {

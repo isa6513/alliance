@@ -82,7 +82,7 @@ const Message = ({
             </div>
           )}
           {isFirstInGroup && (
-            <span className="font-semibold">{message.author.displayName}</span>
+            <span className="font-medium">{message.author.displayName}</span>
           )}
           {message.body && <span>{message.body}</span>}
           {attachments.length > 0 && (

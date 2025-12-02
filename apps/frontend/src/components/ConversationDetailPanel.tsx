@@ -270,13 +270,9 @@ const ConversationDetailPanel = ({
                 </Button>
               )}
               {selectedConvo.photo && (
-                <ProfileImage
-                  pfp={selectedConvo.photo}
-                  size="large"
-                  className="mt-1"
-                />
+                <ProfileImage pfp={selectedConvo.photo} size="large" />
               )}
-              <div className="flex flex-col justify-center">
+              <div className="flex flex-col justify-center -mt-1">
                 <p className="font-semibold text-lg">{selectedConvo.title}</p>
                 {selectedConvo.type !== "direct" && (
                   <div className="flex flex-row items-center gap-x-1 text-zinc-500">
