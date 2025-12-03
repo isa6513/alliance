@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Allow, IsDefined, IsOptional } from 'class-validator';
+import { Allow, IsEnum, IsOptional } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
@@ -63,7 +63,7 @@ export class UserAwayRange {
     enum: UserAwayRangeReason,
     enumName: 'UserAwayRangeReason',
   })
-  @IsDefined()
+  @IsEnum(UserAwayRangeReason)
   reason: UserAwayRangeReason;
 
   @Column({ type: 'text', nullable: true })
