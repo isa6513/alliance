@@ -93,6 +93,9 @@ const CommunityPage = () => {
   useEffect(() => {
     userGetMyCommunity().then((resp) => {
       if (resp.data) {
+        resp.data.users = resp.data.users.filter(
+          (user) => user.hasActiveContract
+        );
         setCommunity(resp.data);
       }
       setLoading(false);
@@ -194,8 +197,7 @@ const CommunityPage = () => {
   }
 
   const leaders = community.leaders;
-  const groupMembers = community.users.filter((user) => user.hasActiveContract);
-  const nonLeaderMembers = groupMembers.filter(
+  const nonLeaderMembers = community.users.filter(
     (user) => !leaders.some((leader) => leader.id === user.id)
   );
 
@@ -255,11 +257,12 @@ const CommunityPage = () => {
 
         <div className="w-1/2">
           <p className="text-sm">
-            {nCompleted} / {groupMembers.length} have completed current action
+            {nCompleted} / {community.users.length} have completed current
+            action
             {activeActions.length !== 1 ? "s" : ""}
           </p>
           <CompletedBar
-            percentage={(nCompleted / groupMembers.length) * 100}
+            percentage={(nCompleted / community.users.length) * 100}
             height="h-4"
             dark
           />
@@ -395,7 +398,7 @@ const CommunityPage = () => {
       {tab === "invites" && (
         <CommunityInvitesTab
           communityId={community.id}
-          existingMembers={groupMembers}
+          existingMembers={community.users}
         />
       )}
       {tab === "edit" && (
