@@ -35,10 +35,10 @@ const MessagesPage = () => {
   const setSelectedConvoId = useCallback(
     (convoId: number | null) => {
       if (!convoId) {
-        setParams({});
+        setParams({}, { replace: true });
         return;
       }
-      setParams({ chat: convoId.toString() });
+      setParams({ chat: convoId.toString() }, { replace: true });
     },
     [setParams]
   );
@@ -279,7 +279,6 @@ const MessagesPage = () => {
           )
       );
       if (existing) {
-        setParams({});
         setSelectedConvoId(existing.id);
         setCreatingNewConversation(false);
         return;
@@ -288,13 +287,7 @@ const MessagesPage = () => {
         handleUpdateRecipientIds([userId]);
       }
     }
-  }, [
-    params,
-    handleUpdateRecipientIds,
-    conversations,
-    setSelectedConvoId,
-    setParams,
-  ]);
+  }, [params, handleUpdateRecipientIds, conversations, setSelectedConvoId]);
 
   const filteredConversations = useMemo(() => {
     return joinedConversations?.filter((convo) =>
