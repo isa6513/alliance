@@ -32,7 +32,7 @@ jobs:
             1) Run `git diff ${{ github.sha }}^!` and review only this patch in the context of the repo.
 
             Review ONLY the changes introduced by the commit.
-            Suggest any improvements, potential bugs, or issues.
+            Suggest any improvements, potential bugs, or issues. Attend to high level direction also, such as if there might be a better way to accomplish the same objective.
 
             Output a final message with your concise thoughts. Do not summarize the commit, just write one short bullet point for each specific issue you found, if any. End the message with the phrase "[NEEDS_ATTENTION]" if there is a significant issue or possible improvement that the author should address. If everything is fine, do not include this phrase.
             Only output [NEEDS_ATTENTION] if you are highly confident there is a substantial issue. Look around at related files to make sure you arent missing anything before doing so. If the changes remove a feature or affordance but this removal was clearly intentional by the author, this does not need attention. For example, if a useful thing was removed as the only change in a commit, the author likely intended to remove it.
@@ -61,24 +61,58 @@ jobs:
           echo "$needs_review"
           echo "needs_review=$needs_review" >> "$GITHUB_OUTPUT"
 
+      - name: Map GitHub actor to Slack mention
+        id: actor_to_slack
+        run: |
+          actor="${{ github.actor }}"
+          mention=""
+          case "$actor" in
+            CaseyManning)
+              mention="<@U08P0THG741>"
+              ;;
+            sidsquid)
+              mention="<@U08NU231VGS>"
+              ;;
+            charleslien)
+              mention="<@U0A0WQQM8HZ>"
+              ;;
+          esac
+          echo "mention=$mention" >> "$GITHUB_OUTPUT"
+
       - name: Build Slack payload (needs review)
         id: slack_body_review
         if: ${{ steps.extract_codex.outputs.needs_review == 'true' }}
         env:
           SUMMARY: ${{ steps.extract_codex.outputs.codex_final_message }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SLACK_MENTION: ${{ steps.actor_to_slack.outputs.mention }}
         run: |
           CLEAN_SUMMARY=$(printf "%s" "$SUMMARY" | sed -E 's/\[NEEDS[ _]ATTENTION\]//g' | sed -E 's/[[:space:]]+$//')
+
           jq -nc \
             --arg url "$RUN_URL" \
             --arg summary "$CLEAN_SUMMARY" \
+            --arg mention "$SLACK_MENTION" \
             '{
               text: "review given",
               blocks: [
-                { "type": "section", "text": { "type": "mrkdwn", "text": $summary } },
-                { "type": "actions", "elements": [
-                    { "type": "button", "text": { "type": "plain_text", "text": "Open run" }, "url": $url }
-                  ] }
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ( ($mention | select(. != "")) + (if $mention != "" then " " else "" end) + $summary )
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": { "type": "plain_text", "text": "Open run" },
+                      "url": $url
+                    }
+                  ]
+                }
               ]
             }' > slack.json
 
