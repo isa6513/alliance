@@ -197,7 +197,7 @@ export class ConversationService {
     });
   }
 
-  async createGroupConversation(
+  async createOrGetGroupConversation(
     userId: number,
     dto: CreateGroupConversationDto,
   ): Promise<ConversationDto> {
@@ -209,6 +209,40 @@ export class ConversationService {
       throw new BadRequestException(
         'A group conversation requires at least one additional participant.',
       );
+    }
+
+    const allUserIds = [userId, ...uniqueParticipantIds];
+
+    const existingConversation = await this.conversationRepository
+      .createQueryBuilder('conversation')
+      .innerJoin('conversation.participants', 'p')
+      .where('conversation.type = :type', {
+        type: ConversationType.Multiple,
+      })
+      .groupBy('conversation.id')
+      // Total number of participants must match exactly
+      .having('COUNT(DISTINCT p.userId) = :participantCount', {
+        participantCount: allUserIds.length,
+      })
+      // All participants must be within the requested set
+      .andHaving(
+        'COUNT(DISTINCT CASE WHEN p.userId IN (:...allUserIds) THEN p.userId END) = :participantCount',
+        {
+          allUserIds,
+          participantCount: allUserIds.length,
+        },
+      )
+      .getOne();
+
+    if (existingConversation) {
+      const hydrated = await this.getConversationEntity(
+        existingConversation.id,
+      );
+      const lastMessage = await this.findLastMessage(existingConversation.id);
+      return new ConversationDto(hydrated, {
+        contextUserId: userId,
+        lastMessage,
+      });
     }
 
     const [owner, participants] = await Promise.all([

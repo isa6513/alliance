@@ -18,9 +18,9 @@ const ProfileImage = ({
   return (
     <img
       src={!!pfp ? pfp : "/noun-user-icon.svg"}
-      className={`object-cover bg-white inline ${className} ${
-        sizeClass[size]
-      } ${!pfp ? "border border-zinc-300" : ""}`}
+      className={`object-cover bg-white inline ${sizeClass[size]} ${
+        !pfp ? "border border-zinc-300" : ""
+      } ${className ?? ""}`}
     />
   );
 };

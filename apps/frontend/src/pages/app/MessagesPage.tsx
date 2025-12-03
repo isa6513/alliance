@@ -20,7 +20,7 @@ import useLiveConvoMessages, {
 } from "./messages";
 import { useSearchParams } from "react-router";
 import ConversationDetailPanel from "../../components/ConversationDetailPanel";
-import { ChevronLeft, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 const MessagesPage = () => {
   const [params, setParams] = useSearchParams();
@@ -95,19 +95,6 @@ const MessagesPage = () => {
 
   const [friends, setFriends] = useState<ProfileDto[] | null>(null);
 
-  const notmessagedFriends = useMemo(() => {
-    return friends?.filter(
-      (friend) =>
-        !conversations?.some(
-          (convo) =>
-            convo.type === "direct" &&
-            convo.participants.some(
-              (participant) => participant.user.id === friend.id
-            )
-        )
-    );
-  }, [friends, conversations]);
-
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [isSmall, setIsSmall] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -137,24 +124,11 @@ const MessagesPage = () => {
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
 
   const [search, setSearch] = useState("");
-  const [creatingGroup, setCreatingGroup] = useState(false);
-  const [selectedFriendsForGroup, setSelectedFriendsForGroup] = useState<
+  const [sendingNewMessageToIds, setSendingNewMessageToIds] = useState<
     number[]
   >([]);
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-
-  const filteredNotmessagedFriends = useMemo(() => {
-    return notmessagedFriends?.filter((friend) =>
-      friend.displayName.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [notmessagedFriends, search]);
-
-  const searchFilteredFriends = useMemo(() => {
-    return friends?.filter((friend) =>
-      friend.displayName.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [friends, search]);
 
   useEffect(() => {
     if (messagesContainerRef.current) {
@@ -163,49 +137,49 @@ const MessagesPage = () => {
     }
   }, [convoMessages]);
 
-  const selectFriend = (friendId: number) => {
-    setCreatingNewConversation(false);
-    conversationCreateDirectConversation({
-      body: {
-        targetUserId: friendId,
-      },
-    }).then((response) => {
-      if (response.data) {
-        setConversations((prev) => [...(prev ?? []), response.data]);
-        setSelectedConvoId(response.data.id);
-      }
-    });
-  };
+  const handleCreateConversation =
+    useCallback(async (): Promise<ConversationDto | null> => {
+      if (sendingNewMessageToIds.length === 0) return null;
 
-  const selectFriendForGroup = useCallback(
-    (friendId: number) => {
-      if (selectedFriendsForGroup.includes(friendId)) {
-        setSelectedFriendsForGroup((prev) =>
-          prev.filter((id) => id !== friendId)
+      const onSuccess = (response: ConversationDto) => {
+        const updated = Array.from(
+          new Set([...(conversations ?? []), response])
         );
-      } else {
-        setSelectedFriendsForGroup((prev) => [...prev, friendId]);
-      }
-    },
-    [selectedFriendsForGroup]
-  );
+        setConversations(updated);
+        setSelectedConvoId(response.id);
+        setSendingNewMessageToIds([]);
+        setCreatingNewConversation(false);
+      };
 
-  const handleCreateGroupForSelectedFriends = useCallback(async () => {
-    if (selectedFriendsForGroup.length === 0) return;
-    const response = await conversationCreateGroupConversation({
-      body: {
-        participantIds: selectedFriendsForGroup,
-        title: "New group",
-      },
-    });
-    if (response.data) {
-      setConversations((prev) => [...(prev ?? []), response.data]);
-      setSelectedConvoId(response.data.id);
-      setCreatingGroup(false);
-      setSelectedFriendsForGroup([]);
-      setCreatingNewConversation(false);
-    }
-  }, [selectedFriendsForGroup, setSelectedConvoId, setConversations]);
+      if (sendingNewMessageToIds.length === 1) {
+        const response = await conversationCreateDirectConversation({
+          body: {
+            targetUserId: sendingNewMessageToIds[0],
+          },
+        });
+        if (response.data) {
+          onSuccess(response.data);
+          return response.data;
+        }
+      } else {
+        const response = await conversationCreateGroupConversation({
+          body: {
+            participantIds: sendingNewMessageToIds,
+            title: "New group",
+          },
+        });
+        if (response.data) {
+          onSuccess(response.data);
+          return response.data;
+        }
+      }
+      return null;
+    }, [
+      sendingNewMessageToIds,
+      setSelectedConvoId,
+      conversations,
+      setConversations,
+    ]);
 
   const joinedConversations = useMemo(() => {
     return conversations?.filter((convo) =>
@@ -251,6 +225,7 @@ const MessagesPage = () => {
   const handleConversationClick = useCallback(
     (conversationId: number) => () => {
       setMessagesOpen(true);
+      setCreatingNewConversation(false);
       setSelectedConvoId(conversationId);
     },
     [setSelectedConvoId]
@@ -258,22 +233,36 @@ const MessagesPage = () => {
 
   const handleCreateNewConversation = useCallback(() => {
     setCreatingNewConversation(true);
-    setCreatingGroup(false);
-    setSelectedFriendsForGroup([]);
+    setSelectedConvoId(null);
+    setSendingNewMessageToIds([]);
     setSearch("");
-  }, []);
+  }, [setSelectedConvoId]);
+
+  const handleUpdateRecipientIds = useCallback(
+    (ids: number[]) => {
+      setSendingNewMessageToIds(ids);
+      for (const convo of conversations ?? []) {
+        const usersWithoutCurrent = convo.participants
+          .filter((participant) => participant.user.id !== user?.id)
+          .map((participant) => participant.user.id);
+        console.log(usersWithoutCurrent, ids);
+        if (
+          usersWithoutCurrent.every((id) => ids.includes(id)) &&
+          ids.every((id) => usersWithoutCurrent.includes(id))
+        ) {
+          setSelectedConvoId(convo.id);
+          return;
+        }
+      }
+    },
+    [conversations, setSelectedConvoId, user?.id]
+  );
 
   const filteredConversations = useMemo(() => {
     return joinedConversations?.filter((convo) =>
       convo.title.toLowerCase().includes(search.toLowerCase())
     );
   }, [joinedConversations, search]);
-
-  const handleCreateGroup = useCallback(() => {
-    setSelectedConvoId(0);
-    setSearch("");
-    setCreatingGroup(true);
-  }, [setSelectedConvoId]);
 
   useEffect(() => {
     if (selectedConvoId) {
@@ -310,214 +299,119 @@ const MessagesPage = () => {
         }`}
         style={{ flex: isSmall && messagesOpen ? 0 : 1 }}
       >
-        {creatingNewConversation ? (
-          <>
-            <div className="flex flex-col p-4 justify-start items-center gap-y-2 pt-6">
-              <div className="flex flex-row gap-x-2 w-full items-center">
-                <Button
-                  color={ButtonColor.Transparent}
-                  onClick={() => setCreatingNewConversation(false)}
-                  className="!px-2 !py-2"
-                >
-                  <ChevronLeft size="20" />
-                </Button>
-                <p className="font-medium">Start a conversation...</p>
-              </div>
-              <input
-                placeholder="Search"
-                className="w-full border border-zinc-200 rounded-md p-2 !bg-gray-200 text-black"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+        <div>
+          <div className="p-4">
+            <div className="flex flex-row items-center justify-between gap-x-2 mb-2">
+              <p className="text-lg font-semibold">Chats</p>
+              <Button
+                color={ButtonColor.Transparent}
+                size="small"
+                onClick={handleCreateNewConversation}
+                className="!px-2"
+              >
+                <Plus size="18" />
+              </Button>
             </div>
-            {creatingGroup ? (
-              <div className="flex flex-col px-4 gap-y-2">
-                <p className="text-sm text-zinc-500 font-medium">
-                  Select friends to add:
-                </p>
-                <div className="max-h-[300px] overflow-y-auto">
-                  {searchFilteredFriends && searchFilteredFriends.length > 0 ? (
-                    searchFilteredFriends.map((friend) => (
-                      <div
-                        key={friend.id}
-                        className="flex flex-row items-center justify-between gap-x-2 hover:bg-zinc-100 p-4 rounded-md cursor-pointer"
-                        onClick={() => selectFriendForGroup(friend.id)}
-                      >
-                        <div className="flex flex-row items-center gap-x-2">
-                          <ProfileImage
-                            pfp={friend.profilePicture}
-                            size="large"
-                          />
-                          <span>{friend.displayName}</span>
-                        </div>
-                        <input
-                          type="checkbox"
-                          checked={selectedFriendsForGroup.includes(friend.id)}
-                          className="w-4 h-4 mr-2"
-                        />
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-center text-zinc-500 p-4 text-sm">
-                      No friends to add
-                    </p>
+            <input
+              placeholder="Search"
+              className="w-full border border-zinc-200 rounded-md p-2 !bg-gray-200 text-black"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="border-t border-zinc-200">
+            {filteredConversations?.map((conversation) => (
+              <div
+                key={conversation.id}
+                className={`p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row justify-between items-center gap-x-3 ${
+                  selectedConvoId === conversation.id
+                    ? "bg-zinc-100"
+                    : "bg-white"
+                }`}
+                onClick={handleConversationClick(conversation.id)}
+              >
+                <div className="flex flex-row items-center gap-x-3">
+                  <ProfileImage pfp={conversation.photo ?? null} size="large" />
+                  <div className="flex flex-col">
+                    <span className="font-medium">{conversation.title}</span>
+                    <span className="text-sm text-zinc-500 line-clamp-1">
+                      {!!conversation.lastMessage
+                        ? conversation.type === "direct"
+                          ? conversation.lastMessage.author.id === user?.id
+                            ? "you: " + conversation.lastMessage.body
+                            : conversation.lastMessage.body
+                          : conversation.lastMessage.author.displayName +
+                            ": " +
+                            conversation.lastMessage.body
+                        : "No messages yet"}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  {conversation.unreadCount > 0 && (
+                    <div
+                      className={`font-semibold text-xs text-white bg-red-500
+                    } rounded-md flex justify-center items-center w-6 h-6`}
+                    >
+                      {conversation.unreadCount}
+                    </div>
                   )}
                 </div>
-                <Button
-                  color={ButtonColor.Black}
-                  onClick={handleCreateGroupForSelectedFriends}
-                  disabled={selectedFriendsForGroup.length === 0}
-                  className="self-end rounded-md"
-                >
-                  Create group
-                </Button>
               </div>
-            ) : (
-              <div className="flex flex-col px-4">
-                <Button
-                  color={ButtonColor.Transparent}
-                  onClick={handleCreateGroup}
-                  className="w-full justify-start rounded-md !py-3 border border-zinc-300 mb-2 !px-4"
-                >
-                  Create a group
-                </Button>
-                {filteredNotmessagedFriends &&
-                filteredNotmessagedFriends.length > 0 ? (
-                  filteredNotmessagedFriends.map((friend) => (
+            ))}
+            {pendingInvites && pendingInvites.length > 0 && (
+              <div className="mt-6">
+                <p className="text-sm text-zinc-500 font-medium px-4">
+                  New message requests
+                </p>
+                <div className="flex flex-col border-t border-zinc-200 mt-2">
+                  {pendingInvites?.map((conversation) => (
                     <div
-                      key={friend.id}
-                      className="flex flex-row items-center gap-x-2 hover:bg-zinc-100 p-4 rounded-md cursor-pointer"
-                      onClick={() => selectFriend(friend.id)}
+                      key={conversation.id}
+                      className={`p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row items-center gap-x-2 ${
+                        selectedConvoId === conversation.id
+                          ? "bg-zinc-100"
+                          : "bg-green/10"
+                      }`}
+                      onClick={handleConversationClick(conversation.id)}
                     >
-                      <ProfileImage pfp={friend.profilePicture} size="large" />
-                      <span>{friend.displayName}</span>
+                      <ProfileImage
+                        pfp={conversation.photo ?? null}
+                        size="large"
+                      />
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {conversation.title}
+                        </span>
+                        <span className="text-sm text-zinc-500 line-clamp-1">
+                          {!!conversation.lastMessage
+                            ? conversation.type === "direct"
+                              ? conversation.lastMessage.body
+                              : conversation.lastMessage.author.displayName +
+                                ": " +
+                                conversation.lastMessage.body
+                            : conversation.type === "direct"
+                            ? "Wants to start a conversation"
+                            : "You were invited to a group"}
+                        </span>
+                      </div>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-center text-zinc-500 p-4 text-sm">
-                    No friends to message yet
-                  </p>
-                )}
+                  ))}
+                </div>
               </div>
             )}
-          </>
-        ) : (
-          <div>
-            <div className="p-4">
-              <div className="flex flex-row items-center justify-between gap-x-2 mb-2">
-                <p className="text-lg font-semibold">Chats</p>
-                <Button
-                  color={ButtonColor.Transparent}
-                  size="small"
-                  onClick={handleCreateNewConversation}
-                  className="!px-2"
-                >
-                  <Plus size="18" />
-                </Button>
-              </div>
-              <input
-                placeholder="Search"
-                className="w-full border border-zinc-200 rounded-md p-2 !bg-gray-200 text-black"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            <div className="border-t border-zinc-200">
-              {filteredConversations?.map((conversation) => (
-                <div
-                  key={conversation.id}
-                  className={`p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row justify-between items-center gap-x-3 ${
-                    selectedConvoId === conversation.id
-                      ? "bg-zinc-100"
-                      : "bg-white"
-                  }`}
-                  onClick={handleConversationClick(conversation.id)}
-                >
-                  <div className="flex flex-row items-center gap-x-3">
-                    <ProfileImage
-                      pfp={conversation.photo ?? null}
-                      size="large"
-                    />
-                    <div className="flex flex-col">
-                      <span className="font-medium">{conversation.title}</span>
-                      <span className="text-sm text-zinc-500 line-clamp-1">
-                        {!!conversation.lastMessage
-                          ? conversation.type === "direct"
-                            ? conversation.lastMessage.author.id === user?.id
-                              ? "you: " + conversation.lastMessage.body
-                              : conversation.lastMessage.body
-                            : conversation.lastMessage.author.displayName +
-                              ": " +
-                              conversation.lastMessage.body
-                          : "No messages yet"}
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    {conversation.unreadCount > 0 && (
-                      <div
-                        className={`font-semibold text-xs text-white bg-red-500
-                    } rounded-md flex justify-center items-center w-6 h-6`}
-                      >
-                        {conversation.unreadCount}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-              {pendingInvites && pendingInvites.length > 0 && (
-                <div className="mt-6">
-                  <p className="text-sm text-zinc-500 font-medium px-4">
-                    New message requests
-                  </p>
-                  <div className="flex flex-col border-t border-zinc-200 mt-2">
-                    {pendingInvites?.map((conversation) => (
-                      <div
-                        key={conversation.id}
-                        className={`p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row items-center gap-x-2 ${
-                          selectedConvoId === conversation.id
-                            ? "bg-zinc-100"
-                            : "bg-green/10"
-                        }`}
-                        onClick={handleConversationClick(conversation.id)}
-                      >
-                        <ProfileImage
-                          pfp={conversation.photo ?? null}
-                          size="large"
-                        />
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {conversation.title}
-                          </span>
-                          <span className="text-sm text-zinc-500 line-clamp-1">
-                            {!!conversation.lastMessage
-                              ? conversation.type === "direct"
-                                ? conversation.lastMessage.body
-                                : conversation.lastMessage.author.displayName +
-                                  ": " +
-                                  conversation.lastMessage.body
-                              : conversation.type === "direct"
-                              ? "Wants to start a conversation"
-                              : "You were invited to a group"}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
-        )}
+        </div>
       </div>
       <div
         className={`flex-1 ${
           isSmall && !messagesOpen ? "max-w-0" : "max-w-full"
         }`}
       >
-        {selectedConvo && (
+        {selectedConvo && !creatingNewConversation && (
           <ConversationDetailPanel
             showCloseButton={isSmall}
+            mode="existing"
             onClose={() => setMessagesOpen(false)}
             onLeave={() => {
               setSelectedConvoId(null);
@@ -529,7 +423,31 @@ const MessagesPage = () => {
             handleAcceptMessageRequest={handleAcceptMessageRequest}
             handleDeclineMessageRequest={handleDeclineMessageRequest}
             handleConversationUpdated={handleConversationUpdated}
+            sendingNewMessageToIds={null}
+            setSendingNewMessageToIds={null}
+            handleCreateConversation={null}
             friends={friends}
+          />
+        )}
+        {creatingNewConversation && (
+          <ConversationDetailPanel
+            showCloseButton={isSmall}
+            mode="new"
+            onClose={() => setMessagesOpen(false)}
+            onLeave={() => {
+              setSelectedConvoId(null);
+              setMessagesOpen(false);
+            }}
+            selectedConvo={null}
+            convoMessages={convoMessages}
+            messagesContainerRef={messagesContainerRef}
+            handleConversationUpdated={handleConversationUpdated}
+            handleAcceptMessageRequest={null}
+            handleDeclineMessageRequest={null}
+            friends={friends}
+            sendingNewMessageToIds={sendingNewMessageToIds}
+            setSendingNewMessageToIds={handleUpdateRecipientIds}
+            handleCreateConversation={handleCreateConversation}
           />
         )}
       </div>

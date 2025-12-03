@@ -51,7 +51,10 @@ export class ConversationController {
     @Body() dto: CreateGroupConversationDto,
     @Request() req: JwtRequest,
   ): Promise<ConversationDto> {
-    return this.conversationService.createGroupConversation(req.user.sub, dto);
+    return this.conversationService.createOrGetGroupConversation(
+      req.user.sub,
+      dto,
+    );
   }
 
   @Post(':conversationId/update')

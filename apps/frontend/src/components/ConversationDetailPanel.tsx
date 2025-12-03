@@ -14,20 +14,40 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { ChevronLeft, Users } from "lucide-react";
 import MessageInput from "./MessageInput";
 import type { MessageDto } from "@alliance/shared/client";
+import MessageRecipientSelect from "./MessageRecipientSelect";
 
-interface ConversationDetailPanelProps {
-  selectedConvo: ConversationDto;
-  convoMessages: MessageDto[] | null;
+type ConversationDetailPanelProps = {
   messagesContainerRef: React.RefObject<HTMLDivElement | null>;
-  handleAcceptMessageRequest: () => unknown;
-  handleDeclineMessageRequest: () => unknown;
-  handleConversationUpdated: (conversation: ConversationDto) => void;
   showCloseButton: boolean;
   onClose: () => void;
   onLeave: () => void;
   friends: ProfileDto[] | null;
-}
+  handleConversationUpdated: (conversation: ConversationDto) => void;
+} & (
+  | {
+      mode: "existing";
+      selectedConvo: ConversationDto;
+      convoMessages: MessageDto[] | null;
+      handleAcceptMessageRequest: () => unknown;
+      handleDeclineMessageRequest: () => unknown;
+      sendingNewMessageToIds: null;
+      setSendingNewMessageToIds: null;
+      handleCreateConversation: null;
+    }
+  | {
+      mode: "new";
+      selectedConvo: ConversationDto | null;
+      convoMessages: MessageDto[] | null;
+      handleAcceptMessageRequest: null;
+      handleDeclineMessageRequest: null;
+      sendingNewMessageToIds: number[];
+      setSendingNewMessageToIds: (ids: number[]) => void;
+      handleCreateConversation: () => Promise<ConversationDto | null>;
+    }
+);
+
 const ConversationDetailPanel = ({
+  mode,
   selectedConvo,
   convoMessages,
   messagesContainerRef,
@@ -38,6 +58,9 @@ const ConversationDetailPanel = ({
   onClose,
   onLeave,
   friends,
+  sendingNewMessageToIds,
+  setSendingNewMessageToIds,
+  handleCreateConversation,
 }: ConversationDetailPanelProps) => {
   const { user } = useAuth();
 
@@ -140,18 +163,28 @@ const ConversationDetailPanel = ({
   }, [convoMessages, replyingTo]);
 
   const amInvited = useMemo(() => {
+    if (mode === "new") return false;
     return selectedConvo.participants.some(
       (participant) =>
         participant.user.id === user?.id && participant.state === "invited"
     );
-  }, [selectedConvo, user]);
+  }, [mode, selectedConvo, user]);
 
   const handleFocusReply = useCallback((messageId: string) => {
     setFocusedMessageId(messageId);
   }, []);
 
   const handleSendMessage = useCallback(async () => {
-    if (isSendingMessage || !selectedConvo) {
+    if (isSendingMessage) {
+      return;
+    }
+
+    let activeConvo = selectedConvo;
+
+    if (mode === "new") {
+      activeConvo = await handleCreateConversation();
+    }
+    if (!activeConvo) {
       return;
     }
 
@@ -163,7 +196,7 @@ const ConversationDetailPanel = ({
     setIsSendingMessage(true);
     try {
       const payload: CreateMessageDto & { attachments?: string[] } = {
-        conversationId: selectedConvo.id,
+        conversationId: activeConvo.id,
         body: message,
         attachments,
         replyToId: replyingTo ?? undefined,
@@ -178,8 +211,8 @@ const ConversationDetailPanel = ({
       }
       if (amInvited) {
         handleConversationUpdated({
-          ...selectedConvo,
-          participants: selectedConvo.participants.map((participant) => {
+          ...activeConvo,
+          participants: activeConvo.participants.map((participant) => {
             if (participant.user.id === user?.id) {
               return { ...participant, state: "joined" };
             }
@@ -199,17 +232,19 @@ const ConversationDetailPanel = ({
     isSendingMessage,
     replyingTo,
     message,
+    mode,
+    handleCreateConversation,
     selectedConvo,
     user?.id,
   ]);
 
   useEffect(() => {
-    if (selectedConvo.id !== null) setGroupInfoOpen(false);
-  }, [selectedConvo.id]);
+    if (selectedConvo?.id !== null) setGroupInfoOpen(false);
+  }, [selectedConvo?.id]);
 
   useEffect(() => {
     setAttachments([]);
-  }, [selectedConvo.id]);
+  }, [selectedConvo?.id]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -224,11 +259,12 @@ const ConversationDetailPanel = ({
   }, []);
 
   const isAdmin = useMemo(() => {
+    if (mode === "new") return false;
     return selectedConvo.participants.some(
       (participant) =>
         participant.user.id === user?.id && participant.role === "admin"
     );
-  }, [selectedConvo, user]);
+  }, [mode, selectedConvo, user]);
 
   return (
     <div
@@ -243,7 +279,7 @@ const ConversationDetailPanel = ({
           Drop images to attach
         </div>
       )}
-      {groupInfoOpen ? (
+      {groupInfoOpen && mode === "existing" ? (
         <ConversationInfoPanel
           selectedConvo={selectedConvo}
           isAdmin={isAdmin}
@@ -255,7 +291,7 @@ const ConversationDetailPanel = ({
       ) : (
         <>
           <div
-            className="flex flex-row gap-y-2 border-b border-zinc-200 p-4 md:px-8 hover:bg-zinc-100 cursor-pointer"
+            className="flex flex-row gap-y-2 border-b border-zinc-200 p-4 md:px-8 cursor-pointer"
             onClick={() => setGroupInfoOpen(true)}
           >
             <div className="flex flex-row gap-x-3 items-center">
@@ -269,27 +305,47 @@ const ConversationDetailPanel = ({
                   <ChevronLeft size="20" />
                 </Button>
               )}
-              {selectedConvo.photo && (
-                <ProfileImage pfp={selectedConvo.photo} size="large" />
+              {selectedConvo?.photo && (
+                <ProfileImage
+                  pfp={selectedConvo.photo}
+                  size="large"
+                  className="w-10 h-10"
+                />
               )}
-              <div className="flex flex-col justify-center -mt-1">
-                <p className="font-semibold text-lg">{selectedConvo.title}</p>
-                {selectedConvo.type !== "direct" && (
-                  <div className="flex flex-row items-center gap-x-1 text-zinc-500">
-                    <Users size="17" />
-                    <p className="text-sm">
-                      {selectedConvo.participants.length} members
-                    </p>
+              {mode === "existing" && (
+                <div className="flex flex-col justify-center">
+                  <p className="font-semibold text-lg">{selectedConvo.title}</p>
+                  {selectedConvo.type !== "direct" && (
+                    <div className="flex flex-row items-center gap-x-1 text-zinc-500">
+                      <Users size="17" />
+                      <p className="text-sm">
+                        {selectedConvo.participants.length} members
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+              {mode === "new" && (
+                <div className="flex flex-col gap-2 z-5">
+                  <p className="font-semibold text-lg">New Message</p>
+                  <div className="flex flex-row items-center gap-x-2">
+                    <p className="text-sm font-medium">To:</p>
+                    <MessageRecipientSelect
+                      users={friends ?? []}
+                      selectedUserIds={sendingNewMessageToIds}
+                      onChange={setSendingNewMessageToIds}
+                    />
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
           <div
             className="overflow-y-auto px-8 justify-end mt-auto py-3"
             ref={messagesContainerRef}
           >
-            {selectedConvo.type === "direct" &&
+            {mode === "existing" &&
+              selectedConvo?.type === "direct" &&
               selectedConvo.participants.some(
                 (participant) =>
                   participant.user.id !== user?.id &&
@@ -309,13 +365,13 @@ const ConversationDetailPanel = ({
                 </div>
               )}
 
-            {convoMessages === null ? (
+            {convoMessages === null && mode === "existing" ? (
               <div className="flex justify-center items-center h-full">
-                <Spinner size="large" color="fill-zinc-200" />
+                <Spinner size="large" color="fill-zinc-500" />
               </div>
-            ) : (
+            ) : convoMessages !== null ? (
               <div>
-                {convoMessages.map((message, idx, arr) => (
+                {convoMessages?.map((message, idx, arr) => (
                   <Message
                     key={message.id}
                     message={message}
@@ -335,8 +391,9 @@ const ConversationDetailPanel = ({
                   />
                 ))}
               </div>
-            )}
-            {selectedConvo.type === "direct" &&
+            ) : null}
+            {mode === "existing" &&
+              selectedConvo?.type === "direct" &&
               selectedConvo.participants.some(
                 (participant) =>
                   participant.user.id === user?.id &&
@@ -375,7 +432,7 @@ const ConversationDetailPanel = ({
           <MessageInput
             message={message}
             setMessage={setMessage}
-            key={selectedConvo.id}
+            key={selectedConvo?.id ?? "new"}
             attachments={attachments}
             setAttachments={setAttachments}
             onSend={handleSendMessage}

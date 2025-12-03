@@ -1,0 +1,153 @@
+import { ProfileDto, userMembers } from "@alliance/shared/client";
+import React, { useEffect, useMemo, useState } from "react";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import { X } from "lucide-react";
+
+export type UserSelectUser = Pick<
+  ProfileDto,
+  "id" | "displayName" | "profilePicture"
+>;
+
+interface MessageRecipientSelectProps {
+  users: UserSelectUser[];
+  selectedUserIds: number[];
+  onChange: (userIds: number[]) => void;
+  loading?: boolean;
+  single?: boolean;
+}
+
+const MAX_RESULTS = 8;
+
+const MessageRecipientSelect: React.FC<MessageRecipientSelectProps> = ({
+  users,
+  selectedUserIds,
+  onChange,
+  loading = false,
+  single = false,
+}) => {
+  const [query, setQuery] = useState<string>("");
+
+  const canSelectMore = !single || selectedUserIds.length === 0;
+
+  const selectedUsers = useMemo(() => {
+    const userMap = new Map(users.map((user) => [user.id, user]));
+    return selectedUserIds.map((userId) => userMap.get(userId)!);
+  }, [users, selectedUserIds]);
+
+  const filteredUsers = useMemo(() => {
+    if (!canSelectMore) {
+      return [];
+    }
+
+    const term = query.trim().toLowerCase();
+    if (!term) {
+      return [];
+    }
+
+    const selectedIds = new Set(selectedUserIds);
+    return users
+      .filter((user) => !selectedIds.has(user.id))
+      .filter((user) => {
+        const haystack = `${user.displayName ?? ""}`.toLowerCase();
+        return haystack.includes(term);
+      })
+      .slice(0, MAX_RESULTS);
+  }, [query, users, selectedUserIds, canSelectMore]);
+
+  const addUser = (userId: number) => {
+    if (selectedUserIds.includes(userId)) {
+      return;
+    }
+    if (single) {
+      onChange([userId]);
+    } else {
+      onChange([...selectedUserIds, userId]);
+    }
+    setQuery("");
+  };
+
+  const removeUser = (userId: number) => {
+    onChange(selectedUserIds.filter((id) => id !== userId));
+  };
+
+  const inputDisabled = loading || !canSelectMore;
+  const placeholder = loading
+    ? "Loading users…"
+    : canSelectMore
+    ? "Search by name"
+    : "Remove current selection to choose another";
+
+  return (
+    <div className="relative flex flex-row items-center gap-x-2">
+      {selectedUsers.map((user) => (
+        <div
+          className="flex items-center justify-between rounded px-1 py-1 text-sm bg-zinc-100 shrink-0"
+          key={user.id}
+        >
+          <div className="flex items-center gap-x-2">
+            <ProfileImage pfp={user.profilePicture} size="medium" />
+            <p className="font-medium">{user.displayName}</p>
+          </div>
+          <Button
+            color={ButtonColor.Transparent}
+            onClick={() => removeUser(user.id)}
+          >
+            <X size="16" />
+          </Button>
+        </div>
+      ))}
+      <div className="relative">
+        {canSelectMore && (
+          <input
+            type="text"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={placeholder}
+            disabled={inputDisabled}
+            className="border border-zinc-300 rounded-md px-3 py-2.5 text-sm disabled:bg-zinc-100 disabled:text-zinc-500"
+          />
+        )}
+        {query && filteredUsers.length > 0 && (
+          <div className="border border-zinc-200 rounded bg-white max-h-48 overflow-y-auto absolute w-full top-full shadow">
+            {filteredUsers.map((user) => (
+              <button
+                type="button"
+                key={user.id}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 flex flex-row items-center gap-x-2"
+                onClick={() => addUser(user.id)}
+              >
+                <ProfileImage pfp={user.profilePicture} size="medium" />
+                <span className="font-medium">{user.displayName}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {query && !filteredUsers.length && !loading && (
+        <p className="ml-2 text-xs text-zinc-500">
+          No users match that search.
+        </p>
+      )}
+    </div>
+  );
+};
+
+export default MessageRecipientSelect;
+
+export const useSelectableUserIds = () => {
+  const [users, setUsers] = useState<UserSelectUser[]>([]);
+  useEffect(() => {
+    userMembers().then((response) => {
+      setUsers(
+        response.data?.map((user) => ({
+          id: user.id,
+          displayName: user.displayName,
+          profilePicture: user.profilePicture,
+        })) ?? []
+      );
+    });
+  }, []);
+  return users;
+};
