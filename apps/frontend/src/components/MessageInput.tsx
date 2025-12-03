@@ -211,7 +211,7 @@ const MessageInput = ({
         <textarea
           ref={inputRef}
           value={message}
-          autoFocus
+          autoFocus={!compact}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
