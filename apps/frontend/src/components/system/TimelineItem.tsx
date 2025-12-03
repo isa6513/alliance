@@ -18,7 +18,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
 }: TimelineItemProps) => {
   return (
     <div className="flex flex-col gap-y-2">
-      <div className="flex flex-row items-center gap-x-2 mt-px">
+      <div className="flex flex-col md:flex-row md:items-center md:gap-x-2 mt-px">
         <p
           className={`${highlighted ? "font-medium text-green" : "text-black"}`}
         >

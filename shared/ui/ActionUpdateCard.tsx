@@ -1,6 +1,5 @@
 import { ActionUpdateDto } from "../client";
 import { formatTime } from "../lib/utils";
-import Card, { CardStyle } from "./Card";
 import EditableContentRenderer from "./EditableContentRenderer";
 import Button, { ButtonColor } from "./Button";
 import DatabaseIcon from "./icons/DatabaseIcon";
@@ -18,31 +17,37 @@ const ActionUpdateCard = ({
   admin = false,
 }: ActionUpdateCardProps) => {
   return (
-    <Card className="!py-3 !px-4 w-full gap-y-1" style={CardStyle.White}>
-      <div className="flex flex-row justify-between items-center">
-        <div className="flex flex-row gap-x-2 items-center">
-          <p className="font-semibold">{update.title}</p>
-          {admin && (
-            <Link to={`/database?table=action_update&id=${update.id}`}>
-              <DatabaseIcon size="small" />
-            </Link>
+    <div className="flex flex-col border border-zinc-200 rounded divide-y divide-zinc-200 overflow-hidden">
+      <div className="p-3 md:p-5 w-full gap-y-1 bg-zinc-50">
+        <div className="flex flex-row justify-between items-center">
+          <div className="flex flex-col md:flex-row md:gap-x-2 md:items-center text-sm">
+            <p className="font-medium">
+              <span className="text-green">Update:</span> {update.title}
+            </p>
+            {admin && (
+              <Link to={`/database?table=action_update&id=${update.id}`}>
+                <DatabaseIcon size="small" />
+              </Link>
+            )}
+            <p className="text-zinc-500">
+              {formatTime(new Date(update.date), {
+                addSuffix: true,
+              })}
+            </p>
+          </div>
+          {onDelete && (
+            <Button onClick={onDelete} color={ButtonColor.Black} size="small">
+              Delete
+            </Button>
           )}
-          <p className="text-zinc-500">
-            {formatTime(new Date(update.date), {
-              addSuffix: true,
-            })}
-          </p>
         </div>
-        {onDelete && (
-          <Button onClick={onDelete} color={ButtonColor.Black} size="small">
-            Delete
-          </Button>
+      </div>
+      <div className="p-3 md:p-5 w-full gap-y-1 bg-white">
+        {!!update.content.body && (
+          <EditableContentRenderer content={update.content} className="" />
         )}
       </div>
-      {!!update.content.body && (
-        <EditableContentRenderer content={update.content} />
-      )}
-    </Card>
+    </div>
   );
 };
 
