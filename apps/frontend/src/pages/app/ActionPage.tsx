@@ -70,8 +70,8 @@ export default function ActionPage() {
   }
 
   return (
-    <div className="w-full flex flex-row justify-between py-10 sm:py-20 px-4 md:px-8 xl:px-18">
-      <div className="flex flex-col pr-0 xl:pr-12 max-w-2xl lg:max-w-3xl mx-auto w-full">
+    <div className="w-full flex flex-row justify-between py-10 sm:py-20 px-4 md:px-4 xl:px-18">
+      <div className="flex flex-col md:pr-4 xl:pr-12 max-w-2xl lg:max-w-3xl mx-auto w-full">
         <Outlet
           context={
             {
