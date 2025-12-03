@@ -215,8 +215,8 @@ const AwayRangesSection: React.FC = () => {
               />
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Reason</label>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium">Reason</label>
             <DropdownSelect
               options={Object.keys(REASON_DROPDOWN_OPTIONS)}
               value={selectedReason}
@@ -226,22 +226,9 @@ const AwayRangesSection: React.FC = () => {
                 )
               }
             />
-            {selectedReasonIsOther && (
-              <p>
-                {"See "}
-                <Link
-                  to={href("/contract")}
-                  target={"_blank"}
-                  className={"text-green"}
-                >
-                  contract
-                </Link>
-                {" for our guidelines on reasons for away periods."}
-              </p>
-            )}
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">
+          <div className="flex flex-col gap-1">
+            <label className="block text-sm font-medium">
               Note{!selectedReasonIsOther && " (optional)"}
             </label>
             <FormInput
@@ -249,8 +236,25 @@ const AwayRangesSection: React.FC = () => {
               type="text"
               value={noteInput}
               onChange={(e) => setNoteInput(e.target.value)}
-              placeholder="e.g., Vacation, conference, etc."
+              placeholder={
+                selectedReasonIsOther
+                  ? "Please provide more details"
+                  : undefined
+              }
             />
+            {selectedReasonIsOther && (
+              <p className="text-sm text-zinc-500">
+                See the{" "}
+                <Link
+                  to={href("/contract")}
+                  target={"_blank"}
+                  className={"text-green"}
+                >
+                  contract
+                </Link>{" "}
+                for our guidelines on reasons for away periods.
+              </p>
+            )}
           </div>
           <Button
             onClick={handleCreate}
@@ -266,7 +270,7 @@ const AwayRangesSection: React.FC = () => {
           >
             {creating ? "Creating..." : "Schedule"}
           </Button>
-          <p className="text-xs text-zinc-500 mt-2">
+          <p className="text-sm text-zinc-500 mt-2">
             Need to be away for longer than 14 days? Please email us.
           </p>
         </div>
