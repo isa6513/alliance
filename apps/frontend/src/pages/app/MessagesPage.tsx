@@ -268,12 +268,33 @@ const MessagesPage = () => {
   );
 
   useEffect(() => {
-    if (params.get("to")) {
-      const userId = parseInt(params.get("to")!);
-      setCreatingNewConversation(true);
-      handleUpdateRecipientIds([userId]);
+    const param = params.get("to");
+    if (param) {
+      const userId = parseInt(param);
+      const existing = conversations?.find(
+        (convo) =>
+          convo.type === "direct" &&
+          convo.participants.some(
+            (participant) => participant.user.id === userId
+          )
+      );
+      if (existing) {
+        setParams({});
+        setSelectedConvoId(existing.id);
+        setCreatingNewConversation(false);
+        return;
+      } else {
+        setCreatingNewConversation(true);
+        handleUpdateRecipientIds([userId]);
+      }
     }
-  }, [params, handleUpdateRecipientIds]);
+  }, [
+    params,
+    handleUpdateRecipientIds,
+    conversations,
+    setSelectedConvoId,
+    setParams,
+  ]);
 
   const filteredConversations = useMemo(() => {
     return joinedConversations?.filter((convo) =>
