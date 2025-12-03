@@ -18,6 +18,7 @@ import CreateIcon from "@alliance/shared/ui/icons/CreateIcon";
 import { sharp_allowed_mime_types } from "@alliance/shared/lib/config";
 import ProfileImageEditor from "./ProfileImageEditor";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Spinner from "./Spinner";
 
 export interface ConversationInfoPanelProps {
   selectedConvo: ConversationDto;
@@ -86,6 +87,7 @@ const ConversationInfoPanel = ({
 
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [justAddedMember, setJustAddedMember] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (justAddedMember) {
@@ -103,6 +105,7 @@ const ConversationInfoPanel = ({
   };
 
   const handleSaveGroup = async () => {
+    setIsSaving(true);
     const response = await conversationUpdateInfo({
       path: { conversationId: selectedConvo.id },
       body: { title: editingGroupTitle, photo: editingGroupPhoto ?? undefined },
@@ -113,6 +116,7 @@ const ConversationInfoPanel = ({
       setEditingGroupTitle(response.data.title);
       setEditingGroupPhoto(response.data.photo ?? null);
     }
+    setIsSaving(false);
   };
 
   const handleAddMember = async (userId: number) => {
@@ -174,10 +178,12 @@ const ConversationInfoPanel = ({
               onChange={(e) => setEditingGroupTitle(e.target.value)}
             />
             <Button
-              color={ButtonColor.Light}
+              color={ButtonColor.Stone}
               onClick={handleSaveGroup}
-              className=""
+              disabled={isSaving}
+              className="flex flex-row items-center gap-x-2"
             >
+              {isSaving && <Spinner size="small" />}
               Save
             </Button>
           </div>
