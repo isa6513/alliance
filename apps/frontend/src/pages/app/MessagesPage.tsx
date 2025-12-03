@@ -151,6 +151,11 @@ const MessagesPage = () => {
         setCreatingNewConversation(false);
       };
 
+      if (selectedConvo) {
+        onSuccess(selectedConvo);
+        return selectedConvo;
+      }
+
       if (sendingNewMessageToIds.length === 1) {
         const response = await conversationCreateDirectConversation({
           body: {
@@ -179,6 +184,7 @@ const MessagesPage = () => {
       setSelectedConvoId,
       conversations,
       setConversations,
+      selectedConvo,
     ]);
 
   const joinedConversations = useMemo(() => {
