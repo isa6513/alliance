@@ -23,6 +23,7 @@ import { ReminderGroup } from './entities/reminder-group.entity';
 import { ActionSuite } from './entities/action-suite.entity';
 import { ForumModule } from 'src/forum/forum.module';
 import { Form } from 'src/tasks/entities/form.entity';
+import { ReloadUsersJoinedWorker } from './reload-users-joined.worker';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { Form } from 'src/tasks/entities/form.entity';
     ActionEventNotifWorker,
     ActionEventRecipientService,
     ActionEventReminderService,
+    ReloadUsersJoinedWorker,
   ],
   exports: [ActionsService],
 })

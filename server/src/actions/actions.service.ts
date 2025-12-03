@@ -217,7 +217,6 @@ export class ActionsService {
   async reloadAllActionUsersJoined(): Promise<void> {
     const actions = await this.actionRepository.find();
     for (const action of actions) {
-      console.log('reloading for: ' + action.id);
       await this.reloadUsersJoinedForAction(action.id);
     }
   }
