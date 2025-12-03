@@ -67,7 +67,7 @@ ORDER BY pp.total_session_duration_seconds DESC
   async getPosthogData(
     range: 'last7Days' | 'total',
   ): Promise<TimeSpentForUserDto[]> {
-    const users = await this.userService.findActiveUsers();
+    const users = await this.userService.findAllUsers();
 
     const emailToUserId = users.reduce((acc, user) => {
       acc[user.email] = user.id;

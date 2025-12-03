@@ -485,7 +485,7 @@ export class UserService {
     await this.userRepository.update(userId, { stripeCustomerId });
   }
 
-  async findActiveUsers(): Promise<User[]> {
+  async findAllUsers(): Promise<User[]> {
     return this.userRepository.find({
       where: {
         isNotSignedUpPartialProfile: false,

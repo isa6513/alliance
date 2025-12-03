@@ -1301,8 +1301,6 @@ export class ActionsService {
   }
 
   async generateNotifsForActionUpdate(actionUpdate: ActionUpdate) {
-    const action = actionUpdate.action;
-
     let users: User[] = [];
     if (actionUpdate.notifyType === ActionUpdateNotifyType.ActionCohort) {
       users = await this.userService.findAll();
@@ -1313,11 +1311,7 @@ export class ActionsService {
       users = (await this.userService.findGroupOrFail(actionUpdate.group.id))
         .users;
     } else if (actionUpdate.notifyType === ActionUpdateNotifyType.AllMembers) {
-      users = await this.actionEventRecipientService.getBaseUsersForEvent(
-        ActionStatus.MemberAction,
-        action,
-        actionUpdate.associatedEvent?.date ?? actionUpdate.date,
-      );
+      users = await this.userService.findAllUsers();
     }
 
     for (const user of users) {
