@@ -126,9 +126,7 @@ const MessageRecipientSelect: React.FC<MessageRecipientSelectProps> = ({
       </div>
 
       {query && !filteredUsers.length && !loading && (
-        <p className="ml-2 text-xs text-zinc-500">
-          No users match that search.
-        </p>
+        <p className="ml-2 text-sm text-zinc-500">No members found</p>
       )}
     </div>
   );

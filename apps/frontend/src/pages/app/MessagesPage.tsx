@@ -142,10 +142,15 @@ const MessagesPage = () => {
       if (sendingNewMessageToIds.length === 0) return null;
 
       const onSuccess = (response: ConversationDto) => {
-        const updated = Array.from(
-          new Set([...(conversations ?? []), response])
-        );
-        setConversations(updated);
+        setConversations((prev) => {
+          const ids: Map<number, ConversationDto> = new Map();
+          for (const convo of prev ?? []) {
+            ids.set(convo.id, convo);
+          }
+          ids.set(response.id, response);
+          const updated = Array.from(ids.values()).sort(sortConversations);
+          return updated;
+        });
         setSelectedConvoId(response.id);
         setSendingNewMessageToIds([]);
         setCreatingNewConversation(false);
@@ -182,7 +187,6 @@ const MessagesPage = () => {
     }, [
       sendingNewMessageToIds,
       setSelectedConvoId,
-      conversations,
       setConversations,
       selectedConvo,
     ]);
@@ -251,7 +255,6 @@ const MessagesPage = () => {
         const usersWithoutCurrent = convo.participants
           .filter((participant) => participant.user.id !== user?.id)
           .map((participant) => participant.user.id);
-        console.log(usersWithoutCurrent, ids);
         if (
           usersWithoutCurrent.every((id) => ids.includes(id)) &&
           ids.every((id) => usersWithoutCurrent.includes(id))
