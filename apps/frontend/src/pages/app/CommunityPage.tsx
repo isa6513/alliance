@@ -194,14 +194,15 @@ const CommunityPage = () => {
   }
 
   const leaders = community.leaders;
-  const members = community.users.filter(
+  const groupMembers = community.users.filter((user) => user.hasActiveContract);
+  const nonLeaderMembers = groupMembers.filter(
     (user) => !leaders.some((leader) => leader.id === user.id)
   );
 
   const membersByFilterMode = {
-    [FilterMode.All]: members.filter((user) => user.hasActiveContract),
-    [FilterMode.NotYetCompleted]: members.filter(
-      (user) => !completedAllCurrentActions[user.id] && user.hasActiveContract
+    [FilterMode.All]: nonLeaderMembers,
+    [FilterMode.NotYetCompleted]: nonLeaderMembers.filter(
+      (user) => !completedAllCurrentActions[user.id]
     ),
   };
   const filteredSortedMembers = membersByFilterMode[filterMode].sort((a, b) => {
@@ -254,11 +255,11 @@ const CommunityPage = () => {
 
         <div className="w-1/2">
           <p className="text-sm">
-            {nCompleted} / {community.users.length} have completed current
-            action{activeActions.length !== 1 ? "s" : ""}
+            {nCompleted} / {groupMembers.length} have completed current action
+            {activeActions.length !== 1 ? "s" : ""}
           </p>
           <CompletedBar
-            percentage={(nCompleted / community.users.length) * 100}
+            percentage={(nCompleted / groupMembers.length) * 100}
             height="h-4"
             dark
           />
@@ -394,7 +395,7 @@ const CommunityPage = () => {
       {tab === "invites" && (
         <CommunityInvitesTab
           communityId={community.id}
-          existingMembers={community.users}
+          existingMembers={groupMembers}
         />
       )}
       {tab === "edit" && (
