@@ -54,7 +54,11 @@ export class UserAwayRange {
   @Type(() => Date)
   createdAt: Date;
 
-  @Column({ type: 'enum', enum: UserAwayRangeReason })
+  @Column({
+    type: 'enum',
+    enum: UserAwayRangeReason,
+    default: UserAwayRangeReason.OTHER,
+  })
   @ApiProperty({
     enum: UserAwayRangeReason,
     enumName: 'UserAwayRangeReason',
