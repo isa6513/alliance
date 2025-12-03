@@ -1,12 +1,30 @@
 import {
   UserAwayRangeDto,
+  UserAwayRangeReason,
   userCreateAwayRange,
   userDeleteAwayRange,
   userGetAwayRanges,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import FormInput from "@alliance/shared/ui/FormInput";
+import { X } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
+import { href, Link } from "react-router";
+
+// {[DisplayName]: Reason enum}
+const REASON_DROPDOWN_OPTIONS = {
+  "Select a reason": null,
+  Vacation: "vacation",
+  Emergency: "emergency",
+  Other: "other",
+} satisfies Record<string, UserAwayRangeReason | null>;
+
+const REASON_DISPLAY_NAMES = Object.fromEntries(
+  Object.entries(REASON_DROPDOWN_OPTIONS)
+    .filter((reason) => reason)
+    .map(([displayName, reason]) => [reason, displayName])
+) as Record<UserAwayRangeReason, string>;
 
 const AwayRangesSection: React.FC = () => {
   const [awayRanges, setAwayRanges] = useState<UserAwayRangeDto[]>([]);
@@ -15,6 +33,10 @@ const AwayRangesSection: React.FC = () => {
   const [startDateInput, setStartDateInput] = useState("");
   const [endDateInput, setEndDateInput] = useState("");
   const [noteInput, setNoteInput] = useState("");
+
+  const [selectedReason, setSelectedReason] =
+    useState<keyof typeof REASON_DROPDOWN_OPTIONS>("Select a reason");
+  const selectedReasonIsOther = selectedReason === "Other";
 
   const loadAwayRanges = useCallback(async () => {
     try {
@@ -49,17 +71,26 @@ const AwayRangesSection: React.FC = () => {
       return;
     }
 
+    const reason = REASON_DROPDOWN_OPTIONS[selectedReason];
+    if (!reason) {
+      // Should not be possible, since button is disabled if no reason is selected
+      alert("Select a reason for your away period.");
+      return;
+    }
+
     setCreating(true);
     const resp = await userCreateAwayRange({
       body: {
         startDay: startDateInput,
         endDay: endDateInput,
+        reason,
         note: noteInput || undefined,
       },
     });
     if (resp.response.ok) {
       setStartDateInput("");
       setEndDateInput("");
+      setSelectedReason("Select a reason");
       setNoteInput("");
     }
     setCreating(false);
@@ -114,7 +145,7 @@ const AwayRangesSection: React.FC = () => {
                   : "bg-gray-50 border-gray-200"
               }`}
             >
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-center">
                 <div className="flex-1">
                   {isCurrentlyAway(range) && (
                     <p className="text-xs font-semibold text-yellow-800 mb-1">
@@ -139,16 +170,17 @@ const AwayRangesSection: React.FC = () => {
                       day: "numeric",
                     })}
                   </p>
-                  {range.note && (
-                    <p className="text-sm text-gray-600 mt-1">{range.note}</p>
-                  )}
+                  <p className="text-sm mt-1">
+                    {REASON_DISPLAY_NAMES[range.reason]}
+                    {range.note && ": " + range.note}
+                  </p>
                 </div>
                 <Button
                   onClick={() => handleDelete(range.id)}
                   color={ButtonColor.Red}
                   className="ml-4 !py-0 !px-1 text-sm !bg-transparent"
                 >
-                  Delete
+                  <X size="20" />
                 </Button>
               </div>
             </div>
@@ -184,8 +216,33 @@ const AwayRangesSection: React.FC = () => {
             </div>
           </div>
           <div>
+            <label className="block text-sm font-medium mb-1">Reason</label>
+            <DropdownSelect
+              options={Object.keys(REASON_DROPDOWN_OPTIONS)}
+              value={selectedReason}
+              onChange={(reason) =>
+                setSelectedReason(
+                  reason as keyof typeof REASON_DROPDOWN_OPTIONS
+                )
+              }
+            />
+            {selectedReasonIsOther && (
+              <p>
+                {"See "}
+                <Link
+                  to={href("/contract")}
+                  target={"_blank"}
+                  className={"text-green"}
+                >
+                  contract
+                </Link>
+                {" for our guidelines on reasons for away periods."}
+              </p>
+            )}
+          </div>
+          <div>
             <label className="block text-sm font-medium mb-1">
-              Note (optional)
+              Note{!selectedReasonIsOther && " (optional)"}
             </label>
             <FormInput
               name="note"
@@ -198,7 +255,13 @@ const AwayRangesSection: React.FC = () => {
           <Button
             onClick={handleCreate}
             color={ButtonColor.Black}
-            disabled={creating || !startDateInput || !endDateInput}
+            disabled={
+              creating ||
+              !startDateInput ||
+              !endDateInput ||
+              selectedReason === "Select a reason" ||
+              (selectedReasonIsOther && !noteInput)
+            }
             className="w-full md:w-auto"
           >
             {creating ? "Creating..." : "Schedule"}

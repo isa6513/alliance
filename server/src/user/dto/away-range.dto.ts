@@ -3,7 +3,10 @@ import { ApiProperty, PickType } from '@nestjs/swagger';
 import { UserAwayRange } from '../entities/user-away-range.entity';
 import { IsDefined, IsString } from 'class-validator';
 
-export class CreateAwayRangeDto extends PickType(UserAwayRange, ['note']) {
+export class CreateAwayRangeDto extends PickType(UserAwayRange, [
+  'note',
+  'reason',
+]) {
   @ApiProperty()
   @IsDefined()
   @IsString()
@@ -19,6 +22,7 @@ export class UserAwayRangeDto extends PickType(UserAwayRange, [
   'id',
   'startDate',
   'endDate',
+  'reason',
   'note',
   'createdAt',
 ]) {}

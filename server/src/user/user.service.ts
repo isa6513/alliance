@@ -36,7 +36,10 @@ import {
   CreateCommunityInviteDto,
   CreateOnetimeInviteDto,
 } from './dto/invite.dto';
-import { UserAwayRange } from './entities/user-away-range.entity';
+import {
+  UserAwayRange,
+  UserAwayRangeReason,
+} from './entities/user-away-range.entity';
 import { CreateAwayRangeDto } from './dto/away-range.dto';
 import { Temporal } from '@js-temporal/polyfill';
 import {
@@ -541,6 +544,7 @@ export class UserService {
     userId: number,
     data: CreateAwayRangeDto,
   ): Promise<UserAwayRange> {
+    const reason = data.reason;
     const startDay = Temporal.PlainDate.from(data.startDay);
     const endDay = Temporal.PlainDate.from(data.endDay);
     const user = await this.findOneOrFail(userId);
@@ -575,10 +579,17 @@ export class UserService {
       );
     }
 
+    if (reason === UserAwayRangeReason.OTHER && !data.note) {
+      throw new BadRequestException(
+        'Please provide a note for your away period.',
+      );
+    }
+
     const awayRange = this.userAwayRangeRepository.create({
       userId,
       startDate: new Date(startDate.epochMilliseconds),
       endDate: new Date(endDate.epochMilliseconds),
+      reason,
       note: data.note,
     });
 

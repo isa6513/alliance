@@ -67,6 +67,7 @@ export type Participant = {
     role: ParticipantRole;
     lastReadMessage?: Message;
     state: ParticipantState;
+    userHidden: boolean;
 };
 
 export type User = {
@@ -183,7 +184,10 @@ export type OnboardingDto = {
     cityId?: number;
 };
 
+export type UserAwayRangeReason = 'vacation' | 'emergency' | 'other';
+
 export type CreateAwayRangeDto = {
+    reason: UserAwayRangeReason;
     note?: string | null;
     startDay: string;
     endDay: string;
@@ -194,6 +198,7 @@ export type UserAwayRangeDto = {
     startDate: string;
     endDate: string;
     createdAt: string;
+    reason: UserAwayRangeReason;
     note?: string | null;
 };
 
@@ -376,6 +381,7 @@ export type MessageReferenceDto = {
 export type ParticipantDto = {
     role: ParticipantRole;
     state: ParticipantState;
+    userHidden: boolean;
     user: ProfileDto;
     lastReadMessage?: MessageReferenceDto;
 };
