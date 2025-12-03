@@ -248,6 +248,15 @@ const MessagesPage = () => {
     setSearch("");
   }, [setSelectedConvoId]);
 
+  const handleLeaveConversation = useCallback(() => {
+    setConversations((prev) => {
+      if (!prev) return null;
+      return prev.filter((convo) => convo.id !== selectedConvoId);
+    });
+    setSelectedConvoId(null);
+    setMessagesOpen(false);
+  }, [setSelectedConvoId, setConversations, selectedConvoId]);
+
   const handleUpdateRecipientIds = useCallback(
     (ids: number[]) => {
       setSendingNewMessageToIds(ids);
@@ -444,10 +453,7 @@ const MessagesPage = () => {
             showCloseButton={isSmall}
             mode="existing"
             onClose={() => setMessagesOpen(false)}
-            onLeave={() => {
-              setSelectedConvoId(null);
-              setMessagesOpen(false);
-            }}
+            onLeave={handleLeaveConversation}
             selectedConvo={selectedConvo}
             convoMessages={convoMessages}
             messagesContainerRef={messagesContainerRef}
