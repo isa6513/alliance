@@ -10,7 +10,7 @@ const PrelaunchLandingPage: React.FC = () => {
       <div className="min-h-screen flex flex-col bg-white">
         <PrelaunchNavbar transparent={false} absolute={false} />
         <div className="flex-1 container mx-auto flex flex-col px-5 py-5">
-          <div className="flex flex-col mx-auto my-auto px-6 max-w-4xl py-12 sm:py-24 lg:py-36">
+          <div className="flex flex-col mx-auto my-auto max-w-3xl py-12 sm:py-24 lg:py-36">
             {/* <img src={earth} className="mx-auto mb-12 w-50" /> */}
             <div className="mx-auto">
               <p className=" max-w-4xl font-medium text-3xl sm:text-6xl font-serif ">
@@ -28,7 +28,7 @@ Humanity faces crises that are causing irreversible and compounding harms. Among
 
 The Alliance aims to give its members, and ultimately a significant proportion of humanity, the ability to make deliberate, large-scale change. We plan to do so by facilitating strategic, sustained collective action.
 
-The bedrock of the Alliance is commitment. Members are expected to contribute a small, consistent amount of their time and resources.
+The Alliance is built on commitment. Members are expected to contribute a small, consistent amount of their time and resources. This allows us to make concrete and effective action plans.
 
 We are in an experimental phase. Membership is by invitation only.
 
