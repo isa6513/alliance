@@ -4,6 +4,7 @@ type ButtonProps = React.PropsWithChildren & {
   ref?: React.RefObject<HTMLButtonElement | null>;
   className?: string;
   color?: ButtonColor;
+  title?: string;
   disabled?: boolean;
   size?: "small" | "medium" | "large";
 } & (
@@ -41,6 +42,7 @@ export enum ButtonColor {
 
 const Button: React.FC<ButtonProps> = ({
   ref,
+  title,
   onClick,
   children,
   className,
@@ -63,6 +65,7 @@ const Button: React.FC<ButtonProps> = ({
     <button
       ref={ref}
       type={type}
+      title={title}
       className={` ${sizeClass} font-medium rounded w-fit h-fit flex items-center justify-center ${
         disabled ? "opacity-50 !cursor-not-allowed" : ``
       } ${color} ${

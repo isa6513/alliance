@@ -17,6 +17,7 @@ import type { MessageDto } from "@alliance/shared/client";
 import MessageRecipientSelect from "./MessageRecipientSelect";
 
 type ConversationDetailPanelProps = {
+  compact?: boolean;
   messagesContainerRef: React.RefObject<HTMLDivElement | null>;
   showCloseButton: boolean;
   onClose: () => void;
@@ -47,6 +48,7 @@ type ConversationDetailPanelProps = {
 );
 
 const ConversationDetailPanel = ({
+  compact = false,
   mode,
   selectedConvo,
   convoMessages,
@@ -441,6 +443,7 @@ const ConversationDetailPanel = ({
             replyingTo={replyingToMessage}
             clearReplyingTo={() => setReplyingTo(null)}
             inputRef={inputRef}
+            compact={compact}
           />
         </>
       )}

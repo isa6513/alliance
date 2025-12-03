@@ -10,7 +10,6 @@ import {
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Spinner from "../../components/Spinner";
-import CenterLayout from "@alliance/shared/ui/CenterLayout";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import CommunityMemberTableRow from "../../components/CommunityMemberTableRow";
@@ -28,6 +27,11 @@ import { href, useNavigate, useSearchParams } from "react-router";
 import { useToast } from "@alliance/shared/ui/ToastProvider";
 import CommunityActivityTab from "../../components/CommunityActivityTab";
 import { parseTimeInput } from "@alliance/shared/forms/timeUtils";
+import TwoColumnLayout from "../../components/TwoColumnLayout";
+import FloatingChatPanel from "../../components/FloatingChatpanel";
+import { MessageCircleMore } from "lucide-react";
+import { Features } from "@alliance/shared/lib/features";
+import { isFeatureEnabled } from "../../lib/config";
 
 type Tab = "activity" | "members" | "invites" | "about" | "edit";
 
@@ -58,6 +62,8 @@ const CommunityPage = () => {
   const [activeActions, setActiveActions] = useState<UserActionSummaryDto[]>(
     []
   );
+
+  const [chatOpen, setChatOpen] = useState(true);
 
   const [completedAllCurrentActions, setCompletedAllCurrentActions] = useState<
     Record<number, boolean>
@@ -100,6 +106,10 @@ const CommunityPage = () => {
       }
       setLoading(false);
     });
+  }, []);
+
+  const messagingEnabled = useMemo(() => {
+    return isFeatureEnabled(Features.Messaging);
   }, []);
 
   const amLeader = useMemo(() => {
@@ -234,185 +244,231 @@ const CommunityPage = () => {
   });
 
   return (
-    <CenterLayout>
-      <div className="flex flex-col gap-y-2 my-8">
-        <div className="flex flex-row gap-x-2 items-start justify-between">
-          <div className="flex flex-col gap-y-4 mb-8">
-            <p className="font-serif font-semibold text-3xl md:text-5xl">
-              {community.name}
-            </p>
-            <AppMarkdownWrapper markdownContent={community.description} />
-          </div>
+    <TwoColumnLayout
+      main={
+        <div className="p-5 xl:p-15">
+          <div className="flex flex-col gap-y-2 my-8">
+            <div className="flex flex-row gap-x-2 items-start justify-between">
+              <div className="flex flex-col gap-y-4 mb-8">
+                <p className="font-serif font-semibold text-3xl md:text-5xl">
+                  {community.name}
+                </p>
+                <AppMarkdownWrapper markdownContent={community.description} />
+              </div>
 
-          {amLeader ? (
-            <Button color={ButtonColor.Light} onClick={() => setTab("edit")}>
-              Edit
-            </Button>
-          ) : (
-            <Button color={ButtonColor.Light} onClick={handleLeave}>
-              Leave group
-            </Button>
+              {amLeader ? (
+                <Button
+                  color={ButtonColor.Light}
+                  onClick={() => setTab("edit")}
+                >
+                  Edit
+                </Button>
+              ) : (
+                <Button color={ButtonColor.Light} onClick={handleLeave}>
+                  Leave group
+                </Button>
+              )}
+            </div>
+
+            <div className="w-1/2">
+              <p className="text-sm">
+                {nCompleted} / {community.users.length} have completed current
+                action
+                {activeActions.length !== 1 ? "s" : ""}
+              </p>
+              <CompletedBar
+                percentage={(nCompleted / community.users.length) * 100}
+                height="h-4"
+                dark
+              />
+            </div>
+          </div>
+          <div className="flex flex-row gap-x-2 justify-start mb-4 border-b border-zinc-200">
+            {tabs.map((m) => (
+              <Button
+                color={ButtonColor.Transparent}
+                key={m}
+                onClick={() => setTab(m)}
+                aria-pressed={m === tab}
+                className={`!border-b-[1.5px] rounded-none ${
+                  m === tab ? "!border-b-green" : "!border-b-transparent"
+                }`}
+              >
+                <p className="capitalize">{m}</p>
+              </Button>
+            ))}
+          </div>
+          {tab === "activity" && (
+            <CommunityActivityTab
+              communityId={community.id}
+              userId={user?.id}
+            />
+          )}
+          {tab === "members" && (
+            <div className="flex flex-col py-4">
+              <div className="">
+                <table className="w-full border-collapse">
+                  <thead className="text-left bg-white">
+                    <tr>
+                      <td colSpan={3} className="px-0 pb-6">
+                        <p className="text-xl md:text-2xl font-semibold">
+                          Lead{leaders.length !== 1 ? "s" : ""}
+                        </p>
+                      </td>
+                    </tr>
+                  </thead>
+                  <thead className="text-left bg-zinc-50">
+                    <tr className="*:py-4 *:px-2 *:md:px-4 border border-zinc-200 text-xs md:text-sm text-zinc-600">
+                      <th scope="col" className="font-medium">
+                        Name
+                      </th>
+                      <th scope="col" className="font-medium">
+                        Action history
+                      </th>
+                      {amLeader && (
+                        <th
+                          scope="col"
+                          className="font-medium md:whitespace-nowrap"
+                        >
+                          Preferred contact time
+                        </th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="border border-zinc-200">
+                    {leaders.map((user) => (
+                      <CommunityMemberTableRow
+                        key={user.id}
+                        profile={user}
+                        canExpand={amLeader}
+                        amLeader={amLeader}
+                        contactInfo={memberContactInfo?.[user.id]}
+                        actionRelations={userActionRelations?.[user.id] ?? []}
+                        actions={actionSummaries}
+                      />
+                    ))}
+                  </tbody>
+                  <thead className="text-left bg-white">
+                    <tr>
+                      <td
+                        colSpan={3}
+                        className="px-0 pt-10 pb-6 border-y border-zinc-200"
+                      >
+                        <div className="flex flex-col gap-y-2">
+                          <p className="text-xl md:text-2xl font-semibold">
+                            Members
+                          </p>
+                          <p className="text-zinc-500 text-sm">
+                            Sort by completion of current actions
+                          </p>
+                          <DropdownSelect
+                            options={Object.values(FilterMode)}
+                            secondaryLabels={Object.values(FilterMode).map(
+                              (mode) =>
+                                membersByFilterMode[mode].length.toString()
+                            )}
+                            value={filterMode}
+                            onChange={(mode) =>
+                              setFilterMode(mode as FilterMode)
+                            }
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  </thead>
+                  <thead className="text-left bg-zinc-50">
+                    <tr className="*:py-4 *:px-2 *:md:px-4 border border-zinc-200 text-xs md:text-sm text-zinc-600">
+                      <th scope="col" className="font-medium">
+                        Name
+                      </th>
+                      <th scope="col" className="font-medium">
+                        Action history
+                      </th>
+                      {amLeader && (
+                        <th
+                          scope="col"
+                          className="font-medium md:whitespace-nowrap"
+                        >
+                          Preferred contact time
+                        </th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="border border-zinc-200">
+                    {filteredSortedMembers.map((user) => (
+                      <CommunityMemberTableRow
+                        key={user.id}
+                        profile={user}
+                        canExpand={amLeader}
+                        amLeader={amLeader}
+                        contactInfo={memberContactInfo?.[user.id]}
+                        actionRelations={userActionRelations?.[user.id] ?? []}
+                        actions={actionSummaries}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          {tab === "about" && (
+            <div className="flex flex-col gap-y-4 py-4">
+              {amLeader ? (
+                <GroupOrganizerGuidelines />
+              ) : (
+                <GroupMemberGuidelines />
+              )}
+            </div>
+          )}
+          {tab === "invites" && (
+            <CommunityInvitesTab
+              communityId={community.id}
+              existingMembers={community.users}
+            />
+          )}
+          {tab === "edit" && (
+            <Card style={CardStyle.Grey}>
+              <CommunityEditForm
+                initialValue={community}
+                onCancel={() => setTab("members")}
+                onSuccess={() => {
+                  window.location.reload();
+                }}
+              />
+            </Card>
+          )}
+          {!chatOpen && messagingEnabled && (
+            <div className="absolute bottom-5 right-7">
+              <Button
+                color={ButtonColor.Outline}
+                onClick={() => setChatOpen(true)}
+                className="!px-3 !py-3"
+              >
+                <MessageCircleMore size="20" />
+              </Button>
+            </div>
           )}
         </div>
-
-        <div className="w-1/2">
-          <p className="text-sm">
-            {nCompleted} / {community.users.length} have completed current
-            action
-            {activeActions.length !== 1 ? "s" : ""}
-          </p>
-          <CompletedBar
-            percentage={(nCompleted / community.users.length) * 100}
-            height="h-4"
-            dark
-          />
-        </div>
-      </div>
-      <div className="flex flex-row gap-x-2 justify-start mb-4 border-b border-zinc-200">
-        {tabs.map((m) => (
-          <Button
-            color={ButtonColor.Transparent}
-            key={m}
-            onClick={() => setTab(m)}
-            aria-pressed={m === tab}
-            className={`!border-b-[1.5px] rounded-none ${
-              m === tab ? "!border-b-green" : "!border-b-transparent"
-            }`}
-          >
-            <p className="capitalize">{m}</p>
-          </Button>
-        ))}
-      </div>
-      {tab === "activity" && (
-        <CommunityActivityTab communityId={community.id} userId={user?.id} />
-      )}
-      {tab === "members" && (
-        <div className="flex flex-col py-4">
-          <div className="">
-            <table className="w-full border-collapse">
-              <thead className="text-left bg-white">
-                <tr>
-                  <td colSpan={3} className="px-0 pb-6">
-                    <p className="text-xl md:text-2xl font-semibold">
-                      Lead{leaders.length !== 1 ? "s" : ""}
-                    </p>
-                  </td>
-                </tr>
-              </thead>
-              <thead className="text-left bg-zinc-50">
-                <tr className="*:py-4 *:px-2 *:md:px-4 border border-zinc-200 text-xs md:text-sm text-zinc-600">
-                  <th scope="col" className="font-medium">
-                    Name
-                  </th>
-                  <th scope="col" className="font-medium">
-                    Action history
-                  </th>
-                  {amLeader && (
-                    <th
-                      scope="col"
-                      className="font-medium md:whitespace-nowrap"
-                    >
-                      Preferred contact time
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody className="border border-zinc-200">
-                {leaders.map((user) => (
-                  <CommunityMemberTableRow
-                    key={user.id}
-                    profile={user}
-                    canExpand={amLeader}
-                    amLeader={amLeader}
-                    contactInfo={memberContactInfo?.[user.id]}
-                    actionRelations={userActionRelations?.[user.id] ?? []}
-                    actions={actionSummaries}
-                  />
-                ))}
-              </tbody>
-              <thead className="text-left bg-white">
-                <tr>
-                  <td
-                    colSpan={3}
-                    className="px-0 pt-10 pb-6 border-y border-zinc-200"
-                  >
-                    <div className="flex flex-col gap-y-2">
-                      <p className="text-xl md:text-2xl font-semibold">
-                        Members
-                      </p>
-                      <p className="text-zinc-500 text-sm">
-                        Sort by completion of current actions
-                      </p>
-                      <DropdownSelect
-                        options={Object.values(FilterMode)}
-                        secondaryLabels={Object.values(FilterMode).map((mode) =>
-                          membersByFilterMode[mode].length.toString()
-                        )}
-                        value={filterMode}
-                        onChange={(mode) => setFilterMode(mode as FilterMode)}
-                      />
-                    </div>
-                  </td>
-                </tr>
-              </thead>
-              <thead className="text-left bg-zinc-50">
-                <tr className="*:py-4 *:px-2 *:md:px-4 border border-zinc-200 text-xs md:text-sm text-zinc-600">
-                  <th scope="col" className="font-medium">
-                    Name
-                  </th>
-                  <th scope="col" className="font-medium">
-                    Action history
-                  </th>
-                  {amLeader && (
-                    <th
-                      scope="col"
-                      className="font-medium md:whitespace-nowrap"
-                    >
-                      Preferred contact time
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody className="border border-zinc-200">
-                {filteredSortedMembers.map((user) => (
-                  <CommunityMemberTableRow
-                    key={user.id}
-                    profile={user}
-                    canExpand={amLeader}
-                    amLeader={amLeader}
-                    contactInfo={memberContactInfo?.[user.id]}
-                    actionRelations={userActionRelations?.[user.id] ?? []}
-                    actions={actionSummaries}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-      {tab === "about" && (
-        <div className="flex flex-col gap-y-4 py-4">
-          {amLeader ? <GroupOrganizerGuidelines /> : <GroupMemberGuidelines />}
-        </div>
-      )}
-      {tab === "invites" && (
-        <CommunityInvitesTab
-          communityId={community.id}
-          existingMembers={community.users}
-        />
-      )}
-      {tab === "edit" && (
-        <Card style={CardStyle.Grey}>
-          <CommunityEditForm
-            initialValue={community}
-            onCancel={() => setTab("members")}
-            onSuccess={() => {
-              window.location.reload();
+      }
+      sidebar={
+        messagingEnabled ? (
+          <div
+            className="p-5 xl:p-10 h-screen xl:px-5 transition-all duration-200 ease-in-out"
+            style={{
+              transform: chatOpen ? "translateY(0)" : "translateY(100%)",
             }}
-          />
-        </Card>
-      )}
-    </CenterLayout>
+          >
+            <Card className="h-full !p-0">
+              <FloatingChatPanel
+                communityId={community.id}
+                onClose={() => setChatOpen(false)}
+              />
+            </Card>
+          </div>
+        ) : null
+      }
+      sidebarWidth={messagingEnabled ? (chatOpen ? 500 : 0) : 0}
+    />
   );
 };
 

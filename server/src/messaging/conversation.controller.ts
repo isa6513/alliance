@@ -34,6 +34,19 @@ export class ConversationController {
     return this.conversationService.getUserConversations(req.user.sub);
   }
 
+  @Get('community/:communityId')
+  @ApiOkResponse({ type: ConversationDto })
+  @UseGuards(AuthGuard)
+  getCommunityConversations(
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Request() req: JwtRequest,
+  ): Promise<ConversationDto> {
+    return this.conversationService.getConversationForCommunity(
+      communityId,
+      req.user.sub,
+    );
+  }
+
   @Post('direct')
   @ApiOkResponse({ type: ConversationDto })
   @UseGuards(AuthGuard)

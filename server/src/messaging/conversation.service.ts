@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -110,6 +111,24 @@ export class ConversationService {
     userId: number,
   ): Promise<ConversationDto> {
     return this.buildConversationDto(conversationId, userId);
+  }
+
+  async getConversationForCommunity(
+    communityId: number,
+    userId: number,
+  ): Promise<ConversationDto> {
+    const conversation = await this.conversationRepository.findOneOrFail({
+      where: { community: { id: communityId } },
+      relations: this.conversationRelations,
+    });
+    if (
+      !conversation.participants.some(
+        (participant) => participant.user.id === userId,
+      )
+    ) {
+      throw new UnauthorizedException();
+    }
+    return this.buildConversationDto(conversation.id, userId);
   }
 
   async createDirectConversation(

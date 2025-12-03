@@ -2859,6 +2859,21 @@ export type ConversationGetMyConversationsResponses = {
 
 export type ConversationGetMyConversationsResponse = ConversationGetMyConversationsResponses[keyof ConversationGetMyConversationsResponses];
 
+export type ConversationGetCommunityConversationsData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/community/{communityId}';
+};
+
+export type ConversationGetCommunityConversationsResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationGetCommunityConversationsResponse = ConversationGetCommunityConversationsResponses[keyof ConversationGetCommunityConversationsResponses];
+
 export type ConversationCreateDirectConversationData = {
     body: CreateDirectConversationDto;
     path?: never;

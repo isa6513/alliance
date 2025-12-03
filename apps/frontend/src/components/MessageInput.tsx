@@ -24,6 +24,7 @@ interface MessageInputProps {
   replyingTo?: MessageDto;
   clearReplyingTo: () => void;
   inputRef: React.RefObject<HTMLTextAreaElement | null>;
+  compact?: boolean;
 }
 
 const MessageInput = ({
@@ -36,6 +37,7 @@ const MessageInput = ({
   replyingTo,
   clearReplyingTo,
   inputRef,
+  compact = false,
 }: MessageInputProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const dragCounterRef = useRef(0);
@@ -151,7 +153,9 @@ const MessageInput = ({
 
   return (
     <div
-      className="flex flex-col gap-y-3 px-8 bg-white pb-17 md:pb-4 relative"
+      className={`flex flex-col gap-y-3 bg-white pb-15 relative ${
+        compact ? "px-4 md:pb-2" : "px-8  md:pb-4"
+      }`}
       onDragEnter={onDragEnter}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
@@ -212,7 +216,7 @@ const MessageInput = ({
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           placeholder="Message"
-          className="w-full border-none bg-transparent p-3 text-black resize-none focus:outline-none"
+          className="w-full border-none bg-transparent p-3 text-black resize-none focus:outline-none pr-9"
           rows={Math.max(1, Math.min(4, message.split("\n").length || 1))}
         />
         <div className="absolute right-2 top-0 bottom-0 flex items-center">
