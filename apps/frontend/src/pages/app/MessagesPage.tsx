@@ -267,6 +267,14 @@ const MessagesPage = () => {
     [conversations, setSelectedConvoId, user?.id]
   );
 
+  useEffect(() => {
+    if (params.get("to")) {
+      const userId = parseInt(params.get("to")!);
+      setCreatingNewConversation(true);
+      handleUpdateRecipientIds([userId]);
+    }
+  }, [params, handleUpdateRecipientIds]);
+
   const filteredConversations = useMemo(() => {
     return joinedConversations?.filter((convo) =>
       convo.title.toLowerCase().includes(search.toLowerCase())

@@ -35,6 +35,7 @@ import List from "@alliance/shared/ui/List";
 import ForumActivityCommentCard from "../../components/ForumActivityCommentCard";
 import ProfileImageEditor from "../../components/ProfileImageEditor";
 import Spinner from "../../components/Spinner";
+import { MessageCircle } from "lucide-react";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -401,19 +402,21 @@ const UserProfilePage: React.FC = () => {
                 handleAcceptFriendRequest={handleAcceptFriendRequest}
               />
             )}
-            {/* {isAuthenticated &&
+            {isAuthenticated &&
               !isMe &&
               friendStatus &&
               friendStatus.status === "accepted" && (
                 <Button
                   color={ButtonColor.Black}
-                  onClick={() => navigate(href("/messages"))}
+                  onClick={() =>
+                    navigate(href("/messages") + `?to=${profile.id}`)
+                  }
                   className="flex flex-row items-center gap-x-2"
                 >
                   <MessageCircle size={16} />
                   Message
                 </Button>
-              )} */}
+              )}
             {isMe && (
               <div className="space-x-3 flex">
                 {isEditing ? (
