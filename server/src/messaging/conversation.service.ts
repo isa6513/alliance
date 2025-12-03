@@ -763,9 +763,12 @@ export class ConversationService {
       .where('message.conversationId = :conversationId', { conversationId })
       .andWhere('message.authorId != :userId', { userId })
       .andWhere('message.createdAt > :since', { since })
-      .andWhere('message.id != :lastReadMessageId', {
-        lastReadMessageId: participant.lastReadMessage?.id,
-      });
+      .andWhere(
+        'message.id != :lastReadMessageId OR :lastReadMessageId IS NULL',
+        {
+          lastReadMessageId: participant.lastReadMessage?.id,
+        },
+      );
 
     return qb.getCount();
   }

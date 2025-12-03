@@ -260,18 +260,20 @@ const MessagesPage = () => {
   const handleUpdateRecipientIds = useCallback(
     (ids: number[]) => {
       setSendingNewMessageToIds(ids);
+      let matchingConvoId: number | null = null;
       for (const convo of conversations ?? []) {
         const usersWithoutCurrent = convo.participants
           .filter((participant) => participant.user.id !== user?.id)
           .map((participant) => participant.user.id);
         if (
           usersWithoutCurrent.every((id) => ids.includes(id)) &&
-          ids.every((id) => usersWithoutCurrent.includes(id))
+          ids.every((id) => usersWithoutCurrent.includes(id)) &&
+          (convo.type === "multiple" || convo.type === "direct")
         ) {
-          setSelectedConvoId(convo.id);
-          return;
+          matchingConvoId = convo.id;
         }
       }
+      setSelectedConvoId(matchingConvoId);
     },
     [conversations, setSelectedConvoId, user?.id]
   );

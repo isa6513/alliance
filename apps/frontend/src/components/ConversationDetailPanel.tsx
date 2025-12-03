@@ -393,7 +393,6 @@ const ConversationDetailPanel = ({
               </div>
             ) : null}
             {mode === "existing" &&
-              selectedConvo?.type === "direct" &&
               selectedConvo.participants.some(
                 (participant) =>
                   participant.user.id === user?.id &&
@@ -402,7 +401,9 @@ const ConversationDetailPanel = ({
                 <div className="flex flex-row items-center gap-x-2 w-full p-5">
                   <div className="flex flex-col lg:flex-row items-center mx-auto gap-3">
                     <p className="text-zinc-800">
-                      You have received a message request from{" "}
+                      {selectedConvo.type === "direct"
+                        ? "You have received a message request from "
+                        : "You have been invited to a group message by "}
                       {
                         selectedConvo.participants.find(
                           (participant) =>
