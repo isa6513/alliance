@@ -547,6 +547,11 @@ export class TasksService {
         } else {
           return { isValid: false };
         }
+      case CustomValidatorType.AnyCommunity:
+        if (user.communities.length === 0) {
+          return { isValid: false };
+        }
+        return { isValid: true };
       default:
         console.warn(
           `Unknown validator type: ${validator.type satisfies never}`,

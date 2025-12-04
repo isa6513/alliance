@@ -93,7 +93,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
         />
       )}
       {query && filteredUsers.length > 0 && (
-        <div className="border border-zinc-200 rounded bg-white max-h-48 overflow-y-auto absolute left-0 w-full">
+        <div className="border border-zinc-200 rounded bg-white max-h-48 overflow-y-auto absolute left-0 w-full z-10">
           {filteredUsers.map((user) => (
             <button
               type="button"
