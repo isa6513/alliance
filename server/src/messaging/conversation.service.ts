@@ -27,6 +27,7 @@ import {
 } from './dto/messaging.dto';
 import { MessagingEvents } from './messaging.events';
 import { ImagesService } from 'src/images/images.service';
+import { RelationString } from 'src/tasks/entities/type';
 
 @Injectable()
 export class ConversationService {
@@ -36,7 +37,7 @@ export class ConversationService {
     'participants.lastReadMessage',
     'participants.lastReadMessage.author',
     'community',
-  ];
+  ] satisfies RelationString<Conversation>[];
 
   private readonly participantRelations = [
     'conversation',
@@ -47,7 +48,7 @@ export class ConversationService {
     'user',
     'lastReadMessage',
     'lastReadMessage.author',
-  ];
+  ] satisfies RelationString<Participant>[];
 
   constructor(
     @InjectRepository(Conversation)
