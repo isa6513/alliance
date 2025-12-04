@@ -35,7 +35,7 @@ import List from "@alliance/shared/ui/List";
 import ForumActivityCommentCard from "../../components/ForumActivityCommentCard";
 import ProfileImageEditor from "../../components/ProfileImageEditor";
 import Spinner from "../../components/Spinner";
-import { MessageCircle } from "lucide-react";
+import { Mail } from "lucide-react";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../../lib/config";
 
@@ -410,14 +410,13 @@ const UserProfilePage: React.FC = () => {
               friendStatus &&
               friendStatus.status === "accepted" && (
                 <Button
-                  color={ButtonColor.Black}
+                  color={ButtonColor.White}
                   onClick={() =>
                     navigate(href("/messages") + `?to=${profile.id}`)
                   }
-                  className="flex flex-row items-center gap-x-2"
+                  className="!h-9 flex flex-row items-center !px-3"
                 >
-                  <MessageCircle size={16} />
-                  Message
+                  <Mail size={16} className="text-zinc-600" />
                 </Button>
               )}
             {isMe && (
@@ -431,6 +430,7 @@ const UserProfilePage: React.FC = () => {
                       color={ButtonColor.Blue}
                       onClick={handleSave}
                       disabled={isSavingProfile}
+                      className="!h-9"
                     >
                       {isSavingProfile ? "Saving..." : "Save"}
                     </Button>
@@ -440,6 +440,7 @@ const UserProfilePage: React.FC = () => {
                     <Button
                       color={ButtonColor.Light}
                       onClick={() => setIsEditing(true)}
+                      className="!h-9"
                     >
                       Edit Profile
                     </Button>

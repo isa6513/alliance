@@ -22,9 +22,9 @@ const FriendRequestButton = ({
       <Button
         color={ButtonColor.BlueOutline}
         onClick={handleSendFriendRequest}
-        className=""
+        className="!h-9"
       >
-        <span>Send Friend Request</span>
+        <span>Send friend request</span>
       </Button>
     );
   }
@@ -33,15 +33,23 @@ const FriendRequestButton = ({
       return (
         <div className="flex flex-row gap-x-3 items-center text-sm">
           <p>Sent you a friend request</p>
-          <Button color={ButtonColor.Green} onClick={handleAcceptFriendRequest}>
+          <Button
+            color={ButtonColor.Green}
+            onClick={handleAcceptFriendRequest}
+            className="!h-9"
+          >
             Accept
           </Button>
         </div>
       );
     }
     return (
-      <Button color={ButtonColor.Light} onClick={handleSendFriendRequest}>
-        <span>Request sent!</span>
+      <Button
+        color={ButtonColor.Light}
+        onClick={handleSendFriendRequest}
+        className="!h-9"
+      >
+        <span>Frind request sent</span>
       </Button>
     );
   }
@@ -49,7 +57,7 @@ const FriendRequestButton = ({
     <Button
       color={isHovered ? ButtonColor.RedOutline : ButtonColor.GreenOutLine}
       onClick={handleRemoveFriend}
-      className={`min-w-36`}
+      className={`min-w-36 !h-9`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
