@@ -192,7 +192,7 @@ const SignupPage: React.FC = () => {
               neglected by governments and markets.
             </p>
             <p>
-              You can read more about how we work on our{" "}
+              You can read more about how we work in our{" "}
               <Link to={"/guide"} className="text-green hover:underline">
                 guide
               </Link>

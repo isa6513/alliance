@@ -33,7 +33,7 @@ import { MessageCircleMore } from "lucide-react";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../../lib/config";
 
-type Tab = "activity" | "members" | "invites" | "about" | "edit";
+type Tab = "activity" | "members" | "invites" | "about" | "edit" | "resources";
 
 export enum FilterMode {
   All = "All members",
@@ -188,7 +188,7 @@ const CommunityPage = () => {
   }, [community, navigate, confirm]);
 
   const tabs: Tab[] = amLeader
-    ? ["activity", "members", "invites", "about"]
+    ? ["activity", "members", "invites", "resources"]
     : ["activity", "members", "about"];
 
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
@@ -415,11 +415,12 @@ const CommunityPage = () => {
           )}
           {tab === "about" && (
             <div className="flex flex-col gap-y-4 py-4">
-              {amLeader ? (
-                <GroupOrganizerGuidelines />
-              ) : (
-                <GroupMemberGuidelines />
-              )}
+              <GroupMemberGuidelines />
+            </div>
+          )}
+          {tab === "resources" && (
+            <div className="flex flex-col gap-y-4 py-4">
+              <GroupOrganizerGuidelines />
             </div>
           )}
           {tab === "invites" && (
