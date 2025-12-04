@@ -579,7 +579,9 @@ export class UserController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [OnetimeInviteDto] })
   async getOnetimeInvites() {
-    return this.userService.findAllOnetimeInvites();
+    return (await this.userService.findAllOnetimeInvites()).map(
+      (invite) => new OnetimeInviteDto(invite),
+    );
   }
 
   @Get('onetimeInvites/:communityId')

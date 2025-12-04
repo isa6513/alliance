@@ -9,7 +9,8 @@ export enum CustomValidatorType {
   RepliedToForumPost = 'RepliedToForumPost',
   HasPhoneNumber = 'HasPhoneNumber',
   IsPhoneNumberValid = 'IsPhoneNumberValid',
-  MemberGroup = 'MemberGroup',
+  MemberTag = 'MemberTag',
+  MemberCommunity = 'MemberCommunity',
 }
 
 export const typeName: Record<CustomValidatorType, string> = {
@@ -19,7 +20,8 @@ export const typeName: Record<CustomValidatorType, string> = {
   [CustomValidatorType.RepliedToForumPost]: 'Replied to Forum Post',
   [CustomValidatorType.HasPhoneNumber]: 'Has Phone Number',
   [CustomValidatorType.IsPhoneNumberValid]: 'Entered phone number is valid',
-  [CustomValidatorType.MemberGroup]: 'Is member of group',
+  [CustomValidatorType.MemberTag]: 'Member has tag',
+  [CustomValidatorType.MemberCommunity]: 'Member is in community',
 };
 
 export const typeUsesIdArgument: Record<CustomValidatorType, boolean> = {
@@ -29,7 +31,8 @@ export const typeUsesIdArgument: Record<CustomValidatorType, boolean> = {
   [CustomValidatorType.RepliedToForumPost]: true,
   [CustomValidatorType.HasPhoneNumber]: false,
   [CustomValidatorType.IsPhoneNumberValid]: false,
-  [CustomValidatorType.MemberGroup]: true,
+  [CustomValidatorType.MemberTag]: true,
+  [CustomValidatorType.MemberCommunity]: true,
 };
 
 export const typeUsableForVisibility: Record<CustomValidatorType, boolean> = {
@@ -39,7 +42,8 @@ export const typeUsableForVisibility: Record<CustomValidatorType, boolean> = {
   [CustomValidatorType.RepliedToForumPost]: false,
   [CustomValidatorType.HasPhoneNumber]: true,
   [CustomValidatorType.IsPhoneNumberValid]: false,
-  [CustomValidatorType.MemberGroup]: true,
+  [CustomValidatorType.MemberTag]: true,
+  [CustomValidatorType.MemberCommunity]: true,
 };
 
 @Entity()

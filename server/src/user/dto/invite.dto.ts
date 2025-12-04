@@ -3,6 +3,7 @@ import { Allow, IsNumber, IsOptional } from 'class-validator';
 import { OnetimeInvite } from '../entities/onetime-invite.entity';
 import { CommunityInvite } from '../entities/community-invite.entity';
 import { ProfileDto } from '../user.dto';
+import { Type } from 'class-transformer';
 
 export class CreateOnetimeInviteDto extends PickType(OnetimeInvite, [
   'invitee',
@@ -55,9 +56,20 @@ export class CommunityInviteDto extends PickType(CommunityInvite, [
 export class OnetimeInviteDto extends PickType(OnetimeInvite, [
   'id',
   'invitee',
-  'invitingUser',
   'code',
   'isValid',
   'createdAt',
   'community',
-]) {}
+]) {
+  @ApiPropertyOptional({ type: ProfileDto })
+  @Type(() => ProfileDto)
+  invitingUser?: ProfileDto;
+
+  constructor(onetimeInvite: OnetimeInvite) {
+    super();
+    Object.assign(this, onetimeInvite);
+    this.invitingUser = onetimeInvite.invitingUser
+      ? new ProfileDto(onetimeInvite.invitingUser)
+      : undefined;
+  }
+}
