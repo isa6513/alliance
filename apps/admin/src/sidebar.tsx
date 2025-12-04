@@ -207,7 +207,7 @@ const Sidebar: React.FC = () => {
             <p className="font-bold">Current Actions</p>
             <Button
               onClick={() => navigate("/actions/new")}
-              className="bg-green-3 text-white !px-3 !py-1 rounded-md text-sm hover:bg-green-3"
+              className="text-white !px-3 !py-1 rounded-md text-sm"
               color={ButtonColor.Green}
             >
               Create
