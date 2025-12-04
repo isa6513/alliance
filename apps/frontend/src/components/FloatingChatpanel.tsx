@@ -1,6 +1,7 @@
 import {
   ConversationDto,
   conversationGetCommunityConversations,
+  conversationMarkRead,
 } from "@alliance/shared/client";
 import { useEffect, useRef, useState } from "react";
 import Spinner from "./Spinner";
@@ -41,6 +42,14 @@ const FloatingChatPanel = ({
         setLoading(false);
       });
   }, [communityId]);
+
+  useEffect(() => {
+    if (conversation?.id) {
+      conversationMarkRead({
+        path: { conversationId: conversation.id },
+      });
+    }
+  }, [conversation?.id]);
 
   if (loading) {
     return <Spinner />;
