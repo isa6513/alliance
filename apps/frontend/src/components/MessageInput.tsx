@@ -7,7 +7,6 @@ import {
   useCallback,
   useRef,
   useState,
-  ChangeEvent,
   useEffect,
 } from "react";
 import { Plus, X } from "lucide-react";

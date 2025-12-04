@@ -243,10 +243,12 @@ const CommunityPage = () => {
     return 0;
   });
 
+  const isChatOpen = messagingEnabled && chatOpen;
+
   return (
     <TwoColumnLayout
       main={
-        <div className="p-5 xl:p-15">
+        <div className="p-5 xl:p-15 max-w-[900px] mx-auto">
           <div className="flex flex-col gap-y-2 my-8">
             <div className="flex flex-row gap-x-2 items-start justify-between">
               <div className="flex flex-col gap-y-4 mb-8">
@@ -467,7 +469,7 @@ const CommunityPage = () => {
           </div>
         ) : null
       }
-      sidebarWidth={messagingEnabled ? (chatOpen ? 500 : 0) : 0}
+      sidebarWidth={isChatOpen ? 500 : 0}
     />
   );
 };
