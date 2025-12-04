@@ -9,6 +9,7 @@ type Primitive =
   | null
   | undefined
   | Date;
+
 type Elem<T> = T extends (infer U)[] ? U : T;
 
 type Dec<N extends number> = N extends 5

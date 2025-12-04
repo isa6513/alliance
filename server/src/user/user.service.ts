@@ -50,7 +50,10 @@ import { ConversationService } from 'src/messaging/conversation.service';
 import { RelationString } from 'src/tasks/entities/type';
 
 const defaultTimeZone = 'America/Los_Angeles';
-const communityDefaultRelations = ['users', 'leaders'] as const;
+const communityDefaultRelations: readonly RelationString<Community>[] = [
+  'users',
+  'leaders',
+];
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -672,7 +675,7 @@ export class UserService {
 
   async findCommunityOrFail(
     id: number,
-    relations?: string[],
+    relations?: RelationString<Community>[],
   ): Promise<Community> {
     return this.communityRepository.findOneOrFail({
       where: { id },
