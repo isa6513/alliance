@@ -331,7 +331,7 @@ export type OnetimeInviteDto = {
 
 export type CreateOnetimeInviteDto = {
     invitee: string;
-    invitingUserId: number;
+    invitingUserId?: number;
     communityId?: number;
 };
 

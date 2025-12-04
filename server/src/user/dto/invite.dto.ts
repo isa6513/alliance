@@ -8,9 +8,9 @@ import { Type } from 'class-transformer';
 export class CreateOnetimeInviteDto extends PickType(OnetimeInvite, [
   'invitee',
 ]) {
-  @ApiProperty()
-  @Allow()
-  invitingUserId: number;
+  @ApiPropertyOptional()
+  @IsOptional()
+  invitingUserId?: number;
 
   @ApiPropertyOptional()
   @IsOptional()

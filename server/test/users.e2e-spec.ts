@@ -404,17 +404,29 @@ describe('Users (e2e)', () => {
       expect(res.body.invitedUser.id).toBe(alternateInviteTargetUserId);
     });
 
-    it('rejects onetime invites where the inviting user is not a leader of the community', async () => {
+    it('rejects onetime invites for communities the user does not lead', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/user/createOnetimeInvite')
+        .set('Authorization', `Bearer ${userAToken}`)
+        .send({
+          invitee: 'nonleader@example.com',
+          communityId: communityLedByUserB.id,
+        });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('ignores provided invitingUserId for non-admins and uses the authenticated user', async () => {
       const res = await request(ctx.app.getHttpServer())
         .post('/user/createOnetimeInvite')
         .set('Authorization', `Bearer ${userAToken}`)
         .send({
           invitingUserId: userBId,
-          invitee: 'nonleader@example.com',
-          communityId: communityLedByUserA.id,
+          invitee: 'mismatch@example.com',
         });
 
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(201);
+      expect(res.body.invitingUser.id).toBe(userAId);
     });
 
     it('allows onetime invites when the inviting user leads the community', async () => {
@@ -437,7 +449,6 @@ describe('Users (e2e)', () => {
         .post('/user/createOnetimeInvite')
         .set('Authorization', `Bearer ${userAToken}`)
         .send({
-          invitingUserId: userAId,
           invitee: 'leader-nocommunity@example.com',
         });
 
@@ -473,6 +484,20 @@ describe('Users (e2e)', () => {
       expect(res.status).toBe(201);
       expect(res.body.community.id).toBe(communityLedByUserB.id);
       expect(res.body.invitingUser.id).toBe(ctx.adminUserId);
+    });
+
+    it('allows admins to create onetime invites on behalf of another user', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/user/createOnetimeInvite')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          invitingUserId: userAId,
+          invitee: 'admin-onbehalf@example.com',
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.community).toBeUndefined();
+      expect(res.body.invitingUser.id).toBe(userAId);
     });
   });
 

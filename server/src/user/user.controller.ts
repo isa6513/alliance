@@ -523,8 +523,11 @@ export class UserController {
   @Post('createOnetimeInvite')
   @UseGuards(CommunityLeaderGuard)
   @ApiOkResponse({ type: OnetimeInviteDto })
-  async createOnetimeInvite(@Body() body: CreateOnetimeInviteDto) {
-    return this.userService.createOnetimeInvite(body);
+  async createOnetimeInvite(
+    @Body() body: CreateOnetimeInviteDto,
+    @Request() req: JwtRequest,
+  ) {
+    return this.userService.createOnetimeInvite(body, req.user.sub);
   }
 
   @Post('createCommunityInvite')

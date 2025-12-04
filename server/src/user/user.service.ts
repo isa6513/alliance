@@ -886,10 +886,18 @@ export class UserService {
 
   async createOnetimeInvite(
     body: CreateOnetimeInviteDto,
+    userId: number,
   ): Promise<OnetimeInvite> {
     const code = Math.random().toString(36).substring(2, 15);
 
-    const { invitingUserId, communityId, ...rest } = body;
+    const {
+      invitingUserId: providedInvitingUserId,
+      communityId,
+      ...rest
+    } = body;
+    const isAdmin = await this.isAdmin(userId);
+    const invitingUserId =
+      (isAdmin ? providedInvitingUserId : undefined) ?? userId;
     const invitingUser =
       communityId === undefined
         ? await this.findOneOrFail(invitingUserId)
