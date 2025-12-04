@@ -49,7 +49,7 @@ const FriendRequestButton = ({
         onClick={handleSendFriendRequest}
         className="!h-9"
       >
-        <span>Frind request sent</span>
+        <span>Friend request sent</span>
       </Button>
     );
   }
