@@ -36,6 +36,8 @@ import ForumActivityCommentCard from "../../components/ForumActivityCommentCard"
 import ProfileImageEditor from "../../components/ProfileImageEditor";
 import Spinner from "../../components/Spinner";
 import { MessageCircle } from "lucide-react";
+import { Features } from "@alliance/shared/lib/features";
+import { isFeatureEnabled } from "../../lib/config";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -277,6 +279,8 @@ const UserProfilePage: React.FC = () => {
     setIsEditing(false);
   };
 
+  const messagingEnabled = isFeatureEnabled(Features.Messaging);
+
   if (!profile && loading) {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
@@ -400,7 +404,8 @@ const UserProfilePage: React.FC = () => {
                 handleAcceptFriendRequest={handleAcceptFriendRequest}
               />
             )}
-            {isAuthenticated &&
+            {messagingEnabled &&
+              isAuthenticated &&
               !isMe &&
               friendStatus &&
               friendStatus.status === "accepted" && (
