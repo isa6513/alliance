@@ -20,7 +20,7 @@ const ActionUpdateCard = ({
     <div className="flex flex-col border border-zinc-200 rounded divide-y divide-zinc-200 overflow-hidden">
       <div className="p-3 md:p-5 w-full gap-y-1 bg-zinc-50">
         <div className="flex flex-row justify-between items-center">
-          <div className="flex flex-col md:flex-row md:gap-x-2 md:items-center text-sm">
+          <div className="flex flex-col md:flex-row md:gap-x-2 md:items-center">
             <p className="font-medium">
               <span className="text-green">Update:</span> {update.title}
             </p>
