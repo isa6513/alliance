@@ -439,6 +439,31 @@ export class UserService {
     return user;
   }
 
+  async findOneLeaderOrFail(
+    userId: number,
+    communityId: number,
+  ): Promise<User> {
+    const user = await this.findOneOrFail(userId);
+    if (user.admin) {
+      return user;
+    }
+
+    const isLeader = await this.communityRepository
+      .createQueryBuilder('community')
+      .innerJoin('community.leaders', 'leader')
+      .where('community.id = :communityId', { communityId })
+      .andWhere('leader.id = :userId', { userId })
+      .getExists();
+
+    if (!isLeader) {
+      throw new UnauthorizedException(
+        `User ${userId} is not a leader of community ${communityId}`,
+      );
+    }
+
+    return user;
+  }
+
   async findByIds(ids: number[], relations?: string[]): Promise<User[]> {
     return this.userRepository.find({
       where: { id: In(ids) },
@@ -862,7 +887,10 @@ export class UserService {
     const code = Math.random().toString(36).substring(2, 15);
 
     const { invitingUserId, communityId, ...rest } = body;
-    const invitingUser = await this.findOneOrFail(invitingUserId);
+    const invitingUser =
+      communityId === undefined
+        ? await this.findOneOrFail(invitingUserId)
+        : await this.findOneLeaderOrFail(invitingUserId, communityId);
 
     let community: Community | undefined;
     if (communityId !== undefined) {
@@ -951,7 +979,7 @@ export class UserService {
 
     const invitedUser = await this.findOneOrFail(invitedUserId);
     const community = await this.findCommunityOrFail(communityId);
-    const invitingUser = await this.findOneOrFail(userId);
+    const invitingUser = await this.findOneLeaderOrFail(userId, communityId);
 
     const existingInvites = await this.communityInviteRepository.find({
       where: {

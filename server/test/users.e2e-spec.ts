@@ -7,22 +7,30 @@ import { FriendStatus } from '../src/user/entities/friend.entity';
 import { User } from '../src/user/entities/user.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { UserService } from 'src/user/user.service';
+import { Community } from '../src/user/entities/community.entity';
 
 describe('Users (e2e)', () => {
   let ctx: TestContext;
   let userRepo: Repository<User>;
   let cityRepo: Repository<City>;
+  let communityRepo: Repository<Community>;
   let userService: UserService;
 
   let userAId: number;
   let userAToken: string;
   let userBId: number;
   let userBToken: string;
+  let communityLedByUserA: Community;
+  let communityLedByUserB: Community;
+  let inviteTargetUserId: number;
+  let alternateInviteTargetUserId: number;
+  let adminInviteTargetUserId: number;
 
   beforeAll(async () => {
     ctx = await createTestApp([GeoModule]);
     userRepo = ctx.dataSource.getRepository(User);
     cityRepo = ctx.dataSource.getRepository(City);
+    communityRepo = ctx.dataSource.getRepository(Community);
     userService = ctx.app.get(UserService);
     const userA = userRepo.create({
       name: 'Friend A',
@@ -31,7 +39,10 @@ describe('Users (e2e)', () => {
     });
     await userRepo.save(userA);
     userAId = userA.id;
-    userAToken = ctx.jwtService.sign({ sub: userAId });
+    userAToken = ctx.jwtService.sign(
+      { sub: userAId, email: userA.email, name: userA.name },
+      { secret: process.env.JWT_SECRET },
+    );
 
     const userB = userRepo.create({
       name: 'Friend B',
@@ -41,7 +52,55 @@ describe('Users (e2e)', () => {
 
     await userRepo.save(userB);
     userBId = userB.id;
-    userBToken = ctx.jwtService.sign({ sub: userBId });
+    userBToken = ctx.jwtService.sign(
+      { sub: userBId, email: userB.email, name: userB.name },
+      { secret: process.env.JWT_SECRET },
+    );
+
+    const inviteTarget = await userRepo.save(
+      userRepo.create({
+        name: 'Pending Invite Target',
+        email: 'pending.invite@example.com',
+        password: 'Password123!',
+      }),
+    );
+    inviteTargetUserId = inviteTarget.id;
+
+    const alternateInviteTarget = await userRepo.save(
+      userRepo.create({
+        name: 'Second Invite Target',
+        email: 'second.invite@example.com',
+        password: 'Password123!',
+      }),
+    );
+    alternateInviteTargetUserId = alternateInviteTarget.id;
+
+    const adminInviteTarget = await userRepo.save(
+      userRepo.create({
+        name: 'Admin Invite Target',
+        email: 'admin.invite@example.com',
+        password: 'Password123!',
+      }),
+    );
+    adminInviteTargetUserId = adminInviteTarget.id;
+
+    communityLedByUserA = await communityRepo.save(
+      communityRepo.create({
+        name: 'Community Alpha',
+        description: 'Alpha',
+        leaders: [userA],
+        users: [userA],
+      }),
+    );
+
+    communityLedByUserB = await communityRepo.save(
+      communityRepo.create({
+        name: 'Community Beta',
+        description: 'Beta',
+        leaders: [userB],
+        users: [userB],
+      }),
+    );
   }, 50000);
 
   it('can update user', async () => {
@@ -316,6 +375,105 @@ describe('Users (e2e)', () => {
 
     const refreshed = await userRepo.findOne({ where: { id: userAId } });
     expect(refreshed?.emailVerified).toBe(true);
+  });
+
+  describe('community invite permissions', () => {
+    it('prevents leaders from inviting people into communities they do not lead', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/user/createCommunityInvite')
+        .set('Authorization', `Bearer ${userAToken}`)
+        .send({
+          invitedUserId: inviteTargetUserId,
+          communityId: communityLedByUserB.id,
+        });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('allows leaders to create community invites for their own communities', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/user/createCommunityInvite')
+        .set('Authorization', `Bearer ${userAToken}`)
+        .send({
+          invitedUserId: alternateInviteTargetUserId,
+          communityId: communityLedByUserA.id,
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.community.id).toBe(communityLedByUserA.id);
+      expect(res.body.invitedUser.id).toBe(alternateInviteTargetUserId);
+    });
+
+    it('rejects onetime invites where the inviting user is not a leader of the community', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/user/createOnetimeInvite')
+        .set('Authorization', `Bearer ${userAToken}`)
+        .send({
+          invitingUserId: userBId,
+          invitee: 'nonleader@example.com',
+          communityId: communityLedByUserA.id,
+        });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('allows onetime invites when the inviting user leads the community', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/user/createOnetimeInvite')
+        .set('Authorization', `Bearer ${userAToken}`)
+        .send({
+          invitingUserId: userAId,
+          invitee: 'leader@example.com',
+          communityId: communityLedByUserA.id,
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.community.id).toBe(communityLedByUserA.id);
+      expect(res.body.invitingUser.id).toBe(userAId);
+    });
+
+    it('allows onetime invites without a community id for community leaders', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/user/createOnetimeInvite')
+        .set('Authorization', `Bearer ${userAToken}`)
+        .send({
+          invitingUserId: userAId,
+          invitee: 'leader-nocommunity@example.com',
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.community).toBeUndefined();
+      expect(res.body.invitingUser.id).toBe(userAId);
+    });
+
+    it('allows admins to create community invites even if they are not community leaders', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/user/createCommunityInvite')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          invitedUserId: adminInviteTargetUserId,
+          communityId: communityLedByUserB.id,
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.community.id).toBe(communityLedByUserB.id);
+      expect(res.body.invitedUser.id).toBe(adminInviteTargetUserId);
+    });
+
+    it('allows admins to create onetime invites for any community', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/user/createOnetimeInvite')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          invitingUserId: ctx.adminUserId,
+          invitee: 'admin-community@example.com',
+          communityId: communityLedByUserB.id,
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.community.id).toBe(communityLedByUserB.id);
+      expect(res.body.invitingUser.id).toBe(ctx.adminUserId);
+    });
   });
 
   afterAll(async () => {
