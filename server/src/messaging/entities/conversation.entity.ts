@@ -6,6 +6,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { Message } from './message.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -27,6 +28,7 @@ export enum ConversationType {
 @Check(
   `("type" = 'direct' AND "communityId" IS NULL) OR ("type" = 'multiple' AND "communityId" IS NULL) OR ("type" = 'community' AND "communityId" IS NOT NULL)`,
 )
+@Unique(['community'])
 export class Conversation {
   @PrimaryGeneratedColumn()
   @ApiProperty({ type: Number })
