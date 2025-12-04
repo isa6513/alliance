@@ -37,7 +37,7 @@ const FormInput: React.FC<FormInputProps> = ({
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
       {label && (
-        <label className="font-newsreader mb-1 text-black" htmlFor={name}>
+        <label className="text-base mb-1 text-black" htmlFor={name}>
           {label}
         </label>
       )}

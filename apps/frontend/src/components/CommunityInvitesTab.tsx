@@ -91,7 +91,7 @@ const CommunityInvitesTab = ({
 
   const copyToClipboard = (text: string) => {
     const baseUrl = getBaseUrl();
-    const url = `${baseUrl}/invite?ref=${text}`;
+    const url = `${baseUrl}/signup?ref=${text}`;
     navigator.clipboard.writeText(url);
   };
 

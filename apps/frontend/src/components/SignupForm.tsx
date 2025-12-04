@@ -14,7 +14,7 @@ export interface SignupFormProps {
 const SignupForm = ({
   onSubmit,
   loading,
-  submitButtonText = "Register",
+  submitButtonText = "Sign up",
   referralCode,
 }: SignupFormProps) => {
   const [formData, setFormData] = useState<
@@ -64,7 +64,7 @@ const SignupForm = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <FormInput
-        label="Full Name"
+        label="Full name"
         type="text"
         value={formData.name}
         onChange={handleChange}
