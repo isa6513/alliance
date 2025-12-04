@@ -346,7 +346,7 @@ const UserProfilePage: React.FC = () => {
                   </div>
                 )}
                 {!profile.hasActiveContract && (
-                  <div className="text-sm bg-zinc-100 text-zinc-600 px-3 py-0.5 rounded self-center mt-2">
+                  <div className="bg-zinc-100 text-zinc-600 px-2.5 py-1 rounded self-center mt-2">
                     Observer
                   </div>
                 )}
