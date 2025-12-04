@@ -127,6 +127,7 @@ export class UserDto extends PickType(User, [
   constructor(user: User) {
     super();
     Object.assign(this, user);
+    this.profilePicture = getImageSource(user.profilePicture);
   }
 }
 
