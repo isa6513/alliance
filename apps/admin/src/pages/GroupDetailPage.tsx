@@ -13,7 +13,6 @@ import {
 import type {
   CommunityDto,
   UpdateCommunityDto,
-  User,
 } from "@alliance/shared/client/types.gen";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
@@ -82,11 +81,12 @@ const CommunityDetailPage: React.FC = () => {
     setUsersLoading(true);
     userList()
       .then((response) => {
-        const rawUsers = (response.data ?? []) as User[];
+        const rawUsers = response.data ?? [];
         setUsers(
           rawUsers.map((user) => ({
             id: user.id,
             name: user.name ?? `User #${user.id}`,
+            profilePicture: user.profilePicture ?? null,
           }))
         );
       })
@@ -390,7 +390,7 @@ const CommunityDetailPage: React.FC = () => {
           </Link>
           <h1 className="text-2xl font-semibold mt-2">{community.name}</h1>
           <p className="text-sm text-zinc-500">
-            Manage community details, membership, and leadership.
+            Manage group details, membership, and leadership.
           </p>
         </div>
         <Button
@@ -399,7 +399,7 @@ const CommunityDetailPage: React.FC = () => {
           onClick={handleDelete}
           disabled={deleting}
         >
-          {deleting ? "Deleting…" : "Delete community"}
+          {deleting ? "Deleting…" : "Delete group"}
         </Button>
       </div>
 

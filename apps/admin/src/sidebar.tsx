@@ -9,7 +9,7 @@ import React, {
   useLayoutEffect,
   useState,
 } from "react";
-import { Link, Outlet, useNavigate } from "react-router";
+import { href, Link, Outlet, useNavigate } from "react-router";
 import { useAuth } from "./lib/AuthContext";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import SidebarIcon from "@alliance/shared/ui/icons/SidebarIcon";
@@ -197,10 +197,10 @@ const Sidebar: React.FC = () => {
               User Invites
             </Link>
             <Link
-              to="/communities"
+              to={href("/groups")}
               className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm "
             >
-              Communities
+              Groups
             </Link>
           </div>
           <div className="flex flex-row justify-between items-center mt-3 relative">
