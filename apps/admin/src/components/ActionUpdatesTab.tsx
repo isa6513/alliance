@@ -116,6 +116,7 @@ const ActionUpdatesTab = ({
             />
             <EditableContentForm
               value={newUpdate.content}
+              draftKey={`action-update-${actionId}`}
               placeholder="Action update body..."
               onChange={(content) => {
                 setNewUpdate({
