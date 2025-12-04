@@ -268,7 +268,8 @@ const MessagesPage = () => {
         if (
           usersWithoutCurrent.every((id) => ids.includes(id)) &&
           ids.every((id) => usersWithoutCurrent.includes(id)) &&
-          (convo.type === "multiple" || convo.type === "direct")
+          ((convo.type === "multiple" && usersWithoutCurrent.length > 1) ||
+            (convo.type === "direct" && usersWithoutCurrent.length === 1))
         ) {
           matchingConvoId = convo.id;
         }
