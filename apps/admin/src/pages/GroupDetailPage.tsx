@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { href, Link, useNavigate, useParams } from "react-router";
 import {
   userAddLeaderToCommunity,
   userAddMemberToCommunity,
@@ -295,7 +295,7 @@ const CommunityDetailPage: React.FC = () => {
     try {
       await userDeleteCommunity({ path: { communityId } });
       success("Community deleted", community.name);
-      navigate("/communities");
+      navigate(href("/groups"));
     } catch (err) {
       console.error("Failed to delete community", err);
       setError("Unable to delete community. Please try again.");
@@ -369,10 +369,10 @@ const CommunityDetailPage: React.FC = () => {
           <p className="text-sm text-zinc-500">Community not found.</p>
         )}
         <Link
-          to="/communities"
+          to={href("/groups")}
           className="text-blue-600 text-sm hover:underline"
         >
-          ← Back to communities
+          ← Back to groups
         </Link>
       </div>
     );
@@ -383,10 +383,10 @@ const CommunityDetailPage: React.FC = () => {
       <div className="flex flex-row items-center justify-between gap-3">
         <div>
           <Link
-            to="/communities"
+            to={href("/groups")}
             className="text-sm text-blue-600 hover:underline"
           >
-            ← Back to communities
+            ← Back to groups
           </Link>
           <h1 className="text-2xl font-semibold mt-2">{community.name}</h1>
           <p className="text-sm text-zinc-500">
