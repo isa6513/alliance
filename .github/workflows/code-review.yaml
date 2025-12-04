@@ -100,7 +100,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": ($mention | select(. != "")) + (if $mention != "" then " " else "" end) + $summary
+                    "text": (if $mention != "" then ($mention + " " + $summary) else $summary end)
                   }
                 },
                 {

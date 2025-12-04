@@ -78,7 +78,7 @@ const InvitePage: React.FC = () => {
     preventCompletion: false,
     everyoneShouldComplete: false,
     archived: false,
-    participatingGroups: [],
+    participatingTags: [],
     updates: [],
     relation: "joined" as const,
     canParticipate: true,
