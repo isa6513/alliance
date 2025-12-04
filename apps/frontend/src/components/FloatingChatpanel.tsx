@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import Spinner from "./Spinner";
 import ConversationDetailPanel from "./ConversationDetailPanel";
 import useLiveConvoMessages from "../pages/app/messages";
-import { MessageCircleMore, Minus } from "lucide-react";
+import { Expand, Minus } from "lucide-react";
 import { href, Link } from "react-router";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 
@@ -75,7 +75,7 @@ const FloatingChatPanel = ({
           onClick={onClose}
           title="Close Chat"
         >
-          <Minus size="20" />
+          <Minus size="18" />
         </Button>
         <Link
           to={
@@ -85,7 +85,7 @@ const FloatingChatPanel = ({
           className="hover:bg-black/5 rounded-md p-2 flex items-center justify-center"
           title="Open Messages"
         >
-          <MessageCircleMore size="20" />
+          <Expand size="18" />
         </Link>
       </div>
     </div>
