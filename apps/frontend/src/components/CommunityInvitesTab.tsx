@@ -23,6 +23,7 @@ import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import OneTimeInviteListItem from "./OneTimeInviteListItem";
 import CommunityInviteListItem from "./CommunityInviteListItem";
+import { Link } from "react-router";
 
 export interface CommunityInvitesTabProps {
   communityId: number;
@@ -196,6 +197,12 @@ const CommunityInvitesTab = ({
                 When the new member signs up, they will automatically be added
                 to your group.
               </p>
+              <Link
+                to="/groups?tab=resources"
+                className="text-green hover:underline"
+              >
+                Invite guide
+              </Link>
               <div className="flex flex-row gap-x-2 mt-2">
                 <input
                   type="text"
