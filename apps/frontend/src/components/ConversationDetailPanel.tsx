@@ -24,6 +24,11 @@ type ConversationDetailPanelProps = {
   onLeave: () => void;
   friends: ProfileDto[] | null;
   handleConversationUpdated: (conversation: ConversationDto) => void;
+  onOptimisticMessage?: (message: MessageDto) => void;
+  onOptimisticMessageFailed?: (
+    tempId: string,
+    draft: { message: string; attachments: string[]; replyingTo: string | null }
+  ) => void;
 } & (
   | {
       mode: "existing";
@@ -63,6 +68,8 @@ const ConversationDetailPanel = ({
   sendingNewMessageToIds,
   setSendingNewMessageToIds,
   handleCreateConversation,
+  onOptimisticMessage,
+  onOptimisticMessageFailed,
 }: ConversationDetailPanelProps) => {
   const { user } = useAuth();
 
@@ -195,21 +202,53 @@ const ConversationDetailPanel = ({
       return;
     }
 
+    const draftMessage = message;
+    const draftAttachments = [...attachments];
+    const draftReplyingTo = replyingTo;
+
+    const tempId = `temp-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
+    if (onOptimisticMessage && user) {
+      const optimisticMessage: MessageDto = {
+        id: tempId,
+        body: draftMessage,
+        attachments: draftAttachments,
+        createdAt: new Date().toISOString(),
+        author: { ...user, displayName: user.name, profileDescription: "" },
+        conversationId: activeConvo.id,
+        replyTo: replyingToMessage,
+      };
+      onOptimisticMessage(optimisticMessage);
+    }
+
+    setMessage("");
+    setAttachments([]);
+    setReplyingTo(null);
+
     setIsSendingMessage(true);
     try {
       const payload: CreateMessageDto & { attachments?: string[] } = {
         conversationId: activeConvo.id,
-        body: message,
-        attachments,
-        replyToId: replyingTo ?? undefined,
+        body: draftMessage,
+        attachments: draftAttachments,
+        replyToId: draftReplyingTo ?? undefined,
       };
       const response = await messageSendMessage({
         body: payload,
       });
-      if (response.data) {
-        setMessage("");
-        setAttachments([]);
-        setReplyingTo(null);
+      if (!response.data) {
+        if (onOptimisticMessageFailed) {
+          onOptimisticMessageFailed(tempId, {
+            message: draftMessage,
+            attachments: draftAttachments,
+            replyingTo: draftReplyingTo,
+          });
+        }
+        setMessage(draftMessage);
+        setAttachments(draftAttachments);
+        setReplyingTo(draftReplyingTo);
       }
       if (amInvited) {
         handleConversationUpdated({
@@ -224,6 +263,16 @@ const ConversationDetailPanel = ({
       }
     } catch (err) {
       console.error("Failed to send message", err);
+      if (onOptimisticMessageFailed) {
+        onOptimisticMessageFailed(tempId, {
+          message: draftMessage,
+          attachments: draftAttachments,
+          replyingTo: draftReplyingTo,
+        });
+      }
+      setMessage(draftMessage);
+      setAttachments(draftAttachments);
+      setReplyingTo(draftReplyingTo);
     } finally {
       setIsSendingMessage(false);
     }
@@ -233,11 +282,14 @@ const ConversationDetailPanel = ({
     handleConversationUpdated,
     isSendingMessage,
     replyingTo,
+    replyingToMessage,
     message,
     mode,
     handleCreateConversation,
     selectedConvo,
-    user?.id,
+    user,
+    onOptimisticMessage,
+    onOptimisticMessageFailed,
   ]);
 
   useEffect(() => {

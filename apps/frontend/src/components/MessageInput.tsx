@@ -28,6 +28,8 @@ interface MessageInputProps {
   compact?: boolean;
 }
 
+const SPINNER_DELAY_MS = 50;
+
 const MessageInput = ({
   message,
   setMessage,
@@ -41,9 +43,20 @@ const MessageInput = ({
   compact = false,
 }: MessageInputProps) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(false);
   const dragCounterRef = useRef(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const canSend = message.trim().length > 0 || attachments.length > 0;
+
+  // Only show spinner after a short delay to avoid flicker
+  useEffect(() => {
+    if (isSending) {
+      const timer = setTimeout(() => setShowSpinner(true), SPINNER_DELAY_MS);
+      return () => clearTimeout(timer);
+    } else {
+      setShowSpinner(false);
+    }
+  }, [isSending]);
 
   const readImagesFromFiles = useCallback(async (files: File[]) => {
     const readers: Promise<string>[] = [];
@@ -241,7 +254,7 @@ const MessageInput = ({
               }
             }}
           />
-          {isSending ? (
+          {showSpinner ? (
             <div className="pr-2">
               <Spinner size="small" />
             </div>

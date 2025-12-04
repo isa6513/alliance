@@ -88,7 +88,7 @@ const MessagesPage = () => {
     [setConversations]
   );
 
-  const [convoMessages] = useLiveConvoMessages(selectedConvoId, {
+  const { messages: convoMessages, addOptimisticMessage, removeOptimisticMessage } = useLiveConvoMessages(selectedConvoId, {
     onIncomingMessage: setConvoLastMessage,
     onConversationUpdated: handleConversationUpdated,
   });
@@ -467,6 +467,8 @@ const MessagesPage = () => {
             setSendingNewMessageToIds={null}
             handleCreateConversation={null}
             friends={friends}
+            onOptimisticMessage={addOptimisticMessage}
+            onOptimisticMessageFailed={(tempId) => removeOptimisticMessage(tempId)}
           />
         )}
         {creatingNewConversation && (
@@ -488,6 +490,8 @@ const MessagesPage = () => {
             sendingNewMessageToIds={sendingNewMessageToIds}
             setSendingNewMessageToIds={handleUpdateRecipientIds}
             handleCreateConversation={handleCreateConversation}
+            onOptimisticMessage={addOptimisticMessage}
+            onOptimisticMessageFailed={(tempId) => removeOptimisticMessage(tempId)}
           />
         )}
       </div>
