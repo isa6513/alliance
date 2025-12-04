@@ -37,6 +37,7 @@ type Tab = "activity" | "members" | "invites" | "about" | "edit" | "resources";
 
 export enum FilterMode {
   All = "All members",
+  Completed = "Completed",
   NotYetCompleted = "Not yet completed",
 }
 
@@ -215,6 +216,9 @@ const CommunityPage = () => {
     [FilterMode.All]: nonLeaderMembers,
     [FilterMode.NotYetCompleted]: nonLeaderMembers.filter(
       (user) => !completedAllCurrentActions[user.id]
+    ),
+    [FilterMode.Completed]: nonLeaderMembers.filter(
+      (user) => completedAllCurrentActions[user.id]
     ),
   };
   const filteredSortedMembers = membersByFilterMode[filterMode].sort((a, b) => {
