@@ -57,7 +57,7 @@ export const testUser = {
   anonymous: false,
   actionEventNotifs: [],
   welcomeMail: null,
-  groups: [],
+  tags: [],
   communities: [],
   leaderOf: [],
   invitedCommunities: [],

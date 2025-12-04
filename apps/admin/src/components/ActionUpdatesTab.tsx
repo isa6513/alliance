@@ -3,8 +3,8 @@ import {
   ActionUpdateNotifyType,
   actionsCreateUpdate,
   CreateActionUpdateDto,
-  GroupDto,
   actionsDeleteUpdate,
+  TagDto,
 } from "@alliance/shared/client";
 import ActionUpdateCard from "@alliance/shared/ui/ActionUpdateCard";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
@@ -18,7 +18,7 @@ interface ActionUpdatesTabProps {
   updates: ActionDto["updates"];
   setUpdates: (updates: ActionDto["updates"]) => unknown;
   events: ActionDto["events"];
-  availableGroups: GroupDto[];
+  availableTags: TagDto[];
 }
 
 const defaultNewUpdate: CreateActionUpdateDto = {
@@ -38,7 +38,7 @@ const ActionUpdatesTab = ({
   updates,
   setUpdates,
   events,
-  availableGroups,
+  availableTags,
 }: ActionUpdatesTabProps) => {
   const [newUpdate, setNewUpdate] =
     useState<CreateActionUpdateDto>(defaultNewUpdate);
@@ -47,18 +47,18 @@ const ActionUpdatesTab = ({
     "none",
     "action_cohort",
     "all_members",
-    "group",
+    "tag",
   ];
   const notifyTypeLabels: Record<ActionUpdateNotifyType, string> = {
     none: "No notification",
     action_cohort: "Action cohort members",
     all_members: "All members",
-    group: "Specific group",
+    tag: "Specific tag",
   };
   const shortNotifString = newUpdate.shortNotifString ?? "";
   const isSubmitDisabled =
     !shortNotifString.trim() ||
-    (newUpdate.notifyType === "group" && !newUpdate.groupId);
+    (newUpdate.notifyType === "tag" && !newUpdate.tagId);
 
   const handleSubmit = async () => {
     if (isSubmitDisabled) {
@@ -152,10 +152,8 @@ const ActionUpdatesTab = ({
                     setNewUpdate({
                       ...newUpdate,
                       notifyType: nextNotifyType,
-                      groupId:
-                        nextNotifyType === "group"
-                          ? newUpdate.groupId
-                          : undefined,
+                      tagId:
+                        nextNotifyType === "tag" ? newUpdate.tagId : undefined,
                     });
                   }}
                 >
@@ -179,25 +177,25 @@ const ActionUpdatesTab = ({
                   }}
                 />
               </label>
-              {newUpdate.notifyType === "group" && (
+              {newUpdate.notifyType === "tag" && (
                 <label className="flex flex-col text-sm gap-1 md:col-span-2">
-                  <span>Target group</span>
+                  <span>Target tag</span>
                   <select
                     className="p-2 rounded-md bg-white text-base"
-                    value={newUpdate.groupId ? String(newUpdate.groupId) : ""}
+                    value={newUpdate.tagId ? String(newUpdate.tagId) : ""}
                     onChange={(e) =>
                       setNewUpdate({
                         ...newUpdate,
-                        groupId: e.target.value
+                        tagId: e.target.value
                           ? Number(e.target.value)
                           : undefined,
                       })
                     }
                   >
-                    <option value="">Select a group</option>
-                    {availableGroups.map((group) => (
-                      <option key={group.id} value={group.id}>
-                        {group.name}
+                    <option value="">Select a tag</option>
+                    {availableTags.map((tag) => (
+                      <option key={tag.id} value={tag.id}>
+                        {tag.name}
                       </option>
                     ))}
                   </select>

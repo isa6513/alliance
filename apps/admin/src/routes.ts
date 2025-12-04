@@ -15,7 +15,7 @@ export default [
       route("/forms/:formId/responses", "pages/FormResponses.tsx"),
       route("/forms/:formId", "pages/FormBuilder.tsx"),
       route("/schedule", "pages/EventNotifTimeline.tsx"),
-      route("/members/groups", "pages/GroupManagement.tsx"),
+      route("/members/tags", "pages/TagManagement.tsx"),
       route("/member/:userId", "pages/UserDetailView.tsx"),
       route("/date", "pages/DateTest.tsx"),
       route("/members", "pages/UsersList.tsx"),

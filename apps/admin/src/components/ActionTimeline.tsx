@@ -163,7 +163,6 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
               );
             }
           } else if (timingMode === "event_launch") {
-            console.log(reminder);
             if (reminder.memberActionEvent) {
               singleDate = parseReminderDate(reminder.memberActionEvent.date);
             }
@@ -343,8 +342,6 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
   const timelineContentHeight =
     Math.max(timelineData.length, hasReminderOverlay ? 1 : 0) * rowHeight;
   const chartHeight = timelineContentHeight + 60;
-
-  console.log(normalizedReminders);
 
   useEffect(() => {
     if (

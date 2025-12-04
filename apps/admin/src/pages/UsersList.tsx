@@ -1,14 +1,14 @@
 import {
   analyticsGetTimeSpentPerUser,
   analyticsGetTimeSpentPerUserTotal,
-  userAddUserToGroup,
-  userGetGroups,
+  userAddUserToTag,
   userList,
   actionsActionRelations as userGetActionRelations,
-  userRemoveUserFromGroup,
+  userRemoveUserFromTag,
+  userGetTags,
 } from "@alliance/shared/client";
 import {
-  GroupDto,
+  TagDto,
   TimeSpentForUserDto,
   UserActionRelationDetailDto,
   UserActionRelationsResponseDto,
@@ -19,7 +19,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import UserCard from "../components/UserCard";
 import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
-import { Link } from "react-router";
+import { href, Link } from "react-router";
 
 const USER_FILTER_MODES = ["All", "Signed", "Suspended", "Not signed"] as const;
 type UserFilterMode = (typeof USER_FILTER_MODES)[number];
@@ -32,24 +32,22 @@ const UsersList: React.FC = () => {
   const [timeSpentPerUserTotal, setTimeSpentPerUserTotal] = useState<
     TimeSpentForUserDto[]
   >([]);
-  const [groups, setGroups] = useState<GroupDto[]>([]);
+  const [tags, setTags] = useState<TagDto[]>([]);
   const [actionSummaries, setActionSummaries] = useState<
     UserActionSummaryDto[]
   >([]);
   const [userActionRelations, setUserActionRelations] = useState<
     Record<number, UserActionRelationDetailDto[]>
   >({});
-  const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const [filterMode, setFilterMode] = useState<UserFilterMode>("All");
-  const [isGroupFilterOpen, setIsGroupFilterOpen] = useState(false);
-  const groupDropdownRef = useOutsideClick(() => setIsGroupFilterOpen(false));
+  const [isTagFilterOpen, setIsTagFilterOpen] = useState(false);
+  const tagDropdownRef = useOutsideClick(() => setIsTagFilterOpen(false));
   const filterModeOptions = useMemo(() => Array.from(USER_FILTER_MODES), []);
-  const [pendingGroupOps, setPendingGroupOps] = useState<Set<string>>(
+  const [pendingTagOps, setPendingTagOps] = useState<Set<string>>(
     () => new Set()
   );
-  const [groupMutationError, setGroupMutationError] = useState<string | null>(
-    null
-  );
+  const [tagMutationError, setTagMutationError] = useState<string | null>(null);
 
   useEffect(() => {
     analyticsGetTimeSpentPerUser().then((res) => {
@@ -69,7 +67,7 @@ const UsersList: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    userGetGroups().then((res) => setGroups(res.data || []));
+    userGetTags().then((res) => setTags(res.data || []));
   }, []);
 
   useEffect(() => {
@@ -113,32 +111,32 @@ const UsersList: React.FC = () => {
     });
   }, [users, userToTimeSpentTotal]);
 
-  const userGroupsMap = useMemo(() => {
-    return groups.reduce((acc, group) => {
-      group.users.forEach((profile) => {
+  const userTagsMap = useMemo(() => {
+    return tags.reduce((acc, tag) => {
+      tag.users.forEach((profile) => {
         if (!acc[profile.id]) {
           acc[profile.id] = [];
         }
-        acc[profile.id].push(group);
+        acc[profile.id].push(tag);
       });
       return acc;
-    }, {} as Record<number, GroupDto[]>);
-  }, [groups]);
+    }, {} as Record<number, TagDto[]>);
+  }, [tags]);
 
-  const filteredByGroups = useMemo(() => {
-    if (!selectedGroupIds.length) {
+  const filteredByTags = useMemo(() => {
+    if (!selectedTagIds.length) {
       return sortedUsers;
     }
-    const selected = new Set(selectedGroupIds);
+    const selected = new Set(selectedTagIds);
     return sortedUsers.filter((user) => {
-      const userGroups = userGroupsMap[user.id] || [];
-      return userGroups.some((group) => selected.has(group.id));
+      const userTags = userTagsMap[user.id] || [];
+      return userTags.some((tag) => selected.has(tag.id));
     });
-  }, [selectedGroupIds, sortedUsers, userGroupsMap]);
+  }, [selectedTagIds, sortedUsers, userTagsMap]);
 
   const modeToUsers = useMemo(() => {
     return USER_FILTER_MODES.reduce((acc, mode) => {
-      acc[mode] = filteredByGroups.filter((user) => {
+      acc[mode] = filteredByTags.filter((user) => {
         if (mode === "All") return true;
         if (mode === "Signed")
           return user.contractDateSigned && !user.contractDateSuspended;
@@ -147,93 +145,89 @@ const UsersList: React.FC = () => {
       });
       return acc;
     }, {} as Record<UserFilterMode, UserDto[]>);
-  }, [filteredByGroups]);
+  }, [filteredByTags]);
 
-  const selectedGroupNames = useMemo(() => {
-    if (!selectedGroupIds.length) return [] as string[];
-    const selected = new Set(selectedGroupIds);
-    return groups
-      .filter((group) => selected.has(group.id))
-      .map((group) => group.name);
-  }, [groups, selectedGroupIds]);
+  const selectedTagNames = useMemo(() => {
+    if (!selectedTagIds.length) return [] as string[];
+    const selected = new Set(selectedTagIds);
+    return tags.filter((tag) => selected.has(tag.id)).map((tag) => tag.name);
+  }, [tags, selectedTagIds]);
 
   const groupFilterLabel = useMemo(() => {
-    if (!selectedGroupIds.length) {
-      return "All groups";
+    if (!selectedTagIds.length) {
+      return "All tags";
     }
-    if (selectedGroupIds.length === 1) {
-      return selectedGroupNames[0] ?? "1 group";
+    if (selectedTagIds.length === 1) {
+      return selectedTagNames[0] ?? "1 tag";
     }
-    return `${selectedGroupIds.length} groups`;
-  }, [selectedGroupIds, selectedGroupNames]);
+    return `${selectedTagIds.length} tags`;
+  }, [selectedTagIds, selectedTagNames]);
 
-  const toggleGroupSelection = (groupId: number) => {
-    setSelectedGroupIds((prev) => {
-      if (prev.includes(groupId)) {
-        return prev.filter((id) => id !== groupId);
+  const toggleTagSelection = (tagId: number) => {
+    setSelectedTagIds((prev) => {
+      if (prev.includes(tagId)) {
+        return prev.filter((id) => id !== tagId);
       }
-      return [...prev, groupId];
+      return [...prev, tagId];
     });
   };
 
-  const clearGroupSelection = () => {
-    setSelectedGroupIds([]);
+  const clearTagSelection = () => {
+    setSelectedTagIds([]);
   };
 
   const noteForLocalhost =
     typeof window !== "undefined" && window.location.href.includes("localhost");
 
-  const updateGroupInState = useCallback((updatedGroup: GroupDto) => {
-    setGroups((prev) => {
-      const groupExists = prev.some((group) => group.id === updatedGroup.id);
-      if (groupExists) {
-        return prev.map((group) =>
-          group.id === updatedGroup.id ? updatedGroup : group
-        );
+  const updateTagInState = useCallback((updatedTag: TagDto) => {
+    setTags((prev) => {
+      const tagExists = prev.some((tag) => tag.id === updatedTag.id);
+      if (tagExists) {
+        return prev.map((tag) => (tag.id === updatedTag.id ? updatedTag : tag));
       }
-      return [...prev, updatedGroup];
+      return [...prev, updatedTag];
     });
   }, []);
 
-  const handleUserGroupToggle = useCallback(
-    async (userId: number, groupId: number, nextChecked: boolean) => {
-      const key = `${userId}-${groupId}`;
-      setPendingGroupOps((prev) => {
+  const handleUserTagToggle = useCallback(
+    async (userId: number, tagId: number, nextChecked: boolean) => {
+      const key = `${userId}-${tagId}`;
+      setPendingTagOps((prev) => {
         const next = new Set(prev);
         next.add(key);
         return next;
       });
-      setGroupMutationError(null);
+      setTagMutationError(null);
       try {
         if (nextChecked) {
-          const res = await userAddUserToGroup({
-            path: { groupId },
+          const res = await userAddUserToTag({
+            path: { tagId },
             body: { userId },
           });
           if (res.data) {
-            updateGroupInState(res.data);
+            updateTagInState(res.data);
           }
         } else {
-          const res = await userRemoveUserFromGroup({
-            path: { groupId },
+          const res = await userRemoveUserFromTag({
+            path: { tagId },
             body: { userId },
           });
           if (res.data) {
-            updateGroupInState(res.data);
+            updateTagInState(res.data);
           }
         }
       } catch (error) {
-        console.error("Failed to update group membership", error);
-        setGroupMutationError("Failed to update group membership. Try again.");
+        console.error("Failed to update tag membership", error);
+        setTagMutationError("Failed to update tag membership. Try again.");
       } finally {
-        setPendingGroupOps((prev) => {
+        setPendingTagOps((prev) => {
           const next = new Set(prev);
           next.delete(key);
           return next;
         });
       }
     },
-    [updateGroupInState]
+    [updateTagInState]
   );
 
   return (
@@ -248,45 +242,45 @@ const UsersList: React.FC = () => {
             value={filterMode}
             onChange={(mode) => setFilterMode(mode as UserFilterMode)}
           />
-          <div className="relative" ref={groupDropdownRef}>
+          <div className="relative" ref={tagDropdownRef}>
             <button
               type="button"
               className="font-ibm text-sm border border-gray-2 text-black bg-white hover:bg-zinc-50 px-3 rounded-sm py-2 flex flex-row gap-x-2 items-center"
               style={{ fontWeight: 450 }}
-              onClick={() => setIsGroupFilterOpen((open) => !open)}
+              onClick={() => setIsTagFilterOpen((open) => !open)}
             >
               <span>{groupFilterLabel}</span>
             </button>
-            {isGroupFilterOpen && (
+            {isTagFilterOpen && (
               <div className="absolute z-10 top-[calc(100%+4px)] left-0 min-w-[220px] bg-white border border-zinc-200 rounded shadow">
                 <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-200">
-                  <p className="text-sm font-medium text-zinc-600">Groups</p>
+                  <p className="text-sm font-medium text-zinc-600">Tags</p>
                   <button
                     type="button"
                     className="text-xs text-blue-600 hover:underline"
-                    onClick={clearGroupSelection}
+                    onClick={clearTagSelection}
                   >
                     Clear
                   </button>
                 </div>
                 <div className="max-h-60 overflow-y-auto">
-                  {groups.length ? (
-                    groups.map((group) => {
-                      const checked = selectedGroupIds.includes(group.id);
-                      const memberCount = group.users.length;
+                  {tags.length ? (
+                    tags.map((tag) => {
+                      const checked = selectedTagIds.includes(tag.id);
+                      const memberCount = tag.users.length;
                       return (
                         <label
-                          key={group.id}
+                          key={tag.id}
                           className="flex flex-row items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-50 cursor-pointer"
                         >
                           <input
                             type="checkbox"
                             className="cursor-pointer"
                             checked={checked}
-                            onChange={() => toggleGroupSelection(group.id)}
+                            onChange={() => toggleTagSelection(tag.id)}
                           />
                           <div className="flex flex-col">
-                            <span className="font-medium">{group.name}</span>
+                            <span className="font-medium">{tag.name}</span>
                             <span className="text-xs text-zinc-500">
                               {memberCount} member{memberCount === 1 ? "" : "s"}
                             </span>
@@ -296,7 +290,7 @@ const UsersList: React.FC = () => {
                     })
                   ) : (
                     <p className="px-3 py-2 text-sm text-zinc-500">
-                      No groups yet
+                      No tags yet
                     </p>
                   )}
                 </div>
@@ -306,10 +300,10 @@ const UsersList: React.FC = () => {
         </div>
         <div className="flex items-center gap-3">
           <Link
-            to="/members/groups"
+            to={href("/members/tags")}
             className="text-sm text-blue-600 hover:underline"
           >
-            Manage groups
+            Manage tags
           </Link>
           {noteForLocalhost && (
             <p className="text-sm text-gray-500">
@@ -318,9 +312,9 @@ const UsersList: React.FC = () => {
           )}
         </div>
       </div>
-      {groupMutationError && (
+      {tagMutationError && (
         <div className="w-full">
-          <p className="text-sm text-red-500">{groupMutationError}</p>
+          <p className="text-sm text-red-500">{tagMutationError}</p>
         </div>
       )}
       <div className="grid gap-3 w-full [grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
@@ -330,14 +324,12 @@ const UsersList: React.FC = () => {
             user={user}
             timeSpent={userToTimeSpent[user.id]}
             timeSpentTotal={userToTimeSpentTotal[user.id]}
-            groups={userGroupsMap[user.id] || []}
-            allGroups={groups}
-            onToggleGroup={(groupId, nextChecked) =>
-              handleUserGroupToggle(user.id, groupId, nextChecked)
+            tags={userTagsMap[user.id] || []}
+            allTags={tags}
+            onToggleTag={(tagId, nextChecked) =>
+              handleUserTagToggle(user.id, tagId, nextChecked)
             }
-            isGroupPending={(groupId) =>
-              pendingGroupOps.has(`${user.id}-${groupId}`)
-            }
+            isTagPending={(tagId) => pendingTagOps.has(`${user.id}-${tagId}`)}
             actions={actionSummaries}
             actionRelations={userActionRelations[user.id] || []}
           />

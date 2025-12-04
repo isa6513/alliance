@@ -1,6 +1,6 @@
 import {
   ActionSuiteDto,
-  GroupDto,
+  TagDto,
   PreviewNotificationPlan,
   ReminderGroup,
   actionsCreateReminderGroup,
@@ -9,7 +9,7 @@ import {
   actionsReminderGroupsForEvent,
   actionsSentNotifsForGroup,
   actionsUpdateReminderGroup,
-  userGetGroups,
+  userGetTags,
   userList,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
@@ -82,10 +82,10 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     memberEvents.length > 0 ? memberEvents[0].id : null //TODO: collate or move between events
   );
   const [users, setUsers] = useState<UserSelectUser[]>([]);
-  const [userGroups, setUserGroups] = useState<GroupDto[]>([]);
+  const [userTags, setUserTags] = useState<TagDto[]>([]);
   const [loadingUsers, setLoadingUsers] = useState<boolean>(false);
-  const [loadingUserGroups, setLoadingUserGroups] = useState<boolean>(false);
-  const [userGroupsError, setUserGroupsError] = useState<string | null>(null);
+  const [loadingUserTags, setLoadingUserTags] = useState<boolean>(false);
+  const [userTagsError, setUserTagsError] = useState<string | null>(null);
 
   const [createGroupExpanded, setCreateGroupExpanded] =
     useState<boolean>(false);
@@ -134,9 +134,9 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
   }, []);
 
   useEffect(() => {
-    setLoadingUserGroups(true);
-    setUserGroupsError(null);
-    userGetGroups()
+    setLoadingUserTags(true);
+    setUserTagsError(null);
+    userGetTags()
       .then((response) => {
         if (response.error) {
           throw new Error(
@@ -145,15 +145,15 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
               : "Failed to load user groups."
           );
         }
-        setUserGroups(response.data ?? []);
+        setUserTags(response.data ?? []);
       })
       .catch((err) => {
         console.error(err);
-        setUserGroupsError(
-          err instanceof Error ? err.message : "Failed to load user groups."
+        setUserTagsError(
+          err instanceof Error ? err.message : "Failed to load user tags."
         );
       })
-      .finally(() => setLoadingUserGroups(false));
+      .finally(() => setLoadingUserTags(false));
   }, []);
 
   const refreshReminderGroups = useCallback(async (eventId: number) => {
@@ -841,9 +841,9 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
                 memberEvents={memberEvents}
                 users={users}
                 loadingUsers={loadingUsers}
-                userGroups={userGroups}
-                loadingUserGroups={loadingUserGroups}
-                userGroupsError={userGroupsError}
+                userTags={userTags}
+                loadingUserTags={loadingUserTags}
+                userTagsError={userTagsError}
                 initialValues={{
                   memberActionEventId: selectedEventId,
                   reminderGroup: selectedPreset
@@ -880,9 +880,9 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             memberEvents={memberEvents}
             users={users}
             loadingUsers={loadingUsers}
-            userGroups={userGroups}
-            loadingUserGroups={loadingUserGroups}
-            userGroupsError={userGroupsError}
+            userTags={userTags}
+            loadingUserTags={loadingUserTags}
+            userTagsError={userTagsError}
             editSubmitting={editSubmitting}
             editError={editError}
             editSuccess={editSuccess}

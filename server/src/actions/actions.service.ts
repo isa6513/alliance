@@ -48,7 +48,7 @@ import {
 } from './entities/action-activity.entity';
 import { ActionEvent, ActionStatus } from './entities/action-event.entity';
 import { Action, ActionTaskType } from './entities/action.entity';
-import { Group } from 'src/user/entities/group.entity';
+import { Tag } from 'src/user/entities/tag.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
@@ -102,8 +102,8 @@ export class ActionsService {
     private readonly commentRepository: Repository<Comment>,
     @InjectRepository(EditableContent)
     private readonly editableContentRepository: Repository<EditableContent>,
-    @InjectRepository(Group)
-    private readonly groupRepository: Repository<Group>,
+    @InjectRepository(Tag)
+    private readonly tagRepository: Repository<Tag>,
     @InjectRepository(ActionUpdate)
     private readonly actionUpdateRepository: Repository<ActionUpdate>,
     @InjectRepository(ActionSuite)
@@ -120,7 +120,7 @@ export class ActionsService {
   ) {}
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
-    const { participatingGroups, suiteId, ...rest } = createActionDto;
+    const { participatingTags, suiteId, ...rest } = createActionDto;
     const action = this.actionRepository.create(rest);
 
     if (suiteId) {
@@ -130,9 +130,9 @@ export class ActionsService {
       action.suite = suite;
     }
 
-    if (participatingGroups && participatingGroups.length > 0) {
-      action.participatingGroups =
-        await this.resolveParticipatingGroups(participatingGroups);
+    if (participatingTags && participatingTags.length > 0) {
+      action.participatingTags =
+        await this.resolveParticipatingTags(participatingTags);
     }
 
     return this.actionRepository.save(action);
@@ -143,7 +143,7 @@ export class ActionsService {
       relations: [
         'events',
         'activities',
-        'participatingGroups',
+        'participatingTags',
         'suite',
         'manualCohortUsers',
       ],
@@ -224,7 +224,7 @@ export class ActionsService {
   async reloadUsersJoinedForAction(actionId: number): Promise<void> {
     const action = await this.actionRepository.findOneOrFail({
       where: { id: actionId },
-      relations: ['events', 'participatingGroups', 'activities'],
+      relations: ['events', 'participatingTags', 'activities'],
     });
 
     let joined = action.usersJoined;
@@ -293,7 +293,7 @@ export class ActionsService {
   async findPublic(userId?: number, sorted?: boolean): Promise<ActionDto[]> {
     const relations: (keyof Omit<Action, 'usersCompleted' | 'status'>)[] = [
       'events',
-      'participatingGroups',
+      'participatingTags',
       'activities',
       'manualCohortUsers',
     ];
@@ -304,7 +304,7 @@ export class ActionsService {
         });
 
     const user = userId
-      ? await this.userService.findOne(userId, ['groups', 'awayRanges'])
+      ? await this.userService.findOne(userId, ['tags', 'awayRanges'])
       : null;
 
     const filtered: Action[] = [];
@@ -323,8 +323,8 @@ export class ActionsService {
             (event) => event.newStatus === ActionStatus.MemberAction,
           )
         ) {
-          const targetGroupIds = new Set(
-            (action.participatingGroups || []).map((group) => group.id),
+          const targetTagIds = new Set(
+            (action.participatingTags || []).map((tag) => tag.id),
           );
           shouldParticipate =
             this.actionEventRecipientService.userShouldCompleteEvent(
@@ -332,7 +332,7 @@ export class ActionsService {
               action.events.find(
                 (event) => event.newStatus === ActionStatus.MemberAction,
               )!.date,
-              targetGroupIds,
+              targetTagIds,
               action.everyoneShouldComplete,
               action.useManualCohort,
               action.manualCohortUsers,
@@ -365,7 +365,7 @@ export class ActionsService {
       return false;
     }
     if (
-      !action.participatingGroups?.length ||
+      !action.participatingTags?.length ||
       action.showToNonparticipating === true
     ) {
       return true;
@@ -374,13 +374,13 @@ export class ActionsService {
       return false;
     }
 
-    if (!action.participatingGroups?.length) {
+    if (!action.participatingTags?.length) {
       return false;
     }
 
-    return user.groups.some((group) =>
-      action.participatingGroups.some(
-        (participatingGroup) => participatingGroup.id === group.id,
+    return user.tags.some((tag) =>
+      action.participatingTags.some(
+        (participatingTag) => participatingTag.id === tag.id,
       ),
     );
   }
@@ -391,14 +391,14 @@ export class ActionsService {
     serverSide = false,
   ): Promise<Action> {
     const user = userId
-      ? await this.userService.findOne(userId, ['groups'])
+      ? await this.userService.findOne(userId, ['tags'])
       : null;
     const action = await this.actionRepository.findOne({
       where: { id },
       relations: [
         'events',
         'activities',
-        'participatingGroups',
+        'participatingTags',
         'manualCohortUsers',
         'updates',
         'suite',
@@ -421,7 +421,7 @@ export class ActionsService {
   ): Promise<ActionDto> {
     const action = await this.findOne(id, userId, serverSide);
     const user = userId
-      ? await this.userService.findOne(userId, ['groups'])
+      ? await this.userService.findOne(userId, ['tags'])
       : null;
     return new ActionDto(action, {
       canParticipate: user
@@ -607,14 +607,14 @@ export class ActionsService {
   ): Promise<Action | null> {
     const action = await this.actionRepository.findOne({
       where: { id },
-      relations: ['participatingGroups', 'manualCohortUsers'],
+      relations: ['participatingTags', 'manualCohortUsers'],
     });
 
     if (!action) {
       throw new NotFoundException('Action not found');
     }
 
-    const { participatingGroups, suiteId, ...rest } = updateActionDto;
+    const { participatingTags, suiteId, ...rest } = updateActionDto;
 
     if (suiteId) {
       const suite = await this.actionSuiteRepository.findOneOrFail({
@@ -625,9 +625,9 @@ export class ActionsService {
 
     Object.assign(action, rest);
 
-    if (participatingGroups !== undefined) {
-      action.participatingGroups =
-        await this.resolveParticipatingGroups(participatingGroups);
+    if (participatingTags !== undefined) {
+      action.participatingTags =
+        await this.resolveParticipatingTags(participatingTags);
     }
 
     await this.actionRepository.save(action);
@@ -836,15 +836,15 @@ export class ActionsService {
     );
   }
 
-  private async resolveParticipatingGroups(
-    groups?: Array<Partial<Group>>,
-  ): Promise<Group[]> {
-    if (!groups || groups.length === 0) {
+  private async resolveParticipatingTags(
+    tags?: Array<Partial<Tag>>,
+  ): Promise<Tag[]> {
+    if (!tags || tags.length === 0) {
       return [];
     }
 
-    const ids = groups
-      .map((group) => group?.id)
+    const ids = tags
+      .map((tag) => tag?.id)
       .filter((id): id is number => typeof id === 'number');
 
     if (ids.length === 0) {
@@ -852,12 +852,12 @@ export class ActionsService {
     }
 
     const uniqueIds = Array.from(new Set(ids));
-    const found = await this.groupRepository.findBy({ id: In(uniqueIds) });
+    const found = await this.tagRepository.findBy({ id: In(uniqueIds) });
 
     if (found.length !== uniqueIds.length) {
-      const foundIds = new Set(found.map((group) => group.id));
+      const foundIds = new Set(found.map((tag) => tag.id));
       const missing = uniqueIds.filter((id) => !foundIds.has(id));
-      throw new NotFoundException(`Group(s) not found: ${missing.join(', ')}`);
+      throw new NotFoundException(`Tag(s) not found: ${missing.join(', ')}`);
     }
 
     return found;
@@ -868,7 +868,7 @@ export class ActionsService {
     userId: number,
   ): Promise<boolean> {
     const action = await this.findOne(actionId, userId);
-    const user = await this.userService.findOne(userId, ['groups']);
+    const user = await this.userService.findOne(userId, ['tags']);
     if (!user) {
       return false;
     }
@@ -882,16 +882,14 @@ export class ActionsService {
     if (action.useManualCohort) {
       return action.manualCohortUsers?.some((m) => m.id === user.id) ?? false;
     }
-    const groups = action.participatingGroups;
-    const userGroupIds = new Set((user.groups || []).map((group) => group.id));
-    const isMember = groups.some((group) => userGroupIds.has(group.id));
+    const tags = action.participatingTags;
+    const userTagIds = new Set((user.tags || []).map((tag) => tag.id));
+    const isMember = tags.some((tag) => userTagIds.has(tag.id));
     return isMember;
   }
 
   async ensureUserEligibleForAction(action: Action, userId: number) {
-    const groups = action.participatingGroups;
-
-    const user = await this.userService.findOne(userId, ['groups']);
+    const user = await this.userService.findOne(userId, ['tags']);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -908,12 +906,14 @@ export class ActionsService {
       }
     }
 
-    const userGroupIds = new Set((user.groups || []).map((group) => group.id));
-    const isMember = groups.some((group) => userGroupIds.has(group.id));
+    const userTagIds = new Set((user.tags || []).map((tag) => tag.id));
+    const isMember = action.participatingTags.some((tag) =>
+      userTagIds.has(tag.id),
+    );
 
     if (!isMember) {
       throw new ForbiddenException(
-        'This action is not available to your groups.',
+        'This action is not available to your tags.',
       );
     }
   }
@@ -1258,13 +1258,13 @@ export class ActionsService {
     await this.editableContentRepository.save(content);
     const action = await this.actionRepository.findOneOrFail({
       where: { id },
-      relations: ['participatingGroups'],
+      relations: ['participatingTags'],
     });
 
-    let group: Group | undefined = undefined;
-    if (createActionUpdateDto.groupId) {
-      group = await this.groupRepository.findOneOrFail({
-        where: { id: createActionUpdateDto.groupId },
+    let tag: Tag | undefined = undefined;
+    if (createActionUpdateDto.tagId) {
+      tag = await this.tagRepository.findOneOrFail({
+        where: { id: createActionUpdateDto.tagId },
       });
     }
 
@@ -1280,7 +1280,7 @@ export class ActionsService {
         ...createActionUpdateDto,
         content,
         action,
-        group,
+        tag,
         associatedEvent,
       }),
     );
@@ -1304,12 +1304,11 @@ export class ActionsService {
     let users: User[] = [];
     if (actionUpdate.notifyType === ActionUpdateNotifyType.ActionCohort) {
       users = await this.userService.findAll();
-    } else if (actionUpdate.notifyType === ActionUpdateNotifyType.Group) {
-      if (!actionUpdate.group) {
-        throw new BadRequestException('Group is required');
+    } else if (actionUpdate.notifyType === ActionUpdateNotifyType.Tag) {
+      if (!actionUpdate.tag) {
+        throw new BadRequestException('Tag is required');
       }
-      users = (await this.userService.findGroupOrFail(actionUpdate.group.id))
-        .users;
+      users = (await this.userService.findTagOrFail(actionUpdate.tag.id)).users;
     } else if (actionUpdate.notifyType === ActionUpdateNotifyType.AllMembers) {
       users = await this.userService.findAllUsers();
     }
@@ -1333,7 +1332,7 @@ export class ActionsService {
         'reminderGroups.memberActionEvent',
         'reminderGroups.memberActionEvent',
         'reminderGroups.deadlineEvent',
-        'actions.participatingGroups',
+        'actions.participatingTags',
         'actions.activities',
       ],
     });
@@ -1450,15 +1449,15 @@ export class ActionsService {
       relations: [
         'action',
         'action.events',
-        'action.participatingGroups',
+        'action.participatingTags',
         'action.manualCohortUsers',
       ],
     });
 
-    let group: Group | undefined = undefined;
-    if (body.userGroupId) {
-      group = await this.groupRepository.findOneOrFail({
-        where: { id: body.userGroupId },
+    let tag: Tag | undefined = undefined;
+    if (body.userTagId) {
+      tag = await this.tagRepository.findOneOrFail({
+        where: { id: body.userTagId },
       });
     }
 
@@ -1474,7 +1473,7 @@ export class ActionsService {
       memberActionEvent: event,
       notifications: [],
       users,
-      userGroup: group,
+      userTag: tag,
       allSent: false,
     } satisfies ReminderGroup;
 
@@ -1547,7 +1546,7 @@ export class ActionsService {
     suite?: boolean,
   ): Promise<ExportActionDto> {
     const relations = [
-      'participatingGroups',
+      'participatingTags',
       ...(events ? ['events'] : []),
       ...(suite ? ['suite'] : []),
     ];
@@ -1617,19 +1616,19 @@ export class ActionsService {
       action.events = newEvents;
     }
 
-    if (action.participatingGroups) {
-      const existingGroups: Group[] = [];
-      for (const group of action.participatingGroups) {
-        const found = await this.groupRepository.findOne({
+    if (action.participatingTags) {
+      const existingTags: Tag[] = [];
+      for (const tag of action.participatingTags) {
+        const found = await this.tagRepository.findOne({
           where: {
-            id: group.id,
+            id: tag.id,
           },
         });
         if (found) {
-          existingGroups.push(found);
+          existingTags.push(found);
         }
       }
-      action.participatingGroups = existingGroups;
+      action.participatingTags = existingTags;
     }
 
     const newAction = this.actionRepository.create({

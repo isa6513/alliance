@@ -10,7 +10,7 @@ import { ActionEventReminderService } from 'src/notifs/action-event-reminder.ser
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { User } from '../user/entities/user.entity';
-import { Group } from '../user/entities/group.entity';
+import { Tag } from '../user/entities/tag.entity';
 import { UserModule } from '../user/user.module';
 import { ActionsController } from './actions.controller';
 import { ActionsGateway } from './actions.gateway';
@@ -34,7 +34,7 @@ import { ReloadUsersJoinedWorker } from './reload-users-joined.worker';
       ActionActivity,
       Comment,
       EditableContent,
-      Group,
+      Tag,
       ActionUpdate,
       ReminderGroup,
       ActionEventNotif,

@@ -14,7 +14,7 @@ import { UserController } from './user.controller';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { IsUserAlreadyExist } from './validators/user-already-exists.validator';
-import { Group } from './entities/group.entity';
+import { Tag } from './entities/tag.entity';
 import { OnetimeInvite } from './entities/onetime-invite.entity';
 import { UserAwayRange } from './entities/user-away-range.entity';
 import { Community } from './entities/community.entity';
@@ -30,7 +30,7 @@ import { CommunityInvite } from './entities/community-invite.entity';
       City,
       Notification,
       PrefillUser,
-      Group,
+      Tag,
       OnetimeInvite,
       UserAwayRange,
       Community,

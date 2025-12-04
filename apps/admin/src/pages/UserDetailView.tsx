@@ -3,14 +3,14 @@ import {
   analyticsGetTimeSpentPerUserTotal,
   notifsNotifsForUser,
   actionsActionRelations as userGetActionRelations,
-  userAddUserToGroup,
-  userGetGroups,
+  userAddUserToTag,
+  userGetTags,
   userList,
-  userRemoveUserFromGroup,
+  userRemoveUserFromTag,
 } from "@alliance/shared/client";
 import {
   ActionEventNotifDto,
-  GroupDto,
+  TagDto,
   TimeSpentForUserDto,
   UserActionRelationDetailDto,
   UserActionRelationsResponseDto,
@@ -41,14 +41,14 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
 
   const [
     usersRes,
-    groupsRes,
+    tagsRes,
     actionRelationsRes,
     timeSpentRes,
     timeSpentTotalRes,
     notifRes,
   ] = await Promise.all([
     userList(),
-    userGetGroups(),
+    userGetTags(),
     userGetActionRelations(),
     analyticsGetTimeSpentPerUser(),
     analyticsGetTimeSpentPerUserTotal(),
@@ -74,7 +74,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
 
   return {
     user,
-    allGroups: groupsRes.data ?? [],
+    allTags: tagsRes.data ?? [],
     actionSummaries,
     actionRelations,
     timeSpent,
@@ -96,21 +96,19 @@ const UserDetailView: React.FC = () => {
 
   const [actionRelationsState, setActionRelationsState] =
     useState<UserActionRelationDetailDto[]>(actionRelations);
-  const [allGroups, setAllGroups] = useState<GroupDto[]>(loaderData.allGroups);
-  const [pendingGroupOps, setPendingGroupOps] = useState<Set<string>>(
+  const [allTags, setAllTags] = useState<TagDto[]>(loaderData.allTags);
+  const [pendingTagOps, setPendingTagOps] = useState<Set<string>>(
     () => new Set()
   );
-  const [groupMutationError, setGroupMutationError] = useState<string | null>(
-    null
-  );
+  const [tagMutationError, setTagMutationError] = useState<string | null>(null);
 
   useEffect(() => {
     setActionRelationsState(actionRelations);
   }, [actionRelations]);
 
-  const sortedAllGroups = useMemo(() => {
-    return [...allGroups].sort((a, b) => a.name.localeCompare(b.name));
-  }, [allGroups]);
+  const sortedAllTags = useMemo(() => {
+    return [...allTags].sort((a, b) => a.name.localeCompare(b.name));
+  }, [allTags]);
 
   const navigate = useNavigate();
 
@@ -118,15 +116,15 @@ const UserDetailView: React.FC = () => {
     navigate(window.location.pathname);
   }, [navigate]);
 
-  const userGroups = useMemo(() => {
-    return allGroups.filter((group) =>
-      group.users.some((profile) => profile.id === user.id)
+  const userTags = useMemo(() => {
+    return allTags.filter((tag) =>
+      tag.users.some((profile) => profile.id === user.id)
     );
-  }, [allGroups, user.id]);
+  }, [allTags, user.id]);
 
-  const userGroupIds = useMemo(() => {
-    return new Set(userGroups.map((group) => group.id));
-  }, [userGroups]);
+  const userTagIds = useMemo(() => {
+    return new Set(userTags.map((tag) => tag.id));
+  }, [userTags]);
 
   const relationByActionId = useMemo(() => {
     return actionRelationsState.reduce((acc, relation) => {
@@ -175,62 +173,60 @@ const UserDetailView: React.FC = () => {
     ? "Signed"
     : "Not signed";
 
-  const groupKey = useCallback(
-    (groupId: number) => `${user.id}-${groupId}`,
+  const tagKey = useCallback(
+    (tagId: number) => `${user.id}-${tagId}`,
     [user.id]
   );
 
-  const updateGroupInState = useCallback((updatedGroup: GroupDto) => {
-    setAllGroups((prev) => {
-      const exists = prev.some((group) => group.id === updatedGroup.id);
+  const updateTagInState = useCallback((updatedTag: TagDto) => {
+    setAllTags((prev) => {
+      const exists = prev.some((tag) => tag.id === updatedTag.id);
       if (exists) {
-        return prev.map((group) =>
-          group.id === updatedGroup.id ? updatedGroup : group
-        );
+        return prev.map((tag) => (tag.id === updatedTag.id ? updatedTag : tag));
       }
-      return [...prev, updatedGroup];
+      return [...prev, updatedTag];
     });
   }, []);
 
-  const handleGroupToggle = useCallback(
-    async (groupId: number, nextChecked: boolean) => {
-      const key = groupKey(groupId);
-      setPendingGroupOps((prev) => {
+  const handleTagToggle = useCallback(
+    async (tagId: number, nextChecked: boolean) => {
+      const key = tagKey(tagId);
+      setPendingTagOps((prev) => {
         const next = new Set(prev);
         next.add(key);
         return next;
       });
-      setGroupMutationError(null);
+      setTagMutationError(null);
       try {
         if (nextChecked) {
-          const res = await userAddUserToGroup({
-            path: { groupId },
+          const res = await userAddUserToTag({
+            path: { tagId },
             body: { userId: user.id },
           });
           if (res.data) {
-            updateGroupInState(res.data);
+            updateTagInState(res.data);
           }
         } else {
-          const res = await userRemoveUserFromGroup({
-            path: { groupId },
+          const res = await userRemoveUserFromTag({
+            path: { tagId },
             body: { userId: user.id },
           });
           if (res.data) {
-            updateGroupInState(res.data);
+            updateTagInState(res.data);
           }
         }
       } catch (error) {
-        console.error("Failed to update group membership", error);
-        setGroupMutationError("Failed to update group membership. Try again.");
+        console.error("Failed to update tag membership", error);
+        setTagMutationError("Failed to update tag membership. Try again.");
       } finally {
-        setPendingGroupOps((prev) => {
+        setPendingTagOps((prev) => {
           const next = new Set(prev);
           next.delete(key);
           return next;
         });
       }
     },
-    [groupKey, updateGroupInState, user.id]
+    [tagKey, updateTagInState, user.id]
   );
 
   return (
@@ -306,16 +302,16 @@ const UserDetailView: React.FC = () => {
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-zinc-900">Groups</h2>
           <span className="text-sm text-zinc-500">
-            {userGroups.length} group{userGroups.length === 1 ? "" : "s"}
+            {userTags.length} tag{userTags.length === 1 ? "" : "s"}
           </span>
         </div>
-        {groupMutationError && (
-          <p className="text-sm text-red-500">{groupMutationError}</p>
+        {tagMutationError && (
+          <p className="text-sm text-red-500">{tagMutationError}</p>
         )}
-        {userGroups.length ? (
+        {userTags.length ? (
           <div className="flex flex-wrap gap-2">
-            {userGroups.map((group) => (
-              <Badge key={group.id}>{group.name}</Badge>
+            {userTags.map((tag) => (
+              <Badge key={tag.id}>{tag.name}</Badge>
             ))}
           </div>
         ) : (
@@ -326,12 +322,12 @@ const UserDetailView: React.FC = () => {
             Update membership
           </p>
           <div className="grid gap-2 md:grid-cols-2">
-            {sortedAllGroups.map((group) => {
-              const checked = userGroupIds.has(group.id);
-              const pending = pendingGroupOps.has(groupKey(group.id));
+            {sortedAllTags.map((tag) => {
+              const checked = userTagIds.has(tag.id);
+              const pending = pendingTagOps.has(tagKey(tag.id));
               return (
                 <label
-                  key={group.id}
+                  key={tag.id}
                   className={`flex items-start gap-3 rounded border border-zinc-200 p-3 text-sm ${
                     pending ? "opacity-60" : ""
                   }`}
@@ -342,22 +338,22 @@ const UserDetailView: React.FC = () => {
                     checked={checked}
                     disabled={pending}
                     onChange={(event) =>
-                      handleGroupToggle(group.id, event.target.checked)
+                      handleTagToggle(tag.id, event.target.checked)
                     }
                   />
                   <div>
-                    <p className="font-medium text-zinc-800">{group.name}</p>
-                    {group.description && (
+                    <p className="font-medium text-zinc-800">{tag.name}</p>
+                    {tag.description && (
                       <p className="text-xs text-zinc-500 mt-1">
-                        {group.description}
+                        {tag.description}
                       </p>
                     )}
                   </div>
                 </label>
               );
             })}
-            {sortedAllGroups.length === 0 && (
-              <p className="text-sm text-zinc-500">No groups available.</p>
+            {sortedAllTags.length === 0 && (
+              <p className="text-sm text-zinc-500">No tags available.</p>
             )}
           </div>
         </div>

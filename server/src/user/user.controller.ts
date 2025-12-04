@@ -38,7 +38,7 @@ import {
 } from './user.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
-import { AddUserToGroupDto, CreateGroupDto, GroupDto } from './group.dto';
+import { AddUserToTagDto, CreateTagDto, TagDto } from './tag.dto';
 import { CommunityMemberContactInfoDto } from './dto/user-action-relations.dto';
 import {
   CommunityInviteDto,
@@ -443,61 +443,57 @@ export class UserController {
     );
   }
 
-  @Post('createGroup')
+  @Post('createTag')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: GroupDto })
-  async createGroup(@Body() body: CreateGroupDto) {
-    return new GroupDto(await this.userService.createGroup(body));
+  @ApiOkResponse({ type: TagDto })
+  async createTag(@Body() body: CreateTagDto) {
+    return new TagDto(await this.userService.createTag(body));
   }
 
-  @Get('groups')
+  @Get('tags')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: [GroupDto] })
-  async getGroups() {
-    return (await this.userService.findAllGroups()).map(
-      (group) => new GroupDto(group),
+  @ApiOkResponse({ type: [TagDto] })
+  async getTags() {
+    return (await this.userService.findAllTags()).map((tag) => new TagDto(tag));
+  }
+
+  @Post('tags/:tagId/addUser')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: TagDto })
+  async addUserToTag(
+    @Param('tagId', ParseIntPipe) tagId: number,
+    @Body() body: AddUserToTagDto,
+  ) {
+    return new TagDto(await this.userService.addUserToTag(tagId, body.userId));
+  }
+
+  @Post('tags/:tagId/removeUser')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: TagDto })
+  async removeUserFromTag(
+    @Param('tagId', ParseIntPipe) tagId: number,
+    @Body() body: AddUserToTagDto,
+  ) {
+    return new TagDto(
+      await this.userService.removeUserFromTag(tagId, body.userId),
     );
   }
 
-  @Post('groups/:groupId/addUser')
+  @Post('tags/:tagId/update')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: GroupDto })
-  async addUserToGroup(
-    @Param('groupId', ParseIntPipe) groupId: number,
-    @Body() body: AddUserToGroupDto,
+  @ApiOkResponse({ type: TagDto })
+  async updateTag(
+    @Param('tagId', ParseIntPipe) tagId: number,
+    @Body() body: CreateTagDto,
   ) {
-    return new GroupDto(
-      await this.userService.addUserToGroup(groupId, body.userId),
-    );
+    return new TagDto(await this.userService.updateTag(tagId, body));
   }
 
-  @Post('groups/:groupId/removeUser')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: GroupDto })
-  async removeUserFromGroup(
-    @Param('groupId', ParseIntPipe) groupId: number,
-    @Body() body: AddUserToGroupDto,
-  ) {
-    return new GroupDto(
-      await this.userService.removeUserFromGroup(groupId, body.userId),
-    );
-  }
-
-  @Post('groups/:groupId/update')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: GroupDto })
-  async updateGroup(
-    @Param('groupId', ParseIntPipe) groupId: number,
-    @Body() body: CreateGroupDto,
-  ) {
-    return new GroupDto(await this.userService.updateGroup(groupId, body));
-  }
-
-  @Delete('groups/:groupId')
+  @Delete('tags/:tagId')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async deleteGroup(@Param('groupId', ParseIntPipe) groupId: number) {
-    await this.userService.deleteGroup(groupId);
+  async deleteTag(@Param('tagId', ParseIntPipe) tagId: number) {
+    await this.userService.deleteTag(tagId);
   }
 
   @Get('referrerProfile/:code')

@@ -1,5 +1,5 @@
 import {
-  GroupDto,
+  TagDto,
   UserActionRelationDetailDto,
   UserActionSummaryDto,
   UserActionRelationStatus,
@@ -23,13 +23,10 @@ export interface UserCardProps {
   user: UserDto;
   timeSpent: number;
   timeSpentTotal: number;
-  groups: GroupDto[];
-  allGroups: GroupDto[];
-  onToggleGroup: (
-    groupId: number,
-    nextChecked: boolean
-  ) => void | Promise<void>;
-  isGroupPending: (groupId: number) => boolean;
+  tags: TagDto[];
+  allTags: TagDto[];
+  onToggleTag: (tagId: number, nextChecked: boolean) => void | Promise<void>;
+  isTagPending: (tagId: number) => boolean;
   actions: UserActionSummaryDto[];
   actionRelations: UserActionRelationDetailDto[];
 }
@@ -38,10 +35,10 @@ const UserCard = ({
   user,
   timeSpent,
   timeSpentTotal,
-  groups,
-  allGroups,
-  onToggleGroup,
-  isGroupPending,
+  tags,
+  allTags,
+  onToggleTag,
+  isTagPending,
   actions,
   actionRelations,
 }: UserCardProps) => {
@@ -85,14 +82,11 @@ const UserCard = ({
       .join(" ");
   };
 
-  const sortedAllGroups = useMemo(() => {
-    return [...allGroups].sort((a, b) => a.name.localeCompare(b.name));
-  }, [allGroups]);
+  const sortedAllTags = useMemo(() => {
+    return [...allTags].sort((a, b) => a.name.localeCompare(b.name));
+  }, [allTags]);
 
-  const groupIds = useMemo(
-    () => new Set(groups.map((group) => group.id)),
-    [groups]
-  );
+  const tagIds = useMemo(() => new Set(tags.map((tag) => tag.id)), [tags]);
 
   const formatTime = (time: number) => {
     const interval = intervalToDuration({ start: 0, end: time * 1000 });
@@ -153,7 +147,7 @@ const UserCard = ({
       </div>
       <div className="border-b pb-2 mb-2 border-zinc-200">
         <div className="flex items-center justify-between">
-          <p className="font-semibold">Groups</p>
+          <p className="font-semibold">Tags</p>
           <div className="relative" ref={dropdownRef}>
             <button
               type="button"
@@ -172,13 +166,13 @@ const UserCard = ({
                 onClick={(event) => event.stopPropagation()}
               >
                 <div className="max-h-56 overflow-y-auto py-1">
-                  {sortedAllGroups.length ? (
-                    sortedAllGroups.map((group) => {
-                      const checked = groupIds.has(group.id);
-                      const pending = isGroupPending(group.id);
+                  {sortedAllTags.length ? (
+                    sortedAllTags.map((tag) => {
+                      const checked = tagIds.has(tag.id);
+                      const pending = isTagPending(tag.id);
                       return (
                         <label
-                          key={group.id}
+                          key={tag.id}
                           className={`flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-50 ${
                             pending ? "opacity-60" : ""
                           }`}
@@ -191,15 +185,15 @@ const UserCard = ({
                             disabled={pending}
                             onChange={(event) => {
                               event.stopPropagation();
-                              onToggleGroup(group.id, !checked);
+                              onToggleTag(tag.id, !checked);
                             }}
                           />
                           <div className="flex flex-col">
                             <span className="font-medium text-zinc-700">
-                              {group.name}
+                              {tag.name}
                             </span>
                             <span className="text-xs text-zinc-500 truncate max-w-[180px]">
-                              {group.description}
+                              {tag.description}
                             </span>
                           </div>
                         </label>
@@ -207,7 +201,7 @@ const UserCard = ({
                     })
                   ) : (
                     <p className="px-3 py-2 text-sm text-zinc-500">
-                      No groups available
+                      No tags available
                     </p>
                   )}
                 </div>
@@ -215,10 +209,10 @@ const UserCard = ({
             )}
           </div>
         </div>
-        {groups.length ? (
+        {tags.length ? (
           <div className="flex flex-wrap gap-2 mt-2">
-            {groups.map((group) => (
-              <Badge key={group.id}>{group.name}</Badge>
+            {tags.map((tag) => (
+              <Badge key={tag.id}>{tag.name}</Badge>
             ))}
           </div>
         ) : null}

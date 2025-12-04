@@ -30,7 +30,7 @@ describe('Forum (e2e)', () => {
       email: `liker${likerCounter}@example.com`,
       password: 'pass',
       name: `Extra Liker ${likerCounter}`,
-      groups: [ctx.defaultGroup],
+      tags: [ctx.defaultTag],
     });
     await userRepo.save(extraUser);
     const token = ctx.jwtService.sign(
@@ -59,7 +59,7 @@ describe('Forum (e2e)', () => {
       category: 'Test',
       body: 'Test action for forum tests',
       status: ActionStatus.GatheringCommitments,
-      participatingGroups: [ctx.defaultGroup],
+      participatingTags: [ctx.defaultTag],
     });
     await actionRepo.save(testAction);
 

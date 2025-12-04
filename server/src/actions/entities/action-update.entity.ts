@@ -14,14 +14,14 @@ import { ActionEvent } from './action-event.entity';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Notification } from 'src/notifs/entities/notification.entity';
-import { Group } from 'src/user/entities/group.entity';
+import { Tag } from 'src/user/entities/tag.entity';
 import { Ty } from 'src/tasks/entities/type';
 
 export enum ActionUpdateNotifyType {
   None = 'none',
   ActionCohort = 'action_cohort',
   AllMembers = 'all_members',
-  Group = 'group',
+  Tag = 'tag',
 }
 
 @Entity()
@@ -100,10 +100,10 @@ export class ActionUpdate {
   @Allow()
   notifs: Ty<Notification>[];
 
-  @ManyToOne(() => Group, { nullable: true })
-  @JoinColumn({ name: 'groupId' })
-  @Type(() => Group)
-  @ApiPropertyOptional({ type: () => Group })
+  @ManyToOne(() => Tag, { nullable: true })
+  @JoinColumn({ name: 'tagId' })
+  @Type(() => Tag)
+  @ApiPropertyOptional({ type: () => Tag })
   @IsOptional()
-  group?: Group;
+  tag?: Ty<Tag>;
 }

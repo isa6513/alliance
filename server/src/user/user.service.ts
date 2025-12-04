@@ -25,8 +25,8 @@ import {
 } from './user.dto';
 import { User } from './entities/user.entity';
 import { profileUrl } from 'src/search/approutes';
-import { Group } from './entities/group.entity';
-import { CreateGroupDto } from './group.dto';
+import { Tag } from './entities/tag.entity';
+import { CreateTagDto } from './tag.dto';
 import { Community } from './entities/community.entity';
 import { CreateCommunityDto, UpdateCommunityDto } from './community.dto';
 import { CommunityMemberContactInfoDto } from './dto/user-action-relations.dto';
@@ -69,8 +69,8 @@ export class UserService {
     private notifRepository: Repository<Notification>,
     @InjectRepository(Friend)
     private readonly friendRepository: Repository<Friend>,
-    @InjectRepository(Group)
-    private readonly groupRepository: Repository<Group>,
+    @InjectRepository(Tag)
+    private readonly tagRepository: Repository<Tag>,
     @InjectRepository(Community)
     private readonly communityRepository: Repository<Community>,
     @InjectRepository(OnetimeInvite)
@@ -496,12 +496,12 @@ export class UserService {
     });
   }
 
-  async findActiveUsersWithGroups(): Promise<User[]> {
+  async findActiveUsersWithTags(): Promise<User[]> {
     return this.userRepository.find({
       where: {
         isNotSignedUpPartialProfile: false,
       },
-      relations: ['groups', 'awayRanges'],
+      relations: ['tags', 'awayRanges'],
     });
   }
 
@@ -799,54 +799,54 @@ export class UserService {
     return contactInfos;
   }
 
-  async createGroup(body: CreateGroupDto): Promise<Group> {
-    const group = this.groupRepository.create(body);
-    return this.groupRepository.save(group);
+  async createTag(body: CreateTagDto): Promise<Tag> {
+    const tag = this.tagRepository.create(body);
+    return this.tagRepository.save(tag);
   }
 
-  async findAllGroups(): Promise<Group[]> {
-    return this.groupRepository.find({ relations: ['users'] });
+  async findAllTags(): Promise<Tag[]> {
+    return this.tagRepository.find({ relations: ['users'] });
   }
 
-  async findGroupByName(name: string): Promise<Group | null> {
-    return this.groupRepository.findOne({ where: { name } });
+  async findTagByName(name: string): Promise<Tag | null> {
+    return this.tagRepository.findOne({ where: { name } });
   }
 
-  async findGroupOrFail(id: number): Promise<Group> {
-    return this.groupRepository.findOneOrFail({
+  async findTagOrFail(id: number): Promise<Tag> {
+    return this.tagRepository.findOneOrFail({
       where: { id },
       relations: ['users'],
     });
   }
 
-  async addUserToGroup(groupId: number, userId: number): Promise<Group> {
-    const group = await this.groupRepository.findOneOrFail({
-      where: { id: groupId },
+  async addUserToTag(tagId: number, userId: number): Promise<Tag> {
+    const tag = await this.tagRepository.findOneOrFail({
+      where: { id: tagId },
       relations: ['users'],
     });
-    group.users.push(await this.findOneOrFail(userId));
-    return this.groupRepository.save(group);
+    tag.users.push(await this.findOneOrFail(userId));
+    return this.tagRepository.save(tag);
   }
 
-  async removeUserFromGroup(groupId: number, userId: number): Promise<Group> {
-    const group = await this.groupRepository.findOneOrFail({
-      where: { id: groupId },
+  async removeUserFromTag(tagId: number, userId: number): Promise<Tag> {
+    const tag = await this.tagRepository.findOneOrFail({
+      where: { id: tagId },
       relations: ['users'],
     });
-    group.users = group.users.filter((user) => user.id !== userId);
-    return this.groupRepository.save(group);
+    tag.users = tag.users.filter((user) => user.id !== userId);
+    return this.tagRepository.save(tag);
   }
 
-  async updateGroup(groupId: number, body: CreateGroupDto): Promise<Group> {
-    const group = await this.groupRepository.findOneOrFail({
-      where: { id: groupId },
+  async updateTag(tagId: number, body: CreateTagDto): Promise<Tag> {
+    const tag = await this.tagRepository.findOneOrFail({
+      where: { id: tagId },
     });
-    Object.assign(group, body);
-    return this.groupRepository.save(group);
+    Object.assign(tag, body);
+    return this.tagRepository.save(tag);
   }
 
-  async deleteGroup(groupId: number): Promise<void> {
-    await this.groupRepository.delete(groupId);
+  async deleteTag(tagId: number): Promise<void> {
+    await this.tagRepository.delete(tagId);
   }
 
   async createOnetimeInvite(

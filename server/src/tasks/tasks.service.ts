@@ -444,7 +444,7 @@ export class TasksService {
     const validator = await this.customValidatorRepository.findOneOrFail({
       where: { id },
     });
-    const user = await this.userService.findOneOrFail(userId, ['groups']);
+    const user = await this.userService.findOneOrFail(userId, ['tags']);
 
     switch (validator.type) {
       case CustomValidatorType.UploadedPhoto:
@@ -524,7 +524,7 @@ export class TasksService {
         if (!validator.idArgument) {
           throw new BadRequestException('Validator has no id argument');
         }
-        if (user.groups.some((group) => group.id === validator.idArgument)) {
+        if (user.tags.some((tag) => tag.id === validator.idArgument)) {
           return {
             isValid: true,
           };

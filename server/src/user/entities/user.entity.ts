@@ -29,7 +29,7 @@ import {
 } from 'typeorm';
 import { Notification } from '../../notifs/entities/notification.entity';
 import { Friend, FriendStatus } from './friend.entity';
-import { Group } from './group.entity';
+import { Tag } from './tag.entity';
 import { UserAwayRange } from './user-away-range.entity';
 import {
   CreateDateColumnTz,
@@ -322,9 +322,9 @@ export class User {
   @JoinColumn({ name: 'welcomeMailId' })
   welcomeMail: Mail | null;
 
-  @ManyToMany(() => Group, (group) => group.users, { onDelete: 'CASCADE' })
-  @Type(() => Group)
-  groups: Group[];
+  @ManyToMany(() => Tag, (tag) => tag.users, { onDelete: 'CASCADE' })
+  @Type(() => Tag)
+  tags: Ty<Tag>[];
 
   @ManyToMany(() => Community, (community) => community.users, {
     onDelete: 'CASCADE',

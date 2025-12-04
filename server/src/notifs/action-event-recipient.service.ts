@@ -30,7 +30,7 @@ export class ActionEventRecipientService {
   public userShouldCompleteEvent(
     user: User,
     eventDate: Date,
-    targetGroupIds: Set<number>,
+    targetTagIds: Set<number>,
     everyoneShouldComplete: boolean,
     useManualCohort: boolean,
     manualCohortUsers?: User[],
@@ -43,7 +43,7 @@ export class ActionEventRecipientService {
         user.contractDateSigned <= eventDate &&
         !user.contractDateSuspended) ||
         everyoneShouldComplete) &&
-      user.groups.some((group) => targetGroupIds.has(group.id))
+      user.tags.some((tag) => targetTagIds.has(tag.id))
     );
   }
 
@@ -52,9 +52,7 @@ export class ActionEventRecipientService {
     action: Action,
     eventDate: Date,
   ): Promise<User[]> {
-    const targetGroupIds = new Set(
-      action.participatingGroups.map((group) => group.id),
-    );
+    const targetTagIds = new Set(action.participatingTags.map((tag) => tag.id));
 
     const filterToEligible = (users: User[]) =>
       users.filter(
@@ -62,7 +60,7 @@ export class ActionEventRecipientService {
           this.userShouldCompleteEvent(
             user,
             eventDate,
-            targetGroupIds,
+            targetTagIds,
             action.everyoneShouldComplete,
             action.useManualCohort,
             action.manualCohortUsers,
@@ -75,7 +73,7 @@ export class ActionEventRecipientService {
           actionId: action.id,
           type: ActionActivityType.USER_JOINED,
         },
-        relations: ['user', 'user.groups', 'user.awayRanges'],
+        relations: ['user', 'user.tags', 'user.awayRanges'],
       });
       return filterToEligible(activities.map((activity) => activity.user));
     }
@@ -84,9 +82,7 @@ export class ActionEventRecipientService {
       eventStatus === ActionStatus.GatheringCommitments ||
       eventStatus === ActionStatus.MemberAction
     ) {
-      return filterToEligible(
-        await this.userService.findActiveUsersWithGroups(),
-      );
+      return filterToEligible(await this.userService.findActiveUsersWithTags());
     }
 
     return [];
@@ -97,21 +93,21 @@ export class ActionEventRecipientService {
     event: Pick<ActionEvent, 'newStatus' | 'action' | 'date'>,
     actionSuite?: ActionSuite,
   ): Promise<User[]> {
-    const targetGroupIds = new Set(
-      event.action.participatingGroups.map((group) => group.id),
+    const targetTagIds = new Set(
+      event.action.participatingTags.map((tag) => tag.id),
     );
-    const usersWithGroups = await this.userService.findByIds(
+    const usersWithTags = await this.userService.findByIds(
       users.map((user) => user.id),
-      ['groups', 'awayRanges'],
+      ['tags', 'awayRanges'],
     );
-    const idToUser = new Map(usersWithGroups.map((user) => [user.id, user]));
+    const idToUser = new Map(usersWithTags.map((user) => [user.id, user]));
 
     const filterToEligible = (users: User[]) =>
       users.filter((user) =>
         this.userShouldCompleteEvent(
           idToUser.get(user.id)!,
           event.date,
-          targetGroupIds,
+          targetTagIds,
           event.action.everyoneShouldComplete,
           event.action.useManualCohort,
           event.action.manualCohortUsers,
@@ -181,14 +177,12 @@ export class ActionEventRecipientService {
           group.actionSuite,
         );
         break;
-      case ReminderCohortType.Group:
-        if (!group.userGroup) {
-          throw new Error('Group cohort type requires user group');
+      case ReminderCohortType.Tag:
+        if (!group.userTag) {
+          throw new Error('Group cohort type requires user tag');
         }
-        const userGroup = await this.userService.findGroupOrFail(
-          group.userGroup.id,
-        );
-        users = userGroup.users;
+        const userTag = await this.userService.findTagOrFail(group.userTag.id);
+        users = userTag.users;
         break;
       default:
         throw new Error(

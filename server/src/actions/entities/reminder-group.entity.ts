@@ -12,7 +12,7 @@ import {
 } from 'typeorm';
 import { Type } from 'class-transformer';
 import { ActionEvent } from './action-event.entity';
-import { Group } from 'src/user/entities/group.entity';
+import { Tag } from 'src/user/entities/tag.entity';
 import { ActionSuite } from './action-suite.entity';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { Temporal } from '@js-temporal/polyfill';
@@ -29,7 +29,7 @@ export enum ReminderGroupTimingMode {
 
 export enum ReminderCohortType {
   AllUncompleted = 'all_uncompleted',
-  Group = 'group',
+  Tag = 'tag',
   Custom = 'custom',
 }
 
@@ -93,12 +93,11 @@ export class ReminderGroup {
   @Allow()
   cohortType: ReminderCohortType;
 
-  // for group cohort
-  @ManyToOne(() => Group)
-  @ApiPropertyOptional({ type: () => Group })
-  @Type(() => Group)
+  @ManyToOne(() => Tag)
+  @ApiPropertyOptional({ type: () => Tag })
+  @Type(() => Tag)
   @IsOptional()
-  userGroup?: Group;
+  userTag?: Tag;
 
   // for custom cohort
   @ManyToMany(() => User)

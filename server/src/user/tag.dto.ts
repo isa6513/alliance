@@ -1,31 +1,29 @@
 import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
-import { Group } from './entities/group.entity';
+import { Tag } from './entities/tag.entity';
 import { ProfileDto } from './user.dto';
 import { Type } from 'class-transformer';
 import { Allow, IsNumber } from 'class-validator';
 
-export class GroupDto extends OmitType(Group, ['users', 'participatingIn']) {
+export class TagDto extends OmitType(Tag, ['users', 'participatingIn']) {
   @Allow()
   @ApiProperty({ type: ProfileDto, isArray: true })
   @Type(() => ProfileDto)
   users: ProfileDto[];
 
-  constructor(group: Group) {
+  constructor(tag: Tag) {
     super();
-    Object.assign(this, group);
-    this.users = group.users
-      ? group.users.map((user) => new ProfileDto(user))
-      : [];
+    Object.assign(this, tag);
+    this.users = tag.users ? tag.users.map((user) => new ProfileDto(user)) : [];
   }
 }
 
-export class CreateGroupDto extends PickType(GroupDto, [
+export class CreateTagDto extends PickType(TagDto, [
   'name',
   'description',
   'publicDisplayName',
 ]) {}
 
-export class AddUserToGroupDto {
+export class AddUserToTagDto {
   @ApiProperty()
   @IsNumber()
   userId: number;

@@ -15,7 +15,7 @@ import cookieParser from 'cookie-parser';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { testConnectionOptions } from 'src/datasources/dataSourceTest';
-import { Group } from 'src/user/entities/group.entity';
+import { Tag } from 'src/user/entities/tag.entity';
 import { ForumModule } from 'src/forum/forum.module';
 
 export interface TestContext {
@@ -27,10 +27,8 @@ export interface TestContext {
   testUserId: number;
   adminUserId: number;
   agent: TestAgent;
-  defaultGroup: Group;
+  defaultTag: Tag;
 }
-
-// hello
 
 export async function createTestApp(
   modules: Type<unknown>[],
@@ -71,11 +69,11 @@ export async function createTestApp(
   await dataSource.synchronize(true);
 
   const userRepo = dataSource.getRepository(User);
-  const groupRepo = dataSource.getRepository(Group);
+  const tagRepo = dataSource.getRepository(Tag);
   const jwtService = moduleFixture.get<JwtService>(JwtService);
 
-  const defaultGroup = await groupRepo.save(
-    groupRepo.create({ name: 'Default Group', description: 'Default Group' }),
+  const defaultTag = await tagRepo.save(
+    tagRepo.create({ name: 'Default Tag', description: 'Default Tag' }),
   );
 
   const user = await userRepo.save(
@@ -83,7 +81,7 @@ export async function createTestApp(
       email: 'user@example.com',
       password: 'pass',
       name: 'Test User',
-      groups: [defaultGroup],
+      tags: [defaultTag],
     }),
   );
 
@@ -93,7 +91,7 @@ export async function createTestApp(
       password: 'pass',
       name: 'Test Admin',
       admin: true,
-      groups: [defaultGroup],
+      tags: [defaultTag],
     }),
   );
 
@@ -126,6 +124,6 @@ export async function createTestApp(
     testUserId: user.id,
     adminUserId: adminUser.id,
     agent,
-    defaultGroup,
+    defaultTag,
   };
 }

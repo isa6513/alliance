@@ -14,24 +14,25 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
+import { Ty } from 'src/tasks/entities/type';
 
 @Entity()
-export class Group {
+export class Tag {
   @PrimaryGeneratedColumn()
   @ApiProperty()
   @Allow()
   id: number;
 
-  @ManyToMany(() => User, (user) => user.groups, {
+  @ManyToMany(() => User, (user) => user.tags, {
     onDelete: 'CASCADE',
   })
   @ApiProperty({ type: () => User, isArray: true })
   @Allow()
   @JoinTable()
   @Type(() => User)
-  users: User[];
+  users: Ty<User>[];
 
-  @ManyToMany(() => Action, (action) => action.participatingGroups)
+  @ManyToMany(() => Action, (action) => action.participatingTags)
   @ApiProperty({ type: () => Action, isArray: true })
   @Allow()
   @JoinTable()

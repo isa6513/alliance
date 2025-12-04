@@ -16,7 +16,7 @@ import {
 } from '../src/actions/entities/action-event.entity';
 import { Action, ActionTaskType } from '../src/actions/entities/action.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
-import { Group } from '../src/user/entities/group.entity';
+import { Tag } from '../src/user/entities/tag.entity';
 import { User } from '../src/user/entities/user.entity';
 import {
   Notification,
@@ -30,10 +30,10 @@ describe('Actions (e2e)', () => {
   let actionRepo: Repository<Action>;
   let eventRepo: Repository<ActionEvent>;
   let userService: UserService;
-  let groupRepo: Repository<Group>;
+  let tagRepo: Repository<Tag>;
   let userRepo: Repository<User>;
   let notifRepo: Repository<Notification>;
-  let restrictedGroup: Group;
+  let restrictedTag: Tag;
   let groupRestrictedAction: Action;
   let outsiderToken: string;
 
@@ -52,7 +52,7 @@ describe('Actions (e2e)', () => {
         taskContents: 'Task copy',
         shortDescription: `${name} short description`,
         showToNonparticipating: true,
-        participatingGroups: [ctx.defaultGroup],
+        participatingTags: [ctx.defaultTag],
         ...options.actionOverrides,
       }),
     );
@@ -75,7 +75,7 @@ describe('Actions (e2e)', () => {
     actionRepo = ctx.dataSource.getRepository(Action);
     eventRepo = ctx.dataSource.getRepository(ActionEvent);
     userService = ctx.app.get(UserService);
-    groupRepo = ctx.dataSource.getRepository(Group);
+    tagRepo = ctx.dataSource.getRepository(Tag);
     userRepo = ctx.dataSource.getRepository(User);
     notifRepo = ctx.dataSource.getRepository(Notification);
 
@@ -86,7 +86,7 @@ describe('Actions (e2e)', () => {
       body: 'Test action for forum tests',
       taskContents: 'Test action for forum tests',
       showToNonparticipating: true,
-      participatingGroups: [ctx.defaultGroup],
+      participatingTags: [ctx.defaultTag],
     });
 
     testDraftAction = actionRepo.create({
@@ -94,7 +94,7 @@ describe('Actions (e2e)', () => {
       category: 'Test',
       body: 'Test action for forum tests',
       showToNonparticipating: true,
-      participatingGroups: [ctx.defaultGroup],
+      participatingTags: [ctx.defaultTag],
     });
 
     await actionRepo.save(testAction);
@@ -118,8 +118,8 @@ describe('Actions (e2e)', () => {
     defaultUser.contractDateSigned = new Date();
     await userRepo.save(defaultUser);
 
-    restrictedGroup = await groupRepo.save(
-      groupRepo.create({
+    restrictedTag = await tagRepo.save(
+      tagRepo.create({
         name: 'Restricted Cohort',
         description: 'Members only',
         users: [defaultUser],
@@ -144,7 +144,7 @@ describe('Actions (e2e)', () => {
       {
         status: ActionStatus.GatheringCommitments,
         actionOverrides: {
-          participatingGroups: [restrictedGroup],
+          participatingTags: [restrictedTag],
           showToNonparticipating: true,
         },
       },
@@ -153,14 +153,14 @@ describe('Actions (e2e)', () => {
     await createPublishedAction('Group Restricted Hidden Action', {
       status: ActionStatus.GatheringCommitments,
       actionOverrides: {
-        participatingGroups: [restrictedGroup],
+        participatingTags: [restrictedTag],
         showToNonparticipating: false,
       },
     });
 
     groupRestrictedAction = await actionRepo.findOneOrFail({
       where: { id: restricted.id },
-      relations: ['participatingGroups'],
+      relations: ['participatingTags'],
     });
   }, 50000);
 
@@ -176,7 +176,7 @@ describe('Actions (e2e)', () => {
         type: ActionTaskType.Activity,
         commitmentless: false,
         everyoneShouldComplete: false,
-        participatingGroups: [],
+        participatingTags: [],
         useManualCohort: false,
         priority: 0,
         preventCompletion: false,
@@ -399,7 +399,7 @@ describe('Actions (e2e)', () => {
           shortDescription: 'Manual cohort short description',
           taskContents: 'Manual cohort task',
           commitmentless: false,
-          participatingGroups: [ctx.defaultGroup],
+          participatingTags: [ctx.defaultTag],
           manualCohortUsers: [cohortMember],
           useManualCohort: true,
           showToNonparticipating: true,
@@ -482,7 +482,7 @@ describe('Actions (e2e)', () => {
         email: `unsigned-${Date.now()}@example.com`,
         password: 'Password123!',
         name: 'Unsigned User',
-        groups: [ctx.defaultGroup],
+        tags: [ctx.defaultTag],
       });
 
       const lateSigner = await userService.create({
@@ -490,7 +490,7 @@ describe('Actions (e2e)', () => {
         password: 'Password123!',
         name: 'Late Signer',
         contractDateSigned: new Date(event.date.getTime() + 1000),
-        groups: [ctx.defaultGroup],
+        tags: [ctx.defaultTag],
       });
 
       const eligibleUser = await userService.create({
@@ -498,7 +498,7 @@ describe('Actions (e2e)', () => {
         password: 'Password123!',
         name: 'Eligible User',
         contractDateSigned: new Date(event.date.getTime() - 1000),
-        groups: [ctx.defaultGroup],
+        tags: [ctx.defaultTag],
       });
 
       const unsignedToken = ctx.jwtService.sign(
@@ -575,7 +575,7 @@ describe('Actions (e2e)', () => {
         email: `contractless-${Date.now()}@example.com`,
         password: 'Password123!',
         name: 'Contractless User',
-        groups: [ctx.defaultGroup],
+        tags: [ctx.defaultTag],
       });
 
       const contractlessToken = ctx.jwtService.sign(
@@ -644,7 +644,7 @@ describe('Actions (e2e)', () => {
           name: 'Status Test Action',
           category: 'Test',
           body: 'Test action for status computation',
-          participatingGroups: [ctx.defaultGroup],
+          participatingTags: [ctx.defaultTag],
         });
         await actionRepo.save(newAction);
 
@@ -667,7 +667,7 @@ describe('Actions (e2e)', () => {
           category: 'Test',
           body: 'Test action for status transitions',
           taskContents: 'Test action for status transitions',
-          participatingGroups: [ctx.defaultGroup],
+          participatingTags: [ctx.defaultTag],
         });
         await actionRepo.save(newAction);
 
@@ -709,7 +709,7 @@ describe('Actions (e2e)', () => {
           category: 'Test',
           body: 'Test action for multiple events',
           taskContents: 'Test action for multiple events',
-          participatingGroups: [ctx.defaultGroup],
+          participatingTags: [ctx.defaultTag],
         });
         await actionRepo.save(newAction);
 
@@ -757,7 +757,7 @@ describe('Actions (e2e)', () => {
           category: 'Test',
           body: 'Test action for future events',
           taskContents: 'Test action for future events',
-          participatingGroups: [ctx.defaultGroup],
+          participatingTags: [ctx.defaultTag],
         });
         await actionRepo.save(newAction);
 
@@ -933,7 +933,7 @@ describe('Actions (e2e)', () => {
         category: 'Test',
         body: 'Test action for automatic commitment transitions',
         commitmentThreshold: 2, // Need 2 users to reach threshold
-        participatingGroups: [ctx.defaultGroup],
+        participatingTags: [ctx.defaultTag],
       });
       await actionRepo.save(newAction);
 
@@ -1002,7 +1002,7 @@ describe('Actions (e2e)', () => {
         name: 'Auto Transition Test - Completion',
         category: 'Test',
         body: 'Test action for automatic completion transitions',
-        participatingGroups: [ctx.defaultGroup],
+        participatingTags: [ctx.defaultTag],
       });
       await actionRepo.save(newAction);
 
@@ -1100,7 +1100,7 @@ describe('Actions (e2e)', () => {
         name: 'Auto Transition Test - No Users',
         category: 'Test',
         body: 'Test action with no users joined',
-        participatingGroups: [ctx.defaultGroup],
+        participatingTags: [ctx.defaultTag],
       });
       await actionRepo.save(newAction);
 
@@ -1260,7 +1260,7 @@ describe('Actions (e2e)', () => {
         name: 'Friend User',
         email: `friend-${Date.now()}@example.com`,
         password: 'Password123!',
-        groups: [ctx.defaultGroup],
+        tags: [ctx.defaultTag],
       });
 
       await userService.makeFriendsAutomated(ctx.testUserId, friend.id);

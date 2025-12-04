@@ -1,65 +1,65 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  userCreateGroup,
-  userDeleteGroup,
-  userGetGroups,
-  userUpdateGroup,
+  userCreateTag,
+  userDeleteTag,
+  userGetTags,
+  userUpdateTag,
 } from "@alliance/shared/client";
-import { CreateGroupDto, GroupDto } from "@alliance/shared/client/types.gen";
+import { CreateTagDto, TagDto } from "@alliance/shared/client/types.gen";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Badge from "@alliance/shared/ui/Badge";
 import { Link } from "react-router";
 
-const INITIAL_NEW_GROUP = {
+const INITIAL_NEW_TAG = {
   name: "",
   description: "",
   publicDisplayName: "",
 };
 
-const GroupManagement: React.FC = () => {
-  const [groups, setGroups] = useState<GroupDto[]>([]);
+const TagManagement: React.FC = () => {
+  const [tags, setTags] = useState<TagDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [newGroup, setNewGroup] = useState<CreateGroupDto>(INITIAL_NEW_GROUP);
+  const [newTag, setNewTag] = useState<CreateTagDto>(INITIAL_NEW_TAG);
   const [creating, setCreating] = useState(false);
-  const [updatingGroups, setUpdatingGroups] = useState<Set<number>>(
+  const [updatingTags, setUpdatingTags] = useState<Set<number>>(
     () => new Set()
   );
-  const [deletingGroups, setDeletingGroups] = useState<Set<number>>(
+  const [deletingTags, setDeletingTags] = useState<Set<number>>(
     () => new Set()
   );
 
-  const loadGroups = useCallback(async () => {
+  const loadTags = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await userGetGroups();
+      const res = await userGetTags();
       if (res.data) {
-        setGroups(res.data);
+        setTags(res.data);
       }
     } catch (err) {
-      console.error("Failed to load groups", err);
-      setError("Failed to load groups. Please try again.");
+      console.error("Failed to load tags", err);
+      setError("Failed to load tags. Please try again.");
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void loadGroups();
-  }, [loadGroups]);
+    void loadTags();
+  }, [loadTags]);
 
-  const sortedGroups = useMemo(() => {
-    return [...groups].sort((a, b) => a.name.localeCompare(b.name));
-  }, [groups]);
+  const sortedTags = useMemo(() => {
+    return [...tags].sort((a, b) => a.name.localeCompare(b.name));
+  }, [tags]);
 
   const handleCreateGroup = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      const name = newGroup.name.trim();
-      const description = newGroup.description.trim();
-      const publicDisplayName = newGroup.publicDisplayName?.trim();
+      const name = newTag.name.trim();
+      const description = newTag.description.trim();
+      const publicDisplayName = newTag.publicDisplayName?.trim();
       if (!name || !description) {
         setError("Name and description are required.");
         return;
@@ -67,7 +67,7 @@ const GroupManagement: React.FC = () => {
       setCreating(true);
       setError(null);
       try {
-        const res = await userCreateGroup({
+        const res = await userCreateTag({
           body: {
             name,
             description,
@@ -75,30 +75,30 @@ const GroupManagement: React.FC = () => {
           },
         });
         if (res.data) {
-          setGroups((prev) => [...prev, res.data]);
-          setNewGroup(INITIAL_NEW_GROUP);
+          setTags((prev) => [...prev, res.data]);
+          setNewTag(INITIAL_NEW_TAG);
         }
       } catch (err) {
-        console.error("Failed to create group", err);
-        setError("Unable to create group. Please try again.");
+        console.error("Failed to create tag", err);
+        setError("Unable to create tag. Please try again.");
       } finally {
         setCreating(false);
       }
     },
-    [newGroup]
+    [newTag]
   );
 
-  const handleUpdateGroup = useCallback(
-    async (groupId: number, values: CreateGroupDto) => {
-      setUpdatingGroups((prev) => {
+  const handleUpdateTag = useCallback(
+    async (tagId: number, values: CreateTagDto) => {
+      setUpdatingTags((prev) => {
         const next = new Set(prev);
-        next.add(groupId);
+        next.add(tagId);
         return next;
       });
       setError(null);
       try {
-        const res = await userUpdateGroup({
-          path: { groupId },
+        const res = await userUpdateTag({
+          path: { tagId },
           body: {
             name: values.name.trim(),
             description: values.description.trim(),
@@ -106,18 +106,18 @@ const GroupManagement: React.FC = () => {
           },
         });
         if (res.data) {
-          setGroups((prev) =>
-            prev.map((group) => (group.id === res.data.id ? res.data : group))
+          setTags((prev) =>
+            prev.map((tag) => (tag.id === res.data.id ? res.data : tag))
           );
           return true;
         }
       } catch (err) {
-        console.error("Failed to update group", err);
-        setError("Unable to update group. Please try again.");
+        console.error("Failed to update tag", err);
+        setError("Unable to update tag. Please try again.");
       } finally {
-        setUpdatingGroups((prev) => {
+        setUpdatingTags((prev) => {
           const next = new Set(prev);
-          next.delete(groupId);
+          next.delete(tagId);
           return next;
         });
       }
@@ -126,26 +126,26 @@ const GroupManagement: React.FC = () => {
     []
   );
 
-  const handleDeleteGroup = useCallback(async (groupId: number) => {
-    setDeletingGroups((prev) => {
+  const handleDeleteTag = useCallback(async (tagId: number) => {
+    setDeletingTags((prev) => {
       const next = new Set(prev);
-      next.add(groupId);
+      next.add(tagId);
       return next;
     });
     setError(null);
     try {
-      await userDeleteGroup({
-        path: { groupId },
+      await userDeleteTag({
+        path: { tagId },
       });
-      setGroups((prev) => prev.filter((group) => group.id !== groupId));
+      setTags((prev) => prev.filter((tag) => tag.id !== tagId));
       return true;
     } catch (err) {
-      console.error("Failed to delete group", err);
-      setError("Unable to delete group. Please try again.");
+      console.error("Failed to delete tag", err);
+      setError("Unable to delete tag. Please try again.");
     } finally {
-      setDeletingGroups((prev) => {
+      setDeletingTags((prev) => {
         const next = new Set(prev);
-        next.delete(groupId);
+        next.delete(tagId);
         return next;
       });
     }
@@ -162,73 +162,51 @@ const GroupManagement: React.FC = () => {
 
       <div className="w-full max-w-4xl flex flex-col gap-3">
         <div className="w-full flex flex-row items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold">Group management</h2>
+          <h2 className="text-2xl font-semibold">Tags</h2>
           <Link to="/members" className="text-sm text-blue-600 hover:underline">
             Back to members
           </Link>
         </div>
         {loading ? (
           <p className="text-sm text-zinc-500">Loading groups...</p>
-        ) : sortedGroups.length ? (
-          sortedGroups.map((group) => (
-            <GroupCard
-              key={group.id}
-              group={group}
-              onSave={(values) => handleUpdateGroup(group.id, values)}
-              onDelete={() => handleDeleteGroup(group.id)}
-              isUpdating={updatingGroups.has(group.id)}
-              isDeleting={deletingGroups.has(group.id)}
+        ) : sortedTags.length ? (
+          sortedTags.map((tag) => (
+            <TagCard
+              key={tag.id}
+              tag={tag}
+              onSave={(values) => handleUpdateTag(tag.id, values)}
+              onDelete={() => handleDeleteTag(tag.id)}
+              isUpdating={updatingTags.has(tag.id)}
+              isDeleting={deletingTags.has(tag.id)}
             />
           ))
         ) : (
-          <p className="text-sm text-zinc-500">No groups yet.</p>
+          <p className="text-sm text-zinc-500">No tags yet.</p>
         )}
       </div>
       <Card className="w-full max-w-4xl" style={CardStyle.White}>
-        <p className="font-bold mb-4">Create group</p>
+        <p className="font-bold mb-4">Create tag</p>
         <form className="flex flex-col gap-3" onSubmit={handleCreateGroup}>
           <div className="flex flex-col gap-1">
             <label
               className="text-sm font-medium text-zinc-700"
-              htmlFor="group-name"
+              htmlFor="tag-name"
             >
-              Group name
+              Tag name
             </label>
             <input
-              id="group-name"
+              id="tag-name"
               type="text"
               className="border border-zinc-300 rounded px-3 py-2 text-sm"
-              value={newGroup.name}
+              value={newTag.name}
               onChange={(event) => {
                 setError(null);
-                setNewGroup((prev) => ({
+                setNewTag((prev) => ({
                   ...prev,
                   name: event.target.value,
                 }));
               }}
-              placeholder="Group name"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label
-              className="text-sm font-medium text-zinc-700"
-              htmlFor="group-display-name"
-            >
-              Public display name (optional)
-            </label>
-            <input
-              id="group-display-name"
-              type="text"
-              className="border border-zinc-300 rounded px-3 py-2 text-sm"
-              value={newGroup.publicDisplayName}
-              onChange={(event) => {
-                setError(null);
-                setNewGroup((prev) => ({
-                  ...prev,
-                  publicDisplayName: event.target.value,
-                }));
-              }}
-              placeholder="Community team"
+              placeholder="Tag name"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -241,15 +219,15 @@ const GroupManagement: React.FC = () => {
             <textarea
               id="group-description"
               className="border border-zinc-300 rounded px-3 py-2 text-sm min-h-[80px]"
-              value={newGroup.description}
+              value={newTag.description}
               onChange={(event) => {
                 setError(null);
-                setNewGroup((prev) => ({
+                setNewTag((prev) => ({
                   ...prev,
                   description: event.target.value,
                 }));
               }}
-              placeholder="What is this group responsible for?"
+              placeholder="What is this tag responsible for?"
             />
           </div>
           <Button
@@ -258,7 +236,7 @@ const GroupManagement: React.FC = () => {
             className="self-start"
             disabled={creating}
           >
-            {creating ? "Creating..." : "Create group"}
+            {creating ? "Creating..." : "Create tag"}
           </Button>
         </form>
       </Card>
@@ -266,37 +244,37 @@ const GroupManagement: React.FC = () => {
   );
 };
 
-type GroupCardProps = {
-  group: GroupDto;
-  onSave: (values: CreateGroupDto) => Promise<boolean> | boolean;
+type TagCardProps = {
+  tag: TagDto;
+  onSave: (values: CreateTagDto) => Promise<boolean> | boolean;
   onDelete: () => Promise<boolean> | boolean;
   isUpdating: boolean;
   isDeleting: boolean;
 };
 
-const GroupCard: React.FC<GroupCardProps> = ({
-  group,
+const TagCard: React.FC<TagCardProps> = ({
+  tag,
   onSave,
   onDelete,
   isUpdating,
   isDeleting,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [formValues, setFormValues] = useState<CreateGroupDto>({
-    name: group.name,
-    description: group.description,
-    publicDisplayName: group.publicDisplayName ?? "",
+  const [formValues, setFormValues] = useState<CreateTagDto>({
+    name: tag.name,
+    description: tag.description,
+    publicDisplayName: tag.publicDisplayName ?? "",
   });
 
   useEffect(() => {
     setFormValues({
-      name: group.name,
-      description: group.description,
-      publicDisplayName: group.publicDisplayName ?? "",
+      name: tag.name,
+      description: tag.description,
+      publicDisplayName: tag.publicDisplayName ?? "",
     });
-  }, [group]);
+  }, [tag]);
 
-  const memberCount = group.users.length;
+  const memberCount = tag.users.length;
 
   const handleSave = async () => {
     const result = await onSave(formValues);
@@ -307,7 +285,7 @@ const GroupCard: React.FC<GroupCardProps> = ({
 
   const confirmAndDelete = async () => {
     const confirmed = window.confirm(
-      `Delete group "${group.name}"? This cannot be undone.`
+      `Delete tag "${tag.name}"? This cannot be undone.`
     );
     if (!confirmed) {
       return;
@@ -324,14 +302,14 @@ const GroupCard: React.FC<GroupCardProps> = ({
         <div className="flex flex-row items-center justify-between">
           <div className="flex flex-col gap-1">
             <div className="flex flex-row items-center gap-3">
-              <h3 className="font-semibold">{group.name}</h3>
+              <h3 className="font-semibold">{tag.name}</h3>
               <Badge>
                 {memberCount} member{memberCount === 1 ? "" : "s"}
               </Badge>
             </div>
-            {group.publicDisplayName && !isEditing && (
+            {tag.publicDisplayName && !isEditing && (
               <p className="text-sm text-zinc-500">
-                Public name: {group.publicDisplayName}
+                Public name: {tag.publicDisplayName}
               </p>
             )}
           </div>
@@ -427,7 +405,7 @@ const GroupCard: React.FC<GroupCardProps> = ({
         ) : (
           <div className="flex flex-col gap-2">
             <p className="text-sm text-zinc-700 whitespace-pre-wrap">
-              {group.description}
+              {tag.description}
             </p>
           </div>
         )}
@@ -436,4 +414,4 @@ const GroupCard: React.FC<GroupCardProps> = ({
   );
 };
 
-export default GroupManagement;
+export default TagManagement;

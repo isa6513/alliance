@@ -78,12 +78,12 @@ export class AuthService {
       }
     }
 
-    const defaultGroup = await this.usersService.findGroupByName('All Members');
+    const defaultTag = await this.usersService.findTagByName('All Members');
 
     const user = await this.usersService.create({
       ...signUp,
       referredBy,
-      groups: defaultGroup ? [defaultGroup] : undefined,
+      tags: defaultTag ? [defaultTag] : undefined,
     });
 
     if (inviteCommunityId) {

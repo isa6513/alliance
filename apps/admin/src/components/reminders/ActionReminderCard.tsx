@@ -7,7 +7,7 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import TextareaWithHighlights from "../TextareaWithHighlights";
 import { ActionEventDto } from "@alliance/shared/client";
 import { UserSelectUser } from "@alliance/shared/ui/UserSelect";
-import { GroupDto } from "@alliance/shared/client";
+import { TagDto } from "@alliance/shared/client";
 import { ActionEventNotifDto } from "@alliance/shared/client";
 import ActionReminderGroupForm, {
   ActionReminderGroupFormSubmitPayload,
@@ -36,9 +36,9 @@ interface ActionReminderCardProps {
   memberEvents: ActionEventDto[];
   users: UserSelectUser[];
   loadingUsers: boolean;
-  userGroups: GroupDto[];
-  loadingUserGroups: boolean;
-  userGroupsError: string | null;
+  userTags: TagDto[];
+  loadingUserTags: boolean;
+  userTagsError: string | null;
   editSubmitting: boolean;
   editError: string | null;
   editSuccess: string | null;
@@ -62,9 +62,9 @@ const ActionReminderCard = ({
   memberEvents,
   users,
   loadingUsers,
-  userGroups,
-  loadingUserGroups,
-  userGroupsError,
+  userTags,
+  loadingUserTags,
+  userTagsError,
   editSubmitting,
   editError,
   editSuccess,
@@ -191,9 +191,9 @@ const ActionReminderCard = ({
               memberEvents={memberEvents}
               users={users}
               loadingUsers={loadingUsers}
-              userGroups={userGroups}
-              loadingUserGroups={loadingUserGroups}
-              userGroupsError={userGroupsError}
+              userTags={userTags}
+              loadingUserTags={loadingUserTags}
+              userTagsError={userTagsError}
               submitting={editSubmitting}
               initialValues={{
                 memberActionEventId: selectedEventId,

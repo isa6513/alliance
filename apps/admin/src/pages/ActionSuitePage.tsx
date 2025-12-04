@@ -50,8 +50,6 @@ const ActionSuitePage = () => {
     return <div>Loading...</div>;
   }
 
-  console.log(suite);
-
   const handleEditEvent = (eventId: number, body: UpdateActionEventDto) => {
     actionsBatchUpdateSuiteEvents({ path: { suiteId, eventId }, body }).then(
       (resp) => {

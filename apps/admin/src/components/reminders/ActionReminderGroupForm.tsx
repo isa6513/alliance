@@ -2,10 +2,10 @@ import {
   actionsPreviewEmailHtml,
   actionsPreviewTextMessage,
   actionsTentativePlansForGroup,
-  Group,
+  Tag,
+  TagDto,
   type ActionEventDto,
   type CreateReminderGroupDto,
-  type GroupDto,
   type PreviewNotificationPlan,
   type ReminderCohortType,
   type ReminderGroup,
@@ -48,7 +48,7 @@ type ReminderGroupScheduleFields = Pick<
 
 type ReminderGroupUserFields = Pick<
   CreateReminderGroupDto,
-  "userIds" | "userGroupId"
+  "userIds" | "userTagId"
 >;
 
 export type ActionReminderGroupFormSubmitPayload = ReminderGroupContentFields &
@@ -59,7 +59,7 @@ export type ActionReminderGroupFormSubmitPayload = ReminderGroupContentFields &
 
 export type ActionReminderGroupFormInitialValues = {
   memberActionEventId: number;
-  reminderGroup: (CreateReminderGroupDto & { userGroup?: Group }) | null;
+  reminderGroup: (CreateReminderGroupDto & { userTag?: Tag }) | null;
   users: User[];
 };
 
@@ -93,7 +93,7 @@ const TIMING_MODE_OPTIONS: Array<{
 
 const COHORT_OPTIONS: Array<{ value: ReminderCohortType; label: string }> = [
   { value: "all_uncompleted", label: "All uncompleted" },
-  { value: "group", label: "User group" },
+  { value: "tag", label: "User tag" },
   { value: "custom", label: "Custom recipients" },
 ];
 
@@ -101,9 +101,9 @@ interface ActionReminderFormProps {
   memberEvents: ActionEventDto[];
   users: UserSelectUser[];
   loadingUsers: boolean;
-  userGroups: GroupDto[];
-  loadingUserGroups: boolean;
-  userGroupsError?: string | null;
+  userTags: TagDto[];
+  loadingUserTags: boolean;
+  userTagsError?: string | null;
   initialValues: ActionReminderGroupFormInitialValues;
   submitting?: boolean;
   submitLabel?: string;
@@ -122,9 +122,9 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   memberEvents,
   users,
   loadingUsers,
-  userGroups,
-  loadingUserGroups,
-  userGroupsError = null,
+  userTags,
+  loadingUserTags,
+  userTagsError = null,
   initialValues,
   submitting = false,
   submitLabel = "Create Reminders",
@@ -210,8 +210,8 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>(
     initialValues.users.map((user) => user.id)
   );
-  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(
-    initialValues.reminderGroup?.userGroup?.id ?? null
+  const [selectedTagId, setSelectedTagId] = useState<number | null>(
+    initialValues.reminderGroup?.userTag?.id ?? null
   );
   const [localError, setLocalError] = useState<string | null>(null);
   const initialSnapshotRef = useRef<string>("");
@@ -241,7 +241,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       reminder: {
         ...reminder,
         userIds: userIds,
-        userGroupId: initialValues.reminderGroup?.userGroup?.id ?? null,
+        userTagId: initialValues.reminderGroup?.userTag?.id ?? null,
         timingMode: reminder?.timingMode ?? null,
         sendAtAbsolute: reminder?.sendAtAbsolute ?? null,
         sendAtSecondsFromDeadline: reminder?.sendAtSecondsFromDeadline ?? null,
@@ -260,7 +260,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     if (!selectedEventId) {
       return;
     }
-    if (cohortType === "group" && !selectedGroupId) {
+    if (cohortType === "tag" && !selectedTagId) {
       setTentativePlans([]);
       return;
     }
@@ -290,8 +290,8 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         textMessage,
         timingMode,
         useSuiteTaskCount,
-        userGroupId:
-          cohortType === "group" ? selectedGroupId ?? undefined : undefined,
+        userTagId:
+          cohortType === "tag" ? selectedTagId ?? undefined : undefined,
         userIds: cohortType === "custom" ? selectedUserIds : undefined,
         sendAtAbsolute: timingMode === "absolute" ? sendAtAbsolute : undefined,
         sendAtSecondsFromDeadline:
@@ -332,7 +332,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     sendAtHoursFromDeadline,
     sendRangeStart,
     sendRangeEnd,
-    selectedGroupId,
+    selectedTagId,
     selectedUserIds,
     relativeRangeStartHours,
     relativeRangeEndHours,
@@ -464,7 +464,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     );
     setCohortType(initialValues.reminderGroup?.cohortType ?? "all_uncompleted");
     setSelectedUserIds(initialValues.users.map((user) => user.id));
-    setSelectedGroupId(initialValues.reminderGroup?.userGroup?.id ?? null);
+    setSelectedTagId(initialValues.reminderGroup?.userTag?.id ?? null);
     setLocalError(null);
   }, [
     computedInitialSnapshot,
@@ -498,7 +498,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       return;
     }
 
-    if (cohortType === "group" && !selectedGroupId) {
+    if (cohortType === "tag" && !selectedTagId) {
       setLocalError("Select a user group.");
       return;
     }
@@ -581,8 +581,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       timingMode,
       memberActionEventId: selectedEventId,
       userIds,
-      userGroupId:
-        cohortType === "group" ? selectedGroupId ?? undefined : undefined,
+      userTagId: cohortType === "tag" ? selectedTagId ?? undefined : undefined,
       sendAtAbsolute:
         timingMode === "absolute" ? normalizedSendAtAbsolute : undefined,
       sendAtSecondsFromDeadline:
@@ -822,40 +821,38 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         </select>
       </div>
 
-      {cohortType === "group" && (
+      {cohortType === "tag" && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            User group
+            User tag
           </label>
           <select
-            value={selectedGroupId ?? ""}
+            value={selectedTagId ?? ""}
             onChange={(event) =>
-              setSelectedGroupId(
+              setSelectedTagId(
                 event.target.value ? Number(event.target.value) : null
               )
             }
-            disabled={loadingUserGroups}
+            disabled={loadingUserTags}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
           >
             <option value="" disabled>
-              {loadingUserGroups ? "Loading groups…" : "Select a group"}
+              {loadingUserTags ? "Loading tags…" : "Select a tag"}
             </option>
-            {userGroups.map((group) => (
-              <option key={group.id} value={group.id}>
-                {group.name}
+            {userTags.map((tag) => (
+              <option key={tag.id} value={tag.id}>
+                {tag.name}
               </option>
             ))}
           </select>
-          {!loadingUserGroups && userGroupsError && (
-            <p className="mt-2 text-xs text-red-600">{userGroupsError}</p>
+          {!loadingUserTags && userTagsError && (
+            <p className="mt-2 text-xs text-red-600">{userTagsError}</p>
           )}
-          {!loadingUserGroups &&
-            !userGroupsError &&
-            userGroups.length === 0 && (
-              <p className="mt-2 text-xs text-gray-500">
-                No groups available. Create a group before scheduling.
-              </p>
-            )}
+          {!loadingUserTags && !userTagsError && userTags.length === 0 && (
+            <p className="mt-2 text-xs text-gray-500">
+              No tags available. Create a tag before scheduling.
+            </p>
+          )}
         </div>
       )}
 

@@ -15,15 +15,10 @@ import {
   tasksCreateForm,
   tasksGetForm,
   tasksListForms,
-  userGetGroups,
+  userGetTags,
   userMembers,
 } from "@alliance/shared/client";
-import type {
-  ActionSuite,
-  Group,
-  GroupDto,
-  User,
-} from "@alliance/shared/client";
+import type { ActionSuite, Tag, TagDto, User } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
@@ -88,11 +83,11 @@ const ActionDashboard: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [availableForms, setAvailableForms] = useState<FormDto[]>([]);
   const [formsLoading, setFormsLoading] = useState<boolean>(true);
-  const [availableGroups, setAvailableGroups] = useState<GroupDto[]>([]);
-  const [groupsLoading, setGroupsLoading] = useState<boolean>(true);
+  const [availableTags, setAvailableTags] = useState<TagDto[]>([]);
+  const [tagsLoading, setTagsLoading] = useState<boolean>(true);
   const [availableSuites, setAvailableSuites] = useState<ActionSuite[]>([]);
   const [suitesLoading, setSuitesLoading] = useState<boolean>(true);
-  const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const [availableUsers, setAvailableUsers] = useState<UserSelectUser[]>([]);
   const [usersLoading, setUsersLoading] = useState<boolean>(true);
   const [manualCohortUserIds, setManualCohortUserIds] = useState<number[]>([]);
@@ -154,22 +149,22 @@ const ActionDashboard: React.FC = () => {
   useEffect(() => {
     let cancelled = false;
 
-    const loadGroups = async () => {
+    const loadTags = async () => {
       try {
-        const response = await userGetGroups();
+        const response = await userGetTags();
         if (!cancelled && response.data) {
-          setAvailableGroups(response.data);
+          setAvailableTags(response.data);
         }
       } catch (err) {
         console.error("Failed to load groups:", err);
       } finally {
         if (!cancelled) {
-          setGroupsLoading(false);
+          setTagsLoading(false);
         }
       }
     };
 
-    loadGroups();
+    loadTags();
 
     return () => {
       cancelled = true;
@@ -217,7 +212,7 @@ const ActionDashboard: React.FC = () => {
     type: "Activity",
     preventCompletion: false,
     taskFormId: undefined,
-    participatingGroups: [],
+    participatingTags: [],
     everyoneShouldComplete: false,
     suiteId: undefined,
     priority: 0,
@@ -239,7 +234,7 @@ const ActionDashboard: React.FC = () => {
         type: "Activity",
         preventCompletion: false,
         taskFormId: undefined,
-        participatingGroups: [],
+        participatingTags: [],
         everyoneShouldComplete: false,
         suiteId: undefined,
         priority: 0,
@@ -249,7 +244,7 @@ const ActionDashboard: React.FC = () => {
       setImageKey(null);
       setImagePreview(null);
       setError(null);
-      setSelectedGroupIds([]);
+      setSelectedTagIds([]);
       setManualCohortUserIds([]);
     }
   }, [isNew]);
@@ -304,14 +299,14 @@ const ActionDashboard: React.FC = () => {
         setForm({
           ...formData,
           taskFormId: actionData.taskFormId,
-          participatingGroups: actionData.participatingGroups ?? [],
+          participatingTags: actionData.participatingTags ?? [],
           suiteId: suite?.id,
           manualCohortUsers,
           useManualCohort: actionData.useManualCohort ?? false,
         });
 
-        setSelectedGroupIds(
-          (actionData.participatingGroups || []).map((group) => group.id)
+        setSelectedTagIds(
+          (actionData.participatingTags || []).map((tag) => tag.id)
         );
         setManualCohortUserIds(manualCohortUsers.map((user) => user.id));
         setAvailableUsers((prev) => {
@@ -465,11 +460,11 @@ const ActionDashboard: React.FC = () => {
     }
   }, [actionId, action?.archived]);
 
-  const handleGroupsChange = useCallback((ids: number[]) => {
-    setSelectedGroupIds(ids);
+  const handleTagsChange = useCallback((ids: number[]) => {
+    setSelectedTagIds(ids);
     setForm((prev) => ({
       ...prev,
-      participatingGroups: ids.map((id) => ({ id } as unknown as Group)),
+      participatingTags: ids.map((id) => ({ id } as unknown as Tag)),
     }));
   }, []);
 
@@ -510,8 +505,8 @@ const ActionDashboard: React.FC = () => {
     try {
       const formData = {
         ...form,
-        participatingGroups: selectedGroupIds.map(
-          (id) => ({ id } as unknown as Group)
+        participatingTags: selectedTagIds.map(
+          (id) => ({ id } as unknown as Tag)
         ),
         image: imageKey ?? undefined,
         manualCohortUsers: form.useManualCohort
@@ -707,12 +702,12 @@ const ActionDashboard: React.FC = () => {
             onCancel={handleCancel}
             availableForms={availableForms}
             formsLoading={formsLoading}
-            availableGroups={availableGroups}
-            groupsLoading={groupsLoading}
+            availableTags={availableTags}
+            tagsLoading={tagsLoading}
             availableSuites={availableSuites}
             suitesLoading={suitesLoading}
-            selectedGroupIds={selectedGroupIds}
-            onGroupsChange={handleGroupsChange}
+            selectedTagIds={selectedTagIds}
+            onTagsChange={handleTagsChange}
             availableUsers={manualCohortSelectableUsers}
             usersLoading={usersLoading}
             manualCohortUserIds={manualCohortUserIds}
@@ -985,12 +980,12 @@ const ActionDashboard: React.FC = () => {
                   baseUrl={baseUrl}
                   availableForms={availableForms}
                   formsLoading={formsLoading}
-                  availableGroups={availableGroups}
-                  groupsLoading={groupsLoading}
+                  availableTags={availableTags}
+                  tagsLoading={tagsLoading}
                   availableSuites={availableSuites}
                   suitesLoading={suitesLoading}
-                  selectedGroupIds={selectedGroupIds}
-                  onGroupsChange={handleGroupsChange}
+                  selectedTagIds={selectedTagIds}
+                  onTagsChange={handleTagsChange}
                   availableUsers={manualCohortSelectableUsers}
                   usersLoading={usersLoading}
                   manualCohortUserIds={manualCohortUserIds}
@@ -1015,7 +1010,7 @@ const ActionDashboard: React.FC = () => {
                 updates={action.updates ?? []}
                 setUpdates={(updates) => setAction({ ...action, updates })}
                 events={action.events ?? []}
-                availableGroups={availableGroups}
+                availableTags={availableTags}
               />
             )}
           </div>

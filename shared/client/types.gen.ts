@@ -299,13 +299,13 @@ export type CommunityMemberDto = {
     userId: number;
 };
 
-export type CreateGroupDto = {
+export type CreateTagDto = {
     name: string;
     description: string;
     publicDisplayName?: string;
 };
 
-export type GroupDto = {
+export type TagDto = {
     id: number;
     name: string;
     description: string;
@@ -315,7 +315,7 @@ export type GroupDto = {
     users: Array<ProfileDto>;
 };
 
-export type AddUserToGroupDto = {
+export type AddUserToTagDto = {
     userId: number;
 };
 
@@ -557,7 +557,7 @@ export type EditableContent = {
     attachments: Array<string>;
 };
 
-export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 'group';
+export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 'tag';
 
 export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'community_invite_rejected' | 'community_invite_accepted';
 
@@ -611,7 +611,7 @@ export type ActionUpdate = {
     associatedEventId?: number;
     notifyType: ActionUpdateNotifyType;
     notifs: Array<Notification>;
-    group?: Group;
+    tag?: Tag;
 };
 
 export type ActionEvent = {
@@ -687,7 +687,7 @@ export type ActionActivity = {
 
 export type ReminderGroupTimingMode = 'absolute' | 'from_deadline' | 'within_range' | 'within_relative_range' | 'event_launch';
 
-export type ReminderCohortType = 'all_uncompleted' | 'group' | 'custom';
+export type ReminderCohortType = 'all_uncompleted' | 'tag' | 'custom';
 
 export type ActionEventNotifType = 'announcement' | 'misseddeadline' | 'reminder' | 'personalreminder';
 
@@ -744,7 +744,7 @@ export type ReminderGroup = {
     actionSuite?: ActionSuite;
     memberActionEvent: ActionEvent;
     cohortType: ReminderCohortType;
-    userGroup?: Group;
+    userTag?: Tag;
     users?: Array<User>;
     emailMessage: string;
     emailSubject: string;
@@ -836,7 +836,7 @@ export type Action = {
      * Events associated with the action
      */
     events: Array<ActionEvent>;
-    participatingGroups: Array<Group>;
+    participatingTags: Array<Tag>;
     /**
      * Whether to use a manual cohort for the action
      */
@@ -870,7 +870,7 @@ export type Action = {
     preventCompletion: boolean;
 };
 
-export type Group = {
+export type Tag = {
     id: number;
     users: Array<User>;
     participatingIn: Array<Action>;
@@ -915,7 +915,7 @@ export type ActionUpdateDto = {
     associatedEvent?: ActionEvent;
     associatedEventId?: number;
     notifyType: ActionUpdateNotifyType;
-    group?: Group;
+    tag?: Tag;
 };
 
 export type ActionDto = {
@@ -971,7 +971,7 @@ export type ActionDto = {
      * Form associated with the action
      */
     taskFormId?: number;
-    participatingGroups: Array<Group>;
+    participatingTags: Array<Tag>;
     /**
      * Whether to use a manual cohort for the action
      */
@@ -1079,7 +1079,7 @@ export type CreateActionDto = {
      * Form associated with the action
      */
     taskFormId?: number;
-    participatingGroups: Array<Group>;
+    participatingTags: Array<Tag>;
     /**
      * Whether to use a manual cohort for the action
      */
@@ -1153,7 +1153,7 @@ export type UpdateActionDto = {
      * Form associated with the action
      */
     taskFormId?: number;
-    participatingGroups?: Array<Group>;
+    participatingTags?: Array<Tag>;
     /**
      * Whether to use a manual cohort for the action
      */
@@ -1216,7 +1216,7 @@ export type CreateReminderGroupDto = {
     relative_range_end_seconds_from_deadline?: number;
     useSuiteTaskCount: boolean;
     userIds?: Array<number>;
-    userGroupId?: number;
+    userTagId?: number;
     suiteId?: number;
 };
 
@@ -1281,7 +1281,7 @@ export type CreateActionUpdateDto = {
     notifyType: ActionUpdateNotifyType;
     content: CreateEditableContentDto;
     associatedEventId?: number;
-    groupId?: number;
+    tagId?: number;
 };
 
 export type ActionSuiteDto = {
@@ -1407,7 +1407,7 @@ export type ExportActionDto = {
      * Events associated with the action
      */
     events: Array<ActionEvent>;
-    participatingGroups: Array<Group>;
+    participatingTags: Array<Tag>;
     /**
      * Whether to use a manual cohort for the action
      */
@@ -2505,87 +2505,87 @@ export type UserRemoveLeaderFromCommunityResponses = {
 
 export type UserRemoveLeaderFromCommunityResponse = UserRemoveLeaderFromCommunityResponses[keyof UserRemoveLeaderFromCommunityResponses];
 
-export type UserCreateGroupData = {
-    body: CreateGroupDto;
+export type UserCreateTagData = {
+    body: CreateTagDto;
     path?: never;
     query?: never;
-    url: '/user/createGroup';
+    url: '/user/createTag';
 };
 
-export type UserCreateGroupResponses = {
-    200: GroupDto;
+export type UserCreateTagResponses = {
+    200: TagDto;
 };
 
-export type UserCreateGroupResponse = UserCreateGroupResponses[keyof UserCreateGroupResponses];
+export type UserCreateTagResponse = UserCreateTagResponses[keyof UserCreateTagResponses];
 
-export type UserGetGroupsData = {
+export type UserGetTagsData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/user/groups';
+    url: '/user/tags';
 };
 
-export type UserGetGroupsResponses = {
-    200: Array<GroupDto>;
+export type UserGetTagsResponses = {
+    200: Array<TagDto>;
 };
 
-export type UserGetGroupsResponse = UserGetGroupsResponses[keyof UserGetGroupsResponses];
+export type UserGetTagsResponse = UserGetTagsResponses[keyof UserGetTagsResponses];
 
-export type UserAddUserToGroupData = {
-    body: AddUserToGroupDto;
+export type UserAddUserToTagData = {
+    body: AddUserToTagDto;
     path: {
-        groupId: number;
+        tagId: number;
     };
     query?: never;
-    url: '/user/groups/{groupId}/addUser';
+    url: '/user/tags/{tagId}/addUser';
 };
 
-export type UserAddUserToGroupResponses = {
-    200: GroupDto;
+export type UserAddUserToTagResponses = {
+    200: TagDto;
 };
 
-export type UserAddUserToGroupResponse = UserAddUserToGroupResponses[keyof UserAddUserToGroupResponses];
+export type UserAddUserToTagResponse = UserAddUserToTagResponses[keyof UserAddUserToTagResponses];
 
-export type UserRemoveUserFromGroupData = {
-    body: AddUserToGroupDto;
+export type UserRemoveUserFromTagData = {
+    body: AddUserToTagDto;
     path: {
-        groupId: number;
+        tagId: number;
     };
     query?: never;
-    url: '/user/groups/{groupId}/removeUser';
+    url: '/user/tags/{tagId}/removeUser';
 };
 
-export type UserRemoveUserFromGroupResponses = {
-    200: GroupDto;
+export type UserRemoveUserFromTagResponses = {
+    200: TagDto;
 };
 
-export type UserRemoveUserFromGroupResponse = UserRemoveUserFromGroupResponses[keyof UserRemoveUserFromGroupResponses];
+export type UserRemoveUserFromTagResponse = UserRemoveUserFromTagResponses[keyof UserRemoveUserFromTagResponses];
 
-export type UserUpdateGroupData = {
-    body: CreateGroupDto;
+export type UserUpdateTagData = {
+    body: CreateTagDto;
     path: {
-        groupId: number;
+        tagId: number;
     };
     query?: never;
-    url: '/user/groups/{groupId}/update';
+    url: '/user/tags/{tagId}/update';
 };
 
-export type UserUpdateGroupResponses = {
-    200: GroupDto;
+export type UserUpdateTagResponses = {
+    200: TagDto;
 };
 
-export type UserUpdateGroupResponse = UserUpdateGroupResponses[keyof UserUpdateGroupResponses];
+export type UserUpdateTagResponse = UserUpdateTagResponses[keyof UserUpdateTagResponses];
 
-export type UserDeleteGroupData = {
+export type UserDeleteTagData = {
     body?: never;
     path: {
-        groupId: number;
+        tagId: number;
     };
     query?: never;
-    url: '/user/groups/{groupId}';
+    url: '/user/tags/{tagId}';
 };
 
-export type UserDeleteGroupResponses = {
+export type UserDeleteTagResponses = {
     200: unknown;
 };
 

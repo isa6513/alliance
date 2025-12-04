@@ -19,7 +19,7 @@ import {
 } from 'typeorm';
 import { ActionActivity, ActionActivityType } from './action-activity.entity';
 import { ActionEvent, ActionStatus } from './action-event.entity';
-import { Group } from 'src/user/entities/group.entity';
+import { Tag } from 'src/user/entities/tag.entity';
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
 import { ActionUpdate } from './action-update.entity';
 import { ActionSuite } from './action-suite.entity';
@@ -138,14 +138,14 @@ export class Action {
   @Type(() => ActionEvent)
   events: Ty<ActionEvent>[];
 
-  @ManyToMany(() => Group, (group) => group.participatingIn, {
+  @ManyToMany(() => Tag, (tag) => tag.participatingIn, {
     onDelete: 'CASCADE',
   })
-  @ApiProperty({ type: () => Group, isArray: true })
+  @ApiProperty({ type: () => Tag, isArray: true })
   @Allow()
   @JoinTable()
-  @Type(() => Group)
-  participatingGroups: Group[];
+  @Type(() => Tag)
+  participatingTags: Tag[];
 
   @Column({ default: false })
   @ApiProperty({

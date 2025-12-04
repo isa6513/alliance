@@ -25,7 +25,7 @@ import {
 } from 'src/actions/dto/action.dto';
 import { UserService } from 'src/user/user.service';
 import { Temporal } from '@js-temporal/polyfill';
-import { Group } from 'src/user/entities/group.entity';
+import { Tag } from 'src/user/entities/tag.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { ActionSuite } from 'src/actions/entities/action-suite.entity';
 import { ActionEventNotifDto } from './entities/action-event-notif.dto';
@@ -267,15 +267,15 @@ export class ActionEventReminderService {
       .createQueryBuilder('rg')
       .leftJoinAndSelect('rg.memberActionEvent', 'event')
       .leftJoinAndSelect('event.action', 'eventAction')
-      .leftJoinAndSelect('eventAction.participatingGroups', 'eventActionGroups')
+      .leftJoinAndSelect('eventAction.participatingTags', 'eventActionTags')
       .leftJoinAndSelect(
         'eventAction.manualCohortUsers',
         'eventActionManualCohortUsers',
       )
       .leftJoinAndSelect('rg.deadlineEvent', 'deadline')
       .leftJoinAndSelect('rg.users', 'users')
-      .leftJoinAndSelect('users.groups', 'userGroups')
-      .leftJoinAndSelect('rg.userGroup', 'userGroup')
+      .leftJoinAndSelect('users.tags', 'userTags')
+      .leftJoinAndSelect('rg.userTag', 'userTag')
       .leftJoinAndSelect('rg.actionSuite', 'actionSuite')
       .leftJoinAndSelect('actionSuite.actions', 'actionSuiteActions')
       .where('rg.id IN (:...ids)', { ids })
@@ -311,9 +311,9 @@ export class ActionEventReminderService {
         'memberActionEvent',
         'deadlineEvent',
         'memberActionEvent.action',
-        'memberActionEvent.action.participatingGroups',
+        'memberActionEvent.action.participatingTags',
         'users',
-        'userGroup',
+        'userTag',
         'actionSuite',
         'actionSuite.actions',
       ],
@@ -350,9 +350,9 @@ export class ActionEventReminderService {
       throw new BadRequestException('Event is not a member action event');
     }
 
-    let userGroup: Group | undefined = undefined;
-    if (dto.cohortType === ReminderCohortType.Group && dto.userGroupId) {
-      userGroup = await this.userService.findGroupOrFail(dto.userGroupId);
+    let userTag: Tag | undefined = undefined;
+    if (dto.cohortType === ReminderCohortType.Tag && dto.userTagId) {
+      userTag = await this.userService.findTagOrFail(dto.userTagId);
     }
 
     let users: User[] | undefined = undefined;
@@ -371,7 +371,7 @@ export class ActionEventReminderService {
       ...dto,
       memberActionEvent: event,
       actionSuite,
-      userGroup,
+      userTag,
       users,
     });
 

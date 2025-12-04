@@ -3,7 +3,7 @@ import {
   ActionSuite,
   CreateActionDto,
   FormDto,
-  GroupDto,
+  TagDto,
 } from "@alliance/shared/client";
 import React, { useMemo, useRef } from "react";
 import UserSelect, { UserSelectUser } from "@alliance/shared/ui/UserSelect";
@@ -26,12 +26,12 @@ interface ActionFormProps {
   baseUrl?: string;
   availableForms?: FormDto[];
   formsLoading: boolean;
-  availableGroups?: GroupDto[];
-  groupsLoading: boolean;
+  availableTags?: TagDto[];
+  tagsLoading: boolean;
   availableSuites?: ActionSuite[];
   suitesLoading: boolean;
-  selectedGroupIds: number[];
-  onGroupsChange: (ids: number[]) => void;
+  selectedTagIds: number[];
+  onTagsChange: (ids: number[]) => void;
   availableUsers?: UserSelectUser[];
   usersLoading?: boolean;
   manualCohortUserIds: number[];
@@ -50,12 +50,12 @@ const ActionForm: React.FC<ActionFormProps> = ({
   onCancel,
   onDelete,
   baseUrl,
-  availableGroups = [],
-  groupsLoading,
+  availableTags = [],
+  tagsLoading,
   availableSuites = [],
   suitesLoading = false,
-  selectedGroupIds,
-  onGroupsChange,
+  selectedTagIds,
+  onTagsChange,
   availableUsers = [],
   usersLoading = false,
   manualCohortUserIds = [],
@@ -63,16 +63,16 @@ const ActionForm: React.FC<ActionFormProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleToggleGroup = (groupId: number) => {
-    const nextSelection = selectedGroupIds.includes(groupId)
-      ? selectedGroupIds.filter((id) => id !== groupId)
-      : [...selectedGroupIds, groupId];
-    onGroupsChange(nextSelection);
+  const handleToggleTag = (tagId: number) => {
+    const nextSelection = selectedTagIds.includes(tagId)
+      ? selectedTagIds.filter((id) => id !== tagId)
+      : [...selectedTagIds, tagId];
+    onTagsChange(nextSelection);
   };
 
-  const handleClearGroups = () => {
-    if (selectedGroupIds.length) {
-      onGroupsChange([]);
+  const handleClearTags = () => {
+    if (selectedTagIds.length) {
+      onTagsChange([]);
     }
   };
 
@@ -431,31 +431,31 @@ const ActionForm: React.FC<ActionFormProps> = ({
         <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-sm font-medium text-gray-700">
-              Participating groups
+              Participating tags
             </p>
             <p className="text-xs text-gray-500">
-              Select one or more groups to limit participation. Leave empty to
+              Select one or more tags to limit participation. Leave empty to
               make the action open to everyone.
             </p>
           </div>
           <button
             type="button"
-            onClick={handleClearGroups}
-            disabled={!selectedGroupIds.length}
+            onClick={handleClearTags}
+            disabled={!selectedTagIds.length}
             className="text-xs text-blue-600 hover:text-blue-800 disabled:text-gray-300"
           >
             Clear
           </button>
         </div>
-        {groupsLoading ? (
-          <p className="text-sm text-gray-500">Loading groups…</p>
-        ) : availableGroups.length ? (
+        {tagsLoading ? (
+          <p className="text-sm text-gray-500">Loading tags…</p>
+        ) : availableTags.length ? (
           <div className="grid gap-3 sm:grid-cols-2">
-            {availableGroups.map((group) => {
-              const checked = selectedGroupIds.includes(group.id);
+            {availableTags.map((tag) => {
+              const checked = selectedTagIds.includes(tag.id);
               return (
                 <label
-                  key={group.id}
+                  key={tag.id}
                   className={`flex items-start gap-2 rounded-md border px-3 py-2 text-sm transition-colors ${
                     checked
                       ? "border-blue-400 bg-blue-50"
@@ -466,19 +466,19 @@ const ActionForm: React.FC<ActionFormProps> = ({
                     type="checkbox"
                     className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     checked={checked}
-                    onChange={() => handleToggleGroup(group.id)}
+                    onChange={() => handleToggleTag(tag.id)}
                   />
                   <span className="flex flex-col">
                     <span className="font-medium text-gray-800">
-                      {group.name}
+                      {tag.name}
                     </span>
-                    {group.publicDisplayName && (
+                    {tag.publicDisplayName && (
                       <span className="text-xs text-gray-500">
-                        {group.publicDisplayName}
+                        {tag.publicDisplayName}
                       </span>
                     )}
                     <span className="text-xs text-gray-500">
-                      {group.description}
+                      {tag.description}
                     </span>
                   </span>
                 </label>
@@ -487,7 +487,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
           </div>
         ) : (
           <p className="text-sm text-gray-500">
-            No groups available yet. Create one in the Groups dashboard.
+            No tags available yet. Create one in the tags dashboard.
           </p>
         )}
       </div>

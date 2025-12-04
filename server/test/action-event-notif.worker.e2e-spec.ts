@@ -12,7 +12,7 @@ import {
 import { ActionEventNotifWorker } from 'src/notifs/action-event-notif.worker';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { NotificationChannel } from 'src/notifs/notif-utils';
-import { Group } from 'src/user/entities/group.entity';
+import { Tag } from 'src/user/entities/tag.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import {
@@ -31,7 +31,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
   let notifRepo: Repository<ActionEventNotif>;
   let userRepo: Repository<User>;
   let activityRepo: Repository<ActionActivity>;
-  let groupRepo: Repository<Group>;
+  let tagRepo: Repository<Tag>;
   let actionSuiteRepo: Repository<ActionSuite>;
 
   const baseMessages = {
@@ -52,7 +52,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
     notifRepo = ctx.dataSource.getRepository(ActionEventNotif);
     userRepo = ctx.dataSource.getRepository(User);
     activityRepo = ctx.dataSource.getRepository(ActionActivity);
-    groupRepo = ctx.dataSource.getRepository(Group);
+    tagRepo = ctx.dataSource.getRepository(Tag);
     actionSuiteRepo = ctx.dataSource.getRepository(ActionSuite);
   });
 
@@ -76,20 +76,20 @@ describe('ActionEventNotifWorker (e2e)', () => {
   const getPrimaryUser = () =>
     userRepo.findOneOrFail({
       where: { id: ctx.testUserId },
-      relations: ['groups'],
+      relations: ['tags'],
     });
 
   const createActionWithMemberEvent = async ({
     name,
     eventDate,
-    participatingGroups,
+    participatingTags,
     suite,
     suiteManaged,
     timeEstimate,
   }: {
     name: string;
     eventDate: Date;
-    participatingGroups?: Group[];
+    participatingTags?: Tag[];
     suite?: ActionSuite;
     suiteManaged?: boolean;
     timeEstimate?: number;
@@ -103,7 +103,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         type: ActionTaskType.Activity,
         commitmentless: true,
         everyoneShouldComplete: false,
-        participatingGroups: participatingGroups ?? [ctx.defaultGroup],
+        participatingTags: participatingTags ?? [ctx.defaultTag],
         suite,
         timeEstimate,
       }),
@@ -430,7 +430,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         email: `${uniqueName('custom')}@example.com`,
         password: 'pass',
         name: 'Custom User',
-        groups: primaryUser.groups,
+        tags: primaryUser.tags,
         contractDateSigned: new Date(now - 48 * 60 * 60 * 1000),
         textNotifsEnabled: true,
         phoneNumber: '+15555550200',
@@ -438,9 +438,9 @@ describe('ActionEventNotifWorker (e2e)', () => {
         emailNotifsEnabled: false,
       }),
     );
-    const customUserWithGroups = await userRepo.findOneOrFail({
+    const customUserWithTags = await userRepo.findOneOrFail({
       where: { id: customUser.id },
-      relations: ['groups'],
+      relations: ['tags'],
     });
 
     const { memberEvent } = await createActionWithMemberEvent({
@@ -453,7 +453,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
       ReminderGroupTimingMode.Absolute,
       ReminderCohortType.Custom,
       {
-        users: [customUserWithGroups],
+        users: [customUserWithTags],
         sendAtAbsolute: new Date(now - 8 * 60 * 1000),
       },
     );
@@ -469,10 +469,10 @@ describe('ActionEventNotifWorker (e2e)', () => {
 
   it('targets only users in the configured group cohort', async () => {
     const now = Date.now();
-    const group = await groupRepo.save(
-      groupRepo.create({
-        name: uniqueName('reminder-group'),
-        description: 'Reminder cohort group',
+    const tag = await tagRepo.save(
+      tagRepo.create({
+        name: uniqueName('reminder-tag'),
+        description: 'Reminder cohort tag',
       }),
     );
 
@@ -481,7 +481,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         email: `${uniqueName('cohort')}@example.com`,
         password: 'pass',
         name: 'Cohort User',
-        groups: [group],
+        tags: [tag],
         contractDateSigned: new Date(now - 48 * 60 * 60 * 1000),
         textNotifsEnabled: true,
         phoneNumber: '+15555550300',
@@ -489,23 +489,23 @@ describe('ActionEventNotifWorker (e2e)', () => {
         emailNotifsEnabled: false,
       }),
     );
-    const cohortUserWithGroups = await userRepo.findOneOrFail({
+    const cohortUserWithTags = await userRepo.findOneOrFail({
       where: { id: cohortUser.id },
-      relations: ['groups'],
+      relations: ['tags'],
     });
 
     const { memberEvent } = await createActionWithMemberEvent({
       name: uniqueName('group-cohort-action'),
       eventDate: new Date(now - 35 * 60 * 1000),
-      participatingGroups: [group],
+      participatingTags: [tag],
     });
 
     const reminderGroup = await createReminderGroup(
       memberEvent,
       ReminderGroupTimingMode.Absolute,
-      ReminderCohortType.Group,
+      ReminderCohortType.Tag,
       {
-        userGroup: group,
+        userTag: tag,
         sendAtAbsolute: new Date(now - 6 * 60 * 1000),
       },
     );
@@ -514,7 +514,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
 
     const notifs = await fetchNotifsForGroup(reminderGroup);
     expect(notifs).toHaveLength(1);
-    expect(notifs[0].user.id).toBe(cohortUserWithGroups.id);
+    expect(notifs[0].user.id).toBe(cohortUserWithTags.id);
 
     await userRepo.delete({ id: cohortUser.id });
   });
@@ -690,7 +690,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
           email: `${uniqueName(`suite-${label}`)}@example.com`,
           password: 'pass',
           name: `Suite ${label}`,
-          groups: [ctx.defaultGroup],
+          tags: [ctx.defaultTag],
           contractDateSigned: new Date(now - 72 * 60 * 60 * 1000),
           contractDateSuspended: null,
           textNotifsEnabled: true,
@@ -753,11 +753,11 @@ describe('ActionEventNotifWorker (e2e)', () => {
       }),
     );
 
-    const newgroup = groupRepo.create({
-      name: uniqueName('suite-reminder-none-group'),
-      description: 'Suite reminder none group',
+    const newtag = tagRepo.create({
+      name: uniqueName('suite-reminder-none-tag'),
+      description: 'Suite reminder none tag',
     });
-    const savedGroup = await groupRepo.save(newgroup);
+    const savedTag = await tagRepo.save(newtag);
 
     const eventDate = new Date(now - 45 * 60 * 1000);
 
@@ -767,7 +767,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         eventDate,
         suite,
         suiteManaged: true,
-        participatingGroups: [savedGroup],
+        participatingTags: [savedTag],
       });
 
     const { action: secondAction } = await createActionWithMemberEvent({
@@ -787,7 +787,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         email: `${uniqueName('suite-complete')}@example.com`,
         password: 'pass',
         name: 'Suite Completer',
-        groups: [savedGroup],
+        tags: [savedTag],
         contractDateSigned: new Date(now - 6 * 24 * 60 * 60 * 1000),
         contractDateSuspended: null,
         textNotifsEnabled: true,
