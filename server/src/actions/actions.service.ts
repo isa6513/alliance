@@ -74,6 +74,7 @@ import {
   UserActionRelationStatus,
   UserActionSummaryDto,
 } from 'src/user/dto/user-action-relations.dto';
+import { RelationString } from 'src/tasks/entities/type';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -402,7 +403,7 @@ export class ActionsService {
         'manualCohortUsers',
         'updates',
         'suite',
-      ],
+      ] satisfies RelationString<Action>[],
     });
 
     if (

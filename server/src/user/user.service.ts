@@ -47,6 +47,7 @@ import {
   CommunityInviteStatus,
 } from './entities/community-invite.entity';
 import { ConversationService } from 'src/messaging/conversation.service';
+import { RelationString } from 'src/tasks/entities/type';
 
 const defaultTimeZone = 'America/Los_Angeles';
 const communityDefaultRelations = ['users', 'leaders'] as const;
@@ -156,7 +157,10 @@ export class UserService {
     });
   }
 
-  findOne(id: number, relations?: string[]): Promise<User | null> {
+  findOne(
+    id: number,
+    relations?: RelationString<User>[],
+  ): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },
       relations: ['city', ...(relations ?? [])],
@@ -423,7 +427,10 @@ export class UserService {
     };
   }
 
-  async findOneOrFail(id: number, relations?: string[]): Promise<User> {
+  async findOneOrFail(
+    id: number,
+    relations?: RelationString<User>[],
+  ): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
       relations,
