@@ -17,6 +17,7 @@ import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
 import { ActionUpdate } from 'src/actions/entities/action-update.entity';
 import { actionUrl } from 'src/search/approutes';
 import { NotificationChannel } from './notif-utils';
+import { RelationString } from 'src/tasks/entities/type';
 
 export function shouldEmailUser(user: User) {
   return (
@@ -93,7 +94,11 @@ export class NotifsService {
   async notifsForUser(id: number) {
     return this.actionEventNotifsRepository.find({
       where: { user: { id } },
-      relations: ['user', 'mail', 'mms'],
+      relations: [
+        'user',
+        'mail',
+        'mms',
+      ] satisfies RelationString<ActionEventNotif>[],
     });
   }
 

@@ -23,7 +23,7 @@ type Dec<N extends number> = N extends 5
           ? 0
           : 0;
 
-type Paths<T, Depth extends number = 5> = Depth extends 0
+type Paths<T, Depth extends number = 4> = Depth extends 0
   ? never
   : T extends Primitive
     ? never
