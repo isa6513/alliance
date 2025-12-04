@@ -275,9 +275,9 @@ export function RenderField({
         : undefined;
 
       return (
-        <div className="gap-y-2 relative pb-6">
+        <div className="relative pb-6">
           <RenderLabel field={field} error={errorMessage} />
-          <div className="flex items-center justify-between text-xs text-zinc-500">
+          <div className="flex items-center justify-between text-xs text-zinc-500 py-1">
             <span className="text-black">{field.startLabel}</span>
             <span className="text-black">{field.endLabel}</span>
           </div>
