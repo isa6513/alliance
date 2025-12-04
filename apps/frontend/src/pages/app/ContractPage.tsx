@@ -5,11 +5,14 @@ import MemberContract from "../../components/MemberContract";
 import FormInput from "@alliance/shared/ui/FormInput";
 import { useAuth } from "../../lib/AuthContext";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 
 const ContractPage: React.FC = () => {
   const { user, loading } = useAuth();
 
   const [contractDateSigned, setContractDateSigned] = useState<Date | null>();
+  const [contractDateSuspended, setContractDateSuspended] =
+    useState<Date | null>();
   const [editName, setEditName] = useState("");
 
   useEffect(() => {
@@ -19,6 +22,9 @@ const ContractPage: React.FC = () => {
           ? new Date(user.contractDateSigned)
           : null
       );
+      setContractDateSuspended(
+        user.contractDateSuspended ? new Date(user.contractDateSuspended) : null
+      );
     }
   }, [user]);
 
@@ -27,6 +33,7 @@ const ContractPage: React.FC = () => {
       const res = await userSignContract();
       if (res.data) {
         setContractDateSigned(new Date(res.data));
+        setContractDateSuspended(null);
       }
     } catch (error) {
       console.error("Error signing contract:", error);
@@ -42,6 +49,7 @@ const ContractPage: React.FC = () => {
 
       await userSuspendContract();
       setContractDateSigned(null);
+      setContractDateSuspended(new Date());
     } catch (error) {
       console.error("Error suspending contract:", error);
       alert("There was an error suspending the contract. Please try again.");
@@ -65,6 +73,14 @@ const ContractPage: React.FC = () => {
             <li>You can terminate your membership at any time.</li>
           </ul>
         </div>
+        {contractDateSuspended && (
+          <Card style={CardStyle.Red}>
+            <p>
+              You suspended your contract on{" "}
+              {new Date(contractDateSuspended).toLocaleDateString()}.
+            </p>
+          </Card>
+        )}
         <MemberContract />
 
         {!contractDateSigned && (
