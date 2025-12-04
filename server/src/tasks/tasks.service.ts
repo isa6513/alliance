@@ -455,7 +455,7 @@ export class TasksService {
           return {
             isValid: false,
             message:
-              "It looks like you haven't uploaded a profile picture yet - please do that now!",
+              "You have not uploaded a profile picture yet - please do that now",
           };
         }
         break;
@@ -465,7 +465,7 @@ export class TasksService {
           return {
             isValid: false,
             message:
-              "It looks like you haven't signed the contract yet - please do that now!",
+              "You have not signed the contract yet - please do that now.",
           };
         }
         break;
@@ -474,7 +474,7 @@ export class TasksService {
           return {
             isValid: false,
             message:
-              "It looks like you haven't added a profile description yet - please do that now!",
+              "You have not added a profile description yet - please do that now.",
           };
         }
         break;
@@ -491,7 +491,7 @@ export class TasksService {
           return {
             isValid: false,
             message:
-              "It looks like you haven't replied to the discussion yet - please do that now!",
+              "You have not replied to the discussion yet - please do that now.",
           };
         }
         break;
@@ -501,7 +501,7 @@ export class TasksService {
           return {
             isValid: false,
             message:
-              "It looks like you haven't added a phone number yet - please do that now!",
+              "You have not added a phone number yet - please do that now.",
           };
         }
         break;
@@ -510,7 +510,7 @@ export class TasksService {
           return {
             isValid: false,
             message:
-              "It looks like you haven't entered a phone number yet - please do that now!",
+              "You have not entered a phone number yet - please do that now.",
           };
         }
         try {
