@@ -110,10 +110,10 @@ const InvitesPage = () => {
               <div className="flex flex-row gap-2">
                 <ProfileImage
                   size="small"
-                  pfp={invite.invitingUser.profilePicture}
+                  pfp={invite.invitingUser?.profilePicture ?? null}
                 />
                 <p>
-                  {invite.invitingUser.name}{" "}
+                  {invite.invitingUser?.displayName}{" "}
                   <span className="text-gray-500"> inviting </span>{" "}
                   {invite.invitee}
                 </p>

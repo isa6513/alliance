@@ -323,10 +323,10 @@ export type OnetimeInviteDto = {
     id: number;
     invitee: string;
     code: string;
-    invitingUser: User;
     createdAt: string;
     isValid: boolean;
     community?: Community;
+    invitingUser?: ProfileDto;
 };
 
 export type CreateOnetimeInviteDto = {
@@ -1816,7 +1816,7 @@ export type FormDto = {
     usedInAction?: ActionDto;
 };
 
-export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'HasPhoneNumber' | 'IsPhoneNumberValid' | 'MemberGroup';
+export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'HasPhoneNumber' | 'IsPhoneNumberValid' | 'MemberTag' | 'MemberCommunity';
 
 export type CustomValidatorTypeDto = {
     name: string;

@@ -7,6 +7,8 @@ import {
   useCallback,
   useRef,
   useState,
+  ChangeEvent,
+  useEffect,
 } from "react";
 import { Plus, X } from "lucide-react";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
@@ -150,6 +152,13 @@ const MessageInput = ({
   const triggerFilePicker = () => {
     fileInputRef.current?.click();
   };
+
+  useEffect(() => {
+    if (inputRef.current && message !== null) {
+      inputRef.current.style.height = "auto";
+      inputRef.current.style.height = inputRef.current.scrollHeight + "px";
+    }
+  }, [message, inputRef]);
 
   return (
     <div

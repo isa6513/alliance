@@ -590,7 +590,9 @@ export class UserController {
   async getOnetimeInvitesByCommunity(
     @Param('communityId', ParseIntPipe) communityId: number,
   ) {
-    return this.userService.findOnetimeInvites(communityId);
+    return (await this.userService.findOnetimeInvites(communityId)).map(
+      (invite) => new OnetimeInviteDto(invite),
+    );
   }
 
   @Get('myCommunity')
