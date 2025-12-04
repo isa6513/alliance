@@ -275,7 +275,7 @@ export function RenderField({
         : undefined;
 
       return (
-        <div className="space-y-2">
+        <div className="gap-y-2 relative pb-6">
           <RenderLabel field={field} error={errorMessage} />
           <div className="flex items-center justify-between text-xs text-zinc-500">
             <span className="text-black">{field.startLabel}</span>
@@ -323,16 +323,16 @@ export function RenderField({
               );
             })}
           </div>
+          {renderValidationMessage()}
           {!field.required && normalizedValue !== undefined && onChange && (
             <button
               type="button"
               onClick={() => onChange("")}
-              className="text-xs text-zinc-600 hover:text-zinc-800"
+              className="text-xs text-zinc-600 hover:text-zinc-800 absolute bottom-0 right-0"
             >
               Clear selection
             </button>
           )}
-          {renderValidationMessage()}
         </div>
       );
     }
