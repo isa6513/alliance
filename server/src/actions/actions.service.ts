@@ -93,8 +93,6 @@ export class ActionsService {
   constructor(
     @InjectRepository(Action)
     private actionRepository: Repository<Action>,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
     @InjectRepository(ActionEvent)
     private readonly actionEventRepository: Repository<ActionEvent>,
     @InjectRepository(ActionActivity)
@@ -1644,10 +1642,8 @@ export class ActionsService {
   // TODO move ==================================
 
   async getUserActionRelations(): Promise<UserActionRelationsResponseDto> {
-    const users = await this.userRepository.find({
-      select: ['id'],
-    });
-    return this.getActionRelationsForUsers(users.map((user) => user.id));
+    const users = await this.userService.getAllUserIds();
+    return this.getActionRelationsForUsers(users);
   }
 
   async getActionRelationsForUsers(

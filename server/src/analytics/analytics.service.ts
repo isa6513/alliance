@@ -4,7 +4,7 @@ import { UserService } from 'src/user/user.service';
 import { TimeSpentForUserDto } from './timespent.dto';
 import { DailyStatsRecord } from './dailystats.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Not, Repository } from 'typeorm';
+import { Between, IsNull, Not, Repository } from 'typeorm';
 import {
   ActionActivity,
   ActionActivityType,
@@ -204,5 +204,16 @@ ORDER BY pp.total_session_duration_seconds DESC
       invitesAccepted: acceptedInvites,
     });
     await this.dailyStatsRepository.save(record);
+  }
+
+  async getDailyStats(
+    startDate: string,
+    endDate: string,
+  ): Promise<DailyStatsRecord[]> {
+    return this.dailyStatsRepository.find({
+      where: {
+        date: Between(new Date(startDate), new Date(endDate)),
+      },
+    });
   }
 }

@@ -5,7 +5,6 @@ import {
   UserActionRelationStatus,
   UserDto,
 } from "@alliance/shared/client/types.gen";
-import { getApiUrl } from "@alliance/shared/lib/config";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { Duration, formatDuration, intervalToDuration } from "date-fns";
@@ -121,14 +120,7 @@ const UserCard = ({
     <Card style={CardStyle.White} className="flex-1 text-sm">
       <div className="flex flex-row items-center justify-between gap-x-3 border-b pb-2 mb-2 border-zinc-200">
         <div className="flex flex-row items-center gap-x-3">
-          <ProfileImage
-            pfp={
-              user.profilePicture
-                ? getApiUrl() + "/images/" + user.profilePicture
-                : null
-            }
-            size="large"
-          />
+          <ProfileImage pfp={user.profilePicture} size="large" />
           <Link to={`/member/${user.id}`} className="text-base">
             {user.name}
           </Link>

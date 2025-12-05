@@ -1110,4 +1110,10 @@ export class UserService {
     );
     await this.userRepository.save(user);
   }
+
+  async getAllUserIds(): Promise<number[]> {
+    return this.userRepository
+      .find({ select: ['id'] })
+      .then((users) => users.map((user) => user.id));
+  }
 }
