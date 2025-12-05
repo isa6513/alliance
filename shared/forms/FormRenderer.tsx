@@ -1086,7 +1086,6 @@ const FormRenderer = ({
     readOnly,
   ]);
 
-  // If key changes (different form/version/instance), attempt to restore
   useEffect(() => {
     if (readOnly) return;
     if (!persistKey || typeof window === "undefined") return;
@@ -1099,6 +1098,12 @@ const FormRenderer = ({
         fieldLookup
       );
       setFormData(applyDefaultValues(filtered, defaultValueMap));
+    }
+    if (parsed?.publicAnswers && typeof parsed.publicAnswers === "object") {
+      setPublicAnswers((prev) => ({
+        ...prev,
+        ...(parsed.publicAnswers as Record<string, boolean>),
+      }));
     }
     if (typeof parsed?.currentPageIndex === "number") {
       const maxIdx = Math.max(0, (pageCount || 1) - 1);
@@ -1114,6 +1119,8 @@ const FormRenderer = ({
     pageCount,
     defaultValueMap,
   ]);
+
+  console.log("publicAnswers", publicAnswers);
 
   // When rendering a completed form, sync provided answers into local state
   useEffect(() => {
