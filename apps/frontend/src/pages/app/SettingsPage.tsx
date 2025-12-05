@@ -476,8 +476,10 @@ const SettingsPage: React.FC = () => {
             <AwayRangesSection />
           </div>
 
+          <hr className="border-zinc-300 mt-4" />
+
           <div>
-            <h2 className="!font-semibold !text-xl mb-4 mt-2">Privacy</h2>
+            <h2 className="!font-semibold !text-xl mb-4 ">Privacy</h2>
             <div className="flex flex-col gap-y-2 mb-4">
               <p className="mb-0">
                 Some parts of your completed tasks can be visible to other
