@@ -876,6 +876,7 @@ export class ActionsService {
       .leftJoinAndSelect('activity.user', 'user')
       .leftJoinAndSelect('activity.action', 'action')
       .leftJoinAndSelect('activity.editableContent', 'editableContent')
+      .leftJoinAndSelect('activity.taskFormResponse', 'taskFormResponse')
       .select([
         'activity.id',
         'activity.type',
@@ -897,6 +898,11 @@ export class ActionsService {
         'editableContent.id',
         'editableContent.body',
         'editableContent.attachments',
+        'taskFormResponse.id',
+        'taskFormResponse.formId',
+        'taskFormResponse.answers',
+        'taskFormResponse.publicAnswers',
+        'taskFormResponse.schemaSnapshot',
       ])
       .loadRelationIdAndMap('user.leaderOfIds', 'user.leaderOf')
       .orderBy('activity.createdAt', 'DESC')
