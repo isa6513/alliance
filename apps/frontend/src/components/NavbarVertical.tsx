@@ -14,7 +14,7 @@ export enum NavbarPage {
   CurrentActions = "Actions",
   Activity = "Activity",
   Forum = "Forum",
-  Priorities = "Priorities",
+  Information = "Information",
   Profile = "Profile",
   Contract = "Contract",
   Settings = "Settings",
@@ -30,7 +30,7 @@ export const destinations: Record<NavbarPage, string> = {
   [NavbarPage.Search]: href("/search"),
   [NavbarPage.Activity]: href("/feed"),
   [NavbarPage.Forum]: href("/forum"),
-  [NavbarPage.Priorities]: href("/priorities"),
+  [NavbarPage.Information]: href("/information"),
   [NavbarPage.Profile]: href("/profile"),
   [NavbarPage.Contract]: href("/contract"),
   [NavbarPage.Settings]: href("/settings"),
@@ -85,8 +85,8 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
           destination: destinations[NavbarPage.Forum],
         },
         {
-          page: NavbarPage.Priorities,
-          destination: destinations[NavbarPage.Priorities],
+          page: NavbarPage.Information,
+          destination: destinations[NavbarPage.Information],
         },
         {
           page: NavbarPage.Search,

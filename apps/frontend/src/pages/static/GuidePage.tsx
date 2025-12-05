@@ -1,12 +1,12 @@
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React from "react";
 import ExampleActionCategoryCard from "../../components/ExampleActionCategoryCard";
 import Footer from "../../components/Footer";
 import MarkdownWrapper from "../../components/MarkdownWrapper";
 import MemberContract from "../../components/MemberContract";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
-import chevronRight from "../../assets/icons8-expand-arrow-96.png";
-import { Link, href } from "react-router";
+
+import { href } from "react-router";
+import ResourceButton from "../../components/ResourceButton";
 
 const GuidePage: React.FC = () => {
   return (
@@ -210,30 +210,20 @@ In addition to formal governance, the office incorporates member input by other 
 
 "
               />
-              <Link to={href("/foundation")}>
-                <Card
-                  style={CardStyle.White}
-                  className="mt-4 p-4 md:p-4 text-lg cursor-pointer hover:bg-zinc-50 flex flex-row items-center justify-between"
-                >
-                  <p className="text-base">
-                    <span className="font-semibold">Our foundation</span>{" "}
-                    describes how we derived our priorities.
-                  </p>
-                  <img src={chevronRight} className="w-4 h-4 rotate-270" />
-                </Card>
-              </Link>
-              <Link to={href("/governance")}>
-                <Card
-                  style={CardStyle.White}
-                  className="p-4 md:p-4 text-lg cursor-pointer hover:bg-zinc-50 flex flex-row items-center justify-between"
-                >
-                  <p className="text-base">
-                    <span className="font-semibold">Our governance</span>{" "}
-                    describes office and member obligations.
-                  </p>
-                  <img src={chevronRight} className="w-4 h-4 rotate-270" />
-                </Card>
-              </Link>
+
+              <ResourceButton className="mt-4" to={href("/foundation")}>
+                <p className="text-base">
+                  <span className="font-semibold">Our foundation</span>{" "}
+                  describes how we derived our priorities.
+                </p>
+              </ResourceButton>
+
+              <ResourceButton to={href("/governance")}>
+                <p className="text-base">
+                  <span className="font-semibold">Our governance</span>{" "}
+                  describes office and member obligations.
+                </p>
+              </ResourceButton>
             </div>
           </div>
         </div>
