@@ -121,10 +121,10 @@ The foundation of the Alliance is trust.
 
 ## Current and future coordination
 
-Right now, we are taking small-scale actions focused on learning, not growth or direct impact. For instance, we recently:
-- Provided actionable feedback on the websites of three non-profits.
-- Voted on proposals for a small grant.
-- Signed a letter requesting news coverage of a coalition of businesses that adopted a new environmental policy at the Alliance’s request.
+Right now, we are taking small-scale actions focused on learning, not growth or direct impact. For instance, some actions we have taken recently are:
+- We provided actionable feedback on the websites of three potential partner non-profits.
+- We voted on proposals for a small grant.
+- The office asked a coalition of businesses to take environmental action, promising that we would help them attain a media feature if they did. After they took action, we signed a letter to journalists requesting a feature of the businesses.
 
 As the Alliance grows, we plan to bring together experts from diverse fields to make increasingly impactful, long-term plans. Our online platform will enable direct communication between these experts and millions of members to enact rapid, large-scale change.
 
