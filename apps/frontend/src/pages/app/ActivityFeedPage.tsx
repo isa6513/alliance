@@ -115,8 +115,10 @@ const ActivityFeedPage = () => {
             <UserActivityCard
               activity={activity}
               key={activity.id}
-              handleLike={handleLikeActivity}
-              onActivityUpdate={updateActivity}
+              handleLike={() => handleLikeActivity(activity.id, mode)}
+              onActivityUpdate={(updatedActivity) =>
+                updateActivity(updatedActivity, mode)
+              }
               canEdit={activity.user.id === user?.id}
             />
           ))}
