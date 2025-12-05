@@ -135,7 +135,9 @@ const useActivities = ({
                 : a
             )
           );
+          return response.data;
         }
+        return null;
       } else {
         const response = await actionsLikeActivity({
           path: { id: activityId },
@@ -158,8 +160,10 @@ const useActivities = ({
             activityId: activity.id,
             activityType: activity.type,
           });
+          return response.data;
         }
       }
+      return null;
     },
     [user, activities]
   );

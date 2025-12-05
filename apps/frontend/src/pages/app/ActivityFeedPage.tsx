@@ -5,6 +5,7 @@ import { useAuth } from "../../lib/AuthContext";
 import useActivities, { ActivityList } from "./useActivities";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
 import { Link, href } from "react-router";
+import { ActionActivityDto } from "@alliance/shared/client";
 
 type Mode = "friends" | "everyone";
 
@@ -13,23 +14,66 @@ const ActivityFeedPage = () => {
   const [mode, setMode] = useState<Mode>("friends");
 
   const { user } = useAuth();
-  const { activities, handleLikeActivity, updateActivity, loading } =
-    useActivities({
-      list: ActivityList.Global,
-      comments: true,
-      limit: 30,
-    });
+  const {
+    activities,
+    handleLikeActivity: handleGlobalLikeActivity,
+    updateActivity: updateGlobalActivity,
+    loading,
+    setActivities: setGlobalActivities,
+  } = useActivities({
+    list: ActivityList.Global,
+    comments: true,
+    limit: 30,
+  });
 
   const {
     activities: friendActivities,
     handleLikeActivity: handleLikeFriendActivity,
     updateActivity: updateFriendActivity,
     loading: loadingFriend,
+    setActivities: setFriendActivities,
   } = useActivities({
     list: ActivityList.Friends,
     comments: true,
     limit: 30,
   });
+
+  const handleLikeActivity = useCallback(
+    async (activityId: number, mode: Mode) => {
+      if (mode === "friends") {
+        const liked = await handleLikeFriendActivity(activityId);
+        if (liked) {
+          setGlobalActivities((prev) =>
+            prev.map((a) => (a.id === activityId ? liked : a))
+          );
+        }
+      } else {
+        const liked = await handleGlobalLikeActivity(activityId);
+        if (liked) {
+          setFriendActivities((prev) =>
+            prev.map((a) => (a.id === activityId ? liked : a))
+          );
+        }
+      }
+    },
+    [
+      handleLikeFriendActivity,
+      handleGlobalLikeActivity,
+      setGlobalActivities,
+      setFriendActivities,
+    ]
+  );
+
+  const updateActivity = useCallback(
+    (activity: ActionActivityDto, mode: Mode) => {
+      if (mode === "friends") {
+        updateFriendActivity(activity);
+      } else {
+        updateGlobalActivity(activity);
+      }
+    },
+    [updateFriendActivity, updateGlobalActivity]
+  );
 
   const friendsRef = useRef<HTMLDivElement>(null);
   const everyoneRef = useRef<HTMLDivElement>(null);
@@ -71,14 +115,8 @@ const ActivityFeedPage = () => {
             <UserActivityCard
               activity={activity}
               key={activity.id}
-              handleLike={
-                mode === "friends"
-                  ? handleLikeFriendActivity
-                  : handleLikeActivity
-              }
-              onActivityUpdate={
-                mode === "friends" ? updateFriendActivity : updateActivity
-              }
+              handleLike={handleLikeActivity}
+              onActivityUpdate={updateActivity}
               canEdit={activity.user.id === user?.id}
             />
           ))}
