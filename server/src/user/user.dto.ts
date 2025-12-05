@@ -144,7 +144,15 @@ export function userToDto(user: User | null): ProfileDto | null {
   return new ProfileDto(user);
 }
 
-export class UpdateProfileDto extends PartialType(OmitType(User, ['city'])) {
+export class UpdateProfileDto extends PartialType(
+  OmitType(User, [
+    'city',
+    'leaderOf',
+    'leaderOfIds',
+    'isCommunityLeader',
+    'admin',
+  ]),
+) {
   @ApiPropertyOptional()
   @IsOptional()
   cityId?: number;
