@@ -708,15 +708,29 @@ export class ActionsService {
   async findCompletedForUser(
     userId: number,
     comments?: boolean,
+    requestingUserId?: number,
   ): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
       where: { userId, type: ActionActivityType.USER_COMPLETED },
       relations: ['action', 'user', 'taskFormResponse'],
     });
+
+    const likedIds = requestingUserId
+      ? await this.getLikedActivityIds(
+          activities.map((a) => a.id),
+          requestingUserId,
+        )
+      : new Set<number>();
+
     if (comments) {
-      return this.attachComments(activities);
+      return this.attachComments(activities, requestingUserId);
     }
-    return activities.map((activity) => new ActionActivityDto(activity));
+    return activities.map(
+      (activity) =>
+        new ActionActivityDto(activity, {
+          likedByMe: likedIds.has(activity.id),
+        }),
+    );
   }
 
   async userCoordinatesForAction(actionId: number): Promise<LatLonDto[]> {

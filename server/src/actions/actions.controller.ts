@@ -436,13 +436,15 @@ export class ActionsController {
   }
 
   @Get('completed/:id')
+  @UseGuards(AuthOptionalGuard)
   @ApiOkResponse({ type: [ActionActivityDto] })
   async findCompletedForUser(
+    @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
     @Query('comments', new ParseBoolPipe({ optional: true }))
     comments?: boolean,
   ): Promise<ActionActivityDto[]> {
-    return this.actionsService.findCompletedForUser(+id, comments);
+    return this.actionsService.findCompletedForUser(+id, comments, req.user?.sub);
   }
 
   @Post(':id/events')
