@@ -55,7 +55,7 @@ const Message = ({
   return (
     <>
       <div
-        className={`${className} bg-white hover:bg-zinc-100 rounded-md flex flex-row gap-x-3 px-2 py-1 group relative transition-colors duration-100 ${
+        className={`${className} bg-white hover:bg-zinc-100 rounded-md flex flex-row gap-x-3 px-2 py-1 group relative ${
           isFirstInGroup ? "pt-2" : "pt-1"
         } ${isFocused ? "!bg-green/20" : ""}`}
         ref={ref}
@@ -107,7 +107,7 @@ const Message = ({
             size="small"
             className="!px-2"
           >
-            <Reply size={15} />
+            <Reply size={18} />
           </Button>
         </div>
       </div>

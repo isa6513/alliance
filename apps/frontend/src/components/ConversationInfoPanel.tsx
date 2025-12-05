@@ -192,17 +192,19 @@ const ConversationInfoPanel = ({
             <p className="font-semibold text-xl text-center">
               {selectedConvo.title}
             </p>
-            <div
-              className="cursor-pointer hover:bg-zinc-100 rounded-md p-2"
-              onClick={() => setIsEditingGroup(true)}
-            >
-              <CreateIcon size="medium" fill="var(--color-zinc-500)" />
-            </div>
+            {selectedConvo.type !== "community" && (
+              <div
+                className="cursor-pointer hover:bg-zinc-100 rounded-md p-2"
+                onClick={() => setIsEditingGroup(true)}
+              >
+                <CreateIcon size="medium" fill="var(--color-zinc-500)" />
+              </div>
+            )}
           </div>
         )}
       </div>
       {selectedConvo.type !== "direct" && (
-        <div className="flex flex-col p-2 px-5 gap-4 w-full items-center  max-w-[500px]">
+        <div className="flex flex-col p-2 px-5 gap-4 w-full items-center max-w-[500px]">
           <p className="text-center">
             {selectedConvo.participants.length} members
           </p>
@@ -243,6 +245,16 @@ const ConversationInfoPanel = ({
                 )}
               </Card>
             )}
+          {selectedConvo.type === "community" && (
+            <p className="text-sm center">
+              <span className="text-zinc-500">
+                This is a chat with everyone in
+              </span>{" "}
+              <Link to={href("/groups")} className="text-green hover:underline">
+                {selectedConvo.community?.name}
+              </Link>
+            </p>
+          )}
           <List
             className={`max-h-[300px] overflow-y-auto w-full ${
               filteredFriends?.length && isSearchFocused
@@ -286,14 +298,7 @@ const ConversationInfoPanel = ({
               </Link>
             ))}
           </List>
-          {selectedConvo.type === "community" && (
-            <p className="text-sm center">
-              This is a chat with everyone in your member group:{" "}
-              <Link to={href("/groups")} className="text-green">
-                {selectedConvo.community?.name}
-              </Link>
-            </p>
-          )}
+
           {selectedConvo.type === "multiple" && (
             <Button
               color={ButtonColor.Transparent}

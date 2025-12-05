@@ -228,7 +228,7 @@ const MessageInput = ({
         </div>
       )}
 
-      <div className="relative border border-zinc-200 rounded-md bg-gray-200/80 focus-within:ring-1 focus-within:ring-zinc-400">
+      <div className="relative border border-zinc-200 rounded-md bg-zinc-100 focus-within:ring-1 focus-within:ring-zinc-400">
         <textarea
           ref={inputRef}
           value={message}

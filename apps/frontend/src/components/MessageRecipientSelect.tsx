@@ -105,7 +105,7 @@ const MessageRecipientSelect: React.FC<MessageRecipientSelectProps> = ({
             onChange={(event) => setQuery(event.target.value)}
             placeholder={placeholder}
             disabled={inputDisabled}
-            className="border border-zinc-300 rounded-md px-3 py-2.5 text-sm disabled:bg-zinc-100 disabled:text-zinc-500"
+            className="border-zinc-300 rounded-md py-2.5 text-sm disabled:bg-zinc-100 disabled:text-zinc-500 focus:outline-none"
           />
         )}
         {query && filteredUsers.length > 0 && (
@@ -123,11 +123,14 @@ const MessageRecipientSelect: React.FC<MessageRecipientSelectProps> = ({
             ))}
           </div>
         )}
+        {query && !filteredUsers.length && !loading && (
+          <div className="border border-zinc-200 rounded bg-white max-h-48 overflow-y-auto absolute w-full top-full shadow">
+            <p className="px-3 py-2 ml-2 text-sm text-zinc-500">
+              No members found
+            </p>
+          </div>
+        )}
       </div>
-
-      {query && !filteredUsers.length && !loading && (
-        <p className="ml-2 text-sm text-zinc-500">No members found</p>
-      )}
     </div>
   );
 };
