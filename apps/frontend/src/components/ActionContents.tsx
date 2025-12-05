@@ -63,12 +63,12 @@ const ActionContents = () => {
         </div>
 
         <div>
-          <p className="font-bold text-xl mb-4">Description</p>
+          <p className="font-semibold text-xl mb-4">Description</p>
           <AppMarkdownWrapper markdownContent={action?.body} />
         </div>
 
         <div>
-          <p className="font-bold text-xl mb-4">Discussion</p>
+          <p className="font-semibold text-xl mb-4">Discussion</p>
           <p className="mb-8">
             Questions and comments about this action that other members would
             find helpful.
