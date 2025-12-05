@@ -21,7 +21,7 @@ import {
   NOTIFICATION_LOOKBACK_WINDOW_MS,
   PreviewNotificationPlan,
 } from 'src/notifs/action-event-reminder.service';
-import { ILike, In, LessThan, Repository } from 'typeorm';
+import { ILike, In, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import {
   ActionActivityDto,
@@ -806,12 +806,15 @@ export class ActionsService {
     comments?: boolean,
     requestingUserId?: number,
   ): Promise<ActionActivityDto[]> {
-    const activities = await this.actionActivityRepository.find({
-      where: { actionId },
-      relations: ['user', 'taskFormResponse'],
-      order: { createdAt: 'DESC' },
-      take: limit,
-    });
+    const activities = await this.buildActivityFeedQuery({
+      limit: limit ?? 20,
+      actionId,
+      filterFeedTypes: false,
+    }).getMany();
+
+    if (activities.length === 0) {
+      return [];
+    }
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(
@@ -857,24 +860,86 @@ export class ActionsService {
     );
   }
 
+  /**
+   * Shared helper to build optimized activity feed queries.
+   * Only selects the fields needed for ActionActivityDto to minimize data transfer.
+   */
+  private buildActivityFeedQuery(options: {
+    limit: number;
+    before?: Date;
+    userIds?: number[];
+    actionId?: number;
+    filterFeedTypes?: boolean;
+  }) {
+    const qb = this.actionActivityRepository
+      .createQueryBuilder('activity')
+      .leftJoinAndSelect('activity.user', 'user')
+      .leftJoinAndSelect('activity.action', 'action')
+      .leftJoinAndSelect('activity.editableContent', 'editableContent')
+      .select([
+        'activity.id',
+        'activity.type',
+        'activity.actionId',
+        'activity.userId',
+        'activity.createdAt',
+        'activity.likesCount',
+        'user.id',
+        'user.name',
+        'user.profilePicture',
+        'user.profileDescription',
+        'user.admin',
+        'user.staff',
+        'user.contractDateSigned',
+        'user.contractDateSuspended',
+        'user.anonymous',
+        'action.id',
+        'action.name',
+        'editableContent.id',
+        'editableContent.body',
+        'editableContent.attachments',
+      ])
+      .loadRelationIdAndMap('user.leaderOfIds', 'user.leaderOf')
+      .orderBy('activity.createdAt', 'DESC')
+      .take(options.limit);
+
+    if (options.filterFeedTypes !== false) {
+      qb.where('activity.type IN (:...types)', {
+        types: [
+          ActionActivityType.USER_JOINED,
+          ActionActivityType.USER_COMPLETED,
+        ],
+      });
+    }
+
+    if (options.before) {
+      qb.andWhere('activity.createdAt < :before', { before: options.before });
+    }
+
+    if (options.userIds?.length) {
+      qb.andWhere('activity.userId IN (:...userIds)', {
+        userIds: options.userIds,
+      });
+    }
+
+    if (options.actionId) {
+      qb.andWhere('activity.actionId = :actionId', {
+        actionId: options.actionId,
+      });
+    }
+
+    return qb;
+  }
+
   async getActivityFeed(
     limit: number = 20,
     before?: Date,
     comments?: boolean,
     requestingUserId?: number,
   ): Promise<ActionActivityDto[]> {
-    const activities = await this.actionActivityRepository.find({
-      where: {
-        ...(before ? { createdAt: LessThan(before) } : {}),
-        type: In([
-          ActionActivityType.USER_JOINED,
-          ActionActivityType.USER_COMPLETED,
-        ]),
-      },
-      relations: ['user', 'action', 'taskFormResponse'],
-      order: { createdAt: 'DESC' },
-      take: limit,
-    });
+    const activities = await this.buildActivityFeedQuery({
+      limit,
+      before,
+    }).getMany();
 
     if (activities.length === 0) {
       return [];
@@ -1085,18 +1150,19 @@ export class ActionsService {
       throw new NotFoundException('User not found');
     }
     const friends = await this.userService.findFriends(userId);
-    const friendActivities = await this.actionActivityRepository.find({
-      where: {
-        user: { id: In(friends.map((f) => f.id)) },
-        type: In([
-          ActionActivityType.USER_JOINED,
-          ActionActivityType.USER_COMPLETED,
-        ]),
-      },
-      relations: ['user', 'action', 'taskFormResponse'],
-      order: { createdAt: 'DESC' },
-      take: limit,
-    });
+
+    if (friends.length === 0) {
+      return [];
+    }
+
+    const friendActivities = await this.buildActivityFeedQuery({
+      limit: limit ?? 20,
+      userIds: friends.map((f) => f.id),
+    }).getMany();
+
+    if (friendActivities.length === 0) {
+      return [];
+    }
 
     const likedIds = await this.getLikedActivityIds(
       friendActivities.map((a) => a.id),
@@ -1126,19 +1192,19 @@ export class ActionsService {
 
     const members = community.users ?? [];
 
-    const memberActivities = await this.actionActivityRepository.find({
-      where: {
-        ...(beforeDate ? { createdAt: LessThan(beforeDate) } : {}),
-        user: { id: In(members.map((m) => m.id)) },
-        type: In([
-          ActionActivityType.USER_JOINED,
-          ActionActivityType.USER_COMPLETED,
-        ]),
-      },
-      relations: ['user', 'action', 'taskFormResponse'],
-      order: { createdAt: 'DESC' },
-      take: limitNum,
-    });
+    if (members.length === 0) {
+      return [];
+    }
+
+    const memberActivities = await this.buildActivityFeedQuery({
+      limit: limitNum,
+      before: beforeDate,
+      userIds: members.map((m) => m.id),
+    }).getMany();
+
+    if (memberActivities.length === 0) {
+      return [];
+    }
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(

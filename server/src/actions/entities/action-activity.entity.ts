@@ -6,6 +6,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   JoinTable,
   ManyToMany,
@@ -28,6 +29,7 @@ export enum ActionActivityType {
 
 @Entity()
 @Unique('UQ_activity_user_action_type', ['userId', 'actionId', 'type'])
+@Index('IDX_action_activity_type_createdAt', ['type', 'createdAt'])
 export class ActionActivity {
   @PrimaryGeneratedColumn()
   @Allow()
