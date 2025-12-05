@@ -189,7 +189,7 @@ In ideation for and development of an action plan, the office weighs many consid
 ## Members oversee the office
 Our governance guarantees that the majority of members believe the majority of their contributions improve the world.
 
-We conduct a membership-wide oversight process that occurs on a regular basis, or whenever it is requested by a majority of members. In the process, the office asks members what they think about the direction of the Alliance and whether or not they have any major concerns. The office collects and responds to feedback until we reach an approval threshold of 80%.
+We conduct a membership-wide oversight process that occurs on a regular basis, or whenever it is requested by a majority of members. In the process, the office asks members what they think about the direction of the Alliance and whether or not they have any major concerns. The office collects and responds to feedback until we reach an approval threshold of 75%.
 
 This procedure achieves two goals:
 1. Members determine the high-level priorities that the Alliance can undertake.
