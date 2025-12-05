@@ -86,17 +86,17 @@ const useActivities = ({
     apiCall
       .then(async (resp) => {
         const data = resp.data ?? [];
-        if (list === ActivityList.Global) {
-          const extraFriendActivity = await actionsFriendActivity({
-            query: { comments, limit: limit.toString() },
-          });
-          const set = new Set(data.map((a) => a.id));
-          extraFriendActivity.data?.forEach((a) => {
-            if (!set.has(a.id)) {
-              data.push(a);
-            }
-          });
-        }
+        // if (list === ActivityList.Global) {
+        //   const extraFriendActivity = await actionsFriendActivity({
+        //     query: { comments, limit: limit.toString() },
+        //   });
+        //   const set = new Set(data.map((a) => a.id));
+        //   extraFriendActivity.data?.forEach((a) => {
+        //     if (!set.has(a.id)) {
+        //       data.push(a);
+        //     }
+        //   });
+        // }
         const respActivities = data.sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()

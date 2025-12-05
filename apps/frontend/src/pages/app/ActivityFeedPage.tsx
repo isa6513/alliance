@@ -1,4 +1,3 @@
-import { ActionActivityDto, userListFriends } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import UserActivityCard from "../../components/UserActivityCard";
@@ -18,35 +17,19 @@ const ActivityFeedPage = () => {
     useActivities({
       list: ActivityList.Global,
       comments: true,
-      limit: 50,
+      limit: 30,
     });
 
-  const [myFriends, setMyFriends] = useState<number[]>([]);
-
-  useEffect(() => {
-    const loadMyFriends = async () => {
-      if (!user) return;
-      const friendsRes = await userListFriends({
-        path: { id: user.id },
-      });
-      if (!friendsRes.data) return;
-      setMyFriends(friendsRes.data.map((friend) => friend.id));
-    };
-    loadMyFriends();
-  }, [user]);
-
-  const [friendsActivities, setFriendsActivities] = useState<
-    ActionActivityDto[]
-  >([]);
-
-  useEffect(() => {
-    setFriendsActivities(
-      activities.filter(
-        (activity) =>
-          activity.user.id === user?.id || myFriends.includes(activity.user.id)
-      )
-    );
-  }, [activities, user, myFriends]);
+  const {
+    activities: friendActivities,
+    handleLikeActivity: handleLikeFriendActivity,
+    updateActivity: updateFriendActivity,
+    loading: loadingFriend,
+  } = useActivities({
+    list: ActivityList.Friends,
+    comments: true,
+    limit: 30,
+  });
 
   const friendsRef = useRef<HTMLDivElement>(null);
   const everyoneRef = useRef<HTMLDivElement>(null);
@@ -77,7 +60,7 @@ const ActivityFeedPage = () => {
   }, [mode, updateHeight]);
 
   const renderActivityColumn = (mode: Mode) => {
-    const list = mode === "friends" ? friendsActivities : activities;
+    const list = mode === "friends" ? friendActivities : activities;
     return (
       <div className="w-1/2">
         <div
@@ -88,15 +71,21 @@ const ActivityFeedPage = () => {
             <UserActivityCard
               activity={activity}
               key={activity.id}
-              handleLike={handleLikeActivity}
-              onActivityUpdate={updateActivity}
+              handleLike={
+                mode === "friends"
+                  ? handleLikeFriendActivity
+                  : handleLikeActivity
+              }
+              onActivityUpdate={
+                mode === "friends" ? updateFriendActivity : updateActivity
+              }
               canEdit={activity.user.id === user?.id}
             />
           ))}
           {list.length === 0 && (
             <div className="flex flex-col items-center justify-center h-64 text-zinc-500 p-8">
               <p>
-                {loading
+                {(mode === "friends" ? loadingFriend : loading)
                   ? "Loading..."
                   : `No ${mode === "friends" ? "friend " : ""}activity yet`}
               </p>
