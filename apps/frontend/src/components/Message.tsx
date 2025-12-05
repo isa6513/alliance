@@ -4,6 +4,7 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { Reply, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, href } from "react-router";
+import UserDisplayName from "./UserDisplayName";
 
 const Message = ({
   message,
@@ -84,7 +85,14 @@ const Message = ({
             </div>
           )}
           {isFirstInGroup && (
-            <span className="font-medium">{message.author.displayName}</span>
+            <span className="font-medium">
+              <UserDisplayName
+                staff={message.author.staff}
+                grouplead={message.author.isCommunityLeader}
+              >
+                {message.author.displayName}
+              </UserDisplayName>
+            </span>
           )}
           {message.body && <span>{message.body}</span>}
           {attachments.length > 0 && (

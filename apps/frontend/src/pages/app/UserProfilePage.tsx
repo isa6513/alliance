@@ -341,13 +341,27 @@ const UserProfilePage: React.FC = () => {
                   {profile.displayName}
                 </h1>
                 {profile.staff && (
-                  <div className="text-sm bg-navy text-white px-3 py-0.5 rounded self-center mt-2">
+                  <div className="text-xs bg-staff text-white px-2 py-0.5 rounded-sm self-center relative group">
                     Staff
+                    <div className="pointer-events-none absolute -top-8 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] font-medium text-zinc-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100">
+                      Member of the office
+                    </div>
+                  </div>
+                )}
+                {!profile.staff && profile.isCommunityLeader && (
+                  <div className="text-xs bg-grouplead text-white px-2 py-0.5 rounded-sm self-center relative group">
+                    Lead
+                    <div className="pointer-events-none absolute -top-8 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] font-medium text-zinc-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100">
+                      Leads a group of members
+                    </div>
                   </div>
                 )}
                 {!profile.hasActiveContract && (
-                  <div className="bg-zinc-100 text-zinc-600 px-2.5 py-1 rounded self-center mt-2">
+                  <div className="text-xs bg-zinc-100 text-zinc-600 px-2 py-1 rounded-sm self-center relative group">
                     Observer
+                    <div className="pointer-events-none absolute -top-8 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] font-medium text-zinc-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100">
+                      No signed contract
+                    </div>
                   </div>
                 )}
               </div>
