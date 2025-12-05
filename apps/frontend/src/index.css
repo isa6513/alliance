@@ -95,7 +95,8 @@ select {
 }
 
 .font-sans {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: "Source Sans 3", system-ui, -apple-system, BlinkMacSystemFont,
+    sans-serif;
 }
 
 .font-berlingske {

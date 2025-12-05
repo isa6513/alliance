@@ -337,7 +337,7 @@ const UserProfilePage: React.FC = () => {
               />
             ) : (
               <div className="flex flex-row gap-3 items-center">
-                <h1 className="font-serif font-medium text-2xl">
+                <h1 className="font-serif font-semibold text-2xl">
                   {profile.displayName}
                 </h1>
                 {profile.staff && (
