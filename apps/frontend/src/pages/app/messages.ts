@@ -388,12 +388,27 @@ const useMessagingUnread = (activeConversationId?: number | null) => {
 
       setUnread((prevTotal) => {
         const map = unreadByConversationRef.current;
-        const prevForConvo = map.get(payload.conversationId) ?? 0;
+        const prevForConvo = map.get(payload.conversationId);
+        const wasTracked = prevForConvo !== undefined;
+        const prevCount = prevForConvo ?? 0;
 
         map.set(payload.conversationId, newCount);
 
-        const hadUnread = prevForConvo > 0;
+        const hadUnread = prevCount > 0;
         const hasUnread = newCount > 0;
+
+        // Conversation wasn't tracked before and is now marked as read.
+        // It was likely part of the "unknown" unread pool from initial load.
+        if (!wasTracked && !hasUnread) {
+          if (unknownUnreadRef.current > 0) {
+            unknownUnreadRef.current = Math.max(
+              unknownUnreadRef.current - 1,
+              0
+            );
+            return Math.max(prevTotal - 1, 0);
+          }
+          return prevTotal;
+        }
 
         if (!hadUnread && hasUnread) {
           if (unknownUnreadRef.current > 0) {
