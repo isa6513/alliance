@@ -351,4 +351,117 @@ describe('ConversationController (e2e)', () => {
       expect(participantRecords).toHaveLength(0);
     });
   });
+
+  describe('unread counts', () => {
+    const getUnreadCount = async (token: string): Promise<number> => {
+      const response = await request(ctx.app.getHttpServer())
+        .get('/messaging/conversations/unread')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      return response.body.count;
+    };
+
+    it('returns zero when the user has no conversations or unread messages', async () => {
+      const { token } = await createUserAndToken();
+      const unreadCount = await getUnreadCount(token);
+      expect(unreadCount).toBe(0);
+    });
+
+    it('ignores messages authored by the requesting user', async () => {
+      const { token: readerToken } = await createUserAndToken();
+      const { user: recipient } = await createUserAndToken();
+
+      const conversationResponse = await request(ctx.app.getHttpServer())
+        .post('/messaging/conversations/direct')
+        .set('Authorization', `Bearer ${readerToken}`)
+        .send({ targetUserId: recipient.id })
+        .expect(201);
+
+      await request(ctx.app.getHttpServer())
+        .post('/messaging/messages')
+        .set('Authorization', `Bearer ${readerToken}`)
+        .send({
+          conversationId: conversationResponse.body.id,
+          body: 'Hello, me!',
+        })
+        .expect(201);
+
+      const unreadCount = await getUnreadCount(readerToken);
+      expect(unreadCount).toBe(0);
+    });
+
+    it('counts conversations with unread messages from others and clears after marking read', async () => {
+      const { token: readerToken } = await createUserAndToken();
+      const { user: sender, token: senderToken } = await createUserAndToken();
+
+      const conversationResponse = await request(ctx.app.getHttpServer())
+        .post('/messaging/conversations/direct')
+        .set('Authorization', `Bearer ${readerToken}`)
+        .send({ targetUserId: sender.id })
+        .expect(201);
+
+      await request(ctx.app.getHttpServer())
+        .post('/messaging/messages')
+        .set('Authorization', `Bearer ${senderToken}`)
+        .send({
+          conversationId: conversationResponse.body.id,
+          body: 'Unread for you',
+        })
+        .expect(201);
+
+      const unreadBefore = await getUnreadCount(readerToken);
+      expect(unreadBefore).toBe(1);
+
+      await request(ctx.app.getHttpServer())
+        .post(`/messaging/conversations/${conversationResponse.body.id}/read`)
+        .set('Authorization', `Bearer ${readerToken}`)
+        .expect(201);
+
+      const unreadAfter = await getUnreadCount(readerToken);
+      expect(unreadAfter).toBe(0);
+    });
+
+    it('counts distinct conversations even when multiple messages are unread', async () => {
+      const { token: readerToken } = await createUserAndToken();
+      const { user: senderA, token: senderAToken } = await createUserAndToken();
+      const { user: senderB, token: senderBToken } = await createUserAndToken();
+
+      const conversationA = await request(ctx.app.getHttpServer())
+        .post('/messaging/conversations/direct')
+        .set('Authorization', `Bearer ${readerToken}`)
+        .send({ targetUserId: senderA.id })
+        .expect(201);
+
+      const conversationB = await request(ctx.app.getHttpServer())
+        .post('/messaging/conversations/direct')
+        .set('Authorization', `Bearer ${readerToken}`)
+        .send({ targetUserId: senderB.id })
+        .expect(201);
+
+      await request(ctx.app.getHttpServer())
+        .post('/messaging/messages')
+        .set('Authorization', `Bearer ${senderAToken}`)
+        .send({ conversationId: conversationA.body.id, body: 'Hi from A' })
+        .expect(201);
+
+      await request(ctx.app.getHttpServer())
+        .post('/messaging/messages')
+        .set('Authorization', `Bearer ${senderAToken}`)
+        .send({
+          conversationId: conversationA.body.id,
+          body: 'Another from A',
+        })
+        .expect(201);
+
+      await request(ctx.app.getHttpServer())
+        .post('/messaging/messages')
+        .set('Authorization', `Bearer ${senderBToken}`)
+        .send({ conversationId: conversationB.body.id, body: 'Hi from B' })
+        .expect(201);
+
+      const unreadCount = await getUnreadCount(readerToken);
+      expect(unreadCount).toBe(2);
+    });
+  });
 });

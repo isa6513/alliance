@@ -800,15 +800,31 @@ export class ConversationService {
   }
 
   async getUnreadMessages(userId: number): Promise<UnreadMessagesDto> {
-    const conversations = await this.getUserConversations(userId);
-    const conversationIds = conversations.map(
-      (conversation) => conversation.id,
-    );
-    const counts = await this.loadUnreadCounts(conversationIds, userId);
-    const count = Array.from(counts.values()).reduce(
-      (sum, c) => sum + (!!c ? 1 : 0),
-      0,
-    );
-    return { count };
+    const result = await this.participantRepository
+      .createQueryBuilder('participant')
+      .leftJoin('participant.lastReadMessage', 'lastReadMessage')
+      .where('participant.userId = :userId', { userId })
+      .andWhere((qb) => {
+        const unreadSubQuery = qb
+          .subQuery()
+          .select('1')
+          .from(Message, 'message')
+          .where('message.conversationId = participant.conversationId')
+          .andWhere('message.authorId != :userId', { userId })
+          .andWhere(
+            'message.createdAt > COALESCE(lastReadMessage.createdAt, participant.joinedAt)',
+          )
+          .andWhere(
+            '(message.id != lastReadMessage.id OR lastReadMessage.id IS NULL)',
+          )
+          .limit(1)
+          .getQuery();
+
+        return `EXISTS ${unreadSubQuery}`;
+      })
+      .select('COUNT(DISTINCT participant.conversationId)', 'unreadCount')
+      .getRawOne<{ unreadCount?: string }>();
+
+    return { count: Number(result?.unreadCount ?? 0) };
   }
 }
