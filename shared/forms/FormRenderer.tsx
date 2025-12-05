@@ -1120,8 +1120,6 @@ const FormRenderer = ({
     defaultValueMap,
   ]);
 
-  console.log("publicAnswers", publicAnswers);
-
   // When rendering a completed form, sync provided answers into local state
   useEffect(() => {
     if (!readOnly) return;
