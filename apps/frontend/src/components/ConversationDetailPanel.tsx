@@ -216,7 +216,12 @@ const ConversationDetailPanel = ({
         body: draftMessage,
         attachments: draftAttachments,
         createdAt: new Date().toISOString(),
-        author: { ...user, displayName: user.name, profileDescription: "" },
+        author: {
+          ...user,
+          displayName: user.name,
+          profileDescription: "",
+          isCommunityLeader: false,
+        },
         conversationId: activeConvo.id,
         replyTo: replyingToMessage,
       };

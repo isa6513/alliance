@@ -26,6 +26,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  RelationId,
 } from 'typeorm';
 import { Notification } from '../../notifs/entities/notification.entity';
 import { Friend, FriendStatus } from './friend.entity';
@@ -338,6 +339,21 @@ export class User {
   })
   @Type(() => Community)
   leaderOf: Community[];
+
+  @RelationId((user: User) => user.leaderOf)
+  leaderOfIds: number[];
+
+  @Expose()
+  @ApiProperty()
+  get isCommunityLeader(): boolean {
+    if (Array.isArray(this.leaderOfIds)) {
+      return this.leaderOfIds.length > 0;
+    }
+    if (Array.isArray(this.leaderOf)) {
+      return this.leaderOf.length > 0;
+    }
+    return false;
+  }
 
   @OneToMany(() => CommunityInvite, (invite) => invite.invitedUser)
   @ApiProperty({ type: () => CommunityInvite, isArray: true })

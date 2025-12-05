@@ -236,11 +236,8 @@ export class UserService {
   }
 
   async isCommunityLeader(email: string): Promise<boolean> {
-    const user = await this.findOneByEmail(email, ['leaderOf']);
-    if (!user) {
-      return false;
-    }
-    return user.leaderOf?.length > 0;
+    const user = await this.findOneByEmail(email);
+    return user?.isCommunityLeader ?? false;
   }
 
   async onboarding(userId: number, body: OnboardingDto): Promise<User> {

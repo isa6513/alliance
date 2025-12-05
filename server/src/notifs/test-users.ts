@@ -2,10 +2,11 @@ import {
   ForumDigestPreference,
   NotificationPreference,
   PublicFormResponseDefault,
+  User,
 } from 'src/user/entities/user.entity';
 import { NotificationChannel } from './notif-utils';
 
-export const testUser = {
+export const testUser: User = {
   id: -1,
   name: 'Test User',
   email: 'test@example.com',
@@ -24,6 +25,8 @@ export const testUser = {
   password: '',
   admin: false,
   staff: false,
+  leaderOfIds: [],
+  isCommunityLeader: false,
   profilePicture: '',
   profileDescription: '',
   activities: [],

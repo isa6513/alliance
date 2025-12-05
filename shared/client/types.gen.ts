@@ -101,6 +101,7 @@ export type User = {
     onboardingComplete: boolean;
     anonymous: boolean;
     communities: Array<Community>;
+    isCommunityLeader: boolean;
     invitedCommunities: Array<CommunityInvite>;
     formDataPreference: PublicFormResponseDefault;
     participants: Array<Participant>;
@@ -176,6 +177,7 @@ export type ProfileDto = {
     profileDescription: string | null;
     displayName: string;
     hasActiveContract: boolean;
+    isCommunityLeader: boolean;
 };
 
 export type OnboardingDto = {
@@ -233,6 +235,7 @@ export type UpdateProfileDto = {
     onboardingComplete?: boolean;
     anonymous?: boolean;
     communities?: Array<Community>;
+    isCommunityLeader?: boolean;
     invitedCommunities?: Array<CommunityInvite>;
     formDataPreference?: PublicFormResponseDefault;
     participants?: Array<Participant>;
@@ -266,6 +269,7 @@ export type ProfileDtoWithFriends = {
     profileDescription: string | null;
     displayName: string;
     hasActiveContract: boolean;
+    isCommunityLeader: boolean;
     friends: Array<ProfileDto>;
 };
 
@@ -1816,7 +1820,7 @@ export type FormDto = {
     usedInAction?: ActionDto;
 };
 
-export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'HasPhoneNumber' | 'IsPhoneNumberValid' | 'MemberTag' | 'MemberCommunity';
+export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'HasPhoneNumber' | 'IsPhoneNumberValid' | 'MemberTag' | 'MemberCommunity' | 'AnyCommunity';
 
 export type CustomValidatorTypeDto = {
     name: string;
@@ -1852,6 +1856,10 @@ export type CreateCustomValidatorResponseDto = {
 export type TimeSpentForUserDto = {
     userId: number;
     timeSpent: number;
+};
+
+export type DailyStatsRecord = {
+    [key: string]: unknown;
 };
 
 export type AppHealthCheckData = {
@@ -4731,6 +4739,22 @@ export type AnalyticsGetTimeSpentPerUserTotalResponses = {
 };
 
 export type AnalyticsGetTimeSpentPerUserTotalResponse = AnalyticsGetTimeSpentPerUserTotalResponses[keyof AnalyticsGetTimeSpentPerUserTotalResponses];
+
+export type AnalyticsGetDailyStatsData = {
+    body?: never;
+    path?: never;
+    query: {
+        date: string;
+        endDate: string;
+    };
+    url: '/analytics/daily-stats';
+};
+
+export type AnalyticsGetDailyStatsResponses = {
+    200: Array<DailyStatsRecord>;
+};
+
+export type AnalyticsGetDailyStatsResponse = AnalyticsGetDailyStatsResponses[keyof AnalyticsGetDailyStatsResponses];
 
 export type ClientOptions = {
     baseUrl: string;

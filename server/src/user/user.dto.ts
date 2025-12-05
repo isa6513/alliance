@@ -32,6 +32,9 @@ export class ProfileDto extends PickType(User, [
   @ApiProperty()
   hasActiveContract: boolean;
 
+  @ApiProperty()
+  isCommunityLeader: boolean;
+
   constructor(
     user: Pick<
       User,
@@ -46,6 +49,7 @@ export class ProfileDto extends PickType(User, [
       | 'contractDateSigned'
       | 'contractDateSuspended'
       | 'hasActiveContract'
+      | 'isCommunityLeader'
     >,
   ) {
     super();
@@ -55,6 +59,7 @@ export class ProfileDto extends PickType(User, [
     this.staff = user.staff;
     this.contractDateSigned = user.contractDateSigned;
     this.hasActiveContract = user.hasActiveContract;
+    this.isCommunityLeader = user.isCommunityLeader;
 
     if (user.anonymous) {
       this.displayName = 'Someone';
