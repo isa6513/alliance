@@ -24,9 +24,9 @@ const Expandable: React.FC<ExpandableProps> = ({
         onClick={toggleExpand}
       >
         <h2 className="!font-semibold !text-2xl !my-1">{title}</h2>
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-zinc-500">
           <svg
-            className={`-mr-1 size-6 text-zinc-300 group-hover:text-black transition group-hover:-rotate-90 ${
+            className={`-mr-1 size-7 text-zinc-400 group-hover:text-black transition group-hover:-rotate-90 ${
               isExpanded ? "-rotate-180" : ""
             }`}
             viewBox="0 0 20 20"

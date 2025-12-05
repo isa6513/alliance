@@ -152,7 +152,7 @@ const ActivityFeedPage = () => {
                   : "!border-b-transparent hover:!border-b-zinc-200 text-zinc-500"
               }`}
             >
-              <p className="capitalize">{m}</p>
+              <p className="capitalize text-base">{m}</p>
             </Button>
           ))}
         </div>

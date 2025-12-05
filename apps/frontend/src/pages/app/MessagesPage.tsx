@@ -88,7 +88,11 @@ const MessagesPage = () => {
     [setConversations]
   );
 
-  const { messages: convoMessages, addOptimisticMessage, removeOptimisticMessage } = useLiveConvoMessages(selectedConvoId, {
+  const {
+    messages: convoMessages,
+    addOptimisticMessage,
+    removeOptimisticMessage,
+  } = useLiveConvoMessages(selectedConvoId, {
     onIncomingMessage: setConvoLastMessage,
     onConversationUpdated: handleConversationUpdated,
   });
@@ -344,8 +348,8 @@ const MessagesPage = () => {
       >
         <div>
           <div className="p-4">
-            <div className="flex flex-row items-center justify-between gap-x-2 mb-2">
-              <p className="text-lg font-semibold">Chats</p>
+            <div className="flex flex-row items-center justify-between gap-x-2 mb-3">
+              <p className="text-2xl font-semibold">Chats</p>
               <Button
                 color={ButtonColor.Transparent}
                 size="small"
@@ -403,9 +407,9 @@ const MessagesPage = () => {
               </div>
             ))}
             {pendingInvites && pendingInvites.length > 0 && (
-              <div className="mt-6">
+              <div className="mt-2">
                 <p className="text-sm text-zinc-500 font-medium px-4">
-                  New message requests
+                  Message requests
                 </p>
                 <div className="flex flex-col border-t border-zinc-200 mt-2">
                   {pendingInvites?.map((conversation) => (
@@ -468,7 +472,9 @@ const MessagesPage = () => {
             handleCreateConversation={null}
             friends={friends}
             onOptimisticMessage={addOptimisticMessage}
-            onOptimisticMessageFailed={(tempId) => removeOptimisticMessage(tempId)}
+            onOptimisticMessageFailed={(tempId) =>
+              removeOptimisticMessage(tempId)
+            }
           />
         )}
         {creatingNewConversation && (
@@ -491,7 +497,9 @@ const MessagesPage = () => {
             setSendingNewMessageToIds={handleUpdateRecipientIds}
             handleCreateConversation={handleCreateConversation}
             onOptimisticMessage={addOptimisticMessage}
-            onOptimisticMessageFailed={(tempId) => removeOptimisticMessage(tempId)}
+            onOptimisticMessageFailed={(tempId) =>
+              removeOptimisticMessage(tempId)
+            }
           />
         )}
       </div>

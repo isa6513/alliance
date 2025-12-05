@@ -305,7 +305,7 @@ const UserProfilePage: React.FC = () => {
     <div className="max-w-[800px] mx-auto">
       <div className="mx-2 space-y-2">
         <div className="w-full h-[50px] md:h-[100px]"></div>
-        <Card className="px-8 pb-6 relative gap-y-2">
+        <Card className="px-4 md:px-8 pb-6 relative gap-y-2">
           {/* {isProfileImageUploadPending && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 backdrop-blur-[1px] rounded-[inherit]">
               <Spinner />
@@ -333,11 +333,11 @@ const UserProfilePage: React.FC = () => {
                 type="text"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                className="w-full border-none !bg-zinc-100 px-2 -mx-2 rounded focus:outline-none !text-[30px] !font-semibold font-serif"
+                className="w-full border-none !bg-zinc-100 px-2 -mx-2 rounded focus:outline-none text-2xl !font-semibold font-serif"
               />
             ) : (
               <div className="flex flex-row gap-3 items-center">
-                <h1 className="font-serif !font-semibold text-3xl">
+                <h1 className="font-serif font-medium text-2xl">
                   {profile.displayName}
                 </h1>
                 {profile.staff && (
@@ -423,7 +423,11 @@ const UserProfilePage: React.FC = () => {
               <div className="space-x-3 flex">
                 {isEditing ? (
                   <>
-                    <Button color={ButtonColor.Light} onClick={handleCancel}>
+                    <Button
+                      color={ButtonColor.Light}
+                      onClick={handleCancel}
+                      className="!h-9"
+                    >
                       Cancel
                     </Button>
                     <Button
@@ -438,11 +442,11 @@ const UserProfilePage: React.FC = () => {
                 ) : (
                   <div className="flex flex-col items-end">
                     <Button
-                      color={ButtonColor.Light}
+                      color={ButtonColor.White}
                       onClick={() => setIsEditing(true)}
                       className="!h-9"
                     >
-                      Edit Profile
+                      Edit
                     </Button>
                   </div>
                 )}
@@ -507,6 +511,7 @@ const UserProfilePage: React.FC = () => {
               isMe={isMe}
               originalTab={openFriendRequest ? "received" : "friends"}
               friends={friends ?? []}
+              className="mt-4"
             />
           )}
         </div>

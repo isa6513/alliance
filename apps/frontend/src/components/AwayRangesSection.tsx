@@ -119,7 +119,7 @@ const AwayRangesSection: React.FC = () => {
   if (loading) {
     return (
       <div>
-        <h2 className="!font-semibold !text-xl mb-4">Away periods</h2>
+        <h2 className="!font-semibold text-2xl mb-4">Away periods</h2>
         <p className="text-zinc-500">Loading...</p>
       </div>
     );
@@ -127,7 +127,7 @@ const AwayRangesSection: React.FC = () => {
 
   return (
     <div>
-      <h2 className="!font-semibold !text-xl mb-2">Away periods</h2>
+      <h2 className="!font-semibold text-2xl mb-2">Away periods</h2>
       <p className="text-sm text-zinc-600 mb-4">
         You can schedule a period of time when you won&apos;t be able to
         complete Alliance actions. This will let the office know not to expect

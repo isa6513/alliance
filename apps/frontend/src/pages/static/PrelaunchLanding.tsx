@@ -9,12 +9,12 @@ const PrelaunchLandingPage: React.FC = () => {
       <div className="min-h-screen flex flex-col bg-white">
         <PrelaunchNavbar transparent={false} absolute={false} />
         <div className="flex-1 container mx-auto flex flex-col px-5 py-5">
-          <div className="flex flex-col mx-auto my-auto max-w-2xl py-12 sm:py-24 lg:py-36">
+          <div className="flex flex-col mx-auto my-auto max-w-3xl py-12 sm:py-24 lg:py-36">
             {/* <img src={earth} className="mx-auto mb-12 w-50" /> */}
 
             <div className="mx-auto w-full flex flex-col gap-y-6">
-              <p className="font-semibold text-3xl font-serif ">
-                We are coordinating to combat global crises.
+              <p className="font-bold text-3xl font-serif mb-4">
+                We are individuals coordinating to combat global crises.
               </p>
 
               <p className="text-lg">

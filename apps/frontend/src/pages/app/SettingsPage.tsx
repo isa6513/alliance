@@ -232,7 +232,9 @@ const SettingsPage: React.FC = () => {
     return (
       <div className="bg-page pt-20 px-2 md:px-16">
         <div className="max-w-4xl mx-auto">
-          <h1 className="!text-3xl !font-serif !font-semibold mb-2">Account</h1>
+          <h1 className="text-2xl sm:text-4xl font-serif !font-semibold mb-2">
+            Settings
+          </h1>
           <Card style={CardStyle.White} className="p-8">
             <p className="text-center text-zinc-500">
               Loading your account information...
@@ -253,8 +255,8 @@ const SettingsPage: React.FC = () => {
         <div className="mb-6 relative flex flex-col gap-y-4">
           <div className="flex justify-between mb-2">
             <div className="gap-x-2">
-              <h1 className="!text-2xl sm:!text-4xl font-serif !font-semibold mb-2">
-                Account
+              <h1 className="text-2xl sm:text-4xl font-serif !font-semibold mb-2">
+                Settings
               </h1>
               <AdminOnly>
                 <Badge className="!bg-yellow-600 text-white">Admin</Badge>
@@ -273,7 +275,7 @@ const SettingsPage: React.FC = () => {
                 color={ButtonColor.Stone}
                 className="px-4"
               >
-                Log Out
+                Log out
               </Button>
             </div>
           </div>
@@ -363,7 +365,7 @@ const SettingsPage: React.FC = () => {
           <hr className="border-zinc-300 mt-4" />
 
           <div>
-            <h2 className="!font-semibold !text-xl mb-4">Notifications</h2>
+            <h2 className="!font-semibold !text-2xl mb-4">Notifications</h2>
 
             <div className="flex flex-col gap-y-2 mb-4">
               <p className="!font-medium mb-0">Send action reminders via:</p>
@@ -447,7 +449,7 @@ const SettingsPage: React.FC = () => {
 
           {user.communities.length > 0 && (
             <div>
-              <h2 className="!font-semibold !text-xl mb-4">Groups</h2>
+              <h2 className="!font-semibold !text-2xl mb-4">Groups</h2>
               <p>Contact info shared with your group lead:</p>
               <div className="flex flex-col gap-y-2 mt-2">
                 <LargeCheckbox
@@ -479,7 +481,7 @@ const SettingsPage: React.FC = () => {
           <hr className="border-zinc-300 mt-4" />
 
           <div>
-            <h2 className="!font-semibold !text-xl mb-4 ">Privacy</h2>
+            <h2 className="!font-semibold text-2xl mb-4 ">Privacy</h2>
             <div className="flex flex-col gap-y-2 mb-4">
               <p className="mb-0">
                 Some parts of your completed tasks can be visible to other

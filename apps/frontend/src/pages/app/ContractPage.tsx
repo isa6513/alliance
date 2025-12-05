@@ -67,11 +67,7 @@ const ContractPage: React.FC = () => {
           Contract
         </p>
         <div className="text-zinc-900 mb-4">
-          Below is your membership contract.
-          <ul className="list-disc list-inside mt-2">
-            <li>We will post any updates to your contract here.</li>
-            <li>You can terminate your membership at any time.</li>
-          </ul>
+          You can terminate your membership at any time.
         </div>
         {contractDateSuspended && (
           <Card style={CardStyle.Red}>

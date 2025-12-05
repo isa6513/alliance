@@ -256,7 +256,7 @@ const CommunityPage = () => {
           <div className="flex flex-col gap-y-2 my-8">
             <div className="flex flex-row gap-x-2 items-start justify-between">
               <div className="flex flex-col gap-y-4 mb-8">
-                <p className="font-serif font-semibold text-3xl md:text-5xl">
+                <p className="font-serif font-semibold text-3xl md:text-4xl">
                   {community.name}
                 </p>
                 <AppMarkdownWrapper markdownContent={community.description} />
@@ -270,7 +270,7 @@ const CommunityPage = () => {
                   Edit
                 </Button>
               ) : (
-                <Button color={ButtonColor.Light} onClick={handleLeave}>
+                <Button color={ButtonColor.White} onClick={handleLeave}>
                   Leave group
                 </Button>
               )}

@@ -365,7 +365,7 @@ const HomePage = () => {
 
         <div className="">
           <div className="flex flex-row justify-between items-center mb-3">
-            <p className="font-semibold text-xl font-serif text-black">
+            <p className="font-semibold text-base font-serif text-black">
               Friend activity
             </p>
             {friendActivities.length > 0 && (

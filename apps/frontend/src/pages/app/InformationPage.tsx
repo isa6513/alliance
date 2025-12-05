@@ -10,7 +10,7 @@ const PrioritiesPage: React.FC = () => {
   return (
     <CenterLayout>
       <div className="md:mt-8 gap-y-4 flex flex-col text-base md:text-lg">
-        <p className="font-serif text-3xl md:text-4xl font-semibold">
+        <p className="font-serif text-3xl md:text-4xl font-semibold mb-4">
           Information
         </p>
 
@@ -54,7 +54,10 @@ const PrioritiesPage: React.FC = () => {
             </p>
           </ResourceButton>
           <ResourceButton to="mailto:contact@worldalliance.org">
-            <p className="text-base">Email the office.</p>
+            <p className="text-base">
+              <span className="font-semibold">Email the office</span> with
+              questions, feedback, or ideas.
+            </p>
           </ResourceButton>
         </div>
       </div>
