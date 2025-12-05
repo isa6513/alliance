@@ -77,6 +77,7 @@ export class User {
   email: string;
 
   @Column({ nullable: true })
+  @ApiPropertyOptional()
   @IsOptional()
   phoneNumber?: string;
 

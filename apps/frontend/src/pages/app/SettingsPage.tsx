@@ -6,11 +6,11 @@ import {
   paymentsClearPaymentMethods,
   paymentsPaymentMethod,
   PublicFormResponseDefault,
-  UserDto,
   userMyLocation,
   userUpdate,
   authForgotPassword,
   authMe,
+  UpdateProfileDto,
 } from "@alliance/shared/client";
 import Badge from "@alliance/shared/ui/Badge";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
@@ -25,36 +25,16 @@ import { useAuth } from "../../lib/AuthContext";
 import AwayRangesSection from "../../components/AwayRangesSection";
 import TimeZoneSelect from "@alliance/shared/forms/TimeZoneSelect";
 
-type EditableUserFields = Pick<
-  UserDto,
-  | "name"
-  | "phoneNumber"
-  | "anonymous"
-  | "emailNotifsEnabled"
-  | "pushNotifsEnabled"
-  | "textNotifsEnabled"
-  | "shareEmailWithCommunityLead"
-  | "sharePhoneNumberWithCommunityLead"
-  | "cityId"
-  | "forumDigestPreference"
-  | "preferredActionReminderChannel"
-  | "preferredReminderTime"
-  | "timeZone"
-  | "formDataPreference"
->;
-
 const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const [location, setLocation] = useState<City | null>(null);
-  const [editableUser, setEditableUser] = useState<EditableUserFields | null>(
+  const [editableUser, setEditableUser] = useState<UpdateProfileDto | null>(
     null
   );
-  const [initialUser, setInitialUser] = useState<EditableUserFields | null>(
-    null
-  );
+  const [initialUser, setInitialUser] = useState<UpdateProfileDto | null>(null);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodDto | null>(
     null
@@ -71,7 +51,7 @@ const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
 
   const updateEditableUser = useCallback(
-    (updates: Partial<EditableUserFields>) => {
+    (updates: Partial<UpdateProfileDto>) => {
       setEditableUser((prev) => (prev ? { ...prev, ...updates } : prev));
     },
     []
@@ -93,7 +73,7 @@ const SettingsPage: React.FC = () => {
     if (!editableUser || !initialUser) {
       return false;
     }
-    const keys = Object.keys(editableUser) as (keyof EditableUserFields)[];
+    const keys = Object.keys(editableUser) as (keyof UpdateProfileDto)[];
 
     return keys.some((key) => editableUser[key] !== initialUser[key]);
   }, [editableUser, initialUser]);
@@ -153,7 +133,7 @@ const SettingsPage: React.FC = () => {
     }
   }, [user?.email]);
 
-  const handleSave = useCallback(async (userPayload: EditableUserFields) => {
+  const handleSave = useCallback(async (userPayload: UpdateProfileDto) => {
     setSaving(true);
     try {
       await userUpdate({
@@ -400,14 +380,14 @@ const SettingsPage: React.FC = () => {
             <div className="flex flex-col gap-y-2 mt-2">
               <LargeCheckbox
                 label="Email"
-                checked={editableUser.emailNotifsEnabled}
+                checked={!!editableUser.emailNotifsEnabled}
                 onChange={(checked) =>
                   updateEditableUser({ emailNotifsEnabled: checked })
                 }
               />
               <LargeCheckbox
                 label="Text/SMS"
-                checked={editableUser.textNotifsEnabled}
+                checked={!!editableUser.textNotifsEnabled}
                 onChange={(checked) =>
                   updateEditableUser({ textNotifsEnabled: checked })
                 }
@@ -454,14 +434,14 @@ const SettingsPage: React.FC = () => {
               <div className="flex flex-col gap-y-2 mt-2">
                 <LargeCheckbox
                   label="Email"
-                  checked={editableUser.shareEmailWithCommunityLead}
+                  checked={!!editableUser.shareEmailWithCommunityLead}
                   onChange={(checked) =>
                     updateEditableUser({ shareEmailWithCommunityLead: checked })
                   }
                 />
                 <LargeCheckbox
                   label="Phone number"
-                  checked={editableUser.sharePhoneNumberWithCommunityLead}
+                  checked={!!editableUser.sharePhoneNumberWithCommunityLead}
                   onChange={(checked) =>
                     updateEditableUser({
                       sharePhoneNumberWithCommunityLead: checked,

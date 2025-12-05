@@ -73,6 +73,7 @@ export type Participant = {
 export type User = {
     id: number;
     name: string;
+    phoneNumber?: string;
     phoneNumberValidated: boolean;
     sentTextOptInMessageAt?: string;
     emailVerified: boolean;
@@ -131,6 +132,7 @@ export type Community = {
 export type UserDto = {
     id: number;
     name: string;
+    phoneNumber?: string;
     preferredReminderTime?: string;
     timeZone?: string;
     contractDateSigned: string | null;
@@ -155,7 +157,6 @@ export type UserDto = {
     formDataPreference: PublicFormResponseDefault;
     cityId?: number;
     email: string;
-    phoneNumber?: string;
     hasActiveContract: boolean;
 };
 
@@ -205,40 +206,21 @@ export type UserAwayRangeDto = {
 };
 
 export type UpdateProfileDto = {
-    id?: number;
     name?: string;
-    phoneNumberValidated?: boolean;
-    sentTextOptInMessageAt?: string;
-    emailVerified?: boolean;
+    phoneNumber?: string;
     preferredReminderTime?: string;
     timeZone?: string;
-    contractDateSigned?: string | null;
-    contractDateSuspended?: string | null;
     preferredActionReminderChannel?: NotificationChannel;
     emailNotifsEnabled?: boolean;
     textNotifsEnabled?: boolean;
     pushNotifsEnabled?: boolean;
     shareEmailWithCommunityLead?: boolean;
     sharePhoneNumberWithCommunityLead?: boolean;
-    socialNotifsPreference?: NotificationPreference;
-    turnedOffAllNotifs?: boolean;
     forumDigestPreference?: ForumDigestPreference;
-    password?: string;
-    admin?: boolean;
-    staff?: boolean;
     profilePicture?: string | null;
     profileDescription?: string | null;
-    referralCode?: string | null;
-    stripeCustomerId?: string | null;
-    isNotSignedUpPartialProfile?: boolean;
-    over18?: boolean | null;
-    onboardingComplete?: boolean;
     anonymous?: boolean;
-    communities?: Array<Community>;
-    isCommunityLeader?: boolean;
-    invitedCommunities?: Array<CommunityInvite>;
     formDataPreference?: PublicFormResponseDefault;
-    participants?: Array<Participant>;
     cityId?: number;
 };
 

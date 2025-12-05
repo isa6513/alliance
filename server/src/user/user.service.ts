@@ -113,7 +113,7 @@ export class UserService {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { cityId, profilePicture, hasActiveContract, ...updateData } = data;
+    const { cityId, profilePicture, ...updateData } = data;
 
     if (!updateData.preferredReminderTime) {
       updateData.preferredReminderTime = undefined;

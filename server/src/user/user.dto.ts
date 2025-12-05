@@ -1,7 +1,6 @@
 import {
   ApiProperty,
   ApiPropertyOptional,
-  OmitType,
   PartialType,
   PickType,
 } from '@nestjs/swagger';
@@ -145,12 +144,23 @@ export function userToDto(user: User | null): ProfileDto | null {
 }
 
 export class UpdateProfileDto extends PartialType(
-  OmitType(User, [
-    'city',
-    'leaderOf',
-    'leaderOfIds',
-    'isCommunityLeader',
-    'admin',
+  PickType(User, [
+    'name',
+    'phoneNumber',
+    'profileDescription',
+    'profilePicture',
+    'anonymous',
+    'emailNotifsEnabled',
+    'pushNotifsEnabled',
+    'textNotifsEnabled',
+    'shareEmailWithCommunityLead',
+    'sharePhoneNumberWithCommunityLead',
+    'forumDigestPreference',
+    'preferredActionReminderChannel',
+    'preferredReminderTime',
+    'formDataPreference',
+    'timeZone',
+    'isNotSignedUpPartialProfile',
   ]),
 ) {
   @ApiPropertyOptional()
