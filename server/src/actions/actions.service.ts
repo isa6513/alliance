@@ -903,6 +903,8 @@ export class ActionsService {
         'taskFormResponse.answers',
         'taskFormResponse.publicAnswers',
         'taskFormResponse.schemaSnapshot',
+        'taskFormResponse.visibilityValidatorResults',
+        'taskFormResponse.deviceType',
       ])
       .loadRelationIdAndMap('user.leaderOfIds', 'user.leaderOf')
       .orderBy('activity.createdAt', 'DESC')
