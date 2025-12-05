@@ -192,12 +192,12 @@ const AwayRangesSection: React.FC = () => {
         <p className="font-medium mb-1">Schedule time away</p>
         <p className="text-sm text-zinc-500 mb-3">
           If you need to be away for longer than 14 days, please{" "}
-          <Link
-            to="mailto:contact@worldalliance.org"
+          <a
+            href="mailto:contact@worldalliance.org"
             className="text-green hover:underline"
           >
             email us
-          </Link>{" "}
+          </a>{" "}
           or reach out to your group lead.
         </p>
         <div className="space-y-3">
