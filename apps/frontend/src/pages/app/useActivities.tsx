@@ -116,19 +116,21 @@ const useActivities = ({
       const activity = activities.find((a) => a.id === activityId);
       if (!activity) return;
 
-      const isLiked = activity.likes.some((like) => like.id === user.id);
+      const isLiked = activity.likedByMe ?? false;
 
       if (isLiked) {
         const response = await actionsUnlikeActivity({
           path: { id: activityId },
         });
-        if (response.response.ok) {
+        if (response.response.ok && response.data) {
           setActivities((prev) =>
             prev.map((a) =>
               a.id === activityId
                 ? {
                     ...a,
-                    likes: a.likes.filter((like) => like.id !== user.id),
+                    likes: response.data.likes,
+                    likesCount: response.data.likesCount,
+                    likedByMe: response.data.likedByMe,
                   }
                 : a
             )
@@ -144,7 +146,9 @@ const useActivities = ({
               a.id === activityId
                 ? {
                     ...a,
-                    likes: response.data.likes || [],
+                    likes: response.data.likes,
+                    likesCount: response.data.likesCount,
+                    likedByMe: response.data.likedByMe,
                   }
                 : a
             )

@@ -687,13 +687,31 @@ export class ActionsService {
     return map;
   }
 
+  async getLikedActivityIds(
+    activityIds: number[],
+    userId: number,
+  ): Promise<Set<number>> {
+    if (!activityIds.length || !userId) {
+      return new Set();
+    }
+
+    const rows = await this.actionActivityRepository
+      .createQueryBuilder('activity')
+      .innerJoin('activity.likes', 'liker', 'liker.id = :userId', { userId })
+      .where('activity.id IN (:...activityIds)', { activityIds })
+      .select('activity.id', 'id')
+      .getRawMany<{ id: number }>();
+
+    return new Set(rows.map((r) => r.id));
+  }
+
   async findCompletedForUser(
     userId: number,
     comments?: boolean,
   ): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
       where: { userId, type: ActionActivityType.USER_COMPLETED },
-      relations: ['action', 'user', 'likes', 'taskFormResponse'],
+      relations: ['action', 'user', 'taskFormResponse'],
     });
     if (comments) {
       return this.attachComments(activities);
@@ -772,22 +790,44 @@ export class ActionsService {
     actionId: number,
     limit?: number,
     comments?: boolean,
+    requestingUserId?: number,
   ): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
       where: { actionId },
-      relations: ['user', 'likes', 'taskFormResponse'],
+      relations: ['user', 'taskFormResponse'],
       order: { createdAt: 'DESC' },
       take: limit,
     });
+
+    const likedIds = requestingUserId
+      ? await this.getLikedActivityIds(
+          activities.map((a) => a.id),
+          requestingUserId,
+        )
+      : new Set<number>();
+
     if (comments) {
-      return this.attachComments(activities);
+      return this.attachComments(activities, requestingUserId);
     }
-    return activities.map((activity) => new ActionActivityDto(activity));
+    return activities.map(
+      (activity) =>
+        new ActionActivityDto(activity, {
+          likedByMe: likedIds.has(activity.id),
+        }),
+    );
   }
 
   async attachComments(
     activities: ActionActivity[],
+    requestingUserId?: number,
   ): Promise<ActionActivityDto[]> {
+    const likedIds = requestingUserId
+      ? await this.getLikedActivityIds(
+          activities.map((a) => a.id),
+          requestingUserId,
+        )
+      : new Set<number>();
+
     return Promise.all(
       activities.map(async (activity) => {
         return new ActionActivityDto(activity, {
@@ -797,6 +837,7 @@ export class ActionsService {
           formResponseOutput: activity.taskFormResponse
             ? this.buildOutputFormResponse(activity)
             : undefined,
+          likedByMe: likedIds.has(activity.id),
         });
       }),
     );
@@ -806,6 +847,7 @@ export class ActionsService {
     limit: number = 20,
     before?: Date,
     comments?: boolean,
+    requestingUserId?: number,
   ): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
       where: {
@@ -815,7 +857,7 @@ export class ActionsService {
           ActionActivityType.USER_COMPLETED,
         ]),
       },
-      relations: ['user', 'action', 'likes', 'taskFormResponse'],
+      relations: ['user', 'action', 'taskFormResponse'],
       order: { createdAt: 'DESC' },
       take: limit,
     });
@@ -824,14 +866,22 @@ export class ActionsService {
       return [];
     }
 
+    const likedIds = requestingUserId
+      ? await this.getLikedActivityIds(
+          activities.map((a) => a.id),
+          requestingUserId,
+        )
+      : new Set<number>();
+
     if (comments) {
-      return this.attachComments(activities);
+      return this.attachComments(activities, requestingUserId);
     }
 
-    return Promise.all(
-      activities.map(async (activity) => {
-        return new ActionActivityDto(activity);
-      }),
+    return activities.map(
+      (activity) =>
+        new ActionActivityDto(activity, {
+          likedByMe: likedIds.has(activity.id),
+        }),
     );
   }
 
@@ -1003,7 +1053,7 @@ export class ActionsService {
       where: {
         user: { id: userId },
       },
-      relations: ['action', 'user', 'likes'],
+      relations: ['action', 'user'],
     });
     return activities.map((activity) => new ActionActivityDto(activity));
   }
@@ -1029,16 +1079,26 @@ export class ActionsService {
           ActionActivityType.USER_COMPLETED,
         ]),
       },
-      relations: ['user', 'action', 'likes', 'taskFormResponse'],
+      relations: ['user', 'action', 'taskFormResponse'],
       order: { createdAt: 'DESC' },
       take: limit,
     });
 
+    const likedIds = await this.getLikedActivityIds(
+      friendActivities.map((a) => a.id),
+      userId,
+    );
+
     if (comments) {
-      return this.attachComments(friendActivities);
+      return this.attachComments(friendActivities, userId);
     }
 
-    return friendActivities.map((activity) => new ActionActivityDto(activity));
+    return friendActivities.map(
+      (activity) =>
+        new ActionActivityDto(activity, {
+          likedByMe: likedIds.has(activity.id),
+        }),
+    );
   }
 
   async communityActivity(
@@ -1046,6 +1106,7 @@ export class ActionsService {
     beforeDate: Date | undefined,
     communityId: number,
     comments?: boolean,
+    requestingUserId?: number,
   ) {
     const community = await this.userService.findCommunityOrFail(communityId);
 
@@ -1060,16 +1121,28 @@ export class ActionsService {
           ActionActivityType.USER_COMPLETED,
         ]),
       },
-      relations: ['user', 'action', 'likes', 'taskFormResponse'],
+      relations: ['user', 'action', 'taskFormResponse'],
       order: { createdAt: 'DESC' },
       take: limitNum,
     });
 
+    const likedIds = requestingUserId
+      ? await this.getLikedActivityIds(
+          memberActivities.map((a) => a.id),
+          requestingUserId,
+        )
+      : new Set<number>();
+
     if (comments) {
-      return this.attachComments(memberActivities);
+      return this.attachComments(memberActivities, requestingUserId);
     }
 
-    return memberActivities.map((activity) => new ActionActivityDto(activity));
+    return memberActivities.map(
+      (activity) =>
+        new ActionActivityDto(activity, {
+          likedByMe: likedIds.has(activity.id),
+        }),
+    );
   }
 
   async findByName(name: string): Promise<Action[]> {
@@ -1080,7 +1153,10 @@ export class ActionsService {
     return actions.filter((action) => action.status !== ActionStatus.Draft);
   }
 
-  async getActivity(id: number): Promise<ActionActivityDto> {
+  async getActivity(
+    id: number,
+    requestingUserId?: number,
+  ): Promise<ActionActivityDto> {
     const activity = await this.actionActivityRepository.findOne({
       where: { id },
       relations: ['user', 'action', 'likes', 'taskFormResponse'],
@@ -1090,6 +1166,10 @@ export class ActionsService {
     }
     return new ActionActivityDto(activity, {
       formResponseOutput: this.buildOutputFormResponse(activity),
+      includeLikes: true,
+      likedByMe: requestingUserId
+        ? activity.likes?.some((like) => like.id === requestingUserId)
+        : undefined,
     });
   }
 
@@ -1120,11 +1200,22 @@ export class ActionsService {
       .of(activity);
 
     let createdLike = false;
+    let removedLike = false;
     if (unlike) {
-      await qb.remove(user);
+      if (activity.likes.some((like) => like.id === user.id)) {
+        await qb.remove(user);
+        removedLike = true;
+      }
     } else if (!activity.likes.some((like) => like.id === user.id)) {
       await qb.add(user);
       createdLike = true;
+    }
+
+    // Update likesCount
+    if (createdLike || removedLike) {
+      await this.actionActivityRepository.update(id, {
+        likesCount: () => `"likesCount" ${createdLike ? '+ 1' : '- 1'}`,
+      });
     }
 
     const updatedActivity = await this.actionActivityRepository.findOne({
@@ -1150,7 +1241,10 @@ export class ActionsService {
       });
     }
 
-    return new ActionActivityDto(updatedActivity);
+    return new ActionActivityDto(updatedActivity, {
+      includeLikes: true,
+      likedByMe: !unlike,
+    });
   }
 
   async addActivityComment(

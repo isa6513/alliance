@@ -56,7 +56,14 @@ const ActionActivityDetail = () => {
       return;
     }
     setActivity((prev) =>
-      !!prev ? { ...prev, likes: origactivity.likes } : prev
+      !!prev
+        ? {
+            ...prev,
+            likes: origactivity.likes,
+            likesCount: origactivity.likesCount,
+            likedByMe: origactivity.likedByMe,
+          }
+        : prev
     );
   }, [origactivity]);
 
@@ -77,7 +84,7 @@ const ActionActivityDetail = () => {
     await handleLikeActivity(activity.id);
   };
 
-  const isLiked = activity?.likes.some((like) => like.id === user?.id) || false;
+  const isLiked = activity?.likedByMe ?? false;
 
   const isOwner = activity?.user.id === user?.id;
   const [editing, setEditing] = useState(false);
@@ -246,6 +253,7 @@ const ActionActivityDetail = () => {
               <ActivityLikesButtonRow
                 isLiked={isLiked}
                 likes={activity.likes}
+                likesCount={activity.likesCount}
                 handleLike={handleLike}
                 labelText={true}
               />

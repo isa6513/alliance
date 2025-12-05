@@ -512,9 +512,11 @@ export type ActionActivityDto = {
     type: ActionActivityType;
     actionId: number;
     createdAt: string;
+    likesCount: number;
     user: ProfileDto;
     actionName: string;
-    likes: Array<ProfileDto>;
+    likes?: Array<ProfileDto>;
+    likedByMe?: boolean;
     comments: Array<CommentDto>;
     formResponseOutput?: FormResponseOutputDto;
     editableContent: EditableContentDto;
@@ -683,6 +685,7 @@ export type ActionActivity = {
     dollar_amount?: number;
     editableContent?: EditableContent;
     likes: Array<User>;
+    likesCount: number;
     taskFormResponse?: FormResponse;
     declineReason?: string;
     isMoral?: boolean;
@@ -1859,7 +1862,14 @@ export type TimeSpentForUserDto = {
 };
 
 export type DailyStatsRecord = {
-    [key: string]: unknown;
+    id: number;
+    dayId: string;
+    date: string;
+    signedMembers: number;
+    suspendedMembers: number;
+    actionsCompleted: number;
+    invitesCreated: number;
+    invitesAccepted: number;
 };
 
 export type AppHealthCheckData = {

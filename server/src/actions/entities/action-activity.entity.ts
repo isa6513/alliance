@@ -100,6 +100,11 @@ export class ActionActivity {
   @Type(() => User)
   likes: Ty<User>[];
 
+  @Column({ default: 0 })
+  @ApiProperty()
+  @Allow()
+  likesCount: number;
+
   @ApiPropertyOptional({ type: () => FormResponse })
   @Type(() => FormResponse)
   @IsOptional()
