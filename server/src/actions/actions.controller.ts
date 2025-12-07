@@ -444,7 +444,11 @@ export class ActionsController {
     @Query('comments', new ParseBoolPipe({ optional: true }))
     comments?: boolean,
   ): Promise<ActionActivityDto[]> {
-    return this.actionsService.findCompletedForUser(+id, comments, req.user?.sub);
+    return this.actionsService.findCompletedForUser(
+      +id,
+      comments,
+      req.user?.sub,
+    );
   }
 
   @Post(':id/events')
@@ -611,6 +615,13 @@ export class ActionsController {
   @ApiOkResponse()
   deleteUpdate(@Param('id', ParseIntPipe) id: number) {
     return this.actionsService.deleteActionUpdate(id);
+  }
+
+  @Get('allUpdates')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionUpdateDto, isArray: true })
+  async allUpdates(): Promise<ActionUpdateDto[]> {
+    return this.actionsService.getAllActionUpdates();
   }
 
   @Get('suites')

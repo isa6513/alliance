@@ -2,6 +2,8 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import { getApiUrl } from "../lib/config";
 
+// TOOD add heading, body color enums
+
 interface AppMarkdownWrapperProps {
   markdownContent: string;
   className?: string;
@@ -88,6 +90,7 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
           if (url.startsWith("http")) {
             return url;
           }
+
           return `${getApiUrl()}/images/${url}`;
         }}
       >

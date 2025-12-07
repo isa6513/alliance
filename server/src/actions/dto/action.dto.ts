@@ -329,14 +329,32 @@ export class ActionUpdateDto extends PickType(ActionUpdate, [
   'id',
   'title',
   'date',
+  'actionId',
   'visibleAt',
   'notifyType',
   'shortNotifString',
-  'content',
   'associatedEvent',
   'associatedEventId',
   'tag',
-]) {}
+]) {
+  @ApiProperty({ type: () => EditableContentDto })
+  @Type(() => EditableContentDto)
+  @Allow()
+  content: EditableContentDto;
+
+  @ApiProperty()
+  @Allow()
+  actionName: string;
+
+  constructor(actionUpdate: ActionUpdate) {
+    super();
+    Object.assign(this, actionUpdate);
+    this.content = actionUpdate.content
+      ? new EditableContentDto(actionUpdate.content)
+      : { body: '', attachments: [] };
+    this.actionName = actionUpdate.action?.name;
+  }
+}
 
 export class CreateActionUpdateDto extends PickType(ActionUpdate, [
   'title',

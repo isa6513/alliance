@@ -219,6 +219,7 @@ export type UpdateProfileDto = {
     forumDigestPreference?: ForumDigestPreference;
     profilePicture?: string | null;
     profileDescription?: string | null;
+    isNotSignedUpPartialProfile?: boolean;
     anonymous?: boolean;
     formDataPreference?: PublicFormResponseDefault;
     cityId?: number;
@@ -590,6 +591,7 @@ export type Notification = {
 export type ActionUpdate = {
     id: number;
     action: Action;
+    actionId: number;
     title: string;
     content: EditableContent;
     date: string;
@@ -896,8 +898,8 @@ export type ActionEventDto = {
 
 export type ActionUpdateDto = {
     id: number;
+    actionId: number;
     title: string;
-    content: EditableContent;
     date: string;
     visibleAt: string;
     shortNotifString: string;
@@ -905,6 +907,8 @@ export type ActionUpdateDto = {
     associatedEventId?: number;
     notifyType: ActionUpdateNotifyType;
     tag?: Tag;
+    content: EditableContentDto;
+    actionName: string;
 };
 
 export type ActionDto = {
@@ -3692,6 +3696,19 @@ export type ActionsDeleteUpdateData = {
 export type ActionsDeleteUpdateResponses = {
     200: unknown;
 };
+
+export type ActionsAllUpdatesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/allUpdates';
+};
+
+export type ActionsAllUpdatesResponses = {
+    200: Array<ActionUpdateDto>;
+};
+
+export type ActionsAllUpdatesResponse = ActionsAllUpdatesResponses[keyof ActionsAllUpdatesResponses];
 
 export type ActionsSuitesData = {
     body?: never;

@@ -139,7 +139,10 @@ select {
 
 .text-link {
   color: var(--color-green);
-  text-decoration: underline;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 a,

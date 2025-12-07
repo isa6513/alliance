@@ -1,11 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import { href } from "react-router";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
 import ResourceButton from "../../components/ResourceButton";
+import { actionsAllUpdates, ActionUpdateDto } from "@alliance/shared/client";
+import ActionUpdateCard from "@alliance/shared/ui/ActionUpdateCard";
 
-const PrioritiesPage: React.FC = () => {
+const InformationPage: React.FC = () => {
   useWhiteBackground();
+
+  const [updates, setUpdates] = useState<ActionUpdateDto[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    actionsAllUpdates().then((response) => {
+      if (response.data) {
+        setUpdates(response.data);
+      } else {
+        setError("Failed to load action updates");
+      }
+    });
+  }, []);
 
   return (
     <CenterLayout>
@@ -60,9 +75,22 @@ const PrioritiesPage: React.FC = () => {
             </p>
           </ResourceButton>
         </div>
+
+        <h2 className="text-xl font-semibold mt-4">Action updates</h2>
+
+        <div className="flex flex-col gap-y-2 text-base">
+          {updates.map((update) => (
+            <ActionUpdateCard
+              key={update.id}
+              update={update}
+              onActionPageTimeline={false}
+            />
+          ))}
+          {error && <p className="text-zinc-500">{error}</p>}
+        </div>
       </div>
     </CenterLayout>
   );
 };
 
-export default PrioritiesPage;
+export default InformationPage;

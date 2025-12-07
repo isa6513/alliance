@@ -1470,7 +1470,7 @@ export class ActionsService {
       await this.generateNotifsForActionUpdate(actionUpdate);
     }
 
-    return actionUpdate;
+    return new ActionUpdateDto(actionUpdate);
   }
 
   async deleteActionUpdate(id: number) {
@@ -1479,6 +1479,22 @@ export class ActionsService {
     });
     await this.actionUpdateRepository.delete(id);
     return actionUpdate;
+  }
+
+  async getAllActionUpdates(limit?: number): Promise<ActionUpdateDto[]> {
+    const actionUpdates = await this.actionUpdateRepository.find({
+      take: limit,
+      relations: ['action'],
+      select: {
+        action: {
+          name: true,
+        },
+      },
+    });
+
+    return actionUpdates.map(
+      (actionUpdate) => new ActionUpdateDto(actionUpdate),
+    );
   }
 
   async generateNotifsForActionUpdate(actionUpdate: ActionUpdate) {
