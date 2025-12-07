@@ -29,7 +29,7 @@ import CommunityActivityTab from "../../components/CommunityActivityTab";
 import { parseTimeInput } from "@alliance/shared/forms/timeUtils";
 import TwoColumnLayout from "../../components/TwoColumnLayout";
 import FloatingChatPanel from "../../components/FloatingChatpanel";
-import { MessageCircleMore } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../../lib/config";
 
@@ -445,13 +445,13 @@ const CommunityPage = () => {
             </Card>
           )}
           {!chatOpen && messagingEnabled && (
-            <div className="absolute bottom-5 right-7">
+            <div className="absolute bottom-5 right-7 bg-white hover:bg-zinc-100">
               <Button
                 color={ButtonColor.Outline}
                 onClick={() => setChatOpen(true)}
                 className="!px-3 !py-3"
               >
-                <MessageCircleMore size="20" />
+                <MessageSquare size="20" />
               </Button>
             </div>
           )}
