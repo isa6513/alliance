@@ -342,9 +342,10 @@ export class ActionUpdateDto extends PickType(ActionUpdate, [
   @Allow()
   content: EditableContentDto;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @Allow()
-  actionName: string;
+  actionName?: string;
 
   constructor(actionUpdate: ActionUpdate) {
     super();

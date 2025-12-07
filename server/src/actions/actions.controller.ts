@@ -618,7 +618,7 @@ export class ActionsController {
   }
 
   @Get('allUpdates')
-  @UseGuards(AdminGuard)
+  @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ActionUpdateDto, isArray: true })
   async allUpdates(): Promise<ActionUpdateDto[]> {
     return this.actionsService.getAllActionUpdates();
