@@ -79,13 +79,17 @@ const InformationPage: React.FC = () => {
         <h2 className="text-xl font-semibold mt-4">Action updates</h2>
 
         <div className="flex flex-col gap-y-2 text-base">
-          {updates.map((update) => (
-            <ActionUpdateCard
-              key={update.id}
-              update={update}
-              onActionPageTimeline={false}
-            />
-          ))}
+          {updates
+            .sort(
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            )
+            .map((update) => (
+              <ActionUpdateCard
+                key={update.id}
+                update={update}
+                onActionPageTimeline={false}
+              />
+            ))}
           {error && <p className="text-zinc-500">{error}</p>}
         </div>
       </div>
