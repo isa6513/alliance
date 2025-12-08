@@ -4,7 +4,7 @@ import {
   PartialType,
   PickType,
 } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { instanceToPlain, Type } from 'class-transformer';
 import { Allow, IsOptional } from 'class-validator';
 import { getImageSource } from 'src/images/images.service';
 import { FriendStatus } from './entities/friend.entity';
@@ -134,7 +134,7 @@ export class UserDto extends PickType(User, [
 
   constructor(user: User) {
     super();
-    Object.assign(this, user);
+    Object.assign(this, instanceToPlain(user));
     this.profilePicture = getImageSource(user.profilePicture);
   }
 }
