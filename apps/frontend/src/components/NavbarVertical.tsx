@@ -9,7 +9,6 @@ import { isFeatureEnabled } from "../lib/config";
 import { useMessagingUnread } from "../pages/app/messages";
 import {
   MessageSquare,
-  NotebookPen,
   Search,
   Bell,
   ListTodo,
@@ -20,6 +19,7 @@ import {
   Layers,
   Menu,
   FileText,
+  MessagesSquare,
 } from "lucide-react";
 
 export enum NavbarPage {
@@ -67,7 +67,7 @@ const getIcon = (page: NavbarPage, size: number) => {
     case NavbarPage.Information:
       return <BookText size={size} />;
     case NavbarPage.Forum:
-      return <NotebookPen size={size} />;
+      return <MessagesSquare size={size} />;
     case NavbarPage.Contract:
       return <FileText size={size} />;
     case NavbarPage.Settings:
