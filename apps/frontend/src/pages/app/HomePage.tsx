@@ -283,7 +283,7 @@ const HomePage = () => {
           />
         ) : (
           <div className="mt-4 px-2 py-2 mx-auto flex flex-col items-center gap-y-4 h-full justify-center">
-            {!user?.hasActiveContract ? (
+            {user && !user.hasActiveContract ? (
               <p className="text-center text-zinc-500">
                 You will not be given new tasks while your contract is
                 suspended.
