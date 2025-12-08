@@ -1999,5 +1999,89 @@ export class ActionsService {
     };
   }
 
-  // ==================================
+  async getFailedUsersForEvent(
+    action: Action,
+    event: ActionEvent,
+  ): Promise<User[]> {
+    const baseUsers =
+      await this.actionEventRecipientService.getBaseUsersForEvent(
+        ActionStatus.MemberAction,
+        action,
+        event.date,
+      );
+
+    const completionActivities = await this.actionActivityRepository.find({
+      where: {
+        actionId: action.id,
+        type: ActionActivityType.USER_COMPLETED,
+      },
+    });
+
+    const didntComplete = baseUsers.filter(
+      (user) =>
+        !completionActivities.some((activity) => activity.userId === user.id),
+    );
+    return didntComplete;
+  }
+
+  async getNextEvent(action: Action): Promise<ActionEvent | null> {
+    const memberActionIndex = action.events.findIndex(
+      (event) => event.newStatus === ActionStatus.MemberAction,
+    );
+    if (memberActionIndex === -1) {
+      return null;
+    }
+    return action.events[memberActionIndex + 1];
+  }
+
+  async getUsersToSuspend(
+    actionId: number,
+    prevActionId: number,
+    now: Date,
+  ): Promise<User[]> {
+    const action = await this.actionRepository.findOneOrFail({
+      where: { id: actionId },
+      relations: ['events', 'participatingTags', 'manualCohortUsers'],
+    });
+    const event = action.events.find(
+      (event) => event.newStatus === ActionStatus.MemberAction,
+    );
+    if (!event) {
+      return [];
+    }
+
+    const didntComplete1 = await this.getFailedUsersForEvent(action, event);
+    const prevAction = await this.actionRepository.findOneOrFail({
+      where: { id: prevActionId },
+      relations: ['events', 'participatingTags', 'manualCohortUsers'],
+    });
+    const prevEvent = prevAction.events.find(
+      (event) => event.newStatus === ActionStatus.MemberAction,
+    );
+    if (!prevEvent) {
+      return [];
+    }
+
+    const didntComplete2 = await this.getFailedUsersForEvent(
+      prevAction,
+      prevEvent,
+    );
+
+    const deadline1 = await this.getNextEvent(action);
+    const deadline2 = await this.getNextEvent(prevAction);
+    if (
+      !deadline1 ||
+      !deadline2 ||
+      deadline1.date > now ||
+      deadline2.date > now
+    ) {
+      return [];
+    }
+
+    const didntCompleteBoth = didntComplete1.filter((user) =>
+      didntComplete2.some((u) => u.id === user.id),
+    );
+
+    return didntCompleteBoth;
+  }
 }

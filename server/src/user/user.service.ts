@@ -582,7 +582,10 @@ export class UserService {
     return contractEvent.date;
   }
 
-  async suspendContract(userId: number): Promise<Date> {
+  async suspendContract(
+    userId: number,
+    automatic: boolean = false,
+  ): Promise<Date> {
     const user = await this.findOneOrFail(userId, ['contractEvents']);
     if (!user.hasActiveContract) {
       throw new BadRequestException('Member does not have an active contract.');
@@ -591,6 +594,7 @@ export class UserService {
       user,
       type: ContractEventType.SUSPENDED,
       date: new Date(),
+      automatic,
     });
     await this.contractEventRepository.save(contractEvent);
     return contractEvent.date;
