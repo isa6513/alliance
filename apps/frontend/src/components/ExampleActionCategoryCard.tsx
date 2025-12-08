@@ -10,7 +10,7 @@ const ExampleActionCategoryCard: React.FC<ExampleActionCategoryCardProps> = ({
   example,
 }: ExampleActionCategoryCardProps) => {
   return (
-    <div className="flex flex-col border border-zinc-200 rounded p-4 md:p-5 bg-white">
+    <div className="flex flex-col p-4 bg-white border-r border-b border-zinc-200 [&:nth-child(2n)]:border-r-0 [&:nth-last-child(-n+2)]:border-b-0">
       <p className="text-base text-green font-semibold">{title}</p>
       <p className="text-base text-zinc-900">{description}</p>
 

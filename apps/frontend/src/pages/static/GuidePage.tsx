@@ -143,12 +143,7 @@ The foundation of the Alliance is trust.
 
 ## Current and future coordination
 
-Right now, we are taking small-scale actions focused on learning, not growth or direct impact.
-
-Here are examples of actions we have taken recently:
-- We provided actionable feedback on the websites of three potential partner non-profits.
-- We voted on proposals for a small grant.
-- The office asked a coalition of businesses to take environmental action, promising that we would help them attain a media feature if they did. After they took action, we signed a letter to journalists requesting a feature of the businesses.
+Right now, we are taking small-scale actions focused on learning, not direct impact. Here are examples of actions we have taken recently:
 
 "
               />
@@ -179,7 +174,7 @@ A few broad categories of actions include:
 "
               />
 
-              <div className="grid grid-cols-2 md:grid-cols-2 gap-3 mt-8 w-full max-w-4xl mx-auto">
+              <div className="grid grid-cols-2 rounded border border-zinc-200 mt-8 w-full max-w-4xl mx-auto">
                 <ExampleActionCategoryCard
                   title="Pooled funding"
                   description="We can pool funding for ambitious initiatives, some of which would otherwise depend on governments."
