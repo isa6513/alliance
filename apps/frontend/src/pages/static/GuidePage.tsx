@@ -54,9 +54,9 @@ const GuidePage: React.FC = () => {
               id="introduction"
               className=""
               markdownContent="
-The Alliance is a group of individuals cooperating to improve the world. Each member spends a small fraction of their time completing tasks that advance a shared strategy.
+The Alliance is a group of individuals cooperating to improve the world. Each member spends a small fraction of their time completing tasks that advance our shared goals.
 
-Our long-term goal is to unite humanity behind a global, expert-developed plan to end global crises. Right now, we are running experiments to learn how to coordinate effectively.
+Our long-term goal is to unite humanity behind a global, expert-developed plan to end global crises. Right now, we are running experiments to test our organizational structures and processes.
 "
             />
 
@@ -90,7 +90,7 @@ Our immediate goal is to end global crises that harm or will harm billions of cu
 The Alliance is composed of a body of members and a full-time strategic office.
 
 1. The responsibility of the office is to develop plans, and corresponding tasks, that effectively advance Alliance priorities.
-2. The responsibility of members is to reliably complete tasks they are assigned on our online platform.
+2. The responsibility of members is to reliably complete tasks assigned on our online platform.
 
 "
               />
@@ -108,9 +108,8 @@ The Alliance is composed of a body of members and a full-time strategic office.
 
 The foundation of the Alliance is trust.
 
-1. Members trust one another to complete tasks, even when they do not personally benefit, which allows people with different interests to cooperate.
-2. The office trusts members to complete their tasks, which allows the office to plan effectively. We maintain this trust with our membership contract, which restricts membership to those that can keep their agreements.
-3. Members trust the office to develop effective plans, which makes their duty as simple as completing their assigned tasks. We maintain this trust with governance processes and with regular communication between members and the office.
+1. The office trusts members to complete tasks, which allows the office to plan effectively. We maintain this trust with our membership contract, which restricts membership to those that can keep their agreements.
+2. Members trust the office to develop effective plans, which makes their duty as simple as completing their assigned tasks. We maintain this trust with governance processes and with regular communication between members and the office.
 
 "
               />
