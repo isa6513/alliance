@@ -64,6 +64,10 @@ const ActionEventsPanel = ({ action }: ActionEventsPanelProps) => {
     const now = new Date().getTime();
     return eventDate <= now;
   });
+  const highlightedObjectId =
+    highlightedObjectIndex !== -1
+      ? interleaved[highlightedObjectIndex].id
+      : undefined;
 
   return events.length > 0 ? (
     <div className="flex flex-col w-full">
@@ -74,9 +78,7 @@ const ActionEventsPanel = ({ action }: ActionEventsPanelProps) => {
               <TimelineItem
                 title={event.title}
                 description={event.description}
-                highlighted={
-                  event.id === interleaved[highlightedObjectIndex].id
-                }
+                highlighted={event.id === highlightedObjectId}
                 time={formatDistance(event.date, new Date(), {
                   addSuffix: true,
                 })}
