@@ -303,7 +303,11 @@ export class ActionsService {
         });
 
     const user = userId
-      ? await this.userService.findOne(userId, ['tags', 'awayRanges'])
+      ? await this.userService.findOne(userId, [
+          'tags',
+          'awayRanges',
+          'contractEvents',
+        ])
       : null;
 
     const filtered: Action[] = [];
@@ -890,8 +894,6 @@ export class ActionsService {
         'user.profileDescription',
         'user.admin',
         'user.staff',
-        'user.contractDateSigned',
-        'user.contractDateSuspended',
         'user.anonymous',
         'action.id',
         'action.name',

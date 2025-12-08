@@ -4,13 +4,14 @@ import { UserService } from 'src/user/user.service';
 import { TimeSpentForUserDto } from './timespent.dto';
 import { DailyStatsRecord } from './dailystats.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, IsNull, Not, Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import {
   ActionActivity,
   ActionActivityType,
 } from 'src/actions/entities/action-activity.entity';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
 import { User } from 'src/user/entities/user.entity';
+import { ContractEventType } from 'src/user/entities/contract-event.entity';
 
 @Injectable()
 export class AnalyticsService {
@@ -168,18 +169,21 @@ ORDER BY pp.total_session_duration_seconds DESC
       return;
     }
 
-    const signedUsers = await this.userRepository.count({
-      where: {
-        contractDateSigned: Not(IsNull()),
-        contractDateSuspended: IsNull(),
-      },
-    });
+    const signedUsers = (
+      await this.userRepository.find({
+        relations: ['contractEvents'],
+      })
+    ).filter((user) => user.hasActiveContract === true).length;
 
-    const suspendedUsers = await this.userRepository.count({
-      where: {
-        contractDateSuspended: Not(IsNull()),
-      },
-    });
+    const suspendedUsers = (
+      await this.userRepository.find({
+        relations: ['contractEvents'],
+      })
+    ).filter((user) =>
+      user.contractEvents!.some(
+        (event) => event.type === ContractEventType.SUSPENDED,
+      ),
+    ).length;
 
     const completionActivities = await this.actionActivityRepository.count({
       where: {

@@ -447,6 +447,7 @@ export class TasksService {
     const user = await this.userService.findOneOrFail(userId, [
       'tags',
       'communities',
+      'contractEvents',
     ]);
 
     switch (validator.type) {
@@ -455,17 +456,16 @@ export class TasksService {
           return {
             isValid: false,
             message:
-              "You have not uploaded a profile picture yet - please do that now",
+              'You have not uploaded a profile picture yet - please do that now',
           };
         }
         break;
       case CustomValidatorType.SignedContract:
-        console.log(user.contractDateSigned, user.contractDateSuspended);
-        if (!user.contractDateSigned || user.contractDateSuspended) {
+        if (!user.hasActiveContract) {
           return {
             isValid: false,
             message:
-              "You have not signed the contract yet - please do that now.",
+              'You have not signed the contract yet - please do that now.',
           };
         }
         break;
@@ -474,7 +474,7 @@ export class TasksService {
           return {
             isValid: false,
             message:
-              "You have not added a profile description yet - please do that now.",
+              'You have not added a profile description yet - please do that now.',
           };
         }
         break;
@@ -491,7 +491,7 @@ export class TasksService {
           return {
             isValid: false,
             message:
-              "You have not replied to the discussion yet - please do that now.",
+              'You have not replied to the discussion yet - please do that now.',
           };
         }
         break;
@@ -501,7 +501,7 @@ export class TasksService {
           return {
             isValid: false,
             message:
-              "You have not added a phone number yet - please do that now.",
+              'You have not added a phone number yet - please do that now.',
           };
         }
         break;
@@ -510,7 +510,7 @@ export class TasksService {
           return {
             isValid: false,
             message:
-              "You have not entered a phone number yet - please do that now.",
+              'You have not entered a phone number yet - please do that now.',
           };
         }
         try {

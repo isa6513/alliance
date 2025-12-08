@@ -26,6 +26,14 @@ export type AccessToken = {
     access_token: string;
 };
 
+export type ContractEventType = 'signed' | 'suspended';
+
+export type ContractEvent = {
+    type: ContractEventType;
+    date: string;
+    automatic: boolean;
+};
+
 export type NotificationChannel = 'text' | 'email' | 'push';
 
 export type NotificationPreference = 'all' | 'digest' | 'none';
@@ -79,8 +87,7 @@ export type User = {
     emailVerified: boolean;
     preferredReminderTime?: string;
     timeZone?: string;
-    contractDateSigned: string | null;
-    contractDateSuspended: string | null;
+    contractEvents: Array<ContractEvent>;
     preferredActionReminderChannel: NotificationChannel;
     emailNotifsEnabled: boolean;
     textNotifsEnabled: boolean;
@@ -135,8 +142,7 @@ export type UserDto = {
     phoneNumber?: string;
     preferredReminderTime?: string;
     timeZone?: string;
-    contractDateSigned: string | null;
-    contractDateSuspended: string | null;
+    contractEvents: Array<ContractEvent>;
     preferredActionReminderChannel: NotificationChannel;
     emailNotifsEnabled: boolean;
     textNotifsEnabled: boolean;
@@ -171,7 +177,6 @@ export type ResetPasswordDto = {
 
 export type ProfileDto = {
     id: number;
-    contractDateSigned: string | null;
     admin: boolean;
     staff: boolean;
     profilePicture: string | null;
@@ -179,6 +184,7 @@ export type ProfileDto = {
     displayName: string;
     hasActiveContract: boolean;
     isCommunityLeader: boolean;
+    lastContractEvent?: ContractEvent;
 };
 
 export type OnboardingDto = {
@@ -245,7 +251,6 @@ export type FriendStatusDto = {
 
 export type ProfileDtoWithFriends = {
     id: number;
-    contractDateSigned: string | null;
     admin: boolean;
     staff: boolean;
     profilePicture: string | null;
@@ -253,6 +258,7 @@ export type ProfileDtoWithFriends = {
     displayName: string;
     hasActiveContract: boolean;
     isCommunityLeader: boolean;
+    lastContractEvent?: ContractEvent;
     friends: Array<ProfileDto>;
 };
 

@@ -42,6 +42,7 @@ import { Community } from './community.entity';
 import { CommunityInvite } from './community-invite.entity';
 import { Participant } from 'src/messaging/entities/participant.entity';
 import { Ty } from 'src/tasks/entities/type';
+import { ContractEvent, ContractEventType } from './contract-event.entity';
 
 export enum NotificationPreference {
   All = 'all',
@@ -101,18 +102,20 @@ export class User {
   @ApiPropertyOptional({ type: 'string' })
   timeZone?: Temporal.TimeZoneLike;
 
-  @Column({ type: 'timestamptz', nullable: true })
-  @ApiProperty({ type: String, format: 'date-time', nullable: true })
-  contractDateSigned: Date | null;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  @ApiProperty({ type: String, format: 'date-time', nullable: true })
-  contractDateSuspended: Date | null;
+  @OneToMany(() => ContractEvent, (event) => event.user, { cascade: true })
+  @Type(() => ContractEvent)
+  @ApiProperty({ type: () => [ContractEvent] })
+  contractEvents: Ty<ContractEvent>[] | null;
 
   @Expose()
   get hasActiveContract(): boolean {
-    // Assumes contract suspension date is cleared when a new contract is signed
-    return !!this.contractDateSigned && !this.contractDateSuspended;
+    if (!this.contractEvents || this.contractEvents.length === 0) {
+      return false;
+    }
+    return (
+      this.contractEvents.sort((a, b) => b.date.getTime() - a.date.getTime())[0]
+        .type === ContractEventType.SIGNED
+    );
   }
 
   @Column({

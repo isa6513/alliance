@@ -8,7 +8,7 @@ interface ActionActivityListProps {
   actionId: number;
   activities: ActionActivityDto[];
   loading: boolean;
-  onLikeActivity: (activityId: number) => Promise<void>;
+  onLikeActivity: (activityId: number) => Promise<unknown>;
   setActivities: React.Dispatch<React.SetStateAction<ActionActivityDto[]>>;
   maxN: number;
 }

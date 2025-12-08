@@ -1,4 +1,8 @@
-import { userSignContract, userSuspendContract } from "@alliance/shared/client";
+import {
+  ContractEvent,
+  userSignContract,
+  userSuspendContract,
+} from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import React, { useEffect, useState } from "react";
 import MemberContract from "../../components/MemberContract";
@@ -10,20 +14,21 @@ import Card, { CardStyle } from "@alliance/shared/ui/Card";
 const ContractPage: React.FC = () => {
   const { user, loading } = useAuth();
 
-  const [contractDateSigned, setContractDateSigned] = useState<Date | null>();
-  const [contractDateSuspended, setContractDateSuspended] =
-    useState<Date | null>();
   const [editName, setEditName] = useState("");
+
+  const [lastContractEvent, setLastContractEvent] = useState<Pick<
+    ContractEvent,
+    "type" | "date"
+  > | null>(null);
 
   useEffect(() => {
     if (user) {
-      setContractDateSigned(
-        user.contractDateSigned && !user.contractDateSuspended
-          ? new Date(user.contractDateSigned)
+      setLastContractEvent(
+        user.contractEvents?.length
+          ? user.contractEvents?.sort(
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            )[0]
           : null
-      );
-      setContractDateSuspended(
-        user.contractDateSuspended ? new Date(user.contractDateSuspended) : null
       );
     }
   }, [user]);
@@ -32,8 +37,7 @@ const ContractPage: React.FC = () => {
     try {
       const res = await userSignContract();
       if (res.data) {
-        setContractDateSigned(new Date(res.data));
-        setContractDateSuspended(null);
+        setLastContractEvent({ type: "signed", date: res.data });
       }
     } catch (error) {
       console.error("Error signing contract:", error);
@@ -47,9 +51,10 @@ const ContractPage: React.FC = () => {
         return;
       }
 
-      await userSuspendContract();
-      setContractDateSigned(null);
-      setContractDateSuspended(new Date());
+      const res = await userSuspendContract();
+      if (res.data) {
+        setLastContractEvent({ type: "suspended", date: res.data });
+      }
     } catch (error) {
       console.error("Error suspending contract:", error);
       alert("There was an error suspending the contract. Please try again.");
@@ -69,17 +74,17 @@ const ContractPage: React.FC = () => {
         <div className="text-zinc-900 mb-4">
           You can terminate your membership at any time.
         </div>
-        {contractDateSuspended && (
+        {lastContractEvent?.type === "suspended" && (
           <Card style={CardStyle.Red}>
             <p>
               You suspended your contract on{" "}
-              {new Date(contractDateSuspended).toLocaleDateString()}.
+              {new Date(lastContractEvent.date).toLocaleDateString()}.
             </p>
           </Card>
         )}
         <MemberContract />
 
-        {!contractDateSigned && (
+        {lastContractEvent?.type !== "signed" && (
           <div className="flex flex-row mt-2 w-full">
             <FormInput
               name="name"
@@ -98,11 +103,11 @@ const ContractPage: React.FC = () => {
             </Button>
           </div>
         )}
-        {contractDateSigned && (
+        {lastContractEvent?.type === "signed" && (
           <div className="mt-4 flex flex-col gap-y-2 sm:flex-row justify-between sm:items-center">
             <p className="text-green">
               You signed this contract on{" "}
-              {new Date(contractDateSigned).toLocaleDateString()}.
+              {new Date(lastContractEvent.date).toLocaleDateString()}.
             </p>
             <Button onClick={handleContractSuspend} color={ButtonColor.Red}>
               Suspend contract

@@ -5,6 +5,7 @@ import {
   User,
 } from 'src/user/entities/user.entity';
 import { NotificationChannel } from './notif-utils';
+import { ContractEventType } from 'src/user/entities/contract-event.entity';
 
 export const testUser: User = {
   id: -1,
@@ -13,8 +14,16 @@ export const testUser: User = {
   phoneNumber: process.env.NOTIF_TEST_PHONE_NUMBER,
   phoneNumberValidated: true,
   emailVerified: false,
-  contractDateSigned: new Date(0),
-  contractDateSuspended: null,
+  contractEvents: [
+    {
+      id: -1,
+      type: ContractEventType.SIGNED,
+      date: new Date(0),
+      updatedAt: new Date(),
+      automatic: false,
+      user: { id: -1 } as User,
+    },
+  ],
   hasActiveContract: true,
   emailNotifsEnabled: false,
   textNotifsEnabled: true,

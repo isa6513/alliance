@@ -104,17 +104,25 @@ const UserCard = ({
   const time = formatTime(timeSpent);
   const timeTotal = formatTime(timeSpentTotal);
 
-  const contractStatusColor = user.contractDateSuspended
-    ? "text-red-500"
-    : user.contractDateSigned
-    ? "text-green"
-    : "text-zinc-500";
+  const latestEvent = user.contractEvents?.length
+    ? user.contractEvents.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      )[0]
+    : null;
 
-  const contractStatus = user.contractDateSuspended
-    ? "Suspended"
-    : user.contractDateSigned
-    ? "Signed"
-    : "Not signed";
+  const contractStatusColor =
+    latestEvent === null
+      ? "text-zinc-500"
+      : latestEvent.type === "signed"
+      ? "text-green"
+      : "text-red-500";
+
+  const contractStatus =
+    latestEvent === null
+      ? "Not signed"
+      : latestEvent.type === "signed"
+      ? "Signed"
+      : "Suspended";
 
   return (
     <Card style={CardStyle.White} className="flex-1 text-sm">
