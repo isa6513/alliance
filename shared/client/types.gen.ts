@@ -539,7 +539,7 @@ export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
 /**
  * New status of the action after the event
  */
-export type ActionStatus = 'draft' | 'upcoming' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
+export type ActionStatus = 'draft' | 'planned' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
 
 export type EditableContent = {
     /**
@@ -914,7 +914,7 @@ export type ActionUpdateDto = {
     notifyType: ActionUpdateNotifyType;
     tag?: Tag;
     content: EditableContentDto;
-    actionName: string;
+    actionName?: string;
 };
 
 export type ActionDto = {

@@ -40,27 +40,31 @@ const ActionContents = () => {
 
       <div className="flex flex-col gap-y-8 sm:gap-y-12">
         <ActionEventsPanel action={action} />
-        <Link
-          to={href("/feed/:actionId", { actionId: action.id.toString() })}
-          className="self-start flex flex-row items-center gap-x-1 md:hidden border border-zinc-200 hover:bg-zinc-50 px-2 py-1 rounded"
-        >
-          <p className="font-medium text-sm">Activity</p>
-          <img src={chevronLeft} className="w-3 h-3 rotate-270" />
-        </Link>
-        <div className="flex flex-col">
-          <div className="flex flex-col lg:flex-row justify-between lg:items-center mb-4 gap-x-4">
-            <p className="font-semibold text-xl flex-1">Task</p>
+        {action.status !== "planned" && (
+          <Link
+            to={href("/feed/:actionId", { actionId: action.id.toString() })}
+            className="self-start flex flex-row items-center gap-x-1 md:hidden border border-zinc-200 hover:bg-zinc-50 px-2 py-1 rounded"
+          >
+            <p className="font-medium text-sm">Activity</p>
+            <img src={chevronLeft} className="w-3 h-3 rotate-270" />
+          </Link>
+        )}
+        {action.status !== "planned" && (
+          <div className="flex flex-col">
+            <div className="flex flex-col lg:flex-row justify-between lg:items-center mb-4 gap-x-4">
+              <p className="font-semibold text-xl flex-1">Task</p>
 
-            <TaskTimeInfo
-              action={action}
-              nextEvent={nextEvent}
-              lastEvent={lastEvent}
-              absoluteDeadline={true}
-            />
+              <TaskTimeInfo
+                action={action}
+                nextEvent={nextEvent}
+                lastEvent={lastEvent}
+                absoluteDeadline={true}
+              />
+            </div>
+
+            <Outlet context={context} />
           </div>
-
-          <Outlet context={context} />
-        </div>
+        )}
 
         <div>
           <p className="font-semibold text-xl mb-4">Description</p>
