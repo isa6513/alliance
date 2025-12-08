@@ -1,5 +1,11 @@
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from './user.entity';
 import { Ty } from 'src/tasks/entities/type';
 import { Type } from 'class-transformer';
@@ -11,6 +17,7 @@ export enum ContractEventType {
 }
 
 @Entity()
+@Index(['user', 'date'])
 export class ContractEvent {
   @PrimaryGeneratedColumn()
   id: number;

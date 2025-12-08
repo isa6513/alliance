@@ -169,20 +169,19 @@ ORDER BY pp.total_session_duration_seconds DESC
       return;
     }
 
-    const signedUsers = (
-      await this.userRepository.find({
-        relations: ['contractEvents'],
-      })
-    ).filter((user) => user.hasActiveContract === true).length;
+    const users = await this.userRepository.find({
+      relations: ['contractEvents'],
+    });
 
-    const suspendedUsers = (
-      await this.userRepository.find({
-        relations: ['contractEvents'],
-      })
-    ).filter((user) =>
-      user.contractEvents!.some(
-        (event) => event.type === ContractEventType.SUSPENDED,
-      ),
+    const signedUsers = users.filter(
+      (user) => user.hasActiveContract === true,
+    ).length;
+
+    const suspendedUsers = users.filter(
+      (user) =>
+        user.contractEvents!.some(
+          (event) => event.type === ContractEventType.SUSPENDED,
+        ) && user.hasActiveContract === false,
     ).length;
 
     const completionActivities = await this.actionActivityRepository.count({

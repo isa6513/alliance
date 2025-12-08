@@ -825,7 +825,11 @@ export class UserService {
       return null;
     }
 
-    return this.findCommunityOrFail(communityId, ['users', 'leaders']);
+    return this.findCommunityOrFail(communityId, [
+      'users',
+      'leaders',
+      'users.contractEvents',
+    ]);
   }
 
   async getUserIdsForUserCommunity(userId: number): Promise<number[]> {

@@ -141,9 +141,9 @@ const UsersList: React.FC = () => {
         const lastEvent = user.contractEvents.sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         )[0];
+        if (mode === "Not signed") return user.contractEvents.length === 0;
         if (mode === "Signed") return lastEvent?.type === "signed";
         if (mode === "Suspended") return lastEvent?.type === "suspended";
-        return false;
       });
       return acc;
     }, {} as Record<UserFilterMode, UserDto[]>);
