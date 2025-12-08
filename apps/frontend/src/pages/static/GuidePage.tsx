@@ -9,6 +9,29 @@ import { href } from "react-router";
 import ResourceButton from "../../components/ResourceButton";
 
 const GuidePage: React.FC = () => {
+  const exampleActions = [
+    {
+      name: "Participate in an experiment to measure awareness of AI data use practices",
+      description:
+        "Members were asked about their AI privacy preferences. The office will use the results to plan a follow-up awareness campaign in favor of opt-in, rather than opt-out, data use practices.",
+    },
+    {
+      name: "Report a pothole in your community",
+      description:
+        "Members found and reported a pothole to their local government, most of which were repaired within a week.",
+    },
+    {
+      name: "Approve proposals for how to spend $1,000",
+      description:
+        "Members sent in and voted on proposals for how to spend $1,000 provided by a one-time donor. The $1,000 was ultimately split between Cool Earth and GiveDirectly.",
+    },
+    {
+      name: "Answer questions about nonprofit website copy and design",
+      description:
+        "Members provided feedback on the copy and design of three nonprofit websites. The office sent the results to the nonprofits to help them increase their donation conversion rates.",
+    },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
@@ -49,7 +72,7 @@ const GuidePage: React.FC = () => {
             </h2>
           </div>
 
-          <div className="flex flex-col gap-y-6">
+          <div className="flex flex-col gap-y-4">
             <MarkdownWrapper
               id="introduction"
               className=""
@@ -120,10 +143,34 @@ The foundation of the Alliance is trust.
 
 ## Current and future coordination
 
-Right now, we are taking small-scale actions focused on learning, not growth or direct impact. For instance, some actions we have taken recently are:
+Right now, we are taking small-scale actions focused on learning, not growth or direct impact.
+
+Here are examples of actions we have taken recently:
 - We provided actionable feedback on the websites of three potential partner non-profits.
 - We voted on proposals for a small grant.
 - The office asked a coalition of businesses to take environmental action, promising that we would help them attain a media feature if they did. After they took action, we signed a letter to journalists requesting a feature of the businesses.
+
+"
+              />
+
+              <div className="flex flex-col divide-y divide-zinc-200 border border-zinc-200 rounded my-8">
+                {exampleActions.map((action) => (
+                  <div key={action.name} className="p-4">
+                    <div className="flex-1 flex flex-col">
+                      <div className="flex flex-row items-center justify-between gap-x-2">
+                        <p className="font-semibold text-green">
+                          {action.name}
+                        </p>
+                      </div>
+                      <p className="text-zinc-500">{action.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <MarkdownWrapper
+                id="structure-4"
+                markdownContent="
 
 As the Alliance grows, we plan to bring together experts from diverse fields to make increasingly impactful, long-term plans. Our online platform will enable direct communication between these experts and millions of members to enact rapid, large-scale change.
 
@@ -132,7 +179,7 @@ A few broad categories of actions include:
 "
               />
 
-              <div className="grid grid-cols-2 md:grid-cols-2 gap-3 mt-6 w-full max-w-4xl mx-auto">
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-3 mt-8 w-full max-w-4xl mx-auto">
                 <ExampleActionCategoryCard
                   title="Pooled funding"
                   description="We can pool funding for ambitious initiatives, some of which would otherwise depend on governments."
