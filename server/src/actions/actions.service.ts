@@ -2103,7 +2103,9 @@ export class ActionsService {
       actions.every((action) => this.isActionPast(action, now)),
     );
 
-    const failedUsersForSuites = new Map<number, User[]>();
+    const failedUsersForSuites = new Map<number, number[]>();
+
+    const idToUser = new Map<number, User>();
 
     const getLastSignedDate = (user: User) => {
       return (
@@ -2128,15 +2130,23 @@ export class ActionsService {
         const signedBeforeFailed = failedAndActive.filter(
           (user) => getLastSignedDate(user) < event.date,
         );
+        for (const user of signedBeforeFailed) {
+          idToUser.set(user.id, user);
+        }
 
         if (failedUsersForSuites.has(suite.suite.id)) {
-          failedUsersForSuites.get(suite.suite.id)!.push(...signedBeforeFailed);
+          failedUsersForSuites
+            .get(suite.suite.id)!
+            .push(...signedBeforeFailed.map((user) => user.id));
         } else {
-          failedUsersForSuites.set(suite.suite.id, signedBeforeFailed);
+          failedUsersForSuites.set(
+            suite.suite.id,
+            signedBeforeFailed.map((user) => user.id),
+          );
         }
       }
     }
-    const usersToSuspend = new Set<User>();
+    const usersToSuspend = new Set<number>();
     const suspendReasonKeys = new Map<number, string>();
 
     for (let i = 2; i < pastSuites.length; i++) {
@@ -2151,19 +2161,21 @@ export class ActionsService {
         continue;
       }
       const failedAll = failedThis
-        .filter((user) => failedPrevious.some((u) => u.id === user.id))
-        .filter((user) => failedPreviousPrevious.some((u) => u.id === user.id));
+        .filter((userId) => failedPrevious.includes(userId))
+        .filter((userId) => failedPreviousPrevious.includes(userId));
 
-      for (const user of failedAll) {
-        usersToSuspend.add(user);
+      for (const userId of failedAll) {
+        usersToSuspend.add(userId);
         suspendReasonKeys.set(
-          user.id,
+          userId,
           `s-${pastSuites[i].suite.id}-${pastSuites[i - 1].suite.id}-${pastSuites[i - 2].suite.id}`,
         );
       }
     }
     return {
-      usersToSuspend: Array.from(usersToSuspend),
+      usersToSuspend: Array.from(usersToSuspend).map(
+        (userId) => idToUser.get(userId)!,
+      ),
       suspendReasonKeys,
     };
   }
