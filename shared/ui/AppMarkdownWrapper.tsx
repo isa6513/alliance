@@ -96,8 +96,8 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
           },
         }}
         urlTransform={(url) => {
-          if (url.includes(".webp")) {
-            // TODO: better way to identify images
+          // TODO: better way to identify images
+          if (url.includes(".webp") && !url.startsWith("http")) {
             return `${getApiUrl()}/images/${url}`;
           }
           return url;
