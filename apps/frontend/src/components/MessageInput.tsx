@@ -83,12 +83,13 @@ const MessageInput = ({
         const base64s = await readImagesFromFiles(Array.from(files));
         if (base64s.length > 0) {
           setAttachments((prev) => [...prev, ...base64s]);
+          inputRef.current?.focus();
         }
       } catch (err) {
         console.error("Failed reading image file(s)", err);
       }
     },
-    [readImagesFromFiles, setAttachments]
+    [readImagesFromFiles, setAttachments, inputRef]
   );
 
   const handlePaste = useCallback(
