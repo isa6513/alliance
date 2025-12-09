@@ -2086,7 +2086,6 @@ export class ActionsService {
       if (!action.suite) continue;
 
       const suiteId = action.suite.id;
-      console.log(suiteId);
       if (!suiteMap.has(suiteId)) {
         suiteMap.set(suiteId, {
           suite: action.suite,
