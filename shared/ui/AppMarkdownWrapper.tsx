@@ -96,11 +96,11 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
           },
         }}
         urlTransform={(url) => {
-          if (url.startsWith("http")) {
-            return url;
+          if (url.includes(".webp")) {
+            // TODO: better way to identify images
+            return `${getApiUrl()}/images/${url}`;
           }
-
-          return `${getApiUrl()}/images/${url}`;
+          return url;
         }}
       >
         {markdownContent}
