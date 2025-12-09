@@ -79,8 +79,13 @@ const MessageRecipientSelect: React.FC<MessageRecipientSelectProps> = ({
     : "Remove current selection to choose another";
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Backspace" && event.currentTarget.value.length === 0) {
+    if (
+      event.key === "Backspace" &&
+      event.currentTarget.value.length === 0 &&
+      selectedUsers.length > 0
+    ) {
       removeUser(selectedUsers[selectedUsers.length - 1].id);
+      event.preventDefault();
     }
   };
 
