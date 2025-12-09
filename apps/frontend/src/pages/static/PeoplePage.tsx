@@ -11,6 +11,7 @@ const PeoplePage: React.FC = () => {
       "Sidney Hough": 7,
       "Casey Manning": 15,
       "Eamon OCearuil": 24,
+      "Charles Lien": 64,
     };
   }, []);
 
@@ -20,6 +21,7 @@ const PeoplePage: React.FC = () => {
       "Sidney Hough": "https://sidney.com/",
       "Casey Manning": "https://caseymanning.github.io/",
       "Eamon OCearuil": "https://worldalliance.org/member/24",
+      "Charles Lien": "https://worldalliance.org/member/64",
     };
   }, []);
 
@@ -65,7 +67,7 @@ const PeoplePage: React.FC = () => {
             <h2 className="!font-semibold !text-xl md:!text-2xl !mt-8 mb-3">
               Members
             </h2>
-            <p>39 members are participating in early experiments.</p>
+            <p>40 members are participating in early experiments.</p>
 
             <h2 className="!font-semibold !text-xl md:!text-2xl !mt-8 mb-3">
               Strategic office

@@ -7,31 +7,9 @@ import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 
 import { href } from "react-router";
 import ResourceButton from "../../components/ResourceButton";
+import ExampleActionCardList from "../../components/ExampleActionCardList";
 
 const GuidePage: React.FC = () => {
-  const exampleActions = [
-    {
-      name: "Participate in an experiment to measure awareness of AI data use practices",
-      description:
-        "Members were asked about their AI privacy preferences. The office will use the results to plan a follow-up awareness campaign in favor of opt-in, rather than opt-out, data use practices.",
-    },
-    {
-      name: "Report a pothole in your community",
-      description:
-        "Members found and reported a pothole to their local government, most of which were repaired within a week.",
-    },
-    {
-      name: "Approve proposals for how to spend $1,000",
-      description:
-        "Members sent in and voted on proposals for how to spend $1,000 provided by a one-time donor. The $1,000 was ultimately split between Cool Earth and GiveDirectly.",
-    },
-    {
-      name: "Answer questions about nonprofit website copy and design",
-      description:
-        "Members provided feedback on the copy and design of three nonprofit websites. The office sent the results to the nonprofits to help them increase their donation conversion rates.",
-    },
-  ];
-
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
@@ -148,19 +126,8 @@ Right now, we are taking small-scale actions focused on learning, not direct imp
 "
               />
 
-              <div className="flex flex-col divide-y divide-zinc-200 border border-zinc-200 rounded my-8">
-                {exampleActions.map((action) => (
-                  <div key={action.name} className="p-4">
-                    <div className="flex-1 flex flex-col">
-                      <div className="flex flex-row items-center justify-between gap-x-2">
-                        <p className="font-semibold text-green">
-                          {action.name}
-                        </p>
-                      </div>
-                      <p className="text-zinc-500">{action.description}</p>
-                    </div>
-                  </div>
-                ))}
+              <div className="my-8">
+                <ExampleActionCardList />
               </div>
 
               <MarkdownWrapper
@@ -233,8 +200,8 @@ Our governance guarantees that the majority of members believe the majority of t
 We conduct a membership-wide oversight process that occurs on a regular basis, or whenever it is requested by a majority of members. In the process, the office asks members what they think about the direction of the Alliance and whether or not they have any major concerns. The office collects and responds to feedback until we reach an approval threshold of 75%.
 
 This procedure achieves two goals:
-1. Members determine the high-level priorities that the Alliance can undertake.
-2. The office retains the freedom to plan any action that advances approved Alliance priorities. It is not required to do what is most popular, nor do actions need unanimous support.
+1. Members determine the high-level goals and methods of the Alliance.
+2. The office retains the freedom to plan any action that advances approved goals with approved methods. It is not required to do what is most popular, nor do actions need unanimous support, so it can operate efficiently and effectively.
 
 It is inevitable, though rare, that some members are assigned tasks whose justifications they do not agree with. Given the urgency of global crises, it is important that we collectively prioritize action over perfect consensus.
 
@@ -263,6 +230,13 @@ In addition to formal governance, the office incorporates member input by other 
                 <p className="text-base">
                   <span className="font-semibold">Our governance</span>{" "}
                   describes office and member obligations.
+                </p>
+              </ResourceButton>
+
+              <ResourceButton to={href("/faq")}>
+                <p className="text-base">
+                  <span className="font-semibold">Our FAQ</span> answers common
+                  questions.
                 </p>
               </ResourceButton>
             </div>

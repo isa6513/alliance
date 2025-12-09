@@ -29,25 +29,7 @@ const InformationPage: React.FC = () => {
           Information
         </p>
 
-        <p>
-          The Alliance is a group of individuals cooperating to improve the
-          world. Our four priorities, in no particular order, are:
-        </p>
-
-        <ol className="ml-4 list-decimal list-inside flex flex-col gap-y-1">
-          <li>Extreme poverty</li>
-          <li>Environmental destruction</li>
-          <li>Breakdown of democratic institutions</li>
-          <li>Unsafe technological development</li>
-        </ol>
-
-        <p>
-          Right now, we are testing organizational structures and processes. Our
-          goal is to ensure we can coordinate effectively before we launch
-          publicly and plan large-scale actions.
-        </p>
-
-        <h2 className="text-xl font-semibold mt-4">Resources</h2>
+        <h2 className="text-2xl font-semibold">Resources</h2>
 
         <div className="flex flex-col gap-y-2">
           <ResourceButton to={href("/guide")}>
@@ -68,6 +50,12 @@ const InformationPage: React.FC = () => {
               office and member obligations.
             </p>
           </ResourceButton>
+          <ResourceButton to={href("/faq")}>
+            <p className="text-base">
+              <span className="font-semibold">Our FAQ</span> answers common
+              questions.
+            </p>
+          </ResourceButton>
           <ResourceButton to="mailto:contact@worldalliance.org">
             <p className="text-base">
               <span className="font-semibold">Email the office</span> with
@@ -76,7 +64,7 @@ const InformationPage: React.FC = () => {
           </ResourceButton>
         </div>
 
-        <h2 className="text-xl font-semibold mt-4">Action updates</h2>
+        <h2 className="text-2xl font-semibold mt-4">Action updates</h2>
 
         <div className="flex flex-col gap-y-2 text-base">
           {updates

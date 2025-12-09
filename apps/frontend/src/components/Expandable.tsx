@@ -19,8 +19,8 @@ const Expandable: React.FC<ExpandableProps> = ({
   return (
     <div className={`transition w-full`}>
       <div
-        className={`group py-4 
-            border-b border-zinc-200 hover:border-zinc-500 pb-4 flex items-center justify-between cursor-pointer`}
+        className={`group py-2 
+            border-b border-zinc-200 hover:border-zinc-500 flex items-center justify-between cursor-pointer`}
         onClick={toggleExpand}
       >
         <h2 className="!font-semibold !text-2xl !my-1">{title}</h2>
