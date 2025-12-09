@@ -390,7 +390,9 @@ const MessagesPage = () => {
                 <div className="flex flex-row items-center gap-x-3">
                   <ProfileImage pfp={conversation.photo ?? null} size="large" />
                   <div className="flex flex-col">
-                    <span className="font-medium">{conversation.title}</span>
+                    <span className="font-medium line-clamp-1">
+                      {conversation.title}
+                    </span>
                     <span className="text-sm text-zinc-500 line-clamp-1">
                       {!!conversation.lastMessage
                         ? conversation.type === "direct"
@@ -438,7 +440,7 @@ const MessagesPage = () => {
                           size="large"
                         />
                         <div className="flex flex-col">
-                          <span className="font-medium">
+                          <span className="font-medium line-clamp-2">
                             {conversation.title}
                           </span>
                           <span className="text-sm text-zinc-500 line-clamp-1">
@@ -456,7 +458,7 @@ const MessagesPage = () => {
                       </div>
                       <div
                         className={`font-semibold text-xs text-white bg-red-500
-                    } rounded-md flex justify-center items-center w-6 h-6`}
+                    } rounded-md flex justify-center items-center w-6 h-6 shrink-0`}
                       >
                         {conversation.unreadCount ?? 1}
                       </div>
