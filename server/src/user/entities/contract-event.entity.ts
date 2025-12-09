@@ -5,11 +5,12 @@ import {
   Index,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Ty } from 'src/tasks/entities/type';
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum ContractEventType {
   SIGNED = 'signed',
@@ -18,6 +19,7 @@ export enum ContractEventType {
 
 @Entity()
 @Index(['user', 'date'])
+@Unique(['user', 'autoSuspendKey'])
 export class ContractEvent {
   @PrimaryGeneratedColumn()
   id: number;
@@ -40,4 +42,8 @@ export class ContractEvent {
   @Column({ default: false })
   @ApiProperty()
   automatic: boolean;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional({ type: 'string' })
+  autoSuspendKey?: string;
 }

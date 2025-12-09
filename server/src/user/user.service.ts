@@ -585,6 +585,7 @@ export class UserService {
   async suspendContract(
     userId: number,
     automatic: boolean = false,
+    autoSuspendKey?: string,
   ): Promise<Date> {
     const user = await this.findOneOrFail(userId, ['contractEvents']);
     if (!user.hasActiveContract) {
@@ -595,6 +596,7 @@ export class UserService {
       type: ContractEventType.SUSPENDED,
       date: new Date(),
       automatic,
+      autoSuspendKey,
     });
     await this.contractEventRepository.save(contractEvent);
     return contractEvent.date;

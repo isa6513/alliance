@@ -75,6 +75,7 @@ import {
   UserActionSummaryDto,
 } from 'src/user/dto/user-action-relations.dto';
 import { RelationString } from 'src/tasks/entities/type';
+import { ContractEventType } from 'src/user/entities/contract-event.entity';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -195,16 +196,33 @@ export class ActionsService {
     const actions = await qb.getMany();
 
     if (relations.length > 0) {
+      const metadata = this.actionRepository.metadata;
       await Promise.all(
         actions.map(async (action) => {
           for (const rel of relations) {
-            const loaded = await this.actionRepository
+            const relationMeta = metadata.relations.find(
+              (r) => r.propertyName === rel,
+            );
+
+            if (!relationMeta) {
+              continue;
+            }
+
+            const relationQb = this.actionRepository
               .createQueryBuilder()
               .relation(Action, rel)
-              .of(action)
-              .loadMany();
+              .of(action);
 
-            (action as Record<keyof Action, unknown>)[rel] = loaded;
+            let loaded: unknown;
+
+            if (relationMeta.isOneToOne || relationMeta.isManyToOne) {
+              loaded = await relationQb.loadOne();
+            } else {
+              loaded = await relationQb.loadMany();
+            }
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (action as any)[rel] = loaded;
           }
         }),
       );
@@ -2048,7 +2066,11 @@ export class ActionsService {
   }
 
   async findUsersToSuspend(now: Date) {
-    const actions = await this.findAllSorted();
+    const actions = await this.findAllSorted([
+      'events',
+      'suite',
+      'participatingTags',
+    ]);
 
     const suiteMap = new Map<
       number,
@@ -2064,6 +2086,7 @@ export class ActionsService {
       if (!action.suite) continue;
 
       const suiteId = action.suite.id;
+      console.log(suiteId);
       if (!suiteMap.has(suiteId)) {
         suiteMap.set(suiteId, {
           suite: action.suite,
@@ -2077,12 +2100,20 @@ export class ActionsService {
     const orderedSuites = Array.from(suiteMap.values()).sort(
       (a, b) => a.orderIndex - b.orderIndex,
     );
-
     const pastSuites = orderedSuites.filter(({ actions }) =>
       actions.every((action) => this.isActionPast(action, now)),
     );
 
-    const failedUsersForSuites = new Map<number, number[]>();
+    const failedUsersForSuites = new Map<number, User[]>();
+
+    const getLastSignedDate = (user: User) => {
+      return (
+        user.contractEvents
+          ?.filter((event) => event.type === ContractEventType.SIGNED)
+          .sort((a, b) => b.date.getTime() - a.date.getTime())[0]?.date ??
+        new Date(0)
+      );
+    };
 
     for (const suite of pastSuites) {
       for (const action of suite.actions) {
@@ -2093,35 +2124,48 @@ export class ActionsService {
           continue;
         }
         const failed = await this.getFailedUsersForEvent(action, event);
+        const failedAndActive = failed.filter((user) => user.hasActiveContract);
+
+        const signedBeforeFailed = failedAndActive.filter(
+          (user) => getLastSignedDate(user) < event.date,
+        );
+
         if (failedUsersForSuites.has(suite.suite.id)) {
-          failedUsersForSuites
-            .get(suite.suite.id)!
-            .push(...failed.map((user) => user.id));
+          failedUsersForSuites.get(suite.suite.id)!.push(...signedBeforeFailed);
         } else {
-          failedUsersForSuites.set(
-            suite.suite.id,
-            failed.map((user) => user.id),
-          );
+          failedUsersForSuites.set(suite.suite.id, signedBeforeFailed);
         }
       }
     }
+    const usersToSuspend = new Set<User>();
+    const suspendReasonKeys = new Map<number, string>();
 
-    const usersToSuspend = new Set<number>();
-
-    for (let i = 1; i < pastSuites.length; i++) {
+    for (let i = 2; i < pastSuites.length; i++) {
       const failedThis = failedUsersForSuites.get(pastSuites[i].suite.id);
       const failedPrevious = failedUsersForSuites.get(
         pastSuites[i - 1].suite.id,
       );
-      if (!failedPrevious || !failedThis) {
+      const failedPreviousPrevious = failedUsersForSuites.get(
+        pastSuites[i - 2].suite.id,
+      );
+      if (!failedPrevious || !failedThis || !failedPreviousPrevious) {
         continue;
       }
-      const failedBoth = failedThis.filter((user) =>
-        failedPrevious.includes(user),
-      );
-      failedBoth.forEach((user) => usersToSuspend.add(user));
-    }
+      const failedAll = failedThis
+        .filter((user) => failedPrevious.some((u) => u.id === user.id))
+        .filter((user) => failedPreviousPrevious.some((u) => u.id === user.id));
 
-    return Array.from(usersToSuspend);
+      for (const user of failedAll) {
+        usersToSuspend.add(user);
+        suspendReasonKeys.set(
+          user.id,
+          `s-${pastSuites[i].suite.id}-${pastSuites[i - 1].suite.id}-${pastSuites[i - 2].suite.id}`,
+        );
+      }
+    }
+    return {
+      usersToSuspend: Array.from(usersToSuspend),
+      suspendReasonKeys,
+    };
   }
 }

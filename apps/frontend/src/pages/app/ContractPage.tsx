@@ -18,7 +18,7 @@ const ContractPage: React.FC = () => {
 
   const [lastContractEvent, setLastContractEvent] = useState<Pick<
     ContractEvent,
-    "type" | "date"
+    "type" | "date" | "automatic"
   > | null>(null);
 
   useEffect(() => {
@@ -37,7 +37,11 @@ const ContractPage: React.FC = () => {
     try {
       const res = await userSignContract();
       if (res.data) {
-        setLastContractEvent({ type: "signed", date: res.data });
+        setLastContractEvent({
+          type: "signed",
+          date: res.data,
+          automatic: false,
+        });
       }
     } catch (error) {
       console.error("Error signing contract:", error);
@@ -53,7 +57,11 @@ const ContractPage: React.FC = () => {
 
       const res = await userSuspendContract();
       if (res.data) {
-        setLastContractEvent({ type: "suspended", date: res.data });
+        setLastContractEvent({
+          type: "suspended",
+          date: res.data,
+          automatic: false,
+        });
       }
     } catch (error) {
       console.error("Error suspending contract:", error);
@@ -77,7 +85,9 @@ const ContractPage: React.FC = () => {
         {lastContractEvent?.type === "suspended" && (
           <Card style={CardStyle.Red}>
             <p>
-              You suspended your contract on{" "}
+              {lastContractEvent.automatic
+                ? "Your contract was suspended automatically on "
+                : "You suspended your contract on "}
               {new Date(lastContractEvent.date).toLocaleDateString()}.
             </p>
           </Card>
