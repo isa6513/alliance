@@ -291,9 +291,9 @@ const ConversationInfoPanel = ({
                   )}
                 {participant.state == "invited" &&
                   (justAddedMember === participant.user.id ? (
-                    <p className="text-sm text-green">Invite sent!</p>
+                    <p className="text-green">Invite sent!</p>
                   ) : (
-                    <p className="text-sm text-zinc-500 mr-2">Invited</p>
+                    <p className="text-zinc-500 mr-2">Invited</p>
                   ))}
               </Link>
             ))}

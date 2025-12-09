@@ -176,10 +176,17 @@ const MessagesPage = () => {
           return response.data;
         }
       } else {
+        const names = sendingNewMessageToIds.map(
+          (id) => friends?.find((friend) => friend.id === id)?.displayName
+        );
+        if (user && !user.anonymous) {
+          names.push(user.name);
+        }
+        const title = names.join(", ");
         const response = await conversationCreateGroupConversation({
           body: {
             participantIds: sendingNewMessageToIds,
-            title: "New group",
+            title: title,
           },
         });
         if (response.data) {
@@ -193,6 +200,8 @@ const MessagesPage = () => {
       setSelectedConvoId,
       setConversations,
       selectedConvo,
+      friends,
+      user,
     ]);
 
   const joinedConversations = useMemo(() => {
