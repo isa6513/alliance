@@ -5,6 +5,7 @@ import { Reply, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, href } from "react-router";
 import UserDisplayName from "./UserDisplayName";
+import { formatTime } from "@alliance/shared/lib/utils";
 
 const Message = ({
   message,
@@ -85,14 +86,25 @@ const Message = ({
             </div>
           )}
           {isFirstInGroup && (
-            <span className="font-medium">
-              <UserDisplayName
-                staff={message.author.staff}
-                grouplead={message.author.isCommunityLeader}
+            <div className="font-medium flex flex-row items-center">
+              <Link
+                to={href("/member/:id", { id: message.author.id.toString() })}
               >
-                {message.author.displayName}
-              </UserDisplayName>
-            </span>
+                <UserDisplayName
+                  staff={message.author.staff}
+                  grouplead={message.author.isCommunityLeader}
+                >
+                  {message.author.displayName}
+                </UserDisplayName>
+              </Link>
+              {message.createdAt && (
+                <span className="text-zinc-500 text-sm ml-2 mt-px">
+                  {formatTime(new Date(message.createdAt), {
+                    addSuffix: true,
+                  }).replace("less than a minute ago", "now")}
+                </span>
+              )}
+            </div>
           )}
           {message.body && <span>{message.body}</span>}
           {attachments.length > 0 && (

@@ -361,9 +361,10 @@ const MessagesPage = () => {
             </div>
             <input
               placeholder="Search"
-              className="w-full border border-zinc-200 rounded-md p-2 !bg-zinc-100 text-black"
+              className="w-full border border-zinc-200 rounded-md p-2 !bg-zinc-100 text-black focus:outline-none"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              autoFocus
             />
           </div>
           <div className="border-t border-zinc-200">

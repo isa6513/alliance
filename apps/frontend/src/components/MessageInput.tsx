@@ -26,6 +26,7 @@ interface MessageInputProps {
   clearReplyingTo: () => void;
   inputRef: React.RefObject<HTMLTextAreaElement | null>;
   compact?: boolean;
+  existingConversation?: boolean;
 }
 
 const SPINNER_DELAY_MS = 50;
@@ -41,6 +42,7 @@ const MessageInput = ({
   clearReplyingTo,
   inputRef,
   compact = false,
+  existingConversation = true,
 }: MessageInputProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
@@ -232,7 +234,7 @@ const MessageInput = ({
         <textarea
           ref={inputRef}
           value={message}
-          autoFocus={!compact}
+          autoFocus={!compact && existingConversation}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}

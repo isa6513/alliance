@@ -101,9 +101,11 @@ const MessageRecipientSelect: React.FC<MessageRecipientSelectProps> = ({
         {canSelectMore && (
           <input
             type="text"
+            key={selectedUsers.length}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={placeholder}
+            autoFocus
             disabled={inputDisabled}
             className="border-zinc-300 rounded-md py-2.5 text-sm disabled:bg-zinc-100 disabled:text-zinc-500 focus:outline-none"
           />

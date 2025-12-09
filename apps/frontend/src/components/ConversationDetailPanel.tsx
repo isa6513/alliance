@@ -491,6 +491,7 @@ const ConversationDetailPanel = ({
           </div>
           <MessageInput
             message={message}
+            existingConversation={mode === "existing"}
             setMessage={setMessage}
             key={selectedConvo?.id ?? "new"}
             attachments={attachments}
