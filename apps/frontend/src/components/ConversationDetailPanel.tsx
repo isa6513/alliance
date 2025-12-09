@@ -388,7 +388,7 @@ const ConversationDetailPanel = ({
                 <div className="flex flex-col gap-2 z-5">
                   <p className="font-semibold text-lg">New message</p>
                   <div className="flex flex-row items-center gap-x-2">
-                    <p className="text-sm font-medium">To:</p>
+                    <p className="font-medium">To:</p>
                     <MessageRecipientSelect
                       users={friends ?? []}
                       selectedUserIds={sendingNewMessageToIds}

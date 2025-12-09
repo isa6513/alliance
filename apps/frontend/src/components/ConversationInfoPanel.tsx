@@ -125,7 +125,7 @@ const ConversationInfoPanel = ({
 
   return (
     <div className="flex-1 relative flex flex-col items-center justify-center">
-      <div className="flex flex-col items-center px-8 w-full gap-y-2">
+      <div className="flex flex-col items-center p-8 w-full gap-y-2">
         {isEditingGroup ? (
           <ProfileImageEditor
             key={0}
@@ -211,7 +211,7 @@ const ConversationInfoPanel = ({
               </Link>
             </p>
           )}
-          <List className={`max-h-[300px] overflow-y-auto w-full`}>
+          <List className={`w-full`}>
             {selectedConvo.participants.map((participant) => (
               <Link
                 key={participant.user.id}

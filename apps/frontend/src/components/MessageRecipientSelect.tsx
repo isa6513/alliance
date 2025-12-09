@@ -78,6 +78,12 @@ const MessageRecipientSelect: React.FC<MessageRecipientSelectProps> = ({
     ? "Search by name"
     : "Remove current selection to choose another";
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Backspace" && event.currentTarget.value.length === 0) {
+      removeUser(selectedUsers[selectedUsers.length - 1].id);
+    }
+  };
+
   return (
     <div className="relative flex flex-row items-center gap-2 flex-wrap">
       {selectedUsers.map((user) => (
@@ -103,11 +109,12 @@ const MessageRecipientSelect: React.FC<MessageRecipientSelectProps> = ({
             type="text"
             key={selectedUsers.length}
             value={query}
+            onKeyDown={handleKeyDown}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={placeholder}
             autoFocus
             disabled={inputDisabled}
-            className="border-zinc-300 rounded-md py-2.5 text-sm disabled:bg-zinc-100 disabled:text-zinc-500 focus:outline-none"
+            className="border-zinc-300 rounded-md py-2.5 disabled:bg-zinc-100 disabled:text-zinc-500 focus:outline-none min-w-48"
           />
         )}
         {query && filteredUsers.length > 0 && (

@@ -258,6 +258,7 @@ const MessagesPage = () => {
     setCreatingNewConversation(true);
     setSelectedConvoId(null);
     setSendingNewMessageToIds([]);
+    setMessagesOpen(true);
     setSearch("");
   }, [setSelectedConvoId]);
 
