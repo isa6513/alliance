@@ -29,7 +29,7 @@ interface MessageInputProps {
   existingConversation?: boolean;
 }
 
-const SPINNER_DELAY_MS = 50;
+const SPINNER_DELAY_MS = 150;
 
 const MessageInput = ({
   message,

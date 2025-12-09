@@ -176,9 +176,9 @@ const MessagesPage = () => {
           return response.data;
         }
       } else {
-        const names = sendingNewMessageToIds.map(
-          (id) => friends?.find((friend) => friend.id === id)?.displayName
-        );
+        const names = sendingNewMessageToIds
+          .map((id) => friends?.find((friend) => friend.id === id)?.displayName)
+          .filter((name) => name !== undefined);
         if (user && !user.anonymous) {
           names.push(user.name);
         }
