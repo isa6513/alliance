@@ -131,9 +131,31 @@ const ConversationDetailPanel = ({
     [readImagesFromFiles]
   );
 
+  function isDraggingImage(e: React.DragEvent) {
+    const items = e.dataTransfer?.items;
+    if (!items) return false;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+
+      if (item.kind === "file" && item.type.startsWith("image/")) {
+        return true;
+      }
+
+      if (item.type.startsWith("image/")) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   const onDragEnterCapture = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isDraggingImage(e)) {
+      return;
+    }
     panelDragCounterRef.current += 1;
     setIsDraggingPanel(true);
   };
