@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, href } from "react-router";
 import UserDisplayName from "./UserDisplayName";
 import { formatTime } from "@alliance/shared/lib/utils";
+import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 
 const Message = ({
   message,
@@ -106,7 +107,9 @@ const Message = ({
               )}
             </div>
           )}
-          {message.body && <span>{message.body}</span>}
+          {message.body && (
+            <AppMarkdownWrapper markdownContent={message.body} />
+          )}
           {attachments.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
               {attachments.map((attachment, idx) => (

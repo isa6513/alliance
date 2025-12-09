@@ -56,11 +56,11 @@ const ActionUpdateCard = ({
           )}
         </div>
       </div>
-      <div className="p-3 md:p-5 w-full gap-y-1 bg-white">
-        {!!update.content.body && (
+      {!!update.content.body && (
+        <div className="p-3 md:p-5 w-full gap-y-1 bg-white">
           <EditableContentRenderer content={update.content} className="" />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
