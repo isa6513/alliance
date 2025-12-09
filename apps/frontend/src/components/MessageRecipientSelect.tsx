@@ -79,7 +79,7 @@ const MessageRecipientSelect: React.FC<MessageRecipientSelectProps> = ({
     : "Remove current selection to choose another";
 
   return (
-    <div className="relative flex flex-row items-center gap-x-2">
+    <div className="relative flex flex-row items-center gap-2 flex-wrap">
       {selectedUsers.map((user) => (
         <div
           className="flex items-center justify-between rounded px-1 py-1 text-sm bg-zinc-100 shrink-0"
@@ -120,7 +120,9 @@ const MessageRecipientSelect: React.FC<MessageRecipientSelectProps> = ({
                 onClick={() => addUser(user.id)}
               >
                 <ProfileImage pfp={user.profilePicture} size="medium" />
-                <span className="font-medium">{user.displayName}</span>
+                <span className="font-medium whitespace-nowrap">
+                  {user.displayName}
+                </span>
               </button>
             ))}
           </div>

@@ -425,32 +425,40 @@ const MessagesPage = () => {
                   {pendingInvites?.map((conversation) => (
                     <div
                       key={conversation.id}
-                      className={`p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row items-center gap-x-2 ${
+                      className={`p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row justify-between items-center gap-x-3 ${
                         selectedConvoId === conversation.id
                           ? "bg-zinc-100"
-                          : "bg-green/10"
+                          : "bg-white"
                       }`}
                       onClick={handleConversationClick(conversation.id)}
                     >
-                      <ProfileImage
-                        pfp={conversation.photo ?? null}
-                        size="large"
-                      />
-                      <div className="flex flex-col">
-                        <span className="font-medium">
-                          {conversation.title}
-                        </span>
-                        <span className="text-sm text-zinc-500 line-clamp-1">
-                          {!!conversation.lastMessage
-                            ? conversation.type === "direct"
-                              ? conversation.lastMessage.body
-                              : conversation.lastMessage.author.displayName +
-                                ": " +
-                                conversation.lastMessage.body
-                            : conversation.type === "direct"
-                            ? "Wants to start a conversation"
-                            : "You were invited to a group"}
-                        </span>
+                      <div className="flex flex-row items-center gap-x-3">
+                        <ProfileImage
+                          pfp={conversation.photo ?? null}
+                          size="large"
+                        />
+                        <div className="flex flex-col">
+                          <span className="font-medium">
+                            {conversation.title}
+                          </span>
+                          <span className="text-sm text-zinc-500 line-clamp-1">
+                            {!!conversation.lastMessage
+                              ? conversation.type === "direct"
+                                ? conversation.lastMessage.body
+                                : conversation.lastMessage.author.displayName +
+                                  ": " +
+                                  conversation.lastMessage.body
+                              : conversation.type === "direct"
+                              ? "Wants to start a conversation"
+                              : "You were invited to a group"}
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        className={`font-semibold text-xs text-white bg-red-500
+                    } rounded-md flex justify-center items-center w-6 h-6`}
+                      >
+                        {conversation.unreadCount ?? 1}
                       </div>
                     </div>
                   ))}
