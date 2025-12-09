@@ -1,6 +1,6 @@
 import React from "react";
 import Footer from "../../components/Footer";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import FAQExpandable from "../../components/FAQExpandable";
@@ -8,6 +8,9 @@ import MemberContract from "../../components/MemberContract";
 import ExampleActionCardList from "../../components/ExampleActionCardList";
 
 const FAQPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const question = searchParams.get("question");
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
@@ -20,7 +23,10 @@ const FAQPage: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-y-6 text-lg">
-            <FAQExpandable title="What is the Alliance?">
+            <FAQExpandable
+              title="What is the Alliance?"
+              expanded={question === "what-is-the-alliance"}
+            >
               <p>
                 The Alliance is a group of people working together to improve
                 the world. Members spend a fraction of their time – currently 15
@@ -35,7 +41,10 @@ const FAQPage: React.FC = () => {
                 processes.
               </p>
             </FAQExpandable>
-            <FAQExpandable title="How do I join the Alliance?">
+            <FAQExpandable
+              title="How do I join the Alliance?"
+              expanded={question === "how-do-i-join"}
+            >
               <p>
                 Membership is currently by invitation only. To request a signup
                 link, please email{" "}
@@ -48,7 +57,10 @@ const FAQPage: React.FC = () => {
                 .
               </p>
             </FAQExpandable>
-            <FAQExpandable title="How is the Alliance structured?">
+            <FAQExpandable
+              title="How is the Alliance structured?"
+              expanded={question === "how-is-the-alliance-structured"}
+            >
               <p>
                 The Alliance is composed of a body of members and a full-time
                 strategic office.
@@ -65,7 +77,10 @@ const FAQPage: React.FC = () => {
                 </li>
               </ol>
             </FAQExpandable>
-            <FAQExpandable title="What are the priorities of the Alliance?">
+            <FAQExpandable
+              title="What are the priorities of the Alliance?"
+              expanded={question === "what-are-the-priorities"}
+            >
               <p>In no particular order, we are focused on:</p>
               <ol className="list-decimal list-inside space-y-2 pl-4">
                 <li>Extreme poverty</li>
@@ -81,7 +96,10 @@ const FAQPage: React.FC = () => {
                 by 25 founding members of the Alliance.
               </p>
             </FAQExpandable>
-            <FAQExpandable title="How is the Alliance governed?">
+            <FAQExpandable
+              title="How is the Alliance governed?"
+              expanded={question === "how-is-the-alliance-governed"}
+            >
               <p>
                 We conduct a membership-wide oversight process that occurs on a
                 regular basis. In the process, the Alliance office asks members
@@ -119,7 +137,10 @@ const FAQPage: React.FC = () => {
                 revision.
               </p>
             </FAQExpandable>
-            <FAQExpandable title="What is expected of members?">
+            <FAQExpandable
+              title="What is expected of members?"
+              expanded={question === "what-is-expected-of-members"}
+            >
               <p>
                 Members are expected to complete all tasks they are assigned on
                 time. Right now, members are not expected to contribute to the
@@ -133,7 +154,10 @@ const FAQPage: React.FC = () => {
 
               <MemberContract id="contract" />
             </FAQExpandable>
-            <FAQExpandable title="How are actions designed and selected?">
+            <FAQExpandable
+              title="How are actions designed and selected?"
+              expanded={question === "how-are-actions-designed-and-selected"}
+            >
               <p>
                 Action design is a creative, open-ended process that searches
                 for levers of change that members can pull. The office draws
@@ -152,7 +176,10 @@ const FAQPage: React.FC = () => {
 
               <ExampleActionCardList />
             </FAQExpandable>
-            <FAQExpandable title="Why are tasks not optional?">
+            <FAQExpandable
+              title="Why are tasks not optional?"
+              expanded={question === "why-are-tasks-not-optional"}
+            >
               <p>
                 Reliability is the foundation of the Alliance. Since the office
                 knows exactly who and how many members will complete tasks, it
@@ -190,7 +217,10 @@ const FAQPage: React.FC = () => {
                 prioritize effective action over perfect consensus.
               </p>
             </FAQExpandable>
-            <FAQExpandable title="What if I do not, or cannot, complete a task?">
+            <FAQExpandable
+              title="What if I do not, or cannot, complete a task?"
+              expanded={question === "cannot-complete-a-task"}
+            >
               <p>
                 If you have already spent 15 minutes completing tasks in a given
                 week, you can withdraw from your remaining tasks without
@@ -213,7 +243,10 @@ const FAQPage: React.FC = () => {
                 contract.
               </p>
             </FAQExpandable>
-            <FAQExpandable title="Who runs the Alliance?">
+            <FAQExpandable
+              title="Who runs the Alliance?"
+              expanded={question === "who-runs-the-alliance"}
+            >
               <p>
                 The Alliance is run by Sidney Hough and Mark Xu. The full list
                 of Alliance staff can be found{" "}
@@ -223,7 +256,10 @@ const FAQPage: React.FC = () => {
                 .
               </p>
             </FAQExpandable>
-            <FAQExpandable title="How is the Alliance funded?">
+            <FAQExpandable
+              title="How is the Alliance funded?"
+              expanded={question === "how-is-the-alliance-funded"}
+            >
               <p>
                 Initial funding for the Alliance was provided by{" "}
                 <a href="https://barnes.page/" className="text-link">

@@ -1,6 +1,5 @@
 import {
   type ClipboardEvent,
-  type DragEvent,
   type KeyboardEvent,
   type Dispatch,
   type SetStateAction,
@@ -44,9 +43,7 @@ const MessageInput = ({
   compact = false,
   existingConversation = true,
 }: MessageInputProps) => {
-  const [isDragging, setIsDragging] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
-  const dragCounterRef = useRef(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const canSend = message.trim().length > 0 || attachments.length > 0;
 
@@ -123,35 +120,6 @@ const MessageInput = ({
     [handleFilesSelected]
   );
 
-  const onDragEnter = (e: DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounterRef.current += 1;
-    setIsDragging(true);
-  };
-
-  const onDragOver = (e: DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const onDragLeave = (e: DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounterRef.current -= 1;
-    if (dragCounterRef.current <= 0) {
-      setIsDragging(false);
-    }
-  };
-
-  const onDrop = async (e: DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-    dragCounterRef.current = 0;
-    await handleFilesSelected(e.dataTransfer?.files ?? null);
-  };
-
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -180,10 +148,6 @@ const MessageInput = ({
       className={`flex flex-col gap-y-3 bg-white pb-15 relative ${
         compact ? "px-4 md:pb-2" : "px-8  md:pb-4"
       }`}
-      onDragEnter={onDragEnter}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
     >
       {replyingTo && (
         <Card className="p-3 flex flex-row items-center justify-between">
@@ -272,12 +236,6 @@ const MessageInput = ({
           )}
         </div>
       </div>
-      {isDragging && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 rounded-md pointer-events-none">
-          <div className="text-white font-medium">Drop images to attach</div>
-        </div>
-      )}
-
       <div className="flex items-center justify-between gap-3 text-sm text-zinc-600 px-1"></div>
     </div>
   );
