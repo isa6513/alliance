@@ -151,21 +151,21 @@ const ConversationDetailPanel = ({
   }
 
   const onDragEnterCapture = (e: React.DragEvent) => {
+    if (!isDraggingImage(e)) return;
     e.preventDefault();
     e.stopPropagation();
-    if (!isDraggingImage(e)) {
-      return;
-    }
     panelDragCounterRef.current += 1;
     setIsDraggingPanel(true);
   };
 
   const onDragOverCapture = (e: React.DragEvent) => {
+    if (!isDraggingImage(e)) return;
     e.preventDefault();
     e.stopPropagation();
   };
 
   const onDragLeaveCapture = (e: React.DragEvent) => {
+    if (!isDraggingImage(e)) return;
     e.preventDefault();
     e.stopPropagation();
     panelDragCounterRef.current -= 1;
