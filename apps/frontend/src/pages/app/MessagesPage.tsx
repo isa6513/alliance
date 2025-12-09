@@ -461,7 +461,7 @@ const MessagesPage = () => {
                         className={`font-semibold text-xs text-white bg-red-500
                     } rounded-md flex justify-center items-center w-6 h-6 shrink-0`}
                       >
-                        {conversation.unreadCount ?? 1}
+                        {conversation.unreadCount || 1}
                       </div>
                     </div>
                   ))}
