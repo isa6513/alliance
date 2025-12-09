@@ -782,13 +782,13 @@ export class ConversationService {
       .createQueryBuilder('message')
       .where('message.conversationId = :conversationId', { conversationId })
       .andWhere('message.authorId != :userId', { userId })
-      .andWhere('message.createdAt > :since', { since })
-      .andWhere(
-        'message.id != :lastReadMessageId OR :lastReadMessageId IS NULL',
-        {
-          lastReadMessageId: participant.lastReadMessage?.id,
-        },
-      );
+      .andWhere('message.createdAt > :since', { since });
+
+    if (participant.lastReadMessage?.id) {
+      qb.andWhere('message.id != :lastReadMessageId', {
+        lastReadMessageId: participant.lastReadMessage.id,
+      });
+    }
 
     return qb.getCount();
   }
