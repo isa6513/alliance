@@ -2013,7 +2013,11 @@ export class ActionsService {
     const completionActivities = await this.actionActivityRepository.find({
       where: {
         actionId: action.id,
-        type: ActionActivityType.USER_COMPLETED,
+        type: In([
+          ActionActivityType.USER_COMPLETED,
+          ActionActivityType.USER_WONT_COMPLETE,
+          ActionActivityType.USER_DECLINED,
+        ]),
       },
     });
 
@@ -2034,54 +2038,90 @@ export class ActionsService {
     return action.events[memberActionIndex + 1];
   }
 
-  async getUsersToSuspend(
-    actionId: number,
-    prevActionId: number,
-    now: Date,
-  ): Promise<User[]> {
-    const action = await this.actionRepository.findOneOrFail({
-      where: { id: actionId },
-      relations: ['events', 'participatingTags', 'manualCohortUsers'],
-    });
-    const event = action.events.find(
-      (event) => event.newStatus === ActionStatus.MemberAction,
+  isActionPast(action: Action, now: Date): boolean {
+    return (
+      action.events.some(
+        (event) =>
+          event.newStatus === ActionStatus.MemberAction && event.date < now,
+      ) && action.status !== ActionStatus.MemberAction
     );
-    if (!event) {
-      return [];
+  }
+
+  async findUsersToSuspend(now: Date) {
+    const actions = await this.findAllSorted();
+
+    const suiteMap = new Map<
+      number,
+      {
+        suite: ActionSuite;
+        actions: Action[];
+        orderIndex: number;
+      }
+    >();
+
+    for (let i = 0; i < actions.length; i++) {
+      const action = actions[i];
+      if (!action.suite) continue;
+
+      const suiteId = action.suite.id;
+      if (!suiteMap.has(suiteId)) {
+        suiteMap.set(suiteId, {
+          suite: action.suite,
+          actions: [],
+          orderIndex: i,
+        });
+      }
+      suiteMap.get(suiteId)!.actions.push(action);
     }
 
-    const didntComplete1 = await this.getFailedUsersForEvent(action, event);
-    const prevAction = await this.actionRepository.findOneOrFail({
-      where: { id: prevActionId },
-      relations: ['events', 'participatingTags', 'manualCohortUsers'],
-    });
-    const prevEvent = prevAction.events.find(
-      (event) => event.newStatus === ActionStatus.MemberAction,
+    const orderedSuites = Array.from(suiteMap.values()).sort(
+      (a, b) => a.orderIndex - b.orderIndex,
     );
-    if (!prevEvent) {
-      return [];
+
+    const pastSuites = orderedSuites.filter(({ actions }) =>
+      actions.every((action) => this.isActionPast(action, now)),
+    );
+
+    const failedUsersForSuites = new Map<number, number[]>();
+
+    for (const suite of pastSuites) {
+      for (const action of suite.actions) {
+        const event = action.events.find(
+          (event) => event.newStatus === ActionStatus.MemberAction,
+        );
+        if (!event) {
+          continue;
+        }
+        const failed = await this.getFailedUsersForEvent(action, event);
+        if (failedUsersForSuites.has(suite.suite.id)) {
+          failedUsersForSuites
+            .get(suite.suite.id)!
+            .push(...failed.map((user) => user.id));
+        } else {
+          failedUsersForSuites.set(
+            suite.suite.id,
+            failed.map((user) => user.id),
+          );
+        }
+      }
     }
 
-    const didntComplete2 = await this.getFailedUsersForEvent(
-      prevAction,
-      prevEvent,
-    );
+    const usersToSuspend = new Set<number>();
 
-    const deadline1 = await this.getNextEvent(action);
-    const deadline2 = await this.getNextEvent(prevAction);
-    if (
-      !deadline1 ||
-      !deadline2 ||
-      deadline1.date > now ||
-      deadline2.date > now
-    ) {
-      return [];
+    for (let i = 1; i < pastSuites.length; i++) {
+      const failedThis = failedUsersForSuites.get(pastSuites[i].suite.id);
+      const failedPrevious = failedUsersForSuites.get(
+        pastSuites[i - 1].suite.id,
+      );
+      if (!failedPrevious || !failedThis) {
+        continue;
+      }
+      const failedBoth = failedThis.filter((user) =>
+        failedPrevious.includes(user),
+      );
+      failedBoth.forEach((user) => usersToSuspend.add(user));
     }
 
-    const didntCompleteBoth = didntComplete1.filter((user) =>
-      didntComplete2.some((u) => u.id === user.id),
-    );
-
-    return didntCompleteBoth;
+    return Array.from(usersToSuspend);
   }
 }

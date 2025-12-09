@@ -41,25 +41,13 @@ export class ContractSuspenderWorker {
       PROCESS_ONE_LOCK_KEY1,
       PROCESS_ONE_LOCK_KEY2,
       async () => {
-        const actions = await this.actionsService.findAllSorted();
-
-        if (actions.length < 2) {
-          return;
-        }
-
-        const lastAction = actions[actions.length - 1];
-        const prevAction = actions[actions.length - 2];
-
         const now = new Date();
 
-        const usersToSuspend = await this.actionsService.getUsersToSuspend(
-          lastAction.id,
-          prevAction.id,
-          now,
-        );
+        const usersToSuspend =
+          await this.actionsService.findUsersToSuspend(now);
 
-        for (const user of usersToSuspend) {
-          await this.userService.suspendContract(user.id, true);
+        for (const userId of usersToSuspend) {
+          await this.userService.suspendContract(userId, true);
         }
       },
     );
