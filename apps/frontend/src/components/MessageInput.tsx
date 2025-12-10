@@ -145,8 +145,8 @@ const MessageInput = ({
 
   return (
     <div
-      className={`flex flex-col gap-y-3 bg-white pb-15 relative ${
-        compact ? "px-4 md:pb-2" : "px-8  md:pb-4"
+      className={`flex flex-col gap-y-3 bg-white relative ${
+        compact ? "px-4 pb-2" : "px-8 pb-4"
       }`}
     >
       {replyingTo && (
