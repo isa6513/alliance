@@ -351,7 +351,7 @@ const MessagesPage = () => {
 
   return (
     <div
-      className="flex flex-row w-full h-[calc(100dvh-var(--mobile-nav-height))]"
+      className="flex flex-row w-full h-[calc(100dvh-var(--mobile-nav-height))] overflow-hidden"
       ref={containerRef}
     >
       <div
