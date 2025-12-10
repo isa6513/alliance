@@ -32,6 +32,7 @@ export type ContractEvent = {
     type: ContractEventType;
     date: string;
     automatic: boolean;
+    autoSuspendKey?: string;
 };
 
 export type NotificationChannel = 'text' | 'email' | 'push';
@@ -688,7 +689,7 @@ export type ReminderCohortType = 'all_uncompleted' | 'tag' | 'custom';
 
 export type ActionEventNotifType = 'announcement' | 'misseddeadline' | 'reminder' | 'personalreminder';
 
-export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder' | 'forum_digest' | 'missed_deadline' | 'missed_second_deadline' | 'custom_action_reminder';
+export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder' | 'forum_digest' | 'missed_deadline' | 'missed_second_deadline' | 'custom_action_reminder' | 'contract_suspended';
 
 export type Mail = {
     id: number;
@@ -1438,6 +1439,11 @@ export type ExportActionDto = {
 
 export type PasteJsonDto = {
     body: string;
+};
+
+export type SuspensionPlanDto = {
+    date: string;
+    users: Array<ProfileDto>;
 };
 
 export type UserActionSummaryDto = {
@@ -3890,6 +3896,22 @@ export type ActionsPasteJsonResponses = {
 };
 
 export type ActionsPasteJsonResponse = ActionsPasteJsonResponses[keyof ActionsPasteJsonResponses];
+
+export type ActionsSuspendPlansData = {
+    body?: never;
+    path?: never;
+    query: {
+        rangeStart: string;
+        rangeEnd: string;
+    };
+    url: '/actions/suspendPlans';
+};
+
+export type ActionsSuspendPlansResponses = {
+    200: Array<SuspensionPlanDto>;
+};
+
+export type ActionsSuspendPlansResponse = ActionsSuspendPlansResponses[keyof ActionsSuspendPlansResponses];
 
 export type ActionsActionRelationsData = {
     body?: never;

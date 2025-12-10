@@ -38,6 +38,8 @@ import {
   ExportActionDto,
   FormResponseOutputDto,
   LatLonDto,
+  ReminderGroupPlanDto,
+  SuspensionPlanDto,
   UpdateActionActivityDto,
   UpdateActionDto,
   UpdateActionEventDto,
@@ -76,6 +78,7 @@ import {
 } from 'src/user/dto/user-action-relations.dto';
 import { RelationString } from 'src/tasks/entities/type';
 import { ContractEventType } from 'src/user/entities/contract-event.entity';
+import { ProfileDto } from 'src/user/user.dto';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -2178,5 +2181,36 @@ export class ActionsService {
       ),
       suspendReasonKeys,
     };
+  }
+
+  async getSuspendPlans(
+    rangeStart: Date,
+    rangeEnd: Date,
+    stepHours: number = 1,
+  ): Promise<SuspensionPlanDto[]> {
+    const plans: SuspensionPlanDto[] = [];
+    let date = rangeStart;
+    const suspendedUsers = new Set<number>();
+    while (new Date(date).getTime() <= new Date(rangeEnd).getTime()) {
+      const { usersToSuspend } = await this.findUsersToSuspend(date);
+      const notAlreadySuspended = usersToSuspend.filter(
+        (user) => !suspendedUsers.has(user.id),
+      );
+      if (notAlreadySuspended.length > 0) {
+        for (const user of notAlreadySuspended) {
+          suspendedUsers.add(user.id);
+        }
+        plans.push({
+          date,
+          users: notAlreadySuspended.map((user) => new ProfileDto(user)),
+        });
+      }
+      date = new Date(new Date(date).getTime() + stepHours * 60 * 60 * 1000);
+    }
+    return plans;
+  }
+
+  async getReminderPlansOverview(): Promise<ReminderGroupPlanDto[]> {
+    return [];
   }
 }

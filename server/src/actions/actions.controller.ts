@@ -51,6 +51,8 @@ import {
   PreviewEmailHtmlDto,
   PreviewTextDto,
   PreviewTextMessageResponse,
+  ReminderGroupPlanDto,
+  SuspensionPlanDto,
   UpdateActionActivityDto,
   UpdateActionDto,
   UpdateActionEventDto,
@@ -746,6 +748,23 @@ export class ActionsController {
   @ApiOkResponse({ type: ActionDto })
   pasteJson(@Body() body: PasteJsonDto): Promise<ActionDto> {
     return this.actionsService.importAction(body.body);
+  }
+
+  @Get('reminderPlansOverview')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ReminderGroupPlanDto, isArray: true })
+  reminderPlansOverview(): Promise<ReminderGroupPlanDto[]> {
+    return this.actionsService.getReminderPlansOverview();
+  }
+
+  @Get('suspendPlans')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: SuspensionPlanDto, isArray: true })
+  suspendPlans(
+    @Query('rangeStart') rangeStart: Date,
+    @Query('rangeEnd') rangeEnd: Date,
+  ): Promise<SuspensionPlanDto[]> {
+    return this.actionsService.getSuspendPlans(rangeStart, rangeEnd, 6);
   }
 
   // TODO move ====================================
