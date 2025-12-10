@@ -23,8 +23,9 @@ import {
   PreviewNotificationPlan,
 } from 'src/notifs/action-event-reminder.service';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
+import { generateCIDForShareUrl } from 'src/notifs/notif-utils';
 import { NotifsService, shouldTextUser } from 'src/notifs/notifs.service';
-import { actionActivityUrl } from 'src/search/approutes';
+import { actionActivityUrl, actionUrl, withCid } from 'src/search/approutes';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { RelationString } from 'src/tasks/entities/type';
@@ -69,6 +70,7 @@ import {
   ActionActivityType,
 } from './entities/action-activity.entity';
 import { ActionEvent, ActionStatus } from './entities/action-event.entity';
+import { ActionShareUrl } from './entities/action-share-url.entity';
 import { ActionSuite } from './entities/action-suite.entity';
 import {
   ActionUpdate,
@@ -113,6 +115,8 @@ export class ActionsService {
     private readonly actionSuiteRepository: Repository<ActionSuite>,
     @InjectRepository(Form)
     private readonly formRepository: Repository<Form>,
+    @InjectRepository(ActionShareUrl)
+    private readonly actionShareUrlRepository: Repository<ActionShareUrl>,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
     private readonly notifsService: NotifsService,
@@ -2216,5 +2220,21 @@ export class ActionsService {
 
   async getReminderPlansOverview(): Promise<ReminderGroupPlanDto[]> {
     return [];
+  }
+
+  async getShareLink(actionId: number, userId: number): Promise<string> {
+    const cid = generateCIDForShareUrl();
+    const url = withCid(actionUrl(actionId, true), cid);
+
+    const shareUrl = await this.actionShareUrlRepository.create({
+      url,
+      user: { id: userId },
+      action: { id: actionId },
+      data: {
+        cid,
+      },
+    });
+    await this.actionShareUrlRepository.save(shareUrl);
+    return shareUrl.url;
   }
 }
