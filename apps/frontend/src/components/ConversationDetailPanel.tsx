@@ -189,6 +189,12 @@ const ConversationDetailPanel = ({
     }
   }, []);
 
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "instant" });
+  }, [convoMessages]);
+
   const replyingToMessage = useMemo(() => {
     return convoMessages?.find((message) => message.id === replyingTo);
   }, [convoMessages, replyingTo]);
@@ -471,6 +477,7 @@ const ConversationDetailPanel = ({
                     isFocused={focusedMessageId === message.id}
                   />
                 ))}
+                <div ref={bottomRef} />
               </div>
             ) : null}
             {mode === "existing" &&
