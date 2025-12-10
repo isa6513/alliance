@@ -339,6 +339,7 @@ const useMessagingUnread = () => {
       .then((res) => {
         if (res.data) {
           setUnread(res.data.count);
+          setHasUpdates(false);
         }
       })
       .catch((err) => {
@@ -371,7 +372,7 @@ const useMessagingUnread = () => {
     };
   }, []);
 
-  return { unread, refreshUnreadCount, hasUpdates };
+  return { unread, refreshUnreadCount, hasUpdates, setUnread };
 };
 
 export { useMessagingUnread };

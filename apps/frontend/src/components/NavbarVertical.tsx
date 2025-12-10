@@ -100,6 +100,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
   const {
     unread: unreadMessages,
     hasUpdates,
+    setUnread,
     refreshUnreadCount,
   } = useMessagingUnread();
 
@@ -239,6 +240,12 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
       refreshUnreadCount();
     }
   }, [hasUpdates, refreshUnreadCount, currentLocation]);
+
+  useEffect(() => {
+    if (currentLocation === NavbarPage.Messages) {
+      setUnread(0);
+    }
+  }, [currentLocation, setUnread]);
 
   const unreadNotifsForPage = useMemo((): Partial<
     Record<NavbarPage, number>
