@@ -15,12 +15,32 @@ import {
   CommentParentObject,
 } from 'src/forum/entities/comment.entity';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
+import { ForumService } from 'src/forum/forum.service';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
 import {
   ActionEventReminderService,
   NOTIFICATION_LOOKBACK_WINDOW_MS,
   PreviewNotificationPlan,
 } from 'src/notifs/action-event-reminder.service';
+import { LikeNotificationService } from 'src/notifs/like-notification.service';
+import { NotifsService, shouldTextUser } from 'src/notifs/notifs.service';
+import { actionActivityUrl } from 'src/search/approutes';
+import { Form } from 'src/tasks/entities/form.entity';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import { RelationString } from 'src/tasks/entities/type';
+import { FormSchema } from 'src/tasks/schema';
+import {
+  CommunityUserInfoDto,
+  UserActionRelationDetailDto,
+  UserActionRelationsForUserDto,
+  UserActionRelationsResponseDto,
+  UserActionRelationStatus,
+  UserActionSummaryDto,
+} from 'src/user/dto/user-action-relations.dto';
+import { ContractEventType } from 'src/user/entities/contract-event.entity';
+import { Tag } from 'src/user/entities/tag.entity';
+import { User } from 'src/user/entities/user.entity';
+import { ProfileDto } from 'src/user/user.dto';
 import { ILike, In, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import {
@@ -49,36 +69,16 @@ import {
   ActionActivityType,
 } from './entities/action-activity.entity';
 import { ActionEvent, ActionStatus } from './entities/action-event.entity';
-import { Action, ActionTaskType } from './entities/action.entity';
-import { Tag } from 'src/user/entities/tag.entity';
-import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import { User } from 'src/user/entities/user.entity';
+import { ActionSuite } from './entities/action-suite.entity';
 import {
   ActionUpdate,
   ActionUpdateNotifyType,
 } from './entities/action-update.entity';
+import { Action, ActionTaskType } from './entities/action.entity';
 import {
   ReminderGroup,
   ReminderGroupTimingMode,
 } from './entities/reminder-group.entity';
-import { ActionSuite } from './entities/action-suite.entity';
-import { NotifsService, shouldTextUser } from 'src/notifs/notifs.service';
-import { LikeNotificationService } from 'src/notifs/like-notification.service';
-import { actionActivityUrl } from 'src/search/approutes';
-import { ForumService } from 'src/forum/forum.service';
-import { Form } from 'src/tasks/entities/form.entity';
-import { FormSchema } from 'src/tasks/schema';
-import {
-  CommunityUserInfoDto,
-  UserActionRelationDetailDto,
-  UserActionRelationsForUserDto,
-  UserActionRelationsResponseDto,
-  UserActionRelationStatus,
-  UserActionSummaryDto,
-} from 'src/user/dto/user-action-relations.dto';
-import { RelationString } from 'src/tasks/entities/type';
-import { ContractEventType } from 'src/user/entities/contract-event.entity';
-import { ProfileDto } from 'src/user/user.dto';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -428,6 +428,10 @@ export class ActionsService {
         'suite',
       ] satisfies RelationString<Action>[],
     });
+
+    if (action?.publicOnly) {
+      return instanceToPlain(action) as Action;
+    }
 
     if (
       !action ||

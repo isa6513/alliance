@@ -1,16 +1,19 @@
 import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 import { Link, Outlet, href, useOutletContext } from "react-router";
-import { TaskPanelContext } from "./ActionPageTaskPanel";
-import Comments from "./Comments";
+import chevronLeft from "../assets/icons8-expand-arrow-96.png";
+import { useAuth } from "../lib/AuthContext";
 import { getLastAndNextEvent } from "../pages/app/LargeActionCard";
 import TaskTimeInfo from "../pages/app/TaskTimeInfo";
 import ActionEventsPanel from "./ActionEventsPanel";
-import chevronLeft from "../assets/icons8-expand-arrow-96.png";
+import { TaskPanelContext } from "./ActionPageTaskPanel";
+import Comments from "./Comments";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();
 
   const action = context.action;
+
+  const { user } = useAuth();
 
   if (!action) {
     return null;
@@ -71,14 +74,16 @@ const ActionContents = () => {
           <AppMarkdownWrapper markdownContent={action?.body} />
         </div>
 
-        <div>
-          <p className="font-semibold text-xl mb-4">Discussion</p>
-          <p className="mb-8">
-            Questions and comments about this action that other members would
-            find helpful.
-          </p>
-          <Comments objectId={action.id} type={"action"} />
-        </div>
+        {user && (
+          <div>
+            <p className="font-semibold text-xl mb-4">Discussion</p>
+            <p className="mb-8">
+              Questions and comments about this action that other members would
+              find helpful.
+            </p>
+            <Comments objectId={action.id} type={"action"} />
+          </div>
+        )}
       </div>
     </div>
   );
