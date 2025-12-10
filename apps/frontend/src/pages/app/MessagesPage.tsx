@@ -298,10 +298,11 @@ const MessagesPage = () => {
   );
 
   useEffect(() => {
+    if (!conversations) return;
     const param = params.get("to");
     if (param) {
       const userId = parseInt(param);
-      const existing = conversations?.find(
+      const existing = conversations.find(
         (convo) =>
           convo.type === "direct" &&
           convo.participants.some(
