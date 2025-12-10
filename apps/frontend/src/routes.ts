@@ -21,7 +21,6 @@ export default [
   route("/progress/:slug", "pages/static/ProgressPostPage.tsx"),
 
   route("/memberquotes", "pages/static/oneoff/MemberQuotesPage.tsx"),
-  route("/flyerexport", "pages/static/FlyerExportPage.tsx"),
 
   route("/actions/completed", "pages/app/PublicActionCompletedPage.tsx"),
   layout("applayout.tsx", [
@@ -58,6 +57,8 @@ export default [
       route("/commit", "pages/app/CommitActionPage.tsx"),
       route("/information", "pages/app/InformationPage.tsx"),
       route("/members", "pages/app/MembersListPage.tsx"),
+
+      route("/flyerexport", "pages/app/FlyerExportPage.tsx"),
     ]),
   ]),
   layout("loggedoutonly.tsx", [

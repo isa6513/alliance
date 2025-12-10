@@ -18,7 +18,7 @@ const ExportableFlyer: React.FC<ExportableFlyerProps> = ({
 
   children,
 }: ExportableFlyerProps) => {
-  const wrapperRef = useRef(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [exporting, setExporting] = useState(false);
 
   async function handleExport() {

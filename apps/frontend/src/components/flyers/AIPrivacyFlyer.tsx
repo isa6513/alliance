@@ -1,8 +1,4 @@
-const generateBarcodeUrl = (url: string) => {
-  return (
-    "https://api.qrserver.com/v1/create-qr-code/?data=" + url + "&size=100x100"
-  );
-};
+import { generateBarcodeUrl } from "../../lib/utils";
 
 interface AIPrivacyFlyerProps {
   url: string;
@@ -11,7 +7,7 @@ interface AIPrivacyFlyerProps {
 const AIPrivacyFlyer: React.FC<AIPrivacyFlyerProps> = ({
   url,
 }: AIPrivacyFlyerProps) => {
-  const qrCodeUrl = generateBarcodeUrl(url);
+  const qrCodeUrl = generateBarcodeUrl(url, 200);
   return (
     <>
       <h1 className="text-[0.3in] font-bold font-serif">
@@ -25,8 +21,8 @@ const AIPrivacyFlyer: React.FC<AIPrivacyFlyerProps> = ({
       <img src={qrCodeUrl} alt="QR Code" className="w-[2in] h-[2in]" />
 
       <p className="text-[0.2in] mt-[0.4in] mb-[0.4in]">
-        This experiment is being run by the Alliance, a group of people working
-        together to improve the world.
+        This experiment is being run by the Alliance, an online community taking
+        weekly actions to improve the world.
       </p>
     </>
   );
