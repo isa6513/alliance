@@ -82,7 +82,7 @@ export class ContractSuspenderWorker {
     );
 
     if (ran === null) {
-      this.logger.log('processOne skipped bc of lock');
+      this.logger.log('suspender processOne skipped bc of lock');
     }
   }
 }

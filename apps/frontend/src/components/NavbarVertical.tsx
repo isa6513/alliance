@@ -1,7 +1,14 @@
 import { Link, href, useOutletContext } from "react-router";
 import { AppLayoutOutletContext } from "../applayout";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useNotifications } from "../lib/useNotifications";
 import { useAuth } from "../lib/AuthContext";
 import { Features } from "@alliance/shared/lib/features";
@@ -90,7 +97,11 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
 
   const { unreadCount } = useNotifications();
 
-  const { unread: unreadMessages } = useMessagingUnread();
+  const {
+    unread: unreadMessages,
+    hasUpdates,
+    refreshUnreadCount,
+  } = useMessagingUnread();
 
   const [open, setOpen] = useState(false);
   const navRef = useRef<HTMLDivElement | null>(null);
@@ -222,6 +233,12 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
       .flatMap((section) => section.items)
       .find((item) => item.destination === window.location.pathname)?.page ||
     null;
+
+  useEffect(() => {
+    if (currentLocation !== NavbarPage.Messages && hasUpdates) {
+      refreshUnreadCount();
+    }
+  }, [hasUpdates, refreshUnreadCount, currentLocation]);
 
   const unreadNotifsForPage = useMemo((): Partial<
     Record<NavbarPage, number>
