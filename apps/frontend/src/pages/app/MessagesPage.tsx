@@ -11,16 +11,16 @@ import {
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import { Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router";
+import ConversationDetailPanel from "../../components/ConversationDetailPanel";
 import Spinner from "../../components/Spinner";
 import { useAuth } from "../../lib/AuthContext";
 import useLiveConvoMessages, {
   sortConversations,
   useConversations,
 } from "./messages";
-import { useSearchParams } from "react-router";
-import ConversationDetailPanel from "../../components/ConversationDetailPanel";
-import { Plus } from "lucide-react";
 
 const MessagesPage = () => {
   const [params, setParams] = useSearchParams();
@@ -351,7 +351,7 @@ const MessagesPage = () => {
 
   return (
     <div
-      className="flex flex-row w-full h-[calc(100vh-var(--mobile-nav-height))]"
+      className="flex flex-row w-full h-[calc(100dvh-var(--mobile-nav-height))]"
       ref={containerRef}
     >
       <div
