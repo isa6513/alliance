@@ -5,6 +5,7 @@ import React, { useRef, useState } from "react";
 
 interface ExportableFlyerProps {
   filename?: string;
+
   scale?: number;
   includeBackground?: boolean;
   showPreview?: boolean;
@@ -15,7 +16,6 @@ const ExportableFlyer: React.FC<ExportableFlyerProps> = ({
   filename = "document.pdf",
   scale = 2, // multiplier for html2canvas to improve resolution (1 = baseline)
   includeBackground = true,
-
   children,
 }: ExportableFlyerProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
