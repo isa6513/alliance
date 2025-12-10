@@ -225,6 +225,27 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     };
   }, [updateNavWidth, updateMobileNavHeight]);
 
+  useEffect(() => {
+    const handleDocumentMouseDown = (event: MouseEvent) => {
+      const el = navRef.current;
+      if (!el) return;
+
+      const target = event.target as Node | null;
+
+      // If click is outside the navbar, close the navbar
+      if (target && el.contains(target)) {
+        return;
+      }
+
+      setOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleDocumentMouseDown);
+    return () => {
+      document.removeEventListener("mousedown", handleDocumentMouseDown);
+    };
+  });
+
   const profilePicture = profile?.profilePicture || null;
 
   //   if (!isAuthenticated && !loading) return null;
