@@ -100,21 +100,8 @@ const MessagesPage = () => {
   const [friends, setFriends] = useState<ProfileDto[] | null>(null);
 
   const [messagesOpen, setMessagesOpen] = useState(false);
-  const [isSmall, setIsSmall] = useState(false);
+  const isSmall = document.body.clientWidth < 768;
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (!containerRef.current) return;
-      setIsSmall(document.body.clientWidth < 768);
-    };
-    window.addEventListener("resize", handleResize);
-    handleResize();
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [containerRef.current]);
 
   useEffect(() => {
     if (!user) return;
