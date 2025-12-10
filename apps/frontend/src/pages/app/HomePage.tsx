@@ -30,7 +30,8 @@ export function shouldCompleteAction(action: ActionWithRelation) {
     canCompleteAction(action) &&
     action.shouldParticipate &&
     (action.status === "member_action" ||
-      action.status === "gathering_commitments")
+      action.status === "gathering_commitments") &&
+    !action.publicOnly
   );
 }
 

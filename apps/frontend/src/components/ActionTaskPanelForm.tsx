@@ -142,6 +142,7 @@ const ActionTaskPanelForm = ({
           onFormStarted={onFormStarted}
           onAbandonAction={onAbandonAction}
           renderFormAsCompleted={disabled}
+          publicAction={publicAction}
         />
       </div>
       {error && (

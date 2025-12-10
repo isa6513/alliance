@@ -333,7 +333,7 @@ export class ActionsService {
 
     const filtered: Action[] = [];
     for (const action of actions) {
-      if (await this.userCanSeeAction(action, user)) {
+      if ((await this.userCanSeeAction(action, user)) && !action.publicOnly) {
         filtered.push(action);
       }
     }

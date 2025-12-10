@@ -23,12 +23,12 @@ export default [
   route("/memberquotes", "pages/static/oneoff/MemberQuotesPage.tsx"),
   route("/flyerexport", "pages/static/FlyerExportPage.tsx"),
 
+  route("/actions/completed", "pages/app/PublicActionCompletedPage.tsx"),
   layout("applayout.tsx", [
     layout("navbar.tsx", [
       ...prefix("/actions", [
         route("/", "pages/app/ActionsListPage.tsx"),
         route("/28", "pages/app/SorryPage.tsx"),
-        route("/completed", "pages/app/PublicActionCompletedPage.tsx"),
         route(":id", "pages/app/ActionPage.tsx", [
           layout("components/ActionContents.tsx", [
             index("components/ActionPageTaskPanel.tsx"),

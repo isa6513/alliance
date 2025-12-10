@@ -13,7 +13,8 @@ const ActionContents = () => {
 
   const action = context.action;
 
-  const { user } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+  const loggedInMode = isAuthenticated || loading;
 
   if (!action) {
     return null;
@@ -22,7 +23,7 @@ const ActionContents = () => {
   const { lastEvent, nextEvent } = getLastAndNextEvent(action);
 
   return (
-    <div className="flex flex-col gap-y-3 flex-2 w-full">
+    <div className="flex flex-col gap-y-3 flex-2 w-full justify-center">
       {action?.image && (
         <img
           src={action.image}
@@ -36,13 +37,22 @@ const ActionContents = () => {
             <p className="font-semibold text-3xl font-serif mb-2">
               {action.name}
             </p>
-            <p className="">{action.shortDescription}</p>
+            {loggedInMode ? (
+              <p className="">{action.shortDescription}</p>
+            ) : (
+              <TaskTimeInfo
+                action={action}
+                nextEvent={nextEvent}
+                lastEvent={lastEvent}
+                absoluteDeadline={true}
+              />
+            )}
           </div>
         )}
       </div>
 
       <div className="flex flex-col gap-y-8 sm:gap-y-12">
-        <ActionEventsPanel action={action} />
+        {loggedInMode && <ActionEventsPanel action={action} />}
         {action.status !== "planned" && (
           <Link
             to={href("/feed/:actionId", { actionId: action.id.toString() })}
@@ -54,35 +64,37 @@ const ActionContents = () => {
         )}
         {action.status !== "planned" && (
           <div className="flex flex-col">
-            <div className="flex flex-col lg:flex-row justify-between lg:items-center mb-4 gap-x-4">
-              <p className="font-semibold text-xl flex-1">Task</p>
+            {loggedInMode && (
+              <div className="flex flex-col lg:flex-row justify-between lg:items-center mb-4 gap-x-4">
+                <p className="font-semibold text-xl flex-1">Task</p>
 
-              <TaskTimeInfo
-                action={action}
-                nextEvent={nextEvent}
-                lastEvent={lastEvent}
-                absoluteDeadline={true}
-              />
-            </div>
-
+                <TaskTimeInfo
+                  action={action}
+                  nextEvent={nextEvent}
+                  lastEvent={lastEvent}
+                  absoluteDeadline={true}
+                />
+              </div>
+            )}
             <Outlet context={context} />
           </div>
         )}
+        {loggedInMode && (
+          <>
+            <div>
+              <p className="font-semibold text-xl mb-4">Description</p>
+              <AppMarkdownWrapper markdownContent={action?.body} />
+            </div>
 
-        <div>
-          <p className="font-semibold text-xl mb-4">Description</p>
-          <AppMarkdownWrapper markdownContent={action?.body} />
-        </div>
-
-        {user && (
-          <div>
-            <p className="font-semibold text-xl mb-4">Discussion</p>
-            <p className="mb-8">
-              Questions and comments about this action that other members would
-              find helpful.
-            </p>
-            <Comments objectId={action.id} type={"action"} />
-          </div>
+            <div>
+              <p className="font-semibold text-xl mb-4">Discussion</p>
+              <p className="mb-8">
+                Questions and comments about this action that other members
+                would find helpful.
+              </p>
+              <Comments objectId={action.id} type={"action"} />
+            </div>
+          </>
         )}
       </div>
     </div>
