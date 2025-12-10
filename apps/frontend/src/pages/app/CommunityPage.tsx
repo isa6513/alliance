@@ -445,15 +445,18 @@ const CommunityPage = () => {
             </Card>
           )}
           {!chatOpen && messagingEnabled && (
-            <div className="absolute bottom-5 right-7 bg-white hover:bg-zinc-100">
-              <Button
-                color={ButtonColor.Outline}
-                onClick={() => setChatOpen(true)}
-                className="!px-3 !py-3"
-              >
-                <MessageSquare size="20" />
-              </Button>
-            </div>
+            <>
+              <div className="h-15" /> {/* spacer for chat button */}
+              <div className="absolute bottom-5 right-7 bg-white hover:bg-zinc-100">
+                <Button
+                  color={ButtonColor.Outline}
+                  onClick={() => setChatOpen(true)}
+                  className="!px-3 !py-3"
+                >
+                  <MessageSquare size="20" />
+                </Button>
+              </div>
+            </>
           )}
         </div>
       }
