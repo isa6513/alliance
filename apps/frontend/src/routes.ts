@@ -21,6 +21,7 @@ export default [
   route("/progress/:slug", "pages/static/ProgressPostPage.tsx"),
 
   route("/memberquotes", "pages/static/oneoff/MemberQuotesPage.tsx"),
+  route("/flyerexport", "pages/static/FlyerExportPage.tsx"),
 
   layout("applayout.tsx", [
     layout("navbar.tsx", [
