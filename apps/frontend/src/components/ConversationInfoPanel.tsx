@@ -125,7 +125,7 @@ const ConversationInfoPanel = ({
 
   return (
     <div className="flex-1 relative flex flex-col items-center justify-center">
-      <div className="flex flex-col items-center p-8 w-full gap-y-2">
+      <div className="flex flex-col items-center px-8 w-full gap-y-2">
         {isEditingGroup ? (
           <ProfileImageEditor
             key={0}

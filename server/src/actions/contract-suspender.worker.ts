@@ -24,7 +24,7 @@ export class ContractSuspenderWorker {
     private readonly userService: UserService,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_NOON)
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async processSuspensions() {
     if (
       process.env.NODE_ENV === 'development' &&
