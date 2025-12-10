@@ -32,6 +32,7 @@ import FloatingChatPanel from "../../components/FloatingChatpanel";
 import { MessageSquare } from "lucide-react";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../../lib/config";
+import BottomSpacer from "@alliance/shared/ui/BottomSpacer";
 
 type Tab = "activity" | "members" | "invites" | "about" | "edit" | "resources";
 
@@ -444,19 +445,17 @@ const CommunityPage = () => {
               />
             </Card>
           )}
+          <BottomSpacer />
           {!chatOpen && messagingEnabled && (
-            <>
-              <div className="h-15" /> {/* spacer for chat button */}
-              <div className="absolute bottom-5 right-7 bg-white hover:bg-zinc-100">
-                <Button
-                  color={ButtonColor.Outline}
-                  onClick={() => setChatOpen(true)}
-                  className="!px-3 !py-3"
-                >
-                  <MessageSquare size="20" />
-                </Button>
-              </div>
-            </>
+            <div className="absolute bottom-5 right-7 bg-white hover:bg-zinc-100">
+              <Button
+                color={ButtonColor.Outline}
+                onClick={() => setChatOpen(true)}
+                className="!px-3 !py-3"
+              >
+                <MessageSquare size="20" />
+              </Button>
+            </div>
           )}
         </div>
       }

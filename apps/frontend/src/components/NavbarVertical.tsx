@@ -28,6 +28,7 @@ import {
   FileText,
   MessagesSquare,
 } from "lucide-react";
+import BottomSpacer from "@alliance/shared/ui/BottomSpacer";
 
 export enum NavbarPage {
   Tasks = "Tasks",
@@ -385,6 +386,8 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
               </nav>
             ))}
           </div>
+
+          <BottomSpacer />
         </div>
       </aside>
     </>
