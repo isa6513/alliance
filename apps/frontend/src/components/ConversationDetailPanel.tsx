@@ -401,7 +401,9 @@ const ConversationDetailPanel = ({
               )}
               {mode === "existing" && (
                 <div className="flex flex-col justify-center">
-                  <p className="font-semibold text-lg">{selectedConvo.title}</p>
+                  <p className="font-semibold text-lg line-clamp-1">
+                    {selectedConvo.title}
+                  </p>
                   {selectedConvo.type !== "direct" && (
                     <div className="flex flex-row items-center gap-x-1 text-zinc-500">
                       <Users size="17" />

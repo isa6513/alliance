@@ -182,7 +182,11 @@ const MessagesPage = () => {
         if (user && !user.anonymous) {
           names.push(user.name);
         }
-        const title = names.join(", ");
+        const moreThan5 = names.length > 3;
+        const title = moreThan5
+          ? names.slice(0, 3).join(", ") + ` +${names.length - 3} more`
+          : names.join(", ");
+
         const response = await conversationCreateGroupConversation({
           body: {
             participantIds: sendingNewMessageToIds,
