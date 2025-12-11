@@ -352,6 +352,7 @@ export type CommunityMemberContactInfoDto = {
     phoneNumber?: string;
     preferredReminderTimeUserTz?: string;
     preferredReminderTimeLeaderTz?: string;
+    awayRanges: Array<UserAwayRangeDto>;
 };
 
 export type StreamableFile = {
@@ -3950,6 +3951,21 @@ export type ActionsSuspendPlansResponses = {
 };
 
 export type ActionsSuspendPlansResponse = ActionsSuspendPlansResponses[keyof ActionsSuspendPlansResponses];
+
+export type ActionsGetShareLinkData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/getShareLink/{id}';
+};
+
+export type ActionsGetShareLinkResponses = {
+    200: string;
+};
+
+export type ActionsGetShareLinkResponse = ActionsGetShareLinkResponses[keyof ActionsGetShareLinkResponses];
 
 export type ActionsActionRelationsData = {
     body?: never;
