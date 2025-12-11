@@ -23,7 +23,7 @@ const AIPrivacyFlyer: React.FC = () => {
   return (
     <div className="flex flex-col justify-between h-full">
       <div className="flex flex-col gap-y-[0.2in]">
-        <h1 className="text-[0.35in] font-bold font-serif">
+        <h1 className="text-[0.35in] font-bold font-serif ">
           Participate in an experiment on ethical AI privacy settings
         </h1>
 
@@ -36,8 +36,8 @@ const AIPrivacyFlyer: React.FC = () => {
         </div>
 
         <p className="text-[0.2in]">
-          We are running a survey to understand how people prefer AI companies
-          use their data.{" "}
+          We are running a survey to understand whether people are aware of how
+          tech companies use their data for AI training.{" "}
         </p>
 
         <div className="flex flex-col gap-y-[0.1in]">
@@ -47,14 +47,14 @@ const AIPrivacyFlyer: React.FC = () => {
           <ol className="text-[0.2in]">
             <li>
               <span className="font-semibold">1. Control your data:</span> The
-              survey will help you control your data by walking you through
-              relevant privacy settings of various tech companies.
+              survey will walk you through your privacy settings for various
+              tech companies so you can decide how your data is used.
             </li>
             <li>
               <span className="font-semibold">
                 2. Help with privacy advocacy:
               </span>{" "}
-              Depending on what you and others say, we will conduct a follow-up
+              Depending on what respondents say, we will conduct a follow-up
               campaign advocating for changes in data use practices.
             </li>
           </ol>

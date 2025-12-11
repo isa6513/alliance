@@ -189,7 +189,7 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(sharedInputClasses)}
-            placeholder="Enter email address..."
+            placeholder="example@email.com"
           />
           {renderValidationMessage()}
         </div>
