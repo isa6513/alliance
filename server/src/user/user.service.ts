@@ -737,11 +737,8 @@ export class UserService {
     body: UpdateCommunityDto,
     userId: number,
   ): Promise<Community> {
-    const user = await this.findOneOrFail(userId, ['leaderOf']);
-    if (
-      !user.leaderOf.some((leader) => leader.id === communityId) &&
-      !user.admin
-    ) {
+    const user = await this.findOneOrFail(userId);
+    if (!user.leaderOfIds.some((cid) => cid === communityId) && !user.admin) {
       throw new UnauthorizedException();
     }
 
@@ -950,7 +947,6 @@ export class UserService {
       ...rest
     } = body;
 
-    // Fetch the user only once
     const user = await this.findOneOrFail(userId, ['leaderOf']);
     const isAdmin = user.admin;
 
