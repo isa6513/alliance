@@ -35,7 +35,7 @@ import List from "@alliance/shared/ui/List";
 import ForumActivityCommentCard from "../../components/ForumActivityCommentCard";
 import ProfileImageEditor from "../../components/ProfileImageEditor";
 import Spinner from "../../components/Spinner";
-import { Mail } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../../lib/config";
 
@@ -429,7 +429,7 @@ const UserProfilePage: React.FC = () => {
                   }
                   className="!h-9 flex flex-row items-center !px-3"
                 >
-                  <Mail size={16} className="text-zinc-600" />
+                  <MessageSquare size={16} className="text-zinc-600" />
                 </Button>
               )}
             {isMe && (
