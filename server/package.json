@@ -25,7 +25,7 @@
     "typeorm": "npx typeorm-ts-node-commonjs --dataSource dist/datasources/dataSourceMigrations.js",
     "migration:generate": "npm run migration:run && npm run typeorm -- migration:generate",
     "migration:create": "npm run migration:run && npx typeorm-ts-node-commonjs migration:create",
-    "migration:runprod": "NODE_ENV=production node ./node_modules/typeorm/cli.js -d dist/datasources/dataSource.js migration:run",
+    "migration:runprod": "NODE_ENV=production typeorm-ts-node-commonjs --dataSource dist/datasources/dataSource.js migration:run",
     "migration:run": "npm run build && npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert"
   },
@@ -70,7 +70,8 @@
     "ts-jest": "^29.4.0",
     "ttypescript": "^1.5.15",
     "twilio": "^5.9.0",
-    "typeorm": "^0.3.25"
+    "typeorm": "^0.3.25",
+    "typeorm-ts-node-commonjs": "^0.3.20"
   },
   "devDependencies": {
     "@darraghor/eslint-plugin-nestjs-typed": "^6.7.0",
