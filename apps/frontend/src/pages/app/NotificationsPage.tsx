@@ -6,10 +6,10 @@ import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import CenterLayout from "@alliance/shared/ui/CenterLayout";
 
 const NotificationsPage = () => {
-  const { allNotifications, handleMarkAllAsRead, handleNotifClick } =
+  const { notifications, handleMarkAllAsRead, handleNotifClick } =
     useNotifications();
 
-  const unreadCount = allNotifications.filter(
+  const unreadCount = notifications.filter(
     (notification) => !notification.readAt
   ).length;
 
@@ -28,7 +28,7 @@ const NotificationsPage = () => {
           )}
         </div>
         <List className="w-full">
-          {allNotifications.map((notification) => (
+          {notifications.map((notification) => (
             <div
               key={notification.id}
               className={`hover:bg-zinc-100 p-4 flex cursor-pointer flex-col gap-y-2 ${

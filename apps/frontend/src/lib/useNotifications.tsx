@@ -22,7 +22,6 @@ export function getWebAppLocation(webAppLocation: string) {
 
 interface NotificationsContextType {
   notifications: NotificationDto[];
-  allNotifications: NotificationDto[];
   unreadCount: number;
   handleNotifClick: (id: number, webAppLocation: string | null) => () => void;
   handleMarkAllAsRead: (e: React.MouseEvent) => void;
@@ -40,9 +39,6 @@ export const NotificationsProvider = ({
   children: ReactNode;
 }) => {
   const [notifications, setNotifications] = useState<NotificationDto[]>([]);
-  const [allNotifications, setAllNotifications] = useState<NotificationDto[]>(
-    []
-  );
   const [unreadCount, setUnreadCount] = useState(0);
 
   const { isAuthenticated } = useAuth();
@@ -62,7 +58,7 @@ export const NotificationsProvider = ({
       )
       .filter((n) => new Date(n.sendTime).getTime() <= new Date().getTime());
 
-    setAllNotifications(sorted);
+    setNotifications(sorted);
     setUnreadCount(sorted.filter((n) => !n.readAt).length);
   }, [isAuthenticated]);
 
@@ -74,19 +70,15 @@ export const NotificationsProvider = ({
     (id: number, webAppLocation: string | null) => () => {
       notifsSetRead({ path: { id } });
 
-      setAllNotifications((prev) =>
-        prev.map((n) =>
-          n.id === id ? { ...n, readAt: new Date().toISOString() } : n
-        )
-      );
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === id ? { ...n, readAt: new Date().toISOString() } : n
-        )
-      );
+      setNotifications((prev) => {
+        const readAt = new Date().toISOString();
+        return prev.map(
+          (n) => (n.id === id ? { ...n, readAt } : n) satisfies NotificationDto
+        );
+      });
       setUnreadCount((prev) => Math.max(prev - 1, 0));
 
-      const clickedNotif = allNotifications.find((n) => n.id === id);
+      const clickedNotif = notifications.find((n) => n.id === id);
       const path = webAppLocation
         ? getWebAppLocation(webAppLocation)
         : window.location.pathname;
@@ -105,14 +97,16 @@ export const NotificationsProvider = ({
         navigate(path);
       }
     },
-    [navigate, allNotifications]
+    [navigate, notifications]
   );
 
   const handleMarkAllAsRead = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     notifsSetReadAll();
-    setAllNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    const readAt = new Date().toISOString();
+    setNotifications((prev) =>
+      prev.map((n) => ({ ...n, readAt } satisfies NotificationDto))
+    );
     setUnreadCount(0);
 
     posthog.capture("notifications_marked_all_as_read");
@@ -120,7 +114,6 @@ export const NotificationsProvider = ({
 
   const handleClearAll = useCallback(() => {
     setNotifications([]);
-    setAllNotifications([]);
     setUnreadCount(0);
   }, []);
 
@@ -128,7 +121,6 @@ export const NotificationsProvider = ({
     <NotificationsContext.Provider
       value={{
         notifications,
-        allNotifications,
         unreadCount,
         handleNotifClick,
         handleMarkAllAsRead,
