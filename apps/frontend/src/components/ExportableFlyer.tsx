@@ -36,10 +36,10 @@ const ExportableFlyer: React.FC<ExportableFlyerProps> = ({
       const imgData = canvas.toDataURL("image/png");
 
       // Create PDF with units in inches. Format is [width, height]
-      const pdf = new jsPDF({ unit: "in", format: [8, 11] });
+      const pdf = new jsPDF({ unit: "in", format: [8.5, 11] });
 
       // Add image filling the page (position x=0,y=0, width=8in, height=11in)
-      pdf.addImage(imgData, "PNG", 0, 0, 8, 11);
+      pdf.addImage(imgData, "PNG", 0, 0, 8.5, 11);
 
       pdf.save(filename);
     } catch (err) {
@@ -65,7 +65,7 @@ const ExportableFlyer: React.FC<ExportableFlyerProps> = ({
         ref={wrapperRef}
         className="mx-auto p-[0.8in] border border-zinc-200"
         style={{
-          width: "8in",
+          width: "8.5in",
           height: "11in",
           background: includeBackground ? "white" : "transparent",
           boxSizing: "border-box",
