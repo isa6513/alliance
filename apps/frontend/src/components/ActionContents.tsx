@@ -45,15 +45,20 @@ const ActionContents = () => {
                     <div className="flex flex-row gap-x-1 text-zinc-800">
                       <p>By</p>
                       {action.authors.map((author, i) => (
-                        <Link
-                          key={author.id}
-                          to={href("/member/:id", { id: author.id.toString() })}
-                          className="flex flex-row items-center gap-x-1 hover:underline"
-                        >
-                          {author.displayName}
+                        <>
+                          <Link
+                            key={author.id}
+                            to={href("/member/:id", {
+                              id: author.id.toString(),
+                            })}
+                            className="flex flex-row items-center gap-x-1 hover:underline"
+                          >
+                            {author.displayName}
+                          </Link>
                           {i < action.authors!.length - 2 && ", "}
-                          {i === action.authors!.length - 2 && ", and "}
-                        </Link>
+                          {i === action.authors!.length - 2 &&
+                            `${action.authors!.length > 2 ? "," : ""} and `}
+                        </>
                       ))}
                     </div>
                   </div>
