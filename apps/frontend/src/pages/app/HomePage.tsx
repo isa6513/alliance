@@ -1,6 +1,6 @@
 import { getPastEvents } from "@alliance/shared/lib/actionUtils";
 import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, href, useNavigate, useOutletContext } from "react-router";
 import { ActionWithRelation, AppLayoutOutletContext } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
@@ -222,7 +222,7 @@ const HomePage = () => {
     const availableHeight =
       window.innerHeight -
       friendActivityListRef.current.getBoundingClientRect().top -
-      24;
+      12;
     const firstActivityHeight =
       firstFriendActivityRef.current?.getBoundingClientRect().height;
 
@@ -239,21 +239,8 @@ const HomePage = () => {
     setVisibleFriendActivityCount(Math.min(maxItems, friendActivities.length));
   }, [friendActivities.length]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     updateFriendActivityCount();
-  }, [
-    updateFriendActivityCount,
-    completedActions.length,
-    currentWeekTodoActions.length,
-    newActions.length,
-    nextWeekTodoActions.length,
-  ]);
-
-  useEffect(() => {
-    window.addEventListener("resize", updateFriendActivityCount);
-    return () => {
-      window.removeEventListener("resize", updateFriendActivityCount);
-    };
   }, [updateFriendActivityCount]);
 
   const mainContent = () => {
