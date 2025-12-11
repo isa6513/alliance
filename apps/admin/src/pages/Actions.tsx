@@ -39,7 +39,7 @@ type ActionSuiteGroup = {
   id: number | null;
   name: string;
   actions: Action[];
-  sortDate: Date | null;
+  sortVal: number;
   isArchivedOnly: boolean;
 };
 
@@ -109,26 +109,14 @@ const ActionsList: React.FC = () => {
         const relevantActions =
           nonArchivedActions.length > 0 ? nonArchivedActions : suiteActions;
 
-        const latestEventDate = relevantActions.reduce<Date | null>(
-          (latest, action) => {
-            const date = getLastPastEventDate(action);
-            if (!date) {
-              return latest;
-            }
-
-            if (!latest || date > latest) {
-              return date;
-            }
-
-            return latest;
-          },
-          null
+        const sortVal = Math.min(
+          ...relevantActions.map((action) => actions.indexOf(action))
         );
 
         return {
           ...suite,
           actions: suiteActions,
-          sortDate: latestEventDate,
+          sortVal: sortVal,
           isArchivedOnly: suiteActions.every((action) => action.archived),
         };
       })
@@ -141,21 +129,10 @@ const ActionsList: React.FC = () => {
           return -1;
         }
 
-        const aDate = a.sortDate;
-        const bDate = b.sortDate;
+        const aVal = a.sortVal;
+        const bVal = b.sortVal;
 
-        if (!aDate || !bDate) {
-          if (aDate && !bDate) {
-            return -1;
-          }
-          if (!aDate && bDate) {
-            return 1;
-          }
-
-          return 0;
-        }
-
-        return bDate.getTime() - aDate.getTime();
+        return aVal - bVal;
       });
   }, [actions]);
 
