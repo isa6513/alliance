@@ -51,18 +51,13 @@ describe('Notifications (e2e)', () => {
     await ctx.agent.post(`/notifs/read/${notifId}`).expect(201);
 
     const notifs = await ctx.agent.get('/notifs').expect(200);
-    expect(notifs.body[0].read).toBe(true);
+    expect(notifs.body[0].readAt).toBeTruthy();
   });
 
-  it('user can mark all notifications read and clear them', async () => {
+  it('user can mark all notifications read', async () => {
     await ctx.agent.post('/notifs/read-all').expect(201);
 
-    let notifs = await ctx.agent.get('/notifs').expect(200);
-    expect(notifs.body.every((notif) => notif.read)).toBe(true);
-
-    await ctx.agent.post('/notifs/clear').expect(201);
-
-    notifs = await ctx.agent.get('/notifs').expect(200);
-    expect(notifs.body.every((notif) => notif.cleared)).toBe(true);
+    const notifs = await ctx.agent.get('/notifs').expect(200);
+    expect(notifs.body.every((notif) => notif.readAt)).toBeTruthy();
   });
 });

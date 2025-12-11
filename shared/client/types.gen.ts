@@ -466,8 +466,7 @@ export type Notification = {
     targetContent?: string;
     webAppLocation: string | null;
     mobileAppLocation: string | null;
-    read: boolean;
-    cleared: boolean;
+    readAt?: string;
     createdAt: string;
     updatedAt: string;
     sendTime: string;
@@ -1523,8 +1522,7 @@ export type NotificationDto = {
     message: string;
     webAppLocation: string | null;
     mobileAppLocation: string | null;
-    read: boolean;
-    cleared: boolean;
+    readAt?: string;
     createdAt: string;
     updatedAt: string;
     sendTime: string;
@@ -4100,17 +4098,6 @@ export type NotifsSetReadAllData = {
 };
 
 export type NotifsSetReadAllResponses = {
-    200: unknown;
-};
-
-export type NotifsClearData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/notifs/clear';
-};
-
-export type NotifsClearResponses = {
     200: unknown;
 };
 

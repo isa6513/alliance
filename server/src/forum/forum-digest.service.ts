@@ -35,8 +35,7 @@ export class ForumDigestService {
       .where('notification.category = :category', {
         category: NotificationCategory.ForumReply,
       })
-      .andWhere('notification.read = false')
-      .andWhere('notification.cleared = false')
+      .andWhere('notification.readAt IS NULL')
       .andWhere('user.forumDigestPreference != :off', {
         off: ForumDigestPreference.Off,
       })
@@ -103,7 +102,7 @@ export class ForumDigestService {
         );
         await this.notificationRepository.update(
           userNotifications.map((item) => item.id),
-          { read: true },
+          { readAt: new Date() },
         );
         await this.digestLogRepository.save(
           this.digestLogRepository.create({

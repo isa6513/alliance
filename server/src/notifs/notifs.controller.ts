@@ -43,13 +43,6 @@ export class NotifsController {
     return this.notifsService.setReadAll(req.user.sub);
   }
 
-  @Post('clear')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse()
-  clear(@Request() req: JwtRequest) {
-    return this.notifsService.clear(req.user.sub);
-  }
-
   @UseGuards(AdminGuard)
   @Get('for-user/:id')
   @ApiOkResponse({ type: [ActionEventNotifDto] })

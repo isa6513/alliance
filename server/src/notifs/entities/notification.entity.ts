@@ -67,13 +67,9 @@ export class Notification {
   @ApiProperty({ nullable: true })
   mobileAppLocation: string;
 
-  @Column({ default: false })
-  @ApiProperty()
-  read: boolean;
-
-  @Column({ default: false })
-  @ApiProperty()
-  cleared: boolean;
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  readAt?: Date;
 
   @CreateDateColumnTz()
   @ApiProperty()

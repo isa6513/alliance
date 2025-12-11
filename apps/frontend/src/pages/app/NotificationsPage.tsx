@@ -10,8 +10,10 @@ const NotificationsPage = () => {
     useNotifications();
 
   const unreadCount = allNotifications.filter(
-    (notification) => !notification.read
+    (notification) => !notification.readAt
   ).length;
+
+  console.log({ allNotifications }, "asdf");
 
   return (
     <CenterLayout>
@@ -32,7 +34,7 @@ const NotificationsPage = () => {
             <div
               key={notification.id}
               className={`hover:bg-zinc-100 p-4 flex cursor-pointer flex-col gap-y-2 ${
-                notification.read ? "bg-white" : "bg-red-50"
+                notification.readAt ? "bg-white" : "bg-red-50"
               }`}
               onClick={handleNotifClick(
                 notification.id,

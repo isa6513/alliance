@@ -74,20 +74,13 @@ export class NotifsService {
     if (notif.user.id !== userId) {
       throw new UnauthorizedException();
     }
-    return this.notifsRepository.update(id, { read: true });
+    return this.notifsRepository.update(id, { readAt: new Date() });
   }
 
   async setReadAll(userId: number) {
     return this.notifsRepository.update(
       { user: { id: userId } },
-      { read: true },
-    );
-  }
-
-  async clear(userId: number) {
-    return this.notifsRepository.update(
-      { user: { id: userId }, cleared: false },
-      { cleared: true },
+      { readAt: new Date() },
     );
   }
 

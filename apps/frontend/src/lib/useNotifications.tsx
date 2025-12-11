@@ -8,7 +8,6 @@ import React, {
 } from "react";
 import {
   NotificationDto,
-  notifsClear,
   notifsFindAll,
   notifsSetRead,
   notifsSetReadAll,
@@ -64,8 +63,7 @@ export const NotificationsProvider = ({
       .filter((n) => new Date(n.sendTime).getTime() <= new Date().getTime());
 
     setAllNotifications(sorted);
-    setNotifications(sorted.filter((n) => !n.cleared));
-    setUnreadCount(sorted.filter((n) => !n.read && !n.cleared).length);
+    setUnreadCount(sorted.filter((n) => !n.readAt).length);
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -77,10 +75,14 @@ export const NotificationsProvider = ({
       notifsSetRead({ path: { id } });
 
       setAllNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+        prev.map((n) =>
+          n.id === id ? { ...n, readAt: new Date().toISOString() } : n
+        )
       );
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+        prev.map((n) =>
+          n.id === id ? { ...n, readAt: new Date().toISOString() } : n
+        )
       );
       setUnreadCount((prev) => Math.max(prev - 1, 0));
 
@@ -117,7 +119,6 @@ export const NotificationsProvider = ({
   }, []);
 
   const handleClearAll = useCallback(() => {
-    notifsClear();
     setNotifications([]);
     setAllNotifications([]);
     setUnreadCount(0);
