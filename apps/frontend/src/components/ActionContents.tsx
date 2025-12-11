@@ -51,7 +51,8 @@ const ActionContents = () => {
                           className="flex flex-row items-center gap-x-1 hover:underline"
                         >
                           {author.displayName}
-                          {i < action.authors!.length - 1 && ", "}
+                          {i < action.authors!.length - 2 && ", "}
+                          {i === action.authors!.length - 2 && ", and "}
                         </Link>
                       ))}
                     </div>
