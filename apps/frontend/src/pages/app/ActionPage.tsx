@@ -66,8 +66,6 @@ export default function ActionPage() {
     );
   }
 
-  const viewingPublicOnly = action?.publicOnly && !user;
-
   if (!action) {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
@@ -131,7 +129,7 @@ export default function ActionPage() {
           }
         />
       </div>
-      {!viewingPublicOnly && (
+      {!action.publicOnly && (
         <div className="hidden lg:flex flex-col max-w-[320px] xl:max-w-[380px] rounded gap-y-12 border-l border-zinc-200 pl-4 lg:pl-12">
           <ActionCompletedBarWithInfo
             friendActivities={[]}

@@ -14,8 +14,8 @@ const ActionContents = () => {
 
   const action = context.action;
 
-  const { isAuthenticated, loading } = useAuth();
-  const loggedInMode = isAuthenticated || loading;
+  const { isAuthenticated } = useAuth();
+  const loggedInMode = !action.publicOnly;
 
   if (!action) {
     return null;
@@ -74,14 +74,12 @@ const ActionContents = () => {
               <div className="flex flex-col lg:flex-row justify-between lg:items-center mb-4 gap-x-4">
                 <p className="font-semibold text-xl flex-1">Task</p>
 
-                {!action.publicOnly && (
-                  <TaskTimeInfo
-                    action={action}
-                    nextEvent={nextEvent}
-                    lastEvent={lastEvent}
-                    absoluteDeadline={true}
-                  />
-                )}
+                <TaskTimeInfo
+                  action={action}
+                  nextEvent={nextEvent}
+                  lastEvent={lastEvent}
+                  absoluteDeadline={true}
+                />
               </div>
             )}
             <Outlet context={context} />
