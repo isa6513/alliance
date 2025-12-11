@@ -78,7 +78,7 @@ const ForumListPost = ({
                 </span>
               )}
             </div>
-            {post.likeCount && (
+            {post.likeCount !== undefined && (
               <p className="text-zinc-500 text-nowrap text-sm mt-1">
                 {post.likeCount} like{post.likeCount === 1 ? "" : "s"}
               </p>

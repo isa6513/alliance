@@ -1132,7 +1132,7 @@ export type CreateActionDto = {
     shouldParticipate?: boolean;
     userRelation?: string;
     reqAuthenticated?: boolean;
-    suiteId?: number;
+    suiteId?: number | null;
 };
 
 export type UpdateActionDto = {
@@ -1210,7 +1210,7 @@ export type UpdateActionDto = {
     shouldParticipate?: boolean;
     userRelation?: string;
     reqAuthenticated?: boolean;
-    suiteId?: number;
+    suiteId?: number | null;
 };
 
 export type CreateActionEventDto = {

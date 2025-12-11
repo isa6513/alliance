@@ -242,7 +242,7 @@ export class Action {
   @ApiPropertyOptional({ type: () => ActionSuite })
   @Type(() => ActionSuite)
   @IsOptional()
-  suite?: ActionSuite;
+  suite?: ActionSuite | null;
 
   @Column({ default: 0 })
   @ApiProperty({ description: 'Priority of the action' })

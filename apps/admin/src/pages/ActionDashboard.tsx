@@ -415,7 +415,7 @@ const ActionDashboard: React.FC = () => {
     if (name === "suiteId") {
       setForm((prev) => ({
         ...prev,
-        suiteId: value === "" ? undefined : parseInt(value, 10),
+        suiteId: value === "" ? null : parseInt(value, 10),
       }));
       return;
     }

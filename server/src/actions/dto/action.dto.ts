@@ -179,9 +179,12 @@ export class CreateActionDto extends OmitType(ActionDto, [
   'archived',
   'updates',
 ]) {
-  @ApiPropertyOptional({ type: Number })
+  @ApiPropertyOptional({
+    type: Number,
+    nullable: true,
+  })
   @IsOptional()
-  suiteId?: number;
+  suiteId?: number | null;
 }
 
 export class UpdateActionDto extends PartialType(CreateActionDto) {}

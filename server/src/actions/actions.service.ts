@@ -648,11 +648,15 @@ export class ActionsService {
 
     const { participatingTags, suiteId, ...rest } = updateActionDto;
 
-    if (suiteId) {
-      const suite = await this.actionSuiteRepository.findOneOrFail({
-        where: { id: suiteId },
-      });
-      action.suite = suite;
+    if (suiteId !== undefined) {
+      if (suiteId === null) {
+        action.suite = null;
+      } else {
+        const suite = await this.actionSuiteRepository.findOneOrFail({
+          where: { id: suiteId },
+        });
+        action.suite = suite;
+      }
     }
 
     Object.assign(action, rest);
