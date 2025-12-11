@@ -68,7 +68,11 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidUnknownValues: true }),
+    new ValidationPipe({
+      whitelist: true,
+      forbidUnknownValues: true,
+      disableErrorMessages: false,
+    }),
   );
   app.useGlobalInterceptors(new MetricsInterceptor());
   app.use(cookieParser());
