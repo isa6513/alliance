@@ -32,7 +32,7 @@ const ActionContents = () => {
         />
       )}
 
-      <div className="flex flex-row justify-between items-start mb-4 sm">
+      <div className="flex flex-row justify-between items-start mb-4">
         {action !== undefined && (
           <div className="flex flex-col gap-y-2">
             <p className="font-semibold text-3xl font-serif mb-1">
