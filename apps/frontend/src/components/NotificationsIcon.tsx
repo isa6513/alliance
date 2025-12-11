@@ -75,7 +75,7 @@ const NotificationsIcon = () => {
                 notification.webAppLocation
               )}
               className={`text-black hover:bg-zinc-100 p-2 rounded-md flex cursor-pointer flex-col ${
-                !notification.readAt ? "" : "bg-red-50"
+                notification.readAt ? "" : "bg-red-50"
               }`}
             >
               <p className="text-gray-500 text-xs">
