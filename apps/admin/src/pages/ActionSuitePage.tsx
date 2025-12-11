@@ -1,4 +1,5 @@
 import {
+  Action,
   actionsBatchUpdateSuiteEvents,
   actionsDeleteSuiteEvent,
   actionsSuite,
@@ -96,7 +97,7 @@ const ActionSuitePage = () => {
   return (
     <div className="p-6 flex flex-col gap-6">
       <ActionTimeline
-        actions={suite?.actions ?? []}
+        actions={(suite?.actions as Action[]) ?? []}
         title={suite.name}
         reminders={suite.reminderGroups}
         className="-m-6 mb-0"

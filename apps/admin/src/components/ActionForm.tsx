@@ -26,6 +26,7 @@ interface ActionFormProps {
   baseUrl?: string;
   availableForms?: FormDto[];
   formsLoading: boolean;
+  availableAuthors: UserSelectUser[];
   availableTags?: TagDto[];
   tagsLoading: boolean;
   availableSuites?: ActionSuite[];
@@ -36,6 +37,8 @@ interface ActionFormProps {
   usersLoading?: boolean;
   manualCohortUserIds: number[];
   onManualCohortChange: (ids: number[]) => void;
+  authorIds: number[];
+  onAuthorsChange: (ids: number[]) => void;
   actionId?: number;
 }
 
@@ -60,6 +63,9 @@ const ActionForm: React.FC<ActionFormProps> = ({
   usersLoading = false,
   manualCohortUserIds = [],
   onManualCohortChange,
+  authorIds,
+  onAuthorsChange,
+  availableAuthors,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -496,6 +502,15 @@ const ActionForm: React.FC<ActionFormProps> = ({
             No tags available yet. Create one in the tags dashboard.
           </p>
         )}
+      </div>
+      <div className="border border-gray-200 rounded-md p-4">
+        <UserSelect
+          users={availableAuthors}
+          selectedUserIds={authorIds}
+          onChange={onAuthorsChange}
+          loading={usersLoading}
+          label="Select authors"
+        />
       </div>
 
       <div className="border border-gray-200 rounded-md p-4">

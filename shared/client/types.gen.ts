@@ -79,47 +79,6 @@ export type Participant = {
     userHidden: boolean;
 };
 
-export type User = {
-    id: number;
-    name: string;
-    phoneNumber?: string;
-    phoneNumberValidated: boolean;
-    sentTextOptInMessageAt?: string;
-    emailVerified: boolean;
-    preferredReminderTime?: string;
-    timeZone?: string;
-    contractEvents: Array<ContractEvent>;
-    preferredActionReminderChannel: NotificationChannel;
-    emailNotifsEnabled: boolean;
-    textNotifsEnabled: boolean;
-    pushNotifsEnabled: boolean;
-    shareEmailWithCommunityLead: boolean;
-    sharePhoneNumberWithCommunityLead: boolean;
-    socialNotifsPreference: NotificationPreference;
-    turnedOffAllNotifs: boolean;
-    forumDigestPreference: ForumDigestPreference;
-    password: string;
-    admin: boolean;
-    staff: boolean;
-    profilePicture: string | null;
-    profileDescription: string | null;
-    referralCode: string | null;
-    stripeCustomerId: string | null;
-    isNotSignedUpPartialProfile: boolean;
-    over18: boolean | null;
-    onboardingComplete: boolean;
-    anonymous: boolean;
-    communities: Array<Community>;
-    isCommunityLeader: boolean;
-    invitedCommunities: Array<CommunityInvite>;
-    formDataPreference: PublicFormResponseDefault;
-    participants: Array<Participant>;
-};
-
-export type OnetimeInviteStatus = 'request_pending' | 'request_rejected' | 'link_unused' | 'link_used';
-
-export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'community_invite_rejected' | 'community_invite_accepted' | 'onetime_invite_request_created' | 'onetime_invite_request_approved' | 'onetime_invite_request_rejected';
-
 /**
  * Type of the action
  */
@@ -129,6 +88,103 @@ export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
  * New status of the action after the event
  */
 export type ActionStatus = 'draft' | 'planned' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
+
+export type EditableContent = {
+    /**
+     * Markdown or plain text body
+     */
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
+};
+
+export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 'tag';
+
+export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'community_invite_rejected' | 'community_invite_accepted' | 'onetime_invite_request_created' | 'onetime_invite_request_approved' | 'onetime_invite_request_rejected';
+
+export type CommentParentObject = 'post' | 'action' | 'activity';
+
+export type Comment = {
+    id: number;
+    editableContent: EditableContent;
+    author: {
+        [key: string]: unknown;
+    };
+    authorId: number;
+    parentObjectType: CommentParentObject;
+    parentObjectId: number;
+    deleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+    parent?: Comment;
+    parentId?: number;
+    children?: Array<Comment>;
+    pinned: boolean;
+    likes: Array<User>;
+    likesCount: number;
+};
+
+export type OnetimeInviteStatus = 'request_pending' | 'request_rejected' | 'link_unused' | 'link_used';
+
+export type OnetimeInvite = {
+    id: number;
+    invitee: string;
+    inviteeDescription?: string;
+    code: string;
+    invitingUser: User;
+    createdAt: string;
+    status: OnetimeInviteStatus;
+    community?: Community;
+    communityId?: number;
+    notifs: Array<Notification>;
+};
+
+export type Notification = {
+    id: number;
+    category: NotificationCategory;
+    message: string;
+    targetContent?: string;
+    webAppLocation: string | null;
+    mobileAppLocation: string | null;
+    readAt?: string;
+    createdAt: string;
+    updatedAt: string;
+    sendTime: string;
+    groupingKey?: string;
+    groupingCount?: number;
+    actionUpdate?: ActionUpdate;
+    comment?: Comment;
+    onetimeInvite?: OnetimeInvite;
+};
+
+export type Tag = {
+    id: number;
+    users: Array<User>;
+    participatingIn: Array<Action>;
+    name: string;
+    description: string;
+    publicDisplayName?: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type ActionUpdate = {
+    id: number;
+    action: Action;
+    actionId: number;
+    title: string;
+    content: EditableContent;
+    date: string;
+    visibleAt: string;
+    shortNotifString: string;
+    associatedEvent?: ActionEvent;
+    associatedEventId?: number;
+    notifyType: ActionUpdateNotifyType;
+    notifs: Array<Notification>;
+    tag?: Tag;
+};
 
 export type ActionEvent = {
     /**
@@ -163,32 +219,10 @@ export type ActionEvent = {
     suiteManaged: boolean;
 };
 
-export type Tag = {
-    id: number;
-    users: Array<User>;
-    participatingIn: Array<Action>;
-    name: string;
-    description: string;
-    publicDisplayName?: string;
-    createdAt: string;
-    updatedAt: string;
-};
-
 /**
  * Type of action activity
  */
 export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete';
-
-export type EditableContent = {
-    /**
-     * Markdown or plain text body
-     */
-    body: string;
-    /**
-     * Image keys attached to the content
-     */
-    attachments: Array<string>;
-};
 
 export type FormResponse = {
     id: number;
@@ -417,77 +451,45 @@ export type Action = {
      * Whether the action is visible to and supposed to only be completed by non-members
      */
     publicOnly: boolean;
+    authors?: Array<User>;
 };
 
-export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 'tag';
-
-export type ActionUpdate = {
+export type User = {
     id: number;
-    action: Action;
-    actionId: number;
-    title: string;
-    content: EditableContent;
-    date: string;
-    visibleAt: string;
-    shortNotifString: string;
-    associatedEvent?: ActionEvent;
-    associatedEventId?: number;
-    notifyType: ActionUpdateNotifyType;
-    notifs: Array<Notification>;
-    tag?: Tag;
-};
-
-export type CommentParentObject = 'post' | 'action' | 'activity';
-
-export type Comment = {
-    id: number;
-    editableContent: EditableContent;
-    author: {
-        [key: string]: unknown;
-    };
-    authorId: number;
-    parentObjectType: CommentParentObject;
-    parentObjectId: number;
-    deleted: boolean;
-    createdAt: string;
-    updatedAt: string;
-    parent?: Comment;
-    parentId?: number;
-    children?: Array<Comment>;
-    pinned: boolean;
-    likes: Array<User>;
-    likesCount: number;
-};
-
-export type Notification = {
-    id: number;
-    category: NotificationCategory;
-    message: string;
-    targetContent?: string;
-    webAppLocation: string | null;
-    mobileAppLocation: string | null;
-    readAt?: string;
-    createdAt: string;
-    updatedAt: string;
-    sendTime: string;
-    groupingKey?: string;
-    groupingCount?: number;
-    actionUpdate?: ActionUpdate;
-    comment?: Comment;
-    onetimeInvite?: OnetimeInvite;
-};
-
-export type OnetimeInvite = {
-    id: number;
-    invitee: string;
-    inviteeDescription?: string;
-    code: string;
-    invitingUser: User;
-    createdAt: string;
-    status: OnetimeInviteStatus;
-    community?: Community;
-    communityId?: number;
-    notifs: Array<Notification>;
+    name: string;
+    phoneNumber?: string;
+    phoneNumberValidated: boolean;
+    sentTextOptInMessageAt?: string;
+    emailVerified: boolean;
+    preferredReminderTime?: string;
+    timeZone?: string;
+    contractEvents: Array<ContractEvent>;
+    preferredActionReminderChannel: NotificationChannel;
+    emailNotifsEnabled: boolean;
+    textNotifsEnabled: boolean;
+    pushNotifsEnabled: boolean;
+    shareEmailWithCommunityLead: boolean;
+    sharePhoneNumberWithCommunityLead: boolean;
+    socialNotifsPreference: NotificationPreference;
+    turnedOffAllNotifs: boolean;
+    forumDigestPreference: ForumDigestPreference;
+    password: string;
+    admin: boolean;
+    staff: boolean;
+    profilePicture: string | null;
+    profileDescription: string | null;
+    referralCode: string | null;
+    stripeCustomerId: string | null;
+    isNotSignedUpPartialProfile: boolean;
+    over18: boolean | null;
+    onboardingComplete: boolean;
+    anonymous: boolean;
+    communities: Array<Community>;
+    isCommunityLeader: boolean;
+    invitedCommunities: Array<CommunityInvite>;
+    formDataPreference: PublicFormResponseDefault;
+    participants: Array<Participant>;
+    authoredActions?: Array<Action>;
 };
 
 export type Community = {
@@ -990,6 +992,14 @@ export type ActionDto = {
      * Form associated with the action
      */
     taskFormId?: number;
+    /**
+     * Timestamp when the action was created
+     */
+    createdAt: string;
+    /**
+     * Timestamp when the action was last updated
+     */
+    updatedAt: string;
     participatingTags: Array<Tag>;
     /**
      * Whether to use a manual cohort for the action
@@ -1031,6 +1041,7 @@ export type ActionDto = {
     shouldParticipate?: boolean;
     userRelation?: string;
     reqAuthenticated?: boolean;
+    authors?: Array<ProfileDto>;
 };
 
 export type LatLonDto = {
@@ -1133,6 +1144,7 @@ export type CreateActionDto = {
     userRelation?: string;
     reqAuthenticated?: boolean;
     suiteId?: number | null;
+    authorIds?: Array<number>;
 };
 
 export type UpdateActionDto = {
@@ -1211,6 +1223,7 @@ export type UpdateActionDto = {
     userRelation?: string;
     reqAuthenticated?: boolean;
     suiteId?: number | null;
+    authorIds?: Array<number>;
 };
 
 export type CreateActionEventDto = {
@@ -1468,6 +1481,7 @@ export type ExportActionDto = {
      * Whether the action is visible to and supposed to only be completed by non-members
      */
     publicOnly: boolean;
+    authors?: Array<User>;
     taskForm?: Form;
     reminderGroups?: Array<ReminderGroup>;
 };
@@ -3529,7 +3543,7 @@ export type ActionsUpdateData = {
 };
 
 export type ActionsUpdateResponses = {
-    200: ActionDto;
+    200: Action;
 };
 
 export type ActionsUpdateResponse = ActionsUpdateResponses[keyof ActionsUpdateResponses];

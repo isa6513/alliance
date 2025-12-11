@@ -32,14 +32,33 @@ const ActionContents = () => {
         />
       )}
 
-      <div className="flex flex-row justify-between items-start mb-4 sm:mb-8">
+      <div className="flex flex-row justify-between items-start mb-4 sm">
         {action !== undefined && (
           <div className="flex flex-col gap-y-2">
-            <p className="font-semibold text-3xl font-serif mb-2">
+            <p className="font-semibold text-3xl font-serif mb-1">
               {action.name}
             </p>
             {loggedInMode ? (
-              <p className="">{action.shortDescription}</p>
+              <div>
+                {!!action.authors?.length && (
+                  <div className="mb-3">
+                    <div className="flex flex-row gap-x-1 text-zinc-800">
+                      <p>By</p>
+                      {action.authors.map((author, i) => (
+                        <Link
+                          key={author.id}
+                          to={href("/member/:id", { id: author.id.toString() })}
+                          className="flex flex-row items-center gap-x-1 hover:underline"
+                        >
+                          {author.displayName}
+                          {i < action.authors!.length - 1 && ", "}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <p>{action.shortDescription}</p>
+              </div>
             ) : (
               <TaskTimeInfo
                 action={action}

@@ -1,5 +1,5 @@
 import {
-  ActionDto,
+  Action,
   ActionEventDto,
   ActionStatus,
   ReminderGroup,
@@ -16,7 +16,7 @@ import ActionTimelineBar from "./ActionTimelineBar";
 import { Link } from "react-router";
 
 interface ActionTimelineProps {
-  actions: ActionDto[];
+  actions: Action[];
   title?: string;
   className?: string;
   reminders?: ReminderGroup[];
@@ -25,7 +25,7 @@ interface ActionTimelineProps {
 }
 
 interface TimelineData {
-  action: ActionDto;
+  action: Pick<Action, "id" | "name" | "status">;
   phases: PhaseSegment[];
   totalDuration: number;
   startDate: Date;

@@ -127,7 +127,7 @@ export class ActionsService {
   ) {}
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
-    const { participatingTags, suiteId, ...rest } = createActionDto;
+    const { participatingTags, suiteId, authorIds, ...rest } = createActionDto;
     const action = this.actionRepository.create(rest);
 
     if (suiteId) {
@@ -140,6 +140,12 @@ export class ActionsService {
     if (participatingTags && participatingTags.length > 0) {
       action.participatingTags =
         await this.resolveParticipatingTags(participatingTags);
+    }
+
+    if (authorIds !== undefined) {
+      action.authors = authorIds.length
+        ? await this.userService.findByIds(authorIds)
+        : [];
     }
 
     return this.actionRepository.save(action);
@@ -430,6 +436,7 @@ export class ActionsService {
         'manualCohortUsers',
         'updates',
         'suite',
+        'authors',
       ] satisfies RelationString<Action>[],
     });
 
@@ -639,14 +646,14 @@ export class ActionsService {
   ): Promise<Action | null> {
     const action = await this.actionRepository.findOne({
       where: { id },
-      relations: ['participatingTags', 'manualCohortUsers'],
+      relations: ['participatingTags', 'manualCohortUsers', 'authors'],
     });
 
     if (!action) {
       throw new NotFoundException('Action not found');
     }
 
-    const { participatingTags, suiteId, ...rest } = updateActionDto;
+    const { participatingTags, suiteId, authorIds, ...rest } = updateActionDto;
 
     if (suiteId !== undefined) {
       if (suiteId === null) {
@@ -657,6 +664,12 @@ export class ActionsService {
         });
         action.suite = suite;
       }
+    }
+
+    if (authorIds !== undefined) {
+      action.authors = authorIds.length
+        ? await this.userService.findByIds(authorIds)
+        : [];
     }
 
     Object.assign(action, rest);
@@ -1577,7 +1590,7 @@ export class ActionsService {
 
   async createSuite(
     createActionSuiteDto: CreateActionSuiteDto,
-  ): Promise<ActionSuiteDto> {
+  ): Promise<ActionSuite> {
     const suite = this.actionSuiteRepository.create(createActionSuiteDto);
     return this.actionSuiteRepository.save(suite);
   }

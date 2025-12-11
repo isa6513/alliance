@@ -1,8 +1,4 @@
-import {
-  ActionDto,
-  ActionEventDto,
-  ActionStatus,
-} from "@alliance/shared/client";
+import { Action, ActionEventDto, ActionStatus } from "@alliance/shared/client";
 import React from "react";
 
 interface PhaseSegment {
@@ -15,7 +11,7 @@ interface PhaseSegment {
 }
 
 interface ActionTimelineBarProps {
-  action: ActionDto;
+  action: Pick<Action, "id" | "name" | "status">;
   phases: PhaseSegment[];
   globalStartDate: Date;
   pixelsPerDay: number;

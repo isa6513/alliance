@@ -6,7 +6,20 @@ import { useCallback } from "react";
 import { useNavigate } from "react-router";
 
 export interface ActionListCardProps {
-  action: ActionDto;
+  action: Pick<
+    ActionDto,
+    | "id"
+    | "name"
+    | "archived"
+    | "events"
+    | "status"
+    | "shortDescription"
+    | "usersJoined"
+    | "usersCompleted"
+    | "commitmentThreshold"
+    | "type"
+    | "donationAmount"
+  >;
 }
 
 const ActionListCard = ({ action }: ActionListCardProps) => {

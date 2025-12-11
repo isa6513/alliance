@@ -43,6 +43,7 @@ import { CommunityInvite } from './community-invite.entity';
 import { Participant } from 'src/messaging/entities/participant.entity';
 import { Ty } from 'src/tasks/entities/type';
 import { ContractEvent, ContractEventType } from './contract-event.entity';
+import { Action } from 'src/actions/entities/action.entity';
 
 export enum NotificationPreference {
   All = 'all',
@@ -380,4 +381,9 @@ export class User {
   @ApiProperty({ type: () => Participant, isArray: true })
   @Type(() => Participant)
   participants: Ty<Participant>[];
+
+  @ManyToMany(() => Action, (action) => action.authors)
+  @ApiPropertyOptional({ type: () => Action, isArray: true })
+  @Type(() => Action)
+  authoredActions?: Ty<Action>[];
 }

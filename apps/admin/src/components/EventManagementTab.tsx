@@ -1,4 +1,4 @@
-import { ActionDto } from "@alliance/shared/client";
+import { Action } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
@@ -10,8 +10,8 @@ import CreateEventForm from "./CreateEventForm";
 // Status options for event creation
 
 export interface EventManagementTabProps {
-  action: ActionDto;
-  setAction: (action: ActionDto) => unknown;
+  action: Action;
+  setAction: (action: Action) => unknown;
 }
 
 const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {

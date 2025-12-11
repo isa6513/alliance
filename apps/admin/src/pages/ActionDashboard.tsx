@@ -1,10 +1,15 @@
-import type { ActionSuite, Tag, TagDto, User } from "@alliance/shared/client";
+import type {
+  Action,
+  ActionSuite,
+  Tag,
+  TagDto,
+  User,
+} from "@alliance/shared/client";
 import {
   ActionDto,
   actionsArchive,
   actionsCreate,
   actionsExportAction,
-  actionsFindOne,
   actionsFindOneAdmin,
   actionsRemove,
   actionsSuites,
@@ -75,7 +80,7 @@ const ActionDashboard: React.FC = () => {
   const navigate = useNavigate();
   const isNew = actionIdParam === "new";
   const actionId = isNew ? null : parseInt(actionIdParam!);
-  const [action, setAction] = useState<ActionDto | null>(null);
+  const [action, setAction] = useState<Action | null>(null);
   const [loading, setLoading] = useState<boolean>(!isNew);
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,7 +96,9 @@ const ActionDashboard: React.FC = () => {
   const [availableUsers, setAvailableUsers] = useState<UserSelectUser[]>([]);
   const [usersLoading, setUsersLoading] = useState<boolean>(true);
   const [manualCohortUserIds, setManualCohortUserIds] = useState<number[]>([]);
-
+  const [availableAuthors, setAvailableAuthors] = useState<UserSelectUser[]>(
+    []
+  );
   const [searchParams, setSearchParams] = useSearchParams();
 
   const selectedTab = (searchParams.get("tab") as Tab) ?? "overview";
@@ -184,6 +191,14 @@ const ActionDashboard: React.FC = () => {
             profilePicture: user.profilePicture,
           }));
           setAvailableUsers(mappedUsers);
+
+          const staffUsers = response.data.filter((user) => user.staff);
+          const mappedStaffUsers = staffUsers.map<UserSelectUser>((user) => ({
+            id: user.id,
+            name: user.displayName,
+            profilePicture: user.profilePicture,
+          }));
+          setAvailableAuthors(mappedStaffUsers);
         }
       } catch (err) {
         console.error("Failed to load users:", err);
@@ -201,7 +216,7 @@ const ActionDashboard: React.FC = () => {
     };
   }, []);
 
-  const [form, setForm] = useState<CreateActionDto & { taskFormId?: number }>({
+  const [form, setForm] = useState<CreateActionDto>({
     name: "",
     category: "",
     image: "",
@@ -219,6 +234,7 @@ const ActionDashboard: React.FC = () => {
     priority: 0,
     manualCohortUsers: [],
     useManualCohort: false,
+    authorIds: [],
   });
 
   // Reset form when switching to new action mode
@@ -244,6 +260,7 @@ const ActionDashboard: React.FC = () => {
         priority: 0,
         manualCohortUsers: [],
         useManualCohort: false,
+        authorIds: [],
       });
       setImageKey(null);
       setImagePreview(null);
@@ -299,6 +316,8 @@ const ActionDashboard: React.FC = () => {
         } = actionData;
 
         const manualCohortUsers = actionData.manualCohortUsers ?? [];
+        const authors = actionData.authors ?? [];
+        const authorIds = authors.map((user) => user.id);
 
         setForm({
           ...formData,
@@ -307,6 +326,7 @@ const ActionDashboard: React.FC = () => {
           suiteId: suite?.id,
           manualCohortUsers,
           useManualCohort: actionData.useManualCohort ?? false,
+          authorIds,
         });
 
         setSelectedTagIds(
@@ -323,7 +343,15 @@ const ActionDashboard: React.FC = () => {
               `User #${user.id}`,
             profilePicture: user.profilePicture,
           }));
-          const additions = manualUsers.filter(
+          const authorUsers = authors.map<UserSelectUser>((user) => ({
+            id: user.id,
+            name:
+              (user as unknown as { displayName?: string }).displayName ??
+              user.name ??
+              `User #${user.id}`,
+            profilePicture: user.profilePicture,
+          }));
+          const additions = [...manualUsers, ...authorUsers].filter(
             (user) => !existingIds.has(user.id)
           );
           return additions.length ? [...prev, ...additions] : prev;
@@ -480,6 +508,13 @@ const ActionDashboard: React.FC = () => {
     }));
   }, []);
 
+  const handleAuthorsChange = useCallback((ids: number[]) => {
+    setForm((prev) => ({
+      ...prev,
+      authorIds: ids,
+    }));
+  }, []);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -538,7 +573,7 @@ const ActionDashboard: React.FC = () => {
           throw new Error("Failed to update action");
         }
         // Reload the action to get updated data
-        const reloadResponse = await actionsFindOne({
+        const reloadResponse = await actionsFindOneAdmin({
           path: { id: actionId },
         });
         if (reloadResponse.data) {
@@ -610,7 +645,7 @@ const ActionDashboard: React.FC = () => {
     }
   };
 
-  const manualCohortSelectableUsers = useMemo(() => {
+  const selectableUsers = useMemo(() => {
     const manualUsers =
       form.manualCohortUsers?.map<UserSelectUser>((user) => ({
         id: user.id,
@@ -712,10 +747,13 @@ const ActionDashboard: React.FC = () => {
             suitesLoading={suitesLoading}
             selectedTagIds={selectedTagIds}
             onTagsChange={handleTagsChange}
-            availableUsers={manualCohortSelectableUsers}
+            availableUsers={selectableUsers}
             usersLoading={usersLoading}
             manualCohortUserIds={manualCohortUserIds}
             onManualCohortChange={handleManualCohortChange}
+            authorIds={form.authorIds ?? []}
+            onAuthorsChange={handleAuthorsChange}
+            availableAuthors={availableAuthors}
           />
         </div>
       ) : (
@@ -990,10 +1028,13 @@ const ActionDashboard: React.FC = () => {
                   suitesLoading={suitesLoading}
                   selectedTagIds={selectedTagIds}
                   onTagsChange={handleTagsChange}
-                  availableUsers={manualCohortSelectableUsers}
+                  availableUsers={selectableUsers}
                   usersLoading={usersLoading}
                   manualCohortUserIds={manualCohortUserIds}
                   onManualCohortChange={handleManualCohortChange}
+                  authorIds={form.authorIds ?? []}
+                  onAuthorsChange={handleAuthorsChange}
+                  availableAuthors={availableAuthors}
                 />
               </Card>
             )}

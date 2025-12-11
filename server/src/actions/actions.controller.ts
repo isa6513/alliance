@@ -421,7 +421,7 @@ export class ActionsController {
 
   @Patch(':id')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: ActionDto })
+  @ApiOkResponse({ type: Action })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateActionDto: UpdateActionDto,
@@ -645,7 +645,7 @@ export class ActionsController {
   @ApiOkResponse({ type: ActionSuiteDto })
   createSuite(
     @Body() createActionSuiteDto: CreateActionSuiteDto,
-  ): Promise<ActionSuiteDto> {
+  ): Promise<ActionSuite> {
     return this.actionsService.createSuite(createActionSuiteDto);
   }
 

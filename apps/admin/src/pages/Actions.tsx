@@ -1,4 +1,5 @@
 import {
+  Action,
   ActionDto,
   actionsAddEvent,
   actionsClearDb,
@@ -14,7 +15,9 @@ import { testActions } from "../lib/testData";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import ActionListCard from "../components/ActionListCard";
 
-export const getLastPastEventDate = (action: ActionDto): Date | null => {
+export const getLastPastEventDate = (
+  action: Pick<ActionDto, "events">
+): Date | null => {
   const now = Date.now();
   let latest: Date | null = null;
 
@@ -38,7 +41,7 @@ export const getLastPastEventDate = (action: ActionDto): Date | null => {
   return latest;
 };
 
-const compareActionsBySchedule = (a: ActionDto, b: ActionDto) => {
+const compareActionsBySchedule = (a: Action, b: Action) => {
   if (a.archived && !b.archived) {
     return 1;
   }
@@ -60,13 +63,13 @@ const compareActionsBySchedule = (a: ActionDto, b: ActionDto) => {
 type ActionSuiteGroup = {
   id: number | null;
   name: string;
-  actions: ActionDto[];
+  actions: Action[];
   sortDate: Date | null;
   isArchivedOnly: boolean;
 };
 
 const ActionsList: React.FC = () => {
-  const [actions, setActions] = useState<ActionDto[]>([]);
+  const [actions, setActions] = useState<Action[]>([]);
   const [actionsLoading, setActionsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showPopulateConfirm, setShowPopulateConfirm] = useState(false);
@@ -145,7 +148,7 @@ const ActionsList: React.FC = () => {
       {
         id: number | null;
         name: string;
-        actions: ActionDto[];
+        actions: Action[];
       }
     >();
 

@@ -109,10 +109,9 @@ export class CreateActionEventDto extends OmitType(ActionEventDto, [
 export class UpdateActionEventDto extends PartialType(CreateActionEventDto) {}
 
 export class ActionDto extends OmitType(Action, [
-  'createdAt',
-  'updatedAt',
   'events',
   'updates',
+  'authors',
 ]) {
   @ApiProperty()
   usersCompleted: number;
@@ -142,6 +141,10 @@ export class ActionDto extends OmitType(Action, [
   @ApiPropertyOptional()
   reqAuthenticated?: boolean;
 
+  @ApiPropertyOptional({ type: () => ProfileDto, isArray: true })
+  @Type(() => ProfileDto)
+  authors?: ProfileDto[];
+
   constructor(
     action: Partial<Action>,
     extra?: {
@@ -163,6 +166,8 @@ export class ActionDto extends OmitType(Action, [
     this.shouldParticipate = extra?.shouldParticipate;
     this.userRelation = extra?.userRelation;
     this.reqAuthenticated = extra?.reqAuthenticated;
+    this.authors =
+      action.authors?.map((author) => new ProfileDto(author)) || [];
   }
 }
 
@@ -178,6 +183,9 @@ export class CreateActionDto extends OmitType(ActionDto, [
   'suite',
   'archived',
   'updates',
+  'authors',
+  'createdAt',
+  'updatedAt',
 ]) {
   @ApiPropertyOptional({
     type: Number,
@@ -185,6 +193,13 @@ export class CreateActionDto extends OmitType(ActionDto, [
   })
   @IsOptional()
   suiteId?: number | null;
+
+  @ApiPropertyOptional({
+    type: Number,
+    isArray: true,
+  })
+  @IsOptional()
+  authorIds?: number[];
 }
 
 export class UpdateActionDto extends PartialType(CreateActionDto) {}

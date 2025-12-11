@@ -263,4 +263,11 @@ export class Action {
   })
   @Allow()
   publicOnly: boolean;
+
+  @ManyToMany(() => User, (user) => user.authoredActions, { cascade: true })
+  @JoinTable()
+  @ApiPropertyOptional({ type: () => User, isArray: true })
+  @Type(() => User)
+  @IsOptional()
+  authors?: Ty<User>[];
 }
