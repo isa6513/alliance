@@ -7,6 +7,7 @@ import TaskTimeInfo from "../pages/app/TaskTimeInfo";
 import ActionEventsPanel from "./ActionEventsPanel";
 import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
+import Card, { CardStyle } from "@alliance/shared/ui/Card";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();
@@ -23,7 +24,7 @@ const ActionContents = () => {
   const { lastEvent, nextEvent } = getLastAndNextEvent(action);
 
   return (
-    <div className="flex flex-col gap-y-3 flex-2 w-full justify-center">
+    <div className="flex flex-col gap-y-3 flex-2 w-full">
       {action?.image && (
         <img
           src={action.image}
@@ -50,7 +51,6 @@ const ActionContents = () => {
           </div>
         )}
       </div>
-
       <div className="flex flex-col gap-y-8 sm:gap-y-12">
         {loggedInMode && <ActionEventsPanel action={action} />}
         {action.status !== "planned" && (
@@ -61,6 +61,12 @@ const ActionContents = () => {
             <p className="font-medium text-sm">Activity</p>
             <img src={chevronLeft} className="w-3 h-3 rotate-270" />
           </Link>
+        )}
+        {isAuthenticated && action.publicOnly && (
+          <Card style={CardStyle.Grey}>
+            This is an action intended for external participants: we do not
+            expect members to complete it.
+          </Card>
         )}
         {action.status !== "planned" && (
           <div className="flex flex-col">

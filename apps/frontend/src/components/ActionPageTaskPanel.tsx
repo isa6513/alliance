@@ -6,6 +6,7 @@ import { Route } from "../../.react-router/types/src/components/+types/ActionPag
 import ActionTaskPanel, { ActionTaskPanelProps } from "./ActionTaskPanel";
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import ActionTaskPanelDeclined from "./ActionTaskPanelDeclined";
+import { useAuth } from "../lib/AuthContext";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
@@ -36,6 +37,8 @@ const ActionPageTaskPanel = () => {
   const { userRelation, action, ...panelHandlers } =
     useOutletContext<TaskPanelContext>();
 
+  const { isAuthenticated } = useAuth();
+
   if (action.publicOnly) {
     return (
       <ActionTaskPanel
@@ -43,8 +46,8 @@ const ActionPageTaskPanel = () => {
         action={action}
         {...panelHandlers}
         missedDeadline={false}
-        disabled={false}
-        card={false}
+        disabled={isAuthenticated}
+        card={isAuthenticated}
       />
     );
   }
