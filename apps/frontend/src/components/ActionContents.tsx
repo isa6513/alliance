@@ -74,12 +74,14 @@ const ActionContents = () => {
               <div className="flex flex-col lg:flex-row justify-between lg:items-center mb-4 gap-x-4">
                 <p className="font-semibold text-xl flex-1">Task</p>
 
-                <TaskTimeInfo
-                  action={action}
-                  nextEvent={nextEvent}
-                  lastEvent={lastEvent}
-                  absoluteDeadline={true}
-                />
+                {!action.publicOnly && (
+                  <TaskTimeInfo
+                    action={action}
+                    nextEvent={nextEvent}
+                    lastEvent={lastEvent}
+                    absoluteDeadline={true}
+                  />
+                )}
               </div>
             )}
             <Outlet context={context} />
