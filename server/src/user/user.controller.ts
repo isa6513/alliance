@@ -45,6 +45,7 @@ import {
   CreateCommunityInviteDto,
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
+  RequestOnetimeInviteDto,
 } from './dto/invite.dto';
 import { CreateAwayRangeDto, UserAwayRangeDto } from './dto/away-range.dto';
 import {
@@ -522,14 +523,48 @@ export class UserController {
     return this.userService.findValidInviteByCode(code);
   }
 
-  @Post('createOnetimeInvite')
+  @Post('onetimeInvite/request')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: OnetimeInviteDto })
+  async requestOnetimeInvite(
+    @Body() body: RequestOnetimeInviteDto,
+    @Request() req: JwtRequest,
+  ) {
+    return this.userService.requestOnetimeInvite(body, req.user.sub);
+  }
+
+  @Post('onetimeInvite/:inviteId/approve')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse({ type: OnetimeInviteDto })
+  async approveOnetimeInvite(
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @Request() req: JwtRequest,
+  ) {
+    return new OnetimeInviteDto(
+      await this.userService.approveOnetimeInvite(inviteId, req.user.sub),
+    );
+  }
+
+  @Post('onetimeInvite/:inviteId/reject')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse()
+  async rejectOnetimeInvite(
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @Request() req: JwtRequest,
+  ) {
+    return this.userService.rejectOnetimeInvite(inviteId, req.user.sub);
+  }
+
+  @Post('onetimeInvite/create')
   @UseGuards(CommunityLeaderGuard)
   @ApiOkResponse({ type: OnetimeInviteDto })
   async createOnetimeInvite(
     @Body() body: CreateOnetimeInviteDto,
     @Request() req: JwtRequest,
   ) {
-    return this.userService.createOnetimeInvite(body, req.user.sub);
+    return new OnetimeInviteDto(
+      await this.userService.createOnetimeInvite(body, req.user.sub),
+    );
   }
 
   @Post('createCommunityInvite')
@@ -554,7 +589,7 @@ export class UserController {
   }
 
   @Delete('onetimeInvites/:inviteId')
-  @UseGuards(CommunityLeaderGuard)
+  @UseGuards(AuthGuard)
   @ApiOkResponse()
   async deleteOnetimeInvite(
     @Param('inviteId', ParseIntPipe) inviteId: number,
@@ -597,6 +632,19 @@ export class UserController {
   ) {
     return (await this.userService.findOnetimeInvites(communityId)).map(
       (invite) => new OnetimeInviteDto(invite),
+    );
+  }
+
+  @Get('onetimeInvites/:communityId/my')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [OnetimeInviteDto] })
+  async getOnetimeInvitesByRequester(
+    @Request() req: JwtRequest,
+    @Param('communityId', ParseIntPipe) communityId: number,
+  ) {
+    return this.userService.findOnetimeInvitesByRequester(
+      req.user.sub,
+      communityId,
     );
   }
 

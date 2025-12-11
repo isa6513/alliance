@@ -9,6 +9,8 @@ import {
   userDeleteOnetimeInvite,
   userGetCommunityInvites,
   userGetOnetimeInvitesByCommunity,
+  userApproveOnetimeInvite,
+  userRejectOnetimeInvite,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useEffect, useMemo, useState } from "react";
@@ -21,13 +23,16 @@ import UserSelect, {
 } from "@alliance/shared/ui/UserSelect";
 import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import OneTimeInviteListItem from "./OneTimeInviteListItem";
 import CommunityInviteListItem from "./CommunityInviteListItem";
 import { Link } from "react-router";
+import OneTimeInviteRequestLeaderListItem from "./OneTimeInviteRequestLeaderListItem";
+import OneTimeInviteLeaderListItem from "./OneTimeInviteLeaderListItem";
+import { useToast } from "@alliance/shared/ui/ToastProvider";
 
-export interface CommunityInvitesTabProps {
+export interface CommunityInvitesTabLeaderProps {
   communityId: number;
   existingMembers: ProfileDto[];
+  setInviteNotifCount: (count: number) => void;
 }
 
 export enum InviteMode {
@@ -35,19 +40,25 @@ export enum InviteMode {
   CurrentMember = "Current Alliance member",
 }
 
-const CommunityInvitesTab = ({
+const CommunityInvitesTabLeader = ({
   communityId,
   existingMembers,
-}: CommunityInvitesTabProps) => {
+  setInviteNotifCount,
+}: CommunityInvitesTabLeaderProps) => {
   const [name, setName] = useState("");
   const { user } = useAuth();
 
   const [creatingInvite, setCreatingInvite] = useState(false);
 
+  const [pendingRequests, setPendingRequests] = useState<OnetimeInviteDto[]>(
+    []
+  );
+
   const [newUserInvites, setNewUserInvites] = useState<OnetimeInviteDto[]>([]);
   const [existingMemberInvites, setExistingMemberInvites] = useState<
     CommunityInviteDto[]
   >([]);
+  const { error: errorToast, confirm } = useToast();
 
   const allUsers = useSelectableUserIds();
 
@@ -88,7 +99,28 @@ const CommunityInvitesTab = ({
         setError("Failed to load existing member invites");
       }
     });
+    userGetOnetimeInvitesByCommunity({ path: { communityId } }).then(
+      (response) => {
+        if (response.data) {
+          setPendingRequests(
+            response.data
+              .filter((request) => request.status === "request_pending")
+              .sort(
+                (a, b) =>
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime()
+              )
+          );
+        } else {
+          setError("Failed to load new member requests");
+        }
+      }
+    );
   }, [communityId]);
+
+  useEffect(() => {
+    setInviteNotifCount(pendingRequests.length);
+  }, [pendingRequests, setInviteNotifCount]);
 
   const copyToClipboard = (text: string) => {
     const baseUrl = getBaseUrl();
@@ -145,14 +177,64 @@ const CommunityInvitesTab = ({
       });
   };
 
-  const handleDeleteInvite = (inviteId: number) => {
-    userDeleteOnetimeInvite({ path: { inviteId } }).then((response) => {
-      if (response.data) {
-        setNewUserInvites((prev) =>
-          prev.filter((invite) => invite.id !== inviteId)
-        );
+  const onApproveOnetimeInvite = (inviteId: number) => {
+    (async () => {
+      const response = await userApproveOnetimeInvite({
+        path: { inviteId },
+      });
+      if (!response.data) {
+        errorToast(`Failed to approve invite: ${response.response.statusText}`);
+        return;
       }
-    });
+
+      setPendingRequests((prev) =>
+        prev.filter((request) => request.id !== inviteId)
+      );
+      setNewUserInvites((prev) => [...prev, response.data]);
+    })();
+  };
+
+  const onRejectOnetimeInvite = (inviteId: number) => {
+    (async () => {
+      const response = await userRejectOnetimeInvite({
+        path: { inviteId },
+      });
+
+      if (response.error) {
+        errorToast(`Failed to reject invite: ${response.response.statusText}`);
+        return;
+      }
+
+      setPendingRequests((prev) =>
+        prev.filter((request) => request.id !== inviteId)
+      );
+    })();
+  };
+
+  const handleDeleteInvite = (
+    inviteId: number,
+    event: React.MouseEvent<HTMLElement>
+  ) => {
+    void (async () => {
+      const ok = await confirm({
+        message: "Are you sure you want to delete this invite?",
+        confirmLabel: "Yes, delete it!",
+        cancelLabel: "No, keep it",
+        anchorEl: event.currentTarget,
+        placement: "topleft",
+      });
+      if (!ok) {
+        return;
+      }
+
+      userDeleteOnetimeInvite({ path: { inviteId } }).then((response) => {
+        if (response.data) {
+          setNewUserInvites((prev) =>
+            prev.filter((invite) => invite.id !== inviteId)
+          );
+        }
+      });
+    })();
   };
 
   const handleDeleteCommunityInvite = (inviteId: number) => {
@@ -165,9 +247,21 @@ const CommunityInvitesTab = ({
     });
   };
 
-  const combinedInvites = useMemo(() => {
-    return [...newUserInvites, ...existingMemberInvites].sort((a, b) => {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  const combinedPastInvites = useMemo(() => {
+    return [
+      ...newUserInvites.map((invite) => ({
+        type: "new_member" as const,
+        data: invite,
+      })),
+      ...existingMemberInvites.map((invite) => ({
+        type: "existing_member" as const,
+        data: invite,
+      })),
+    ].sort((a, b) => {
+      return (
+        new Date(b.data.createdAt).getTime() -
+        new Date(a.data.createdAt).getTime()
+      );
     });
   }, [newUserInvites, existingMemberInvites]);
 
@@ -262,29 +356,55 @@ const CommunityInvitesTab = ({
         {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
 
-      <div className="flex flex-col gap-y-2">
-        <p className="font-semibold text-xl">Past invites</p>
-        <List>
-          {combinedInvites.map((invite) =>
-            "invitee" in invite ? (
-              <OneTimeInviteListItem
-                key={invite.id}
-                invite={invite}
-                onDelete={handleDeleteInvite}
-                onCopy={copyToClipboard}
+      {pendingRequests.length > 0 && (
+        <div className="flex flex-col gap-y-2">
+          <p className="font-semibold text-xl">Invite requests</p>
+          <List>
+            {pendingRequests.map((request) => (
+              <OneTimeInviteRequestLeaderListItem
+                key={request.id}
+                request={request}
+                onApprove={onApproveOnetimeInvite}
+                onReject={onRejectOnetimeInvite}
               />
-            ) : (
-              <CommunityInviteListItem
-                key={invite.id}
-                invite={invite}
-                onDelete={handleDeleteCommunityInvite}
-              />
-            )
-          )}
-        </List>
-      </div>
+            ))}
+          </List>
+        </div>
+      )}
+
+      {combinedPastInvites.length > 0 && (
+        <div className="flex flex-col gap-y-2">
+          <p className="font-semibold text-xl">Past invites</p>
+          <List>
+            {combinedPastInvites.map((entry) => {
+              switch (entry.type) {
+                case "new_member":
+                  return (
+                    <OneTimeInviteLeaderListItem
+                      key={entry.data.id}
+                      leaderId={user?.id}
+                      invite={entry.data}
+                      onDelete={handleDeleteInvite}
+                      onCopy={copyToClipboard}
+                    />
+                  );
+                case "existing_member":
+                  return (
+                    <CommunityInviteListItem
+                      key={entry.data.id}
+                      invite={entry.data}
+                      onDelete={handleDeleteCommunityInvite}
+                    />
+                  );
+                default:
+                  entry satisfies never;
+              }
+            })}
+          </List>
+        </div>
+      )}
     </div>
   );
 };
 
-export default CommunityInvitesTab;
+export default CommunityInvitesTabLeader;

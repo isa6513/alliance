@@ -116,422 +116,9 @@ export type User = {
     participants: Array<Participant>;
 };
 
-export type OnetimeInvite = {
-    id: number;
-    invitee: string;
-    code: string;
-    invitingUser: User;
-    createdAt: string;
-    isValid: boolean;
-    community?: Community;
-};
+export type OnetimeInviteStatus = 'request_pending' | 'request_rejected' | 'link_unused' | 'link_used';
 
-export type Community = {
-    id: number;
-    name: string;
-    description: string;
-    photo?: string;
-    users?: Array<User>;
-    leaders?: Array<User>;
-    invites?: Array<OnetimeInvite>;
-    internalInvites: Array<CommunityInvite>;
-};
-
-export type UserDto = {
-    id: number;
-    name: string;
-    phoneNumber?: string;
-    preferredReminderTime?: string;
-    timeZone?: string;
-    contractEvents: Array<ContractEvent>;
-    preferredActionReminderChannel: NotificationChannel;
-    emailNotifsEnabled: boolean;
-    textNotifsEnabled: boolean;
-    pushNotifsEnabled: boolean;
-    shareEmailWithCommunityLead: boolean;
-    sharePhoneNumberWithCommunityLead: boolean;
-    socialNotifsPreference: NotificationPreference;
-    turnedOffAllNotifs: boolean;
-    forumDigestPreference: ForumDigestPreference;
-    admin: boolean;
-    staff: boolean;
-    profilePicture: string | null;
-    referralCode: string | null;
-    onboardingComplete: boolean;
-    anonymous: boolean;
-    communities: Array<Community>;
-    invitedCommunities: Array<CommunityInvite>;
-    formDataPreference: PublicFormResponseDefault;
-    cityId?: number;
-    email: string;
-    hasActiveContract: boolean;
-};
-
-export type ForgotPasswordDto = {
-    email: string;
-};
-
-export type ResetPasswordDto = {
-    token: string;
-    password: string;
-};
-
-export type ProfileDto = {
-    id: number;
-    admin: boolean;
-    staff: boolean;
-    profilePicture: string | null;
-    profileDescription: string | null;
-    displayName: string;
-    hasActiveContract: boolean;
-    isCommunityLeader: boolean;
-    lastContractEvent?: ContractEvent;
-};
-
-export type OnboardingDto = {
-    over18: boolean | null;
-    anonymous: boolean;
-    cityId?: number;
-};
-
-export type UserAwayRangeReason = 'vacation' | 'emergency' | 'other';
-
-export type CreateAwayRangeDto = {
-    reason: UserAwayRangeReason;
-    note?: string | null;
-    startDay: string;
-    endDay: string;
-};
-
-export type UserAwayRangeDto = {
-    id: number;
-    startDate: string;
-    endDate: string;
-    createdAt: string;
-    reason: UserAwayRangeReason;
-    note?: string | null;
-};
-
-export type UpdateProfileDto = {
-    name?: string;
-    phoneNumber?: string;
-    preferredReminderTime?: string;
-    timeZone?: string;
-    preferredActionReminderChannel?: NotificationChannel;
-    emailNotifsEnabled?: boolean;
-    textNotifsEnabled?: boolean;
-    pushNotifsEnabled?: boolean;
-    shareEmailWithCommunityLead?: boolean;
-    sharePhoneNumberWithCommunityLead?: boolean;
-    forumDigestPreference?: ForumDigestPreference;
-    profilePicture?: string | null;
-    profileDescription?: string | null;
-    isNotSignedUpPartialProfile?: boolean;
-    anonymous?: boolean;
-    formDataPreference?: PublicFormResponseDefault;
-    cityId?: number;
-};
-
-export type City = {
-    id: number;
-    name: string;
-    admin1: string;
-    admin2: string;
-    countryCode: string;
-    countryName: string;
-    latitude: number;
-    longitude: number;
-};
-
-export type FriendStatus = 'pending' | 'accepted' | 'declined' | 'none';
-
-export type FriendStatusDto = {
-    status: FriendStatus | null;
-    didReceiveRequest: boolean;
-};
-
-export type ProfileDtoWithFriends = {
-    id: number;
-    admin: boolean;
-    staff: boolean;
-    profilePicture: string | null;
-    profileDescription: string | null;
-    displayName: string;
-    hasActiveContract: boolean;
-    isCommunityLeader: boolean;
-    lastContractEvent?: ContractEvent;
-    friends: Array<ProfileDto>;
-};
-
-export type VerifyEmailBody = {
-    [key: string]: unknown;
-};
-
-export type CreateCommunityDto = {
-    name: string;
-    description: string;
-    photo?: string;
-};
-
-export type CommunityDto = {
-    id: number;
-    name: string;
-    description: string;
-    photo?: string;
-    internalInvites: Array<CommunityInvite>;
-    users: Array<ProfileDto>;
-    leaders: Array<ProfileDto>;
-};
-
-export type UpdateCommunityDto = {
-    name?: string;
-    description?: string;
-    photo?: string;
-};
-
-export type CommunityMemberDto = {
-    userId: number;
-};
-
-export type CreateTagDto = {
-    name: string;
-    description: string;
-    publicDisplayName?: string;
-};
-
-export type TagDto = {
-    id: number;
-    name: string;
-    description: string;
-    publicDisplayName?: string;
-    createdAt: string;
-    updatedAt: string;
-    users: Array<ProfileDto>;
-};
-
-export type AddUserToTagDto = {
-    userId: number;
-};
-
-export type OnetimeInviteDto = {
-    id: number;
-    invitee: string;
-    code: string;
-    createdAt: string;
-    isValid: boolean;
-    community?: Community;
-    invitingUser?: ProfileDto;
-};
-
-export type CreateOnetimeInviteDto = {
-    invitee: string;
-    invitingUserId?: number;
-    communityId?: number;
-};
-
-export type CreateCommunityInviteDto = {
-    invitedUserId: number;
-    communityId: number;
-};
-
-export type CommunityInviteDto = {
-    id: number;
-    status: CommunityInviteStatus;
-    createdAt: string;
-    updatedAt: string;
-    community: Community;
-    invitedUser?: ProfileDto;
-    invitingUser?: ProfileDto;
-};
-
-export type CommunityMemberContactInfoDto = {
-    id: number;
-    timeZone?: string;
-    preferredActionReminderChannel: NotificationChannel;
-    email?: string;
-    phoneNumber?: string;
-    preferredReminderTimeUserTz?: string;
-    preferredReminderTimeLeaderTz?: string;
-    awayRanges: Array<UserAwayRangeDto>;
-};
-
-export type StreamableFile = {
-    [key: string]: unknown;
-};
-
-export type UploadImageResponseDto = {
-    url: string;
-    key: string;
-};
-
-export type ConversationType = 'direct' | 'multiple' | 'community';
-
-export type MessageReferenceDto = {
-    id: string;
-    body: string;
-    createdAt: string;
-    author: ProfileDto;
-};
-
-export type ParticipantDto = {
-    role: ParticipantRole;
-    state: ParticipantState;
-    userHidden: boolean;
-    user: ProfileDto;
-    lastReadMessage?: MessageReferenceDto;
-};
-
-export type MessageDto = {
-    id: string;
-    body: string;
-    /**
-     * Image keys attached to the content
-     */
-    attachments: Array<string>;
-    createdAt: string;
-    deletedAt?: string;
-    author: ProfileDto;
-    conversationId: number;
-    replyTo?: MessageReferenceDto;
-};
-
-export type ConversationDto = {
-    id: number;
-    createdAt: string;
-    updatedAt: string;
-    type: ConversationType;
-    title: string;
-    photo?: string;
-    participants: Array<ParticipantDto>;
-    lastMessage?: MessageDto;
-    community?: CommunityDto;
-    hasUnread: boolean;
-    isMessageRequest: boolean;
-    unreadCount: number;
-};
-
-export type CreateDirectConversationDto = {
-    targetUserId: number;
-    title?: string;
-};
-
-export type CreateGroupConversationDto = {
-    title: string;
-    photo?: string;
-    participantIds: Array<number>;
-};
-
-export type UpdateConversationDto = {
-    title?: string;
-    photo?: string;
-};
-
-export type ConversationParticipantDto = {
-    userId: number;
-};
-
-export type UnreadMessagesDto = {
-    count: number;
-};
-
-export type CreateMessageDto = {
-    conversationId: number;
-    body: string;
-    /**
-     * Image attachments encoded as data URLs or existing keys
-     */
-    attachments?: Array<string>;
-    replyToId?: string;
-};
-
-/**
- * Type of action activity
- */
-export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete';
-
-export type CommentParentObject = 'post' | 'action' | 'activity';
-
-export type EditableContentDto = {
-    /**
-     * Markdown or plain text body
-     */
-    body: string;
-    /**
-     * Image keys attached to the content
-     */
-    attachments: Array<string>;
-};
-
-export type CommentDto = {
-    id: number;
-    parentObjectType: CommentParentObject;
-    parentObjectId: number;
-    deleted: boolean;
-    createdAt: string;
-    updatedAt: string;
-    parentId?: number;
-    pinned: boolean;
-    author: ProfileDto;
-    children?: Array<CommentDto>;
-    likes: Array<ProfileDto>;
-    editableContent: EditableContentDto;
-};
-
-export type FormResponseOutputDto = {
-    id: number;
-    formId: number;
-    answers: {
-        [key: string]: unknown;
-    };
-    visibilityValidatorResults: {
-        [key: string]: unknown;
-    };
-    publicAnswers: {
-        [key: string]: unknown;
-    };
-    deviceType?: string;
-    schemaSnapshot: {
-        [key: string]: unknown;
-    };
-};
-
-export type ActionActivityDto = {
-    id: number;
-    /**
-     * Type of action activity
-     */
-    type: ActionActivityType;
-    actionId: number;
-    createdAt: string;
-    likesCount: number;
-    user: ProfileDto;
-    actionName: string;
-    likes?: Array<ProfileDto>;
-    likedByMe?: boolean;
-    comments: Array<CommentDto>;
-    formResponseOutput?: FormResponseOutputDto;
-    editableContent: EditableContentDto;
-};
-
-export type DeclineActionDto = {
-    reason: string;
-    moral: boolean;
-};
-
-export type OptOutActionDto = {
-    actionId: number;
-    reason: string;
-    outOfTime: boolean;
-    partialFormData?: {
-        [key: string]: unknown;
-    };
-};
-
-export type UserActionRelation = 'joined' | 'completed' | 'none' | 'declined';
-
-export type UserActionRelationDto = {
-    relation: UserActionRelation;
-};
+export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'community_invite_rejected' | 'community_invite_accepted' | 'onetime_invite_request_created' | 'onetime_invite_request_approved' | 'onetime_invite_request_rejected';
 
 /**
  * Type of the action
@@ -542,75 +129,6 @@ export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
  * New status of the action after the event
  */
 export type ActionStatus = 'draft' | 'planned' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
-
-export type EditableContent = {
-    /**
-     * Markdown or plain text body
-     */
-    body: string;
-    /**
-     * Image keys attached to the content
-     */
-    attachments: Array<string>;
-};
-
-export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 'tag';
-
-export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'community_invite_rejected' | 'community_invite_accepted';
-
-export type Comment = {
-    id: number;
-    editableContent: EditableContent;
-    author: {
-        [key: string]: unknown;
-    };
-    authorId: number;
-    parentObjectType: CommentParentObject;
-    parentObjectId: number;
-    deleted: boolean;
-    createdAt: string;
-    updatedAt: string;
-    parent?: Comment;
-    parentId?: number;
-    children?: Array<Comment>;
-    pinned: boolean;
-    likes: Array<User>;
-    likesCount: number;
-};
-
-export type Notification = {
-    id: number;
-    category: NotificationCategory;
-    message: string;
-    targetContent?: string;
-    webAppLocation: string | null;
-    mobileAppLocation: string | null;
-    read: boolean;
-    cleared: boolean;
-    createdAt: string;
-    updatedAt: string;
-    sendTime: string;
-    groupingKey?: string;
-    groupingCount?: number;
-    actionUpdate?: ActionUpdate;
-    comment?: Comment;
-};
-
-export type ActionUpdate = {
-    id: number;
-    action: Action;
-    actionId: number;
-    title: string;
-    content: EditableContent;
-    date: string;
-    visibleAt: string;
-    shortNotifString: string;
-    associatedEvent?: ActionEvent;
-    associatedEventId?: number;
-    notifyType: ActionUpdateNotifyType;
-    notifs: Array<Notification>;
-    tag?: Tag;
-};
 
 export type ActionEvent = {
     /**
@@ -643,6 +161,33 @@ export type ActionEvent = {
     action: Action;
     updates: Array<ActionUpdate>;
     suiteManaged: boolean;
+};
+
+export type Tag = {
+    id: number;
+    users: Array<User>;
+    participatingIn: Array<Action>;
+    name: string;
+    description: string;
+    publicDisplayName?: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+/**
+ * Type of action activity
+ */
+export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete';
+
+export type EditableContent = {
+    /**
+     * Markdown or plain text body
+     */
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
 };
 
 export type FormResponse = {
@@ -873,15 +418,484 @@ export type Action = {
     publicOnly: boolean;
 };
 
-export type Tag = {
+export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 'tag';
+
+export type ActionUpdate = {
     id: number;
-    users: Array<User>;
-    participatingIn: Array<Action>;
+    action: Action;
+    actionId: number;
+    title: string;
+    content: EditableContent;
+    date: string;
+    visibleAt: string;
+    shortNotifString: string;
+    associatedEvent?: ActionEvent;
+    associatedEventId?: number;
+    notifyType: ActionUpdateNotifyType;
+    notifs: Array<Notification>;
+    tag?: Tag;
+};
+
+export type CommentParentObject = 'post' | 'action' | 'activity';
+
+export type Comment = {
+    id: number;
+    editableContent: EditableContent;
+    author: {
+        [key: string]: unknown;
+    };
+    authorId: number;
+    parentObjectType: CommentParentObject;
+    parentObjectId: number;
+    deleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+    parent?: Comment;
+    parentId?: number;
+    children?: Array<Comment>;
+    pinned: boolean;
+    likes: Array<User>;
+    likesCount: number;
+};
+
+export type Notification = {
+    id: number;
+    category: NotificationCategory;
+    message: string;
+    targetContent?: string;
+    webAppLocation: string | null;
+    mobileAppLocation: string | null;
+    read: boolean;
+    cleared: boolean;
+    createdAt: string;
+    updatedAt: string;
+    sendTime: string;
+    groupingKey?: string;
+    groupingCount?: number;
+    actionUpdate?: ActionUpdate;
+    comment?: Comment;
+    onetimeInvite?: OnetimeInvite;
+};
+
+export type OnetimeInvite = {
+    id: number;
+    invitee: string;
+    inviteeDescription?: string;
+    code: string;
+    invitingUser: User;
+    createdAt: string;
+    status: OnetimeInviteStatus;
+    community?: Community;
+    communityId?: number;
+    notifs: Array<Notification>;
+};
+
+export type Community = {
+    id: number;
+    name: string;
+    description: string;
+    photo?: string;
+    users?: Array<User>;
+    leaders?: Array<User>;
+    invites?: Array<OnetimeInvite>;
+    internalInvites: Array<CommunityInvite>;
+};
+
+export type UserDto = {
+    id: number;
+    name: string;
+    phoneNumber?: string;
+    preferredReminderTime?: string;
+    timeZone?: string;
+    contractEvents: Array<ContractEvent>;
+    preferredActionReminderChannel: NotificationChannel;
+    emailNotifsEnabled: boolean;
+    textNotifsEnabled: boolean;
+    pushNotifsEnabled: boolean;
+    shareEmailWithCommunityLead: boolean;
+    sharePhoneNumberWithCommunityLead: boolean;
+    socialNotifsPreference: NotificationPreference;
+    turnedOffAllNotifs: boolean;
+    forumDigestPreference: ForumDigestPreference;
+    admin: boolean;
+    staff: boolean;
+    profilePicture: string | null;
+    referralCode: string | null;
+    onboardingComplete: boolean;
+    anonymous: boolean;
+    communities: Array<Community>;
+    invitedCommunities: Array<CommunityInvite>;
+    formDataPreference: PublicFormResponseDefault;
+    cityId?: number;
+    email: string;
+    hasActiveContract: boolean;
+};
+
+export type ForgotPasswordDto = {
+    email: string;
+};
+
+export type ResetPasswordDto = {
+    token: string;
+    password: string;
+};
+
+export type ProfileDto = {
+    id: number;
+    admin: boolean;
+    staff: boolean;
+    profilePicture: string | null;
+    profileDescription: string | null;
+    displayName: string;
+    hasActiveContract: boolean;
+    isCommunityLeader: boolean;
+    lastContractEvent?: ContractEvent;
+};
+
+export type OnboardingDto = {
+    over18: boolean | null;
+    anonymous: boolean;
+    cityId?: number;
+};
+
+export type UserAwayRangeReason = 'vacation' | 'emergency' | 'other';
+
+export type CreateAwayRangeDto = {
+    reason: UserAwayRangeReason;
+    note?: string | null;
+    startDay: string;
+    endDay: string;
+};
+
+export type UserAwayRangeDto = {
+    id: number;
+    startDate: string;
+    endDate: string;
+    createdAt: string;
+    reason: UserAwayRangeReason;
+    note?: string | null;
+};
+
+export type UpdateProfileDto = {
+    name?: string;
+    phoneNumber?: string;
+    preferredReminderTime?: string;
+    timeZone?: string;
+    preferredActionReminderChannel?: NotificationChannel;
+    emailNotifsEnabled?: boolean;
+    textNotifsEnabled?: boolean;
+    pushNotifsEnabled?: boolean;
+    shareEmailWithCommunityLead?: boolean;
+    sharePhoneNumberWithCommunityLead?: boolean;
+    forumDigestPreference?: ForumDigestPreference;
+    profilePicture?: string | null;
+    profileDescription?: string | null;
+    isNotSignedUpPartialProfile?: boolean;
+    anonymous?: boolean;
+    formDataPreference?: PublicFormResponseDefault;
+    cityId?: number;
+};
+
+export type City = {
+    id: number;
+    name: string;
+    admin1: string;
+    admin2: string;
+    countryCode: string;
+    countryName: string;
+    latitude: number;
+    longitude: number;
+};
+
+export type FriendStatus = 'pending' | 'accepted' | 'declined' | 'none';
+
+export type FriendStatusDto = {
+    status: FriendStatus | null;
+    didReceiveRequest: boolean;
+};
+
+export type ProfileDtoWithFriends = {
+    id: number;
+    admin: boolean;
+    staff: boolean;
+    profilePicture: string | null;
+    profileDescription: string | null;
+    displayName: string;
+    hasActiveContract: boolean;
+    isCommunityLeader: boolean;
+    lastContractEvent?: ContractEvent;
+    friends: Array<ProfileDto>;
+};
+
+export type VerifyEmailBody = {
+    [key: string]: unknown;
+};
+
+export type CreateCommunityDto = {
+    name: string;
+    description: string;
+    photo?: string;
+};
+
+export type CommunityDto = {
+    id: number;
+    name: string;
+    description: string;
+    photo?: string;
+    internalInvites: Array<CommunityInvite>;
+    users: Array<ProfileDto>;
+    leaders: Array<ProfileDto>;
+};
+
+export type UpdateCommunityDto = {
+    name?: string;
+    description?: string;
+    photo?: string;
+};
+
+export type CommunityMemberDto = {
+    userId: number;
+};
+
+export type CreateTagDto = {
+    name: string;
+    description: string;
+    publicDisplayName?: string;
+};
+
+export type TagDto = {
+    id: number;
     name: string;
     description: string;
     publicDisplayName?: string;
     createdAt: string;
     updatedAt: string;
+    users: Array<ProfileDto>;
+};
+
+export type AddUserToTagDto = {
+    userId: number;
+};
+
+export type OnetimeInviteDto = {
+    id: number;
+    invitee: string;
+    inviteeDescription?: string;
+    code: string;
+    createdAt: string;
+    status: OnetimeInviteStatus;
+    community?: Community;
+    invitingUser: ProfileDto;
+};
+
+export type RequestOnetimeInviteDto = {
+    invitee: string;
+    inviteeDescription?: string;
+    invitingUserId?: number;
+    communityId: number;
+};
+
+export type CreateOnetimeInviteDto = {
+    invitee: string;
+    invitingUserId?: number;
+    communityId?: number;
+};
+
+export type CreateCommunityInviteDto = {
+    invitedUserId: number;
+    communityId: number;
+};
+
+export type CommunityInviteDto = {
+    id: number;
+    status: CommunityInviteStatus;
+    createdAt: string;
+    updatedAt: string;
+    community: Community;
+    invitedUser?: ProfileDto;
+    invitingUser?: ProfileDto;
+};
+
+export type CommunityMemberContactInfoDto = {
+    id: number;
+    timeZone?: string;
+    preferredActionReminderChannel: NotificationChannel;
+    email?: string;
+    phoneNumber?: string;
+    preferredReminderTimeUserTz?: string;
+    preferredReminderTimeLeaderTz?: string;
+    awayRanges: Array<UserAwayRangeDto>;
+};
+
+export type StreamableFile = {
+    [key: string]: unknown;
+};
+
+export type UploadImageResponseDto = {
+    url: string;
+    key: string;
+};
+
+export type ConversationType = 'direct' | 'multiple' | 'community';
+
+export type MessageReferenceDto = {
+    id: string;
+    body: string;
+    createdAt: string;
+    author: ProfileDto;
+};
+
+export type ParticipantDto = {
+    role: ParticipantRole;
+    state: ParticipantState;
+    userHidden: boolean;
+    user: ProfileDto;
+    lastReadMessage?: MessageReferenceDto;
+};
+
+export type MessageDto = {
+    id: string;
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
+    createdAt: string;
+    deletedAt?: string;
+    author: ProfileDto;
+    conversationId: number;
+    replyTo?: MessageReferenceDto;
+};
+
+export type ConversationDto = {
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+    type: ConversationType;
+    title: string;
+    photo?: string;
+    participants: Array<ParticipantDto>;
+    lastMessage?: MessageDto;
+    community?: CommunityDto;
+    hasUnread: boolean;
+    isMessageRequest: boolean;
+    unreadCount: number;
+};
+
+export type CreateDirectConversationDto = {
+    targetUserId: number;
+    title?: string;
+};
+
+export type CreateGroupConversationDto = {
+    title: string;
+    photo?: string;
+    participantIds: Array<number>;
+};
+
+export type UpdateConversationDto = {
+    title?: string;
+    photo?: string;
+};
+
+export type ConversationParticipantDto = {
+    userId: number;
+};
+
+export type UnreadMessagesDto = {
+    count: number;
+};
+
+export type CreateMessageDto = {
+    conversationId: number;
+    body: string;
+    /**
+     * Image attachments encoded as data URLs or existing keys
+     */
+    attachments?: Array<string>;
+    replyToId?: string;
+};
+
+export type EditableContentDto = {
+    /**
+     * Markdown or plain text body
+     */
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
+};
+
+export type CommentDto = {
+    id: number;
+    parentObjectType: CommentParentObject;
+    parentObjectId: number;
+    deleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+    parentId?: number;
+    pinned: boolean;
+    author: ProfileDto;
+    children?: Array<CommentDto>;
+    likes: Array<ProfileDto>;
+    editableContent: EditableContentDto;
+};
+
+export type FormResponseOutputDto = {
+    id: number;
+    formId: number;
+    answers: {
+        [key: string]: unknown;
+    };
+    visibilityValidatorResults: {
+        [key: string]: unknown;
+    };
+    publicAnswers: {
+        [key: string]: unknown;
+    };
+    deviceType?: string;
+    schemaSnapshot: {
+        [key: string]: unknown;
+    };
+};
+
+export type ActionActivityDto = {
+    id: number;
+    /**
+     * Type of action activity
+     */
+    type: ActionActivityType;
+    actionId: number;
+    createdAt: string;
+    likesCount: number;
+    user: ProfileDto;
+    actionName: string;
+    likes?: Array<ProfileDto>;
+    likedByMe?: boolean;
+    comments: Array<CommentDto>;
+    formResponseOutput?: FormResponseOutputDto;
+    editableContent: EditableContentDto;
+};
+
+export type DeclineActionDto = {
+    reason: string;
+    moral: boolean;
+};
+
+export type OptOutActionDto = {
+    actionId: number;
+    reason: string;
+    outOfTime: boolean;
+    partialFormData?: {
+        [key: string]: unknown;
+    };
+};
+
+export type UserActionRelation = 'joined' | 'completed' | 'none' | 'declined';
+
+export type UserActionRelationDto = {
+    relation: UserActionRelation;
 };
 
 export type ActionEventDto = {
@@ -2661,11 +2675,52 @@ export type UserOnetimeInviteResponses = {
 
 export type UserOnetimeInviteResponse = UserOnetimeInviteResponses[keyof UserOnetimeInviteResponses];
 
+export type UserRequestOnetimeInviteData = {
+    body: RequestOnetimeInviteDto;
+    path?: never;
+    query?: never;
+    url: '/user/onetimeInvite/request';
+};
+
+export type UserRequestOnetimeInviteResponses = {
+    200: OnetimeInviteDto;
+};
+
+export type UserRequestOnetimeInviteResponse = UserRequestOnetimeInviteResponses[keyof UserRequestOnetimeInviteResponses];
+
+export type UserApproveOnetimeInviteData = {
+    body?: never;
+    path: {
+        inviteId: number;
+    };
+    query?: never;
+    url: '/user/onetimeInvite/{inviteId}/approve';
+};
+
+export type UserApproveOnetimeInviteResponses = {
+    200: OnetimeInviteDto;
+};
+
+export type UserApproveOnetimeInviteResponse = UserApproveOnetimeInviteResponses[keyof UserApproveOnetimeInviteResponses];
+
+export type UserRejectOnetimeInviteData = {
+    body?: never;
+    path: {
+        inviteId: number;
+    };
+    query?: never;
+    url: '/user/onetimeInvite/{inviteId}/reject';
+};
+
+export type UserRejectOnetimeInviteResponses = {
+    200: unknown;
+};
+
 export type UserCreateOnetimeInviteData = {
     body: CreateOnetimeInviteDto;
     path?: never;
     query?: never;
-    url: '/user/createOnetimeInvite';
+    url: '/user/onetimeInvite/create';
 };
 
 export type UserCreateOnetimeInviteResponses = {
@@ -2768,6 +2823,21 @@ export type UserGetOnetimeInvitesByCommunityResponses = {
 };
 
 export type UserGetOnetimeInvitesByCommunityResponse = UserGetOnetimeInvitesByCommunityResponses[keyof UserGetOnetimeInvitesByCommunityResponses];
+
+export type UserGetOnetimeInvitesByRequesterData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/onetimeInvites/{communityId}/my';
+};
+
+export type UserGetOnetimeInvitesByRequesterResponses = {
+    200: Array<OnetimeInviteDto>;
+};
+
+export type UserGetOnetimeInvitesByRequesterResponse = UserGetOnetimeInvitesByRequesterResponses[keyof UserGetOnetimeInvitesByRequesterResponses];
 
 export type UserGetMyCommunityData = {
     body?: never;

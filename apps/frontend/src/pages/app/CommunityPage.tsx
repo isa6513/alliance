@@ -6,6 +6,7 @@ import {
   actionsGetCommunityMemberInfo,
   userGetMyCommunity,
   userLeaveCommunity,
+  userGetOnetimeInvitesByCommunity,
   CommunityMemberContactInfoDto,
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -22,7 +23,6 @@ import {
   GroupOrganizerGuidelines,
 } from "../../components/GroupGuidelines";
 import CommunityEditForm from "../../components/CommunityEditForm";
-import CommunityInvitesTab from "../../components/CommunityInvitesTab";
 import { href, useNavigate, useSearchParams } from "react-router";
 import { useToast } from "@alliance/shared/ui/ToastProvider";
 import CommunityActivityTab from "../../components/CommunityActivityTab";
@@ -32,6 +32,8 @@ import FloatingChatPanel from "../../components/FloatingChatpanel";
 import { MessageSquare } from "lucide-react";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../../lib/config";
+import CommunityInvitesTabLeader from "../../components/CommunityInvitesTabLeader";
+import CommunityInvitesTabMember from "../../components/CommunityInvitesTabMember";
 import BottomSpacer from "@alliance/shared/ui/BottomSpacer";
 
 type Tab = "activity" | "members" | "invites" | "about" | "edit" | "resources";
@@ -64,6 +66,7 @@ const CommunityPage = () => {
   const [activeActions, setActiveActions] = useState<UserActionSummaryDto[]>(
     []
   );
+  const [inviteNotifCount, setInviteNotifCount] = useState(0);
 
   const [chatOpen, setChatOpen] = useState(true);
 
@@ -117,6 +120,24 @@ const CommunityPage = () => {
   const amLeader = useMemo(() => {
     return community?.leaders.some((leader) => leader.id === user?.id);
   }, [community, user]);
+
+  useEffect(() => {
+    if (!community || !amLeader) {
+      return;
+    }
+    (async () => {
+      const invites = await userGetOnetimeInvitesByCommunity({
+        path: { communityId: community.id },
+      });
+      if (!invites.data) {
+        return;
+      }
+      setInviteNotifCount(
+        invites.data.filter((invite) => invite.status === "request_pending")
+          .length
+      );
+    })();
+  }, [amLeader, community]);
 
   useEffect(() => {
     actionsGetCommunityMemberInfo().then((resp) => {
@@ -191,7 +212,7 @@ const CommunityPage = () => {
 
   const tabs: Tab[] = amLeader
     ? ["activity", "members", "invites", "resources"]
-    : ["activity", "members", "about"];
+    : ["activity", "members", "invites", "about"];
 
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
@@ -301,7 +322,14 @@ const CommunityPage = () => {
                   m === tab ? "!border-b-green" : "!border-b-transparent"
                 }`}
               >
-                <p className="capitalize">{m}</p>
+                <div className="flex flex-row gap-x-2">
+                  <span className="capitalize">{m}</span>
+                  {m === "invites" && inviteNotifCount > 0 && (
+                    <div className="font-semibold text-xs text-white bg-zinc-500 rounded-full rounded-md flex justify-center items-center w-5 h-5">
+                      {inviteNotifCount}
+                    </div>
+                  )}
+                </div>
               </Button>
             ))}
           </div>
@@ -428,12 +456,16 @@ const CommunityPage = () => {
               <GroupOrganizerGuidelines />
             </div>
           )}
-          {tab === "invites" && (
-            <CommunityInvitesTab
-              communityId={community.id}
-              existingMembers={community.users}
-            />
-          )}
+          {tab === "invites" &&
+            (amLeader ? (
+              <CommunityInvitesTabLeader
+                communityId={community.id}
+                existingMembers={community.users}
+                setInviteNotifCount={setInviteNotifCount}
+              />
+            ) : (
+              <CommunityInvitesTabMember communityId={community.id} />
+            ))}
           {tab === "edit" && (
             <Card style={CardStyle.Grey}>
               <CommunityEditForm

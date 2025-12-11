@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -24,17 +25,21 @@ import {
   UpdateProfileDto,
 } from './user.dto';
 import { User } from './entities/user.entity';
-import { profileUrl } from 'src/search/approutes';
+import { groupInvitesUrl, profileUrl } from 'src/search/approutes';
 import { Tag } from './entities/tag.entity';
 import { CreateTagDto } from './tag.dto';
 import { Community } from './entities/community.entity';
 import { CreateCommunityDto, UpdateCommunityDto } from './community.dto';
 import { CommunityMemberContactInfoDto } from './dto/user-action-relations.dto';
-import { OnetimeInvite } from './entities/onetime-invite.entity';
+import {
+  OnetimeInvite,
+  OnetimeInviteStatus,
+} from './entities/onetime-invite.entity';
 import {
   CommunityInviteDto,
   CreateCommunityInviteDto,
   CreateOnetimeInviteDto,
+  RequestOnetimeInviteDto,
 } from './dto/invite.dto';
 import {
   UserAwayRange,
@@ -944,43 +949,63 @@ export class UserService {
       communityId,
       ...rest
     } = body;
-    const isAdmin = await this.isAdmin(userId);
+
+    // Fetch the user only once
+    const user = await this.findOneOrFail(userId, ['leaderOf']);
+    const isAdmin = user.admin;
+
+    // Normal users cannot create invites from other users
     const invitingUserId =
       (isAdmin ? providedInvitingUserId : undefined) ?? userId;
-    const invitingUser =
-      communityId === undefined
-        ? await this.findOneOrFail(invitingUserId)
-        : await this.findOneLeaderOrFail(invitingUserId, communityId);
 
     let community: Community | undefined;
-    if (communityId !== undefined) {
-      community = await this.communityRepository.findOneOrFail({
-        where: { id: communityId },
-      });
+
+    if (isAdmin) {
+      if (communityId) {
+        community = await this.communityRepository.findOneOrFail({
+          where: { id: communityId },
+        });
+      }
+    } else {
+      if (communityId === undefined) {
+        throw new UnauthorizedException('Community ID not provided');
+      }
+
+      community = user.leaderOf.find(
+        (community) => community.id === communityId,
+      );
       if (!community) {
-        throw new NotFoundException(`Community ${communityId} not found`);
+        throw new UnauthorizedException(
+          `User is not a leader of community ${communityId}`,
+        );
       }
     }
+
+    const invitingUser =
+      userId === invitingUserId
+        ? user
+        : await this.findOneOrFail(invitingUserId);
 
     const invite = this.onetimeInviteRepository.create({
       ...rest,
       code,
       invitingUser,
       community,
+      status: OnetimeInviteStatus.LINK_UNUSED,
     });
-    return this.onetimeInviteRepository.save(invite);
+    return await this.onetimeInviteRepository.save(invite);
   }
 
   async deleteOnetimeInvite(inviteId: number, userId: number): Promise<void> {
     const invite = await this.onetimeInviteRepository.findOneOrFail({
       where: { id: inviteId },
-      relations: ['invitingUser', 'community'],
+      relations: ['invitingUser'],
     });
-    const user = await this.findOneOrFail(userId, ['leaderOf']);
+    const user = await this.findOneOrFail(userId);
     if (
       !(
         invite.invitingUser.id === userId ||
-        user.leaderOf.some((leader) => leader.id === invite.community?.id) ||
+        user.leaderOfIds.some((cid) => cid === invite.communityId) ||
         user.admin
       )
     ) {
@@ -988,6 +1013,137 @@ export class UserService {
     }
 
     await this.onetimeInviteRepository.delete(inviteId);
+  }
+
+  async requestOnetimeInvite(body: RequestOnetimeInviteDto, userId: number) {
+    const { communityId, ...rest } = body;
+
+    const user = await this.findOneOrFail(userId, ['communities']);
+    const community: Community | undefined = user.communities.find(
+      (community) => community.id === communityId,
+    );
+    if (!community) {
+      throw new UnauthorizedException(
+        `User is not a member of community ${communityId} or community does not exist`,
+      );
+    }
+
+    const code = Math.random().toString(36).substring(2, 15);
+
+    const savedInvite = await this.onetimeInviteRepository.save(
+      this.onetimeInviteRepository.create({
+        ...rest,
+        code,
+        invitingUser: user,
+        community,
+        status: OnetimeInviteStatus.REQUEST_PENDING,
+      }),
+    );
+
+    sendNotificationToLeaders: {
+      const communityWithLeaders = await this.communityRepository.findOne({
+        where: { id: communityId },
+        relations: ['leaders'],
+      });
+      if (!communityWithLeaders || !communityWithLeaders.leaders) {
+        console.log('Community leaders not found for community', communityId);
+        break sendNotificationToLeaders;
+      }
+      for (const leader of communityWithLeaders.leaders) {
+        const notif = this.notifRepository.create({
+          user: leader,
+          category: NotificationCategory.OnetimeInviteRequestCreated,
+          message: `${user.name} has requested that ${rest.invitee} join the Alliance and your group`,
+          webAppLocation: groupInvitesUrl(),
+          associatedUsers: [user],
+          onetimeInvite: savedInvite,
+        });
+        this.notifRepository.save(notif);
+      }
+    }
+
+    return savedInvite;
+  }
+
+  async approveOnetimeInvite(
+    inviteId: number,
+    userId: number,
+  ): Promise<OnetimeInvite> {
+    console.log({ inviteId, userId }, 'asdf');
+
+    return this.approveOrRejectOnetimeInvite({
+      inviteId,
+      userId,
+      newStatus: 'approve',
+      message: `Your request to invite [USER] has been approved and is ready to be shared`,
+    });
+  }
+
+  async rejectOnetimeInvite(inviteId: number, userId: number): Promise<void> {
+    await this.approveOrRejectOnetimeInvite({
+      inviteId,
+      userId,
+      newStatus: 'reject',
+      message: 'Your request to invite [USER] has been rejected',
+    });
+  }
+
+  async approveOrRejectOnetimeInvite(params: {
+    userId: number;
+    inviteId: number;
+    newStatus: 'approve' | 'reject';
+    message: `${string}[USER]${string}`;
+  }): Promise<OnetimeInvite> {
+    const { userId, inviteId, newStatus, message } = params;
+
+    const user = await this.findOneOrFail(userId);
+
+    const request = await this.onetimeInviteRepository.findOneOrFail({
+      where: { id: inviteId },
+      relations: ['invitingUser'],
+    });
+
+    if (request.status === OnetimeInviteStatus.REQUEST_REJECTED) {
+      throw new BadRequestException(`Request has already been rejected`);
+    }
+    if (
+      request.status === OnetimeInviteStatus.LINK_UNUSED ||
+      request.status === OnetimeInviteStatus.LINK_USED
+    ) {
+      throw new BadRequestException(`Request has already been approved`);
+    }
+    if (request.status !== OnetimeInviteStatus.REQUEST_PENDING) {
+      request.status satisfies never;
+      throw new InternalServerErrorException(
+        `Unhandled status: ${request.status}`,
+      );
+    }
+
+    if (!user.leaderOfIds.some((cid) => cid === request.communityId)) {
+      throw new UnauthorizedException(
+        `User is not a leader of community ${request.communityId}`,
+      );
+    }
+
+    request.status =
+      newStatus === 'approve'
+        ? OnetimeInviteStatus.LINK_UNUSED
+        : OnetimeInviteStatus.REQUEST_REJECTED;
+    const savedInvite = await this.onetimeInviteRepository.save(request);
+
+    await this.notifRepository.save(
+      this.notifRepository.create({
+        user: savedInvite.invitingUser,
+        category:
+          newStatus === 'approve'
+            ? NotificationCategory.OnetimeInviteRequestApproved
+            : NotificationCategory.OnetimeInviteRequestRejected,
+        message: message.replace('[USER]', savedInvite.invitee),
+        webAppLocation: groupInvitesUrl(),
+      }),
+    );
+
+    return savedInvite;
   }
 
   async deleteCommunityInvite(inviteId: number, userId: number): Promise<void> {
@@ -1010,7 +1166,7 @@ export class UserService {
 
   async findValidInviteByCode(code: string): Promise<OnetimeInvite | null> {
     return this.onetimeInviteRepository.findOne({
-      where: { code, isValid: true },
+      where: { code, status: OnetimeInviteStatus.LINK_UNUSED },
       relations: ['invitingUser', 'community'],
     });
   }
@@ -1024,11 +1180,23 @@ export class UserService {
   async findOnetimeInvites(communityId: number): Promise<OnetimeInvite[]> {
     return this.onetimeInviteRepository.find({
       where: { community: { id: communityId } },
+      relations: ['invitingUser'],
+    });
+  }
+
+  async findOnetimeInvitesByRequester(
+    userId: number,
+    communityId: number,
+  ): Promise<OnetimeInvite[]> {
+    return this.onetimeInviteRepository.find({
+      where: { invitingUser: { id: userId }, community: { id: communityId } },
     });
   }
 
   async invalidateInvite(inviteId: number): Promise<void> {
-    await this.onetimeInviteRepository.update(inviteId, { isValid: false });
+    await this.onetimeInviteRepository.update(inviteId, {
+      status: OnetimeInviteStatus.LINK_USED,
+    });
   }
 
   async createCommunityInvite(
@@ -1119,7 +1287,7 @@ export class UserService {
       user: invite.invitingUser,
       category: NotificationCategory.CommunityInviteAccepted,
       message: `${invite.invitedUser?.name} has joined your community`,
-      webAppLocation: `/groups?tab=invites`,
+      webAppLocation: groupInvitesUrl(),
       associatedUsers: [invite.invitedUser],
     });
     await this.notifRepository.save(notif);
@@ -1143,7 +1311,7 @@ export class UserService {
       user: invite.invitingUser,
       category: NotificationCategory.CommunityInviteRejected,
       message: `${invite.invitedUser?.name} declined your community invitation`,
-      webAppLocation: `/community?tab=invites`,
+      webAppLocation: groupInvitesUrl(),
       associatedUsers: [invite.invitedUser],
     });
     await this.notifRepository.save(notif);
