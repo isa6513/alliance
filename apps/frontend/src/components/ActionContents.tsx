@@ -64,8 +64,8 @@ const ActionContents = () => {
         )}
         {isAuthenticated && action.publicOnly && (
           <Card style={CardStyle.Grey}>
-            This is an action intended for external participants: we do not
-            expect members to complete it.
+            This action is intended for external participants. Members cannot
+            complete it.
           </Card>
         )}
         {action.status !== "planned" && (
