@@ -40,6 +40,13 @@ export enum InviteMode {
   CurrentMember = "Current Alliance member",
 }
 
+function createdAtComparator(
+  a: { createdAt: string },
+  b: { createdAt: string }
+) {
+  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+}
+
 const CommunityInvitesTabLeader = ({
   communityId,
   existingMembers,
@@ -86,7 +93,20 @@ const CommunityInvitesTabLeader = ({
     userGetOnetimeInvitesByCommunity({ path: { communityId } }).then(
       (response) => {
         if (response.data) {
-          setNewUserInvites(response.data);
+          setNewUserInvites(
+            response.data
+              .filter(
+                (invite) =>
+                  invite.status === "link_unused" ||
+                  invite.status === "link_used"
+              )
+              .sort(createdAtComparator)
+          );
+          setPendingRequests(
+            response.data
+              .filter((invite) => invite.status === "request_pending")
+              .sort(createdAtComparator)
+          );
         } else {
           setError("Failed to load new member invites");
         }
@@ -99,23 +119,6 @@ const CommunityInvitesTabLeader = ({
         setError("Failed to load existing member invites");
       }
     });
-    userGetOnetimeInvitesByCommunity({ path: { communityId } }).then(
-      (response) => {
-        if (response.data) {
-          setPendingRequests(
-            response.data
-              .filter((request) => request.status === "request_pending")
-              .sort(
-                (a, b) =>
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime()
-              )
-          );
-        } else {
-          setError("Failed to load new member requests");
-        }
-      }
-    );
   }, [communityId]);
 
   useEffect(() => {
@@ -228,7 +231,7 @@ const CommunityInvitesTabLeader = ({
       }
 
       userDeleteOnetimeInvite({ path: { inviteId } }).then((response) => {
-        if (response.data) {
+        if (!response.error) {
           setNewUserInvites((prev) =>
             prev.filter((invite) => invite.id !== inviteId)
           );

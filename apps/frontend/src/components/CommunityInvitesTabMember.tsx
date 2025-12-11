@@ -95,7 +95,7 @@ const CommunityInvitesTabMember = ({
       }
 
       userDeleteOnetimeInvite({ path: { inviteId } }).then((response) => {
-        if (response.data) {
+        if (!response.error) {
           setInvites((prev) => prev.filter((invite) => invite.id !== inviteId));
         }
       });
