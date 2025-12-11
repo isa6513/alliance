@@ -41,25 +41,6 @@ export const getLastPastEventDate = (
   return latest;
 };
 
-const compareActionsBySchedule = (a: Action, b: Action) => {
-  if (a.archived && !b.archived) {
-    return 1;
-  }
-
-  if (!a.archived && b.archived) {
-    return -1;
-  }
-
-  const aLastPast = getLastPastEventDate(a);
-  const bLastPast = getLastPastEventDate(b);
-
-  if (!aLastPast || !bLastPast) {
-    return 0;
-  }
-
-  return aLastPast.getTime() - bLastPast.getTime();
-};
-
 type ActionSuiteGroup = {
   id: number | null;
   name: string;
@@ -173,9 +154,7 @@ const ActionsList: React.FC = () => {
 
     return Array.from(suites.values())
       .map((suite) => {
-        const suiteActions = suite.actions
-          .slice()
-          .sort(compareActionsBySchedule);
+        const suiteActions = suite.actions.slice();
         const nonArchivedActions = suiteActions.filter(
           (action) => !action.archived
         );
