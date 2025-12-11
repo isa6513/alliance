@@ -62,16 +62,16 @@ const AwayRangesSection: React.FC = () => {
       alert("Please select both start and end dates.");
       return;
     }
-    const startDate = new Date(startDateInput);
-    const endDate = new Date(endDateInput);
+    // const startDate = new Date(startDateInput);
+    // const endDate = new Date(endDateInput);
 
-    const maxDuration = 14 * 24 * 60 * 60 * 1000;
-    if (endDate.getTime() - startDate.getTime() > maxDuration) {
-      alert(
-        "Away period cannot exceed 14 days. Please email us if you need to be away for longer."
-      );
-      return;
-    }
+    // const maxDuration = 14 * 24 * 60 * 60 * 1000;
+    // if (endDate.getTime() - startDate.getTime() > maxDuration) {
+    //   alert(
+    //     "Away period cannot exceed 14 days. Please email us if you need to be away for longer."
+    //   );
+    //   return;
+    // }
 
     const reason = REASON_DROPDOWN_OPTIONS[selectedReason];
     if (!reason) {
@@ -197,16 +197,6 @@ const AwayRangesSection: React.FC = () => {
 
       <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
         <p className="font-medium mb-1">Schedule time away</p>
-        <p className="text-sm text-zinc-500 mb-3">
-          If you need to be away for longer than 14 days, please{" "}
-          <a
-            href="mailto:contact@worldalliance.org"
-            className="text-green hover:underline"
-          >
-            email us
-          </a>{" "}
-          or reach out to your group lead.
-        </p>
         <div className="space-y-3">
           <div className="flex flex-col md:flex-row gap-3">
             <div className="flex-1">

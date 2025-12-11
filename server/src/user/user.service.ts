@@ -640,12 +640,12 @@ export class UserService {
       throw new BadRequestException('Start date must be in the future.');
     }
 
-    const maxDuration = 14 * 24 * 60 * 60 * 1000; // 14 days in milliseconds
-    if (endDate.epochMilliseconds - startDate.epochMilliseconds > maxDuration) {
-      throw new BadRequestException(
-        'Away period cannot exceed 14 days. Please email us if you need to be away for longer.',
-      );
-    }
+    // const maxDuration = 14 * 24 * 60 * 60 * 1000; // 14 days in milliseconds
+    // if (endDate.epochMilliseconds - startDate.epochMilliseconds > maxDuration) {
+    //   throw new BadRequestException(
+    //     'Away period cannot exceed 14 days. Please email us if you need to be away for longer.',
+    //   );
+    // }
 
     if (reason === UserAwayRangeReason.OTHER && !data.note) {
       throw new BadRequestException(

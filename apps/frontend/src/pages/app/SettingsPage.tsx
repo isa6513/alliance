@@ -12,7 +12,6 @@ import {
   authMe,
   UpdateProfileDto,
 } from "@alliance/shared/client";
-import Badge from "@alliance/shared/ui/Badge";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -20,7 +19,6 @@ import { href, useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
 import LargeCheckbox from "@alliance/shared/ui/LargeCheckbox";
 import FormInput from "@alliance/shared/ui/FormInput";
-import { AdminOnly } from "../../lib/AdminOnly";
 import { useAuth } from "../../lib/AuthContext";
 import AwayRangesSection from "../../components/AwayRangesSection";
 import TimeZoneSelect from "@alliance/shared/forms/TimeZoneSelect";
@@ -238,9 +236,6 @@ const SettingsPage: React.FC = () => {
               <h1 className="text-2xl sm:text-4xl font-serif !font-semibold mb-2">
                 Settings
               </h1>
-              <AdminOnly>
-                <Badge className="!bg-yellow-600 text-white">Admin</Badge>
-              </AdminOnly>
             </div>
             <div className="flex flex-row gap-x-4 items-center">
               <p className="text-sm text-zinc-500">
