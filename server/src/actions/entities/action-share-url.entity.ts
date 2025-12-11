@@ -1,4 +1,8 @@
 import { Type } from 'class-transformer';
+import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/datasources/basecolumns';
 import { Ty } from 'src/tasks/entities/type';
 import { User } from 'src/user/entities/user.entity';
 import {
@@ -28,12 +32,10 @@ export class ActionShareUrl {
   @Type(() => Action)
   action: Ty<Action>;
 
-  @Column()
-  @Type(() => Date)
+  @CreateDateColumnTz()
   createdAt: Date;
 
-  @Column()
-  @Type(() => Date)
+  @UpdateDateColumnTz()
   updatedAt: Date;
 
   @Column({ type: 'jsonb' })

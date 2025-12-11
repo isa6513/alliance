@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Comment } from 'src/forum/entities/comment.entity';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
-import { ForumModule } from 'src/forum/forum.module';
 import { MailModule } from 'src/mail/mail.module';
 import { MmsModule } from 'src/mms/mms.module';
 import { ActionEventNotifWorker } from 'src/notifs/action-event-notif.worker';
@@ -25,6 +24,7 @@ import { ActionSuite } from './entities/action-suite.entity';
 import { ActionUpdate } from './entities/action-update.entity';
 import { Action } from './entities/action.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
+import { ForumModule } from 'src/forum/forum.module';
 import { ReloadUsersJoinedWorker } from './reload-users-joined.worker';
 
 @Module({

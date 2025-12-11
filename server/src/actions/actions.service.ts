@@ -8,6 +8,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiProperty } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { instanceToPlain } from 'class-transformer';
+import { randomBytes } from 'crypto';
 import { from, Observable } from 'rxjs';
 import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
 import {
@@ -23,9 +24,8 @@ import {
   PreviewNotificationPlan,
 } from 'src/notifs/action-event-reminder.service';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
-import { generateCIDForShareUrl } from 'src/notifs/notif-utils';
 import { NotifsService, shouldTextUser } from 'src/notifs/notifs.service';
-import { actionActivityUrl, actionUrl, withCid } from 'src/search/approutes';
+import { actionActivityUrl, actionUrl, withSid } from 'src/search/approutes';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { RelationString } from 'src/tasks/entities/type';
@@ -2222,18 +2222,23 @@ export class ActionsService {
     return [];
   }
 
+  private generateCIDForShareUrl() {
+    return 'share-' + randomBytes(5).toString('hex');
+  }
+
   async getShareLink(actionId: number, userId: number): Promise<string> {
-    const cid = generateCIDForShareUrl();
-    const url = withCid(actionUrl(actionId, true), cid);
+    const sid = this.generateCIDForShareUrl();
+    const url = withSid(actionUrl(actionId, true), sid);
 
     const shareUrl = await this.actionShareUrlRepository.create({
       url,
       user: { id: userId },
       action: { id: actionId },
       data: {
-        cid,
+        sid,
       },
     });
+
     await this.actionShareUrlRepository.save(shareUrl);
     return shareUrl.url;
   }
