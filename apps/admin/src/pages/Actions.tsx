@@ -53,7 +53,7 @@ const ActionsList: React.FC = () => {
     try {
       const response = await actionsFindAllWithDrafts();
       if (response.data) {
-        setActions(response.data);
+        setActions(response.data.filter((action) => !action.archived));
       }
       setActionsLoading(false);
     } catch (err) {
