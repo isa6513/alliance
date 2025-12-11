@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
-import { AppTypeOrmLogger } from '../typeorm-logger';
+import { AppTypeOrmLogger } from '../utils/typeorm-logger';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
 export const connectionOptions = (): PostgresConnectionOptions => {

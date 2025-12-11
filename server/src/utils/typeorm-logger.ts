@@ -3,7 +3,7 @@ import { Logger as TypeOrmLogger } from 'typeorm';
 import { Logger as NestLogger } from '@nestjs/common';
 import { PostHog } from 'posthog-node';
 import * as client from 'prom-client';
-import { register } from './metrics';
+import { register } from '../metrics';
 
 const dbQueryTotal = new client.Counter({
   name: 'db_query_total',

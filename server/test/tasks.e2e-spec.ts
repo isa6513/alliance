@@ -90,6 +90,7 @@ describe('Tasks (e2e)', () => {
         priority: 0,
         preventCompletion: false,
         useManualCohort: false,
+        publicOnly: false,
       } satisfies CreateActionDto),
     );
 

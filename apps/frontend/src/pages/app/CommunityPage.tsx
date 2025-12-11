@@ -298,7 +298,7 @@ const CommunityPage = () => {
               )}
             </div>
 
-            <div className="w-1/2">
+            <div className="max-w-[400px]">
               <p className="text-sm">
                 {nCompleted} / {community.users.length} have completed current
                 action

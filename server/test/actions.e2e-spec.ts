@@ -180,6 +180,7 @@ describe('Actions (e2e)', () => {
         useManualCohort: false,
         priority: 0,
         preventCompletion: false,
+        publicOnly: false,
       };
 
       const res = await request(ctx.app.getHttpServer())
