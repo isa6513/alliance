@@ -3,21 +3,46 @@ import {
   customComponentRegistry,
   getCustomComponentById,
 } from "@alliance/shared/forms/components";
+import type {
+  CustomComponentConfigField,
+  CustomComponentDefinition,
+} from "@alliance/shared/forms/components";
 import type { CustomComponentField } from "@alliance/shared/forms/formschema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
 import type { BaseFieldProps } from "./types";
 
-const formatConfig = (value: CustomComponentField["componentConfig"]) => {
-  if (!value || Object.keys(value).length === 0) {
-    return "";
+const toDisplayLabel = (name: string, label?: string) => {
+  if (label) return label;
+  const withSpaces = name
+    .replace(/([A-Z])/g, " $1")
+    .replace(/[_-]+/g, " ")
+    .trim();
+  return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
+};
+
+const normalizeComponentConfig = (config: Record<string, unknown>) => {
+  const cleaned = { ...config };
+  for (const key of Object.keys(cleaned)) {
+    if (cleaned[key] === undefined) {
+      delete cleaned[key];
+    }
   }
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return "";
+  return Object.keys(cleaned).length > 0 ? cleaned : undefined;
+};
+
+const buildDefaultConfig = (component?: CustomComponentDefinition) => {
+  if (!component?.configFields?.length) {
+    return undefined;
   }
+  const defaults: Record<string, unknown> = {};
+  for (const field of component.configFields) {
+    if (field.defaultValue !== undefined) {
+      defaults[field.name] = field.defaultValue;
+    }
+  }
+  return Object.keys(defaults).length ? defaults : undefined;
 };
 
 export function EditableCustomComponentField({
@@ -29,10 +54,8 @@ export function EditableCustomComponentField({
   isDragging,
   previousFields,
 }: BaseFieldProps<CustomComponentField>) {
-  const [configDraft, setConfigDraft] = useState(() =>
-    formatConfig(field.componentConfig)
-  );
-  const [configError, setConfigError] = useState<string | null>(null);
+  const [configDrafts, setConfigDrafts] = useState<Record<string, string>>({});
+  const [configErrors, setConfigErrors] = useState<Record<string, string>>({});
   const fallbackComponent = customComponentRegistry[0];
 
   useEffect(() => {
@@ -44,50 +67,230 @@ export function EditableCustomComponentField({
     }
     onUpdate({
       componentId: fallbackComponent.id,
-      componentConfig: undefined,
+      componentConfig: buildDefaultConfig(fallbackComponent),
       defaultValue: undefined,
     } as Partial<CustomComponentField>);
-    setConfigDraft("");
-    setConfigError(null);
+    setConfigDrafts({});
+    setConfigErrors({});
   }, [field.componentId, onUpdate, fallbackComponent]);
-
-  useEffect(() => {
-    if (configError) {
-      return;
-    }
-    setConfigDraft(formatConfig(field.componentConfig));
-  }, [field.componentConfig, configError]);
 
   const selectedComponent = useMemo(
     () => getCustomComponentById(field.componentId),
     [field.componentId]
   );
 
+  const componentConfig = useMemo(
+    () => (field.componentConfig ?? {}) as Record<string, unknown>,
+    [field.componentConfig]
+  );
+
+  useEffect(() => {
+    if (!selectedComponent?.configFields?.length) {
+      setConfigDrafts({});
+      setConfigErrors({});
+      return;
+    }
+    const drafts: Record<string, string> = {};
+    for (const configField of selectedComponent.configFields) {
+      const rawValue = componentConfig[configField.name];
+      if (typeof rawValue === "string") {
+        drafts[configField.name] = rawValue;
+      } else if (
+        typeof rawValue === "number" ||
+        typeof rawValue === "boolean"
+      ) {
+        drafts[configField.name] = String(rawValue);
+      } else if (configField.defaultValue !== undefined) {
+        drafts[configField.name] = String(configField.defaultValue);
+      } else {
+        drafts[configField.name] = "";
+      }
+    }
+    setConfigDrafts(drafts);
+    setConfigErrors({});
+  }, [selectedComponent, componentConfig]);
+
+  useEffect(() => {
+    if (!selectedComponent?.configFields?.length) {
+      return;
+    }
+    const nextConfig = { ...componentConfig };
+    let changed = false;
+    for (const configField of selectedComponent.configFields) {
+      if (
+        configField.defaultValue !== undefined &&
+        !(configField.name in nextConfig)
+      ) {
+        nextConfig[configField.name] = configField.defaultValue;
+        changed = true;
+      }
+    }
+    if (changed) {
+      onUpdate({
+        componentConfig: normalizeComponentConfig(nextConfig),
+      } as Partial<CustomComponentField>);
+    }
+  }, [selectedComponent, componentConfig, onUpdate]);
+
   const handleComponentChange = (componentId: string) => {
+    const nextComponent = getCustomComponentById(componentId);
     const updates: Partial<CustomComponentField> = {
       componentId,
-      componentConfig: undefined,
+      componentConfig: buildDefaultConfig(nextComponent),
       defaultValue: undefined,
     };
     onUpdate(updates);
-    setConfigDraft("");
-    setConfigError(null);
+    setConfigDrafts({});
+    setConfigErrors({});
   };
 
-  const handleConfigChange = (value: string) => {
-    setConfigDraft(value);
+  const handleStringChange = (name: string, value: string) => {
+    setConfigDrafts((prev) => ({ ...prev, [name]: value }));
+    setConfigErrors((prev) => {
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
+    const nextConfig = { ...componentConfig };
     if (!value.trim()) {
-      setConfigError(null);
-      onUpdate({ componentConfig: undefined });
+      delete nextConfig[name];
+    } else {
+      nextConfig[name] = value;
+    }
+    onUpdate({
+      componentConfig: normalizeComponentConfig(nextConfig),
+    } as Partial<CustomComponentField>);
+  };
+
+  const handleNumberChange = (name: string, rawValue: string) => {
+    setConfigDrafts((prev) => ({ ...prev, [name]: rawValue }));
+    if (!rawValue.trim()) {
+      setConfigErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+      const nextConfig = { ...componentConfig };
+      delete nextConfig[name];
+      onUpdate({
+        componentConfig: normalizeComponentConfig(nextConfig),
+      } as Partial<CustomComponentField>);
       return;
     }
-    try {
-      const parsed = JSON.parse(value);
-      setConfigError(null);
-      onUpdate({ componentConfig: parsed });
-    } catch {
-      setConfigError("Component config must be valid JSON.");
+
+    const parsed = Number(rawValue);
+    if (!Number.isFinite(parsed)) {
+      setConfigErrors((prev) => ({
+        ...prev,
+        [name]: "Enter a valid number",
+      }));
+      return;
     }
+
+    setConfigErrors((prev) => {
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
+    const nextConfig = { ...componentConfig, [name]: parsed };
+    onUpdate({
+      componentConfig: normalizeComponentConfig(nextConfig),
+    } as Partial<CustomComponentField>);
+  };
+
+  const handleBooleanChange = (name: string, checked: boolean) => {
+    setConfigDrafts((prev) => ({
+      ...prev,
+      [name]: checked ? "true" : "false",
+    }));
+    setConfigErrors((prev) => {
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
+    const nextConfig = { ...componentConfig, [name]: checked };
+    onUpdate({
+      componentConfig: normalizeComponentConfig(nextConfig),
+    } as Partial<CustomComponentField>);
+  };
+
+  const renderConfigField = (configField: CustomComponentConfigField) => {
+    const error = configErrors[configField.name];
+    const label = toDisplayLabel(configField.name, configField.label);
+    const description = configField.description;
+    const draftValue = configDrafts[configField.name] ?? "";
+
+    if (configField.type === "boolean") {
+      const checked =
+        typeof componentConfig[configField.name] === "boolean"
+          ? (componentConfig[configField.name] as boolean)
+          : draftValue === "true";
+      const inputId = `custom-config-${configField.name}`;
+      return (
+        <div key={configField.name} className="space-y-1">
+          <div className="flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              id={inputId}
+              checked={checked}
+              onChange={(event) =>
+                handleBooleanChange(configField.name, event.target.checked)
+              }
+              className="h-4 w-4"
+            />
+            <label htmlFor={inputId}>{label}</label>
+          </div>
+          {description && (
+            <p className="text-xs text-gray-500">{description}</p>
+          )}
+          {error && <p className="text-xs text-red-600">{error}</p>}
+        </div>
+      );
+    }
+
+    if (configField.type === "number") {
+      return (
+        <div key={configField.name} className="space-y-1">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            {label}
+          </label>
+          <input
+            type="number"
+            value={draftValue}
+            onChange={(event) =>
+              handleNumberChange(configField.name, event.target.value)
+            }
+            className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder={`Enter ${label.toLowerCase()}`}
+          />
+          {description && (
+            <p className="text-xs text-gray-500">{description}</p>
+          )}
+          {error && <p className="text-xs text-red-600">{error}</p>}
+        </div>
+      );
+    }
+
+    return (
+      <div key={configField.name} className="space-y-1">
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          {label}
+        </label>
+        <input
+          type="text"
+          value={draftValue}
+          onChange={(event) =>
+            handleStringChange(configField.name, event.target.value)
+          }
+          className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          placeholder={`Enter ${label.toLowerCase()}`}
+        />
+        {description && (
+          <p className="text-xs text-gray-500">{description}</p>
+        )}
+        {error && <p className="text-xs text-red-600">{error}</p>}
+      </div>
+    );
   };
 
   return (
@@ -139,19 +342,18 @@ export function EditableCustomComponentField({
             onChange={(checked) => onUpdate({ required: checked })}
           />
 
-          <div>
+          <div className="space-y-2">
             <label className="block text-xs font-medium text-gray-700 mb-1">
-              Component Config (JSON, optional)
+              Component Configuration
             </label>
-            <textarea
-              value={configDraft}
-              onChange={(event) => handleConfigChange(event.target.value)}
-              rows={1}
-              className="w-full rounded border border-gray-300 px-2 py-1 !text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="Optional custom component configuration"
-            />
-            {configError !== null && (
-              <p className="mt-1 text-xs text-red-600">{configError}</p>
+            {selectedComponent?.configFields?.length ? (
+              <div className="space-y-3">
+                {selectedComponent.configFields.map(renderConfigField)}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-500">
+                This component does not require any configuration.
+              </p>
             )}
           </div>
         </div>

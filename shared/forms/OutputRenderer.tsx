@@ -35,6 +35,19 @@ const normalizeConditions = (
   return Array.isArray(conditions) ? conditions : [conditions];
 };
 
+const hasContent = (value: FormValue | undefined): boolean => {
+  if (value === undefined || value === null) {
+    return false;
+  }
+  if (typeof value === "string") {
+    return value.trim().length > 0;
+  }
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+  return true;
+};
+
 const isBlockVisible = (
   block: { visibleIf?: Condition[] | Condition },
   answers: Record<string, FormValue>,
@@ -69,6 +82,10 @@ const isBlockVisible = (
     }
 
     const value = answers[condition.when];
+    if ("hasValue" in condition) {
+      const present = hasContent(value as FormValue | undefined);
+      return condition.hasValue ? present : !present;
+    }
     if ("anySelected" in condition) {
       const selections = Array.isArray(value) ? value : [];
       return condition.anySelected

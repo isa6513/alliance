@@ -14,6 +14,15 @@ export const customComponentRegistry: CustomComponentDefinition[] = [
     label: "Action Share URL Component",
     description: "Component to share the URL of an action",
     component: ActionShareUrlComponent,
+    configFields: [
+      {
+        name: "actionId",
+        label: "Action ID",
+        description:
+          "Specify which action to reference. Defaults to the current action when left blank.",
+        type: "number",
+      },
+    ],
   },
 ];
 

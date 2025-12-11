@@ -2,6 +2,16 @@ import type { ComponentType } from "react";
 import type { UserDto } from "@alliance/shared/client";
 import type { CustomComponentField } from "../formschema";
 
+export type CustomComponentConfigFieldType = "string" | "number" | "boolean";
+
+export interface CustomComponentConfigField {
+  name: string;
+  label?: string;
+  description?: string;
+  type: CustomComponentConfigFieldType;
+  defaultValue?: string | number | boolean;
+}
+
 export interface CustomComponentProps {
   field: CustomComponentField;
   value: string | null;
@@ -16,4 +26,5 @@ export interface CustomComponentDefinition {
   description?: string;
   component: ComponentType<CustomComponentProps>;
   defaultValue?: string;
+  configFields?: CustomComponentConfigField[];
 }

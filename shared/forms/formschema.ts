@@ -59,6 +59,7 @@ export type Condition =
   | { when: string; equals: string | number | boolean | null }
   | { when: string; includesOption: string }
   | { when: string; anySelected: boolean }
+  | { when: string; hasValue: boolean }
   | { expr: string }
   | { validatorId: number; resultEquals?: boolean } // validators default to expecting true
   | { deviceType: DeviceVisibilityTarget[] };

@@ -107,6 +107,19 @@ function isValidRangeSelection(
   return value >= 1 && value <= max;
 }
 
+const hasContent = (value: FormValue | undefined): boolean => {
+  if (value === undefined || value === null) {
+    return false;
+  }
+  if (typeof value === "string") {
+    return value.trim().length > 0;
+  }
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+  return true;
+};
+
 function resolveFieldDefaultValue(field: AnyField): FormValue | undefined {
   const rawDefault = field.defaultValue;
 
@@ -561,6 +574,10 @@ const FormRenderer = ({
         return actual === expected;
       }
       const val = data[cond.when];
+      if ("hasValue" in cond) {
+        const present = hasContent(val as FormValue | undefined);
+        return cond.hasValue ? present : !present;
+      }
       if ("anySelected" in cond) {
         const selections = Array.isArray(val) ? val : [];
         return cond.anySelected

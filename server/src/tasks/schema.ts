@@ -59,6 +59,7 @@ export type Condition =
   | { when: string; equals: string | number | boolean | null }
   | { when: string; includesOption: string }
   | { when: string; anySelected: boolean }
+  | { when: string; hasValue: boolean }
   | { expr: string }
   | { validatorId: number; resultEquals?: boolean } // validators default to expecting true
   | { deviceType: DeviceVisibilityTarget[] };
@@ -190,6 +191,18 @@ export function isQuestionVisible(
   deviceType?: DeviceVisibilityTarget,
 ): boolean {
   const normalizedDeviceType: DeviceVisibilityTarget = deviceType ?? 'desktop';
+  const hasContent = (value: FormValue | undefined): boolean => {
+    if (value === undefined || value === null) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      return value.trim().length > 0;
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    return true;
+  };
   const raw = element.visibleIf;
   if (raw && (Array.isArray(raw) ? raw.length > 0 : true)) {
     const evalCond = (c: Condition): boolean => {
@@ -211,6 +224,10 @@ export function isQuestionVisible(
         return actual === expected;
       }
       const val = formData[c.when];
+      if ('hasValue' in c) {
+        const present = hasContent(val as FormValue | undefined);
+        return c.hasValue ? present : !present;
+      }
       if ('anySelected' in c) {
         const selections = Array.isArray(val) ? val : [];
         return c.anySelected

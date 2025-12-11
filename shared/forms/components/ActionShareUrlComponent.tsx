@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import { actionsGetShareLink } from "../../client";
 import Button, { ButtonColor } from "../../ui/Button";
 
-const ActionShareUrlComponent = ({ user, field }: CustomComponentProps) => {
+const ActionShareUrlComponent = ({ field }: CustomComponentProps) => {
   const [shareUrl, setShareUrl] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const actionId = (field.componentConfig?.actionId ?? null) as number | null;
+  const actionId =
+    typeof field.componentConfig?.actionId === "number"
+      ? field.componentConfig?.actionId
+      : null;
 
   useEffect(() => {
     const fetchShareUrl = async () => {
@@ -23,7 +26,7 @@ const ActionShareUrlComponent = ({ user, field }: CustomComponentProps) => {
       }
     };
     fetchShareUrl();
-  }, [user]);
+  }, [actionId]);
 
   useEffect(() => {
     if (copied) {
@@ -35,14 +38,14 @@ const ActionShareUrlComponent = ({ user, field }: CustomComponentProps) => {
 
   return (
     <Card style={CardStyle.Grey} className="flex-row items-center !p-0">
-      <p className="flex-1 p-1 pl-3">{shareUrl}</p>
+      <p className="flex-1 p-2 pl-3">{shareUrl}</p>
       <Button
         color={ButtonColor.Transparent}
         onClick={() => {
           navigator.clipboard.writeText(shareUrl);
           setCopied(true);
         }}
-        className="text-sm pr-2 text-green"
+        className="text-sm !p-3 !pr-3 text-green"
       >
         {copied ? "Copied!" : "Copy"}
       </Button>
