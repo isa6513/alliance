@@ -35,7 +35,7 @@ export default function TwoColumnLayout({
       </div>
       {!!sidebar && !!sidebarWidth && (
         <div
-          className={`ml-auto sticky top-0 h-screen bg-page px-2 hidden lg:flex flex-col gap-y-5 items-stretch overflow-y-auto mr-3 transition-all duration-200 ease-in-out `}
+          className={`ml-auto sticky top-0 h-screen bg-page px-2 hidden lg:flex flex-col gap-y-5 items-stretch overflow-y-auto transition-all duration-200 ease-in-out `}
           style={{
             width: `${sidebarWidth}px`,
             overflowY: sidebarWidth === 0 ? "hidden" : "auto",
