@@ -16,6 +16,27 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name == 'production' && 'production' || 'staging' }}
 
 jobs:
+  dirty-check:
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Abort if dirty.txt is true
+        if: ${{ github.ref_name == 'production' }}
+        run: |
+          if [ -f dirty.txt ]; then
+            VALUE=$(cat dirty.txt | tr -d '[:space:]')
+            if [ "$VALUE" = "true" ]; then
+              echo "dirty.txt indicates the repo is dirty. Aborting."
+              exit 1
+            else
+              echo "dirty.txt is present but not 'true' (value: '$VALUE'). Continuing."
+            fi
+          else
+            echo "dirty.txt not found. Continuing."
+          fi
+
   test-backend-e2e:
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     runs-on: ubuntu-latest
@@ -172,6 +193,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-react-app
+      - dirty-check
       - test-backend-e2e
       - test-backend-unit
       - migrations-drift-check
@@ -279,6 +301,7 @@ jobs:
   deploy-admin-app:
     runs-on: ubuntu-latest
     needs:
+      - dirty-check
       - build-admin-frontend
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
@@ -419,6 +442,7 @@ jobs:
   deploy-nest-backend:
     runs-on: ubuntu-latest
     needs:
+      - dirty-check
       - build-nest-backend
       - test-backend-e2e
       - test-backend-unit
