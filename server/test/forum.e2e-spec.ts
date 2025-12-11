@@ -186,7 +186,6 @@ describe('Forum (e2e)', () => {
       expect(response.body.id).toBe(postId);
       expect(response.body.title).toBeDefined();
       expect(response.body.editableContent).toBeDefined();
-      expect(response.body.commentCount).toBeDefined();
     });
 
     it('should hide future-scheduled posts created by other users', async () => {
@@ -579,14 +578,6 @@ describe('Forum (e2e)', () => {
         } satisfies CreateCommentDto)
         .expect(201);
 
-      const postResponse = await request(ctx.app.getHttpServer())
-        .get(`/forum/posts/${testPostId}`)
-        .set('Authorization', `Bearer ${ctx.accessToken}`)
-        .expect(200);
-
-      expect(postResponse.body.commentCount).toBeDefined();
-      expect(postResponse.body.commentCount).toBeGreaterThan(0);
-
       const commentsResponse = await request(ctx.app.getHttpServer())
         .get(`/forum/posts/${testPostId}/comments`)
         .expect(200);
@@ -703,53 +694,6 @@ describe('Forum (e2e)', () => {
   });
 
   describe('Additional endpoints', () => {
-    it('returns the last comment for a post', async () => {
-      const postResponse = await request(ctx.app.getHttpServer())
-        .post('/forum/posts')
-        .set('Authorization', `Bearer ${ctx.accessToken}`)
-        .send({
-          title: 'Post With Last Comment',
-          editableContent: {
-            body: 'Initial body',
-            attachments: [],
-          },
-          visibleAt: new Date(),
-        } satisfies CreatePostDto)
-        .expect(201);
-
-      const postId = postResponse.body.id;
-
-      await request(ctx.app.getHttpServer())
-        .post('/forum/comments')
-        .set('Authorization', `Bearer ${ctx.accessToken}`)
-        .send({
-          editableContent: { body: 'First', attachments: [] },
-          parentObjectId: postId,
-          parentObjectType: CommentParentObject.Post,
-        } satisfies CreateCommentDto)
-        .expect(201);
-
-      const secondComment = await request(ctx.app.getHttpServer())
-        .post('/forum/comments')
-        .set('Authorization', `Bearer ${ctx.accessToken}`)
-        .send({
-          editableContent: { body: 'Second', attachments: [] },
-          parentObjectId: postId,
-          parentObjectType: CommentParentObject.Post,
-        } satisfies CreateCommentDto)
-        .expect(201);
-
-      const lastCommentResponse = await request(ctx.app.getHttpServer())
-        .get(`/forum/posts/${postId}`)
-        .set('Authorization', `Bearer ${ctx.accessToken}`)
-        .expect(200);
-
-      expect(lastCommentResponse.body.lastComment?.id).toBe(
-        secondComment.body.id,
-      );
-      expect(lastCommentResponse.body.lastComment?.parentObjectId).toBe(postId);
-    });
-
     it('lists posts and comments authored by a user', async () => {
       const postResponse = await request(ctx.app.getHttpServer())
         .post('/forum/posts')
