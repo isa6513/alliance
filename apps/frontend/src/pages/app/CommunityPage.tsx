@@ -286,13 +286,18 @@ const CommunityPage = () => {
 
               {amLeader ? (
                 <Button
-                  color={ButtonColor.Light}
+                  color={ButtonColor.White}
                   onClick={() => setTab("edit")}
+                  className="!text-sm"
                 >
                   Edit
                 </Button>
               ) : (
-                <Button color={ButtonColor.White} onClick={handleLeave}>
+                <Button
+                  color={ButtonColor.White}
+                  onClick={handleLeave}
+                  className="!text-sm"
+                >
                   Leave group
                 </Button>
               )}
