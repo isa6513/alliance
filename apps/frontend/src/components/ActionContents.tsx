@@ -53,7 +53,7 @@ const ActionContents = () => {
       </div>
       <div className="flex flex-col gap-y-8 sm:gap-y-12">
         {loggedInMode && <ActionEventsPanel action={action} />}
-        {action.status !== "planned" && (
+        {loggedInMode && action.status !== "planned" && (
           <Link
             to={href("/feed/:actionId", { actionId: action.id.toString() })}
             className="self-start flex flex-row items-center gap-x-1 md:hidden border border-zinc-200 hover:bg-zinc-50 px-2 py-1 rounded"
