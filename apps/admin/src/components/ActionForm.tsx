@@ -8,6 +8,7 @@ import {
 import UserSelect, { UserSelectUser } from "@alliance/shared/ui/UserSelect";
 import React, { useMemo, useRef } from "react";
 import { MarkdownTextArea } from "./MarkdownTextArea";
+import Card from "@alliance/shared/ui/Card";
 
 interface ActionFormProps {
   form: CreateActionDto;
@@ -364,8 +365,8 @@ const ActionForm: React.FC<ActionFormProps> = ({
 
     if (f.type === "checkbox") {
       return (
-        <div key={String(f.name)}>
-          <div className="flex items-center flex-row gap-x-3 mt-5">
+        <Card key={String(f.name)}>
+          <div className="flex items-center flex-row gap-x-3">
             <label
               htmlFor={String(f.name)}
               className="block font-medium text-gray-700"
@@ -384,7 +385,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
           {f.helpText && (
             <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>
           )}
-        </div>
+        </Card>
       );
     }
 
@@ -446,8 +447,8 @@ const ActionForm: React.FC<ActionFormProps> = ({
               Participating tags
             </p>
             <p className="text-xs text-gray-500">
-              Select one or more tags to limit participation. Leave empty to
-              make the action open to everyone.
+              Determines which users can participate in the action. Actions
+              without tags will not be shown to any users.
             </p>
           </div>
           <button
@@ -509,7 +510,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
           selectedUserIds={authorIds}
           onChange={onAuthorsChange}
           loading={usersLoading}
-          label="Select authors"
+          label="Action authors"
         />
       </div>
 
