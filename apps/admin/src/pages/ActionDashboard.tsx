@@ -238,7 +238,9 @@ const ActionDashboard: React.FC = () => {
         participatingTags: [],
         publicOnly: false,
         everyoneShouldComplete: false,
-        suiteId: undefined,
+        suiteId: searchParams.get("suiteId")
+          ? parseInt(searchParams.get("suiteId")!)
+          : undefined,
         priority: 0,
         manualCohortUsers: [],
         useManualCohort: false,
@@ -249,7 +251,7 @@ const ActionDashboard: React.FC = () => {
       setSelectedTagIds([]);
       setManualCohortUserIds([]);
     }
-  }, [isNew]);
+  }, [isNew, searchParams]);
 
   const setTaskFormId = async (formId: number) => {
     setForm((prev) => ({ ...prev, taskFormId: formId }));

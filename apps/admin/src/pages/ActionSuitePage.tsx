@@ -6,11 +6,12 @@ import {
   UpdateActionEventDto,
 } from "@alliance/shared/client";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import ActionListCard from "../components/ActionListCard";
 import ActionRemindersTab from "../components/reminders/ActionRemindersTab";
 import ActionTimeline from "../components/ActionTimeline";
 import SuiteEventList from "../components/SuiteEventList";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 
 const ActionSuitePage = () => {
   const { suiteId: suiteIdString } = useParams();
@@ -18,6 +19,7 @@ const ActionSuitePage = () => {
 
   const [error, setError] = useState<string | null>(null);
   const [suite, setSuite] = useState<ActionSuiteDto | null>(null);
+  const navigate = useNavigate();
 
   const [highlightedReminder, setHighlightedReminder] = useState<number | null>(
     null
@@ -78,9 +80,15 @@ const ActionSuitePage = () => {
     return (
       <div className="p-6 flex flex-col gap-6 items-center justify-center h-screen">
         <p>Suite: {suite.name}</p>
-        <p className="text-sm text-zinc-500">
-          Add an action to the suite to begin managing events & reminders
-        </p>
+        <p className="text-sm text-zinc-500">No actions yet</p>
+        <Button
+          color={ButtonColor.Black}
+          onClick={() => {
+            navigate(`/actions/new?suiteId=${suiteId}`);
+          }}
+        >
+          Add new action
+        </Button>
       </div>
     );
   }

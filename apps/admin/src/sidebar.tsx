@@ -227,17 +227,24 @@ const Sidebar: React.FC = () => {
             {createActionDropdownOpen && (
               <Dropdown
                 isOpen={createActionDropdownOpen}
-                className="absolute top-[100%] right-0 gap-y-2 min-w-[150px]"
+                className="absolute top-[100%] right-0 min-w-[150px] *:text-sm *:w-full divide-y divide-zinc-200"
               >
                 <Button
-                  color={ButtonColor.Light}
-                  className="w-full"
+                  color={ButtonColor.Transparent}
+                  className=""
                   onClick={() => navigate("/actions/new")}
                 >
                   New Action
                 </Button>
                 <Button
-                  color={ButtonColor.Black}
+                  color={ButtonColor.Transparent}
+                  className=""
+                  onClick={() => navigate("/new-suite")}
+                >
+                  New Suite
+                </Button>
+                <Button
+                  color={ButtonColor.Transparent}
                   className="w-full"
                   onClick={handlePasteJson}
                   disabled={pasteJsonLoading}
