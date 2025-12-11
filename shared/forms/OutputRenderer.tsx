@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { FormResponseDto, FormResponseOutputDto } from "../client";
 import { getApiUrl } from "../lib/config";
 import Card, { CardStyle } from "../ui/Card";
+import ImageLightbox from "../ui/ImageLightbox";
 import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
 import type {
@@ -197,14 +198,37 @@ const renderOutputFieldValue = (
     );
   }
   if (field.kind === "file") {
-    if (!value) {
+    if (!value || (Array.isArray(value) && value.length === 0)) {
+      return <span className="text-xs text-gray-500">No file uploaded</span>;
+    }
+    const rawValues = Array.isArray(value) ? value : [value];
+    const imageUrls = rawValues
+      .filter((entry): entry is string => Boolean(entry))
+      .map((entry) => `${getApiUrl()}/images/${entry}`);
+    if (!imageUrls.length) {
       return <span className="text-xs text-gray-500">No file uploaded</span>;
     }
     return (
-      <img
-        src={getApiUrl() + "/images/" + value}
-        alt="Uploaded file"
-        className="w-28 h-28 object-cover rounded"
+      <ImageLightbox
+        images={imageUrls}
+        renderPreview={(openLightbox) => (
+          <div className="flex flex-wrap gap-2">
+            {imageUrls.map((src, idx) => (
+              <button
+                type="button"
+                key={idx}
+                className="focus:outline-none"
+                onClick={() => openLightbox(idx)}
+              >
+                <img
+                  src={src}
+                  alt="Uploaded file"
+                  className="w-28 h-28 object-cover rounded"
+                />
+              </button>
+            ))}
+          </div>
+        )}
       />
     );
   }

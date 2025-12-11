@@ -1,17 +1,11 @@
 import {
   Action,
   ActionDto,
-  actionsAddEvent,
-  actionsClearDb,
-  actionsCreate,
   actionsFindAllWithDrafts,
-  actionsSetTestRelations,
 } from "@alliance/shared/client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import ActionTimeline from "../components/ActionTimeline";
-import ConfirmDialog from "../components/ConfirmDialog";
-import { testActions } from "../lib/testData";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import ActionListCard from "../components/ActionListCard";
 
@@ -53,8 +47,6 @@ const ActionsList: React.FC = () => {
   const [actions, setActions] = useState<Action[]>([]);
   const [actionsLoading, setActionsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [showPopulateConfirm, setShowPopulateConfirm] = useState(false);
-  const [isPopulating, setIsPopulating] = useState(false);
   const navigate = useNavigate();
 
   const loadActions = useCallback(async () => {
@@ -73,50 +65,6 @@ const ActionsList: React.FC = () => {
 
   useEffect(() => {
     loadActions();
-  }, [loadActions]);
-
-  const handlePopulateTestData = useCallback(async () => {
-    setIsPopulating(true);
-    try {
-      await actionsClearDb();
-      // Create each test action using the existing endpoint
-      for (let i = 0; i < testActions.length; i++) {
-        const testAction = testActions[i];
-        const response = await actionsCreate({ body: { ...testAction } });
-
-        if (response.data?.id) {
-          await actionsAddEvent({
-            path: { id: response.data.id },
-            body: {
-              title: "Action Launch",
-              description:
-                "Action is now live and gathering commitments from the community.",
-              newStatus: "gathering_commitments",
-              date: new Date(Date.now() - 86400000).toISOString(),
-            },
-          });
-          if (i % 2 === 0) {
-            await actionsAddEvent({
-              path: { id: response.data.id },
-              body: {
-                title: "Member action",
-                description: "Enough people have committed! Time for action.",
-                newStatus: "member_action",
-                date: new Date(Date.now() - 26400000).toISOString(),
-              },
-            });
-          }
-        }
-      }
-      await loadActions();
-      await actionsSetTestRelations();
-    } catch (err) {
-      setError("Failed to populate test data");
-      console.error(err);
-    } finally {
-      setIsPopulating(false);
-      setShowPopulateConfirm(false);
-    }
   }, [loadActions]);
 
   const groupedActions = useMemo<ActionSuiteGroup[]>(() => {
@@ -224,26 +172,8 @@ const ActionsList: React.FC = () => {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <p className="font-bold ml-2">Actions</p>
-          <button
-            onClick={() => setShowPopulateConfirm(true)}
-            disabled={isPopulating}
-            className="bg-gray-100 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm font-medium"
-          >
-            {isPopulating ? "Populating..." : "Populate Test Data"}
-          </button>
         </div>
         <p>No actions found.</p>
-        {showPopulateConfirm && (
-          <ConfirmDialog
-            isOpen={showPopulateConfirm}
-            onCancel={() => setShowPopulateConfirm(false)}
-            onConfirm={handlePopulateTestData}
-            title="Populate Test Data"
-            message={`This will clear all existing action data and replace it with test actions. Are you sure you want to proceed?`}
-            confirmText="Populate Data"
-            cancelText="Cancel"
-          />
-        )}
       </div>
     );
   }
@@ -306,30 +236,7 @@ const ActionsList: React.FC = () => {
             </div>
           </div>
         ))}
-        {window.location.href.includes("localhost") && (
-          <div className="flex justify-between items-center">
-            <button
-              onClick={() => setShowPopulateConfirm(true)}
-              disabled={isPopulating}
-              className="bg-gray-100 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm font-medium"
-            >
-              {isPopulating ? "Populating..." : "Populate Test Data"}
-            </button>
-          </div>
-        )}
       </div>
-
-      {showPopulateConfirm && (
-        <ConfirmDialog
-          isOpen={showPopulateConfirm}
-          onCancel={() => setShowPopulateConfirm(false)}
-          onConfirm={handlePopulateTestData}
-          title="Populate Test Data"
-          message={`This will clear all existing action data and replace it with test actions. Are you sure you want to proceed?`}
-          confirmText="Populate Data"
-          cancelText="Cancel"
-        />
-      )}
     </div>
   );
 };
