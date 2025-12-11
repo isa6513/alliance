@@ -27,7 +27,10 @@ const OneTimeInviteRequestLeaderListItem = ({
               id: request.invitingUser.id.toString(),
             })}
           >
-            <ProfileImage pfp={request.invitingUser.profilePicture} />
+            <ProfileImage
+              pfp={request.invitingUser.profilePicture}
+              size="small"
+            />
           </Link>
 
           <span className="break-words">
@@ -39,7 +42,7 @@ const OneTimeInviteRequestLeaderListItem = ({
             >
               {request.invitingUser.displayName}
             </Link>
-            <span className="text-gray-500">{" would like to invite "}</span>
+            <span className="text-zinc-500">{" would like to invite "}</span>
             {request.invitee}
           </span>
         </div>
@@ -48,12 +51,14 @@ const OneTimeInviteRequestLeaderListItem = ({
           <Button
             onClick={() => onApprove(request.id)}
             color={ButtonColor.Green}
+            className="!h-8 text-sm"
           >
             Approve
           </Button>
           <Button
             onClick={() => onReject(request.id)}
             color={ButtonColor.White}
+            className="!h-8 text-sm"
           >
             Reject
           </Button>

@@ -31,7 +31,10 @@ const OneTimeInviteLeaderListItem = ({
             })}
             className="hover:underline gap-x-3"
           >
-            <ProfileImage pfp={invite.invitingUser.profilePicture} />
+            <ProfileImage
+              pfp={invite.invitingUser.profilePicture}
+              size="medium"
+            />
           </Link>
         )}
 

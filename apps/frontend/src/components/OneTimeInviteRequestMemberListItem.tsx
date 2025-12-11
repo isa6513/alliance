@@ -31,10 +31,12 @@ const OneTimeInviteRequestMemberListItem = ({
         </div>
       </div>
       {request.inviteeDescription && (
-        <AppMarkdownWrapper
-          markdownContent={request.inviteeDescription}
-          className="break-words"
-        />
+        <p className="text-zinc-500">
+          <AppMarkdownWrapper
+            markdownContent={request.inviteeDescription}
+            className="break-words"
+          />
+        </p>
       )}
     </div>
   );

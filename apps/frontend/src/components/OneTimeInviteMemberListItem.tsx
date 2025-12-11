@@ -1,6 +1,7 @@
 import { OnetimeInviteDto } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import { useCallback, useRef, useState } from "react";
+import { Link } from "lucide-react";
 
 export interface OneTimeInviteMemberListItemProps {
   invite: OnetimeInviteDto;
@@ -36,7 +37,7 @@ const OneTimeInviteMemberListItem = ({
         <span className="">{invite.invitee}</span>
       </div>
 
-      <div className="flex flex-row gap-3 items-center">
+      <div className="flex flex-row gap-2 items-center">
         {invite.status === "link_used" ? (
           <p className="text-gray-500">Accepted</p>
         ) : (
@@ -47,12 +48,21 @@ const OneTimeInviteMemberListItem = ({
                 setCopiedAndTimeout();
               }}
               color={copied ? ButtonColor.Green : ButtonColor.Black}
+              className="!h-8 text-sm"
             >
-              {copied ? "Copied!" : "Share"}
+              {copied ? (
+                "Copied!"
+              ) : (
+                <div className="flex flex-row items-center gap-x-1">
+                  <Link size={12} />
+                  <p>Share</p>
+                </div>
+              )}
             </Button>
             <Button
               onClick={(e) => onDelete(invite.id, e)}
               color={ButtonColor.Red}
+              className="!h-8 text-sm"
             >
               Delete
             </Button>

@@ -161,13 +161,20 @@ const CommunityInvitesTabMember = ({
               <p className="font-semibold">
                 Invite a new member to the Alliance and your group
               </p>
-              <p className="text-zinc-500">
-                The group leader will first need to approve the request for the
-                new member. Once approved, this will create a personalized
-                invite page that explains the Alliance and how to sign up. When
-                the new member signs up, they will automatically be added to
-                your group.
-              </p>
+              <ol className="text-zinc-500 list-decimal list-inside mb-2">
+                <li>
+                  A group lead will first need to approve the request for the
+                  invitee.
+                </li>
+                <li>
+                  Once approved, you will receive a personalized invite link
+                  that you can share with the invitee.
+                </li>
+                <li>
+                  When the invitee signs up, they will automatically be added to
+                  your group.
+                </li>
+              </ol>
               <input
                 type="text"
                 className="border border-zinc-300 rounded px-3 py-2 bg-white"
@@ -178,7 +185,7 @@ const CommunityInvitesTabMember = ({
               <textarea
                 ref={descriptionInputRef}
                 className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
-                placeholder="Message to group leader"
+                placeholder="Context about invitee"
                 value={inviteeDescription}
                 onChange={(e) => {
                   setInviteeDescription(e.target.value);
@@ -194,9 +201,7 @@ const CommunityInvitesTabMember = ({
                   creatingRequest || !inviteeDescription || !inviteeName
                 }
               >
-                {creatingRequest
-                  ? "Creating request..."
-                  : "Send request to group leader"}
+                {creatingRequest ? "Creating request..." : "Send request"}
               </Button>
             </div>
           </Card>
