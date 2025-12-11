@@ -31,7 +31,7 @@ const AIPrivacyFlyer: React.FC = () => {
           <Clock className="w-[0.2in] h-[0.2in]" />
 
           <p className="text-[0.2in] font-semibold">
-            This survey will take about 5 minutes.
+            This survey will take about 5 minutes
           </p>
         </div>
 
