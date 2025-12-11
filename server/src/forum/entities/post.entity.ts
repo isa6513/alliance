@@ -10,6 +10,7 @@ import {
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
+  RelationId,
 } from 'typeorm';
 import { Action } from '../../actions/entities/action.entity';
 import { User } from '../../user/entities/user.entity';
@@ -102,4 +103,9 @@ export class Post {
   @Allow()
   @Type(() => User)
   likes: User[];
+
+  @RelationId((post: Post) => post.likes)
+  @ApiProperty({ type: () => Number, isArray: true })
+  @Allow()
+  likesIds: number[];
 }

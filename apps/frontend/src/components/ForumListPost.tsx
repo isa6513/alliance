@@ -65,17 +65,22 @@ const ForumListPost = ({
         )}
       >
         <div className="flex flex-col gap-y-0 mb-2">
-          <div className="flex flex-row gap-y-1 items-center gap-2">
-            {post.pinned && <PinnedIcon size="small" />}
-            <p className={`text-base`}>{post.title}</p>
-            {isPrivateFuturePost && (
-              <span className="text-sm text-blue">
-                Only you can see this - will be posted{" "}
-                {formatTime(new Date(post.visibleAt!), {
-                  addSuffix: true,
-                })}
-              </span>
-            )}
+          <div className="flex flex-row gap-y-1 gap-2 justify-between">
+            <div>
+              {post.pinned && <PinnedIcon size="small" />}
+              <p className={`text-base`}>{post.title}</p>
+              {isPrivateFuturePost && (
+                <span className="text-sm text-blue">
+                  Only you can see this - will be posted{" "}
+                  {formatTime(new Date(post.visibleAt!), {
+                    addSuffix: true,
+                  })}
+                </span>
+              )}
+            </div>
+            <p className="text-zinc-500 text-nowrap text-sm mt-1">
+              {post.likeCount} like{post.likeCount === 1 ? "" : "s"}
+            </p>
           </div>
           {showContentPreview && (
             <EditableContentRenderer

@@ -40,11 +40,14 @@ export class PostDto extends PickType(Post, [
   @ApiProperty({ type: () => EditableContentDto })
   editableContent: EditableContentDto;
 
-  @ApiProperty({ type: () => ProfileDto, isArray: true })
-  likes: ProfileDto[];
+  @ApiPropertyOptional({ type: () => ProfileDto, isArray: true })
+  likes?: ProfileDto[];
 
   @ApiPropertyOptional({ type: () => CommentDto })
   lastComment?: CommentDto;
+
+  @ApiPropertyOptional({ type: Number })
+  likeCount?: number;
 
   constructor(
     post: Post,
@@ -54,12 +57,15 @@ export class PostDto extends PickType(Post, [
     Object.assign(this, post);
     this.author = new ProfileDto(post.author);
     this.commentCount = extras?.commentCount;
-    this.likes = post.likes.map((like) => new ProfileDto(like));
+    this.likes = post.likes
+      ? post.likes.map((like) => new ProfileDto(like))
+      : undefined;
     this.editableContent = new EditableContentDto(post.editableContent);
     this.createdAt = post.visibleAt ?? post.createdAt;
     this.lastComment = extras?.lastComment
       ? new CommentDto(extras?.lastComment)
       : undefined;
+    this.likeCount = post.likesIds?.length;
   }
 }
 

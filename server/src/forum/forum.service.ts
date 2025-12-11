@@ -91,7 +91,6 @@ export class ForumService {
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.author', 'author')
       .leftJoinAndSelect('post.action', 'action')
-      .leftJoinAndSelect('post.likes', 'likes')
       .leftJoinAndSelect('post.editableContent', 'editableContent')
       .leftJoin(
         Comment,
@@ -103,12 +102,13 @@ export class ForumService {
       )
       .where('post.deleted = :deleted', { deleted: false })
       .orderBy('post.updatedAt', 'DESC')
+      // aggregate comment count
       .addSelect('COUNT(comment.id)', 'commentCount')
+      // group by PKs of selected entities (Postgres-friendly)
       .groupBy('post.id')
       .addGroupBy('author.id')
       .addGroupBy('action.id')
-      .addGroupBy('editableContent.id')
-      .addGroupBy('likes.id');
+      .addGroupBy('editableContent.id');
 
     const { entities: allPosts, raw: allRaw } = await qb.getRawAndEntities();
 

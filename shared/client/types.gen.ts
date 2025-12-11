@@ -1557,8 +1557,9 @@ export type PostDto = {
     author: ProfileDto;
     commentCount?: number;
     editableContent: EditableContentDto;
-    likes: Array<ProfileDto>;
+    likes?: Array<ProfileDto>;
     lastComment?: CommentDto;
+    likeCount?: number;
 };
 
 export type UserCommentDto = {
