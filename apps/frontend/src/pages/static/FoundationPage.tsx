@@ -2,8 +2,6 @@ import React from "react";
 import Footer from "../../components/Footer";
 import MarkdownWrapper from "../../components/MarkdownWrapper";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import chevronRight from "../../assets/icons8-expand-arrow-96.png";
 import { Link, href } from "react-router";
 
 const FoundationPage: React.FC = () => {
@@ -18,21 +16,16 @@ const FoundationPage: React.FC = () => {
             </h2>
           </div>
 
-          <Link
-            to={href("/progress/:slug", { slug: "early-governance" })}
-            className="mb-8"
-          >
-            <Card
-              style={CardStyle.White}
-              className="mt-4 p-4 md:p-4 text-lg cursor-pointer hover:bg-zinc-50 flex flex-row gap-x-4 items-center justify-between"
+          <p className="text-lg mb-8 text-zinc-500">
+            The following principle, aims, and priorities were{" "}
+            <Link
+              to={href("/progress/:slug", { slug: "early-governance" })}
+              className="text-link"
             >
-              <p className="text-base">
-                The following principle, aims, and priorities were developed and
-                approved by 25 founding members of the Alliance.
-              </p>
-              <img src={chevronRight} className="w-4 h-4 rotate-270" />
-            </Card>
-          </Link>
+              developed and approved
+            </Link>{" "}
+            by 25 founding members of the Alliance.
+          </p>
 
           <div className="flex flex-col gap-y-6">
             <MarkdownWrapper

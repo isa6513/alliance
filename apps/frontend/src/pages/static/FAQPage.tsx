@@ -89,11 +89,10 @@ const FAQPage: React.FC = () => {
                 <li>Dangerous technological development</li>
               </ol>
               <p>
-                These priorities were{" "}
+                Learn more about our priorities{" "}
                 <Link to={"/foundation"} className="text-link">
-                  determined
-                </Link>{" "}
-                by 25 founding members of the Alliance.
+                  here.
+                </Link>
               </p>
             </FAQExpandable>
             <FAQExpandable
@@ -129,12 +128,10 @@ const FAQPage: React.FC = () => {
                 open-ended feedback, and so on.
               </p>
               <p>
-                This governance procedure was{" "}
+                Learn more about our governance{" "}
                 <Link to={"/governance"} className="text-link">
-                  determined
-                </Link>{" "}
-                by 25 founding members of the Alliance and is subject to
-                revision.
+                  here.
+                </Link>
               </p>
             </FAQExpandable>
             <FAQExpandable
@@ -143,8 +140,8 @@ const FAQPage: React.FC = () => {
             >
               <p>
                 Members are expected to complete all tasks they are assigned on
-                time. Members are not required to contribute to the
-                Alliance financially.
+                time. Members are not required to contribute to the Alliance
+                financially.
               </p>
 
               <p>
