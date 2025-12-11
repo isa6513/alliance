@@ -70,8 +70,7 @@
     "ts-jest": "^29.4.0",
     "ttypescript": "^1.5.15",
     "twilio": "^5.9.0",
-    "typeorm": "^0.3.25",
-    "typeorm-ts-node-commonjs": "^0.3.20"
+    "typeorm": "^0.3.25"
   },
   "devDependencies": {
     "@darraghor/eslint-plugin-nestjs-typed": "^6.7.0",

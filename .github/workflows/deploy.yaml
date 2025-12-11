@@ -509,8 +509,6 @@ jobs:
             cd ~/nest-backend
             npm install --omit=dev
 
-            npm run migration:runprod
-
             npm install -g pm2
             pm2 delete nest-app || true
             pm2 start dist/main.js --name nest-app
