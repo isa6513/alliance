@@ -171,8 +171,6 @@ const FAQPage: React.FC = () => {
                 the impact they achieve, and how they help the Alliance learn
                 and build capacity.
               </p>
-
-              <ExampleActionCardList />
             </FAQExpandable>
             <FAQExpandable title="What are some examples of actions?">
               <p>
