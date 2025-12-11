@@ -1,14 +1,25 @@
 import { Clock } from "lucide-react";
 import { generateBarcodeUrl } from "../../lib/utils";
+import { actionsGetShareLink } from "@alliance/shared/client";
+import { useState, useEffect } from "react";
 
-interface AIPrivacyFlyerProps {
-  url: string;
-}
+const AIPrivacyFlyer: React.FC = () => {
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
 
-const AIPrivacyFlyer: React.FC<AIPrivacyFlyerProps> = ({
-  url,
-}: AIPrivacyFlyerProps) => {
-  const qrCodeUrl = generateBarcodeUrl(url, 200);
+  const publicActionId = 55;
+
+  useEffect(() => {
+    const fetchShareUrl = async () => {
+      const shareUrlRes = await actionsGetShareLink({
+        path: { id: publicActionId },
+      });
+      if (shareUrlRes.data) {
+        setQrCodeUrl(generateBarcodeUrl(shareUrlRes.data, 200));
+      }
+    };
+    fetchShareUrl();
+  }, []);
+
   return (
     <div className="flex flex-col justify-between h-full">
       <div className="flex flex-col gap-y-[0.2in]">
@@ -51,8 +62,15 @@ const AIPrivacyFlyer: React.FC<AIPrivacyFlyerProps> = ({
       </div>
 
       <div className="flex flex-col items-center mx-auto gap-y-[0.1in]">
-        <img src={qrCodeUrl} alt="QR Code" className="w-[2.5in] h-[2.5in]" />
-        <p className="text-[0.2in] text-zinc-500 text-center">{url}</p>
+        {qrCodeUrl ? (
+          <img src={qrCodeUrl} alt="QR Code" className="w-[2.5in] h-[2.5in]" />
+        ) : (
+          "Loading QR code..."
+        )}
+
+        <p className="text-[0.2in] text-zinc-500 text-center">
+          https://worldalliance.org/
+        </p>
       </div>
 
       <p className="text-[0.2in] text-zinc-500">

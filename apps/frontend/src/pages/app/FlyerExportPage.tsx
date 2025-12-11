@@ -15,7 +15,7 @@ const FlyerExportPage: React.FC = () => {
       </p>
 
       <ExportableFlyer filename="ai-privacy-flyer.pdf">
-        <AIPrivacyFlyer url="https://worldalliance.org" />
+        <AIPrivacyFlyer />
       </ExportableFlyer>
     </CenterLayout>
   );
