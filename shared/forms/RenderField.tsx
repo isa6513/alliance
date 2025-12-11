@@ -556,7 +556,7 @@ export function RenderField({
         <div className="space-y-1">
           <RenderLabel field={field} error={errorMessage} />
           <TimeZoneSelect
-            value={value as string}
+            value={(value as string) ?? "America/Los_Angeles"}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={field.required}
             disabled={disabled}
