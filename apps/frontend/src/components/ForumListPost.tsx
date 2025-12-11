@@ -78,9 +78,11 @@ const ForumListPost = ({
                 </span>
               )}
             </div>
-            <p className="text-zinc-500 text-nowrap text-sm mt-1">
-              {post.likeCount} like{post.likeCount === 1 ? "" : "s"}
-            </p>
+            {post.likeCount && (
+              <p className="text-zinc-500 text-nowrap text-sm mt-1">
+                {post.likeCount} like{post.likeCount === 1 ? "" : "s"}
+              </p>
+            )}
           </div>
           {showContentPreview && (
             <EditableContentRenderer
