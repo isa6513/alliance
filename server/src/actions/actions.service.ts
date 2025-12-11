@@ -2227,13 +2227,30 @@ export class ActionsService {
   }
 
   async getShareLink(actionId: number, userId: number): Promise<string> {
+    const existing = await this.actionShareUrlRepository.findOne({
+      where: {
+        action: { id: actionId },
+        user: { id: userId },
+      },
+    });
+    if (existing) {
+      return existing.url;
+    }
+
     const sid = this.generateCIDForShareUrl();
     const url = withSid(actionUrl(actionId, true), sid);
+
+    const action = await this.actionRepository.findOne({
+      where: { id: actionId },
+    });
+    if (!action) {
+      throw new BadRequestException('specified action not found');
+    }
 
     const shareUrl = await this.actionShareUrlRepository.create({
       url,
       user: { id: userId },
-      action: { id: actionId },
+      action,
       data: {
         sid,
       },
