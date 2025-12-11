@@ -69,7 +69,7 @@ export class ForumController {
     @Param('id') id: string,
     @Request() req: JwtRequest,
   ): Promise<PostDto> {
-    return this.forumService.findPostWithComments(+id, req.user?.sub);
+    return new PostDto(await this.forumService.findOnePost(+id, req.user?.sub));
   }
 
   @Get('posts/:id/comments')

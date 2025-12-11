@@ -87,34 +87,71 @@ export class ForumService {
   }
 
   async findAllPosts(userId?: number): Promise<PostDto[]> {
-    const posts = await this.postRepository.find({
-      where: { deleted: false },
-      relations: ['author', 'action', 'editableContent'],
-      order: { updatedAt: 'DESC' },
-    });
-    const postsWithComments = await Promise.all(
-      posts
-        .filter((post) => this.postIsVisible(post, userId))
-        .map(async (post) => {
-          return this.postWithCommentCount(post);
-        }),
+    const qb = this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .leftJoinAndSelect('post.action', 'action')
+      .leftJoinAndSelect('post.likes', 'likes')
+      .leftJoinAndSelect('post.editableContent', 'editableContent')
+      .leftJoin(
+        Comment,
+        'comment',
+        'comment.parentObjectId = post.id ' +
+          'AND comment.parentObjectType = :parentType ' +
+          'AND comment.deleted = false',
+        { parentType: CommentParentObject.Post },
+      )
+      .where('post.deleted = :deleted', { deleted: false })
+      .orderBy('post.updatedAt', 'DESC')
+      .addSelect('COUNT(comment.id)', 'commentCount')
+      .groupBy('post.id')
+      .addGroupBy('author.id')
+      .addGroupBy('action.id')
+      .addGroupBy('editableContent.id')
+      .addGroupBy('likes.id');
+
+    const { entities: allPosts, raw: allRaw } = await qb.getRawAndEntities();
+
+    // Filter by visibility in memory (user-specific logic)
+    const visible = allPosts
+      .map((post, index) => ({ post, raw: allRaw[index] }))
+      .filter(({ post }) => this.postIsVisible(post, userId));
+
+    if (!visible.length) {
+      return [];
+    }
+
+    const posts = visible.map((v) => v.post);
+    const raw = visible.map((v) => v.raw);
+    const postIds = posts.map((p) => p.id);
+
+    // 2) Fetch last comment per post in one query using DISTINCT ON (Postgres)
+    const lastComments = await this.commentRepository
+      .createQueryBuilder('comment')
+      .leftJoinAndSelect('comment.author', 'author')
+      .leftJoinAndSelect('comment.editableContent', 'editableContent')
+      .where('comment.parentObjectType = :parentType', {
+        parentType: CommentParentObject.Post,
+      })
+      .andWhere('comment.deleted = false')
+      .andWhere('comment.parentObjectId IN (:...postIds)', { postIds })
+      .distinctOn(['comment.parentObjectId'])
+      .orderBy('comment.parentObjectId', 'ASC')
+      .addOrderBy('comment.createdAt', 'DESC') // latest for each post
+      .getMany();
+
+    const lastCommentByPostId = new Map<number, Comment>(
+      lastComments.map((c) => [c.parentObjectId, c]),
     );
-    return postsWithComments;
-  }
 
-  async postWithCommentCount(post: Post): Promise<PostDto> {
-    const commentCount = await this.countCommentsForPost(post.id);
-    const lastComment =
-      (await this.findLastCommentForPost(post.id)) ?? undefined;
-    return new PostDto(post, { commentCount, lastComment });
-  }
+    return posts.map((post, index) => {
+      const commentCount = Number(raw[index].commentCount ?? 0);
+      const lastComment = lastCommentByPostId.get(post.id) ?? undefined;
 
-  async countCommentsForPost(postId: number): Promise<number> {
-    return this.commentRepository.count({
-      where: {
-        parentObjectId: postId,
-        parentObjectType: CommentParentObject.Post,
-      },
+      return new PostDto(post, {
+        commentCount,
+        lastComment,
+      });
     });
   }
 
@@ -678,10 +715,5 @@ export class ForumService {
     return this.postRepository.find({
       where: { title: ILike(`%${title}%`), deleted: false },
     });
-  }
-
-  async findPostWithComments(id: number, userId?: number): Promise<PostDto> {
-    const post = await this.findOnePost(id, userId);
-    return this.postWithCommentCount(post);
   }
 }
