@@ -1880,7 +1880,7 @@ export class ActionsService {
     actionLimit: number = 8,
   ): Promise<UserActionRelationsResponseDto> {
     const actions = (await this.findAllSorted(['events'], actionLimit)).filter(
-      (action) => action.status !== ActionStatus.Draft,
+      (action) => action.status !== ActionStatus.Draft && !action.publicOnly,
     );
 
     const now = new Date();
