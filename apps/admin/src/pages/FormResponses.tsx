@@ -175,7 +175,7 @@ const FormResponses: React.FC = () => {
 
   const handleExportCsv = useCallback(() => {
     if (!form) return;
-    const metaHeaders = ["Response ID", "User ID", "User Name"];
+    const metaHeaders = ["Response ID", "User ID", "User Name", "SID"];
     const used = new Set<string>();
     const questionHeaders = orderedFieldIds.map((id) => {
       const base = fieldLabels[id] || id;
@@ -196,6 +196,7 @@ const FormResponses: React.FC = () => {
         String(resp.id ?? ""),
         String(user?.id ?? ""),
         userName,
+        resp.sid ?? "",
         ...orderedFieldIds.map((id) => formatValue(resp.answers?.[id])),
       ];
       return values;

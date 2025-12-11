@@ -208,6 +208,7 @@ export type FormResponse = {
     schemaSnapshot: {
         [key: string]: unknown;
     };
+    sid?: string;
 };
 
 export type ActionActivity = {
@@ -1843,6 +1844,7 @@ export type FormResponseDto = {
     schemaSnapshot: {
         [key: string]: unknown;
     };
+    sid?: string;
     user?: UserDto;
 };
 

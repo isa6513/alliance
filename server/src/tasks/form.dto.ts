@@ -54,6 +54,7 @@ export class FormResponseDto extends PickType(FormResponse, [
   'schemaSnapshot',
   'visibilityValidatorResults',
   'deviceType',
+  'sid',
   'publicAnswers',
 ]) {
   @ApiPropertyOptional({ type: () => UserDto })
