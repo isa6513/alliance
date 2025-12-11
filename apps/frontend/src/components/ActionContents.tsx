@@ -45,9 +45,8 @@ const ActionContents = () => {
                     <div className="flex flex-row gap-x-1 text-zinc-800">
                       <p>By</p>
                       {action.authors.map((author, i) => (
-                        <>
+                        <div key={author.id}>
                           <Link
-                            key={author.id}
                             to={href("/member/:id", {
                               id: author.id.toString(),
                             })}
@@ -58,7 +57,7 @@ const ActionContents = () => {
                           {i < action.authors!.length - 2 && ", "}
                           {i === action.authors!.length - 2 &&
                             `${action.authors!.length > 2 ? "," : ""} and `}
-                        </>
+                        </div>
                       ))}
                     </div>
                   </div>
