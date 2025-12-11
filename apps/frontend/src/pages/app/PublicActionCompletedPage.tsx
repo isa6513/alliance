@@ -7,7 +7,7 @@ const PublicActionCompletedPage = () => {
       <div className="flex flex-row items-center justify-center flex-1 gap-4">
         <CheckIcon size="xl" />
         <div>
-          <p className="text-xl font-bold">Action Completed</p>
+          <p className="text-xl font-bold">Action completed</p>
           <p>Thanks for participating!</p>
         </div>
       </div>
