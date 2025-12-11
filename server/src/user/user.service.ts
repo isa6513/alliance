@@ -1065,8 +1065,6 @@ export class UserService {
     inviteId: number,
     userId: number,
   ): Promise<OnetimeInvite> {
-    console.log({ inviteId, userId }, 'asdf');
-
     return this.approveOrRejectOnetimeInvite({
       inviteId,
       userId,

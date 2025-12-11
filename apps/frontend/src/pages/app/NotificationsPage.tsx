@@ -13,8 +13,6 @@ const NotificationsPage = () => {
     (notification) => !notification.readAt
   ).length;
 
-  console.log({ allNotifications }, "asdf");
-
   return (
     <CenterLayout>
       <div className="md:mt-8 flex flex-col items-center w-[calc(min(650px,100%))] gap-y-6">
