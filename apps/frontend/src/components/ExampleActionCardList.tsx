@@ -33,8 +33,24 @@ const ExampleActionCardList: React.FC = () => {
     },
     {
       name: "Sign a letter requesting news coverage of a bring-your-own-cup cafe coalition",
-      description:
-        "The office asked a coalition of cafes to adopt and advertise a bring-your-own-cup policy, promising that Alliance members would help them attain media coverage. After the cafes took action, members signed a letter to journalists requesting a feature. Finally, a journalist wrote an article about the cafes.",
+      description: (
+        <span>
+          The office asked a coalition of cafes to adopt and advertise a
+          bring-your-own-cup policy, promising that Alliance members would help
+          them attain media coverage. After the cafes took action, members
+          signed a letter to journalists requesting a feature. Finally, a
+          journalist{" "}
+          <a
+            href="https://www.baristamagazine.com/washington-cafes-are-uniting-to-combat-disposable-cup-waste-and-they-want-you-to-join-them/"
+            target="_blank"
+            rel="noreferrer"
+            className="underline"
+          >
+            wrote an article about the cafes
+          </a>
+          .
+        </span>
+      ),
       purpose:
         "We learned that offering to help businesses attain media coverage can encourage policy changes. The policy change itself will likely reduce a small amount of waste.",
     },

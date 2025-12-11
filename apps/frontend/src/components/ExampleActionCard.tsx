@@ -1,6 +1,8 @@
+import { ReactNode } from "react";
+
 interface ExampleActionCardProps {
   name: string;
-  description: string;
+  description: ReactNode;
   purpose?: string;
 }
 
