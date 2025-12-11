@@ -13,6 +13,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Action } from './action.entity';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 @Entity()
 export class ActionShareUrl {
@@ -31,6 +32,10 @@ export class ActionShareUrl {
   @JoinColumn({ name: 'actionId' })
   @Type(() => Action)
   action: Ty<Action>;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  sid?: string;
 
   @CreateDateColumnTz()
   createdAt: Date;

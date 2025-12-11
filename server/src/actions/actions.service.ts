@@ -2251,6 +2251,7 @@ export class ActionsService {
       url,
       user: { id: userId },
       action,
+      sid,
       data: {
         sid,
       },
