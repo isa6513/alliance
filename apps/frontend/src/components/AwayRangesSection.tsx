@@ -57,6 +57,7 @@ const AwayRangesSection: React.FC = () => {
   }, [loadAwayRanges]);
 
   const handleCreate = async () => {
+    setError(null);
     if (!startDateInput || !endDateInput) {
       alert("Please select both start and end dates.");
       return;
@@ -96,7 +97,7 @@ const AwayRangesSection: React.FC = () => {
     } else {
       setError(
         (resp.error as { message: string }).message ??
-          "An unknown error occurred."
+          `Error: ${resp.response.statusText}`
       );
     }
     setCreating(false);
