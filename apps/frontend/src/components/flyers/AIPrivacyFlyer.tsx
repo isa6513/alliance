@@ -24,7 +24,7 @@ const AIPrivacyFlyer: React.FC = () => {
     <div className="flex flex-col justify-between h-full">
       <div className="flex flex-col gap-y-[0.2in]">
         <h1 className="text-[0.35in] font-bold font-serif ">
-          Participate in an experiment on ethical AI privacy settings
+          Participate in a survey on ethical AI privacy settings
         </h1>
 
         <div className="flex flex-row items-center gap-x-[0.08in] bg-green text-white py-[0.05in] px-[0.15in] self-start rounded-lg">
