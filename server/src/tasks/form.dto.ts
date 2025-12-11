@@ -1,7 +1,7 @@
 // src/forms/dto/create-form.dto.ts
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDefined, IsEnum, IsOptional } from 'class-validator';
+import { IsDefined, IsEnum, IsOptional, IsString } from 'class-validator';
 import { ActionDto } from 'src/actions/dto/action.dto';
 import { UserDto } from 'src/user/user.dto';
 import { Form } from './entities/form.entity';
@@ -34,6 +34,11 @@ export class SubmitFormDto extends PickType(FormResponse, [
   @Type(() => Object)
   @IsOptional()
   publicAnswers?: Record<string, boolean>;
+
+  @ApiPropertyOptional({ type: String })
+  @IsOptional()
+  @IsString()
+  sid?: string;
 }
 
 export class FormDto extends PickType(Form, ['id', 'title', 'schema']) {

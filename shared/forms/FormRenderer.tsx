@@ -21,6 +21,7 @@ import type {
   RangeField,
 } from "./formschema";
 import { parseTimeToMinutes } from "./timeUtils";
+import { useSearchParams } from "react-router";
 
 type FormRendererProps = {
   form: FormSchema;
@@ -266,6 +267,8 @@ const FormRenderer = ({
     }
     return base;
   }, [id, user?.id, userId, persistKey]);
+
+  const [searchParams] = useSearchParams();
 
   const { fieldLookup, defaultValueMap } = useMemo(() => {
     const lookup = new Map<string, AnyField>();
@@ -1037,6 +1040,8 @@ const FormRenderer = ({
 
     const sanitizedAnswers = filterAnswersByFieldIds(formData, fieldLookup);
 
+    const sid = searchParams.get("sid");
+
     const submissionPayload = {
       answers: sanitizedAnswers,
       schemaSnapshot: form as unknown as Record<string, unknown>,
@@ -1044,6 +1049,7 @@ const FormRenderer = ({
       visibilityValidatorResults,
       deviceType,
       publicAnswers,
+      sid: sid ?? undefined,
     } as SubmitFormDto;
 
     onSubmit(submissionPayload).finally(() => {

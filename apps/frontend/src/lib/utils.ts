@@ -3,7 +3,7 @@ import { posthog } from "posthog-js";
 import { useEffect } from "react";
 import { useSearchParams } from "react-router";
 
-export const useCIDFromParams = () => {
+export const useCIDFromParams = (actionId?: number) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const cid = searchParams.get("cid");
 
@@ -23,10 +23,22 @@ export const useCIDFromParams = () => {
         posthog.capture("notif_link_click", {
           cid,
           platform,
+          actionId,
         });
       });
     }
-  }, [cid, setSearchParams, searchParams]);
+  }, [cid, setSearchParams, searchParams, actionId]);
+
+  const sid = searchParams.get("sid");
+  useEffect(() => {
+    if (sid) {
+      posthog.register_for_session({ sid });
+      posthog.capture("sid_load", {
+        sid,
+        actionId,
+      });
+    }
+  }, [sid, actionId]);
 };
 
 export const generateBarcodeUrl = (url: string, size: number) => {

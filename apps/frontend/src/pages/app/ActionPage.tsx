@@ -49,7 +49,7 @@ export default function ActionPage() {
     fetchAction();
   }, [fetchAction, isAuthenticated]);
 
-  useCIDFromParams();
+  useCIDFromParams(actionId);
 
   const { activities, handleLikeActivity, setActivities } = useActivities({
     list: ActivityList.Action,

@@ -75,4 +75,10 @@ export class FormResponse {
   @IsDefined()
   @Type(() => Object)
   schemaSnapshot: Record<string, unknown>;
+
+  @Column({ type: 'text', nullable: true })
+  @ApiPropertyOptional({ type: 'string' })
+  @IsOptional()
+  @Type(() => String)
+  sid?: string;
 }
