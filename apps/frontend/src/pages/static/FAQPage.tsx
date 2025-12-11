@@ -143,7 +143,7 @@ const FAQPage: React.FC = () => {
             >
               <p>
                 Members are expected to complete all tasks they are assigned on
-                time. Right now, members are not expected to contribute to the
+                time. Members are not required to contribute to the
                 Alliance financially.
               </p>
 
