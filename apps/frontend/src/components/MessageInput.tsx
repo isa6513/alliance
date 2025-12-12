@@ -141,6 +141,9 @@ const MessageInput = ({
       inputRef.current.style.height = "auto";
       inputRef.current.style.height = inputRef.current.scrollHeight + "px";
     }
+    if (inputRef.current && !message) {
+      inputRef.current.style.height = "auto";
+    }
   }, [message, inputRef]);
 
   return (

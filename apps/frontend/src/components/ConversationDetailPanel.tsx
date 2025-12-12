@@ -386,7 +386,10 @@ const ConversationDetailPanel = ({
                 <Button
                   color={ButtonColor.Transparent}
                   size="medium"
-                  onClick={onClose}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClose();
+                  }}
                   className="!px-2 !py-2"
                 >
                   <ChevronLeft size="20" />
