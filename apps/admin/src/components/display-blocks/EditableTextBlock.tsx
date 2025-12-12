@@ -1,6 +1,8 @@
+import { useState } from "react";
 import type { TextBlock } from "@alliance/shared/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
+import RenderDisplayBlock from "@alliance/shared/forms/RenderDisplayBlock";
 
 export function EditableTextBlock({
   block,
@@ -11,6 +13,8 @@ export function EditableTextBlock({
   isDragging,
   previousFields,
 }: BaseDisplayBlockProps<TextBlock>) {
+  const [showPreview, setShowPreview] = useState(false);
+
   return (
     <DisplayBlockWrapper
       onRemove={onRemove}
@@ -31,7 +35,7 @@ export function EditableTextBlock({
           style={{ resize: "vertical" }}
         />
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2">
           <label className="flex items-center text-xs text-gray-500">
             <input
               type="checkbox"
@@ -41,7 +45,26 @@ export function EditableTextBlock({
             />
             Markdown formatting
           </label>
+          <button
+            type="button"
+            onClick={() => setShowPreview((prev) => !prev)}
+            className="text-xs font-medium text-green hover:text-emerald-700"
+          >
+            {showPreview ? "Hide preview" : "Show preview"}
+          </button>
         </div>
+
+        {showPreview && (
+          <div className="border border-gray-200 rounded-md p-3 bg-white">
+            <RenderDisplayBlock
+              block={{
+                kind: "text",
+                text: block.text,
+                markdown: block.markdown,
+              }}
+            />
+          </div>
+        )}
       </div>
     </DisplayBlockWrapper>
   );

@@ -889,7 +889,9 @@ describe('Forum (e2e)', () => {
       });
 
       expect(likeNotifs).toHaveLength(1);
-      expect(likeNotifs[0].message).toBe('2 people liked your post');
+      expect(likeNotifs[0].message).toBe(
+        '2 people liked your post: Post To Get Likes',
+      );
       expect(likeNotifs[0].groupingCount).toBe(2);
     });
 
