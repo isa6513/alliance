@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Outlet, useNavigation, useOutletContext } from "react-router";
 import { AppLayoutOutletContext } from "./applayout";
 import NavbarVertical from "./components/NavbarVertical";
@@ -18,6 +18,28 @@ function Navbar() {
         : 0,
     [context.actions]
   );
+
+  useEffect(() => {
+    const href =
+      nTasks > 0 ? "/planet-earth-notif.png" : "/planet-earth.png";
+    const existingFavicon = document.querySelector<HTMLLinkElement>(
+      "link[rel~='icon']"
+    );
+
+    if (existingFavicon) {
+      const hrefUrl = new URL(href, window.location.href).href;
+      if (existingFavicon.href !== hrefUrl) {
+        existingFavicon.href = href;
+      }
+      return;
+    }
+
+    const favicon = document.createElement("link");
+    favicon.rel = "icon";
+    favicon.type = "image/png";
+    favicon.href = href;
+    document.head.appendChild(favicon);
+  }, [nTasks]);
 
   const navigation = useNavigation();
   const isNavigating = Boolean(navigation.location);
