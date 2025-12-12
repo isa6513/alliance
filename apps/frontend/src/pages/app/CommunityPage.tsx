@@ -330,7 +330,7 @@ const CommunityPage = () => {
                 <div className="flex flex-row gap-x-2">
                   <span className="capitalize">{m}</span>
                   {m === "invites" && inviteNotifCount > 0 && (
-                    <div className="font-semibold text-xs text-white bg-zinc-500 rounded-full rounded-md flex justify-center items-center w-5 h-5">
+                    <div className="font-semibold text-xs text-white bg-zinc-500 rounded-md flex justify-center items-center w-5 h-5">
                       {inviteNotifCount}
                     </div>
                   )}

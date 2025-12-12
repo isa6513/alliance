@@ -94,7 +94,7 @@ const CommunityMemberTableRow = ({
             )}
             <Link
               to={href("/member/:id", { id: profile.id.toString() })}
-              className="flex-shrink-0"
+              className="flex-shrink-0 group flex items-center gap-x-1 mr-3"
             >
               <div className="hidden md:block">
                 <ProfileImage pfp={profile.profilePicture} size="medium" />
@@ -102,14 +102,11 @@ const CommunityMemberTableRow = ({
               <div className="md:hidden">
                 <ProfileImage pfp={profile.profilePicture} size="mini" />
               </div>
-            </Link>
-            <Link
-              to={href("/member/:id", { id: profile.id.toString() })}
-              className="text-sm md:text-base min-[400px]:whitespace-nowrap mr-2 md:mr-6"
-            >
               <UserDisplayName staff={profile.staff} underline={false}>
                 <span
-                  className={currentAwayRange ? "text-zinc-400" : undefined}
+                  className={`${
+                    currentAwayRange ? "text-zinc-400" : undefined
+                  } group-hover:underline`}
                 >
                   {profile.displayName}
                   {currentAwayRange && " (away)"}
