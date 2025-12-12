@@ -87,6 +87,9 @@ const MessageRecipientSelect: React.FC<MessageRecipientSelectProps> = ({
       removeUser(selectedUsers[selectedUsers.length - 1].id);
       event.preventDefault();
     }
+    if (event.key === "Enter" && filteredUsers.length > 0) {
+      addUser(filteredUsers[0].id);
+    }
   };
 
   return (
