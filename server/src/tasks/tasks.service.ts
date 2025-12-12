@@ -384,7 +384,7 @@ export class TasksService {
       }
       for (const field of page.fields) {
         if (kind === 'city' && field.kind === 'city') {
-          return (answers[field.id] as CityFieldValue).id.toString();
+          return (answers[field.id] as CityFieldValue)?.id?.toString() ?? null;
         }
         if (
           field.kind === kind &&

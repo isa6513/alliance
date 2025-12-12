@@ -33,8 +33,6 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
   const [longitude, setLongitude] = useState<number | undefined>(undefined);
   const [geoFetched, setGeoFetched] = useState(false);
 
-  console.log(latitude, longitude);
-
   const fetchGeolocation = useCallback(async () => {
     if (geoFetched) return;
     try {
@@ -62,7 +60,6 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
         const res = await geoSearchCity({
           query: { query: name, latitude, longitude },
         });
-        console.log(res);
         if (!res.data) {
           console.log(res.error);
           throw new Error("Geo search failed");
