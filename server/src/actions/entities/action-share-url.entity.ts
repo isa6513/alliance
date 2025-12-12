@@ -45,5 +45,6 @@ export class ActionShareUrl {
 
   @Column({ type: 'jsonb' })
   @Type(() => Object)
-  data: Record<string, unknown>;
+  @ApiPropertyOptional({ type: Object })
+  data?: Record<string, unknown>;
 }

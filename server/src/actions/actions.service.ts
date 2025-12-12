@@ -81,6 +81,7 @@ import {
   ReminderGroup,
   ReminderGroupTimingMode,
 } from './entities/reminder-group.entity';
+import { ShareUrlDto } from './dto/share-url.dto';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -2276,5 +2277,19 @@ export class ActionsService {
 
     await this.actionShareUrlRepository.save(shareUrl);
     return shareUrl.url;
+  }
+
+  async getShareLinksForForm(formId: number): Promise<ShareUrlDto[]> {
+    const action = await this.actionRepository.findOneOrFail({
+      where: { taskFormId: formId },
+    });
+    return this.actionShareUrlRepository
+      .find({
+        where: { action: { id: action.id } },
+        relations: ['user'],
+      })
+      .then((shareUrls) =>
+        shareUrls.map((shareUrl) => new ShareUrlDto(shareUrl)),
+      );
   }
 }

@@ -1,5 +1,7 @@
 import {
+  actionsShareLinksForForm,
   FormResponseDto,
+  ProfileDto,
   tasksGetForm,
   tasksGetFormResponses,
   type FormDto,
@@ -71,10 +73,31 @@ const FormResponses: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
+  const [sidsToUserMap, setSidsToUserMap] = useState<
+    Record<string, ProfileDto>
+  >({});
+
   const numericFormId = useMemo(
     () => (formId ? Number(formId) : NaN),
     [formId]
   );
+  console.log(sidsToUserMap);
+
+  useEffect(() => {
+    if (form) {
+      actionsShareLinksForForm({ path: { formId: form.id } }).then((res) => {
+        console.log(res.data);
+        setSidsToUserMap(
+          Object.fromEntries(
+            res.data?.map((r) => [
+              r.sid ?? (r.data as { sid?: string })?.sid,
+              r.user,
+            ]) ?? []
+          )
+        );
+      });
+    }
+  }, [form]);
 
   const loadData = useCallback(async () => {
     if (!numericFormId || Number.isNaN(numericFormId)) return;
@@ -225,6 +248,8 @@ const FormResponses: React.FC = () => {
     URL.revokeObjectURL(url);
   }, [form, responses, orderedFieldIds, fieldLabels, formatValue]);
 
+  console.log(pageItems[0]?.sid);
+
   return (
     <div className="space-y-4 p-3">
       <div className="flex items-center justify-between">
@@ -312,7 +337,13 @@ const FormResponses: React.FC = () => {
                 </span>
                 {pageItems[0] && (
                   <div className="text-black flex items-center gap-3">
-                    <span>{pageItems[0].user?.name ?? "anonymous"}</span>
+                    <span>
+                      {pageItems[0].user?.name ??
+                      !!sidsToUserMap[pageItems[0].sid ?? ""]
+                        ? "anonymous invited by " +
+                          sidsToUserMap[pageItems[0].sid ?? ""]?.displayName
+                        : "anonymous"}
+                    </span>
                     <span className="text-gray-500 text-sm">
                       {new Date(pageItems[0].createdAt).toLocaleString()}
                     </span>

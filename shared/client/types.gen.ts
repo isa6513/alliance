@@ -1500,6 +1500,14 @@ export type SuspensionPlanDto = {
     users: Array<ProfileDto>;
 };
 
+export type ShareUrlDto = {
+    sid?: string;
+    data?: {
+        [key: string]: unknown;
+    };
+    user: ProfileDto;
+};
+
 export type UserActionSummaryDto = {
     id: number;
     name: string;
@@ -4065,6 +4073,21 @@ export type ActionsGetShareLinkResponses = {
 };
 
 export type ActionsGetShareLinkResponse = ActionsGetShareLinkResponses[keyof ActionsGetShareLinkResponses];
+
+export type ActionsShareLinksForFormData = {
+    body?: never;
+    path: {
+        formId: number;
+    };
+    query?: never;
+    url: '/actions/shareLinksForForm/{formId}';
+};
+
+export type ActionsShareLinksForFormResponses = {
+    200: Array<ShareUrlDto>;
+};
+
+export type ActionsShareLinksForFormResponse = ActionsShareLinksForFormResponses[keyof ActionsShareLinksForFormResponses];
 
 export type ActionsActionRelationsData = {
     body?: never;
