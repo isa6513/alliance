@@ -379,43 +379,56 @@ export class UserService {
   }
 
   async findMessageableUsers(userId: number): Promise<ProfileDto[]> {
-    const user = await this.findOneOrFail(userId, ['communities']);
+    const user = await this.findOneOrFail(userId, ['communities', 'leaderOf']);
 
-    const rels = this.friendRepository.find({
-      where: [
-        { requester: { id: userId }, status: FriendStatus.Accepted },
-        { addressee: { id: userId }, status: FriendStatus.Accepted },
-      ],
-      relations: ['requester', 'addressee'],
-    });
+    const memberCommunityIds = user.communities.map((c) => c.id);
+    const leaderCommunityIds = user.leaderOf.map((c) => c.id);
 
-    const staff = this.userRepository.find({
-      where: {
-        staff: true,
-      },
-    });
+    const [rels, staff, communityUsers] = await Promise.all([
+      this.friendRepository.find({
+        where: [
+          { requester: { id: userId }, status: FriendStatus.Accepted },
+          { addressee: { id: userId }, status: FriendStatus.Accepted },
+        ],
+        relations: ['requester', 'addressee'],
+      }),
 
-    const usersGroupLeads = await this.userRepository
-      .createQueryBuilder('u')
-      .innerJoin('u.leaderOf', 'c') // join the communities the user leads
-      .where('c.id IN (:...communityIds)', {
-        communityIds: user.communities.map((c) => c.id),
-      })
-      .getMany();
+      this.userRepository.find({ where: { staff: true } }),
 
-    const all = [
-      ...(await staff),
-      ...(await usersGroupLeads),
-      ...(await rels).map((r) =>
-        r.requester.id === userId ? r.addressee : r.requester,
-      ),
-    ];
+      this.userRepository
+        .createQueryBuilder('u')
+        .distinct(true)
+        .leftJoin('u.leaderOf', 'leadCommunity')
+        .leftJoin('u.communities', 'memberCommunity')
+        .where(
+          `
+            (
+              leadCommunity.id IN (:...memberCommunityIds)
+              OR memberCommunity.id IN (:...leaderCommunityIds)
+            )
+          `,
+          {
+            memberCommunityIds: memberCommunityIds.length
+              ? memberCommunityIds
+              : [-1],
+            leaderCommunityIds: leaderCommunityIds.length
+              ? leaderCommunityIds
+              : [-1],
+          },
+        )
+        .getMany(),
+    ]);
 
-    const deduped = [...new Map(all.map((u) => [u.id, u])).values()].filter(
-      (u) => u.id !== userId,
+    const friends = rels.map((r) =>
+      r.requester.id === userId ? r.addressee : r.requester,
     );
 
-    return deduped.map((o) => new ProfileDto(o));
+    const byId = new Map<number, User>();
+    for (const u of [...staff, ...communityUsers, ...friends]) {
+      if (u?.id && u.id !== userId) byId.set(u.id, u);
+    }
+
+    return [...byId.values()].map((o) => new ProfileDto(o));
   }
 
   /**
