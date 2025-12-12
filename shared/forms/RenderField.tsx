@@ -579,19 +579,15 @@ export function RenderField({
       );
 
     case "timezone": {
+      console.log(value);
       return (
         <div className="space-y-1">
           <RenderLabel field={field} error={errorMessage} />
           <TimeZoneSelect
             value={(value as string) ?? "America/Los_Angeles"}
-            onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-            required={field.required}
+            onChange={onChange ? (tz) => onChange(tz) : undefined}
             disabled={disabled}
             aria-invalid={hasError}
-            className={composeClassName(
-              sharedInputClasses +
-                " has-[option.placeholder:checked]:text-gray-400"
-            )}
           />
           {renderValidationMessage()}
         </div>

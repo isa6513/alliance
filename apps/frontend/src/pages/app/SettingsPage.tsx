@@ -413,10 +413,7 @@ const SettingsPage: React.FC = () => {
             </p>
             <TimeZoneSelect
               value={editableUser.timeZone}
-              className="border border-zinc-300 rounded px-3 py-3 self-start"
-              onChange={(event) =>
-                updateEditableUser({ timeZone: event.target.value })
-              }
+              onChange={(tz) => updateEditableUser({ timeZone: tz })}
             />
           </div>
 
