@@ -1164,6 +1164,7 @@ export function FormBuilder({
               <Button
                 onClick={() => navigate(`/forms/${formId}/responses`)}
                 color={ButtonColor.Stone}
+                size="small"
               >
                 Responses
               </Button>
@@ -1171,6 +1172,7 @@ export function FormBuilder({
                 <Button
                   onClick={() => setIsPreviewMode(!isPreviewMode)}
                   color={ButtonColor.Stone}
+                  size="small"
                 >
                   {isPreviewMode ? "Edit" : "Preview"}
                 </Button>
@@ -1179,12 +1181,13 @@ export function FormBuilder({
                 onClick={handleSaveForm}
                 disabled={isSaving || isLoading || !hasUnsavedChanges}
                 color={ButtonColor.Blue}
+                size="small"
               >
                 {isSaving
                   ? "Saving..."
                   : hasUnsavedChanges
                   ? "Save Form"
-                  : "No unsaved changes"}
+                  : "No changes"}
               </Button>
             </div>
             <div className="inline-flex rounded-md bg-gray-200 p-0.5 text-sm font-medium text-gray-600">

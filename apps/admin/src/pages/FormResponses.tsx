@@ -81,12 +81,10 @@ const FormResponses: React.FC = () => {
     () => (formId ? Number(formId) : NaN),
     [formId]
   );
-  console.log(sidsToUserMap);
 
   useEffect(() => {
     if (form) {
       actionsShareLinksForForm({ path: { formId: form.id } }).then((res) => {
-        console.log(res.data);
         setSidsToUserMap(
           Object.fromEntries(
             res.data?.map((r) => [
@@ -339,10 +337,10 @@ const FormResponses: React.FC = () => {
                   <div className="text-black flex items-center gap-3">
                     <span>
                       {pageItems[0].user?.name ??
-                      !!sidsToUserMap[pageItems[0].sid ?? ""]
-                        ? "anonymous invited by " +
-                          sidsToUserMap[pageItems[0].sid ?? ""]?.displayName
-                        : "anonymous"}
+                        (!!sidsToUserMap[pageItems[0].sid ?? ""]
+                          ? "anonymous invited by " +
+                            sidsToUserMap[pageItems[0].sid ?? ""]?.displayName
+                          : "anonymous")}
                     </span>
                     <span className="text-gray-500 text-sm">
                       {new Date(pageItems[0].createdAt).toLocaleString()}
