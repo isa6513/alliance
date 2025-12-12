@@ -82,7 +82,7 @@ const ActionsListPage = () => {
         {filteredActions.length === 0 && (
           <>
             {loading ? (
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center py-5">
                 <Spinner size="large" />
               </div>
             ) : (
