@@ -355,7 +355,7 @@ const ConversationDetailPanel = ({
 
   return (
     <div
-      className="flex flex-col h-full overflow-x-hidden relative"
+      className="flex flex-col h-full overflow-hidden relative"
       onDragEnterCapture={onDragEnterCapture}
       onDragOverCapture={onDragOverCapture}
       onDragLeaveCapture={onDragLeaveCapture}
