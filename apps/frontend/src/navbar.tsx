@@ -20,11 +20,9 @@ function Navbar() {
   );
 
   useEffect(() => {
-    const href =
-      nTasks > 0 ? "/planet-earth-notif.png" : "/planet-earth.png";
-    const existingFavicon = document.querySelector<HTMLLinkElement>(
-      "link[rel~='icon']"
-    );
+    const href = nTasks > 0 ? "/planet-earth-notif.png" : "/planet-earth.png";
+    const existingFavicon =
+      document.querySelector<HTMLLinkElement>("link[rel~='icon']");
 
     if (existingFavicon) {
       const hrefUrl = new URL(href, window.location.href).href;
@@ -47,7 +45,7 @@ function Navbar() {
   return (
     <NotificationsProvider>
       <NavbarVertical todoActions={nTasks} />
-      <main className="min-h-[calc(100vh-var(--mobile-nav-height))] md:min-h-screen bg-page md:ml-[var(--nav-width)] mt-[var(--mobile-nav-height)] md:mt-0 relative">
+      <main className="min-h-[calc(100dvh-var(--mobile-nav-height))] md:min-h-screen bg-page md:ml-[var(--nav-width)] mt-[var(--mobile-nav-height)] md:mt-0 relative">
         <Outlet context={context} />
         {isNavigating && (
           <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">

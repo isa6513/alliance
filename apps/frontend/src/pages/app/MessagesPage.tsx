@@ -7,7 +7,6 @@ import {
   conversationMarkRead,
   MessageDto,
   ProfileDto,
-  userListFriends,
   userListMessageableUsers,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
