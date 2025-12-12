@@ -231,9 +231,9 @@ const HomePage = () => {
       return;
     }
 
-    const maxItems = Math.max(
-      1,
-      Math.floor(availableHeight / firstActivityHeight)
+    const maxItems = Math.min(
+      5,
+      Math.max(1, Math.floor(availableHeight / firstActivityHeight))
     );
 
     setVisibleFriendActivityCount(Math.min(maxItems, friendActivities.length));
