@@ -33,6 +33,12 @@ import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
 import LargeCheckbox from "@alliance/shared/ui/LargeCheckbox";
 import { UserSelectUser } from "@alliance/shared/ui/UserSelect";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  CheckIcon,
+  ListChecks,
+} from "lucide-react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import ActionForm from "../components/ActionForm";
 import ActionUpdatesTab from "../components/ActionUpdatesTab";
@@ -75,6 +81,13 @@ export const formatStatus = (status: string) => {
 
 type Tab = "overview" | "details" | "events" | "form" | "updates";
 
+type ReadinessCheckItem = {
+  id: string;
+  label: string;
+  isReady: boolean;
+  fixTab: Tab;
+};
+
 const ActionDashboard: React.FC = () => {
   const { actionId: actionIdParam } = useParams<{ actionId: string }>();
   const navigate = useNavigate();
@@ -103,13 +116,16 @@ const ActionDashboard: React.FC = () => {
 
   const selectedTab = (searchParams.get("tab") as Tab) ?? "overview";
 
-  const onTabChange = (t: Tab) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set("tab", t);
-      return next;
-    });
-  };
+  const onTabChange = useCallback(
+    (t: Tab) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set("tab", t);
+        return next;
+      });
+    },
+    [setSearchParams]
+  );
 
   // Load available forms on component mount
   useEffect(() => {
@@ -659,9 +675,6 @@ const ActionDashboard: React.FC = () => {
     return Array.from(merged.values());
   }, [availableUsers, form.manualCohortUsers]);
 
-  if (loading) {
-    return <div className="p-8">Loading action...</div>;
-  }
   const baseUrl = getApiUrl();
 
   const tabData: { key: Tab; label: string }[] = [
@@ -684,6 +697,72 @@ const ActionDashboard: React.FC = () => {
     .sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     )[0]?.id;
+
+  const readinessChecklist = useMemo<ReadinessCheckItem[]>(() => {
+    if (!action) {
+      return [];
+    }
+
+    const trimmedShortDescription = action.shortDescription?.trim() ?? "";
+    const trimmedBody = action.body?.trim() ?? "";
+    const partOfSuite = Boolean(action.suite?.id);
+
+    const items: ReadinessCheckItem[] = [
+      {
+        id: "shortDescription",
+        label: "Short description",
+        isReady: trimmedShortDescription.length > 0,
+        fixTab: "details",
+      },
+      {
+        id: "body",
+        label: "Full body content",
+        isReady: trimmedBody.length > 0,
+        fixTab: "details",
+      },
+      {
+        id: "suite",
+        label: "Part of a suite",
+        isReady: partOfSuite,
+        fixTab: "details",
+      },
+      {
+        id: "authors",
+        label: "Action authors set",
+        isReady: (action.authors?.length ?? 0) > 0,
+        fixTab: "details",
+      },
+    ];
+
+    if (action.type === "Activity") {
+      items.push({
+        id: "taskForm",
+        label: "Task form linked",
+        isReady: Boolean(action.taskFormId),
+        fixTab: "form",
+      });
+    }
+
+    return items;
+  }, [action]);
+
+  const readinessReadyCount = readinessChecklist.filter(
+    (item) => item.isReady
+  ).length;
+  const readinessTotalCount = readinessChecklist.length;
+  const readinessComplete =
+    readinessTotalCount > 0 && readinessReadyCount === readinessTotalCount;
+
+  const handleReadinessItemFix = useCallback(
+    (item: ReadinessCheckItem) => {
+      onTabChange(item.fixTab);
+    },
+    [onTabChange]
+  );
+
+  if (loading) {
+    return <div className="p-8">Loading action...</div>;
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -789,7 +868,7 @@ const ActionDashboard: React.FC = () => {
           {/* Tab Content */}
           <div className="flex-1 overflow-y-auto">
             {activeTab === "overview" && action && (
-              <div className="space-y-4">
+              <div className="space-y-4 pb-4">
                 {/* Current Status */}
                 <div className="flex flex-row gap-2 flex-wrap">
                   {action.suite !== undefined && (
@@ -878,6 +957,64 @@ const ActionDashboard: React.FC = () => {
                     {action.archived ? "Unarchive Action" : "Archive Action"}
                   </Button>
                 </div>
+                {action.status === "draft" && readinessTotalCount > 0 && (
+                  <Card style={CardStyle.White}>
+                    <div className="flex flex-col gap-y-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center gap-2">
+                        <ListChecks
+                          className="mt-0.5 h-5 w-5 text-green"
+                          strokeWidth={3}
+                        />
+                        <h2 className="text-lg font-semibold">
+                          Readiness Check
+                        </h2>
+                      </div>
+                      <span
+                        className={`rounded-full px-3 py-1 text-sm font-medium ${
+                          readinessComplete
+                            ? "bg-green/20 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {readinessReadyCount}/{readinessTotalCount} ready
+                      </span>
+                    </div>
+                    <ul className="space-y-3">
+                      {readinessChecklist.map((item) => (
+                        <li
+                          key={item.id}
+                          className="flex flex-col gap-3 rounded-md border border-gray-200 p-3 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <div className="flex items-start gap-3">
+                            {item.isReady ? (
+                              <CheckIcon
+                                className="h-5 w-5 text-green"
+                                strokeWidth={3}
+                              />
+                            ) : (
+                              <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                            )}
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">
+                                {item.label}
+                              </p>
+                            </div>
+                          </div>
+                          {!item.isReady && (
+                            <button
+                              type="button"
+                              className="inline-flex items-center text-sm font-medium text-blue-500 hover:text-blue-700"
+                              onClick={() => handleReadinessItemFix(item)}
+                            >
+                              Fix
+                              <ArrowUpRight className="ml-1 h-4 w-4" />
+                            </button>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                )}
                 <Card style={CardStyle.White}>
                   <h2 className="text-lg font-semibold mb-0">
                     Current Status:{" "}
@@ -894,9 +1031,6 @@ const ActionDashboard: React.FC = () => {
                   </h2>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <div className="text-sm text-gray-600">
-                        <strong>Users Joined:</strong> {action.usersJoined}
-                      </div>
                       <div className="text-sm text-gray-600">
                         <strong>Users Completed:</strong>{" "}
                         {action.usersCompleted}

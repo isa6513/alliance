@@ -627,6 +627,11 @@ export const useDatabaseViewerState = ({
 
       setErrorMessage(null);
 
+      if (data.totalPages > 0 && query.page > data.totalPages) {
+        setPage(data.totalPages);
+        return;
+      }
+
       const defaultSort = !query.sortBy
         ? getDefaultSortColumn(data.columns)
         : null;
@@ -674,6 +679,7 @@ export const useDatabaseViewerState = ({
     applyDefaultSort,
     getRowPrimaryKey,
     applyImmediateSearch,
+    setPage,
   ]);
 
   const loadTableDataRef = useRef(loadTableData);
