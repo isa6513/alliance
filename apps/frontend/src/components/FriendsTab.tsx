@@ -40,9 +40,6 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
   const [processingIds, setProcessingIds] = useState<Record<string, boolean>>(
     {}
   );
-  console.log("originalTab", originalTab);
-  console.log("isMe", isMe);
-  console.log(activeTab);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
