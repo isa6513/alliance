@@ -270,6 +270,18 @@ export class UserController {
     return this.userService.findFriends(id);
   }
 
+  @Get('listMessageableUsers')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [ProfileDto] })
+  async listMessageableUsers(
+    @Request() req: JwtRequest,
+  ): Promise<ProfileDto[]> {
+    if (!req.user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return this.userService.findMessageableUsers(req.user.sub);
+  }
+
   @Get('countreferred/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: Number })

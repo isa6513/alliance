@@ -2349,6 +2349,19 @@ export type UserListFriendsResponses = {
 
 export type UserListFriendsResponse = UserListFriendsResponses[keyof UserListFriendsResponses];
 
+export type UserListMessageableUsersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/listMessageableUsers';
+};
+
+export type UserListMessageableUsersResponses = {
+    200: Array<ProfileDto>;
+};
+
+export type UserListMessageableUsersResponse = UserListMessageableUsersResponses[keyof UserListMessageableUsersResponses];
+
 export type UserCountReferredData = {
     body?: never;
     path: {

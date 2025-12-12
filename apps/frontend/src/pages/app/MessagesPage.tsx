@@ -8,6 +8,7 @@ import {
   MessageDto,
   ProfileDto,
   userListFriends,
+  userListMessageableUsers,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
@@ -97,7 +98,9 @@ const MessagesPage = () => {
     onConversationUpdated: handleConversationUpdated,
   });
 
-  const [friends, setFriends] = useState<ProfileDto[] | null>(null);
+  const [messageableUsers, setMessageableUsers] = useState<ProfileDto[] | null>(
+    null
+  );
 
   const [messagesOpen, setMessagesOpen] = useState(false);
   const isSmall = document.body.clientWidth < 768;
@@ -105,9 +108,9 @@ const MessagesPage = () => {
 
   useEffect(() => {
     if (!user) return;
-    userListFriends({ path: { id: user.id } }).then((response) => {
+    userListMessageableUsers().then((response) => {
       if (response.data) {
-        setFriends(response.data);
+        setMessageableUsers(response.data);
       }
     });
   }, [user]);
@@ -164,7 +167,10 @@ const MessagesPage = () => {
         }
       } else {
         const names = sendingNewMessageToIds
-          .map((id) => friends?.find((friend) => friend.id === id)?.displayName)
+          .map(
+            (id) =>
+              messageableUsers?.find((friend) => friend.id === id)?.displayName
+          )
           .filter((name) => name !== undefined);
         if (user && !user.anonymous) {
           names.push(user.name);
@@ -191,7 +197,7 @@ const MessagesPage = () => {
       setSelectedConvoId,
       setConversations,
       selectedConvo,
-      friends,
+      messageableUsers,
       user,
     ]);
 
@@ -483,7 +489,7 @@ const MessagesPage = () => {
             sendingNewMessageToIds={null}
             setSendingNewMessageToIds={null}
             handleCreateConversation={null}
-            friends={friends}
+            friends={messageableUsers}
             onOptimisticMessage={addOptimisticMessage}
             onOptimisticMessageFailed={(tempId) =>
               removeOptimisticMessage(tempId)
@@ -505,7 +511,7 @@ const MessagesPage = () => {
             handleConversationUpdated={handleConversationUpdated}
             handleAcceptMessageRequest={null}
             handleDeclineMessageRequest={null}
-            friends={friends}
+            friends={messageableUsers}
             sendingNewMessageToIds={sendingNewMessageToIds}
             setSendingNewMessageToIds={handleUpdateRecipientIds}
             handleCreateConversation={handleCreateConversation}

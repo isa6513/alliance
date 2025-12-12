@@ -378,6 +378,46 @@ export class UserService {
     return others.map((o) => new ProfileDto(o));
   }
 
+  async findMessageableUsers(userId: number): Promise<ProfileDto[]> {
+    const user = await this.findOneOrFail(userId, ['communities']);
+
+    const rels = this.friendRepository.find({
+      where: [
+        { requester: { id: userId }, status: FriendStatus.Accepted },
+        { addressee: { id: userId }, status: FriendStatus.Accepted },
+      ],
+      relations: ['requester', 'addressee'],
+    });
+
+    const staff = this.userRepository.find({
+      where: {
+        staff: true,
+      },
+    });
+
+    const usersGroupLeads = await this.userRepository
+      .createQueryBuilder('u')
+      .innerJoin('u.leaderOf', 'c') // join the communities the user leads
+      .where('c.id IN (:...communityIds)', {
+        communityIds: user.communities.map((c) => c.id),
+      })
+      .getMany();
+
+    const all = [
+      ...(await staff),
+      ...(await usersGroupLeads),
+      ...(await rels).map((r) =>
+        r.requester.id === userId ? r.addressee : r.requester,
+      ),
+    ];
+
+    const deduped = [...new Map(all.map((u) => [u.id, u])).values()].filter(
+      (u) => u.id !== userId,
+    );
+
+    return deduped.map((o) => new ProfileDto(o));
+  }
+
   /**
    * Make two users friends without sending any notifications. Used sed when a user signs up with a referral code.
    */
