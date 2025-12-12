@@ -110,6 +110,15 @@ const buildPreviewAnswers = (fields: AnyField[]): Record<string, FormValue> => {
       case "timezone":
         answers[field.id] = "America/Los_Angeles";
         break;
+      case "city":
+        answers[field.id] = {
+          id: 1,
+          name: "San Francisco",
+          admin1: "California",
+          countryCode: "US",
+          countryName: "United States",
+        };
+        break;
       case "file":
         answers[field.id] = "uploaded/file.pdf";
         break;

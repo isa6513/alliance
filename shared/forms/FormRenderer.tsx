@@ -14,6 +14,7 @@ import RenderField from "./RenderField";
 import type { DisplayBlock } from "./display-blocks";
 import type {
   AnyField,
+  CityFieldValue,
   Condition,
   DeviceVisibilityTarget,
   FormSchema,
@@ -82,6 +83,15 @@ const detectDeviceType = (): DeviceVisibilityTarget => {
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
+const isCityValue = (value: unknown): value is CityFieldValue => {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.name === "string" &&
+    typeof candidate.countryName === "string" &&
+    "id" in candidate
+  );
+};
 
 function getRangeOptionCount(field: RangeField): number {
   const desired = field.optionCount ?? DEFAULT_RANGE_OPTION_COUNT;
@@ -166,6 +176,11 @@ function resolveFieldDefaultValue(field: AnyField): FormValue | undefined {
       case "phone":
       case "file":
       case "custom":
+        return isNonEmptyString(rawDefault) ? rawDefault : undefined;
+      case "city":
+        if (isCityValue(rawDefault)) {
+          return rawDefault;
+        }
         return isNonEmptyString(rawDefault) ? rawDefault : undefined;
       default:
         return isNonEmptyString(rawDefault) ? rawDefault : undefined;

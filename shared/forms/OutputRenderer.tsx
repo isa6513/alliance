@@ -7,6 +7,7 @@ import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
 import type {
   AnyField,
+  CityFieldValue,
   Condition,
   DeviceVisibilityTarget,
   FormSchema,
@@ -47,6 +48,29 @@ const hasContent = (value: FormValue | undefined): boolean => {
     return value.length > 0;
   }
   return true;
+};
+
+const isCityValue = (value: unknown): value is CityFieldValue => {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.name === "string" &&
+    typeof candidate.countryName === "string" &&
+    "id" in candidate
+  );
+};
+
+const formatCity = (value: CityFieldValue | string): string => {
+  if (typeof value === "string") {
+    return value;
+  }
+  const region = value.admin1?.trim();
+  const country = value.countryName?.trim();
+  const locationParts = [region, country].filter(
+    (part): part is string => !!part && part.length > 0
+  );
+  const suffix = locationParts.length ? `, ${locationParts.join(", ")}` : "";
+  return `${value.name}${suffix}`;
 };
 
 const isBlockVisible = (
@@ -177,6 +201,11 @@ const formatValue = (field: AnyField, value: FormValue | undefined): string => {
     case "range": {
       return value ? String(value) : "";
     }
+    case "city":
+      if (isCityValue(value)) {
+        return formatCity(value);
+      }
+      return value ? formatCity(String(value)) : "";
     default:
       return Array.isArray(value)
         ? value.join(", ")

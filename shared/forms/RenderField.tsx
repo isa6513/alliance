@@ -1,13 +1,21 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import type { UserDto } from "@alliance/shared/client";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
-import type { AnyField, FormValue, RangeField, TimeField } from "./formschema";
+import type {
+  AnyField,
+  CityField,
+  CityFieldValue,
+  FormValue,
+  RangeField,
+  TimeField,
+} from "./formschema";
 import { shuffleWithSeed } from "./randomutils";
 import { formatTimeForDisplay, parseTimeInput } from "./timeUtils";
 import DropdownIcon from "../ui/icons/DropdownIcon";
 import { getCustomComponentById } from "./components";
 import { getApiUrl } from "../lib/config";
 import TimeZoneSelect from "./TimeZoneSelect";
+import CityAutosuggest from "./CityAutosuggest";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -29,6 +37,25 @@ const sharedInputClasses =
 const DEFAULT_RANGE_OPTION_COUNT = 10;
 const MIN_RANGE_OPTION_COUNT = 2;
 const MAX_RANGE_OPTION_COUNT = 50;
+const formatCityValue = (city: CityFieldValue): string => {
+  const region = city.admin1?.trim();
+  const country = city.countryName?.trim();
+  const locationParts = [region, country].filter(
+    (part): part is string => !!part && part.length > 0
+  );
+  const suffix = locationParts.length ? `, ${locationParts.join(", ")}` : "";
+  return `${city.name}${suffix}`;
+};
+
+const isCityValue = (candidate: unknown): candidate is CityFieldValue => {
+  if (!candidate || typeof candidate !== "object") return false;
+  const value = candidate as Record<string, unknown>;
+  return (
+    typeof value.name === "string" &&
+    typeof value.countryName === "string" &&
+    "id" in value
+  );
+};
 
 const getRangeValues = (field: RangeField): number[] => {
   const desired = field.optionCount ?? DEFAULT_RANGE_OPTION_COUNT;
@@ -566,6 +593,45 @@ export function RenderField({
                 " has-[option.placeholder:checked]:text-gray-400"
             )}
           />
+          {renderValidationMessage()}
+        </div>
+      );
+    }
+
+    case "city": {
+      const cityValue = isCityValue(value) ? value : undefined;
+      const displayValue =
+        cityValue !== undefined
+          ? formatCityValue(cityValue)
+          : typeof value === "string"
+          ? value
+          : "";
+      return (
+        <div className="space-y-1">
+          <RenderLabel field={field as CityField} error={errorMessage} />
+          <CityAutosuggest
+            key={`city-${cityValue?.id ?? field.id}`}
+            value={displayValue}
+            placeholder={(field as CityField).placeholder}
+            minLength={(field as CityField).minLength}
+            debounceMs={(field as CityField).debounceMs}
+            inputClassName={
+              hasError
+                ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                : "focus:border-green focus:ring-1 focus:ring-green"
+            }
+            disabled={disabled}
+            onSelect={(city) => onChange?.(city)}
+          />
+          {cityValue && onChange && (
+            <button
+              type="button"
+              onClick={() => onChange("")}
+              className="text-xs text-zinc-600 hover:text-zinc-800"
+            >
+              Clear selection
+            </button>
+          )}
           {renderValidationMessage()}
         </div>
       );

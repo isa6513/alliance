@@ -70,7 +70,7 @@ export function RequiredToggle({
         type="checkbox"
         checked={!!checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mr-1"
+        className="mr-2"
       />
       {label}
     </label>
@@ -136,9 +136,7 @@ type ControllerField =
   | RangeField
   | TextContentControllerField;
 
-function isTextContentController(
-  f: AnyField
-): f is TextContentControllerField {
+function isTextContentController(f: AnyField): f is TextContentControllerField {
   return (
     f.kind === "text" ||
     f.kind === "textarea" ||
@@ -1084,7 +1082,7 @@ export function AutoExtractUserDataToggle({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="flex items-center text-xs text-gray-700 mt-2">
+    <label className="flex items-center text-xs text-gray-700">
       <input
         type="checkbox"
         checked={checked}

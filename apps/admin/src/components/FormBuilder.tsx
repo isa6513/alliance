@@ -38,6 +38,7 @@ import {
   EditableSelectField,
   EditableTimeField,
   EditableTimezoneField,
+  EditableCityField,
   EditableTextField,
   EditableTextareaField,
   EditableCustomComponentField,
@@ -164,6 +165,7 @@ export function FormBuilder({
       { id: "date", name: "Date Field", type: "field" as const },
       { id: "time", name: "Time Field", type: "field" as const },
       { id: "timezone", name: "Timezone Field", type: "field" as const },
+      { id: "city", name: "City Field", type: "field" as const },
       { id: "file", name: "File Field", type: "field" as const },
       {
         id: "custom",
@@ -382,6 +384,16 @@ export function FormBuilder({
           required: false,
           autoExtractUserData: false,
           defaultValue: "America/Los_Angeles",
+        };
+        break;
+      case "city":
+        newField = {
+          id: fieldId,
+          kind: "city",
+          label: "City Field",
+          required: false,
+          placeholder: "Search for a city",
+          minLength: 1,
         };
         break;
       case "file":
@@ -1020,6 +1032,13 @@ export function FormBuilder({
                         {...commonProps}
                       />
                     );
+                  case "city":
+                    return (
+                      <EditableCityField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
                   case "file":
                     return (
                       <EditableFileField
@@ -1129,8 +1148,8 @@ export function FormBuilder({
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <div className="bg-white border-b border-gray-200 p-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center space-x-4 flex-1">
+          <div className="flex items-center justify-between gap-4 flex-wrap xl:flex-nowrap">
+            <div className="flex items-center space-x-4 flex-1 min-w-[200px]">
               <input
                 type="text"
                 value={schema.title}

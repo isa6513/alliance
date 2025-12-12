@@ -23,6 +23,7 @@ export function ElementSelect({
     "date",
     "time",
     "timezone",
+    "city",
     "file",
     "custom",
   ];

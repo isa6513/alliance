@@ -27,18 +27,28 @@ export function EditableCityField({
         value={field.label}
         onChange={(v) => onUpdate({ label: v })}
       />
-
-      <RequiredToggle
-        checked={field.required}
-        onChange={(checked) => onUpdate({ required: checked })}
-      />
-
-      <AutoExtractUserDataToggle
-        checked={!!field.autoExtractUserData}
-        onChange={(checked) => onUpdate({ autoExtractUserData: checked })}
-      />
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Placeholder Text
+        </label>
+        <input
+          type="text"
+          value={field.placeholder || ""}
+          onChange={(e) => onUpdate({ placeholder: e.target.value })}
+          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+          placeholder="Search for a city"
+        />
+      </div>
+      <div className="flex items-center space-x-4">
+        <RequiredToggle
+          checked={field.required}
+          onChange={(checked) => onUpdate({ required: checked })}
+        />
+        <AutoExtractUserDataToggle
+          checked={!!field.autoExtractUserData}
+          onChange={(checked) => onUpdate({ autoExtractUserData: checked })}
+        />
+      </div>
     </FieldWrapper>
   );
 }
-
-export default EditableCityField;

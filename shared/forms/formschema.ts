@@ -1,3 +1,4 @@
+import type { CitySearchDto } from "../client";
 import type { DisplayBlock } from "./display-blocks";
 
 // field-kinds.ts
@@ -16,12 +17,14 @@ export type FieldKind =
   | "time"
   | "timezone"
   | "file"
+  | "city"
   | "custom";
 
 type Option<V extends string = string> = { label: string; value: V };
 
 // Unified value type for answers (persisted)
-export type FormValue = string | number | boolean | string[];
+export type CityFieldValue = CitySearchDto;
+export type FormValue = string | number | boolean | string[] | CityFieldValue;
 
 export const DEVICE_VISIBILITY_TARGETS = [
   "mobile",
@@ -120,6 +123,12 @@ export type TimeField = BaseField<"time"> & {
 export type TimezoneField = BaseField<"timezone"> & {
   autoExtractUserData?: boolean;
 };
+export type CityField = BaseField<"city"> & {
+  placeholder?: string;
+  minLength?: number;
+  debounceMs?: number;
+  autoExtractUserData?: boolean;
+};
 // Persist file answers as string URL/key
 export type FileField = BaseField<"file">;
 export type CustomComponentField = BaseField<"custom"> & {
@@ -141,6 +150,7 @@ export type AnyField =
   | DateField
   | TimeField
   | TimezoneField
+  | CityField
   | FileField
   | CustomComponentField;
 

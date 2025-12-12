@@ -37,6 +37,7 @@ const ANSWER_FIELD_KINDS = new Set<FieldKind>([
   "date",
   "time",
   "timezone",
+  "city",
   "file",
 ]);
 

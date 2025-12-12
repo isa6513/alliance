@@ -37,7 +37,15 @@ import {
   FormResponseDto,
   SubmitFormDto,
 } from './form.dto';
-import { FormSchema, isQuestionField, isQuestionVisible, Page } from './schema';
+import {
+  CityFieldValue,
+  FormSchema,
+  isQuestionField,
+  isQuestionVisible,
+  Page,
+} from './schema';
+import { ActionDto } from 'src/actions/dto/action.dto';
+import { City } from 'src/geo/city.entity';
 
 @Injectable()
 export class TasksService {
@@ -211,6 +219,12 @@ export class TasksService {
       'timezone',
     );
 
+    const city = this.getFirstAutoExtractAnswer(
+      form,
+      submitFormDto.answers,
+      'city',
+    );
+
     let userNeedsUpdate = false;
 
     if (phoneNumber) {
@@ -237,6 +251,11 @@ export class TasksService {
         user.phoneNumber = phoneNumber;
         userNeedsUpdate = true;
       }
+    }
+
+    if (city) {
+      user.city = { id: parseInt(city) } as City;
+      userNeedsUpdate = true;
     }
 
     if (preferredReminderTime) {
@@ -355,7 +374,7 @@ export class TasksService {
   private getFirstAutoExtractAnswer(
     form: Form,
     answers: Record<string, unknown>,
-    kind: 'phone' | 'time' | 'timezone',
+    kind: 'phone' | 'time' | 'timezone' | 'city',
   ): string | null {
     const schema = form.schema as unknown as FormSchema;
 
@@ -364,6 +383,9 @@ export class TasksService {
         continue;
       }
       for (const field of page.fields) {
+        if (kind === 'city' && field.kind === 'city') {
+          return (answers[field.id] as CityFieldValue).id.toString();
+        }
         if (
           field.kind === kind &&
           field.autoExtractUserData &&
@@ -383,18 +405,17 @@ export class TasksService {
   async listForms(): Promise<FormDto[]> {
     const forms = await this.formRepository.find();
     return Promise.all(
-      forms.map(
-        async (form) =>
-          ({
-            id: form.id,
-            title: form.title,
-            schema: form.schema,
-            usedInAction:
-              (await this.actionRepository.findOne({
-                where: { taskFormId: form.id },
-              })) ?? undefined,
-          }) satisfies FormDto,
-      ),
+      forms.map(async (form) => {
+        const action = await this.actionRepository.findOne({
+          where: { taskFormId: form.id },
+        });
+        return {
+          id: form.id,
+          title: form.title,
+          schema: form.schema,
+          usedInAction: action ? new ActionDto(action) : undefined,
+        } satisfies FormDto;
+      }),
     );
   }
 
