@@ -579,7 +579,6 @@ export function RenderField({
       );
 
     case "timezone": {
-      console.log(value);
       return (
         <div className="space-y-1">
           <RenderLabel field={field} error={errorMessage} />

@@ -145,16 +145,6 @@ function getOffsetMinutes(tz: string): number | null {
   }
 }
 
-function formatOffsetLabel(mins: number | null) {
-  if (mins == null) return "";
-  const sign = mins < 0 ? "-" : "+";
-  const abs = Math.abs(mins);
-  const hh = Math.floor(abs / 60);
-  const mm = abs % 60;
-  const mmStr = mm.toString().padStart(2, "0");
-  return `GMT${sign}${hh}:${mmStr}`;
-}
-
 export default function TimeZoneSelectPretty({
   value,
   defaultValue = "America/Los_Angeles",
@@ -215,16 +205,6 @@ export default function TimeZoneSelectPretty({
     return parts.find((p) => p.type === "timeZoneName")?.value ?? null;
   }
 
-  function getOffsetLabelFromIntl(tz: string) {
-    // "GMT-08:00"
-    const now = new Date();
-    const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: tz,
-      timeZoneName: "shortOffset",
-    }).formatToParts(now);
-    return parts.find((p) => p.type === "timeZoneName")?.value ?? null;
-  }
-
   const allItems = React.useMemo<Item[]>(() => {
     const tzs = TZ_OPTIONS.map((tz) => tz.tz);
 
@@ -236,14 +216,10 @@ export default function TimeZoneSelectPretty({
       const offsetMins = getOffsetMinutes(tz);
       const dst = observesDst(tz);
 
-      const offsetLabel =
-        getOffsetLabelFromIntl(tz) ??
-        (offsetMins != null ? formatOffsetLabel(offsetMins) : "");
-
       return {
         tz,
         labelLeft: `${left}`.trim(),
-        searchText: `${offsetLabel} ${left} ${tz}`.toLowerCase(),
+        searchText: `${left} ${tz}`.toLowerCase(),
         offsetMins,
         observesDst: dst,
       };
@@ -327,7 +303,7 @@ export default function TimeZoneSelectPretty({
 
   return (
     <div className={className ?? ""}>
-      <div className="relative">
+      <div className="relative max-w-[500px]">
         <button
           type="button"
           disabled={disabled}
