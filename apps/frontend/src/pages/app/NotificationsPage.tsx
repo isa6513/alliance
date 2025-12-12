@@ -39,26 +39,24 @@ const NotificationsPage = () => {
                 notification.webAppLocation
               )}
             >
-              <div className="flex flex-row items-center gap-x-2">
+              <h3 className="line-clamp-2">
                 {notification.associatedUsers.length > 0 && (
-                  <div className="flex flex-row items-center gap-x-0.5 shrink-0">
+                  <div className="inline mr-1">
                     {notification.associatedUsers.map((user) => (
                       <ProfileImage
                         key={user.id}
                         pfp={user.profilePicture}
                         size="small"
+                        className="mr-1"
                       />
                     ))}
                   </div>
                 )}
-
-                <h3 className="line-clamp-2">
-                  {notification.category === "action_update" && (
-                    <span className="font-semibold">Action update: </span>
-                  )}
-                  {notification.message}
-                </h3>
-              </div>
+                {notification.category === "action_update" && (
+                  <span className="font-semibold">Action update: </span>
+                )}
+                {notification.message}
+              </h3>
               <p className=" text-zinc-500 text-sm">
                 {formatTime(
                   new Date(notification.sendTime || notification.createdAt),

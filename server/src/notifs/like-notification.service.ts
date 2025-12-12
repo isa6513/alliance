@@ -60,12 +60,15 @@ export class LikeNotificationService {
         return;
       }
 
+      existingNotif.targetContent =
+        existingNotif.targetContent ?? targetContent;
       const updatedUsers = [...(existingNotif.associatedUsers ?? []), liker];
       existingNotif.associatedUsers = updatedUsers;
       existingNotif.groupingCount = updatedUsers.length;
       existingNotif.message = this.buildMessage(
         targetType,
         updatedUsers.length,
+        existingNotif.targetContent,
         updatedUsers.length === 1
           ? new ProfileDto(updatedUsers[0]).displayName
           : undefined,
@@ -85,6 +88,7 @@ export class LikeNotificationService {
         targetContent,
         likerProfile.displayName,
       ),
+      targetContent,
       webAppLocation,
       groupingKey,
       groupingCount: 1,
