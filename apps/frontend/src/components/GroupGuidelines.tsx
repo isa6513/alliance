@@ -89,7 +89,7 @@ You should ultimately tailor your message to the person you’re inviting. Howev
 
 **1. Picking the best channel**
 
-Since the Alliance is complex, most successful invitations have occurred in person or over a call. During these meetings, it is often good to walk the new member through signing up and onboarding.
+Since the Alliance is complex, most successful invitations have occurred in person or over a call. During these conversations, it is often good to walk the new member through signing up and onboarding.
 
 Some members, typically trusted friends who are likely to say yes, have joined via a simple text and follow-ups.
 
