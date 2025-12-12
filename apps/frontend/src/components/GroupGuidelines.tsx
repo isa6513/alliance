@@ -122,7 +122,7 @@ When sending follow-up messages, it’s helpful to include the invite link again
 
 # Answering questions
 
-Please use our [guide](${getBaseUrl()}/guide) to answer any questions that come up.
+Please use our [guide](${getBaseUrl()}/guide) and our [FAQ](${getBaseUrl()}/faq) to answer any questions that come up.
 
 If they ask a question that you don’t know the answer to, feel free to ask a member of the office.
 
