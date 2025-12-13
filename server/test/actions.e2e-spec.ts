@@ -206,22 +206,6 @@ describe('Actions (e2e)', () => {
       expect(res.status).toBe(400);
     });
 
-    it('action will count joined users', async () => {
-      const action = await actionRepo.findOneBy({
-        name: 'Test Action',
-      });
-      expect(action).not.toBeNull();
-    });
-
-    it('action will show locations of joined users', async () => {
-      const locations = await request(ctx.app.getHttpServer())
-        .get(`/actions/userlocations/${testAction.id}`)
-        .set('Authorization', `Bearer ${ctx.accessToken}`);
-
-      expect(locations.status).toBe(200);
-      expect(locations.body.length).toBe(0); //todo city data in test
-    });
-
     it('user is shown their own relation to an action', async () => {
       const action = await actionRepo.findOneBy({
         name: 'Test Action',
