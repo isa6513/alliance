@@ -8,6 +8,7 @@ import {
   userLeaveCommunity,
   userGetOnetimeInvitesByCommunity,
   CommunityMemberContactInfoDto,
+  conversationGetCommunityConversations,
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Spinner from "../../components/Spinner";
@@ -68,7 +69,20 @@ const CommunityPage = () => {
   );
   const [inviteNotifCount, setInviteNotifCount] = useState(0);
 
-  const [chatOpen, setChatOpen] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
+
+  useEffect(() => {
+    if (!community?.id) {
+      return;
+    }
+    conversationGetCommunityConversations({
+      path: { communityId: community.id },
+    }).then((response) => {
+      if (response.data?.lastMessage) {
+        setChatOpen(true);
+      }
+    });
+  }, [community?.id]);
 
   const [completedAllCurrentActions, setCompletedAllCurrentActions] = useState<
     Record<number, boolean>
