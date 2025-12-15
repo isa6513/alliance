@@ -85,7 +85,7 @@ const CommunityMemberTableRow = ({
         }`}
         onClick={canExpand ? () => setExpanded(!expanded) : undefined}
       >
-        <td className="">
+        <td>
           <div className="flex flex-row items-center gap-x-1 md:gap-x-3">
             {canExpand && (
               <div className={`${expanded ? "" : "-rotate-90"}`}>
@@ -94,28 +94,28 @@ const CommunityMemberTableRow = ({
             )}
             <Link
               to={href("/member/:id", { id: profile.id.toString() })}
-              className="flex-shrink-0 group flex items-center gap-x-1 mr-3"
+              className="flex-shrink-0 group flex items-center gap-x-1 mr-3 text-ellipsis overflow-hidden line-clamp-2 wrap-words w-full"
             >
-              <div className="hidden md:block">
+              <div className="hidden md:block shrink-0">
                 <ProfileImage pfp={profile.profilePicture} size="medium" />
               </div>
               <div className="md:hidden">
                 <ProfileImage pfp={profile.profilePicture} size="mini" />
               </div>
-              <UserDisplayName staff={profile.staff} underline={false}>
-                <span
-                  className={`${
-                    currentAwayRange ? "text-zinc-400" : undefined
-                  } group-hover:underline`}
-                >
-                  {profile.displayName}
-                  {currentAwayRange && " (away)"}
-                </span>
+              <UserDisplayName
+                staff={profile.staff}
+                underline={false}
+                className={`${
+                  currentAwayRange ? "text-zinc-400" : undefined
+                } group-hover:underline`}
+              >
+                {profile.displayName}
+                {currentAwayRange && " (away)"}
               </UserDisplayName>
             </Link>
           </div>
         </td>
-        <td className="w-full">
+        <td>
           <div>
             {!!actions && (
               <UserProgressPills

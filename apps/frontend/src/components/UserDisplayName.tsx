@@ -2,6 +2,7 @@ interface UserDisplayNameProps extends React.PropsWithChildren {
   staff?: boolean;
   grouplead?: boolean;
   underline?: boolean;
+  className?: string;
 }
 
 const UserDisplayName: React.FC<UserDisplayNameProps> = ({
@@ -9,13 +10,11 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
   staff = false,
   grouplead = false,
   underline = true,
+  className = "",
 }: React.PropsWithChildren<UserDisplayNameProps>) => {
   return (
-    <>
-      <span
-        className={`${underline ? "hover:underline" : ""}
-        }`}
-      >
+    <span>
+      <span className={`${underline ? "hover:underline" : ""} ${className}`}>
         {children}
       </span>
       {staff && (
@@ -28,7 +27,7 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
           Lead
         </span>
       )}
-    </>
+    </span>
   );
 };
 

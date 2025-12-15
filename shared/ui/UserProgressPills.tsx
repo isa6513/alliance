@@ -38,7 +38,7 @@ const UserProgressPills = ({
   pillHeight = "h-3",
 }: UserProgressPillsProps) => {
   return (
-    <div className="flex gap-1 w-full">
+    <div className="flex gap-px w-full">
       {actions.map((action) => {
         const relation = relationByActionId[action.id] ?? {
           status: "none",

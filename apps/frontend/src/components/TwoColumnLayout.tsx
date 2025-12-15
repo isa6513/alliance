@@ -5,6 +5,7 @@ interface TwoColumnLayoutProps {
   sidebar?: ReactNode; // optional right column content
   sidebarWidth?: number; // width of the sidebar in pixels
   className?: string; // optional outer class for customization
+  noSidebarOverflow?: boolean;
 }
 
 /**
@@ -17,6 +18,7 @@ export default function TwoColumnLayout({
   sidebar,
   sidebarWidth = 380,
   className = "",
+  noSidebarOverflow = false,
 }: TwoColumnLayoutProps) {
   return (
     <div
@@ -33,12 +35,13 @@ export default function TwoColumnLayout({
           ></div>
         )}
       </div>
-      {!!sidebar && !!sidebarWidth && (
+      {!!sidebar && (
         <div
-          className={`ml-auto sticky top-0 h-screen bg-page px-2 hidden lg:flex flex-col gap-y-5 items-stretch overflow-y-auto transition-all duration-200 ease-in-out `}
+          className={`ml-auto sticky top-0 h-screen bg-page px-2 flex-col gap-y-5 items-stretch overflow-y-auto transition-all duration-200 ease-in-out `}
           style={{
             width: `${sidebarWidth}px`,
-            overflowY: sidebarWidth === 0 ? "hidden" : "auto",
+            overflowY:
+              sidebarWidth === 0 || noSidebarOverflow ? "hidden" : "auto",
           }}
         >
           {sidebar}

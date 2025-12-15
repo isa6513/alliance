@@ -36,6 +36,7 @@ import { isFeatureEnabled } from "../../lib/config";
 import CommunityInvitesTabLeader from "../../components/CommunityInvitesTabLeader";
 import CommunityInvitesTabMember from "../../components/CommunityInvitesTabMember";
 import BottomSpacer from "@alliance/shared/ui/BottomSpacer";
+import { useMediaQuery } from "../../lib/useMediaQuery";
 
 type Tab = "activity" | "members" | "invites" | "about" | "edit" | "resources";
 
@@ -230,6 +231,9 @@ const CommunityPage = () => {
 
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
+  const isLargeScreen = useMediaQuery("(min-width: 1350px)");
+  const isChatOpen = messagingEnabled && chatOpen;
+
   if (!community) {
     if (loading) {
       return <Spinner />;
@@ -283,12 +287,10 @@ const CommunityPage = () => {
     return 0;
   });
 
-  const isChatOpen = messagingEnabled && chatOpen;
-
   return (
     <TwoColumnLayout
       main={
-        <div className="p-5 xl:p-10 max-w-[900px] mx-auto">
+        <div className="p-5 xl:p-10 xl:pr-5 max-w-[900px] mx-auto">
           <div className="flex flex-col gap-y-2 my-8">
             <div className="flex flex-row gap-x-2 items-start justify-between">
               <div className="flex flex-col gap-y-4 mb-8">
@@ -361,7 +363,12 @@ const CommunityPage = () => {
           {tab === "members" && (
             <div className="flex flex-col py-4">
               <div className="">
-                <table className="w-full border-collapse">
+                <table className="w-full border-collapse table-fixed overflow-x-clip">
+                  <colgroup>
+                    <col style={{ width: "200px" }} />
+                    <col />
+                    <col style={{ width: "180px" }} />
+                  </colgroup>
                   <thead className="text-left bg-white">
                     <tr>
                       <td colSpan={3} className="px-0 pb-6">
@@ -513,7 +520,7 @@ const CommunityPage = () => {
       sidebar={
         messagingEnabled ? (
           <div
-            className="p-5 xl:p-10 h-screen xl:px-5 transition-all duration-200 ease-in-out"
+            className="p-10 h-screen px-5 transition-all duration-200 ease-in-out"
             style={{
               transform: chatOpen ? "translateY(0)" : "translateY(100%)",
             }}
@@ -527,7 +534,8 @@ const CommunityPage = () => {
           </div>
         ) : null
       }
-      sidebarWidth={isChatOpen ? 500 : 0}
+      sidebarWidth={isChatOpen && isLargeScreen ? 500 : 0}
+      noSidebarOverflow
     />
   );
 };
