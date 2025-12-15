@@ -2072,12 +2072,10 @@ export class ActionsService {
     );
   }
 
-  async findUsersToSuspend(now: Date) {
-    const actions = await this.findAllSorted([
-      'events',
-      'suite',
-      'participatingTags',
-    ]);
+  async findUsersToSuspend(now: Date, preloadedActions?: Action[]) {
+    const actions =
+      preloadedActions ??
+      (await this.findAllSorted(['events', 'suite', 'participatingTags']));
 
     const suiteMap = new Map<
       number,
@@ -2192,11 +2190,18 @@ export class ActionsService {
     rangeEnd: Date,
     stepHours: number = 1,
   ): Promise<SuspensionPlanDto[]> {
+    const actions = await this.findAllSorted([
+      'events',
+      'suite',
+      'participatingTags',
+    ]);
+
     const plans: SuspensionPlanDto[] = [];
     let date = rangeStart;
     const suspendedUsers = new Set<number>();
+
     while (new Date(date).getTime() <= new Date(rangeEnd).getTime()) {
-      const { usersToSuspend } = await this.findUsersToSuspend(date);
+      const { usersToSuspend } = await this.findUsersToSuspend(date, actions);
       const notAlreadySuspended = usersToSuspend.filter(
         (user) => !suspendedUsers.has(user.id),
       );
