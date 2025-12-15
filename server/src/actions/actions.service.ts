@@ -184,8 +184,8 @@ export class ActionsService {
       )
       .addSelect(
         `
-    MAX(CASE 
-      WHEN e.newStatus = :memberAction THEN e.date 
+    MAX(CASE
+      WHEN e.newStatus = :memberAction THEN e.date
     END)
   `,
         'latest_memberaction_event_date',
@@ -207,42 +207,20 @@ export class ActionsService {
     if (limit) {
       qb.limit(limit);
     }
-    const actions = await qb.getMany();
+    const sortedActions = await qb.getMany();
 
-    if (relations.length > 0) {
-      const metadata = this.actionRepository.metadata;
-      await Promise.all(
-        actions.map(async (action) => {
-          for (const rel of relations) {
-            const relationMeta = metadata.relations.find(
-              (r) => r.propertyName === rel,
-            );
-
-            if (!relationMeta) {
-              continue;
-            }
-
-            const relationQb = this.actionRepository
-              .createQueryBuilder()
-              .relation(Action, rel)
-              .of(action);
-
-            let loaded: unknown;
-
-            if (relationMeta.isOneToOne || relationMeta.isManyToOne) {
-              loaded = await relationQb.loadOne();
-            } else {
-              loaded = await relationQb.loadMany();
-            }
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (action as any)[rel] = loaded;
-          }
-        }),
-      );
+    if (relations.length === 0 || sortedActions.length === 0) {
+      return sortedActions;
     }
 
-    return actions;
+    const actionIds = sortedActions.map((a) => a.id);
+    const actionsWithRelations = await this.actionRepository.find({
+      where: { id: In(actionIds) },
+      relations: relations as string[],
+    });
+
+    const actionMap = new Map(actionsWithRelations.map((a) => [a.id, a]));
+    return actionIds.map((id) => actionMap.get(id)!);
   }
 
   async reloadAllActionUsersJoined(): Promise<void> {

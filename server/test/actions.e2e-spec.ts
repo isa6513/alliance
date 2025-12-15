@@ -1373,6 +1373,335 @@ describe('Actions (e2e)', () => {
     });
   });
 
+  describe('Action Ordering in /actions/loggedIn', () => {
+    let orderingActions: Action[] = [];
+
+    afterEach(async () => {
+      for (const action of orderingActions) {
+        await actionRepo.delete(action.id);
+      }
+      orderingActions = [];
+    });
+
+    const createOrderingAction = async (
+      name: string,
+      options: {
+        events?: Array<{ status: ActionStatus; date: Date }>;
+        priority?: number;
+      } = {},
+    ) => {
+      const action = await actionRepo.save(
+        actionRepo.create({
+          name,
+          category: 'Test',
+          body: 'Ordering test action',
+          taskContents: 'Ordering test task',
+          shortDescription: `${name} short description`,
+          showToNonparticipating: true,
+          participatingTags: [ctx.defaultTag],
+          priority: options.priority ?? 0,
+        }),
+      );
+      orderingActions.push(action);
+
+      if (options.events) {
+        for (const evt of options.events) {
+          await eventRepo.save(
+            eventRepo.create({
+              title: `${name} - ${evt.status}`,
+              description: 'Event for ordering test',
+              newStatus: evt.status,
+              date: evt.date,
+              action,
+            }),
+          );
+        }
+      }
+
+      return action;
+    };
+
+    // Helper to get relative order of test actions only (filtering out other actions)
+    const getRelativeOrder = (
+      allActionIds: number[],
+      testActionIds: number[],
+    ): number[] => {
+      return allActionIds.filter((id) => testActionIds.includes(id));
+    };
+
+    it('orders actions with deadlines before actions without deadlines', async () => {
+      const now = Date.now();
+
+      // Action with no deadline (only past MemberAction, no event after it)
+      const noDeadlineAction = await createOrderingAction('No Deadline', {
+        events: [
+          { status: ActionStatus.MemberAction, date: new Date(now - 3600000) },
+        ],
+      });
+
+      // Action with a deadline (MemberAction + Resolution event after it)
+      const hasDeadlineAction = await createOrderingAction('Has Deadline', {
+        events: [
+          { status: ActionStatus.MemberAction, date: new Date(now - 3600000) }, // past MemberAction
+          { status: ActionStatus.Resolution, date: new Date(now + 3600000) }, // future deadline
+        ],
+      });
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/actions/loggedIn?sorted=true')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+
+      const actionIds = res.body.map((a: ActionDto) => a.id);
+      const testActionIds = [noDeadlineAction.id, hasDeadlineAction.id];
+      const orderedTestActions = getRelativeOrder(actionIds, testActionIds);
+
+      expect(orderedTestActions).toContain(hasDeadlineAction.id);
+      expect(orderedTestActions).toContain(noDeadlineAction.id);
+      // Action with deadline should come before action without deadline
+      expect(orderedTestActions.indexOf(hasDeadlineAction.id)).toBeLessThan(
+        orderedTestActions.indexOf(noDeadlineAction.id),
+      );
+    });
+
+    it('orders actions by soonest deadline first', async () => {
+      const now = Date.now();
+
+      // Action with later deadline
+      const laterDeadlineAction = await createOrderingAction('Later Deadline', {
+        events: [
+          { status: ActionStatus.MemberAction, date: new Date(now - 3600000) }, // past MemberAction
+          { status: ActionStatus.Resolution, date: new Date(now + 7200000) }, // deadline 2 hours from now
+        ],
+      });
+
+      // Action with sooner deadline
+      const soonerDeadlineAction = await createOrderingAction('Sooner Deadline', {
+        events: [
+          { status: ActionStatus.MemberAction, date: new Date(now - 3600000) }, // past MemberAction
+          { status: ActionStatus.Resolution, date: new Date(now + 1800000) }, // deadline 30 min from now
+        ],
+      });
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/actions/loggedIn?sorted=true')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+
+      const actionIds = res.body.map((a: ActionDto) => a.id);
+      const testActionIds = [laterDeadlineAction.id, soonerDeadlineAction.id];
+      const orderedTestActions = getRelativeOrder(actionIds, testActionIds);
+
+      expect(orderedTestActions).toContain(soonerDeadlineAction.id);
+      expect(orderedTestActions).toContain(laterDeadlineAction.id);
+      // Sooner deadline should come before later deadline
+      expect(orderedTestActions.indexOf(soonerDeadlineAction.id)).toBeLessThan(
+        orderedTestActions.indexOf(laterDeadlineAction.id),
+      );
+    });
+
+    it('orders actions with past member action events before actions without them (when no future events)', async () => {
+      const now = Date.now();
+
+      // Action with past GatheringCommitments only (no MemberAction)
+      const noMemberActionAction = await createOrderingAction('No Member Action', {
+        events: [
+          { status: ActionStatus.GatheringCommitments, date: new Date(now - 3600000) },
+        ],
+      });
+
+      // Action with past member action event
+      const memberActionAction = await createOrderingAction('Past Member Action', {
+        events: [
+          { status: ActionStatus.MemberAction, date: new Date(now - 3600000) },
+        ],
+      });
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/actions/loggedIn?sorted=true')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+
+      const actionIds = res.body.map((a: ActionDto) => a.id);
+      const testActionIds = [noMemberActionAction.id, memberActionAction.id];
+      const orderedTestActions = getRelativeOrder(actionIds, testActionIds);
+
+      expect(orderedTestActions).toContain(memberActionAction.id);
+      expect(orderedTestActions).toContain(noMemberActionAction.id);
+      // Member action should come before no member action
+      expect(orderedTestActions.indexOf(memberActionAction.id)).toBeLessThan(
+        orderedTestActions.indexOf(noMemberActionAction.id),
+      );
+    });
+
+    it('orders actions by most recent past member action event first', async () => {
+      const now = Date.now();
+
+      // Action with older member action event
+      const olderAction = await createOrderingAction('Older Member Action', {
+        events: [
+          { status: ActionStatus.MemberAction, date: new Date(now - 7200000) }, // 2 hours ago
+        ],
+      });
+
+      // Action with more recent member action event
+      const newerAction = await createOrderingAction('Newer Member Action', {
+        events: [
+          { status: ActionStatus.MemberAction, date: new Date(now - 1800000) }, // 30 min ago
+        ],
+      });
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/actions/loggedIn?sorted=true')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+
+      const actionIds = res.body.map((a: ActionDto) => a.id);
+      const testActionIds = [olderAction.id, newerAction.id];
+      const orderedTestActions = getRelativeOrder(actionIds, testActionIds);
+
+      expect(orderedTestActions).toContain(newerAction.id);
+      expect(orderedTestActions).toContain(olderAction.id);
+      // Newer action should come before older action
+      expect(orderedTestActions.indexOf(newerAction.id)).toBeLessThan(
+        orderedTestActions.indexOf(olderAction.id),
+      );
+    });
+
+    it('uses priority as final tiebreaker (lower number = higher priority)', async () => {
+      const now = Date.now();
+      const sameEventDate = new Date(now - 3600000);
+
+      // Lower priority (higher number)
+      const lowPriorityAction = await createOrderingAction('Low Priority', {
+        events: [{ status: ActionStatus.MemberAction, date: sameEventDate }],
+        priority: 10,
+      });
+
+      // Higher priority (lower number)
+      const highPriorityAction = await createOrderingAction('High Priority', {
+        events: [{ status: ActionStatus.MemberAction, date: sameEventDate }],
+        priority: 1,
+      });
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/actions/loggedIn?sorted=true')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+
+      const actionIds = res.body.map((a: ActionDto) => a.id);
+      const testActionIds = [lowPriorityAction.id, highPriorityAction.id];
+      const orderedTestActions = getRelativeOrder(actionIds, testActionIds);
+
+      expect(orderedTestActions).toContain(highPriorityAction.id);
+      expect(orderedTestActions).toContain(lowPriorityAction.id);
+      // High priority should come before low priority
+      expect(orderedTestActions.indexOf(highPriorityAction.id)).toBeLessThan(
+        orderedTestActions.indexOf(lowPriorityAction.id),
+      );
+    });
+
+    it('maintains correct ordering with mixed deadlines, past member actions, and priority', async () => {
+      const now = Date.now();
+
+      // 1. Action with soonest deadline (should be first)
+      const soonestDeadline = await createOrderingAction('Soonest Deadline', {
+        events: [
+          { status: ActionStatus.MemberAction, date: new Date(now - 3600000) }, // past MemberAction
+          { status: ActionStatus.Resolution, date: new Date(now + 1800000) }, // deadline 30 min from now
+        ],
+        priority: 5,
+      });
+
+      // 2. Action with later deadline (should be second)
+      const laterDeadline = await createOrderingAction('Later Deadline', {
+        events: [
+          { status: ActionStatus.MemberAction, date: new Date(now - 3600000) }, // past MemberAction
+          { status: ActionStatus.Resolution, date: new Date(now + 3600000) }, // deadline 1 hour from now
+        ],
+        priority: 1,
+      });
+
+      // 3. Action with recent past member action but no deadline (should be third)
+      const recentPastNoDeadline = await createOrderingAction('Recent Past No Deadline', {
+        events: [
+          { status: ActionStatus.MemberAction, date: new Date(now - 1800000) }, // 30 min ago
+        ],
+        priority: 5,
+      });
+
+      // 4. Action with older past member action but no deadline (should be fourth)
+      const olderPastNoDeadline = await createOrderingAction('Older Past No Deadline', {
+        events: [
+          { status: ActionStatus.MemberAction, date: new Date(now - 7200000) }, // 2 hours ago
+        ],
+        priority: 1,
+      });
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/actions/loggedIn?sorted=true')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+
+      const actionIds = res.body.map((a: ActionDto) => a.id);
+      const testActionIds = [soonestDeadline.id, laterDeadline.id, recentPastNoDeadline.id, olderPastNoDeadline.id];
+      const orderedTestActions = getRelativeOrder(actionIds, testActionIds);
+
+      expect(orderedTestActions.length).toBe(4);
+
+      const soonestDeadlineIdx = orderedTestActions.indexOf(soonestDeadline.id);
+      const laterDeadlineIdx = orderedTestActions.indexOf(laterDeadline.id);
+      const recentPastIdx = orderedTestActions.indexOf(recentPastNoDeadline.id);
+      const olderPastIdx = orderedTestActions.indexOf(olderPastNoDeadline.id);
+
+      // Actions with deadlines come before actions without deadlines
+      expect(soonestDeadlineIdx).toBeLessThan(recentPastIdx);
+      expect(laterDeadlineIdx).toBeLessThan(recentPastIdx);
+
+      // Soonest deadline comes before later deadline
+      expect(soonestDeadlineIdx).toBeLessThan(laterDeadlineIdx);
+
+      // Recent past member action comes before older past member action
+      expect(recentPastIdx).toBeLessThan(olderPastIdx);
+    });
+
+    it('correctly sorts by MemberAction date when neither action has a deadline', async () => {
+      const now = Date.now();
+
+      // Action with older MemberAction (no deadline - Resolution is in the past)
+      const olderMemberAction = await createOrderingAction('Older MemberAction', {
+        events: [
+          { status: ActionStatus.GatheringCommitments, date: new Date(now - 10800000) }, // 3h ago
+          { status: ActionStatus.MemberAction, date: new Date(now - 7200000) }, // 2h ago
+          { status: ActionStatus.Resolution, date: new Date(now - 1800000) }, // 30min ago (past, not a deadline)
+        ],
+      });
+
+      // Action with more recent MemberAction (no deadline)
+      const newerMemberAction = await createOrderingAction('Newer MemberAction', {
+        events: [
+          { status: ActionStatus.MemberAction, date: new Date(now - 3600000) }, // 1h ago
+        ],
+      });
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/actions/loggedIn?sorted=true')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+
+      const actionIds = res.body.map((a: ActionDto) => a.id);
+      const testActionIds = [olderMemberAction.id, newerMemberAction.id];
+      const orderedTestActions = getRelativeOrder(actionIds, testActionIds);
+
+      expect(orderedTestActions).toContain(newerMemberAction.id);
+      expect(orderedTestActions).toContain(olderMemberAction.id);
+      // The action with more recent MemberAction should come first
+      expect(orderedTestActions.indexOf(newerMemberAction.id)).toBeLessThan(
+        orderedTestActions.indexOf(olderMemberAction.id),
+      );
+    });
+  });
+
   afterAll(async () => {
     await actionRepo.query('DELETE FROM action');
     await ctx.app.close();

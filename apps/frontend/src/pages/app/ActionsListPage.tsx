@@ -71,7 +71,7 @@ const ActionsListPage = () => {
         />
       </div>
 
-      <List className="w-full mb-20">
+      <List className="w-full">
         {filteredActions.map((action) => (
           <ActionItemCard
             key={action.id}

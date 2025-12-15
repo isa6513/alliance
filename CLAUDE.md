@@ -1,5 +1,3 @@
-- NEVER run yarn tsc. no typecheck is needed after making edits.
-
 ### Server
 
 For all controller endpoints, ensure the function has an `@ApiOkResponse({ type:  })` decorator to properly specify the openapi output, and ensure that the function returns that same DTO type.
