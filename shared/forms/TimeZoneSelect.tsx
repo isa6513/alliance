@@ -303,7 +303,7 @@ export default function TimeZoneSelectPretty({
 
   return (
     <div className={className ?? ""}>
-      <div className="relative max-w-[500px]">
+      <div className="relative max-w-[700px]">
         <button
           type="button"
           disabled={disabled}
