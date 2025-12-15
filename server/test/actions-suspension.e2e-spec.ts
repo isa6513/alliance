@@ -1,5 +1,8 @@
 import { ActionsService } from '../src/actions/actions.service';
-import { ActionEvent, ActionStatus } from '../src/actions/entities/action-event.entity';
+import {
+  ActionEvent,
+  ActionStatus,
+} from '../src/actions/entities/action-event.entity';
 import { ActionSuite } from '../src/actions/entities/action-suite.entity';
 import { Action, ActionTaskType } from '../src/actions/entities/action.entity';
 import {

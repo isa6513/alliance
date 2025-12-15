@@ -12,6 +12,7 @@ import { useAuth } from "../../lib/AuthContext";
 import { useCIDFromParams } from "../../lib/utils";
 import LargeActionCard from "./LargeActionCard";
 import useActivities, { ActivityList } from "./useActivities";
+import { useMediaQuery } from "../../lib/useMediaQuery";
 
 export function canCompleteAction(action: ActionWithRelation) {
   return (
@@ -243,7 +244,7 @@ const HomePage = () => {
     updateFriendActivityCount();
   }, [updateFriendActivityCount]);
 
-  const mainContent = () => {
+  const mainContent = useMemo(() => {
     if (actions === null) {
       return loading ? (
         <div className="flex justify-center items-center h-screen">
@@ -288,9 +289,9 @@ const HomePage = () => {
         )}
       </div>
     );
-  };
+  }, [actions, loading, currentTask, user, friendActivities, navigate]);
 
-  const sidebarContent = () => {
+  const sidebarContent = useMemo(() => {
     return (
       <div className="px-4 pt-12 flex flex-col divide-y *:py-6 *:px-2 divide-zinc-200">
         {todoActions.length + newActions.length > 0 && (
@@ -402,18 +403,26 @@ const HomePage = () => {
         </div>
       </div>
     );
-  };
+  }, [
+    completedActions,
+    currentWeekTodoActions,
+    friendActivities,
+    handleLikeActivity,
+    newActions.length,
+    nextWeekTodoActions,
+    remainingTasksEstimatedTimeCurrentWeek,
+    todoActions.length,
+    visibleFriendActivityCount,
+  ]);
 
   useWhiteBackground();
 
-  return (
-    <>
-      <div className="hidden lg:block">
-        <TwoColumnLayout main={mainContent()} sidebar={sidebarContent()} />
-      </div>
+  const isLargeScreen = useMediaQuery("(min-width: 1150px)");
 
-      <div className="lg:hidden">{mainContent()}</div>
-    </>
+  return isLargeScreen ? (
+    <TwoColumnLayout main={mainContent} sidebar={sidebarContent} />
+  ) : (
+    <div className="h-full">{mainContent}</div>
   );
 };
 
