@@ -27,7 +27,8 @@
     "migration:create": "npm run migration:run && npx typeorm-ts-node-commonjs migration:create",
     "migration:runprod": "npx typeorm-ts-node-commonjs --dataSource dist/datasources/dataSource.js migration:run",
     "migration:run": "npm run build && npm run typeorm -- migration:run",
-    "migration:revert": "npm run typeorm -- migration:revert"
+    "migration:revert": "npm run typeorm -- migration:revert",
+    "test:agents": "./scripts/test-in-container.sh"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.842.0",
