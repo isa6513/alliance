@@ -16,7 +16,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   updates,
   time,
 }: TimelineItemProps) => {
-  const sortedUpdates = updates?.sort(
+  const sortedUpdates = [...(updates ?? [])].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
   return (
