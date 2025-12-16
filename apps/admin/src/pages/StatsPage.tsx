@@ -88,8 +88,11 @@ const StatsPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hoveredDay, setHoveredDay] = useState<ParsedDailyStats | null>(null);
+  const [hoveredActionsDay, setHoveredActionsDay] =
+    useState<ParsedDailyStats | null>(null);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const actionsSvgRef = useRef<SVGSVGElement | null>(null);
 
   const loadStats = useCallback(async (startDate: string, endDate: string) => {
     setLoading(true);
@@ -150,88 +153,119 @@ const StatsPage: React.FC = () => {
   useEffect(() => {
     if (parsedStats.length === 0) {
       setHoveredDay(null);
+      setHoveredActionsDay(null);
       return;
     }
     setHoveredDay(parsedStats[parsedStats.length - 1]);
+    setHoveredActionsDay(parsedStats[parsedStats.length - 1]);
   }, [parsedStats]);
 
-  const chartGeometry = useMemo(() => {
-    if (parsedStats.length === 0) {
-      return null;
-    }
+  const createChartGeometry = useCallback(
+    (metrics: MetricDefinition[], includeArea: boolean = false) => {
+      if (parsedStats.length === 0) {
+        return null;
+      }
 
-    const width = 1000;
-    const height = 420;
-    const margin = { top: 28, right: 32, bottom: 64, left: 72 };
+      const width = 1000;
+      const height = 420;
+      const margin = { top: 28, right: 32, bottom: 64, left: 72 };
 
-    const dateExtent = d3.extent(parsedStats, (d) => d.parsedDate);
-    if (!dateExtent[0] || !dateExtent[1]) {
-      return null;
-    }
+      const dateExtent = d3.extent(parsedStats, (d) => d.parsedDate);
+      if (!dateExtent[0] || !dateExtent[1]) {
+        return null;
+      }
 
-    const xScale = d3
-      .scaleTime()
-      .domain(dateExtent)
-      .range([margin.left, width - margin.right]);
+      const xScale = d3
+        .scaleTime()
+        .domain(dateExtent)
+        .range([margin.left, width - margin.right]);
 
-    const maxMetricValue =
-      d3.max(metricDefinitions, (metric) =>
-        d3.max(parsedStats, (d) => d[metric.key] ?? 0)
-      ) ?? 0;
+      const maxMetricValue =
+        d3.max(metrics, (metric) =>
+          d3.max(parsedStats, (d) => d[metric.key] ?? 0)
+        ) ?? 0;
 
-    const yScale = d3
-      .scaleLinear()
-      .domain([0, Math.max(maxMetricValue * 1.1, 10)])
-      .nice()
-      .range([height - margin.bottom, margin.top]);
+      const yScale = d3
+        .scaleLinear()
+        .domain([0, Math.max(maxMetricValue * 1.1, 10)])
+        .nice()
+        .range([height - margin.bottom, margin.top]);
 
-    const line = d3
-      .line<{ parsedDate: Date; value: number }>()
-      .x((d) => xScale(d.parsedDate))
-      .y((d) => yScale(d.value))
-      .curve(d3.curveMonotoneX);
+      const line = d3
+        .line<{ parsedDate: Date; value: number }>()
+        .x((d) => xScale(d.parsedDate))
+        .y((d) => yScale(d.value))
+        .curve(d3.curveMonotoneX);
 
-    const area = d3
-      .area<ParsedDailyStats>()
-      .x((d) => xScale(d.parsedDate))
-      .y0(height - margin.bottom)
-      .y1((d) => yScale(d.actionsCompleted ?? 0))
-      .curve(d3.curveMonotoneX);
+      const lines = metrics.map((metric) => {
+        const values = parsedStats.map((record) => ({
+          parsedDate: record.parsedDate,
+          value: record[metric.key] ?? 0,
+        }));
 
-    const lines = metricDefinitions.map((metric) => {
-      const values = parsedStats.map((record) => ({
-        parsedDate: record.parsedDate,
-        value: record[metric.key] ?? 0,
-      }));
+        return {
+          metric,
+          path: line(values) ?? "",
+        };
+      });
+
+      const xTicks = xScale.ticks(Math.min(8, parsedStats.length));
+      const yTicks = yScale.ticks(6);
+
+      const bisectDate = d3.bisector<ParsedDailyStats, Date>(
+        (d) => d.parsedDate
+      ).center;
+
+      let areaPath = "";
+      if (includeArea && metrics.length > 0) {
+        const area = d3
+          .area<ParsedDailyStats>()
+          .x((d) => xScale(d.parsedDate))
+          .y0(height - margin.bottom)
+          .y1((d) => yScale(d[metrics[0].key] ?? 0))
+          .curve(d3.curveMonotoneX);
+        areaPath = area(parsedStats) ?? "";
+      }
 
       return {
-        metric,
-        path: line(values) ?? "",
+        width,
+        height,
+        margin,
+        xScale,
+        yScale,
+        xTicks,
+        yTicks,
+        lines,
+        areaPath,
+        bisectDate,
+        metrics,
       };
-    });
+    },
+    [parsedStats]
+  );
 
-    const xTicks = xScale.ticks(Math.min(8, parsedStats.length));
-    const yTicks = yScale.ticks(6);
+  const mainMetrics = useMemo(
+    () => metricDefinitions.filter((m) => m.key !== "actionsCompleted"),
+    []
+  );
+  const actionsMetric = useMemo(
+    () => metricDefinitions.filter((m) => m.key === "actionsCompleted"),
+    []
+  );
 
-    const bisectDate = d3.bisector<ParsedDailyStats, Date>(
-      (d) => d.parsedDate
-    ).center;
+  const mainChartGeometry = useMemo(
+    () => createChartGeometry(mainMetrics, false),
+    [createChartGeometry, mainMetrics]
+  );
 
-    return {
-      width,
-      height,
-      margin,
-      xScale,
-      yScale,
-      xTicks,
-      yTicks,
-      lines,
-      areaPath: area(parsedStats) ?? "",
-      bisectDate,
-    };
-  }, [parsedStats]);
+  const actionsChartGeometry = useMemo(
+    () => createChartGeometry(actionsMetric, true),
+    [createChartGeometry, actionsMetric]
+  );
 
   const activeDay = hoveredDay ?? parsedStats[parsedStats.length - 1];
+  const activeActionsDay =
+    hoveredActionsDay ?? parsedStats[parsedStats.length - 1];
 
   const handleApplyRange = useCallback(() => {
     setQueryRange({ start: startInput, end: endInput });
@@ -250,7 +284,7 @@ const StatsPage: React.FC = () => {
 
   const handleHover = useCallback(
     (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
-      if (!chartGeometry || parsedStats.length === 0 || !svgRef.current) {
+      if (!mainChartGeometry || parsedStats.length === 0 || !svgRef.current) {
         return;
       }
 
@@ -261,16 +295,45 @@ const StatsPage: React.FC = () => {
         return;
       }
 
-      const scaleX = chartGeometry.width / rect.width;
+      const scaleX = mainChartGeometry.width / rect.width;
       const pointerX = relativeX * scaleX;
 
-      const hoveredDate = chartGeometry.xScale.invert(pointerX);
-      const index = chartGeometry.bisectDate(parsedStats, hoveredDate);
+      const hoveredDate = mainChartGeometry.xScale.invert(pointerX);
+      const index = mainChartGeometry.bisectDate(parsedStats, hoveredDate);
       const clampedIndex = Math.max(0, Math.min(parsedStats.length - 1, index));
 
       setHoveredDay(parsedStats[clampedIndex]);
     },
-    [chartGeometry, parsedStats]
+    [mainChartGeometry, parsedStats]
+  );
+
+  const handleActionsHover = useCallback(
+    (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
+      if (
+        !actionsChartGeometry ||
+        parsedStats.length === 0 ||
+        !actionsSvgRef.current
+      ) {
+        return;
+      }
+
+      const rect = actionsSvgRef.current.getBoundingClientRect();
+      const relativeX = event.clientX - rect.left;
+      const relativeY = event.clientY - rect.top;
+      if (relativeX < 0 || relativeY < 0) {
+        return;
+      }
+
+      const scaleX = actionsChartGeometry.width / rect.width;
+      const pointerX = relativeX * scaleX;
+
+      const hoveredDate = actionsChartGeometry.xScale.invert(pointerX);
+      const index = actionsChartGeometry.bisectDate(parsedStats, hoveredDate);
+      const clampedIndex = Math.max(0, Math.min(parsedStats.length - 1, index));
+
+      setHoveredActionsDay(parsedStats[clampedIndex]);
+    },
+    [actionsChartGeometry, parsedStats]
   );
 
   return (
@@ -305,7 +368,7 @@ const StatsPage: React.FC = () => {
             </label>
             <button
               onClick={handleApplyRange}
-              className="px-4 py-2 rounded-md text-sm bg-green-600 text-white shadow hover:bg-green-500"
+              className="px-4 py-2 rounded-md text-sm bg-green text-white shadow hover:bg-green-500"
             >
               Update
             </button>
@@ -335,154 +398,341 @@ const StatsPage: React.FC = () => {
       {!loading && parsedStats.length === 0 && (
         <p className="text-sm text-gray-600">No daily stats for this range.</p>
       )}
-      {!loading && parsedStats.length > 0 && chartGeometry && (
-        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
-          <div className="relative p-4">
-            <svg
-              ref={svgRef}
-              viewBox={`0 0 ${chartGeometry.width} ${chartGeometry.height}`}
-              onMouseMove={handleHover}
-              onMouseLeave={() =>
-                setHoveredDay(parsedStats[parsedStats.length - 1])
-              }
-            >
-              <g>
-                {chartGeometry.yTicks.map((tick) => (
-                  <g key={`y-${tick}`}>
-                    <line
-                      x1={chartGeometry.margin.left}
-                      x2={chartGeometry.width - chartGeometry.margin.right}
-                      y1={chartGeometry.yScale(tick)}
-                      y2={chartGeometry.yScale(tick)}
-                      stroke="#e5e7eb"
-                      strokeDasharray="4 6"
-                    />
-                    <text
-                      x={chartGeometry.margin.left - 12}
-                      y={chartGeometry.yScale(tick)}
-                      textAnchor="end"
-                      dominantBaseline="middle"
-                      className="fill-gray-500 text-xs"
-                    >
-                      {tick}
-                    </text>
-                  </g>
-                ))}
-                {chartGeometry.xTicks.map((tick) => (
-                  <g key={`x-${tick.toISOString()}`}>
-                    <line
-                      x1={chartGeometry.xScale(tick)}
-                      x2={chartGeometry.xScale(tick)}
-                      y1={chartGeometry.margin.top}
-                      y2={chartGeometry.height - chartGeometry.margin.bottom}
-                      stroke="#f3f4f6"
-                    />
-                    <text
-                      x={chartGeometry.xScale(tick)}
-                      y={
-                        chartGeometry.height - chartGeometry.margin.bottom + 24
-                      }
-                      textAnchor="middle"
-                      className="fill-gray-600 text-xs"
-                    >
-                      {dateFormatter.format(tick)}
-                    </text>
-                  </g>
-                ))}
-              </g>
-              <path
-                d={chartGeometry.areaPath}
-                fill="rgba(8,145,178,0.12)"
-                stroke="none"
-              />
-              {chartGeometry.lines.map(({ metric, path }) => (
-                <path
-                  key={metric.key}
-                  d={path}
-                  fill="none"
-                  stroke={metric.color}
-                  strokeWidth={2.4}
-                />
-              ))}
-              {activeDay && (
-                <>
-                  <line
-                    x1={chartGeometry.xScale(activeDay.parsedDate)}
-                    x2={chartGeometry.xScale(activeDay.parsedDate)}
-                    y1={chartGeometry.margin.top}
-                    y2={chartGeometry.height - chartGeometry.margin.bottom}
-                    stroke="#6b7280"
-                    strokeWidth={1}
-                    strokeDasharray="4 4"
-                  />
-                  {metricDefinitions.map((metric) => (
-                    <circle
-                      key={`point-${metric.key}`}
-                      cx={chartGeometry.xScale(activeDay.parsedDate)}
-                      cy={chartGeometry.yScale(activeDay[metric.key] ?? 0)}
-                      r={4}
-                      fill="white"
-                      stroke={metric.color}
-                      strokeWidth={2}
-                    />
-                  ))}
-                  <rect
-                    x={Math.min(
-                      chartGeometry.xScale(activeDay.parsedDate) + 12,
-                      chartGeometry.width - 210
-                    )}
-                    y={chartGeometry.margin.top + 12}
-                    width={196}
-                    height={metricDefinitions.length * 24 + 42}
-                    rx={10}
-                    fill="white"
-                    stroke="#e5e7eb"
-                    className="shadow-lg"
-                  />
-                  <text
-                    x={Math.min(
-                      chartGeometry.xScale(activeDay.parsedDate) + 24,
-                      chartGeometry.width - 196
-                    )}
-                    y={chartGeometry.margin.top + 32}
-                    className="fill-gray-900 text-sm font-semibold"
-                  >
-                    {fullDateFormatter.format(activeDay.parsedDate)}
-                  </text>
-                  {metricDefinitions.map((metric, idx) => (
-                    <g
-                      key={`label-${metric.key}`}
-                      transform={`translate(${Math.min(
-                        chartGeometry.xScale(activeDay.parsedDate) + 24,
-                        chartGeometry.width - 196
-                      )}, ${chartGeometry.margin.top + 52 + idx * 24})`}
-                    >
-                      <rect
-                        x={-6}
-                        y={-10}
-                        width={12}
-                        height={12}
-                        rx={3}
-                        fill={metric.color}
+      {!loading && parsedStats.length > 0 && mainChartGeometry && (
+        <>
+          <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div className="relative p-4">
+              <svg
+                ref={svgRef}
+                viewBox={`0 0 ${mainChartGeometry.width} ${mainChartGeometry.height}`}
+                onMouseMove={handleHover}
+                onMouseLeave={() =>
+                  setHoveredDay(parsedStats[parsedStats.length - 1])
+                }
+              >
+                <g>
+                  {mainChartGeometry.yTicks.map((tick) => (
+                    <g key={`y-${tick}`}>
+                      <line
+                        x1={mainChartGeometry.margin.left}
+                        x2={
+                          mainChartGeometry.width -
+                          mainChartGeometry.margin.right
+                        }
+                        y1={mainChartGeometry.yScale(tick)}
+                        y2={mainChartGeometry.yScale(tick)}
+                        stroke="#e5e7eb"
+                        strokeDasharray="4 6"
                       />
-                      <text x={10} y={0} className="fill-gray-700 text-xs">
-                        {metric.label}
-                      </text>
                       <text
-                        x={148}
-                        y={0}
+                        x={mainChartGeometry.margin.left - 12}
+                        y={mainChartGeometry.yScale(tick)}
                         textAnchor="end"
-                        className="fill-gray-900 text-xs font-semibold"
+                        dominantBaseline="middle"
+                        className="fill-gray-500 text-xs"
                       >
-                        {activeDay[metric.key] ?? 0}
+                        {tick}
                       </text>
                     </g>
                   ))}
-                </>
-              )}
-            </svg>
+                  {mainChartGeometry.xTicks.map((tick) => (
+                    <g key={`x-${tick.toISOString()}`}>
+                      <line
+                        x1={mainChartGeometry.xScale(tick)}
+                        x2={mainChartGeometry.xScale(tick)}
+                        y1={mainChartGeometry.margin.top}
+                        y2={
+                          mainChartGeometry.height -
+                          mainChartGeometry.margin.bottom
+                        }
+                        stroke="#f3f4f6"
+                      />
+                      <text
+                        x={mainChartGeometry.xScale(tick)}
+                        y={
+                          mainChartGeometry.height -
+                          mainChartGeometry.margin.bottom +
+                          24
+                        }
+                        textAnchor="middle"
+                        className="fill-gray-600 text-xs"
+                      >
+                        {dateFormatter.format(tick)}
+                      </text>
+                    </g>
+                  ))}
+                </g>
+                {mainChartGeometry.lines.map(({ metric, path }) => (
+                  <path
+                    key={metric.key}
+                    d={path}
+                    fill="none"
+                    stroke={metric.color}
+                    strokeWidth={2.4}
+                  />
+                ))}
+                {activeDay && (
+                  <>
+                    <line
+                      x1={mainChartGeometry.xScale(activeDay.parsedDate)}
+                      x2={mainChartGeometry.xScale(activeDay.parsedDate)}
+                      y1={mainChartGeometry.margin.top}
+                      y2={
+                        mainChartGeometry.height -
+                        mainChartGeometry.margin.bottom
+                      }
+                      stroke="#6b7280"
+                      strokeWidth={1}
+                      strokeDasharray="4 4"
+                    />
+                    {mainChartGeometry.metrics.map((metric) => (
+                      <circle
+                        key={`point-${metric.key}`}
+                        cx={mainChartGeometry.xScale(activeDay.parsedDate)}
+                        cy={mainChartGeometry.yScale(
+                          activeDay[metric.key] ?? 0
+                        )}
+                        r={4}
+                        fill="white"
+                        stroke={metric.color}
+                        strokeWidth={2}
+                      />
+                    ))}
+                    <rect
+                      x={Math.min(
+                        mainChartGeometry.xScale(activeDay.parsedDate) + 12,
+                        mainChartGeometry.width - 210
+                      )}
+                      y={mainChartGeometry.margin.top + 12}
+                      width={196}
+                      height={mainChartGeometry.metrics.length * 24 + 42}
+                      rx={10}
+                      fill="white"
+                      stroke="#e5e7eb"
+                      className="shadow-lg"
+                    />
+                    <text
+                      x={Math.min(
+                        mainChartGeometry.xScale(activeDay.parsedDate) + 24,
+                        mainChartGeometry.width - 196
+                      )}
+                      y={mainChartGeometry.margin.top + 32}
+                      className="fill-gray-900 text-sm font-semibold"
+                    >
+                      {fullDateFormatter.format(activeDay.parsedDate)}
+                    </text>
+                    {mainChartGeometry.metrics.map((metric, idx) => (
+                      <g
+                        key={`label-${metric.key}`}
+                        transform={`translate(${Math.min(
+                          mainChartGeometry.xScale(activeDay.parsedDate) + 24,
+                          mainChartGeometry.width - 196
+                        )}, ${mainChartGeometry.margin.top + 52 + idx * 24})`}
+                      >
+                        <rect
+                          x={0}
+                          y={-10}
+                          width={12}
+                          height={12}
+                          rx={3}
+                          fill={metric.color}
+                        />
+                        <text x={16} y={0} className="fill-gray-700 text-xs">
+                          {metric.label}
+                        </text>
+                        <text
+                          x={164}
+                          y={0}
+                          textAnchor="end"
+                          className="fill-gray-900 text-xs font-semibold"
+                        >
+                          {activeDay[metric.key] ?? 0}
+                        </text>
+                      </g>
+                    ))}
+                  </>
+                )}
+              </svg>
+            </div>
           </div>
-        </div>
+          {actionsChartGeometry && (
+            <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
+              <div className="relative p-4">
+                <svg
+                  ref={actionsSvgRef}
+                  viewBox={`0 0 ${actionsChartGeometry.width} ${actionsChartGeometry.height}`}
+                  className="w-full"
+                  onMouseMove={handleActionsHover}
+                  onMouseLeave={() =>
+                    setHoveredActionsDay(parsedStats[parsedStats.length - 1])
+                  }
+                >
+                  <g>
+                    {actionsChartGeometry.yTicks.map((tick) => (
+                      <g key={`y-${tick}`}>
+                        <line
+                          x1={actionsChartGeometry.margin.left}
+                          x2={
+                            actionsChartGeometry.width -
+                            actionsChartGeometry.margin.right
+                          }
+                          y1={actionsChartGeometry.yScale(tick)}
+                          y2={actionsChartGeometry.yScale(tick)}
+                          stroke="#e5e7eb"
+                          strokeDasharray="4 6"
+                        />
+                        <text
+                          x={actionsChartGeometry.margin.left - 12}
+                          y={actionsChartGeometry.yScale(tick)}
+                          textAnchor="end"
+                          dominantBaseline="middle"
+                          className="fill-gray-500 text-xs"
+                        >
+                          {tick}
+                        </text>
+                      </g>
+                    ))}
+                    {actionsChartGeometry.xTicks.map((tick) => (
+                      <g key={`x-${tick.toISOString()}`}>
+                        <line
+                          x1={actionsChartGeometry.xScale(tick)}
+                          x2={actionsChartGeometry.xScale(tick)}
+                          y1={actionsChartGeometry.margin.top}
+                          y2={
+                            actionsChartGeometry.height -
+                            actionsChartGeometry.margin.bottom
+                          }
+                          stroke="#f3f4f6"
+                        />
+                        <text
+                          x={actionsChartGeometry.xScale(tick)}
+                          y={
+                            actionsChartGeometry.height -
+                            actionsChartGeometry.margin.bottom +
+                            24
+                          }
+                          textAnchor="middle"
+                          className="fill-gray-600 text-xs"
+                        >
+                          {dateFormatter.format(tick)}
+                        </text>
+                      </g>
+                    ))}
+                  </g>
+                  <path
+                    d={actionsChartGeometry.areaPath}
+                    fill="rgba(8,145,178,0.12)"
+                    stroke="none"
+                  />
+                  {actionsChartGeometry.lines.map(({ metric, path }) => (
+                    <path
+                      key={metric.key}
+                      d={path}
+                      fill="none"
+                      stroke={metric.color}
+                      strokeWidth={2.4}
+                    />
+                  ))}
+                  {activeActionsDay && (
+                    <>
+                      <line
+                        x1={actionsChartGeometry.xScale(
+                          activeActionsDay.parsedDate
+                        )}
+                        x2={actionsChartGeometry.xScale(
+                          activeActionsDay.parsedDate
+                        )}
+                        y1={actionsChartGeometry.margin.top}
+                        y2={
+                          actionsChartGeometry.height -
+                          actionsChartGeometry.margin.bottom
+                        }
+                        stroke="#6b7280"
+                        strokeWidth={1}
+                        strokeDasharray="4 4"
+                      />
+                      {actionsChartGeometry.metrics.map((metric) => (
+                        <circle
+                          key={`point-actions-${metric.key}`}
+                          cx={actionsChartGeometry.xScale(
+                            activeActionsDay.parsedDate
+                          )}
+                          cy={actionsChartGeometry.yScale(
+                            activeActionsDay[metric.key] ?? 0
+                          )}
+                          r={4}
+                          fill="white"
+                          stroke={metric.color}
+                          strokeWidth={2}
+                        />
+                      ))}
+                      <rect
+                        x={Math.min(
+                          actionsChartGeometry.xScale(
+                            activeActionsDay.parsedDate
+                          ) + 12,
+                          actionsChartGeometry.width - 210
+                        )}
+                        y={actionsChartGeometry.margin.top + 12}
+                        width={196}
+                        height={actionsChartGeometry.metrics.length * 24 + 42}
+                        rx={10}
+                        fill="white"
+                        stroke="#e5e7eb"
+                        className="shadow-lg"
+                      />
+                      <text
+                        x={Math.min(
+                          actionsChartGeometry.xScale(
+                            activeActionsDay.parsedDate
+                          ) + 24,
+                          actionsChartGeometry.width - 196
+                        )}
+                        y={actionsChartGeometry.margin.top + 32}
+                        className="fill-gray-900 text-sm font-semibold"
+                      >
+                        {fullDateFormatter.format(activeActionsDay.parsedDate)}
+                      </text>
+                      {actionsChartGeometry.metrics.map((metric, idx) => (
+                        <g
+                          key={`label-actions-${metric.key}`}
+                          transform={`translate(${Math.min(
+                            actionsChartGeometry.xScale(
+                              activeActionsDay.parsedDate
+                            ) + 24,
+                            actionsChartGeometry.width - 196
+                          )}, ${
+                            actionsChartGeometry.margin.top + 52 + idx * 24
+                          })`}
+                        >
+                          <rect
+                            x={0}
+                            y={-10}
+                            width={12}
+                            height={12}
+                            rx={3}
+                            fill={metric.color}
+                          />
+                          <text x={16} y={0} className="fill-gray-700 text-xs">
+                            {metric.label}
+                          </text>
+                          <text
+                            x={164}
+                            y={0}
+                            textAnchor="end"
+                            className="fill-gray-900 text-xs font-semibold"
+                          >
+                            {activeActionsDay[metric.key] ?? 0}
+                          </text>
+                        </g>
+                      ))}
+                    </>
+                  )}
+                </svg>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <div className="overflow-auto border border-gray-200 rounded-lg">
