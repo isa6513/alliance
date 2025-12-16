@@ -67,8 +67,10 @@ const ForumListPost = ({
         <div className="flex flex-col gap-y-0 mb-2">
           <div className="flex flex-row gap-y-1 gap-2 justify-between">
             <div>
-              {post.pinned && <PinnedIcon size="small" />}
-              <p className={`text-base`}>{post.title}</p>
+              <div className="flex flex-row gap-x-1 items-center">
+                {post.pinned && <PinnedIcon size="small" />}
+                <p className={`text-base`}>{post.title}</p>
+              </div>
               {isPrivateFuturePost && (
                 <span className="text-sm text-blue">
                   Only you can see this - will be posted{" "}
