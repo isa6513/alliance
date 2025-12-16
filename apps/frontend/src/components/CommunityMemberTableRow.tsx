@@ -127,7 +127,7 @@ const CommunityMemberTableRow = ({
           </div>
         </td>
         {amLeader && (
-          <td className="w-px whitespace-nowrap text-sm md:text-base">
+          <td className="w-px whitespace-nowrap text-sm md:text-base hidden md:table-cell">
             <p>
               {contactInfo?.preferredReminderTimeLeaderTz
                 ? contactInfo.preferredReminderTimeLeaderTz

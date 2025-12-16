@@ -1,7 +1,9 @@
 import {
   ConversationDto,
   CreateMessageDto,
+  messageDeleteMessage,
   messageSendMessage,
+  messageUpdateMessage,
   ProfileDto,
 } from "@alliance/shared/client";
 import Spinner from "./Spinner";
@@ -29,6 +31,7 @@ type ConversationDetailPanelProps = {
     tempId: string,
     draft: { message: string; attachments: string[]; replyingTo: string | null }
   ) => void;
+  onMessageUpdated?: (message: MessageDto) => void;
 } & (
   | {
       mode: "existing";
@@ -70,6 +73,7 @@ const ConversationDetailPanel = ({
   handleCreateConversation,
   onOptimisticMessage,
   onOptimisticMessageFailed,
+  onMessageUpdated,
 }: ConversationDetailPanelProps) => {
   const { user } = useAuth();
 
@@ -80,6 +84,12 @@ const ConversationDetailPanel = ({
   const [isDraggingPanel, setIsDraggingPanel] = useState(false);
   const [focusedMessageId, setFocusedMessageId] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingDraft, setEditingDraft] = useState<string>("");
+  const [isUpdatingMessage, setIsUpdatingMessage] = useState(false);
+  const [deletingMessageId, setDeletingMessageId] = useState<string | null>(
+    null
+  );
   const panelDragCounterRef = useRef(0);
 
   const focusedMessageRef = useRef<HTMLDivElement | null>(null);
@@ -211,6 +221,106 @@ const ConversationDetailPanel = ({
     setFocusedMessageId(messageId);
   }, []);
 
+  const handleStartEditMessage = useCallback(
+    (target: MessageDto) => {
+      if (target.deletedAt || target.author.id !== user?.id) return;
+      setEditingMessageId(target.id);
+      setEditingDraft(target.body ?? "");
+    },
+    [user?.id]
+  );
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingMessageId(null);
+    setEditingDraft("");
+  }, []);
+
+  const handleSubmitEdit = useCallback(
+    async (messageId: string) => {
+      if (isUpdatingMessage || !messageId || editingMessageId !== messageId) {
+        return;
+      }
+      const target = convoMessages?.find((msg) => msg.id === messageId);
+      if (!target) return;
+
+      const trimmed = editingDraft.trim();
+      const hasAttachments = (target.attachments?.length ?? 0) > 0;
+
+      if (!trimmed && !hasAttachments) {
+        return;
+      }
+
+      if (trimmed === (target.body ?? "")) {
+        handleCancelEdit();
+        return;
+      }
+
+      setIsUpdatingMessage(true);
+      try {
+        const response = await messageUpdateMessage({
+          path: { messageId },
+          body: { body: trimmed },
+        });
+        if (response.data) {
+          onMessageUpdated?.(response.data);
+        }
+        handleCancelEdit();
+      } catch (error) {
+        console.error("Failed to update message", error);
+      } finally {
+        setIsUpdatingMessage(false);
+      }
+    },
+    [
+      convoMessages,
+      editingDraft,
+      editingMessageId,
+      handleCancelEdit,
+      isUpdatingMessage,
+      onMessageUpdated,
+    ]
+  );
+
+  const handleDeleteMessage = useCallback(
+    async (messageId: string) => {
+      if (deletingMessageId === messageId) return;
+      const target = convoMessages?.find((msg) => msg.id === messageId);
+      if (!target || target.deletedAt) return;
+
+      if (!window.confirm("Delete this message?")) return;
+
+      setDeletingMessageId(messageId);
+      try {
+        const response = await messageDeleteMessage({
+          path: { messageId },
+        });
+        if (response.data) {
+          onMessageUpdated?.(response.data);
+          if (replyingTo === messageId) {
+            setReplyingTo(null);
+          }
+          if (editingMessageId === messageId) {
+            handleCancelEdit();
+          }
+        }
+      } catch (error) {
+        console.error("Failed to delete message", error);
+      } finally {
+        setDeletingMessageId((current) =>
+          current === messageId ? null : current
+        );
+      }
+    },
+    [
+      convoMessages,
+      deletingMessageId,
+      editingMessageId,
+      handleCancelEdit,
+      onMessageUpdated,
+      replyingTo,
+    ]
+  );
+
   const handleSendMessage = useCallback(async () => {
     if (isSendingMessage) {
       return;
@@ -334,6 +444,12 @@ const ConversationDetailPanel = ({
   }, [selectedConvo?.id]);
 
   useEffect(() => {
+    setEditingMessageId(null);
+    setEditingDraft("");
+    setDeletingMessageId(null);
+  }, [selectedConvo?.id]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setGroupInfoOpen(false);
@@ -433,7 +549,7 @@ const ConversationDetailPanel = ({
             </div>
           </div>
           <div
-            className="overflow-y-auto px-8 justify-end mt-auto py-3"
+            className="px-8 justify-end mt-auto py-3"
             ref={messagesContainerRef}
           >
             {mode === "existing" &&
@@ -469,7 +585,7 @@ const ConversationDetailPanel = ({
                     message={message}
                     setReplyingTo={handleSetReplyingTo}
                     handleFocusReply={handleFocusReply}
-                    ref={
+                    messageRef={
                       focusedMessageId === message.id ? focusedMessageRef : null
                     }
                     isFirstInGroup={
@@ -480,6 +596,21 @@ const ConversationDetailPanel = ({
                       arr[idx - 1].replyTo?.id !== message.replyTo?.id
                     }
                     isFocused={focusedMessageId === message.id}
+                    canReply={!message.deletedAt}
+                    canEdit={
+                      message.author.id === user?.id && !message.deletedAt
+                    }
+                    onEdit={() => handleStartEditMessage(message)}
+                    onDelete={() => handleDeleteMessage(message.id)}
+                    isEditing={editingMessageId === message.id}
+                    editDraft={editingDraft}
+                    onEditDraftChange={setEditingDraft}
+                    onEditSubmit={() => handleSubmitEdit(message.id)}
+                    onEditCancel={handleCancelEdit}
+                    isSavingEdit={
+                      isUpdatingMessage && editingMessageId === message.id
+                    }
+                    isDeleting={deletingMessageId === message.id}
                   />
                 ))}
                 <div ref={bottomRef} />
