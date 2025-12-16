@@ -894,13 +894,16 @@ export class UserService {
     ]);
   }
 
-  async getUserIdsForUserCommunity(userId: number): Promise<number[]> {
+  async getCommunityForUserOrFail(userId: number): Promise<Community> {
     const user = await this.findOneOrFail(userId, ['communities']);
-    const communityId =
-      user.communities.length > 0 ? user.communities[0].id : null;
-    if (!communityId) {
+    const community = user.communities.length > 0 ? user.communities[0] : null;
+    if (!community) {
       throw new NotFoundException('User is not a member of any community.');
     }
+    return community;
+  }
+
+  async getUserIdsForCommunity(communityId: number): Promise<number[]> {
     const community = await this.findCommunityOrFail(communityId, ['users']);
     const userIds = community.users!.map((user) => user.id);
     return userIds;
@@ -910,7 +913,8 @@ export class UserService {
     userId: number,
   ): Promise<CommunityMemberContactInfoDto[]> {
     const leader = await this.findOneOrFail(userId);
-    const userIds = await this.getUserIdsForUserCommunity(userId);
+    const community = await this.getCommunityForUserOrFail(userId);
+    const userIds = await this.getUserIdsForCommunity(community.id);
     const users = await this.userRepository.find({
       where: { id: In(userIds) },
       relations: ['awayRanges'],

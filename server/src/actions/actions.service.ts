@@ -2017,7 +2017,8 @@ export class ActionsService {
   }
 
   async getMemberInfo(userId: number): Promise<CommunityUserInfoDto> {
-    const userIds = await this.userService.getUserIdsForUserCommunity(userId);
+    const community = await this.userService.getCommunityForUserOrFail(userId);
+    const userIds = await this.userService.getUserIdsForCommunity(community.id);
     const actionRelations = await this.getActionRelationsForUsers(userIds);
 
     return {
