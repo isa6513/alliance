@@ -97,7 +97,7 @@ export default function ActionPage() {
   }
 
   return (
-    <div className="w-full flex flex-row justify-between py-10 sm:py-20 px-4 md:px-4 xl:px-18">
+    <div className="w-full flex flex-row justify-between py-10 sm:py-20 px-4 md:px-8 xl:px-18">
       <div className="flex flex-col md:pr-4 xl:pr-12 max-w-2xl lg:max-w-3xl mx-auto w-full">
         <Outlet
           context={
@@ -146,7 +146,7 @@ export default function ActionPage() {
         />
       </div>
       {!action.publicOnly && (
-        <div className="hidden lg:flex flex-col max-w-[320px] xl:max-w-[380px] rounded gap-y-12 border-l border-zinc-200 pl-4 lg:pl-12">
+        <div className="hidden lg:flex flex-col max-w-[320px] xl:max-w-[380px] rounded gap-y-12 border-l border-zinc-200 pl-4 xl:pl-12">
           <ActionCompletedBarWithInfo
             friendActivities={[]}
             action={action}

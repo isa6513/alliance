@@ -322,7 +322,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
 
       <aside
         id="side-nav"
-        className={`fixed top-0 left-0 h-screen w-screen sm:w-60 lg:w-72 bg-zinc-50 border-r border-zinc-200 flex flex-col transform transition-transform duration-100 ease-in-out z-30 overflow-y-auto
+        className={`fixed top-0 left-0 h-screen w-screen sm:w-60 xl:w-72 bg-zinc-50 border-r border-zinc-200 flex flex-col transform transition-transform duration-100 ease-in-out z-30 overflow-y-auto
         ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 md:shadow-none`}
