@@ -14,6 +14,22 @@ import { useCIDFromParams } from "../../lib/utils";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 import useActivities, { ActivityList } from "./useActivities";
 
+export async function loader({ params }: { params: { id: string } }) {
+  const { id } = params;
+  const action = await actionsFindOne({
+    path: { id: parseInt(id) },
+  });
+  return action.data;
+}
+
+export function meta({ data }: { data: Awaited<ReturnType<typeof loader>> }) {
+  return [
+    {
+      title: data ? data.name + " - Alliance" : "Alliance",
+    },
+  ];
+}
+
 export default function ActionPage() {
   const { id: idParam } = useParams();
   const navigate = useNavigate();
