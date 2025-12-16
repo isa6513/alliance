@@ -1905,11 +1905,23 @@ export class ActionsService {
       );
     }
 
-    const actionSummaries: UserActionSummaryDto[] = actions.map((action) => ({
-      id: action.id,
-      name: action.name,
-      status: action.status,
-    }));
+    const userIdSet = new Set(userIds);
+    const actionSummaryPromises: Promise<UserActionSummaryDto>[] = actions.map(
+      async (action) => {
+        const joinedUserIds = (
+          await this.computeUsersJoinedForAction(action.id)
+        ).filter((userId) => userIdSet.has(userId));
+        return {
+          id: action.id,
+          name: action.name,
+          status: action.status,
+          joinedUserIds,
+        } satisfies UserActionSummaryDto;
+      },
+    );
+    const actionSummaries: UserActionSummaryDto[] = await Promise.all(
+      actionSummaryPromises,
+    );
 
     const actionIds = actionSummaries.map((summary) => summary.id);
     const actionOrder = new Map(actionIds.map((id, index) => [id, index]));
@@ -2028,6 +2040,8 @@ export class ActionsService {
     const community = await this.userService.getCommunityForUserOrFail(userId);
     const userIds = await this.userService.getUserIdsForCommunity(community.id);
     const actionRelations = await this.getActionRelationsForUsers(userIds);
+
+    console.dir({ actionsasdf: actionRelations.actions }, { depth: null });
 
     return {
       actions: actionRelations.actions,

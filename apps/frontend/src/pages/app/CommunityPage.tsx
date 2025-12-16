@@ -89,28 +89,34 @@ const CommunityPage = () => {
     Record<number, boolean>
   >({});
 
-  const nCompleted = useMemo(() => {
+  const { nCompleted, nTotal } = useMemo(() => {
     if (!community?.users || !userActionRelations) {
-      return 0;
+      return { nCompleted: 0, nTotal: 0 };
     }
 
-    const completedall: Record<number, boolean> = {};
-    for (const member of community.users) {
-      completedall[member.id] = true;
+    const completedAll: Record<number, boolean> = {};
+    for (const action of activeActions) {
+      for (const userId of action.joinedUserIds) {
+        completedAll[userId] = true;
+      }
     }
 
     for (const action of activeActions) {
-      for (const member of community?.users ?? []) {
-        const relation = userActionRelations?.[member.id]?.find(
+      for (const userId of action.joinedUserIds) {
+        const relation = userActionRelations[userId]?.find(
           (relation) => relation.actionId === action.id
         );
         if (relation?.status !== "completed") {
-          completedall[member.id] = false;
+          completedAll[userId] = false;
         }
       }
     }
-    setCompletedAllCurrentActions(completedall);
-    return Object.values(completedall).filter((completed) => completed).length;
+    setCompletedAllCurrentActions(completedAll);
+    const completedAllValues = Object.values(completedAll);
+    return {
+      nCompleted: completedAllValues.filter((completed) => completed).length,
+      nTotal: completedAllValues.length,
+    };
   }, [activeActions, community, userActionRelations]);
 
   const [loading, setLoading] = useState(true);
@@ -321,12 +327,11 @@ const CommunityPage = () => {
 
             <div className="max-w-[400px]">
               <p className="text-sm">
-                {nCompleted} / {community.users.length} have completed current
-                action
+                {nCompleted} / {nTotal} have completed current action
                 {activeActions.length !== 1 ? "s" : ""}
               </p>
               <CompletedBar
-                percentage={(nCompleted / community.users.length) * 100}
+                percentage={nTotal === 0 ? 0 : (nCompleted / nTotal) * 100}
                 height="h-4"
                 dark
               />
