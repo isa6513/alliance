@@ -11,6 +11,7 @@ import Comments from "./Comments";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { shuffleWithSeed } from "../lib/utils";
 import { useMemo } from "react";
+import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();
@@ -89,13 +90,22 @@ const ActionContents = () => {
       <div className="flex flex-col gap-y-8 sm:gap-y-12">
         {loggedInMode && <ActionEventsPanel action={action} />}
         {loggedInMode && action.status !== "planned" && (
-          <Link
-            to={href("/feed/:actionId", { actionId: action.id.toString() })}
-            className="self-start flex flex-row items-center gap-x-1 md:hidden border border-zinc-200 hover:bg-zinc-50 px-2 py-1 rounded"
-          >
-            <p className="font-medium text-sm">Activity</p>
-            <img src={chevronLeft} className="w-3 h-3 rotate-270" />
-          </Link>
+          <div className="flex flex-col gap-y-4 md:hidden">
+            <p className="font-semibold text-xl">Activity</p>
+            <ActionCompletedBarWithInfo
+              friendActivities={[]}
+              action={action}
+              textSize="base"
+              textColor="zinc-500"
+            />
+            <Link
+              to={href("/feed/:actionId", { actionId: action.id.toString() })}
+              className="self-start flex flex-row items-center gap-x-1 border border-zinc-200 hover:bg-zinc-50 px-2 py-1 rounded"
+            >
+              <p className="font-medium text-sm">All activities</p>
+              <img src={chevronLeft} className="w-3 h-3 rotate-270" />
+            </Link>
+          </div>
         )}
         {isAuthenticated && action.publicOnly && (
           <Card style={CardStyle.Grey}>
