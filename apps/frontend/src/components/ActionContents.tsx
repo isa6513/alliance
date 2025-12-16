@@ -1,4 +1,5 @@
 import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
+import { ProfileDto } from "@alliance/shared/client/types.gen";
 import { Link, Outlet, href, useOutletContext } from "react-router";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
@@ -8,6 +9,7 @@ import ActionEventsPanel from "./ActionEventsPanel";
 import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import { shuffleWithSeed } from "../lib/utils";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();
@@ -45,7 +47,10 @@ const ActionContents = () => {
                   <div className="mt-1">
                     <div className="flex flex-row gap-x-1 text-zinc-500">
                       <p>By</p>
-                      {action.authors.map((author, i) => (
+                      {shuffleWithSeed(
+                        action.authors,
+                        action.id.toString()
+                      ).map((author: ProfileDto, i: number) => (
                         <span key={author.id} className="text-nowrap">
                           <Link
                             key={author.id}
