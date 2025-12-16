@@ -691,7 +691,7 @@ export class UserController {
   async getCommunityMemberContactInfoAdmin(
     @Param('communityId', ParseIntPipe) communityId: number,
   ) {
-    return this.userService.getMemberContactInfo(communityId);
+    return this.userService.getMemberContactInfoByCommunityId(communityId);
   }
 
   @Post('communityInvites/:inviteId/accept')

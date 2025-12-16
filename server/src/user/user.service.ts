@@ -909,6 +909,16 @@ export class UserService {
     return userIds;
   }
 
+  async getMemberContactInfoByCommunityId(
+    communityId: number,
+  ): Promise<CommunityMemberContactInfoDto[]> {
+    const userIds = await this.getUserIdsForCommunity(communityId);
+    if (userIds.length === 0) {
+      return [];
+    }
+    return this.getMemberContactInfo(userIds[0]);
+  }
+
   async getMemberContactInfo(
     userId: number,
   ): Promise<CommunityMemberContactInfoDto[]> {

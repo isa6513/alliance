@@ -2036,6 +2036,17 @@ export class ActionsService {
     };
   }
 
+  async getMemberInfoByCommunityId(
+    communityId: number,
+  ): Promise<CommunityUserInfoDto> {
+    const userIds = await this.userService.getUserIdsForCommunity(communityId);
+    const actionRelations = await this.getActionRelationsForUsers(userIds);
+    return {
+      actions: actionRelations.actions,
+      users: actionRelations.users,
+    };
+  }
+
   async getMemberInfo(userId: number): Promise<CommunityUserInfoDto> {
     const community = await this.userService.getCommunityForUserOrFail(userId);
     const userIds = await this.userService.getUserIdsForCommunity(community.id);

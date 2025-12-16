@@ -807,7 +807,7 @@ export class ActionsController {
   async getCommunityMemberInfoAdmin(
     @Param('communityId', ParseIntPipe) communityId: number,
   ) {
-    return this.actionsService.getMemberInfo(communityId);
+    return this.actionsService.getMemberInfoByCommunityId(communityId);
   }
 
   @Get('communityMemberInfo')
