@@ -12,6 +12,7 @@ import type {
   DeviceVisibilityTarget,
   FormSchema,
   FormValue,
+  OutputBlock,
   OutputViewSchema,
 } from "./formschema";
 
@@ -145,7 +146,7 @@ const isElementCurrentlyVisible = (
 };
 
 const isBlockVisible = (
-  block: { visibleIf?: Condition[] | Condition },
+  block: OutputBlock,
   answers: Record<string, FormValue>,
   validatorResults?: Record<number, boolean>,
   deviceType?: DeviceVisibilityTarget,
@@ -161,6 +162,9 @@ const isBlockVisible = (
     if (!isVisible) {
       return false;
     }
+  }
+  if ("fieldId" in block && !answers[block.fieldId]) {
+    return false;
   }
 
   const conditions = normalizeConditions(block.visibleIf);
