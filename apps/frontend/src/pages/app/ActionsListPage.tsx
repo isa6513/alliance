@@ -62,12 +62,10 @@ const ActionsListPage = () => {
       <div className="flex flex-row justify-start items-center w-full gap-x-4">
         <p>Filter by:</p>
         <DropdownSelect
-          options={Object.values(FilterMode)}
-          secondaryLabels={Object.values(FilterMode).map((mode) =>
-            modeToActions[mode].length.toString()
-          )}
+          options={FilterMode}
+          secondaryLabel={(_, mode) => modeToActions[mode].length.toString()}
           value={filterMode}
-          onChange={(mode) => setFilterMode(mode as FilterMode)}
+          onChange={(_, mode) => setFilterMode(mode)}
         />
       </div>
 

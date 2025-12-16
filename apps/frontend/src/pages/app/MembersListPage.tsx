@@ -97,6 +97,10 @@ const MembersListPage = () => {
 
   const selectedMembers =
     filterMode === MemberFilterMode.All ? sortedMembers : friendsOfFriends;
+  const secondaryLabels = {
+    [MemberFilterMode.All]: members.length.toString(),
+    [MemberFilterMode.FriendsOfFriends]: friendsOfFriends.length.toString(),
+  };
 
   return (
     <CenterLayout className="gap-y-4" width="3xl">
@@ -106,15 +110,11 @@ const MembersListPage = () => {
         </p>
 
         <DropdownSelect
-          options={Object.values(MemberFilterMode)}
-          secondaryLabels={Object.values(MemberFilterMode).map((mode) =>
-            mode === MemberFilterMode.All
-              ? members.length.toString()
-              : friendsOfFriends.length.toString()
-          )}
+          options={MemberFilterMode}
+          secondaryLabel={(_, mode) => secondaryLabels[mode]}
           value={filterMode}
-          onChange={(value) => {
-            setFilterMode(value as MemberFilterMode);
+          onChange={(_, mode) => {
+            setFilterMode(mode);
           }}
         />
       </div>

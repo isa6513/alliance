@@ -275,9 +275,9 @@ const CommunityInvitesTabLeader = ({
           Invite someone to your group
         </p>
         <DropdownSelect
-          options={Object.values(InviteMode)}
+          options={InviteMode}
           value={inviteMode}
-          onChange={(mode) => setInviteMode(mode as InviteMode)}
+          onChange={(_, mode) => setInviteMode(mode)}
         />
 
         {inviteMode === InviteMode.NewMember ? (

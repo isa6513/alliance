@@ -12,19 +12,32 @@ import { X } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { href, Link } from "react-router";
 
-// {[DisplayName]: Reason enum}
-const REASON_DROPDOWN_OPTIONS = {
-  "Select a reason": null,
-  Vacation: "vacation",
-  Emergency: "emergency",
-  Other: "other",
-} satisfies Record<string, UserAwayRangeReason | null>;
+enum ReasonDropdownOption {
+  UNSELECTED = "Select a reason",
+  VACATION = "Vacation",
+  EMERGENCY = "Emergency",
+  OTHER = "Other",
+}
+const REASON_DROPDOWN_OPTION_TO_REASON_DTO = {
+  [ReasonDropdownOption.UNSELECTED]: null,
+  [ReasonDropdownOption.VACATION]: "vacation",
+  [ReasonDropdownOption.EMERGENCY]: "emergency",
+  [ReasonDropdownOption.OTHER]: "other",
+} satisfies Record<ReasonDropdownOption, UserAwayRangeReason | null>;
 
-const REASON_DISPLAY_NAMES = Object.fromEntries(
-  Object.entries(REASON_DROPDOWN_OPTIONS)
-    .filter((reason) => reason)
-    .map(([displayName, reason]) => [reason, displayName])
-) as Record<UserAwayRangeReason, string>;
+function reasonDisplayName(reason: UserAwayRangeReason): string {
+  switch (reason) {
+    case "vacation":
+      return ReasonDropdownOption.VACATION;
+    case "emergency":
+      return ReasonDropdownOption.EMERGENCY;
+    case "other":
+      return ReasonDropdownOption.OTHER;
+    default:
+      const x: never = reason;
+      throw new Error(`Unknown reason: ${x}`);
+  }
+}
 
 const AwayRangesSection: React.FC = () => {
   const [awayRanges, setAwayRanges] = useState<UserAwayRangeDto[]>([]);
@@ -35,8 +48,9 @@ const AwayRangesSection: React.FC = () => {
   const [noteInput, setNoteInput] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedReason, setSelectedReason] =
-    useState<keyof typeof REASON_DROPDOWN_OPTIONS>("Select a reason");
+  const [selectedReason, setSelectedReason] = useState<ReasonDropdownOption>(
+    ReasonDropdownOption.UNSELECTED
+  );
   const selectedReasonIsOther = selectedReason === "Other";
 
   const loadAwayRanges = useCallback(async () => {
@@ -73,7 +87,7 @@ const AwayRangesSection: React.FC = () => {
     //   return;
     // }
 
-    const reason = REASON_DROPDOWN_OPTIONS[selectedReason];
+    const reason = REASON_DROPDOWN_OPTION_TO_REASON_DTO[selectedReason];
     if (!reason) {
       // Should not be possible, since button is disabled if no reason is selected
       alert("Select a reason for your away period.");
@@ -92,7 +106,7 @@ const AwayRangesSection: React.FC = () => {
     if (resp.response.ok) {
       setStartDateInput("");
       setEndDateInput("");
-      setSelectedReason("Select a reason");
+      setSelectedReason(ReasonDropdownOption.UNSELECTED);
       setNoteInput("");
     } else {
       setError(
@@ -178,7 +192,7 @@ const AwayRangesSection: React.FC = () => {
                     })}
                   </p>
                   <p className="text-sm mt-1">
-                    {REASON_DISPLAY_NAMES[range.reason]}
+                    {reasonDisplayName(range.reason)}
                     {range.note && ": " + range.note}
                   </p>
                 </div>
@@ -225,13 +239,9 @@ const AwayRangesSection: React.FC = () => {
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium">Reason</label>
             <DropdownSelect
-              options={Object.keys(REASON_DROPDOWN_OPTIONS)}
+              options={ReasonDropdownOption}
               value={selectedReason}
-              onChange={(reason) =>
-                setSelectedReason(
-                  reason as keyof typeof REASON_DROPDOWN_OPTIONS
-                )
-              }
+              onChange={(_, reason) => setSelectedReason(reason)}
             />
           </div>
           <div className="flex flex-col gap-1">

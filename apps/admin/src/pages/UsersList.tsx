@@ -21,8 +21,12 @@ import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
 import { href, Link } from "react-router";
 
-const USER_FILTER_MODES = ["All", "Signed", "Suspended", "Not signed"] as const;
-type UserFilterMode = (typeof USER_FILTER_MODES)[number];
+enum UserFilterMode {
+  ALL = "All",
+  SIGNED = "Signed",
+  SUSPENDED = "Suspended",
+  NOT_SIGNED = "Not signed",
+}
 
 const UsersList: React.FC = () => {
   const [users, setUsers] = useState<UserDto[]>([]);
@@ -40,10 +44,11 @@ const UsersList: React.FC = () => {
     Record<number, UserActionRelationDetailDto[]>
   >({});
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
-  const [filterMode, setFilterMode] = useState<UserFilterMode>("All");
+  const [filterMode, setFilterMode] = useState<UserFilterMode>(
+    UserFilterMode.ALL
+  );
   const [isTagFilterOpen, setIsTagFilterOpen] = useState(false);
   const tagDropdownRef = useOutsideClick(() => setIsTagFilterOpen(false));
-  const filterModeOptions = useMemo(() => Array.from(USER_FILTER_MODES), []);
   const [pendingTagOps, setPendingTagOps] = useState<Set<string>>(
     () => new Set()
   );
@@ -135,15 +140,17 @@ const UsersList: React.FC = () => {
   }, [selectedTagIds, sortedUsers, userTagsMap]);
 
   const modeToUsers = useMemo(() => {
-    return USER_FILTER_MODES.reduce((acc, mode) => {
+    return Object.values(UserFilterMode).reduce((acc, mode) => {
       acc[mode] = filteredByTags.filter((user) => {
-        if (mode === "All") return true;
+        if (mode === UserFilterMode.ALL) return true;
         const lastEvent = user.contractEvents.sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         )[0];
-        if (mode === "Not signed") return user.contractEvents.length === 0;
-        if (mode === "Signed") return lastEvent?.type === "signed";
-        if (mode === "Suspended") return lastEvent?.type === "suspended";
+        if (mode === UserFilterMode.NOT_SIGNED)
+          return user.contractEvents.length === 0;
+        if (mode === UserFilterMode.SIGNED) return lastEvent?.type === "signed";
+        if (mode === UserFilterMode.SUSPENDED)
+          return lastEvent?.type === "suspended";
       });
       return acc;
     }, {} as Record<UserFilterMode, UserDto[]>);
@@ -237,12 +244,12 @@ const UsersList: React.FC = () => {
       <div className="flex flex-row gap-3 w-full items-center">
         <div className="flex flex-row gap-3 items-center">
           <DropdownSelect
-            options={filterModeOptions}
-            secondaryLabels={filterModeOptions.map((mode) =>
-              (modeToUsers[mode as UserFilterMode]?.length ?? 0).toString()
-            )}
+            options={UserFilterMode}
+            secondaryLabel={(_, mode) =>
+              (modeToUsers[mode]?.length ?? 0).toString()
+            }
             value={filterMode}
-            onChange={(mode) => setFilterMode(mode as UserFilterMode)}
+            onChange={(_, mode) => setFilterMode(mode)}
           />
           <div className="relative" ref={tagDropdownRef}>
             <button

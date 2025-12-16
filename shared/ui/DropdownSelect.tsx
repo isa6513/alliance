@@ -2,19 +2,25 @@ import { useState } from "react";
 import { useOutsideClick } from "../lib/useOutsideClick";
 import { ChevronDown } from "lucide-react";
 
-interface DropdownSelectProps {
-  options: string[];
-  secondaryLabels?: string[];
-  value: string;
-  onChange: (value: string) => void;
-}
+type EnumType = Record<string, string | number>;
 
-const DropdownSelect = ({
+type KVPair<T extends EnumType> = {
+  [K in keyof T]: [key: K, value: T[K]];
+}[keyof T];
+
+type DropdownSelectProps<T extends EnumType> = {
+  options: T;
+  secondaryLabel?: (...args: KVPair<T>) => string | undefined;
+  value: T[keyof T];
+  onChange: (...args: KVPair<T>) => void;
+};
+
+function DropdownSelect<T extends EnumType>({
   options,
-  secondaryLabels,
+  secondaryLabel,
   value,
   onChange,
-}: DropdownSelectProps) => {
+}: DropdownSelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
 
   const ref = useOutsideClick(() => setIsOpen(false));
@@ -35,11 +41,11 @@ const DropdownSelect = ({
         }`}
         ref={ref}
       >
-        {options.map((option, index) => (
+        {(Object.entries(options) as KVPair<T>[]).map(([key, value]) => (
           <button
-            key={option}
+            key={value}
             onClick={() => {
-              onChange(option);
+              onChange(key, value);
               setIsOpen(false);
             }}
             className="px-3 pr-3 py-2 hover:bg-zinc-50 text-left font-ibm text-sm"
@@ -48,10 +54,10 @@ const DropdownSelect = ({
             }}
           >
             <div className="flex flex-row justify-between items-center">
-              <span>{option}</span>
-              {secondaryLabels?.[index] && (
+              <span>{value}</span>
+              {secondaryLabel?.(key, value) && (
                 <span className="text-zinc-500 !font-mono">
-                  {secondaryLabels[index]}
+                  {secondaryLabel(key, value)}
                 </span>
               )}
             </div>
@@ -60,6 +66,6 @@ const DropdownSelect = ({
       </div>
     </div>
   );
-};
+}
 
 export default DropdownSelect;

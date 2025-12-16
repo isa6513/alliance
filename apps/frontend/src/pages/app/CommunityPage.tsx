@@ -428,15 +428,12 @@ const CommunityPage = () => {
                             Sort by completion of current actions
                           </p>
                           <DropdownSelect
-                            options={Object.values(FilterMode)}
-                            secondaryLabels={Object.values(FilterMode).map(
-                              (mode) =>
-                                membersByFilterMode[mode].length.toString()
-                            )}
-                            value={filterMode}
-                            onChange={(mode) =>
-                              setFilterMode(mode as FilterMode)
+                            options={FilterMode}
+                            secondaryLabel={(_, mode) =>
+                              membersByFilterMode[mode].length.toString()
                             }
+                            value={filterMode}
+                            onChange={(_, mode) => setFilterMode(mode)}
                           />
                         </div>
                       </td>
