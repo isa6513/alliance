@@ -10,6 +10,7 @@ import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import { shuffleWithSeed } from "../lib/utils";
+import { useMemo } from "react";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();
@@ -18,6 +19,13 @@ const ActionContents = () => {
 
   const { isAuthenticated } = useAuth();
   const loggedInMode = !action.publicOnly;
+
+  const shuffledAuthors = useMemo(() => {
+    if (!action.authors) {
+      return [];
+    }
+    return shuffleWithSeed(action.authors, action.id.toString());
+  }, [action.authors, action.id]);
 
   if (!action) {
     return null;
@@ -47,10 +55,7 @@ const ActionContents = () => {
                   <div className="mt-1">
                     <div className="flex flex-row gap-x-1 text-zinc-500">
                       <p>By</p>
-                      {shuffleWithSeed(
-                        action.authors,
-                        action.id.toString()
-                      ).map((author: ProfileDto, i: number) => (
+                      {shuffledAuthors.map((author: ProfileDto, i: number) => (
                         <span key={author.id} className="text-nowrap">
                           <Link
                             key={author.id}

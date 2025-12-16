@@ -75,10 +75,11 @@ const hashStringToSeed = (input: string): number => {
 };
 
 export const shuffleWithSeed = <T>(array: T[], seed: string): T[] => {
+  const res = [...array];
   const random = mulberry32(hashStringToSeed(seed));
-  for (let i = array.length - 1; i > 0; i--) {
+  for (let i = res.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    [res[i], res[j]] = [res[j], res[i]];
   }
-  return array;
+  return res;
 };
