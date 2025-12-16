@@ -685,6 +685,15 @@ export class UserController {
     return this.userService.getMemberContactInfo(req.user.sub);
   }
 
+  @Get('communityMemberContactInfo/:communityId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
+  async getCommunityMemberContactInfoAdmin(
+    @Param('communityId', ParseIntPipe) communityId: number,
+  ) {
+    return this.userService.getMemberContactInfo(communityId);
+  }
+
   @Post('communityInvites/:inviteId/accept')
   @UseGuards(AuthGuard)
   @ApiOkResponse()

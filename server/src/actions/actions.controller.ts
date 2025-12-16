@@ -801,6 +801,15 @@ export class ActionsController {
     return this.actionsService.getUserActionRelations();
   }
 
+  @Get('communityMemberInfo/:communityId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityUserInfoDto })
+  async getCommunityMemberInfoAdmin(
+    @Param('communityId', ParseIntPipe) communityId: number,
+  ) {
+    return this.actionsService.getMemberInfo(communityId);
+  }
+
   @Get('communityMemberInfo')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: CommunityUserInfoDto })

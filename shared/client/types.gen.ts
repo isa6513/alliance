@@ -2943,6 +2943,21 @@ export type UserGetCommunityMemberContactInfoResponses = {
 
 export type UserGetCommunityMemberContactInfoResponse = UserGetCommunityMemberContactInfoResponses[keyof UserGetCommunityMemberContactInfoResponses];
 
+export type UserGetCommunityMemberContactInfoAdminData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/communityMemberContactInfo/{communityId}';
+};
+
+export type UserGetCommunityMemberContactInfoAdminResponses = {
+    200: Array<CommunityMemberContactInfoDto>;
+};
+
+export type UserGetCommunityMemberContactInfoAdminResponse = UserGetCommunityMemberContactInfoAdminResponses[keyof UserGetCommunityMemberContactInfoAdminResponses];
+
 export type UserAcceptCommunityInviteData = {
     body?: never;
     path: {
@@ -4142,6 +4157,21 @@ export type ActionsActionRelationsResponses = {
 };
 
 export type ActionsActionRelationsResponse = ActionsActionRelationsResponses[keyof ActionsActionRelationsResponses];
+
+export type ActionsGetCommunityMemberInfoAdminData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/actions/communityMemberInfo/{communityId}';
+};
+
+export type ActionsGetCommunityMemberInfoAdminResponses = {
+    200: CommunityUserInfoDto;
+};
+
+export type ActionsGetCommunityMemberInfoAdminResponse = ActionsGetCommunityMemberInfoAdminResponses[keyof ActionsGetCommunityMemberInfoAdminResponses];
 
 export type ActionsGetCommunityMemberInfoData = {
     body?: never;

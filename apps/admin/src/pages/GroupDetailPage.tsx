@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, Link, useNavigate, useParams } from "react-router";
 import {
-  actionsGetCommunityMemberInfo,
+  actionsGetCommunityMemberInfoAdmin,
   userAddLeaderToCommunity,
   userAddMemberToCommunity,
   userDeleteCommunity,
   userGetCommunities,
-  userGetCommunityMemberContactInfo,
+  userGetCommunityMemberContactInfoAdmin,
   userList,
   userRemoveLeaderFromCommunity,
   userRemoveMemberFromCommunity,
@@ -101,36 +101,40 @@ const CommunityDetailPage: React.FC = () => {
   > | null>(null);
 
   useEffect(() => {
-    actionsGetCommunityMemberInfo().then((resp) => {
-      if (resp.data) {
-        // Most recent actions first
-        resp.data.actions.reverse();
+    actionsGetCommunityMemberInfoAdmin({ path: { communityId } }).then(
+      (resp) => {
+        if (resp.data) {
+          // Most recent actions first
+          resp.data.actions.reverse();
 
-        setActionSummaries(resp.data.actions);
-        setActiveActions(
-          resp.data.actions.filter(
-            (action) => action.status === "member_action"
-          )
-        );
-        setUserActionRelations(
-          resp.data.users.reduce((acc, user) => {
-            acc[user.userId] = user.relations;
-            return acc;
-          }, {} as Record<number, UserActionRelationDetailDto[]>)
-        );
+          setActionSummaries(resp.data.actions);
+          setActiveActions(
+            resp.data.actions.filter(
+              (action) => action.status === "member_action"
+            )
+          );
+          setUserActionRelations(
+            resp.data.users.reduce((acc, user) => {
+              acc[user.userId] = user.relations;
+              return acc;
+            }, {} as Record<number, UserActionRelationDetailDto[]>)
+          );
+        }
       }
-    });
-    userGetCommunityMemberContactInfo().then((resp) => {
-      if (resp.data) {
-        setMemberContactInfo(
-          resp.data.reduce((acc, contactInfo) => {
-            acc[contactInfo.id] = contactInfo;
-            return acc;
-          }, {} as Record<number, CommunityMemberContactInfoDto>)
-        );
+    );
+    userGetCommunityMemberContactInfoAdmin({ path: { communityId } }).then(
+      (resp) => {
+        if (resp.data) {
+          setMemberContactInfo(
+            resp.data.reduce((acc, contactInfo) => {
+              acc[contactInfo.id] = contactInfo;
+              return acc;
+            }, {} as Record<number, CommunityMemberContactInfoDto>)
+          );
+        }
       }
-    });
-  }, []);
+    );
+  }, [communityId]);
 
   useEffect(() => {
     setUsersLoading(true);
