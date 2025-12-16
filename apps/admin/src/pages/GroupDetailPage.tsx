@@ -161,7 +161,7 @@ const CommunityDetailPage: React.FC = () => {
     }
   }, [community]);
 
-  const { completedAllCurrentActions, nCompleted, nTotal } = useMemo<{
+  const { completedAllCurrentActions } = useMemo<{
     completedAllCurrentActions: Record<number, boolean>;
     nCompleted: number;
     nTotal: number;
