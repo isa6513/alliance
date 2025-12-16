@@ -56,6 +56,20 @@ export class Action {
 
   @Column({ nullable: true })
   @ApiPropertyOptional({
+    description: 'Square thumbnail image URL for the action',
+  })
+  @IsOptional()
+  squareThumbnailImage?: string;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional({
+    description: 'Square thumbnail image alt for the action',
+  })
+  @IsOptional()
+  squareThumbnailImageAlt?: string;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional({
     description: 'Number of commitments needed to start the action',
   })
   @IsOptional()

@@ -4,6 +4,7 @@ import { Link, href } from "react-router";
 import { ActionWithRelation } from "../applayout";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
+import ActionSquareThumbnail from "./ActionSquareThumbnail";
 
 export interface ActionItemCardProps {
   action: Pick<
@@ -18,6 +19,8 @@ export interface ActionItemCardProps {
     | "everyoneShouldComplete"
     | "usersJoined"
     | "usersCompleted"
+    | "squareThumbnailImage"
+    | "squareThumbnailImageAlt"
   >;
   className?: string;
   friendCommitmentActivities?: ActionActivityDto[];
@@ -33,26 +36,35 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   return (
     <Link
       to={href("/actions/:id", { id: action.id.toString() })}
-      className={`relative ${className} p-4 hover:bg-zinc-50`}
+      className={`relative ${className} p-3 md:p-4  hover:bg-zinc-50`}
     >
-      <div className="flex flex-row items-start gap-x-8">
-        <div className="flex-1 flex flex-col">
-          <div className="flex flex-row items-center justify-between gap-x-2 mb-2">
-            <p className="font-medium text-black">{action.name}</p>
-            {action.relation === "completed" && <CheckIcon size="mini" />}
+      <div className="flex flex-row gap-x-3 md:gap-x-4">
+        <ActionSquareThumbnail
+          imgSrc={action.squareThumbnailImage}
+          imgAlt={action.squareThumbnailImageAlt}
+          size="smallDynamic"
+        />
+        <div className="flex flex-col justify-between flex-1">
+          <div className="flex flex-row items-start gap-x-8">
+            <div className="flex-1 flex flex-col">
+              <div className="flex flex-row items-center justify-between gap-x-2 mb-2">
+                <p className="font-medium text-black">{action.name}</p>
+                {action.relation === "completed" && <CheckIcon size="mini" />}
+              </div>
+              <p className="text-zinc-500">{action.shortDescription}</p>
+            </div>
           </div>
-          <p className="text-zinc-500">{action.shortDescription}</p>
+          {(action.status === "member_action" ||
+            action.status === "gathering_commitments") &&
+            !action.everyoneShouldComplete && (
+              <ActionCompletedBarWithInfo
+                action={action}
+                friendActivities={friendCommitmentActivities ?? null}
+                className="mt-4"
+              />
+            )}
         </div>
       </div>
-      {(action.status === "member_action" ||
-        action.status === "gathering_commitments") &&
-        !action.everyoneShouldComplete && (
-          <ActionCompletedBarWithInfo
-            action={action}
-            friendActivities={friendCommitmentActivities ?? null}
-            className="mt-4"
-          />
-        )}
     </Link>
   );
 };

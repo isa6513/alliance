@@ -368,6 +368,14 @@ export type Action = {
      */
     image?: string;
     /**
+     * Square thumbnail image URL for the action
+     */
+    squareThumbnailImage?: string;
+    /**
+     * Square thumbnail image alt for the action
+     */
+    squareThumbnailImageAlt?: string;
+    /**
      * Number of commitments needed to start the action
      */
     commitmentThreshold?: number;
@@ -957,6 +965,14 @@ export type ActionDto = {
      */
     image?: string;
     /**
+     * Square thumbnail image URL for the action
+     */
+    squareThumbnailImage?: string;
+    /**
+     * Square thumbnail image alt for the action
+     */
+    squareThumbnailImageAlt?: string;
+    /**
      * Number of commitments needed to start the action
      */
     commitmentThreshold?: number;
@@ -1082,6 +1098,14 @@ export type CreateActionDto = {
      */
     image?: string;
     /**
+     * Square thumbnail image URL for the action
+     */
+    squareThumbnailImage?: string;
+    /**
+     * Square thumbnail image alt for the action
+     */
+    squareThumbnailImageAlt?: string;
+    /**
      * Number of commitments needed to start the action
      */
     commitmentThreshold?: number;
@@ -1160,6 +1184,14 @@ export type UpdateActionDto = {
      * Image URL for the action
      */
     image?: string;
+    /**
+     * Square thumbnail image URL for the action
+     */
+    squareThumbnailImage?: string;
+    /**
+     * Square thumbnail image alt for the action
+     */
+    squareThumbnailImageAlt?: string;
     /**
      * Number of commitments needed to start the action
      */
@@ -1403,6 +1435,14 @@ export type ExportActionDto = {
      * Image URL for the action
      */
     image?: string;
+    /**
+     * Square thumbnail image URL for the action
+     */
+    squareThumbnailImage?: string;
+    /**
+     * Square thumbnail image alt for the action
+     */
+    squareThumbnailImageAlt?: string;
     /**
      * Number of commitments needed to start the action
      */

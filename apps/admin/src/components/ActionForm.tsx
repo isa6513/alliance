@@ -232,6 +232,16 @@ const ActionForm: React.FC<ActionFormProps> = ({
       },
       { name: "body", label: "Body", type: "markdowntextarea", required: true },
       { name: "image", label: "Image", type: "file" },
+      {
+        name: "squareThumbnailImage",
+        label: "Square Thumbnail Image (url)",
+        type: "text",
+      },
+      {
+        name: "squareThumbnailImageAlt",
+        label: "Square Thumbnail Image Alt/Title",
+        type: "text",
+      },
     ],
     [actionTypeOptions, suiteSelectOptions, suitesLoading]
   );

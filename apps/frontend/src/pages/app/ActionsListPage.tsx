@@ -58,9 +58,9 @@ const ActionsListPage = () => {
   );
 
   return (
-    <CenterLayout className="gap-y-4" width="3xl">
-      <div className="flex flex-row justify-start items-center w-full">
-        <p className="mx-4">Filter by:</p>
+    <CenterLayout className="gap-y-4" width="4xl">
+      <div className="flex flex-row justify-start items-center w-full gap-x-4">
+        <p>Filter by:</p>
         <DropdownSelect
           options={Object.values(FilterMode)}
           secondaryLabels={Object.values(FilterMode).map((mode) =>
@@ -73,11 +73,7 @@ const ActionsListPage = () => {
 
       <List className="w-full">
         {filteredActions.map((action) => (
-          <ActionItemCard
-            key={action.id}
-            action={action}
-            className="w-full hover:bg-zinc-100"
-          />
+          <ActionItemCard key={action.id} action={action} className="w-full " />
         ))}
         {filteredActions.length === 0 && (
           <>
