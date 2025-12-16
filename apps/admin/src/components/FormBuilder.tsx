@@ -11,8 +11,10 @@ import type {
 import FormRenderer from "@alliance/shared/forms/FormRenderer";
 import type {
   AnyField,
+  Condition,
   FieldKind,
   FormSchema,
+  MultiSelectField,
   Page,
 } from "@alliance/shared/forms/formschema";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -68,6 +70,138 @@ const ensureOutputViews = (schema: FormSchema): FormSchema => ({
   ...schema,
   outputViews: schema.outputViews ?? [],
 });
+
+const buildValueCounts = (values: string[]) => {
+  const counts = new Map<string, number>();
+  values.forEach((value) => {
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  });
+  return counts;
+};
+
+const findSingleOptionValueChange = (
+  previousOptions: MultiSelectField["options"] | undefined,
+  nextOptions: MultiSelectField["options"] | undefined
+):
+  | {
+      previousValue: string;
+      nextValue: string;
+    }
+  | null => {
+  if (!previousOptions || !nextOptions) {
+    return null;
+  }
+  if (previousOptions.length !== nextOptions.length) {
+    return null;
+  }
+
+  const previousValues = previousOptions.map((option) => option.value ?? "");
+  const nextValues = nextOptions.map((option) => option.value ?? "");
+  const previousCounts = buildValueCounts(previousValues);
+  const nextCounts = buildValueCounts(nextValues);
+
+  const removed: string[] = [];
+  const added: string[] = [];
+
+  previousCounts.forEach((count, value) => {
+    const nextCount = nextCounts.get(value) ?? 0;
+    if (nextCount < count) {
+      for (let i = 0; i < count - nextCount; i += 1) {
+        removed.push(value);
+      }
+    }
+  });
+
+  nextCounts.forEach((count, value) => {
+    const previousCount = previousCounts.get(value) ?? 0;
+    if (previousCount < count) {
+      for (let i = 0; i < count - previousCount; i += 1) {
+        added.push(value);
+      }
+    }
+  });
+
+  if (removed.length === 1 && added.length === 1) {
+    return {
+      previousValue: removed[0],
+      nextValue: added[0],
+    };
+  }
+
+  return null;
+};
+
+const getUpdatedVisibilityConditions = (
+  visibleIf: Condition[] | Condition | undefined,
+  controllerId: string,
+  previousValue: string,
+  nextValue: string
+): { changed: boolean; visibleIf?: Condition[] } => {
+  if (!visibleIf) {
+    return { changed: false };
+  }
+
+  const conditions = Array.isArray(visibleIf) ? visibleIf : [visibleIf];
+  let updated = false;
+  const nextConditions = conditions.map((condition) => {
+    if (!("when" in condition) || condition.when !== controllerId) {
+      return condition;
+    }
+    if ("includesOption" in condition && condition.includesOption === previousValue) {
+      updated = true;
+      return { ...condition, includesOption: nextValue };
+    }
+    if ("equals" in condition && condition.equals === previousValue) {
+      updated = true;
+      return { ...condition, equals: nextValue };
+    }
+    return condition;
+  });
+
+  if (!updated) {
+    return { changed: false };
+  }
+
+  return {
+    changed: true,
+    visibleIf: nextConditions,
+  };
+};
+
+const applyOptionValueToConditionalVisibility = (
+  fields: Array<AnyField | DisplayBlock>,
+  controllerId: string,
+  previousValue: string,
+  nextValue: string,
+  startIndex: number
+) => {
+  let hasChanges = false;
+
+  const nextFields = fields.map((candidate, idx) => {
+    if (idx <= startIndex) {
+      return candidate;
+    }
+
+    const result = getUpdatedVisibilityConditions(
+      (candidate as AnyField).visibleIf ?? (candidate as DisplayBlock).visibleIf,
+      controllerId,
+      previousValue,
+      nextValue
+    );
+
+    if (!result.changed || !result.visibleIf) {
+      return candidate;
+    }
+
+    hasChanges = true;
+    return {
+      ...candidate,
+      visibleIf: result.visibleIf,
+    } as AnyField | DisplayBlock;
+  });
+
+  return hasChanges ? nextFields : fields;
+};
 
 export function FormBuilder({
   onSave,
@@ -869,20 +1003,59 @@ export function FormBuilder({
 
   const renderField = (field: AnyField | DisplayBlock, index: number) => {
     const updateField = (updates: Partial<AnyField | DisplayBlock>) => {
+      const optionValueChange =
+        (field as AnyField).kind === "multiselect" &&
+        "options" in updates &&
+        updates.options
+          ? findSingleOptionValueChange(
+              (field as MultiSelectField).options,
+              updates.options as MultiSelectField["options"]
+            )
+          : null;
+
+      const nextPages = schema.pages.map((page, pageIndex) => {
+        if (pageIndex === selectedPageIndex) {
+          const updatedFields = page.fields.map((f, i) =>
+            i === index ? ({ ...f, ...updates } as AnyField | DisplayBlock) : f
+          );
+
+          if (!optionValueChange) {
+            return { ...page, fields: updatedFields };
+          }
+
+          const fieldsWithUpdatedConditions =
+            applyOptionValueToConditionalVisibility(
+              updatedFields,
+              (field as AnyField).id,
+              optionValueChange.previousValue,
+              optionValueChange.nextValue,
+              index
+            );
+
+          return { ...page, fields: fieldsWithUpdatedConditions };
+        }
+
+        if (optionValueChange && pageIndex > selectedPageIndex) {
+          const fieldsWithUpdatedConditions =
+            applyOptionValueToConditionalVisibility(
+              page.fields,
+              (field as AnyField).id,
+              optionValueChange.previousValue,
+              optionValueChange.nextValue,
+              -1
+            );
+
+          if (fieldsWithUpdatedConditions !== page.fields) {
+            return { ...page, fields: fieldsWithUpdatedConditions };
+          }
+        }
+
+        return page;
+      });
+
       updateSchema({
         ...schema,
-        pages: schema.pages.map((page, idx) =>
-          idx === selectedPageIndex
-            ? {
-                ...page,
-                fields: page.fields.map((f, i) =>
-                  i === index
-                    ? ({ ...f, ...updates } as AnyField | DisplayBlock)
-                    : f
-                ),
-              }
-            : page
-        ),
+        pages: nextPages,
       });
     };
 

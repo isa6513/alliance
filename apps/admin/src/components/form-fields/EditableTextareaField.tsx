@@ -28,11 +28,6 @@ export function EditableTextareaField({
         onChange={(v) => onUpdate({ label: v })}
       />
 
-      <RequiredToggle
-        checked={field.required}
-        onChange={(checked) => onUpdate({ required: checked })}
-      />
-
       <div className="flex items-center space-x-2">
         <label className="text-xs text-gray-700">Rows:</label>
         <input
@@ -43,9 +38,6 @@ export function EditableTextareaField({
           min="1"
           max="20"
         />
-      </div>
-
-      <div className="flex items-center space-x-2">
         <label className="text-xs text-gray-700">Max Length:</label>
         <input
           type="number"
@@ -55,8 +47,12 @@ export function EditableTextareaField({
               maxLength: e.target.value ? parseInt(e.target.value) : undefined,
             })
           }
-          className="w-16 px-1 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-16 px-1 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 mr-5"
           min="0"
+        />
+        <RequiredToggle
+          checked={field.required}
+          onChange={(checked) => onUpdate({ required: checked })}
         />
       </div>
 
