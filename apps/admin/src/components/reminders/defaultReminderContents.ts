@@ -5,7 +5,7 @@ export const defaultAnnouncementEmailSubject =
 
 export const defaultAnnouncementEmailContents = `Hi #{firstname},
 
-#{n} newAlliance task#{s} #{is|are} ready for you to complete:
+#{n} new Alliance task#{s} #{is|are} ready for you to complete:
 
 1. ACTION1
 2. ACTION2
