@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, Link, useNavigate, useParams } from "react-router";
 import {
+  actionsGetCommunityMemberInfo,
   userAddLeaderToCommunity,
   userAddMemberToCommunity,
   userDeleteCommunity,
   userGetCommunities,
+  userGetCommunityMemberContactInfo,
   userList,
   userRemoveLeaderFromCommunity,
   userRemoveMemberFromCommunity,
@@ -12,12 +14,16 @@ import {
 } from "@alliance/shared/client";
 import type {
   CommunityDto,
+  CommunityMemberContactInfoDto,
   UpdateCommunityDto,
+  UserActionRelationDetailDto,
+  UserActionSummaryDto,
 } from "@alliance/shared/client/types.gen";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import UserSelect, { UserSelectUser } from "@alliance/shared/ui/UserSelect";
 import { useToast } from "@alliance/shared/ui/ToastProvider";
+import CommunityMembersTable from "@alliance/shared/ui/CommunityMembersTable";
 
 const CommunityDetailPage: React.FC = () => {
   const { id } = useParams();
@@ -76,6 +82,45 @@ const CommunityDetailPage: React.FC = () => {
   useEffect(() => {
     void loadCommunity();
   }, [loadCommunity]);
+
+  const [userActionRelations, setUserActionRelations] = useState<Record<
+    number,
+    UserActionRelationDetailDto[]
+  > | null>(null);
+
+  const [actionSummaries, setActionSummaries] = useState<
+    UserActionSummaryDto[]
+  >([]);
+
+  const [memberContactInfo, setMemberContactInfo] = useState<Record<
+    number,
+    CommunityMemberContactInfoDto
+  > | null>(null);
+
+  useEffect(() => {
+    actionsGetCommunityMemberInfo().then((resp) => {
+      if (resp.data) {
+        resp.data.actions.reverse();
+        setActionSummaries(resp.data.actions);
+        setUserActionRelations(
+          resp.data.users.reduce((acc, user) => {
+            acc[user.userId] = user.relations;
+            return acc;
+          }, {} as Record<number, UserActionRelationDetailDto[]>)
+        );
+      }
+    });
+    userGetCommunityMemberContactInfo().then((resp) => {
+      if (resp.data) {
+        setMemberContactInfo(
+          resp.data.reduce((acc, contactInfo) => {
+            acc[contactInfo.id] = contactInfo;
+            return acc;
+          }, {} as Record<number, CommunityMemberContactInfoDto>)
+        );
+      }
+    });
+  }, []);
 
   useEffect(() => {
     setUsersLoading(true);
@@ -614,6 +659,16 @@ const CommunityDetailPage: React.FC = () => {
           </div>
         </Card>
       </div>
+      <Card style={CardStyle.White}>
+        <CommunityMembersTable
+          leaders={sortedLeaders}
+          members={sortedMembers}
+          amLeader={true}
+          userActionRelations={userActionRelations ?? undefined}
+          actions={actionSummaries}
+          memberContactInfo={memberContactInfo ?? undefined}
+        />
+      </Card>
     </div>
   );
 };
