@@ -231,43 +231,51 @@ export class ActionsService {
   }
 
   async reloadUsersJoinedForAction(actionId: number): Promise<void> {
+    const usersJoined = (await this.computeUsersJoinedForAction(actionId))
+      .length;
+    await this.actionRepository.update(actionId, { usersJoined });
+  }
+
+  async computeUsersJoinedForAction(actionId: number): Promise<number[]> {
     const action = await this.actionRepository.findOneOrFail({
       where: { id: actionId },
       relations: ['events', 'participatingTags', 'activities'],
     });
 
-    let joined = action.usersJoined;
     if (action.commitmentless) {
-      joined = await this.getUsersJoinedForCommitmentlessAction(action);
-    } else {
-      const activities = await this.actionActivityRepository.find({
-        where: {
-          actionId: action.id,
-          type: In([
-            ActionActivityType.USER_JOINED,
-            ActionActivityType.USER_WONT_COMPLETE,
-          ]),
-        },
-      });
-      joined = Math.max(
-        activities.filter(
-          (activity) => activity.type === ActionActivityType.USER_JOINED,
-        ).length -
-          activities.filter(
-            (activity) =>
-              activity.type === ActionActivityType.USER_WONT_COMPLETE,
-          ).length,
-        0,
-      );
+      return await this.getUsersJoinedForCommitmentlessAction(action);
     }
-    await this.actionRepository.update(action.id, { usersJoined: joined });
+
+    const activities = await this.actionActivityRepository.find({
+      where: {
+        actionId: action.id,
+        type: In([
+          ActionActivityType.USER_JOINED,
+          ActionActivityType.USER_WONT_COMPLETE,
+        ]),
+      },
+    });
+
+    const userIds: Set<number> = new Set(
+      activities
+        .filter((activity) => activity.type === ActionActivityType.USER_JOINED)
+        .map((activity) => activity.userId),
+    );
+    for (const activity of activities.filter(
+      (activity) => activity.type === ActionActivityType.USER_WONT_COMPLETE,
+    )) {
+      userIds.delete(activity.userId);
+    }
+    return Array.from(userIds);
   }
 
-  async getUsersJoinedForCommitmentlessAction(action: Action): Promise<number> {
+  async getUsersJoinedForCommitmentlessAction(
+    action: Action,
+  ): Promise<number[]> {
     const event = action.events.find(
       (event) => event.newStatus === ActionStatus.MemberAction,
     );
-    if (!event) return 1;
+    if (!event) return [];
 
     const baseUsers =
       await this.actionEventRecipientService.getBaseUsersForEvent(
@@ -296,7 +304,7 @@ export class ActionsService {
       ...completionActivities.map((activity) => activity.userId),
     ]);
 
-    return set.size;
+    return Array.from(set);
   }
 
   async findPublic(userId?: number, sorted?: boolean): Promise<ActionDto[]> {
