@@ -152,12 +152,15 @@ const isBlockVisible = (
   inputField?: AnyField
 ): boolean => {
   if (inputField) {
-    return isElementCurrentlyVisible(
+    const isVisible = isElementCurrentlyVisible(
       inputField,
       answers,
       deviceType ?? "desktop",
       validatorResults ?? {}
     );
+    if (!isVisible) {
+      return false;
+    }
   }
 
   const conditions = normalizeConditions(block.visibleIf);

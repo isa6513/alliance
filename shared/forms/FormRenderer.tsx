@@ -389,7 +389,7 @@ const FormRenderer = ({
   );
 
   useEffect(() => {
-    if (!outputFieldIds || outputFieldIds.size === 0) return;
+    if (!outputFieldIds || outputFieldIds.size === 0 || !user) return;
 
     setPublicAnswers((prev) => {
       if (prev && Object.keys(prev).length > 0) {
@@ -398,12 +398,12 @@ const FormRenderer = ({
 
       const next: Record<string, boolean> = {};
       for (const fieldId of outputFieldIds) {
-        next[fieldId] = user?.formDataPreference === "public" ? true : false;
+        next[fieldId] = user.formDataPreference === "public" ? true : false;
       }
 
       return next;
     });
-  }, [outputFieldIds, user?.formDataPreference]);
+  }, [outputFieldIds, user]);
 
   const [uploadingFields, setUploadingFields] = useState<Set<string>>(
     new Set()

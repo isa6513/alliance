@@ -811,6 +811,8 @@ export class ActionsService {
     const answers = activity.taskFormResponse.answers;
     const publicAnswers = activity.taskFormResponse.publicAnswers ?? {};
 
+    //TODO: for now we dont use pruned so that we can use non-output fields
+    // to evaluate the conditional visibility of output fields - maybe just cache?
     const answersPrunedObj = Object.fromEntries(
       Object.entries(answers).filter(([key]) =>
         answerToIsPublic(key, publicAnswers),
@@ -823,7 +825,7 @@ export class ActionsService {
 
     const responseWithPruned = {
       ...activity.taskFormResponse,
-      answers: answersPrunedObj,
+      answers,
     } as FormResponse;
 
     return new FormResponseOutputDto(responseWithPruned);
