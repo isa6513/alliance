@@ -28,21 +28,22 @@ const ActionContents = () => {
       {action?.image && (
         <img
           src={action.image}
-          className="w-full h-auto rounded-md border border-gray-300 max-h-[200px] object-cover mb-5"
+          className="w-full h-auto rounded-md border border-zinc-300 max-h-[200px] object-cover mb-5"
         />
       )}
 
-      <div className="flex flex-row justify-between items-start mb-4">
+      <div className="flex flex-row justify-between items-start mb-6">
         {action !== undefined && (
-          <div className="flex flex-col gap-y-2">
+          <div className="flex flex-col gap-y-3">
             <p className="font-semibold text-3xl font-serif mb-1">
               {action.name}
             </p>
             {loggedInMode ? (
               <div>
+                <p>{action.shortDescription}</p>
                 {!!action.authors?.length && (
-                  <div className="mb-3">
-                    <div className="flex flex-row gap-x-1 text-zinc-800">
+                  <div className="mt-1">
+                    <div className="flex flex-row gap-x-1 text-zinc-500">
                       <p>By</p>
                       {action.authors.map((author, i) => (
                         <span key={author.id} className="text-nowrap">
@@ -51,7 +52,7 @@ const ActionContents = () => {
                             to={href("/member/:id", {
                               id: author.id.toString(),
                             })}
-                            className="hover:underline"
+                            className="underline"
                           >
                             {author.displayName}
                           </Link>
@@ -63,7 +64,6 @@ const ActionContents = () => {
                     </div>
                   </div>
                 )}
-                <p>{action.shortDescription}</p>
               </div>
             ) : (
               <TaskTimeInfo
