@@ -19,6 +19,7 @@ import type {
   DeviceVisibilityTarget,
   FormSchema,
   FormValue,
+  NumberField,
   RangeField,
 } from "./formschema";
 import { parseTimeToMinutes } from "./timeUtils";
@@ -686,10 +687,6 @@ const FormRenderer = ({
         return null;
       }
 
-      if (!required) {
-        return null;
-      }
-
       switch (field.kind) {
         case "text":
         case "textarea":
@@ -698,6 +695,7 @@ const FormRenderer = ({
         case "date":
         case "timezone":
         case "select": {
+          if (!required) return null;
           if (valueToCheck === undefined || valueToCheck === null) {
             return "This field is required.";
           }
@@ -707,31 +705,60 @@ const FormRenderer = ({
           return null;
         }
         case "time": {
-          if (valueToCheck === undefined || valueToCheck === null) {
-            return "This field is required.";
-          }
-          if (isEmptyString) {
-            return "This field is required.";
-          }
           if (typeof valueToCheck === "string") {
             const minutes = parseTimeToMinutes(valueToCheck);
             if (minutes === null) {
               return "Enter a valid time.";
             }
           }
+          if (!required) return null;
+          if (valueToCheck === undefined || valueToCheck === null) {
+            return "This field is required.";
+          }
+          if (isEmptyString) {
+            return "This field is required.";
+          }
           return null;
         }
         case "number": {
+          const numValue =
+            typeof valueToCheck === "number"
+              ? valueToCheck
+              : typeof valueToCheck === "string"
+              ? parseFloat(valueToCheck)
+              : NaN;
+          const numberField = field as NumberField;
+          if (Number.isNaN(numValue)) {
+            return "Please enter a valid number.";
+          }
+          if (
+            typeof numberField.min === "number" &&
+            numValue < numberField.min
+          ) {
+            return `Value must be at least ${numberField.min}.`;
+          }
+          if (
+            typeof numberField.max === "number" &&
+            numValue > numberField.max
+          ) {
+            return `Value must be at most ${numberField.max}.`;
+          }
+          if (!required) return null;
           if (
             valueToCheck === undefined ||
             valueToCheck === null ||
             valueToCheck === ""
           ) {
-            return "Please enter a number.";
+            return required ? "Please enter a number." : null;
+          }
+
+          if (!Number.isFinite(numValue)) {
+            return "Please enter a valid number.";
           }
           return null;
         }
         case "range": {
+          if (!required) return null;
           if (
             valueToCheck === undefined ||
             valueToCheck === null ||
@@ -748,12 +775,16 @@ const FormRenderer = ({
           return null;
         }
         case "checkbox":
+          if (!required) return null;
           return valueToCheck === true ? null : "This field is required.";
         case "radio":
+          if (!required) return null;
           return valueToCheck ? null : "Please select an option.";
         case "file":
+          if (!required) return null;
           return valueToCheck ? null : "Please upload a file.";
         default: {
+          if (!required) return null;
           if (valueToCheck === undefined || valueToCheck === null) {
             return "This field is required.";
           }
