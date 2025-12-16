@@ -106,7 +106,7 @@ const SignupPage: React.FC = () => {
       <div className="flex flex-col md:flex-row gap-x-16 lg:gap-x-24 xl:gap-x-32 gap-y-12 py-12 items-center my-auto mx-auto px-4">
         <div className="flex flex-col w-full md:w-lg items-center justify-center">
           <div className="w-full">
-            <h2 className="font-serif !text-3xl text-center mb-8">
+            <h2 className="font-serif font-semibold !text-3xl text-center mb-8">
               Create an account
             </h2>
 

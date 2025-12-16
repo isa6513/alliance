@@ -67,7 +67,7 @@ const PeoplePage: React.FC = () => {
             <h2 className="!font-semibold !text-xl md:!text-2xl !mt-8 mb-3">
               Members
             </h2>
-            <p>40 members are participating in early experiments.</p>
+            <p>49 members are participating in early experiments.</p>
 
             <h2 className="!font-semibold !text-xl md:!text-2xl !mt-8 mb-3">
               Strategic office

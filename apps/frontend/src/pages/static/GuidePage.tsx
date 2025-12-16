@@ -124,7 +124,7 @@ The Alliance is composed of a body of members and a full-time strategic office.
               />
 
               <div className="my-12 flex flex-col gap-y-4">
-                <MemberContract id="contract" />
+                <MemberContract id="contract" className="bg-zinc-50" />
                 <p className="text-center text-zinc-800">
                   Our current membership contract
                 </p>
@@ -168,7 +168,7 @@ A few broad categories of actions include:
 "
               />
 
-              <div className="grid grid-cols-2 rounded border border-zinc-200 mt-8 w-full max-w-4xl mx-auto">
+              <div className="grid grid-cols-2 rounded border border-zinc-200 mt-8 w-full max-w-5xl mx-auto">
                 <ExampleActionCategoryCard
                   title="Pooled funding"
                   description="We can pool funding for ambitious initiatives, some of which would otherwise depend on governments."
