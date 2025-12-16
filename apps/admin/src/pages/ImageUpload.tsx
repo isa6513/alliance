@@ -1,4 +1,5 @@
 import { imagesUploadImage } from "@alliance/shared/client";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import React, { useState } from "react";
 
 const ImageUpload: React.FC = () => {
@@ -31,13 +32,15 @@ const ImageUpload: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="p-8">
       <input
         type="file"
         onChange={handleFileChange}
         className="border bg-zinc-200 rounded cursor-pointer"
       />
-      <button onClick={handleUpload}>Upload</button>
+      <Button color={ButtonColor.Black} onClick={handleUpload}>
+        Upload
+      </Button>
       {key && <img src={key} alt="uploaded image" />}
     </div>
   );

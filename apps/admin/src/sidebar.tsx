@@ -208,6 +208,12 @@ const Sidebar: React.FC = () => {
             >
               Scheduled Plans
             </Link>
+            <Link
+              to={href("/image")}
+              className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm "
+            >
+              Image upload
+            </Link>
           </div>
           <div className="flex flex-row justify-between items-center mt-3 relative">
             <p className="font-bold">Current Actions</p>
