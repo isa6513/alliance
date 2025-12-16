@@ -1,6 +1,5 @@
 import { analyticsGetDailyStats } from "@alliance/shared/client";
 import { DailyStatsRecord } from "@alliance/shared/client/types.gen";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import * as d3 from "d3";
 import React, {
   useCallback,
@@ -63,18 +62,22 @@ const fullDateFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
+const formatDateAsLocal = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 const getDefaultRange = () => {
   const end = new Date();
   const start = new Date();
   start.setDate(end.getDate() - 29);
   return {
-    start: start.toISOString().slice(0, 10),
-    end: end.toISOString().slice(0, 10),
+    start: formatDateAsLocal(start),
+    end: formatDateAsLocal(end),
   };
 };
-
-const formatNumber = (value: number) =>
-  value.toLocaleString("en-US", { maximumFractionDigits: 0 });
 
 const StatsPage: React.FC = () => {
   const defaultRange = useMemo(() => getDefaultRange(), []);
@@ -228,18 +231,7 @@ const StatsPage: React.FC = () => {
     };
   }, [parsedStats]);
 
-  const totals = useMemo(() => {
-    return parsedStats.reduce((acc, record) => {
-      metricDefinitions.forEach((metric) => {
-        acc[metric.key] = (acc[metric.key] ?? 0) + (record[metric.key] ?? 0);
-      });
-      return acc;
-    }, {} as Record<MetricKey, number>);
-  }, [parsedStats]);
-
   const activeDay = hoveredDay ?? parsedStats[parsedStats.length - 1];
-  const previousDay =
-    parsedStats.length > 1 ? parsedStats[parsedStats.length - 2] : undefined;
 
   const handleApplyRange = useCallback(() => {
     setQueryRange({ start: startInput, end: endInput });
@@ -248,9 +240,9 @@ const StatsPage: React.FC = () => {
   const handleQuickRange = useCallback((days: number) => {
     const end = new Date();
     const start = new Date();
-    start.setDate(end.getDate() - (days - 1));
-    const startValue = start.toISOString().slice(0, 10);
-    const endValue = end.toISOString().slice(0, 10);
+    start.setDate(start.getDate() - (days - 1));
+    const startValue = formatDateAsLocal(start);
+    const endValue = formatDateAsLocal(end);
     setStartInput(startValue);
     setEndInput(endValue);
     setQueryRange({ start: startValue, end: endValue });
@@ -293,7 +285,7 @@ const StatsPage: React.FC = () => {
               type="date"
               value={startInput}
               onChange={(e) => setStartInput(e.target.value)}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -304,8 +296,19 @@ const StatsPage: React.FC = () => {
               type="date"
               value={endInput}
               onChange={(e) => setEndInput(e.target.value)}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
             />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-gray-600 opacity-0">
+              Update
+            </label>
+            <button
+              onClick={handleApplyRange}
+              className="px-4 py-2 rounded-md text-sm bg-green-600 text-white shadow hover:bg-green-500"
+            >
+              Update
+            </button>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -321,12 +324,6 @@ const StatsPage: React.FC = () => {
           >
             Last 30 days
           </button>
-          <button
-            onClick={handleApplyRange}
-            className="px-4 py-2 rounded-md text-sm bg-green-600 text-white shadow hover:bg-green-500"
-          >
-            Update
-          </button>
         </div>
       </div>
       {error && (
@@ -339,55 +336,11 @@ const StatsPage: React.FC = () => {
         <p className="text-sm text-gray-600">No daily stats for this range.</p>
       )}
       {!loading && parsedStats.length > 0 && chartGeometry && (
-        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-inner">
+        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
           <div className="relative p-4">
-            <div className="flex flex-wrap items-center gap-4 pb-4">
-              {metricDefinitions.map((metric) => {
-                const currentValue = activeDay?.[metric.key] ?? 0;
-                const previousValue = previousDay?.[metric.key] ?? null;
-                const delta =
-                  previousValue === null ? null : currentValue - previousValue;
-                return (
-                  <div
-                    key={metric.key}
-                    className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm"
-                  >
-                    <span
-                      className="h-3 w-3 rounded-full"
-                      style={{ backgroundColor: metric.color }}
-                    />
-                    <div className="flex flex-col leading-tight">
-                      <span className="text-xs text-gray-600">
-                        {metric.label}
-                      </span>
-                      <div className="flex items-baseline gap-2">
-                        <span className="font-semibold text-lg">
-                          {formatNumber(currentValue)}
-                        </span>
-                        {delta !== null && (
-                          <span
-                            className={`text-xs ${
-                              delta > 0
-                                ? "text-green-600"
-                                : delta < 0
-                                ? "text-red-500"
-                                : "text-gray-500"
-                            }`}
-                          >
-                            {delta > 0 ? "+" : ""}
-                            {delta}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
             <svg
               ref={svgRef}
               viewBox={`0 0 ${chartGeometry.width} ${chartGeometry.height}`}
-              className="w-full h-[380px]"
               onMouseMove={handleHover}
               onMouseLeave={() =>
                 setHoveredDay(parsedStats[parsedStats.length - 1])
@@ -532,90 +485,45 @@ const StatsPage: React.FC = () => {
         </div>
       )}
 
-      <div className="grid md:grid-cols-3 gap-4">
-        {metricDefinitions.slice(0, 3).map((metric) => {
-          const average =
-            parsedStats.length === 0
-              ? 0
-              : Math.round((totals[metric.key] ?? 0) / parsedStats.length);
-          const latestValue = activeDay?.[metric.key] ?? 0;
-          return (
-            <Card
-              key={metric.key}
-              className="gap-2 relative overflow-hidden"
-              style={CardStyle.White}
-            >
-              <p className="text-sm text-gray-500">{metric.label}</p>
-              <h2 className="text-3xl font-semibold">
-                {formatNumber(latestValue)}
-              </h2>
-              <p className="text-sm text-gray-600">
-                Avg/day:{" "}
-                <span className="font-semibold text-gray-800">
-                  {formatNumber(average)}
-                </span>{" "}
-                • Total window:{" "}
-                <span className="font-semibold text-gray-800">
-                  {formatNumber(totals[metric.key] ?? 0)}
-                </span>
-              </p>
-            </Card>
-          );
-        })}
-      </div>
-
-      <Card className="gap-4" style={CardStyle.White}>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-gray-500">
-              Table log
-            </p>
-            <h2 className="text-xl font-semibold">Daily breakdown</h2>
-          </div>
-          <div className="text-sm text-gray-600">
-            Range: {queryRange.start} → {queryRange.end}
-          </div>
-        </div>
-        <div className="overflow-auto border border-gray-200 rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
-              <tr className="text-gray-600">
-                <th className="px-4 py-3 text-left font-semibold">Date</th>
-                <th className="px-4 py-3 text-left font-semibold">
-                  Actions completed
-                </th>
-                <th className="px-4 py-3 text-left font-semibold">
-                  Members signed
-                </th>
-                <th className="px-4 py-3 text-left font-semibold">
-                  Invites created
-                </th>
-                <th className="px-4 py-3 text-left font-semibold">
-                  Invites accepted
-                </th>
-                <th className="px-4 py-3 text-left font-semibold">Suspended</th>
+      <div className="overflow-auto border border-gray-200 rounded-lg">
+        <table className="min-w-full divide-y divide-gray-200 text-sm">
+          <thead className="bg-gray-50">
+            <tr className="text-gray-600">
+              <th className="px-4 py-3 text-left font-semibold">Date</th>
+              <th className="px-4 py-3 text-left font-semibold">
+                Actions completed
+              </th>
+              <th className="px-4 py-3 text-left font-semibold">
+                Members signed
+              </th>
+              <th className="px-4 py-3 text-left font-semibold">
+                Invites created
+              </th>
+              <th className="px-4 py-3 text-left font-semibold">
+                Invites accepted
+              </th>
+              <th className="px-4 py-3 text-left font-semibold">Suspended</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 bg-white">
+            {[...parsedStats].reverse().map((day) => (
+              <tr
+                key={day.dayId}
+                className="hover:bg-gray-50 transition-colors"
+              >
+                <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+                  {fullDateFormatter.format(day.parsedDate)}
+                </td>
+                <td className="px-4 py-3">{day.actionsCompleted}</td>
+                <td className="px-4 py-3">{day.signedMembers}</td>
+                <td className="px-4 py-3">{day.invitesCreated}</td>
+                <td className="px-4 py-3">{day.invitesAccepted}</td>
+                <td className="px-4 py-3">{day.suspendedMembers}</td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
-              {[...parsedStats].reverse().map((day) => (
-                <tr
-                  key={day.dayId}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
-                    {fullDateFormatter.format(day.parsedDate)}
-                  </td>
-                  <td className="px-4 py-3">{day.actionsCompleted}</td>
-                  <td className="px-4 py-3">{day.signedMembers}</td>
-                  <td className="px-4 py-3">{day.invitesCreated}</td>
-                  <td className="px-4 py-3">{day.invitesAccepted}</td>
-                  <td className="px-4 py-3">{day.suspendedMembers}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
