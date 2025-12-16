@@ -2041,8 +2041,6 @@ export class ActionsService {
     const userIds = await this.userService.getUserIdsForCommunity(community.id);
     const actionRelations = await this.getActionRelationsForUsers(userIds);
 
-    console.dir({ actionsasdf: actionRelations.actions }, { depth: null });
-
     return {
       actions: actionRelations.actions,
       users: actionRelations.users,
