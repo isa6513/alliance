@@ -73,12 +73,93 @@ const formatCity = (value: CityFieldValue | string): string => {
   return `${value.name}${suffix}`;
 };
 
+//TODO: refactor to share with FormRenderer.tsx
+const evaluateCondition = (
+  cond: Condition,
+  data: Record<string, FormValue>,
+  deviceType: DeviceVisibilityTarget,
+  visibilityValidatorResults: Record<number, boolean>
+): boolean => {
+  if ("expr" in cond) {
+    return true;
+  }
+  if ("deviceType" in cond) {
+    if (!Array.isArray(cond.deviceType) || cond.deviceType.length === 0) {
+      return false;
+    }
+    return cond.deviceType.includes(deviceType);
+  }
+  if ("validatorId" in cond) {
+    const expected = cond.resultEquals ?? true;
+    const actual = visibilityValidatorResults[cond.validatorId];
+    if (actual === undefined) {
+      return false;
+    }
+    return actual === expected;
+  }
+  const val = data[cond.when];
+  if ("hasValue" in cond) {
+    const present = hasContent(val as FormValue | undefined);
+    return cond.hasValue ? present : !present;
+  }
+  if ("anySelected" in cond) {
+    const selections = Array.isArray(val) ? val : [];
+    return cond.anySelected ? selections.length > 0 : selections.length === 0;
+  }
+  if ("includesOption" in cond) {
+    if (!cond.includesOption) {
+      return false;
+    }
+    return Array.isArray(val) && val.includes(cond.includesOption);
+  }
+  if (!("equals" in cond)) {
+    return true;
+  }
+  const equals = cond.equals;
+  if (typeof equals === "boolean") {
+    return Boolean(val) === equals;
+  }
+  if (Array.isArray(val) && equals !== null && equals !== undefined) {
+    return val.includes(equals as string);
+  }
+  return val === equals;
+};
+
+const isElementCurrentlyVisible = (
+  element: AnyField,
+  data: Record<string, FormValue>,
+  deviceType: DeviceVisibilityTarget,
+  visibilityValidatorResults: Record<number, boolean>
+): boolean => {
+  const conditions = Array.isArray(element.visibleIf)
+    ? element.visibleIf
+    : element.visibleIf
+    ? [element.visibleIf]
+    : [];
+  if (conditions.length === 0) {
+    return true;
+  }
+  return conditions.every((condition) =>
+    evaluateCondition(condition, data, deviceType, visibilityValidatorResults)
+  );
+};
+
 const isBlockVisible = (
   block: { visibleIf?: Condition[] | Condition },
   answers: Record<string, FormValue>,
   validatorResults?: Record<number, boolean>,
-  deviceType?: DeviceVisibilityTarget
+  deviceType?: DeviceVisibilityTarget,
+  inputField?: AnyField
 ): boolean => {
+  if (inputField) {
+    return isElementCurrentlyVisible(
+      inputField,
+      answers,
+      deviceType ?? "desktop",
+      validatorResults ?? {}
+    );
+  }
+
   const conditions = normalizeConditions(block.visibleIf);
   if (!conditions.length) {
     return true;
@@ -323,7 +404,8 @@ export function OutputRenderer({
         block,
         resolvedAnswers,
         resolvedValidatorResults,
-        resolvedDeviceType
+        resolvedDeviceType,
+        "fieldId" in block ? fieldLookup.get(block.fieldId) : undefined
       ) &&
       ("kind" in block ||
         (resolvedPublicAnswers &&
