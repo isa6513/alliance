@@ -728,7 +728,8 @@ const FormRenderer = ({
               ? parseFloat(valueToCheck)
               : NaN;
           const numberField = field as NumberField;
-          if (Number.isNaN(numValue)) {
+
+          if (Number.isNaN(numValue) && valueToCheck !== "") {
             return "Please enter a valid number.";
           }
           if (
