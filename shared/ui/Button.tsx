@@ -6,7 +6,7 @@ type ButtonProps = React.PropsWithChildren & {
   color?: ButtonColor;
   title?: string;
   disabled?: boolean;
-  size?: "small" | "medium" | "large";
+  size?: "small" | "medium" | "large" | "mediumDynamic";
 } & (
     | {
         type: "submit";
@@ -58,6 +58,7 @@ const Button: React.FC<ButtonProps> = ({
   const sizeClass = {
     small: "px-3 py-1.5 text-sm",
     medium: "px-4 py-2 text-base",
+    mediumDynamic: "px-2 md:px-4 py-1 md:py-1.5 text-base",
     large: "px-6 py-3 text-lg",
   }[size];
 

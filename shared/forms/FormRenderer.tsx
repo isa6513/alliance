@@ -1364,6 +1364,7 @@ const FormRenderer = ({
                   <Button
                     color={ButtonColor.LightHover}
                     type="button"
+                    size="mediumDynamic"
                     onClick={handlePrevious}
                     className=""
                   >
@@ -1371,7 +1372,7 @@ const FormRenderer = ({
                   </Button>
                 )}
                 <div>
-                  <span className="text-zinc-500">
+                  <span className="text-zinc-500 whitespace-nowrap">
                     Page {currentPageIndex + 1} of {schema.pages.length}
                   </span>
                 </div>
@@ -1379,6 +1380,7 @@ const FormRenderer = ({
                   <Button
                     color={ButtonColor.Black}
                     type="button"
+                    size="mediumDynamic"
                     onClick={handleNext}
                     className=""
                   >
@@ -1420,7 +1422,7 @@ const FormRenderer = ({
             <div className="relative">
               <Button
                 color={ButtonColor.White}
-                className="px-4 flex items-center cursor-pointer justify-center mt-0 text-zinc-800 !h-[45px]"
+                className="px-4 flex items-center cursor-pointer justify-center mt-0 text-zinc-800  !w-[35px] !h-[35px] md:!w-[45px] md:!h-[45px]"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 ⋯
