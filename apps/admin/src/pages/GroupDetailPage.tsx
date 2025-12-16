@@ -91,6 +91,9 @@ const CommunityDetailPage: React.FC = () => {
   const [actionSummaries, setActionSummaries] = useState<
     UserActionSummaryDto[]
   >([]);
+  const [activeActions, setActiveActions] = useState<UserActionSummaryDto[]>(
+    []
+  );
 
   const [memberContactInfo, setMemberContactInfo] = useState<Record<
     number,
@@ -100,8 +103,15 @@ const CommunityDetailPage: React.FC = () => {
   useEffect(() => {
     actionsGetCommunityMemberInfo().then((resp) => {
       if (resp.data) {
+        // Most recent actions first
         resp.data.actions.reverse();
+
         setActionSummaries(resp.data.actions);
+        setActiveActions(
+          resp.data.actions.filter(
+            (action) => action.status === "member_action"
+          )
+        );
         setUserActionRelations(
           resp.data.users.reduce((acc, user) => {
             acc[user.userId] = user.relations;
@@ -150,6 +160,44 @@ const CommunityDetailPage: React.FC = () => {
       });
     }
   }, [community]);
+
+  const { completedAllCurrentActions, nCompleted, nTotal } = useMemo<{
+    completedAllCurrentActions: Record<number, boolean>;
+    nCompleted: number;
+    nTotal: number;
+  }>(() => {
+    if (!community?.users || !userActionRelations) {
+      return {
+        completedAllCurrentActions: {} as Record<number, boolean>,
+        nCompleted: 0,
+        nTotal: 0,
+      };
+    }
+
+    const completedAll: Record<number, boolean> = {};
+    for (const action of activeActions) {
+      for (const userId of action.joinedUserIds) {
+        completedAll[userId] = true;
+      }
+    }
+
+    for (const action of activeActions) {
+      for (const userId of action.joinedUserIds) {
+        const relation = userActionRelations[userId]?.find(
+          (relation) => relation.actionId === action.id
+        );
+        if (relation?.status !== "completed") {
+          completedAll[userId] = false;
+        }
+      }
+    }
+    const completedAllValues = Object.values(completedAll);
+    return {
+      completedAllCurrentActions: completedAll,
+      nCompleted: completedAllValues.filter((completed) => completed).length,
+      nTotal: completedAllValues.length,
+    };
+  }, [activeActions, community, userActionRelations]);
 
   const handleUpdateDetails = async (
     event: React.FormEvent<HTMLFormElement>
@@ -667,6 +715,7 @@ const CommunityDetailPage: React.FC = () => {
           userActionRelations={userActionRelations ?? undefined}
           actions={actionSummaries}
           memberContactInfo={memberContactInfo ?? undefined}
+          completedAllCurrentActions={completedAllCurrentActions}
         />
       </Card>
     </div>
