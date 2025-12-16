@@ -1,16 +1,16 @@
+import { useMemo, useState } from "react";
+import { Link, href } from "react-router";
 import {
   CommunityMemberContactInfoDto,
   ProfileDto,
   UserActionRelationDetailDto,
   UserActionSummaryDto,
   UserAwayRangeDto,
-} from "@alliance/shared/client";
+} from "../client";
+import ProfileImage from "./ProfileImage";
+import UserProgressPills from "./UserProgressPills";
+import DropdownIcon from "./icons/DropdownIcon";
 import UserDisplayName from "./UserDisplayName";
-import { useMemo, useState } from "react";
-import UserProgressPills from "@alliance/shared/ui/UserProgressPills";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
-import { Link, href } from "react-router";
 
 const CommunityMemberTableRow = ({
   profile,

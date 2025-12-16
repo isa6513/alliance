@@ -2,7 +2,7 @@ import { UserCommentDto } from "@alliance/shared/client";
 import { Link, href, useNavigate } from "react-router";
 import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import UserDisplayName from "./UserDisplayName";
+import UserDisplayName from "@alliance/shared/ui/UserDisplayName";
 import { formatTime } from "@alliance/shared/lib/utils";
 
 export interface ForumActivityCommentCardProps {

@@ -5,7 +5,7 @@ import { Link, href, useNavigate } from "react-router";
 import { cx, formatTime } from "@alliance/shared/lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
 import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
-import UserDisplayName from "./UserDisplayName";
+import UserDisplayName from "@alliance/shared/ui/UserDisplayName";
 
 export interface ForumListPostProps {
   post: PostDto;

@@ -14,7 +14,7 @@ import { useAuth } from "../lib/AuthContext";
 import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
 import Comments from "./Comments";
-import UserDisplayName from "./UserDisplayName";
+import UserDisplayName from "@alliance/shared/ui/UserDisplayName";
 import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
 import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
 import { OutputRenderer } from "@alliance/shared/forms/OutputRenderer";

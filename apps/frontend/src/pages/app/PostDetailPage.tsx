@@ -13,7 +13,7 @@ import { Link, href, useNavigate, useParams } from "react-router";
 import { setRevalidate } from "../../applayout";
 import Comments from "../../components/Comments";
 import PostLikeButton from "../../components/PostLikeButton";
-import UserDisplayName from "../../components/UserDisplayName";
+import UserDisplayName from "@alliance/shared/ui/UserDisplayName";
 import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
 import { useAuth } from "../../lib/AuthContext";
 import { formatTime } from "@alliance/shared/lib/utils";

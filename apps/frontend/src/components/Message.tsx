@@ -4,7 +4,7 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { Reply, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, href } from "react-router";
-import UserDisplayName from "./UserDisplayName";
+import UserDisplayName from "@alliance/shared/ui/UserDisplayName";
 import { formatTime } from "@alliance/shared/lib/utils";
 import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
 

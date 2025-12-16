@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   UserActionRelationDetailDto,
   UserActionRelationStatus,
@@ -38,7 +37,7 @@ const UserProgressPills = ({
   pillHeight = "h-3",
 }: UserProgressPillsProps) => {
   return (
-    <div className="flex gap-px w-full">
+    <div className="flex gap-1 w-full">
       {actions.map((action) => {
         const relation = relationByActionId[action.id] ?? {
           status: "none",

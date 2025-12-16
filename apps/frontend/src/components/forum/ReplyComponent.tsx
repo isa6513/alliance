@@ -11,7 +11,7 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import { formatDistanceToNow } from "date-fns";
 import React, { useEffect, useRef, useState } from "react";
 import CommentLikeButton from "../CommentLikeButton";
-import UserDisplayName from "../UserDisplayName";
+import UserDisplayName from "@alliance/shared/ui/UserDisplayName";
 import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
 import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
 import ReplyForm from "./ReplyForm";
