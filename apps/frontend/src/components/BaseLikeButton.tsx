@@ -66,7 +66,7 @@ const BaseLikeButton = ({
       {likes > 0 && <p className="text-sm text-zinc-800">{likes}</p>}
       {labelText && likes > 0 && (
         <p className="text-sm text-zinc-800">
-          {likes === 1 ? "Like" : "Likes"}
+          {likes === 1 ? "likes" : "likes"}
         </p>
       )}
     </div>
