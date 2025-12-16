@@ -16,6 +16,9 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   updates,
   time,
 }: TimelineItemProps) => {
+  const sortedUpdates = updates?.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
   return (
     <div className="flex flex-col gap-y-2">
       <div className="flex flex-col md:flex-row md:items-center md:gap-x-2 mt-px">
@@ -31,7 +34,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
       )}
       {updates && updates.length > 0 && (
         <div className="flex flex-col gap-y-1.5 mt-2">
-          {updates.map((update) => (
+          {sortedUpdates?.map((update) => (
             <ActionUpdateCard key={update.id} update={update} />
           ))}
         </div>
