@@ -46,6 +46,7 @@ import ActionForm from "../components/ActionForm";
 import ActionUpdatesTab from "../components/ActionUpdatesTab";
 import EventManagementTab from "../components/EventManagementTab";
 import { FormBuilder } from "../components/FormBuilder";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 
 // Status color mapping
 export const getStatusColor = (status: ActionDto["status"]) => {
@@ -1167,10 +1168,10 @@ const ActionDashboard: React.FC = () => {
                 {/* Share URL Stats - only for publicOnly actions */}
                 {action.publicOnly && (
                   <Card style={CardStyle.White}>
-                    <h2 className="text-lg font-semibold mb-4">
+                    <h2 className="font-semibold mb-4">
                       Invite Stats (
                       {shareUrlStats.reduce((sum, s) => sum + s.inviteCount, 0)}{" "}
-                      total invites)
+                      total public submissions)
                     </h2>
                     {shareUrlStatsLoading ? (
                       <div className="text-sm text-gray-500">Loading...</div>
@@ -1195,15 +1196,10 @@ const ActionDashboard: React.FC = () => {
                               >
                                 <td className="py-2 px-3">
                                   <div className="flex items-center gap-2">
-                                    {stat.user.profilePicture ? (
-                                      <img
-                                        src={stat.user.profilePicture}
-                                        alt=""
-                                        className="w-6 h-6 rounded-full object-cover"
-                                      />
-                                    ) : (
-                                      <div className="w-6 h-6 rounded-full bg-gray-200" />
-                                    )}
+                                    <ProfileImage
+                                      pfp={stat.user.profilePicture}
+                                      size="small"
+                                    />
                                     <span className="font-medium text-gray-800">
                                       {stat.user.displayName}
                                     </span>
