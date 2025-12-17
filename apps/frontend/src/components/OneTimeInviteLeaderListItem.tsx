@@ -29,7 +29,7 @@ const OneTimeInviteLeaderListItem = ({
             to={href("/member/:id", {
               id: invite.invitingUser.id.toString(),
             })}
-            className="hover:underline gap-x-3"
+            className="hover:underline gap-x-3 shrink-0"
           >
             <ProfileImage
               pfp={invite.invitingUser.profilePicture}
