@@ -19,18 +19,15 @@ import {
   UserActionSummaryDto,
   UserAwayRangeDto,
 } from "@alliance/shared/client/types.gen";
-import Badge from "@alliance/shared/ui/Badge";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
 import { Duration, formatDuration, intervalToDuration } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router";
 import { Route } from "../../.react-router/types/src/pages/+types/UserDetailView";
-import EmailNotif from "../components/EmailNotif";
-import TextNotif from "../components/TextNotif";
-import CreateActivityControls from "../components/CreateActivityControls";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import CreateActivityControls from "../components/CreateActivityControls";
+import { ChevronDown, ChevronRight, Mail, Phone } from "lucide-react";
 
 export async function clientLoader({ params }: Route.LoaderArgs) {
   const userIdParam = params.userId;
@@ -109,6 +106,7 @@ const UserDetailView: React.FC = () => {
     () => new Set()
   );
   const [tagMutationError, setTagMutationError] = useState<string | null>(null);
+  const [expandedEmailId, setExpandedEmailId] = useState<number | null>(null);
 
   useEffect(() => {
     setActionRelationsState(actionRelations);
@@ -198,7 +196,7 @@ const UserDetailView: React.FC = () => {
       ? "text-zinc-500"
       : latestEvent.type === "signed"
       ? "text-green"
-      : "text-red-500";
+      : "text-red-700";
 
   const contractStatus =
     latestEvent === null
@@ -263,306 +261,441 @@ const UserDetailView: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <Card style={CardStyle.WhiteSolid} className="p-6">
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col sm:flex-row sm:gap-4">
-            <ProfileImage pfp={user.profilePicture} size="large" />
-            <div className="mt-4 sm:mt-0">
-              <div className="flex items-center gap-3">
-                <h1 className="text-xl font-semibold text-zinc-900">
-                  {user.name}
-                </h1>
-                <Link
-                  to={`/database/?table=user&id=${user.id}`}
-                  className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
-                >
-                  <DatabaseIcon size="mini" />
-                </Link>
-                <Button
-                  color={ButtonColor.Stone}
-                  onClick={() => {
-                    const apiUrl = getApiUrl();
-                    window.open(
-                      `${apiUrl}/auth/impersonate/${user.id}`,
-                      "_blank"
-                    );
-                  }}
-                  size="small"
-                >
-                  Log in as user
-                </Button>
-              </div>
-              <div className="mt-2 space-y-1 text-sm text-zinc-600">
-                <p>{user.email}</p>
-                {user.phoneNumber && <p>{user.phoneNumber}</p>}
-                <p>ID: {user.id}</p>
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2 text-sm text-zinc-700">
-            <p>
-              <span className="font-medium text-zinc-900">
-                Contract status:{" "}
-              </span>
-              <span className={`font-semibold ${contractStatusColor}`}>
-                {contractStatus}
-              </span>
-            </p>
-            {latestEvent?.type === "signed" && (
-              <p>Signed on {new Date(latestEvent.date).toLocaleDateString()}</p>
-            )}
-            {latestEvent?.type === "suspended" && (
-              <p>
-                Suspended on {new Date(latestEvent.date).toLocaleDateString()}
-              </p>
-            )}
-            <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
-              <PreferenceBadge
-                label="Email"
-                enabled={user.emailNotifsEnabled}
-              />
-              <PreferenceBadge label="Text" enabled={user.textNotifsEnabled} />
-              <PreferenceBadge label="Push" enabled={user.pushNotifsEnabled} />
-              <PreferenceBadge
-                label="All notifs off"
-                enabled={user.turnedOffAllNotifs}
-              />
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <Card style={CardStyle.WhiteSolid} className="p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-zinc-900">Away periods</h2>
-          {currentAwayRange && (
-            <span
-              className={`rounded px-2 py-1 text-xs font-semibold ${"bg-amber-100 text-amber-800"}`}
-            >
-              Away until {formatAwayDate(currentAwayRange.endDate)}
+    <div className="p-4 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex items-start gap-4 pb-4 border-b border-zinc-200 mb-4">
+        <ProfileImage pfp={user.profilePicture} size="huge" />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-lg font-semibold text-zinc-900">{user.name}</h1>
+            <span className={`text-sm font-medium ${contractStatusColor}`}>
+              {contractStatus}
             </span>
-          )}
+            {currentAwayRange && (
+              <span className="text-xs px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+                Away
+              </span>
+            )}
+            <Link
+              to={`/database/?table=user&id=${user.id}`}
+              className="text-zinc-400 hover:text-zinc-600"
+            >
+              <DatabaseIcon size="large" />
+            </Link>
+            <Button
+              color={ButtonColor.Stone}
+              onClick={() => {
+                const apiUrl = getApiUrl();
+                window.open(`${apiUrl}/auth/impersonate/${user.id}`, "_blank");
+              }}
+              size="small"
+            >
+              Log in as user
+            </Button>
+          </div>
+          <div className="flex items-center gap-4 text-sm text-zinc-600 mt-3">
+            <span>
+              <Mail size={16} className="text-zinc-500 inline mr-1" />
+              {user.email}
+            </span>
+            {user.phoneNumber && (
+              <span className="text-zinc-400">
+                <Phone size={16} className="text-zinc-500 inline mr-1" />+
+                {user.phoneNumber}
+              </span>
+            )}
+            <span className="text-zinc-400">ID: {user.id}</span>
+          </div>
+          <div className="flex items-center gap-3 mt-3 text-sm">
+            <span
+              className={
+                user.emailNotifsEnabled ? "text-green-600" : "text-zinc-400"
+              }
+            >
+              Email {user.emailNotifsEnabled ? "on" : "off"}
+            </span>
+            <span
+              className={
+                user.textNotifsEnabled ? "text-green-600" : "text-zinc-400"
+              }
+            >
+              Text {user.textNotifsEnabled ? "on" : "off"}
+            </span>
+            <span
+              className={
+                user.pushNotifsEnabled ? "text-green-600" : "text-zinc-400"
+              }
+            >
+              Push {user.pushNotifsEnabled ? "on" : "off"}
+            </span>
+            {user.turnedOffAllNotifs && (
+              <span className="text-red-500 font-medium">All notifs off</span>
+            )}
+          </div>
         </div>
-        {sortedAwayRanges.length ? (
-          <div className="space-y-3">
-            {sortedAwayRanges.map((range) => {
-              const status = awayRangeStatus(range);
-              return (
-                <div
-                  key={range.id}
-                  className={`flex items-start justify-between gap-3 rounded border p-3 ${
-                    status === "current"
-                      ? "border-amber-200 bg-amber-50"
-                      : status === "upcoming"
-                      ? "border-blue-200 bg-blue-50"
-                      : "border-zinc-200 bg-zinc-50"
-                  }`}
-                >
-                  <div className="space-y-1">
-                    <p className="font-medium text-zinc-800">
-                      {formatAwayRange(range)}
-                    </p>
-                    <p className="text-sm text-zinc-600">
-                      {formatAwayReason(range.reason)}
-                      {range.note ? ` - ${range.note}` : ""}
-                    </p>
+      </div>
+
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        {/* Left Column */}
+        <div className="lg:col-span-3 space-y-4">
+          {/* Actions Table */}
+          <section>
+            {actionSummaries.length ? (
+              <div className="border border-zinc-200 rounded overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-zinc-100 text-left">
+                    <tr>
+                      <th className="px-3 py-2 font-medium text-zinc-600">
+                        Action
+                      </th>
+                      <th className="px-3 py-2 font-medium text-zinc-600">
+                        Status
+                      </th>
+                      <th className="px-3 py-2 font-medium text-zinc-600 text-nowrap">
+                        User Status
+                      </th>
+                      <th className="px-3 py-2 font-medium text-zinc-600 text-nowrap">
+                        Last Activity
+                      </th>
+                      <th className="px-3 py-2 font-medium text-zinc-600">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100">
+                    {actionSummaries.map((action) => {
+                      const relation = relationByActionId[action.id];
+                      const relationStatus = relation?.status ?? "none";
+                      return (
+                        <tr key={action.id} className="hover:bg-zinc-50">
+                          <td className="px-3 py-2">
+                            <Link
+                              to={`/actions/${action.id}`}
+                              className="text-blue-600 hover:underline"
+                            >
+                              {action.name}
+                            </Link>
+                          </td>
+                          <td className="px-3 py-2 text-zinc-500">
+                            {humanize(action.status)}
+                          </td>
+                          <td className="px-3 py-2">
+                            <span
+                              className={`font-medium ${relationStatusColor(
+                                relationStatus
+                              )}`}
+                            >
+                              {formatRelationStatus(relationStatus)}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 text-zinc-500">
+                            {relation?.latestActivityAt
+                              ? new Date(
+                                  relation.latestActivityAt
+                                ).toLocaleDateString()
+                              : "—"}
+                          </td>
+                          <td className="px-3 py-2">
+                            <CreateActivityControls
+                              actionId={action.id}
+                              userId={user.id}
+                              onCreated={upsertActionRelation}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-sm text-zinc-500">No actions tracked.</p>
+            )}
+          </section>
+
+          {/* Notifications Tables */}
+          <section>
+            <h2 className="text-sm font-semibold text-zinc-700 mb-2">
+              Notifications ({notifs.length})
+              {otherNotifs.length > 0 && (
+                <span className="font-normal text-zinc-400 ml-1">
+                  + {otherNotifs.length} push
+                </span>
+              )}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Texts */}
+              <div className="border border-zinc-200 rounded overflow-hidden">
+                <div className="bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600 border-b border-zinc-200">
+                  Texts ({textNotifs.length})
+                </div>
+                {textNotifs.length ? (
+                  <div className="max-h-64 overflow-y-auto divide-y divide-zinc-100">
+                    {textNotifs.map((notif) => {
+                      const mms = notif.mms;
+                      const status =
+                        mms?.status || (notif.sent ? "sent" : "pending");
+                      return (
+                        <div
+                          key={keyForNotif(notif)}
+                          className="px-3 py-2 text-xs hover:bg-zinc-50"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span
+                              className={`font-medium ${
+                                ["sent", "delivered"].includes(
+                                  status.toLowerCase()
+                                )
+                                  ? "text-green-600"
+                                  : ["failed", "undelivered"].includes(
+                                      status.toLowerCase()
+                                    )
+                                  ? "text-red-600"
+                                  : "text-amber-600"
+                              }`}
+                            >
+                              {status}
+                            </span>
+                            <span className="text-zinc-400">
+                              {mms?.createdAt &&
+                                new Date(mms.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          {mms?.body && (
+                            <p className="text-zinc-600 truncate mt-0.5">
+                              {mms.body}
+                            </p>
+                          )}
+                          {mms?.clickedLink && (
+                            <span className="text-green-600">Link clicked</span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                  <span
-                    className={`rounded px-2 py-1 text-xs font-semibold ${awayStatusTone(
-                      status
-                    )}`}
+                ) : (
+                  <p className="px-3 py-2 text-xs text-zinc-500">
+                    No texts sent.
+                  </p>
+                )}
+              </div>
+
+              {/* Emails */}
+              <div className="border border-zinc-200 rounded overflow-hidden">
+                <div className="bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600 border-b border-zinc-200">
+                  Emails ({emailNotifs.length})
+                </div>
+                {emailNotifs.length ? (
+                  <div className="max-h-96 overflow-y-auto divide-y divide-zinc-100">
+                    {emailNotifs.map((notif) => {
+                      const mail = notif.mail;
+                      const isExpanded = expandedEmailId === mail?.id;
+                      return (
+                        <div key={keyForNotif(notif)}>
+                          <div
+                            className="px-3 py-2 text-xs hover:bg-zinc-50 cursor-pointer"
+                            onClick={() =>
+                              setExpandedEmailId(
+                                isExpanded ? null : mail?.id ?? null
+                              )
+                            }
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-zinc-400">
+                                  {isExpanded ? (
+                                    <ChevronDown size={16} />
+                                  ) : (
+                                    <ChevronRight size={16} />
+                                  )}
+                                </span>
+                                <span
+                                  className={`font-medium ${
+                                    mail?.status?.toLowerCase() === "sent"
+                                      ? "text-green-600"
+                                      : mail?.status?.toLowerCase() === "failed"
+                                      ? "text-red-600"
+                                      : "text-amber-600"
+                                  }`}
+                                >
+                                  {mail?.status || "unknown"}
+                                </span>
+                              </div>
+                              <span className="text-zinc-400">
+                                {mail?.createdAt &&
+                                  new Date(mail.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <p className="text-zinc-500 truncate mt-0.5 ml-5">
+                              {mail?.to}
+                            </p>
+                            {mail?.clickedLink && (
+                              <span className="text-green-600 ml-5">
+                                Link clicked
+                              </span>
+                            )}
+                          </div>
+                          {isExpanded && mail?.renderedHtml && (
+                            <div className="border-t border-zinc-200 bg-white">
+                              <iframe
+                                srcDoc={mail.renderedHtml}
+                                className="w-full h-96 border-0"
+                                title="Email preview"
+                                sandbox=""
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="px-3 py-2 text-xs text-zinc-500">
+                    No emails sent.
+                  </p>
+                )}
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-4">
+          {/* Tags */}
+          <section className="border border-zinc-200 rounded p-3">
+            <h2 className="text-sm font-semibold text-zinc-700 mb-2">
+              Groups ({userTags.length})
+            </h2>
+            {tagMutationError && (
+              <p className="text-xs text-red-500 mb-2">{tagMutationError}</p>
+            )}
+            <div className="space-y-1 max-h-48 overflow-y-auto">
+              {sortedAllTags.map((tag) => {
+                const checked = userTagIds.has(tag.id);
+                const pending = pendingTagOps.has(tagKey(tag.id));
+                return (
+                  <label
+                    key={tag.id}
+                    className={`flex items-center gap-2 text-sm cursor-pointer hover:bg-zinc-50 px-1 py-0.5 rounded ${
+                      pending ? "opacity-50" : ""
+                    }`}
                   >
-                    {status === "current"
-                      ? "Current"
-                      : status === "upcoming"
-                      ? "Upcoming"
-                      : "Past"}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-sm text-zinc-500">
-            No away periods have been recorded for this user.
-          </p>
-        )}
-      </Card>
-
-      <Card style={CardStyle.WhiteSolid} className="p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-zinc-900">Groups</h2>
-          <span className="text-sm text-zinc-500">
-            {userTags.length} tag{userTags.length === 1 ? "" : "s"}
-          </span>
-        </div>
-        {tagMutationError && (
-          <p className="text-sm text-red-500">{tagMutationError}</p>
-        )}
-        {userTags.length ? (
-          <div className="flex flex-wrap gap-2">
-            {userTags.map((tag) => (
-              <Badge key={tag.id}>{tag.name}</Badge>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-zinc-500">No group memberships yet.</p>
-        )}
-        <div className="border-t border-zinc-200 pt-4">
-          <p className="text-sm font-medium text-zinc-700 mb-3">
-            Update membership
-          </p>
-          <div className="grid gap-2 md:grid-cols-2">
-            {sortedAllTags.map((tag) => {
-              const checked = userTagIds.has(tag.id);
-              const pending = pendingTagOps.has(tagKey(tag.id));
-              return (
-                <label
-                  key={tag.id}
-                  className={`flex items-start gap-3 rounded border border-zinc-200 p-3 text-sm ${
-                    pending ? "opacity-60" : ""
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-1"
-                    checked={checked}
-                    disabled={pending}
-                    onChange={(event) =>
-                      handleTagToggle(tag.id, event.target.checked)
-                    }
-                  />
-                  <div>
-                    <p className="font-medium text-zinc-800">{tag.name}</p>
-                    {tag.description && (
-                      <p className="text-xs text-zinc-500 mt-1">
-                        {tag.description}
-                      </p>
-                    )}
-                  </div>
-                </label>
-              );
-            })}
-            {sortedAllTags.length === 0 && (
-              <p className="text-sm text-zinc-500">No tags available.</p>
-            )}
-          </div>
-        </div>
-      </Card>
-
-      <Card style={CardStyle.WhiteSolid} className="p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-zinc-900">Actions</h2>
-          <span className="text-sm text-zinc-500">
-            {actionSummaries.length} tracked action
-            {actionSummaries.length === 1 ? "" : "s"}
-          </span>
-        </div>
-        {actionSummaries.length ? (
-          <div className="grid gap-3">
-            {actionSummaries.map((action) => {
-              const relation = relationByActionId[action.id];
-              const relationStatus = relation?.status ?? "none";
-              const statusLabel = formatRelationStatus(relationStatus);
-              return (
-                <div
-                  key={action.id}
-                  className="rounded border border-zinc-200 bg-zinc-50 p-3"
-                >
-                  <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <Link
-                        to={`/actions/${action.id}`}
-                        className="font-medium text-zinc-800 hover:text-blue-600"
-                      >
-                        {action.name}
-                      </Link>
-                      <p className="text-xs text-zinc-500">
-                        Action status:{" "}
-                        {humanize(action.status) ?? action.status}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span
-                        className={`text-sm font-semibold ${relationStatusColor(
-                          relationStatus
-                        )}`}
-                      >
-                        {statusLabel}
-                      </span>
-                      <span className="text-xs text-zinc-500">
-                        {relation?.latestActivityAt &&
-                          new Date(
-                            relation.latestActivityAt
-                          ).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  {!relation && (
-                    <CreateActivityControls
-                      actionId={action.id}
-                      userId={user.id}
-                      onCreated={upsertActionRelation}
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      disabled={pending}
+                      onChange={(e) =>
+                        handleTagToggle(tag.id, e.target.checked)
+                      }
+                      className="rounded"
                     />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-sm text-zinc-500">
-            No actions are currently tracked for this user.
-          </p>
-        )}
-      </Card>
+                    <span
+                      className={checked ? "text-zinc-900" : "text-zinc-500"}
+                    >
+                      {tag.name}
+                    </span>
+                  </label>
+                );
+              })}
+              {sortedAllTags.length === 0 && (
+                <p className="text-xs text-zinc-500">No tags available.</p>
+              )}
+            </div>
+          </section>
 
-      <Card style={CardStyle.WhiteSolid} className="p-6 space-y-3">
-        <h2 className="text-lg font-semibold text-zinc-900">Activity</h2>
-        <div className="flex flex-col gap-3 sm:flex-row sm:gap-6">
-          <ActivityStat label="Last 7 days" value={formatTimeSpent || "0"} />
-          <ActivityStat label="Total" value={formatTimeSpentTotal || "0"} />
-        </div>
-      </Card>
+          {/* Away Periods */}
+          <section className="border border-zinc-200 rounded p-3">
+            <h2 className="text-sm font-semibold text-zinc-700 mb-2">
+              Away Periods ({sortedAwayRanges.length})
+            </h2>
+            {sortedAwayRanges.length ? (
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {sortedAwayRanges.map((range) => {
+                  const status = awayRangeStatus(range);
+                  return (
+                    <div
+                      key={range.id}
+                      className={`text-xs p-2 rounded ${
+                        status === "current"
+                          ? "bg-amber-50 border border-amber-200"
+                          : status === "upcoming"
+                          ? "bg-blue-50 border border-blue-200"
+                          : "bg-zinc-50"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">
+                          {formatAwayRange(range)}
+                        </span>
+                        <span
+                          className={`text-xs ${
+                            status === "current"
+                              ? "text-amber-700"
+                              : status === "upcoming"
+                              ? "text-blue-700"
+                              : "text-zinc-400"
+                          }`}
+                        >
+                          {status}
+                        </span>
+                      </div>
+                      <p className="text-zinc-600 mt-0.5">
+                        {formatAwayReason(range.reason)}
+                        {range.note && ` — ${range.note}`}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-xs text-zinc-500">No away periods.</p>
+            )}
+          </section>
 
-      <Card style={CardStyle.WhiteSolid} className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-zinc-900">Notifications</h2>
-          <span className="text-sm text-zinc-500">{notifs.length} total</span>
-        </div>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-zinc-700">Texts</h3>
-            {textNotifs.length ? (
-              textNotifs.map((notif) => (
-                <TextNotif key={keyForNotif(notif)} notif={notif} />
-              ))
+          {/* Contract Details */}
+          <section className="border border-zinc-200 rounded p-3">
+            <div className="flex items-center justify-between mx-1">
+              <h2 className="text-sm font-semibold text-zinc-700 mb-2">
+                Contract
+              </h2>
+              <div className="text-sm mb-2">
+                <span className={`font-medium ${contractStatusColor}`}>
+                  {contractStatus}
+                </span>
+              </div>
+            </div>
+            {user.contractEvents?.length > 0 ? (
+              <div className="space-y-1 max-h-32 overflow-y-auto">
+                {[...user.contractEvents]
+                  .sort(
+                    (a, b) =>
+                      new Date(b.date).getTime() - new Date(a.date).getTime()
+                  )
+                  .map((event, idx) => (
+                    <div
+                      key={idx}
+                      className={`text-xs flex items-center justify-between px-2 py-1 rounded ${
+                        event.type === "signed"
+                          ? "bg-green-50 text-green-700"
+                          : "bg-red-50 text-red-700"
+                      }`}
+                    >
+                      <span className="font-medium capitalize">
+                        {event.type}
+                      </span>
+                      <span className="text-zinc-500">
+                        {new Date(event.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+              </div>
             ) : (
-              <p className="text-sm text-zinc-500">
-                No texts have been sent to this user.
-              </p>
+              <p className="text-xs text-zinc-500">No contract events.</p>
             )}
-          </div>
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-zinc-700">Emails</h3>
-            {emailNotifs.length ? (
-              emailNotifs.map((notif) => (
-                <EmailNotif key={keyForNotif(notif)} notif={notif} />
-              ))
-            ) : (
-              <p className="text-sm text-zinc-500">
-                No emails have been sent to this user.
-              </p>
-            )}
-          </div>
+          </section>
         </div>
-        {otherNotifs.length ? (
-          <div className="rounded border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600">
-            {otherNotifs.length} push notification
-            {otherNotifs.length === 1 ? "" : "s"} not shown here.
-          </div>
-        ) : null}
-      </Card>
+      </div>
     </div>
   );
 };
@@ -612,19 +745,6 @@ function awayRangeStatus(range: UserAwayRangeDto): AwayRangeStatus {
     return "upcoming";
   }
   return "past";
-}
-
-function awayStatusTone(status: AwayRangeStatus) {
-  switch (status) {
-    case "current":
-      return "bg-amber-200 text-amber-900";
-    case "upcoming":
-      return "bg-blue-100 text-blue-800";
-    case "past":
-      return "bg-zinc-200 text-zinc-700";
-    default:
-      throw new Error(`Unknown away range status: ${status satisfies never}`);
-  }
 }
 
 function formatRelationStatus(status: UserActionRelationDetailDto["status"]) {
@@ -691,35 +811,5 @@ function keyForNotif(notif: ActionEventNotifDto) {
     mailId ?? mmsId ?? Math.random()
   }`;
 }
-
-interface PreferenceBadgeProps {
-  label: string;
-  enabled: boolean;
-}
-
-const PreferenceBadge = ({ label, enabled }: PreferenceBadgeProps) => {
-  const tone = enabled
-    ? "bg-green-100 text-green-700"
-    : "bg-zinc-200 text-zinc-600";
-  return (
-    <span className={`rounded px-2 py-1 font-medium ${tone}`}>
-      {label}: {enabled ? "Enabled" : "Disabled"}
-    </span>
-  );
-};
-
-interface ActivityStatProps {
-  label: string;
-  value: string;
-}
-
-const ActivityStat = ({ label, value }: ActivityStatProps) => {
-  return (
-    <div className="flex flex-col rounded border border-zinc-200 bg-zinc-50 px-4 py-3">
-      <span className="text-xs uppercase text-zinc-500">{label}</span>
-      <span className="text-lg font-semibold text-zinc-800">{value}</span>
-    </div>
-  );
-};
 
 export default UserDetailView;

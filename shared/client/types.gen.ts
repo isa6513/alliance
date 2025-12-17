@@ -289,9 +289,7 @@ export type Mms = {
     to: string;
     from: string;
     body: string;
-    status: {
-        [key: string]: unknown;
-    };
+    status: string;
     twilioSid: string;
     errorCode?: number;
     errorMessage?: string;
@@ -2135,13 +2133,6 @@ export type AuthImpersonateData = {
     };
     query?: never;
     url: '/auth/impersonate/{userId}';
-};
-
-export type AuthImpersonateResponses = {
-    /**
-     * Redirects to frontend as the specified user
-     */
-    200: unknown;
 };
 
 export type UserFindMeData = {
