@@ -2060,6 +2060,7 @@ export class ActionsService {
     const actionRelations = await this.getActionRelationsForUsers(userIds);
     return {
       actions: actionRelations.actions,
+      suites: actionRelations.suites,
       users: actionRelations.users,
     };
   }
