@@ -1888,7 +1888,10 @@ export class ActionsService {
     actionLimit: number = 8,
   ): Promise<UserActionRelationsResponseDto> {
     const actions = (
-      await this.findAllSorted(['events', 'suite'], actionLimit)
+      await this.findAllSorted(
+        ['events', 'suite', 'participatingTags'],
+        actionLimit,
+      )
     ).filter(
       (action) => action.status !== ActionStatus.Draft && !action.publicOnly,
     );
@@ -1909,16 +1912,25 @@ export class ActionsService {
       );
     }
 
+    const allMembersTagId = (
+      await this.userService.findTagByName('All Members')
+    )?.id;
     const userIdSet = new Set(userIds);
     const actionSummaryPromises: Promise<UserActionSummaryDto>[] = actions.map(
       async (action) => {
         const joinedUserIds = (
           await this.computeUsersJoinedForAction(action.id)
         ).filter((userId) => userIdSet.has(userId));
+
         return {
           id: action.id,
           name: action.name,
           status: action.status,
+          allMembersParticipating:
+            allMembersTagId !== undefined &&
+            !!action.participatingTags.find(
+              (tag) => tag.id === allMembersTagId,
+            ),
           joinedUserIds,
           suiteId: action.suite?.id,
         } satisfies UserActionSummaryDto;

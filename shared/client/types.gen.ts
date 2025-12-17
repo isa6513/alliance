@@ -1552,6 +1552,7 @@ export type UserActionSummaryDto = {
     id: number;
     name: string;
     status: ActionStatus;
+    allMembersParticipating: boolean;
     joinedUserIds: Array<number>;
     suiteId?: number;
 };

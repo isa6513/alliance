@@ -67,6 +67,7 @@ const CommunityPage = () => {
     ActionSuiteSummaryDto[] | null
   >(null);
   const [selectedSuite, setSelectedSuite] = useState<string | null>(null);
+  const [currentActionsSelected, setCurrentActionsSelected] = useState(true);
 
   const [chatOpen, setChatOpen] = useState(false);
 
@@ -83,7 +84,7 @@ const CommunityPage = () => {
     });
   }, [community?.id]);
 
-  const suiteActions = useMemo(() => {
+  const selectedActions = useMemo(() => {
     if (selectedSuite === null || activeActionSuites === null) {
       return activeActions;
     }
@@ -112,13 +113,13 @@ const CommunityPage = () => {
     }
 
     const completedAll: Record<number, boolean> = {};
-    for (const action of suiteActions) {
+    for (const action of selectedActions) {
       for (const userId of action.joinedUserIds) {
         completedAll[userId] = true;
       }
     }
 
-    for (const action of suiteActions) {
+    for (const action of selectedActions) {
       for (const userId of action.joinedUserIds) {
         const relation = userActionRelations[userId]?.find(
           (relation) => relation.actionId === action.id
@@ -134,7 +135,7 @@ const CommunityPage = () => {
       nCompleted: completedAllValues.filter((completed) => completed).length,
       nTotal: completedAllValues.length,
     };
-  }, [suiteActions, community, userActionRelations]);
+  }, [selectedActions, community, userActionRelations]);
 
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -180,14 +181,6 @@ const CommunityPage = () => {
   useEffect(() => {
     actionsGetCommunityMemberInfo().then((resp) => {
       if (resp.data) {
-        // Most recent actions first
-        resp.data.actions.reverse();
-
-        setActionSummaries(resp.data.actions);
-        const activeActions = resp.data.actions.filter(
-          (action) => action.status === "member_action"
-        );
-        setActiveActions(activeActions);
         setUserActionRelations(
           resp.data.users.reduce((acc, user) => {
             acc[user.userId] = user.relations;
@@ -195,14 +188,44 @@ const CommunityPage = () => {
           }, {} as Record<number, UserActionRelationDetailDto[]>)
         );
 
+        // Most recent actions first
+        resp.data.actions.reverse();
+
+        setActionSummaries(resp.data.actions);
+        const actionsWithSuites = resp.data.actions.filter(
+          (action): action is typeof action & { suiteId: number } =>
+            action.suiteId !== undefined && action.allMembersParticipating
+        );
+        if (actionsWithSuites.length === 0) {
+          return;
+        }
+        const activeActions = actionsWithSuites.filter(
+          (action) => action.status === "member_action"
+        );
+
+        if (activeActions.length === 0) {
+          const lastSuiteId =
+            actionsWithSuites[actionsWithSuites.length - 1].suiteId;
+          const lastSuite = resp.data.suites.find(
+            (suite) => suite.id === lastSuiteId
+          )!;
+          setActiveActionSuites([lastSuite]);
+          setActiveActions(
+            actionsWithSuites.filter((action) => action.suiteId === lastSuiteId)
+          );
+          setSelectedSuite(lastSuite.name);
+          setCurrentActionsSelected(false);
+          return;
+        }
+
         const activeSuiteIds = new Set(activeActions.map((a) => a.suiteId));
         const activeSuites = resp.data.suites.filter((suite) =>
           activeSuiteIds.has(suite.id)
         );
         setActiveActionSuites(activeSuites);
-        if (activeSuites.length > 0) {
-          setSelectedSuite(activeSuites[0].name);
-        }
+        setActiveActions(activeActions);
+        setSelectedSuite(activeSuites[0].name);
+        setCurrentActionsSelected(true);
       }
     });
   }, []);
@@ -275,6 +298,19 @@ const CommunityPage = () => {
   const isLargeScreen = useMediaQuery("(min-width: 1350px)");
   const isChatOpen = messagingEnabled && chatOpen;
 
+  const actionDisplay = useMemo(() => {
+    if (selectedActions.length === 1) {
+      if (currentActionsSelected) {
+        return "the current action";
+      }
+      return "the previous action";
+    }
+    if (currentActionsSelected) {
+      return "current actions";
+    }
+    return "the previous actions";
+  }, [selectedActions.length, currentActionsSelected]);
+
   if (!community) {
     if (loading) {
       return <Spinner />;
@@ -325,7 +361,7 @@ const CommunityPage = () => {
               )}
             </div>
 
-            <div className="max-w-[400px]">
+            <div className={`max-w-[400px]${nTotal === 0 ? " invisible" : ""}`}>
               {amLeader && suiteDropdownOptions && selectedSuite && (
                 <>
                   <DropdownSelect
@@ -337,9 +373,7 @@ const CommunityPage = () => {
                 </>
               )}
               <p className="text-sm">
-                {nCompleted} / {nTotal} have completed{" "}
-                {suiteActions.length === 1 ? "the " : ""} current action
-                {suiteActions.length !== 1 ? "s" : ""}
+                {nCompleted} / {nTotal} have completed {actionDisplay}
               </p>
               <CompletedBar
                 percentage={nTotal === 0 ? 0 : (nCompleted / nTotal) * 100}
