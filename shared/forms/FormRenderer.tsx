@@ -729,7 +729,7 @@ const FormRenderer = ({
               : NaN;
           const numberField = field as NumberField;
 
-          if (Number.isNaN(numValue) && valueToCheck !== "") {
+          if (Number.isNaN(numValue) && !!valueToCheck) {
             return "Please enter a valid number.";
           }
           if (
