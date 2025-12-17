@@ -7,6 +7,7 @@ import {
   userGetTags,
   userList,
   userRemoveUserFromTag,
+  userGetAwayRangeForUser,
 } from "@alliance/shared/client";
 import {
   ActionEventNotifDto,
@@ -15,6 +16,7 @@ import {
   UserActionRelationDetailDto,
   UserActionRelationsResponseDto,
   UserActionSummaryDto,
+  UserAwayRangeDto,
 } from "@alliance/shared/client/types.gen";
 import Badge from "@alliance/shared/ui/Badge";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -40,6 +42,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
 
   const [
     usersRes,
+    awayRangesRes,
     tagsRes,
     actionRelationsRes,
     timeSpentRes,
@@ -47,6 +50,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
     notifRes,
   ] = await Promise.all([
     userList(),
+    userGetAwayRangeForUser({ path: { id: userId } }),
     userGetTags(),
     userGetActionRelations(),
     analyticsGetTimeSpentPerUser(),
@@ -61,6 +65,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
     throw new Error("Not found");
   }
 
+  const awayRanges = awayRangesRes.data ?? [];
   const timeSpent = findTimeForUser(timeSpentRes.data ?? [], userId);
   const timeSpentTotal = findTimeForUser(timeSpentTotalRes.data ?? [], userId);
 
@@ -78,6 +83,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
     actionRelations,
     timeSpent,
     timeSpentTotal,
+    awayRanges,
     notifs: notifRes.data ?? [],
   };
 }
@@ -90,6 +96,7 @@ const UserDetailView: React.FC = () => {
     actionRelations,
     timeSpent,
     timeSpentTotal,
+    awayRanges,
     notifs,
   } = loaderData;
 
@@ -159,6 +166,24 @@ const UserDetailView: React.FC = () => {
     () => formatTime(timeSpentTotal),
     [timeSpentTotal]
   );
+
+  const sortedAwayRanges = useMemo(() => {
+    return [...awayRanges].sort(
+      (a, b) =>
+        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    );
+  }, [awayRanges]);
+
+  const currentAwayRange = useMemo(() => {
+    const now = new Date();
+    return (
+      sortedAwayRanges.find((range) => {
+        const start = new Date(range.startDate);
+        const end = new Date(range.endDate);
+        return start <= now && now <= end;
+      }) ?? null
+    );
+  }, [sortedAwayRanges]);
 
   const latestEvent = user.contractEvents?.length
     ? user.contractEvents.sort(
@@ -291,6 +316,67 @@ const UserDetailView: React.FC = () => {
             </div>
           </div>
         </div>
+      </Card>
+
+      <Card style={CardStyle.WhiteSolid} className="p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-zinc-900">Away periods</h2>
+          {currentAwayRange && (
+            <span
+              className={`rounded px-2 py-1 text-xs font-semibold ${
+                currentAwayRange
+                  ? "bg-amber-100 text-amber-800"
+                  : "bg-green-100 text-green-700"
+              }`}
+            >
+              Away until ${formatAwayDate(currentAwayRange.endDate)}
+            </span>
+          )}
+        </div>
+        {sortedAwayRanges.length ? (
+          <div className="space-y-3">
+            {sortedAwayRanges.map((range) => {
+              const status = awayRangeStatus(range);
+              return (
+                <div
+                  key={range.id}
+                  className={`flex items-start justify-between gap-3 rounded border p-3 ${
+                    status === "current"
+                      ? "border-amber-200 bg-amber-50"
+                      : status === "upcoming"
+                      ? "border-blue-200 bg-blue-50"
+                      : "border-zinc-200 bg-zinc-50"
+                  }`}
+                >
+                  <div className="space-y-1">
+                    <p className="font-medium text-zinc-800">
+                      {formatAwayRange(range)}
+                    </p>
+                    <p className="text-sm text-zinc-600">
+                      {formatAwayReason(range.reason)}
+                      {range.note ? ` - ${range.note}` : ""}
+                    </p>
+                  </div>
+                  <span
+                    className={`rounded px-2 py-1 text-xs font-semibold ${awayStatusTone(
+                      status
+                    )}`}
+                  >
+                    {status === "current"
+                      ? "Current"
+                      : status === "upcoming"
+                      ? "Upcoming"
+                      : "Past"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-500">
+            No away periods have been recorded for this user.
+          </p>
+        )}
       </Card>
 
       <Card style={CardStyle.WhiteSolid} className="p-6 space-y-4">
@@ -482,6 +568,52 @@ function humanize(value?: string) {
     .split("_")
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(" ");
+}
+
+type AwayRangeStatus = "current" | "upcoming" | "past";
+
+function formatAwayDate(date: string) {
+  return new Date(date).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function formatAwayRange(range: UserAwayRangeDto) {
+  return `${formatAwayDate(range.startDate)} to ${formatAwayDate(
+    range.endDate
+  )}`;
+}
+
+function formatAwayReason(reason: UserAwayRangeDto["reason"]) {
+  return humanize(reason) ?? reason;
+}
+
+function awayRangeStatus(range: UserAwayRangeDto): AwayRangeStatus {
+  const now = new Date();
+  const start = new Date(range.startDate);
+  const end = new Date(range.endDate);
+  if (start <= now && now <= end) {
+    return "current";
+  }
+  if (start > now) {
+    return "upcoming";
+  }
+  return "past";
+}
+
+function awayStatusTone(status: AwayRangeStatus) {
+  switch (status) {
+    case "current":
+      return "bg-amber-200 text-amber-900";
+    case "upcoming":
+      return "bg-blue-100 text-blue-800";
+    case "past":
+      return "bg-zinc-200 text-zinc-700";
+    default:
+      throw new Error(`Unknown away range status: ${status satisfies never}`);
+  }
 }
 
 function formatRelationStatus(status: UserActionRelationDetailDto["status"]) {

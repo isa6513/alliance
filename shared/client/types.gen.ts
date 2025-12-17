@@ -2241,6 +2241,25 @@ export type UserDeleteAwayRangeResponses = {
 
 export type UserDeleteAwayRangeResponse = UserDeleteAwayRangeResponses[keyof UserDeleteAwayRangeResponses];
 
+export type UserGetAwayRangeForUserData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/user/awayranges/{id}';
+};
+
+export type UserGetAwayRangeForUserErrors = {
+    401: unknown;
+};
+
+export type UserGetAwayRangeForUserResponses = {
+    200: Array<UserAwayRangeDto>;
+};
+
+export type UserGetAwayRangeForUserResponse = UserGetAwayRangeForUserResponses[keyof UserGetAwayRangeForUserResponses];
+
 export type UserUpdateData = {
     body: UpdateProfileDto;
     path?: never;

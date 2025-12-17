@@ -133,6 +133,14 @@ export class UserController {
     return { success: true };
   }
 
+  @Get('awayranges/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [UserAwayRangeDto] })
+  @ApiUnauthorizedResponse()
+  async getAwayRangeForUser(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.getAwayRanges(id);
+  }
+
   @Post('update')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ProfileDto })
