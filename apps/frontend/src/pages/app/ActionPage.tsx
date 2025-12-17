@@ -38,7 +38,7 @@ export default function ActionPage() {
 
   useWhiteBackground();
 
-  const { user, loading: userLoading } = useAuth();
+  const { isAuthenticated, user, loading: userLoading } = useAuth();
 
   const [action, setAction] = useState<ActionDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,7 +61,7 @@ export default function ActionPage() {
 
   useEffect(() => {
     fetchAction();
-  }, [fetchAction]);
+  }, [fetchAction, isAuthenticated]);
 
   useCIDFromParams(actionId);
 
