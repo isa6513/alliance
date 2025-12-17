@@ -39,16 +39,15 @@ export class ActionEventRecipientService {
       throw new Error('user contract events not loaded');
     }
 
-    const eventsBefore = contractEvents
-      .sort((a, b) => a.date.getTime() - b.date.getTime())
-      .filter((event) => event.date <= date);
+    const lastEventBefore = contractEvents
+      .filter((event) => event.date <= date)
+      .reduce(
+        (a: ContractEvent | null, b) =>
+          a === null || a.date.getTime() < b.date.getTime() ? b : a,
+        null,
+      );
 
-    if (!eventsBefore.length) {
-      return false;
-    }
-
-    const lastEvent = eventsBefore[eventsBefore.length - 1];
-    return lastEvent.type === ContractEventType.SIGNED;
+    return lastEventBefore?.type === ContractEventType.SIGNED;
   }
 
   public userShouldCompleteEvent(
