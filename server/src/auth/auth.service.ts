@@ -125,11 +125,15 @@ export class AuthService {
     };
   }
 
-  async generateRefreshToken(user: User): Promise<string> {
+  async generateRefreshToken(
+    user: User,
+    isImpersonation = false,
+  ): Promise<string> {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       tokenType: JWTTokenType.refresh,
+      ...(isImpersonation && { isImpersonation: true }),
     };
     const token = await this.jwtService.signAsync(payload, {
       expiresIn: '14d',
@@ -138,21 +142,25 @@ export class AuthService {
     return token;
   }
 
-  async generateAccessToken(user: User): Promise<string> {
+  async generateAccessToken(user: User, isImpersonation = false): Promise<string> {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       tokenType: JWTTokenType.access,
+      ...(isImpersonation && { isImpersonation: true }),
     };
     return this.jwtService.signAsync(payload, { expiresIn: '15m' });
   }
 
-  async refreshAccessToken(userId: number): Promise<string> {
+  async refreshAccessToken(
+    userId: number,
+    isImpersonation = false,
+  ): Promise<string> {
     const user = await this.usersService.findOne(userId);
     if (!user) {
       throw new UnauthorizedException('Invalid user id');
     }
-    return await this.generateAccessToken(user);
+    return await this.generateAccessToken(user, isImpersonation);
   }
 
   async getProfile(email: string): Promise<User> {
@@ -206,5 +214,19 @@ export class AuthService {
         isNotSignedUpPartialProfile: false,
       });
     }
+  }
+
+  async generateImpersonationTokens(
+    userId: number,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    const user = await this.usersService.findOne(userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    return {
+      access_token: await this.generateAccessToken(user, true),
+      refresh_token: await this.generateRefreshToken(user, true),
+    };
   }
 }

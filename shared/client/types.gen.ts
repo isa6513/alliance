@@ -541,6 +541,11 @@ export type UserDto = {
     hasActiveContract: boolean;
 };
 
+export type AuthMeResponseDto = {
+    user: UserDto;
+    isImpersonation?: boolean;
+};
+
 export type ForgotPasswordDto = {
     email: string;
 };
@@ -2085,7 +2090,7 @@ export type AuthMeData = {
 };
 
 export type AuthMeResponses = {
-    200: UserDto;
+    200: AuthMeResponseDto;
 };
 
 export type AuthMeResponse = AuthMeResponses[keyof AuthMeResponses];
@@ -2120,6 +2125,22 @@ export type AuthResetPasswordData = {
 };
 
 export type AuthResetPasswordResponses = {
+    200: unknown;
+};
+
+export type AuthImpersonateData = {
+    body?: never;
+    path: {
+        userId: number;
+    };
+    query?: never;
+    url: '/auth/impersonate/{userId}';
+};
+
+export type AuthImpersonateResponses = {
+    /**
+     * Redirects to frontend as the specified user
+     */
     200: unknown;
 };
 

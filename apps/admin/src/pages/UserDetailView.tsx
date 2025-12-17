@@ -9,6 +9,7 @@ import {
   userRemoveUserFromTag,
   userGetAwayRangeForUser,
 } from "@alliance/shared/client";
+import { getApiUrl } from "@alliance/shared/lib/config";
 import {
   ActionEventNotifDto,
   TagDto,
@@ -29,6 +30,7 @@ import { Route } from "../../.react-router/types/src/pages/+types/UserDetailView
 import EmailNotif from "../components/EmailNotif";
 import TextNotif from "../components/TextNotif";
 import CreateActivityControls from "../components/CreateActivityControls";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 
 export async function clientLoader({ params }: Route.LoaderArgs) {
   const userIdParam = params.userId;
@@ -277,6 +279,19 @@ const UserDetailView: React.FC = () => {
                 >
                   <DatabaseIcon size="mini" />
                 </Link>
+                <Button
+                  color={ButtonColor.Stone}
+                  onClick={() => {
+                    const apiUrl = getApiUrl();
+                    window.open(
+                      `${apiUrl}/auth/impersonate/${user.id}`,
+                      "_blank"
+                    );
+                  }}
+                  size="small"
+                >
+                  Log in as user
+                </Button>
               </div>
               <div className="mt-2 space-y-1 text-sm text-zinc-600">
                 <p>{user.email}</p>

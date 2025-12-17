@@ -37,7 +37,7 @@ export const AuthProvider = memo(({ children }: React.PropsWithChildren) => {
       try {
         const { data } = await authMe();
         if (data) {
-          if (!cancelled) setUser(data);
+          if (!cancelled) setUser(data.user);
         } else {
           throw new Error("No user data");
         }
@@ -46,7 +46,7 @@ export const AuthProvider = memo(({ children }: React.PropsWithChildren) => {
           await authRefreshTokens();
           const { data } = await authMe();
           if (data && !cancelled) {
-            setUser(data);
+            setUser(data.user);
           }
         } catch (error) {
           console.log("AuthContext", "refresh failed", error);
@@ -78,7 +78,7 @@ export const AuthProvider = memo(({ children }: React.PropsWithChildren) => {
 
       const { data } = await authMe();
       if (data) {
-        setUser(data);
+        setUser(data.user);
         window.location.href = "/";
       } else {
         throw new Error("Failed to get user data after login");

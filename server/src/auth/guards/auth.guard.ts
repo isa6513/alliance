@@ -18,6 +18,7 @@ export interface JwtPayload {
   sub: number;
   email: string;
   tokenType: JWTTokenType;
+  isImpersonation?: boolean;
 }
 
 export interface JwtRequest extends Request {

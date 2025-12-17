@@ -23,6 +23,7 @@ import { testAuthUser } from "../stories/testData";
 interface AuthContextType {
   isAuthenticated: boolean;
   user: UserDto | undefined;
+  isImpersonation: boolean;
   login: (email: string, password: string) => Promise<void>;
   onLogin: () => void;
   logout: () => Promise<void>;
@@ -34,16 +35,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
   ({ children }: React.PropsWithChildren) => {
     const [user, setUser] = useState<UserDto | undefined>();
+    const [isImpersonation, setIsImpersonation] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      if (user && import.meta.env.PROD) {
-        posthog.identify(user.id.toString(), {
-          email: user.email,
-          name: user.name,
-        });
+      if (import.meta.env.PROD) {
+        if (isImpersonation) {
+          posthog.opt_out_capturing();
+        } else if (user) {
+          posthog.opt_in_capturing();
+          posthog.identify(user.id.toString(), {
+            email: user.email,
+            name: user.name,
+          });
+        }
       }
-    }, [user]);
+    }, [user, isImpersonation]);
 
     useEffect(() => {
       let cancelled = false;
@@ -52,7 +59,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
         try {
           const { data } = await authMe();
           if (data) {
-            if (!cancelled) setUser(data);
+            if (!cancelled) {
+              setUser(data.user);
+              setIsImpersonation(data.isImpersonation ?? false);
+            }
           } else {
             throw new Error("No user data");
           }
@@ -63,7 +73,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
             setRevalidate();
 
             const { data } = await authMe();
-            if (!cancelled) setUser(data);
+            if (!cancelled && data) {
+              setUser(data.user);
+              setIsImpersonation(data.isImpersonation ?? false);
+            }
           } catch {
             console.log("AuthContext", "refresh failed");
           }
@@ -91,7 +104,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
       setRevalidate();
 
       const { data } = await authMe();
-      setUser(data);
+      if (data) {
+        setUser(data.user);
+        setIsImpersonation(data.isImpersonation ?? false);
+      }
       setLoading(false);
     }, []);
 
@@ -106,7 +122,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
     const onLogin = useCallback(() => {
       authMe().then((res) => {
         if (res.data) {
-          setUser(res.data);
+          setUser(res.data.user);
+          setIsImpersonation(res.data.isImpersonation ?? false);
         }
       });
       setRevalidate();
@@ -116,12 +133,13 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
       () => ({
         isAuthenticated: !!user,
         user,
+        isImpersonation,
         login,
         onLogin,
         logout,
         loading,
       }),
-      [user, loading, login, logout, onLogin]
+      [user, isImpersonation, loading, login, logout, onLogin]
     );
 
     return (
@@ -139,6 +157,7 @@ export const useAuth = (): AuthContextType => {
     return {
       isAuthenticated: true,
       user: testAuthUser,
+      isImpersonation: false,
       login: () => Promise.resolve(),
       onLogin: () => {},
       logout: () => Promise.resolve(),
@@ -152,6 +171,7 @@ export const useAuth = (): AuthContextType => {
     return {
       isAuthenticated: false,
       user: undefined,
+      isImpersonation: false,
       login: () => Promise.resolve(),
       onLogin: () => {},
       logout: () => Promise.resolve(),

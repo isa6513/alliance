@@ -186,7 +186,7 @@ export function isAuthOnly() {
   return true;
 }
 export default function AppLayout() {
-  const { isAuthenticated, loading: authLoading, logout } = useAuth();
+  const { isAuthenticated, loading: authLoading, logout, isImpersonation } = useAuth();
 
   const {
     actionData: actionDataLoader,
@@ -294,6 +294,15 @@ export default function AppLayout() {
           {[...Array(100)].map((_, index) => (
             <span key={index} className="text-white text-sm !font-mono">
               staging
+            </span>
+          ))}
+        </div>
+      )}
+      {isImpersonation && (
+        <div className="fixed top-0 left-0 right-0 h-6 bg-amber-500 z-50 flex flex-row gap-1">
+          {[...Array(100)].map((_, index) => (
+            <span key={index} className="text-white text-sm !font-mono">
+              impersonation
             </span>
           ))}
         </div>

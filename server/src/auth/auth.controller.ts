@@ -4,6 +4,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseIntPipe,
   Post,
   Request,
   Res,
@@ -19,10 +21,11 @@ import {
 import { Response } from 'express';
 import { UserDto } from '../user/user.dto';
 import { AuthService } from './auth.service';
-import { AccessToken } from './dto/authtokens.dto';
+import { AccessToken, AuthMeResponseDto } from './dto/authtokens.dto';
 import ForgotPasswordDto, { ResetPasswordDto } from './dto/forgotpassword.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto, SignInResponseDto, TokenMode } from './dto/signin.dto';
+import { AdminGuard } from './guards/admin.guard';
 import {
   AuthGuard,
   extractRefreshTokenFromCookie,
@@ -113,7 +116,11 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const userId: number = req.user.sub;
-    const access_token = await this.authService.refreshAccessToken(userId);
+    const isImpersonation = req.user.isImpersonation ?? false;
+    const access_token = await this.authService.refreshAccessToken(
+      userId,
+      isImpersonation,
+    );
     const mode: TokenMode = extractRefreshTokenFromCookie(req)
       ? 'cookie'
       : 'header';
@@ -126,11 +133,14 @@ export class AuthController {
 
   @Get('/me')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: UserDto })
-  async me(@Request() req: JwtRequest): Promise<UserDto> {
+  @ApiOkResponse({ type: AuthMeResponseDto })
+  async me(@Request() req: JwtRequest): Promise<AuthMeResponseDto> {
     const profile = await this.authService.getProfile(req.user.email);
     const user = new UserDto(profile);
-    return user;
+    return {
+      user,
+      ...(req.user.isImpersonation && { isImpersonation: true }),
+    };
   }
 
   @Post('logout')
@@ -154,5 +164,25 @@ export class AuthController {
   @ApiOkResponse()
   async resetPassword(@Body() body: ResetPasswordDto) {
     await this.authService.resetPassword(body.token, body.password);
+  }
+
+  @Get('impersonate/:userId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ description: 'Redirects to frontend as the specified user' })
+  async impersonate(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Res() res: Response,
+  ) {
+    const { access_token, refresh_token } =
+      await this.authService.generateImpersonationTokens(userId);
+
+    this.authService.setAuthCookies(res, access_token, refresh_token);
+
+    if (!process.env.APP_URL) {
+      throw new Error('APP_URL is not set');
+    }
+
+    const frontendUrl = process.env.APP_URL + '/tasks';
+    res.redirect(frontendUrl);
   }
 }

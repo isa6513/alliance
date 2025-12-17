@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { UserDto } from '../../user/user.dto';
 
 export class AuthTokens {
   @ApiProperty()
@@ -11,4 +12,12 @@ export class AuthTokens {
 export class AccessToken {
   @ApiProperty()
   access_token: string;
+}
+
+export class AuthMeResponseDto {
+  @ApiProperty({ type: () => UserDto })
+  user: UserDto;
+
+  @ApiPropertyOptional()
+  isImpersonation?: boolean;
 }

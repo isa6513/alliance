@@ -13,7 +13,7 @@ const ActionSquareThumbnail: React.FC<ActionSquareThumbnailProps> = ({
 }: ActionSquareThumbnailProps) => {
   const sizeClass = {
     mediumDynamic: "w-24 md:w-48 h-24 md:h-48 rounded-md",
-    smallDynamic: "w-12 h-12 md:w-36 md:h-36 rounded",
+    smallDynamic: "w-12 h-12 md:w-28 md:h-28 rounded",
   };
 
   const iconSizeClass = {

@@ -5,7 +5,6 @@ resource "aws_iam_user" "dev" {
   }
 }
 
-# Inline policy that lets the user do exactly what your server does
 data "aws_iam_policy_document" "dev_s3_policy" {
   statement {
     sid    = "AllowUploadDownloadToAssetsBucket"
