@@ -32,7 +32,7 @@ const ImageUpload: React.FC = () => {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-8 flex flex-col gap-4 self-center">
       <input
         type="file"
         onChange={handleFileChange}
@@ -41,7 +41,16 @@ const ImageUpload: React.FC = () => {
       <Button color={ButtonColor.Black} onClick={handleUpload}>
         Upload
       </Button>
-      {key && <img src={key} alt="uploaded image" />}
+      {key && (
+        <div className="flex flex-col gap-2">
+          <img
+            src={key}
+            alt="uploaded image"
+            className="max-h-[300px] h-auto mr-auto"
+          />
+          <p>{key}</p>
+        </div>
+      )}
     </div>
   );
 };
