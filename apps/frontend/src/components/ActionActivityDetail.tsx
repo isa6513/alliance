@@ -204,7 +204,7 @@ const ActionActivityDetail = () => {
               </div>
             </div>
             {editing ? (
-              <div className="flex-1 space-y-2 -m-4 mt-4 mb-0 border-t border-zinc-200">
+              <div className="space-y-2 mt-4 mb-0">
                 <div className="rounded p-3 bg-zinc-100">
                   <EditableContentForm
                     value={editContent ?? { body: "", attachments: [] }}
