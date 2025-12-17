@@ -878,26 +878,24 @@ export class ActionsService {
     activities: ActionActivity[],
     requestingUserId?: number,
   ): Promise<ActionActivityDto[]> {
+    const activityIds = activities.map((activity) => activity.id);
     const likedIds = requestingUserId
-      ? await this.getLikedActivityIds(
-          activities.map((a) => a.id),
-          requestingUserId,
-        )
+      ? await this.getLikedActivityIds(activityIds, requestingUserId)
       : new Set<number>();
 
-    return Promise.all(
-      activities.map(async (activity) => {
-        return new ActionActivityDto(activity, {
-          comments: (
-            await this.forumService.findCommentsForActivity(activity.id)
-          ).map((comment) => new CommentDto(comment)),
-          formResponseOutput: activity.taskFormResponse
-            ? this.buildOutputFormResponse(activity)
-            : undefined,
-          likedByMe: likedIds.has(activity.id),
-        });
-      }),
-    );
+    const commentsByActivity =
+      await this.forumService.findCommentsForActivities(activityIds);
+
+    return activities.map((activity) => {
+      const comments = commentsByActivity.get(activity.id) ?? [];
+      return new ActionActivityDto(activity, {
+        comments: comments.map((comment) => new CommentDto(comment)),
+        formResponseOutput: activity.taskFormResponse
+          ? this.buildOutputFormResponse(activity)
+          : undefined,
+        likedByMe: likedIds.has(activity.id),
+      });
+    });
   }
 
   /**
@@ -910,6 +908,7 @@ export class ActionsService {
     userIds?: number[];
     actionId?: number;
     filterFeedTypes?: boolean;
+    communityId?: number;
   }) {
     const qb = this.actionActivityRepository
       .createQueryBuilder('activity')
@@ -961,7 +960,14 @@ export class ActionsService {
       qb.andWhere('activity.createdAt < :before', { before: options.before });
     }
 
-    if (options.userIds?.length) {
+    if (options.communityId) {
+      qb.innerJoin(
+        'user.communities',
+        'communityFilter',
+        'communityFilter.id = :communityId',
+        { communityId: options.communityId },
+      );
+    } else if (options.userIds?.length) {
       qb.andWhere('activity.userId IN (:...userIds)', {
         userIds: options.userIds,
       });

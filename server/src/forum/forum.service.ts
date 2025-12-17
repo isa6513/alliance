@@ -235,6 +235,37 @@ export class ForumService {
     return this.organizeRepliesHierarchy(allComments);
   }
 
+  async findCommentsForActivities(
+    activityIds: number[],
+  ): Promise<Map<number, Comment[]>> {
+    if (activityIds.length === 0) {
+      return new Map();
+    }
+
+    const allComments = await this.commentRepository.find({
+      where: {
+        parentObjectId: In(activityIds),
+        parentObjectType: CommentParentObject.Activity,
+      },
+      relations: ['author', 'editableContent', 'likes'],
+      order: { createdAt: 'ASC' },
+    });
+
+    const grouped = new Map<number, Comment[]>();
+    for (const comment of allComments) {
+      const commentsForActivity =
+        grouped.get(comment.parentObjectId) ?? ([] as Comment[]);
+      commentsForActivity.push(comment);
+      grouped.set(comment.parentObjectId, commentsForActivity);
+    }
+
+    grouped.forEach((comments, activityId) => {
+      grouped.set(activityId, this.organizeRepliesHierarchy(comments));
+    });
+
+    return grouped;
+  }
+
   async findCommentsForAction(actionId: number): Promise<Comment[]> {
     const allComments = await this.commentRepository.find({
       where: {
