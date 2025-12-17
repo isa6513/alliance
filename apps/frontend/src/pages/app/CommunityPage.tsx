@@ -9,6 +9,7 @@ import {
   userGetOnetimeInvitesByCommunity,
   CommunityMemberContactInfoDto,
   conversationGetCommunityConversations,
+  ActionSuiteSummaryDto,
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Spinner from "../../components/Spinner";
@@ -35,6 +36,7 @@ import CommunityInvitesTabLeader from "../../components/CommunityInvitesTabLeade
 import CommunityInvitesTabMember from "../../components/CommunityInvitesTabMember";
 import BottomSpacer from "@alliance/shared/ui/BottomSpacer";
 import { useMediaQuery } from "../../lib/useMediaQuery";
+import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 
 type Tab = "activity" | "members" | "invites" | "about" | "edit" | "resources";
 
@@ -61,6 +63,10 @@ const CommunityPage = () => {
     []
   );
   const [inviteNotifCount, setInviteNotifCount] = useState(0);
+  const [activeActionSuites, setActiveActionSuites] = useState<
+    ActionSuiteSummaryDto[] | null
+  >(null);
+  const [selectedSuite, setSelectedSuite] = useState<string | null>(null);
 
   const [chatOpen, setChatOpen] = useState(false);
 
@@ -77,6 +83,21 @@ const CommunityPage = () => {
     });
   }, [community?.id]);
 
+  const suiteActions = useMemo(() => {
+    if (selectedSuite === null || activeActionSuites === null) {
+      return activeActions;
+    }
+
+    const suite = activeActionSuites?.find(
+      (suite) => suite.name === selectedSuite
+    );
+    if (suite === undefined) {
+      return activeActions;
+    }
+
+    return activeActions.filter((action) => action.suiteId === suite.id);
+  }, [activeActions, activeActionSuites, selectedSuite]);
+
   const { completedAllCurrentActions, nCompleted, nTotal } = useMemo<{
     completedAllCurrentActions: Record<number, boolean>;
     nCompleted: number;
@@ -91,13 +112,13 @@ const CommunityPage = () => {
     }
 
     const completedAll: Record<number, boolean> = {};
-    for (const action of activeActions) {
+    for (const action of suiteActions) {
       for (const userId of action.joinedUserIds) {
         completedAll[userId] = true;
       }
     }
 
-    for (const action of activeActions) {
+    for (const action of suiteActions) {
       for (const userId of action.joinedUserIds) {
         const relation = userActionRelations[userId]?.find(
           (relation) => relation.actionId === action.id
@@ -113,7 +134,7 @@ const CommunityPage = () => {
       nCompleted: completedAllValues.filter((completed) => completed).length,
       nTotal: completedAllValues.length,
     };
-  }, [activeActions, community, userActionRelations]);
+  }, [suiteActions, community, userActionRelations]);
 
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -163,19 +184,30 @@ const CommunityPage = () => {
         resp.data.actions.reverse();
 
         setActionSummaries(resp.data.actions);
-        setActiveActions(
-          resp.data.actions.filter(
-            (action) => action.status === "member_action"
-          )
+        const activeActions = resp.data.actions.filter(
+          (action) => action.status === "member_action"
         );
+        setActiveActions(activeActions);
         setUserActionRelations(
           resp.data.users.reduce((acc, user) => {
             acc[user.userId] = user.relations;
             return acc;
           }, {} as Record<number, UserActionRelationDetailDto[]>)
         );
+
+        const activeSuiteIds = new Set(activeActions.map((a) => a.suiteId));
+        const activeSuites = resp.data.suites.filter((suite) =>
+          activeSuiteIds.has(suite.id)
+        );
+        setActiveActionSuites(activeSuites);
+        if (activeSuites.length > 0) {
+          setSelectedSuite(activeSuites[0].name);
+        }
       }
     });
+  }, []);
+
+  useEffect(() => {
     if (amLeader) {
       userGetCommunityMemberContactInfo().then((resp) => {
         if (resp.data) {
@@ -189,6 +221,15 @@ const CommunityPage = () => {
       });
     }
   }, [amLeader]);
+  const suiteDropdownOptions = useMemo(() => {
+    if (!activeActionSuites || activeActionSuites.length <= 1) {
+      return null;
+    }
+
+    return Object.fromEntries(
+      activeActionSuites.map((suite) => [suite.id, suite.name])
+    );
+  }, [activeActionSuites]);
 
   const setTab = useCallback(
     (tab: Tab) => {
@@ -285,9 +326,20 @@ const CommunityPage = () => {
             </div>
 
             <div className="max-w-[400px]">
+              {amLeader && suiteDropdownOptions && selectedSuite && (
+                <>
+                  <DropdownSelect
+                    options={suiteDropdownOptions}
+                    value={selectedSuite}
+                    onChange={(_, suiteId) => setSelectedSuite(suiteId)}
+                  ></DropdownSelect>
+                  <br />
+                </>
+              )}
               <p className="text-sm">
-                {nCompleted} / {nTotal} have completed current action
-                {activeActions.length !== 1 ? "s" : ""}
+                {nCompleted} / {nTotal} have completed{" "}
+                {suiteActions.length === 1 ? "the " : ""} current action
+                {suiteActions.length !== 1 ? "s" : ""}
               </p>
               <CompletedBar
                 percentage={nTotal === 0 ? 0 : (nCompleted / nTotal) * 100}

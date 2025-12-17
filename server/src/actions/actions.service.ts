@@ -31,6 +31,7 @@ import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { RelationString } from 'src/tasks/entities/type';
 import { FormSchema } from 'src/tasks/schema';
 import {
+  ActionSuiteSummaryDto,
   CommunityUserInfoDto,
   UserActionRelationDetailDto,
   UserActionRelationsForUserDto,
@@ -1885,7 +1886,9 @@ export class ActionsService {
     userIds: number[],
     actionLimit: number = 8,
   ): Promise<UserActionRelationsResponseDto> {
-    const actions = (await this.findAllSorted(['events'], actionLimit)).filter(
+    const actions = (
+      await this.findAllSorted(['events', 'suite'], actionLimit)
+    ).filter(
       (action) => action.status !== ActionStatus.Draft && !action.publicOnly,
     );
 
@@ -1916,6 +1919,7 @@ export class ActionsService {
           name: action.name,
           status: action.status,
           joinedUserIds,
+          suiteId: action.suite?.id,
         } satisfies UserActionSummaryDto;
       },
     );
@@ -2030,8 +2034,21 @@ export class ActionsService {
       } satisfies UserActionRelationsForUserDto;
     });
 
+    const suiteIds: number[] = Array.from(
+      new Set(actionSummaries.map((a) => a.suiteId)),
+    ).filter((id): id is number => typeof id === 'number');
+    const suites: ActionSuiteSummaryDto[] = (
+      await this.actionSuiteRepository.find({
+        where: { id: In(suiteIds) },
+      })
+    ).map(
+      (suite) =>
+        ({ id: suite.id, name: suite.name }) satisfies ActionSuiteSummaryDto,
+    );
+
     return {
       actions: actionSummaries,
+      suites,
       users,
     };
   }
@@ -2054,6 +2071,7 @@ export class ActionsService {
 
     return {
       actions: actionRelations.actions,
+      suites: actionRelations.suites,
       users: actionRelations.users,
     };
   }

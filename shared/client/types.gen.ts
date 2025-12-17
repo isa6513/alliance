@@ -1553,6 +1553,12 @@ export type UserActionSummaryDto = {
     name: string;
     status: ActionStatus;
     joinedUserIds: Array<number>;
+    suiteId?: number;
+};
+
+export type ActionSuiteSummaryDto = {
+    id: number;
+    name: string;
 };
 
 export type UserActionRelationStatus = 'none' | 'joined' | 'completed' | 'declined' | 'wont_complete' | 'missed_deadline';
@@ -1571,11 +1577,13 @@ export type UserActionRelationsForUserDto = {
 
 export type UserActionRelationsResponseDto = {
     actions: Array<UserActionSummaryDto>;
+    suites: Array<ActionSuiteSummaryDto>;
     users: Array<UserActionRelationsForUserDto>;
 };
 
 export type CommunityUserInfoDto = {
     actions: Array<UserActionSummaryDto>;
+    suites: Array<ActionSuiteSummaryDto>;
     users: Array<UserActionRelationsForUserDto>;
 };
 

@@ -26,6 +26,17 @@ export class UserActionSummaryDto {
 
   @ApiProperty({ type: Number, isArray: true })
   joinedUserIds: number[];
+
+  @ApiPropertyOptional()
+  suiteId?: number;
+}
+
+export class ActionSuiteSummaryDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  name: string;
 }
 
 export class UserActionRelationDetailDto {
@@ -59,6 +70,9 @@ export class UserActionRelationsForUserDto {
 export class UserActionRelationsResponseDto {
   @ApiProperty({ type: () => UserActionSummaryDto, isArray: true })
   actions: UserActionSummaryDto[];
+
+  @ApiProperty({ type: () => ActionSuiteSummaryDto, isArray: true })
+  suites: ActionSuiteSummaryDto[];
 
   @ApiProperty({ type: () => UserActionRelationsForUserDto, isArray: true })
   users: UserActionRelationsForUserDto[];
