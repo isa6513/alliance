@@ -1552,6 +1552,12 @@ export type ShareUrlDto = {
     user: ProfileDto;
 };
 
+export type ShareUrlStatsDto = {
+    user: ProfileDto;
+    inviteCount: number;
+    sid: string;
+};
+
 export type UserActionSummaryDto = {
     id: number;
     name: string;
@@ -4199,6 +4205,21 @@ export type ActionsShareLinksForFormResponses = {
 
 export type ActionsShareLinksForFormResponse = ActionsShareLinksForFormResponses[keyof ActionsShareLinksForFormResponses];
 
+export type ActionsShareUrlStatsData = {
+    body?: never;
+    path: {
+        actionId: number;
+    };
+    query?: never;
+    url: '/actions/shareUrlStats/{actionId}';
+};
+
+export type ActionsShareUrlStatsResponses = {
+    200: Array<ShareUrlStatsDto>;
+};
+
+export type ActionsShareUrlStatsResponse = ActionsShareUrlStatsResponses[keyof ActionsShareUrlStatsResponses];
+
 export type ActionsActionRelationsData = {
     body?: never;
     path?: never;
@@ -5055,6 +5076,21 @@ export type TasksOptoutResponses = {
 };
 
 export type TasksOptoutResponse = TasksOptoutResponses[keyof TasksOptoutResponses];
+
+export type TasksGetFormsForUserSidData = {
+    body?: never;
+    path: {
+        userId: number;
+    };
+    query?: never;
+    url: '/tasks/formsForUserSID/{userId}';
+};
+
+export type TasksGetFormsForUserSidResponses = {
+    200: Array<FormResponseDto>;
+};
+
+export type TasksGetFormsForUserSidResponse = TasksGetFormsForUserSidResponses[keyof TasksGetFormsForUserSidResponses];
 
 export type AnalyticsGetTimeSpentPerUserData = {
     body?: never;

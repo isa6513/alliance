@@ -46,6 +46,7 @@ import {
 } from './schema';
 import { ActionDto } from 'src/actions/dto/action.dto';
 import { City } from 'src/geo/city.entity';
+import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
 
 @Injectable()
 export class TasksService {
@@ -63,6 +64,8 @@ export class TasksService {
     private mmsService: MmsService,
     @InjectRepository(CustomValidator)
     private customValidatorRepository: Repository<CustomValidator>,
+    @InjectRepository(ActionShareUrl)
+    private actionShareUrlRepository: Repository<ActionShareUrl>,
   ) {}
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
@@ -599,5 +602,30 @@ export class TasksService {
         );
     }
     return { isValid: true };
+  }
+
+  async getFormsForUserSID(userId: number): Promise<FormResponseDto[]> {
+    const shareUrl = await this.actionShareUrlRepository.findOne({
+      where: {
+        user: { id: userId },
+      },
+    });
+    if (!shareUrl) {
+      return [];
+    }
+
+    const sid: string | null =
+      shareUrl.sid ?? (shareUrl.data?.['sid'] as string) ?? null;
+
+    if (!sid) {
+      return [];
+    }
+
+    const formResponses = await this.formResponseRepository.find({
+      where: {
+        sid,
+      },
+    });
+    return formResponses;
   }
 }

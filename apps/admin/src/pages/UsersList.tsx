@@ -353,10 +353,11 @@ const UsersList: React.FC = () => {
       <div className="flex flex-row gap-3 w-full items-center">
         <input
           type="text"
+          autoFocus
           placeholder="Search by name or email..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="font-ibm text-sm border border-gray-2 text-black bg-white px-3 rounded-sm py-2 w-64"
+          className="font-ibm text-sm border border-gray-2 text-black bg-white px-3 rounded-sm py-2 w-64 focus:outline-none focus:border-black"
         />
         <div className="flex flex-row gap-3 items-center">
           <DropdownSelect

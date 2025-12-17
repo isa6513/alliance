@@ -18,3 +18,21 @@ export class ShareUrlDto extends PickType(ActionShareUrl, [
     this.user = new ProfileDto(shareUrl.user);
   }
 }
+
+export class ShareUrlStatsDto {
+  @ApiProperty({ type: ProfileDto })
+  @Type(() => ProfileDto)
+  user: ProfileDto;
+
+  @ApiProperty()
+  inviteCount: number;
+
+  @ApiProperty()
+  sid: string;
+
+  constructor(user: ProfileDto, inviteCount: number, sid: string) {
+    this.user = user;
+    this.inviteCount = inviteCount;
+    this.sid = sid;
+  }
+}

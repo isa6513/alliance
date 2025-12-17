@@ -169,4 +169,11 @@ export class TasksController {
       body.partialFormData,
     );
   }
+
+  @Post('formsForUserSID/:userId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [FormResponseDto] })
+  async getFormsForUserSID(@Param('userId', ParseIntPipe) userId: number) {
+    return this.tasksService.getFormsForUserSID(userId);
+  }
 }

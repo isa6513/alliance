@@ -10,6 +10,7 @@ import { ActionEventReminderService } from 'src/notifs/action-event-reminder.ser
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { Form } from 'src/tasks/entities/form.entity';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { Tag } from '../user/entities/tag.entity';
 import { User } from '../user/entities/user.entity';
 import { UserModule } from '../user/user.module';
@@ -42,6 +43,7 @@ import { ReloadUsersJoinedWorker } from './reload-users-joined.worker';
       ActionEventNotif,
       ActionSuite,
       Form,
+      FormResponse,
       ActionShareUrl,
     ]),
     UserModule,

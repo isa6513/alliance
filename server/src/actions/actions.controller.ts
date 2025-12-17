@@ -75,7 +75,7 @@ import { ActionEvent } from './entities/action-event.entity';
 import { ActionSuite } from './entities/action-suite.entity';
 import { Action } from './entities/action.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
-import { ShareUrlDto } from './dto/share-url.dto';
+import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 
 @Controller('actions')
 export class ActionsController {
@@ -791,6 +791,15 @@ export class ActionsController {
     @Param('formId', ParseIntPipe) formId: number,
   ): Promise<ShareUrlDto[]> {
     return this.actionsService.getShareLinksForForm(formId);
+  }
+
+  @Get('shareUrlStats/:actionId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ShareUrlStatsDto, isArray: true })
+  shareUrlStats(
+    @Param('actionId', ParseIntPipe) actionId: number,
+  ): Promise<ShareUrlStatsDto[]> {
+    return this.actionsService.getShareUrlStats(actionId);
   }
 
   // TODO move ====================================

@@ -8,6 +8,7 @@ import {
   userList,
   userRemoveUserFromTag,
   userGetAwayRangeForUser,
+  tasksGetFormsForUserSid,
 } from "@alliance/shared/client";
 import { getApiUrl } from "@alliance/shared/lib/config";
 import {
@@ -46,6 +47,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
     timeSpentRes,
     timeSpentTotalRes,
     notifRes,
+    formResponsesRes,
   ] = await Promise.all([
     userList(),
     userGetAwayRangeForUser({ path: { id: userId } }),
@@ -54,6 +56,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
     analyticsGetTimeSpentPerUser(),
     analyticsGetTimeSpentPerUserTotal(),
     notifsNotifsForUser({ path: { id: userId } }),
+    tasksGetFormsForUserSid({ path: { userId } }).catch(() => ({ data: [] })),
   ]);
 
   const user = (usersRes.data ?? []).find(
@@ -83,13 +86,20 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
     timeSpentTotal,
     awayRanges,
     notifs: notifRes.data ?? [],
+    formResponses: formResponsesRes.data ?? [],
   };
 }
 
 const UserDetailView: React.FC = () => {
   const loaderData = useLoaderData<typeof clientLoader>();
-  const { user, actionSummaries, actionRelations, awayRanges, notifs } =
-    loaderData;
+  const {
+    user,
+    actionSummaries,
+    actionRelations,
+    awayRanges,
+    notifs,
+    formResponses,
+  } = loaderData;
 
   const [actionRelationsState, setActionRelationsState] =
     useState<UserActionRelationDetailDto[]>(actionRelations);
@@ -176,6 +186,13 @@ const UserDetailView: React.FC = () => {
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       )[0]
     : null;
+
+  const sortedFormResponses = useMemo(() => {
+    return [...formResponses].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [formResponses]);
 
   const contractStatusColor =
     latestEvent === null
@@ -678,6 +695,42 @@ const UserDetailView: React.FC = () => {
               </div>
             ) : (
               <p className="text-xs text-zinc-500">No contract events.</p>
+            )}
+          </section>
+
+          {/* Form Submissions */}
+          <section className="border border-zinc-200 rounded p-3">
+            <h2 className="text-sm font-semibold text-zinc-700 mb-2">
+              Invited Submissions ({sortedFormResponses.length})
+            </h2>
+            {sortedFormResponses.length > 0 ? (
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {sortedFormResponses.map((response) => (
+                  <div
+                    key={response.id}
+                    className="text-xs p-2 rounded bg-zinc-50 border border-zinc-100"
+                  >
+                    <div className="flex items-center justify-between">
+                      <Link
+                        to={`/forms/${response.formId}/responses`}
+                        className="font-medium text-blue-600 hover:underline"
+                      >
+                        Form #{response.formId}
+                      </Link>
+                      <span className="text-zinc-400">
+                        {new Date(response.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {response.deviceType && (
+                      <p className="text-zinc-500 mt-0.5">
+                        {response.deviceType}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-zinc-500">No form submissions.</p>
             )}
           </section>
         </div>

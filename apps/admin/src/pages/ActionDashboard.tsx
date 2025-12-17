@@ -13,6 +13,7 @@ import {
   actionsFindOneAdmin,
   actionsRemove,
   actionsSuites,
+  actionsShareUrlStats,
   actionsUnarchive,
   actionsUpdate,
   CreateActionDto,
@@ -24,6 +25,7 @@ import {
   userGetTags,
   userMembers,
 } from "@alliance/shared/client";
+import type { ShareUrlStatsDto } from "@alliance/shared/client/types.gen";
 import { getApiUrl, getBaseUrl } from "@alliance/shared/lib/config";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
@@ -112,6 +114,8 @@ const ActionDashboard: React.FC = () => {
   const [availableAuthors, setAvailableAuthors] = useState<UserSelectUser[]>(
     []
   );
+  const [shareUrlStats, setShareUrlStats] = useState<ShareUrlStatsDto[]>([]);
+  const [shareUrlStatsLoading, setShareUrlStatsLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const selectedTab = (searchParams.get("tab") as Tab) ?? "overview";
@@ -386,6 +390,32 @@ const ActionDashboard: React.FC = () => {
 
     loadAction();
   }, [actionId, isNew]);
+
+  // Load share URL stats for publicOnly actions
+  useEffect(() => {
+    if (!action || !action.publicOnly || !actionId) {
+      setShareUrlStats([]);
+      return;
+    }
+
+    const loadShareUrlStats = async () => {
+      setShareUrlStatsLoading(true);
+      try {
+        const response = await actionsShareUrlStats({
+          path: { actionId },
+        });
+        if (response.data) {
+          setShareUrlStats(response.data);
+        }
+      } catch (err) {
+        console.error("Failed to load share URL stats:", err);
+      } finally {
+        setShareUrlStatsLoading(false);
+      }
+    };
+
+    loadShareUrlStats();
+  }, [action, actionId]);
 
   const handleActionCreated = useCallback(
     (action: ActionDto) => {
@@ -1133,6 +1163,67 @@ const ActionDashboard: React.FC = () => {
                     )}
                   </div>
                 </Card>
+
+                {/* Share URL Stats - only for publicOnly actions */}
+                {action.publicOnly && (
+                  <Card style={CardStyle.White}>
+                    <h2 className="text-lg font-semibold mb-4">
+                      Invite Stats (
+                      {shareUrlStats.reduce((sum, s) => sum + s.inviteCount, 0)}{" "}
+                      total invites)
+                    </h2>
+                    {shareUrlStatsLoading ? (
+                      <div className="text-sm text-gray-500">Loading...</div>
+                    ) : shareUrlStats.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-gray-200">
+                              <th className="text-left py-2 px-3 font-medium text-gray-600">
+                                Member
+                              </th>
+                              <th className="text-right py-2 px-3 font-medium text-gray-600">
+                                Form submissions
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {shareUrlStats.map((stat) => (
+                              <tr
+                                key={stat.sid}
+                                className="border-b border-gray-100 hover:bg-gray-50"
+                              >
+                                <td className="py-2 px-3">
+                                  <div className="flex items-center gap-2">
+                                    {stat.user.profilePicture ? (
+                                      <img
+                                        src={stat.user.profilePicture}
+                                        alt=""
+                                        className="w-6 h-6 rounded-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="w-6 h-6 rounded-full bg-gray-200" />
+                                    )}
+                                    <span className="font-medium text-gray-800">
+                                      {stat.user.displayName}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="py-2 px-3 text-right font-medium">
+                                  {stat.inviteCount}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-500">
+                        No invites yet.
+                      </div>
+                    )}
+                  </Card>
+                )}
               </div>
             )}
 
