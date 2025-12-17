@@ -38,12 +38,10 @@ export default function ActionPage() {
 
   useWhiteBackground();
 
-  const { isAuthenticated } = useAuth();
+  const { user, loading: userLoading } = useAuth();
 
   const [action, setAction] = useState<ActionDto | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const { user, loading: userLoading } = useAuth();
 
   const fetchAction = useCallback(async () => {
     try {
@@ -63,7 +61,7 @@ export default function ActionPage() {
 
   useEffect(() => {
     fetchAction();
-  }, [fetchAction, isAuthenticated]);
+  }, [fetchAction]);
 
   useCIDFromParams(actionId);
 
