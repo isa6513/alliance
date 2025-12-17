@@ -281,13 +281,13 @@ export class ActionsController {
   @ApiOkResponse({ type: [Action] })
   async findAllWithDrafts() {
     return this.actionsService
-      .findAllSorted([
-        'events',
-        'activities',
-        'participatingTags',
-        'suite',
-        'manualCohortUsers',
-      ])
+      .findAllSorted({
+        events: true,
+        activities: true,
+        participatingTags: true,
+        suite: true,
+        manualCohortUsers: true,
+      })
       .then((actions) => instanceToPlain(actions));
   }
 

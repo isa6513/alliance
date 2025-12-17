@@ -478,7 +478,7 @@ export class UserService {
           })
         : await this.friendRepository.find({
             where: { addressee: { id: userId }, status: FriendStatus.Pending },
-            relations: { addressee: true },
+            relations: { requester: true },
           });
     const users =
       direction === 'sent'

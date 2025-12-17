@@ -142,7 +142,10 @@ export class AuthService {
     return token;
   }
 
-  async generateAccessToken(user: User, isImpersonation = false): Promise<string> {
+  async generateAccessToken(
+    user: User,
+    isImpersonation = false,
+  ): Promise<string> {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -164,12 +167,12 @@ export class AuthService {
   }
 
   async getProfile(email: string): Promise<User> {
-    const user = await this.usersService.findOneByEmail(email, [
-      'communities',
-      'invitedCommunities',
-      'contractEvents',
-      'city',
-    ]);
+    const user = await this.usersService.findOneByEmail(email, {
+      communities: true,
+      invitedCommunities: true,
+      contractEvents: true,
+      city: true,
+    });
     if (!user) {
       throw new UnauthorizedException();
     }

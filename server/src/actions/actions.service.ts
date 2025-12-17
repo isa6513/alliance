@@ -154,15 +154,6 @@ export class ActionsService {
   }
 
   findAll(): Promise<Action[]> {
-    this.actionRepository.find({
-      relations: {
-        events: true,
-        activities: true,
-        participatingTags: true,
-        suite: true,
-        manualCohortUsers: true,
-      },
-    });
     return this.actionRepository.find({
       relations: {
         events: true,
@@ -221,7 +212,7 @@ export class ActionsService {
     }
     const sortedActions = await qb.getMany();
 
-    if (relations || sortedActions.length === 0) {
+    if (!relations || sortedActions.length === 0) {
       return sortedActions;
     }
 
