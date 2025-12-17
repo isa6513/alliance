@@ -75,6 +75,7 @@ export const keywords = [
   "#{s}",
   "#{timeremaining}",
   "#{tasktime}",
+  "#{tasknames}",
 ];
 
 const TIMING_MODE_OPTIONS: Array<{
@@ -977,14 +978,14 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       </div>
 
       <div
-        className={`p-2 border border-gray-200 rounded-md bg-zinc-100 ${
+        className={`border border-gray-200 rounded-md bg-zinc-100 ${
           !keywordsHelpExpanded ? "hover:border-gray-300" : ""
         }`}
       >
         <button
           type="button"
           onClick={() => setKeywordsHelpExpanded(!keywordsHelpExpanded)}
-          className="text-sm w-full text-left"
+          className="text-sm w-full text-left p-3"
         >
           Keyword replacement syntax{keywordsHelpExpanded ? " " : "..."}
         </button>
@@ -1040,7 +1041,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
                     &apos;hours&apos; attached. Note: assumes usage with days,
                     so will not show more than 24 hours. (ie an action due in 25
                     hours will show &quot;1 hour&quot;) to allow rendering
-                    &quot;1 day 1 hour remaning&quot;
+                    &quot;1 day 1 hour remaining&quot;
                   </td>
                 </tr>
                 <tr>
@@ -1059,6 +1060,16 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
                   <td>
                     The total estimated minutes it will take for the user to
                     finish all uncompleted tasks.
+                  </td>
+                </tr>
+                <tr>
+                  <td>{"#{tasknames}"}</td>
+                  <td>Task 1, Task 2, Task 3</td>
+                  <td>
+                    The names of the uncompleted actions for this user,
+                    separated by commas. Based on the &quot;use suite task
+                    count&quot; flag, will either include all actions, or only
+                    actions in this suite.
                   </td>
                 </tr>
                 <tr>

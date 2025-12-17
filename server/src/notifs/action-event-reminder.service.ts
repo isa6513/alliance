@@ -432,22 +432,38 @@ export class ActionEventReminderService {
       deadlineEvent: deadlineEvents.length > 0 ? deadlineEvents[0] : undefined,
     };
   }
-  async previewEmailHtml(
+
+  async getKeywordContextForPreview(
     eventId: number,
-    dto: PreviewEmailHtmlDto,
+    dto: PreviewEmailHtmlDto | PreviewTextDto,
     sendTime?: Date,
-  ): Promise<string> {
+  ) {
     const { event, deadlineEvent } = await this.loadEventsForPreview(eventId);
 
-    const replaced = processKeywordReplacements(dto.emailMessage, {
+    return {
       action: event.action,
       deadlineEvent,
       user: testUser,
       cid: await generateCIDForNotif(),
       uncompletedTasksCount: dto.taskCount,
       uncompletedTasksTime: dto.taskCount * 5 + ' minutes',
+      uncompletedTasksNames: ['Task 1', 'Task 2', 'Task 3'].slice(
+        0,
+        dto.taskCount,
+      ),
       dateNow: sendTime,
-    });
+    };
+  }
+
+  async previewEmailHtml(
+    eventId: number,
+    dto: PreviewEmailHtmlDto,
+    sendTime?: Date,
+  ): Promise<string> {
+    const replaced = processKeywordReplacements(
+      dto.emailMessage,
+      await this.getKeywordContextForPreview(eventId, dto, sendTime),
+    );
 
     return this.mailService.renderHtml(EmailType.CustomActionReminder, {
       customMessage: replaced.replace(/\n/g, '<br>'),
@@ -459,16 +475,12 @@ export class ActionEventReminderService {
     dto: PreviewTextDto,
     sendTime?: Date,
   ): Promise<string> {
-    const { event, deadlineEvent } = await this.loadEventsForPreview(eventId);
+    const context = await this.getKeywordContextForPreview(
+      eventId,
+      dto,
+      sendTime,
+    );
 
-    return processKeywordReplacements(dto.textMessage, {
-      action: event.action,
-      deadlineEvent,
-      user: testUser,
-      cid: await generateCIDForNotif(),
-      uncompletedTasksCount: dto.taskCount,
-      uncompletedTasksTime: dto.taskCount * 5 + ' minutes',
-      dateNow: sendTime,
-    });
+    return processKeywordReplacements(dto.textMessage, context);
   }
 }

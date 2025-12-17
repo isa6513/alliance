@@ -18,6 +18,7 @@ export function processKeywordReplacements(
     cid: string;
     uncompletedTasksCount: number;
     uncompletedTasksTime: string;
+    uncompletedTasksNames: string[];
     dateNow?: Date;
   },
 ): string {
@@ -37,6 +38,7 @@ export function processKeywordReplacements(
     .replaceAll('#{firstname}', firstname)
     .replaceAll('#{lastname}', lastname)
     .replaceAll('#{action}', context.action.name)
+    .replaceAll('#{tasknames}', context.uncompletedTasksNames.join(', '))
     .replaceAll('#{n}', context.uncompletedTasksCount.toString())
     .replaceAll('#{tasktime}', context.uncompletedTasksTime)
     .replaceAll('#{s}', context.uncompletedTasksCount === 1 ? '' : 's')

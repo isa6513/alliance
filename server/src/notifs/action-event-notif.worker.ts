@@ -34,7 +34,9 @@ export class ActionEventNotifWorker {
     @InjectRepository(ActionEventNotif)
     private readonly actionEventNotifsRepository: Repository<ActionEventNotif>,
     private readonly reminderService: ActionEventReminderService,
-  ) {}
+  ) {
+    this.dispatchDueNotifs();
+  }
 
   @Cron('*/3 * * * *')
   async dispatchDueNotifs() {
@@ -89,6 +91,7 @@ export class ActionEventNotifWorker {
       deadlineEvent: plan.group.deadlineEvent,
       cid,
       uncompletedTasksCount: uncompletedTasks.length,
+      uncompletedTasksNames: uncompletedTasks.map((task) => task.name),
       uncompletedTasksTime:
         uncompletedTasks.reduce(
           (acc, task) => acc + (task.timeEstimate ?? 0),
