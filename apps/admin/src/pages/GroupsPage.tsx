@@ -10,7 +10,7 @@ import type {
 } from "@alliance/shared/client/types.gen";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Badge from "@alliance/shared/ui/Badge";
+import List from "@alliance/shared/ui/List";
 
 const INITIAL_COMMUNITY: CreateCommunityDto = {
   name: "",
@@ -105,9 +105,11 @@ const GroupsPage: React.FC = () => {
         {loading ? (
           <p className="text-sm text-zinc-500">Loading groups…</p>
         ) : sortedCommunities.length ? (
-          sortedCommunities.map((community) => (
-            <CommunityCard key={community.id} community={community} />
-          ))
+          <List>
+            {sortedCommunities.map((community) => (
+              <CommunityCard key={community.id} community={community} />
+            ))}
+          </List>
         ) : (
           <p className="text-sm text-zinc-500">No groups yet.</p>
         )}
@@ -182,27 +184,28 @@ const CommunityCard: React.FC<CommunityCardProps> = ({ community }) => {
   const leaderCount = community.leaders.length;
 
   return (
-    <Link to={href("/groups/:id", { id: community.id.toString() })}>
-      <Card className="w-full hover:border-zinc-400" style={CardStyle.White}>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-row items-center justify-between gap-3">
-            <div className="flex flex-col gap-1">
-              <div className="flex flex-row items-center gap-3 flex-wrap">
-                <h3 className="font-semibold text-lg">{community.name}</h3>
-                <Badge>
-                  {memberCount} member{memberCount === 1 ? "" : "s"}
-                </Badge>
-                <Badge>
-                  {leaderCount} leader{leaderCount === 1 ? "" : "s"}
-                </Badge>
-              </div>
+    <Link
+      to={href("/groups/:id", { id: community.id.toString() })}
+      className="p-4 hover:bg-zinc-100 cursor-pointer"
+    >
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-row items-center justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <h3 className="font-semibold text-lg">{community.name}</h3>
+            <p className="text-sm text-zinc-600">
+              {community.description || "No description yet."}
+            </p>
+          </div>
+          <div className="flex flex-row items-center gap-3">
+            {leaderCount !== 1 && (
               <p className="text-sm text-zinc-600">
-                {community.description || "No description yet."}
+                {leaderCount} leader{leaderCount === 1 ? "" : "s"}
               </p>
-            </div>
+            )}
+            <p className="text-sm mr-4 font-medium">{memberCount}</p>
           </div>
         </div>
-      </Card>
+      </div>
     </Link>
   );
 };
