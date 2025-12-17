@@ -574,7 +574,9 @@ export class AdminViewerService {
         return null;
       }
 
-      const literalMatch = trimmed.match(/(\d{1,2}):(\d{2})(?::(\d{2})(?:\.\d{1,6})?)?/);
+      const literalMatch = trimmed.match(
+        /(\d{1,2}):(\d{2})(?::(\d{2})(?:\.\d{1,6})?)?/,
+      );
       if (literalMatch) {
         return this.normalizeTimeParts(
           Number(literalMatch[1]),
@@ -583,11 +585,18 @@ export class AdminViewerService {
         );
       }
 
-      const twelveHourMatch = trimmed.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i);
+      const twelveHourMatch = trimmed.match(
+        /^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i,
+      );
       if (twelveHourMatch) {
         const hours = Number(twelveHourMatch[1]);
         const minutes = twelveHourMatch[2] ? Number(twelveHourMatch[2]) : 0;
-        if (Number.isNaN(hours) || Number.isNaN(minutes) || hours < 1 || hours > 12) {
+        if (
+          Number.isNaN(hours) ||
+          Number.isNaN(minutes) ||
+          hours < 1 ||
+          hours > 12
+        ) {
           return null;
         }
         const meridiem = twelveHourMatch[3].toLowerCase();
@@ -881,6 +890,23 @@ export class AdminViewerService {
       if (relation.joinColumns && relation.joinColumns.length > 0) {
         // Foreign key columns
         for (const joinColumn of relation.joinColumns) {
+          const existingIndex = columns.findIndex(
+            (col) => col.name === joinColumn.databaseName,
+          );
+
+          if (existingIndex >= 0) {
+            const existing = columns[existingIndex];
+            columns[existingIndex] = {
+              ...existing,
+              dataType: ColumnDataType.RELATION,
+              rawType: 'relation',
+              isNullable: relation.isNullable ?? existing.isNullable,
+              relationTarget: relation.inverseEntityMetadata.tableName,
+              relationType: relation.relationType,
+            };
+            continue;
+          }
+
           columns.push({
             name: joinColumn.databaseName,
             dataType: ColumnDataType.RELATION,
