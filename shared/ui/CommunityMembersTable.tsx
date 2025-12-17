@@ -37,6 +37,9 @@ const CommunityMembersTable = ({
   const [filterMode, setFilterMode] = useState<CommunityMembersFilterMode>(
     CommunityMembersFilterMode.All
   );
+  const visibleActions = useMemo(() => {
+    return actions.filter((action) => action.status !== "planned");
+  }, [actions]);
 
   const membersByFilterMode = useMemo(() => {
     return {
@@ -122,7 +125,7 @@ const CommunityMembersTable = ({
                 amLeader={amLeader}
                 contactInfo={memberContactInfo?.[user.id]}
                 actionRelations={userActionRelations?.[user.id] ?? []}
-                actions={actions}
+                actions={visibleActions}
               />
             ))}
           </tbody>
@@ -173,7 +176,7 @@ const CommunityMembersTable = ({
                 amLeader={amLeader}
                 contactInfo={memberContactInfo?.[user.id]}
                 actionRelations={userActionRelations?.[user.id] ?? []}
-                actions={actions}
+                actions={visibleActions}
               />
             ))}
           </tbody>
