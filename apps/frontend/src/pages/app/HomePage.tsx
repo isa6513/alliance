@@ -207,8 +207,11 @@ const HomePage = () => {
     0
   );
 
-  const completedActions =
-    actions?.filter((action) => isCurrentlyCompletedAction(action)) || [];
+  const completedActions = useMemo(() => {
+    return (
+      actions?.filter((action) => isCurrentlyCompletedAction(action)) || []
+    );
+  }, [actions]);
 
   const updateFriendActivityCount = useCallback(() => {
     if (typeof window === "undefined" || !friendActivityListRef.current) {

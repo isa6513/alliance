@@ -21,6 +21,7 @@ import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.s
 import {
   ActionEventReminderService,
   NOTIFICATION_LOOKBACK_WINDOW_MS,
+  POST_MEMBER_ACTION_STATUSES,
   PreviewNotificationPlan,
 } from 'src/notifs/action-event-reminder.service';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
@@ -43,7 +44,7 @@ import { ContractEventType } from 'src/user/entities/contract-event.entity';
 import { Tag } from 'src/user/entities/tag.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ProfileDto } from 'src/user/user.dto';
-import { ILike, In, Repository } from 'typeorm';
+import { ILike, In, MoreThan, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import {
   ActionActivityDto,
@@ -284,6 +285,26 @@ export class ActionsService {
         action,
         event.date,
       );
+
+    const deadlineEvents = await this.actionEventRepository.find({
+      where: {
+        action: { id: action.id },
+        date: MoreThan(event.date),
+        newStatus: In(Array.from(POST_MEMBER_ACTION_STATUSES)),
+      },
+      order: {
+        date: 'ASC',
+      },
+      take: 1,
+    });
+    const notAwayForDeadline =
+      deadlineEvents.length > 0
+        ? baseUsers.filter(
+            (user) =>
+              !this.userService.isUserAway(user, deadlineEvents[0].date),
+          )
+        : baseUsers;
+
     const completionActivities = await this.actionActivityRepository.find({
       where: {
         actionId: action.id,
@@ -296,12 +317,12 @@ export class ActionsService {
         type: ActionActivityType.USER_WONT_COMPLETE,
       },
     });
-    const baseUsersMinusWithdrawals = baseUsers.filter(
+    const notAwayUsersMinusWithdrawals = notAwayForDeadline.filter(
       (user) =>
         !withdrawalActivities.some((activity) => activity.userId === user.id),
     );
     const set = new Set([
-      ...baseUsersMinusWithdrawals.map((user) => user.id),
+      ...notAwayUsersMinusWithdrawals.map((user) => user.id),
       ...completionActivities.map((activity) => activity.userId),
     ]);
 
