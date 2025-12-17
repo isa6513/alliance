@@ -3,6 +3,7 @@ import React from "react";
 import { Link, href, useLoaderData } from "react-router";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import List from "@alliance/shared/ui/List";
 
 export async function loader() {
   const postFiles = import.meta.glob("/src/action-posts/*.md", {
@@ -34,12 +35,12 @@ const ProgressListPage: React.FC = () => {
           <h2 className="text-center font-serif font-bold text-3xl md:text-5xl">
             Progress
           </h2>
-          <div className="flex flex-col gap-y-4">
+          <List className="w-full">
             {posts.map((post) => (
               <Link
                 to={href("/progress/:slug", { slug: post.slug })}
                 key={post.slug}
-                className="group flex flex-row justify-between"
+                className="flex flex-row justify-between hover:bg-zinc-50 p-3 md:p-6"
               >
                 {/* <Card
                   style={CardStyle.White}
@@ -47,7 +48,7 @@ const ProgressListPage: React.FC = () => {
                 > */}
                 <div className="">
                   <div className="flex justify-between">
-                    <p className="text-xl md:text-2xl font-medium mb-2 group-hover:underline">
+                    <p className="text-xl md:text-2xl font-medium mb-2">
                       {post.frontmatter.title}
                     </p>
                   </div>
@@ -63,13 +64,9 @@ const ProgressListPage: React.FC = () => {
                     )}
                   </p>
                 </div>
-                <p className="self-start text-zinc-500">
-                  {post.frontmatter.members} members
-                </p>
-                {/* </Card> */}
               </Link>
             ))}
-          </div>
+          </List>
         </div>
       </div>
       <Footer />
