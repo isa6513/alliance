@@ -53,6 +53,7 @@ const UsersList: React.FC = () => {
     () => new Set()
   );
   const [tagMutationError, setTagMutationError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     analyticsGetTimeSpentPerUser().then((res) => {
@@ -139,9 +140,21 @@ const UsersList: React.FC = () => {
     });
   }, [selectedTagIds, sortedUsers, userTagsMap]);
 
+  const filteredBySearch = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return filteredByTags;
+    }
+    const query = searchQuery.toLowerCase().trim();
+    return filteredByTags.filter((user) => {
+      const name = user.name?.toLowerCase() ?? "";
+      const email = user.email?.toLowerCase() ?? "";
+      return name.includes(query) || email.includes(query);
+    });
+  }, [filteredByTags, searchQuery]);
+
   const modeToUsers = useMemo(() => {
     return Object.values(UserFilterMode).reduce((acc, mode) => {
-      acc[mode] = filteredByTags.filter((user) => {
+      acc[mode] = filteredBySearch.filter((user) => {
         if (mode === UserFilterMode.ALL) return true;
         const lastEvent = user.contractEvents.sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -154,7 +167,7 @@ const UsersList: React.FC = () => {
       });
       return acc;
     }, {} as Record<UserFilterMode, UserDto[]>);
-  }, [filteredByTags]);
+  }, [filteredBySearch]);
 
   const selectedTagNames = useMemo(() => {
     if (!selectedTagIds.length) return [] as string[];
@@ -185,8 +198,16 @@ const UsersList: React.FC = () => {
     setSelectedTagIds([]);
   };
 
-  const noteForLocalhost =
-    typeof window !== "undefined" && window.location.href.includes("localhost");
+  const resetAllFilters = () => {
+    setSearchQuery("");
+    setSelectedTagIds([]);
+    setFilterMode(UserFilterMode.ALL);
+  };
+
+  const hasActiveFilters =
+    searchQuery.trim() !== "" ||
+    selectedTagIds.length > 0 ||
+    filterMode !== UserFilterMode.ALL;
 
   const updateTagInState = useCallback((updatedTag: TagDto) => {
     setTags((prev) => {
@@ -242,6 +263,13 @@ const UsersList: React.FC = () => {
   return (
     <div className="h-full p-5 pt-20 flex flex-col items-center gap-y-3 overflow-x-hidden">
       <div className="flex flex-row gap-3 w-full items-center">
+        <input
+          type="text"
+          placeholder="Search by name or email..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="font-ibm text-sm border border-gray-2 text-black bg-white px-3 rounded-sm py-2 w-64"
+        />
         <div className="flex flex-row gap-3 items-center">
           <DropdownSelect
             options={UserFilterMode}
@@ -308,17 +336,21 @@ const UsersList: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={resetAllFilters}
+              className="text-sm text-zinc-500 hover:text-zinc-700 hover:underline"
+            >
+              Reset filters
+            </button>
+          )}
           <Link
             to={href("/members/tags")}
             className="text-sm text-blue-600 hover:underline"
           >
             Manage tags
           </Link>
-          {noteForLocalhost && (
-            <p className="text-sm text-gray-500">
-              note: activity data is prod-only
-            </p>
-          )}
         </div>
       </div>
       {tagMutationError && (
