@@ -1780,10 +1780,11 @@ export class ActionsService {
     taskForm?: boolean,
     suite?: boolean,
   ): Promise<ExportActionDto> {
-    const relations = [
+    const relations: RelationString<Action>[] = [
       'participatingTags',
-      ...(events ? ['events'] : []),
-      ...(suite ? ['suite'] : []),
+      'authors',
+      ...(events ? ['events' as const] : []),
+      ...(suite ? ['suite' as const] : []),
     ];
     const action = await this.actionRepository.findOneOrFail({
       where: { id },
