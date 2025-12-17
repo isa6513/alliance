@@ -226,6 +226,7 @@ const DatabaseViewer: React.FC = () => {
     setSelectedRow(null);
     applyImmediateSearch(undefined);
   }, [setSelectedRow, applyImmediateSearch]);
+
   const navigateToRelatedRow = useCallback(
     (tableName: string, rowId: string | number) => {
       selectTable(tableName);

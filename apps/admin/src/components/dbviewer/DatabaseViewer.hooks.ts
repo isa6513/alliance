@@ -641,11 +641,7 @@ export const useDatabaseViewerState = ({
         return;
       }
 
-      if (
-        selectedRow &&
-        selectedRow.tableName === selectedTable &&
-        data.rows.length > 0
-      ) {
+      if (selectedRow && selectedRow.tableName === selectedTable) {
         const rowExists = data.rows.some((row) => {
           const primaryKeyValue = getRowPrimaryKey(row, data.columns);
           return (
@@ -654,9 +650,19 @@ export const useDatabaseViewerState = ({
           );
         });
 
-        if (!rowExists && !query.search) {
-          applyImmediateSearch(String(selectedRow.rowId));
-          return;
+        const primaryKeyName = data.columns.find((col) => col.isPrimary)?.name;
+        const selectedRowId = String(selectedRow.rowId);
+        const primaryKeyFilter = primaryKeyName
+          ? `${primaryKeyName}: ${selectedRowId}`
+          : selectedRowId;
+        const searchTargetsSelectedRow =
+          query.search === selectedRowId || query.search === primaryKeyFilter;
+
+        if (!rowExists && (!query.search || searchTargetsSelectedRow)) {
+          if (query.search !== primaryKeyFilter) {
+            applyImmediateSearch(primaryKeyFilter);
+            return;
+          }
         }
       }
 
