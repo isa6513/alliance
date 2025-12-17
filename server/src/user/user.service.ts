@@ -15,7 +15,7 @@ import {
   NotificationCategory,
 } from 'src/notifs/entities/notification.entity';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
-import { DeepPartial, ILike, In, Repository } from 'typeorm';
+import { DeepPartial, ILike, In, Not, Repository } from 'typeorm';
 import { Friend, FriendStatus } from './entities/friend.entity';
 import { PrefillUser } from './entities/prefill-user.entity';
 import {
@@ -380,6 +380,14 @@ export class UserService {
 
   async findMessageableUsers(userId: number): Promise<ProfileDto[]> {
     const user = await this.findOneOrFail(userId, ['communities', 'leaderOf']);
+
+    // Staff can message everyone
+    if (user.staff) {
+      const allUsers = await this.userRepository.find({
+        where: { id: Not(userId) },
+      });
+      return allUsers.map((u) => new ProfileDto(u));
+    }
 
     const memberCommunityIds = user.communities.map((c) => c.id);
     const leaderCommunityIds = user.leaderOf.map((c) => c.id);
