@@ -17,7 +17,6 @@ import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
 import { ActionUpdate } from 'src/actions/entities/action-update.entity';
 import { actionUrl } from 'src/search/approutes';
 import { NotificationChannel } from './notif-utils';
-import { RelationString } from 'src/tasks/entities/type';
 
 export function shouldEmailUser(user: User) {
   return (
@@ -52,7 +51,7 @@ export class NotifsService {
   async findAll(userId: number) {
     const notifs = await this.notifsRepository.find({
       where: { user: { id: userId }, sendTime: LessThan(new Date()) },
-      relations: ['associatedUsers'],
+      relations: { associatedUsers: true },
     });
     return notifs;
   }
@@ -66,7 +65,7 @@ export class NotifsService {
   async setRead(id: number, userId: number) {
     const notif = await this.notifsRepository.findOne({
       where: { id, user: { id: userId } },
-      relations: ['user'],
+      relations: { user: true },
     });
     if (!notif) {
       throw new NotFoundException('Notif not found');
@@ -87,11 +86,11 @@ export class NotifsService {
   async notifsForUser(id: number) {
     return this.actionEventNotifsRepository.find({
       where: { user: { id } },
-      relations: [
-        'user',
-        'mail',
-        'mms',
-      ] satisfies RelationString<ActionEventNotif>[],
+      relations: {
+        user: true,
+        mail: true,
+        mms: true,
+      },
     });
   }
 

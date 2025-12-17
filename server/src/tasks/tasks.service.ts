@@ -427,7 +427,7 @@ export class TasksService {
   async getFormResponses(formId: number): Promise<FormResponseDto[]> {
     const responses = await this.formResponseRepository.find({
       where: { formId },
-      relations: ['user'],
+      relations: { user: true },
     });
     return responses;
   }
@@ -485,11 +485,11 @@ export class TasksService {
     const validator = await this.customValidatorRepository.findOneOrFail({
       where: { id },
     });
-    const user = await this.userService.findOneOrFail(userId, [
-      'tags',
-      'communities',
-      'contractEvents',
-    ]);
+    const user = await this.userService.findOneOrFail(userId, {
+      tags: true,
+      communities: true,
+      contractEvents: true,
+    });
 
     switch (validator.type) {
       case CustomValidatorType.UploadedPhoto:

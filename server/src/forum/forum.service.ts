@@ -159,7 +159,7 @@ export class ForumService {
     const posts = (
       await this.postRepository.find({
         where: { actionId, deleted: false },
-        relations: ['author', 'action', 'editableContent'],
+        relations: { author: true, action: true, editableContent: true },
         order: { updatedAt: 'DESC' },
       })
     ).filter((post) => this.postIsVisible(post));
@@ -185,7 +185,7 @@ export class ForumService {
   async findOnePost(id: number, userId?: number): Promise<Post> {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['author', 'action', 'editableContent'],
+      relations: { author: true, action: true, editableContent: true },
     });
 
     if (!post || !this.postIsVisible(post, userId)) {
@@ -201,7 +201,7 @@ export class ForumService {
         parentObjectId: postId,
         parentObjectType: CommentParentObject.Post,
       },
-      relations: ['author', 'editableContent', 'likes'],
+      relations: { author: true, editableContent: true, likes: true },
       order: { createdAt: 'ASC' },
     });
 
@@ -215,7 +215,7 @@ export class ForumService {
         parentObjectType: CommentParentObject.Post,
         deleted: false,
       },
-      relations: ['author', 'editableContent'],
+      relations: { author: true, editableContent: true },
       order: { createdAt: 'DESC' },
     });
 
@@ -228,7 +228,7 @@ export class ForumService {
         parentObjectId: activityId,
         parentObjectType: CommentParentObject.Activity,
       },
-      relations: ['author', 'editableContent', 'likes'],
+      relations: { author: true, editableContent: true, likes: true },
       order: { createdAt: 'ASC' },
     });
 
@@ -247,7 +247,7 @@ export class ForumService {
         parentObjectId: In(activityIds),
         parentObjectType: CommentParentObject.Activity,
       },
-      relations: ['author', 'editableContent', 'likes'],
+      relations: { author: true, editableContent: true, likes: true },
       order: { createdAt: 'ASC' },
     });
 
@@ -272,7 +272,7 @@ export class ForumService {
         parentObjectId: actionId,
         parentObjectType: CommentParentObject.Action,
       },
-      relations: ['author', 'editableContent', 'likes'],
+      relations: { author: true, editableContent: true, likes: true },
       order: { createdAt: 'ASC' },
     });
 
@@ -374,7 +374,7 @@ export class ForumService {
           id: createCommentDto.parentId,
           parentObjectId: createCommentDto.parentObjectId,
         },
-        relations: ['author'],
+        relations: { author: true },
       });
 
       if (!parentReply) {
@@ -412,7 +412,7 @@ export class ForumService {
 
     const replyWithAuthor = await this.commentRepository.findOneOrFail({
       where: { id: reply.id },
-      relations: ['author', 'editableContent'],
+      relations: { author: true, editableContent: true },
     });
 
     this.sendNotifsForNewComment(replyWithAuthor);
@@ -429,7 +429,7 @@ export class ForumService {
     if (comment.parentId) {
       const parentReply = await this.commentRepository.findOneOrFail({
         where: { id: comment.parentId, deleted: false },
-        relations: ['author'],
+        relations: { author: true },
       });
       usersToNotify.push(parentReply.author);
     }
@@ -437,14 +437,14 @@ export class ForumService {
     if (comment.parentObjectType === CommentParentObject.Post) {
       const post = await this.postRepository.findOneOrFail({
         where: { id: comment.parentObjectId, deleted: false },
-        relations: ['author'],
+        relations: { author: true },
       });
       usersToNotify.push(post.author);
     }
     if (comment.parentObjectType === CommentParentObject.Activity) {
       const activity = await this.actionActivityRepository.findOneOrFail({
         where: { id: comment.parentObjectId },
-        relations: ['user', 'action'],
+        relations: { user: true, action: true },
       });
       usersToNotify.push(activity.user);
       actionIds.set(activity.id, activity.action.id);
@@ -480,7 +480,7 @@ export class ForumService {
   ): Promise<Comment> {
     const reply = await this.commentRepository.findOne({
       where: { id },
-      relations: ['author', 'editableContent'],
+      relations: { author: true, editableContent: true },
     });
 
     if (!reply) {
@@ -504,7 +504,7 @@ export class ForumService {
     }
     const updatedReply = await this.commentRepository.findOne({
       where: { id },
-      relations: ['author', 'editableContent'],
+      relations: { author: true, editableContent: true },
     });
 
     if (!updatedReply) {
@@ -518,7 +518,7 @@ export class ForumService {
   async refreshLikesCount(comment: Comment): Promise<void> {
     const withLikes = await this.commentRepository.findOneOrFail({
       where: { id: comment.id },
-      relations: ['likes'],
+      relations: { likes: true },
     });
     const likesCount = withLikes.likes.length;
     await this.commentRepository.update(comment.id, { likesCount });
@@ -534,11 +534,11 @@ export class ForumService {
       type === 'comment'
         ? await this.commentRepository.findOne({
             where: { id },
-            relations: ['likes', 'author'],
+            relations: { likes: true, author: true },
           })
         : await this.postRepository.findOne({
             where: { id },
-            relations: ['likes', 'author'],
+            relations: { likes: true, author: true },
           });
 
     if (!object) {
@@ -660,7 +660,7 @@ export class ForumService {
   async deleteReply(id: number, userId: number): Promise<void> {
     const reply = await this.commentRepository.findOne({
       where: { id },
-      relations: ['notifications'],
+      relations: { notifications: true },
     });
 
     if (!reply) {
@@ -682,7 +682,7 @@ export class ForumService {
     return (
       await this.postRepository.find({
         where: { authorId: userId, deleted: false },
-        relations: ['author', 'action'],
+        relations: { author: true, action: true },
       })
     ).filter((post) => this.postIsVisible(post, userId));
   }
@@ -694,7 +694,7 @@ export class ForumService {
         deleted: false,
         parentObjectType: Not(CommentParentObject.Activity),
       },
-      relations: ['author'],
+      relations: { author: true },
     });
     const postIds = comments
       .filter(
@@ -737,7 +737,7 @@ export class ForumService {
         deleted: false,
         parentObjectType: CommentParentObject.Post,
       },
-      relations: ['author', 'editableContent', 'likes'],
+      relations: { author: true, editableContent: true, likes: true },
       order: { createdAt: 'DESC' },
     });
   }

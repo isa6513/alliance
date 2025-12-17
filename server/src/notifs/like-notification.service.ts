@@ -111,7 +111,7 @@ export class LikeNotificationService {
         groupingKey,
         category: NotificationCategory.Likes,
       },
-      relations: ['associatedUsers'],
+      relations: {associatedUsers: true}
     });
 
     if (!notification) {

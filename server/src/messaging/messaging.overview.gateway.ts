@@ -89,7 +89,7 @@ export class MessagingOverviewGateway
   private async handleMessageCreated(payload: MessageCreatedPayload) {
     const participants = await this.participantRepository.find({
       where: { conversation: { id: payload.conversationId } },
-      relations: ['user'],
+      relations: { user: true },
     });
 
     await Promise.all(
@@ -126,7 +126,7 @@ export class MessagingOverviewGateway
   private async handleConversationUpdated(payload: { conversationId: number }) {
     const participants = await this.participantRepository.find({
       where: { conversation: { id: payload.conversationId } },
-      relations: ['user'],
+      relations: { user: true },
     });
 
     await Promise.all(

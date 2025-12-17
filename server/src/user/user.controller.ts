@@ -302,7 +302,7 @@ export class UserController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: UserDto, isArray: true })
   async list(): Promise<UserDto[]> {
-    return (await this.userService.findAll(['contractEvents'])).map(
+    return (await this.userService.findAll({ contractEvents: true })).map(
       (user) => new UserDto(user),
     );
   }
@@ -345,9 +345,9 @@ export class UserController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ProfileDto })
   async myProfile(@Request() req: JwtRequest): Promise<ProfileDto | null> {
-    const user = await this.userService.findOne(req.user.sub, [
-      'contractEvents',
-    ]);
+    const user = await this.userService.findOne(req.user.sub, {
+      contractEvents: true,
+    });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -367,7 +367,9 @@ export class UserController {
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ProfileDto | null> {
-    return userToDto(await this.userService.findOne(id, ['contractEvents']));
+    return userToDto(
+      await this.userService.findOne(id, { contractEvents: true }),
+    );
   }
 
   @Post('verifyEmail')

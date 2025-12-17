@@ -181,7 +181,7 @@ ORDER BY pp.total_session_duration_seconds DESC
     }
 
     const users = await this.userRepository.find({
-      relations: ['contractEvents'],
+      relations: { contractEvents: true },
     });
 
     const signedUsers = users.filter(

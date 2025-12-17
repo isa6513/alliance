@@ -29,7 +29,6 @@ import { NotifsService, shouldTextUser } from 'src/notifs/notifs.service';
 import { actionActivityUrl, actionUrl, withSid } from 'src/search/approutes';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import { RelationString } from 'src/tasks/entities/type';
 import { FormSchema } from 'src/tasks/schema';
 import {
   ActionSuiteSummaryDto,
@@ -44,7 +43,7 @@ import { ContractEventType } from 'src/user/entities/contract-event.entity';
 import { Tag } from 'src/user/entities/tag.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ProfileDto } from 'src/user/user.dto';
-import { ILike, In, MoreThan, Repository } from 'typeorm';
+import { FindOptionsRelations, ILike, In, MoreThan, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import {
   ActionActivityDto,
@@ -155,19 +154,30 @@ export class ActionsService {
   }
 
   findAll(): Promise<Action[]> {
+    this.actionRepository.find({
+      relations: {
+        events: true,
+        activities: true,
+        participatingTags: true,
+        suite: true,
+        manualCohortUsers: true,
+      },
+    });
     return this.actionRepository.find({
-      relations: [
-        'events',
-        'activities',
-        'participatingTags',
-        'suite',
-        'manualCohortUsers',
-      ],
+      relations: {
+        events: true,
+        activities: true,
+        participatingTags: true,
+        suite: true,
+        manualCohortUsers: true,
+      },
     });
   }
 
   async findAllSorted(
-    relations: (keyof Omit<Action, 'usersCompleted' | 'status'>)[] = [],
+    relations:
+      | Omit<FindOptionsRelations<Action>, 'usersCompleted' | 'status'>
+      | undefined = undefined,
     limit?: number,
   ): Promise<Action[]> {
     // Sort by:
@@ -211,14 +221,14 @@ export class ActionsService {
     }
     const sortedActions = await qb.getMany();
 
-    if (relations.length === 0 || sortedActions.length === 0) {
+    if (relations || sortedActions.length === 0) {
       return sortedActions;
     }
 
     const actionIds = sortedActions.map((a) => a.id);
     const actionsWithRelations = await this.actionRepository.find({
       where: { id: In(actionIds) },
-      relations: relations as string[],
+      relations,
     });
 
     const actionMap = new Map(actionsWithRelations.map((a) => [a.id, a]));
@@ -241,7 +251,7 @@ export class ActionsService {
   async computeUsersJoinedForAction(actionId: number): Promise<number[]> {
     const action = await this.actionRepository.findOneOrFail({
       where: { id: actionId },
-      relations: ['events', 'participatingTags', 'activities'],
+      relations: { events: true, participatingTags: true, activities: true },
     });
 
     if (action.commitmentless) {
@@ -330,24 +340,27 @@ export class ActionsService {
   }
 
   async findPublic(userId?: number, sorted?: boolean): Promise<ActionDto[]> {
-    const relations: (keyof Omit<Action, 'usersCompleted' | 'status'>)[] = [
-      'events',
-      'participatingTags',
-      'activities',
-      'manualCohortUsers',
-    ];
+    const relations: Omit<
+      FindOptionsRelations<Action>,
+      'usersCompleted' | 'status'
+    > = {
+      events: true,
+      participatingTags: true,
+      activities: true,
+      manualCohortUsers: true,
+    };
     const actions = sorted
       ? await this.findAllSorted(relations)
       : await this.actionRepository.find({
-          relations: relations,
+          relations,
         });
 
     const user = userId
-      ? await this.userService.findOne(userId, [
-          'tags',
-          'awayRanges',
-          'contractEvents',
-        ])
+      ? await this.userService.findOne(userId, {
+          tags: true,
+          awayRanges: true,
+          contractEvents: true,
+        })
       : null;
 
     const filtered: Action[] = [];
@@ -434,19 +447,19 @@ export class ActionsService {
     serverSide = false,
   ): Promise<Action> {
     const user = userId
-      ? await this.userService.findOne(userId, ['tags'])
+      ? await this.userService.findOne(userId, { tags: true })
       : null;
     const action = await this.actionRepository.findOne({
       where: { id },
-      relations: [
-        'events',
-        'activities',
-        'participatingTags',
-        'manualCohortUsers',
-        'updates',
-        'suite',
-        'authors',
-      ] satisfies RelationString<Action>[],
+      relations: {
+        events: true,
+        activities: true,
+        participatingTags: true,
+        manualCohortUsers: true,
+        updates: true,
+        suite: true,
+        authors: true,
+      },
     });
 
     if (action?.publicOnly) {
@@ -469,7 +482,7 @@ export class ActionsService {
   ): Promise<ActionDto> {
     const action = await this.findOne(id, userId, serverSide);
     const user = userId
-      ? await this.userService.findOne(userId, ['tags'])
+      ? await this.userService.findOne(userId, { tags: true })
       : null;
     return new ActionDto(action, {
       canParticipate: user
@@ -655,7 +668,11 @@ export class ActionsService {
   ): Promise<Action | null> {
     const action = await this.actionRepository.findOne({
       where: { id },
-      relations: ['participatingTags', 'manualCohortUsers', 'authors'],
+      relations: {
+        participatingTags: true,
+        manualCohortUsers: true,
+        authors: true,
+      },
     });
 
     if (!action) {
@@ -771,7 +788,11 @@ export class ActionsService {
   ): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
       where: { userId, type: ActionActivityType.USER_COMPLETED },
-      relations: ['action', 'user', 'taskFormResponse'],
+      relations: {
+        action: true,
+        user: true,
+        taskFormResponse: true,
+      },
     });
 
     const likedIds = requestingUserId
@@ -798,7 +819,9 @@ export class ActionsService {
         action: { id: actionId },
         type: ActionActivityType.USER_JOINED,
       },
-      relations: ['user', 'user.city'],
+      relations: {
+        user: { city: true },
+      },
     });
     return joinActivities
       .filter(
@@ -1069,7 +1092,7 @@ export class ActionsService {
     userId: number,
   ): Promise<boolean> {
     const action = await this.findOne(actionId, userId);
-    const user = await this.userService.findOne(userId, ['tags']);
+    const user = await this.userService.findOne(userId, { tags: true });
     if (!user) {
       return false;
     }
@@ -1090,7 +1113,7 @@ export class ActionsService {
   }
 
   async ensureUserEligibleForAction(action: Action, userId: number) {
-    const user = await this.userService.findOne(userId, ['tags']);
+    const user = await this.userService.findOne(userId, { tags: true });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -1187,7 +1210,7 @@ export class ActionsService {
 
   async setTestRelations(id: number) {
     const actions = await this.actionRepository.find({
-      relations: ['events'],
+      relations: { events: true },
     });
     for (const action of actions) {
       if (action.status === ActionStatus.MemberAction) {
@@ -1205,7 +1228,7 @@ export class ActionsService {
       where: {
         user: { id: userId },
       },
-      relations: ['action', 'user'],
+      relations: { action: true, user: true },
     });
     return activities.map((activity) => new ActionActivityDto(activity));
   }
@@ -1215,10 +1238,10 @@ export class ActionsService {
     comments?: boolean,
     limit?: number,
   ): Promise<ActionActivityDto[]> {
-    const user = await this.userService.findOne(userId, [
-      'sentFriendRequests',
-      'receivedFriendRequests',
-    ]);
+    const user = await this.userService.findOne(userId, {
+      sentFriendRequests: true,
+      receivedFriendRequests: true,
+    });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -1301,7 +1324,7 @@ export class ActionsService {
   async findByName(name: string): Promise<Action[]> {
     const actions = await this.actionRepository.find({
       where: { name: ILike(`%${name}%`) },
-      relations: ['events'],
+      relations: { events: true },
     });
     return actions.filter((action) => action.status !== ActionStatus.Draft);
   }
@@ -1312,7 +1335,12 @@ export class ActionsService {
   ): Promise<ActionActivityDto> {
     const activity = await this.actionActivityRepository.findOne({
       where: { id },
-      relations: ['user', 'action', 'likes', 'taskFormResponse'],
+      relations: {
+        user: true,
+        action: true,
+        likes: true,
+        taskFormResponse: true,
+      },
     });
     if (!activity) {
       throw new NotFoundException('Activity not found');
@@ -1329,7 +1357,7 @@ export class ActionsService {
   async getEvent(id: number): Promise<ActionEventDto> {
     const event = await this.actionEventRepository.findOne({
       where: { id },
-      relations: ['action'],
+      relations: { action: true },
     });
     if (!event) {
       throw new NotFoundException('Event not found');
@@ -1340,7 +1368,7 @@ export class ActionsService {
   async likeActivity(id: number, userId: number, unlike = false) {
     const activity = await this.actionActivityRepository.findOne({
       where: { id },
-      relations: ['user', 'action', 'likes'],
+      relations: { user: true, action: true, likes: true },
     });
     if (!activity) {
       throw new NotFoundException('Activity not found');
@@ -1373,7 +1401,7 @@ export class ActionsService {
 
     const updatedActivity = await this.actionActivityRepository.findOne({
       where: { id },
-      relations: ['user', 'action', 'likes'],
+      relations: { user: true, action: true, likes: true },
     });
     if (!updatedActivity) {
       throw new NotFoundException('Activity not found');
@@ -1430,7 +1458,7 @@ export class ActionsService {
   ): Promise<ActionActivityDto> {
     const activity = await this.actionActivityRepository.findOne({
       where: { id },
-      relations: ['editableContent', 'taskFormResponse'],
+      relations: { editableContent: true, taskFormResponse: true },
     });
     if (!activity) {
       throw new NotFoundException('Activity not found');
@@ -1504,7 +1532,7 @@ export class ActionsService {
     await this.editableContentRepository.save(content);
     const action = await this.actionRepository.findOneOrFail({
       where: { id },
-      relations: ['participatingTags'],
+      relations: { participatingTags: true },
     });
 
     let tag: Tag | undefined = undefined;
@@ -1549,7 +1577,7 @@ export class ActionsService {
   async getAllActionUpdates(limit?: number): Promise<ActionUpdateDto[]> {
     const actionUpdates = await this.actionUpdateRepository.find({
       take: limit,
-      relations: ['action'],
+      relations: { action: true },
       select: {
         action: {
           name: true,
@@ -1587,16 +1615,10 @@ export class ActionsService {
   async getSuite(id: number): Promise<ActionSuiteDto> {
     const suite = await this.actionSuiteRepository.findOneOrFail({
       where: { id },
-      relations: [
-        'actions',
-        'actions.events',
-        'reminderGroups',
-        'reminderGroups.memberActionEvent',
-        'reminderGroups.memberActionEvent',
-        'reminderGroups.deadlineEvent',
-        'actions.participatingTags',
-        'actions.activities',
-      ],
+      relations: {
+        actions: { events: true, participatingTags: true, activities: true },
+        reminderGroups: { memberActionEvent: true, deadlineEvent: true },
+      },
     });
 
     return new ActionSuiteDto(
@@ -1619,11 +1641,11 @@ export class ActionsService {
   ) {
     const event = await this.actionEventRepository.findOneOrFail({
       where: { id: eventId },
-      relations: ['action', 'action.events'],
+      relations: { action: { events: true } },
     });
     const suite = await this.actionSuiteRepository.findOneOrFail({
       where: { id: suiteId },
-      relations: ['actions', 'actions.events'],
+      relations: { actions: { events: true } },
     });
     const eventIdx = event.action.events.findIndex(
       (event) => event.id === eventId,
@@ -1654,7 +1676,7 @@ export class ActionsService {
   async addSuiteEvent(suiteId: number, actionEventDto: CreateActionEventDto) {
     const suite = await this.actionSuiteRepository.findOneOrFail({
       where: { id: suiteId },
-      relations: ['actions'],
+      relations: { actions: true },
     });
 
     for (const action of suite.actions) {
@@ -1674,11 +1696,11 @@ export class ActionsService {
   async deleteSuiteEvent(suiteId: number, eventId: number) {
     const event = await this.actionEventRepository.findOneOrFail({
       where: { id: eventId },
-      relations: ['action', 'action.events'],
+      relations: { action: { events: true } },
     });
     const suite = await this.actionSuiteRepository.findOneOrFail({
       where: { id: suiteId },
-      relations: ['actions', 'actions.events'],
+      relations: { actions: { events: true } },
     });
     const eventIdx = event.action.events.findIndex(
       (event) => event.id === eventId,
@@ -1708,12 +1730,13 @@ export class ActionsService {
   ): Promise<PreviewNotificationPlan[]> {
     const event = await this.actionEventRepository.findOneOrFail({
       where: { id: eventId },
-      relations: [
-        'action',
-        'action.events',
-        'action.participatingTags',
-        'action.manualCohortUsers',
-      ],
+      relations: {
+        action: {
+          events: true,
+          participatingTags: true,
+          manualCohortUsers: true,
+        },
+      },
     });
 
     let tag: Tag | undefined = undefined;
@@ -1792,7 +1815,7 @@ export class ActionsService {
 
     const suite = await this.actionSuiteRepository.findOneOrFail({
       where: { id: suiteId },
-      relations: ['actions'],
+      relations: { actions: true },
     });
 
     return actions.filter((action) =>
@@ -1807,12 +1830,13 @@ export class ActionsService {
     taskForm?: boolean,
     suite?: boolean,
   ): Promise<ExportActionDto> {
-    const relations: RelationString<Action>[] = [
-      'participatingTags',
-      'authors',
-      ...(events ? ['events' as const] : []),
-      ...(suite ? ['suite' as const] : []),
-    ];
+    const relations: FindOptionsRelations<Action> = {
+      participatingTags: true,
+      authors: true,
+      events,
+      suite,
+    };
+
     const action = await this.actionRepository.findOneOrFail({
       where: { id },
       relations,
@@ -1916,7 +1940,7 @@ export class ActionsService {
   ): Promise<UserActionRelationsResponseDto> {
     const actions = (
       await this.findAllSorted(
-        ['events', 'suite', 'participatingTags'],
+        { events: true, suite: true, participatingTags: true },
         actionLimit,
       )
     ).filter(
@@ -2168,7 +2192,11 @@ export class ActionsService {
   async findUsersToSuspend(now: Date, preloadedActions?: Action[]) {
     const actions =
       preloadedActions ??
-      (await this.findAllSorted(['events', 'suite', 'participatingTags']));
+      (await this.findAllSorted({
+        events: true,
+        suite: true,
+        participatingTags: true,
+      }));
 
     const suiteMap = new Map<
       number,
@@ -2283,11 +2311,11 @@ export class ActionsService {
     rangeEnd: Date,
     stepHours: number = 1,
   ): Promise<SuspensionPlanDto[]> {
-    const actions = await this.findAllSorted([
-      'events',
-      'suite',
-      'participatingTags',
-    ]);
+    const actions = await this.findAllSorted({
+      events: true,
+      suite: true,
+      participatingTags: true,
+    });
 
     const plans: SuspensionPlanDto[] = [];
     let date = rangeStart;
@@ -2362,7 +2390,7 @@ export class ActionsService {
     return this.actionShareUrlRepository
       .find({
         where: { action: { id: action.id } },
-        relations: ['user'],
+        relations: { user: true },
       })
       .then((shareUrls) =>
         shareUrls.map((shareUrl) => new ShareUrlDto(shareUrl)),

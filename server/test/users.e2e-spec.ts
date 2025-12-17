@@ -159,7 +159,7 @@ describe('Users (e2e)', () => {
     // Verify the user was updated in the database
     const updatedUser = await userRepo.findOne({
       where: { id: userAId },
-      relations: ['city'],
+      relations: { city: true },
     });
     expect(updatedUser).not.toBeNull();
 
@@ -196,7 +196,7 @@ describe('Users (e2e)', () => {
     // Verify the user was updated in the database
     const updatedUser = await userRepo.findOne({
       where: { id: userAId },
-      relations: ['city'],
+      relations: { city: true },
     });
     expect(updatedUser?.anonymous).toBe(false);
     expect(updatedUser?.city?.id).toBe(newCity.id);

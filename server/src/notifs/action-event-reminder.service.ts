@@ -307,16 +307,17 @@ export class ActionEventReminderService {
   ): Promise<PreviewNotificationPlan[]> {
     const group = await this.reminderGroupRepository.findOneOrFail({
       where: { id: groupId },
-      relations: [
-        'memberActionEvent',
-        'deadlineEvent',
-        'memberActionEvent.action',
-        'memberActionEvent.action.participatingTags',
-        'users',
-        'userTag',
-        'actionSuite',
-        'actionSuite.actions',
-      ],
+      relations: {
+        memberActionEvent: {
+          action: {
+            participatingTags: true,
+          },
+        },
+        deadlineEvent: true,
+        users: true,
+        userTag: true,
+        actionSuite: { actions: true },
+      },
     });
 
     const plans = await this.getPlansForGroup(
@@ -333,7 +334,7 @@ export class ActionEventReminderService {
   async getSentNotifsForGroup(groupId: number): Promise<ActionEventNotifDto[]> {
     const notifs = await this.actionEventNotifRepository.find({
       where: { reminderGroup: { id: groupId }, sent: true },
-      relations: ['user'],
+      relations: { user: true },
     });
     return notifs.map((notif) => new ActionEventNotifDto(notif));
   }
@@ -344,7 +345,7 @@ export class ActionEventReminderService {
   ): Promise<ReminderGroup> {
     const event = await this.eventRepository.findOneOrFail({
       where: { id: eventId },
-      relations: ['action'],
+      relations: { action: true },
     });
     if (event.newStatus !== ActionStatus.MemberAction) {
       throw new BadRequestException('Event is not a member action event');
@@ -386,7 +387,7 @@ export class ActionEventReminderService {
   ): Promise<ReminderGroup> {
     const group = await this.reminderGroupRepository.findOneOrFail({
       where: { id: groupId },
-      relations: ['memberActionEvent', 'memberActionEvent.action'],
+      relations: { memberActionEvent: { action: true } },
     });
 
     Object.assign(group, dto);
@@ -405,7 +406,7 @@ export class ActionEventReminderService {
   async getReminderGroupsForEvent(id: number): Promise<ReminderGroup[]> {
     return this.reminderGroupRepository.find({
       where: { memberActionEvent: { id } },
-      relations: ['memberActionEvent'],
+      relations: { memberActionEvent: true },
     });
   }
 
@@ -414,7 +415,7 @@ export class ActionEventReminderService {
   ): Promise<{ deadlineEvent: ActionEvent | undefined; event: ActionEvent }> {
     const event = await this.eventRepository.findOneOrFail({
       where: { id: eventId },
-      relations: ['action'],
+      relations: { action: true },
     });
     const deadlineEvents = await this.eventRepository.find({
       where: {

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { FindOptionsRelations, In, Repository } from 'typeorm';
 import { Community } from 'src/user/entities/community.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Conversation, ConversationType } from './entities/conversation.entity';
@@ -27,28 +27,24 @@ import {
 } from './dto/messaging.dto';
 import { MessagingEvents } from './messaging.events';
 import { ImagesService } from 'src/images/images.service';
-import { RelationString } from 'src/tasks/entities/type';
 
 @Injectable()
 export class ConversationService {
-  private readonly conversationRelations = [
-    'participants',
-    'participants.user',
-    'participants.lastReadMessage',
-    'participants.lastReadMessage.author',
-    'community',
-  ] satisfies RelationString<Conversation>[];
+  private readonly conversationRelations: FindOptionsRelations<Conversation> = {
+    participants: {
+      user: true,
+      lastReadMessage: { author: true },
+    },
+    community: true,
+  };
 
-  private readonly participantRelations = [
-    'conversation',
-    'conversation.participants',
-    'conversation.participants.user',
-    'conversation.participants.lastReadMessage',
-    'conversation.participants.lastReadMessage.author',
-    'user',
-    'lastReadMessage',
-    'lastReadMessage.author',
-  ] satisfies RelationString<Participant>[];
+  private readonly participantRelations: FindOptionsRelations<Participant> = {
+    conversation: {
+      participants: { user: true, lastReadMessage: { author: true } },
+    },
+    user: true,
+    lastReadMessage: { author: true },
+  };
 
   constructor(
     @InjectRepository(Conversation)
@@ -435,7 +431,7 @@ export class ConversationService {
         conversation: { id: conversationId },
         user: { id: targetUserId },
       },
-      relations: ['user'],
+      relations: { user: true },
     });
 
     if (!targetParticipant) {
@@ -478,7 +474,7 @@ export class ConversationService {
   ): Promise<Conversation> {
     const community = await this.communityRepository.findOne({
       where: { id: communityId },
-      relations: ['users', 'leaders'],
+      relations: { users: true, leaders: true },
     });
 
     if (!community) {
@@ -627,7 +623,7 @@ export class ConversationService {
   private async ensureCommunityMembershipForUser(userId: number) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['communities'],
+      relations: { communities: true },
     });
 
     if (!user) {
@@ -770,7 +766,7 @@ export class ConversationService {
         conversation: { id: conversationId },
         user: { id: userId },
       },
-      relations: ['lastReadMessage'],
+      relations: { lastReadMessage: true },
     });
 
     const since =

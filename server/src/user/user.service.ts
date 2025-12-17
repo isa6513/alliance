@@ -15,7 +15,14 @@ import {
   NotificationCategory,
 } from 'src/notifs/entities/notification.entity';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
-import { DeepPartial, ILike, In, Not, Repository } from 'typeorm';
+import {
+  DeepPartial,
+  FindOptionsRelations,
+  ILike,
+  In,
+  Not,
+  Repository,
+} from 'typeorm';
 import { Friend, FriendStatus } from './entities/friend.entity';
 import { PrefillUser } from './entities/prefill-user.entity';
 import {
@@ -52,17 +59,17 @@ import {
   CommunityInviteStatus,
 } from './entities/community-invite.entity';
 import { ConversationService } from 'src/messaging/conversation.service';
-import { RelationString } from 'src/tasks/entities/type';
 import {
   ContractEvent,
   ContractEventType,
 } from './entities/contract-event.entity';
 
 const defaultTimeZone = 'America/Los_Angeles';
-const communityDefaultRelations: readonly RelationString<Community>[] = [
-  'users',
-  'leaders',
-];
+const COMMUNITY_DEFAULT_RELATIONS: Readonly<FindOptionsRelations<Community>> =
+  Object.freeze({
+    users: true,
+    leaders: true,
+  });
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -156,7 +163,7 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  findAll(relations?: RelationString<User>[]): Promise<User[]> {
+  findAll(relations?: FindOptionsRelations<User>): Promise<User[]> {
     return this.userRepository.find({
       relations,
     });
@@ -164,29 +171,27 @@ export class UserService {
 
   findAllWithFriendRequests(): Promise<User[]> {
     return this.userRepository.find({
-      relations: [
-        'sentFriendRequests',
-        'sentFriendRequests.addressee',
-        'receivedFriendRequests',
-        'receivedFriendRequests.requester',
-        'contractEvents',
-      ],
+      relations: {
+        sentFriendRequests: { addressee: true },
+        receivedFriendRequests: { requester: true },
+        contractEvents: true,
+      },
     });
   }
 
   findOne(
     id: number,
-    relations?: RelationString<User>[],
+    relations?: FindOptionsRelations<User>,
   ): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },
-      relations: [...(relations ?? [])],
+      relations,
     });
   }
 
   async findOneByEmail(
     email: string,
-    relations?: string[],
+    relations?: FindOptionsRelations<User>,
   ): Promise<User | null> {
     return this.userRepository.findOne({
       where: { email: ILike(email) },
@@ -329,7 +334,7 @@ export class UserService {
         addressee: { id: addresseeId },
         status: FriendStatus.Pending,
       },
-      relations: ['requester', 'addressee'],
+      relations: { requester: true, addressee: true },
     });
 
     if (!rel) {
@@ -368,7 +373,7 @@ export class UserService {
         { requester: { id: userId }, status: FriendStatus.Accepted },
         { addressee: { id: userId }, status: FriendStatus.Accepted },
       ],
-      relations: ['requester', 'addressee'],
+      relations: { requester: true, addressee: true },
     });
 
     const others = rels.map((r) =>
@@ -379,7 +384,10 @@ export class UserService {
   }
 
   async findMessageableUsers(userId: number): Promise<ProfileDto[]> {
-    const user = await this.findOneOrFail(userId, ['communities', 'leaderOf']);
+    const user = await this.findOneOrFail(userId, {
+      communities: true,
+      leaderOf: true,
+    });
 
     // Staff can message everyone
     if (user.staff) {
@@ -398,7 +406,7 @@ export class UserService {
           { requester: { id: userId }, status: FriendStatus.Accepted },
           { addressee: { id: userId }, status: FriendStatus.Accepted },
         ],
-        relations: ['requester', 'addressee'],
+        relations: { requester: true, addressee: true },
       }),
 
       this.userRepository.find({ where: { staff: true } }),
@@ -466,11 +474,11 @@ export class UserService {
       direction === 'sent'
         ? await this.friendRepository.find({
             where: { requester: { id: userId }, status: FriendStatus.Pending },
-            relations: ['addressee'],
+            relations: { addressee: true },
           })
         : await this.friendRepository.find({
             where: { addressee: { id: userId }, status: FriendStatus.Pending },
-            relations: ['requester'],
+            relations: { addressee: true },
           });
     const users =
       direction === 'sent'
@@ -487,11 +495,11 @@ export class UserService {
     const rel =
       (await this.friendRepository.findOne({
         where: { requester: { id: userId }, addressee: { id: targetUserId } },
-        relations: ['requester', 'addressee'],
+        relations: { requester: true, addressee: true },
       })) ||
       (await this.friendRepository.findOne({
         where: { requester: { id: targetUserId }, addressee: { id: userId } },
-        relations: ['requester', 'addressee'],
+        relations: { requester: true, addressee: true },
       }));
 
     const status = rel ? rel.status : FriendStatus.None;
@@ -504,7 +512,7 @@ export class UserService {
 
   async findOneOrFail(
     id: number,
-    relations?: RelationString<User>[],
+    relations?: FindOptionsRelations<User>,
   ): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
@@ -539,7 +547,10 @@ export class UserService {
     return user;
   }
 
-  async findByIds(ids: number[], relations?: string[]): Promise<User[]> {
+  async findByIds(
+    ids: number[],
+    relations?: FindOptionsRelations<User>,
+  ): Promise<User[]> {
     return this.userRepository.find({
       where: { id: In(ids) },
       relations,
@@ -549,7 +560,7 @@ export class UserService {
   async countReferred(id: number): Promise<number> {
     const user = await this.userRepository.findOne({
       where: { id },
-      relations: ['referredUsers'],
+      relations: { referredUsers: true },
     });
     return user?.referredUsers.length ?? 0;
   }
@@ -557,7 +568,7 @@ export class UserService {
   async getUserLocation(userId: number): Promise<City | undefined> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['city'],
+      relations: { city: true },
     });
     if (!user) {
       throw new NotFoundException(`User ${userId} not found`);
@@ -608,7 +619,7 @@ export class UserService {
       where: {
         isNotSignedUpPartialProfile: false,
       },
-      relations: ['tags', 'awayRanges', 'contractEvents'],
+      relations: { tags: true, awayRanges: true, contractEvents: true },
     });
   }
 
@@ -635,7 +646,7 @@ export class UserService {
   }
 
   async signContract(userId: number): Promise<Date> {
-    const user = await this.findOneOrFail(userId, ['contractEvents']);
+    const user = await this.findOneOrFail(userId, { contractEvents: true });
     if (user.hasActiveContract) {
       throw new BadRequestException('Member already has an active contract.');
     }
@@ -653,7 +664,7 @@ export class UserService {
     automatic: boolean = false,
     autoSuspendKey?: string,
   ): Promise<Date> {
-    const user = await this.findOneOrFail(userId, ['contractEvents']);
+    const user = await this.findOneOrFail(userId, { contractEvents: true });
     if (!user.hasActiveContract) {
       throw new BadRequestException('Member does not have an active contract.');
     }
@@ -763,17 +774,13 @@ export class UserService {
     );
   }
 
-  private get communityRelations(): string[] {
-    return [...communityDefaultRelations];
-  }
-
   async findCommunityOrFail(
     id: number,
-    relations?: RelationString<Community>[],
+    relations?: FindOptionsRelations<Community>,
   ): Promise<Community> {
     return this.communityRepository.findOneOrFail({
       where: { id },
-      relations: relations ?? this.communityRelations,
+      relations: relations ?? COMMUNITY_DEFAULT_RELATIONS,
     });
   }
 
@@ -788,7 +795,7 @@ export class UserService {
 
   async findAllCommunities(): Promise<Community[]> {
     return this.communityRepository.find({
-      relations: this.communityRelations,
+      relations: COMMUNITY_DEFAULT_RELATIONS,
       order: { createdAt: 'DESC' },
     });
   }
@@ -887,7 +894,7 @@ export class UserService {
   }
 
   async findUserCommunity(userId: number): Promise<Community | null> {
-    const user = await this.findOneOrFail(userId, ['communities']);
+    const user = await this.findOneOrFail(userId, { communities: true });
     const communityId =
       user.communities.length > 0 ? user.communities[0].id : null;
 
@@ -895,15 +902,16 @@ export class UserService {
       return null;
     }
 
-    return this.findCommunityOrFail(communityId, [
-      'users',
-      'leaders',
-      'users.contractEvents',
-    ]);
+    return this.findCommunityOrFail(communityId, {
+      users: {
+        contractEvents: true,
+      },
+      leaders: true,
+    });
   }
 
   async getCommunityForUserOrFail(userId: number): Promise<Community> {
-    const user = await this.findOneOrFail(userId, ['communities']);
+    const user = await this.findOneOrFail(userId, { communities: true });
     const community = user.communities.length > 0 ? user.communities[0] : null;
     if (!community) {
       throw new NotFoundException('User is not a member of any community.');
@@ -912,7 +920,9 @@ export class UserService {
   }
 
   async getUserIdsForCommunity(communityId: number): Promise<number[]> {
-    const community = await this.findCommunityOrFail(communityId, ['users']);
+    const community = await this.findCommunityOrFail(communityId, {
+      users: true,
+    });
     const userIds = community.users!.map((user) => user.id);
     return userIds;
   }
@@ -935,7 +945,7 @@ export class UserService {
     const userIds = await this.getUserIdsForCommunity(community.id);
     const users = await this.userRepository.find({
       where: { id: In(userIds) },
-      relations: ['awayRanges'],
+      relations: { awayRanges: true },
     });
     return users.map((user) => {
       const awayRanges: UserAwayRangeDto[] = (user.awayRanges ?? [])
@@ -966,7 +976,7 @@ export class UserService {
   }
 
   async findAllTags(): Promise<Tag[]> {
-    return this.tagRepository.find({ relations: ['users'] });
+    return this.tagRepository.find({ relations: { users: true } });
   }
 
   async findTagByName(name: string): Promise<Tag | null> {
@@ -976,14 +986,14 @@ export class UserService {
   async findTagOrFail(id: number): Promise<Tag> {
     return this.tagRepository.findOneOrFail({
       where: { id },
-      relations: ['users'],
+      relations: { users: true },
     });
   }
 
   async addUserToTag(tagId: number, userId: number): Promise<Tag> {
     const tag = await this.tagRepository.findOneOrFail({
       where: { id: tagId },
-      relations: ['users'],
+      relations: { users: true },
     });
     tag.users.push(await this.findOneOrFail(userId));
     return this.tagRepository.save(tag);
@@ -992,7 +1002,7 @@ export class UserService {
   async removeUserFromTag(tagId: number, userId: number): Promise<Tag> {
     const tag = await this.tagRepository.findOneOrFail({
       where: { id: tagId },
-      relations: ['users'],
+      relations: { users: true },
     });
     tag.users = tag.users.filter((user) => user.id !== userId);
     return this.tagRepository.save(tag);
@@ -1022,7 +1032,7 @@ export class UserService {
       ...rest
     } = body;
 
-    const user = await this.findOneOrFail(userId, ['leaderOf']);
+    const user = await this.findOneOrFail(userId, { leaderOf: true });
     const isAdmin = user.admin;
 
     // Normal users cannot create invites from other users
@@ -1070,7 +1080,7 @@ export class UserService {
   async deleteOnetimeInvite(inviteId: number, userId: number): Promise<void> {
     const invite = await this.onetimeInviteRepository.findOneOrFail({
       where: { id: inviteId },
-      relations: ['invitingUser'],
+      relations: { invitingUser: true },
     });
     const user = await this.findOneOrFail(userId);
     if (
@@ -1089,7 +1099,7 @@ export class UserService {
   async requestOnetimeInvite(body: RequestOnetimeInviteDto, userId: number) {
     const { communityId, ...rest } = body;
 
-    const user = await this.findOneOrFail(userId, ['communities']);
+    const user = await this.findOneOrFail(userId, { communities: true });
     const community: Community | undefined = user.communities.find(
       (community) => community.id === communityId,
     );
@@ -1114,7 +1124,7 @@ export class UserService {
     sendNotificationToLeaders: {
       const communityWithLeaders = await this.communityRepository.findOne({
         where: { id: communityId },
-        relations: ['leaders'],
+        relations: { leaders: true },
       });
       if (!communityWithLeaders || !communityWithLeaders.leaders) {
         console.log('Community leaders not found for community', communityId);
@@ -1169,7 +1179,7 @@ export class UserService {
 
     const request = await this.onetimeInviteRepository.findOneOrFail({
       where: { id: inviteId },
-      relations: ['invitingUser'],
+      relations: { invitingUser: true },
     });
 
     if (request.status === OnetimeInviteStatus.REQUEST_REJECTED) {
@@ -1218,9 +1228,9 @@ export class UserService {
   async deleteCommunityInvite(inviteId: number, userId: number): Promise<void> {
     const invite = await this.communityInviteRepository.findOneOrFail({
       where: { id: inviteId },
-      relations: ['invitingUser', 'community'],
+      relations: { invitingUser: true, community: true },
     });
-    const user = await this.findOneOrFail(userId, ['leaderOf']);
+    const user = await this.findOneOrFail(userId, { leaderOf: true });
     if (
       !(
         invite.invitingUser?.id === userId ||
@@ -1236,20 +1246,20 @@ export class UserService {
   async findValidInviteByCode(code: string): Promise<OnetimeInvite | null> {
     return this.onetimeInviteRepository.findOne({
       where: { code, status: OnetimeInviteStatus.LINK_UNUSED },
-      relations: ['invitingUser', 'community'],
+      relations: { invitingUser: true, community: true },
     });
   }
 
   async findAllOnetimeInvites(): Promise<OnetimeInvite[]> {
     return this.onetimeInviteRepository.find({
-      relations: ['invitingUser', 'community'],
+      relations: { invitingUser: true, community: true },
     });
   }
 
   async findOnetimeInvites(communityId: number): Promise<OnetimeInvite[]> {
     return this.onetimeInviteRepository.find({
       where: { community: { id: communityId } },
-      relations: ['invitingUser'],
+      relations: { invitingUser: true },
     });
   }
 
@@ -1308,7 +1318,7 @@ export class UserService {
   ): Promise<CommunityInviteDto[]> {
     const invites = await this.communityInviteRepository.find({
       where: { community: { id: communityId } },
-      relations: ['invitedUser', 'invitingUser'],
+      relations: { invitedUser: true, invitingUser: true },
     });
     return invites.map((invite) => new CommunityInviteDto(invite));
   }
@@ -1321,7 +1331,7 @@ export class UserService {
         invitedUser: { id: userId },
         status: CommunityInviteStatus.Pending,
       },
-      relations: ['invitingUser', 'community'],
+      relations: { invitingUser: true, community: true },
     });
     return invites.map((invite) => new CommunityInviteDto(invite));
   }
@@ -1329,7 +1339,7 @@ export class UserService {
   async acceptCommunityInvite(inviteId: number, userId: number): Promise<void> {
     const invite = await this.communityInviteRepository.findOneOrFail({
       where: { id: inviteId },
-      relations: ['invitedUser', 'invitingUser', 'community'],
+      relations: { invitedUser: true, invitingUser: true, community: true },
     });
     if (invite.invitedUser.id !== userId) {
       throw new BadRequestException();
@@ -1341,9 +1351,9 @@ export class UserService {
     invite.status = CommunityInviteStatus.Accepted;
     await this.communityInviteRepository.save(invite);
 
-    const community = await this.findCommunityOrFail(invite.community.id, [
-      'users',
-    ]);
+    const community = await this.findCommunityOrFail(invite.community.id, {
+      users: true,
+    });
 
     if (community.users!.some((user) => user.id === invite.invitedUser.id)) {
       throw new BadRequestException();
@@ -1365,7 +1375,7 @@ export class UserService {
   async rejectCommunityInvite(inviteId: number, userId: number): Promise<void> {
     const invite = await this.communityInviteRepository.findOneOrFail({
       where: { id: inviteId },
-      relations: ['invitedUser', 'invitingUser'],
+      relations: { invitedUser: true, invitingUser: true },
     });
     if (invite.invitedUser.id !== userId) {
       throw new BadRequestException();
@@ -1387,7 +1397,7 @@ export class UserService {
   }
 
   async leaveCommunity(communityId: number, userId: number): Promise<void> {
-    const user = await this.findOneOrFail(userId, ['communities']);
+    const user = await this.findOneOrFail(userId, { communities: true });
     if (!user.communities?.some((community) => community.id === communityId)) {
       throw new BadRequestException();
     }

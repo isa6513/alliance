@@ -160,7 +160,7 @@ describe('Actions (e2e)', () => {
 
     groupRestrictedAction = await actionRepo.findOneOrFail({
       where: { id: restricted.id },
-      relations: ['participatingTags'],
+      relations: {participatingTags: true}
     });
   }, 50000);
 

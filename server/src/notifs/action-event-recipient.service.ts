@@ -94,12 +94,13 @@ export class ActionEventRecipientService {
           actionId: action.id,
           type: ActionActivityType.USER_JOINED,
         },
-        relations: [
-          'user',
-          'user.tags',
-          'user.awayRanges',
-          'user.contractEvents',
-        ],
+        relations: {
+          user: {
+            tags: true,
+            awayRanges: true,
+            contractEvents: true,
+          },
+        },
       });
       return filterToEligible(activities.map((activity) => activity.user));
     }
@@ -124,7 +125,7 @@ export class ActionEventRecipientService {
     );
     const usersWithTags = await this.userService.findByIds(
       users.map((user) => user.id),
-      ['tags', 'awayRanges', 'contractEvents'],
+      { tags: true, awayRanges: true, contractEvents: true },
     );
     const idToUser = new Map(usersWithTags.map((user) => [user.id, user]));
 

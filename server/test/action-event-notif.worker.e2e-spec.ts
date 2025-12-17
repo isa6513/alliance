@@ -122,7 +122,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
   const getPrimaryUser = () =>
     userRepo.findOneOrFail({
       where: { id: ctx.testUserId },
-      relations: ['tags'],
+      relations: { tags: true },
     });
 
   const createActionWithMemberEvent = async ({
@@ -193,7 +193,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
   const fetchNotifsForGroup = async (group: ReminderGroup) =>
     notifRepo.find({
       where: { reminderGroup: { id: group.id } },
-      relations: ['user', 'reminderGroup'],
+      relations: { user: true, reminderGroup: true },
     });
 
   const recordCompletion = (user: User, action: Action) =>
@@ -482,7 +482,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
     );
     const customUserWithTags = await userRepo.findOneOrFail({
       where: { id: customUser.id },
-      relations: ['tags'],
+      relations: { tags: true },
     });
 
     const { memberEvent } = await createActionWithMemberEvent({
@@ -539,7 +539,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
     );
     const cohortUserWithTags = await userRepo.findOneOrFail({
       where: { id: cohortUser.id },
-      relations: ['tags'],
+      relations: { tags: true },
     });
 
     const { memberEvent } = await createActionWithMemberEvent({
@@ -733,7 +733,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
 
     const suiteWithActions = await actionSuiteRepo.findOneOrFail({
       where: { id: suite.id },
-      relations: ['actions'],
+      relations: { actions: true },
     });
 
     const createSuiteUser = async (
@@ -839,7 +839,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
 
     const suiteWithActions = await actionSuiteRepo.findOneOrFail({
       where: { id: suite.id },
-      relations: ['actions'],
+      relations: { actions: true },
     });
 
     const completeUser = await userRepo.save(
@@ -928,7 +928,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
 
     const suiteWithActions = await actionSuiteRepo.findOneOrFail({
       where: { id: suite.id },
-      relations: ['actions'],
+      relations: { actions: true },
     });
 
     const suiteReminderGroup = await createReminderGroup(

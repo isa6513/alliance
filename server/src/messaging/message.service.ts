@@ -40,7 +40,7 @@ export class MessageService {
         conversation: { id: dto.conversationId },
         user: { id: userId },
       },
-      relations: ['conversation'],
+      relations: { conversation: true },
     });
 
     if (!participant) {
@@ -58,7 +58,7 @@ export class MessageService {
       replyTo =
         (await this.messageRepository.findOne({
           where: { id: dto.replyToId },
-          relations: ['conversation'],
+          relations: { conversation: true },
         })) ?? undefined;
 
       if (!replyTo || replyTo.conversation.id !== participant.conversation.id) {
@@ -92,7 +92,11 @@ export class MessageService {
 
     const hydratedMessage = await this.messageRepository.findOneOrFail({
       where: { id: savedMessage.id },
-      relations: ['author', 'replyTo', 'replyTo.author', 'conversation'],
+      relations: {
+        author: true,
+        replyTo: { author: true },
+        conversation: true,
+      },
     });
 
     const dtoMessage = new MessageDto(
