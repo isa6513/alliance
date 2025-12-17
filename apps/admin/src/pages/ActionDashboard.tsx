@@ -706,6 +706,8 @@ const ActionDashboard: React.FC = () => {
     const trimmedShortDescription = action.shortDescription?.trim() ?? "";
     const trimmedBody = action.body?.trim() ?? "";
     const partOfSuite = Boolean(action.suite?.id);
+    const thumbnail = action.squareThumbnailImage?.trim() ?? "";
+    const hasThumbnail = thumbnail.length > 0;
 
     const items: ReadinessCheckItem[] = [
       {
@@ -718,6 +720,12 @@ const ActionDashboard: React.FC = () => {
         id: "body",
         label: "Full body content",
         isReady: trimmedBody.length > 0,
+        fixTab: "details",
+      },
+      {
+        id: "thumbnail",
+        label: "Has a thumbnail",
+        isReady: hasThumbnail,
         fixTab: "details",
       },
       {
@@ -957,7 +965,7 @@ const ActionDashboard: React.FC = () => {
                     {action.archived ? "Unarchive Action" : "Archive Action"}
                   </Button>
                 </div>
-                {action.status === "draft" && readinessTotalCount > 0 && (
+                {readinessTotalCount > 0 && (
                   <Card style={CardStyle.White}>
                     <div className="flex flex-col gap-y-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center gap-2">
@@ -966,7 +974,7 @@ const ActionDashboard: React.FC = () => {
                           strokeWidth={3}
                         />
                         <h2 className="text-lg font-semibold">
-                          Readiness Check
+                          Recommendations
                         </h2>
                       </div>
                       <span
@@ -1055,19 +1063,6 @@ const ActionDashboard: React.FC = () => {
                         <strong>Action ID:</strong> {action.id}
                       </div>
                     </div>
-
-                    {action.image && (
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 mb-2">
-                          Action Image:
-                        </p>
-                        <img
-                          src={action.image}
-                          alt={action.name}
-                          className="w-full max-w-sm h-auto rounded-md border border-gray-300"
-                        />
-                      </div>
-                    )}
                   </div>
                 </Card>
 
