@@ -2,6 +2,7 @@ import React from "react";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import type { TableDataDto } from "@alliance/shared/client/types.gen";
 import type { SelectedRowState } from "./DatabaseViewer.hooks";
+import { X } from "lucide-react";
 
 interface DatabaseToolbarProps {
   selectedTable: string;
@@ -153,7 +154,7 @@ const DatabaseToolbar: React.FC<DatabaseToolbarProps> = ({
                 className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
                 onClick={() => onSearchChange("")}
               >
-                <span className="text-gray-400 !font-mono text-xs">x</span>
+                <X className="text-gray-400" size={16} />
               </div>
             )}
           </div>
