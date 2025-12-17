@@ -21,6 +21,7 @@ import useLiveConvoMessages, {
   sortConversations,
   useConversations,
 } from "./messages";
+import { useMediaQuery } from "../../lib/useMediaQuery";
 
 const MessagesPage = () => {
   const [params, setParams] = useSearchParams();
@@ -101,8 +102,8 @@ const MessagesPage = () => {
     null
   );
 
-  const [messagesOpen, setMessagesOpen] = useState(false);
-  const isSmall = document.body.clientWidth < 768;
+  const [messagesOpen, setMessagesOpen] = useState(!!selectedConvoId);
+  const isSmall = useMediaQuery("(max-width: 768px)");
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
