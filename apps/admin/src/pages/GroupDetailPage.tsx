@@ -170,7 +170,7 @@ const CommunityDetailPage: React.FC = () => {
     nCompleted: number;
     nTotal: number;
   }>(() => {
-    if (!community?.users || !userActionRelations) {
+    if (!userActionRelations) {
       return {
         completedAllCurrentActions: {} as Record<number, boolean>,
         nCompleted: 0,
@@ -201,7 +201,7 @@ const CommunityDetailPage: React.FC = () => {
       nCompleted: completedAllValues.filter((completed) => completed).length,
       nTotal: completedAllValues.length,
     };
-  }, [activeActions, community, userActionRelations]);
+  }, [activeActions, userActionRelations]);
 
   const handleUpdateDetails = async (
     event: React.FormEvent<HTMLFormElement>

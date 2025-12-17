@@ -92,49 +92,53 @@ const CommunityMembersTable = ({
             <col />
             {amLeader && <col className={`w-[0px] md:w-[180px]`} />}
           </colgroup>
-          <thead className="text-left bg-white">
+          {leaders.length > 0 && (
+            <>
+              <thead className="text-left bg-white">
+                <tr>
+                  <td colSpan={amLeader ? 3 : 2} className="px-0 pb-6">
+                    <p className="text-xl md:text-2xl font-semibold">
+                      Lead{leaders.length !== 1 ? "s" : ""}
+                    </p>
+                  </td>
+                </tr>
+              </thead>
+              <thead className="text-left bg-zinc-50">
+                <tr className="*:py-4 *:px-2 *:md:px-4 border border-zinc-200 text-xs md:text-sm text-zinc-600">
+                  <th scope="col" className="font-medium">
+                    Name
+                  </th>
+                  <th scope="col" className="font-medium">
+                    Action history
+                  </th>
+                  {amLeader && (
+                    <th
+                      scope="col"
+                      className="font-medium md:whitespace-nowrap"
+                    >
+                      Preferred contact time
+                    </th>
+                  )}
+                </tr>
+              </thead>
+              <tbody className="border border-zinc-200">
+                {leaders.map((user) => (
+                  <CommunityMemberTableRow
+                    key={user.id}
+                    profile={user}
+                    canExpand={amLeader}
+                    amLeader={amLeader}
+                    contactInfo={memberContactInfo?.[user.id]}
+                    actionRelations={userActionRelations?.[user.id] ?? []}
+                    actions={visibleActions}
+                  />
+                ))}
+              </tbody>
+            </>
+          )}
+          <thead className="text-left">
             <tr>
-              <td colSpan={amLeader ? 3 : 2} className="px-0 pb-6">
-                <p className="text-xl md:text-2xl font-semibold">
-                  Lead{leaders.length !== 1 ? "s" : ""}
-                </p>
-              </td>
-            </tr>
-          </thead>
-          <thead className="text-left bg-zinc-50">
-            <tr className="*:py-4 *:px-2 *:md:px-4 border border-zinc-200 text-xs md:text-sm text-zinc-600">
-              <th scope="col" className="font-medium">
-                Name
-              </th>
-              <th scope="col" className="font-medium">
-                Action history
-              </th>
-              {amLeader && (
-                <th scope="col" className="font-medium md:whitespace-nowrap">
-                  Preferred contact time
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody className="border border-zinc-200">
-            {leaders.map((user) => (
-              <CommunityMemberTableRow
-                key={user.id}
-                profile={user}
-                canExpand={amLeader}
-                amLeader={amLeader}
-                contactInfo={memberContactInfo?.[user.id]}
-                actionRelations={userActionRelations?.[user.id] ?? []}
-                actions={visibleActions}
-              />
-            ))}
-          </tbody>
-          <thead className="text-left bg-white">
-            <tr>
-              <td
-                colSpan={amLeader ? 3 : 2}
-                className="px-0 pt-10 pb-6 border-y border-zinc-200"
-              >
+              <td colSpan={amLeader ? 3 : 2} className="px-0 pb-6 pt-6">
                 <div className="flex flex-col gap-y-2">
                   <p className="text-xl md:text-2xl font-semibold">Members</p>
                   <p className="text-zinc-500 text-sm">

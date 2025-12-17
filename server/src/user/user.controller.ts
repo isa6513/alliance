@@ -704,6 +704,13 @@ export class UserController {
     return this.userService.getMemberContactInfoByCommunityId(communityId);
   }
 
+  @Get('memberContactInfo')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
+  async getAllMemberContactInfo() {
+    return this.userService.getAllMemberContactInfo();
+  }
+
   @Post('communityInvites/:inviteId/accept')
   @UseGuards(AuthGuard)
   @ApiOkResponse()

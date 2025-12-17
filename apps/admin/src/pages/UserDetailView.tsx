@@ -21,7 +21,6 @@ import {
 } from "@alliance/shared/client/types.gen";
 import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
-import { Duration, formatDuration, intervalToDuration } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router";
 import { Route } from "../../.react-router/types/src/pages/+types/UserDetailView";
@@ -89,15 +88,8 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
 
 const UserDetailView: React.FC = () => {
   const loaderData = useLoaderData<typeof clientLoader>();
-  const {
-    user,
-    actionSummaries,
-    actionRelations,
-    timeSpent,
-    timeSpentTotal,
-    awayRanges,
-    notifs,
-  } = loaderData;
+  const { user, actionSummaries, actionRelations, awayRanges, notifs } =
+    loaderData;
 
   const [actionRelationsState, setActionRelationsState] =
     useState<UserActionRelationDetailDto[]>(actionRelations);
@@ -160,12 +152,6 @@ const UserDetailView: React.FC = () => {
       otherNotifs: sortDesc(other),
     };
   }, [notifs]);
-
-  const formatTimeSpent = useMemo(() => formatTime(timeSpent), [timeSpent]);
-  const formatTimeSpentTotal = useMemo(
-    () => formatTime(timeSpentTotal),
-    [timeSpentTotal]
-  );
 
   const sortedAwayRanges = useMemo(() => {
     return [...awayRanges].sort(
@@ -782,20 +768,6 @@ function relationStatusColor(status: UserActionRelationDetailDto["status"]) {
     default:
       throw new Error(`Unknown relation status: ${status satisfies never}`);
   }
-}
-
-function formatTime(time: number) {
-  const interval = intervalToDuration({ start: 0, end: time * 1000 });
-  const formatUnits: (keyof Duration)[] =
-    interval.minutes || interval.hours || interval.days
-      ? ["hours", "minutes"]
-      : ["hours", "minutes", "seconds"];
-  return formatDuration(interval, {
-    format: formatUnits,
-  })
-    .replace(" hours", "h")
-    .replace(" minutes", "m")
-    .replace(" seconds", "s");
 }
 
 function notifTimestamp(notif: ActionEventNotifDto) {

@@ -6,8 +6,11 @@ import {
   actionsActionRelations as userGetActionRelations,
   userRemoveUserFromTag,
   userGetTags,
+  userGetAllMemberContactInfo,
 } from "@alliance/shared/client";
 import {
+  CommunityMemberContactInfoDto,
+  ProfileDto,
   TagDto,
   TimeSpentForUserDto,
   UserActionRelationDetailDto,
@@ -20,6 +23,10 @@ import UserCard from "../components/UserCard";
 import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
 import { href, Link } from "react-router";
+import { LayoutGrid, List } from "lucide-react";
+import CommunityMembersTable from "@alliance/shared/ui/CommunityMembersTable";
+
+type ViewMode = "cards" | "rows";
 
 enum UserFilterMode {
   ALL = "All",
@@ -40,6 +47,9 @@ const UsersList: React.FC = () => {
   const [actionSummaries, setActionSummaries] = useState<
     UserActionSummaryDto[]
   >([]);
+  const [activeActions, setActiveActions] = useState<UserActionSummaryDto[]>(
+    []
+  );
   const [userActionRelations, setUserActionRelations] = useState<
     Record<number, UserActionRelationDetailDto[]>
   >({});
@@ -54,6 +64,7 @@ const UsersList: React.FC = () => {
   );
   const [tagMutationError, setTagMutationError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("cards");
 
   useEffect(() => {
     analyticsGetTimeSpentPerUser().then((res) => {
@@ -87,6 +98,9 @@ const UsersList: React.FC = () => {
       data.actions.reverse();
 
       setActionSummaries(data.actions ?? []);
+      setActiveActions(
+        data.actions.filter((action) => action.status === "member_action")
+      );
       const relationMap: Record<number, UserActionRelationDetailDto[]> = {};
       for (const entry of data.users ?? []) {
         relationMap[entry.userId] = entry.relations ?? [];
@@ -209,6 +223,80 @@ const UsersList: React.FC = () => {
     selectedTagIds.length > 0 ||
     filterMode !== UserFilterMode.ALL;
 
+  const usersAsProfiles = useMemo((): ProfileDto[] => {
+    return (modeToUsers[filterMode] ?? []).map((user) => {
+      const lastEvent = user.contractEvents.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      )[0];
+      return {
+        id: user.id,
+        admin: user.admin,
+        staff: user.staff,
+        profilePicture: user.profilePicture,
+        profileDescription: user.profileDescription,
+        displayName: user.name,
+        hasActiveContract: lastEvent?.type === "signed",
+        isCommunityLeader: false,
+        lastContractEvent: lastEvent,
+      };
+    });
+  }, [modeToUsers, filterMode]);
+
+  const [memberContactInfo, setMemberContactInfo] = useState<
+    Record<number, CommunityMemberContactInfoDto>
+  >({});
+
+  useEffect(() => {
+    userGetAllMemberContactInfo().then((resp) => {
+      if (resp.data) {
+        setMemberContactInfo(
+          resp.data.reduce((acc, contactInfo) => {
+            acc[contactInfo.id] = contactInfo;
+            return acc;
+          }, {} as Record<number, CommunityMemberContactInfoDto>)
+        );
+      }
+    });
+  }, []);
+
+  const { completedAllCurrentActions } = useMemo<{
+    completedAllCurrentActions: Record<number, boolean>;
+    nCompleted: number;
+    nTotal: number;
+  }>(() => {
+    if (!userActionRelations) {
+      return {
+        completedAllCurrentActions: {} as Record<number, boolean>,
+        nCompleted: 0,
+        nTotal: 0,
+      };
+    }
+
+    const completedAll: Record<number, boolean> = {};
+    for (const action of activeActions) {
+      for (const userId of action.joinedUserIds) {
+        completedAll[userId] = true;
+      }
+    }
+
+    for (const action of activeActions) {
+      for (const userId of action.joinedUserIds) {
+        const relation = userActionRelations[userId]?.find(
+          (relation) => relation.actionId === action.id
+        );
+        if (relation?.status !== "completed") {
+          completedAll[userId] = false;
+        }
+      }
+    }
+    const completedAllValues = Object.values(completedAll);
+    return {
+      completedAllCurrentActions: completedAll,
+      nCompleted: completedAllValues.filter((completed) => completed).length,
+      nTotal: completedAllValues.length,
+    };
+  }, [activeActions, userActionRelations]);
+
   const updateTagInState = useCallback((updatedTag: TagDto) => {
     setTags((prev) => {
       const tagExists = prev.some((tag) => tag.id === updatedTag.id);
@@ -261,7 +349,7 @@ const UsersList: React.FC = () => {
   );
 
   return (
-    <div className="h-full p-5 pt-20 flex flex-col items-center gap-y-3 overflow-x-hidden">
+    <div className="h-full p-5 flex flex-col items-center gap-y-3 overflow-x-hidden">
       <div className="flex flex-row gap-3 w-full items-center">
         <input
           type="text"
@@ -352,30 +440,66 @@ const UsersList: React.FC = () => {
             Manage tags
           </Link>
         </div>
+        <div className="ml-auto flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setViewMode("cards")}
+            className={`p-2 rounded ${
+              viewMode === "cards" ? "bg-zinc-200" : "hover:bg-zinc-100"
+            }`}
+            title="Card view"
+          >
+            <LayoutGrid size={18} className="text-zinc-600" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("rows")}
+            className={`p-2 rounded ${
+              viewMode === "rows" ? "bg-zinc-200" : "hover:bg-zinc-100"
+            }`}
+            title="Table view"
+          >
+            <List size={18} className="text-zinc-600" />
+          </button>
+        </div>
       </div>
       {tagMutationError && (
         <div className="w-full">
           <p className="text-sm text-red-500">{tagMutationError}</p>
         </div>
       )}
-      <div className="grid gap-3 w-full [grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
-        {(modeToUsers[filterMode] ?? []).map((user) => (
-          <UserCard
-            key={user.id}
-            user={user}
-            timeSpent={userToTimeSpent[user.id]}
-            timeSpentTotal={userToTimeSpentTotal[user.id]}
-            tags={userTagsMap[user.id] || []}
-            allTags={tags}
-            onToggleTag={(tagId, nextChecked) =>
-              handleUserTagToggle(user.id, tagId, nextChecked)
-            }
-            isTagPending={(tagId) => pendingTagOps.has(`${user.id}-${tagId}`)}
+      {viewMode === "cards" ? (
+        <div className="grid gap-3 w-full [grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
+          {(modeToUsers[filterMode] ?? []).map((user) => (
+            <UserCard
+              key={user.id}
+              user={user}
+              timeSpent={userToTimeSpent[user.id]}
+              timeSpentTotal={userToTimeSpentTotal[user.id]}
+              tags={userTagsMap[user.id] || []}
+              allTags={tags}
+              onToggleTag={(tagId, nextChecked) =>
+                handleUserTagToggle(user.id, tagId, nextChecked)
+              }
+              isTagPending={(tagId) => pendingTagOps.has(`${user.id}-${tagId}`)}
+              actions={actionSummaries}
+              actionRelations={userActionRelations[user.id] || []}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="w-full">
+          <CommunityMembersTable
+            leaders={[]}
+            members={usersAsProfiles}
+            amLeader={true}
+            userActionRelations={userActionRelations}
+            memberContactInfo={memberContactInfo}
             actions={actionSummaries}
-            actionRelations={userActionRelations[user.id] || []}
+            completedAllCurrentActions={completedAllCurrentActions}
           />
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -42,4 +42,4 @@ uploads/
 *.log
 
 .yarn/*
-apps/frontend/tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfo

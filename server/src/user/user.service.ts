@@ -937,6 +937,34 @@ export class UserService {
     return this.getMemberContactInfo(userIds[0]);
   }
 
+  async getAllMemberContactInfo(): Promise<CommunityMemberContactInfoDto[]> {
+    const users = await this.userRepository.find({
+      relations: ['awayRanges'],
+    });
+
+    return users.map((user) => {
+      const awayRanges: UserAwayRangeDto[] = (user.awayRanges ?? [])
+        .slice()
+        .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+        .map((awayRange) =>
+          Object.assign(new UserAwayRangeDto(), {
+            id: awayRange.id,
+            startDate: awayRange.startDate,
+            endDate: awayRange.endDate,
+            createdAt: awayRange.createdAt,
+            reason: awayRange.reason,
+            note: awayRange.note,
+          }),
+        );
+
+      return new CommunityMemberContactInfoDto(
+        user,
+        'America/Los_Angeles',
+        awayRanges,
+      );
+    });
+  }
+
   async getMemberContactInfo(
     userId: number,
   ): Promise<CommunityMemberContactInfoDto[]> {

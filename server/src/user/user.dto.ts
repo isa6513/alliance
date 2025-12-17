@@ -99,6 +99,7 @@ export class UserDto extends PickType(User, [
   'pushNotifsEnabled',
   'textNotifsEnabled',
   'socialNotifsPreference',
+  'profileDescription',
   'forumDigestPreference',
   'turnedOffAllNotifs',
   'invitedCommunities',

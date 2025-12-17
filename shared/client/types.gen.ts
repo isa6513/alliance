@@ -528,6 +528,7 @@ export type UserDto = {
     admin: boolean;
     staff: boolean;
     profilePicture: string | null;
+    profileDescription: string | null;
     referralCode: string | null;
     onboardingComplete: boolean;
     anonymous: boolean;
@@ -2997,6 +2998,19 @@ export type UserGetCommunityMemberContactInfoAdminResponses = {
 };
 
 export type UserGetCommunityMemberContactInfoAdminResponse = UserGetCommunityMemberContactInfoAdminResponses[keyof UserGetCommunityMemberContactInfoAdminResponses];
+
+export type UserGetAllMemberContactInfoData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/memberContactInfo';
+};
+
+export type UserGetAllMemberContactInfoResponses = {
+    200: Array<CommunityMemberContactInfoDto>;
+};
+
+export type UserGetAllMemberContactInfoResponse = UserGetAllMemberContactInfoResponses[keyof UserGetAllMemberContactInfoResponses];
 
 export type UserAcceptCommunityInviteData = {
     body?: never;
