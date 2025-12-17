@@ -323,13 +323,9 @@ const UserDetailView: React.FC = () => {
           <h2 className="text-lg font-semibold text-zinc-900">Away periods</h2>
           {currentAwayRange && (
             <span
-              className={`rounded px-2 py-1 text-xs font-semibold ${
-                currentAwayRange
-                  ? "bg-amber-100 text-amber-800"
-                  : "bg-green-100 text-green-700"
-              }`}
+              className={`rounded px-2 py-1 text-xs font-semibold ${"bg-amber-100 text-amber-800"}`}
             >
-              Away until ${formatAwayDate(currentAwayRange.endDate)}
+              Away until {formatAwayDate(currentAwayRange.endDate)}
             </span>
           )}
         </div>
