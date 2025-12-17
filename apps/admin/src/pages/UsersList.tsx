@@ -22,7 +22,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import UserCard from "../components/UserCard";
 import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
 import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
-import { href, Link } from "react-router";
+import { href, Link, useSearchParams } from "react-router";
 import { LayoutGrid, List } from "lucide-react";
 import CommunityMembersTable from "@alliance/shared/ui/CommunityMembersTable";
 
@@ -64,7 +64,9 @@ const UsersList: React.FC = () => {
   );
   const [tagMutationError, setTagMutationError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("cards");
+
+  const [params, setParams] = useSearchParams();
+  const viewMode = (params.get("viewMode") as ViewMode | undefined) ?? "cards";
 
   useEffect(() => {
     analyticsGetTimeSpentPerUser().then((res) => {
@@ -444,7 +446,7 @@ const UsersList: React.FC = () => {
         <div className="ml-auto flex items-center gap-1">
           <button
             type="button"
-            onClick={() => setViewMode("cards")}
+            onClick={() => setParams({ viewMode: "cards" })}
             className={`p-2 rounded ${
               viewMode === "cards" ? "bg-zinc-200" : "hover:bg-zinc-100"
             }`}
@@ -454,7 +456,7 @@ const UsersList: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => setViewMode("rows")}
+            onClick={() => setParams({ viewMode: "rows" })}
             className={`p-2 rounded ${
               viewMode === "rows" ? "bg-zinc-200" : "hover:bg-zinc-100"
             }`}
