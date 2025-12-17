@@ -9,7 +9,10 @@ import {
   ActionActivity,
   ActionActivityType,
 } from 'src/actions/entities/action-activity.entity';
-import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
+import {
+  OnetimeInvite,
+  OnetimeInviteStatus,
+} from 'src/user/entities/onetime-invite.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ContractEventType } from 'src/user/entities/contract-event.entity';
 
@@ -201,7 +204,7 @@ ORDER BY pp.total_session_duration_seconds DESC
     const createdInvites = await this.onetimeInviteRepository.count();
     const acceptedInvites = await this.onetimeInviteRepository.count({
       where: {
-        isValid: false,
+        status: OnetimeInviteStatus.LINK_USED,
       },
     });
 
