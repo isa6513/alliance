@@ -169,8 +169,8 @@ const SettingsPage: React.FC = () => {
     authMe()
       .then((response) => {
         if (response.data) {
-          setEditableUser(response.data);
-          setInitialUser(response.data);
+          setEditableUser(response.data.user);
+          setInitialUser(response.data.user);
         }
       })
       .finally(() => {

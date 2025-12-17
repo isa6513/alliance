@@ -59,7 +59,7 @@ const SignupPage: React.FC = () => {
         const checkAuth = await authMe();
 
         if (checkAuth.response.ok) {
-          const user = checkAuth.data;
+          const user = checkAuth.data?.user;
           if (user) {
             posthog.identify(user.id.toString(), {
               email: user.email,

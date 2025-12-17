@@ -168,7 +168,10 @@ export class AuthController {
 
   @Get('impersonate/:userId')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ description: 'Redirects to frontend as the specified user' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to frontend as the specified user',
+  })
   async impersonate(
     @Param('userId', ParseIntPipe) userId: number,
     @Res() res: Response,
