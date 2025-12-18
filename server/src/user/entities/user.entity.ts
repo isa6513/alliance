@@ -103,7 +103,7 @@ export class User {
   @ApiPropertyOptional({ type: 'string' })
   timeZone?: Temporal.TimeZoneLike;
 
-  @OneToMany(() => ContractEvent, (event) => event.user, { cascade: true })
+  @OneToMany(() => ContractEvent, (event) => event.user)
   @Type(() => ContractEvent)
   @ApiProperty({ type: () => [ContractEvent] })
   contractEvents: Ty<ContractEvent>[] | null;

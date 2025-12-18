@@ -42,7 +42,7 @@ const ContractPage: React.FC = () => {
           date: res.data,
           automatic: false,
         });
-        refreshUser();
+        await refreshUser();
       }
     } catch (error) {
       console.error("Error signing contract:", error);
@@ -63,7 +63,7 @@ const ContractPage: React.FC = () => {
           date: res.data,
           automatic: false,
         });
-        refreshUser();
+        await refreshUser();
       }
     } catch (error) {
       console.error("Error suspending contract:", error);
