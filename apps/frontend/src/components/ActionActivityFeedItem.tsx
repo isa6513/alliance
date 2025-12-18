@@ -1,9 +1,8 @@
 import { ActionActivityDto } from "@alliance/shared/client";
 import { Link, href, useNavigate } from "react-router";
-import { useAuth } from "../lib/AuthContext";
 import { formatTime } from "@alliance/shared/lib/utils";
-import ActivityFeedItem from "./ActivityFeedItem";
 import ActivityLikeButton from "./ActivityLikeButton";
+import ProfileImage from "@alliance/shared/ui/ProfileImage";
 
 export interface ActionActivityFeedItemProps {
   activity: ActionActivityDto;
@@ -17,12 +16,10 @@ const ActionActivityFeedItem = ({
   activity,
   showTime = true,
   card = true,
-  showAction,
   handleLike,
 }: ActionActivityFeedItemProps) => {
   const navigate = useNavigate();
   const verb = activity.type === "user_joined" ? "committed to" : "completed";
-  const { user } = useAuth();
 
   if (
     !(activity.type === "user_joined" || activity.type === "user_completed")
@@ -71,24 +68,16 @@ const ActionActivityFeedItem = ({
           );
         }}
       >
-        <div className="flex flex-row gap-x-3 items-center">
+        <div className="flex flex-row gap-x-3 items-center flex-1">
+          <ProfileImage pfp={activity.user.profilePicture} size="medium" />
           <div className="flex-1">
-            <ActivityFeedItem
-              title={activity.actionName}
-              content={`${verb} this action ${formatTime(
-                new Date(activity.createdAt),
-                {
-                  addSuffix: true,
-                }
-              )}`}
-              user={activity.user}
-              showTitle={showAction}
-              titleLink={href("/actions/:id", {
-                id: activity.actionId.toString(),
+            <p className="font-medium">{activity.user.displayName}</p>
+            <p className="text-sm text-gray-500">
+              {formatTime(new Date(activity.createdAt), {
+                addSuffix: true,
               })}
-            />
+            </p>
           </div>
-
           <ActivityLikeButton
             liked={activity.likedByMe ?? false}
             likes={activity.likesCount}

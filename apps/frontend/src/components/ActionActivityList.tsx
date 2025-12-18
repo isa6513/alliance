@@ -59,9 +59,9 @@ const ActionActivityList = ({
   return (
     <div className="space-y-3 w-full">
       <div className="mb-2">
-        <div className="flex flex-row justify-between items-center mb-3">
+        <div className="flex flex-row justify-between items-center mb-2">
           <p className="font-semibold text-base font-serif text-black">
-            Activity
+            Recently completed
           </p>
           <Link
             to={href("/feed/:actionId", {
@@ -73,7 +73,7 @@ const ActionActivityList = ({
           </Link>
         </div>
       </div>
-      <div className="flex flex-col *:py-3 -my-3">
+      <div className="flex flex-col *:py-2">
         {displayedActivities.map((activity) => (
           <ActionActivityFeedItem
             key={activity.id}

@@ -91,7 +91,6 @@ const ActionContents = () => {
         {loggedInMode && <ActionEventsPanel action={action} />}
         {loggedInMode && action.status !== "planned" && (
           <div className="flex flex-col gap-y-4 md:hidden">
-            <p className="font-semibold text-xl">Activity</p>
             <ActionCompletedBarWithInfo
               friendActivities={[]}
               action={action}
@@ -102,7 +101,7 @@ const ActionContents = () => {
               to={href("/feed/:actionId", { actionId: action.id.toString() })}
               className="self-start flex flex-row items-center gap-x-1 border border-zinc-200 hover:bg-zinc-50 px-2 py-1 rounded"
             >
-              <p className="font-medium text-sm">All activities</p>
+              <p className="font-medium text-sm">See activity</p>
               <img src={chevronLeft} className="w-3 h-3 rotate-270" />
             </Link>
           </div>
