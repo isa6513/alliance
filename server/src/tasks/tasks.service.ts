@@ -257,8 +257,15 @@ export class TasksService {
     }
 
     if (city) {
-      user.city = { id: parseInt(city) } as City;
-      userNeedsUpdate = true;
+      const parsedCityId = Number.parseInt(city, 10);
+      if (Number.isFinite(parsedCityId)) {
+        user.city = { id: parsedCityId } as City;
+        userNeedsUpdate = true;
+      } else {
+        this.logger.warn(`setting custom city from form submission: ${city}`);
+        user.customCityString = city;
+        userNeedsUpdate = true;
+      }
     }
 
     if (preferredReminderTime) {
@@ -387,7 +394,17 @@ export class TasksService {
       }
       for (const field of page.fields) {
         if (kind === 'city' && field.kind === 'city') {
-          return (answers[field.id] as CityFieldValue)?.id?.toString() ?? null;
+          const answer = answers[field.id];
+          if (
+            answer &&
+            typeof answer === 'object' &&
+            'id' in (answer as CityFieldValue) &&
+            typeof (answer as CityFieldValue).id === 'number' &&
+            Number.isFinite((answer as CityFieldValue).id)
+          ) {
+            return (answer as CityFieldValue).id.toString();
+          }
+          return answer as string;
         }
         if (
           field.kind === kind &&

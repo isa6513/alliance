@@ -301,7 +301,12 @@ export class User {
   @ManyToOne(() => City, { nullable: true })
   @IsOptional()
   @Type(() => City)
-  city?: City;
+  city?: City | null;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional({ nullable: true })
+  @Allow()
+  customCityString?: string;
 
   @Column({ nullable: true })
   @ApiProperty({ nullable: true })

@@ -616,17 +616,9 @@ export function RenderField({
                 : "focus:border-green focus:ring-1 focus:ring-green"
             }
             disabled={disabled}
+            allowCustomValue
             onSelect={(city) => onChange?.(city)}
           />
-          {cityValue && onChange && (
-            <button
-              type="button"
-              onClick={() => onChange("")}
-              className="text-xs text-zinc-600 hover:text-zinc-800"
-            >
-              Clear selection
-            </button>
-          )}
           {renderValidationMessage()}
         </div>
       );

@@ -61,7 +61,11 @@ const SettingsPage: React.FC = () => {
   }, [logout, navigate]);
 
   const handleCitySelect = useCallback(
-    (city: CitySearchDto) => {
+    (city: CitySearchDto | string) => {
+      if (typeof city === "string") {
+        updateEditableUser({ customCityString: city, cityId: null });
+        return;
+      }
       updateEditableUser({ cityId: city.id });
     },
     [updateEditableUser]
@@ -141,19 +145,6 @@ const SettingsPage: React.FC = () => {
       });
 
       setInitialUser({ ...userPayload });
-
-      const locationResponse = await userMyLocation();
-      if (locationResponse.data) {
-        const city = locationResponse.data;
-        setLocation(city);
-        const cityId = city.id;
-        setEditableUser((prev) =>
-          prev ? { ...prev, cityId } : { ...userPayload, cityId }
-        );
-        setInitialUser((prev) =>
-          prev ? { ...prev, cityId } : { ...userPayload, cityId }
-        );
-      }
     } catch (error) {
       console.error("Failed to save settings:", error);
     } finally {
@@ -290,7 +281,11 @@ const SettingsPage: React.FC = () => {
               <label className="block mb-1">Location</label>
               <CityAutosuggest
                 onSelect={handleCitySelect}
-                placeholder={location?.name || "Select a city"}
+                placeholder={
+                  location?.name ||
+                  editableUser.customCityString ||
+                  "Select a city"
+                }
                 className="flex-1"
               />
             </div>

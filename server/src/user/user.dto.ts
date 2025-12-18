@@ -116,6 +116,7 @@ export class UserDto extends PickType(User, [
   'timeZone',
   'formDataPreference',
   'contractEvents',
+  'customCityString',
 ]) {
   @ApiPropertyOptional()
   @IsOptional()
@@ -166,11 +167,12 @@ export class UpdateProfileDto extends PartialType(
     'formDataPreference',
     'timeZone',
     'isNotSignedUpPartialProfile',
+    'customCityString',
   ]),
 ) {
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ type: Number, nullable: true })
   @IsOptional()
-  cityId?: number;
+  cityId?: number | null;
 }
 
 export class OnboardingDto extends PickType(User, ['over18', 'anonymous']) {

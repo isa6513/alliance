@@ -487,6 +487,7 @@ export type User = {
     referralCode: string | null;
     stripeCustomerId: string | null;
     isNotSignedUpPartialProfile: boolean;
+    customCityString?: string | null;
     over18: boolean | null;
     onboardingComplete: boolean;
     anonymous: boolean;
@@ -530,6 +531,7 @@ export type UserDto = {
     profilePicture: string | null;
     profileDescription: string | null;
     referralCode: string | null;
+    customCityString?: string | null;
     onboardingComplete: boolean;
     anonymous: boolean;
     communities: Array<Community>;
@@ -605,9 +607,10 @@ export type UpdateProfileDto = {
     profilePicture?: string | null;
     profileDescription?: string | null;
     isNotSignedUpPartialProfile?: boolean;
+    customCityString?: string | null;
     anonymous?: boolean;
     formDataPreference?: PublicFormResponseDefault;
-    cityId?: number;
+    cityId?: number | null;
 };
 
 export type City = {

@@ -4,13 +4,14 @@ import { geoSearchCity } from "../client";
 
 export interface CityAutosuggestProps {
   value?: string;
-  onSelect(city: CitySearchDto): void;
+  onSelect(city: CitySearchDto | string): void;
   placeholder?: string;
   minLength?: number;
   debounceMs?: number;
   className?: string;
   inputClassName?: string;
   disabled?: boolean;
+  allowCustomValue?: boolean;
 }
 
 const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
@@ -22,6 +23,7 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
   className = "",
   inputClassName = "",
   disabled = false,
+  allowCustomValue = true,
 }) => {
   const [query, setQuery] = useState(value);
   const [results, setResults] = useState<CitySearchDto[]>([]);
@@ -32,6 +34,10 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
   const [latitude, setLatitude] = useState<number | undefined>(undefined);
   const [longitude, setLongitude] = useState<number | undefined>(undefined);
   const [geoFetched, setGeoFetched] = useState(false);
+
+  useEffect(() => {
+    setQuery(value);
+  }, [value]);
 
   const fetchGeolocation = useCallback(async () => {
     if (geoFetched) return;
@@ -90,6 +96,17 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
     return () => document.removeEventListener("mousedown", listener);
   }, []);
 
+  const commitCustomValue = useCallback(() => {
+    if (!allowCustomValue || didSelect) return;
+    const trimmed = query.trim();
+    onSelect(trimmed);
+    setDidSelect(true);
+    setResults([]);
+    setOpen(false);
+    setHighlighted(-1);
+    setQuery(trimmed);
+  }, [allowCustomValue, didSelect, onSelect, query]);
+
   const select = useCallback(
     (city: CitySearchDto) => {
       onSelect(city);
@@ -104,6 +121,15 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
   const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> =
     useCallback(
       (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (open && results[highlighted]) {
+            select(results[highlighted]);
+          } else {
+            commitCustomValue();
+          }
+          return;
+        }
         if (!open) return;
         setDidSelect(false);
         if (e.key === "ArrowDown") {
@@ -112,14 +138,11 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
         } else if (e.key === "ArrowUp") {
           e.preventDefault();
           setHighlighted((i) => Math.max(i - 1, 0));
-        } else if (e.key === "Enter") {
-          e.preventDefault();
-          if (results[highlighted]) select(results[highlighted]);
         } else if (e.key === "Escape") {
           setOpen(false);
         }
       },
-      [open, results, highlighted, select]
+      [open, results, highlighted, select, commitCustomValue]
     );
 
   return (
@@ -136,6 +159,7 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
           fetchGeolocation();
           if (query.length >= minLength && results.length) setOpen(true);
         }}
+        onBlur={commitCustomValue}
         onKeyDown={handleKeyDown}
         aria-autocomplete="list"
         autoComplete="off"

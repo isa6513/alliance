@@ -190,6 +190,7 @@ const HomePage = () => {
 
   const currentTask: ActionWithRelation | null =
     newActions[0] || todoActions[0] || null;
+
   const currentWeekTodoActions = todoActions.filter((action) => {
     return isActionInCurrentWeek(action);
   });

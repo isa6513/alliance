@@ -110,18 +110,22 @@ export class UserService {
     const user = await this.findOneOrFail(id);
 
     if (data.cityId !== undefined) {
-      const city =
-        (data.cityId
-          ? await this.cityRepository.findOne({
-              where: { id: data.cityId },
-            })
-          : undefined) ?? undefined;
+      if (data.cityId === null) {
+        user.city = null;
+      } else {
+        const city =
+          (data.cityId
+            ? await this.cityRepository.findOne({
+                where: { id: data.cityId },
+              })
+            : undefined) ?? undefined;
 
-      if (data.cityId && !city) {
-        throw new BadRequestException('City not found');
+        if (data.cityId && !city) {
+          throw new BadRequestException('City not found');
+        }
+
+        user.city = city;
       }
-
-      user.city = city;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -558,7 +562,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException(`User ${userId} not found`);
     }
-    return user.city;
+    return user.city ?? undefined;
   }
 
   async findOnePrefill(id: number): Promise<PrefillUser> {
