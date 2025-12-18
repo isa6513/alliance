@@ -1559,6 +1559,18 @@ export class ActionsService {
     return new ActionUpdateDto(actionUpdate);
   }
 
+  async updateActionUpdate(
+    id: number,
+    createActionUpdateDto: CreateActionUpdateDto,
+  ): Promise<ActionUpdateDto> {
+    const actionUpdate = await this.actionUpdateRepository.findOneOrFail({
+      where: { id },
+    });
+    const updatedActionUpdate = { ...actionUpdate, ...createActionUpdateDto };
+    const saved = await this.actionUpdateRepository.save(updatedActionUpdate);
+    return new ActionUpdateDto(saved);
+  }
+
   async deleteActionUpdate(id: number) {
     const actionUpdate = await this.actionUpdateRepository.findOneOrFail({
       where: { id },

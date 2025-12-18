@@ -619,6 +619,16 @@ export class ActionsController {
     return this.actionsService.createActionUpdate(id, createActionUpdateDto);
   }
 
+  @Patch('updateUpdate/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionUpdateDto })
+  updateUpdate(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateActionUpdateDto: CreateActionUpdateDto,
+  ): Promise<ActionUpdateDto> {
+    return this.actionsService.updateActionUpdate(id, updateActionUpdateDto);
+  }
+
   @Delete('deleteUpdate/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse()

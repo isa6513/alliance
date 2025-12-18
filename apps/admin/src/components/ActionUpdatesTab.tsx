@@ -2,9 +2,11 @@ import {
   Action,
   actionsCreateUpdate,
   actionsDeleteUpdate,
+  actionsUpdateUpdate,
   ActionUpdate,
   ActionUpdateNotifyType,
   CreateActionUpdateDto,
+  CreateEditableContentDto,
   TagDto,
 } from "@alliance/shared/client";
 import ActionUpdateCard from "@alliance/shared/ui/ActionUpdateCard";
@@ -87,6 +89,33 @@ const ActionUpdatesTab = ({
     });
     if (response.response.ok) {
       setUpdates(updates.filter((update) => update.id !== id));
+    }
+  };
+
+  const handleEdit = async (
+    id: number,
+    title: string,
+    content: CreateEditableContentDto
+  ) => {
+    const existingUpdate = updates.find((u) => u.id === id);
+    if (!existingUpdate) return;
+
+    const response = await actionsUpdateUpdate({
+      path: { id },
+      body: {
+        title,
+        content,
+        date: existingUpdate.date,
+        visibleAt: existingUpdate.visibleAt ?? existingUpdate.date,
+        notifyType: "none",
+        shortNotifString: existingUpdate.shortNotifString ?? "",
+      },
+    });
+
+    if (response.response.ok && response.data) {
+      setUpdates(
+        updates.map((u) => (u.id === id ? (response.data as ActionUpdate) : u))
+      );
     }
   };
 
@@ -257,6 +286,7 @@ const ActionUpdatesTab = ({
             key={update.id}
             update={update}
             onDelete={() => handleDelete(update.id)}
+            onEdit={handleEdit}
             admin
           />
         ))}

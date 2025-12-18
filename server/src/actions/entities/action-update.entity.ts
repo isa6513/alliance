@@ -50,7 +50,7 @@ export class ActionUpdate {
   @ApiProperty()
   title: string;
 
-  @ManyToOne(() => EditableContent, { eager: true })
+  @ManyToOne(() => EditableContent, { eager: true, cascade: true })
   @JoinColumn({ name: 'contentId' })
   @Type(() => EditableContent)
   @Allow()

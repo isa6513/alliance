@@ -3945,6 +3945,21 @@ export type ActionsCreateUpdateResponses = {
 
 export type ActionsCreateUpdateResponse = ActionsCreateUpdateResponses[keyof ActionsCreateUpdateResponses];
 
+export type ActionsUpdateUpdateData = {
+    body: CreateActionUpdateDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/updateUpdate/{id}';
+};
+
+export type ActionsUpdateUpdateResponses = {
+    200: ActionUpdateDto;
+};
+
+export type ActionsUpdateUpdateResponse = ActionsUpdateUpdateResponses[keyof ActionsUpdateUpdateResponses];
+
 export type ActionsDeleteUpdateData = {
     body?: never;
     path: {
