@@ -473,7 +473,7 @@ export class Repository<
   }
 
   /** @deprecated use {@link findTyped} instead */
-  find: TypeOrmRepository<Entity>['find'];
+  find = super.find;
   findTyped<R extends Relations<Entity>>(
     options: FindManyOptions<Entity> & { relations?: R },
   ): Promise<WithRelations<Entity, R>[]> {
@@ -483,7 +483,7 @@ export class Repository<
   }
 
   /** @deprecated use {@link findOneTyped} instead */
-  findOne: TypeOrmRepository<Entity>['findOne'];
+  findOne = super.findOne;
   findOneTyped<R extends Relations<Entity>>(
     options: FindOneOptions<Entity> & { relations?: R },
   ): Promise<WithRelations<Entity, R> | null> {
@@ -494,7 +494,7 @@ export class Repository<
   }
 
   /** @deprecated use {@link findOneOrFailTyped} instead */
-  findOneOrFail: TypeOrmRepository<Entity>['findOneOrFail'];
+  findOneOrFail = super.findOneOrFail;
   findOneOrFailTyped<R extends Relations<Entity>>(
     options: FindOneOptions<Entity> & { relations?: R },
   ): Promise<WithRelations<Entity, R>> {
