@@ -73,7 +73,6 @@ export default function ActionPage() {
   });
 
   if (!action && !loading && !user && !userLoading) {
-    alert("navigating from action page");
     return (
       <Navigate
         to={href("/login") + `?redirect=${window.location.pathname}`}
