@@ -15,14 +15,7 @@ import {
   NotificationCategory,
 } from 'src/notifs/entities/notification.entity';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
-import {
-  DeepPartial,
-  FindOptionsRelations,
-  ILike,
-  In,
-  Not,
-  Repository,
-} from 'typeorm';
+import { DeepPartial, ILike, In, Not, Repository } from 'typeorm';
 import { Friend, FriendStatus } from './entities/friend.entity';
 import { PrefillUser } from './entities/prefill-user.entity';
 import {
@@ -63,9 +56,10 @@ import {
   ContractEvent,
   ContractEventType,
 } from './entities/contract-event.entity';
+import { Relations } from 'src/utils/Repository';
 
 const defaultTimeZone = 'America/Los_Angeles';
-const COMMUNITY_DEFAULT_RELATIONS: Readonly<FindOptionsRelations<Community>> =
+const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
   Object.freeze({
     users: true,
     leaders: true,
@@ -163,7 +157,7 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  findAll(relations?: FindOptionsRelations<User>): Promise<User[]> {
+  findAll(relations?: Relations<User>): Promise<User[]> {
     return this.userRepository.find({
       relations,
     });
@@ -179,10 +173,7 @@ export class UserService {
     });
   }
 
-  findOne(
-    id: number,
-    relations?: FindOptionsRelations<User>,
-  ): Promise<User | null> {
+  findOne(id: number, relations?: Relations<User>): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },
       relations,
@@ -191,7 +182,7 @@ export class UserService {
 
   async findOneByEmail(
     email: string,
-    relations?: FindOptionsRelations<User>,
+    relations?: Relations<User>,
   ): Promise<User | null> {
     return this.userRepository.findOne({
       where: { email: ILike(email) },
@@ -510,10 +501,7 @@ export class UserService {
     };
   }
 
-  async findOneOrFail(
-    id: number,
-    relations?: FindOptionsRelations<User>,
-  ): Promise<User> {
+  async findOneOrFail(id: number, relations?: Relations<User>): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
       relations,
@@ -547,10 +535,7 @@ export class UserService {
     return user;
   }
 
-  async findByIds(
-    ids: number[],
-    relations?: FindOptionsRelations<User>,
-  ): Promise<User[]> {
+  async findByIds(ids: number[], relations?: Relations<User>): Promise<User[]> {
     return this.userRepository.find({
       where: { id: In(ids) },
       relations,
@@ -776,7 +761,7 @@ export class UserService {
 
   async findCommunityOrFail(
     id: number,
-    relations?: FindOptionsRelations<Community>,
+    relations?: Relations<Community>,
   ): Promise<Community> {
     return this.communityRepository.findOneOrFail({
       where: { id },

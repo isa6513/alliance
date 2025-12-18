@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsRelations, In, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Community } from 'src/user/entities/community.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Conversation, ConversationType } from './entities/conversation.entity';
@@ -27,24 +27,25 @@ import {
 } from './dto/messaging.dto';
 import { MessagingEvents } from './messaging.events';
 import { ImagesService } from 'src/images/images.service';
+import { Relations } from 'src/utils/Repository';
 
 @Injectable()
 export class ConversationService {
-  private readonly conversationRelations: FindOptionsRelations<Conversation> = {
+  private readonly conversationRelations = {
     participants: {
       user: true,
       lastReadMessage: { author: true },
     },
     community: true,
-  };
+  } as const satisfies Relations<Conversation>;
 
-  private readonly participantRelations: FindOptionsRelations<Participant> = {
+  private readonly participantRelations = {
     conversation: {
       participants: { user: true, lastReadMessage: { author: true } },
     },
     user: true,
     lastReadMessage: { author: true },
-  };
+  } as const satisfies Relations<Participant>;
 
   constructor(
     @InjectRepository(Conversation)

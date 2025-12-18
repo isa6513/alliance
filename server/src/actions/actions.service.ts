@@ -43,7 +43,7 @@ import { ContractEventType } from 'src/user/entities/contract-event.entity';
 import { Tag } from 'src/user/entities/tag.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ProfileDto } from 'src/user/user.dto';
-import { FindOptionsRelations, ILike, In, MoreThan, Repository } from 'typeorm';
+import { ILike, In, MoreThan, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import {
   ActionActivityDto,
@@ -83,6 +83,7 @@ import {
   ReminderGroupTimingMode,
 } from './entities/reminder-group.entity';
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
+import { Relations } from 'src/utils/Repository';
 
 export enum UserActionRelation {
   Joined = 'joined',
@@ -169,7 +170,7 @@ export class ActionsService {
 
   async findAllSorted(
     relations:
-      | Omit<FindOptionsRelations<Action>, 'usersCompleted' | 'status'>
+      | Omit<Relations<Action>, 'usersCompleted' | 'status'>
       | undefined = undefined,
     limit?: number,
   ): Promise<Action[]> {
@@ -333,10 +334,7 @@ export class ActionsService {
   }
 
   async findPublic(userId?: number, sorted?: boolean): Promise<ActionDto[]> {
-    const relations: Omit<
-      FindOptionsRelations<Action>,
-      'usersCompleted' | 'status'
-    > = {
+    const relations: Omit<Relations<Action>, 'usersCompleted' | 'status'> = {
       events: true,
       participatingTags: true,
       activities: true,
@@ -1835,11 +1833,11 @@ export class ActionsService {
     taskForm?: boolean,
     suite?: boolean,
   ): Promise<ExportActionDto> {
-    const relations: FindOptionsRelations<Action> = {
+    const relations: Relations<Action> = {
       participatingTags: true,
       authors: true,
-      events,
-      suite,
+      events: events || undefined,
+      suite: suite || undefined,
     };
 
     const action = await this.actionRepository.findOneOrFail({
