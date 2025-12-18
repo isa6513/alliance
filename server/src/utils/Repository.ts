@@ -273,7 +273,6 @@ export type WithRelations<Entity, R extends Relations<Entity>> = StripItems<
                       | Promise<WithRelations<I, R[K]>>
                       | (Entity[K] & null)
                       | (Entity[K] & undefined)
-                      | 1234
                   : never
                 : R[K] extends Relations<NonNullable<Entity[K]>>
                   ?
@@ -474,9 +473,7 @@ export class Repository<
   }
 
   /** @deprecated use {@link findTyped} instead */
-  find(options?: FindManyOptions<Entity>): Promise<Entity[]> {
-    return super.find(options);
-  }
+  find: TypeOrmRepository<Entity>['find'];
   findTyped<R extends Relations<Entity>>(
     options: FindManyOptions<Entity> & { relations?: R },
   ): Promise<WithRelations<Entity, R>[]> {
@@ -486,9 +483,7 @@ export class Repository<
   }
 
   /** @deprecated use {@link findOneTyped} instead */
-  findOne(options: FindOneOptions<Entity>): Promise<Entity | null> {
-    return super.findOne(options);
-  }
+  findOne: TypeOrmRepository<Entity>['findOne'];
   findOneTyped<R extends Relations<Entity>>(
     options: FindOneOptions<Entity> & { relations?: R },
   ): Promise<WithRelations<Entity, R> | null> {
@@ -499,9 +494,7 @@ export class Repository<
   }
 
   /** @deprecated use {@link findOneOrFailTyped} instead */
-  findOneOrFail(options: FindOneOptions<Entity>): Promise<Entity> {
-    return super.findOneOrFail(options);
-  }
+  findOneOrFail: TypeOrmRepository<Entity>['findOneOrFail'];
   findOneOrFailTyped<R extends Relations<Entity>>(
     options: FindOneOptions<Entity> & { relations?: R },
   ): Promise<WithRelations<Entity, R>> {
