@@ -97,7 +97,7 @@ export default function ActionPage() {
 
   return (
     <>
-      {action.publicOnly && (
+      {action.publicOnly && !isAuthenticated && (
         <PrelaunchNavbar transparent={false} absolute={false} />
       )}
       <div className="w-full flex flex-row justify-between py-10 sm:py-20 px-4 md:px-8 xl:px-16">
