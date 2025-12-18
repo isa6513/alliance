@@ -10,7 +10,11 @@ import { useState } from "react";
 export interface ActionUpdateCardProps {
   update: ActionUpdateDto;
   onDelete?: () => void;
-  onEdit?: (id: number, title: string, content: CreateEditableContentDto) => Promise<void>;
+  onEdit?: (
+    id: number,
+    title: string,
+    content: CreateEditableContentDto
+  ) => Promise<void>;
   admin?: boolean;
   onActionPageTimeline?: boolean;
 }
@@ -24,7 +28,9 @@ const ActionUpdateCard = ({
 }: ActionUpdateCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(update.title);
-  const [editContent, setEditContent] = useState<CreateEditableContentDto>(update.content);
+  const [editContent, setEditContent] = useState<CreateEditableContentDto>(
+    update.content
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
@@ -67,7 +73,12 @@ const ActionUpdateCard = ({
           <Button onClick={handleCancel} color={ButtonColor.Light} size="small">
             Cancel
           </Button>
-          <Button onClick={handleSave} color={ButtonColor.Black} size="small" disabled={isSaving}>
+          <Button
+            onClick={handleSave}
+            color={ButtonColor.Black}
+            size="small"
+            disabled={isSaving}
+          >
             {isSaving ? "Saving..." : "Save"}
           </Button>
         </div>
@@ -77,7 +88,7 @@ const ActionUpdateCard = ({
 
   return (
     <div className="flex flex-col border border-zinc-200 rounded divide-y divide-zinc-200 overflow-hidden">
-      <div className="p-3 md:p-5 w-full gap-y-1 bg-zinc-50">
+      <div className="p-3 md:px-4 w-full gap-y-1 bg-zinc-50">
         <div className="flex flex-col">
           <div className="flex flex-col md:flex-row md:gap-x-2 items-center">
             <p className="font-medium">
@@ -101,7 +112,11 @@ const ActionUpdateCard = ({
             </p>
 
             {onEdit && (
-              <Button onClick={() => setIsEditing(true)} color={ButtonColor.Light} size="small">
+              <Button
+                onClick={() => setIsEditing(true)}
+                color={ButtonColor.Light}
+                size="small"
+              >
                 Edit
               </Button>
             )}
@@ -120,7 +135,7 @@ const ActionUpdateCard = ({
         </div>
       </div>
       {!!update.content.body && (
-        <div className="p-3 md:p-5 w-full gap-y-1 bg-white">
+        <div className="p-3 md:p-4 w-full gap-y-1 bg-white">
           <EditableContentRenderer content={update.content} className="" />
         </div>
       )}
