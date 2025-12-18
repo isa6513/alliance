@@ -43,7 +43,7 @@ const ActionTaskPanelForm = ({
   const [form, setForm] = useState<FormDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
 
   useEffect(() => {
     const fetchForm = async () => {
@@ -83,6 +83,9 @@ const ActionTaskPanelForm = ({
               instanceId: taskFormId,
             });
             window.localStorage.removeItem(storageKey);
+          }
+          if (user && !user.hasActiveContract) {
+            refreshUser();
           }
           onCompleteAction(false); //tasksSubmitForm handles completion here
         } else {
