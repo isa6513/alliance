@@ -3,6 +3,7 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import React, { useEffect, useMemo, useState } from "react";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import sidneyandmark from "../../assets/sidneyandmark.jpg";
 
 const PeoplePage: React.FC = () => {
   const authorIds: Record<string, number> = useMemo(() => {
@@ -53,38 +54,58 @@ const PeoplePage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex-1 container mx-auto pt-16 md:pt-28 pb-56 flex flex-col px-5">
-        <div className="mx-auto w-full max-w-3xl flex flex-col gap-4 md:gap-12">
-          <h2 className="text-center font-serif font-bold text-3xl md:text-5xl">
+        <div className="mx-auto w-full max-w-3xl flex flex-col text-base md:text-lg gap-y-8 md:gap-y-12">
+          <h2 className="font-serif font-semibold text-3xl md:text-5xl text-center">
             People
           </h2>
-
-          <div className="flex flex-col text-base md:text-lg">
-            <p>
-              The Alliance has a body of members that take actions and a
-              full-time strategic office that plans actions.
-            </p>
-
-            <h2 className="!font-semibold !text-xl md:!text-2xl !mt-8 mb-3">
+          <div>
+            <h2 className="!font-semibold !text-xl md:!text-2xl mb-4">
               Members
             </h2>
-            <p>49 members are participating in early experiments.</p>
-
-            <h2 className="!font-semibold !text-xl md:!text-2xl !mt-8 mb-3">
+            <p className="text-zinc-900">
+              The Alliance has 49 members. Membership is currently by invitation
+              only.
+            </p>
+          </div>
+          <div>
+            <h2 className="!font-semibold !text-xl md:!text-2xl mb-4">
               Strategic office
             </h2>
 
-            <div className="flex flex-col gap-y-1 text-base md:text-lg">
-              {Object.entries(authorLinks).map(([name, link]) => (
-                <p key={name} className="flex items-center gap-x-2">
-                  <ProfileImage
-                    pfp={authorProfiles[name]?.profilePicture ?? null}
-                    size="small"
-                  />
-                  <a className="text-link" href={link}>
-                    {name}
-                  </a>
-                </p>
-              ))}
+            <div className="w-full flex flex-col gap-4 mb-8">
+              <p className="text-zinc-900">
+                The Alliance was founded by Sidney Hough and Mark Xu, a couple
+                living in San Francisco, California.
+              </p>
+              <img
+                src={sidneyandmark}
+                alt="Sidney and Mark"
+                className="max-w-96 h-auto rounded-md"
+              />
+            </div>
+
+            <p className="mb-4 text-zinc-900">
+              Members of the office plan actions and develop our online
+              platform.
+            </p>
+
+            <div className="">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-12 gap-y-2 text-base md:text-lg">
+                {Object.entries(authorLinks).map(([name, link]) => (
+                  <p
+                    key={name}
+                    className="rounded-lg flex items-center gap-x-2"
+                  >
+                    <ProfileImage
+                      pfp={authorProfiles[name]?.profilePicture ?? null}
+                      size="small"
+                    />
+                    <a className="text-link" href={link}>
+                      {name}
+                    </a>
+                  </p>
+                ))}
+              </div>
             </div>
           </div>
         </div>
