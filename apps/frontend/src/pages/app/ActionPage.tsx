@@ -72,7 +72,8 @@ export default function ActionPage() {
     limit: 10,
   });
 
-  if (!action && !user && !userLoading) {
+  if (!action && !loading && !user && !userLoading) {
+    alert("navigating from action page");
     return (
       <Navigate
         to={href("/login") + `?redirect=${window.location.pathname}`}
