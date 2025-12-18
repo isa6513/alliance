@@ -151,7 +151,12 @@ export class UserService {
       Object.assign(user, updateData);
     }
 
-    return this.userRepository.save(user);
+    this.userRepository.save(user);
+
+    return this.findOneOrFail(id, {
+      contractEvents: true,
+      city: true,
+    });
   }
 
   async setPassword(id: number, password: string): Promise<User> {
