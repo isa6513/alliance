@@ -72,6 +72,7 @@ export default function ActionPage() {
     limit: 10,
   });
 
+  // TODO: hack because some action pages are public and some are private. we should handle this in a more general way elsehwere (ie applayout.tsx logic)
   if (!action && !loading && !user && !userLoading) {
     return (
       <Navigate
