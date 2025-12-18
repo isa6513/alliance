@@ -10,6 +10,14 @@ import {
   RemoveOptions,
 } from 'typeorm';
 
+type Equal<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
+    ? true
+    : false;
+type Assert<T extends true> = T;
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+type EmptyObject = {};
+
 /**
  * `Object` refers to a `Record`.
  *
@@ -32,6 +40,17 @@ type PlainObject<T> =
             : [T] extends [object]
               ? T
               : never;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _typecheck_PlainObject =
+  | Assert<Equal<PlainObject<number[]>, never>>
+  | Assert<Equal<PlainObject<{ param: string }[]>, never>>
+  | Assert<Equal<PlainObject<() => void>, never>>
+  | Assert<Equal<PlainObject<Buffer>, never>>
+  | Assert<Equal<PlainObject<Date>, never>>
+  | Assert<Equal<PlainObject<ObjectId>, never>>
+  | Assert<Equal<PlainObject<{ param: string }>, { param: string }>>
+  | Assert<Equal<PlainObject<string>, never>>
+  | Assert<Equal<PlainObject<number>, never>>;
 
 /**
  * A type is "relationable" if it is an `Object`, a `Promise<Object>` or an
@@ -45,6 +64,16 @@ type Relationable<T> = [T] extends [Promise<infer I>]
   : [T] extends [Array<infer I>]
     ? Relationable<NonNullable<I>>
     : PlainObject<T>;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _typecheck_Relationable =
+  | Assert<Equal<Relationable<string>, never>>
+  | Assert<Equal<Relationable<number | undefined>, never>>
+  | Assert<Equal<Relationable<{ param: string } | undefined>, never>>
+  | Assert<Equal<Relationable<{ param: string }>, { param: string }>>
+  | Assert<Equal<Relationable<string[]>, never>>
+  | Assert<Equal<Relationable<{ param: string }[]>, { param: string }>>
+  | Assert<Equal<Relationable<Promise<{ param: string }>>, { param: string }>>;
+
 type StripItems<T> = {
   [K in keyof T as [T[K]] extends [never]
     ? never
@@ -52,6 +81,27 @@ type StripItems<T> = {
       ? never
       : K]: T[K];
 } & {};
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _typecheck_StripItems =
+  | Assert<Equal<StripItems<{ param: string }>, { param: string }>>
+  | Assert<
+      Equal<
+        StripItems<{ param?: { subparam: string } }>,
+        { param?: { subparam: string } }
+      >
+    >
+  | Assert<Equal<StripItems<{ param: never }>, EmptyObject>>
+  | Assert<Equal<StripItems<{ param: undefined }>, EmptyObject>>
+  | Assert<Equal<StripItems<{ param?: never }>, EmptyObject>>
+  | Assert<Equal<StripItems<{ param?: undefined }>, EmptyObject>>
+  | Assert<Equal<StripItems<{ param?: null }>, { param?: null }>>
+  | Assert<
+      Equal<
+        StripItems<{ param1?: string; param2: number; param3: never }>,
+        { param1?: string; param2: number }
+      >
+    >
+  | never;
 
 /**
  * @param T - The type to check for emptiness
@@ -60,6 +110,11 @@ type StripItems<T> = {
  * @returns `Default` if, `T` is `{}`. Otherwise `T`.
  */
 type NonEmpty<T, Default = never> = [keyof T] extends [never] ? Default : T;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _typecheck_NonEmpty =
+  | Assert<Equal<NonEmpty<EmptyObject, { test: 123 }>, { test: 123 }>>
+  | Assert<Equal<NonEmpty<EmptyObject>, never>>
+  | Assert<Equal<NonEmpty<{ param: string }>, { param: string }>>;
 
 type Prev = [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -97,6 +152,48 @@ export type Relations<Entity, D extends number = 9> = NonEmpty<
   }>,
   true | undefined
 >;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _typecheck_Relations =
+  | Assert<Equal<Relations<{ param: string }>, true | undefined>>
+  | Assert<Equal<Relations<{ param: number[] }>, true | undefined>>
+  | Assert<Equal<Relations<{ param: Date }>, true | undefined>>
+  | Assert<
+      Equal<
+        Relations<{ param: { subparam: string } }>,
+        { param?: true | undefined }
+      >
+    >
+  | Assert<
+      Equal<
+        Relations<{ param: { subparam: string }[] }>,
+        { param?: true | undefined }
+      >
+    >
+  | Assert<
+      Equal<
+        Relations<{ param: Promise<{ subparam: string }> }>,
+        { param?: true | undefined }
+      >
+    >
+  | Assert<
+      Equal<
+        Relations<{ param: { subparam: { subsubparam: string } } }>,
+        { param?: true | undefined | { subparam?: true | undefined } }
+      >
+    >
+  | Assert<
+      Equal<
+        Relations<{
+          param1: string;
+          param2: { subparam: string };
+          param3: { subparam: { subsubparam: string } };
+        }>,
+        {
+          param2?: true | undefined;
+          param3?: true | undefined | { subparam?: true | undefined };
+        }
+      >
+    >;
 
 type StripRelationFields<T> = StripItems<{
   [K in keyof T]: [Relationable<NonNullable<T[K]>>] extends [never]
@@ -119,31 +216,251 @@ export type NoRelations<T> = [T] extends [Promise<infer I>]
             : [T] extends [object]
               ? StripRelationFields<T>
               : T;
-export type WithRelations<Entity, R extends Relations<Entity>> = NonEmpty<
-  StripItems<
-    NoRelations<Entity> & {
-      [K in keyof R as [R[K]] extends [undefined] ? never : K]: [R[K]] extends [
-        undefined,
-      ]
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _typecheck_NoRelations =
+  | Assert<Equal<NoRelations<{ param: string }>, { param: string }>>
+  | Assert<Equal<NoRelations<{ param?: number }>, { param?: number }>>
+  | Assert<Equal<NoRelations<{ param: null }>, EmptyObject>>
+  | Assert<Equal<NoRelations<{ param: { subparam: string } }>, EmptyObject>>
+  | Assert<Equal<NoRelations<{ param?: { subparam: string } }>, EmptyObject>>
+  | Assert<Equal<NoRelations<{ param: { subparam: string }[] }>, EmptyObject>>
+  | Assert<
+      Equal<NoRelations<{ param: { subparam: string }[] | null }>, EmptyObject>
+    >
+  | Assert<
+      Equal<
+        NoRelations<{ param: ({ subparam: string } | null)[] }>,
+        EmptyObject
+      >
+    >
+  | Assert<
+      Equal<NoRelations<{ param: Promise<{ subparam: string }> }>, EmptyObject>
+    >
+  | Assert<
+      Equal<
+        NoRelations<{ param: Promise<{ subparam: string } | null> }>,
+        EmptyObject
+      >
+    >
+  | Assert<
+      Equal<
+        NoRelations<{ param: Promise<{ subparam: string }> | null }>,
+        EmptyObject
+      >
+    >;
+
+export type WithRelations<Entity, R extends Relations<Entity>> = StripItems<
+  NoRelations<Entity> & {
+    [K in keyof Entity as K extends keyof R ? K : never]: K extends keyof R
+      ? [R[K]] extends [undefined]
         ? never
         : [K] extends [keyof Entity]
           ? [R[K]] extends [true]
-            ? NoRelations<Entity[K]>
-            : Entity[K] extends Array<infer I>
+            ?
+                | NoRelations<NonNullable<Entity[K]>>
+                | (Entity[K] & null)
+                | (Entity[K] & undefined)
+            : NonNullable<Entity[K]> extends Array<infer I>
               ? R[K] extends Relations<I>
-                ? WithRelations<I, R[K]>[]
+                ?
+                    | WithRelations<I, R[K]>[]
+                    | (Entity[K] & null)
+                    | (Entity[K] & undefined)
                 : never
-              : Entity[K] extends Promise<infer I>
+              : NonNullable<Entity[K]> extends Promise<infer I>
                 ? R[K] extends Relations<I>
-                  ? Promise<WithRelations<I, R[K]>>
+                  ?
+                      | Promise<WithRelations<I, R[K]>>
+                      | (Entity[K] & null)
+                      | (Entity[K] & undefined)
+                      | 1234
                   : never
-                : R[K] extends Relations<Entity[K]>
-                  ? WithRelations<Entity[K], R[K]>
+                : R[K] extends Relations<NonNullable<Entity[K]>>
+                  ?
+                      | WithRelations<NonNullable<Entity[K]>, R[K]>
+                      | (Entity[K] & null)
+                      | (Entity[K] & undefined)
                   : never
-          : never;
-    }
-  >
+          : never
+      : never;
+  }
 >;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _typecheck_WithRelations =
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param: string;
+          },
+          undefined
+        >,
+        { param: string }
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param?: number;
+          },
+          undefined
+        >,
+        { param?: number }
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param: { subparam: string };
+          },
+          EmptyObject
+        >,
+        EmptyObject
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param: { subparam: string };
+          },
+          { param: undefined }
+        >,
+        EmptyObject
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param: { subparam: string };
+          },
+          { param: true }
+        >,
+        { param: { subparam: string } }
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param?: { subparam: string };
+          },
+          { param: true }
+        >,
+        { param?: { subparam: string } }
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param: { subparam: string }[];
+          },
+          { param: true }
+        >,
+        { param: { subparam: string }[] }
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param?: { subparam: string }[];
+          },
+          { param: true }
+        >,
+        { param?: { subparam: string }[] }
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param?: ({ subparam: string } | null)[];
+          },
+          { param: true }
+        >,
+        { param?: ({ subparam: string } | null)[] }
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param: Promise<{ subparam: string }>;
+          },
+          { param: true }
+        >,
+        { param: Promise<{ subparam: string }> }
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param?: Promise<{ subparam: string }>;
+          },
+          { param: true }
+        >,
+        { param?: Promise<{ subparam: string }> }
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param?: Promise<{ subparam: string } | null>;
+          },
+          { param: true }
+        >,
+        { param?: Promise<{ subparam: string } | null> }
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param: { subparam: string; subparam2: { subsubparam: string } };
+          },
+          { param: true }
+        >,
+        { param: { subparam: string } }
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param: { subparam: string; subparam2: { subsubparam: string } };
+          },
+          { param: { subparam2: undefined } }
+        >,
+        { param: { subparam: string } }
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          {
+            param: { subparam: string; subparam2: { subsubparam: string } };
+          },
+          { param: { subparam2: true } }
+        >,
+        { param: { subparam: string; subparam2: { subsubparam: string } } }
+      >
+    >
+  | Assert<
+      Equal<
+        WithRelations<
+          { param?: { subparam1: string; subparam2: { subsubparam: string } } },
+          { param: true }
+        >,
+        { param?: { subparam1: string } }
+      >
+    >;
 
 export class Repository<
   Entity extends ObjectLiteral,
