@@ -24,6 +24,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   user: UserDto | undefined;
   isImpersonation: boolean;
+  refreshUser: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   onLogin: () => void;
   logout: () => Promise<void>;
@@ -129,6 +130,14 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
       setRevalidate();
     }, []);
 
+    const refreshUser = useCallback(async () => {
+      const { data } = await authMe();
+      if (data) {
+        setUser(data.user);
+        setIsImpersonation(data.isImpersonation ?? false);
+      }
+    }, []);
+
     const value = useMemo<AuthContextType>(
       () => ({
         isAuthenticated: !!user,
@@ -136,10 +145,11 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
         isImpersonation,
         login,
         onLogin,
+        refreshUser,
         logout,
         loading,
       }),
-      [user, isImpersonation, loading, login, logout, onLogin]
+      [user, isImpersonation, loading, login, logout, onLogin, refreshUser]
     );
 
     return (
@@ -161,6 +171,7 @@ export const useAuth = (): AuthContextType => {
       login: () => Promise.resolve(),
       onLogin: () => {},
       logout: () => Promise.resolve(),
+      refreshUser: () => Promise.resolve(),
       loading: false,
     };
   }
@@ -175,6 +186,7 @@ export const useAuth = (): AuthContextType => {
       login: () => Promise.resolve(),
       onLogin: () => {},
       logout: () => Promise.resolve(),
+      refreshUser: () => Promise.resolve(),
       loading: false,
     };
   }

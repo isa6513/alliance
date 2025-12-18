@@ -12,7 +12,7 @@ import CenterLayout from "@alliance/shared/ui/CenterLayout";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 
 const ContractPage: React.FC = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, refreshUser } = useAuth();
 
   const [editName, setEditName] = useState("");
 
@@ -42,6 +42,7 @@ const ContractPage: React.FC = () => {
           date: res.data,
           automatic: false,
         });
+        refreshUser();
       }
     } catch (error) {
       console.error("Error signing contract:", error);
@@ -62,6 +63,7 @@ const ContractPage: React.FC = () => {
           date: res.data,
           automatic: false,
         });
+        refreshUser();
       }
     } catch (error) {
       console.error("Error suspending contract:", error);
