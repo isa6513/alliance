@@ -171,7 +171,7 @@ const ActionActivityDetail = () => {
                       />
                     </Link>
                   )}
-                  <p className="font-medium">
+                  <p>
                     <Link
                       to={href("/member/:id", {
                         id: activity.user.id.toString(),
@@ -181,7 +181,7 @@ const ActionActivityDetail = () => {
                         {activity.user.displayName}
                       </UserDisplayName>
                     </Link>{" "}
-                    {verb} this action
+                    <span className="">{verb} this action</span>
                   </p>
                 </div>
               </div>
@@ -189,14 +189,14 @@ const ActionActivityDetail = () => {
                 {isOwner && !editing && (
                   <button
                     onClick={() => setEditing(true)}
-                    className="text-green text-sm underline md:ml-2 text-nowrap"
+                    className="text-green underline md:ml-2 text-nowrap"
                   >
                     {activity.editableContent?.body
                       ? "Edit details"
                       : "Add details"}
                   </button>
                 )}
-                <p className="text-gray-500 text-sm text-nowrap">
+                <p className="text-zinc-500 text-nowrap">
                   {formatTime(new Date(activity?.createdAt), {
                     addSuffix: true,
                   })}

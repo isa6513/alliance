@@ -37,10 +37,10 @@ const ActionActivityFeedItem = ({
         <span className="hover:underline font-medium">
           {`${activity.user.displayName}`}
         </span>
-        <span className="text-gray-600"> {verb}</span>
+        <span className="text-zinc-600"> {verb}</span>
         <span className="font-medium"> {activity.actionName}</span>
         {showTime && (
-          <p className="text-gray-500 text-right text-nowrap">
+          <p className="text-zinc-500 text-right text-nowrap">
             {formatTime(new Date(activity.createdAt), {
               addSuffix: true,
             })}{" "}
@@ -52,7 +52,7 @@ const ActionActivityFeedItem = ({
     return (
       <div
         key={activity.id}
-        className={`rounded-md border-gray-200 ${
+        className={`rounded-md border-zinc-200 ${
           activity.type === "user_joined" ? "cursor-default" : "cursor-pointer"
         }`}
         onClick={() => {
@@ -69,26 +69,27 @@ const ActionActivityFeedItem = ({
           );
         }}
       >
-        <div className="flex flex-row gap-x-3 items-center flex-1">
+        <div className="flex flex-row gap-x-2 items-center flex-1 hover:bg-zinc-50 hover:p-2 hover:-m-2 rounded">
           <ProfileImage
             pfp={activity.user.profilePicture}
             size="medium"
             className="self-start mt-1.5"
           />
-          <div className="flex-1">
+          <div className="flex-1 text-zinc-700">
             <p className="font-medium">{activity.user.displayName}</p>
             {showAction ? (
-              <p className="text-sm ">
-                {verb.charAt(0).toUpperCase() + verb.slice(1)}:{" "}
-                {activity.actionName}{" "}
-                <span className="text-gray-500 text-nowrap">
+              <p className="">
+                <span className="text-zinc-500 text-nowrap">{verb} </span>
+                <span className="text-green">{activity.actionName}</span>
+                <span className="text-zinc-500 text-nowrap">
+                  {" "}
                   {formatTime(new Date(activity.createdAt), {
                     addSuffix: true,
                   })}
                 </span>
               </p>
             ) : (
-              <p className="text-sm ">
+              <p className="text-zinc-500">
                 {formatTime(new Date(activity.createdAt), {
                   addSuffix: true,
                 })}
@@ -99,6 +100,7 @@ const ActionActivityFeedItem = ({
             liked={activity.likedByMe ?? false}
             likes={activity.likesCount}
             handleLike={() => handleLike(activity)}
+            backgroundColor="white"
           />
         </div>
       </div>

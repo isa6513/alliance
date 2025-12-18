@@ -225,7 +225,7 @@ const UserActivityCard = ({
             </>
 
             <div className="flex flex-row justify-between w-full items-end">
-              <p className="text-zinc-500 text-sm">{timeSinceCompleted}</p>
+              <p className="text-zinc-500">{timeSinceCompleted}</p>
               <div
                 className={`flex items-center space-x-2 self-end ${
                   !activity.editableContent.body ? "mt-2" : ""

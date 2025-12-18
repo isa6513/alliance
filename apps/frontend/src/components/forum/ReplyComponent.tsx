@@ -186,7 +186,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
           <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
             <Link
               to={href("/member/:id", { id: reply.author.id.toString() })}
-              className="text-black font-medium"
+              className="text-zinc-800 font-medium"
             >
               <UserDisplayName
                 staff={reply.author.staff}
@@ -201,7 +201,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
               })}
             </span>
             {hasChildren && isCollapsed && reply.children !== undefined && (
-              <span className="text-xs bg-gray-200 px-2 py-1 -my-1 rounded">
+              <span className="text-xs bg-zinc-200 px-2 py-1 -my-1 rounded">
                 {countAllReplies(reply.children)}{" "}
                 {countAllReplies(reply.children) === 1 ? "reply" : "replies"}{" "}
                 hidden

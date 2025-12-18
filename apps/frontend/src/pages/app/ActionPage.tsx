@@ -144,7 +144,7 @@ export default function ActionPage() {
         />
       </div>
       {!action.publicOnly && (
-        <div className="hidden lg:flex flex-col w-[320px] xl:w-[380px] rounded gap-y-12 border-l border-zinc-200 pl-4 xl:pl-10">
+        <div className="hidden lg:flex flex-col w-[320px] xl:w-[340px] rounded gap-y-12 border-l border-zinc-200 pl-4 xl:pl-10">
           <ActionCompletedBarWithInfo
             friendActivities={[]}
             action={action}

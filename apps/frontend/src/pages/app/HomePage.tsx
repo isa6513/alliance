@@ -296,7 +296,7 @@ const HomePage = () => {
 
   const sidebarContent = useMemo(() => {
     return (
-      <div className="px-4 pt-12 flex flex-col divide-y *:py-6 *:px-2 divide-zinc-200">
+      <div className="px-4 pt-12 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200">
         {todoActions.length + newActions.length > 0 && (
           <div className="flex flex-col gap-y-2">
             <p className="font-semibold text-base font-serif text-black">
@@ -369,10 +369,7 @@ const HomePage = () => {
               </Link>
             )}
           </div>
-          <div
-            className="flex flex-col *:py-3 -my-3"
-            ref={friendActivityListRef}
-          >
+          <div className="flex flex-col gap-y-5" ref={friendActivityListRef}>
             {friendActivities.length === 0 && (
               <div className="space-x-1">
                 <span className="text-zinc-400 mb-3">No activity yet.</span>
