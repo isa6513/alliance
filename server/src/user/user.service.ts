@@ -151,7 +151,7 @@ export class UserService {
       Object.assign(user, updateData);
     }
 
-    this.userRepository.save(user);
+    await this.userRepository.save(user);
 
     return this.findOneOrFail(id, {
       contractEvents: true,
