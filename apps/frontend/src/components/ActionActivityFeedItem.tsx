@@ -16,6 +16,7 @@ const ActionActivityFeedItem = ({
   activity,
   showTime = true,
   card = true,
+  showAction = true,
   handleLike,
 }: ActionActivityFeedItemProps) => {
   const navigate = useNavigate();
@@ -69,14 +70,30 @@ const ActionActivityFeedItem = ({
         }}
       >
         <div className="flex flex-row gap-x-3 items-center flex-1">
-          <ProfileImage pfp={activity.user.profilePicture} size="medium" />
+          <ProfileImage
+            pfp={activity.user.profilePicture}
+            size="medium"
+            className="self-start mt-1.5"
+          />
           <div className="flex-1">
             <p className="font-medium">{activity.user.displayName}</p>
-            <p className="text-sm text-gray-500">
-              {formatTime(new Date(activity.createdAt), {
-                addSuffix: true,
-              })}
-            </p>
+            {showAction ? (
+              <p className="text-sm ">
+                {verb.charAt(0).toUpperCase() + verb.slice(1)}:{" "}
+                {activity.actionName}{" "}
+                <span className="text-gray-500 text-nowrap">
+                  {formatTime(new Date(activity.createdAt), {
+                    addSuffix: true,
+                  })}
+                </span>
+              </p>
+            ) : (
+              <p className="text-sm ">
+                {formatTime(new Date(activity.createdAt), {
+                  addSuffix: true,
+                })}
+              </p>
+            )}
           </div>
           <ActivityLikeButton
             liked={activity.likedByMe ?? false}
