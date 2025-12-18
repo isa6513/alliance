@@ -288,6 +288,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
   const { isAuthenticated, loading } = useAuth();
   if (!isAuthenticated && !loading) {
     document.documentElement.style.setProperty("--nav-width", `0px`);
+    document.documentElement.style.setProperty("--mobile-nav-height", `0px`);
     return null;
   }
 

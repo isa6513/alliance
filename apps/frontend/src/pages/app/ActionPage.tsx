@@ -13,6 +13,7 @@ import { useAuth } from "../../lib/AuthContext";
 import { useCIDFromParams } from "../../lib/utils";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 import useActivities, { ActivityList } from "./useActivities";
+import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 
 export async function loader({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -95,72 +96,78 @@ export default function ActionPage() {
   }
 
   return (
-    <div className="w-full flex flex-row justify-between py-10 sm:py-20 px-4 md:px-8 xl:px-16">
-      <div className="flex flex-col md:pr-4 xl:pr-12 max-w-2xl lg:max-w-3xl mx-auto w-full">
-        <Outlet
-          context={
-            {
-              action,
-              userRelation:
-                (action.userRelation as UserActionRelation | undefined) ?? null,
-              onCompleteAction: () => {
-                setAction((action) => ({
-                  ...action!,
-                  userRelation: "completed",
-                  usersCompleted: action!.usersCompleted + 1,
-                }));
+    <>
+      {action.publicOnly && (
+        <PrelaunchNavbar transparent={false} absolute={false} />
+      )}
+      <div className="w-full flex flex-row justify-between py-10 sm:py-20 px-4 md:px-8 xl:px-16">
+        <div className="flex flex-col md:pr-4 xl:pr-12 max-w-2xl lg:max-w-3xl mx-auto w-full">
+          <Outlet
+            context={
+              {
+                action,
+                userRelation:
+                  (action.userRelation as UserActionRelation | undefined) ??
+                  null,
+                onCompleteAction: () => {
+                  setAction((action) => ({
+                    ...action!,
+                    userRelation: "completed",
+                    usersCompleted: action!.usersCompleted + 1,
+                  }));
 
-                // TODO need better way to update number of remaining tasks
-                navigate(href("/actions/:id", { id: actionId.toString() }));
-              },
-              onJoinAction: () =>
-                setAction((action) => ({
-                  ...action!,
-                  userRelation: "joined",
-                })),
-              onDeclineAction: () => {
-                setAction((action) => ({
-                  ...action!,
-                  userRelation: "declined",
-                }));
+                  // TODO need better way to update number of remaining tasks
+                  navigate(href("/actions/:id", { id: actionId.toString() }));
+                },
+                onJoinAction: () =>
+                  setAction((action) => ({
+                    ...action!,
+                    userRelation: "joined",
+                  })),
+                onDeclineAction: () => {
+                  setAction((action) => ({
+                    ...action!,
+                    userRelation: "declined",
+                  }));
 
-                // TODO need better way to update number of remaining tasks
-                navigate(href("/actions/:id", { id: actionId.toString() }));
-              },
-              onOptOutAction: () => {
-                setAction((action) => ({
-                  ...action!,
-                  userRelation: "declined",
-                }));
+                  // TODO need better way to update number of remaining tasks
+                  navigate(href("/actions/:id", { id: actionId.toString() }));
+                },
+                onOptOutAction: () => {
+                  setAction((action) => ({
+                    ...action!,
+                    userRelation: "declined",
+                  }));
 
-                // TODO need better way to update number of remaining tasks
-                navigate(href("/actions/:id", { id: actionId.toString() }));
-              },
-              activities,
-              handleLikeActivity,
-              setActivities,
-            } satisfies TaskPanelContext
-          }
-        />
-      </div>
-      {!action.publicOnly && (
-        <div className="hidden lg:flex flex-col w-[320px] xl:w-[340px] rounded gap-y-12 border-l border-zinc-200 pl-4 xl:pl-10">
-          <ActionCompletedBarWithInfo
-            friendActivities={[]}
-            action={action}
-            textSize="base"
-            textColor="zinc-800"
-          />
-          <ActionActivityList
-            actionId={action.id}
-            activities={activities}
-            loading={false}
-            onLikeActivity={(activityId) => handleLikeActivity(activityId)}
-            setActivities={setActivities}
-            maxN={10}
+                  // TODO need better way to update number of remaining tasks
+                  navigate(href("/actions/:id", { id: actionId.toString() }));
+                },
+                activities,
+                handleLikeActivity,
+                setActivities,
+              } satisfies TaskPanelContext
+            }
           />
         </div>
-      )}
-    </div>
+        {!action.publicOnly && (
+          <div className="hidden lg:flex flex-col w-[320px] xl:w-[340px] rounded gap-y-12 border-l border-zinc-200 pl-4 xl:pl-10">
+            <ActionCompletedBarWithInfo
+              friendActivities={[]}
+              action={action}
+              textSize="base"
+              textColor="zinc-800"
+            />
+            <ActionActivityList
+              actionId={action.id}
+              activities={activities}
+              loading={false}
+              onLikeActivity={(activityId) => handleLikeActivity(activityId)}
+              setActivities={setActivities}
+              maxN={10}
+            />
+          </div>
+        )}
+      </div>
+    </>
   );
 }
