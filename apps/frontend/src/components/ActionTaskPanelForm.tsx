@@ -85,6 +85,7 @@ const ActionTaskPanelForm = ({
             window.localStorage.removeItem(storageKey);
           }
           if (user && !user.hasActiveContract) {
+            //TODO: better handling of user refresh (things used to break if the user signed a contract in another tab then went back to the first one)
             refreshUser();
           }
           onCompleteAction(false); //tasksSubmitForm handles completion here
