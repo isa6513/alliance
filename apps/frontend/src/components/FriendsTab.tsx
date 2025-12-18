@@ -14,6 +14,7 @@ import ProfileImage from "@alliance/shared/ui/ProfileImage";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, href } from "react-router";
 import { setRevalidate } from "../applayout";
+import { useToast } from "@alliance/shared/ui/ToastProvider";
 
 interface FriendsTabProps {
   userId: number;
@@ -40,6 +41,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
   const [processingIds, setProcessingIds] = useState<Record<string, boolean>>(
     {}
   );
+  const { confirm } = useToast();
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -105,7 +107,20 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
     }
   };
 
-  const handleRemoveFriend = async (friendId: number) => {
+  const handleRemoveFriend = async (
+    e: React.MouseEvent<HTMLElement>,
+    friendId: number
+  ) => {
+    const ok = await confirm({
+      message: "Are you sure you want to remove this friend?",
+      confirmLabel: "Yes",
+      cancelLabel: "No",
+      anchorEl: e.currentTarget,
+    });
+    if (!ok) {
+      return;
+    }
+
     startProcessing(friendId);
 
     try {
@@ -155,21 +170,22 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
       ) : (
         <List>
           {friends.map((friend) => (
-            <Link
+            <div
               key={friend.id}
               className="flex items-center p-3 hover:bg-zinc-100"
-              to={href("/member/:id", { id: friend.id.toString() })}
             >
-              <ProfileImage className="mr-3" pfp={friend.profilePicture} />
-              <div className="flex-grow">
-                <p className="">{friend.displayName}</p>
-              </div>
+              <Link
+                className="flex items-center flex-1"
+                to={href("/member/:id", { id: friend.id.toString() })}
+              >
+                <ProfileImage className="mr-3" pfp={friend.profilePicture} />
+                <div className="flex-grow">
+                  <p className="">{friend.displayName}</p>
+                </div>
+              </Link>
               {isMe && (
                 <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveFriend(friend.id);
-                  }}
+                  onClick={(e) => handleRemoveFriend(e, friend.id)}
                   color={ButtonColor.Red}
                   disabled={processingIds[friend.id]}
                   className="text-sm bg-transparent hover:!text-red-700"
@@ -177,7 +193,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
                   {processingIds[friend.id] ? "Removing..." : "Remove friend"}
                 </Button>
               )}
-            </Link>
+            </div>
           ))}
         </List>
       )}
