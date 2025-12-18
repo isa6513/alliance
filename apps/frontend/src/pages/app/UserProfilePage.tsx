@@ -38,6 +38,7 @@ import Spinner from "../../components/Spinner";
 import { MessageSquare } from "lucide-react";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../../lib/config";
+import { useToast } from "@alliance/shared/ui/ToastProvider";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -65,6 +66,7 @@ const UserProfilePage: React.FC = () => {
   const { state } = useLocation();
   const { openFriendRequest } = state || false;
   const { openFriends } = state || false;
+  const { confirm } = useToast();
 
   const [profile, setProfile] = useState<ProfileDto | null>(null);
   useAppLoaderData().profile.then((data) => {
@@ -231,15 +233,26 @@ const UserProfilePage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const handleRemoveFriend = useCallback(async () => {
-    if (!id || !user) return;
-    try {
-      await userRemoveFriend({ path: { targetUserId: parseInt(id) } });
-      setFriendStatus({ status: "none", didReceiveRequest: false });
-    } catch (error) {
-      console.error("Error removing friend:", error);
-    }
-  }, [id, user]);
+  const handleRemoveFriend = useCallback(
+    async (e: React.MouseEvent<HTMLElement>) => {
+      if (!id || !user) return;
+      const ok = await confirm({
+        message: "Are you sure you want to remove this friend?",
+        confirmLabel: "Yes",
+        cancelLabel: "No",
+        anchorEl: e.currentTarget,
+      });
+
+      if (!ok) return;
+      try {
+        await userRemoveFriend({ path: { targetUserId: parseInt(id) } });
+        setFriendStatus({ status: "none", didReceiveRequest: false });
+      } catch (error) {
+        console.error("Error removing friend:", error);
+      }
+    },
+    [id, user, confirm]
+  );
 
   const handleSave = async () => {
     if (!user || isSavingProfile) return;

@@ -5,7 +5,7 @@ import { useState } from "react";
 interface FriendRequestButtonProps {
   friendStatus: FriendStatusDto | null;
   handleSendFriendRequest: () => void;
-  handleRemoveFriend: () => void;
+  handleRemoveFriend: (e: React.MouseEvent<HTMLElement>) => void;
   handleAcceptFriendRequest: () => void;
 }
 
