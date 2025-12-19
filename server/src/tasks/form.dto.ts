@@ -16,6 +16,7 @@ export class SubmitFormDto extends PickType(FormResponse, [
   'answers',
   'schemaSnapshot',
   'phDistinctId',
+  'sessionReplayUrl',
 ]) {
   @ApiProperty()
   @IsDefined()

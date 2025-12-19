@@ -238,6 +238,7 @@ export type FormResponse = {
     };
     deviceType?: string;
     user?: User;
+    sessionReplayUrl?: string;
     createdAt: string;
     phDistinctId?: string;
     schemaSnapshot: {
@@ -1900,6 +1901,7 @@ export type SubmitFormDto = {
     answers: {
         [key: string]: unknown;
     };
+    sessionReplayUrl?: string;
     phDistinctId?: string;
     schemaSnapshot: {
         [key: string]: unknown;

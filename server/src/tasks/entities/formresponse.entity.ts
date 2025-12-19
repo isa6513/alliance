@@ -64,6 +64,12 @@ export class FormResponse {
   @Type(() => User)
   user?: Ty<User>;
 
+  @Column({ type: 'text', nullable: true })
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => String)
+  sessionReplayUrl?: string;
+
   @CreateDateColumn()
   @ApiProperty()
   @Allow()

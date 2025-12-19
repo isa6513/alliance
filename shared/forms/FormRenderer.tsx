@@ -34,6 +34,7 @@ type FormRendererProps = {
   initialPageIndex?: number;
   userId?: string | number;
   phDistinctId?: string;
+  sessionReplayUrl?: string;
   user?: Omit<UserDto, "email">;
   disableOptionRandomization?: boolean;
   onFormStarted?: () => void;
@@ -258,6 +259,7 @@ const FormRenderer = ({
   completedFormResponse,
   actionId,
   initialPageIndex,
+  sessionReplayUrl,
 }: FormRendererProps) => {
   // Compute schema and a namespaced storage key for persistence (if enabled)
   const schema = form as unknown as FormSchema;
@@ -1098,7 +1100,8 @@ const FormRenderer = ({
       visibilityValidatorResults,
       deviceType,
       publicAnswers,
-      phDistinctId: phDistinctId ?? undefined,
+      phDistinctId,
+      sessionReplayUrl,
       sid: sid ?? undefined,
     };
 

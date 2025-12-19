@@ -105,8 +105,11 @@ const ActionTaskPanelForm = ({
       }
     : null;
 
-  const distinctId = useMemo(() => {
-    return posthog.get_distinct_id();
+  const { distinctId, sessionReplayUrl } = useMemo(() => {
+    return {
+      distinctId: posthog.get_distinct_id(),
+      sessionReplayUrl: posthog.get_session_replay_url(),
+    };
   }, []);
 
   if (!form) {
@@ -152,6 +155,7 @@ const ActionTaskPanelForm = ({
           renderFormAsCompleted={disabled}
           publicAction={publicAction}
           phDistinctId={distinctId}
+          sessionReplayUrl={sessionReplayUrl}
         />
       </div>
       {error && (
