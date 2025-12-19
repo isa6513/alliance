@@ -45,7 +45,7 @@ const ActionShareUrlComponent = ({ field }: CustomComponentProps) => {
           navigator.clipboard.writeText(shareUrl);
           setCopied(true);
         }}
-        className="text-sm !p-3 !pr-3 text-green"
+        className="text-sm !p-3 !px-3 text-green"
       >
         {copied ? "Copied!" : "Copy"}
       </Button>
