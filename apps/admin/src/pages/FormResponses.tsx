@@ -23,8 +23,6 @@ type FormWithSchema = Pick<FormDto, "id" | "title"> & {
   pages?: Page[];
 };
 
-const PAGE_SIZE = 1; // show one response per page (step-through)
-
 // Runtime guard: distinguish answer fields from display blocks
 const ANSWER_FIELD_KINDS = new Set<FieldKind>([
   "text",
@@ -127,14 +125,13 @@ const FormResponses: React.FC = () => {
 
   useEffect(() => {
     // Keep current page in range when responses length changes
-    const totalPages = Math.max(1, Math.ceil(responses.length / PAGE_SIZE));
+    const totalPages = Math.max(1, responses.length);
     if (page > totalPages) setPage(totalPages);
   }, [responses, page]);
 
   const total = responses.length;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const startIdx = (page - 1) * PAGE_SIZE;
-  const pageItems = responses.slice(startIdx, startIdx + PAGE_SIZE);
+  const totalPages = Math.max(1, responses.length);
+  const currentResponse = responses[page - 1];
 
   const fieldLabels = useMemo(() => {
     const labels: Record<string, string> = {};
@@ -247,8 +244,6 @@ const FormResponses: React.FC = () => {
     URL.revokeObjectURL(url);
   }, [form, responses, orderedFieldIds, fieldLabels, formatValue]);
 
-  console.log(pageItems[0]?.sid);
-
   return (
     <div className="space-y-4 p-3">
       <div className="flex items-center justify-between">
@@ -334,30 +329,32 @@ const FormResponses: React.FC = () => {
                 <span className="text-sm">
                   Response {page} / {totalPages}:
                 </span>
-                {pageItems[0] && (
+                {currentResponse && (
                   <div className="text-black flex items-center gap-3">
                     <span>
-                      {pageItems[0].user?.name ??
-                        (!!sidsToUserMap[pageItems[0].sid ?? ""]
+                      {currentResponse.user?.name ??
+                        (!!sidsToUserMap[currentResponse.sid ?? ""]
                           ? "anonymous invited by " +
-                            sidsToUserMap[pageItems[0].sid ?? ""]?.displayName
+                            sidsToUserMap[currentResponse.sid ?? ""]
+                              ?.displayName
                           : "anonymous")}
                     </span>
                     <span className="text-gray-500 text-sm">
-                      {new Date(pageItems[0].createdAt).toLocaleString()}
+                      {new Date(currentResponse.createdAt).toLocaleString()}
                     </span>
                   </div>
                 )}
-                {pageItems[0].sessionReplayUrl && (
+                {currentResponse && currentResponse.sessionReplayUrl && (
                   <span className="text-gray-500 text-sm">
                     <Button
                       size={"small"}
                       onClick={() =>
                         window.open(
                           "https://us.posthog.com/project/188181/replay/home?sessionRecordingId=" +
-                            pageItems[0].sessionReplayUrl!.substring(
-                              pageItems[0].sessionReplayUrl!.lastIndexOf("/") +
-                                1
+                            currentResponse.sessionReplayUrl!.substring(
+                              currentResponse.sessionReplayUrl!.lastIndexOf(
+                                "/"
+                              ) + 1
                             ),
                           "_blank"
                         )
@@ -376,7 +373,7 @@ const FormResponses: React.FC = () => {
             <div className="max-w-[600px] mx-auto pt-10 space-y-4">
               {(() => {
                 const responseSchema =
-                  (pageItems[0].schemaSnapshot as unknown as FormSchema) ??
+                  (currentResponse?.schemaSnapshot as unknown as FormSchema) ??
                   form.schema;
                 return (
                   <div className="bg-white p-6 border border-gray-200 rounded-lg">
@@ -384,11 +381,11 @@ const FormResponses: React.FC = () => {
                       id={form.id}
                       actionId={0}
                       form={responseSchema}
-                      completedFormResponse={pageItems[0]}
+                      completedFormResponse={currentResponse}
                       renderFormAsCompleted
                       onSubmit={null}
-                      userId={pageItems[0]?.user?.id}
-                      user={pageItems[0]?.user ?? undefined}
+                      userId={currentResponse?.user?.id}
+                      user={currentResponse?.user ?? undefined}
                       disableOptionRandomization
                     />
                   </div>
