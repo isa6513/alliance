@@ -12,7 +12,7 @@ import type {
   FormSchema,
   Page,
 } from "@alliance/shared/forms/formschema";
-import Button from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -244,157 +244,176 @@ const FormResponses: React.FC = () => {
     URL.revokeObjectURL(url);
   }, [form, responses, orderedFieldIds, fieldLabels, formatValue]);
 
+  const respondentName = currentResponse
+    ? currentResponse.user?.name ??
+      (sidsToUserMap[currentResponse.sid ?? ""]
+        ? "anonymous invited by " +
+          sidsToUserMap[currentResponse.sid ?? ""]?.displayName
+        : "anonymous")
+    : "";
+
   return (
-    <div className="space-y-4 p-3">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">
-            {form?.title ? `Responses: ${form.title}` : "Form Responses"}
-          </h2>
-          <p className="text-sm text-gray-500">
-            {total} total response{total === 1 ? "" : "s"}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => navigate("/forms")}
-            className="px-3 py-2 rounded-md text-sm bg-gray-100 hover:bg-gray-200"
-          >
-            Back to Forms
-          </Button>
-          <Button onClick={handleExportCsv} disabled={responses.length === 0}>
-            Export CSV
-          </Button>
-          <Button onClick={loadData}>Refresh</Button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => navigate("/forms")}
+                color={ButtonColor.Transparent}
+                size="small"
+              >
+                &larr; Forms
+              </Button>
+              <div className="h-6 w-px bg-gray-200" />
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">
+                  {form?.title ?? "Form Responses"}
+                </h1>
+                <p className="text-sm text-gray-500">
+                  {total} response{total === 1 ? "" : "s"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button onClick={loadData} color={ButtonColor.White} size="small">
+                Refresh
+              </Button>
+              <Button
+                onClick={handleExportCsv}
+                disabled={responses.length === 0}
+                color={ButtonColor.Black}
+                size="small"
+              >
+                Export CSV
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {loading ? (
-        <p>Loading responses...</p>
-      ) : error ? (
-        <p className="text-red-500">{error}</p>
-      ) : total === 0 ? (
-        <Card style={CardStyle.White}>
-          <p className="text-gray-600">No responses yet for this form.</p>
-        </Card>
-      ) : (
-        <>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <button
-                disabled={page <= 1}
-                onClick={() => setPage(1)}
-                className={`px-3 py-2 rounded-md text-sm ${
-                  page <= 1
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              >
-                First
-              </button>
-              <button
-                disabled={page <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className={`px-3 py-2 rounded-md text-sm ${
-                  page <= 1
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              >
-                Previous
-              </button>
-              <button
-                disabled={page >= totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className={`px-3 py-2 rounded-md text-sm ${
-                  page >= totalPages
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              >
-                Next
-              </button>
-              <button
-                disabled={page >= totalPages}
-                onClick={() => setPage(totalPages)}
-                className={`px-3 py-2 rounded-md text-sm ${
-                  page >= totalPages
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              >
-                Last
-              </button>
-              <div className="flex items-center gap-2 mx-2 justify-center">
-                <span className="text-sm">
-                  Response {page} / {totalPages}:
-                </span>
-                {currentResponse && (
-                  <div className="text-black flex items-center gap-3">
-                    <span>
-                      {currentResponse.user?.name ??
-                        (!!sidsToUserMap[currentResponse.sid ?? ""]
-                          ? "anonymous invited by " +
-                            sidsToUserMap[currentResponse.sid ?? ""]
-                              ?.displayName
-                          : "anonymous")}
-                    </span>
-                    <span className="text-gray-500 text-sm">
-                      {new Date(currentResponse.createdAt).toLocaleString()}
-                    </span>
+      <div className="p-2">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <p className="text-gray-500">Loading responses...</p>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center py-12">
+            <p className="text-red-500">{error}</p>
+          </div>
+        ) : total === 0 ? (
+          <Card style={CardStyle.White}>
+            <p className="text-gray-600">No responses yet for this form.</p>
+          </Card>
+        ) : (
+          <>
+            {/* Response Navigator */}
+            <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+              <div className="flex items-center justify-between flex-wrap md:flex-nowrap">
+                {/* Pagination Controls */}
+                <div className="flex items-center gap-1">
+                  <Button
+                    disabled={page <= 1}
+                    onClick={() => setPage(1)}
+                    color={ButtonColor.Black}
+                    size="small"
+                  >
+                    First
+                  </Button>
+                  <Button
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    color={ButtonColor.Black}
+                    size="small"
+                  >
+                    &larr; Prev
+                  </Button>
+                  <div className="px-4 py-1.5 text-sm font-medium text-gray-700 min-w-[100px] text-center">
+                    {page} of {totalPages}
                   </div>
-                )}
-                {currentResponse && currentResponse.sessionReplayUrl && (
-                  <span className="text-gray-500 text-sm">
-                    <Button
-                      size={"small"}
-                      onClick={() =>
-                        window.open(
-                          "https://us.posthog.com/project/188181/replay/home?sessionRecordingId=" +
-                            currentResponse.sessionReplayUrl!.substring(
-                              currentResponse.sessionReplayUrl!.lastIndexOf(
-                                "/"
-                              ) + 1
-                            ),
-                          "_blank"
-                        )
-                      }
-                      className="flex items-center gap-1"
-                    >
-                      <CirclePlay size={15} />
-                      Open Replay
-                    </Button>
-                  </span>
+                  <Button
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    color={ButtonColor.Black}
+                    size="small"
+                  >
+                    Next &rarr;
+                  </Button>
+                  <Button
+                    disabled={page >= totalPages}
+                    onClick={() => setPage(totalPages)}
+                    color={ButtonColor.Black}
+                    size="small"
+                  >
+                    Last
+                  </Button>
+                </div>
+
+                {/* Response Info - Fixed width to prevent layout shift */}
+                {currentResponse && (
+                  <div className="flex items-center gap-4">
+                    <div className="text-right min-w-[200px]">
+                      <p className="font-medium text-gray-900 truncate max-w-[700px]">
+                        {respondentName}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(currentResponse.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    {currentResponse.sessionReplayUrl && (
+                      <Button
+                        size="small"
+                        color={ButtonColor.BlueOutline}
+                        onClick={() =>
+                          window.open(
+                            "https://us.posthog.com/project/188181/replay/home?sessionRecordingId=" +
+                              currentResponse.sessionReplayUrl!.substring(
+                                currentResponse.sessionReplayUrl!.lastIndexOf(
+                                  "/"
+                                ) + 1
+                              ),
+                            "_blank"
+                          )
+                        }
+                      >
+                        <CirclePlay size={14} className="mr-1.5" />
+                        Replay
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
-          </div>
-          {form !== null && (
-            <div className="max-w-[600px] mx-auto pt-10 space-y-4">
-              {(() => {
-                const responseSchema =
-                  (currentResponse?.schemaSnapshot as unknown as FormSchema) ??
-                  form.schema;
-                return (
-                  <div className="bg-white p-6 border border-gray-200 rounded-lg">
-                    <FormRenderer
-                      id={form.id}
-                      actionId={0}
-                      form={responseSchema}
-                      completedFormResponse={currentResponse}
-                      renderFormAsCompleted
-                      onSubmit={null}
-                      userId={currentResponse?.user?.id}
-                      user={currentResponse?.user ?? undefined}
-                      disableOptionRandomization
-                    />
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-        </>
-      )}
+
+            {/* Form Response */}
+            {form !== null && (
+              <div className="max-w-[600px] mx-auto">
+                {(() => {
+                  const responseSchema =
+                    (currentResponse?.schemaSnapshot as unknown as FormSchema) ??
+                    form.schema;
+                  return (
+                    <div className="bg-white p-6 border border-gray-200 rounded-lg">
+                      <FormRenderer
+                        id={form.id}
+                        actionId={0}
+                        form={responseSchema}
+                        completedFormResponse={currentResponse}
+                        renderFormAsCompleted
+                        onSubmit={null}
+                        userId={currentResponse?.user?.id}
+                        user={currentResponse?.user ?? undefined}
+                        disableOptionRandomization
+                      />
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

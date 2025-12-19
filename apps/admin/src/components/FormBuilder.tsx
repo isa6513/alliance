@@ -47,12 +47,7 @@ import {
   EditableRangeField,
 } from "./form-fields";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import {
-  useBeforeUnload,
-  useBlocker,
-  useNavigate,
-  useSearchParams,
-} from "react-router";
+import { useBeforeUnload, useBlocker, useSearchParams } from "react-router";
 import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
 import { customComponentRegistry } from "@alliance/shared/forms/components";
 import { FORM_BUILDER_PREVIEW_USER } from "../lib/testData";
@@ -82,12 +77,10 @@ const buildValueCounts = (values: string[]) => {
 const findSingleOptionValueChange = (
   previousOptions: MultiSelectField["options"] | undefined,
   nextOptions: MultiSelectField["options"] | undefined
-):
-  | {
-      previousValue: string;
-      nextValue: string;
-    }
-  | null => {
+): {
+  previousValue: string;
+  nextValue: string;
+} | null => {
   if (!previousOptions || !nextOptions) {
     return null;
   }
@@ -147,7 +140,10 @@ const getUpdatedVisibilityConditions = (
     if (!("when" in condition) || condition.when !== controllerId) {
       return condition;
     }
-    if ("includesOption" in condition && condition.includesOption === previousValue) {
+    if (
+      "includesOption" in condition &&
+      condition.includesOption === previousValue
+    ) {
       updated = true;
       return { ...condition, includesOption: nextValue };
     }
@@ -183,7 +179,8 @@ const applyOptionValueToConditionalVisibility = (
     }
 
     const result = getUpdatedVisibilityConditions(
-      (candidate as AnyField).visibleIf ?? (candidate as DisplayBlock).visibleIf,
+      (candidate as AnyField).visibleIf ??
+        (candidate as DisplayBlock).visibleIf,
       controllerId,
       previousValue,
       nextValue
@@ -281,7 +278,6 @@ export function FormBuilder({
 
   const currentPage = schema.pages[selectedPageIndex];
 
-  const navigate = useNavigate();
   const { success: showSuccessToast, error: showErrorToast } = useToast();
 
   // Available elements for search
@@ -1334,13 +1330,6 @@ export function FormBuilder({
               />
             </div>
             <div className="flex items-center space-x-2">
-              <Button
-                onClick={() => navigate(`/forms/${formId}/responses`)}
-                color={ButtonColor.Stone}
-                size="small"
-              >
-                Responses
-              </Button>
               {activeEditor === "form" && (
                 <Button
                   onClick={() => setIsPreviewMode(!isPreviewMode)}
