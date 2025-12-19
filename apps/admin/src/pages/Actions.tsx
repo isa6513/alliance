@@ -192,7 +192,7 @@ const ActionsList: React.FC = () => {
             key={suite.id ?? "suite-unspecified"}
             className="border border-zinc-200 rounded-lg overflow-hidden"
           >
-            <div className="px-4 py-2 border-b border-zinc-200 bg-zinc-50">
+            <div className="px-4 py-2 border-b border-zinc-200 bg-zinc-100">
               {suite.id ? (
                 <Link
                   to={`/suites/${suite.id}`}
@@ -206,7 +206,7 @@ const ActionsList: React.FC = () => {
                 </p>
               )}
             </div>
-            <div className="space-y-3 p-4">
+            <div className="divide-y divide-zinc-200">
               {suite.actions.map((action) => (
                 <ActionListCard key={action.id} action={action} />
               ))}

@@ -33,7 +33,7 @@ const ActionListCard = ({ action }: ActionListCardProps) => {
 
   const lastEventDate = getLastPastEventDate(action);
   return (
-    <Card key={action.id} style={CardStyle.White}>
+    <div key={action.id} className="p-4 group">
       <div
         onClick={() => handleEditAction(action.id)}
         className="cursor-pointer relative"
@@ -76,7 +76,7 @@ const ActionListCard = ({ action }: ActionListCardProps) => {
           className="mt-2"
         />
       </div>
-    </Card>
+    </div>
   );
 };
 
