@@ -16,6 +16,7 @@ import Button from "@alliance/shared/ui/Button";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import { CirclePlay } from "lucide-react";
 
 type FormWithSchema = Pick<FormDto, "id" | "title"> & {
   schema: FormSchema;
@@ -346,6 +347,27 @@ const FormResponses: React.FC = () => {
                       {new Date(pageItems[0].createdAt).toLocaleString()}
                     </span>
                   </div>
+                )}
+                {pageItems[0].sessionReplayUrl && (
+                  <span className="text-gray-500 text-sm">
+                    <Button
+                      size={"small"}
+                      onClick={() =>
+                        window.open(
+                          "https://us.posthog.com/project/188181/replay/home?sessionRecordingId=" +
+                            pageItems[0].sessionReplayUrl!.substring(
+                              pageItems[0].sessionReplayUrl!.lastIndexOf("/") +
+                                1
+                            ),
+                          "_blank"
+                        )
+                      }
+                      className="flex items-center gap-1"
+                    >
+                      <CirclePlay size={15} />
+                      Open Replay
+                    </Button>
+                  </span>
                 )}
               </div>
             </div>

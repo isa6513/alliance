@@ -56,6 +56,7 @@ export class FormResponseDto extends PickType(FormResponse, [
   'schemaSnapshot',
   'visibilityValidatorResults',
   'phDistinctId',
+  'sessionReplayUrl',
   'deviceType',
   'sid',
   'publicAnswers',

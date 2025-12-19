@@ -1930,6 +1930,7 @@ export type FormResponseDto = {
         [key: string]: unknown;
     };
     deviceType?: string;
+    sessionReplayUrl?: string;
     createdAt: string;
     phDistinctId?: string;
     schemaSnapshot: {
