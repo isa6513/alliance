@@ -1,5 +1,4 @@
 import { ActionDto } from "@alliance/shared/client";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import ActionProgressBar from "./ActionProgressBar";
 import { getLastPastEventDate } from "../pages/Actions";
 import { useCallback } from "react";
