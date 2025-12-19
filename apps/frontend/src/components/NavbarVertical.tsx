@@ -340,9 +340,11 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
         </div>
 
         <div className="flex flex-col items-start px-4 py-4">
-          <p className="p-3 font-berlingske uppercase text-xl mb-12 h-sm">
-            The Alliance
-          </p>
+          <Link to={href("/tasks")}>
+            <p className="p-3 font-berlingske uppercase text-xl mb-12 h-sm">
+              The Alliance
+            </p>
+          </Link>
 
           <div className="flex flex-col w-full divide-y divide-zinc-200">
             {navSections.map((section) => (

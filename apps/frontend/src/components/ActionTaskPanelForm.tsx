@@ -11,7 +11,7 @@ import FormRenderer, {
 import { FormSchema } from "@alliance/shared/forms/formschema";
 import Card, { CardStyle } from "@alliance/shared/ui/Card";
 import posthog from "posthog-js";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import Spinner from "./Spinner";
 
@@ -105,6 +105,10 @@ const ActionTaskPanelForm = ({
       }
     : null;
 
+  const distinctId = useMemo(() => {
+    return posthog.get_distinct_id();
+  }, []);
+
   if (!form) {
     if (loading) {
       return (
@@ -147,6 +151,7 @@ const ActionTaskPanelForm = ({
           onAbandonAction={onAbandonAction}
           renderFormAsCompleted={disabled}
           publicAction={publicAction}
+          phDistinctId={distinctId}
         />
       </div>
       {error && (

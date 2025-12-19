@@ -15,6 +15,7 @@ export class CreateFormDto extends PickType(Form, ['title', 'schema']) {}
 export class SubmitFormDto extends PickType(FormResponse, [
   'answers',
   'schemaSnapshot',
+  'phDistinctId',
 ]) {
   @ApiProperty()
   @IsDefined()
@@ -53,6 +54,7 @@ export class FormResponseDto extends PickType(FormResponse, [
   'createdAt',
   'schemaSnapshot',
   'visibilityValidatorResults',
+  'phDistinctId',
   'deviceType',
   'sid',
   'publicAnswers',

@@ -33,6 +33,7 @@ type FormRendererProps = {
   persistKey?: string | null;
   initialPageIndex?: number;
   userId?: string | number;
+  phDistinctId?: string;
   user?: Omit<UserDto, "email">;
   disableOptionRandomization?: boolean;
   onFormStarted?: () => void;
@@ -251,6 +252,7 @@ const FormRenderer = ({
   user,
   disableOptionRandomization,
   onFormStarted,
+  phDistinctId,
   onAbandonAction,
   renderFormAsCompleted,
   completedFormResponse,
@@ -1089,15 +1091,16 @@ const FormRenderer = ({
 
     const sid = searchParams.get("sid");
 
-    const submissionPayload = {
+    const submissionPayload: SubmitFormDto = {
       answers: sanitizedAnswers,
       schemaSnapshot: form as unknown as Record<string, unknown>,
       actionId,
       visibilityValidatorResults,
       deviceType,
       publicAnswers,
+      phDistinctId: phDistinctId ?? undefined,
       sid: sid ?? undefined,
-    } as SubmitFormDto;
+    };
 
     onSubmit(submissionPayload).finally(() => {
       setSubmitting(false);

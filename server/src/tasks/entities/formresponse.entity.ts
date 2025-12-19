@@ -70,6 +70,11 @@ export class FormResponse {
   @Type(() => Date)
   createdAt: Date;
 
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  @IsOptional()
+  phDistinctId?: string;
+
   @Column({ type: 'jsonb' })
   @ApiProperty()
   @IsDefined()

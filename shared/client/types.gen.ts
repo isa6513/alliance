@@ -239,6 +239,7 @@ export type FormResponse = {
     deviceType?: string;
     user?: User;
     createdAt: string;
+    phDistinctId?: string;
     schemaSnapshot: {
         [key: string]: unknown;
     };
@@ -616,6 +617,8 @@ export type UpdateProfileDto = {
 export type City = {
     id: number;
     name: string;
+    asciiName: string;
+    englishName: string;
     admin1: string;
     admin2: string;
     countryCode: string;
@@ -1897,6 +1900,7 @@ export type SubmitFormDto = {
     answers: {
         [key: string]: unknown;
     };
+    phDistinctId?: string;
     schemaSnapshot: {
         [key: string]: unknown;
     };
@@ -1925,6 +1929,7 @@ export type FormResponseDto = {
     };
     deviceType?: string;
     createdAt: string;
+    phDistinctId?: string;
     schemaSnapshot: {
         [key: string]: unknown;
     };
