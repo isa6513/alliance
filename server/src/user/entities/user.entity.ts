@@ -298,7 +298,7 @@ export class User {
 
   // -- onboarding info --
 
-  @ManyToOne(() => City, { nullable: true })
+  @ManyToOne(() => City, { nullable: true, onDelete: 'SET NULL' })
   @IsOptional()
   @Type(() => City)
   city?: City | null;

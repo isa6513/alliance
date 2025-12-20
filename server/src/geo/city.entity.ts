@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
@@ -9,7 +9,17 @@ export class City {
 
   @Column()
   @ApiProperty()
+  @Index('idx_city_name_trgm', { synchronize: false })
   name: string;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  asciiName: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  @Index('idx_city_english_name_trgm', { synchronize: false })
+  @ApiProperty()
+  englishName: string | null;
 
   @Column({ type: 'varchar', length: 20 })
   @ApiProperty()

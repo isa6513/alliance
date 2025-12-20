@@ -2,10 +2,11 @@
 import { Injectable } from '@nestjs/common';
 import { CitySearchDto } from './city.dto';
 import { City } from './city.entity';
-import { ILike, Repository } from 'typeorm';
+import { ILike, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as readline from 'readline';
 
 @Injectable()
 export class GeoService {
@@ -26,14 +27,39 @@ export class GeoService {
     return countries;
   }
 
+  async loadEnglishNames(): Promise<Record<number, string>> {
+    const filePath = path.join(__dirname, 'alternateNames.txt');
+    const englishMap: Record<number, string> = {};
+
+    const stream = fs.createReadStream(filePath, { encoding: 'utf-8' });
+    const rl = readline.createInterface({ input: stream });
+
+    for await (const line of rl) {
+      const cols = line.split('\t');
+      const geonameid = cols[1];
+      const isolanguage = cols[2];
+      const name = cols[3];
+
+      if (isolanguage === 'en') {
+        const id = parseInt(geonameid, 10);
+        if (!englishMap[id]) englishMap[id] = name;
+      }
+    }
+
+    return englishMap;
+  }
+
   async loadCityDataFromTxt(): Promise<City[]> {
-    const filePath = path.join(__dirname, 'cities15000.txt');
+    const filePath = path.join(__dirname, 'cities5000.txt');
 
     const countries = await this.loadCountryDataFromTxt();
 
     const cities: City[] = [];
     const data = fs.readFileSync(filePath, { encoding: 'utf-8' });
     const lines = data.split('\n').filter((line) => !line.startsWith('#'));
+
+    const englishNames = await this.loadEnglishNames();
+
     for (const line of lines) {
       const [
         geonameid,
@@ -68,6 +94,8 @@ export class GeoService {
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
         countryName: countries[countryCode],
+        asciiName: asciiname,
+        englishName: englishNames[parseInt(geonameid)] ?? null,
       });
     }
 
@@ -87,10 +115,11 @@ export class GeoService {
   ): Promise<CitySearchDto[]> {
     const qb = this.cityRepository
       .createQueryBuilder('c')
-      .where('c.name ILIKE :name', { name: `%${query}%` });
+      .where('(c.name ILIKE :q OR c.englishName ILIKE :q)', {
+        q: `%${query}%`,
+      });
 
     if (latitude != null && longitude != null) {
-      // Euclidean distance in degrees – good enough for “nearby” ranking
       qb.orderBy(
         '( (c.latitude  - :lat) * (c.latitude  - :lat) ' +
           '+ (c.longitude - :lon) * (c.longitude - :lon) )',
