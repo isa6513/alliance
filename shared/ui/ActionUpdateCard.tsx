@@ -90,7 +90,7 @@ const ActionUpdateCard = ({
     <div className="flex flex-col border border-zinc-200 rounded divide-y divide-zinc-200 overflow-hidden">
       <div className="p-3 md:px-4 w-full gap-y-1 bg-zinc-50">
         <div className="flex flex-col">
-          <div className="flex flex-col md:flex-row md:gap-x-2 items-center">
+          <div className="flex flex-col md:flex-row md:gap-x-2 items-start">
             <p className="font-medium">
               {onActionPageTimeline && (
                 <span className="text-green">Update: </span>

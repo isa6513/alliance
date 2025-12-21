@@ -56,7 +56,7 @@ const UserProgressPills = ({
             : relation.status === "missed_deadline"
             ? "bg-orange-600"
             : !action.joinedUserIds.includes(userId)
-            ? "bg-gray-400"
+            ? "bg-zinc-200 border border-zinc-300"
             : "bg-zinc-100 text-zinc-500 border border-zinc-200";
           return relation ? (
             <div key={action.id} className="relative group flex-1">
@@ -66,8 +66,21 @@ const UserProgressPills = ({
                   relation.status
                 )}`}
               ></div>
-              <div className="pointer-events-none absolute -top-8 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] font-medium text-zinc-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100">
-                {action.name}
+              <div className="pointer-events-none absolute bottom-full mb-1 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] font-medium text-zinc-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100">
+                <div className="flex flex-col items-center justify-center">
+                  {action.name}
+                  {!action.joinedUserIds.includes(userId) && (
+                    <span className="text-zinc-500">
+                      Member not expected to complete
+                    </span>
+                  )}
+                  {action.joinedUserIds.includes(userId) && !isCompleted && (
+                    <span className="text-zinc-500">Not yet completed</span>
+                  )}
+                  {action.joinedUserIds.includes(userId) && isCompleted && (
+                    <span className="text-green">Completed</span>
+                  )}
+                </div>
               </div>
             </div>
           ) : null;
