@@ -38,7 +38,6 @@ const UserProgressPills = ({
   relationByActionId,
   pillHeight = "h-3",
 }: UserProgressPillsProps) => {
-  console.log({ actions, userId }, "asdf");
   return (
     <div className="flex gap-1 w-full">
       {actions.map((action) => {
