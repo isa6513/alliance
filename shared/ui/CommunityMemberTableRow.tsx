@@ -94,12 +94,12 @@ const CommunityMemberTableRow = ({
             )}
             <Link
               to={href("/member/:id", { id: profile.id.toString() })}
-              className="flex-shrink-0 group flex items-center gap-x-1 mr-3 text-ellipsis overflow-hidden line-clamp-2 wrap-words w-full"
+              className="flex-shrink-0 group flex items-center gap-x-1 md:gap-x-2 mr-3 text-ellipsis overflow-hidden line-clamp-2 wrap-words w-full"
             >
-              <div className="hidden md:block shrink-0">
+              <div className="hidden md:flex shrink-0 items-center justify-center">
                 <ProfileImage pfp={profile.profilePicture} size="medium" />
               </div>
-              <div className="md:hidden">
+              <div className="md:hidden shrink-0 flex items-center justify-center">
                 <ProfileImage pfp={profile.profilePicture} size="mini" />
               </div>
               <UserDisplayName
