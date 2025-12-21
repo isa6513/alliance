@@ -27,30 +27,35 @@ export const formatRelationStatus = (
 
 export interface UserProgressPillsProps {
   actions: UserActionSummaryDto[];
+  userId: number;
   relationByActionId: Record<number, UserActionRelationDetailDto>;
   pillHeight?: string;
 }
 
 const UserProgressPills = ({
   actions,
+  userId,
   relationByActionId,
   pillHeight = "h-3",
 }: UserProgressPillsProps) => {
+  console.log({ actions, userId }, "asdf");
   return (
     <div className="flex gap-1 w-full">
       {actions.map((action) => {
         const relation = relationByActionId[action.id] ?? {
           status: "none",
         };
-        const isCompleted = relation?.status === "completed";
+        const isCompleted = relation.status === "completed";
         const className = isCompleted
           ? "bg-green"
-          : relation?.status === "joined"
+          : relation.status === "joined"
           ? "bg-green/40"
-          : relation?.status === "wont_complete"
+          : relation.status === "wont_complete"
           ? "bg-yellow-400"
-          : relation?.status === "missed_deadline"
+          : relation.status === "missed_deadline"
           ? "bg-orange-600"
+          : !action.joinedUserIds.includes(userId)
+          ? "bg-gray-400"
           : "bg-zinc-100 text-zinc-500 border border-zinc-200";
         return relation ? (
           <div key={action.id} className="relative group flex-1">

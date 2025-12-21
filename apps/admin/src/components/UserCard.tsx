@@ -214,6 +214,7 @@ const UserCard = ({
           </div>
           <UserProgressPills
             actions={actions}
+            userId={user.id}
             relationByActionId={relationByActionId}
           />
           {isActionDetailsOpen && (
