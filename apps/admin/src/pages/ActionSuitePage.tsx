@@ -13,6 +13,7 @@ import ActionRemindersTab from "../components/reminders/ActionRemindersTab";
 import ActionTimeline from "../components/ActionTimeline";
 import SuiteEventList from "../components/SuiteEventList";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Card from "@alliance/shared/ui/Card";
 
 const ActionSuitePage = () => {
   const { suiteId: suiteIdString } = useParams();
@@ -117,7 +118,9 @@ const ActionSuitePage = () => {
         {suite?.actions
           .sort((a, b) => b.priority - a.priority)
           .map((action) => (
-            <ActionListCard key={action.id} action={action} />
+            <Card key={action.id} className="!p-0">
+              <ActionListCard action={action} />
+            </Card>
           ))}
       </div>
       {suite && suite.actions.length > 0 && (
