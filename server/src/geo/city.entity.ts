@@ -18,7 +18,7 @@ export class City {
 
   @Column({ type: 'varchar', nullable: true })
   @Index('idx_city_english_name_trgm', { synchronize: false })
-  @ApiProperty()
+  @ApiProperty({ type: String, nullable: true })
   englishName: string | null;
 
   @Column({ type: 'varchar', length: 20 })

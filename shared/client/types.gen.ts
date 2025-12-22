@@ -619,9 +619,7 @@ export type City = {
     id: number;
     name: string;
     asciiName: string;
-    englishName: {
-        [key: string]: unknown;
-    };
+    englishName: string | null;
     admin1: string;
     admin2: string;
     countryCode: string;

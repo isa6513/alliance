@@ -88,8 +88,6 @@ ORDER BY pp.total_session_duration_seconds DESC
     }
     this.API_KEY = process.env.POSTHOG_QUERY_KEY;
     this.PROJECT_ID = process.env.POSTHOG_PROJECT_ID;
-
-    this.calculateDailyStats();
   }
 
   async getPosthogData(
