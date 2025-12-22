@@ -262,7 +262,7 @@ const HomePage = () => {
     return (
       <div
         className={
-          "flex flex-col py-8 sm:py-18 px-4 max-w-3xl mx-auto min-h-full justify-center"
+          "flex flex-col py-8 sm:py-18 px-4 max-w-3xl mx-auto min-h-full"
         }
       >
         {currentTask && currentTask.relation ? (
