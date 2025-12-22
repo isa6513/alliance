@@ -122,7 +122,7 @@ ORDER BY pp.total_session_duration_seconds DESC
       data = await res.json();
     } catch {}
 
-    if (!data) {
+    if (!data || !data.results) {
       return [];
     }
 
