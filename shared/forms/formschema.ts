@@ -1,5 +1,8 @@
 import type { CitySearchDto } from "../client";
-import type { DisplayBlock } from "./display-blocks";
+import type {
+  DisplayBlock,
+  ManualDisplayBlockContent,
+} from "./display-blocks";
 
 // field-kinds.ts
 export type FieldKind =
@@ -160,6 +163,11 @@ export interface Page {
   description?: string;
   fields: Array<AnyField | DisplayBlock>;
 }
+
+export type ManualDisplayBlockContentMap = Record<
+  string,
+  ManualDisplayBlockContent
+>;
 
 export interface FormSchema {
   title: string;

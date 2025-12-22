@@ -21,16 +21,18 @@ export function EditableQuoteBlock({
       onUpdate={onUpdate}
       previousFields={previousFields}
     >
-      <div className="space-y-2 bg-zinc-100 px-5 py-4">
-        <textarea
-          value={block.text}
-          onChange={(e) => onUpdate({ text: e.target.value })}
-          className="w-full text-gray-900 border-none outline-none !bg-transparent resize-none whitespace-pre-wrap"
-          placeholder="Enter text content"
-          rows={Math.max(2, block.text.split("\n").length)}
-          style={{ resize: "vertical" }}
-        />
-      </div>
+      {({ block: activeBlock, onUpdate: handleUpdate }) => (
+        <div className="space-y-2 bg-zinc-100 px-5 py-4">
+          <textarea
+            value={activeBlock.text}
+            onChange={(e) => handleUpdate({ text: e.target.value })}
+            className="w-full text-gray-900 border-none outline-none !bg-transparent resize-none whitespace-pre-wrap"
+            placeholder="Enter text content"
+            rows={Math.max(2, activeBlock.text.split("\n").length)}
+            style={{ resize: "vertical" }}
+          />
+        </div>
+      )}
     </DisplayBlockWrapper>
   );
 }

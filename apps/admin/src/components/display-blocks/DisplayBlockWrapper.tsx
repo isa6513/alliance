@@ -1,10 +1,47 @@
-import { useEffect, useRef, useState } from "react";
-import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import type {
+  DisplayBlock,
+  ManualDisplayBlockContent,
+} from "@alliance/shared/forms/display-blocks";
 import type { AnyField, Condition } from "@alliance/shared/forms/formschema";
+import type { UserDto } from "@alliance/shared/client";
+import { userList } from "@alliance/shared/client";
 import { ConditionalVisibility } from "../form-fields/CommonControls";
+import { CheckCircle2, Circle, HelpCircle } from "lucide-react";
+
+type ManualUserListEntry = Pick<UserDto, "id" | "name" | "hasActiveContract">;
+
+const stripManualFields = (
+  updates: Partial<DisplayBlock>
+): Partial<DisplayBlock> => {
+  const {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    manualPerUser: _manualPerUser,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    manualUserContent: _manualUserContent,
+    ...rest
+  } = updates as Partial<DisplayBlock>;
+  return rest;
+};
+
+type DisplayBlockChildRenderProps<T extends DisplayBlock> = {
+  block: T;
+  onUpdate: (updates: Partial<T>) => void;
+  activeUserId?: string | null;
+  activeUserName?: string;
+  isDefaultContent: boolean;
+  hasContentForUser: boolean;
+};
 
 interface DisplayBlockWrapperProps<T extends DisplayBlock = DisplayBlock> {
-  children: React.ReactNode;
+  children: ReactNode | ((props: DisplayBlockChildRenderProps<T>) => ReactNode);
   onRemove: () => void;
   onDragStart?: (e: React.DragEvent) => void;
   onDragEnd?: (e: React.DragEvent) => void;
@@ -27,22 +64,123 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
   const showConditional = Boolean(block && onUpdate);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const optionsMenuRef = useRef<HTMLDivElement | null>(null);
-  const [showConditionalVisibilityControl, setShowConditionalVisibilityControl] =
-    useState(() => {
-      if (!block) return false;
-      const conditions = Array.isArray(block.visibleIf)
-        ? block.visibleIf.length
-        : block?.visibleIf
-        ? 1
-        : 0;
-      return conditions > 0;
-    });
+  const hasAttemptedUserLoadRef = useRef(false);
+  const [
+    showConditionalVisibilityControl,
+    setShowConditionalVisibilityControl,
+  ] = useState(() => {
+    if (!block) return false;
+    const conditions = Array.isArray(block.visibleIf)
+      ? block.visibleIf.length
+      : block?.visibleIf
+      ? 1
+      : 0;
+    return conditions > 0;
+  });
 
-  const handleConditionalChange = (updates: { visibleIf?: Condition[] }) => {
-    if (onUpdate) {
-      onUpdate(updates as Partial<T>);
+  const manualUserContent = useMemo(
+    () => block?.manualUserContent ?? {},
+    [block?.manualUserContent]
+  );
+  const manualContentKeys = useMemo(
+    () => Object.keys(manualUserContent),
+    [manualUserContent]
+  );
+  const manualPerUserEnabled = Boolean(block?.manualPerUser);
+  const [manualUsers, setManualUsers] = useState<UserDto[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [userLoadError, setUserLoadError] = useState<string | null>(null);
+  const [activeManualUserId, setActiveManualUserId] = useState<string | null>(
+    null
+  );
+  const [hasUserSelectedTarget, setHasUserSelectedTarget] = useState(false);
+  const [isUserListOpen, setIsUserListOpen] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
+  const manualTargetList = useMemo(
+    () =>
+      manualUsers.length > 0
+        ? manualUsers.map((candidate) => String(candidate.id))
+        : manualContentKeys,
+    [manualContentKeys, manualUsers]
+  );
+  const totalManualTargets = manualTargetList.length;
+  const activeManualIndex = useMemo(() => {
+    if (!activeManualUserId) return -1;
+    return manualTargetList.findIndex((id) => id === activeManualUserId);
+  }, [activeManualUserId, manualTargetList]);
+  const paginationLabel = useMemo(() => {
+    if (totalManualTargets === 0) {
+      return "0/0";
     }
-  };
+    if (!activeManualUserId) {
+      return `0/${totalManualTargets}`;
+    }
+    const displayIndex = activeManualIndex >= 0 ? activeManualIndex + 1 : 1;
+    return `${displayIndex}/${totalManualTargets}`;
+  }, [activeManualIndex, activeManualUserId, totalManualTargets]);
+  const totalUserCount =
+    manualUsers.length > 0 ? manualUsers.length : manualContentKeys.length;
+  const setCount = manualContentKeys.length;
+  const sortedManualUsers: ManualUserListEntry[] = useMemo(() => {
+    const base: ManualUserListEntry[] = manualUsers.map((user) => ({
+      id: user.id,
+      name: user.name,
+      hasActiveContract: user.hasActiveContract,
+    }));
+    return base.sort((a, b) => {
+      const aLabel = (a.name ?? String(a.id)).toLowerCase();
+      const bLabel = (b.name ?? String(b.id)).toLowerCase();
+      return aLabel.localeCompare(bLabel);
+    });
+  }, [manualUsers]);
+  const filteredManualUsers = useMemo(() => {
+    const query = userSearch.trim().toLowerCase();
+    if (!query) return sortedManualUsers;
+    return sortedManualUsers.filter((entry) => {
+      const name = (entry.name ?? "").toLowerCase();
+      const idString = String(entry.id).toLowerCase();
+      return name.includes(query) || idString.includes(query);
+    });
+  }, [sortedManualUsers, userSearch]);
+
+  const selectManualTarget = useCallback(
+    (userId: string | null, markSelection = true) => {
+      if (markSelection) {
+        setHasUserSelectedTarget(true);
+      }
+      setActiveManualUserId(userId);
+    },
+    []
+  );
+
+  const loadUsers = useCallback(
+    async (force = false) => {
+      if (isLoadingUsers) return;
+      if (!force && manualUsers.length > 0) return;
+      setIsLoadingUsers(true);
+      setUserLoadError(null);
+      try {
+        const response = await userList();
+        setManualUsers(response.data ?? []);
+      } catch (error) {
+        console.error(
+          "Failed to load users for display block overrides",
+          error
+        );
+        setUserLoadError("Unable to load users");
+      } finally {
+        hasAttemptedUserLoadRef.current = true;
+        setIsLoadingUsers(false);
+      }
+    },
+    [isLoadingUsers, manualUsers.length]
+  );
+
+  useEffect(() => {
+    if (manualPerUserEnabled && !hasAttemptedUserLoadRef.current) {
+      void loadUsers();
+    }
+  }, [loadUsers, manualPerUserEnabled]);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -79,6 +217,102 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
     }
   }, [block, showConditionalVisibilityControl]);
 
+  useEffect(() => {
+    if (!manualPerUserEnabled) {
+      selectManualTarget(null, false);
+      setHasUserSelectedTarget(false);
+      return;
+    }
+    if (hasUserSelectedTarget) {
+      return;
+    }
+    const firstManualKey = manualContentKeys[0];
+    if (firstManualKey) {
+      selectManualTarget(firstManualKey, false);
+      return;
+    }
+    if (manualUsers.length > 0) {
+      selectManualTarget(String(manualUsers[0].id), false);
+    }
+  }, [
+    activeManualUserId,
+    hasUserSelectedTarget,
+    manualPerUserEnabled,
+    manualContentKeys,
+    selectManualTarget,
+    manualUsers,
+  ]);
+
+  const effectiveBlock = useMemo(() => {
+    if (!block) return block;
+    if (manualPerUserEnabled && activeManualUserId) {
+      const manualContent = manualUserContent[activeManualUserId];
+      if (manualContent) {
+        return {
+          ...block,
+          ...manualContent,
+          manualPerUser: block.manualPerUser,
+          manualUserContent: block.manualUserContent,
+        } as T;
+      }
+    }
+    return block;
+  }, [activeManualUserId, block, manualPerUserEnabled, manualUserContent]);
+
+  const hasContentForActiveUser = Boolean(
+    activeManualUserId && manualUserContent[activeManualUserId]
+  );
+  const activeUser = useMemo(
+    () =>
+      manualPerUserEnabled && activeManualUserId
+        ? manualUsers.find(
+            (candidate) => String(candidate.id) === activeManualUserId
+          )
+        : undefined,
+    [activeManualUserId, manualPerUserEnabled, manualUsers]
+  );
+  const usersWithContent = useMemo(
+    () =>
+      manualUsers.filter((candidate) =>
+        Object.prototype.hasOwnProperty.call(
+          manualUserContent,
+          String(candidate.id)
+        )
+      ),
+    [manualUserContent, manualUsers]
+  );
+  const usersWithoutContent = useMemo(
+    () =>
+      manualUsers.filter(
+        (candidate) => !manualUserContent[String(candidate.id)]
+      ),
+    [manualUserContent, manualUsers]
+  );
+
+  const handleConditionalChange = (updates: { visibleIf?: Condition[] }) => {
+    if (!onUpdate || !block) {
+      return;
+    }
+    if (
+      block.manualUserContent &&
+      Object.keys(block.manualUserContent).length
+    ) {
+      const nextManualContent = Object.fromEntries(
+        Object.entries(block.manualUserContent).map(([userId, content]) => [
+          userId,
+          { ...content, ...updates },
+        ])
+      ) as Record<string, ManualDisplayBlockContent>;
+      onUpdate({
+        ...(updates as Partial<T>),
+        manualUserContent: nextManualContent,
+      } as Partial<T>);
+      return;
+    }
+
+    onUpdate(updates as Partial<T>);
+  };
+
   const handleConditionalVisibilityToggle = (checked: boolean) => {
     setShowConditionalVisibilityControl(checked);
     if (!checked) {
@@ -86,8 +320,104 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
     }
   };
 
+  const handleManualToggle = (checked: boolean) => {
+    if (!onUpdate) return;
+    if (!checked) {
+      selectManualTarget(null, false);
+      setHasUserSelectedTarget(false);
+      setIsUserListOpen(false);
+    } else if (manualUsers.length === 0) {
+      void loadUsers();
+    }
+    onUpdate({ manualPerUser: checked } as Partial<T>);
+  };
+
+  const handleCycleUser = (direction: "prev" | "next") => {
+    if (totalManualTargets === 0) return;
+    if (!activeManualUserId) {
+      selectManualTarget(manualTargetList[0]);
+      return;
+    }
+
+    const currentIndex = manualTargetList.findIndex(
+      (id) => id === activeManualUserId
+    );
+    const safeIndex = currentIndex >= 0 ? currentIndex : 0;
+    const nextIndex =
+      direction === "next"
+        ? (safeIndex + 1) % totalManualTargets
+        : (safeIndex - 1 + totalManualTargets) % totalManualTargets;
+    selectManualTarget(manualTargetList[nextIndex]);
+  };
+
+  const handleBlockUpdate = useCallback(
+    (updates: Partial<T>) => {
+      if (!onUpdate || !block) {
+        return;
+      }
+      if (manualPerUserEnabled && activeManualUserId) {
+        const existingContent =
+          manualUserContent[activeManualUserId] ??
+          stripManualFields({
+            ...block,
+            manualPerUser: undefined,
+            manualUserContent: undefined,
+          });
+
+        const nextManualContent: Record<string, ManualDisplayBlockContent> = {
+          ...manualUserContent,
+          [activeManualUserId]: {
+            ...existingContent,
+            ...stripManualFields(updates),
+            kind: existingContent.kind ?? block.kind,
+            id: block.id,
+          },
+        };
+
+        onUpdate({
+          manualUserContent: nextManualContent,
+        } as Partial<T>);
+        return;
+      }
+
+      onUpdate(updates);
+    },
+    [
+      activeManualUserId,
+      block,
+      manualPerUserEnabled,
+      manualUserContent,
+      onUpdate,
+    ]
+  );
+
+  const clearContentForActiveUser = () => {
+    if (!onUpdate || !block || !activeManualUserId) {
+      return;
+    }
+    if (!manualUserContent[activeManualUserId]) {
+      return;
+    }
+    const { [activeManualUserId]: _removed, ...rest } = manualUserContent; // eslint-disable-line @typescript-eslint/no-unused-vars
+    onUpdate({
+      manualUserContent: rest,
+    } as Partial<T>);
+  };
+
   const showConditionalControls =
     showConditionalVisibilityControl && showConditional;
+
+  const renderContent =
+    typeof children === "function"
+      ? children({
+          block: (effectiveBlock ?? (block as T)) as T,
+          onUpdate: handleBlockUpdate,
+          activeUserId: activeManualUserId,
+          activeUserName: activeUser?.name,
+          isDefaultContent: !manualPerUserEnabled || !activeManualUserId,
+          hasContentForUser: hasContentForActiveUser,
+        })
+      : children;
 
   return (
     <div
@@ -148,7 +478,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
               </svg>
             </button>
             {isMenuOpen && (
-              <div className="absolute right-0 mt-1 w-56 rounded-lg border border-gray-200 bg-white py-2 text-sm shadow-lg">
+              <div className="absolute right-0 mt-1 w-64 rounded-lg border border-gray-200 bg-white py-2 text-sm shadow-lg">
                 <label className="flex cursor-pointer items-center px-3 py-1.5 text-gray-700">
                   <input
                     type="checkbox"
@@ -160,6 +490,192 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
                   />
                   Use conditional visibility
                 </label>
+                <div className="mt-2 border-t border-gray-100 pt-2">
+                  <label className="flex cursor-pointer items-center px-3 py-1.5 text-gray-700">
+                    <input
+                      type="checkbox"
+                      className="mr-2"
+                      checked={manualPerUserEnabled}
+                      onChange={(event) =>
+                        handleManualToggle(event.target.checked)
+                      }
+                    />
+                    Manual content per user
+                  </label>
+                  {manualPerUserEnabled && (
+                    <div className="px-3 pb-1 pt-1 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <button
+                          type="button"
+                          className="text-xs text-gray-600 border border-gray-200 rounded px-2 py-1 hover:border-gray-300"
+                          onClick={() => selectManualTarget(null)}
+                        >
+                          Edit default
+                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            className="text-xs text-gray-600 border border-gray-200 rounded px-2 py-1 hover:border-gray-300 disabled:opacity-50"
+                            onClick={() => handleCycleUser("prev")}
+                            disabled={manualUsers.length === 0}
+                          >
+                            Prev
+                          </button>
+                          <button
+                            type="button"
+                            className="text-xs text-gray-600 border border-gray-200 rounded px-2 py-1 hover:border-gray-300 disabled:opacity-50"
+                            onClick={() => handleCycleUser("next")}
+                            disabled={manualUsers.length === 0}
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-700">
+                        {activeManualUserId ? (
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-medium">
+                              {activeUser
+                                ? `${activeUser.name ?? "User"} (#${
+                                    activeUser.id
+                                  })`
+                                : `User ${activeManualUserId}`}
+                            </span>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[11px] ${
+                                hasContentForActiveUser
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                              }`}
+                            >
+                              {hasContentForActiveUser
+                                ? "Custom content"
+                                : "Using default"}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="font-medium text-gray-700">
+                            Editing default content
+                          </span>
+                        )}
+                      </div>
+                      <div className="rounded-md border border-gray-100 bg-gray-50 p-2 text-xs text-gray-700 space-y-1">
+                        {userLoadError ? (
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-red-700">
+                              {userLoadError}
+                            </span>
+                            <button
+                              type="button"
+                              className="text-blue-600 hover:text-blue-700"
+                              onClick={() => void loadUsers(true)}
+                            >
+                              Retry
+                            </button>
+                          </div>
+                        ) : isLoadingUsers ? (
+                          <span>Loading users…</span>
+                        ) : manualUsers.length === 0 ? (
+                          <>
+                            <div className="font-medium text-gray-800">
+                              Users with content ({manualContentKeys.length})
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {manualContentKeys.length === 0 ? (
+                                <span className="text-gray-500">
+                                  No overrides yet
+                                </span>
+                              ) : (
+                                manualContentKeys.slice(0, 6).map((userId) => (
+                                  <span
+                                    key={userId}
+                                    className="rounded-full bg-green-100 px-2 py-0.5 text-[11px] text-green-800"
+                                  >
+                                    User {userId}
+                                  </span>
+                                ))
+                              )}
+                              {manualContentKeys.length > 6 && (
+                                <span className="text-[11px] text-gray-500">
+                                  +{manualContentKeys.length - 6} more
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-gray-500">
+                              Load users to see who is missing content.
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <div className="font-medium text-gray-800">
+                              Users with content ({usersWithContent.length})
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {usersWithContent.length === 0 ? (
+                                <span className="text-gray-500">None yet</span>
+                              ) : (
+                                usersWithContent.slice(0, 6).map((user) => (
+                                  <button
+                                    key={user.id}
+                                    type="button"
+                                    className="rounded-full bg-green-100 px-2 py-0.5 text-[11px] text-green-800 hover:bg-green-200"
+                                    onClick={() =>
+                                      selectManualTarget(String(user.id))
+                                    }
+                                  >
+                                    {user.name ?? `User #${user.id}`}
+                                  </button>
+                                ))
+                              )}
+                              {usersWithContent.length > 6 && (
+                                <span className="text-[11px] text-gray-500">
+                                  +{usersWithContent.length - 6} more
+                                </span>
+                              )}
+                            </div>
+                            <div className="font-medium text-gray-800 pt-1">
+                              Missing ({usersWithoutContent.length})
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {usersWithoutContent.length === 0 ? (
+                                <span className="text-gray-500">
+                                  Everyone set
+                                </span>
+                              ) : (
+                                usersWithoutContent.slice(0, 6).map((user) => (
+                                  <button
+                                    key={user.id}
+                                    type="button"
+                                    className="rounded-full bg-gray-200 px-2 py-0.5 text-[11px] text-gray-800 hover:bg-gray-300"
+                                    onClick={() =>
+                                      selectManualTarget(String(user.id))
+                                    }
+                                  >
+                                    {user.name ?? `User #${user.id}`}
+                                  </button>
+                                ))
+                              )}
+                              {usersWithoutContent.length > 6 && (
+                                <span className="text-[11px] text-gray-500">
+                                  +{usersWithoutContent.length - 6} more
+                                </span>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      {activeManualUserId && hasContentForActiveUser && (
+                        <button
+                          type="button"
+                          className="text-xs text-red-700 hover:text-red-800"
+                          onClick={clearContentForActiveUser}
+                        >
+                          Clear content for this user
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -173,11 +689,172 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
         </button>
       </div>
       <div className={showConditionalControls ? "space-y-3" : undefined}>
-        {children}
+        {manualPerUserEnabled && (
+          <div className="mb-3 flex items-center justify-between rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-900">
+            <div>
+              <p className="text-sm font-semibold">
+                {activeManualUserId
+                  ? `Editing ${
+                      activeUser?.name
+                        ? `${activeUser.name}`
+                        : `User ${activeManualUserId}`
+                    }`
+                  : "Editing default content"}
+              </p>
+              <p className="text-xs">
+                {hasContentForActiveUser
+                  ? "Custom content saved for this user."
+                  : "Currently using the default block content."}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="rounded bg-white px-2 py-1 text-[11px] text-gray-700">
+                {paginationLabel}
+              </span>
+              <button
+                type="button"
+                className="text-xs text-gray-700 border border-gray-200 rounded px-2 py-1 hover:border-gray-300 disabled:opacity-50"
+                onClick={() => handleCycleUser("prev")}
+                disabled={totalManualTargets === 0}
+              >
+                Prev
+              </button>
+              <button
+                type="button"
+                className="text-xs text-gray-700 border border-gray-200 rounded px-2 py-1 hover:border-gray-300 disabled:opacity-50"
+                onClick={() => handleCycleUser("next")}
+                disabled={totalManualTargets === 0}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+        {renderContent}
+        {onUpdate && block && (
+          <div className="mt-3 flex flex-wrap items-center justify-between text-xs text-gray-500">
+            <label className="flex items-center gap-1">
+              <input
+                type="checkbox"
+                checked={manualPerUserEnabled}
+                onChange={(event) => handleManualToggle(event.target.checked)}
+              />
+              Manual content per user
+            </label>
+            <div className="flex items-center gap-2">
+              {manualPerUserEnabled && (
+                <>
+                  {isLoadingUsers && <span>Loading users…</span>}
+                  {!isLoadingUsers && manualUsers.length === 0 && (
+                    <button
+                      type="button"
+                      className="text-blue-600 hover:text-blue-700"
+                      onClick={() => void loadUsers(true)}
+                    >
+                      Load users
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="text-gray-600 underline decoration-dotted underline-offset-2"
+                    onClick={() => {
+                      if (!isUserListOpen && manualUsers.length === 0) {
+                        void loadUsers(true);
+                      }
+                      setIsUserListOpen((prev) => !prev);
+                    }}
+                  >
+                    {setCount} set / {totalUserCount} total
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+        {manualPerUserEnabled && isUserListOpen && (
+          <div className="mt-2 rounded-md border border-gray-200 bg-white">
+            <div className="flex items-center justify-between px-3 py-2 text-xs text-gray-700">
+              <span className="font-medium">Users</span>
+              {isLoadingUsers && (
+                <span className="text-gray-500">Loading…</span>
+              )}
+            </div>
+            <div className="px-3 pb-2">
+              <input
+                type="text"
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                placeholder="Search users"
+                className="w-full rounded-md border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            <div className="max-h-56 overflow-y-auto divide-y divide-gray-100">
+              {filteredManualUsers.map((entry) => {
+                const userId = String(entry.id);
+                const name = entry.name ?? `User ${entry.id}`;
+                const isActiveContract =
+                  entry.hasActiveContract === undefined
+                    ? null
+                    : entry.hasActiveContract;
+                const hasContent = Boolean(manualUserContent[userId]);
+                const StatusIcon =
+                  isActiveContract === null
+                    ? HelpCircle
+                    : isActiveContract
+                    ? CheckCircle2
+                    : Circle;
+                const statusColor =
+                  isActiveContract === null
+                    ? "text-gray-500"
+                    : isActiveContract
+                    ? "text-emerald-600"
+                    : "text-amber-600";
+                return (
+                  <button
+                    key={userId}
+                    type="button"
+                    className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-blue-50"
+                    onClick={() => selectManualTarget(userId)}
+                  >
+                    <span className="flex items-center gap-2 truncate">
+                      <StatusIcon
+                        className={`h-3 w-3 ${statusColor}`}
+                        strokeWidth={3}
+                      />
+                      <span
+                        className={`truncate ${
+                          activeManualUserId === userId
+                            ? "font-semibold text-blue-700"
+                            : "text-gray-800"
+                        }`}
+                      >
+                        {name}
+                      </span>
+                    </span>
+                    <span
+                      className={`text-xs rounded-full px-2 py-0.5 ${
+                        hasContent
+                          ? "bg-green/10 text-green-800"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      {hasContent ? "Set" : "Unset"}
+                    </span>
+                  </button>
+                );
+              })}
+              {filteredManualUsers.length === 0 && (
+                <div className="px-3 py-2 text-sm text-gray-500">
+                  No users match your search.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {showConditionalControls && (
           <div className="border-t border-gray-200 pt-4">
             <ConditionalVisibility
-              field={block as DisplayBlock}
+              field={effectiveBlock ?? block!}
               previousFields={previousFields || []}
               onChange={handleConditionalChange}
             />

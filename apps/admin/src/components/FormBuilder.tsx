@@ -3,6 +3,7 @@ import {
   tasksCreateForm,
   tasksGetForm,
   tasksUpdateForm,
+  userList,
 } from "@alliance/shared/client";
 import type {
   DisplayBlock,
@@ -17,6 +18,7 @@ import type {
   MultiSelectField,
   Page,
 } from "@alliance/shared/forms/formschema";
+import type { UserDto } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   EditableDividerBlock,
@@ -267,6 +269,10 @@ export function FormBuilder({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [previewUsers, setPreviewUsers] = useState<UserDto[]>([]);
+  const [previewUserId, setPreviewUserId] = useState<string>("preview");
+  const [isLoadingPreviewUsers, setIsLoadingPreviewUsers] = useState(false);
+  const [previewUserError, setPreviewUserError] = useState<string | null>(null);
   const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(
     null
   );
@@ -277,6 +283,19 @@ export function FormBuilder({
   const contentScrollRef = useRef<HTMLDivElement | null>(null);
 
   const currentPage = schema.pages[selectedPageIndex];
+  const resolvedPreviewUser = useMemo(() => {
+    if (previewUserId === "preview") {
+      return FORM_BUILDER_PREVIEW_USER;
+    }
+    const match = previewUsers.find(
+      (candidate) => String(candidate.id) === previewUserId
+    );
+    return match ?? FORM_BUILDER_PREVIEW_USER;
+  }, [previewUserId, previewUsers]);
+  const resolvedPreviewUserId =
+    previewUserId === "preview"
+      ? "preview"
+      : resolvedPreviewUser?.id ?? "preview";
 
   const { success: showSuccessToast, error: showErrorToast } = useToast();
 
@@ -667,6 +686,31 @@ export function FormBuilder({
       setIsPreviewMode(false);
     }
   }, [activeEditor, isPreviewMode]);
+
+  const fetchPreviewUsers = useCallback(async () => {
+    if (isLoadingPreviewUsers) {
+      return;
+    }
+    setIsLoadingPreviewUsers(true);
+    setPreviewUserError(null);
+    try {
+      const response = await userList();
+      setPreviewUsers(response.data ?? []);
+    } catch (error) {
+      console.error("Failed to load users for preview", error);
+      setPreviewUserError(
+        error instanceof Error ? error.message : "Could not load users"
+      );
+    } finally {
+      setIsLoadingPreviewUsers(false);
+    }
+  }, [isLoadingPreviewUsers]);
+
+  useEffect(() => {
+    if (isPreviewMode && previewUsers.length === 0 && !previewUserError) {
+      void fetchPreviewUsers();
+    }
+  }, [fetchPreviewUsers, isPreviewMode, previewUserError, previewUsers.length]);
 
   useEffect(() => {
     const scrollContainer = contentScrollRef.current;
@@ -1556,14 +1600,44 @@ export function FormBuilder({
             <OutputBuilder schema={schema} onSchemaChange={updateSchema} />
           ) : isPreviewMode ? (
             <div className="max-w-3xl mx-auto bg-white p-6 border border-gray-200 rounded-lg">
+              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Preview as</span>
+                  <select
+                    value={previewUserId}
+                    onChange={(event) => setPreviewUserId(event.target.value)}
+                    className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="preview">Preview user</option>
+                    {previewUsers.map((user) => (
+                      <option key={user.id} value={String(user.id)}>
+                        {user.name ?? `User #${user.id}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-gray-500">
+                  {isLoadingPreviewUsers && <span>Loading users…</span>}
+                  {previewUserError && (
+                    <span className="text-red-600">{previewUserError}</span>
+                  )}
+                  <button
+                    type="button"
+                    className="text-blue-600 hover:text-blue-700"
+                    onClick={() => void fetchPreviewUsers()}
+                  >
+                    Refresh users
+                  </button>
+                </div>
+              </div>
               <FormRenderer
                 id={0}
                 actionId={0}
                 form={schema}
                 onSubmit={null}
                 renderFormAsCompleted={false}
-                userId="preview"
-                user={FORM_BUILDER_PREVIEW_USER}
+                userId={resolvedPreviewUserId}
+                user={resolvedPreviewUser}
                 initialPageIndex={selectedPageIndex}
               />
             </div>

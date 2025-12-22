@@ -287,6 +287,15 @@ const FormRenderer = ({
     }
     return base;
   }, [id, user?.id, userId, persistKey]);
+  const activeUserKey = useMemo(() => {
+    const normalizedUserId =
+      user?.id !== undefined && user?.id !== null ? user.id : userId;
+    if (normalizedUserId === undefined || normalizedUserId === null) {
+      return undefined;
+    }
+    const asString = String(normalizedUserId);
+    return asString.length > 0 ? asString : undefined;
+  }, [user?.id, userId]);
 
   const [searchParams] = useSearchParams();
 
@@ -650,6 +659,25 @@ const FormRenderer = ({
       );
     },
     [evaluateCondition, formData, readOnly]
+  );
+
+  const resolveDisplayBlockForUser = useCallback(
+    (candidate: DisplayBlock): DisplayBlock => {
+      if (!candidate.manualPerUser || !activeUserKey) {
+        return candidate;
+      }
+      const manualContent = candidate.manualUserContent?.[activeUserKey];
+      if (!manualContent) {
+        return candidate;
+      }
+      return {
+        ...candidate,
+        ...manualContent,
+        manualPerUser: candidate.manualPerUser,
+        manualUserContent: candidate.manualUserContent,
+      };
+    },
+    [activeUserKey]
   );
 
   const isFieldConditionallyRequired = useCallback(
@@ -1370,13 +1398,17 @@ const FormRenderer = ({
   };
 
   const renderElement = (element: AnyField | DisplayBlock, index: number) => {
-    if (!isElementCurrentlyVisible(element)) {
-      return null;
-    }
     if ("label" in element) {
+      if (!isElementCurrentlyVisible(element)) {
+        return null;
+      }
       return renderField(element as AnyField, index);
     }
-    return <RenderDisplayBlock key={index} block={element as DisplayBlock} />;
+    const resolvedBlock = resolveDisplayBlockForUser(element as DisplayBlock);
+    if (!isElementCurrentlyVisible(resolvedBlock)) {
+      return null;
+    }
+    return <RenderDisplayBlock key={index} block={resolvedBlock} />;
   };
 
   return (

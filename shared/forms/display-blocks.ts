@@ -16,6 +16,8 @@ interface BaseBlock {
   id?: string;
   visibleIf?: Condition[];
   width?: "full" | "1/2" | "1/3";
+  manualPerUser?: boolean;
+  manualUserContent?: Record<string, ManualDisplayBlockContent>;
 }
 
 // Specific blocks
@@ -75,3 +77,8 @@ export type DisplayBlock =
   | SpacerBlock
   | HtmlBlock
   | ImageBlock;
+
+export type ManualDisplayBlockContent = Omit<
+  DisplayBlock,
+  "manualPerUser" | "manualUserContent"
+>;

@@ -17,7 +17,10 @@ export function EditableImageBlock({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    update: (updates: Partial<ImageBlock>) => void
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -33,7 +36,7 @@ export function EditableImageBlock({
               body: { file: reader.result },
             });
             if (data) {
-              onUpdate({ src: data.key });
+              update({ src: data.key });
             }
           } catch (error) {
             console.error("Failed to upload image:", error);
@@ -60,41 +63,45 @@ export function EditableImageBlock({
       onUpdate={onUpdate}
       previousFields={previousFields}
     >
-      <div className="space-y-2">
-        {/* File upload */}
-        <div className="flex items-center space-x-2">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            disabled={isUploading}
-            className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
-          />
-          {isUploading && (
-            <span className="text-xs text-blue-600">Uploading...</span>
+      {({ block: activeBlock, onUpdate: handleUpdate }) => (
+        <div className="space-y-2">
+          {/* File upload */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(event) => handleFileChange(event, handleUpdate)}
+              disabled={isUploading}
+              className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+            />
+            {isUploading && (
+              <span className="text-xs text-blue-600">Uploading...</span>
+            )}
+          </div>
+
+          {uploadError && (
+            <p className="text-xs text-red-600">{uploadError}</p>
           )}
-        </div>
 
-        {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-gray-600">
+              Caption
+            </label>
+            <input
+              type="text"
+              value={activeBlock.caption ?? ""}
+              onChange={(e) => handleUpdate({ caption: e.target.value })}
+              placeholder="Add an optional caption"
+              className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
 
-        <div className="space-y-1">
-          <label className="block text-xs font-medium text-gray-600">
-            Caption
-          </label>
-          <input
-            type="text"
-            value={block.caption ?? ""}
-            onChange={(e) => onUpdate({ caption: e.target.value })}
-            placeholder="Add an optional caption"
-            className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
+          {/* Preview */}
+          <div className="pt-2 border-t border-gray-200">
+            <RenderDisplayBlock block={activeBlock} />
+          </div>
         </div>
-
-        {/* Preview */}
-        <div className="pt-2 border-t border-gray-200">
-          <RenderDisplayBlock block={block} />
-        </div>
-      </div>
+      )}
     </DisplayBlockWrapper>
   );
 }
