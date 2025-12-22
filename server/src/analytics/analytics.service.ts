@@ -4,7 +4,7 @@ import { UserService } from 'src/user/user.service';
 import { TimeSpentForUserDto } from './timespent.dto';
 import { DailyStatsRecord } from './dailystats.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { Between, IsNull, Repository } from 'typeorm';
 import {
   ActionActivity,
   ActionActivityType,
@@ -15,6 +15,7 @@ import {
 } from 'src/user/entities/onetime-invite.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ContractEventType } from 'src/user/entities/contract-event.entity';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 
 @Injectable()
 export class AnalyticsService {
@@ -78,6 +79,8 @@ ORDER BY pp.total_session_duration_seconds DESC
     private readonly actionActivityRepository: Repository<ActionActivity>,
     @InjectRepository(OnetimeInvite)
     private readonly onetimeInviteRepository: Repository<OnetimeInvite>,
+    @InjectRepository(FormResponse)
+    private readonly formResponseRepository: Repository<FormResponse>,
   ) {
     if (!process.env.POSTHOG_QUERY_KEY || !process.env.POSTHOG_PROJECT_ID) {
       this.logger.warn('POSTHOG_QUERY_KEY or POSTHOG_PROJECT_ID is not set');
@@ -85,6 +88,8 @@ ORDER BY pp.total_session_duration_seconds DESC
     }
     this.API_KEY = process.env.POSTHOG_QUERY_KEY;
     this.PROJECT_ID = process.env.POSTHOG_PROJECT_ID;
+
+    this.calculateDailyStats();
   }
 
   async getPosthogData(
@@ -201,6 +206,12 @@ ORDER BY pp.total_session_duration_seconds DESC
       },
     });
 
+    const anonFormSubmissions = await this.formResponseRepository.count({
+      where: {
+        user: IsNull(),
+      },
+    });
+
     const createdInvites = await this.onetimeInviteRepository.count();
     const acceptedInvites = await this.onetimeInviteRepository.count({
       where: {
@@ -214,6 +225,7 @@ ORDER BY pp.total_session_duration_seconds DESC
       signedMembers: signedUsers,
       suspendedMembers: suspendedUsers,
       actionsCompleted: completionActivities,
+      anonFormSubmissions: anonFormSubmissions,
       invitesCreated: createdInvites,
       invitesAccepted: acceptedInvites,
     });

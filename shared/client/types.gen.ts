@@ -619,7 +619,9 @@ export type City = {
     id: number;
     name: string;
     asciiName: string;
-    englishName: string;
+    englishName: {
+        [key: string]: unknown;
+    };
     admin1: string;
     admin2: string;
     countryCode: string;
@@ -2001,6 +2003,7 @@ export type DailyStatsRecord = {
     signedMembers: number;
     suspendedMembers: number;
     actionsCompleted: number;
+    anonFormSubmissions: number;
     invitesCreated: number;
     invitesAccepted: number;
 };
@@ -4652,10 +4655,8 @@ export type GeoLoadCountryDataData = {
 };
 
 export type GeoLoadCountryDataResponses = {
-    200: Array<City>;
+    200: unknown;
 };
-
-export type GeoLoadCountryDataResponse = GeoLoadCountryDataResponses[keyof GeoLoadCountryDataResponses];
 
 export type GeoLoadCityDataData = {
     body?: never;

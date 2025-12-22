@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
       User,
       ActionActivity,
       OnetimeInvite,
+      FormResponse,
     ]),
   ],
   controllers: [AnalyticsController],

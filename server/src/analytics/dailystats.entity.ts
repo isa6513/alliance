@@ -28,6 +28,10 @@ export class DailyStatsRecord {
   @ApiProperty()
   actionsCompleted: number;
 
+  @Column({ default: 0 })
+  @ApiProperty()
+  anonFormSubmissions: number;
+
   @Column()
   @ApiProperty()
   invitesCreated: number;

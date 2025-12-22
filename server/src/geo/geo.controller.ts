@@ -3,7 +3,6 @@ import { GeoService } from './geo.service';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { ApiResponse } from '@nestjs/swagger';
 import { CitySearchDto } from './city.dto';
-import { City } from './city.entity';
 
 @Controller('geo')
 export class GeoController {

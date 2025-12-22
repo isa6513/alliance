@@ -12,6 +12,7 @@ import React, {
 type ParsedDailyStats = DailyStatsRecord & { parsedDate: Date };
 type MetricKey =
   | "actionsCompleted"
+  | "anonFormSubmissions"
   | "signedMembers"
   | "invitesAccepted"
   | "invitesCreated"
@@ -28,6 +29,11 @@ const metricDefinitions: MetricDefinition[] = [
     key: "actionsCompleted",
     label: "Actions completed",
     color: "#0891b2",
+  },
+  {
+    key: "anonFormSubmissions",
+    label: "Anon form submissions",
+    color: "#8b5cf6",
   },
   {
     key: "signedMembers",
@@ -245,11 +251,11 @@ const StatsPage: React.FC = () => {
   );
 
   const mainMetrics = useMemo(
-    () => metricDefinitions.filter((m) => m.key !== "actionsCompleted"),
+    () => metricDefinitions.filter((m) => m.key !== "actionsCompleted" && m.key !== "anonFormSubmissions"),
     []
   );
   const actionsMetric = useMemo(
-    () => metricDefinitions.filter((m) => m.key === "actionsCompleted"),
+    () => metricDefinitions.filter((m) => m.key === "actionsCompleted" || m.key === "anonFormSubmissions"),
     []
   );
 
@@ -744,6 +750,9 @@ const StatsPage: React.FC = () => {
                 Actions completed
               </th>
               <th className="px-4 py-3 text-left font-semibold">
+                Anon forms
+              </th>
+              <th className="px-4 py-3 text-left font-semibold">
                 Members signed
               </th>
               <th className="px-4 py-3 text-left font-semibold">
@@ -765,6 +774,7 @@ const StatsPage: React.FC = () => {
                   {fullDateFormatter.format(day.parsedDate)}
                 </td>
                 <td className="px-4 py-3">{day.actionsCompleted}</td>
+                <td className="px-4 py-3">{day.anonFormSubmissions}</td>
                 <td className="px-4 py-3">{day.signedMembers}</td>
                 <td className="px-4 py-3">{day.invitesCreated}</td>
                 <td className="px-4 py-3">{day.invitesAccepted}</td>
