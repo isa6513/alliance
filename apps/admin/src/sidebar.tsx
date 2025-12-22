@@ -25,6 +25,7 @@ import {
   UsersRound,
   Calendar,
   ImageUp,
+  BarChart2,
 } from "lucide-react";
 
 const Sidebar: React.FC = () => {
@@ -208,6 +209,11 @@ const Sidebar: React.FC = () => {
                 to: "/image",
                 label: "Image Upload",
                 icon: <ImageUp size={16} />,
+              },
+              {
+                to: "/stats",
+                label: "Stats (wip)",
+                icon: <BarChart2 size={16} />,
               },
             ].map((link) => (
               <Link
