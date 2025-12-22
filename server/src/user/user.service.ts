@@ -1265,9 +1265,9 @@ export class UserService {
     await this.communityInviteRepository.delete(inviteId);
   }
 
-  async findValidInviteByCode(code: string): Promise<OnetimeInvite | null> {
+  async findInviteByCode(code: string): Promise<OnetimeInvite | null> {
     return this.onetimeInviteRepository.findOne({
-      where: { code, status: OnetimeInviteStatus.LINK_UNUSED },
+      where: { code },
       relations: { invitingUser: true, community: true },
     });
   }

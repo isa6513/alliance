@@ -527,7 +527,7 @@ export class UserController {
   async referrerProfile(
     @Param('code') code: string,
   ): Promise<ProfileDto | null> {
-    const invite = await this.userService.findValidInviteByCode(code);
+    const invite = await this.userService.findInviteByCode(code);
     if (invite) {
       return new ProfileDto(invite.invitingUser);
     }
@@ -542,7 +542,7 @@ export class UserController {
   @Public()
   @ApiOkResponse({ type: OnetimeInviteDto })
   async onetimeInvite(@Param('code') code: string) {
-    return this.userService.findValidInviteByCode(code);
+    return this.userService.findInviteByCode(code);
   }
 
   @Post('onetimeInvite/request')

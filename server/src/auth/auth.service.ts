@@ -12,6 +12,7 @@ import { AuthTokens } from './dto/authtokens.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInResponseDto } from './dto/signin.dto';
 import { JWTTokenType, JwtPayload } from './guards/auth.guard';
+import { OnetimeInviteStatus } from 'src/user/entities/onetime-invite.entity';
 
 @Injectable()
 export class AuthService {
@@ -63,10 +64,13 @@ export class AuthService {
     }
     let inviteCommunityId: number | null = null;
     if (!referredBy && signUp.referralCode) {
-      const invite = await this.usersService.findValidInviteByCode(
+      const invite = await this.usersService.findInviteByCode(
         signUp.referralCode,
       );
       if (invite) {
+        if (invite.status !== OnetimeInviteStatus.LINK_UNUSED) {
+          throw new UnauthorizedException('invalid referral code');
+        }
         referredBy = invite.invitingUser;
         inviteCommunityId = invite.community?.id ?? null;
         await this.usersService.invalidateInvite(invite.id);
