@@ -43,10 +43,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
       if (import.meta.env.PROD) {
         if (isImpersonation) {
           posthog.opt_out_capturing();
-        } else if (user) {
-          posthog.capture("user_state", {
-            user: user,
-          });
+        } else if (user && user.id) {
           posthog.opt_in_capturing();
           posthog.identify(user.id.toString(), {
             email: user.email,
