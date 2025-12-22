@@ -337,7 +337,7 @@ const StatsPage: React.FC = () => {
   );
 
   return (
-    <div className="p-6 md:p-8 space-y-6 text-gray-900">
+    <div className="p-6 md:p-8 space-y-6 text-gray-900 mx-auto">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div className="flex flex-wrap gap-3">
           <div className="flex flex-col gap-1">

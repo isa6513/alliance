@@ -15,6 +15,22 @@ export class GeoService {
     private cityRepository: Repository<City>,
   ) {}
 
+  async collectCityIds(filePath: string): Promise<Set<number>> {
+    const ids = new Set<number>();
+
+    const stream = fs.createReadStream(filePath, { encoding: 'utf-8' });
+    const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+
+    for await (const line of rl) {
+      if (!line || line.startsWith('#')) continue;
+      const geonameid = line.split('\t', 2)[0];
+      if (!geonameid) continue;
+      ids.add(parseInt(geonameid, 10));
+    }
+
+    return ids;
+  }
+
   async loadCountryDataFromTxt(): Promise<Record<string, string>> {
     const filePath = path.join(__dirname, 'countryInfo.txt');
     const countries: Record<string, string> = {};
@@ -27,85 +43,89 @@ export class GeoService {
     return countries;
   }
 
-  async loadEnglishNames(): Promise<Record<number, string>> {
+  async loadEnglishNamesForIds(ids: Set<number>): Promise<Map<number, string>> {
     const filePath = path.join(__dirname, 'alternateNames.txt');
-    const englishMap: Record<number, string> = {};
+    const english = new Map<number, string>();
 
     const stream = fs.createReadStream(filePath, { encoding: 'utf-8' });
-    const rl = readline.createInterface({ input: stream });
+    const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
 
     for await (const line of rl) {
+      if (!line) continue;
       const cols = line.split('\t');
+      // GeoNames: [alternateNameId, geonameid, isolanguage, alternateName, isPreferredName, ...]
       const geonameid = cols[1];
       const isolanguage = cols[2];
-      const name = cols[3];
+      const altName = cols[3];
+      const isPreferred = cols[4] === '1';
 
-      if (isolanguage === 'en') {
-        const id = parseInt(geonameid, 10);
-        if (!englishMap[id]) englishMap[id] = name;
+      if (isolanguage !== 'en' || !geonameid || !altName) continue;
+
+      const id = parseInt(geonameid, 10);
+      if (!ids.has(id)) continue;
+
+      // prefer preferred name if present; otherwise first seen
+      if (!english.has(id) || isPreferred) {
+        english.set(id, altName);
       }
     }
 
-    return englishMap;
+    return english;
   }
 
-  async loadCityDataFromTxt(): Promise<City[]> {
-    const filePath = path.join(__dirname, 'cities5000.txt');
+  async loadCityDataFromTxt(): Promise<void> {
+    const citiesPath = path.join(__dirname, 'cities5000.txt');
 
     const countries = await this.loadCountryDataFromTxt();
 
-    const cities: City[] = [];
-    const data = fs.readFileSync(filePath, { encoding: 'utf-8' });
-    const lines = data.split('\n').filter((line) => !line.startsWith('#'));
+    const ids = await this.collectCityIds(citiesPath);
+    const englishNames = await this.loadEnglishNamesForIds(ids);
 
-    const englishNames = await this.loadEnglishNames();
+    const stream = fs.createReadStream(citiesPath, { encoding: 'utf-8' });
+    const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
 
-    for (const line of lines) {
-      const [
-        geonameid,
-        name,
-        asciiname,
-        alternatenames,
-        latitude,
-        longitude,
-        featureClass,
-        featureCode,
-        countryCode,
-        cc2,
-        admin1,
-        admin2,
-        admin3,
-        admin4,
-        population,
-        elevation,
-        dem,
-        timezone,
-        modificationDate,
-      ] = line.split('\t');
+    const batch: City[] = [];
+    const BATCH_SIZE = 500;
 
+    for await (const line of rl) {
+      if (!line || line.startsWith('#')) continue;
+
+      const cols = line.split('\t');
+      const geonameid = cols[0];
       if (!geonameid) continue;
 
-      cities.push({
-        id: parseInt(geonameid),
-        name: name,
-        countryCode: countryCode,
-        admin1: admin1,
-        admin2: admin2,
+      const id = parseInt(geonameid, 10);
+
+      const name = cols[1];
+      const asciiname = cols[2];
+      const latitude = cols[4];
+      const longitude = cols[5];
+      const countryCode = cols[8];
+      const admin1 = cols[10];
+      const admin2 = cols[11];
+
+      batch.push({
+        id,
+        name,
+        countryCode,
+        admin1,
+        admin2,
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
         countryName: countries[countryCode],
         asciiName: asciiname,
-        englishName: englishNames[parseInt(geonameid)] ?? null,
+        englishName: englishNames.get(id) ?? null,
       });
+
+      if (batch.length >= BATCH_SIZE) {
+        await this.cityRepository.save(batch);
+        batch.length = 0;
+      }
     }
 
-    for (let i = 0; i < cities.length; i += 500) {
-      await this.cityRepository.save(
-        cities.slice(i, Math.min(i + 500, cities.length)),
-      );
+    if (batch.length) {
+      await this.cityRepository.save(batch);
     }
-
-    return cities;
   }
 
   async searchCity(
