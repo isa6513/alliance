@@ -155,7 +155,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
           page: NavbarPage.Forum,
           destination: destinations[NavbarPage.Forum],
         },
-        ...(user?.communities.length ||
+        ...((!!user && user.communities.length) ||
         user?.invitedCommunities.filter((invite) => invite.status === "pending")
           .length
           ? [
@@ -275,11 +275,12 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     return {
       [NavbarPage.Notifications]: unreadCount,
       [NavbarPage.Tasks]: todoActions,
-      [NavbarPage.Groups]: user?.communities.length
-        ? 0
-        : user?.invitedCommunities.filter(
-            (invite) => invite.status === "pending"
-          ).length,
+      [NavbarPage.Groups]:
+        !!user && user.communities.length
+          ? 0
+          : user?.invitedCommunities.filter(
+              (invite) => invite.status === "pending"
+            ).length,
       [NavbarPage.Messages]:
         currentLocation !== NavbarPage.Messages ? unreadMessages : 0,
     };
