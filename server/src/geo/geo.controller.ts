@@ -23,8 +23,8 @@ export class GeoController {
   }
 
   @Get('load-country-data')
-  @ApiOkResponse({ type: [City] })
-  async loadCountryData(): Promise<City[]> {
+  @ApiOkResponse()
+  async loadCountryData() {
     return this.geoService.loadCityDataFromTxt();
   }
 

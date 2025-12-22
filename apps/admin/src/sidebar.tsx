@@ -1,5 +1,5 @@
 import {
-  ActionDto,
+  Action,
   actionsFindAllWithDrafts,
   actionsPasteJson,
 } from "@alliance/shared/client";
@@ -9,7 +9,7 @@ import React, {
   useLayoutEffect,
   useState,
 } from "react";
-import { href, Link, Outlet, useNavigate } from "react-router";
+import { Link, Outlet, useNavigate } from "react-router";
 import { useAuth } from "./lib/AuthContext";
 import Button, { ButtonColor } from "@alliance/shared/ui/Button";
 import SidebarIcon from "@alliance/shared/ui/icons/SidebarIcon";
@@ -17,9 +17,18 @@ import { isProduction } from "@alliance/shared/lib/config";
 import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
 import Dropdown from "@alliance/shared/ui/Dropdown";
 import { useToast } from "@alliance/shared/ui/ToastProvider";
+import {
+  Database,
+  SquareActivity,
+  Users,
+  UserPlus,
+  UsersRound,
+  Calendar,
+  ImageUp,
+} from "lucide-react";
 
 const Sidebar: React.FC = () => {
-  const [actions, setActions] = useState<ActionDto[]>([]);
+  const [actions, setActions] = useState<Action[]>([]);
   const [actionsLoading, setActionsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
@@ -106,7 +115,7 @@ const Sidebar: React.FC = () => {
 
   const groups: {
     name: string;
-    actions: ActionDto[];
+    actions: Action[];
   }[] = [
     {
       name: "Active",
@@ -171,50 +180,46 @@ const Sidebar: React.FC = () => {
           >
             Alliance Admin
           </h1>
-          <div className="flex flex-col gap-y-2">
-            <Link
-              to="/"
-              className="pl-6 w-full bg-white hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm"
-            >
-              Actions
-            </Link>
-            <Link
-              to="/members"
-              className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm"
-            >
-              Members
-            </Link>
-            <Link
-              to="/database"
-              className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-blue-500 px-4 py-2 rounded-md text-sm "
-            >
-              Database Viewer →
-            </Link>
-            <Link
-              to="/invites"
-              className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm "
-            >
-              User Invites
-            </Link>
-            <Link
-              to={href("/groups")}
-              className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm "
-            >
-              Groups
-            </Link>
-            <Link
-              to={href("/scheduled")}
-              className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm "
-            >
-              Scheduled Plans
-            </Link>
-            <Link
-              to={href("/image")}
-              className="w-full bg-white pl-6 hover:bg-gray-200/50 border border-gray-300 text-black px-4 py-2 rounded-md text-sm "
-            >
-              Image upload
-            </Link>
-          </div>
+          <nav className="flex flex-col gap-y-1">
+            {[
+              { to: "/", label: "Actions", icon: <SquareActivity size={16} /> },
+              { to: "/members", label: "Members", icon: <Users size={16} /> },
+              {
+                to: "/database",
+                label: "Database Viewer →",
+                icon: <Database size={16} />,
+              },
+              {
+                to: "/invites",
+                label: "User Invites",
+                icon: <UserPlus size={16} />,
+              },
+              {
+                to: "/groups",
+                label: "Groups",
+                icon: <UsersRound size={16} />,
+              },
+              {
+                to: "/scheduled",
+                label: "Scheduled Plans",
+                icon: <Calendar size={16} />,
+              },
+              {
+                to: "/image",
+                label: "Image Upload",
+                icon: <ImageUp size={16} />,
+              },
+            ].map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="flex items-center gap-2 text-[15px] text-gray-700 hover:text-black hover:bg-zinc-200/60 py-2 px-2 rounded transition-colors"
+              >
+                {link.icon}
+                {link.label}
+              </Link>
+            ))}
+          </nav>
           <div className="flex flex-row justify-between items-center mt-3 relative">
             <p className="font-bold">Current Actions</p>
             <Button
