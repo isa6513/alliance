@@ -21,6 +21,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { instanceToPlain } from 'class-transformer';
@@ -806,10 +807,12 @@ export class ActionsController {
   @Get('shareUrlStats/:actionId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ShareUrlStatsDto, isArray: true })
+  @ApiQuery({ name: 'questionId', required: false, type: String })
   shareUrlStats(
     @Param('actionId', ParseIntPipe) actionId: number,
+    @Query('questionId') questionId?: string,
   ): Promise<ShareUrlStatsDto[]> {
-    return this.actionsService.getShareUrlStats(actionId);
+    return this.actionsService.getShareUrlStats(actionId, questionId);
   }
 
   // TODO move ====================================

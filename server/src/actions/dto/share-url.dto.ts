@@ -30,9 +30,18 @@ export class ShareUrlStatsDto {
   @ApiProperty()
   sid: string;
 
-  constructor(user: ProfileDto, inviteCount: number, sid: string) {
+  @ApiProperty()
+  yesCount: number;
+
+  constructor(
+    user: ProfileDto,
+    inviteCount: number,
+    sid: string,
+    yesCount: number = 0,
+  ) {
     this.user = user;
     this.inviteCount = inviteCount;
     this.sid = sid;
+    this.yesCount = yesCount;
   }
 }

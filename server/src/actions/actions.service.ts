@@ -2400,7 +2400,10 @@ export class ActionsService {
       );
   }
 
-  async getShareUrlStats(actionId: number): Promise<ShareUrlStatsDto[]> {
+  async getShareUrlStats(
+    actionId: number,
+    questionId?: string,
+  ): Promise<ShareUrlStatsDto[]> {
     // Get all share URLs for this action
     const shareUrls = await this.actionShareUrlRepository.find({
       where: { action: { id: actionId } },
@@ -2436,6 +2439,23 @@ export class ActionsService {
       countMap.set(row.sid, parseInt(row.count, 10));
     }
 
+    // Count yes answers per sid for the specified question
+    const yesCountMap = new Map<string, number>();
+    if (questionId) {
+      const yesAnswerCounts = await this.formResponseRepository
+        .createQueryBuilder('fr')
+        .select('fr.sid', 'sid')
+        .addSelect('COUNT(*)', 'count')
+        .where('fr.sid IN (:...sids)', { sids })
+        .andWhere(`fr.answers ->> :questionId = 'yes'`, { questionId })
+        .groupBy('fr.sid')
+        .getRawMany<{ sid: string; count: string }>();
+
+      for (const row of yesAnswerCounts) {
+        yesCountMap.set(row.sid, parseInt(row.count, 10));
+      }
+    }
+
     const results = shareUrls
       .map(
         (su) =>
@@ -2443,6 +2463,7 @@ export class ActionsService {
             new ProfileDto(su.user),
             countMap.get(su.sid ?? '') ?? 0,
             su.sid ?? '',
+            yesCountMap.get(su.sid ?? '') ?? 0,
           ),
       )
       .filter((stat) => stat.inviteCount > 0);

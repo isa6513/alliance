@@ -1563,6 +1563,7 @@ export type ShareUrlStatsDto = {
     user: ProfileDto;
     inviteCount: number;
     sid: string;
+    yesCount: number;
 };
 
 export type UserActionSummaryDto = {
@@ -4237,7 +4238,9 @@ export type ActionsShareUrlStatsData = {
     path: {
         actionId: number;
     };
-    query?: never;
+    query?: {
+        questionId?: string;
+    };
     url: '/actions/shareUrlStats/{actionId}';
 };
 

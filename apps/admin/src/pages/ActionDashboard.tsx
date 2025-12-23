@@ -404,6 +404,7 @@ const ActionDashboard: React.FC = () => {
       try {
         const response = await actionsShareUrlStats({
           path: { actionId },
+          query: { questionId: "field-1765411401186" },
         });
         if (response.data) {
           setShareUrlStats(response.data);
@@ -1195,6 +1196,9 @@ const ActionDashboard: React.FC = () => {
                               <th className="text-right py-2 px-3 font-medium text-gray-600">
                                 Form submissions
                               </th>
+                              <th className="text-right py-2 px-3 font-medium text-gray-600">
+                                Interested in joining
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1216,6 +1220,9 @@ const ActionDashboard: React.FC = () => {
                                 </td>
                                 <td className="py-2 px-3 text-right font-medium">
                                   {stat.inviteCount}
+                                </td>
+                                <td className="py-2 px-3 text-right font-medium">
+                                  {stat.yesCount}
                                 </td>
                               </tr>
                             ))}
