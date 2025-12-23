@@ -128,7 +128,7 @@ const ConversationInfoPanel = ({
   };
 
   return (
-    <div className="overflow-y-auto">
+    <div className="overflow-y-auto my-auto">
       <div className="flex-1 relative flex flex-col items-center justify-center">
         {error && <p className="text-red-500">{error}</p>}
         <div className="flex flex-col items-center px-8 w-full gap-y-2 mt-20">
@@ -306,14 +306,14 @@ const ConversationInfoPanel = ({
             )}
           </div>
         )}
-        <Button
-          color={ButtonColor.Transparent}
-          onClick={onClose}
-          className="!px-2 !py-2 mx-auto absolute top-5 left-5"
-        >
-          <ChevronLeft size="20" />
-        </Button>
       </div>
+      <Button
+        color={ButtonColor.Transparent}
+        onClick={onClose}
+        className="!px-2 !py-2 mx-auto absolute top-5 left-5"
+      >
+        <ChevronLeft size="20" />
+      </Button>
     </div>
   );
 };
