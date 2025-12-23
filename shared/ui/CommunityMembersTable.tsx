@@ -88,9 +88,9 @@ const CommunityMembersTable = ({
       <div className="">
         <table className="w-full border-collapse table-fixed overflow-x-clip">
           <colgroup>
-            <col style={{ width: "200px" }} />
+            <col className="w-[140px] md:w-[200px]" />
             <col />
-            {amLeader && <col className={`w-[0px] md:w-[180px]`} />}
+            {amLeader && <col className={`w-[90px] md:w-[180px]`} />}
           </colgroup>
           {leaders.length > 0 && (
             <>

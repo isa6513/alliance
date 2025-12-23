@@ -295,7 +295,7 @@ const CommunityPage = () => {
     ? ["activity", "members", "invites", "resources"]
     : ["activity", "members", "invites", "about"];
 
-  const isLargeScreen = useMediaQuery("(min-width: 1350px)");
+  const isLargeScreen = useMediaQuery("(min-width: 1250px)");
   const isChatOpen = messagingEnabled && chatOpen;
 
   const actionDisplay = useMemo(() => {
@@ -332,7 +332,7 @@ const CommunityPage = () => {
   return (
     <TwoColumnLayout
       main={
-        <div className="p-5 xl:p-10 xl:pr-5 max-w-[900px] mx-auto">
+        <div className="p-5 xl:p-10 xl:pr-5 max-w-[900px] mx-auto px-3">
           <div className="flex flex-col gap-y-2 my-8">
             <div className="flex flex-row gap-x-2 items-start justify-between">
               <div className="flex flex-col gap-y-4 mb-8">
@@ -453,7 +453,7 @@ const CommunityPage = () => {
             </Card>
           )}
           <BottomSpacer />
-          {!chatOpen && messagingEnabled && (
+          {!chatOpen && messagingEnabled && isLargeScreen && (
             <div className="absolute bottom-5 right-7 bg-white hover:bg-zinc-100">
               <Button
                 color={ButtonColor.Outline}
@@ -467,7 +467,7 @@ const CommunityPage = () => {
         </div>
       }
       sidebar={
-        messagingEnabled ? (
+        messagingEnabled && isLargeScreen ? (
           <div
             className="p-10 h-screen px-5 transition-all duration-200 ease-in-out"
             style={{
