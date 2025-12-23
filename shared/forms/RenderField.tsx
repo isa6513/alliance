@@ -378,7 +378,7 @@ export function RenderField({
               disabled={disabled}
               aria-invalid={hasError}
               className={composeClassName(
-                `shrink-0 mt-1 mr-2 h-4 w-4 ${
+                `shrink-0 mt-1 mr-2 h-4 w-4 cursor-pointer ${
                   hasError ? "text-red-600" : "text-blue-600"
                 } focus:outline-none rounded`,
                 {
@@ -389,7 +389,12 @@ export function RenderField({
                 }
               )}
             />
-            <RenderLabel field={field} error={errorMessage} />
+            <span className={hasError ? "text-red-600" : "text-zinc-700"}>
+              {field.label !== null && (
+                <FormMarkdownWrapper markdownContent={field.label} inline />
+              )}
+              {field.required && <span className="text-red-500 ml-1">*</span>}
+            </span>
           </label>
           {renderValidationMessage()}
         </div>
