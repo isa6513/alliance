@@ -19,6 +19,13 @@
 }
 
 @font-face {
+  font-family: "Source Sans 3";
+  src: url("/assets/fonts/SourceSans3-Italic-VariableFont_wght.ttf")
+    format("truetype");
+  font-style: italic;
+}
+
+@font-face {
   font-family: "Libre Baskerville";
   src: url("/assets/fonts/LibreBaskerville-VariableFont_wght.ttf")
     format("truetype");
