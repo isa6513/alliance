@@ -478,7 +478,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
               </svg>
             </button>
             {isMenuOpen && (
-              <div className="absolute right-0 mt-1 w-64 rounded-lg border border-gray-200 bg-white py-2 text-sm shadow-lg">
+              <div className="absolute right-0 mt-1 w-64 rounded-lg border border-gray-200 bg-white py-2 text-sm shadow-lg z-20">
                 <label className="flex cursor-pointer items-center px-3 py-1.5 text-gray-700">
                   <input
                     type="checkbox"
@@ -732,43 +732,33 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
         )}
         {renderContent}
         {onUpdate && block && (
-          <div className="mt-3 flex flex-wrap items-center justify-between text-xs text-gray-500">
-            <label className="flex items-center gap-1">
-              <input
-                type="checkbox"
-                checked={manualPerUserEnabled}
-                onChange={(event) => handleManualToggle(event.target.checked)}
-              />
-              Manual content per user
-            </label>
-            <div className="flex items-center gap-2">
-              {manualPerUserEnabled && (
-                <>
-                  {isLoadingUsers && <span>Loading users…</span>}
-                  {!isLoadingUsers && manualUsers.length === 0 && (
-                    <button
-                      type="button"
-                      className="text-blue-600 hover:text-blue-700"
-                      onClick={() => void loadUsers(true)}
-                    >
-                      Load users
-                    </button>
-                  )}
+          <div className="flex w-full items-center justify-end gap-2 text-sm">
+            {manualPerUserEnabled && (
+              <>
+                {isLoadingUsers && <span>Loading users…</span>}
+                {!isLoadingUsers && manualUsers.length === 0 && (
                   <button
                     type="button"
-                    className="text-gray-600 underline decoration-dotted underline-offset-2"
-                    onClick={() => {
-                      if (!isUserListOpen && manualUsers.length === 0) {
-                        void loadUsers(true);
-                      }
-                      setIsUserListOpen((prev) => !prev);
-                    }}
+                    className="text-blue-600 hover:text-blue-700"
+                    onClick={() => void loadUsers(true)}
                   >
-                    {setCount} set / {totalUserCount} total
+                    Load users
                   </button>
-                </>
-              )}
-            </div>
+                )}
+                <button
+                  type="button"
+                  className="text-gray-600 underline decoration-dotted underline-offset-2"
+                  onClick={() => {
+                    if (!isUserListOpen && manualUsers.length === 0) {
+                      void loadUsers(true);
+                    }
+                    setIsUserListOpen((prev) => !prev);
+                  }}
+                >
+                  {setCount} set / {totalUserCount} total
+                </button>
+              </>
+            )}
           </div>
         )}
         {manualPerUserEnabled && isUserListOpen && (
