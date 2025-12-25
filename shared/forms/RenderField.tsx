@@ -173,6 +173,7 @@ export function RenderField({
           <textarea
             ref={(el) => {
               if (el) {
+                console.log("el", el);
                 el.style.height = "auto";
                 el.style.height = `${el.scrollHeight}px`;
               }
@@ -183,7 +184,7 @@ export function RenderField({
               target.style.height = `${target.scrollHeight}px`;
               onChange?.(target.value);
             }}
-            rows={field.rows || 3}
+            rows={disabled ? 1 : field.rows || 3}
             maxLength={field.maxLength}
             value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
