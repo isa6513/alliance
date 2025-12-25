@@ -311,6 +311,7 @@ export class ActionEventReminderService {
         memberActionEvent: {
           action: {
             participatingTags: true,
+            manualCohortUsers: true,
           },
         },
         deadlineEvent: true,
