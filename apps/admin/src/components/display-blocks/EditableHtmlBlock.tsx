@@ -2,6 +2,7 @@ import type { HtmlBlock } from "@alliance/shared/forms/display-blocks";
 import RenderDisplayBlock from "@alliance/shared/forms/RenderDisplayBlock";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
+import FormTextarea from "../FormTextarea";
 
 export function EditableHtmlBlock({
   block,
@@ -25,7 +26,7 @@ export function EditableHtmlBlock({
       {({ block: activeBlock, onUpdate: handleUpdate }) => (
         <div className="space-y-2">
           {/* Inline HTML editor */}
-          <textarea
+          <FormTextarea
             value={activeBlock.html}
             onChange={(e) => handleUpdate({ html: e.target.value })}
             className="w-full px-2 py-1 text-sm border border-yellow-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500 font-mono bg-yellow-50"

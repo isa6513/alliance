@@ -3,6 +3,7 @@ import type { TextBlock } from "@alliance/shared/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 import RenderDisplayBlock from "@alliance/shared/forms/RenderDisplayBlock";
+import FormTextarea from "../FormTextarea";
 
 export function EditableTextBlock({
   block,
@@ -27,7 +28,7 @@ export function EditableTextBlock({
     >
       {({ block: activeBlock, onUpdate: handleUpdate }) => (
         <div className="space-y-2">
-          <textarea
+          <FormTextarea
             value={activeBlock.text}
             onChange={(e) => handleUpdate({ text: e.target.value })}
             className="w-full text-gray-900 border-none outline-none bg-transparent resize-none whitespace-pre-wrap"

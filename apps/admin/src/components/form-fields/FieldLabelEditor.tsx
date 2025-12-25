@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import FormTextarea from "../FormTextarea";
 
 type FieldLabelEditorProps = {
   value: string | null;
@@ -13,15 +13,12 @@ export function FieldLabelEditor({
   label = "Field Label",
   placeholder = "Enter field label",
 }: FieldLabelEditorProps) {
-  const ref = useRef<HTMLTextAreaElement | null>(null);
-
   return (
     <div>
       <label className="block text-xs font-medium text-gray-700 mb-1">
         {label}
       </label>
-      <textarea
-        ref={ref}
+      <FormTextarea
         rows={1}
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value)}
