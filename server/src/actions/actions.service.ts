@@ -1835,6 +1835,7 @@ export class ActionsService {
   ): Promise<ExportActionDto> {
     const relations: Relations<Action> = {
       participatingTags: true,
+      manualCohortUsers: true,
       authors: true,
       events: events || undefined,
       suite: suite || undefined,
@@ -1904,6 +1905,13 @@ export class ActionsService {
       }
       await this.actionEventRepository.save(newEvents);
       action.events = newEvents;
+    }
+
+    if (action.manualCohortUsers) {
+      const found = await this.userService.findByIds(
+        action.manualCohortUsers.map((user) => user.id),
+      );
+      action.manualCohortUsers = found;
     }
 
     if (action.participatingTags) {

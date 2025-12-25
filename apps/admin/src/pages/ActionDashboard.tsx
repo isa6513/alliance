@@ -992,6 +992,7 @@ const ActionDashboard: React.FC = () => {
                           color={ButtonColor.Black}
                           onClick={handleExportAction}
                           disabled={jsonCopied}
+                          className="text-nowrap"
                         >
                           {jsonCopied ? "in clipboard" : "Export JSON"}
                         </Button>
