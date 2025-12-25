@@ -84,7 +84,6 @@ function FormTextarea({ value, onChange, ...props }: FormTextareaProps) {
       if (!ta) return;
 
       const html = e.clipboardData.getData("text/html");
-      console.log("html", html);
       if (!html) return; // let normal paste happen for plain text sources
 
       e.preventDefault();
