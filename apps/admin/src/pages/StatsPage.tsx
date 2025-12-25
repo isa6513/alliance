@@ -32,7 +32,7 @@ const metricDefinitions: MetricDefinition[] = [
   },
   {
     key: "anonFormSubmissions",
-    label: "Anon form submissions",
+    label: "Public responses",
     color: "#8b5cf6",
   },
   {
@@ -251,11 +251,17 @@ const StatsPage: React.FC = () => {
   );
 
   const mainMetrics = useMemo(
-    () => metricDefinitions.filter((m) => m.key !== "actionsCompleted" && m.key !== "anonFormSubmissions"),
+    () =>
+      metricDefinitions.filter(
+        (m) => m.key !== "actionsCompleted" && m.key !== "anonFormSubmissions"
+      ),
     []
   );
   const actionsMetric = useMemo(
-    () => metricDefinitions.filter((m) => m.key === "actionsCompleted" || m.key === "anonFormSubmissions"),
+    () =>
+      metricDefinitions.filter(
+        (m) => m.key === "actionsCompleted" || m.key === "anonFormSubmissions"
+      ),
     []
   );
 
@@ -749,9 +755,7 @@ const StatsPage: React.FC = () => {
               <th className="px-4 py-3 text-left font-semibold">
                 Actions completed
               </th>
-              <th className="px-4 py-3 text-left font-semibold">
-                Anon forms
-              </th>
+              <th className="px-4 py-3 text-left font-semibold">Anon forms</th>
               <th className="px-4 py-3 text-left font-semibold">
                 Members signed
               </th>

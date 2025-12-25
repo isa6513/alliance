@@ -60,6 +60,14 @@ const ActionPageTaskPanel = () => {
     );
   }
 
+  if (action.status === "member_action" && !action.canParticipate) {
+    return (
+      <Card style={CardStyle.Grey}>
+        You have not been assigned to complete this task - no action is needed.
+      </Card>
+    );
+  }
+
   if (
     !userRelation ||
     !action ||
