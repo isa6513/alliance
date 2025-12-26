@@ -111,7 +111,6 @@ export class MmsService {
 
   async refreshMmsData(mms: Mms): Promise<Mms> {
     const message = await this.twilioClient.messages.get(mms.twilioSid).fetch();
-
     return this.mmsRepository.save({
       ...mms,
       ...message,
