@@ -11,9 +11,7 @@ export class TwilioStatusWorker {
     private readonly mmsService: MmsService,
     @InjectRepository(Mms)
     private readonly mmsRepository: Repository<Mms>,
-  ) {
-    this.processTwilioStatus();
-  }
+  ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
   async processTwilioStatus() {
