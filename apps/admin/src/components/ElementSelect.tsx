@@ -1,5 +1,5 @@
-import type { DisplayKind } from "@alliance/shared/forms/display-blocks";
-import type { FieldKind } from "@alliance/shared/forms/formschema";
+import type { DisplayKind } from "@alliance/sharedweb/forms/display-blocks";
+import type { FieldKind } from "@alliance/sharedweb/forms/formschema";
 
 interface ElementSelectProps {
   onAddField: (kind: FieldKind) => void;

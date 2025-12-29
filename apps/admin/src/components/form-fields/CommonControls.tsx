@@ -13,7 +13,7 @@ import {
   tasksCustomValidators,
   tasksFindOneCustomValidator,
 } from "@alliance/shared/client";
-import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
+import type { DisplayBlock } from "@alliance/sharedweb/forms/display-blocks";
 import {
   DEVICE_VISIBILITY_TARGETS,
   type AnyField,
@@ -28,7 +28,7 @@ import {
   type SelectField,
   type TextField,
   type TextareaField,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/sharedweb/forms/formschema";
 
 const DEVICE_LABELS: Record<DeviceVisibilityTarget, string> = {
   mobile: "Mobile",

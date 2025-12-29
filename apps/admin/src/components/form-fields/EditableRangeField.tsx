@@ -1,4 +1,4 @@
-import type { RangeField } from "@alliance/shared/forms/formschema";
+import type { RangeField } from "@alliance/sharedweb/forms/formschema";
 import { FieldWrapper } from "./FieldWrapper";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { RequiredToggle } from "./CommonControls";

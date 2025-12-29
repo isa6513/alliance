@@ -1,4 +1,4 @@
-import type { TimezoneField } from "@alliance/shared/forms/formschema";
+import type { TimezoneField } from "@alliance/sharedweb/forms/formschema";
 import { AutoExtractUserDataToggle, RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";

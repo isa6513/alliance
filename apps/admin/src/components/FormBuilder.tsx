@@ -8,8 +8,8 @@ import {
 import type {
   DisplayBlock,
   DisplayKind,
-} from "@alliance/shared/forms/display-blocks";
-import FormRenderer from "@alliance/shared/forms/FormRenderer";
+} from "@alliance/sharedweb/forms/display-blocks";
+import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import type {
   AnyField,
   Condition,
@@ -17,7 +17,7 @@ import type {
   FormSchema,
   MultiSelectField,
   Page,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/sharedweb/forms/formschema";
 import type { UserDto } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -51,7 +51,7 @@ import {
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useBeforeUnload, useBlocker, useSearchParams } from "react-router";
 import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
-import { customComponentRegistry } from "@alliance/shared/forms/components";
+import { customComponentRegistry } from "@alliance/sharedweb/forms/components";
 import { FORM_BUILDER_PREVIEW_USER } from "../lib/testData";
 import { OutputBuilder } from "./OutputBuilder";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";

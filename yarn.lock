@@ -242,6 +242,7 @@ __metadata:
   resolution: "@alliance/sharedweb@workspace:sharedweb"
   dependencies:
     "@alliance/shared": "workspace:*"
+    "@hey-api/client-fetch": "npm:^0.13.1"
     clsx: "npm:^2.1.1"
     date-fns: "npm:^4.1.0"
     lucide-react: "npm:^0.555.0"
@@ -2498,6 +2499,15 @@ __metadata:
   peerDependencies:
     "@hey-api/openapi-ts": < 2
   checksum: 10c0/cc440dda8145cce17f91b3d773c268830ac6a6bb6bfe5b14f0bd9e795e9a8b51eb29db0f98fa73125f9b7d8b577ef6e0ad16c882bebbba19a2075063fb547b4e
+  languageName: node
+  linkType: hard
+
+"@hey-api/client-fetch@npm:^0.13.1":
+  version: 0.13.1
+  resolution: "@hey-api/client-fetch@npm:0.13.1"
+  peerDependencies:
+    "@hey-api/openapi-ts": < 2
+  checksum: 10c0/2c144edd852475062ac2631a08e611d06d7c09b2cdf608ac02eb95de96df12fc83f49954f655733958f4279ab6cc5f179d2f8ba1c8e074bb0f476f51604a2623
   languageName: node
   linkType: hard
 

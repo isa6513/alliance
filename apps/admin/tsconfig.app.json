@@ -28,6 +28,8 @@
     "src",
     "../../shared",
     "vite-env.d.ts",
-    ".react-router/types/**/*"
+    ".react-router/types/**/*",
+    "../../shared/client/hey-api.ts",
+    "../../shared/client/client.gen.ts"
   ]
 }

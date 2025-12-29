@@ -1,7 +1,7 @@
 import { imagesUploadImage } from "@alliance/shared/client";
-import type { ImageBlock } from "@alliance/shared/forms/display-blocks";
+import type { ImageBlock } from "@alliance/sharedweb/forms/display-blocks";
 import { useState } from "react";
-import RenderDisplayBlock from "@alliance/shared/forms/RenderDisplayBlock";
+import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 
@@ -79,9 +79,7 @@ export function EditableImageBlock({
             )}
           </div>
 
-          {uploadError && (
-            <p className="text-xs text-red-600">{uploadError}</p>
-          )}
+          {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
 
           <div className="space-y-1">
             <label className="block text-xs font-medium text-gray-600">

@@ -1,5 +1,5 @@
-import type { HtmlBlock } from "@alliance/shared/forms/display-blocks";
-import RenderDisplayBlock from "@alliance/shared/forms/RenderDisplayBlock";
+import type { HtmlBlock } from "@alliance/sharedweb/forms/display-blocks";
+import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 import FormTextarea from "../FormTextarea";

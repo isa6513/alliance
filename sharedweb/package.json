@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@alliance/shared": "workspace:*",
+    "@hey-api/client-fetch": "^0.13.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.555.0",

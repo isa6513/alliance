@@ -9,6 +9,12 @@ import {
 import { Route } from "../.react-router/types/src/+types/root";
 import { AuthProvider } from "./lib/AuthContext";
 import { ToastProvider } from "@alliance/sharedweb/ui/ToastProvider";
+import { client } from "@alliance/shared/client/client.gen";
+import { getApiUrl } from "@alliance/sharedweb/lib/config";
+
+client.setConfig({
+  baseUrl: getApiUrl(),
+});
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   if (!import.meta.env.PROD) {

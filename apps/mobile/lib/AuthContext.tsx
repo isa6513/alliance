@@ -14,6 +14,7 @@ import {
 } from "../../../shared/client";
 import { useRouter } from "expo-router";
 import { client } from "@alliance/shared/client/client.gen";
+import { getApiUrl } from "./config";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -77,6 +78,7 @@ export const AuthProvider: React.FC<
     if (refreshToken) {
       try {
         client.setConfig({
+          baseUrl: getApiUrl(),
           headers: {
             Authorization: `Bearer ${refreshToken}`,
           },
@@ -88,6 +90,7 @@ export const AuthProvider: React.FC<
         }
       } finally {
         client.setConfig({
+          baseUrl: getApiUrl(),
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -104,6 +107,7 @@ export const AuthProvider: React.FC<
         console.log("got access token: ", accessToken);
         if (accessToken) {
           client.setConfig({
+            baseUrl: getApiUrl(),
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
@@ -111,14 +115,14 @@ export const AuthProvider: React.FC<
         }
         const profile = (await authMe()).data;
         console.log("got profile: ", profile);
-        setUser(profile);
+        setUser(profile?.user);
       } catch {
         try {
           console.log("attempting silent refresh");
           await refreshAccessToken();
 
           const profile = (await authMe()).data;
-          setUser(profile);
+          setUser(profile?.user);
         } catch {
           logout();
         }
@@ -144,6 +148,7 @@ export const AuthProvider: React.FC<
       console.log("saving tokens");
 
       client.setConfig({
+        baseUrl: getApiUrl(),
         headers: {
           Authorization: `Bearer ${response.data.access_token}`,
         },

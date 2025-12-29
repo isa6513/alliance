@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import {
   customComponentRegistry,
   getCustomComponentById,
-} from "@alliance/shared/forms/components";
+} from "@alliance/sharedweb/forms/components";
 import type {
   CustomComponentConfigField,
   CustomComponentDefinition,
-} from "@alliance/shared/forms/components";
-import type { CustomComponentField } from "@alliance/shared/forms/formschema";
+} from "@alliance/sharedweb/forms/components";
+import type { CustomComponentField } from "@alliance/sharedweb/forms/formschema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
@@ -285,9 +285,7 @@ export function EditableCustomComponentField({
           className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           placeholder={`Enter ${label.toLowerCase()}`}
         />
-        {description && (
-          <p className="text-xs text-gray-500">{description}</p>
-        )}
+        {description && <p className="text-xs text-gray-500">{description}</p>}
         {error && <p className="text-xs text-red-600">{error}</p>}
       </div>
     );

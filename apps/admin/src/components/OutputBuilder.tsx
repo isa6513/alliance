@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type {
   DisplayBlock,
   DisplayKind,
-} from "@alliance/shared/forms/display-blocks";
+} from "@alliance/sharedweb/forms/display-blocks";
 import type {
   AnyField,
   FormSchema,
@@ -10,8 +10,8 @@ import type {
   OutputBlock,
   OutputFieldBlock,
   OutputViewSchema,
-} from "@alliance/shared/forms/formschema";
-import OutputRenderer from "@alliance/shared/forms/OutputRenderer";
+} from "@alliance/sharedweb/forms/formschema";
+import OutputRenderer from "@alliance/sharedweb/forms/OutputRenderer";
 import {
   EditableDividerBlock,
   EditableHeaderBlock,

@@ -6,12 +6,12 @@ import {
   tasksGetFormResponses,
   type FormDto,
 } from "@alliance/shared/client";
-import FormRenderer from "@alliance/shared/forms/FormRenderer";
+import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import type {
   FieldKind,
   FormSchema,
   Page,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/sharedweb/forms/formschema";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";

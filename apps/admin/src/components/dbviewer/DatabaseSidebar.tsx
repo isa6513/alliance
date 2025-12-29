@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import type { TableMetadataDto } from "@alliance/shared/client/types.gen";
-import { isProduction } from "@alliance/shared/lib/config";
+import { isProduction } from "@alliance/sharedweb/lib/config";
 
 interface DatabaseSidebarProps {
   tables: TableMetadataDto[];

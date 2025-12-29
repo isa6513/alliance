@@ -26,7 +26,7 @@ import {
   userMembers,
 } from "@alliance/shared/client";
 import type { ShareUrlStatsDto } from "@alliance/shared/client/types.gen";
-import { getApiUrl, getBaseUrl } from "@alliance/shared/lib/config";
+import { getApiUrl, getBaseUrl } from "@alliance/sharedweb/lib/config";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import Dropdown from "@alliance/sharedweb/ui/Dropdown";

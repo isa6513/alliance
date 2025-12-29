@@ -1,4 +1,4 @@
-import type { PhoneField } from "@alliance/shared/forms/formschema";
+import type { PhoneField } from "@alliance/sharedweb/forms/formschema";
 import { AutoExtractUserDataToggle, RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";

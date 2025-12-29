@@ -12,7 +12,7 @@ import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import List from "@alliance/sharedweb/ui/List";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import CopyIcon from "@alliance/sharedweb/ui/icons/CopyIcon";
-import { getBaseUrl } from "@alliance/shared/lib/config";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 
 const InvitesPage = () => {
   const [invites, setInvites] = useState<OnetimeInviteDto[]>([]);

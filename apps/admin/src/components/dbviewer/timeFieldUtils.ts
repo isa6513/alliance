@@ -2,7 +2,7 @@ import type { ColumnMetadataDto } from "@alliance/shared/client/types.gen";
 import {
   formatTimeForDisplay,
   parseTimeInput,
-} from "@alliance/shared/forms/timeUtils";
+} from "@alliance/sharedweb/forms/timeUtils";
 
 const TIME_RAW_TYPE_PREFIX = "time";
 const TIME_PART_PATTERN = /(\d{1,2}):(\d{2})(?::(\d{2})(?:\.\d{1,6})?)?/i;

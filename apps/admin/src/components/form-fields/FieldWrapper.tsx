@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import type { AnyField } from "@alliance/shared/forms/formschema";
+import type { AnyField } from "@alliance/sharedweb/forms/formschema";
 import {
   ConditionalVisibility,
   CustomValidatorSelect,
   OutputFieldToggle,
 } from "./CommonControls";
 import type { FieldWrapperProps } from "./types";
-import RenderField from "@alliance/shared/forms/RenderField";
+import RenderField from "@alliance/sharedweb/forms/RenderField";
 import {
   CustomValidatorType,
   tasksCreateCustomValidator,

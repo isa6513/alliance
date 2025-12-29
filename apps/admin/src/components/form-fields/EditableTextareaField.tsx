@@ -1,4 +1,4 @@
-import type { TextareaField } from "@alliance/shared/forms/formschema";
+import type { TextareaField } from "@alliance/sharedweb/forms/formschema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
