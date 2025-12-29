@@ -168,7 +168,7 @@ export const AuthProvider: React.FC<
         throw new Error("Failed to fetch user profile");
       }
 
-      setUser(userProfile.data);
+      setUser(userProfile.data?.user);
 
       router.replace("/");
     } catch (error) {

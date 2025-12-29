@@ -1,11 +1,6 @@
 import { View, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { useEffect, useState } from "react";
-import {
-  ActionDto,
-  actionsFindAll,
-  actionsMyActionRelations,
-  UserActionDto,
-} from "../../../../../shared/client";
+import { ActionDto, actionsFindAllLoggedIn } from "@alliance/shared/client";
 import ActionCard from "../../../components/ActionCard";
 import { router } from "expo-router";
 import { colors, Text, TextStyle } from "../../../components/system";
@@ -14,26 +9,17 @@ export default function HomeScreen() {
   const [actions, setActions] = useState<ActionDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [relations, setRelations] = useState<
-    Map<number, UserActionDto["status"]>
-  >(new Map());
 
   useEffect(() => {
     const fetchActions = async () => {
       try {
-        const response = await actionsFindAll();
+        const response = await actionsFindAllLoggedIn({
+          query: { sorted: true },
+        });
         if (response.error) {
           throw new Error("Failed to fetch actions");
         }
         setActions(response.data || []);
-
-        const relations = await actionsMyActionRelations();
-        const relationList = relations.data ?? [];
-        const actionToRelationMap = new Map<number, UserActionDto["status"]>();
-        relationList.forEach((relation) => {
-          actionToRelationMap.set(relation.actionId, relation.status);
-        });
-        setRelations(actionToRelationMap);
 
         setLoading(false);
       } catch (err) {
@@ -45,23 +31,6 @@ export default function HomeScreen() {
 
     fetchActions();
   }, []);
-
-  const todoActions = actions.filter(
-    (action) =>
-      relations.get(action.id) === "joined" && action.status === "member_action"
-  );
-
-  const newActions = actions.filter(
-    (action) =>
-      (!relations.get(action.id) || relations.get(action.id) === "none") &&
-      action.status === "gathering_commitments"
-  );
-
-  const committedActions = actions.filter(
-    (action) =>
-      relations.get(action.id) === "joined" &&
-      action.status === "gathering_commitments"
-  );
 
   const navigateToAction = (actionId: number) => {
     router.push(`/action/${actionId}`);
@@ -79,11 +48,11 @@ export default function HomeScreen() {
           />
         ) : error ? (
           <Text style={styles.errorText}>{error}</Text>
-        ) : todoActions.length === 0 ? (
+        ) : actions.length === 0 ? (
           <Text style={styles.noActionsText}>No actions available</Text>
         ) : (
           <View>
-            {todoActions.map((action) => (
+            {actions.map((action) => (
               <ActionCard
                 key={action.id}
                 action={action}

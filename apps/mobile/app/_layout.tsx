@@ -7,10 +7,11 @@ import WebTokenStore from "../lib/ExpoWebTokenStore";
 import SecureStorage from "../lib/SecureStorage";
 import { getApiUrl } from "../lib/config";
 import { useFonts } from "expo-font";
+import "../global.css";
 
 export default function RootLayout() {
   useFonts({
-    "IBMPlexSans-Regular": require("../assets/fonts/IBMPlexSans-Regular.ttf"),
+    SourceSans3: require("../assets/fonts/SourceSans3.ttf"),
     "IBMPlexSans-Medium": require("../assets/fonts/IBMPlexSans-Medium.ttf"),
     "IBMPlexSans-Bold": require("../assets/fonts/IBMPlexSans-Bold.ttf"),
   });

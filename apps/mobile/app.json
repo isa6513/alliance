@@ -41,7 +41,10 @@
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/IBMPlexSans-Regular.ttf"]
+          "fonts": [
+            "./assets/fonts/IBMPlexSans-Regular.ttf",
+            "./assets/fonts/SourceSans3-VariableFont_wght.ttf"
+          ]
         }
       ]
     ],

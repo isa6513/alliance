@@ -1,5 +1,4 @@
 import { View, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
-import { useAuth } from "../../../lib/AuthContext";
 import { useEffect, useMemo, useState } from "react";
 import { ActionDto, actionsFindAll } from "../../../../../shared/client";
 import ActionCard from "../../../components/ActionCard";
@@ -10,10 +9,8 @@ import {
 } from "../../../../../shared/lib/actionUtils";
 import {
   Button,
-  Card,
   colors,
   ButtonColor,
-  CardStyle,
   Text,
   TextStyle,
 } from "../../../components/system";

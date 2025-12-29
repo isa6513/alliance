@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "uniwind";
+
+@theme {
+  --font-sans: "SourceSans3", system-ui, -apple-system, BlinkMacSystemFont,
+    sans-serif;
+}
+
+* {
+  font-family: "SourceSans3";
+}
