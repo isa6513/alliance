@@ -29,6 +29,7 @@ __metadata:
   resolution: "@alliance/admin@workspace:apps/admin"
   dependencies:
     "@alliance/shared": "workspace:*"
+    "@alliance/sharedweb": "workspace:*"
     "@eslint/js": "npm:^9.22.0"
     "@hey-api/client-fetch": "npm:^0.12.0"
     "@hey-api/openapi-ts": "npm:^0.67.3"
