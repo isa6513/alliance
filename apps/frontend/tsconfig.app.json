@@ -21,8 +21,14 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
+    "noFallthroughCasesInSwitch": true
     // "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "../../shared", "vite-env.d.ts", ".react-router/types/**/*"]
+  "include": [
+    "src",
+    "../../shared",
+    "../../sharedweb",
+    "vite-env.d.ts",
+    ".react-router/types/**/*"
+  ]
 }

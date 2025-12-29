@@ -12,22 +12,22 @@ import {
   userApproveOnetimeInvite,
   userRejectOnetimeInvite,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
-import List from "@alliance/shared/ui/List";
-import { getBaseUrl } from "@alliance/shared/lib/config";
+import List from "@alliance/sharedweb/ui/List";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import UserSelect, {
   UserSelectUser,
   useSelectableUserIds,
-} from "@alliance/shared/ui/UserSelect";
-import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+} from "@alliance/sharedweb/ui/UserSelect";
+import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import CommunityInviteListItem from "./CommunityInviteListItem";
 import { Link } from "react-router";
 import OneTimeInviteRequestLeaderListItem from "./OneTimeInviteRequestLeaderListItem";
 import OneTimeInviteLeaderListItem from "./OneTimeInviteLeaderListItem";
-import { useToast } from "@alliance/shared/ui/ToastProvider";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 
 export interface CommunityInvitesTabLeaderProps {
   communityId: number;

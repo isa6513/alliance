@@ -1,11 +1,11 @@
 import { CommentDto, PostDto } from "@alliance/shared/client";
-import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { Link, href, useNavigate } from "react-router";
-import { cx, formatTime } from "@alliance/shared/lib/utils";
+import { formatTime } from "@alliance/sharedweb/lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
-import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
-import UserDisplayName from "@alliance/shared/ui/UserDisplayName";
+import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
+import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
 
 export interface ForumListPostProps {
   post: PostDto;
@@ -57,12 +57,11 @@ const ForumListPost = ({
     return (
       <Link
         to={href("/forum/post/:id", { id: post.id.toString() })}
-        className={cx(
-          "w-full mb-0 !gap-y-1 p-4  cursor-pointer",
-          isPrivateFuturePost
+        className={
+          "w-full mb-0 !gap-y-1 p-4  cursor-pointer " + isPrivateFuturePost
             ? "bg-sky-50 hover:bg-sky-100/60"
             : "hover:bg-zinc-50 bg-white"
-        )}
+        }
       >
         <div className="flex flex-col gap-y-0 mb-2">
           <div className="flex flex-row gap-y-1 gap-2 justify-between">

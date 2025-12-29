@@ -7,9 +7,9 @@ import {
   forumUpdatePost,
   imagesUploadImage,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card from "@alliance/shared/ui/Card";
-import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
+import DateTimePicker from "@alliance/sharedweb/ui/DateTimePicker";
 import React, { useEffect, useState } from "react";
 import {
   Link,
@@ -19,9 +19,9 @@ import {
   useSearchParams,
 } from "react-router";
 import { setRevalidate } from "../../applayout";
-import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
+import EditableContentForm from "@alliance/sharedweb/ui/EditableContentForm";
 import { useAuth } from "../../lib/AuthContext";
-import LargeCheckbox from "@alliance/shared/ui/LargeCheckbox";
+import LargeCheckbox from "@alliance/sharedweb/ui/LargeCheckbox";
 
 type FormMode = "create" | "edit";
 

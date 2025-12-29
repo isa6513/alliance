@@ -9,11 +9,11 @@ import {
   CreateEditableContentDto,
   TagDto,
 } from "@alliance/shared/client";
-import ActionUpdateCard from "@alliance/shared/ui/ActionUpdateCard";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card from "@alliance/shared/ui/Card";
-import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
-import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
+import ActionUpdateCard from "@alliance/sharedweb/ui/ActionUpdateCard";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
+import DateTimePicker from "@alliance/sharedweb/ui/DateTimePicker";
+import EditableContentForm from "@alliance/sharedweb/ui/EditableContentForm";
 import { useState } from "react";
 
 interface ActionUpdatesTabProps {

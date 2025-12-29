@@ -1,6 +1,6 @@
 import { ProfileDto, userMembers } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { X } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 

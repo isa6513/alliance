@@ -15,10 +15,10 @@ import {
   userRequestFriend,
   userUpdate,
 } from "@alliance/shared/client";
-import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card from "@alliance/shared/ui/Card";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, useLocation, useNavigate, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
@@ -30,15 +30,15 @@ import UserActivityCard from "../../components/UserActivityCard";
 import UserProfileTab from "../../components/UserProfileTab";
 import { useAuth } from "../../lib/AuthContext";
 import useActivities, { ActivityList } from "./useActivities";
-import { sharp_allowed_mime_types } from "@alliance/shared/lib/config";
-import List from "@alliance/shared/ui/List";
+import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
+import List from "@alliance/sharedweb/ui/List";
 import ForumActivityCommentCard from "../../components/ForumActivityCommentCard";
 import ProfileImageEditor from "../../components/ProfileImageEditor";
 import Spinner from "../../components/Spinner";
 import { MessageSquare } from "lucide-react";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../../lib/config";
-import { useToast } from "@alliance/shared/ui/ToastProvider";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 
 enum ProfileTabs {
   Activity = "Actions",

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useRef } from "react";
 import type { ColumnMetadataDto } from "@alliance/shared/client/types.gen";
-import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
+import DateTimePicker from "@alliance/sharedweb/ui/DateTimePicker";
 import {
   isTimeOnlyColumn,
   normalizeTimeValue,

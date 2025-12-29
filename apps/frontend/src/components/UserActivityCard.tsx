@@ -4,17 +4,17 @@ import {
   CreateEditableContentDto,
   imagesUploadImage,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { useCallback, useState } from "react";
 import { Link, href, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
-import { formatTime } from "@alliance/shared/lib/utils";
+import { formatTime } from "@alliance/sharedweb/lib/utils";
 import ActivityLikeButton from "./ActivityLikeButton";
 import Comments from "./Comments";
-import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
-import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
-import OutputRenderer from "@alliance/shared/forms/OutputRenderer";
+import EditableContentForm from "@alliance/sharedweb/ui/EditableContentForm";
+import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
+import OutputRenderer from "@alliance/sharedweb/forms/OutputRenderer";
 import { Edit } from "lucide-react";
 
 interface UserActivityCardProps {

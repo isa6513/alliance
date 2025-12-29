@@ -1,4 +1,4 @@
-import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { ProfileDto } from "@alliance/shared/client/types.gen";
 import { Link, Outlet, href, useOutletContext } from "react-router";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
@@ -8,7 +8,7 @@ import TaskTimeInfo from "../pages/app/TaskTimeInfo";
 import ActionEventsPanel from "./ActionEventsPanel";
 import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import { shuffleWithSeed } from "../lib/utils";
 import { useMemo } from "react";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";

@@ -1,9 +1,9 @@
 import { authResetPassword } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import { useEffect, useState } from "react";
 import { href, useNavigate } from "react-router";
-import FormInput from "@alliance/shared/ui/FormInput";
+import FormInput from "@alliance/sharedweb/ui/FormInput";
 
 const ResetPasswordPage = () => {
   const [token, setToken] = useState<string | null>(null);
@@ -48,7 +48,7 @@ const ResetPasswordPage = () => {
 
     if (!reset.response.ok) {
       setError(
-        "error resetting password. Please try again, or request a new token. ",
+        "error resetting password. Please try again, or request a new token. "
       );
       setLoading(false);
       return;

@@ -3,7 +3,7 @@ import {
   CreateCommunityDto,
   userUpdateCommunity,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useCallback, useState } from "react";
 
 export interface CommunityEditFormProps {

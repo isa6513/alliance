@@ -1,4 +1,4 @@
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import uistuff from "../assets/uistuff.png";
 import uistuff2 from "../assets/uistuff2.png";
 import uistuff3 from "../assets/uistuff3.png";

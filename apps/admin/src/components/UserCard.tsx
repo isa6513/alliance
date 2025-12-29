@@ -5,17 +5,17 @@ import {
   UserActionRelationStatus,
   UserDto,
 } from "@alliance/shared/client/types.gen";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import Badge from "@alliance/shared/ui/Badge";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import Badge from "@alliance/sharedweb/ui/Badge";
 import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
 import { useMemo, useState } from "react";
-import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
-import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
+import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
+import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
 import { Link } from "react-router";
 import UserProgressPills, {
   formatRelationStatus,
-} from "@alliance/shared/ui/UserProgressPills";
+} from "@alliance/sharedweb/ui/UserProgressPills";
 
 export interface UserCardProps {
   user: UserDto;

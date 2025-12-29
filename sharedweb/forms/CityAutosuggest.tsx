@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import type { CitySearchDto } from "../client";
-import { geoSearchCity } from "../client";
+import type { CitySearchDto } from "@alliance/shared/client";
+import { geoSearchCity } from "@alliance/shared/client";
 
 export interface CityAutosuggestProps {
   value?: string;

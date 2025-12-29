@@ -3,7 +3,7 @@ import React from "react";
 import { Link, href, useLoaderData } from "react-router";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
-import List from "@alliance/shared/ui/List";
+import List from "@alliance/sharedweb/ui/List";
 
 export async function loader() {
   const postFiles = import.meta.glob("/src/action-posts/*.md", {

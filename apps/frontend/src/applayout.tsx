@@ -9,7 +9,7 @@ import {
   UserActionRelation,
   userMyProfile,
 } from "@alliance/shared/client";
-import { isStaging } from "@alliance/shared/lib/config";
+import { isStaging } from "@alliance/sharedweb/lib/config";
 import { Features } from "@alliance/shared/lib/features";
 import { useEffect, useState } from "react";
 import {
@@ -186,7 +186,12 @@ export function isAuthOnly() {
   return true;
 }
 export default function AppLayout() {
-  const { isAuthenticated, loading: authLoading, logout, isImpersonation } = useAuth();
+  const {
+    isAuthenticated,
+    loading: authLoading,
+    logout,
+    isImpersonation,
+  } = useAuth();
 
   const {
     actionData: actionDataLoader,

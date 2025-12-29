@@ -12,8 +12,8 @@ import type {
   FormSchema,
   Page,
 } from "@alliance/shared/forms/formschema";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { CirclePlay } from "lucide-react";

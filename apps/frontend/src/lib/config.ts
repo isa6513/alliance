@@ -1,7 +1,7 @@
 import {
   getApiUrl,
   getWebSocketUrl as getWebSocketUrlShared,
-} from "@alliance/shared/lib/config";
+} from "@alliance/sharedweb/lib/config";
 import { Features, isEnabled } from "@alliance/shared/lib/features";
 
 export const getWebSocketUrl = (): string => {

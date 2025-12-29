@@ -2,9 +2,9 @@ import {
   actionsSuspendPlans,
   SuspensionPlanDto,
 } from "@alliance/shared/client";
-import CenterLayout from "@alliance/shared/ui/CenterLayout";
-import Card from "@alliance/shared/ui/Card";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import Card from "@alliance/sharedweb/ui/Card";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { ChevronDown, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";

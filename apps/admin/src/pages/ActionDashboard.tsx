@@ -27,13 +27,13 @@ import {
 } from "@alliance/shared/client";
 import type { ShareUrlStatsDto } from "@alliance/shared/client/types.gen";
 import { getApiUrl, getBaseUrl } from "@alliance/shared/lib/config";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import Dropdown from "@alliance/shared/ui/Dropdown";
-import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
-import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
-import LargeCheckbox from "@alliance/shared/ui/LargeCheckbox";
-import { UserSelectUser } from "@alliance/shared/ui/UserSelect";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Dropdown from "@alliance/sharedweb/ui/Dropdown";
+import CopyIcon from "@alliance/sharedweb/ui/icons/CopyIcon";
+import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
+import LargeCheckbox from "@alliance/sharedweb/ui/LargeCheckbox";
+import { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -46,7 +46,7 @@ import ActionForm from "../components/ActionForm";
 import ActionUpdatesTab from "../components/ActionUpdatesTab";
 import EventManagementTab from "../components/EventManagementTab";
 import { FormBuilder } from "../components/FormBuilder";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 
 // Status color mapping
 export const getStatusColor = (status: ActionDto["status"]) => {

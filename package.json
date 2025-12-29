@@ -6,7 +6,8 @@
     "apps/frontend",
     "apps/admin",
     "apps/mobile",
-    "shared"
+    "shared",
+    "sharedweb"
   ],
   "engines": {
     "node": ">=22"

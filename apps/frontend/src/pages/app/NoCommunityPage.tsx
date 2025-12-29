@@ -6,9 +6,9 @@ import {
   userRejectCommunityInvite,
 } from "@alliance/shared/client";
 import Spinner from "../../components/Spinner";
-import List from "@alliance/shared/ui/List";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import CenterLayout from "@alliance/shared/ui/CenterLayout";
+import List from "@alliance/sharedweb/ui/List";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 
 const NoCommunityPage = () => {
   const [communityInvites, setCommunityInvites] = useState<

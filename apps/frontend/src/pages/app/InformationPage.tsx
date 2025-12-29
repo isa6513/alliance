@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import { href } from "react-router";
-import CenterLayout from "@alliance/shared/ui/CenterLayout";
+import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import ResourceButton from "../../components/ResourceButton";
 import { actionsAllUpdates, ActionUpdateDto } from "@alliance/shared/client";
-import ActionUpdateCard from "@alliance/shared/ui/ActionUpdateCard";
+import ActionUpdateCard from "@alliance/sharedweb/ui/ActionUpdateCard";
 
 const InformationPage: React.FC = () => {
   useWhiteBackground();

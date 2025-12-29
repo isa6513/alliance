@@ -1,7 +1,7 @@
 import { OnetimeInviteDto } from "@alliance/shared/client";
-import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { href, Link } from "react-router";
 
 export type OneTimeInviteRequestLeaderListItemProps = {

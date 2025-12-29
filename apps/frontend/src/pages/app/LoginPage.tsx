@@ -5,8 +5,8 @@ import {
   SignInDto,
 } from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Link,
@@ -15,7 +15,7 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router";
-import FormInput from "@alliance/shared/ui/FormInput";
+import FormInput from "@alliance/sharedweb/ui/FormInput";
 import { useAuth } from "../../lib/AuthContext";
 import { isFeatureEnabled } from "../../lib/config";
 import { setRevalidate } from "../../applayout";

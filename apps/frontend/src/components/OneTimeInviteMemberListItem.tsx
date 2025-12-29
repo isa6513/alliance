@@ -1,5 +1,5 @@
 import { OnetimeInviteDto } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useCallback, useRef, useState } from "react";
 import { Link } from "lucide-react";
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useOutsideClick } from "../lib/useOutsideClick";
+import { useOutsideClick } from "../../sharedweb/lib/useOutsideClick";
 import { ChevronDown } from "lucide-react";
 
 type EnumType = Record<string, string | number>;

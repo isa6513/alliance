@@ -12,18 +12,18 @@ import {
   type ReminderGroupTimingMode,
   type User,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import DateTimePicker from "@alliance/sharedweb/ui/DateTimePicker";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import TextareaWithHighlights from "../TextareaWithHighlights";
-import UserSelect, { UserSelectUser } from "@alliance/shared/ui/UserSelect";
+import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import {
   defaultEmailContents,
   defaultEmailSubject,
   defaultTextMessage,
 } from "./defaultReminderContents";
-import Card from "@alliance/shared/ui/Card";
-import LargeCheckbox from "@alliance/shared/ui/LargeCheckbox";
+import Card from "@alliance/sharedweb/ui/Card";
+import LargeCheckbox from "@alliance/sharedweb/ui/LargeCheckbox";
 
 type ReminderGroupContentFields = Pick<
   ReminderGroup,

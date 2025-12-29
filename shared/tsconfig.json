@@ -6,5 +6,12 @@
     "moduleResolution": "bundler",
     "jsx": "react-jsx"
   },
-  "include": ["lib", "client", "ui", "forms"]
+  "include": [
+    "lib",
+    "client",
+    "ui",
+    "forms",
+    "../sharedweb/lib/useOutsideClick.ts",
+    "../sharedweb/lib/config.ts"
+  ]
 }

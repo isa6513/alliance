@@ -7,8 +7,8 @@ import clsx from "clsx";
 import SuiteEventCard from "./SuiteEventCard";
 import { useState } from "react";
 import CreateEventForm from "./CreateEventForm";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card from "@alliance/shared/ui/Card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
 
 export type SuiteEventListProps = {
   referenceAction: ActionDto;

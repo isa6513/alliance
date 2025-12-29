@@ -11,12 +11,12 @@ import React, {
 } from "react";
 import { Link, Outlet, useNavigate } from "react-router";
 import { useAuth } from "./lib/AuthContext";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import SidebarIcon from "@alliance/shared/ui/icons/SidebarIcon";
-import { isProduction } from "@alliance/shared/lib/config";
-import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
-import Dropdown from "@alliance/shared/ui/Dropdown";
-import { useToast } from "@alliance/shared/ui/ToastProvider";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import SidebarIcon from "@alliance/sharedweb/ui/icons/SidebarIcon";
+import { isProduction } from "@alliance/sharedweb/lib/config";
+import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
+import Dropdown from "@alliance/sharedweb/ui/Dropdown";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import {
   Database,
   SquareActivity,
@@ -26,6 +26,7 @@ import {
   Calendar,
   ImageUp,
   BarChart2,
+  ChevronDown,
 } from "lucide-react";
 
 const Sidebar: React.FC = () => {
@@ -238,7 +239,7 @@ const Sidebar: React.FC = () => {
                 className="mt-px ml-1 hover:bg-white/20 rounded-full p-1"
                 onClick={handleCreateActionDropdown}
               >
-                <DropdownIcon size="mini" fill="white" />
+                <ChevronDown size={20} />
               </div>
             </Button>
             {createActionDropdownOpen && (

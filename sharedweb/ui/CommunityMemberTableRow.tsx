@@ -6,7 +6,7 @@ import {
   UserActionRelationDetailDto,
   UserActionSummaryDto,
   UserAwayRangeDto,
-} from "../client";
+} from "@alliance/shared/client";
 import ProfileImage from "./ProfileImage";
 import UserProgressPills from "./UserProgressPills";
 import DropdownIcon from "./icons/DropdownIcon";
@@ -28,10 +28,13 @@ const CommunityMemberTableRow = ({
   actionRelations: UserActionRelationDetailDto[];
 }) => {
   const relationByActionId = useMemo(() => {
-    return actionRelations.reduce((acc, relation) => {
-      acc[relation.actionId] = relation;
-      return acc;
-    }, {} as Record<number, UserActionRelationDetailDto>);
+    return actionRelations.reduce(
+      (acc, relation) => {
+        acc[relation.actionId] = relation;
+        return acc;
+      },
+      {} as Record<number, UserActionRelationDetailDto>,
+    );
   }, [actionRelations]);
 
   const [expanded, setExpanded] = useState(false);
@@ -41,7 +44,7 @@ const CommunityMemberTableRow = ({
     }
     return [...contactInfo.awayRanges].sort(
       (a, b) =>
-        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+        new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
     );
   }, [contactInfo?.awayRanges]);
 

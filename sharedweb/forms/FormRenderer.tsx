@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { UserDto } from "../client";
+import type { UserDto } from "@alliance/shared/client";
 import {
   FormResponseDto,
   SubmitFormDto,
   imagesUploadImage,
   tasksRunValidator,
-} from "../client";
-import { useOutsideClick } from "../lib/useOutsideClick";
+} from "@alliance/shared/client";
+import { useOutsideClick } from "../../sharedweb/lib/useOutsideClick";
 import Button, { ButtonColor } from "../ui/Button";
 import Dropdown from "../ui/Dropdown";
 import RenderDisplayBlock from "./RenderDisplayBlock";
@@ -41,7 +41,7 @@ type FormRendererProps = {
   onAbandonAction?: (
     outOfTime: boolean,
     reason: string,
-    partialFormData: SubmitFormDto
+    partialFormData: SubmitFormDto,
   ) => void;
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
@@ -103,13 +103,13 @@ function getRangeOptionCount(field: RangeField): number {
     : DEFAULT_RANGE_OPTION_COUNT;
   return Math.min(
     MAX_RANGE_OPTION_COUNT,
-    Math.max(MIN_RANGE_OPTION_COUNT, normalized)
+    Math.max(MIN_RANGE_OPTION_COUNT, normalized),
   );
 }
 
 function isValidRangeSelection(
   field: RangeField,
-  value: unknown
+  value: unknown,
 ): value is number {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return false;
@@ -157,7 +157,7 @@ function resolveFieldDefaultValue(field: AnyField): FormValue | undefined {
         }
         const validValues = field.options?.map((option) => option.value) ?? [];
         const filtered = rawDefault.filter((value): value is string =>
-          validValues.includes(value)
+          validValues.includes(value),
         );
         return filtered.length ? filtered : undefined;
       }
@@ -199,7 +199,7 @@ function resolveFieldDefaultValue(field: AnyField): FormValue | undefined {
 
 function applyDefaultValues(
   base: Record<string, FormValue> | undefined,
-  defaults: Map<string, FormValue>
+  defaults: Map<string, FormValue>,
 ): Record<string, FormValue> {
   if (!defaults.size) {
     return base ? base : {};
@@ -228,7 +228,7 @@ function applyDefaultValues(
 
 function filterAnswersByFieldIds(
   answers: Record<string, FormValue> | null,
-  allowedFields: Map<string, AnyField>
+  allowedFields: Map<string, AnyField>,
 ): Record<string, FormValue> {
   if (!answers) {
     return {};
@@ -399,7 +399,7 @@ const FormRenderer = ({
   });
 
   const [publicAnswers, setPublicAnswers] = useState<Record<string, boolean>>(
-    {}
+    {},
   );
 
   useEffect(() => {
@@ -420,13 +420,13 @@ const FormRenderer = ({
   }, [outputFieldIds, user]);
 
   const [uploadingFields, setUploadingFields] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [hasEmittedStart, setHasEmittedStart] = useState(false);
   const [deviceType, setDeviceType] = useState<DeviceVisibilityTarget>(() =>
-    detectDeviceType()
+    detectDeviceType(),
   );
   const [submitting, setSubmitting] = useState(false);
 
@@ -456,7 +456,7 @@ const FormRenderer = ({
     | undefined;
 
   const effectiveDeviceType = readOnly
-    ? savedDeviceType ?? deviceType
+    ? (savedDeviceType ?? deviceType)
     : deviceType;
 
   const visibilityValidatorIds = useMemo(() => {
@@ -466,8 +466,8 @@ const FormRenderer = ({
         const conditions = Array.isArray(element.visibleIf)
           ? element.visibleIf
           : element.visibleIf
-          ? [element.visibleIf]
-          : [];
+            ? [element.visibleIf]
+            : [];
         for (const condition of conditions) {
           if ("validatorId" in condition) {
             ids.add(condition.validatorId);
@@ -519,7 +519,7 @@ const FormRenderer = ({
       return;
     }
     const missingIds = visibilityValidatorIds.filter(
-      (id) => !(id in visibilityValidatorResults)
+      (id) => !(id in visibilityValidatorResults),
     );
     if (!missingIds.length) {
       return;
@@ -541,11 +541,11 @@ const FormRenderer = ({
           } catch (error) {
             console.error(
               `Failed to evaluate visibility validator ${validatorId}`,
-              error
+              error,
             );
             return [validatorId, false] as const;
           }
-        })
+        }),
       );
       if (cancelled) return;
       setVisibilityValidatorResults((prev) => {
@@ -583,7 +583,7 @@ const FormRenderer = ({
         return changed ? next : prev;
       });
     },
-    []
+    [],
   );
 
   const evaluateCondition = useCallback(
@@ -634,19 +634,19 @@ const FormRenderer = ({
       }
       return val === equals;
     },
-    [effectiveDeviceType, formData, visibilityValidatorResults]
+    [effectiveDeviceType, formData, visibilityValidatorResults],
   );
 
   const isElementCurrentlyVisible = useCallback(
     (
       element: AnyField | DisplayBlock,
-      data?: Record<string, FormValue>
+      data?: Record<string, FormValue>,
     ): boolean => {
       const conditions = Array.isArray(element.visibleIf)
         ? element.visibleIf
         : element.visibleIf
-        ? [element.visibleIf]
-        : [];
+          ? [element.visibleIf]
+          : [];
       if (conditions.length === 0) {
         return true;
       }
@@ -655,14 +655,16 @@ const FormRenderer = ({
         return true;
       }
       return conditions.every((condition) =>
-        evaluateCondition(condition, targetData)
+        evaluateCondition(condition, targetData),
       );
     },
-    [evaluateCondition, formData, readOnly]
+    [evaluateCondition, formData, readOnly],
   );
 
-  const resolveDisplayBlockForUser = useCallback(
-    (candidate: DisplayBlock): DisplayBlock => {
+  const resolveDisplayBlockForUser = useCallback<
+    <T extends DisplayBlock>(candidate: T) => T
+  >(
+    (candidate) => {
       if (!candidate.manualPerUser || !activeUserKey) {
         return candidate;
       }
@@ -677,7 +679,7 @@ const FormRenderer = ({
         manualUserContent: candidate.manualUserContent,
       };
     },
-    [activeUserKey]
+    [activeUserKey],
   );
 
   const isFieldConditionallyRequired = useCallback(
@@ -687,14 +689,14 @@ const FormRenderer = ({
       }
       return !!field.required;
     },
-    [evaluateCondition, formData]
+    [evaluateCondition, formData],
   );
 
   const validateFieldValue = useCallback(
     (
       field: AnyField,
       fieldValue: FormValue | undefined,
-      data?: Record<string, FormValue>
+      data?: Record<string, FormValue>,
     ): string | null => {
       const required = isFieldConditionallyRequired(field, data);
 
@@ -757,8 +759,8 @@ const FormRenderer = ({
             typeof valueToCheck === "number"
               ? valueToCheck
               : typeof valueToCheck === "string"
-              ? parseFloat(valueToCheck)
-              : NaN;
+                ? parseFloat(valueToCheck)
+                : NaN;
           const numberField = field as NumberField;
 
           if (Number.isNaN(numValue) && !!valueToCheck) {
@@ -828,12 +830,12 @@ const FormRenderer = ({
         }
       }
     },
-    [isFieldConditionallyRequired]
+    [isFieldConditionallyRequired],
   );
 
   const runCustomValidatorsForFields = useCallback(
     async (
-      fieldsToValidate: AnyField[]
+      fieldsToValidate: AnyField[],
     ): Promise<Record<string, string | null>> => {
       if (!fieldsToValidate.length || readOnly) {
         return {};
@@ -858,7 +860,7 @@ const FormRenderer = ({
             const isValid = response.data.isValid;
             return [
               field.id,
-              isValid ? null : response.data.message ?? null,
+              isValid ? null : (response.data.message ?? null),
             ] as const;
           } catch (err) {
             console.error("Failed to run custom validator", err);
@@ -867,18 +869,18 @@ const FormRenderer = ({
               "Unable to validate this field right now. Please try again.",
             ] as const;
           }
-        })
+        }),
       );
 
       return Object.fromEntries(results);
     },
-    [readOnly, formData]
+    [readOnly, formData],
   );
 
   const validatePage = useCallback(
     async (
       pageIndex: number,
-      includeCustomValidators: boolean
+      includeCustomValidators: boolean,
     ): Promise<{ isValid: boolean; firstInvalidFieldId?: string }> => {
       const page = schema.pages[pageIndex];
       if (!page) {
@@ -887,10 +889,10 @@ const FormRenderer = ({
 
       const updates: Record<string, string | null> = {};
       const fieldsOnPage = page.fields.filter(
-        (element): element is AnyField => "label" in element
+        (element): element is AnyField => "label" in element,
       );
       const visibleFields = fieldsOnPage.filter((field) =>
-        isElementCurrentlyVisible(field)
+        isElementCurrentlyVisible(field),
       );
       const visibleFieldIds = new Set(visibleFields.map((field) => field.id));
 
@@ -905,7 +907,7 @@ const FormRenderer = ({
 
       if (includeCustomValidators && !readOnly) {
         const candidates = visibleFields.filter(
-          (field) => field.customValidatorId && !updates[field.id]
+          (field) => field.customValidatorId && !updates[field.id],
         );
         if (candidates.length > 0) {
           const customResults = await runCustomValidatorsForFields(candidates);
@@ -933,7 +935,7 @@ const FormRenderer = ({
       runCustomValidatorsForFields,
       applyFieldErrorUpdates,
       readOnly,
-    ]
+    ],
   );
 
   const validateAllPages = useCallback(async () => {
@@ -992,7 +994,7 @@ const FormRenderer = ({
           const requiredError = validateFieldValue(
             fieldDefinition,
             nextValue,
-            next
+            next,
           );
           applyFieldErrorUpdates({ [fieldId]: requiredError });
         }
@@ -1181,7 +1183,7 @@ const FormRenderer = ({
         publicAnswers,
         currentPageIndex,
         updatedAt: Date.now(),
-      })
+      }),
     );
   }, [
     formData,
@@ -1201,7 +1203,7 @@ const FormRenderer = ({
     if (parsed?.formData && typeof parsed.formData === "object") {
       const filtered = filterAnswersByFieldIds(
         parsed.formData as Record<string, FormValue>,
-        fieldLookup
+        fieldLookup,
       );
       setFormData(applyDefaultValues(filtered, defaultValueMap));
     }
@@ -1233,8 +1235,8 @@ const FormRenderer = ({
       setFormData(
         filterAnswersByFieldIds(
           completedFormResponse.answers as Record<string, FormValue>,
-          fieldLookup
-        )
+          fieldLookup,
+        ),
       );
     }
   }, [readOnly, completedFormResponse, fieldLookup]);
@@ -1259,8 +1261,8 @@ const FormRenderer = ({
           fieldId in prev
             ? prev[fieldId]
             : user?.formDataPreference === "public"
-            ? true
-            : false;
+              ? true
+              : false;
       }
       return next;
     });
@@ -1422,7 +1424,7 @@ const FormRenderer = ({
         >
           {currentPage !== null &&
             currentPage.fields.map((element, index) =>
-              renderElement(element, index)
+              renderElement(element, index),
             )}
         </div>
         {/* Navigation */}

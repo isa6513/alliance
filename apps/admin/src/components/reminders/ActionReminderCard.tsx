@@ -2,21 +2,21 @@ import {
   PreviewNotificationPlan,
   ReminderGroup,
 } from "@alliance/shared/client";
-import Card from "@alliance/shared/ui/Card";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import TextareaWithHighlights from "../TextareaWithHighlights";
 import { ActionEventDto } from "@alliance/shared/client";
-import { UserSelectUser } from "@alliance/shared/ui/UserSelect";
+import { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import { TagDto } from "@alliance/shared/client";
 import { ActionEventNotifDto } from "@alliance/shared/client";
 import ActionReminderGroupForm, {
   ActionReminderGroupFormSubmitPayload,
 } from "./ActionReminderGroupForm";
-import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
+import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
 import { Link } from "react-router";
 import { formatDate, formatDistanceToNow } from "date-fns";
 import { useMemo, useRef, useState } from "react";
-import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
+import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
 import { GroupScheduleLabels } from "./ActionRemindersTab";
 
 interface ActionReminderCardProps {

@@ -7,14 +7,14 @@ import {
   userListSentRequests,
   userRemoveFriend,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import List from "@alliance/shared/ui/List";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import List from "@alliance/sharedweb/ui/List";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, href } from "react-router";
 import { setRevalidate } from "../applayout";
-import { useToast } from "@alliance/shared/ui/ToastProvider";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 
 interface FriendsTabProps {
   userId: number;

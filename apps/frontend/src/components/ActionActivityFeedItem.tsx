@@ -1,8 +1,8 @@
 import { ActionActivityDto } from "@alliance/shared/client";
 import { Link, href, useNavigate } from "react-router";
-import { formatTime } from "@alliance/shared/lib/utils";
+import { formatTime } from "@alliance/sharedweb/lib/utils";
 import ActivityLikeButton from "./ActivityLikeButton";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 
 export interface ActionActivityFeedItemProps {
   activity: ActionActivityDto;

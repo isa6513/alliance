@@ -6,16 +6,16 @@ import {
   conversationUpdateInfo,
   ProfileDto,
 } from "@alliance/shared/client";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { Link, href } from "react-router";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import List from "@alliance/shared/ui/List";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import DeleteIcon from "@alliance/shared/ui/icons/DeleteIcon";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import List from "@alliance/sharedweb/ui/List";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import DeleteIcon from "@alliance/sharedweb/ui/icons/DeleteIcon";
 import { useAuth } from "../lib/AuthContext";
 import { useEffect, useMemo, useState } from "react";
-import CreateIcon from "@alliance/shared/ui/icons/CreateIcon";
-import { sharp_allowed_mime_types } from "@alliance/shared/lib/config";
+import CreateIcon from "@alliance/sharedweb/ui/icons/CreateIcon";
+import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
 import ProfileImageEditor from "./ProfileImageEditor";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Spinner from "./Spinner";

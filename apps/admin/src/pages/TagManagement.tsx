@@ -6,9 +6,9 @@ import {
   userUpdateTag,
 } from "@alliance/shared/client";
 import { CreateTagDto, TagDto } from "@alliance/shared/client/types.gen";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Badge from "@alliance/shared/ui/Badge";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Badge from "@alliance/sharedweb/ui/Badge";
 import { Link } from "react-router";
 
 const INITIAL_NEW_TAG = {

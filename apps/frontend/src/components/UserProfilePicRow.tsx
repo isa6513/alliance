@@ -1,5 +1,5 @@
 import { ProfileDto } from "@alliance/shared/client";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { useState } from "react";
 import { href } from "react-router";
 

@@ -1,6 +1,6 @@
 import { EditableContentDto } from "@alliance/shared/client";
-import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
-import ImageLightbox from "@alliance/shared/ui/ImageLightbox";
+import AppMarkdownWrapper from "./AppMarkdownWrapper";
+import ImageLightbox from "./ImageLightbox";
 import React from "react";
 
 interface EditableContentRendererProps {
@@ -18,8 +18,8 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
   className,
   truncated = false,
 }) => {
-  const attachments = (content.attachments ?? []).filter(
-    (src): src is string => Boolean(src)
+  const attachments = (content.attachments ?? []).filter((src): src is string =>
+    Boolean(src)
   );
   const sharedClasses = "mb-1 whitespace-pre-wrap";
 

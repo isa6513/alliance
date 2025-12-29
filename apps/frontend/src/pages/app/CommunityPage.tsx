@@ -13,11 +13,11 @@ import {
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Spinner from "../../components/Spinner";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import CommunityMembersTable from "@alliance/shared/ui/CommunityMembersTable";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
 import { useAuth } from "../../lib/AuthContext";
-import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import CompletedBar from "../../components/CompletedBar";
 import {
   GroupMemberGuidelines,
@@ -25,7 +25,7 @@ import {
 } from "../../components/GroupGuidelines";
 import CommunityEditForm from "../../components/CommunityEditForm";
 import { href, useNavigate, useSearchParams } from "react-router";
-import { useToast } from "@alliance/shared/ui/ToastProvider";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import CommunityActivityTab from "../../components/CommunityActivityTab";
 import TwoColumnLayout from "../../components/TwoColumnLayout";
 import FloatingChatPanel from "../../components/FloatingChatpanel";
@@ -34,9 +34,9 @@ import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../../lib/config";
 import CommunityInvitesTabLeader from "../../components/CommunityInvitesTabLeader";
 import CommunityInvitesTabMember from "../../components/CommunityInvitesTabMember";
-import BottomSpacer from "@alliance/shared/ui/BottomSpacer";
+import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
 import { useMediaQuery } from "../../lib/useMediaQuery";
-import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
+import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 
 type Tab = "activity" | "members" | "invites" | "about" | "edit" | "resources";
 

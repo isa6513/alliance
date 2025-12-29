@@ -9,7 +9,7 @@ import ConversationDetailPanel from "./ConversationDetailPanel";
 import useLiveConvoMessages from "../pages/app/messages";
 import { Expand, Minus } from "lucide-react";
 import { href, Link } from "react-router";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 
 const FloatingChatPanel = ({
   communityId,

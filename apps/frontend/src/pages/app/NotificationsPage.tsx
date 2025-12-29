@@ -1,9 +1,9 @@
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { useNotifications } from "../../lib/useNotifications";
-import { formatTime } from "@alliance/shared/lib/utils";
-import List from "@alliance/shared/ui/List";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import CenterLayout from "@alliance/shared/ui/CenterLayout";
+import { formatTime } from "@alliance/sharedweb/lib/utils";
+import List from "@alliance/sharedweb/ui/List";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 
 const NotificationsPage = () => {
   const { notifications, handleMarkAllAsRead, handleNotifClick } =

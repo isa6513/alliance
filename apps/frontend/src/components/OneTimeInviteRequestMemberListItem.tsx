@@ -1,5 +1,5 @@
 import { OnetimeInviteDto } from "@alliance/shared/client";
-import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { X } from "lucide-react";
 
 export type OneTimeInviteRequestMemberListItemProps = {

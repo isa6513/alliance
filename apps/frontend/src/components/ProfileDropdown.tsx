@@ -1,5 +1,5 @@
-import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { useCallback, useState } from "react";
 import { Link, href, useNavigate, useOutletContext } from "react-router";
 import { useAuth } from "../lib/AuthContext";

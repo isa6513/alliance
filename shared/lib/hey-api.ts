@@ -1,6 +1,6 @@
 import { authRefreshTokens } from "../client";
 import { CreateClientConfig } from "../client/client.gen";
-import { getApiUrl } from "./config";
+import { getApiUrl } from "../../sharedweb/lib/config";
 
 export const AuthEvents = {
   onUnauthorized: () => {
@@ -15,7 +15,7 @@ export const createClientConfig: CreateClientConfig = (config) => {
 
   const wrappedFetch: typeof fetch = async (
     input: RequestInfo | URL,
-    init?: RequestInit
+    init?: RequestInit,
   ) => {
     const req = new Request(input, init);
     const retryReq = req.clone();

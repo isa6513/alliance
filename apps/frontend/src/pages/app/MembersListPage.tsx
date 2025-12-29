@@ -6,12 +6,12 @@ import {
 } from "@alliance/shared/client";
 
 import MembersListItem from "../../components/MembersListItem";
-import List from "@alliance/shared/ui/List";
-import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
+import List from "@alliance/sharedweb/ui/List";
+import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import { useAuth } from "../../lib/AuthContext";
 import { useEffect, useState } from "react";
 import BasicErrorMessage from "../../components/BasicErrorMessage";
-import CenterLayout from "@alliance/shared/ui/CenterLayout";
+import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import Spinner from "../../components/Spinner";
 
 export enum MemberFilterMode {

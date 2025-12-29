@@ -1,5 +1,5 @@
-import CenterLayout from "@alliance/shared/ui/CenterLayout";
-import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
+import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
 
 const PublicActionCompletedPage = () => {
   return (

@@ -1,6 +1,6 @@
-import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import Expandable from "./Expandable";
-import { getBaseUrl } from "@alliance/shared/lib/config";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 
 const GroupOrganizerGuidelines = () => {
   return (

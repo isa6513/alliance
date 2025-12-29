@@ -1,5 +1,5 @@
 import { getPastEvents } from "@alliance/shared/lib/actionUtils";
-import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
+import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, href, useNavigate, useOutletContext } from "react-router";
 import { ActionWithRelation, AppLayoutOutletContext } from "../../applayout";

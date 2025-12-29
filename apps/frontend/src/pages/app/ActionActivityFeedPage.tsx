@@ -4,12 +4,12 @@ import {
   actionsFindOne,
   ActionDto,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import UserActivityCard from "../../components/UserActivityCard";
 import { useAuth } from "../../lib/AuthContext";
 import useActivities, { ActivityList } from "./useActivities";
-import CenterLayout from "@alliance/shared/ui/CenterLayout";
+import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import { Link, href, useParams } from "react-router";
 import chevronLeft from "../../assets/icons8-expand-arrow-96.png";
 

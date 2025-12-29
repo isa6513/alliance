@@ -5,11 +5,11 @@ import {
   userGetOnetimeInvitesByRequester,
   userRequestOnetimeInvite,
 } from "@alliance/shared/client";
-import { getBaseUrl } from "@alliance/shared/lib/config";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import List from "@alliance/shared/ui/List";
-import { useToast } from "@alliance/shared/ui/ToastProvider";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import List from "@alliance/sharedweb/ui/List";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import OneTimeInviteRequestMemberListItem from "./OneTimeInviteRequestMemberListItem";

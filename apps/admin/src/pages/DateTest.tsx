@@ -1,4 +1,4 @@
-import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
+import DateTimePicker from "@alliance/sharedweb/ui/DateTimePicker";
 
 const DateTest = () => {
   return (

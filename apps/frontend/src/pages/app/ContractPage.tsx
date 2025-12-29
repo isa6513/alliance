@@ -3,13 +3,13 @@ import {
   userSignContract,
   userSuspendContract,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import React, { useEffect, useState } from "react";
 import MemberContract from "../../components/MemberContract";
-import FormInput from "@alliance/shared/ui/FormInput";
+import FormInput from "@alliance/sharedweb/ui/FormInput";
 import { useAuth } from "../../lib/AuthContext";
-import CenterLayout from "@alliance/shared/ui/CenterLayout";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 
 const ContractPage: React.FC = () => {
   const { user, loading, refreshUser } = useAuth();

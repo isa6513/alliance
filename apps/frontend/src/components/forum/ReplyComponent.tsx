@@ -5,15 +5,15 @@ import {
   forumUpdateComment,
   imagesUploadImage,
 } from "@alliance/shared/client";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { formatDistanceToNow } from "date-fns";
 import React, { useEffect, useRef, useState } from "react";
 import CommentLikeButton from "../CommentLikeButton";
-import UserDisplayName from "@alliance/shared/ui/UserDisplayName";
-import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
-import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
+import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
+import EditableContentForm from "@alliance/sharedweb/ui/EditableContentForm";
+import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
 import ReplyForm from "./ReplyForm";
 import { Link, href } from "react-router";
 

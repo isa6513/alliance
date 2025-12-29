@@ -3,6 +3,9 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "packageManager": "yarn@4.9.1",
+  "installConfig": {
+    "hoistingLimits": "workspaces"
+  },
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",

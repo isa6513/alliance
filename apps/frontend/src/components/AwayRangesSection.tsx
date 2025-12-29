@@ -5,9 +5,9 @@ import {
   userDeleteAwayRange,
   userGetAwayRanges,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
-import FormInput from "@alliance/shared/ui/FormInput";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
+import FormInput from "@alliance/sharedweb/ui/FormInput";
 import { X } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { href, Link } from "react-router";

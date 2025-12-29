@@ -1,5 +1,5 @@
 import { ActionUpdate } from "@alliance/shared/client/types.gen";
-import ActionUpdateCard from "@alliance/shared/ui/ActionUpdateCard";
+import ActionUpdateCard from "@alliance/sharedweb/ui/ActionUpdateCard";
 import { useState } from "react";
 
 const ActionUpdatesPanel = ({ updates }: { updates: ActionUpdate[] }) => {

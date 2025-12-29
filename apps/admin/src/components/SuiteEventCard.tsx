@@ -1,7 +1,7 @@
 import { ActionEventDto, UpdateActionEventDto } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card from "@alliance/shared/ui/Card";
-import DateTimePicker from "@alliance/shared/ui/DateTimePicker";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
+import DateTimePicker from "@alliance/sharedweb/ui/DateTimePicker";
 import { formatDate } from "date-fns";
 import { useState } from "react";
 

@@ -159,7 +159,7 @@ export default function TimeZoneSelectPretty({
   const [activeIndex, setActiveIndex] = React.useState(0);
 
   const [internalValue, setInternalValue] = React.useState<TimeZoneValue>(
-    value ?? defaultValue
+    value ?? defaultValue,
   );
 
   // keep internal in sync with controlled value
@@ -227,7 +227,7 @@ export default function TimeZoneSelectPretty({
 
     items.sort(
       (a, b) =>
-        a.offsetMins! - b.offsetMins! || a.labelLeft.localeCompare(b.labelLeft)
+        a.offsetMins! - b.offsetMins! || a.labelLeft.localeCompare(b.labelLeft),
     );
 
     return items;

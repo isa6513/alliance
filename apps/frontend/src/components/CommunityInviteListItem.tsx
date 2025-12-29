@@ -1,6 +1,6 @@
 import { CommunityInviteDto } from "@alliance/shared/client";
-import DeleteIcon from "@alliance/shared/ui/icons/DeleteIcon";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import DeleteIcon from "@alliance/sharedweb/ui/icons/DeleteIcon";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 
 export interface CommunityInviteListItemProps {
   invite: CommunityInviteDto;

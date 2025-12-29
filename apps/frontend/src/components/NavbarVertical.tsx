@@ -1,6 +1,6 @@
 import { Features } from "@alliance/shared/lib/features";
-import BottomSpacer from "@alliance/shared/ui/BottomSpacer";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import {
   Bell,
   BookText,

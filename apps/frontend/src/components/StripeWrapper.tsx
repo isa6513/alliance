@@ -1,5 +1,5 @@
 import { paymentsCreatePaymentIntent } from "@alliance/shared/client";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";

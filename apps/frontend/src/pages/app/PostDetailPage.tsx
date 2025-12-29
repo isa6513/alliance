@@ -5,18 +5,18 @@ import {
   forumUnlikePost,
   PostDto,
 } from "@alliance/shared/client";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import PinnedIcon from "@alliance/shared/ui/icons/PinnedIcon";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, href, useNavigate, useParams } from "react-router";
 import { setRevalidate } from "../../applayout";
 import Comments from "../../components/Comments";
 import PostLikeButton from "../../components/PostLikeButton";
-import UserDisplayName from "@alliance/shared/ui/UserDisplayName";
-import EditableContentRenderer from "@alliance/shared/ui/EditableContentRenderer";
+import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
+import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
 import { useAuth } from "../../lib/AuthContext";
-import { formatTime } from "@alliance/shared/lib/utils";
+import { formatTime } from "@alliance/sharedweb/lib/utils";
 import Spinner from "../../components/Spinner";
 import { useCIDFromParams } from "../../lib/utils";
 

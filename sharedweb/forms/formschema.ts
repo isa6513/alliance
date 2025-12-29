@@ -1,8 +1,5 @@
-import type { CitySearchDto } from "../client";
-import type {
-  DisplayBlock,
-  ManualDisplayBlockContent,
-} from "./display-blocks";
+import type { CitySearchDto } from "../../shared/client";
+import type { DisplayBlock, ManualDisplayBlockContent } from "./display-blocks";
 
 // field-kinds.ts
 export type FieldKind =

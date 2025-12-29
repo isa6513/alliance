@@ -12,8 +12,8 @@ import ActionListCard from "../components/ActionListCard";
 import ActionRemindersTab from "../components/reminders/ActionRemindersTab";
 import ActionTimeline from "../components/ActionTimeline";
 import SuiteEventList from "../components/SuiteEventList";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card from "@alliance/shared/ui/Card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
 
 const ActionSuitePage = () => {
   const { suiteId: suiteIdString } = useParams();

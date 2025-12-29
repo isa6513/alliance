@@ -1,6 +1,6 @@
 import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Dropdown from "@alliance/shared/ui/Dropdown";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Dropdown from "@alliance/sharedweb/ui/Dropdown";
 import { useState } from "react";
 
 export interface ActionTaskPanelOptOutProps {

@@ -4,7 +4,7 @@ import {
   SearchItemType,
   searchSaveSelected,
 } from "@alliance/shared/client";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 

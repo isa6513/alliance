@@ -7,9 +7,9 @@ import {
 } from "@alliance/shared/client";
 import FormRenderer, {
   computeFormStorageKey,
-} from "@alliance/shared/forms/FormRenderer";
-import { FormSchema } from "@alliance/shared/forms/formschema";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+} from "@alliance/sharedweb/forms/FormRenderer";
+import { FormSchema } from "@alliance/sharedweb/forms/formschema";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import posthog from "posthog-js";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../lib/AuthContext";

@@ -3,7 +3,7 @@ import { href, useNavigate } from "react-router";
 
 import { ActionDto, UserActionRelation } from "@alliance/shared/client";
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ActionTaskPanel from "../../components/ActionTaskPanel";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 import TaskTimeInfo from "./TaskTimeInfo";

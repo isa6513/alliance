@@ -1,4 +1,4 @@
-import CenterLayout from "@alliance/shared/ui/CenterLayout";
+import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import ExportableFlyer from "../../components/ExportableFlyer";
 import AIPrivacyFlyer from "../../components/flyers/AIPrivacyFlyer";
 

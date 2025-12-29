@@ -12,16 +12,16 @@ import {
   authMe,
   UpdateProfileDto,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
-import LargeCheckbox from "@alliance/shared/ui/LargeCheckbox";
-import FormInput from "@alliance/shared/ui/FormInput";
+import LargeCheckbox from "@alliance/sharedweb/ui/LargeCheckbox";
+import FormInput from "@alliance/sharedweb/ui/FormInput";
 import { useAuth } from "../../lib/AuthContext";
 import AwayRangesSection from "../../components/AwayRangesSection";
-import TimeZoneSelect from "@alliance/shared/forms/TimeZoneSelect";
+import TimeZoneSelect from "@alliance/sharedweb/forms/TimeZoneSelect";
 
 const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();

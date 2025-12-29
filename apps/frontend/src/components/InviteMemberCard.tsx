@@ -1,6 +1,6 @@
 import { Features } from "@alliance/shared/lib/features";
-import Button from "@alliance/shared/ui/Button";
-import Card from "@alliance/shared/ui/Card";
+import Button from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
 import { useCallback } from "react";
 import { useAuth } from "../lib/AuthContext";
 import { isFeatureEnabled } from "../lib/config";

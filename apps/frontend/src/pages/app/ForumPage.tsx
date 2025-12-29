@@ -2,9 +2,9 @@ import React, { useCallback } from "react";
 import { href, useNavigate, useOutletContext } from "react-router";
 import ForumListPost from "../../components/ForumListPost";
 import { useGrayBackground } from "../../components/HtmlBackgroundManager";
-import List from "@alliance/shared/ui/List";
-import CenterLayout from "@alliance/shared/ui/CenterLayout";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import List from "@alliance/sharedweb/ui/List";
+import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import { AppLayoutOutletContext } from "../../applayout";
 
 const ForumPage: React.FC = () => {

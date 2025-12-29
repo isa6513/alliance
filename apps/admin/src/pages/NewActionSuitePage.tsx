@@ -1,6 +1,6 @@
 import { actionsCreateSuite } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card from "@alliance/shared/ui/Card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 

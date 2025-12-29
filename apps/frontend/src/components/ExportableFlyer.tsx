@@ -1,4 +1,4 @@
-import Button from "@alliance/shared/ui/Button";
+import Button from "@alliance/sharedweb/ui/Button";
 import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
 import React, { useRef, useState } from "react";

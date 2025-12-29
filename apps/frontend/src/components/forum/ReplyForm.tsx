@@ -1,7 +1,7 @@
 import { CreateEditableContentDto } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import React, { useCallback, useState } from "react";
-import EditableContentForm from "@alliance/shared/ui/EditableContentForm";
+import EditableContentForm from "@alliance/sharedweb/ui/EditableContentForm";
 
 interface ReplyFormProps {
   parentId: number | null;

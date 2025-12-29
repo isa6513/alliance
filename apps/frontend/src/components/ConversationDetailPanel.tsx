@@ -6,11 +6,11 @@ import {
 } from "@alliance/shared/client";
 import Spinner from "./Spinner";
 import Message from "./Message";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useAuth } from "../lib/AuthContext";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ConversationInfoPanel from "./ConversationInfoPanel";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { ChevronLeft, Users } from "lucide-react";
 import MessageInput from "./MessageInput";
 import type { MessageDto } from "@alliance/shared/client";

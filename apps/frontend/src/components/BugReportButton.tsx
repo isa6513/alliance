@@ -1,4 +1,4 @@
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import posthog from "posthog-js";
 import { useState } from "react";
 

@@ -221,6 +221,7 @@ jobs:
 
             cd ~/output
             sed -i '/"@alliance\/shared": "workspace:\*"/d' package.json
+            sed -i '/"@alliance\/sharedweb": "workspace:\*"/d' package.json
             yarn install --omit=dev
 
             pm2 delete client-ssr || true

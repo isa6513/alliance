@@ -9,7 +9,7 @@ import {
 } from "@alliance/shared/client";
 import DateTimePicker, {
   DateTimePickerChange,
-} from "@alliance/shared/ui/DateTimePicker";
+} from "@alliance/sharedweb/ui/DateTimePicker";
 import { useState } from "react";
 
 export type CreateEventFormProps = {

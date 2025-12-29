@@ -1,6 +1,6 @@
 import { ActionActivityDto, UserActionRelation } from "@alliance/shared/client";
 import { getLatestEvent } from "@alliance/shared/lib/actionUtils";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
 import ActionTaskPanel, { ActionTaskPanelProps } from "./ActionTaskPanel";

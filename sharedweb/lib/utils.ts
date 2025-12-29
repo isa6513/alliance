@@ -1,12 +1,6 @@
 // Tremor Raw cx [v0.0.0]
 
-import clsx, { type ClassValue } from "clsx";
 import { formatDistanceToNow } from "date-fns";
-import { twMerge } from "tailwind-merge";
-
-export function cx(...args: ClassValue[]) {
-  return twMerge(clsx(...args));
-}
 
 // Tremor focusInput [v0.0.2]
 

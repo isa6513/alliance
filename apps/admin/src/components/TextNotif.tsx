@@ -1,6 +1,6 @@
 import { ActionEventNotifDto, ProfileDto } from "@alliance/shared/client";
-import Badge from "@alliance/shared/ui/Badge";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import Badge from "@alliance/sharedweb/ui/Badge";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import React from "react";
 import { linkClickClasses } from "./EmailNotif";
 

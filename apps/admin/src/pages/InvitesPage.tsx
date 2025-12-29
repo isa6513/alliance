@@ -5,13 +5,13 @@ import {
   userGetOnetimeInvites,
   userList,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card from "@alliance/shared/ui/Card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
 import { useEffect, useState } from "react";
-import UserSelect, { UserSelectUser } from "@alliance/shared/ui/UserSelect";
-import List from "@alliance/shared/ui/List";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
+import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
+import List from "@alliance/sharedweb/ui/List";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import CopyIcon from "@alliance/sharedweb/ui/icons/CopyIcon";
 import { getBaseUrl } from "@alliance/shared/lib/config";
 
 const InvitesPage = () => {
@@ -120,7 +120,7 @@ const InvitesPage = () => {
               </div>
               <div className="flex flex-row gap-3 items-center">
                 <p className="text-gray-500">{invite.code}</p>
-                {invite.status === 'link_unused' ? (
+                {invite.status === "link_unused" ? (
                   <p className="text-green">Active</p>
                 ) : (
                   <p className="text-gray-500">used</p>

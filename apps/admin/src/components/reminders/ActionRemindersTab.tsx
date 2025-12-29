@@ -12,8 +12,8 @@ import {
   userGetTags,
   userList,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import React, {
   useCallback,
   useEffect,
@@ -31,10 +31,10 @@ import {
 import ActionReminderGroupForm, {
   ActionReminderGroupFormSubmitPayload,
 } from "./ActionReminderGroupForm";
-import { UserSelectUser } from "@alliance/shared/ui/UserSelect";
+import { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import { ActionEventNotifDto } from "@alliance/shared/client";
 import ActionReminderCard from "./ActionReminderCard";
-import { useToast } from "@alliance/shared/ui/ToastProvider";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { presetNames, ReminderPresetName, reminderPresets } from "./presets";
 
 interface ActionRemindersTabProps {

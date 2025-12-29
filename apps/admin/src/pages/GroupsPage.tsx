@@ -8,9 +8,9 @@ import type {
   CommunityDto,
   CreateCommunityDto,
 } from "@alliance/shared/client/types.gen";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import List from "@alliance/shared/ui/List";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import List from "@alliance/sharedweb/ui/List";
 
 const INITIAL_COMMUNITY: CreateCommunityDto = {
   name: "",

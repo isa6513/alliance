@@ -1,5 +1,5 @@
 import { imagesUploadImage } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import React, { useState } from "react";
 
 const ImageUpload: React.FC = () => {

@@ -10,7 +10,7 @@ import {
 } from "react";
 import { RiArrowGoBackLine, RiArrowGoForwardLine } from "@remixicon/react";
 import Spinner from "./Spinner";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 
 type ProfileImageEditorProps = {
   initialImageUrl: string | null;

@@ -1,7 +1,7 @@
 import type { CustomComponentProps } from "./types";
 import Card, { CardStyle } from "../../ui/Card";
 import { useEffect, useState } from "react";
-import { actionsGetShareLink } from "../../client";
+import { actionsGetShareLink } from "@alliance/shared/client";
 import Button, { ButtonColor } from "../../ui/Button";
 
 const ActionShareUrlComponent = ({ field }: CustomComponentProps) => {

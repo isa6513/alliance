@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @source "../../../shared/";
+@source "../../../sharedweb/";
 
 @font-face {
   font-family: "Berlingske";

@@ -9,8 +9,8 @@ import {
   ProfileDto,
   userListMessageableUsers,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router";

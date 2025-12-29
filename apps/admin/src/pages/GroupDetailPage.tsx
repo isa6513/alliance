@@ -19,11 +19,11 @@ import type {
   UserActionRelationDetailDto,
   UserActionSummaryDto,
 } from "@alliance/shared/client/types.gen";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import UserSelect, { UserSelectUser } from "@alliance/shared/ui/UserSelect";
-import { useToast } from "@alliance/shared/ui/ToastProvider";
-import CommunityMembersTable from "@alliance/shared/ui/CommunityMembersTable";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
 
 const CommunityDetailPage: React.FC = () => {
   const { id } = useParams();

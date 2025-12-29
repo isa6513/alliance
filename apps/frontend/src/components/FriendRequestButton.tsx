@@ -1,5 +1,5 @@
 import { FriendStatusDto } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useState } from "react";
 
 interface FriendRequestButtonProps {

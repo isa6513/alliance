@@ -11,7 +11,7 @@ import {
 } from "@alliance/shared/client";
 import { Outlet, useRouteLoaderData } from "react-router";
 import { useAuth } from "./lib/AuthContext";
-import { isStaging } from "@alliance/shared/lib/config";
+import { isStaging } from "@alliance/sharedweb/lib/config";
 
 export interface RouteMatch {
   data: unknown;

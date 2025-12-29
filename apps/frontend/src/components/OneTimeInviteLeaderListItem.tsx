@@ -1,6 +1,6 @@
 import { OnetimeInviteDto } from "@alliance/shared/client";
-import CopyIcon from "@alliance/shared/ui/icons/CopyIcon";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import CopyIcon from "@alliance/sharedweb/ui/icons/CopyIcon";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { href, Link } from "react-router";
 import { X } from "lucide-react";
 

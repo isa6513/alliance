@@ -1,5 +1,5 @@
 import React from "react";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import type { TableDataDto } from "@alliance/shared/client/types.gen";
 import type { SelectedRowState } from "./DatabaseViewer.hooks";
 import { X } from "lucide-react";

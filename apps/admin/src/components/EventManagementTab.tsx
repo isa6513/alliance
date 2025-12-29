@@ -1,8 +1,8 @@
 import { Action } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
-import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
-import DropdownIcon from "@alliance/shared/ui/icons/DropdownIcon";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
+import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
 import { useState } from "react";
 import { formatStatus, getStatusColor } from "../pages/ActionDashboard";
 import CreateEventForm from "./CreateEventForm";

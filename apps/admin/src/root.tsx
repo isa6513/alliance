@@ -8,7 +8,7 @@ import {
 } from "react-router";
 import { Route } from "../.react-router/types/src/+types/root";
 import { AuthProvider } from "./lib/AuthContext";
-import { ToastProvider } from "@alliance/shared/ui/ToastProvider";
+import { ToastProvider } from "@alliance/sharedweb/ui/ToastProvider";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   if (!import.meta.env.PROD) {

@@ -1,8 +1,8 @@
 import { ActionEventDto } from "@alliance/shared/client/types.gen";
 import { ActionDto } from "@alliance/shared/client/types.gen";
-import { formatTime } from "@alliance/shared/lib/utils";
-import ClockIcon from "@alliance/shared/ui/icons/ClockIcon";
-import DeadlineIcon from "@alliance/shared/ui/icons/DeadlineIcon";
+import { formatTime } from "@alliance/sharedweb/lib/utils";
+import ClockIcon from "@alliance/sharedweb/ui/icons/ClockIcon";
+import DeadlineIcon from "@alliance/sharedweb/ui/icons/DeadlineIcon";
 import { format } from "date-fns";
 
 export interface TaskTimeInfoProps {

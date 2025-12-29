@@ -3,7 +3,7 @@ import React from "react";
 import { Link, href } from "react-router";
 import { ActionWithRelation } from "../applayout";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
-import CheckIcon from "@alliance/shared/ui/icons/CheckIcon";
+import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
 import ActionSquareThumbnail from "./ActionSquareThumbnail";
 
 export interface ActionItemCardProps {

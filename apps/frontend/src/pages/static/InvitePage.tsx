@@ -7,10 +7,10 @@ import {
   userReferrerProfile,
   userOnetimeInvite,
 } from "@alliance/shared/client";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import posthog from "posthog-js";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 
 const InvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();

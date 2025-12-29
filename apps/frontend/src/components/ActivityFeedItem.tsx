@@ -1,7 +1,7 @@
 import { ProfileDto } from "@alliance/shared/client";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { Link, href } from "react-router";
-import UserDisplayName from "@alliance/shared/ui/UserDisplayName";
+import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
 
 export interface ActivityFeedItem {
   title: string;

@@ -1,9 +1,9 @@
-import Button from "@alliance/shared/ui/Button";
+import Button from "@alliance/sharedweb/ui/Button";
 
 import { SignUpDto } from "@alliance/shared/client";
-import { ButtonColor } from "@alliance/shared/ui/Button";
+import { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useCallback, useState } from "react";
-import FormInput from "@alliance/shared/ui/FormInput";
+import FormInput from "@alliance/sharedweb/ui/FormInput";
 
 export interface SignupFormProps {
   onSubmit: (formData: SignUpDto) => void;

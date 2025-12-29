@@ -1,4 +1,4 @@
-import Card, { CardStyle } from "@alliance/shared/ui/Card";
+import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import { href, useNavigate } from "react-router";
 import StatusIndicator, { Status } from "./StatusIndicator";
 

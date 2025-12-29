@@ -6,7 +6,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import ActionTimeline from "../components/ActionTimeline";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ActionListCard from "../components/ActionListCard";
 
 export const getLastPastEventDate = (

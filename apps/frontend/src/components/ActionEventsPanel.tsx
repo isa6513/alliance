@@ -7,7 +7,7 @@ import { formatDistance } from "date-fns";
 import Timeline from "./system/Timeline";
 import TimelineItem from "./system/TimelineItem";
 import { Fragment } from "react";
-import ActionUpdateCard from "@alliance/shared/ui/ActionUpdateCard";
+import ActionUpdateCard from "@alliance/sharedweb/ui/ActionUpdateCard";
 
 export interface ActionEventsPanelProps {
   action: ActionDto;

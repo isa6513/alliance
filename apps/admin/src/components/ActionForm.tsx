@@ -5,10 +5,10 @@ import {
   FormDto,
   TagDto,
 } from "@alliance/shared/client";
-import UserSelect, { UserSelectUser } from "@alliance/shared/ui/UserSelect";
+import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import React, { useMemo, useRef } from "react";
 import { MarkdownTextArea } from "./MarkdownTextArea";
-import Card from "@alliance/shared/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 
 interface ActionFormProps {
   form: CreateActionDto;

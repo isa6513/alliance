@@ -23,7 +23,7 @@ import {
 } from "./display-blocks";
 import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
 import { EditableOutputFieldBlock } from "./output-builder/EditableOutputFieldBlock";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 
 const DISPLAY_BLOCK_KINDS: DisplayKind[] = [
   "header",

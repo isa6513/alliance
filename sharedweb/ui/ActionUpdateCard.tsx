@@ -1,5 +1,8 @@
 import { Link } from "react-router";
-import { ActionUpdateDto, CreateEditableContentDto } from "../client";
+import {
+  ActionUpdateDto,
+  CreateEditableContentDto,
+} from "@alliance/shared/client";
 import { formatTime } from "../lib/utils";
 import Button, { ButtonColor } from "./Button";
 import EditableContentForm from "./EditableContentForm";
@@ -13,7 +16,7 @@ export interface ActionUpdateCardProps {
   onEdit?: (
     id: number,
     title: string,
-    content: CreateEditableContentDto
+    content: CreateEditableContentDto,
   ) => Promise<void>;
   admin?: boolean;
   onActionPageTimeline?: boolean;
@@ -29,7 +32,7 @@ const ActionUpdateCard = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(update.title);
   const [editContent, setEditContent] = useState<CreateEditableContentDto>(
-    update.content
+    update.content,
   );
   const [isSaving, setIsSaving] = useState(false);
 

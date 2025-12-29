@@ -1,6 +1,6 @@
 import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { formatDate } from "date-fns";
 import { useCallback, useState } from "react";
 import { Link, href } from "react-router";

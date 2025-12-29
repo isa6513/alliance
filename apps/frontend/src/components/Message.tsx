@@ -1,12 +1,12 @@
 import type { MessageDto } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { Reply, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, href } from "react-router";
-import UserDisplayName from "@alliance/shared/ui/UserDisplayName";
-import { formatTime } from "@alliance/shared/lib/utils";
-import AppMarkdownWrapper from "@alliance/shared/ui/AppMarkdownWrapper";
+import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
+import { formatTime } from "@alliance/sharedweb/lib/utils";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 
 const Message = ({
   message,

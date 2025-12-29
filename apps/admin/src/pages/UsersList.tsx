@@ -20,11 +20,11 @@ import {
 } from "@alliance/shared/client/types.gen";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import UserCard from "../components/UserCard";
-import DropdownSelect from "@alliance/shared/ui/DropdownSelect";
+import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
 import { href, Link, useSearchParams } from "react-router";
 import { LayoutGrid, List } from "lucide-react";
-import CommunityMembersTable from "@alliance/shared/ui/CommunityMembersTable";
+import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
 
 type ViewMode = "cards" | "rows";
 

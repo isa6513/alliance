@@ -1,8 +1,8 @@
-import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
-import Dropdown from "@alliance/shared/ui/Dropdown";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Dropdown from "@alliance/sharedweb/ui/Dropdown";
 import { useState } from "react";
 import ActionCommitButton from "./ActionCommitButton";
+import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 
 export interface ActionTaskPanelCommitProps {
   onCommit: () => void;

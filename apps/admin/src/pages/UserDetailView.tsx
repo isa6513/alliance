@@ -20,12 +20,12 @@ import {
   UserActionSummaryDto,
   UserAwayRangeDto,
 } from "@alliance/shared/client/types.gen";
-import ProfileImage from "@alliance/shared/ui/ProfileImage";
-import DatabaseIcon from "@alliance/shared/ui/icons/DatabaseIcon";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router";
 import { Route } from "../../.react-router/types/src/pages/+types/UserDetailView";
-import Button, { ButtonColor } from "@alliance/shared/ui/Button";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import CreateActivityControls from "../components/CreateActivityControls";
 import { ChevronDown, ChevronRight, Mail, Phone } from "lucide-react";
 

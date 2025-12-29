@@ -1,5 +1,5 @@
 import { ActionUpdateDto } from "@alliance/shared/client";
-import ActionUpdateCard from "@alliance/shared/ui/ActionUpdateCard";
+import ActionUpdateCard from "@alliance/sharedweb/ui/ActionUpdateCard";
 
 interface TimelineItemProps {
   highlighted?: boolean;
