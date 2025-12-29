@@ -451,6 +451,7 @@ jobs:
       - build-nest-backend
       - test-backend-e2e
       - test-backend-unit
+      - build-react-app
       - migrations-drift-check
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
