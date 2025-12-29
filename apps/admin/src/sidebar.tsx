@@ -14,7 +14,6 @@ import { useAuth } from "./lib/AuthContext";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import SidebarIcon from "@alliance/sharedweb/ui/icons/SidebarIcon";
 import { isProduction } from "@alliance/sharedweb/lib/config";
-import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
 import Dropdown from "@alliance/sharedweb/ui/Dropdown";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import {

@@ -8,7 +8,7 @@ import {
 import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import Badge from "@alliance/sharedweb/ui/Badge";
-import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
+import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import { useMemo, useState } from "react";
 import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
 import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";

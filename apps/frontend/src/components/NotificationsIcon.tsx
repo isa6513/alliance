@@ -1,4 +1,4 @@
-import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
+import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { formatDate } from "date-fns";

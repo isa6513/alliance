@@ -10,7 +10,7 @@ import {
   userGetAwayRangeForUser,
   tasksGetFormsForUserSid,
 } from "@alliance/shared/client";
-import { getApiUrl } from "@alliance/shared/lib/config";
+import { getApiUrl } from "@alliance/sharedweb/lib/config";
 import {
   ActionEventNotifDto,
   TagDto,

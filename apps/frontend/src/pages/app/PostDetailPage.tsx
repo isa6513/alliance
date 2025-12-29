@@ -75,7 +75,7 @@ const PostDetailPage: React.FC = () => {
   const handleLike = useCallback(async () => {
     if (!post) return;
 
-    if (post.likes.some((like) => like.id === user?.id)) {
+    if (post.likes?.some((like) => like.id === user?.id)) {
       await forumUnlikePost({
         path: { id: post.id },
       });
@@ -184,8 +184,10 @@ const PostDetailPage: React.FC = () => {
             <div className="flex items-center mt-2 sm:mt-4 gap-x-1.5 -mb-2">
               <div className="">
                 <PostLikeButton
-                  liked={post.likes.some((like) => like.id === user?.id)}
-                  likes={post.likes.length}
+                  liked={
+                    post.likes?.some((like) => like.id === user?.id) ?? false
+                  }
+                  likes={post.likes?.length ?? 0}
                   handleLike={handleLike}
                 />
               </div>

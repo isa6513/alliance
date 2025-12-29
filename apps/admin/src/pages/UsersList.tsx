@@ -21,7 +21,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import UserCard from "../components/UserCard";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
-import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
+import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import { href, Link, useSearchParams } from "react-router";
 import { LayoutGrid, List } from "lucide-react";
 import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";

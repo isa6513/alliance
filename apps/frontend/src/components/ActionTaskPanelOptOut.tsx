@@ -1,4 +1,4 @@
-import { useOutsideClick } from "@alliance/shared/lib/useOutsideClick";
+import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Dropdown from "@alliance/sharedweb/ui/Dropdown";
 import { useState } from "react";
