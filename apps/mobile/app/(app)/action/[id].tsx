@@ -148,10 +148,7 @@ export default function ActionDetailScreen() {
             </Text>
           )}
           {action.events && action.events.length > 0 && (
-            <View className="mb-6">
-              <Text className="text-xl font-semibold text-zinc-900 mb-4">
-                Timeline
-              </Text>
+            <View className="mb-4">
               <ActionEventsPanel action={action} />
             </View>
           )}
@@ -180,7 +177,7 @@ export default function ActionDetailScreen() {
           )}
 
           <View className="mb-6">
-            <Text className="text-xl font-semibold text-zinc-900 mb-4">
+            <Text className="text-xl font-semibold text-zinc-900">
               Description
             </Text>
             <Markdown
