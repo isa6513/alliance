@@ -38,24 +38,49 @@ export class ImagesController {
   private readonly bucket = process.env.ASSETS_BUCKET!;
 
   @Get(':key')
-  @ApiOkResponse({ type: StreamableFile })
+  @ApiOkResponse()
   async getImage(
     @Param('key') key: string,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<StreamableFile> {
+    @Res() res: Response,
+  ): Promise<void> {
     if (!key) throw new NotFoundException();
+
+    const ac = new AbortController();
+
+    res.on('close', () => ac.abort());
+    res.on('error', () => ac.abort());
+
     try {
-      const { Body, ContentType } = await this.s3.send(
+      const out = await this.s3.send(
         new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+        { abortSignal: ac.signal },
       );
 
-      res.set({
-        'Content-Type': ContentType ?? 'application/octet-stream',
-        'Content-Disposition': `inline; filename="${basename(key)}"`,
+      const body = out.Body as Readable | undefined;
+      if (!body) throw new NotFoundException();
+
+      res.setHeader(
+        'Content-Type',
+        out.ContentType ?? 'application/octet-stream',
+      );
+      res.setHeader(
+        'Content-Disposition',
+        `inline; filename="${basename(key)}"`,
+      );
+
+      body.on('error', () => {
+        try {
+          body.destroy();
+        } catch {}
+        if (!res.headersSent) res.status(500);
+        res.end();
       });
-      return new StreamableFile(Body as Readable);
-    } catch (error) {
-      console.error('Error getting image:', error);
+
+      body.pipe(res);
+    } catch (err) {
+      if (err?.name === 'AbortError') return;
+
+      console.error('Error getting image:', err);
       throw new NotFoundException();
     }
   }
