@@ -245,7 +245,7 @@ export class ActionsService {
   async computeUsersJoinedForAction(actionId: number): Promise<number[]> {
     const action = await this.actionRepository.findOneOrFail({
       where: { id: actionId },
-      relations: { events: true, participatingTags: true, activities: true },
+      relations: { events: true, participatingTags: true, activities: true, manualCohortUsers: true },
     });
 
     if (action.commitmentless) {
