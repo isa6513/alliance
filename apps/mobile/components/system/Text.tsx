@@ -28,8 +28,6 @@ export default function Text({
 }: TextProps) {
   const baseClasses = "font-sans";
   const typeClass = type ? typeClasses[type] : "";
-  console.log(type);
-  console.log(typeClass);
   const combinedClasses = `${baseClasses} ${typeClass} ${className || ""}`;
 
   return (
