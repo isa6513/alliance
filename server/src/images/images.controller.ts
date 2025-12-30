@@ -67,6 +67,7 @@ export class ImagesController {
         'Content-Disposition',
         `inline; filename="${basename(key)}"`,
       );
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
 
       body.on('error', () => {
         try {
