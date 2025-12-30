@@ -2,7 +2,7 @@ import { getPastEvents } from "@alliance/shared/lib/actionUtils";
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, href, useNavigate, useOutletContext } from "react-router";
-import { ActionWithRelation, AppLayoutOutletContext } from "../../applayout";
+import { AppLayoutOutletContext } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import BasicErrorMessage from "../../components/BasicErrorMessage";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
@@ -13,20 +13,21 @@ import { useCIDFromParams } from "../../lib/utils";
 import LargeActionCard from "./LargeActionCard";
 import useActivities, { ActivityList } from "./useActivities";
 import { useMediaQuery } from "../../lib/useMediaQuery";
+import { ActionDto } from "@alliance/shared/client/types.gen";
 
-export function canCompleteAction(action: ActionWithRelation) {
+export function canCompleteAction(action: ActionDto) {
   return (
     getPastEvents(action).some(
       (event) => event.newStatus === "member_action"
     ) &&
-    (action.relation === "joined" ||
-      (action.commitmentless && action.relation !== "completed")) &&
-    action.relation !== "declined" &&
+    (action.userRelation === "joined" ||
+      (action.commitmentless && action.userRelation !== "completed")) &&
+    action.userRelation !== "declined" &&
     (action.canParticipate || action.publicOnly)
   );
 }
 
-export function shouldCompleteAction(action: ActionWithRelation) {
+export function shouldCompleteAction(action: ActionDto) {
   return (
     canCompleteAction(action) &&
     action.shouldParticipate &&
@@ -36,25 +37,25 @@ export function shouldCompleteAction(action: ActionWithRelation) {
   );
 }
 
-export function isCurrentlyCompletedAction(action: ActionWithRelation) {
+export function isCurrentlyCompletedAction(action: ActionDto) {
   return (
     action.shouldParticipate &&
     (action.status === "member_action" ||
       action.status === "gathering_commitments") &&
     !action.everyoneShouldComplete &&
-    action.relation === "completed"
+    action.userRelation === "completed"
   );
 }
 
-export function canJoinAction(action: ActionWithRelation) {
+export function canJoinAction(action: ActionDto) {
   return (
     action.status === "gathering_commitments" &&
-    action.relation === "none" &&
+    action.userRelation === "none" &&
     action.canParticipate
   );
 }
 
-function getDeadlineTimestamp(action: ActionWithRelation): number {
+function getDeadlineTimestamp(action: ActionDto): number {
   let i = 0;
   // Find first 'member_action' or 'gathering_commitments' event
   while (
@@ -83,8 +84,8 @@ function getDeadlineTimestamp(action: ActionWithRelation): number {
 }
 
 function actionPriorityComparator(
-  actionA: ActionWithRelation,
-  actionB: ActionWithRelation
+  actionA: ActionDto,
+  actionB: ActionDto
 ): number {
   // Sort by priority
   if (actionA.priority !== actionB.priority) {
@@ -154,7 +155,7 @@ const HomePage = () => {
       }) || [];
 
   const isActionDeadlineWithinDays = useCallback(
-    (action: ActionWithRelation, days: number) => {
+    (action: ActionDto, days: number) => {
       const deadlineEvent = action.events.find(
         (event) => event.newStatus === "office_action"
       );
@@ -178,7 +179,7 @@ const HomePage = () => {
   );
 
   const isActionInCurrentWeek = useCallback(
-    (action: ActionWithRelation) => {
+    (action: ActionDto) => {
       if (doesCurrentWeekHaveActions) {
         return isActionDeadlineWithinDays(action, 7);
       } else {
@@ -188,8 +189,7 @@ const HomePage = () => {
     [doesCurrentWeekHaveActions, isActionDeadlineWithinDays]
   );
 
-  const currentTask: ActionWithRelation | null =
-    newActions[0] || todoActions[0] || null;
+  const currentTask: ActionDto | null = newActions[0] || todoActions[0] || null;
 
   const currentWeekTodoActions = todoActions.filter((action) => {
     return isActionInCurrentWeek(action);
@@ -265,10 +265,10 @@ const HomePage = () => {
           "flex flex-col py-8 sm:py-18 px-4 max-w-3xl mx-auto min-h-full"
         }
       >
-        {currentTask && currentTask.relation ? (
+        {currentTask && currentTask.userRelation ? (
           <LargeActionCard
             action={currentTask}
-            userRelation={currentTask.relation as "joined" | "none"}
+            userRelation={currentTask.userRelation as "joined" | "none"}
             friendActivities={friendActivities.filter(
               (activity) => activity.actionId === currentTask.id
             )}

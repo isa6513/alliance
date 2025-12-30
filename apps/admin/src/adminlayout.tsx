@@ -22,12 +22,8 @@ export interface RouteMatches {
   matches: RouteMatch[];
 }
 
-export type ActionWithRelation = ActionDto & {
-  relation: UserActionRelation | undefined;
-};
-
 export interface LoaderData {
-  actions: ActionWithRelation[];
+  actions: ActionDto[];
   relations?: Map<number, UserActionRelation>;
   activities?: Map<number, ActivitiesForAction>;
   posts: PostDto[];

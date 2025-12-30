@@ -1,20 +1,23 @@
-import { ActionActivityDto } from "@alliance/shared/client/types.gen";
+import {
+  ActionActivityDto,
+  ActionDto,
+} from "@alliance/shared/client/types.gen";
 import React from "react";
 import { Link, href } from "react-router";
-import { ActionWithRelation } from "../applayout";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
 import ActionSquareThumbnail from "./ActionSquareThumbnail";
+import { showCompletedBar } from "@alliance/shared/lib/actionItemCard";
 
 export interface ActionItemCardProps {
   action: Pick<
-    ActionWithRelation,
+    ActionDto,
     | "name"
     | "shortDescription"
     | "category"
     | "id"
     | "status"
-    | "relation"
+    | "userRelation"
     | "commitmentThreshold"
     | "everyoneShouldComplete"
     | "usersJoined"
@@ -49,20 +52,20 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
             <div className="flex-1 flex flex-col">
               <div className="flex flex-row items-center justify-between gap-x-2 mb-2">
                 <p className="font-medium text-black">{action.name}</p>
-                {action.relation === "completed" && <CheckIcon size="mini" />}
+                {action.userRelation === "completed" && (
+                  <CheckIcon size="mini" />
+                )}
               </div>
               <p className="text-zinc-500">{action.shortDescription}</p>
             </div>
           </div>
-          {(action.status === "member_action" ||
-            action.status === "gathering_commitments") &&
-            !action.everyoneShouldComplete && (
-              <ActionCompletedBarWithInfo
-                action={action}
-                friendActivities={friendCommitmentActivities ?? null}
-                className="mt-4"
-              />
-            )}
+          {showCompletedBar(action) && (
+            <ActionCompletedBarWithInfo
+              action={action}
+              friendActivities={friendCommitmentActivities ?? null}
+              className="mt-4"
+            />
+          )}
         </div>
       </div>
     </Link>

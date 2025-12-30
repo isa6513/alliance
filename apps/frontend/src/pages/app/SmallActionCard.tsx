@@ -1,15 +1,17 @@
-import { ActionActivityDto } from "@alliance/shared/client/types.gen";
+import {
+  ActionActivityDto,
+  ActionDto,
+} from "@alliance/shared/client/types.gen";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import React, { useCallback } from "react";
 import { href, useNavigate } from "react-router";
-import { ActionWithRelation } from "../../applayout";
 import Tag, { TagStyle } from "../../components/Tag";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 
 export interface SmallActionCardProps {
   action: Pick<
-    ActionWithRelation,
+    ActionDto,
     | "name"
     | "shortDescription"
     | "commitmentless"
@@ -17,7 +19,7 @@ export interface SmallActionCardProps {
     | "id"
     | "status"
     | "everyoneShouldComplete"
-    | "relation"
+    | "userRelation"
     | "commitmentThreshold"
     | "status"
     | "everyoneShouldComplete"
@@ -46,16 +48,17 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
 
   const waitingOnCompletion =
     action.status === "member_action" &&
-    (action.relation === "joined" || action.commitmentless);
+    (action.userRelation === "joined" || action.commitmentless);
 
   const waitingOnCommitment =
-    action.status === "gathering_commitments" && action.relation === "none";
+    action.status === "gathering_commitments" && action.userRelation === "none";
 
   const waitingForOffice =
-    action.status === "office_action" && action.relation === "joined";
+    action.status === "office_action" && action.userRelation === "joined";
 
   const waitingOnOthers =
-    action.status === "gathering_commitments" && action.relation === "joined";
+    action.status === "gathering_commitments" &&
+    action.userRelation === "joined";
 
   return (
     <div className={`relative ${className}`}>

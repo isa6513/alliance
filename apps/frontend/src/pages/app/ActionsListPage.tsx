@@ -1,54 +1,27 @@
 import { FilterMode } from "@alliance/shared/lib/actionUtils";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import { useMemo, useState } from "react";
-import { ActionWithRelation, AppLayoutOutletContext } from "../../applayout";
+import { AppLayoutOutletContext } from "../../applayout";
+import { filterActions } from "@alliance/shared/lib/actionsListPage";
 import ActionItemCard from "../../components/ActionItemCard";
 import { useGrayBackground } from "../../components/HtmlBackgroundManager";
 import List from "@alliance/sharedweb/ui/List";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import { useOutletContext } from "react-router";
 import Spinner from "../../components/Spinner";
-
-export const filterActions = (
-  actions: ActionWithRelation[],
-  mode: FilterMode
-): ActionWithRelation[] => {
-  switch (mode) {
-    case FilterMode.All:
-      return actions.filter((action) => action.status !== "planned");
-    case FilterMode.GatheringCommitments:
-      return actions.filter(
-        (action) => action.status === "gathering_commitments"
-      );
-    case FilterMode.PendingOfficeResolution:
-      return actions.filter((action) => action.status === "office_action");
-    case FilterMode.MemberAction:
-      return actions.filter(
-        (action) =>
-          action.status === "member_action" && !action.everyoneShouldComplete
-      );
-    case FilterMode.Past:
-      return actions.filter(
-        (action) => action.status === "completed" || action.status === "failed"
-      );
-    default:
-      const x: never = mode;
-      throw new Error(`Invalid filter mode: ${x}`);
-  }
-};
+import { ActionDto } from "@alliance/shared/client";
 
 const ActionsListPage = () => {
   const { actions, loading } = useOutletContext<AppLayoutOutletContext>();
 
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
-  const modeToActions: Record<FilterMode, ActionWithRelation[]> =
-    useMemo(() => {
-      return Object.values(FilterMode).reduce((acc, mode) => {
-        acc[mode] = filterActions(actions ?? [], mode);
-        return acc;
-      }, {} as Record<FilterMode, ActionWithRelation[]>);
-    }, [actions]);
+  const modeToActions: Record<FilterMode, ActionDto[]> = useMemo(() => {
+    return Object.values(FilterMode).reduce((acc, mode) => {
+      acc[mode] = filterActions(actions ?? [], mode);
+      return acc;
+    }, {} as Record<FilterMode, ActionDto[]>);
+  }, [actions]);
 
   useGrayBackground();
 
