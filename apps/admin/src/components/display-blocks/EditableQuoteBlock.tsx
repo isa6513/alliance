@@ -1,4 +1,4 @@
-import type { QuoteBlock } from "@alliance/sharedweb/forms/display-blocks";
+import type { QuoteBlock } from "@alliance/shared/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 import FormTextarea from "../FormTextarea";

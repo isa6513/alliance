@@ -1,4 +1,4 @@
-import type { DividerBlock } from "@alliance/sharedweb/forms/display-blocks";
+import type { DividerBlock } from "@alliance/shared/forms/display-blocks";
 import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";

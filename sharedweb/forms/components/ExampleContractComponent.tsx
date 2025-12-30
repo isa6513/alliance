@@ -1,5 +1,6 @@
 import type { CustomComponentProps } from "./types";
-import Card, { CardStyle } from "../../ui/Card";
+import Card from "../../ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 const ExampleContractComponent = ({
   user,

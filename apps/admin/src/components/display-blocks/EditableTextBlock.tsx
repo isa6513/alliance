@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { TextBlock } from "@alliance/sharedweb/forms/display-blocks";
+import type { TextBlock } from "@alliance/shared/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";

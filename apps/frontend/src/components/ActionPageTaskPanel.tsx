@@ -1,12 +1,13 @@
 import { ActionActivityDto, UserActionRelation } from "@alliance/shared/client";
 import { getLatestEvent } from "@alliance/shared/lib/actionUtils";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
 import ActionTaskPanel, { ActionTaskPanelProps } from "./ActionTaskPanel";
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import ActionTaskPanelDeclined from "./ActionTaskPanelDeclined";
 import { useAuth } from "../lib/AuthContext";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);

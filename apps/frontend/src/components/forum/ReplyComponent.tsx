@@ -5,7 +5,8 @@ import {
   forumUpdateComment,
   imagesUploadImage,
 } from "@alliance/shared/client";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { formatDistanceToNow } from "date-fns";

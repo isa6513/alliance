@@ -1,5 +1,5 @@
 // display-blocks.ts
-import { Condition } from "./formschema";
+import { Condition } from "@alliance/shared/forms/formschema";
 
 export type DisplayKind =
   | "header" // H1–H6

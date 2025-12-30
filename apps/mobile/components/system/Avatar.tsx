@@ -3,10 +3,8 @@ import {
   View,
   Text,
   Image,
-  StyleSheet,
-  ViewStyle,
-  TextStyle,
   ImageSourcePropType,
+  ViewProps,
 } from "react-native";
 
 export enum AvatarSize {
@@ -17,107 +15,50 @@ export enum AvatarSize {
   ExtraLarge = "xl",
 }
 
-interface AvatarProps {
+interface AvatarProps extends ViewProps {
   source?: ImageSourcePropType;
   initials?: string;
   size?: AvatarSize;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
   backgroundColor?: string;
 }
+
+const sizeClasses: Record<AvatarSize, { container: string; text: string }> = {
+  [AvatarSize.ExtraSmall]: { container: "w-6 h-6", text: "text-xs" },
+  [AvatarSize.Small]: { container: "w-8 h-8", text: "text-xs" },
+  [AvatarSize.Medium]: { container: "w-10 h-10", text: "text-sm" },
+  [AvatarSize.Large]: { container: "w-12 h-12", text: "text-base" },
+  [AvatarSize.ExtraLarge]: { container: "w-14 h-14", text: "text-lg" },
+};
 
 export default function Avatar({
   source,
   initials,
   size = AvatarSize.Medium,
+  backgroundColor,
+  className,
   style,
-  textStyle,
-  backgroundColor = "#e5e7eb",
+  ...props
 }: AvatarProps) {
-  const containerStyle = [
-    styles.container,
-    styles[`${size}Container`],
-    { backgroundColor },
-    style,
-  ];
+  const sizeStyle = sizeClasses[size];
+  const containerClasses = `justify-center items-center rounded-full bg-zinc-200 ${sizeStyle.container} ${className || ""}`;
+  const imageClasses = `rounded-full ${sizeStyle.container}`;
+  const textClasses = `font-semibold text-zinc-700 text-center ${sizeStyle.text}`;
 
-  const imageStyle = [
-    styles.image,
-    styles[`${size}Container`],
-  ];
-
-  const textStyleCombined = [
-    styles.text,
-    styles[`${size}Text`],
-    textStyle,
-  ];
+  const combinedStyle = backgroundColor
+    ? [{ backgroundColor }, style].filter(Boolean)
+    : style;
 
   if (source) {
     return (
-      <View style={containerStyle}>
-        <Image source={source} style={imageStyle} />
+      <View className={containerClasses} style={combinedStyle} {...props}>
+        <Image source={source} className={imageClasses} />
       </View>
     );
   }
 
   return (
-    <View style={containerStyle}>
-      <Text style={textStyleCombined}>{initials}</Text>
+    <View className={containerClasses} style={combinedStyle} {...props}>
+      <Text className={textClasses}>{initials}</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 50,
-  },
-  image: {
-    borderRadius: 50,
-  },
-  text: {
-    fontWeight: "600",
-    color: "#374151",
-    textAlign: "center",
-  },
-  
-  // Size variants
-  xsContainer: {
-    width: 24,
-    height: 24,
-  },
-  smContainer: {
-    width: 32,
-    height: 32,
-  },
-  mdContainer: {
-    width: 40,
-    height: 40,
-  },
-  lgContainer: {
-    width: 48,
-    height: 48,
-  },
-  xlContainer: {
-    width: 56,
-    height: 56,
-  },
-  
-  // Text size variants
-  xsText: {
-    fontSize: 10,
-  },
-  smText: {
-    fontSize: 12,
-  },
-  mdText: {
-    fontSize: 14,
-  },
-  lgText: {
-    fontSize: 16,
-  },
-  xlText: {
-    fontSize: 18,
-  },
-});

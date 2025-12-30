@@ -22,12 +22,13 @@ import UserSelect, {
   useSelectableUserIds,
 } from "@alliance/sharedweb/ui/UserSelect";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 import CommunityInviteListItem from "./CommunityInviteListItem";
 import { Link } from "react-router";
 import OneTimeInviteRequestLeaderListItem from "./OneTimeInviteRequestLeaderListItem";
 import OneTimeInviteLeaderListItem from "./OneTimeInviteLeaderListItem";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 export interface CommunityInvitesTabLeaderProps {
   communityId: number;

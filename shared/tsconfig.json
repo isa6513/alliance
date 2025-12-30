@@ -15,6 +15,7 @@
     "../sharedweb/lib/useOutsideClick.ts",
     "../sharedweb/lib/config.ts",
     "client/hey-api.ts",
-    "client/client.gen.ts"
+    "client/client.gen.ts",
+    "styles/card.ts"
   ]
 }

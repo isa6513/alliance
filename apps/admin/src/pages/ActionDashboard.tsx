@@ -28,7 +28,7 @@ import {
 import type { ShareUrlStatsDto } from "@alliance/shared/client/types.gen";
 import { getApiUrl, getBaseUrl } from "@alliance/sharedweb/lib/config";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 import Dropdown from "@alliance/sharedweb/ui/Dropdown";
 import CopyIcon from "@alliance/sharedweb/ui/icons/CopyIcon";
 import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
@@ -47,6 +47,7 @@ import ActionUpdatesTab from "../components/ActionUpdatesTab";
 import EventManagementTab from "../components/EventManagementTab";
 import { FormBuilder } from "../components/FormBuilder";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 // Status color mapping
 export const getStatusColor = (status: ActionDto["status"]) => {

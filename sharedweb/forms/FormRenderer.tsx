@@ -11,7 +11,7 @@ import Button, { ButtonColor } from "../ui/Button";
 import Dropdown from "../ui/Dropdown";
 import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
-import type { DisplayBlock } from "./display-blocks";
+import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import type {
   AnyField,
   CityFieldValue,
@@ -21,7 +21,7 @@ import type {
   FormValue,
   NumberField,
   RangeField,
-} from "./formschema";
+} from "@alliance/shared/forms/formschema";
 import { parseTimeToMinutes } from "./timeUtils";
 import { useSearchParams } from "react-router";
 

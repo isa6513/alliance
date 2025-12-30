@@ -9,8 +9,8 @@ import {
 import type {
   DisplayBlock,
   ManualDisplayBlockContent,
-} from "@alliance/sharedweb/forms/display-blocks";
-import type { AnyField, Condition } from "@alliance/sharedweb/forms/formschema";
+} from "@alliance/shared/forms/display-blocks";
+import type { AnyField, Condition } from "@alliance/shared/forms/formschema";
 import type { UserDto } from "@alliance/shared/client";
 import { userList } from "@alliance/shared/client";
 import { ConditionalVisibility } from "../form-fields/CommonControls";

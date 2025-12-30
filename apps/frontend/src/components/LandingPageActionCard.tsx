@@ -1,4 +1,5 @@
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 import React from "react";
 
 interface LandingPageActionCardProps {
@@ -9,9 +10,6 @@ interface LandingPageActionCardProps {
 }
 
 const LandingPageActionCard: React.FC<LandingPageActionCardProps> = ({
-  title,
-  description,
-  category,
   className,
 }) => {
   return (

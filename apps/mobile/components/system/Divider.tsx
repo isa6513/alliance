@@ -1,37 +1,26 @@
 import React from "react";
-import { View, StyleSheet, ViewStyle } from "react-native";
+import { View, ViewProps } from "react-native";
 
 export enum DividerOrientation {
   Horizontal = "horizontal",
   Vertical = "vertical",
 }
 
-interface DividerProps {
+interface DividerProps extends ViewProps {
   orientation?: DividerOrientation;
-  color?: string;
-  thickness?: number;
-  style?: ViewStyle;
 }
 
 export default function Divider({
   orientation = DividerOrientation.Horizontal,
-  color = "#e5e7eb",
-  thickness = 1,
-  style,
+  className,
+  ...props
 }: DividerProps) {
-  const dividerStyle = [
-    styles.base,
+  const orientationClasses =
     orientation === DividerOrientation.Horizontal
-      ? { height: thickness, backgroundColor: color }
-      : { width: thickness, backgroundColor: color },
-    style,
-  ];
+      ? "h-px w-full"
+      : "w-px h-full";
 
-  return <View style={dividerStyle} />;
+  const combinedClasses = `flex-1 bg-zinc-200 ${orientationClasses} ${className || ""}`;
+
+  return <View className={combinedClasses} {...props} />;
 }
-
-const styles = StyleSheet.create({
-  base: {
-    flex: 1,
-  },
-});

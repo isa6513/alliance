@@ -8,7 +8,7 @@ import {
 import type {
   DisplayBlock,
   DisplayKind,
-} from "@alliance/sharedweb/forms/display-blocks";
+} from "@alliance/shared/forms/display-blocks";
 import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import type {
   AnyField,
@@ -17,7 +17,7 @@ import type {
   FormSchema,
   MultiSelectField,
   Page,
-} from "@alliance/sharedweb/forms/formschema";
+} from "@alliance/shared/forms/formschema";
 import type { UserDto } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {

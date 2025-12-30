@@ -8,12 +8,13 @@ import {
 import FormRenderer, {
   computeFormStorageKey,
 } from "@alliance/sharedweb/forms/FormRenderer";
-import { FormSchema } from "@alliance/sharedweb/forms/formschema";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import { FormSchema } from "@alliance/shared/forms/formschema";
+import Card from "@alliance/sharedweb/ui/Card";
 import posthog from "posthog-js";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import Spinner from "./Spinner";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 interface ActionTaskPanelActivityProps {
   taskFormId: number;

@@ -1,11 +1,10 @@
 @import "tailwindcss";
 @import "uniwind";
+@source "../../shared/styles";
 
 @theme {
   --font-sans: "SourceSans3", system-ui, -apple-system, BlinkMacSystemFont,
     sans-serif;
-}
-
-* {
-  font-family: "SourceSans3";
+  --font-serif: "LibreBaskerville", serif;
+  --color-green: rgb(98, 161, 36);
 }

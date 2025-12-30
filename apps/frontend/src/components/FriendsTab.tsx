@@ -8,7 +8,8 @@ import {
   userRemoveFriend,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 import List from "@alliance/sharedweb/ui/List";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import React, { useCallback, useEffect, useState } from "react";

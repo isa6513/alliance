@@ -58,9 +58,10 @@ const ForumListPost = ({
       <Link
         to={href("/forum/post/:id", { id: post.id.toString() })}
         className={
-          "w-full mb-0 !gap-y-1 p-4  cursor-pointer " + isPrivateFuturePost
+          "w-full mb-0 !gap-y-1 p-4 cursor-pointer " +
+          (isPrivateFuturePost
             ? "bg-sky-50 hover:bg-sky-100/60"
-            : "hover:bg-zinc-50 bg-white"
+            : "hover:bg-zinc-50 bg-white")
         }
       >
         <div className="flex flex-col gap-y-0 mb-2">

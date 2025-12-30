@@ -1,5 +1,5 @@
 import { imagesUploadImage } from "@alliance/shared/client";
-import type { ImageBlock } from "@alliance/sharedweb/forms/display-blocks";
+import type { ImageBlock } from "@alliance/shared/forms/display-blocks";
 import { useState } from "react";
 import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";

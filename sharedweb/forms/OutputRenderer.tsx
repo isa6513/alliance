@@ -1,7 +1,8 @@
-import { useMemo } from "react";
-import type { FormResponseDto, FormResponseOutputDto } from "../client";
+import React, { useMemo } from "react";
+import type { FormResponseDto, FormResponseOutputDto } from "@alliance/shared/client";
 import { getApiUrl } from "../lib/config";
-import Card, { CardStyle } from "../ui/Card";
+import Card from "../ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 import ImageLightbox from "../ui/ImageLightbox";
 import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
@@ -14,7 +15,7 @@ import type {
   FormValue,
   OutputBlock,
   OutputViewSchema,
-} from "./formschema";
+} from "@alliance/shared/forms/formschema";
 
 type OutputRendererProps = {
   schema?: FormSchema;

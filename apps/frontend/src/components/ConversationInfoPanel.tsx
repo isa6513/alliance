@@ -8,7 +8,7 @@ import {
 } from "@alliance/shared/client";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { Link, href } from "react-router";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 import List from "@alliance/sharedweb/ui/List";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import DeleteIcon from "@alliance/sharedweb/ui/icons/DeleteIcon";
@@ -19,6 +19,7 @@ import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
 import ProfileImageEditor from "./ProfileImageEditor";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Spinner from "./Spinner";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 export interface ConversationInfoPanelProps {
   selectedConvo: ConversationDto;

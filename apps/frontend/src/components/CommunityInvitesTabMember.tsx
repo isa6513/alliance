@@ -7,13 +7,14 @@ import {
 } from "@alliance/shared/client";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 import List from "@alliance/sharedweb/ui/List";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import OneTimeInviteRequestMemberListItem from "./OneTimeInviteRequestMemberListItem";
 import OneTimeInviteMemberListItem from "./OneTimeInviteMemberListItem";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 export interface CommunityInvitesTabMemberProps {
   communityId: number;

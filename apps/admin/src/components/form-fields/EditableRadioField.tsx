@@ -1,4 +1,4 @@
-import type { RadioField } from "@alliance/sharedweb/forms/formschema";
+import type { RadioField } from "@alliance/shared/forms/formschema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";

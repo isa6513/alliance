@@ -3,7 +3,7 @@ import type {
   AnyField,
   Condition,
   OutputFieldBlock,
-} from "@alliance/sharedweb/forms/formschema";
+} from "@alliance/shared/forms/formschema";
 import { ConditionalVisibility } from "../form-fields/CommonControls";
 
 interface EditableOutputFieldBlockProps {

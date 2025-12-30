@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { AnyField } from "@alliance/sharedweb/forms/formschema";
+import type { AnyField } from "@alliance/shared/forms/formschema";
 import {
   ConditionalVisibility,
   CustomValidatorSelect,

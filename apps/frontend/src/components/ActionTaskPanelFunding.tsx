@@ -1,6 +1,7 @@
 import { paymentsSetPartialProfile } from "@alliance/shared/client";
 import Button from "@alliance/sharedweb/ui/Button";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 import {
   PaymentElement,
   useElements,

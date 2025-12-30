@@ -4,8 +4,9 @@ import {
   tasksGetFormResponses,
   tasksListForms,
 } from "@alliance/shared/client";
-import { FormSchema, Page } from "@alliance/sharedweb/forms/formschema";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import { FormSchema, Page } from "@alliance/shared/forms/formschema";
+import Card from "@alliance/sharedweb/ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 

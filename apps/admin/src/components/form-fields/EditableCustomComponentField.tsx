@@ -7,7 +7,7 @@ import type {
   CustomComponentConfigField,
   CustomComponentDefinition,
 } from "@alliance/sharedweb/forms/components";
-import type { CustomComponentField } from "@alliance/sharedweb/forms/formschema";
+import type { CustomComponentField } from "@alliance/shared/forms/formschema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";

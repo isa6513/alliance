@@ -1,5 +1,6 @@
 import { ActionActivityDto } from "@alliance/shared/client/types.gen";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 import React, { useCallback } from "react";
 import { href, useNavigate } from "react-router";
 import { ActionWithRelation } from "../../applayout";

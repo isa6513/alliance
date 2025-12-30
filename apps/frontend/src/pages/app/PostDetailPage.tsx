@@ -5,7 +5,7 @@ import {
   forumUnlikePost,
   PostDto,
 } from "@alliance/shared/client";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
 import React, { useCallback, useEffect, useState } from "react";
@@ -19,6 +19,7 @@ import { useAuth } from "../../lib/AuthContext";
 import { formatTime } from "@alliance/sharedweb/lib/utils";
 import Spinner from "../../components/Spinner";
 import { useCIDFromParams } from "../../lib/utils";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();

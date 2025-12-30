@@ -1,8 +1,4 @@
-import {
-  faCheckCircle,
-  faChevronLeft,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { Check } from "lucide-react-native";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -10,27 +6,28 @@ import {
   Alert,
   Image,
   ScrollView,
-  StyleSheet,
-  TouchableOpacity,
   View,
 } from "react-native";
 import Markdown from "react-native-markdown-display";
 import {
   ActionDto,
-  UserActionDto,
+  UserActionRelation,
   actionsFindOne,
   actionsJoin,
-  actionsMyStatus,
 } from "../../../../../shared/client";
-import { Button, ButtonColor } from "../../../components/system";
-import Text, { TextStyle } from "../../../components/system/Text";
-import { colors } from "../../../lib/style/colors";
+import {
+  Button,
+  ButtonColor,
+  ButtonSize,
+  Card,
+  CardStyle,
+  Text,
+} from "../../../components/system";
+import ActionEventsPanel from "../../../components/ActionEventsPanel";
+
 export default function ActionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [action, setAction] = useState<ActionDto | null>(null);
-  const [userStatus, setUserStatus] = useState<UserActionDto["status"] | null>(
-    null
-  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,7 +37,6 @@ export default function ActionDetailScreen() {
     try {
       setLoading(true);
 
-      // Fetch action details
       const actionResponse = await actionsFindOne({
         path: { id: parseInt(id) },
       });
@@ -50,16 +46,6 @@ export default function ActionDetailScreen() {
       }
 
       setAction(actionResponse.data);
-
-      // Fetch user's relationship to this action
-      const statusResponse = await actionsMyStatus({
-        path: { id },
-      });
-
-      if (statusResponse.data) {
-        setUserStatus(statusResponse.data.status);
-      }
-
       setLoading(false);
     } catch (err) {
       console.error("Error fetching action details:", err);
@@ -78,15 +64,17 @@ export default function ActionDetailScreen() {
     try {
       setLoading(true);
       const response = await actionsJoin({
-        path: { id },
+        path: { id: parseInt(id) },
       });
 
       if (response.error) {
         throw new Error("Failed to join action");
       }
 
-      // Reload action details to update status
-      await fetchActionDetails();
+      setAction((prev: ActionDto | null) =>
+        prev ? { ...prev, userRelation: "joined" } : null
+      );
+      setLoading(false);
       Alert.alert("Success", "You've committed to this action!");
     } catch (err) {
       console.error("Error joining action:", err);
@@ -97,23 +85,29 @@ export default function ActionDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0D1B2A" />
-        <Text style={styles.loadingText}>Loading action details...</Text>
+      <View className="flex-1 justify-center items-center p-5 bg-white">
+        <ActivityIndicator size="large" color="#333" />
+        <Text className="mt-3 text-zinc-500">Loading action details...</Text>
       </View>
     );
   }
 
   if (error || !action) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error || "Action not found"}</Text>
-        <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-          <Text style={styles.buttonText}>Go Back</Text>
-        </TouchableOpacity>
+      <View className="flex-1 justify-center items-center p-5 bg-white">
+        <Text className="text-red-500 mb-5 text-center">
+          {error || "Action not found"}
+        </Text>
+        <Button
+          color={ButtonColor.Black}
+          onPress={() => router.back()}
+          title="Go Back"
+        />
       </View>
     );
   }
+
+  const userRelation = action.userRelation as UserActionRelation | undefined;
 
   return (
     <>
@@ -122,211 +116,135 @@ export default function ActionDetailScreen() {
           headerShown: false,
         }}
       />
-      <ScrollView style={styles.container}>
+      <ScrollView className="flex-1 bg-white">
         {action.image && (
           <Image
             source={{ uri: action.image }}
-            style={styles.heroImage}
+            className="w-full h-48 bg-zinc-200"
             resizeMode="cover"
           />
         )}
 
-        <View style={styles.contentContainer}>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()}>
-              <FontAwesomeIcon icon={faChevronLeft} size={20} color="#0D1B2A" />
-            </TouchableOpacity>
-            <Text style={styles.title}>{action.name}</Text>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{action.category}</Text>
-            </View>
-          </View>
-
-          {userStatus === "none" && (
-            <TouchableOpacity
-              style={styles.joinButton}
-              onPress={handleJoinAction}
-            >
-              <Text style={styles.joinButtonText}>Commit to this action</Text>
-            </TouchableOpacity>
+        <View className="p-5 py-10">
+          <Text className="text-[24px] font-semibold text-zinc-900 mb-4 font-serif">
+            {action.name}
+          </Text>
+          {action.shortDescription && (
+            <Text className="mb-1">{action.shortDescription}</Text>
           )}
-
-          {userStatus === "joined" && (
-            <View style={styles.joinedMessage}>
-              <FontAwesomeIcon icon={faCheckCircle} size={20} color="#4CAF50" />
-              <Text style={styles.joinedText}>
-                You&apos;ve committed to this action
+          {action.authors && action.authors.length > 0 && (
+            <Text className="mb-4">
+              By{" "}
+              {action.authors.map((author, i) => (
+                <Text key={author.id}>
+                  <Text className="text-zinc-500 underline">
+                    {author.displayName}
+                  </Text>
+                  {i < action.authors!.length - 2 && ", "}
+                  {i === action.authors!.length - 2 &&
+                    `${action.authors!.length > 2 ? "," : ""} and `}
+                </Text>
+              ))}
+            </Text>
+          )}
+          {action.events && action.events.length > 0 && (
+            <View className="mb-6">
+              <Text className="text-xl font-semibold text-zinc-900 mb-4">
+                Timeline
               </Text>
+              <ActionEventsPanel action={action} />
             </View>
           )}
+          {userRelation === "joined" &&
+            action.status === "gathering_commitments" && (
+              <Card cardStyle={CardStyle.Green} className="mb-6">
+                <View className="flex-row items-center gap-2">
+                  <Check size={18} color="#166534" />
+                  <Text className="text-green-800 font-medium flex-1">
+                    You&apos;ve committed to participate. We&apos;ll notify you
+                    when it&apos;s time to act.
+                  </Text>
+                </View>
+              </Card>
+            )}
 
-          <Markdown
-            style={{
-              body: {
-                fontFamily: "IBMPlexSans-Regular",
-                fontSize: 15,
-              },
-            }}
-          >
-            {action.body}
-          </Markdown>
+          {userRelation === "completed" && (
+            <Card cardStyle={CardStyle.Green} className="mb-6">
+              <View className="flex-row items-center gap-2 text-green">
+                <Check size={18} />
+                <Text className="font-medium">
+                  You&apos;ve completed this action!
+                </Text>
+              </View>
+            </Card>
+          )}
+
+          <View className="mb-6">
+            <Text className="text-xl font-semibold text-zinc-900 mb-4">
+              Description
+            </Text>
+            <Markdown
+              style={{
+                body: {
+                  fontFamily: "SourceSans3",
+                  fontSize: 15,
+                  lineHeight: 24,
+                  color: "#333",
+                },
+                paragraph: {
+                  marginBottom: 12,
+                },
+                heading1: {
+                  fontSize: 24,
+                  fontWeight: "600",
+                  marginTop: 16,
+                  marginBottom: 8,
+                },
+                heading2: {
+                  fontSize: 20,
+                  fontWeight: "600",
+                  marginTop: 14,
+                  marginBottom: 6,
+                },
+                heading3: {
+                  fontSize: 18,
+                  fontWeight: "600",
+                  marginTop: 12,
+                  marginBottom: 4,
+                },
+                link: {
+                  color: "#318dde",
+                },
+                bullet_list: {
+                  marginBottom: 12,
+                },
+                ordered_list: {
+                  marginBottom: 12,
+                },
+                list_item: {
+                  marginBottom: 4,
+                },
+              }}
+            >
+              {action.body}
+            </Markdown>
+          </View>
         </View>
       </ScrollView>
-      {userStatus === "none" && action.status === "gathering_commitments" && (
-        <Button
-          color={ButtonColor.Green}
-          onPress={handleJoinAction}
-          style={styles.joinButton}
-        >
-          <Text type={TextStyle.Label}>Commit</Text>
-        </Button>
-      )}
+
+      {/* Fixed Bottom Button */}
+      {(!userRelation || userRelation === "none") &&
+        action.status === "gathering_commitments" && (
+          <View className="absolute bottom-0 left-0 right-0 p-5 pb-8 bg-white border-t border-zinc-200">
+            <Button
+              color={ButtonColor.Black}
+              size={ButtonSize.Large}
+              onPress={handleJoinAction}
+              title="Confirm participation"
+              className="w-full"
+            />
+          </View>
+        )}
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#555",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  errorText: {
-    fontSize: 16,
-    color: "#FF3B30",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  heroImage: {
-    width: "100%",
-    height: 200,
-    backgroundColor: "#ddd",
-  },
-  contentContainer: {
-    padding: 20,
-    paddingBottom: 100,
-  },
-  header: {
-    marginBottom: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#0D1B2A",
-  },
-  badge: {
-    backgroundColor: "#E0E0E0",
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  badgeText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#333",
-  },
-  statItem: {
-    alignItems: "center",
-  },
-  statValue: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#0D1B2A",
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: "#666",
-  },
-  joinButton: {
-    position: "absolute",
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    bottom: 32,
-    right: 32,
-  },
-  joinButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 16,
-  },
-  joinedMessage: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#E8F5E9",
-    borderRadius: 8,
-    padding: 16,
-    marginVertical: 16,
-  },
-  joinedText: {
-    marginLeft: 10,
-    fontSize: 16,
-    color: "#2E7D32",
-    fontWeight: "500",
-  },
-  section: {
-    marginVertical: 16,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#0D1B2A",
-    marginBottom: 12,
-  },
-  sectionText: {
-    fontSize: 16,
-    color: "#555",
-    lineHeight: 24,
-  },
-  button: {
-    backgroundColor: "#0D1B2A",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 16,
-  },
-  forumButton: {
-    backgroundColor: "#E0E0E0",
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: "center",
-    marginTop: 16,
-  },
-  forumButtonText: {
-    color: "#0D1B2A",
-    fontWeight: "600",
-    fontSize: 16,
-  },
-});

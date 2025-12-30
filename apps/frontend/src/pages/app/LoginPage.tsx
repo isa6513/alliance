@@ -6,7 +6,7 @@ import {
 } from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Link,
@@ -20,6 +20,7 @@ import { useAuth } from "../../lib/AuthContext";
 import { isFeatureEnabled } from "../../lib/config";
 import { setRevalidate } from "../../applayout";
 import { EyeOff, Eye } from "lucide-react";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 const LoginPage: React.FC = () => {
   const location = useLocation();

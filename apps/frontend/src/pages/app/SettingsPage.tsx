@@ -13,7 +13,7 @@ import {
   UpdateProfileDto,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
@@ -22,6 +22,7 @@ import FormInput from "@alliance/sharedweb/ui/FormInput";
 import { useAuth } from "../../lib/AuthContext";
 import AwayRangesSection from "../../components/AwayRangesSection";
 import TimeZoneSelect from "@alliance/sharedweb/forms/TimeZoneSelect";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();

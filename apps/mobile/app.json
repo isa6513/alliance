@@ -43,7 +43,9 @@
         {
           "fonts": [
             "./assets/fonts/IBMPlexSans-Regular.ttf",
-            "./assets/fonts/SourceSans3-VariableFont_wght.ttf"
+            "./assets/fonts/SourceSans3.ttf",
+            "./assets/fonts/SourceSans3-Italic.ttf",
+            "./assets/fonts/LibreBaskerville.ttf"
           ]
         }
       ]

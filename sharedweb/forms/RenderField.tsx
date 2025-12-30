@@ -8,7 +8,7 @@ import type {
   FormValue,
   RangeField,
   TimeField,
-} from "./formschema";
+} from "@alliance/shared/forms/formschema";
 import { shuffleWithSeed } from "./randomutils";
 import { formatTimeForDisplay, parseTimeInput } from "./timeUtils";
 import DropdownIcon from "../ui/icons/DropdownIcon";

@@ -4,10 +4,11 @@ import {
   tasksGetMyFormResponse,
 } from "@alliance/shared/client";
 import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
-import { FormSchema } from "@alliance/sharedweb/forms/formschema";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import { FormSchema } from "@alliance/shared/forms/formschema";
+import Card from "@alliance/sharedweb/ui/Card";
 import { useEffect, useState } from "react";
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 export interface ActionTaskPanelCompletedProps {
   action: ActionDto | null;

@@ -2,11 +2,11 @@ import React from "react";
 import {
   View,
   TouchableOpacity,
-  StyleSheet,
-  ViewStyle,
   ImageBackground,
   ImageSourcePropType,
+  ViewProps,
 } from "react-native";
+import { cardStyleClasses } from "@alliance/shared/styles/card";
 
 export enum CardStyle {
   White = "white",
@@ -16,99 +16,57 @@ export enum CardStyle {
   Black = "black",
   Green = "green",
   Image = "image",
+  LightGreen = "light-green",
+  Red = "red",
 }
 
-interface CardProps {
+interface CardProps extends ViewProps {
   children: React.ReactNode;
-  style?: ViewStyle;
   cardStyle?: CardStyle;
   onPress?: () => void;
   backgroundImage?: ImageSourcePropType;
-  borderRadius?: number;
-  padding?: number;
 }
 
 export default function Card({
   children,
-  style,
+  className,
   cardStyle = CardStyle.White,
   onPress,
   backgroundImage,
-  borderRadius = 12,
-  padding = 16,
+  ...props
 }: CardProps) {
-  const containerStyle = [
-    styles.base,
-    styles[`${cardStyle}Container`],
-    { borderRadius, padding },
-    style,
-  ];
-
-  const CardComponent = onPress ? TouchableOpacity : View;
-
-  const cardContent = (
-    <CardComponent
-      style={containerStyle}
-      onPress={onPress}
-      activeOpacity={0.95}
-    >
-      {children}
-    </CardComponent>
-  );
+  const baseClasses = "flex flex-col p-4 rounded-lg";
+  const variantClasses = cardStyleClasses[cardStyle];
+  const combinedClasses = `${baseClasses} ${variantClasses} ${className || ""}`;
 
   if (backgroundImage && cardStyle === CardStyle.Image) {
     return (
       <ImageBackground
         source={backgroundImage}
-        style={[containerStyle, { padding: 0 }]}
-        imageStyle={{ borderRadius }}
+        className={combinedClasses}
+        imageStyle={{ borderRadius: 8 }}
       >
-        <View style={{ padding }}>{children}</View>
+        {children}
       </ImageBackground>
     );
   }
 
-  return cardContent;
+  if (onPress) {
+    return (
+      <TouchableOpacity
+        className={combinedClasses}
+        onPress={onPress}
+        activeOpacity={0.95}
+        {...props}
+      >
+        {children}
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <View className={combinedClasses} {...props}>
+      {children}
+    </View>
+  );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: 12,
-    padding: 16,
-  },
-
-  // Card style variants
-  whiteContainer: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ececec",
-  },
-  outlineContainer: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#d6d3d1",
-  },
-  alertContainer: {
-    backgroundColor: "#e0f2fe",
-    borderWidth: 1,
-    borderColor: "#bae6fd",
-  },
-  greyContainer: {
-    backgroundColor: "#f5f5f4",
-    borderWidth: 1,
-    borderColor: "#e7e5e4",
-  },
-  blackContainer: {
-    backgroundColor: "#1c1917",
-    borderWidth: 1,
-    borderColor: "#44403c",
-  },
-  greenContainer: {
-    backgroundColor: "#c4d8bf",
-    borderWidth: 1,
-    borderColor: "#a3c197",
-  },
-  imageContainer: {
-    backgroundColor: "transparent",
-  },
-});

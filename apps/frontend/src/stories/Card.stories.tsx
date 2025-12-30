@@ -1,4 +1,5 @@
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 import { Meta, StoryObj } from "@storybook/react";
 import testImage from "./test_image.jpg";
 

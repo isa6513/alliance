@@ -1,9 +1,4 @@
-import {
-  Text as RNText,
-  TextProps as RNTextProps,
-  StyleSheet,
-} from "react-native";
-import { colors } from "../../lib/style/colors";
+import { Text as RNText, TextProps as RNTextProps } from "react-native";
 
 export enum TextStyle {
   Header = "header",
@@ -17,48 +12,29 @@ interface TextProps extends RNTextProps {
   type?: TextStyle;
 }
 
-export default function Text({ children, ...props }: TextProps) {
+const typeClasses: Record<TextStyle, string> = {
+  [TextStyle.Header]: "text-2xl font-medium text-zinc-900",
+  [TextStyle.Primary]: "text-sm text-zinc-900",
+  [TextStyle.Bold]: "text-sm font-bold text-zinc-900",
+  [TextStyle.Secondary]: "text-sm text-zinc-500",
+  [TextStyle.Label]: "text-sm text-white font-medium",
+};
+
+export default function Text({
+  children,
+  type,
+  className,
+  ...props
+}: TextProps) {
+  const baseClasses = "font-sans";
+  const typeClass = type ? typeClasses[type] : "";
+  console.log(type);
+  console.log(typeClass);
+  const combinedClasses = `${baseClasses} ${typeClass} ${className || ""}`;
+
   return (
-    <RNText
-      {...props}
-      style={[styles.shared, styles[props.type || "default"], props.style]}
-    >
+    <RNText className={combinedClasses} {...props}>
       {children}
     </RNText>
   );
 }
-
-const styles = StyleSheet.create({
-  shared: {
-    fontFamily: "IBMPlexSans-Regular",
-  },
-  default: {
-    fontSize: 14,
-    fontFamily: "IBMPlexSans-Regular",
-    color: colors.text.primary,
-  },
-  header: {
-    fontSize: 24,
-    fontFamily: "IBMPlexSans-Medium",
-    color: colors.text.primary,
-  },
-  primary: {
-    fontSize: 14,
-    color: colors.text.primary,
-  },
-  bold: {
-    fontSize: 14,
-    fontWeight: "bold",
-    fontFamily: "IBMPlexSans-Bold",
-    color: colors.text.primary,
-  },
-  secondary: {
-    fontSize: 14,
-    color: colors.text.secondary,
-  },
-  label: {
-    fontSize: 14,
-    color: colors.white,
-    fontFamily: "IBMPlexSans-Medium",
-  },
-});

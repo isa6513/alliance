@@ -1,11 +1,10 @@
 import React from "react";
 import {
   TouchableOpacity,
-  StyleSheet,
-  ViewStyle,
   ActivityIndicator,
+  ViewProps,
 } from "react-native";
-import Text, { TextStyle } from "./Text";
+import Text from "./Text";
 
 export enum ButtonColor {
   Black = "black",
@@ -14,6 +13,7 @@ export enum ButtonColor {
   Red = "red",
   Light = "light",
   Outline = "outline",
+  White = "white",
 }
 
 export enum ButtonSize {
@@ -22,16 +22,41 @@ export enum ButtonSize {
   Large = "large",
 }
 
-interface ButtonProps {
+interface ButtonProps extends ViewProps {
   onPress: () => void;
   color?: ButtonColor;
   size?: ButtonSize;
   disabled?: boolean;
   loading?: boolean;
-  style?: ViewStyle;
   children?: React.ReactNode;
   title?: string;
 }
+
+const colorClasses: Record<ButtonColor, string> = {
+  [ButtonColor.Black]: "bg-zinc-800 border border-zinc-800",
+  [ButtonColor.Green]: "bg-green-600 border border-green-600",
+  [ButtonColor.Blue]: "bg-blue-500 border border-blue-500",
+  [ButtonColor.Red]: "bg-red-500 border border-red-500",
+  [ButtonColor.Light]: "bg-stone-200 border border-stone-300",
+  [ButtonColor.Outline]: "bg-transparent border border-stone-300",
+  [ButtonColor.White]: "bg-white border border-stone-300",
+};
+
+const sizeClasses: Record<ButtonSize, string> = {
+  [ButtonSize.Small]: "px-3 py-1.5 min-h-8",
+  [ButtonSize.Medium]: "px-4 py-2 min-h-10",
+  [ButtonSize.Large]: "px-5 py-3 min-h-12",
+};
+
+const textColorClasses: Record<ButtonColor, string> = {
+  [ButtonColor.Black]: "text-white",
+  [ButtonColor.Green]: "text-white",
+  [ButtonColor.Blue]: "text-white",
+  [ButtonColor.Red]: "text-white",
+  [ButtonColor.Light]: "text-zinc-800",
+  [ButtonColor.Outline]: "text-zinc-800",
+  [ButtonColor.White]: "text-zinc-800",
+};
 
 export default function Button({
   onPress,
@@ -39,113 +64,37 @@ export default function Button({
   size = ButtonSize.Medium,
   disabled = false,
   loading = false,
-  style,
+  className,
   children,
   title,
+  ...props
 }: ButtonProps) {
-  const containerStyle = [
-    styles.base,
-    styles[`${color}Container`],
-    styles[`${size}Container`],
-    disabled && styles.disabledContainer,
-    style,
-  ];
+  const baseClasses = "flex-row items-center justify-center rounded-lg";
+  const variantClasses = colorClasses[color];
+  const sizeClass = sizeClasses[size];
+  const disabledClasses = disabled ? "opacity-50" : "";
+  const combinedClasses = `${baseClasses} ${variantClasses} ${sizeClass} ${disabledClasses} ${className || ""}`;
+
+  const textClass = `font-medium ${textColorClasses[color]}`;
 
   return (
     <TouchableOpacity
-      style={containerStyle}
+      className={combinedClasses}
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.8}
+      {...props}
     >
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={color === ButtonColor.Outline ? "#444" : "#fff"}
+          color={color === ButtonColor.Outline || color === ButtonColor.White || color === ButtonColor.Light ? "#444" : "#fff"}
         />
       ) : children ? (
         children
-      ) : (
-        <Text type={TextStyle.Label}>{title}</Text>
-      )}
+      ) : title ? (
+        <Text className={textClass}>{title}</Text>
+      ) : null}
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 8,
-    fontWeight: "500",
-    fontFamily: "IBMPlexSans-Regular",
-    textAlign: "center",
-  },
-
-  // Size variants
-  smallContainer: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    minHeight: 32,
-  },
-  mediumContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    minHeight: 40,
-  },
-  largeContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    minHeight: 48,
-  },
-
-  // Color variants - containers
-  blackContainer: {
-    backgroundColor: "#333",
-    color: "white",
-  },
-  greenContainer: {
-    backgroundColor: "#5d9c2d",
-  },
-  blueContainer: {
-    backgroundColor: "#318dde",
-  },
-  redContainer: {
-    backgroundColor: "#ef4444",
-  },
-  lightContainer: {
-    backgroundColor: "#e7e5e4",
-  },
-  outlineContainer: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#d6d3d1",
-  },
-
-  // Text styles
-  text: {
-    fontSize: 12,
-    fontWeight: "500",
-    textAlign: "center",
-  },
-
-  // Size-specific text
-  smallText: {
-    fontSize: 10,
-  },
-  mediumText: {
-    fontSize: 14,
-  },
-  largeText: {
-    fontSize: 18,
-  },
-
-  // Disabled states
-  disabledContainer: {
-    opacity: 0.5,
-  },
-  disabledText: {
-    opacity: 0.7,
-  },
-});

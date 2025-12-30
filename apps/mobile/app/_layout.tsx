@@ -12,6 +12,7 @@ import "../global.css";
 export default function RootLayout() {
   useFonts({
     SourceSans3: require("../assets/fonts/SourceSans3.ttf"),
+    LibreBaskerville: require("../assets/fonts/LibreBaskerville.ttf"),
     "IBMPlexSans-Medium": require("../assets/fonts/IBMPlexSans-Medium.ttf"),
     "IBMPlexSans-Bold": require("../assets/fonts/IBMPlexSans-Bold.ttf"),
   });

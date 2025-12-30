@@ -7,13 +7,14 @@ import {
   userReferrerProfile,
 } from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 import posthog from "posthog-js";
 import React, { useEffect, useState } from "react";
 import { Link, href, useSearchParams } from "react-router";
 import SignupForm from "../../components/SignupForm";
 import { isFeatureEnabled } from "../../lib/config";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 const SignupPage: React.FC = () => {
   const [searchParams] = useSearchParams();

@@ -7,7 +7,8 @@ import {
   tasksOptout,
   UserActionRelation,
 } from "@alliance/shared/client";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 import posthog from "posthog-js";
 import { useCallback, useMemo, useState } from "react";
 import { setRevalidate } from "../applayout";

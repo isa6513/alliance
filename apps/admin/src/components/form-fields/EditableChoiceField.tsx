@@ -1,7 +1,7 @@
 import type {
   MultiSelectField,
   SelectField,
-} from "@alliance/sharedweb/forms/formschema";
+} from "@alliance/shared/forms/formschema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";

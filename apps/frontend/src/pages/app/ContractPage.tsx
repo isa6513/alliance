@@ -9,7 +9,8 @@ import MemberContract from "../../components/MemberContract";
 import FormInput from "@alliance/sharedweb/ui/FormInput";
 import { useAuth } from "../../lib/AuthContext";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 const ContractPage: React.FC = () => {
   const { user, loading, refreshUser } = useAuth();

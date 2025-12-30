@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, ViewStyle } from "react-native";
+import { View, Text, ViewProps } from "react-native";
 
 export enum StatusType {
   Active = "active",
@@ -11,145 +11,64 @@ export enum StatusType {
   Info = "info",
 }
 
-interface StatusIndicatorProps {
+export enum StatusSize {
+  Small = "small",
+  Medium = "medium",
+  Large = "large",
+}
+
+interface StatusIndicatorProps extends ViewProps {
   status: StatusType;
   text?: string;
-  size?: "small" | "medium" | "large";
-  style?: ViewStyle;
+  size?: StatusSize;
   showText?: boolean;
 }
+
+const dotColorClasses: Record<StatusType, string> = {
+  [StatusType.Active]: "bg-green-500",
+  [StatusType.Inactive]: "bg-zinc-500",
+  [StatusType.Pending]: "bg-yellow-500",
+  [StatusType.Success]: "bg-green-500",
+  [StatusType.Warning]: "bg-amber-500",
+  [StatusType.Error]: "bg-red-500",
+  [StatusType.Info]: "bg-blue-500",
+};
+
+const textColorClasses: Record<StatusType, string> = {
+  [StatusType.Active]: "text-green-700",
+  [StatusType.Inactive]: "text-zinc-500",
+  [StatusType.Pending]: "text-yellow-600",
+  [StatusType.Success]: "text-green-700",
+  [StatusType.Warning]: "text-amber-600",
+  [StatusType.Error]: "text-red-600",
+  [StatusType.Info]: "text-blue-600",
+};
+
+const sizeClasses: Record<StatusSize, { gap: string; dot: string; text: string }> = {
+  [StatusSize.Small]: { gap: "gap-1", dot: "w-1.5 h-1.5", text: "text-xs" },
+  [StatusSize.Medium]: { gap: "gap-1.5", dot: "w-2 h-2", text: "text-xs" },
+  [StatusSize.Large]: { gap: "gap-2", dot: "w-2.5 h-2.5", text: "text-sm" },
+};
 
 export default function StatusIndicator({
   status,
   text,
-  size = "medium",
-  style,
+  size = StatusSize.Medium,
   showText = true,
+  className,
+  ...props
 }: StatusIndicatorProps) {
-  const containerStyle = [
-    styles.container,
-    styles[`${size}Container`],
-    style,
-  ];
-
-  const dotStyle = [
-    styles.dot,
-    styles[`${status}Dot`],
-    styles[`${size}Dot`],
-  ];
-
-  const textStyle = [
-    styles.text,
-    styles[`${status}Text`],
-    styles[`${size}Text`],
-  ];
-
   const displayText = text || status.charAt(0).toUpperCase() + status.slice(1);
+  const sizeStyle = sizeClasses[size];
+
+  const containerClasses = `flex-row items-center self-start ${sizeStyle.gap} ${className || ""}`;
+  const dotClasses = `rounded-full ${sizeStyle.dot} ${dotColorClasses[status]}`;
+  const textClasses = `font-medium ${sizeStyle.text} ${textColorClasses[status]}`;
 
   return (
-    <View style={containerStyle}>
-      <View style={dotStyle} />
-      {showText && <Text style={textStyle}>{displayText}</Text>}
+    <View className={containerClasses} {...props}>
+      <View className={dotClasses} />
+      {showText && <Text className={textClasses}>{displayText}</Text>}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-  },
-  
-  // Size variants for container
-  smallContainer: {
-    gap: 4,
-  },
-  mediumContainer: {
-    gap: 6,
-  },
-  largeContainer: {
-    gap: 8,
-  },
-  
-  // Dot base styles
-  dot: {
-    borderRadius: 50,
-  },
-  
-  // Dot size variants
-  smallDot: {
-    width: 6,
-    height: 6,
-  },
-  mediumDot: {
-    width: 8,
-    height: 8,
-  },
-  largeDot: {
-    width: 10,
-    height: 10,
-  },
-  
-  // Status colors for dots
-  activeDot: {
-    backgroundColor: "#22c55e",
-  },
-  inactiveDot: {
-    backgroundColor: "#6b7280",
-  },
-  pendingDot: {
-    backgroundColor: "#eab308",
-  },
-  successDot: {
-    backgroundColor: "#22c55e",
-  },
-  warningDot: {
-    backgroundColor: "#f59e0b",
-  },
-  errorDot: {
-    backgroundColor: "#ef4444",
-  },
-  infoDot: {
-    backgroundColor: "#3b82f6",
-  },
-  
-  // Text styles
-  text: {
-    fontWeight: "500",
-  },
-  
-  // Text size variants
-  smallText: {
-    fontSize: 11,
-  },
-  mediumText: {
-    fontSize: 12,
-  },
-  largeText: {
-    fontSize: 14,
-  },
-  
-  // Status colors for text
-  activeText: {
-    color: "#15803d",
-  },
-  inactiveText: {
-    color: "#6b7280",
-  },
-  pendingText: {
-    color: "#ca8a04",
-  },
-  successText: {
-    color: "#15803d",
-  },
-  warningText: {
-    color: "#d97706",
-  },
-  errorText: {
-    color: "#dc2626",
-  },
-  infoText: {
-    color: "#2563eb",
-  },
-});

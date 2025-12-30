@@ -3,100 +3,61 @@ import {
   View,
   TextInput,
   Text,
-  StyleSheet,
   TextInputProps,
-  ViewStyle,
-  TextStyle,
-  Platform,
 } from "react-native";
 
 interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
   helperText?: string;
-  containerStyle?: ViewStyle;
-  labelStyle?: TextStyle;
-  inputStyle?: TextStyle;
-  errorStyle?: TextStyle;
   required?: boolean;
+  containerClassName?: string;
 }
 
 export default function Input({
   label,
   error,
   helperText,
-  containerStyle,
-  labelStyle,
-  inputStyle,
-  errorStyle,
   required = false,
+  containerClassName,
+  className,
   ...textInputProps
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
 
-  // Single source of truth for border color
-  const borderColor = error ? "#ef4444" : isFocused ? "#318dde" : "#d1d5db";
+  const borderColorClass = error
+    ? "border-red-500"
+    : isFocused
+    ? "border-blue-500"
+    : "border-zinc-300";
+
+  const inputContainerClasses = `border rounded-lg bg-white px-3 min-h-11 ${borderColorClass}`;
+  const inputClasses = `text-base text-zinc-700 py-3 ${className || ""}`;
 
   return (
-    <View style={containerStyle}>
+    <View className={containerClassName}>
       {label && (
-        <Text style={[styles.label, labelStyle]}>
+        <Text className="text-sm font-medium text-zinc-700 mb-2">
           {label}
-          {required && <Text style={styles.required}> *</Text>}
+          {required && <Text className="text-red-500"> *</Text>}
         </Text>
       )}
-      <View style={[styles.inputContainer, { borderColor }]}>
+      <View className={inputContainerClasses}>
         <TextInput
-          style={[styles.input, inputStyle]}
+          className={inputClasses}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholderTextColor="#9ca3af"
-          underlineColorAndroid="transparent" // <-- removes Android underline
-          {...(Platform.OS === "web" && {
-            style: [{ outlineStyle: undefined }, styles.input, inputStyle],
-          })}
+          underlineColorAndroid="transparent"
           {...textInputProps}
         />
       </View>
-      {error && <Text style={[styles.errorText, errorStyle]}>{error}</Text>}
+      {error && (
+        <Text className="text-xs text-red-500 mt-1">{error}</Text>
+      )}
       {helperText && !error && (
-        <Text style={styles.helperText}>{helperText}</Text>
+        <Text className="text-xs text-zinc-500 mt-1">{helperText}</Text>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  label: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#374151",
-    marginBottom: 8,
-  },
-  required: {
-    color: "#ef4444",
-  },
-  inputContainer: {
-    borderWidth: 1,
-    borderRadius: 8,
-    backgroundColor: "#fff",
-    paddingHorizontal: 12,
-    minHeight: 44,
-  },
-  input: {
-    fontSize: 15,
-    color: "#374151",
-    paddingVertical: 12,
-    fontFamily: "System",
-  },
-  errorText: {
-    fontSize: 12,
-    color: "#ef4444",
-    marginTop: 4,
-  },
-  helperText: {
-    fontSize: 12,
-    color: "#6b7280",
-    marginTop: 4,
-  },
-});

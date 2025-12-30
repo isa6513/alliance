@@ -14,7 +14,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Spinner from "../../components/Spinner";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
 import { useAuth } from "../../lib/AuthContext";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
@@ -37,6 +37,7 @@ import CommunityInvitesTabMember from "../../components/CommunityInvitesTabMembe
 import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
 import { useMediaQuery } from "../../lib/useMediaQuery";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 type Tab = "activity" | "members" | "invites" | "about" | "edit" | "resources";
 

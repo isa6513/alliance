@@ -6,7 +6,8 @@ import {
   userUpdateTag,
 } from "@alliance/shared/client";
 import { CreateTagDto, TagDto } from "@alliance/shared/client/types.gen";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Badge from "@alliance/sharedweb/ui/Badge";
 import { Link } from "react-router";

@@ -1,4 +1,5 @@
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 interface MemberContractProps {
   id?: string;

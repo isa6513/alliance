@@ -1,6 +1,7 @@
 import { authResetPassword } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 import { useEffect, useState } from "react";
 import { href, useNavigate } from "react-router";
 import FormInput from "@alliance/sharedweb/ui/FormInput";

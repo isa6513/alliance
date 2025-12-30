@@ -1,6 +1,6 @@
 import React from "react";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
-import type { DisplayBlock } from "./display-blocks";
+import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import { getApiUrl } from "../lib/config";
 
 type Props = {

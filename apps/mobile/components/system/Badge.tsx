@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TextStyle, ViewStyle } from "react-native";
+import { View, Text, ViewProps } from "react-native";
 
 export enum BadgeColor {
   Default = "default",
@@ -16,121 +16,70 @@ export enum BadgeSize {
   Large = "large",
 }
 
-interface BadgeProps {
+interface BadgeProps extends ViewProps {
   text: string;
   color?: BadgeColor;
   size?: BadgeSize;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
 }
+
+const colorClasses: Record<BadgeColor, { container: string; text: string }> = {
+  [BadgeColor.Default]: {
+    container: "bg-zinc-200",
+    text: "text-zinc-700",
+  },
+  [BadgeColor.Green]: {
+    container: "bg-green-100",
+    text: "text-green-800",
+  },
+  [BadgeColor.Blue]: {
+    container: "bg-blue-100",
+    text: "text-blue-800",
+  },
+  [BadgeColor.Red]: {
+    container: "bg-red-100",
+    text: "text-red-600",
+  },
+  [BadgeColor.Yellow]: {
+    container: "bg-amber-100",
+    text: "text-amber-700",
+  },
+  [BadgeColor.Purple]: {
+    container: "bg-purple-100",
+    text: "text-purple-700",
+  },
+};
+
+const sizeClasses: Record<BadgeSize, { container: string; text: string }> = {
+  [BadgeSize.Small]: {
+    container: "px-1.5 py-0.5 min-h-5",
+    text: "text-xs",
+  },
+  [BadgeSize.Medium]: {
+    container: "px-2 py-1 min-h-6",
+    text: "text-xs",
+  },
+  [BadgeSize.Large]: {
+    container: "px-3 py-1.5 min-h-7",
+    text: "text-sm",
+  },
+};
 
 export default function Badge({
   text,
   color = BadgeColor.Default,
   size = BadgeSize.Medium,
-  style,
-  textStyle,
+  className,
+  ...props
 }: BadgeProps) {
-  const containerStyle = [
-    styles.base,
-    styles[`${color}Container`],
-    styles[`${size}Container`],
-    style,
-  ];
+  const colorStyle = colorClasses[color];
+  const sizeStyle = sizeClasses[size];
 
-  const titleStyle = [
-    styles.text,
-    styles[`${color}Text`],
-    styles[`${size}Text`],
-    textStyle,
-  ];
+  const containerClasses = `self-start rounded-full items-center justify-center ${colorStyle.container} ${sizeStyle.container} ${className || ""}`;
+  const textClasses = `font-medium text-center ${colorStyle.text} ${sizeStyle.text}`;
 
   return (
-    <View style={containerStyle}>
-      <Text style={titleStyle}>{text}</Text>
+    <View className={containerClasses} {...props}>
+      <Text className={textClasses}>{text}</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: 12,
-    alignSelf: "flex-start",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  
-  // Size variants
-  smallContainer: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    minHeight: 20,
-  },
-  mediumContainer: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    minHeight: 24,
-  },
-  largeContainer: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    minHeight: 28,
-  },
-  
-  // Color variants - containers
-  defaultContainer: {
-    backgroundColor: "#e0e0e0",
-  },
-  greenContainer: {
-    backgroundColor: "#dcfce7",
-  },
-  blueContainer: {
-    backgroundColor: "#dbeafe",
-  },
-  redContainer: {
-    backgroundColor: "#fee2e2",
-  },
-  yellowContainer: {
-    backgroundColor: "#fef3c7",
-  },
-  purpleContainer: {
-    backgroundColor: "#e9d5ff",
-  },
-  
-  // Text styles
-  text: {
-    fontWeight: "500",
-    textAlign: "center",
-  },
-  
-  // Size-specific text
-  smallText: {
-    fontSize: 10,
-  },
-  mediumText: {
-    fontSize: 12,
-  },
-  largeText: {
-    fontSize: 14,
-  },
-  
-  // Color-specific text
-  defaultText: {
-    color: "#333",
-  },
-  greenText: {
-    color: "#166534",
-  },
-  blueText: {
-    color: "#1e40af",
-  },
-  redText: {
-    color: "#dc2626",
-  },
-  yellowText: {
-    color: "#d97706",
-  },
-  purpleText: {
-    color: "#7c3aed",
-  },
-});

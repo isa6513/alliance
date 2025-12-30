@@ -110,7 +110,7 @@ __metadata:
     "@storybook/test": "npm:^8.6.12"
     "@storybook/theming": "npm:^8.6.14"
     "@stripe/react-stripe-js": "npm:^3.7.0"
-    "@stripe/stripe-js": "npm:^7.3.1"
+    "@stripe/stripe-js": "npm:^8.6.0"
     "@tailwindcss/vite": "npm:^4.1.4"
     "@types/compression": "npm:^1"
     "@types/d3": "npm:^7.4.3"
@@ -135,7 +135,7 @@ __metadata:
     express: "npm:^5.1.0"
     globals: "npm:^16.2.0"
     gray-matter: "npm:^4.0.3"
-    html2canvas-pro: "npm:^1.5.13"
+    html2canvas-pro: "npm:^1.6.2"
     install: "npm:^0.13.0"
     isbot: "npm:^5"
     jspdf: "npm:^3.0.4"
@@ -203,6 +203,7 @@ __metadata:
     expo-symbols: "npm:~0.4.4"
     expo-system-ui: "npm:~5.0.7"
     expo-web-browser: "npm:~14.1.6"
+    lucide-react-native: "npm:^0.562.0"
     react: "npm:19.0.0"
     react-dom: "npm:19.0.0"
     react-native: "npm:0.79.2"
@@ -4325,10 +4326,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@stripe/stripe-js@npm:^7.3.1":
-  version: 7.3.1
-  resolution: "@stripe/stripe-js@npm:7.3.1"
-  checksum: 10c0/5ff21220074cae1f07c3f17372280f7f4884b8dcc2ace06f7d4e581314b376c72fc1888135408324de277c3bef471d26660f82f46945e313a9892363d8d15727
+"@stripe/stripe-js@npm:^8.6.0":
+  version: 8.6.0
+  resolution: "@stripe/stripe-js@npm:8.6.0"
+  checksum: 10c0/9286be05080049bddd6ad59d13e858ec3d1a36c33d553f806b127e2696232a447fa0f4775b44f18d9d251f6784bb8e8d849a5ef87970ef7f8516a30aee59f5f0
   languageName: node
   linkType: hard
 
@@ -11122,13 +11123,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"html2canvas-pro@npm:^1.5.13":
-  version: 1.5.13
-  resolution: "html2canvas-pro@npm:1.5.13"
+"html2canvas-pro@npm:^1.6.2":
+  version: 1.6.2
+  resolution: "html2canvas-pro@npm:1.6.2"
   dependencies:
     css-line-break: "npm:^2.1.0"
     text-segmentation: "npm:^1.0.3"
-  checksum: 10c0/23d672753e02d91837d5a118ac1160aad7edac12e8354133ad8d54d9f2f0f641b4cee5920971201ac9d827a7c6a1a4163075d9b888dfa726ac29ce69cb6cee5e
+  checksum: 10c0/3d1c01a0f3f3e0ed4b61b05db80a203ccea9a1578b66acf5d13f6622645432e4cd61a8efd19ce4a6a7063d9fc6a4b6e74d4afecb8ffd57eded6205416b5324bd
   languageName: node
   linkType: hard
 
@@ -12904,6 +12905,17 @@ __metadata:
   version: 7.18.3
   resolution: "lru-cache@npm:7.18.3"
   checksum: 10c0/b3a452b491433db885beed95041eb104c157ef7794b9c9b4d647be503be91769d11206bb573849a16b4cc0d03cbd15ffd22df7960997788b74c1d399ac7a4fed
+  languageName: node
+  linkType: hard
+
+"lucide-react-native@npm:^0.562.0":
+  version: 0.562.0
+  resolution: "lucide-react-native@npm:0.562.0"
+  peerDependencies:
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-native: "*"
+    react-native-svg: ^12.0.0 || ^13.0.0 || ^14.0.0 || ^15.0.0
+  checksum: 10c0/091690219e47f051b9381aeee48fdf574f05672672faa5e59c32583655f2b2d55c99dba3a2180f56031de743afcc5c9a742f2ad1f63527f352ec6cb50570f572
   languageName: node
   linkType: hard
 

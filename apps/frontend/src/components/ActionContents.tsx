@@ -8,10 +8,11 @@ import TaskTimeInfo from "../pages/app/TaskTimeInfo";
 import ActionEventsPanel from "./ActionEventsPanel";
 import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 import { shuffleWithSeed } from "../lib/utils";
 import { useMemo } from "react";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();

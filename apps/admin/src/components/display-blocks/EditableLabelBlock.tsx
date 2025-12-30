@@ -1,4 +1,4 @@
-import type { LabelBlock } from "@alliance/sharedweb/forms/display-blocks";
+import type { LabelBlock } from "@alliance/shared/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 

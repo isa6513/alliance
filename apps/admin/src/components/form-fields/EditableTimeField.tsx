@@ -1,4 +1,4 @@
-import type { TimeField } from "@alliance/sharedweb/forms/formschema";
+import type { TimeField } from "@alliance/shared/forms/formschema";
 import { AutoExtractUserDataToggle, RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";

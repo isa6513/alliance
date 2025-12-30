@@ -5,7 +5,7 @@ import {
   UserActionRelationStatus,
   UserDto,
 } from "@alliance/shared/client/types.gen";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import Badge from "@alliance/sharedweb/ui/Badge";
 import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
@@ -16,6 +16,7 @@ import { Link } from "react-router";
 import UserProgressPills, {
   formatRelationStatus,
 } from "@alliance/sharedweb/ui/UserProgressPills";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 export interface UserCardProps {
   user: UserDto;

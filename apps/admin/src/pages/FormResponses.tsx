@@ -11,12 +11,13 @@ import type {
   FieldKind,
   FormSchema,
   Page,
-} from "@alliance/sharedweb/forms/formschema";
+} from "@alliance/shared/forms/formschema";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import Card, { CardStyle } from "@alliance/sharedweb/ui/Card";
+import Card from "@alliance/sharedweb/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { CirclePlay } from "lucide-react";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 type FormWithSchema = Pick<FormDto, "id" | "title"> & {
   schema: FormSchema;
