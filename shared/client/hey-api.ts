@@ -3,7 +3,13 @@ import { CreateClientConfig } from "./client.gen";
 
 export const AuthEvents = {
   onUnauthorized: () => {
-    if (typeof window !== "undefined" && typeof navigator === "undefined") {
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.product === "ReactNative"
+    ) {
+      return;
+    }
+    if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("auth:unauthorized"));
     }
   },
@@ -33,16 +39,15 @@ export const createClientConfig: CreateClientConfig = (config) => {
     const refreshRes = await authRefreshTokens();
 
     if (refreshRes.response.ok) {
-      const retryRes = await oriπginalFetch(retryReq);
+      const retryRes = await originalFetch(retryReq);
       if (retryRes.status !== 401) {
         return retryRes;
       } else {
         console.error(retryRes);
       }
     }
-
-    console.log("onUnauthorized");
     AuthEvents.onUnauthorized();
+
     return res;
   };
   const baseUrl = config?.baseUrl;
