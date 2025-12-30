@@ -3,7 +3,7 @@ import { CreateClientConfig } from "./client.gen";
 
 export const AuthEvents = {
   onUnauthorized: () => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && typeof navigator === "undefined") {
       window.dispatchEvent(new CustomEvent("auth:unauthorized"));
     }
   },
@@ -33,7 +33,7 @@ export const createClientConfig: CreateClientConfig = (config) => {
     const refreshRes = await authRefreshTokens();
 
     if (refreshRes.response.ok) {
-      const retryRes = await originalFetch(retryReq);
+      const retryRes = await oriπginalFetch(retryReq);
       if (retryRes.status !== 401) {
         return retryRes;
       } else {
