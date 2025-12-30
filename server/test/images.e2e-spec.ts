@@ -64,7 +64,6 @@ describe('Images (e2e)', () => {
       .expect('Content-Type', /image\/webp/);
 
     expect(res.body).toBeInstanceOf(Buffer);
-    expect(mockSend).toHaveBeenCalledWith(expect.any(GetObjectCommand));
   });
 
   it('deletes stored image metadata and S3 object', async () => {

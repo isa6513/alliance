@@ -38,7 +38,7 @@ export class ImagesController {
   private readonly bucket = process.env.ASSETS_BUCKET!;
 
   @Get(':key')
-  @ApiOkResponse()
+  @ApiOkResponse({ type: StreamableFile })
   async getImage(
     @Param('key') key: string,
     @Res() res: Response,
