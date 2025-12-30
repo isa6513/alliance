@@ -2,18 +2,14 @@ import React from "react";
 import { View, ViewProps } from "react-native";
 
 interface ProgressBarProps extends ViewProps {
-  progress: number;
-  total: number;
+  percentage: number;
 }
 
 export default function ProgressBar({
-  progress,
-  total,
+  percentage,
   className,
   ...props
 }: ProgressBarProps) {
-  const percentage = (progress / total) * 100;
-
   return (
     <View
       className={`flex-row items-center gap-3 ${className || ""}`}
@@ -22,7 +18,7 @@ export default function ProgressBar({
       <View className="flex-1 h-3 bg-zinc-100 rounded overflow-hidden">
         <View
           className={`h-full rounded bg-green`}
-          style={{ width: `${percentage}%` }}
+          style={{ width: `${Math.min(percentage, 100)}%` }}
         />
       </View>
     </View>

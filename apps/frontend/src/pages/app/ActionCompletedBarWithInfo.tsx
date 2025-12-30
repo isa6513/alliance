@@ -1,23 +1,15 @@
-import {
-  ActionActivityDto,
-  ActionDto,
-} from "@alliance/shared/client/types.gen";
 import CompletedBar from "../../components/CompletedBar";
 import UserProfilePicRow from "../../components/UserProfilePicRow";
+import {
+  ActionCompletedBarWithInfoPropsShared,
+  getCompletedPercentage,
+} from "@alliance/shared/lib/actionCompletedBarWithInfo";
 
-interface ActionCompletedBarWithInfoProps {
-  friendActivities: ActionActivityDto[] | null;
+interface ActionCompletedBarWithInfoProps
+  extends ActionCompletedBarWithInfoPropsShared {
   className?: string;
   textSize?: "sm" | "base";
   textColor?: string;
-  action: Pick<
-    ActionDto,
-    | "commitmentThreshold"
-    | "status"
-    | "everyoneShouldComplete"
-    | "usersCompleted"
-    | "usersJoined"
-  >;
 }
 
 const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
@@ -27,25 +19,11 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
   textSize = "sm",
   textColor = "zinc-500",
 }: ActionCompletedBarWithInfoProps) => {
-  const value =
-    action.status === "gathering_commitments"
-      ? action.usersJoined
-      : action.usersCompleted;
+  const { labelString, percentage } = getCompletedPercentage(action);
 
-  const threshold =
-    action.status === "gathering_commitments"
-      ? action.commitmentThreshold
-      : action.usersJoined;
-
-  if (!threshold) {
+  if (percentage === null) {
     return null;
   }
-
-  const safeThreshold = Math.max(threshold, value);
-
-  const labelString = action.everyoneShouldComplete
-    ? value
-    : `${value} / ${safeThreshold}`;
 
   return (
     <div className={`${className}`}>
@@ -62,12 +40,7 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
           />
         )}
       </div>
-      <CompletedBar
-        percentage={
-          (value / (action.everyoneShouldComplete ? value : safeThreshold)) *
-          100
-        }
-      />
+      <CompletedBar percentage={percentage} />
     </div>
   );
 };

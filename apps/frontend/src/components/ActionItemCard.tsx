@@ -1,34 +1,15 @@
-import {
-  ActionActivityDto,
-  ActionDto,
-} from "@alliance/shared/client/types.gen";
 import React from "react";
 import { Link, href } from "react-router";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
 import ActionSquareThumbnail from "./ActionSquareThumbnail";
-import { showCompletedBar } from "@alliance/shared/lib/actionItemCard";
+import {
+  ActionItemCardPropsShared,
+  showCompletedBar,
+} from "@alliance/shared/lib/actionItemCard";
 
-export interface ActionItemCardProps {
-  action: Pick<
-    ActionDto,
-    | "name"
-    | "shortDescription"
-    | "category"
-    | "id"
-    | "status"
-    | "userRelation"
-    | "commitmentThreshold"
-    | "everyoneShouldComplete"
-    | "usersJoined"
-    | "usersCompleted"
-    | "squareThumbnailImage"
-    | "squareThumbnailImageAlt"
-  >;
+export interface ActionItemCardProps extends ActionItemCardPropsShared {
   className?: string;
-  friendCommitmentActivities?: ActionActivityDto[];
-  showDescription?: boolean;
-  activity?: ActionActivityDto;
 }
 
 const ActionItemCard: React.FC<ActionItemCardProps> = ({

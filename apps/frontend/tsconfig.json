@@ -11,5 +11,5 @@
     "composite": true,
     "baseUrl": "./src",
     "rootDirs": [".", "../.react-router/types"]
-  },
+  }
 }

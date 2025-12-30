@@ -41,6 +41,7 @@ export interface LoaderData {
 
 export interface ActionLoaderData {
   actions: ActionDto[] | null;
+  loading?: boolean;
 }
 
 export interface ActivitiesForAction {
@@ -67,6 +68,7 @@ export function clientLoader() {
     if (!activities.data || !actions.data) {
       return {
         actions: actions.data ?? null,
+        loading: false,
       } satisfies ActionLoaderData;
     }
 

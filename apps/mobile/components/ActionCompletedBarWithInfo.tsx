@@ -3,6 +3,7 @@ import React from "react";
 import { View } from "react-native";
 import { Text, ProgressBar } from "./system";
 import { UserProfilePicRow } from "./UserProfilePicRow";
+import { getCompletedPercentage } from "@alliance/shared/lib/actionCompletedBarWithInfo";
 
 export const ActionCompletedBarWithInfo = ({
   action,
@@ -18,25 +19,11 @@ export const ActionCompletedBarWithInfo = ({
   >;
   friendActivities: ActionActivityDto[] | null;
 }) => {
-  const value =
-    action.status === "gathering_commitments"
-      ? action.usersJoined
-      : action.usersCompleted;
+  const { labelString, percentage } = getCompletedPercentage(action);
 
-  const threshold =
-    action.status === "gathering_commitments"
-      ? action.commitmentThreshold
-      : action.usersJoined;
-
-  if (!threshold) {
+  if (percentage === null) {
     return null;
   }
-
-  const safeThreshold = Math.max(threshold, value);
-
-  const labelString = action.everyoneShouldComplete
-    ? `${value}`
-    : `${value} / ${safeThreshold}`;
 
   return (
     <View className="mt-3">
@@ -57,7 +44,7 @@ export const ActionCompletedBarWithInfo = ({
           />
         )}
       </View>
-      <ProgressBar progress={value} total={threshold} />
+      <ProgressBar percentage={percentage} />
     </View>
   );
 };
