@@ -145,8 +145,6 @@ export const AuthProvider: React.FC<
         throw new Error("Login failed");
       }
 
-      console.log("saving tokens");
-
       client.setConfig({
         baseUrl: getApiUrl(),
         headers: {
@@ -185,8 +183,6 @@ export const AuthProvider: React.FC<
     logout,
     isLoading,
   };
-
-  console.log("value: ", value);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
