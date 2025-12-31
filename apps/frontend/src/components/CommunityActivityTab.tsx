@@ -2,7 +2,6 @@ import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
 import UserActivityCard from "./UserActivityCard";
-import { useAuth } from "../lib/AuthContext";
 
 export interface CommunityActivityTabProps {
   communityId: number;
@@ -13,15 +12,11 @@ const CommunityActivityTab = ({
   communityId,
   userId,
 }: CommunityActivityTabProps) => {
-  const { isAuthenticated, user } = useAuth();
-
   const { activities, handleLikeActivity, updateActivity, loading } =
     useActivities({
       list: ActivityList.Community,
       objectId: communityId,
       comments: true,
-      isAuthenticated,
-      user,
     });
 
   return (

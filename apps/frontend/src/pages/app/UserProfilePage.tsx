@@ -131,8 +131,6 @@ const UserProfilePage: React.FC = () => {
     list: ActivityList.User,
     objectId: parseInt(id!),
     comments: true,
-    isAuthenticated,
-    user,
   });
 
   useEffect(() => {

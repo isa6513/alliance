@@ -20,13 +20,11 @@ const HomePage = () => {
   const navigate = useNavigate();
   const { actions, loading } = useOutletContext<AppLayoutOutletContext>();
 
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
 
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
     limit: 8,
-    isAuthenticated,
-    user,
   });
 
   const [visibleFriendActivityCount, setVisibleFriendActivityCount] =

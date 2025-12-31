@@ -45,13 +45,9 @@ export default function HomeScreen() {
     completedActions,
   } = useHomePageActions(actions);
 
-  const { user, isAuthenticated } = useAuth();
-
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
     limit: 8,
-    isAuthenticated,
-    user,
   });
 
   return (

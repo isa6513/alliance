@@ -72,8 +72,6 @@ export default function ActionPage() {
     list: ActivityList.Action,
     objectId: actionId,
     limit: 10,
-    isAuthenticated,
-    user,
   });
 
   // TODO: hack because some action pages are public and some are private. we should handle this in a more general way elsehwere (ie applayout.tsx logic)

@@ -7,7 +7,6 @@ import {
   actionsCommunityActivity,
   actionsLikeActivity,
   actionsUnlikeActivity,
-  UserDto,
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useState } from "react";
 import posthog from "posthog-js";
@@ -22,8 +21,6 @@ export enum ActivityList {
 
 export type UseActivitiesProps = {
   comments?: boolean;
-  user?: UserDto;
-  isAuthenticated: boolean;
 } & (
   | {
       list: ActivityList.User | ActivityList.Action | ActivityList.Community;
@@ -42,8 +39,6 @@ const useActivities = ({
   objectId,
   limit = 50,
   comments = false,
-  user,
-  isAuthenticated,
 }: UseActivitiesProps) => {
   const [activities, setActivities] = useState<ActionActivityDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -112,12 +107,10 @@ const useActivities = ({
       .finally(() => {
         setLoading(false);
       });
-  }, [list, objectId, isAuthenticated, comments, limit]);
+  }, [list, objectId, comments, limit]);
 
   const handleLikeActivity = useCallback(
     async (activityId: number) => {
-      if (!user) return;
-
       const activity = activities.find((a) => a.id === activityId);
       if (!activity) return;
 
@@ -170,7 +163,7 @@ const useActivities = ({
       }
       return null;
     },
-    [user, activities]
+    [activities]
   );
 
   const updateActivity = useCallback((updatedActivity: ActionActivityDto) => {

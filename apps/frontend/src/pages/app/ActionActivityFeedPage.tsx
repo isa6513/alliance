@@ -55,8 +55,6 @@ const ActionActivityFeedPage = () => {
       objectId: parseInt(actionId!),
       comments: true,
       limit: 50,
-      isAuthenticated,
-      user,
     });
 
   const [myFriends, setMyFriends] = useState<number[]>([]);
