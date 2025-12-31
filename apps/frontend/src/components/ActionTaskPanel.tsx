@@ -1,17 +1,6 @@
-import {
-  ActionDto,
-  actionsComplete,
-  actionsDecline,
-  actionsJoin,
-  SubmitFormDto,
-  tasksOptout,
-  UserActionRelation,
-} from "@alliance/shared/client";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
-import posthog from "posthog-js";
-import { useCallback, useMemo, useState } from "react";
-import { setRevalidate } from "../applayout";
+import { useMemo } from "react";
 import { useAuth } from "../lib/AuthContext";
 import { canCompleteAction } from "@alliance/shared/lib/homePage";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
@@ -19,18 +8,10 @@ import ActionTaskPanelCommit from "./ActionTaskPanelCommit";
 import ActionTaskPanelForm from "./ActionTaskPanelForm";
 import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
 import { StripeWrapper } from "./StripeWrapper";
-
-export interface ActionTaskPanelProps {
-  action: ActionDto;
-  userRelation: Extract<UserActionRelation, "joined" | "none">;
-  missedDeadline?: boolean;
-  onCompleteAction: () => void;
-  onJoinAction: () => void;
-  onDeclineAction: () => void;
-  onOptOutAction: () => void;
-  card?: boolean;
-  disabled?: boolean;
-}
+import {
+  ActionTaskPanelProps,
+  useTaskFormHandlers,
+} from "@alliance/shared/lib/actionTaskPanel";
 
 const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   action,
@@ -44,7 +25,22 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   disabled = false,
 }: ActionTaskPanelProps) => {
   const { isAuthenticated } = useAuth();
-  const [actionError, setActionError] = useState<string | null>(null);
+
+  const {
+    handleCompleteWithTracking,
+    actionError,
+    handleFormStarted,
+    handleAbandonAction,
+    handleJoinAction,
+    handleDeclineAction,
+  } = useTaskFormHandlers({
+    action,
+    onCompleteAction,
+    userRelation,
+    onJoinAction,
+    onDeclineAction,
+    onOptOutAction,
+  });
 
   const errorMessageNode = useMemo(() => {
     if (!actionError) {
@@ -56,88 +52,6 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       </p>
     );
   }, [actionError]);
-
-  const handleCompleteWithTracking = useCallback(
-    async (sendComplete: boolean = true) => {
-      if (sendComplete) {
-        const req = await actionsComplete({
-          path: { id: action.id },
-        });
-        if (req.error) {
-          setActionError("Something went wrong. Please try again.");
-          return;
-        }
-      }
-      setActionError(null);
-      posthog.capture("action_completed", {
-        actionId: action.id,
-        actionType: action.type,
-        actionName: action.name,
-      });
-      setRevalidate();
-      onCompleteAction();
-    },
-    [action, onCompleteAction]
-  );
-
-  const handleJoinAction = useCallback(async () => {
-    const req = await actionsJoin({
-      path: { id: action.id },
-    });
-    if (req.error) {
-      setActionError("Something went wrong. Please try again.");
-      return;
-    }
-    setActionError(null);
-    setRevalidate();
-    onJoinAction();
-  }, [action, onJoinAction]);
-
-  const handleDeclineAction = useCallback(
-    async (moral: boolean, reason: string) => {
-      const req = await actionsDecline({
-        path: { id: action.id },
-        body: { reason, moral },
-      });
-      if (req.error) {
-        setActionError("Something went wrong. Please try again.");
-        return;
-      }
-      setActionError(null);
-      setRevalidate();
-      onDeclineAction();
-    },
-    [action, onDeclineAction]
-  );
-
-  const handleAbandonAction = useCallback(
-    async (
-      outOfTime: boolean,
-      reason: string,
-      partialFormData: SubmitFormDto
-    ) => {
-      const req = await tasksOptout({
-        path: { id: action.taskFormId! },
-        body: { actionId: action.id, reason, outOfTime, partialFormData },
-      });
-      if (req.error) {
-        setActionError("Something went wrong. Please try again.");
-        return;
-      }
-      setActionError(null);
-      setRevalidate();
-      onOptOutAction();
-    },
-    [action, onOptOutAction]
-  );
-
-  const handleFormStarted = useCallback(() => {
-    posthog.capture("form_started", {
-      actionId: action.id,
-      actionType: action.type,
-      actionName: action.name,
-    });
-  }, [action]);
 
   if (disabled && action.taskFormId) {
     return (

@@ -628,8 +628,6 @@ export function RenderField({
   }
 }
 
-export default RenderField;
-
 type TimeInputFieldProps = {
   field: TimeField;
   value: FormValue | undefined;

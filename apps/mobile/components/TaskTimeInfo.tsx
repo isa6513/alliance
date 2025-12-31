@@ -22,7 +22,7 @@ const TaskTimeInfo = ({
           <View className="bg-green rounded-full">
             <ClockIcon size={16} color="white" />
           </View>
-          <Text className="text-green">
+          <Text className="text-green text-base">
             {action.timeEstimate} minute{action.timeEstimate === 1 ? "" : "s"}
           </Text>
         </View>

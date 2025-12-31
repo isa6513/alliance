@@ -84,3 +84,7 @@ output "staging_assets_bucket_name" {
 output "cloudfront_domain" {
   value = aws_cloudfront_distribution.assets.domain_name
 }
+
+output "cloudfront_domain_staging" {
+  value = aws_cloudfront_distribution.staging_assets.domain_name
+}

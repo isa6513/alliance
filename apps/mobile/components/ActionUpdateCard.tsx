@@ -1,8 +1,7 @@
-import React from "react";
 import { View } from "react-native";
 import { formatDistance } from "date-fns";
 import Markdown from "react-native-markdown-display";
-import { ActionUpdateDto } from "../../../shared/client";
+import { ActionUpdateDto } from "@alliance/shared/client";
 import { Text } from "./system";
 
 export interface ActionUpdateCardProps {

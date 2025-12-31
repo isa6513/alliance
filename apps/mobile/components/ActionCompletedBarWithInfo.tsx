@@ -20,7 +20,7 @@ export const ActionCompletedBarWithInfo = ({
   return (
     <View className="mt-3">
       <View className="flex-row items-center justify-between mb-1">
-        <Text className="text-xs text-zinc-500">
+        <Text className="text-zinc-500 text-base">
           {labelString}{" "}
           {action.status === "gathering_commitments"
             ? "members committed"

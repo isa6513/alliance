@@ -235,7 +235,7 @@ const Sidebar: React.FC = () => {
             >
               Create
               <div
-                className="mt-px ml-1 hover:bg-white/20 rounded-full p-1"
+                className="mt-px ml-1 hover:bg-white/20 rounded-full"
                 onClick={handleCreateActionDropdown}
               >
                 <ChevronDown size={20} />

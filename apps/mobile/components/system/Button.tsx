@@ -65,7 +65,7 @@ export default function Button({
   title,
   ...props
 }: ButtonProps) {
-  const baseClasses = "flex-row items-center justify-center rounded-lg";
+  const baseClasses = "flex-row items-center justify-center rounded-sm";
   const variantClasses = colorClasses[color];
   const sizeClass = sizeClasses[size];
   const disabledClasses = disabled ? "opacity-50" : "";

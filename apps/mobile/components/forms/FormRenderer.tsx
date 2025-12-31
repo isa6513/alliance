@@ -25,11 +25,10 @@ import {
   applyDefaultValues,
   filterAnswersByFieldIds,
   isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
-  isFieldConditionallyRequired as isFieldConditionallyRequiredShared,
   resolveFieldDefaultValue,
   validateFieldValue as validateFieldValueShared,
 } from "@alliance/shared/formrenderer";
-import RenderField from "./RenderField";
+import { RenderField } from "./RenderField";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
 
 type FormRendererProps = {
@@ -48,7 +47,7 @@ type FormRendererProps = {
   onAbandonAction?: (
     outOfTime: boolean,
     reason: string,
-    partialFormData: SubmitFormDto,
+    partialFormData: SubmitFormDto
   ) => void;
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
@@ -82,15 +81,14 @@ function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
         <Markdown
           style={{
             body: { color: "#18181b", fontSize: 15, lineHeight: 22 },
+            link: { color: "rgb(98, 161, 36)" },
             paragraph: { marginBottom: 8 },
           }}
         >
           {block.text}
         </Markdown>
       ) : (
-        <Text className="text-base text-zinc-800 leading-6">
-          {block.text}
-        </Text>
+        <Text className="text-base text-zinc-800 leading-6">{block.text}</Text>
       );
     case "label":
       return (
@@ -209,7 +207,7 @@ const FormRenderer = ({
   };
 
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(() =>
-    clampPageIndex(initialPageIndex ?? 0),
+    clampPageIndex(initialPageIndex ?? 0)
   );
   const [formData, setFormData] = useState<Record<string, FormValue>>(() => {
     if (readOnly) {
@@ -220,7 +218,7 @@ const FormRenderer = ({
     return applyDefaultValues({}, defaultValueMap);
   });
   const [publicAnswers, setPublicAnswers] = useState<Record<string, boolean>>(
-    {},
+    {}
   );
   const [visibilityValidatorResults, setVisibilityValidatorResults] = useState<
     Record<number, boolean>
@@ -257,8 +255,8 @@ const FormRenderer = ({
         const conditions = Array.isArray(element.visibleIf)
           ? element.visibleIf
           : element.visibleIf
-            ? [element.visibleIf]
-            : [];
+          ? [element.visibleIf]
+          : [];
         for (const condition of conditions) {
           if ("validatorId" in condition) {
             ids.add(condition.validatorId);
@@ -274,7 +272,7 @@ const FormRenderer = ({
       return;
     }
     const missingIds = visibilityValidatorIds.filter(
-      (id) => !(id in visibilityValidatorResults),
+      (id) => !(id in visibilityValidatorResults)
     );
     if (!missingIds.length) {
       return;
@@ -296,11 +294,11 @@ const FormRenderer = ({
           } catch (error) {
             console.error(
               `Failed to evaluate visibility validator ${validatorId}`,
-              error,
+              error
             );
             return [validatorId, false] as const;
           }
-        }),
+        })
       );
       if (cancelled) return;
       setVisibilityValidatorResults((prev) => {
@@ -320,36 +318,27 @@ const FormRenderer = ({
   const isElementCurrentlyVisible = useCallback(
     (
       element: AnyField | DisplayBlock,
-      data?: Record<string, FormValue>,
+      data?: Record<string, FormValue>
     ): boolean =>
       isElementCurrentlyVisibleShared(element, data ?? formData, {
         deviceType: DEVICE_TYPE,
         visibilityValidatorResults,
         readOnly,
       }),
-    [formData, visibilityValidatorResults, readOnly],
-  );
-
-  const isFieldConditionallyRequired = useCallback(
-    (field: AnyField, data?: Record<string, FormValue>): boolean =>
-      isFieldConditionallyRequiredShared(field, data ?? formData, {
-        deviceType: DEVICE_TYPE,
-        visibilityValidatorResults,
-      }),
-    [formData, visibilityValidatorResults],
+    [formData, visibilityValidatorResults, readOnly]
   );
 
   const validateFieldValue = useCallback(
     (
       field: AnyField,
       fieldValue: FormValue | undefined,
-      data?: Record<string, FormValue>,
+      data?: Record<string, FormValue>
     ): string | null =>
       validateFieldValueShared(field, fieldValue, data ?? formData, {
         deviceType: DEVICE_TYPE,
         visibilityValidatorResults,
       }),
-    [formData, visibilityValidatorResults],
+    [formData, visibilityValidatorResults]
   );
 
   const applyFieldErrorUpdates = useCallback(
@@ -373,12 +362,12 @@ const FormRenderer = ({
         return changed ? next : prev;
       });
     },
-    [],
+    []
   );
 
   const runCustomValidatorsForFields = useCallback(
     async (
-      fieldsToValidate: AnyField[],
+      fieldsToValidate: AnyField[]
     ): Promise<Record<string, string | null>> => {
       if (!fieldsToValidate.length || readOnly) {
         return {};
@@ -404,7 +393,7 @@ const FormRenderer = ({
             const isValid = response.data.isValid;
             return [
               field.id,
-              isValid ? null : (response.data.message ?? null),
+              isValid ? null : response.data.message ?? null,
             ] as const;
           } catch (err) {
             console.error("Failed to run custom validator", err);
@@ -413,18 +402,18 @@ const FormRenderer = ({
               "Unable to validate this field right now. Please try again.",
             ] as const;
           }
-        }),
+        })
       );
 
       return Object.fromEntries(results);
     },
-    [readOnly, formData],
+    [readOnly, formData]
   );
 
   const validatePage = useCallback(
     async (
       pageIndex: number,
-      includeCustomValidators: boolean,
+      includeCustomValidators: boolean
     ): Promise<{ isValid: boolean; firstInvalidFieldId?: string }> => {
       const page = schema.pages[pageIndex];
       if (!page) {
@@ -433,10 +422,10 @@ const FormRenderer = ({
 
       const updates: Record<string, string | null> = {};
       const fieldsOnPage = page.fields.filter(
-        (element): element is AnyField => "label" in element,
+        (element): element is AnyField => "label" in element
       );
       const visibleFields = fieldsOnPage.filter((field) =>
-        isElementCurrentlyVisible(field),
+        isElementCurrentlyVisible(field)
       );
       const visibleFieldIds = new Set(visibleFields.map((field) => field.id));
 
@@ -451,7 +440,7 @@ const FormRenderer = ({
 
       if (includeCustomValidators && !readOnly) {
         const candidates = visibleFields.filter(
-          (field) => field.customValidatorId && !updates[field.id],
+          (field) => field.customValidatorId && !updates[field.id]
         );
         if (candidates.length > 0) {
           const customResults = await runCustomValidatorsForFields(candidates);
@@ -479,7 +468,7 @@ const FormRenderer = ({
       runCustomValidatorsForFields,
       applyFieldErrorUpdates,
       readOnly,
-    ],
+    ]
   );
 
   const validateAllPages = useCallback(async () => {
@@ -600,28 +589,6 @@ const FormRenderer = ({
         contentContainerClassName="p-4 pb-24"
         keyboardShouldPersistTaps="handled"
       >
-        {schema.title && (
-          <Text className="text-2xl font-semibold text-zinc-900 mb-2">
-            {schema.title}
-          </Text>
-        )}
-        {schema.description && (
-          <Text className="text-base text-zinc-700 mb-4">
-            {schema.description}
-          </Text>
-        )}
-
-        {currentPage?.title && (
-          <Text className="text-xl font-semibold text-zinc-900 mb-2">
-            {currentPage.title}
-          </Text>
-        )}
-        {currentPage?.description && (
-          <Text className="text-base text-zinc-700 mb-3">
-            {currentPage.description}
-          </Text>
-        )}
-
         {currentPage?.fields.map((element, idx) => {
           if (!("label" in element)) {
             return (
@@ -675,7 +642,7 @@ const FormRenderer = ({
               onPress={isLastPage ? handleSubmit : handleNextPage}
               color={ButtonColor.Black}
               size={ButtonSize.Medium}
-              className="flex-[2]"
+              className="flex-2"
               disabled={submitting}
             >
               {submitting ? (

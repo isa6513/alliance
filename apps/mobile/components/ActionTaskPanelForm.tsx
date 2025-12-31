@@ -5,16 +5,13 @@ import {
   tasksSubmitForm,
   tasksSubmitPublicForm,
 } from "@alliance/shared/client";
-import FormRenderer, {
-  computeFormStorageKey,
-} from "@alliance/sharedweb/forms/FormRenderer";
-import { FormSchema } from "@alliance/shared/forms/formschema";
-import Card from "@alliance/sharedweb/ui/Card";
-import posthog from "posthog-js";
 import { useEffect, useMemo, useState } from "react";
+import FormRenderer from "./forms/FormRenderer";
+import { FormSchema } from "@alliance/shared/forms/formschema";
+import { ActivityIndicator, View } from "react-native";
+import { computeFormStorageKey } from "@alliance/shared/formrenderer";
 import { useAuth } from "../lib/AuthContext";
-import Spinner from "./Spinner";
-import { CardStyle } from "@alliance/shared/styles/card";
+import posthog from "posthog-js";
 
 interface ActionTaskPanelFormProps {
   taskFormId: number;
@@ -25,9 +22,7 @@ interface ActionTaskPanelFormProps {
     reason: string,
     partialFormData: SubmitFormDto
   ) => void;
-  card?: boolean;
   actionId: number;
-  disabled?: boolean;
   publicAction?: boolean;
 }
 
@@ -36,27 +31,20 @@ const ActionTaskPanelForm = ({
   onCompleteAction,
   onFormStarted,
   onAbandonAction,
-  card = false,
   actionId,
-  disabled = false,
   publicAction = false,
 }: ActionTaskPanelFormProps) => {
   const [form, setForm] = useState<FormDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user, refreshUser } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchForm = async () => {
       const form = await tasksGetForm({
         path: { id: taskFormId },
       });
-      setLoading(false);
-      if (!form.data) {
-        setError("Unable to load form - please reload");
-        throw new Error((form.error as Error).message);
-      }
-      setForm(form.data);
+      setForm(form.data ?? null);
     };
     fetchForm();
   }, [taskFormId]);
@@ -87,7 +75,7 @@ const ActionTaskPanelForm = ({
           }
           if (user && !user.hasActiveContract) {
             //TODO: better handling of user refresh (things used to break if the user signed a contract in another tab then went back to the first one)
-            refreshUser();
+            // refreshUser();
           }
           onCompleteAction(false); //tasksSubmitForm handles completion here
         } else {
@@ -114,57 +102,20 @@ const ActionTaskPanelForm = ({
   }, []);
 
   if (!form) {
-    if (loading) {
-      return (
-        <div
-          className={`flex flex-col justify-center items-center ${
-            card ? "p-6 border border-zinc-200" : ""
-          }`}
-        >
-          <Spinner />
-        </div>
-      );
-    } else {
-      return (
-        <div
-          className={`flex flex-col justify-center items-center text-red-500 ${
-            card ? "p-6 border border-zinc-200" : ""
-          }`}
-        >
-          <p>Error loading form</p>
-          {error && <p>{error}</p>}
-        </div>
-      );
-    }
+    return <ActivityIndicator />;
   }
 
-  const Wrapper = card ? Card : "div";
-
   return (
-    <Wrapper className={!card ? "flex flex-col gap-y-2" : "p-4 sm:p-6"}>
-      <div>
-        <FormRenderer
-          form={form.schema as unknown as FormSchema}
-          id={form.id}
-          actionId={actionId}
-          onSubmit={handleSubmitForm}
-          persistKey={String(taskFormId)}
-          userId={user?.id}
-          user={user}
-          onFormStarted={onFormStarted}
-          onAbandonAction={onAbandonAction}
-          renderFormAsCompleted={disabled}
-          publicAction={publicAction}
-          phDistinctId={distinctId}
-          sessionReplayUrl={sessionReplayUrl}
-        />
-      </div>
-      {error && (
-        <Card style={CardStyle.White} className="!border-red-400 !bg-red-50">
-          <div className="text-red-500">{error}</div>
-        </Card>
-      )}
-    </Wrapper>
+    <View>
+      <FormRenderer
+        id={taskFormId}
+        form={form?.schema as unknown as FormSchema}
+        onSubmit={handleSubmitForm}
+        onFormStarted={onFormStarted}
+        onAbandonAction={onAbandonAction}
+        actionId={actionId}
+      />
+    </View>
   );
 };
 

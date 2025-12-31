@@ -186,3 +186,72 @@ resource "aws_iam_role_policy" "ec2_s3_policy_staging" {
     }]
   })
 }
+
+resource "aws_cloudfront_origin_access_control" "staging_assets" {
+  name                              = "alliance-staging-assets-oac"
+  description                       = "OAC for alliance staging assets bucket"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
+resource "aws_cloudfront_distribution" "staging_assets" {
+  enabled             = true
+  is_ipv6_enabled     = true
+  comment             = "Alliance staging assets CDN"
+  price_class         = "PriceClass_100"
+
+  origin {
+    domain_name              = aws_s3_bucket.staging_assets.bucket_regional_domain_name
+    origin_id                = "S3-staging-assets"
+    origin_access_control_id = aws_cloudfront_origin_access_control.staging_assets.id
+  }
+
+  default_cache_behavior {
+    allowed_methods          = ["GET", "HEAD", "OPTIONS"]
+    cached_methods           = ["GET", "HEAD"]
+    target_origin_id         = "S3-staging-assets"
+    viewer_protocol_policy   = "redirect-to-https"
+    cache_policy_id          = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+    origin_request_policy_id = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+    compress                 = true
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
+
+  tags = {
+    Name        = "alliance-staging-assets-cdn"
+    Environment = "staging"
+  }
+}
+
+resource "aws_s3_bucket_policy" "staging_assets" {
+  bucket = aws_s3_bucket.staging_assets.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowCloudFrontServicePrincipal"
+        Effect    = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.staging_assets.arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.staging_assets.arn
+          }
+        }
+      }
+    ]
+  })
+}

@@ -17,6 +17,7 @@ export default defineConfig({
   plugins: [!isStorybook && reactRouter(), tailwindcss()],
   optimizeDeps: {
     exclude: ["@alliance/shared"],
+    include: ["style-to-js", "hast-util-to-jsx-runtime"],
   },
   server: {
     port: 5174,
