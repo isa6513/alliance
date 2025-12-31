@@ -508,6 +508,8 @@ jobs:
             export MAILGUN_SIGNING_KEY=${{ secrets.MAILGUN_SIGNING_KEY }}
             export NOTIF_TEST_PHONE_NUMBER=${{ secrets.NOTIF_TEST_PHONE_NUMBER }}
             export NOTIF_TEST_EMAIL=${{ secrets.NOTIF_TEST_EMAIL }}
+            export USE_CLOUDFRONT=${{ vars.USE_CLOUDFRONT }}
+            export CLOUDFRONT_DOMAIN=${{ secrets.CLOUDFRONT_DOMAIN }}
 
             rollback () {
               echo "Deployment failed - rolling back"

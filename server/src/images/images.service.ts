@@ -116,7 +116,10 @@ export function getImageSource(string: string) {
     process.env.NODE_ENV === 'production' ||
     process.env.NODE_ENV === 'staging'
   ) {
-    if (process.env.USE_CLOUDFRONT && process.env.CLOUDFRONT_DOMAIN) {
+    if (
+      process.env.USE_CLOUDFRONT === 'true' &&
+      process.env.CLOUDFRONT_DOMAIN
+    ) {
       return `https://${process.env.CLOUDFRONT_DOMAIN}/${string}`;
     }
     return `${process.env.APP_URL}/api/images/${string}`;
