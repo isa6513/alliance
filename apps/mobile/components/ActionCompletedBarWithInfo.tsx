@@ -1,24 +1,16 @@
-import { ActionActivityDto, ActionDto } from "@alliance/shared/client";
 import React from "react";
 import { View } from "react-native";
 import { Text, ProgressBar } from "./system";
 import { UserProfilePicRow } from "./UserProfilePicRow";
-import { getCompletedPercentage } from "@alliance/shared/lib/actionCompletedBarWithInfo";
+import {
+  ActionCompletedBarWithInfoPropsShared,
+  getCompletedPercentage,
+} from "@alliance/shared/lib/actionCompletedBarWithInfo";
 
 export const ActionCompletedBarWithInfo = ({
   action,
   friendActivities,
-}: {
-  action: Pick<
-    ActionDto,
-    | "commitmentThreshold"
-    | "status"
-    | "everyoneShouldComplete"
-    | "usersCompleted"
-    | "usersJoined"
-  >;
-  friendActivities: ActionActivityDto[] | null;
-}) => {
+}: ActionCompletedBarWithInfoPropsShared) => {
   const { labelString, percentage } = getCompletedPercentage(action);
 
   if (percentage === null) {

@@ -7,9 +7,9 @@ import {
   actionsCommunityActivity,
   actionsLikeActivity,
   actionsUnlikeActivity,
+  UserDto,
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useState } from "react";
-import { useAuth } from "../../lib/AuthContext";
 import posthog from "posthog-js";
 
 export enum ActivityList {
@@ -20,7 +20,11 @@ export enum ActivityList {
   Community = "community",
 }
 
-export type UseActivitiesProps = { comments?: boolean } & (
+export type UseActivitiesProps = {
+  comments?: boolean;
+  user?: UserDto;
+  isAuthenticated: boolean;
+} & (
   | {
       list: ActivityList.User | ActivityList.Action | ActivityList.Community;
       objectId: number;
@@ -38,10 +42,11 @@ const useActivities = ({
   objectId,
   limit = 50,
   comments = false,
+  user,
+  isAuthenticated,
 }: UseActivitiesProps) => {
   const [activities, setActivities] = useState<ActionActivityDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     let apiCall;

@@ -1,0 +1,20 @@
+import { ActionDto, ActionEventDto } from "../client";
+import { format } from "date-fns";
+
+export interface TaskTimeInfoPropsShared {
+  action: ActionDto;
+  nextEvent: ActionEventDto | null;
+  lastEvent: ActionEventDto | null;
+  absoluteDeadline?: boolean;
+}
+
+export function deadlineColor(nextEvent: ActionEventDto | null) {
+  return !!nextEvent &&
+    new Date(nextEvent.date).getTime() - Date.now() < 172800000 // 2 days
+    ? "var(--color-red-600)"
+    : "var(--color-zinc-500)";
+}
+
+export function formatDeadline(date: string) {
+  return format(new Date(date), "MMMM d h:mm a");
+}

@@ -256,6 +256,81 @@ resource "aws_s3_bucket_versioning" "assets" {
   }
 }
 
+resource "aws_cloudfront_origin_access_control" "assets" {
+  name                              = "alliance-assets-oac"
+  description                       = "OAC for alliance assets bucket"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
+# CloudFront distribution
+resource "aws_cloudfront_distribution" "assets" {
+  enabled             = true
+  is_ipv6_enabled     = true
+  comment             = "Alliance assets CDN"
+  default_root_object = ""
+  price_class         = "PriceClass_100"  # US, Canada, Europe only (cheapest)
+
+  origin {
+    domain_name              = aws_s3_bucket.assets.bucket_regional_domain_name
+    origin_id                = "S3-assets"
+    origin_access_control_id = aws_cloudfront_origin_access_control.assets.id
+  }
+
+  default_cache_behavior {
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = "S3-assets"
+    viewer_protocol_policy = "redirect-to-https"
+
+    # Use managed cache policy for optimized caching
+    cache_policy_id          = "658327ea-f89d-4fab-a63d-7e88639e58f6"  # CachingOptimized
+    origin_request_policy_id = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"  # CORS-S3Origin
+
+    compress = true
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
+
+  tags = {
+    Name        = "alliance-assets-cdn"
+    Environment = "prod"
+  }
+}
+
+# Update S3 bucket policy to allow CloudFront access
+resource "aws_s3_bucket_policy" "assets" {
+  bucket = aws_s3_bucket.assets.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowCloudFrontServicePrincipal"
+        Effect    = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.assets.arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.assets.arn
+          }
+        }
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role" "ec2_role" {
   name               = "alliance-ec2-role"
   assume_role_policy = data.aws_iam_policy_document.ec2_assume.json

@@ -2,7 +2,9 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import UserActivityCard from "../../components/UserActivityCard";
 import { useAuth } from "../../lib/AuthContext";
-import useActivities, { ActivityList } from "./useActivities";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import { Link, href } from "react-router";
 import { ActionActivityDto } from "@alliance/shared/client";

@@ -1,10 +1,13 @@
 import { View, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { useEffect, useState } from "react";
 import { ActionDto, actionsFindAllLoggedIn } from "@alliance/shared/client";
-import ActionCard from "../../../components/ActionCard";
-import { router } from "expo-router";
-import { colors, Text, TextStyle } from "../../../components/system";
+import { colors, Text } from "../../../components/system";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
+import LargeActionCard from "../../../components/LargeActionCard";
+import { useAuth } from "../../../lib/AuthContext";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
 
 export default function HomeScreen() {
   const [actions, setActions] = useState<ActionDto[]>([]);
@@ -42,13 +45,17 @@ export default function HomeScreen() {
     completedActions,
   } = useHomePageActions(actions);
 
-  const navigateToAction = (actionId: number) => {
-    router.push(`/action/${actionId}`);
-  };
+  const { user, isAuthenticated } = useAuth();
+
+  const { activities: friendActivities, handleLikeActivity } = useActivities({
+    list: ActivityList.Friends,
+    limit: 8,
+    isAuthenticated,
+    user,
+  });
 
   return (
     <ScrollView style={styles.container}>
-      <Text type={TextStyle.Header}>Your Tasks</Text>
       <View style={styles.actionsListContainer}>
         {loading ? (
           <ActivityIndicator
@@ -62,10 +69,16 @@ export default function HomeScreen() {
           <Text style={styles.noActionsText}>No actions available</Text>
         ) : (
           <View>
-            <ActionCard
-              action={currentTask}
-              onPress={() => navigateToAction(currentTask?.id)}
-            />
+            {currentTask && (
+              <LargeActionCard
+                action={currentTask}
+                userRelation={currentTask.userRelation as "joined" | "none"}
+                friendActivities={friendActivities.filter(
+                  (activity) => activity.actionId === currentTask.id
+                )}
+                onUpdateActionState={() => {}}
+              />
+            )}
           </View>
         )}
       </View>

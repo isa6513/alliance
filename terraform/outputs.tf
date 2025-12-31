@@ -80,3 +80,7 @@ output "staging_assets_bucket_name" {
   description = "S3 bucket used for staging static assets and uploads"
   value       = aws_s3_bucket.staging_assets.bucket
 }
+
+output "cloudfront_domain" {
+  value = aws_cloudfront_distribution.assets.domain_name
+}

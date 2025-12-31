@@ -1,37 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { href, useNavigate } from "react-router";
 
-import { ActionDto, UserActionRelation } from "@alliance/shared/client";
-import { ActionActivityDto } from "@alliance/shared/client/types.gen";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ActionTaskPanel from "../../components/ActionTaskPanel";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 import TaskTimeInfo from "./TaskTimeInfo";
 import { ChevronRight } from "lucide-react";
+import {
+  getLastAndNextEvent,
+  LargeActionCardPropsShared,
+} from "@alliance/shared/lib/largeActionCard";
 
-export interface LargeActionCardProps {
-  action: ActionDto;
-  userRelation: Extract<UserActionRelation, "joined" | "none">;
-  friendActivities: ActionActivityDto[];
-  onUpdateActionState: () => void;
+export interface LargeActionCardProps extends LargeActionCardPropsShared {
   showDetails?: boolean;
   className?: string;
-}
-
-export function getLastAndNextEvent(action: ActionDto) {
-  const pastEvents = action.events.filter(
-    (event) => new Date(event.date) <= new Date()
-  );
-
-  const futureEvents = action.events.filter(
-    (event) => new Date(event.date) > new Date()
-  );
-
-  const lastEvent =
-    pastEvents.length > 0 ? pastEvents[pastEvents.length - 1] : null;
-  const nextEvent = futureEvents.length > 0 ? futureEvents[0] : null;
-
-  return { lastEvent, nextEvent };
 }
 
 enum LargeActionCardState {

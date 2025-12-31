@@ -1,26 +1,18 @@
-import { ActionEventDto } from "@alliance/shared/client/types.gen";
-import { ActionDto } from "@alliance/shared/client/types.gen";
+import {
+  deadlineColor,
+  formatDeadline,
+  TaskTimeInfoPropsShared,
+} from "@alliance/shared/lib/taskTimeInfo";
 import { formatTime } from "@alliance/sharedweb/lib/utils";
 import ClockIcon from "@alliance/sharedweb/ui/icons/ClockIcon";
 import DeadlineIcon from "@alliance/sharedweb/ui/icons/DeadlineIcon";
-import { format } from "date-fns";
-
-export interface TaskTimeInfoProps {
-  action: ActionDto;
-  nextEvent: ActionEventDto | null;
-  lastEvent: ActionEventDto | null;
-  absoluteDeadline?: boolean;
-}
 
 const TaskTimeInfo = ({
   action,
   nextEvent,
   absoluteDeadline = false,
-}: TaskTimeInfoProps) => {
-  const deadlineColor =
-    !!nextEvent && new Date(nextEvent.date).getTime() - Date.now() < 172800000 // 2 days
-      ? "var(--color-red-600)"
-      : "var(--color-zinc-500)";
+}: TaskTimeInfoPropsShared) => {
+  const color = deadlineColor(nextEvent);
 
   return (
     <div className="flex flex-row flex-wrap gap-x-4">
@@ -34,17 +26,17 @@ const TaskTimeInfo = ({
       )}
       {!!nextEvent && (
         <div className="flex flex-row items-center gap-x-1.5 text-base group text-zinc-500">
-          <DeadlineIcon fill={deadlineColor} />
+          <DeadlineIcon fill={color} />
           {absoluteDeadline ? (
             <p className="text-zinc-500">
-              Due {format(new Date(nextEvent.date), "MMMM d h:mm a")} (
+              Due {formatDeadline(nextEvent.date)} (
               {`${formatTime(new Date(nextEvent.date), {
                 addSuffix: false,
               })}`}{" "}
               left)
             </p>
           ) : (
-            <p style={{ color: deadlineColor }}>
+            <p style={{ color: color }}>
               {`${formatTime(new Date(nextEvent.date), {
                 addSuffix: false,
               })}`}{" "}

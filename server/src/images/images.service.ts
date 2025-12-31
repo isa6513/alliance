@@ -111,10 +111,14 @@ export function getImageSource(string: string) {
   if (string.startsWith('http')) {
     return string; // TODO
   }
+
   if (
     process.env.NODE_ENV === 'production' ||
     process.env.NODE_ENV === 'staging'
   ) {
+    if (process.env.USE_CLOUDFRONT && process.env.CLOUDFRONT_DOMAIN) {
+      return `https://${process.env.CLOUDFRONT_DOMAIN}/${string}`;
+    }
     return `${process.env.APP_URL}/api/images/${string}`;
   } else {
     return `http://localhost:3005/images/${string}`;

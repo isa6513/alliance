@@ -11,7 +11,6 @@ resource "aws_security_group" "monitoring_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Grafana UI
   ingress {
     description = "grafana ui"
     from_port   = 3001

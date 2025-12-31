@@ -12,7 +12,9 @@ import Spinner from "../../components/Spinner";
 import { useAuth } from "../../lib/AuthContext";
 import { useCIDFromParams } from "../../lib/utils";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
-import useActivities, { ActivityList } from "./useActivities";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 
 export async function loader({ params }: { params: { id: string } }) {
@@ -70,6 +72,8 @@ export default function ActionPage() {
     list: ActivityList.Action,
     objectId: actionId,
     limit: 10,
+    isAuthenticated,
+    user,
   });
 
   // TODO: hack because some action pages are public and some are private. we should handle this in a more general way elsehwere (ie applayout.tsx logic)

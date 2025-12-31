@@ -184,9 +184,9 @@ export default function ActionDetailScreen() {
               style={{
                 body: {
                   fontFamily: "SourceSans3",
-                  fontSize: 15,
+                  fontSize: 16,
                   lineHeight: 24,
-                  color: "#333",
+                  color: "black",
                 },
                 paragraph: {
                   marginBottom: 12,

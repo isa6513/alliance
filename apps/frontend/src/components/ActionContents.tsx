@@ -3,7 +3,7 @@ import { ProfileDto } from "@alliance/shared/client/types.gen";
 import { Link, Outlet, href, useOutletContext } from "react-router";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
-import { getLastAndNextEvent } from "../pages/app/LargeActionCard";
+import { getLastAndNextEvent } from "@alliance/shared/lib/largeActionCard";
 import TaskTimeInfo from "../pages/app/TaskTimeInfo";
 import ActionEventsPanel from "./ActionEventsPanel";
 import { TaskPanelContext } from "./ActionPageTaskPanel";

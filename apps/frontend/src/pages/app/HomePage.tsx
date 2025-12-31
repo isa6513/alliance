@@ -10,7 +10,9 @@ import TwoColumnLayout from "../../components/TwoColumnLayout";
 import { useAuth } from "../../lib/AuthContext";
 import { useCIDFromParams } from "../../lib/utils";
 import LargeActionCard from "./LargeActionCard";
-import useActivities, { ActivityList } from "./useActivities";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
 import { useMediaQuery } from "../../lib/useMediaQuery";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 
@@ -18,18 +20,21 @@ const HomePage = () => {
   const navigate = useNavigate();
   const { actions, loading } = useOutletContext<AppLayoutOutletContext>();
 
+  const { user, isAuthenticated } = useAuth();
+
   const { activities: friendActivities, handleLikeActivity } = useActivities({
     list: ActivityList.Friends,
     limit: 8,
+    isAuthenticated,
+    user,
   });
+
   const [visibleFriendActivityCount, setVisibleFriendActivityCount] =
     useState<number>(3);
   const friendActivityListRef = useRef<HTMLDivElement | null>(null);
   const firstFriendActivityRef = useRef<HTMLDivElement | null>(null);
 
   useCIDFromParams();
-
-  const { user } = useAuth();
 
   const {
     currentTask,

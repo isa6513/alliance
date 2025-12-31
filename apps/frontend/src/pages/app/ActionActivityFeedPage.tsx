@@ -8,7 +8,9 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import UserActivityCard from "../../components/UserActivityCard";
 import { useAuth } from "../../lib/AuthContext";
-import useActivities, { ActivityList } from "./useActivities";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import { Link, href, useParams } from "react-router";
 import chevronLeft from "../../assets/icons8-expand-arrow-96.png";
@@ -18,7 +20,7 @@ type Mode = "friends" | "everyone";
 const ActionActivityFeedPage = () => {
   const { actionId } = useParams<{ actionId: string }>();
 
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const [action, setAction] = useState<ActionDto | null>(null);
   const [actionLoading, setActionLoading] = useState(true);
@@ -47,13 +49,14 @@ const ActionActivityFeedPage = () => {
   const modes: Mode[] = ["friends", "everyone"];
   const [mode, setMode] = useState<Mode>("friends");
 
-  const { user } = useAuth();
   const { activities, handleLikeActivity, updateActivity, loading } =
     useActivities({
       list: ActivityList.Action,
       objectId: parseInt(actionId!),
       comments: true,
       limit: 50,
+      isAuthenticated,
+      user,
     });
 
   const [myFriends, setMyFriends] = useState<number[]>([]);

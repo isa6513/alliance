@@ -29,7 +29,9 @@ import FriendsTab from "../../components/FriendsTab";
 import UserActivityCard from "../../components/UserActivityCard";
 import UserProfileTab from "../../components/UserProfileTab";
 import { useAuth } from "../../lib/AuthContext";
-import useActivities, { ActivityList } from "./useActivities";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
 import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
 import List from "@alliance/sharedweb/ui/List";
 import ForumActivityCommentCard from "../../components/ForumActivityCommentCard";
@@ -129,6 +131,8 @@ const UserProfilePage: React.FC = () => {
     list: ActivityList.User,
     objectId: parseInt(id!),
     comments: true,
+    isAuthenticated,
+    user,
   });
 
   useEffect(() => {
