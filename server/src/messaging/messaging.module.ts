@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Community } from 'src/user/entities/community.entity';
+import { UserModule } from 'src/user/user.module';
 import { User } from 'src/user/entities/user.entity';
 import { ConversationController } from './conversation.controller';
 import { ConversationService } from './conversation.service';
@@ -22,6 +23,7 @@ import { MessagingOverviewGateway } from './messaging.overview.gateway';
       Community,
       User,
     ]),
+    forwardRef(() => UserModule),
     ImagesModule,
   ],
   controllers: [ConversationController, MessageController],

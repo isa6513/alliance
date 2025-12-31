@@ -21,6 +21,11 @@ export default [
       route("/date", "pages/DateTest.tsx"),
       route("/members", "pages/UsersList.tsx"),
       route("/image", "pages/ImageUpload.tsx"),
+      route("/messaging", "pages/MessagingOverview.tsx"),
+      route(
+        "/messaging/:conversationId",
+        "pages/MessagingConversationDetail.tsx"
+      ),
     ]),
     route("/database", "pages/DatabaseViewer.tsx"),
   ]),

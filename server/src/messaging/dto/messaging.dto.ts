@@ -219,6 +219,19 @@ export class ConversationDto extends OmitType(Conversation, [
   }
 }
 
+export class ConversationAdminSummaryDto extends ConversationDto {
+  @ApiProperty({ type: Number })
+  messageCount: number;
+
+  constructor(
+    conversation: Conversation,
+    extras: { messageCount: number; lastMessage?: Message | null },
+  ) {
+    super(conversation, { lastMessage: extras.lastMessage });
+    this.messageCount = extras.messageCount;
+  }
+}
+
 export class CreateDirectConversationDto {
   @ApiProperty({ type: Number })
   @IsInt()

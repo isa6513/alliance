@@ -19,6 +19,7 @@ import {
 } from './entities/participant.entity';
 import {
   ConversationDto,
+  ConversationAdminSummaryDto,
   CreateDirectConversationDto,
   CreateGroupConversationDto,
   ConversationParticipantDto,
@@ -61,6 +62,39 @@ export class ConversationService {
     private readonly eventEmitter: EventEmitter2,
     private readonly imagesService: ImagesService,
   ) {}
+
+  async getAllConversationsForAdmin(): Promise<ConversationAdminSummaryDto[]> {
+    const conversations = await this.conversationRepository
+      .createQueryBuilder('conversation')
+      .leftJoinAndSelect('conversation.participants', 'participant')
+      .leftJoinAndSelect('participant.user', 'participantUser')
+      .leftJoinAndSelect('participant.lastReadMessage', 'participantLastRead')
+      .leftJoinAndSelect(
+        'participantLastRead.author',
+        'participantLastReadAuthor',
+      )
+      .leftJoinAndSelect('conversation.community', 'community')
+      .orderBy('conversation.updatedAt', 'DESC')
+      .getMany();
+
+    if (!conversations.length) {
+      return [];
+    }
+
+    const conversationIds = conversations.map(
+      (conversation) => conversation.id,
+    );
+    const lastMessages = await this.loadLastMessages(conversationIds);
+    const messageCounts = await this.loadMessageCounts(conversationIds);
+
+    return conversations.map(
+      (conversation) =>
+        new ConversationAdminSummaryDto(conversation, {
+          lastMessage: lastMessages.get(conversation.id),
+          messageCount: messageCounts.get(conversation.id) ?? 0,
+        }),
+    );
+  }
 
   async getUserConversations(userId: number): Promise<ConversationDto[]> {
     await this.ensureCommunityMembershipForUser(userId);
@@ -719,6 +753,31 @@ export class ConversationService {
       if (conversationId) {
         map.set(conversationId, message);
       }
+    });
+
+    return map;
+  }
+
+  private async loadMessageCounts(
+    conversationIds: number[],
+  ): Promise<Map<number, number>> {
+    const map = new Map<number, number>();
+    if (!conversationIds.length) {
+      return map;
+    }
+
+    const rows = await this.messageRepository
+      .createQueryBuilder('message')
+      .select('message.conversationId', 'conversationId')
+      .addSelect('COUNT(message.id)', 'count')
+      .where('message.conversationId IN (:...conversationIds)', {
+        conversationIds,
+      })
+      .groupBy('message.conversationId')
+      .getRawMany<{ conversationId: number; count: string }>();
+
+    rows.forEach((row) => {
+      map.set(Number(row.conversationId), Number(row.count));
     });
 
     return map;

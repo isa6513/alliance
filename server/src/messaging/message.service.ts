@@ -141,6 +141,32 @@ export class MessageService {
       .map((message) => new MessageDto(message, conversationId));
   }
 
+  async getConversationMessagesForAdmin(
+    conversationId: number,
+    query: ConversationMessagesQueryDto,
+  ): Promise<MessageDto[]> {
+    const limit = Math.min(query.limit ?? 50, 100);
+    const qb = this.messageRepository
+      .createQueryBuilder('message')
+      .leftJoinAndSelect('message.author', 'author')
+      .leftJoinAndSelect('message.replyTo', 'replyTo')
+      .leftJoinAndSelect('replyTo.author', 'replyToAuthor')
+      .where('message.conversationId = :conversationId', { conversationId })
+      .orderBy('message.createdAt', 'DESC')
+      .take(limit);
+
+    if (query.before) {
+      qb.andWhere('message.createdAt < :before', {
+        before: new Date(query.before),
+      });
+    }
+
+    const messages = await qb.getMany();
+    return messages
+      .reverse()
+      .map((message) => new MessageDto(message, conversationId));
+  }
+
   private async assertParticipant(
     conversationId: number,
     userId: number,

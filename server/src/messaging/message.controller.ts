@@ -11,6 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
 import { MessageService } from './message.service';
 import {
@@ -27,6 +28,19 @@ export class MessageController {
     private readonly messageService: MessageService,
     private readonly conversationService: ConversationService,
   ) {}
+
+  @Get('admin/:conversationId')
+  @ApiOkResponse({ type: MessageDto, isArray: true })
+  @UseGuards(AdminGuard)
+  getConversationMessagesForAdmin(
+    @Param('conversationId', ParseIntPipe) conversationId: number,
+    @Query() query: ConversationMessagesQueryDto,
+  ): Promise<MessageDto[]> {
+    return this.messageService.getConversationMessagesForAdmin(
+      conversationId,
+      query,
+    );
+  }
 
   @Post()
   @ApiOkResponse({ type: MessageDto })

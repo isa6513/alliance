@@ -11,10 +11,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
 import { ConversationService } from './conversation.service';
 import {
   ConversationDto,
+  ConversationAdminSummaryDto,
   CreateDirectConversationDto,
   CreateGroupConversationDto,
   ConversationParticipantDto,
@@ -26,6 +28,13 @@ import {
 @Controller('messaging/conversations')
 export class ConversationController {
   constructor(private readonly conversationService: ConversationService) {}
+
+  @Get('admin')
+  @ApiOkResponse({ type: ConversationAdminSummaryDto, isArray: true })
+  @UseGuards(AdminGuard)
+  getAllConversationsForAdmin(): Promise<ConversationAdminSummaryDto[]> {
+    return this.conversationService.getAllConversationsForAdmin();
+  }
 
   @Get()
   @ApiOkResponse({ type: ConversationDto, isArray: true })

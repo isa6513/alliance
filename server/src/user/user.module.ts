@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ImagesModule } from 'src/images/images.module';
@@ -41,7 +41,7 @@ import { ContractEvent } from './entities/contract-event.entity';
     JwtModule,
     ImagesModule,
     MailModule,
-    MessagingModule,
+    forwardRef(() => MessagingModule),
   ],
   controllers: [UserController],
   providers: [UserService, IsUserAlreadyExist],
