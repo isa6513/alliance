@@ -21,7 +21,7 @@ const Timeline: React.FC<TimelineProps> = ({
   children,
   lineWidth = 2,
   dotSize = 12,
-  lineColor = "var(--color-zinc-100)",
+  lineColor = "var(--color-zinc-200)",
   className,
   currentIdx,
 }) => {

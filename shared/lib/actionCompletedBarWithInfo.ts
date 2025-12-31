@@ -1,4 +1,4 @@
-import { ActionDto } from "../client/types.gen";
+import { ActionActivityDto, ActionDto } from "../client/types.gen";
 
 export interface ActionCompletedBarWithInfoPropsShared {
   action: Pick<

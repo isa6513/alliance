@@ -4,6 +4,7 @@ import { ActionDto, actionsFindAllLoggedIn } from "@alliance/shared/client";
 import ActionCard from "../../../components/ActionCard";
 import { router } from "expo-router";
 import { colors, Text, TextStyle } from "../../../components/system";
+import { useHomePageActions } from "@alliance/shared/lib/homePage";
 
 export default function HomeScreen() {
   const [actions, setActions] = useState<ActionDto[]>([]);
@@ -20,7 +21,6 @@ export default function HomeScreen() {
           throw new Error("Failed to fetch actions");
         }
         setActions(response.data || []);
-
         setLoading(false);
       } catch (err) {
         setError("Failed to load actions");
@@ -31,6 +31,16 @@ export default function HomeScreen() {
 
     fetchActions();
   }, []);
+
+  const {
+    currentTask,
+    todoActions,
+    newActions,
+    currentWeekTodoActions,
+    nextWeekTodoActions,
+    remainingTasksEstimatedTimeCurrentWeek,
+    completedActions,
+  } = useHomePageActions(actions);
 
   const navigateToAction = (actionId: number) => {
     router.push(`/action/${actionId}`);
@@ -52,13 +62,10 @@ export default function HomeScreen() {
           <Text style={styles.noActionsText}>No actions available</Text>
         ) : (
           <View>
-            {actions.map((action) => (
-              <ActionCard
-                key={action.id}
-                action={action}
-                onPress={() => navigateToAction(action.id)}
-              />
-            ))}
+            <ActionCard
+              action={currentTask}
+              onPress={() => navigateToAction(currentTask?.id)}
+            />
           </View>
         )}
       </View>

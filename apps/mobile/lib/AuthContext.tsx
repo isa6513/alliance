@@ -114,7 +114,6 @@ export const AuthProvider: React.FC<
           });
         }
         const profile = (await authMe()).data;
-        console.log("got profile: ", profile);
         setUser(profile?.user);
       } catch {
         try {

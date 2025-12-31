@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  TouchableOpacity,
-  ActivityIndicator,
-  ViewProps,
-} from "react-native";
+import { TouchableOpacity, ActivityIndicator, ViewProps } from "react-native";
 import Text from "./Text";
 
 export enum ButtonColor {
@@ -73,7 +69,9 @@ export default function Button({
   const variantClasses = colorClasses[color];
   const sizeClass = sizeClasses[size];
   const disabledClasses = disabled ? "opacity-50" : "";
-  const combinedClasses = `${baseClasses} ${variantClasses} ${sizeClass} ${disabledClasses} ${className || ""}`;
+  const combinedClasses = `${baseClasses} ${variantClasses} ${sizeClass} ${disabledClasses} ${
+    className || ""
+  }`;
 
   const textClass = `font-medium ${textColorClasses[color]}`;
 
@@ -88,7 +86,13 @@ export default function Button({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={color === ButtonColor.Outline || color === ButtonColor.White || color === ButtonColor.Light ? "#444" : "#fff"}
+          color={
+            color === ButtonColor.Outline ||
+            color === ButtonColor.White ||
+            color === ButtonColor.Light
+              ? "#444"
+              : "#fff"
+          }
         />
       ) : children ? (
         children

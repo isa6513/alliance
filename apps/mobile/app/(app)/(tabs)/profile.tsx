@@ -20,6 +20,7 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { colors } from "../../../components/system";
+import { router } from "expo-router";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
@@ -120,7 +121,10 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Preferences</Text>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.push("/user/settings")}
+        >
           <FontAwesomeIcon
             icon={faCog}
             size={20}

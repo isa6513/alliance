@@ -1,7 +1,6 @@
+const path = require("path");
 const { getDefaultConfig } = require("expo/metro-config");
 const { withUniwindConfig } = require("uniwind/metro");
-
-const path = require("path");
 
 const projectRoot = __dirname;
 const monorepoRoot = path.resolve(projectRoot, "../..");
@@ -10,15 +9,21 @@ const config = getDefaultConfig(projectRoot);
 
 config.watchFolders = [monorepoRoot];
 
+config.resolver.disableHierarchicalLookup = true;
+
 config.resolver.nodeModulesPaths = [
-  path.resolve(projectRoot, "node_modules"),
   path.resolve(monorepoRoot, "node_modules"),
+  path.resolve(projectRoot, "node_modules"),
 ];
 
+config.resolver.extraNodeModules = {
+  ...(config.resolver.extraNodeModules || {}),
+  react: path.resolve(monorepoRoot, "node_modules/react"),
+  "react-dom": path.resolve(monorepoRoot, "node_modules/react-dom"),
+  "react-native": path.resolve(monorepoRoot, "node_modules/react-native"),
+};
+
 module.exports = withUniwindConfig(config, {
-  // relative path to your global.css file (from previous step)
   cssEntryFile: "./global.css",
-  // (optional) path where we gonna auto-generate typings
-  // defaults to project's root
   dtsFile: "./uniwind-types.d.ts",
 });

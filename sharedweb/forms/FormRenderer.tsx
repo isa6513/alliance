@@ -14,15 +14,18 @@ import RenderField from "./RenderField";
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import type {
   AnyField,
-  CityFieldValue,
-  Condition,
   DeviceVisibilityTarget,
   FormSchema,
   FormValue,
-  NumberField,
-  RangeField,
 } from "@alliance/shared/forms/formschema";
-import { parseTimeToMinutes } from "./timeUtils";
+import {
+  applyDefaultValues,
+  computeFormStorageKey,
+  filterAnswersByFieldIds,
+  isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
+  resolveFieldDefaultValue,
+  validateFieldValue as validateFieldValueShared,
+} from "@alliance/shared/formrenderer";
 import { useSearchParams } from "react-router";
 
 type FormRendererProps = {
@@ -41,34 +44,16 @@ type FormRendererProps = {
   onAbandonAction?: (
     outOfTime: boolean,
     reason: string,
-    partialFormData: SubmitFormDto,
+    partialFormData: SubmitFormDto
   ) => void;
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
   onSubmit: ((data: SubmitFormDto) => Promise<void>) | null; // null for admin preview
 };
 
-/**
- * Compute a stable localStorage key for a form draft.
- * Format: `form:<slug>:v<version>[:<instanceId>]`
- */
-export function computeFormStorageKey(args: {
-  formId: number;
-  instanceId?: string | number | null;
-}): string {
-  const base = `form:${args.formId}`;
-  const hasInstance =
-    args.instanceId !== undefined &&
-    args.instanceId !== null &&
-    args.instanceId !== "";
-  return hasInstance ? `${base}:${String(args.instanceId)}` : base;
-}
+export { computeFormStorageKey };
 
-const FALLBACK_TIMEZONE = "America/Los_Angeles";
 const DEFAULT_DEVICE_TYPE: DeviceVisibilityTarget = "desktop";
-const DEFAULT_RANGE_OPTION_COUNT = 10;
-const MIN_RANGE_OPTION_COUNT = 2;
-const MAX_RANGE_OPTION_COUNT = 50;
 
 const detectDeviceType = (): DeviceVisibilityTarget => {
   if (typeof window === "undefined") {
@@ -83,165 +68,6 @@ const detectDeviceType = (): DeviceVisibilityTarget => {
   }
   return "desktop";
 };
-
-const isNonEmptyString = (value: unknown): value is string =>
-  typeof value === "string" && value.trim().length > 0;
-const isCityValue = (value: unknown): value is CityFieldValue => {
-  if (!value || typeof value !== "object") return false;
-  const candidate = value as Record<string, unknown>;
-  return (
-    typeof candidate.name === "string" &&
-    typeof candidate.countryName === "string" &&
-    "id" in candidate
-  );
-};
-
-function getRangeOptionCount(field: RangeField): number {
-  const desired = field.optionCount ?? DEFAULT_RANGE_OPTION_COUNT;
-  const normalized = Number.isFinite(desired)
-    ? Math.floor(desired)
-    : DEFAULT_RANGE_OPTION_COUNT;
-  return Math.min(
-    MAX_RANGE_OPTION_COUNT,
-    Math.max(MIN_RANGE_OPTION_COUNT, normalized),
-  );
-}
-
-function isValidRangeSelection(
-  field: RangeField,
-  value: unknown,
-): value is number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    return false;
-  }
-  if (field.kind !== "range") {
-    return false;
-  }
-  const max = getRangeOptionCount(field);
-  return value >= 1 && value <= max;
-}
-
-const hasContent = (value: FormValue | undefined): boolean => {
-  if (value === undefined || value === null) {
-    return false;
-  }
-  if (typeof value === "string") {
-    return value.trim().length > 0;
-  }
-  if (Array.isArray(value)) {
-    return value.length > 0;
-  }
-  return true;
-};
-
-function resolveFieldDefaultValue(field: AnyField): FormValue | undefined {
-  const rawDefault = field.defaultValue;
-
-  if (rawDefault === null) {
-    return undefined;
-  }
-
-  if (rawDefault !== undefined) {
-    switch (field.kind) {
-      case "radio":
-      case "select": {
-        if (typeof rawDefault !== "string" || !isNonEmptyString(rawDefault)) {
-          return undefined;
-        }
-        const values = field.options?.map((option) => option.value) ?? [];
-        return values.includes(rawDefault) ? rawDefault : undefined;
-      }
-      case "multiselect": {
-        if (!Array.isArray(rawDefault) || rawDefault.length === 0) {
-          return undefined;
-        }
-        const validValues = field.options?.map((option) => option.value) ?? [];
-        const filtered = rawDefault.filter((value): value is string =>
-          validValues.includes(value),
-        );
-        return filtered.length ? filtered : undefined;
-      }
-      case "checkbox":
-        return typeof rawDefault === "boolean" ? rawDefault : undefined;
-      case "number":
-        return typeof rawDefault === "number" ? rawDefault : undefined;
-      case "range":
-        return field.kind === "range" &&
-          isValidRangeSelection(field, rawDefault)
-          ? rawDefault
-          : undefined;
-      case "time":
-      case "date":
-      case "timezone":
-      case "text":
-      case "textarea":
-      case "email":
-      case "phone":
-      case "file":
-      case "custom":
-        return isNonEmptyString(rawDefault) ? rawDefault : undefined;
-      case "city":
-        if (isCityValue(rawDefault)) {
-          return rawDefault;
-        }
-        return isNonEmptyString(rawDefault) ? rawDefault : undefined;
-      default:
-        return isNonEmptyString(rawDefault) ? rawDefault : undefined;
-    }
-  }
-
-  if (field.kind === "timezone") {
-    return FALLBACK_TIMEZONE;
-  }
-
-  return undefined;
-}
-
-function applyDefaultValues(
-  base: Record<string, FormValue> | undefined,
-  defaults: Map<string, FormValue>,
-): Record<string, FormValue> {
-  if (!defaults.size) {
-    return base ? base : {};
-  }
-
-  let result = base ?? {};
-  let mutated = false;
-
-  for (const [fieldId, defaultValue] of defaults.entries()) {
-    const current = result[fieldId];
-    if (current === undefined || current === null) {
-      if (!mutated) {
-        result = base ? { ...base } : { ...result };
-        mutated = true;
-      }
-      result[fieldId] = defaultValue;
-    }
-  }
-
-  if (mutated) {
-    return result;
-  }
-
-  return base ? base : {};
-}
-
-function filterAnswersByFieldIds(
-  answers: Record<string, FormValue> | null,
-  allowedFields: Map<string, AnyField>,
-): Record<string, FormValue> {
-  if (!answers) {
-    return {};
-  }
-
-  const filtered: Record<string, FormValue> = {};
-  for (const [fieldId, value] of Object.entries(answers)) {
-    if (allowedFields.has(fieldId)) {
-      filtered[fieldId] = value;
-    }
-  }
-  return filtered;
-}
 
 const FormRenderer = ({
   form,
@@ -399,7 +225,7 @@ const FormRenderer = ({
   });
 
   const [publicAnswers, setPublicAnswers] = useState<Record<string, boolean>>(
-    {},
+    {}
   );
 
   useEffect(() => {
@@ -420,13 +246,13 @@ const FormRenderer = ({
   }, [outputFieldIds, user]);
 
   const [uploadingFields, setUploadingFields] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [hasEmittedStart, setHasEmittedStart] = useState(false);
   const [deviceType, setDeviceType] = useState<DeviceVisibilityTarget>(() =>
-    detectDeviceType(),
+    detectDeviceType()
   );
   const [submitting, setSubmitting] = useState(false);
 
@@ -456,7 +282,7 @@ const FormRenderer = ({
     | undefined;
 
   const effectiveDeviceType = readOnly
-    ? (savedDeviceType ?? deviceType)
+    ? savedDeviceType ?? deviceType
     : deviceType;
 
   const visibilityValidatorIds = useMemo(() => {
@@ -466,8 +292,8 @@ const FormRenderer = ({
         const conditions = Array.isArray(element.visibleIf)
           ? element.visibleIf
           : element.visibleIf
-            ? [element.visibleIf]
-            : [];
+          ? [element.visibleIf]
+          : [];
         for (const condition of conditions) {
           if ("validatorId" in condition) {
             ids.add(condition.validatorId);
@@ -519,7 +345,7 @@ const FormRenderer = ({
       return;
     }
     const missingIds = visibilityValidatorIds.filter(
-      (id) => !(id in visibilityValidatorResults),
+      (id) => !(id in visibilityValidatorResults)
     );
     if (!missingIds.length) {
       return;
@@ -541,11 +367,11 @@ const FormRenderer = ({
           } catch (error) {
             console.error(
               `Failed to evaluate visibility validator ${validatorId}`,
-              error,
+              error
             );
             return [validatorId, false] as const;
           }
-        }),
+        })
       );
       if (cancelled) return;
       setVisibilityValidatorResults((prev) => {
@@ -583,82 +409,20 @@ const FormRenderer = ({
         return changed ? next : prev;
       });
     },
-    [],
-  );
-
-  const evaluateCondition = useCallback(
-    (cond: Condition, data: Record<string, FormValue> = formData): boolean => {
-      if ("expr" in cond) {
-        return true;
-      }
-      if ("deviceType" in cond) {
-        if (!Array.isArray(cond.deviceType) || cond.deviceType.length === 0) {
-          return false;
-        }
-        return cond.deviceType.includes(effectiveDeviceType);
-      }
-      if ("validatorId" in cond) {
-        const expected = cond.resultEquals ?? true;
-        const actual = visibilityValidatorResults[cond.validatorId];
-        if (actual === undefined) {
-          return false;
-        }
-        return actual === expected;
-      }
-      const val = data[cond.when];
-      if ("hasValue" in cond) {
-        const present = hasContent(val as FormValue | undefined);
-        return cond.hasValue ? present : !present;
-      }
-      if ("anySelected" in cond) {
-        const selections = Array.isArray(val) ? val : [];
-        return cond.anySelected
-          ? selections.length > 0
-          : selections.length === 0;
-      }
-      if ("includesOption" in cond) {
-        if (!cond.includesOption) {
-          return false;
-        }
-        return Array.isArray(val) && val.includes(cond.includesOption);
-      }
-      if (!("equals" in cond)) {
-        return true;
-      }
-      const equals = cond.equals;
-      if (typeof equals === "boolean") {
-        return Boolean(val) === equals;
-      }
-      if (Array.isArray(val) && equals !== null && equals !== undefined) {
-        return val.includes(equals as string);
-      }
-      return val === equals;
-    },
-    [effectiveDeviceType, formData, visibilityValidatorResults],
+    []
   );
 
   const isElementCurrentlyVisible = useCallback(
     (
       element: AnyField | DisplayBlock,
-      data?: Record<string, FormValue>,
-    ): boolean => {
-      const conditions = Array.isArray(element.visibleIf)
-        ? element.visibleIf
-        : element.visibleIf
-          ? [element.visibleIf]
-          : [];
-      if (conditions.length === 0) {
-        return true;
-      }
-      const targetData = data ?? formData;
-      if (readOnly && !!targetData[element.id as keyof typeof targetData]) {
-        return true;
-      }
-      return conditions.every((condition) =>
-        evaluateCondition(condition, targetData),
-      );
-    },
-    [evaluateCondition, formData, readOnly],
+      data?: Record<string, FormValue>
+    ): boolean =>
+      isElementCurrentlyVisibleShared(element, data ?? formData, {
+        deviceType: effectiveDeviceType,
+        visibilityValidatorResults,
+        readOnly,
+      }),
+    [effectiveDeviceType, formData, readOnly, visibilityValidatorResults]
   );
 
   const resolveDisplayBlockForUser = useCallback<
@@ -679,163 +443,25 @@ const FormRenderer = ({
         manualUserContent: candidate.manualUserContent,
       };
     },
-    [activeUserKey],
-  );
-
-  const isFieldConditionallyRequired = useCallback(
-    (field: AnyField, data?: Record<string, FormValue>): boolean => {
-      if (field.requiredIf) {
-        return evaluateCondition(field.requiredIf, data ?? formData);
-      }
-      return !!field.required;
-    },
-    [evaluateCondition, formData],
+    [activeUserKey]
   );
 
   const validateFieldValue = useCallback(
     (
       field: AnyField,
       fieldValue: FormValue | undefined,
-      data?: Record<string, FormValue>,
-    ): string | null => {
-      const required = isFieldConditionallyRequired(field, data);
-
-      const valueToCheck = fieldValue;
-      const isEmptyString =
-        typeof valueToCheck === "string" && valueToCheck.trim() === "";
-
-      if (field.kind === "multiselect") {
-        const selections = Array.isArray(valueToCheck) ? valueToCheck : [];
-        if (required && selections.length === 0) {
-          return "Select at least one option.";
-        }
-        if (
-          typeof field.maxSelections === "number" &&
-          field.maxSelections > 0 &&
-          selections.length > field.maxSelections
-        ) {
-          return `Select no more than ${field.maxSelections} option${
-            field.maxSelections === 1 ? "" : "s"
-          }.`;
-        }
-        return null;
-      }
-
-      switch (field.kind) {
-        case "text":
-        case "textarea":
-        case "email":
-        case "phone":
-        case "date":
-        case "timezone":
-        case "select": {
-          if (!required) return null;
-          if (valueToCheck === undefined || valueToCheck === null) {
-            return "This field is required.";
-          }
-          if (isEmptyString) {
-            return "This field is required.";
-          }
-          return null;
-        }
-        case "time": {
-          if (typeof valueToCheck === "string") {
-            const minutes = parseTimeToMinutes(valueToCheck);
-            if (minutes === null) {
-              return "Enter a valid time.";
-            }
-          }
-          if (!required) return null;
-          if (valueToCheck === undefined || valueToCheck === null) {
-            return "This field is required.";
-          }
-          if (isEmptyString) {
-            return "This field is required.";
-          }
-          return null;
-        }
-        case "number": {
-          const numValue =
-            typeof valueToCheck === "number"
-              ? valueToCheck
-              : typeof valueToCheck === "string"
-                ? parseFloat(valueToCheck)
-                : NaN;
-          const numberField = field as NumberField;
-
-          if (Number.isNaN(numValue) && !!valueToCheck) {
-            return "Please enter a valid number.";
-          }
-          if (
-            typeof numberField.min === "number" &&
-            numValue < numberField.min
-          ) {
-            return `Value must be at least ${numberField.min}.`;
-          }
-          if (
-            typeof numberField.max === "number" &&
-            numValue > numberField.max
-          ) {
-            return `Value must be at most ${numberField.max}.`;
-          }
-          if (!required) return null;
-          if (
-            valueToCheck === undefined ||
-            valueToCheck === null ||
-            valueToCheck === ""
-          ) {
-            return required ? "Please enter a number." : null;
-          }
-
-          if (!Number.isFinite(numValue)) {
-            return "Please enter a valid number.";
-          }
-          return null;
-        }
-        case "range": {
-          if (!required) return null;
-          if (
-            valueToCheck === undefined ||
-            valueToCheck === null ||
-            valueToCheck === ""
-          ) {
-            return "Please select a value.";
-          }
-          if (field.kind !== "range") {
-            return "Please select a value.";
-          }
-          if (!isValidRangeSelection(field, valueToCheck)) {
-            return "Please select a value.";
-          }
-          return null;
-        }
-        case "checkbox":
-          if (!required) return null;
-          return valueToCheck === true ? null : "This field is required.";
-        case "radio":
-          if (!required) return null;
-          return valueToCheck ? null : "Please select an option.";
-        case "file":
-          if (!required) return null;
-          return valueToCheck ? null : "Please upload a file.";
-        default: {
-          if (!required) return null;
-          if (valueToCheck === undefined || valueToCheck === null) {
-            return "This field is required.";
-          }
-          if (isEmptyString) {
-            return "This field is required.";
-          }
-          return null;
-        }
-      }
-    },
-    [isFieldConditionallyRequired],
+      data?: Record<string, FormValue>
+    ): string | null =>
+      validateFieldValueShared(field, fieldValue, data ?? formData, {
+        deviceType: effectiveDeviceType,
+        visibilityValidatorResults,
+      }),
+    [effectiveDeviceType, formData, visibilityValidatorResults]
   );
 
   const runCustomValidatorsForFields = useCallback(
     async (
-      fieldsToValidate: AnyField[],
+      fieldsToValidate: AnyField[]
     ): Promise<Record<string, string | null>> => {
       if (!fieldsToValidate.length || readOnly) {
         return {};
@@ -860,7 +486,7 @@ const FormRenderer = ({
             const isValid = response.data.isValid;
             return [
               field.id,
-              isValid ? null : (response.data.message ?? null),
+              isValid ? null : response.data.message ?? null,
             ] as const;
           } catch (err) {
             console.error("Failed to run custom validator", err);
@@ -869,18 +495,18 @@ const FormRenderer = ({
               "Unable to validate this field right now. Please try again.",
             ] as const;
           }
-        }),
+        })
       );
 
       return Object.fromEntries(results);
     },
-    [readOnly, formData],
+    [readOnly, formData]
   );
 
   const validatePage = useCallback(
     async (
       pageIndex: number,
-      includeCustomValidators: boolean,
+      includeCustomValidators: boolean
     ): Promise<{ isValid: boolean; firstInvalidFieldId?: string }> => {
       const page = schema.pages[pageIndex];
       if (!page) {
@@ -889,10 +515,10 @@ const FormRenderer = ({
 
       const updates: Record<string, string | null> = {};
       const fieldsOnPage = page.fields.filter(
-        (element): element is AnyField => "label" in element,
+        (element): element is AnyField => "label" in element
       );
       const visibleFields = fieldsOnPage.filter((field) =>
-        isElementCurrentlyVisible(field),
+        isElementCurrentlyVisible(field)
       );
       const visibleFieldIds = new Set(visibleFields.map((field) => field.id));
 
@@ -907,7 +533,7 @@ const FormRenderer = ({
 
       if (includeCustomValidators && !readOnly) {
         const candidates = visibleFields.filter(
-          (field) => field.customValidatorId && !updates[field.id],
+          (field) => field.customValidatorId && !updates[field.id]
         );
         if (candidates.length > 0) {
           const customResults = await runCustomValidatorsForFields(candidates);
@@ -935,7 +561,7 @@ const FormRenderer = ({
       runCustomValidatorsForFields,
       applyFieldErrorUpdates,
       readOnly,
-    ],
+    ]
   );
 
   const validateAllPages = useCallback(async () => {
@@ -994,7 +620,7 @@ const FormRenderer = ({
           const requiredError = validateFieldValue(
             fieldDefinition,
             nextValue,
-            next,
+            next
           );
           applyFieldErrorUpdates({ [fieldId]: requiredError });
         }
@@ -1183,7 +809,7 @@ const FormRenderer = ({
         publicAnswers,
         currentPageIndex,
         updatedAt: Date.now(),
-      }),
+      })
     );
   }, [
     formData,
@@ -1203,7 +829,7 @@ const FormRenderer = ({
     if (parsed?.formData && typeof parsed.formData === "object") {
       const filtered = filterAnswersByFieldIds(
         parsed.formData as Record<string, FormValue>,
-        fieldLookup,
+        fieldLookup
       );
       setFormData(applyDefaultValues(filtered, defaultValueMap));
     }
@@ -1235,8 +861,8 @@ const FormRenderer = ({
       setFormData(
         filterAnswersByFieldIds(
           completedFormResponse.answers as Record<string, FormValue>,
-          fieldLookup,
-        ),
+          fieldLookup
+        )
       );
     }
   }, [readOnly, completedFormResponse, fieldLookup]);
@@ -1261,8 +887,8 @@ const FormRenderer = ({
           fieldId in prev
             ? prev[fieldId]
             : user?.formDataPreference === "public"
-              ? true
-              : false;
+            ? true
+            : false;
       }
       return next;
     });
@@ -1424,7 +1050,7 @@ const FormRenderer = ({
         >
           {currentPage !== null &&
             currentPage.fields.map((element, index) =>
-              renderElement(element, index),
+              renderElement(element, index)
             )}
         </div>
         {/* Navigation */}

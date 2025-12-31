@@ -12,6 +12,7 @@
     "client",
     "ui",
     "forms",
+    "formrenderer.ts",
     "../sharedweb/lib/useOutsideClick.ts",
     "../sharedweb/lib/config.ts",
     "client/hey-api.ts",

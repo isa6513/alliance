@@ -4,7 +4,10 @@ import { AppLayoutOutletContext } from "./applayout";
 import NavbarVertical from "./components/NavbarVertical";
 import Spinner from "./components/Spinner";
 import { NotificationsProvider } from "./lib/useNotifications";
-import { canJoinAction, shouldCompleteAction } from "./pages/app/HomePage";
+import {
+  canJoinAction,
+  shouldCompleteAction,
+} from "@alliance/shared/lib/homePage";
 
 function Navbar() {
   const context = useOutletContext<AppLayoutOutletContext>();

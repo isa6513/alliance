@@ -13,7 +13,7 @@ import posthog from "posthog-js";
 import { useCallback, useMemo, useState } from "react";
 import { setRevalidate } from "../applayout";
 import { useAuth } from "../lib/AuthContext";
-import { canCompleteAction } from "../pages/app/HomePage";
+import { canCompleteAction } from "@alliance/shared/lib/homePage";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
 import ActionTaskPanelCommit from "./ActionTaskPanelCommit";
 import ActionTaskPanelForm from "./ActionTaskPanelForm";
