@@ -21,20 +21,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Abort if dirty.txt is true
+      - name: Abort if dirty.txt has content
         if: ${{ github.ref_name == 'production' }}
         run: |
-          if [ -f dirty.txt ]; then
-            VALUE=$(cat dirty.txt | tr -d '[:space:]')
-            if [ "$VALUE" = "true" ]; then
-              echo "dirty.txt indicates the repo is dirty. Aborting."
-              exit 1
-            else
-              echo "dirty.txt is present but not 'true' (value: '$VALUE'). Continuing."
-            fi
+          if [ -f dirty.txt ] && [ -s dirty.txt ]; then
+            echo "dirty.txt has content. Aborting."
+            exit 1
           else
-            echo "dirty.txt not found. Continuing."
+            echo "dirty.txt is empty or not found. Continuing."
           fi
 
   test-backend-e2e:
