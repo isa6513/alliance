@@ -3,6 +3,8 @@ import {
   useTaskFormHandlers,
 } from "@alliance/shared/lib/actionTaskPanel";
 import ActionTaskPanelForm from "./ActionTaskPanelForm";
+import { useCallback } from "react";
+import { usePostHog } from "posthog-react-native";
 
 const ActionTaskPanel = ({
   action,
@@ -15,7 +17,6 @@ const ActionTaskPanel = ({
   const {
     handleCompleteWithTracking,
     actionError,
-    handleFormStarted,
     handleAbandonAction,
     handleJoinAction,
     handleDeclineAction,
@@ -27,6 +28,16 @@ const ActionTaskPanel = ({
     onDeclineAction,
     onOptOutAction,
   });
+
+  const posthog = usePostHog();
+
+  const handleFormStarted = useCallback(() => {
+    posthog.capture("form_started", {
+      actionId: action.id,
+      actionType: action.type,
+      actionName: action.name,
+    });
+  }, [action, posthog]);
 
   if (action.taskFormId) {
     return (

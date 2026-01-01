@@ -6,6 +6,7 @@
   "build": {
     "base": {
       "node": "20.19.1",
+      "yarn": "1.22.22",
       "corepack": true
     },
     "development": {
@@ -14,8 +15,6 @@
       "distribution": "internal"
     },
     "ios-simulator": {
-      "node": "20.19.1",
-      "corepack": true,
       "extends": "development",
       "ios": {
         "simulator": true

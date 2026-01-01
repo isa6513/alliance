@@ -16,7 +16,8 @@
     "frontend:dev": "yarn workspace @alliance/frontend dev",
     "admin:dev": "yarn workspace @alliance/admin dev",
     "server:dev": "cd server && npm run start:dev",
-    "gen-api": "yarn workspace @alliance/shared gen-api"
+    "gen-api": "yarn workspace @alliance/shared gen-api",
+    "eas-build-pre-install": "corepack enable && corepack prepare yarn@4.9.1 --activate"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",

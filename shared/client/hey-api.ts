@@ -1,4 +1,3 @@
-import { authRefreshTokens } from "@alliance/shared/client";
 import { CreateClientConfig } from "./client.gen";
 
 export const AuthEvents = {
@@ -36,6 +35,7 @@ export const createClientConfig: CreateClientConfig = (config) => {
       return res;
     }
 
+    const { authRefreshTokens } = await import("./sdk.gen");
     const refreshRes = await authRefreshTokens();
 
     if (refreshRes.response.ok) {
