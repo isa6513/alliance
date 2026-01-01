@@ -98,7 +98,9 @@ const MembersListPage = () => {
   return (
     <CenterLayout className="gap-y-4" width="3xl">
       <div className="md:mt-8 flex flex-row gap-x-6 items-center">
-        <p className="text-2xl md:text-3xl font-serif font-medium">Members</p>
+        <p className="text-2xl md:text-3xl font-serif font-medium">
+          Members ({members.length})
+        </p>
 
         <DropdownSelect
           options={MemberFilterMode}
