@@ -267,7 +267,8 @@ const FAQPage: React.FC = () => {
                 <a href="https://barnes.page/" className="text-link">
                   Elizabeth Barnes
                 </a>
-                .
+                . Funds are managed by the Alliance Foundation, a 501(c)(3)
+                nonprofit organization.
               </p>
             </FAQExpandable>
           </div>
