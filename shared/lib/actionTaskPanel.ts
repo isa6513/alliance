@@ -8,7 +8,6 @@ import {
   tasksOptout,
   UserActionRelation,
 } from "../client";
-import posthog from "posthog-js";
 
 export interface ActionTaskPanelProps {
   action: ActionDto;
@@ -31,7 +30,7 @@ export const useTaskFormHandlers = ({
 }: ActionTaskPanelProps) => {
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const handleCompleteWithTracking = useCallback(
+  const handleComplete = useCallback(
     async (sendComplete: boolean = true) => {
       if (sendComplete) {
         const req = await actionsComplete({
@@ -43,11 +42,6 @@ export const useTaskFormHandlers = ({
         }
       }
       setActionError(null);
-      posthog.capture("action_completed", {
-        actionId: action.id,
-        actionType: action.type,
-        actionName: action.name,
-      });
       onCompleteAction();
     },
     [action, onCompleteAction]
@@ -101,20 +95,11 @@ export const useTaskFormHandlers = ({
     [action, onOptOutAction]
   );
 
-  const handleFormStarted = useCallback(() => {
-    posthog.capture("form_started", {
-      actionId: action.id,
-      actionType: action.type,
-      actionName: action.name,
-    });
-  }, [action]);
-
   return {
-    handleCompleteWithTracking,
+    handleCompleteWithTracking: handleComplete,
     handleJoinAction,
     handleDeclineAction,
     handleAbandonAction,
-    handleFormStarted,
     actionError,
   };
 };

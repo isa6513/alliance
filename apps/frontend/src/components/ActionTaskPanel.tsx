@@ -1,6 +1,6 @@
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useAuth } from "../lib/AuthContext";
 import { canCompleteAction } from "@alliance/shared/lib/homePage";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
@@ -12,6 +12,7 @@ import {
   ActionTaskPanelProps,
   useTaskFormHandlers,
 } from "@alliance/shared/lib/actionTaskPanel";
+import posthog from "posthog-js";
 
 const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   action,
@@ -26,16 +27,32 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
 }: ActionTaskPanelProps) => {
   const { isAuthenticated } = useAuth();
 
+  const handleCompleteAction = useCallback(() => {
+    onCompleteAction();
+    posthog.capture("action_completed", {
+      actionId: action.id,
+      actionType: action.type,
+      actionName: action.name,
+    });
+  }, [onCompleteAction, action.id, action.type, action.name]);
+
+  const handleFormStarted = useCallback(() => {
+    posthog.capture("form_started", {
+      actionId: action.id,
+      actionType: action.type,
+      actionName: action.name,
+    });
+  }, [action]);
+
   const {
     handleCompleteWithTracking,
     actionError,
-    handleFormStarted,
     handleAbandonAction,
     handleJoinAction,
     handleDeclineAction,
   } = useTaskFormHandlers({
     action,
-    onCompleteAction,
+    onCompleteAction: handleCompleteAction,
     userRelation,
     onJoinAction,
     onDeclineAction,

@@ -187,14 +187,17 @@ __metadata:
     eslint: "npm:^9.25.0"
     eslint-config-expo: "npm:~9.2.0"
     expo: "npm:~53.0.9"
+    expo-application: "npm:~6.1.5"
     expo-blur: "npm:~14.1.4"
     expo-constants: "npm:~17.1.6"
     expo-dev-client: "npm:~5.2.4"
     expo-device: "npm:~7.1.4"
+    expo-file-system: "npm:~18.1.11"
     expo-font: "npm:~13.3.2"
     expo-haptics: "npm:~14.1.4"
     expo-image: "npm:~2.1.7"
     expo-linking: "npm:~7.1.5"
+    expo-localization: "npm:~16.1.6"
     expo-notifications: "npm:~0.31.2"
     expo-router: "npm:~5.0.6"
     expo-secure-store: "npm:^14.2.3"
@@ -204,6 +207,7 @@ __metadata:
     expo-system-ui: "npm:~5.0.7"
     expo-web-browser: "npm:~14.1.6"
     lucide-react-native: "npm:^0.562.0"
+    posthog-react-native: "npm:^4.17.2"
     react: "npm:19.0.0"
     react-dom: "npm:19.0.0"
     react-native: "npm:0.79.2"
@@ -9684,6 +9688,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-application@npm:~6.1.5":
+  version: 6.1.5
+  resolution: "expo-application@npm:6.1.5"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/c4fa0bddfc911af17055334558314d819d403efa5db22b05cffc44c91eef38e9fb57b4a5aae35378523c59847189a7ca09ad9e5370ee5a3b0f23c1c5146c8683
+  languageName: node
+  linkType: hard
+
 "expo-asset@npm:~11.1.5":
   version: 11.1.5
   resolution: "expo-asset@npm:11.1.5"
@@ -9792,6 +9805,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-file-system@npm:~18.1.11":
+  version: 18.1.11
+  resolution: "expo-file-system@npm:18.1.11"
+  peerDependencies:
+    expo: "*"
+    react-native: "*"
+  checksum: 10c0/e7c4c02acfbb7c5b6f8afff7e010af28ca7112c2ab0e7baddab394b275edc363d0587aedbb1996058a65e2d1e8aba0074b49007cad37d10a4b5ef2987b7f6bdf
+  languageName: node
+  linkType: hard
+
 "expo-font@npm:~13.3.1":
   version: 13.3.1
   resolution: "expo-font@npm:13.3.1"
@@ -9867,6 +9890,18 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10c0/ed976f27aab12063702b5e4fca56c564133f01f8efa7e9980b7aa8de17ad987cf8cb7ee9117015672193e9400b785ec289a7553c734cddc807b17495d4551b98
+  languageName: node
+  linkType: hard
+
+"expo-localization@npm:~16.1.6":
+  version: 16.1.6
+  resolution: "expo-localization@npm:16.1.6"
+  dependencies:
+    rtl-detect: "npm:^1.0.2"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+  checksum: 10c0/7a3e32e2a3f43054422d6509aa7cb290af93522b2e3e6cf0c4643766eef31233c0d2939ef3c77d9d5d95a7fde67aad7ec92b945af8411c38e6ffc1f5f7a0886f
   languageName: node
   linkType: hard
 
@@ -15481,6 +15516,51 @@ __metadata:
   languageName: node
   linkType: hard
 
+"posthog-react-native@npm:^4.17.2":
+  version: 4.17.2
+  resolution: "posthog-react-native@npm:4.17.2"
+  dependencies:
+    "@posthog/core": "npm:1.9.0"
+  peerDependencies:
+    "@react-native-async-storage/async-storage": ">=1.0.0"
+    "@react-navigation/native": ">= 5.0.0"
+    expo-application: ">= 4.0.0"
+    expo-device: ">= 4.0.0"
+    expo-file-system: ">= 13.0.0"
+    expo-localization: ">= 11.0.0"
+    posthog-react-native-session-replay: ">= 1.2.0"
+    react-native-device-info: ">= 10.0.0"
+    react-native-localize: ">= 3.0.0"
+    react-native-navigation: ">= 6.0.0"
+    react-native-safe-area-context: ">= 4.0.0"
+    react-native-svg: ">= 15.0.0"
+  peerDependenciesMeta:
+    "@react-native-async-storage/async-storage":
+      optional: true
+    "@react-navigation/native":
+      optional: true
+    expo-application:
+      optional: true
+    expo-device:
+      optional: true
+    expo-file-system:
+      optional: true
+    expo-localization:
+      optional: true
+    posthog-react-native-session-replay:
+      optional: true
+    react-native-device-info:
+      optional: true
+    react-native-localize:
+      optional: true
+    react-native-navigation:
+      optional: true
+    react-native-safe-area-context:
+      optional: true
+  checksum: 10c0/a1e051ea380504220b22ce4002c0c5e47e2bc0100b709506d3b02136fe5418ede01718d70de826803412f1bdf42d92395a88215caf00dbc42134838b30238e17
+  languageName: node
+  linkType: hard
+
 "preact@npm:^10.19.3":
   version: 10.26.9
   resolution: "preact@npm:10.26.9"
@@ -16804,6 +16884,13 @@ __metadata:
     parseurl: "npm:^1.3.3"
     path-to-regexp: "npm:^8.0.0"
   checksum: 10c0/3279de7450c8eae2f6e095e9edacbdeec0abb5cb7249c6e719faa0db2dba43574b4fff5892d9220631c9abaff52dd3cad648cfea2aaace845e1a071915ac8867
+  languageName: node
+  linkType: hard
+
+"rtl-detect@npm:^1.0.2":
+  version: 1.1.2
+  resolution: "rtl-detect@npm:1.1.2"
+  checksum: 10c0/1b92888aafca1593314f837e83fdf02eb208faae3e713ab87c176804728efd3b1980d53b64f65f1fa593348087e852c5cd729b7b9372950f6e9b7be489afc0ca
   languageName: node
   linkType: hard
 

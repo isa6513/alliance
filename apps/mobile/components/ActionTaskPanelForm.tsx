@@ -11,7 +11,7 @@ import { FormSchema } from "@alliance/shared/forms/formschema";
 import { ActivityIndicator, View } from "react-native";
 import { computeFormStorageKey } from "@alliance/shared/formrenderer";
 import { useAuth } from "../lib/AuthContext";
-import posthog from "posthog-js";
+import { usePostHog } from "posthog-react-native";
 
 interface ActionTaskPanelFormProps {
   taskFormId: number;
@@ -38,6 +38,8 @@ const ActionTaskPanelForm = ({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+
+  const posthog = usePostHog();
 
   useEffect(() => {
     const fetchForm = async () => {
@@ -96,10 +98,10 @@ const ActionTaskPanelForm = ({
 
   const { distinctId, sessionReplayUrl } = useMemo(() => {
     return {
-      distinctId: posthog.get_distinct_id(),
-      sessionReplayUrl: posthog.get_session_replay_url(),
+      distinctId: posthog.getDistinctId(),
+      sessionReplayUrl: posthog.getSessionId(), //TODO
     };
-  }, []);
+  }, [posthog]);
 
   if (!form) {
     return <ActivityIndicator />;

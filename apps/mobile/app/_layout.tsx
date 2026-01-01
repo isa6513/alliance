@@ -8,6 +8,7 @@ import SecureStorage from "../lib/SecureStorage";
 import { getApiUrl } from "../lib/config";
 import { useFonts } from "expo-font";
 import "../global.css";
+import { PostHogProvider } from "posthog-react-native";
 
 export default function RootLayout() {
   useFonts({
@@ -30,8 +31,10 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <AuthProvider tokenStore={tokenStore}>
-      <Slot />
-    </AuthProvider>
+    <PostHogProvider apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt">
+      <AuthProvider tokenStore={tokenStore}>
+        <Slot />
+      </AuthProvider>
+    </PostHogProvider>
   );
 }
