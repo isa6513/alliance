@@ -584,11 +584,7 @@ const FormRenderer = ({
 
   return (
     <View className="flex-1 bg-white">
-      <ScrollView
-        className="flex-1"
-        contentContainerClassName="p-4 pb-24"
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
         {currentPage?.fields.map((element, idx) => {
           if (!("label" in element)) {
             return (

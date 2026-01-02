@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   Modal,
   ScrollView,
-  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -10,6 +9,7 @@ import {
 } from "react-native";
 import Markdown from "react-native-markdown-display";
 import { ChevronDown } from "lucide-react-native";
+import Checkbox from "../system/Checkbox";
 import type { UserDto } from "@alliance/shared/client";
 import type {
   AnyField,
@@ -323,25 +323,15 @@ export function RenderField({
     case "checkbox":
       return (
         <View className="mb-5">
-          <TouchableOpacity
-            className="flex-row items-start"
-            activeOpacity={0.7}
-            onPress={() => onChange?.(!value)}
+          <Checkbox
+            checked={!!value}
+            onChange={(next) => onChange?.(next)}
             disabled={disabled}
-          >
-            <Switch
-              value={!!value}
-              onValueChange={(next) => onChange?.(next)}
-              disabled={disabled}
-              thumbColor={!!value ? "#10b981" : "#f4f4f5"}
-              trackColor={{ true: "#bbf7d0", false: "#d4d4d8" }}
-              className="mr-3"
-            />
-            <View className="flex-1">
-              <RenderLabel field={field} error={errorMessage} />
-              {renderValidationMessage(errorMessage)}
-            </View>
-          </TouchableOpacity>
+            label={field.label}
+            required={field.required}
+            error={hasError}
+          />
+          {renderValidationMessage(errorMessage)}
         </View>
       );
 

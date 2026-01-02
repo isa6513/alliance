@@ -32,6 +32,7 @@ const ActionTaskPanel = ({
   const posthog = usePostHog();
 
   const handleFormStarted = useCallback(() => {
+    if (!posthog) return;
     posthog.capture("form_started", {
       actionId: action.id,
       actionType: action.type,
