@@ -19,7 +19,7 @@ const GuidePage: React.FC = () => {
             <h2 className="!font-semibold !text-lg md:!text-xl max-w-2xl mb-4">
               Table of contents
             </h2>
-            <ol className="flex flex-col gap-y-1 *:hover:underline">
+            <ol className="flex flex-col gap-y-1 *:hover:underline text-zinc-900">
               <li>
                 <a href="#priorities">Priorities</a>
               </li>
@@ -27,12 +27,12 @@ const GuidePage: React.FC = () => {
                 <a href="#structure">How we work</a>
               </li>
               <li className="ml-4">
-                <a href="#structure" className="text-zinc-500">
+                <a href="#structure" className="">
                   Responsibilities
                 </a>
               </li>
               <li className="ml-4">
-                <a href="#structure-3" className="text-zinc-500">
+                <a href="#structure-3" className="">
                   Coordination
                 </a>
               </li>
@@ -40,12 +40,12 @@ const GuidePage: React.FC = () => {
                 <a href="#decisions">How we make decisions</a>
               </li>
               <li className="ml-4">
-                <a href="#decisions" className="text-zinc-500">
+                <a href="#decisions" className="">
                   The office plans actions
                 </a>
               </li>
               <li className="ml-4">
-                <a href="#decisions-2" className="text-zinc-500">
+                <a href="#decisions-2" className="">
                   Members oversee the office
                 </a>
               </li>
@@ -53,17 +53,17 @@ const GuidePage: React.FC = () => {
                 <a href="#resources">Resources</a>
               </li>
               <li className="ml-4">
-                <a href="#governance" className="text-zinc-500">
+                <a href="#governance" className="">
                   Foundation
                 </a>
               </li>
               <li className="ml-4">
-                <a href="#governance" className="text-zinc-500">
+                <a href="#governance" className="">
                   Governance
                 </a>
               </li>
               <li className="ml-4">
-                <a href="#faq" className="text-zinc-500">
+                <a href="#faq" className="">
                   FAQ
                 </a>
               </li>

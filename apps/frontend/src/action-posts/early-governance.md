@@ -4,13 +4,13 @@ date: "2025-08-19"
 authors: ["Sidney Hough", "Mark Xu", "Casey Manning"]
 ---
 
-Our first collective action was to establish the founding principles and initial governance procedures for the Alliance, which are summarized in our [guide](/guide).
+We worked with an initial set of members to establish the founding principles of and initial governance procedures for the Alliance, which are summarized in our [guide](/guide).
 
 ## Goal
 
-In order to begin taking actions together, we needed a shared foundation. We wanted to ensure that the premises of this foundation made sense and were acceptable to a reasonably diverse group of people, both because the premises are important enough to deserve democratic input, and because they will determine what members we will be able to attract in the future.
+In order to begin taking actions together, we needed a shared foundation. We wanted to ensure that the premises of our foundation made sense and were acceptable to a reasonably diverse group of people, both because the premises are important enough to deserve democratic input, and because they will determine what members we will be able to attract in the future.
 
-We will use these premises for many purposes going forward, including to explain the Alliance to new members, to justify proposed collective actions, and to provide a framework for member deliberations.
+We will use the foundation we established for many purposes going forward, including to explain the Alliance to new members, to justify proposed actions, and to provide a framework for member deliberations.
 
 Certain premises, such as our vision, are unlikely to change; others, such as the process by which the strategic office is held accountable to members, are subject to future revision. In the meantime, the strategic office will make small edits to the produced guide for clarity, but will not make major changes to content without member consultation.
 
