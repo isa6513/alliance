@@ -34,7 +34,6 @@ export type RenderFieldProps = {
   value?: FormValue;
   onChange?: (value: FormValue) => void;
   disabled?: boolean;
-  // File upload hooks (kept for parity with web, not yet implemented on mobile)
   onFileSelected?: (file: unknown) => void;
   uploading?: boolean;
   uploadError?: string | null;

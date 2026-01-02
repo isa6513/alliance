@@ -1,5 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, Text, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Markdown from "react-native-markdown-display";
 import type { UserDto } from "@alliance/shared/client";
 import {
@@ -22,7 +30,9 @@ import {
   validateFieldValue as validateFieldValueShared,
 } from "@alliance/shared/formrenderer";
 import { RenderField } from "./RenderField";
+import FormModal from "./FormModal";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
+import { CheckIcon, CircleCheck } from "lucide-react-native";
 
 type FormRendererProps = {
   form: FormSchema;
@@ -226,6 +236,10 @@ const FormRenderer = ({
   });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [outOfTimeSelected, setOutOfTimeSelected] = useState(false);
+  const [otherReasonSelected, setOtherReasonSelected] = useState(false);
+  const [customReason, setCustomReason] = useState("");
   const [hasEmittedStart, setHasEmittedStart] = useState(false);
 
   useEffect(() => {
@@ -568,7 +582,8 @@ const FormRenderer = ({
       publicAnswers,
     };
 
-    onAbandonAction?.(false, "", submissionPayload);
+    onAbandonAction?.(outOfTimeSelected, customReason, submissionPayload);
+    setWithdrawOpen(false);
   };
 
   const currentPage = schema.pages[currentPageIndex];
@@ -630,26 +645,102 @@ const FormRenderer = ({
               onPress={isLastPage ? handleSubmit : handleNextPage}
               color={ButtonColor.Black}
               size={ButtonSize.Medium}
-              className="flex-2 py-3!"
+              className="flex-2 py-4!"
               disabled={submitting}
             >
               {submitting ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <Text className="text-white font-medium">
-                  {isLastPage ? "Complete" : "Next"}
-                </Text>
+                <>
+                  {isLastPage ? (
+                    <CircleCheck
+                      size={16}
+                      color="#fff"
+                      className="mr-2"
+                      strokeWidth={2.5}
+                    />
+                  ) : null}
+                  <Text className="text-white font-medium">
+                    {isLastPage ? "Complete" : "Next"}
+                  </Text>
+                </>
               )}
             </Button>
             <Button
-              onPress={handleAbandon}
-              className="px-3! items-center"
+              onPress={() => setWithdrawOpen(true)}
+              className="px-4! items-center"
               color={ButtonColor.Outline}
               size={ButtonSize.Medium}
               title="..."
-            ></Button>
+            />
           </View>
         </View>
+      )}
+
+      {onAbandonAction && (
+        <FormModal
+          visible={withdrawOpen}
+          onClose={() => setWithdrawOpen(false)}
+          maxHeight={420}
+        >
+          <Text className="text-lg font-semibold text-zinc-900 mb-3">
+            Withdraw from action
+          </Text>
+          <View className="gap-2 mb-3">
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className={`border rounded-lg px-3 py-3 ${
+                outOfTimeSelected
+                  ? "border-green-600 bg-green/20"
+                  : "border-zinc-200"
+              }`}
+              onPress={() => {
+                setOutOfTimeSelected((prev) => !prev);
+                if (!outOfTimeSelected) {
+                  setOtherReasonSelected(false);
+                }
+              }}
+            >
+              <Text className="text-base text-zinc-900">
+                Took more than 15 minutes
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className={`border rounded-lg px-3 py-3 ${
+                otherReasonSelected
+                  ? "border-green-600 bg-green/20"
+                  : "border-zinc-200"
+              }`}
+              onPress={() => {
+                setOtherReasonSelected((prev) => !prev);
+                if (!otherReasonSelected) {
+                  setOutOfTimeSelected(false);
+                }
+              }}
+            >
+              <Text className="text-base text-zinc-900">Other reason</Text>
+            </TouchableOpacity>
+          </View>
+          {(outOfTimeSelected || otherReasonSelected) && (
+            <TextInput
+              value={customReason}
+              onChangeText={setCustomReason}
+              placeholder="Explain in more detail..."
+              placeholderTextColor="#9ca3af"
+              multiline
+              textAlignVertical="top"
+              className="border border-zinc-200 rounded-lg px-3 py-2 h-24 text-base text-zinc-900 mb-3"
+            />
+          )}
+          <Button
+            onPress={handleAbandon}
+            color={ButtonColor.Black}
+            size={ButtonSize.Medium}
+            disabled={submitting}
+            title="Withdraw"
+          />
+        </FormModal>
       )}
     </View>
   );
