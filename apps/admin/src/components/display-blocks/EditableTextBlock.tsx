@@ -33,7 +33,6 @@ export function EditableTextBlock({
             onChange={(e) => handleUpdate({ text: e.target.value })}
             className="w-full text-gray-900 border-none outline-none bg-transparent resize-none whitespace-pre-wrap"
             placeholder="Enter text content"
-            rows={Math.max(2, activeBlock.text.split("\n").length)}
             style={{ resize: "vertical" }}
           />
 
