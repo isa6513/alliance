@@ -1,15 +1,9 @@
 import React from "react";
-import {
-  Modal,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { ChevronDown, Clock } from "lucide-react-native";
 import { useTimeZoneSelect } from "@alliance/shared/forms/timeZoneSelect";
 import { getTimeZone } from "react-native-localize";
+import FormModal from "./FormModal";
 
 type Props = {
   value?: string;
@@ -68,91 +62,76 @@ export default function TimeZoneSelect({
         <ChevronDown size={18} color="#52525b" />
       </TouchableOpacity>
 
-      <Modal visible={open} transparent onRequestClose={() => setOpen(false)}>
-        <TouchableOpacity
-          activeOpacity={1}
-          className="flex-1 bg-black/40 justify-end"
-          onPress={() => setOpen(false)}
-        >
-          <TouchableOpacity
-            activeOpacity={1}
-            className="bg-white rounded-t-2xl p-4 w-full"
-            style={{ maxHeight: 520 }}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <View className="flex-row items-center justify-between mb-3">
-              <View className="flex-row items-center gap-2">
-                <Clock size={18} color="#0f172a" />
-                <Text className="text-lg font-semibold text-zinc-900">
-                  Select time zone
-                </Text>
-              </View>
-              <TouchableOpacity onPress={() => setOpen(false)}>
-                <Text className="text-blue-600 font-medium">Close</Text>
-              </TouchableOpacity>
-            </View>
-            <View className="border border-zinc-200 rounded-lg mb-3">
-              <TextInput
-                value={query}
-                onChangeText={setQuery}
-                placeholder="Search time zones…"
-                placeholderTextColor="#9ca3af"
-                className="px-3 py-2 text-base text-zinc-900 focus:outline-none"
-                autoFocus
-              />
-            </View>
-            <ScrollView
-              keyboardShouldPersistTaps="handled"
-              style={{ maxHeight: 420 }}
-              contentContainerClassName="pb-2"
-              ref={(ref) => {
-                if (!ref || !open) return;
-                const idx = filtered.findIndex((i) => i.tz === selected.tz);
-                if (idx >= 0) {
-                  const approximateItemHeight = 55; // px
-                  const targetOffset = Math.max(
-                    approximateItemHeight * (idx - 1),
-                    0
-                  );
-                  requestAnimationFrame(() => {
-                    ref.scrollTo({ y: targetOffset, animated: false });
-                  });
-                }
-              }}
-            >
-              {filtered.length === 0 ? (
-                <Text className="text-zinc-500 p-3 text-center">
-                  No matches
-                </Text>
-              ) : (
-                filtered.map((item, idx) => {
-                  const isSelected = item.tz === selected.tz;
-                  return (
-                    <TouchableOpacity
-                      key={item.tz}
-                      activeOpacity={0.8}
-                      onPress={() => commit(item.tz)}
-                      onFocus={() => setActiveIndex(idx)}
-                      className={`px-3 py-3 rounded-lg mb-2 border flex-row justify-between ${
-                        isSelected
-                          ? "border-green-600 bg-green-50"
-                          : "border-zinc-200 bg-white"
-                      }`}
-                    >
-                      <Text className="text-base text-zinc-900">
-                        {item.labelLeft}
-                      </Text>
-                      <Text className="text-xs text-zinc-600 mt-1 shrink-0">
-                        {item.timeLabel}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })
-              )}
-            </ScrollView>
+      <FormModal visible={open} onClose={() => setOpen(false)} maxHeight={520}>
+        <View className="flex-row items-center justify-between mb-3">
+          <View className="flex-row items-center gap-2">
+            <Clock size={18} color="#0f172a" />
+            <Text className="text-lg font-semibold text-zinc-900">
+              Select time zone
+            </Text>
+          </View>
+          <TouchableOpacity onPress={() => setOpen(false)}>
+            <Text className="text-blue-600 font-medium">Close</Text>
           </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
+        </View>
+        <View className="border border-zinc-200 rounded-lg mb-3">
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Search time zones…"
+            placeholderTextColor="#9ca3af"
+            className="px-3 py-2 text-base text-zinc-900 focus:outline-none"
+            autoFocus
+          />
+        </View>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          style={{ maxHeight: 420 }}
+          contentContainerClassName="pb-2"
+          ref={(ref) => {
+            if (!ref || !open) return;
+            const idx = filtered.findIndex((i) => i.tz === selected.tz);
+            if (idx >= 0) {
+              const approximateItemHeight = 55; // px
+              const targetOffset = Math.max(
+                approximateItemHeight * (idx - 1),
+                0
+              );
+              requestAnimationFrame(() => {
+                ref.scrollTo({ y: targetOffset, animated: false });
+              });
+            }
+          }}
+        >
+          {filtered.length === 0 ? (
+            <Text className="text-zinc-500 p-3 text-center">No matches</Text>
+          ) : (
+            filtered.map((item, idx) => {
+              const isSelected = item.tz === selected.tz;
+              return (
+                <TouchableOpacity
+                  key={item.tz}
+                  activeOpacity={0.8}
+                  onPress={() => commit(item.tz)}
+                  onFocus={() => setActiveIndex(idx)}
+                  className={`px-3 py-3 rounded-lg mb-2 border flex-row justify-between ${
+                    isSelected
+                      ? "border-green-600 bg-green-50"
+                      : "border-zinc-200 bg-white"
+                  }`}
+                >
+                  <Text className="text-base text-zinc-900">
+                    {item.labelLeft}
+                  </Text>
+                  <Text className="text-xs text-zinc-600 mt-1 shrink-0">
+                    {item.timeLabel}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </ScrollView>
+      </FormModal>
     </View>
   );
 }

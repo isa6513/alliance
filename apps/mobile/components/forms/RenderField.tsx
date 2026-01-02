@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Modal,
   ScrollView,
   Image,
   Text,
@@ -11,10 +10,10 @@ import {
 import Markdown from "react-native-markdown-display";
 import { Check, ChevronDown } from "lucide-react-native";
 import Checkbox from "../system/Checkbox";
-import Button, { ButtonColor, ButtonSize } from "../system/Button";
 import * as ImagePicker from "expo-image-picker";
 import TimeZoneSelect from "./TimeZoneSelect";
 import CityAutosuggest from "./CityAutosuggest";
+import FormModal from "./FormModal";
 import type { UserDto } from "@alliance/shared/client";
 import type {
   AnyField,
@@ -413,58 +412,45 @@ export function RenderField({
             </Text>
             <ChevronDown size={18} color="#52525b" />
           </TouchableOpacity>
-          <Modal
+          <FormModal
             visible={selectOpen}
-            transparent
-            animationType="fade"
-            onRequestClose={() => setSelectOpen(false)}
+            onClose={() => setSelectOpen(false)}
+            maxHeight={420}
           >
-            <TouchableOpacity
-              activeOpacity={1}
-              className="flex-1 bg-black/40 justify-end"
-              onPress={() => setSelectOpen(false)}
-            >
-              <TouchableOpacity
-                activeOpacity={1}
-                className="bg-white rounded-t-2xl max-h-[60%] p-4"
-                onPress={(e) => e.stopPropagation()}
-              >
-                <View className="flex-row justify-between items-center mb-2">
-                  <Text className="text-base font-semibold text-zinc-900">
-                    Select
+            <View className="flex-row justify-between items-center mb-2">
+              <Text className="text-base font-semibold text-zinc-900">
+                Select
+              </Text>
+            </View>
+            <ScrollView>
+              {options.map((option, optIndex) => (
+                <TouchableOpacity
+                  key={optIndex}
+                  className="py-3 flex-row items-center"
+                  onPress={() => {
+                    onChange?.(option.value);
+                    setSelectOpen(false);
+                  }}
+                  disabled={disabled}
+                >
+                  <View
+                    className={`w-5 h-5 rounded-full border mr-3 items-center justify-center ${
+                      value === option.value
+                        ? "border-green"
+                        : "border-zinc-300"
+                    }`}
+                  >
+                    {value === option.value && (
+                      <View className="w-2.5 h-2.5 rounded-full bg-green" />
+                    )}
+                  </View>
+                  <Text className="text-base text-zinc-800">
+                    {option.label}
                   </Text>
-                </View>
-                <ScrollView>
-                  {options.map((option, optIndex) => (
-                    <TouchableOpacity
-                      key={optIndex}
-                      className="py-3 flex-row items-center"
-                      onPress={() => {
-                        onChange?.(option.value);
-                        setSelectOpen(false);
-                      }}
-                      disabled={disabled}
-                    >
-                      <View
-                        className={`w-5 h-5 rounded-full border mr-3 items-center justify-center ${
-                          value === option.value
-                            ? "border-green"
-                            : "border-zinc-300"
-                        }`}
-                      >
-                        {value === option.value && (
-                          <View className="w-2.5 h-2.5 rounded-full bg-green" />
-                        )}
-                      </View>
-                      <Text className="text-base text-zinc-800">
-                        {option.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </TouchableOpacity>
-            </TouchableOpacity>
-          </Modal>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </FormModal>
           {renderValidationMessage(errorMessage)}
         </View>
       );
@@ -770,58 +756,45 @@ export function TimeInputField({
           <ChevronDown size={18} color="#52525b" />
         </TouchableOpacity>
 
-        <Modal
+        <FormModal
           visible={showDropdown}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShowDropdown(false)}
+          onClose={() => setShowDropdown(false)}
+          maxHeight={420}
         >
-          <TouchableOpacity
-            activeOpacity={1}
-            className="flex-1 bg-black/30 justify-end"
-            onPress={() => setShowDropdown(false)}
-          >
-            <TouchableOpacity
-              activeOpacity={1}
-              className="bg-white rounded-t-2xl max-h-[60%] p-4"
-              onPress={(e) => e.stopPropagation()}
-            >
-              <View className="flex-row justify-between items-center mb-3">
-                <Text className="text-lg font-semibold text-zinc-900">
-                  Pick a time
-                </Text>
-                <TouchableOpacity onPress={() => setShowDropdown(false)}>
-                  <Text className="text-blue-600 font-medium">Close</Text>
-                </TouchableOpacity>
-              </View>
-              <ScrollView>
-                {timeOptions.map((t) => (
-                  <TouchableOpacity
-                    key={t}
-                    className="py-3"
-                    onPress={() => {
-                      setInputValue(t);
-                      setLocalError(null);
-                      setShowDropdown(false);
-                      const parsed = parseTimeInput(t);
-                      if (parsed) onChange?.(parsed.normalized);
-                    }}
-                  >
-                    <Text
-                      className={`text-base ${
-                        t === inputValue
-                          ? "font-semibold text-green-700"
-                          : "text-zinc-800"
-                      }`}
-                    >
-                      {t}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-lg font-semibold text-zinc-900">
+              Pick a time
+            </Text>
+            <TouchableOpacity onPress={() => setShowDropdown(false)}>
+              <Text className="text-blue-600 font-medium">Close</Text>
             </TouchableOpacity>
-          </TouchableOpacity>
-        </Modal>
+          </View>
+          <ScrollView>
+            {timeOptions.map((t) => (
+              <TouchableOpacity
+                key={t}
+                className="py-3"
+                onPress={() => {
+                  setInputValue(t);
+                  setLocalError(null);
+                  setShowDropdown(false);
+                  const parsed = parseTimeInput(t);
+                  if (parsed) onChange?.(parsed.normalized);
+                }}
+              >
+                <Text
+                  className={`text-base ${
+                    t === inputValue
+                      ? "font-semibold text-green-700"
+                      : "text-zinc-800"
+                  }`}
+                >
+                  {t}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </FormModal>
       </View>
 
       {hasError && (
