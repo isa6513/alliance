@@ -2,14 +2,13 @@ import { Check } from "lucide-react";
 import * as React from "react";
 import {
   useTimeZoneSelect,
-  type TimeZoneValue,
+  formatNowTimeInTz,
 } from "@alliance/shared/forms/timeZoneSelect";
-import { formatNowTimeInTz } from "@alliance/shared/lib/timezones";
 
 type Props = {
-  value?: TimeZoneValue;
-  defaultValue?: TimeZoneValue; // defaults to America/Los_Angeles
-  onChange?: (tz: TimeZoneValue) => void;
+  value?: string;
+  defaultValue?: string; // defaults to America/Los_Angeles
+  onChange?: (tz: string) => void;
 
   placeholder?: string;
   disabled?: boolean;

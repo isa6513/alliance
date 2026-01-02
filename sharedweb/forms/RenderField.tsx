@@ -173,7 +173,6 @@ export function RenderField({
           <textarea
             ref={(el) => {
               if (el) {
-                console.log("el", el);
                 el.style.height = "auto";
                 el.style.height = `${el.scrollHeight}px`;
               }
