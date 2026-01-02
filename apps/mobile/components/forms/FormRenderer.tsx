@@ -1,12 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Image, ScrollView, Text, View } from "react-native";
 import Markdown from "react-native-markdown-display";
 import type { UserDto } from "@alliance/shared/client";
 import {
@@ -598,7 +591,7 @@ const FormRenderer = ({
             return null;
           }
           return (
-            <View key={field.id} className="mb-4">
+            <View key={field.id}>
               <RenderField
                 field={field}
                 value={formData[field.id]}

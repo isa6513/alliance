@@ -1,14 +1,10 @@
 import { Check } from "lucide-react";
 import * as React from "react";
 import {
-  TZ_OPTIONS,
-  formatNowTimeInTz,
-  getOffsetMinutes,
-  getGenericLabelFromIntl,
-  prettyCityFromIana,
-} from "@alliance/shared/lib/timezones";
-
-type TimeZoneValue = string;
+  useTimeZoneSelect,
+  type TimeZoneValue,
+} from "@alliance/shared/forms/timeZoneSelect";
+import { formatNowTimeInTz } from "@alliance/shared/lib/timezones";
 
 type Props = {
   value?: TimeZoneValue;
@@ -32,99 +28,23 @@ export default function TimeZoneSelectPretty({
   className,
   hour12 = true,
 }: Props) {
-  const [open, setOpen] = React.useState(false);
-  const [query, setQuery] = React.useState("");
-  const [activeIndex, setActiveIndex] = React.useState(0);
-
-  const [internalValue, setInternalValue] = React.useState<TimeZoneValue>(
-    value ?? defaultValue
-  );
-
-  // keep internal in sync with controlled value
-  React.useEffect(() => {
-    if (value != null) setInternalValue(value);
-  }, [value]);
-
-  // tick every 30s so displayed times stay fresh
-  const [, forceTick] = React.useState(0);
-  React.useEffect(() => {
-    const id = window.setInterval(() => forceTick((x) => x + 1), 30_000);
-    return () => window.clearInterval(id);
-  }, []);
-  type Item = {
-    tz: string;
-    labelLeft: string;
-    searchText: string;
-    offsetMins: number | null;
-    observesDst?: boolean;
-  };
-
-  function observesDst(tz: string) {
-    // crude but effective: compare offsets in winter vs summer (UTC dates)
-    const jan = getOffsetMinutes(tz);
-    const jul = getOffsetMinutes(tz);
-    if (jan == null || jul == null) return false;
-    return jan !== jul;
-  }
-
-  const allItems = React.useMemo<Item[]>(() => {
-    const tzs = TZ_OPTIONS.map((tz) => tz.tz);
-
-    const items: Item[] = tzs.map((tz) => {
-      const generic = getGenericLabelFromIntl(tz);
-      const city = prettyCityFromIana(tz);
-      const left = generic ? `${generic} — ${city}` : city;
-
-      const offsetMins = getOffsetMinutes(tz);
-      const dst = observesDst(tz);
-
-      return {
-        tz,
-        labelLeft: `${left}`.trim(),
-        searchText: `${left} ${tz}`.toLowerCase(),
-        offsetMins,
-        observesDst: dst,
-      };
-    });
-
-    items.sort(
-      (a, b) =>
-        a.offsetMins! - b.offsetMins! || a.labelLeft.localeCompare(b.labelLeft)
-    );
-
-    return items;
-  }, []);
-
-  const selected = React.useMemo(() => {
-    return (
-      allItems.find((i) => i.tz === internalValue) ?? {
-        tz: internalValue,
-        labelLeft: internalValue,
-        searchText: internalValue.toLowerCase(),
-        offsetMins: getOffsetMinutes(internalValue),
-      }
-    );
-  }, [allItems, internalValue]);
-
-  const filtered = React.useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const list = q
-      ? allItems.filter((i) => i.searchText.includes(q))
-      : allItems;
-    return list;
-  }, [allItems, query]);
-
-  React.useEffect(() => {
-    // reset highlight when filtering
-    setActiveIndex(0);
-  }, [query, open]);
-
-  function commit(tz: string) {
-    if (disabled) return;
-    if (value == null) setInternalValue(tz);
-    onChange?.(tz);
-    setOpen(false);
-  }
+  const {
+    filtered,
+    selected,
+    query,
+    setQuery,
+    activeIndex,
+    setActiveIndex,
+    commit,
+    open,
+    setOpen,
+  } = useTimeZoneSelect({
+    value,
+    defaultValue,
+    onChange,
+    hour12,
+    disabled,
+  });
 
   function onTriggerKeyDown(e: React.KeyboardEvent) {
     if (disabled) return;

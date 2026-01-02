@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   Modal,
   ScrollView,
+  Image,
   Text,
   TextInput,
   TouchableOpacity,
@@ -10,6 +11,9 @@ import {
 import Markdown from "react-native-markdown-display";
 import { ChevronDown } from "lucide-react-native";
 import Checkbox from "../system/Checkbox";
+import Button, { ButtonColor, ButtonSize } from "../system/Button";
+import * as ImagePicker from "expo-image-picker";
+import TimeZoneSelect from "./TimeZoneSelect";
 import type { UserDto } from "@alliance/shared/client";
 import type {
   AnyField,
@@ -115,6 +119,9 @@ export function RenderField({
   value,
   onChange,
   disabled,
+  onFileSelected,
+  uploading,
+  uploadError,
   error,
   randomizationKey,
   disableOptionRandomization,
@@ -149,6 +156,9 @@ export function RenderField({
     }
     return shuffleWithSeed(options, randomizationSeedBase);
   }, [field, randomizationSeedBase, disableOptionRandomization]);
+
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [pickerError, setPickerError] = useState<string | null>(null);
 
   switch (field.kind) {
     case "text":
@@ -287,7 +297,7 @@ export function RenderField({
                   key={optionValue}
                   className={`flex-1 items-center border py-2 ${
                     checked
-                      ? "bg-green-600 border-green-600"
+                      ? "bg-green border-green"
                       : hasError
                       ? "border-red-500"
                       : "border-zinc-300"
@@ -551,13 +561,10 @@ export function RenderField({
       return (
         <View className="mb-5">
           <RenderLabel field={field} error={errorMessage} />
-          <TextInput
-            className={inputBase}
-            value={(value as string) ?? ""}
-            onChangeText={(text) => onChange?.(text)}
-            placeholder="America/Los_Angeles"
-            placeholderTextColor="#9ca3af"
-            editable={!disabled}
+          <TimeZoneSelect
+            value={(value as string) ?? undefined}
+            onChange={(tz) => onChange?.(tz)}
+            disabled={disabled}
           />
           {renderValidationMessage(errorMessage)}
         </View>
@@ -588,14 +595,65 @@ export function RenderField({
     }
 
     case "file":
+      const currentPreview =
+        filePreview || (typeof value === "string" && value ? value : null);
+
+      const pickImage = async () => {
+        if (disabled || uploading) return;
+        setPickerError(null);
+        const permission =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+          setPickerError("Permission to access photos is required.");
+          return;
+        }
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          quality: 0.8,
+        });
+        if (result.canceled || !result.assets.length) {
+          return;
+        }
+        const asset = result.assets[0];
+        const fileLike = {
+          uri: asset.uri,
+          name: asset.fileName,
+          type: asset.mimeType,
+        };
+        setFilePreview(asset.uri);
+        onFileSelected?.(fileLike as unknown);
+        onChange?.(asset.uri);
+      };
+
       return (
         <View className="mb-5">
           <RenderLabel field={field} error={errorMessage} />
-          <View className="border border-zinc-200 bg-zinc-50 rounded-lg p-3">
-            <Text className="text-sm text-zinc-700">
-              File uploads are not supported on mobile yet.
-            </Text>
+          {currentPreview && (
+            <Image
+              source={{ uri: currentPreview }}
+              className="w-full h-48 rounded-lg mb-3 bg-zinc-200"
+              resizeMode="cover"
+            />
+          )}
+          <View className="flex-row items-center gap-3">
+            <Button
+              onPress={pickImage}
+              disabled={disabled || uploading}
+              color={ButtonColor.White}
+              size={ButtonSize.Medium}
+              className="flex-1 justify-start"
+              title={currentPreview ? "Replace photo" : "Choose photo"}
+            />
+            {uploading && (
+              <Text className="text-sm text-blue-600">Uploading...</Text>
+            )}
           </View>
+          {pickerError || uploadError ? (
+            <Text className="text-xs text-red-500 mt-2">
+              {uploadError || pickerError}
+            </Text>
+          ) : null}
           {renderValidationMessage(errorMessage)}
         </View>
       );

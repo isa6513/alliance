@@ -65,7 +65,7 @@ export const TZ_OPTIONS: TzOption[] = [
   { group: "Asia", label: "Dubai Time", tz: "Asia/Dubai" },
   { group: "Asia", label: "Tehran Time", tz: "Asia/Tehran" },
   { group: "Asia", label: "Pakistan, Maldives Time", tz: "Asia/Karachi" },
-  { group: "Asia", label: "India, Sri Lanka Time", tz: "Asia/Kolkata" },
+  //   { group: "Asia", label: "India, Sri Lanka Time", tz: "Asia/Kolkata" }, //TODO: react native intl does not support
   { group: "Asia", label: "Kathmandu Time", tz: "Asia/Kathmandu" },
   { group: "Asia", label: "Bangladesh Time", tz: "Asia/Dhaka" },
   { group: "Asia", label: "Indochina Time", tz: "Asia/Bangkok" },
@@ -97,6 +97,7 @@ export const TZ_OPTIONS: TzOption[] = [
 ];
 
 export function formatNowTimeInTz(tz: string, hour12: boolean = true): string {
+  console.log("formatNowTimeInTz", tz, hour12);
   return new Intl.DateTimeFormat(undefined, {
     timeZone: tz,
     hour: "numeric",
