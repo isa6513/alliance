@@ -5,13 +5,14 @@ import {
   tasksSubmitForm,
   tasksSubmitPublicForm,
 } from "@alliance/shared/client";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import FormRenderer from "./forms/FormRenderer";
 import { FormSchema } from "@alliance/shared/forms/formschema";
 import { ActivityIndicator, View } from "react-native";
 import { computeFormStorageKey } from "@alliance/shared/formrenderer";
 import { useAuth } from "../lib/AuthContext";
 import { usePostHog } from "posthog-react-native";
+import SuccessOverlay from "./SuccessOverlay";
 
 interface ActionTaskPanelFormProps {
   taskFormId: number;
@@ -37,9 +38,17 @@ const ActionTaskPanelForm = ({
   const [form, setForm] = useState<FormDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showSuccess, setShowSuccess] = useState(false);
   const { user } = useAuth();
 
   const posthog = usePostHog();
+
+  const handleSuccessComplete = useCallback(() => {
+    setShowSuccess(false);
+    if (onCompleteAction) {
+      onCompleteAction(false);
+    }
+  }, [onCompleteAction]);
 
   useEffect(() => {
     const fetchForm = async () => {
@@ -79,7 +88,8 @@ const ActionTaskPanelForm = ({
             //TODO: better handling of user refresh (things used to break if the user signed a contract in another tab then went back to the first one)
             // refreshUser();
           }
-          onCompleteAction(false); //tasksSubmitForm handles completion here
+          // Show success overlay - it will call onCompleteAction after animation
+          setShowSuccess(true);
         } else {
           console.error(response.error);
           posthog.captureException(response.error, {
@@ -117,6 +127,11 @@ const ActionTaskPanelForm = ({
         onFormStarted={onFormStarted}
         onAbandonAction={onAbandonAction}
         actionId={actionId}
+      />
+      <SuccessOverlay
+        visible={showSuccess}
+        onComplete={handleSuccessComplete}
+        message="Thank you!"
       />
     </View>
   );

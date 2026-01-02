@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useAuth } from "../../../lib/AuthContext";
 import { router } from "expo-router";
-import { PostDto, forumFindAllPosts } from "../../../../../shared/client";
+import { PostDto, forumFindAllPosts } from "@alliance/shared/client";
 import {
   Card,
   Button,

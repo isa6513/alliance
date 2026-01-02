@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import type { ScrollView as ScrollViewType } from "react-native";
 import Markdown from "react-native-markdown-display";
 import type { UserDto } from "@alliance/shared/client";
 import {
@@ -32,7 +33,7 @@ import {
 import { RenderField } from "./RenderField";
 import FormModal from "./FormModal";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
-import { CheckIcon, CircleCheck } from "lucide-react-native";
+import { CircleCheck } from "lucide-react-native";
 
 type FormRendererProps = {
   form: FormSchema;
@@ -241,6 +242,17 @@ const FormRenderer = ({
   const [otherReasonSelected, setOtherReasonSelected] = useState(false);
   const [customReason, setCustomReason] = useState("");
   const [hasEmittedStart, setHasEmittedStart] = useState(false);
+
+  // Refs for scrolling to invalid fields
+  const scrollViewRef = useRef<ScrollViewType>(null);
+  const fieldPositions = useRef<Record<string, number>>({});
+
+  const scrollToField = useCallback((fieldId: string) => {
+    const yPosition = fieldPositions.current[fieldId];
+    if (yPosition !== undefined && scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ y: Math.max(0, yPosition - 20), animated: true });
+    }
+  }, []);
 
   useEffect(() => {
     if (!user || Object.keys(publicAnswers).length > 0) {
@@ -520,7 +532,7 @@ const FormRenderer = ({
     if (result.isValid) {
       setCurrentPageIndex((prev) => Math.min(prev + 1, maxPageIndex));
     } else if (result.firstInvalidFieldId) {
-      setCurrentPageIndex(currentPageIndex);
+      scrollToField(result.firstInvalidFieldId);
     }
   };
 
@@ -538,18 +550,26 @@ const FormRenderer = ({
       const result = await validatePage(currentPageIndex, true);
       if (result.isValid) {
         setCurrentPageIndex((prev) => prev + 1);
+      } else if (result.firstInvalidFieldId) {
+        scrollToField(result.firstInvalidFieldId);
       }
       setSubmitting(false);
       return;
     }
 
-    const { isValid, firstInvalidPageIndex } = await validateAllPages();
+    const { isValid, firstInvalidPageIndex, firstInvalidFieldId } = await validateAllPages();
     if (!isValid) {
       if (
         typeof firstInvalidPageIndex === "number" &&
         firstInvalidPageIndex !== currentPageIndex
       ) {
         setCurrentPageIndex(firstInvalidPageIndex);
+        // Scroll after page change - use setTimeout to wait for re-render
+        if (firstInvalidFieldId) {
+          setTimeout(() => scrollToField(firstInvalidFieldId), 100);
+        }
+      } else if (firstInvalidFieldId) {
+        scrollToField(firstInvalidFieldId);
       }
       setSubmitting(false);
       return;
@@ -592,7 +612,11 @@ const FormRenderer = ({
 
   return (
     <View className="flex-1 bg-white">
-      <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        ref={scrollViewRef}
+        className="flex-1"
+        keyboardShouldPersistTaps="handled"
+      >
         {currentPage?.fields.map((element, idx) => {
           if (!("label" in element)) {
             return (
@@ -606,7 +630,12 @@ const FormRenderer = ({
             return null;
           }
           return (
-            <View key={field.id}>
+            <View
+              key={field.id}
+              onLayout={(event) => {
+                fieldPositions.current[field.id] = event.nativeEvent.layout.y;
+              }}
+            >
               <RenderField
                 field={field}
                 value={formData[field.id]}

@@ -1,8 +1,5 @@
-// Define color constants for easy theming - aligned with frontend design system
 export const colors = {
-  hgreen: "#3f5640",
   green: "#62a124",
-  bgreen: "#8fbe6f",
   blue: "#318dde",
   white: "#fff",
 

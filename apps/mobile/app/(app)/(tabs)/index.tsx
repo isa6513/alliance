@@ -1,39 +1,39 @@
-import { View, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
-import { useEffect, useState } from "react";
+import { View, ScrollView, ActivityIndicator } from "react-native";
+import { useCallback, useEffect, useState } from "react";
 import { ActionDto, actionsFindAllLoggedIn } from "@alliance/shared/client";
 import { colors, Text } from "../../../components/system";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import LargeActionCard from "../../../components/LargeActionCard";
-import { useAuth } from "../../../lib/AuthContext";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
+import { Check } from "lucide-react-native";
 
 export default function HomeScreen() {
   const [actions, setActions] = useState<ActionDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchActions = async () => {
-      try {
-        const response = await actionsFindAllLoggedIn({
-          query: { sorted: true },
-        });
-        if (response.error) {
-          throw new Error("Failed to fetch actions");
-        }
-        setActions(response.data || []);
-        setLoading(false);
-      } catch (err) {
-        setError("Failed to load actions");
-        setLoading(false);
-        console.error("Error fetching actions:", err);
+  const fetchActions = useCallback(async () => {
+    try {
+      const response = await actionsFindAllLoggedIn({
+        query: { sorted: true },
+      });
+      if (response.error) {
+        throw new Error("Failed to fetch actions");
       }
-    };
-
-    fetchActions();
+      setActions(response.data || []);
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to load actions");
+      setLoading(false);
+      console.error("Error fetching actions:", err);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchActions();
+  }, [fetchActions]);
 
   const {
     currentTask,
@@ -51,162 +51,36 @@ export default function HomeScreen() {
   });
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.actionsListContainer}>
+    <ScrollView className="flex-1 bg-white">
+      <View className="mt-24">
         {loading ? (
           <ActivityIndicator
             size="large"
-            color="#0D1B2A"
-            style={styles.loader}
+            color={colors.green}
+            className="self-center mx-auto"
           />
         ) : error ? (
-          <Text style={styles.errorText}>{error}</Text>
-        ) : actions.length === 0 ? (
-          <Text style={styles.noActionsText}>No actions available</Text>
-        ) : (
-          <View>
-            {currentTask && (
-              <LargeActionCard
-                action={currentTask}
-                userRelation={currentTask.userRelation as "joined" | "none"}
-                friendActivities={friendActivities.filter(
-                  (activity) => activity.actionId === currentTask.id
-                )}
-                onUpdateActionState={() => {}}
-              />
+          <Text className="text-red-500 text-center py-4">{error}</Text>
+        ) : currentTask ? (
+          <LargeActionCard
+            action={currentTask}
+            userRelation={currentTask.userRelation as "joined" | "none"}
+            friendActivities={friendActivities.filter(
+              (activity) => activity.actionId === currentTask.id
             )}
+            onUpdateActionState={fetchActions}
+          />
+        ) : (
+          <View className="items-center justify-center py-16 px-5">
+            <View className="w-12 h-12 rounded-full bg-green items-center justify-center mb-4">
+              <Check size={32} color="#fff" strokeWidth={3} />
+            </View>
+            <Text className="text-zinc-500 text-lg text-center">
+              No tasks to do right now
+            </Text>
           </View>
         )}
       </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 16,
-    backgroundColor: colors.page,
-    paddingTop: 24,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 16,
-  },
-  welcomeTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: colors.text.primary,
-    marginBottom: 6,
-  },
-  welcomeSubtitle: {
-    fontSize: 18,
-    color: colors.text.tertiary,
-    marginBottom: 8,
-  },
-  card: {
-    margin: 16,
-    marginTop: 8,
-    padding: 20,
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: colors.text.primary,
-    marginBottom: 12,
-  },
-  infoText: {
-    fontSize: 16,
-    color: colors.text.tertiary,
-    lineHeight: 22,
-  },
-  actionsContainer: {
-    paddingHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.text.primary,
-    marginBottom: 12,
-    paddingHorizontal: 4,
-  },
-  actionButtonsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  actionButton: {
-    flex: 1,
-  },
-  actionsListContainer: {
-    marginTop: 24,
-    marginBottom: 16,
-  },
-  actionsTitleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  filterRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
-    gap: 4,
-  },
-  filterButton: {
-    flex: 1,
-    padding: 12,
-  },
-  viewAllText: {
-    fontSize: 14,
-    color: colors.primary,
-    fontWeight: "600",
-  },
-  loader: {
-    marginVertical: 20,
-  },
-  errorText: {
-    color: colors.error,
-    textAlign: "center",
-    padding: 16,
-  },
-  noActionsText: {
-    color: colors.text.tertiary,
-    fontSize: 16,
-    textAlign: "center",
-    padding: 20,
-  },
-  statsCard: {
-    margin: 16,
-    marginTop: 8,
-    padding: 20,
-  },
-  statsTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.text.primary,
-    marginBottom: 16,
-  },
-  statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  statItem: {
-    alignItems: "center",
-    flex: 1,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: colors.primary,
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: colors.text.tertiary,
-  },
-});
