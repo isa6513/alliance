@@ -69,10 +69,16 @@ export default function TimeZoneSelect({
       </TouchableOpacity>
 
       <Modal visible={open} transparent onRequestClose={() => setOpen(false)}>
-        <View className="flex-1 bg-black/40 justify-end">
-          <View
+        <TouchableOpacity
+          activeOpacity={1}
+          className="flex-1 bg-black/40 justify-end"
+          onPress={() => setOpen(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
             className="bg-white rounded-t-2xl p-4 w-full"
             style={{ maxHeight: 520 }}
+            onPress={(e) => e.stopPropagation()}
           >
             <View className="flex-row items-center justify-between mb-3">
               <View className="flex-row items-center gap-2">
@@ -144,8 +150,8 @@ export default function TimeZoneSelect({
                 })
               )}
             </ScrollView>
-          </View>
-        </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
     </View>
   );

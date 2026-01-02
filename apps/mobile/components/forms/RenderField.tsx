@@ -9,11 +9,12 @@ import {
   View,
 } from "react-native";
 import Markdown from "react-native-markdown-display";
-import { ChevronDown } from "lucide-react-native";
+import { Check, ChevronDown } from "lucide-react-native";
 import Checkbox from "../system/Checkbox";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
 import * as ImagePicker from "expo-image-picker";
 import TimeZoneSelect from "./TimeZoneSelect";
+import CityAutosuggest from "./CityAutosuggest";
 import type { UserDto } from "@alliance/shared/client";
 import type {
   AnyField,
@@ -302,7 +303,17 @@ export function RenderField({
                       ? "border-red-500"
                       : "border-zinc-300"
                   }`}
-                  onPress={disabled ? undefined : () => onChange?.(optionValue)}
+                  onPress={
+                    disabled
+                      ? undefined
+                      : () => {
+                          if (checked) {
+                            onChange?.("");
+                          } else {
+                            onChange?.(optionValue);
+                          }
+                        }
+                  }
                   disabled={disabled}
                 >
                   <Text
@@ -316,15 +327,6 @@ export function RenderField({
               );
             })}
           </View>
-          {!field.required && normalizedValue !== undefined && onChange && (
-            <TouchableOpacity
-              onPress={() => onChange("")}
-              disabled={disabled}
-              className="mt-2 self-end"
-            >
-              <Text className="text-xs text-zinc-600">Clear selection</Text>
-            </TouchableOpacity>
-          )}
           {renderValidationMessage(errorMessage)}
         </View>
       );
@@ -366,14 +368,14 @@ export function RenderField({
                   <View
                     className={`w-5 h-5 rounded-full border items-center justify-center mr-3 ${
                       selected
-                        ? "border-green-600"
+                        ? "border-green"
                         : hasError
                         ? "border-red-500"
                         : "border-zinc-400"
                     }`}
                   >
                     {selected && (
-                      <View className="w-2.5 h-2.5 rounded-full bg-green-600" />
+                      <View className="w-2.5 h-2.5 rounded-full bg-green" />
                     )}
                   </View>
                   <Text className={hasError ? "text-red-600" : "text-zinc-700"}>
@@ -417,15 +419,20 @@ export function RenderField({
             animationType="fade"
             onRequestClose={() => setSelectOpen(false)}
           >
-            <View className="flex-1 bg-black/40 justify-end">
-              <View className="bg-white rounded-t-2xl max-h-[60%] p-4">
-                <View className="flex-row justify-between items-center mb-3">
-                  <Text className="text-lg font-semibold text-zinc-900">
+            <TouchableOpacity
+              activeOpacity={1}
+              className="flex-1 bg-black/40 justify-end"
+              onPress={() => setSelectOpen(false)}
+            >
+              <TouchableOpacity
+                activeOpacity={1}
+                className="bg-white rounded-t-2xl max-h-[60%] p-4"
+                onPress={(e) => e.stopPropagation()}
+              >
+                <View className="flex-row justify-between items-center mb-2">
+                  <Text className="text-base font-semibold text-zinc-900">
                     Select
                   </Text>
-                  <TouchableOpacity onPress={() => setSelectOpen(false)}>
-                    <Text className="text-blue-600 font-medium">Close</Text>
-                  </TouchableOpacity>
                 </View>
                 <ScrollView>
                   {options.map((option, optIndex) => (
@@ -441,12 +448,12 @@ export function RenderField({
                       <View
                         className={`w-5 h-5 rounded-full border mr-3 items-center justify-center ${
                           value === option.value
-                            ? "border-green-600"
+                            ? "border-green"
                             : "border-zinc-300"
                         }`}
                       >
                         {value === option.value && (
-                          <View className="w-2.5 h-2.5 rounded-full bg-green-600" />
+                          <View className="w-2.5 h-2.5 rounded-full bg-green" />
                         )}
                       </View>
                       <Text className="text-base text-zinc-800">
@@ -455,8 +462,8 @@ export function RenderField({
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
-              </View>
-            </View>
+              </TouchableOpacity>
+            </TouchableOpacity>
           </Modal>
           {renderValidationMessage(errorMessage)}
         </View>
@@ -502,14 +509,14 @@ export function RenderField({
                   <View
                     className={`w-5 h-5 rounded border mr-3 items-center justify-center ${
                       checked
-                        ? "border-green-600 bg-green-600"
+                        ? "border-green bg-green"
                         : hasError
                         ? "border-red-500"
                         : "border-zinc-400"
                     } ${disabledOption ? "opacity-60" : ""}`}
                   >
                     {checked && (
-                      <View className="w-2.5 h-2.5 bg-white rounded" />
+                      <Check size={14} color="#fff" strokeWidth={3} />
                     )}
                   </View>
                   <Text className={hasError ? "text-red-600" : "text-zinc-700"}>
@@ -581,13 +588,14 @@ export function RenderField({
       return (
         <View className="mb-5">
           <RenderLabel field={field as CityField} error={errorMessage} />
-          <TextInput
-            className={inputBase}
+          <CityAutosuggest
             value={displayValue}
-            onChangeText={(text) => onChange?.(text)}
             placeholder={(field as CityField).placeholder || "City"}
-            placeholderTextColor="#9ca3af"
-            editable={!disabled}
+            minLength={(field as CityField).minLength}
+            debounceMs={(field as CityField).debounceMs}
+            disabled={disabled}
+            allowCustomValue
+            onSelect={(city) => onChange?.(city)}
           />
           {renderValidationMessage(errorMessage)}
         </View>
@@ -637,17 +645,17 @@ export function RenderField({
             />
           )}
           <View className="flex-row items-center gap-3">
-            <Button
+            <TouchableOpacity
               onPress={pickImage}
               disabled={disabled || uploading}
-              color={ButtonColor.White}
-              size={ButtonSize.Medium}
-              className="flex-1 justify-start"
-              title={currentPreview ? "Replace photo" : "Choose photo"}
-            />
-            {uploading && (
-              <Text className="text-sm text-blue-600">Uploading...</Text>
-            )}
+              className="flex-1 justify-start border border-zinc-300 rounded-lg p-3"
+            >
+              {uploading ? (
+                <Text className="text-sm text-blue-600">Uploading...</Text>
+              ) : (
+                <Text className="text-base">Choose photo</Text>
+              )}
+            </TouchableOpacity>
           </View>
           {pickerError || uploadError ? (
             <Text className="text-xs text-red-500 mt-2">
@@ -768,8 +776,16 @@ export function TimeInputField({
           animationType="fade"
           onRequestClose={() => setShowDropdown(false)}
         >
-          <View className="flex-1 bg-black/30 justify-end">
-            <View className="bg-white rounded-t-2xl max-h-[60%] p-4">
+          <TouchableOpacity
+            activeOpacity={1}
+            className="flex-1 bg-black/30 justify-end"
+            onPress={() => setShowDropdown(false)}
+          >
+            <TouchableOpacity
+              activeOpacity={1}
+              className="bg-white rounded-t-2xl max-h-[60%] p-4"
+              onPress={(e) => e.stopPropagation()}
+            >
               <View className="flex-row justify-between items-center mb-3">
                 <Text className="text-lg font-semibold text-zinc-900">
                   Pick a time
@@ -803,8 +819,8 @@ export function TimeInputField({
                   </TouchableOpacity>
                 ))}
               </ScrollView>
-            </View>
-          </View>
+            </TouchableOpacity>
+          </TouchableOpacity>
         </Modal>
       </View>
 

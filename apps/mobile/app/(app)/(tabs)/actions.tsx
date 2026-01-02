@@ -61,7 +61,7 @@ export default function ActionsScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white">
-      <View className="px-4 py-6 gap-y-4">
+      <View className="px-4 py-10 gap-y-4">
         {/* Filter dropdown row */}
         <View className="flex-row items-center gap-x-3">
           <Text className="text-sm text-black">Filter by:</Text>

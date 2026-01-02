@@ -630,7 +630,7 @@ const FormRenderer = ({
               onPress={isLastPage ? handleSubmit : handleNextPage}
               color={ButtonColor.Black}
               size={ButtonSize.Medium}
-              className="flex-2"
+              className="flex-2 py-3!"
               disabled={submitting}
             >
               {submitting ? (

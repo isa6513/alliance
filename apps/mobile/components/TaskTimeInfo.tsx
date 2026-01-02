@@ -18,15 +18,8 @@ const TaskTimeInfo = ({
   return (
     <View>
       {!!action.timeEstimate && action.status !== "gathering_commitments" ? (
-        <View className="flex-row items-center gap-x-1">
-          <View className="relative w-4 h-4">
-            <View className="absolute w-4 h-4 bg-green rounded-full top-0 left-0 right-0 bottom-0 m-auto" />
-            <ClockIcon
-              size={19}
-              color="white"
-              className="absolute top-0 -left-px right-0 bottom-0 m-auto"
-            />
-          </View>
+        <View className="flex-row items-center gap-x-2">
+          <ClockIcon size={19} color="rgb(98, 161, 36)" />
           <Text className="text-green text-base">
             {action.timeEstimate} minute{action.timeEstimate === 1 ? "" : "s"}
           </Text>

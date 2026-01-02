@@ -1,6 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import type { CitySearchDto } from "@alliance/shared/client";
-import { geoSearchCity } from "@alliance/shared/client";
+import {
+  formatCityDisplay,
+  useCityAutosuggest,
+} from "@alliance/shared/forms/cityAutosuggest";
 
 export interface CityAutosuggestProps {
   value?: string;
@@ -17,7 +20,7 @@ export interface CityAutosuggestProps {
 const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
   value = "",
   onSelect,
-  placeholder = "Search a city …",
+  placeholder = "Search for a city …",
   minLength = 1,
   debounceMs = 100,
   className = "",
@@ -25,67 +28,24 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
   disabled = false,
   allowCustomValue = true,
 }) => {
-  const [query, setQuery] = useState(value);
-  const [results, setResults] = useState<CitySearchDto[]>([]);
-  const [open, setOpen] = useState(false);
-  const [highlighted, setHighlighted] = useState(-1);
-  const [didSelect, setDidSelect] = useState(false);
-  const ctrl = useRef<AbortController | null>(null);
-  const [latitude, setLatitude] = useState<number | undefined>(undefined);
-  const [longitude, setLongitude] = useState<number | undefined>(undefined);
-  const [geoFetched, setGeoFetched] = useState(false);
-
-  useEffect(() => {
-    setQuery(value);
-  }, [value]);
-
-  const fetchGeolocation = useCallback(async () => {
-    if (geoFetched) return;
-    try {
-      const res = await fetch("https://ipapi.co/json/");
-      const data = await res.json();
-      if (data.latitude && data.longitude) {
-        setLatitude(data.latitude);
-        setLongitude(data.longitude);
-      }
-    } catch (err) {
-      console.error("Failed to fetch geolocation:", err);
-    }
-    setGeoFetched(true);
-  }, [geoFetched]);
-
-  const fetchCities = useCallback(
-    async (name: string) => {
-      if (name.length < minLength) {
-        setResults([]);
-        return;
-      }
-      ctrl.current?.abort();
-      ctrl.current = new AbortController();
-      try {
-        const res = await geoSearchCity({
-          query: { query: name, latitude, longitude },
-        });
-        if (!res.data) {
-          console.log(res.error);
-          throw new Error("Geo search failed");
-        }
-        const data: CitySearchDto[] = res.data;
-        setResults(data);
-        setOpen(true);
-        setHighlighted(-1);
-      } catch (err) {
-        if ((err as Error)?.name !== "AbortError") console.error(err);
-      }
-    },
-    [minLength, latitude, longitude]
-  );
-
-  useEffect(() => {
-    if (didSelect) return;
-    const id = window.setTimeout(() => fetchCities(query), debounceMs);
-    return () => window.clearTimeout(id);
-  }, [query, fetchCities, debounceMs, didSelect]);
+  const {
+    query,
+    setQuery,
+    results,
+    open,
+    setOpen,
+    highlighted,
+    setHighlighted,
+    selectCity,
+    commitCustomValue,
+    fetchGeolocation,
+  } = useCityAutosuggest({
+    value,
+    minLength,
+    debounceMs,
+    allowCustomValue,
+    onSelect,
+  });
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -96,42 +56,19 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
     return () => document.removeEventListener("mousedown", listener);
   }, []);
 
-  const commitCustomValue = useCallback(() => {
-    if (!allowCustomValue || didSelect) return;
-    const trimmed = query.trim();
-    onSelect(trimmed);
-    setDidSelect(true);
-    setResults([]);
-    setOpen(false);
-    setHighlighted(-1);
-    setQuery(trimmed);
-  }, [allowCustomValue, didSelect, onSelect, query]);
-
-  const select = useCallback(
-    (city: CitySearchDto) => {
-      onSelect(city);
-      setDidSelect(true);
-      setQuery(`${city.name}, ${city.countryName}`);
-      setResults([]);
-      setOpen(false);
-    },
-    [onSelect]
-  );
-
   const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> =
     useCallback(
       (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
           if (open && results[highlighted]) {
-            select(results[highlighted]);
+            selectCity(results[highlighted]);
           } else {
             commitCustomValue();
           }
           return;
         }
         if (!open) return;
-        setDidSelect(false);
         if (e.key === "ArrowDown") {
           e.preventDefault();
           setHighlighted((i) => Math.min(i + 1, results.length - 1));
@@ -142,7 +79,7 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
           setOpen(false);
         }
       },
-      [open, results, highlighted, select, commitCustomValue]
+      [open, results, highlighted, selectCity, commitCustomValue, setOpen]
     );
 
   return (
@@ -153,7 +90,6 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
         placeholder={placeholder}
         onChange={(e) => {
           setQuery(e.target.value);
-          setDidSelect(false);
         }}
         onFocus={() => {
           fetchGeolocation();
@@ -172,16 +108,12 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
           {results.map((city: CitySearchDto, idx: number) => (
             <div
               key={`${city.name}-${city.admin1}-${city.countryCode}`}
-              onMouseDown={() => select(city)}
+              onMouseDown={() => selectCity(city)}
               className={`cursor-pointer px-3 py-2 gap-2 flex flex-row ${
                 idx === highlighted ? "bg-gray-200 " : "hover:bg-gray-100"
               }`}
             >
-              <p>{city.name}</p>
-              <p className="text-gray-500">
-                {city.admin1 ? `${city.admin1}, ` : ""}
-                {city.countryName}
-              </p>
+              <p>{formatCityDisplay(city)}</p>
             </div>
           ))}
         </ul>
