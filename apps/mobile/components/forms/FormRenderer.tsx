@@ -616,12 +616,11 @@ const FormRenderer = ({
       {!readOnly && (
         <View className="border-t border-zinc-200 p-4 bg-white">
           <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-sm text-zinc-500">
-              Page {currentPageIndex + 1} of {pageCount || 1}
-            </Text>
-            {publicAction && (
-              <Text className="text-xs text-zinc-500">Public action</Text>
-            )}
+            {pageCount > 1 ? (
+              <Text className="text-sm text-zinc-500">
+                Page {currentPageIndex + 1} of {pageCount}
+              </Text>
+            ) : null}
           </View>
           <View className="flex-row gap-3">
             {!isFirstPage && (
@@ -645,21 +644,18 @@ const FormRenderer = ({
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
                 <Text className="text-white font-medium">
-                  {isLastPage ? "Submit" : "Next"}
+                  {isLastPage ? "Complete" : "Next"}
                 </Text>
               )}
             </Button>
-          </View>
-          {onAbandonAction && (
-            <TouchableOpacity
+            <Button
               onPress={handleAbandon}
-              className="mt-3 items-center"
-            >
-              <Text className="text-sm text-zinc-500 underline">
-                Save and finish later
-              </Text>
-            </TouchableOpacity>
-          )}
+              className="px-3! items-center"
+              color={ButtonColor.Outline}
+              size={ButtonSize.Medium}
+              title="..."
+            ></Button>
+          </View>
         </View>
       )}
     </View>

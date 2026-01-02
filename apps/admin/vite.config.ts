@@ -37,7 +37,7 @@ export default defineConfig({
     },
   },
   resolve: {
-    preserveSymlinks: true,
+    preserveSymlinks: false,
     dedupe: ["react", "react-dom"],
     alias: [
       {

@@ -48,6 +48,8 @@ export default function Checkbox({
       disabled={disabled}
       onPress={() => onChange?.(!checked)}
       className={`flex-row items-start ${className || ""}`}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked }}
     >
       <View
         className={`w-5 h-5 rounded border items-center justify-center mr-2 ${borderClass} ${
@@ -60,7 +62,9 @@ export default function Checkbox({
         {label ? (
           <View className="flex-row flex-wrap items-center">
             <Markdown style={markdownStyles}>{label}</Markdown>
-            {required && <Text className="text-red-500 ml-1">*</Text>}
+            {required && (
+              <Text className="text-red-500 ml-px self-start">*</Text>
+            )}
           </View>
         ) : null}
       </View>
