@@ -30,6 +30,14 @@ export default function RootLayout() {
     return SecureStorage;
   }, []);
 
+  if (Platform.OS === "web") {
+    return (
+      <AuthProvider tokenStore={tokenStore}>
+        <Slot />
+      </AuthProvider>
+    );
+  }
+
   return (
     <PostHogProvider apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt">
       <AuthProvider tokenStore={tokenStore}>

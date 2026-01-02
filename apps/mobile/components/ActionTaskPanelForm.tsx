@@ -97,9 +97,10 @@ const ActionTaskPanelForm = ({
     : null;
 
   const { distinctId, sessionReplayUrl } = useMemo(() => {
+    if (!posthog) return { distinctId: undefined, sessionReplayUrl: undefined };
     return {
       distinctId: posthog.getDistinctId(),
-      sessionReplayUrl: posthog.getSessionId(), //TODO
+      sessionReplayUrl: undefined, //TODO mobile posthog doesnt have a replay url
     };
   }, [posthog]);
 

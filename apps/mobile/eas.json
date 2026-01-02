@@ -5,9 +5,7 @@
   },
   "build": {
     "base": {
-      "node": "20.19.1",
-      "yarn": "1.22.22",
-      "corepack": true
+      "node": "20.19.1"
     },
     "development": {
       "extends": "base",
