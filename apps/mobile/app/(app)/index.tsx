@@ -1,13 +1,14 @@
 import { View, ScrollView, ActivityIndicator } from "react-native";
 import { useCallback, useEffect, useState } from "react";
 import { ActionDto, actionsFindAllLoggedIn } from "@alliance/shared/client";
-import { colors, Text } from "../../../components/system";
+import { colors, Text } from "../../components/system";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
-import LargeActionCard from "../../../components/LargeActionCard";
+import LargeActionCard from "../../components/LargeActionCard";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
 import { Check } from "lucide-react-native";
+import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
 
 export default function HomeScreen() {
   const [actions, setActions] = useState<ActionDto[]>([]);
@@ -52,7 +53,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white">
-      <View className="mt-24">
+      <View className="mt-4">
         {loading ? (
           <ActivityIndicator
             size="large"
@@ -76,7 +77,7 @@ export default function HomeScreen() {
               <Check size={32} color="#fff" strokeWidth={3} />
             </View>
             <Text className="text-zinc-500 text-lg text-center">
-              No tasks to do right now
+              {noTasksToDoRightNow}
             </Text>
           </View>
         )}

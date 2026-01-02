@@ -314,7 +314,7 @@ export function RenderField({
               return (
                 <label
                   key={optionValue}
-                  className={`flex flex-col items-center text-xs font-medium  flex-1 w-[${
+                  className={`flex flex-col items-center text-sm font-medium  flex-1 w-[${
                     100 / values.length
                   }%] ${
                     disabled

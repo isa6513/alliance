@@ -15,6 +15,10 @@ import useActivities, {
 } from "@alliance/shared/lib/useActivities";
 import { useMediaQuery } from "../../lib/useMediaQuery";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
+import {
+  noTasksContractSuspended,
+  noTasksToDoRightNow,
+} from "@alliance/shared/lib/copy";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -108,14 +112,13 @@ const HomePage = () => {
           <div className="mt-4 px-2 py-2 mx-auto flex flex-col items-center gap-y-4 h-full justify-center">
             {user && !user.hasActiveContract ? (
               <p className="text-center text-zinc-500">
-                You will not be given new tasks while your contract is
-                suspended.
+                {noTasksContractSuspended}
               </p>
             ) : (
               <>
                 <CheckIcon size="large" />
                 <p className="text-center text-zinc-500 text-lg lg:text-xl">
-                  No tasks to do right now
+                  {noTasksToDoRightNow}
                 </p>
               </>
             )}

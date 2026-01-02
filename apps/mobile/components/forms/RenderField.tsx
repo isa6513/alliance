@@ -52,7 +52,6 @@ const MAX_RANGE_OPTION_COUNT = 50;
 const labelMarkdownStyles = {
   body: {
     fontSize: 15,
-    color: "#3f3f46",
     lineHeight: 20,
   },
   strong: {
@@ -101,12 +100,21 @@ export function RenderLabel({
 }) {
   if (field.label === null) return null;
   return (
-    <View className="flex-row items-center mb-1">
-      <Markdown style={labelMarkdownStyles}>{field.label}</Markdown>
+    <Text className="block mb-1">
+      <Markdown
+        style={labelMarkdownStyles}
+        rules={{
+          paragraph: (node, children) => <>{children}</>,
+          body: (node, children) => <>{children}</>,
+        }}
+        mergeStyle
+      >
+        {field.label}
+      </Markdown>
       {field.required && (
-        <Text className="text-red-500 ml-1 font-medium">*</Text>
+        <Text className="text-red-500 ml-px font-medium inline">*</Text>
       )}
-    </View>
+    </Text>
   );
 }
 

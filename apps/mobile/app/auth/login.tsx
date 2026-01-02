@@ -36,7 +36,6 @@ const LoginScreen = () => {
     setIsSubmitting(true);
     try {
       await login(email, password);
-      // If login is successful, navigate to home
       router.replace("/");
     } catch (error) {
       const errorMessage =
@@ -60,8 +59,8 @@ const LoginScreen = () => {
         }}
       />
       <ScrollView contentContainerStyle={authStyles.scrollContent}>
-        <View style={authStyles.formContainer}>
-          <View style={authStyles.inputContainer}>
+        <View className="px-3 flex flex-col space-y-4">
+          <View>
             <Text style={authStyles.label}>Email</Text>
             <Input
               placeholder="your@email.com"
@@ -74,7 +73,7 @@ const LoginScreen = () => {
             />
           </View>
 
-          <View style={authStyles.inputContainer}>
+          <View>
             <Text style={authStyles.label}>Password</Text>
             <Input
               placeholder="Your password"
@@ -99,7 +98,7 @@ const LoginScreen = () => {
             )}
           </Button>
 
-          <View style={authStyles.linkContainer}>
+          <View className="flex-row justify-center gap-x-2">
             <Text style={authStyles.linkText}>Don&apos;t have an account?</Text>
             <Link href="/auth/signup" asChild>
               <TouchableOpacity>

@@ -7,7 +7,7 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { useAuth } from "../../../lib/AuthContext";
+import { useAuth } from "../../lib/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   faUser,
@@ -19,7 +19,7 @@ import {
   faInfoCircle,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
-import { colors } from "../../../components/system";
+import { colors } from "../../components/system";
 import { router } from "expo-router";
 
 export default function ProfileScreen() {
