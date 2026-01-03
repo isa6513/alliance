@@ -27,7 +27,7 @@ export default function Text({
   ...props
 }: TextProps) {
   const baseClasses = "font-sans";
-  const typeClass = type ? typeClasses[type] : "";
+  const typeClass = type ? typeClasses[type] : "text-base";
   const combinedClasses = `${baseClasses} ${typeClass} ${className || ""}`;
 
   return (

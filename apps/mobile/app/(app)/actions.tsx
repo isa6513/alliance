@@ -107,7 +107,7 @@ export default function ActionsScreen() {
         </View>
 
         {/* Actions list */}
-        <View className="bg-white border border-zinc-200 rounded overflow-hidden">
+        <View className="bg-white rounded overflow-hidden">
           {loading ? (
             <View className="py-5 items-center justify-center">
               <ActivityIndicator size="large" color="#0D1B2A" />
@@ -120,10 +120,7 @@ export default function ActionsScreen() {
             </Text>
           ) : (
             filteredActions.map((action, index) => (
-              <View
-                key={action.id}
-                className={index > 0 ? "border-t border-zinc-200" : ""}
-              >
+              <View key={action.id} className="border-t border-zinc-200">
                 <ActionItemCard
                   action={action}
                   onPress={() => navigateToAction(action.id)}

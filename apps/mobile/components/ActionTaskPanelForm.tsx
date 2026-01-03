@@ -13,6 +13,7 @@ import { computeFormStorageKey } from "@alliance/shared/formrenderer";
 import { useAuth } from "../lib/AuthContext";
 import { usePostHog } from "posthog-react-native";
 import SuccessOverlay from "./SuccessOverlay";
+import { Text } from "./system";
 
 interface ActionTaskPanelFormProps {
   taskFormId: number;
@@ -37,7 +38,6 @@ const ActionTaskPanelForm = ({
 }: ActionTaskPanelFormProps) => {
   const [form, setForm] = useState<FormDto | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
   const { user } = useAuth();
 
@@ -128,6 +128,7 @@ const ActionTaskPanelForm = ({
         onAbandonAction={onAbandonAction}
         actionId={actionId}
       />
+      {error && <Text className="text-red-500">{error}</Text>}
       <SuccessOverlay
         visible={showSuccess}
         onComplete={handleSuccessComplete}

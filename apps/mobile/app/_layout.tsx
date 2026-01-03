@@ -9,6 +9,7 @@ import { getApiUrl } from "../lib/config";
 import { useFonts } from "expo-font";
 import "../global.css";
 import { PostHogProvider } from "posthog-react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function RootLayout() {
   useFonts({
@@ -39,10 +40,12 @@ export default function RootLayout() {
   }
 
   return (
-    <PostHogProvider apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt">
-      <AuthProvider tokenStore={tokenStore}>
-        <Slot />
-      </AuthProvider>
-    </PostHogProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PostHogProvider apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt">
+        <AuthProvider tokenStore={tokenStore}>
+          <Slot />
+        </AuthProvider>
+      </PostHogProvider>
+    </GestureHandlerRootView>
   );
 }

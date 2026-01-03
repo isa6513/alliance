@@ -183,43 +183,8 @@ export default function ActionDetailScreen() {
             <Markdown
               style={{
                 body: {
-                  fontFamily: "SourceSans3",
-                  fontSize: 16,
-                  lineHeight: 24,
-                  color: "black",
-                },
-                paragraph: {
-                  marginBottom: 12,
-                },
-                heading1: {
-                  fontSize: 24,
-                  fontWeight: "600",
-                  marginTop: 16,
-                  marginBottom: 8,
-                },
-                heading2: {
-                  fontSize: 20,
-                  fontWeight: "600",
-                  marginTop: 14,
-                  marginBottom: 6,
-                },
-                heading3: {
-                  fontSize: 18,
-                  fontWeight: "600",
-                  marginTop: 12,
-                  marginBottom: 4,
-                },
-                link: {
-                  color: "#318dde",
-                },
-                bullet_list: {
-                  marginBottom: 12,
-                },
-                ordered_list: {
-                  marginBottom: 12,
-                },
-                list_item: {
-                  marginBottom: 4,
+                  fontSize: 15,
+                  lineHeight: 20,
                 },
               }}
             >
