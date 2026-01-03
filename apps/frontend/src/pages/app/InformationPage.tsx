@@ -1,26 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import { href } from "react-router";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import ResourceButton from "../../components/ResourceButton";
-import { actionsAllUpdates, ActionUpdateDto } from "@alliance/shared/client";
 import ActionUpdateCard from "@alliance/sharedweb/ui/ActionUpdateCard";
+import { useActionUpdates } from "@alliance/shared/lib/informationPage";
 
 const InformationPage: React.FC = () => {
   useWhiteBackground();
 
-  const [updates, setUpdates] = useState<ActionUpdateDto[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    actionsAllUpdates().then((response) => {
-      if (response.data) {
-        setUpdates(response.data);
-      } else {
-        setError("Failed to load action updates");
-      }
-    });
-  }, []);
+  const { updates, error } = useActionUpdates();
 
   return (
     <CenterLayout>

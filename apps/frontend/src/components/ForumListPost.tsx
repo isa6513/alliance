@@ -2,7 +2,7 @@ import { CommentDto, PostDto } from "@alliance/shared/client";
 import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { Link, href, useNavigate } from "react-router";
-import { formatTime } from "@alliance/sharedweb/lib/utils";
+import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
 import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
 import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";

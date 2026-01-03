@@ -1,14 +1,18 @@
 import { View } from "react-native";
 import { formatDistance } from "date-fns";
-import Markdown from "react-native-markdown-display";
 import { ActionUpdateDto } from "@alliance/shared/client";
 import Text from "./system/Text";
+import EditableContentRenderer from "./EditableContentRenderer";
 
 export interface ActionUpdateCardProps {
   update: ActionUpdateDto;
 }
 
 export default function ActionUpdateCard({ update }: ActionUpdateCardProps) {
+  const hasContent =
+    !!update.content?.body ||
+    (update.content?.attachments?.length ?? 0) > 0;
+
   return (
     <View className="flex flex-col border border-zinc-200 rounded-sm overflow-hidden">
       <View className="p-3 bg-zinc-50 border-b border-zinc-200">
@@ -26,24 +30,9 @@ export default function ActionUpdateCard({ update }: ActionUpdateCardProps) {
           </View>
         </View>
       </View>
-      {!!update.content?.body && (
+      {hasContent && (
         <View className="p-3 bg-white">
-          <Markdown
-            style={{
-              body: {
-                fontFamily: "SourceSans3",
-                fontSize: 14,
-                lineHeight: 20,
-                color: "#333",
-              },
-              paragraph: {
-                marginBottom: 8,
-                marginTop: 0,
-              },
-            }}
-          >
-            {update.content.body}
-          </Markdown>
+          <EditableContentRenderer content={update.content} />
         </View>
       )}
     </View>

@@ -16,7 +16,7 @@ import PostLikeButton from "../../components/PostLikeButton";
 import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
 import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
 import { useAuth } from "../../lib/AuthContext";
-import { formatTime } from "@alliance/sharedweb/lib/utils";
+import { formatTime } from "@alliance/shared/lib/utils";
 import Spinner from "../../components/Spinner";
 import { useCIDFromParams } from "../../lib/utils";
 import { CardStyle } from "@alliance/shared/styles/card";

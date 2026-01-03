@@ -9,7 +9,7 @@ import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { useCallback, useState } from "react";
 import { Link, href, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
-import { formatTime } from "@alliance/sharedweb/lib/utils";
+import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityLikeButton from "./ActivityLikeButton";
 import Comments from "./Comments";
 import EditableContentForm from "@alliance/sharedweb/ui/EditableContentForm";

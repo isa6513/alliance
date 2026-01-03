@@ -3,7 +3,7 @@ import { Link, href, useNavigate } from "react-router";
 import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
-import { formatTime } from "@alliance/sharedweb/lib/utils";
+import { formatTime } from "@alliance/shared/lib/utils";
 
 export interface ForumActivityCommentCardProps {
   comment: UserCommentDto;

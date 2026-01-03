@@ -3,7 +3,7 @@ import {
   formatDeadline,
   TaskTimeInfoPropsShared,
 } from "@alliance/shared/lib/taskTimeInfo";
-import { formatTime } from "@alliance/sharedweb/lib/utils";
+import { formatTime } from "@alliance/shared/lib/utils";
 import ClockIcon from "@alliance/sharedweb/ui/icons/ClockIcon";
 import DeadlineIcon from "@alliance/sharedweb/ui/icons/DeadlineIcon";
 

@@ -27,7 +27,7 @@ import { Link, href, useOutletContext } from "react-router";
 import { AppLayoutOutletContext } from "../applayout";
 import { useAuth } from "../lib/AuthContext";
 import { isFeatureEnabled } from "../lib/config";
-import { useNotifications } from "../lib/useNotifications";
+import { useNotifications } from "@alliance/shared/lib/useNotifications";
 import { useMessagingUnread } from "../pages/app/messages";
 
 export enum NavbarPage {

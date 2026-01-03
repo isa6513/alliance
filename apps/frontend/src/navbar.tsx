@@ -3,7 +3,7 @@ import { Outlet, useNavigation, useOutletContext } from "react-router";
 import { AppLayoutOutletContext } from "./applayout";
 import NavbarVertical from "./components/NavbarVertical";
 import Spinner from "./components/Spinner";
-import { NotificationsProvider } from "./lib/useNotifications";
+import { NotificationsProvider } from "@alliance/shared/lib/useNotifications";
 import {
   canJoinAction,
   shouldCompleteAction,

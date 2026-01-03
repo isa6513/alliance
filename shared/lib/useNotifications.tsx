@@ -13,7 +13,6 @@ import {
   notifsSetReadAll,
 } from "@alliance/shared/client";
 import { useNavigate } from "react-router";
-import { useAuth } from "./AuthContext";
 import posthog from "posthog-js";
 
 export function getWebAppLocation(webAppLocation: string) {
@@ -41,12 +40,9 @@ export const NotificationsProvider = ({
   const [notifications, setNotifications] = useState<NotificationDto[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const refreshNotifications = useCallback(async () => {
-    if (!isAuthenticated) return;
-
     const { data } = await notifsFindAll();
     if (!data) return;
 
@@ -60,7 +56,7 @@ export const NotificationsProvider = ({
 
     setNotifications(sorted);
     setUnreadCount(sorted.filter((n) => !n.readAt).length);
-  }, [isAuthenticated]);
+  }, []);
 
   useEffect(() => {
     refreshNotifications();

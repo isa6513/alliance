@@ -1,6 +1,6 @@
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
-import { useNotifications } from "../../lib/useNotifications";
-import { formatTime } from "@alliance/sharedweb/lib/utils";
+import { useNotifications } from "@alliance/shared/lib/useNotifications";
+import { formatTime } from "@alliance/shared/lib/utils";
 import List from "@alliance/sharedweb/ui/List";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
