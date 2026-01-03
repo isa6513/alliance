@@ -31,10 +31,8 @@ const ProgressListPage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex-1 container mx-auto pt-16 md:pt-28 pb-56 flex flex-col px-5">
-        <div className="mx-auto w-full max-w-3xl flex flex-col gap-4 md:gap-16">
-          <h2 className="text-center font-serif font-semibold text-3xl md:text-5xl">
-            Progress
-          </h2>
+        <div className="mx-auto w-full max-w-3xl flex flex-col gap-4 md:gap-12">
+          <h2 className="font-semibold text-3xl md:text-5xl">Progress</h2>
           <List className="w-full">
             {posts.map((post) => (
               <Link

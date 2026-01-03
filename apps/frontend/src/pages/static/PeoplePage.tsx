@@ -55,9 +55,7 @@ const PeoplePage: React.FC = () => {
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex-1 container mx-auto pt-16 md:pt-28 pb-56 flex flex-col px-5">
         <div className="mx-auto w-full max-w-3xl flex flex-col text-base md:text-lg gap-y-8 md:gap-y-12">
-          <h2 className="font-serif font-semibold text-3xl md:text-5xl text-center">
-            People
-          </h2>
+          <h2 className="font-semibold text-3xl md:text-5xl">People</h2>
           <div>
             <h2 className="!font-semibold !text-xl md:!text-2xl mb-4">
               Members

@@ -5,7 +5,7 @@ enum NavbarPage {
   People = "People",
   Guide = "Guide",
   Progress = "Progress",
-  LogIn = "Log In",
+  LogIn = "Log in",
 }
 
 const links: NavbarPage[] = [
@@ -57,13 +57,25 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
       </h1>
       <div className="flex flex-row items-center gap-x-5 sm:gap-x-10 text-base sm:text-lg">
         {links.map((link) => (
-          <Link
-            to={destinations[link]}
-            key={link}
-            className="hover:underline whitespace-nowrap"
-          >
-            {link}
-          </Link>
+          <>
+            {link == NavbarPage.LogIn ? (
+              <Link
+                to={destinations[link]}
+                key={link}
+                className="border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 py-1 md:py-1.5 px-3 md:px-5 rounded-md whitespace-nowrap"
+              >
+                {link}
+              </Link>
+            ) : (
+              <Link
+                to={destinations[link]}
+                key={link}
+                className="hover:underline whitespace-nowrap"
+              >
+                {link}
+              </Link>
+            )}
+          </>
         ))}
       </div>
     </div>

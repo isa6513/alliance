@@ -15,7 +15,7 @@ const GuidePage: React.FC = () => {
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex flex-col md:flex-row mx-2 sm:mx-4 md:mx-12 lg:mr-40 gap-8 lg:gap-18 pt-8 md:pt-32 pb-56 justify-center">
         <aside className="min-w-80">
-          <div className="px-3 flex flex-col md:sticky top-12 md:pr-8 lg:pr-18 md:border-r border-zinc-200">
+          <div className="md:px-3 flex flex-col md:sticky top-12 md:pr-8 lg:pr-18 md:border-r border-zinc-200">
             <h2 className="!font-semibold !text-lg md:!text-xl max-w-2xl mb-4">
               Table of contents
             </h2>
@@ -72,7 +72,7 @@ const GuidePage: React.FC = () => {
         </aside>
         <div className="flex flex-col max-w-[46rem]">
           <div className="mx-auto w-full mb-4 md:mb-6">
-            <h2 className="font-serif font-semibold text-3xl md:text-5xl mb-3 text-black">
+            <h2 className="font-semibold text-3xl md:text-5xl mb-3 text-black">
               Guide to the Alliance
             </h2>
           </div>
@@ -125,7 +125,7 @@ The Alliance is composed of a body of members and a full-time strategic office.
 
               <div className="my-12 flex flex-col gap-y-4">
                 <MemberContract id="contract" className="bg-zinc-50" />
-                <p className="text-center text-zinc-800">
+                <p className="text-center text-zinc-500">
                   Our current membership contract
                 </p>
               </div>

@@ -13,7 +13,7 @@ const PrelaunchLandingPage: React.FC = () => {
             {/* <img src={earth} className="mx-auto mb-12 w-50" /> */}
 
             <div className="mx-auto w-full flex flex-col gap-y-6 text-lg md:text-xl">
-              <p className="font-semibold text-3xl md:text-4xl">
+              <p className="font-medium text-3xl md:text-4xl">
                 The Alliance is a group of individuals coordinating to combat
                 global crises.
               </p>
@@ -27,9 +27,9 @@ const PrelaunchLandingPage: React.FC = () => {
               </p>
 
               <p>
-                Eventually, we aim to give our members, and ultimately a
-                significant proportion of humanity, the ability to make
-                deliberate, large-scale change.
+                We aim to give our members, and ultimately a significant
+                proportion of humanity, the ability to make deliberate,
+                large-scale change.
               </p>
 
               <p>
