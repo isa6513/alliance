@@ -159,6 +159,7 @@ export default function ActionPage() {
               action={action}
               textSize="base"
               textColor="zinc-800"
+              showInfoTooltip
             />
             <ActionActivityList
               actionId={action.id}

@@ -62,7 +62,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
               <Link
                 to={destinations[link]}
                 key={link}
-                className="border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 py-1 md:py-1.5 px-3 md:px-5 rounded-md whitespace-nowrap"
+                className="border border-zinc-200 bg-white hover:bg-zinc-50 py-1 md:py-1.5 px-3 md:px-5 rounded-full whitespace-nowrap"
               >
                 {link}
               </Link>

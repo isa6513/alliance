@@ -13,10 +13,10 @@ const CompletedBar: React.FC<CompletedBarProps> = ({
     <div
       className={`w-full ${height} ${
         dark ? "bg-zinc-200" : "bg-zinc-100"
-      } rounded-[3px] mt-1`}
+      } rounded-full outline outline-zinc-200 mt-0.5`}
     >
       <div
-        className={`${height} bg-green rounded-[3px]`}
+        className={`${height} bg-green outline outline-green rounded-full overflow-hidden`}
         style={{ width: `${percentage}%` }}
       ></div>
     </div>
