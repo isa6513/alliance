@@ -788,6 +788,22 @@ export type MessageDto = {
     replyTo?: MessageReferenceDto;
 };
 
+export type ConversationAdminSummaryDto = {
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+    type: ConversationType;
+    title: string;
+    photo?: string;
+    participants: Array<ParticipantDto>;
+    lastMessage?: MessageDto;
+    community?: CommunityDto;
+    hasUnread: boolean;
+    isMessageRequest: boolean;
+    unreadCount: number;
+    messageCount: number;
+};
+
 export type ConversationDto = {
     id: number;
     createdAt: string;
@@ -3124,6 +3140,19 @@ export type MailgunWebhookHandleResponses = {
     200: unknown;
 };
 
+export type ConversationGetAllConversationsForAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/messaging/conversations/admin';
+};
+
+export type ConversationGetAllConversationsForAdminResponses = {
+    200: Array<ConversationAdminSummaryDto>;
+};
+
+export type ConversationGetAllConversationsForAdminResponse = ConversationGetAllConversationsForAdminResponses[keyof ConversationGetAllConversationsForAdminResponses];
+
 export type ConversationGetMyConversationsData = {
     body?: never;
     path?: never;
@@ -3296,6 +3325,24 @@ export type ConversationLeaveResponses = {
 };
 
 export type ConversationLeaveResponse = ConversationLeaveResponses[keyof ConversationLeaveResponses];
+
+export type MessageGetConversationMessagesForAdminData = {
+    body?: never;
+    path: {
+        conversationId: number;
+    };
+    query?: {
+        before?: string;
+        limit?: number;
+    };
+    url: '/messaging/messages/admin/{conversationId}';
+};
+
+export type MessageGetConversationMessagesForAdminResponses = {
+    200: Array<MessageDto>;
+};
+
+export type MessageGetConversationMessagesForAdminResponse = MessageGetConversationMessagesForAdminResponses[keyof MessageGetConversationMessagesForAdminResponses];
 
 export type MessageSendMessageData = {
     body: CreateMessageDto;

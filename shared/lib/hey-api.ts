@@ -1,4 +1,4 @@
-import { CreateClientConfig } from "./client.gen";
+import { CreateClientConfig } from "../client/client.gen";
 
 export const AuthEvents = {
   onUnauthorized: () => {
@@ -35,7 +35,7 @@ export const createClientConfig: CreateClientConfig = (config) => {
       return res;
     }
 
-    const { authRefreshTokens } = await import("./sdk.gen");
+    const { authRefreshTokens } = await import("../client/sdk.gen");
     const refreshRes = await authRefreshTokens();
 
     if (refreshRes.response.ok) {
