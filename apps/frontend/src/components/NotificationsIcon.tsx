@@ -5,7 +5,7 @@ import { formatDate } from "date-fns";
 import { useCallback, useState } from "react";
 import { Link, href } from "react-router";
 import notifBell from "../assets/notif-bell.svg";
-import { useNotifications } from "../lib/useNotifications";
+import { useNotifications } from "@alliance/shared/lib/useNotifications";
 
 const NotificationsIcon = () => {
   const [isOpen, setIsOpen] = useState(false);
