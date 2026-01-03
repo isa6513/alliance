@@ -14,10 +14,9 @@ interface EditableContentRendererProps {
 
 const markdownStyles = StyleSheet.create({
   body: {
-    fontFamily: "SourceSans3",
     fontSize: 15,
     lineHeight: 20,
-    color: "#333333",
+    color: "#000",
   },
   link: {
     color: "#62a124",
