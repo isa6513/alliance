@@ -5,7 +5,7 @@ import {
 } from "@alliance/shared/client";
 
 export const formatRelationStatus = (
-  status: UserActionRelationStatus,
+  status: UserActionRelationStatus
 ): string => {
   switch (status) {
     case "completed":
@@ -50,20 +50,20 @@ const UserProgressPills = ({
           const className = isCompleted
             ? "bg-green"
             : relation.status === "joined"
-              ? "bg-green/40"
-              : relation.status === "wont_complete"
-                ? "bg-yellow-400"
-                : relation.status === "missed_deadline"
-                  ? "bg-orange-600"
-                  : !action.joinedUserIds.includes(userId)
-                    ? "bg-zinc-200 border border-zinc-300"
-                    : "bg-zinc-100 text-zinc-500 border border-zinc-200";
+            ? "bg-green/40"
+            : relation.status === "wont_complete"
+            ? "bg-yellow-400"
+            : relation.status === "missed_deadline"
+            ? "bg-orange-600"
+            : !action.joinedUserIds.includes(userId)
+            ? "bg-zinc-100 border border-zinc-200"
+            : "bg-white text-zinc-500 border border-green";
           return relation ? (
             <div key={action.id} className="relative group flex-1">
               <div
                 className={`rounded flex items-center justify-center text-xs font-semibold min-w-2 ${className} ${pillHeight}`}
                 aria-label={`${action.name} – ${formatRelationStatus(
-                  relation.status,
+                  relation.status
                 )}`}
               ></div>
               <div className="pointer-events-none absolute bottom-full mb-1 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] font-medium text-zinc-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100">
