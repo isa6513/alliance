@@ -38,7 +38,7 @@ const ProgressListPage: React.FC = () => {
               <Link
                 to={href("/progress/:slug", { slug: post.slug })}
                 key={post.slug}
-                className="flex flex-row justify-between hover:bg-zinc-50 p-3 md:p-6"
+                className="flex flex-row justify-between hover:bg-zinc-50 p-3 md:p-5"
               >
                 {/* <Card
                   style={CardStyle.White}
@@ -46,12 +46,12 @@ const ProgressListPage: React.FC = () => {
                 > */}
                 <div className="">
                   <div className="flex justify-between">
-                    <p className="text-xl md:text-2xl font-medium mb-2">
+                    <p className="text-lg md:text-xl font-medium">
                       {post.frontmatter.title}
                     </p>
                   </div>
 
-                  <p className="text-sm md:text-base text-zinc-500">
+                  <p className="text-base md:text-lg text-zinc-500">
                     {new Date(post.frontmatter.date).toLocaleDateString(
                       "en-US",
                       {
