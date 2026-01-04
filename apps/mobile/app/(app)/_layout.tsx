@@ -37,7 +37,7 @@ export default function AppLayout() {
           <Stack.Screen name="notifications" />
           <Stack.Screen name="profile" />
           <Stack.Screen name="action/[id]" />
-          <Stack.Screen name="forum/forum" />
+          <Stack.Screen name="forum" />
           <Stack.Screen name="user/settings" />
         </Stack>
       </Sidebar>

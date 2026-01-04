@@ -70,7 +70,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
 
   const draftPath = useMemo(() => getDraftPath(draftKey), [draftKey]);
   const shouldRestoreDraft = restoreDraft ?? draftKey !== undefined;
-  const minHeight = expanded ? 120 : 48;
+  const minHeight = expanded ? 120 : 32;
 
   useEffect(() => {
     if (!shouldRestoreDraft || !draftPath) return;

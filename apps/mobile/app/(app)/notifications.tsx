@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   View,
-  Image,
 } from "react-native";
 import { router, RelativePathString } from "expo-router";
 import {
@@ -23,6 +22,7 @@ import {
   colors,
 } from "../../components/system";
 import { formatTime } from "@alliance/shared/lib/utils";
+import ProfileImage from "../../components/ProfileImage";
 
 const normalizeLocation = (location: string | null) => {
   if (!location) return null;
@@ -162,6 +162,8 @@ export default function NotificationsScreen() {
           <View className="rounded border border-zinc-200 overflow-hidden bg-white">
             {notifications.map((notification, index) => {
               const displayUsers = notification.associatedUsers.slice(0, 3);
+              const remainingUsers =
+                notification.associatedUsers.length - displayUsers.length;
 
               return (
                 <TouchableOpacity
@@ -173,28 +175,32 @@ export default function NotificationsScreen() {
                   } ${index === 0 ? "" : "border-t border-zinc-200"}`}
                 >
                   <View className="flex-1">
-                    <Text
-                      className="text-base text-zinc-900 flex-1"
-                      numberOfLines={2}
-                    >
-                      {displayUsers.length > 0 && (
-                        <>
-                          {displayUsers.map((user) => (
-                            <Image
-                              key={user.id}
-                              source={{
-                                uri: user.profilePicture ?? undefined,
-                              }}
-                              className="w-5 h-5 rounded-sm mr-1 top-1"
-                            />
-                          ))}
-                        </>
+                    <View className="flex-row items-center flex-wrap gap-x-1">
+                      {displayUsers.map((user) => (
+                        <ProfileImage
+                          key={user.id}
+                          pfp={user.profilePicture}
+                          size="small"
+                          className="mr-1 border border-white"
+                        />
+                      ))}
+                      {remainingUsers > 0 && (
+                        <Text className="text-xs text-zinc-500 mr-1">
+                          +{remainingUsers}
+                        </Text>
                       )}
-                      {notification.category === "action_update" && (
-                        <Text className="font-semibold">Action update: </Text>
-                      )}
-                      {notification.message}
-                    </Text>
+                      <Text
+                        className="text-base text-zinc-900 flex-1"
+                        numberOfLines={2}
+                      >
+                        {notification.category === "action_update" && (
+                          <Text className="font-semibold">
+                            Action update:{" "}
+                          </Text>
+                        )}
+                        {notification.message}
+                      </Text>
+                    </View>
                     <Text className="text-xs text-zinc-500 mt-1">
                       {formatTime(getNotifTime(notification), {
                         addSuffix: true,

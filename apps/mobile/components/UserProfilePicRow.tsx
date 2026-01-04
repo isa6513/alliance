@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Image } from "react-native";
-import { Avatar, AvatarSize, Text } from "./system";
+import { View } from "react-native";
+import { Text } from "./system";
+import ProfileImage from "./ProfileImage";
 
 export const UserProfilePicRow = ({
   users,
@@ -21,18 +22,11 @@ export const UserProfilePicRow = ({
     <View className="flex-row items-center">
       {displayUsers.map((user, index) => (
         <View key={user.id} className={index > 0 ? "-ml-1" : ""}>
-          {user.profilePicture ? (
-            <Image
-              source={{ uri: user.profilePicture }}
-              className="w-5 h-5 rounded-full border border-white"
-            />
-          ) : (
-            <Avatar
-              size={AvatarSize.ExtraSmall}
-              initials={user.name.split(" ")[0][0]}
-              className="border border-white"
-            />
-          )}
+          <ProfileImage
+            pfp={user.profilePicture ?? null}
+            size="small"
+            className="border border-white"
+          />
         </View>
       ))}
       {remaining > 0 && (

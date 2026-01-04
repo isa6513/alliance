@@ -18,7 +18,7 @@ const tabs = [
   },
   {
     name: "Forum",
-    href: "/forum/forum" as const,
+    href: "/forum" as const,
     icon: MessageSquare,
     matchPaths: ["/forum"],
   },

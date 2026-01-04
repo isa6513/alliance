@@ -21,6 +21,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { colors } from "../../components/system";
 import { router } from "expo-router";
+import ProfileImage from "../../components/ProfileImage";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
@@ -51,11 +52,7 @@ export default function ProfileScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {user.name.substring(0, 1).toUpperCase()}
-            </Text>
-          </View>
+          <ProfileImage pfp={user.profilePicture ?? null} size="huge" />
         </View>
         <Text style={styles.name}>{user.name}</Text>
         <Text style={styles.email}>{user.email}</Text>
@@ -215,19 +212,6 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     marginBottom: 16,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#0D1B2A",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  avatarText: {
-    fontSize: 40,
-    color: "#fff",
-    fontWeight: "bold",
   },
   name: {
     fontSize: 24,
