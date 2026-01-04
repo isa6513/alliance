@@ -4,6 +4,7 @@
   "files": [],
   "references": [
     { "path": "../../shared" },
+    { "path": "../../sharedweb" },
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
   ],
@@ -11,5 +12,5 @@
     "composite": true,
     "baseUrl": "./src",
     "rootDirs": [".", "../.react-router/types"]
-  },
+  }
 }
