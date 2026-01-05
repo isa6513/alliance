@@ -1,5 +1,14 @@
+import { View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { colors } from "../../lib/style/colors";
+
+const sizeMap = {
+  line: 16,
+  mini: 20,
+  small: 24,
+  large: 32,
+  xl: 40,
+};
 
 const CheckIcon = ({
   size = "small",
@@ -15,17 +24,23 @@ const CheckIcon = ({
     large: "w-8 h-8",
     xl: "w-10 h-10",
   };
+  const dimension = sizeMap[size];
+
   return (
-    <Svg
-      viewBox="0 0 88 88"
+    <View
       className={`shrink-0 ${sizeClass[size]} ${
         filled ? "bg-green" : "bg-white"
-      } rounded-full`}
-      fill={filled ? "#fff" : colors.green}
-      aria-label="Done"
+      } rounded-full items-center justify-center`}
     >
-      <Path d="M36.9 62.4001L20 45.4001L25.6 39.8001L36.9 51.1001L62.4 25.6001L68 31.3001L36.9 62.4001Z" />
-    </Svg>
+      <Svg
+        viewBox="0 0 88 88"
+        width={dimension}
+        height={dimension}
+        fill={filled ? "#fff" : colors.green}
+      >
+        <Path d="M36.9 62.4001L20 45.4001L25.6 39.8001L36.9 51.1001L62.4 25.6001L68 31.3001L36.9 62.4001Z" />
+      </Svg>
+    </View>
   );
 };
 

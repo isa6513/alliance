@@ -5,7 +5,6 @@ import FormRenderer from "./forms/FormRenderer";
 import { FormSchema } from "@alliance/shared/forms/formschema";
 import { View } from "react-native";
 import { taskCompleted } from "@alliance/shared/lib/copy";
-import CheckIcon from "./system/CheckIcon";
 import { Check } from "lucide-react-native";
 
 export interface ActionTaskPanelCompletedProps {
