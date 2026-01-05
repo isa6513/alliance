@@ -494,6 +494,7 @@ export type User = {
     onboardingComplete: boolean;
     anonymous: boolean;
     communities: Array<Community>;
+    shareInfoPublicly: boolean;
     isCommunityLeader: boolean;
     invitedCommunities: Array<CommunityInvite>;
     formDataPreference: PublicFormResponseDefault;
@@ -537,6 +538,7 @@ export type UserDto = {
     onboardingComplete: boolean;
     anonymous: boolean;
     communities: Array<Community>;
+    shareInfoPublicly: boolean;
     invitedCommunities: Array<CommunityInvite>;
     formDataPreference: PublicFormResponseDefault;
     cityId?: number;
@@ -611,6 +613,7 @@ export type UpdateProfileDto = {
     isNotSignedUpPartialProfile?: boolean;
     customCityString?: string | null;
     anonymous?: boolean;
+    shareInfoPublicly?: boolean;
     formDataPreference?: PublicFormResponseDefault;
     cityId?: number | null;
 };

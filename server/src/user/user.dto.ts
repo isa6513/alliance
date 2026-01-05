@@ -116,6 +116,7 @@ export class UserDto extends PickType(User, [
   'timeZone',
   'formDataPreference',
   'contractEvents',
+  'shareInfoPublicly',
   'customCityString',
 ]) {
   @ApiPropertyOptional()
@@ -167,6 +168,7 @@ export class UpdateProfileDto extends PartialType(
     'formDataPreference',
     'timeZone',
     'isNotSignedUpPartialProfile',
+    'shareInfoPublicly',
     'customCityString',
   ]),
 ) {

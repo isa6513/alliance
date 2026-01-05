@@ -353,6 +353,11 @@ export class User {
   @RelationId((user: User) => user.leaderOf)
   leaderOfIds: number[];
 
+  @Column({ default: false })
+  @ApiProperty()
+  @Allow()
+  shareInfoPublicly: boolean;
+
   @Expose()
   @ApiProperty()
   get isCommunityLeader(): boolean {

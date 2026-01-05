@@ -305,18 +305,30 @@ const SettingsPage: React.FC = () => {
             </div>
           </div>
 
-          <div>
-            <label className="block font-medium mb-2">Anonymous account</label>
-            <p className="text-zinc-500 text-sm mb-4">
-              With an anonymous account, other members will not be able to see
-              your name.
-            </p>
+          <Card
+            style={CardStyle.White}
+            className="flex flex-row gap-x-4 items-center justify-between"
+          >
+            <div>
+              <label className="block font-medium mb-2">
+                Anonymous account
+              </label>
+              <p className="text-zinc-500 text-sm">
+                With an anonymous account, other members will not be able to see
+                your name.
+              </p>
+            </div>
             <div className="flex flex-row gap-x-2">
               <Button
                 color={
                   editableUser.anonymous ? ButtonColor.Black : ButtonColor.Light
                 }
-                onClick={() => updateEditableUser({ anonymous: true })}
+                onClick={() =>
+                  updateEditableUser({
+                    anonymous: true,
+                    shareInfoPublicly: false,
+                  })
+                }
               >
                 Yes
               </Button>
@@ -331,7 +343,46 @@ const SettingsPage: React.FC = () => {
                 No
               </Button>
             </div>
-          </div>
+          </Card>
+
+          <Card
+            style={CardStyle.White}
+            className="flex flex-row gap-x-4 items-center justify-between"
+          >
+            <div>
+              <label className="block font-medium mb-2">
+                Share information publicly
+              </label>
+              <p className="text-zinc-500 text-sm">
+                Allow your name, photo, and user bio to be listed publicly in a
+                member directory.
+              </p>
+            </div>
+            <div className="flex flex-row gap-x-2">
+              <Button
+                color={
+                  editableUser.shareInfoPublicly
+                    ? ButtonColor.Black
+                    : ButtonColor.Light
+                }
+                onClick={() => updateEditableUser({ shareInfoPublicly: true })}
+                disabled={editableUser.anonymous}
+              >
+                Yes
+              </Button>
+              <Button
+                color={
+                  !editableUser.shareInfoPublicly
+                    ? ButtonColor.Black
+                    : ButtonColor.Light
+                }
+                onClick={() => updateEditableUser({ shareInfoPublicly: false })}
+                disabled={editableUser.anonymous}
+              >
+                No
+              </Button>
+            </div>
+          </Card>
 
           <hr className="border-zinc-300 mt-4" />
 
