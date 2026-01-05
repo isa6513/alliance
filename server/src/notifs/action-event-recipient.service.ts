@@ -28,6 +28,8 @@ export class ActionEventRecipientService {
   constructor(
     @InjectRepository(ActionActivity)
     private readonly actionActivityRepository: Repository<ActionActivity>,
+    @InjectRepository(Action)
+    private readonly actionRepository: Repository<Action>,
     private readonly userService: UserService,
   ) {}
 
@@ -92,7 +94,16 @@ export class ActionEventRecipientService {
     eventId: number,
   ): Promise<User[]> {
     const targetTagIds = new Set(action.participatingTags.map((tag) => tag.id));
-    const event = action.events.find((event) => event.id === eventId);
+    const events =
+      action.events ??
+      (
+        await this.actionRepository.findOneOrFail({
+          where: { id: action.id },
+          relations: { events: true },
+        })
+      ).events;
+    const event = events.find((event) => event.id === eventId);
+
     if (!event) {
       throw new Error(`Event not found: ${eventId}`);
     }
@@ -109,7 +120,7 @@ export class ActionEventRecipientService {
       !this.userService.isUserAwayInRange(user, {
         startDate: event.date,
         endDate: this.getNextEvent({
-          events: action.events,
+          events,
           currentEventId: eventId,
         })?.date,
       });
