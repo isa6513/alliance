@@ -26,7 +26,10 @@ export class MmsService {
     const authToken = process.env.TWILIO_AUTH_TOKEN!;
     this.twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER!;
 
-    if (!accountSid || !authToken || !this.twilioPhoneNumber) {
+    if (
+      (!accountSid || !authToken || !this.twilioPhoneNumber) &&
+      process.env.SEND_DEV_NOTIFS
+    ) {
       this.logger.error(
         'Twilio configuration (Account SID, Auth Token, Phone Number) is missing or invalid.',
       );
