@@ -51,6 +51,19 @@ export default function HomeScreen() {
     limit: 8,
   });
 
+  if (!currentTask) {
+    return (
+      <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
+        <View className="w-12 h-12 rounded-full bg-green items-center justify-center mb-4">
+          <Check size={32} color="#fff" strokeWidth={3} />
+        </View>
+        <Text className="text-zinc-500 text-lg text-center">
+          {noTasksToDoRightNow}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView className="flex-1 bg-white">
       <View className="mt-4">
@@ -62,7 +75,7 @@ export default function HomeScreen() {
           />
         ) : error ? (
           <Text className="text-red-500 text-center py-4">{error}</Text>
-        ) : currentTask ? (
+        ) : (
           <LargeActionCard
             action={currentTask}
             userRelation={currentTask.userRelation as "joined" | "none"}
@@ -71,15 +84,6 @@ export default function HomeScreen() {
             )}
             onUpdateActionState={fetchActions}
           />
-        ) : (
-          <View className="items-center justify-center py-16 px-5">
-            <View className="w-12 h-12 rounded-full bg-green items-center justify-center mb-4">
-              <Check size={32} color="#fff" strokeWidth={3} />
-            </View>
-            <Text className="text-zinc-500 text-lg text-center">
-              {noTasksToDoRightNow}
-            </Text>
-          </View>
         )}
       </View>
     </ScrollView>

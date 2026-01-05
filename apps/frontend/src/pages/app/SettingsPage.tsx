@@ -384,8 +384,6 @@ const SettingsPage: React.FC = () => {
             </div>
           </Card>
 
-          <hr className="border-zinc-300 mt-4" />
-
           <div>
             <h2 className="!font-semibold !text-2xl mb-4">Notifications</h2>
 
