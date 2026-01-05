@@ -1,9 +1,4 @@
-import {
-  ActionDto,
-  actionsFindOne,
-  UserActionRelation,
-} from "@alliance/shared/client";
-import { useCallback, useEffect, useState } from "react";
+import { actionsFindOne, UserActionRelation } from "@alliance/shared/client";
 import { href, Navigate, Outlet, useNavigate, useParams } from "react-router";
 import ActionActivityList from "../../components/ActionActivityList";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
@@ -16,6 +11,8 @@ import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import { useActionHandlers } from "@alliance/shared/lib/actionPage";
+import { useCallback } from "react";
 
 export async function loader({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -43,29 +40,6 @@ export default function ActionPage() {
 
   const { isAuthenticated, user, loading: userLoading } = useAuth();
 
-  const [action, setAction] = useState<ActionDto | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const fetchAction = useCallback(async () => {
-    try {
-      setLoading(true);
-      const actionResponse = await actionsFindOne({
-        path: { id: actionId },
-      });
-      if (actionResponse.data) {
-        setAction(actionResponse.data);
-      } else {
-        setAction(null);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [actionId]);
-
-  useEffect(() => {
-    fetchAction();
-  }, [fetchAction, isAuthenticated]);
-
   useCIDFromParams(actionId);
 
   const { activities, handleLikeActivity, setActivities } = useActivities({
@@ -73,6 +47,19 @@ export default function ActionPage() {
     objectId: actionId,
     limit: 10,
   });
+
+  const reloadTasks = useCallback(() => {
+    navigate(href("/actions/:id", { id: actionId.toString() }));
+  }, [actionId, navigate]);
+
+  const {
+    action,
+    loading,
+    onCompleteAction,
+    onJoinAction,
+    onDeclineAction,
+    onOptOutAction,
+  } = useActionHandlers(actionId, isAuthenticated, reloadTasks);
 
   // TODO: hack because some action pages are public and some are private. we should handle this in a more general way elsehwere (ie applayout.tsx logic)
   if (!action && !loading && !user && !userLoading) {
@@ -112,39 +99,10 @@ export default function ActionPage() {
                 userRelation:
                   (action.userRelation as UserActionRelation | undefined) ??
                   null,
-                onCompleteAction: () => {
-                  setAction((action) => ({
-                    ...action!,
-                    userRelation: "completed",
-                    usersCompleted: action!.usersCompleted + 1,
-                  }));
-
-                  // TODO need better way to update number of remaining tasks
-                  navigate(href("/actions/:id", { id: actionId.toString() }));
-                },
-                onJoinAction: () =>
-                  setAction((action) => ({
-                    ...action!,
-                    userRelation: "joined",
-                  })),
-                onDeclineAction: () => {
-                  setAction((action) => ({
-                    ...action!,
-                    userRelation: "declined",
-                  }));
-
-                  // TODO need better way to update number of remaining tasks
-                  navigate(href("/actions/:id", { id: actionId.toString() }));
-                },
-                onOptOutAction: () => {
-                  setAction((action) => ({
-                    ...action!,
-                    userRelation: "declined",
-                  }));
-
-                  // TODO need better way to update number of remaining tasks
-                  navigate(href("/actions/:id", { id: actionId.toString() }));
-                },
+                onCompleteAction,
+                onJoinAction,
+                onDeclineAction,
+                onOptOutAction,
                 activities,
                 handleLikeActivity,
                 setActivities,

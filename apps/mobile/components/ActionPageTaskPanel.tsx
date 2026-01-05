@@ -37,8 +37,6 @@ const ActionPageTaskPanel = ({
 }: ActionPageTaskPanelProps) => {
   const state = getActionPageTaskPanelState(action, userRelation);
 
-  console.log("state", state);
-
   const panelHandlers = {
     onCompleteAction,
     onJoinAction,

@@ -1,20 +1,9 @@
 import { Check } from "lucide-react-native";
 import { Stack, router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  ScrollView,
-  View,
-} from "react-native";
+import { useCallback } from "react";
+import { ActivityIndicator, Image, ScrollView, View } from "react-native";
 import Markdown from "react-native-markdown-display";
-import {
-  ActionDto,
-  UserActionRelation,
-  actionsFindOne,
-  actionsJoin,
-} from "../../../../../shared/client";
+import { UserActionRelation } from "../../../../../shared/client";
 import {
   Button,
   ButtonColor,
@@ -26,66 +15,24 @@ import {
 import ActionEventsPanel from "../../../components/ActionEventsPanel";
 import TaskTimeInfo from "../../../components/TaskTimeInfo";
 import { getLastAndNextEvent } from "@alliance/shared/lib/largeActionCard";
-import ActionTaskPanel from "../../../components/ActionTaskPanel";
 import ActionPageTaskPanel from "../../../components/ActionPageTaskPanel";
+import { useActionHandlers } from "@alliance/shared/lib/actionPage";
 
 export default function ActionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [action, setAction] = useState<ActionDto | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchActionDetails = useCallback(async () => {
-    if (!id) return;
+  const reloadTasks = useCallback(() => {
+    router.reload();
+  }, []);
 
-    try {
-      setLoading(true);
-
-      const actionResponse = await actionsFindOne({
-        path: { id: parseInt(id) },
-      });
-
-      if (actionResponse.error || !actionResponse.data) {
-        throw new Error("Failed to load action details");
-      }
-
-      setAction(actionResponse.data);
-      setLoading(false);
-    } catch (err) {
-      console.error("Error fetching action details:", err);
-      setError("Failed to load action details. Please try again.");
-      setLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    fetchActionDetails();
-  }, [id, fetchActionDetails]);
-
-  const handleJoinAction = async () => {
-    if (!id) return;
-
-    try {
-      setLoading(true);
-      const response = await actionsJoin({
-        path: { id: parseInt(id) },
-      });
-
-      if (response.error) {
-        throw new Error("Failed to join action");
-      }
-
-      setAction((prev: ActionDto | null) =>
-        prev ? { ...prev, userRelation: "joined" } : null
-      );
-      setLoading(false);
-      Alert.alert("Success", "You've committed to this action!");
-    } catch (err) {
-      console.error("Error joining action:", err);
-      setError("Failed to join this action. Please try again.");
-      setLoading(false);
-    }
-  };
+  const {
+    action,
+    loading,
+    onCompleteAction,
+    onJoinAction,
+    onDeclineAction,
+    onOptOutAction,
+  } = useActionHandlers(parseInt(id), true, reloadTasks);
 
   if (loading) {
     return (
@@ -96,11 +43,11 @@ export default function ActionDetailScreen() {
     );
   }
 
-  if (error || !action) {
+  if (!action) {
     return (
       <View className="flex-1 justify-center items-center p-5 bg-white">
         <Text className="text-red-500 mb-5 text-center">
-          {error || "Action not found"}
+          Could not load action
         </Text>
         <Button
           color={ButtonColor.Black}
@@ -130,7 +77,7 @@ export default function ActionDetailScreen() {
           />
         )}
         <View className="p-5 py-10">
-          <Text className="text-[24px] font-semibold text-zinc-900 mb-4 font-serif">
+          <Text className="text-[24px] font-bold text-zinc-900 mb-4 font-serif-bold">
             {action.name}
           </Text>
           {action.shortDescription && (
@@ -173,10 +120,10 @@ export default function ActionDetailScreen() {
               <ActionPageTaskPanel
                 action={action}
                 userRelation={userRelation ?? null}
-                onCompleteAction={() => {}}
-                onJoinAction={() => {}}
-                onDeclineAction={() => {}}
-                onOptOutAction={() => {}}
+                onCompleteAction={onCompleteAction}
+                onJoinAction={onJoinAction}
+                onDeclineAction={onDeclineAction}
+                onOptOutAction={onOptOutAction}
               />
             </View>
           )}
@@ -193,7 +140,7 @@ export default function ActionDetailScreen() {
               </Card>
             )}
 
-          <View className="mb-6">
+          <View className="mb-6 mt-3">
             <Text className="text-xl font-semibold text-zinc-900">
               Description
             </Text>
@@ -210,15 +157,13 @@ export default function ActionDetailScreen() {
           </View>
         </View>
       </ScrollView>
-
-      {/* Fixed Bottom Button */}
       {(!userRelation || userRelation === "none") &&
         action.status === "gathering_commitments" && (
           <View className="absolute bottom-0 left-0 right-0 p-5 pb-8 bg-white border-t border-zinc-200">
             <Button
               color={ButtonColor.Black}
               size={ButtonSize.Large}
-              onPress={handleJoinAction}
+              onPress={onJoinAction}
               title="Confirm participation"
               className="w-full"
             />

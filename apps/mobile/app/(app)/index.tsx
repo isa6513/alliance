@@ -66,7 +66,10 @@ export default function HomeScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white">
-      <View className="mt-4">
+      <Text className="text-green text-lg font-semibold p-6 mt-2 pb-0">
+        Current task
+      </Text>
+      <View className="">
         {loading ? (
           <ActivityIndicator
             size="large"

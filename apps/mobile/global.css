@@ -6,5 +6,7 @@
   --font-sans: "SourceSans3", system-ui, -apple-system, BlinkMacSystemFont,
     sans-serif;
   --font-serif: "LibreBaskerville", serif;
+  --font-serif-semibold: "LibreBaskerville-SemiBold", serif;
+  --font-serif-bold: "LibreBaskerville-Bold", serif;
   --color-green: rgb(98, 161, 36);
 }

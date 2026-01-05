@@ -1,4 +1,5 @@
 import Svg, { Path } from "react-native-svg";
+import { colors } from "../../lib/style/colors";
 
 const CheckIcon = ({
   size = "small",
@@ -20,7 +21,7 @@ const CheckIcon = ({
       className={`shrink-0 ${sizeClass[size]} ${
         filled ? "bg-green" : "bg-white"
       } rounded-full`}
-      fill={filled ? "#fff" : "var(--color-green)"}
+      fill={filled ? "#fff" : colors.green}
       aria-label="Done"
     >
       <Path d="M36.9 62.4001L20 45.4001L25.6 39.8001L36.9 51.1001L62.4 25.6001L68 31.3001L36.9 62.4001Z" />

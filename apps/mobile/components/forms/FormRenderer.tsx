@@ -656,7 +656,7 @@ const FormRenderer = ({
       </ScrollView>
 
       {!readOnly && (
-        <View className="border-t border-zinc-200 p-4 bg-white">
+        <View className="">
           <View className="flex-row justify-between items-center mb-3">
             {pageCount > 1 ? (
               <Text className="text-sm text-zinc-500">
@@ -679,7 +679,7 @@ const FormRenderer = ({
               onPress={isLastPage ? handleSubmit : handleNextPage}
               color={ButtonColor.Black}
               size={ButtonSize.Medium}
-              className="flex-2 py-4!"
+              className="flex-2 py-4! gap-x-2"
               disabled={submitting}
             >
               {submitting ? (
@@ -687,14 +687,9 @@ const FormRenderer = ({
               ) : (
                 <>
                   {isLastPage ? (
-                    <CircleCheck
-                      size={16}
-                      color="#fff"
-                      className="mr-2"
-                      strokeWidth={2.5}
-                    />
+                    <CircleCheck size={16} color="#fff" strokeWidth={2.5} />
                   ) : null}
-                  <Text className="text-white font-medium">
+                  <Text className="text-white font-medium text-base">
                     {isLastPage ? "Complete" : "Next"}
                   </Text>
                 </>

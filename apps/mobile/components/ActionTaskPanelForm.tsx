@@ -9,7 +9,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import FormRenderer from "./forms/FormRenderer";
 import { FormSchema } from "@alliance/shared/forms/formschema";
 import { ActivityIndicator, View } from "react-native";
-import { computeFormStorageKey } from "@alliance/shared/formrenderer";
 import { useAuth } from "../lib/AuthContext";
 import { usePostHog } from "posthog-react-native";
 import SuccessOverlay from "./SuccessOverlay";
@@ -74,20 +73,10 @@ const ActionTaskPanelForm = ({
               body: data,
             });
         if (response.response.ok) {
-          if (publicAction) {
-            window.location.href = "/actions/completed";
-          }
-          if (typeof window !== "undefined" && form) {
-            const storageKey = computeFormStorageKey({
-              formId: form.id,
-              instanceId: taskFormId,
-            });
-            window.localStorage.removeItem(storageKey);
-          }
-          if (user && !user.hasActiveContract) {
-            //TODO: better handling of user refresh (things used to break if the user signed a contract in another tab then went back to the first one)
-            // refreshUser();
-          }
+          //   if (user && !user.hasActiveContract) {
+          //TODO: better handling of user refresh (things used to break if the user signed a contract in another tab then went back to the first one)
+          // refreshUser();
+          //   }
           // Show success overlay - it will call onCompleteAction after animation
           setShowSuccess(true);
         } else {
@@ -99,9 +88,7 @@ const ActionTaskPanelForm = ({
               $exception_fingerprint: "FormSubmitError",
             },
           });
-          setError(
-            "Failed to submit action. We have been notified of the problem and will take a look. You can also try again later."
-          );
+          setError("Failed to submit action.");
         }
       }
     : null;

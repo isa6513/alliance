@@ -33,7 +33,6 @@ export const authStyles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     color: colors.text.secondary,
-    marginBottom: 8,
   },
   errorText: {
     color: colors.error,

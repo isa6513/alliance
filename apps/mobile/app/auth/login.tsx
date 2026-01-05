@@ -59,7 +59,7 @@ const LoginScreen = () => {
         }}
       />
       <ScrollView contentContainerStyle={authStyles.scrollContent}>
-        <View className="px-3 flex flex-col space-y-4">
+        <View className="px-3 flex flex-col gap-y-4">
           <View>
             <Text style={authStyles.label}>Email</Text>
             <Input

@@ -6,6 +6,7 @@ import { FormSchema } from "@alliance/shared/forms/formschema";
 import { View } from "react-native";
 import { taskCompleted } from "@alliance/shared/lib/copy";
 import CheckIcon from "./system/CheckIcon";
+import { Check } from "lucide-react-native";
 
 export interface ActionTaskPanelCompletedProps {
   action: ActionDto | null;
@@ -20,8 +21,10 @@ const ActionTaskPanelCompleted = ({
       cardStyle={CardStyle.White}
       className="border rounded-b-none rounded-sm"
     >
-      <View className="flex-row items-center gap-x-2">
-        <CheckIcon size="small" />
+      <View className="flex-row items-center gap-x-2 max-w-[100vw]">
+        <View className="w-6 h-6 rounded-full bg-green items-center justify-center">
+          <Check size={16} color="#fff" strokeWidth={3} />
+        </View>
         <Text>{taskCompleted}</Text>
       </View>
     </Card>
