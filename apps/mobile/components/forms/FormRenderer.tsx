@@ -65,7 +65,7 @@ function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
     case "header":
       return (
         <Text
-          className={`font-semibold text-zinc-900 ${
+          className={`font-semibold text-zinc-900 my-2 ${
             block.level === 1
               ? "text-3xl"
               : block.level === 2
@@ -250,7 +250,10 @@ const FormRenderer = ({
   const scrollToField = useCallback((fieldId: string) => {
     const yPosition = fieldPositions.current[fieldId];
     if (yPosition !== undefined && scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({ y: Math.max(0, yPosition - 20), animated: true });
+      scrollViewRef.current.scrollTo({
+        y: Math.max(0, yPosition - 20),
+        animated: true,
+      });
     }
   }, []);
 
@@ -557,7 +560,8 @@ const FormRenderer = ({
       return;
     }
 
-    const { isValid, firstInvalidPageIndex, firstInvalidFieldId } = await validateAllPages();
+    const { isValid, firstInvalidPageIndex, firstInvalidFieldId } =
+      await validateAllPages();
     if (!isValid) {
       if (
         typeof firstInvalidPageIndex === "number" &&
@@ -611,16 +615,17 @@ const FormRenderer = ({
   const isLastPage = currentPageIndex === maxPageIndex;
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1">
       <ScrollView
         ref={scrollViewRef}
         className="flex-1"
         keyboardShouldPersistTaps="handled"
+        contentContainerClassName="flex flex-col gap-y-2"
       >
         {currentPage?.fields.map((element, idx) => {
           if (!("label" in element)) {
             return (
-              <View key={`block-${idx}`} className="mb-4">
+              <View key={`block-${idx}`}>
                 <RenderDisplayBlockMobile block={element as DisplayBlock} />
               </View>
             );

@@ -88,3 +88,7 @@ output "cloudfront_domain" {
 output "cloudfront_domain_staging" {
   value = aws_cloudfront_distribution.staging_assets.domain_name
 }
+
+output "metrics_server_ip" {
+    value = aws_eip.monitoring_eip.public_ip
+}

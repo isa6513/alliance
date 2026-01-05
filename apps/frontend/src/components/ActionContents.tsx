@@ -13,6 +13,7 @@ import { shuffleWithSeed } from "../lib/utils";
 import { useMemo } from "react";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { externalOnly } from "@alliance/shared/lib/copy";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();
@@ -108,10 +109,7 @@ const ActionContents = () => {
           </div>
         )}
         {isAuthenticated && action.publicOnly && (
-          <Card style={CardStyle.Grey}>
-            This action is intended for external participants. Members cannot
-            complete it.
-          </Card>
+          <Card style={CardStyle.Grey}>{externalOnly}</Card>
         )}
         {action.status !== "planned" && (
           <div className="flex flex-col">

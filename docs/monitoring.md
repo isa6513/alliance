@@ -1,3 +1,9 @@
+## Restarting monitoring if down:
+
+`ssh ec2-user@[monitoring-ip]`
+
+`cd prometheus && docker-compose up -d`
+
 ## Steps for setting up Prometheus / Grafana monitoring.
 
 ### Infra setup.

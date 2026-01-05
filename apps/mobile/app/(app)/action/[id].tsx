@@ -24,6 +24,10 @@ import {
   Text,
 } from "../../../components/system";
 import ActionEventsPanel from "../../../components/ActionEventsPanel";
+import TaskTimeInfo from "../../../components/TaskTimeInfo";
+import { getLastAndNextEvent } from "@alliance/shared/lib/largeActionCard";
+import ActionTaskPanel from "../../../components/ActionTaskPanel";
+import ActionPageTaskPanel from "../../../components/ActionPageTaskPanel";
 
 export default function ActionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -108,6 +112,7 @@ export default function ActionDetailScreen() {
   }
 
   const userRelation = action.userRelation as UserActionRelation | undefined;
+  const { nextEvent, lastEvent } = getLastAndNextEvent(action);
 
   return (
     <>
@@ -124,7 +129,6 @@ export default function ActionDetailScreen() {
             resizeMode="cover"
           />
         )}
-
         <View className="p-5 py-10">
           <Text className="text-[24px] font-semibold text-zinc-900 mb-4 font-serif">
             {action.name}
@@ -152,6 +156,30 @@ export default function ActionDetailScreen() {
               <ActionEventsPanel action={action} />
             </View>
           )}
+          {action.status !== "planned" && (
+            <View>
+              <View className="mb-2 flex flex-row items-center gap-2 w-full">
+                <View className="flex-1">
+                  <Text className="text-xl font-semibold text-zinc-900">
+                    Task
+                  </Text>
+                </View>
+                <TaskTimeInfo
+                  action={action}
+                  nextEvent={nextEvent}
+                  lastEvent={lastEvent}
+                />
+              </View>
+              <ActionPageTaskPanel
+                action={action}
+                userRelation={userRelation ?? null}
+                onCompleteAction={() => {}}
+                onJoinAction={() => {}}
+                onDeclineAction={() => {}}
+                onOptOutAction={() => {}}
+              />
+            </View>
+          )}
           {userRelation === "joined" &&
             action.status === "gathering_commitments" && (
               <Card cardStyle={CardStyle.Green} className="mb-6">
@@ -164,17 +192,6 @@ export default function ActionDetailScreen() {
                 </View>
               </Card>
             )}
-
-          {userRelation === "completed" && (
-            <Card cardStyle={CardStyle.Green} className="mb-6">
-              <View className="flex-row items-center gap-2 text-green">
-                <Check size={18} />
-                <Text className="font-medium">
-                  You&apos;ve completed this action!
-                </Text>
-              </View>
-            </Card>
-          )}
 
           <View className="mb-6">
             <Text className="text-xl font-semibold text-zinc-900">

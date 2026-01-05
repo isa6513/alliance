@@ -1,5 +1,4 @@
 import { ActionActivityDto, UserActionRelation } from "@alliance/shared/client";
-import { getLatestEvent } from "@alliance/shared/lib/actionUtils";
 import Card from "@alliance/sharedweb/ui/Card";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
@@ -9,6 +8,15 @@ import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import ActionTaskPanelDeclined from "./ActionTaskPanelDeclined";
 import { useAuth } from "../lib/AuthContext";
 import { CardStyle } from "@alliance/shared/styles/card";
+import {
+  ActionPageTaskPanelState,
+  getActionPageTaskPanelState,
+} from "@alliance/shared/lib/actionPageTaskPanel";
+import {
+  taskDeadlinePassed,
+  taskDeadlinePassedDescription,
+  taskNotAssigned,
+} from "@alliance/shared/lib/copy";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
@@ -39,106 +47,90 @@ const ActionPageTaskPanel = () => {
   const { userRelation, action, ...panelHandlers } =
     useOutletContext<TaskPanelContext>();
 
+  const state = getActionPageTaskPanelState(action, userRelation);
+
   const { isAuthenticated } = useAuth();
 
-  if (action.publicOnly) {
-    return (
-      <ActionTaskPanel
-        userRelation={"none"}
-        action={action}
-        {...panelHandlers}
-        missedDeadline={false}
-        disabled={isAuthenticated}
-        card={isAuthenticated}
-      />
-    );
-  }
-
-  if (!action.reqAuthenticated) {
-    return (
-      <Card style={CardStyle.Grey}>
-        Log in or reload to interact with this action
-      </Card>
-    );
-  }
-
-  if (
-    action.status === "member_action" &&
-    !action.canParticipate &&
-    !action.preventCompletion
-  ) {
-    return (
-      <Card style={CardStyle.Grey}>
-        You have not been assigned to complete this task - no action is needed.
-      </Card>
-    );
-  }
-
-  if (
-    !userRelation ||
-    !action ||
-    (!action.canParticipate && !action.preventCompletion)
-  ) {
-    return null;
-  }
-
-  if (userRelation === "completed") {
-    return <ActionTaskPanelCompleted action={action} />;
-  } else if (userRelation === "declined") {
-    return <ActionTaskPanelDeclined />;
-  }
-
-  if (!action.canParticipate) {
-    return (
-      <div>
-        <Card
-          style={CardStyle.Grey}
-          className=" !bg-zinc-200 rounded-b-none border-t-0 border-x-0"
-        >
-          This action no longer requires member participation.
+  switch (state) {
+    case ActionPageTaskPanelState.PublicOnly:
+      return (
+        <ActionTaskPanel
+          userRelation={"none"}
+          action={action}
+          {...panelHandlers}
+          missedDeadline={false}
+          disabled={isAuthenticated}
+          card={isAuthenticated}
+        />
+      );
+    case ActionPageTaskPanelState.NotAuthenticated:
+      return (
+        <Card style={CardStyle.Grey}>
+          Log in or reload to interact with this action
         </Card>
-        <Card style={CardStyle.Grey} className="rounded-t-none">
+      );
+    case ActionPageTaskPanelState.ActiveButCantParticipate:
+      return <Card style={CardStyle.Grey}>{taskNotAssigned}</Card>;
+    case ActionPageTaskPanelState.MissingDataOrNotActive:
+      return null;
+    case ActionPageTaskPanelState.Completed:
+      return <ActionTaskPanelCompleted action={action} />;
+    case ActionPageTaskPanelState.Declined:
+      return <ActionTaskPanelDeclined />;
+    case ActionPageTaskPanelState.MemberActionClosed:
+      return (
+        <div>
+          <Card
+            style={CardStyle.Grey}
+            className=" !bg-zinc-200 rounded-b-none border-t-0 border-x-0"
+          >
+            This action no longer requires member participation.
+          </Card>
+          <Card style={CardStyle.Grey} className="rounded-t-none">
+            <ActionTaskPanel
+              userRelation={"none"}
+              action={action}
+              {...panelHandlers}
+              missedDeadline={false}
+              disabled={true}
+              card={false}
+            />
+          </Card>
+        </div>
+      );
+    case ActionPageTaskPanelState.ShowTaskWithMissedDeadline:
+      return (
+        <>
+          <Card style={CardStyle.Grey} className="mb-2">
+            <p className="font-medium">{taskDeadlinePassed}</p>
+            <p>{taskDeadlinePassedDescription}</p>
+          </Card>
           <ActionTaskPanel
-            userRelation={"none"}
+            userRelation={
+              userRelation as Extract<UserActionRelation, "joined" | "none">
+            }
             action={action}
             {...panelHandlers}
-            missedDeadline={false}
-            disabled={true}
-            card={false}
+            missedDeadline={true}
+            card={true}
           />
-        </Card>
-      </div>
-    );
+        </>
+      );
+    case ActionPageTaskPanelState.ShowTask:
+      return (
+        <ActionTaskPanel
+          action={action}
+          userRelation={
+            userRelation as Extract<UserActionRelation, "joined" | "none">
+          }
+          {...panelHandlers}
+        />
+      );
+    default:
+      throw new Error(
+        `Unknown action page task panel state: ${state satisfies never}`
+      );
   }
-
-  const latestEvent = getLatestEvent(action);
-  const didMissDeadline =
-    action.events.some((event) => event.newStatus === "member_action") &&
-    (latestEvent?.newStatus === "office_action" ||
-      latestEvent?.newStatus === "resolution");
-
-  return (
-    <>
-      {didMissDeadline && (
-        <Card style={CardStyle.Grey} className="mb-2">
-          <p className="font-medium">
-            The deadline for member action has passed.
-          </p>
-          <p>
-            You do not need to complete this task, but you can still do so below
-            if you would like.
-          </p>
-        </Card>
-      )}
-      <ActionTaskPanel
-        userRelation={userRelation}
-        action={action}
-        {...panelHandlers}
-        missedDeadline={didMissDeadline}
-        card={true}
-      />
-    </>
-  );
 };
 
 export default ActionPageTaskPanel;

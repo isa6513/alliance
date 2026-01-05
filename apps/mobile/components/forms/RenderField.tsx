@@ -170,7 +170,7 @@ export function RenderField({
   switch (field.kind) {
     case "text":
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field} error={errorMessage} />
           <TextInput
             className={inputBase}
@@ -186,7 +186,7 @@ export function RenderField({
 
     case "textarea":
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field} error={errorMessage} />
           <TextInput
             className={`${inputBase} min-h-[100px] text-base`}
@@ -210,7 +210,7 @@ export function RenderField({
 
     case "email":
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field} error={errorMessage} />
           <TextInput
             className={inputBase}
@@ -228,7 +228,7 @@ export function RenderField({
 
     case "phone":
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field} error={errorMessage} />
           <TextInput
             className={inputBase}
@@ -248,7 +248,7 @@ export function RenderField({
 
     case "number":
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field} error={errorMessage} />
           <TextInput
             className={inputBase}
@@ -290,7 +290,7 @@ export function RenderField({
         : undefined;
 
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field} error={errorMessage} />
           <View className="flex-row justify-between mb-2">
             <Text className="text-xs text-zinc-500">{field.startLabel}</Text>
@@ -340,7 +340,7 @@ export function RenderField({
 
     case "checkbox":
       return (
-        <View className="mb-5">
+        <View>
           <Checkbox
             checked={!!value}
             onChange={(next) => onChange?.(next)}
@@ -356,7 +356,7 @@ export function RenderField({
     case "radio": {
       const options = randomizedOptions ?? field.options;
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field} error={errorMessage} />
           <View
             className={`${hasError ? "border-l-2 border-red-500 pl-3" : ""}`}
@@ -402,7 +402,7 @@ export function RenderField({
         options.find((opt) => opt.value === value)?.label || null;
 
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field} error={errorMessage} />
           <TouchableOpacity
             className={`${inputBase} flex-row items-center justify-between`}
@@ -475,7 +475,7 @@ export function RenderField({
         maxSelections !== undefined && selectedCount >= maxSelections;
 
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field} error={errorMessage} />
           <View
             className={`${hasError ? "border-l-2 border-red-500 pl-3" : ""}`}
@@ -532,7 +532,7 @@ export function RenderField({
 
     case "date":
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field} error={errorMessage} />
           <TextInput
             className={inputBase}
@@ -559,7 +559,7 @@ export function RenderField({
 
     case "timezone":
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field} error={errorMessage} />
           <TimeZoneSelect
             value={(value as string) ?? undefined}
@@ -579,7 +579,7 @@ export function RenderField({
           ? value
           : "";
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field as CityField} error={errorMessage} />
           <CityAutosuggest
             value={displayValue}
@@ -628,7 +628,7 @@ export function RenderField({
       };
 
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field} error={errorMessage} />
           {currentPreview && (
             <Image
@@ -661,7 +661,7 @@ export function RenderField({
 
     case "custom":
       return (
-        <View className="mb-5">
+        <View>
           <RenderLabel field={field} error={errorMessage} />
           <View className="border border-zinc-200 bg-zinc-50 rounded-lg p-3">
             <Text className="text-sm text-zinc-700">
@@ -737,7 +737,7 @@ export function TimeInputField({
   );
 
   return (
-    <View className="mb-5">
+    <View>
       <RenderLabel field={field} error={effectiveError} />
       <View className="relative">
         <TouchableOpacity
