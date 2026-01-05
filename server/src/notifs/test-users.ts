@@ -25,6 +25,7 @@ export const testUser: User = {
     },
   ],
   hasActiveContract: true,
+  shareInfoPublicly: false,
   emailNotifsEnabled: false,
   textNotifsEnabled: true,
   pushNotifsEnabled: false,
