@@ -9,11 +9,12 @@ export const taskDeadlinePassed = "The deadline for member action has passed.";
 export const taskDeadlinePassedDescription =
   "You do not need to complete this task, but you can still do so below if you would like.";
 
-export const TASK_MESSAGE_AWAY_OVERLAPS = ", so this task is optional.";
-export const TASK_MESSAGE_CURRENTLY_AWAY = "You are currently away";
+export const TASK_MESSAGE_CURRENTLY_AWAY =
+  "You are currently away, so this task is optional for you. You can either complete it here or dismiss it";
 export const TASK_MESSAGE_WAS_AWAY =
-  "You were previously away during this task";
-export const TASK_MESSAGE_WILL_BE_AWAY = "You will be away during this task";
+  "This task happened when you were away, so it is optional for you. You can either complete it here or dismiss it";
+export const TASK_MESSAGE_WILL_BE_AWAY =
+  "You will be away before this task is due, so it is optional for you. You can either complete it here or dismiss it";
 
 export const externalOnly =
   "This action is intended for external participants. Members cannot complete it.";
