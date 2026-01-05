@@ -450,7 +450,12 @@ export class TasksService {
           const checkboxField = field as CheckboxField;
           if (checkboxField.autoExtractUserData?.target === target) {
             const answer = answers[field.id];
-            return answer === true;
+            // Only return a value if the checkbox was explicitly answered
+            if (typeof answer === 'boolean') {
+              return answer;
+            }
+            // Field wasn't answered - don't overwrite existing user setting
+            return null;
           }
         }
       }
