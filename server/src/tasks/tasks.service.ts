@@ -38,6 +38,8 @@ import {
   SubmitFormDto,
 } from './form.dto';
 import {
+  CheckboxExtractionTarget,
+  CheckboxField,
   CityFieldValue,
   FormSchema,
   isQuestionField,
@@ -301,6 +303,16 @@ export class TasksService {
       }
     }
 
+    const shareInfoPublicly = this.getCheckboxExtractionValue(
+      form,
+      submitFormDto.answers,
+      'shareInfoPublicly',
+    );
+    if (shareInfoPublicly !== null) {
+      user.shareInfoPublicly = shareInfoPublicly;
+      userNeedsUpdate = true;
+    }
+
     if (userNeedsUpdate) {
       await this.userService.update(user.id, user);
     }
@@ -414,6 +426,31 @@ export class TasksService {
           const value = (answers[field.id] as string).trim();
           if (value) {
             return value;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private getCheckboxExtractionValue(
+    form: Form,
+    answers: Record<string, unknown>,
+    target: CheckboxExtractionTarget,
+  ): boolean | null {
+    const schema = form.schema as unknown as FormSchema;
+
+    for (const page of schema.pages ?? []) {
+      if (!page.fields) {
+        continue;
+      }
+      for (const field of page.fields) {
+        if (field.kind === 'checkbox') {
+          const checkboxField = field as CheckboxField;
+          if (checkboxField.autoExtractUserData?.target === target) {
+            const answer = answers[field.id];
+            return answer === true;
           }
         }
       }

@@ -99,7 +99,21 @@ export type RangeField = BaseField<"range"> & {
   endLabel?: string;
 };
 
-export type CheckboxField = BaseField<"checkbox">;
+export type CheckboxExtractionTarget = "shareInfoPublicly";
+
+export type CheckboxField = BaseField<"checkbox"> & {
+  autoExtractUserData?: { target: CheckboxExtractionTarget };
+};
+
+// Field kinds that support auto-extraction into user data
+export const AUTO_EXTRACT_FIELD_KINDS = [
+  "phone",
+  "time",
+  "timezone",
+  "city",
+  "checkbox",
+] as const;
+export type AutoExtractFieldKind = (typeof AUTO_EXTRACT_FIELD_KINDS)[number];
 export type RadioField = BaseField<"radio"> & {
   options: Option<string>[];
   randomizeOptions?: boolean;

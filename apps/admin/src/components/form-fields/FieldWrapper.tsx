@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import type { AnyField } from "@alliance/shared/forms/formschema";
+import type {
+  AnyField,
+  CheckboxField,
+  CheckboxExtractionTarget,
+  CityField,
+  PhoneField,
+  TimeField,
+  TimezoneField,
+} from "@alliance/shared/forms/formschema";
+import { AUTO_EXTRACT_FIELD_KINDS } from "@alliance/shared/forms/formschema";
 import {
   ConditionalVisibility,
   CustomValidatorSelect,
@@ -18,6 +27,47 @@ function isFormField(field: unknown): field is AnyField {
   return Boolean(
     field && typeof field === "object" && "kind" in (field as AnyField)
   );
+}
+
+type ExtractableField =
+  | PhoneField
+  | TimeField
+  | TimezoneField
+  | CityField
+  | CheckboxField;
+
+function supportsExtraction(field: AnyField): field is ExtractableField {
+  return AUTO_EXTRACT_FIELD_KINDS.includes(
+    field.kind as (typeof AUTO_EXTRACT_FIELD_KINDS)[number]
+  );
+}
+
+function hasExtractionEnabled(field: AnyField): boolean {
+  if (!supportsExtraction(field)) return false;
+  if (field.kind === "checkbox") {
+    return Boolean((field as CheckboxField).autoExtractUserData?.target);
+  }
+  return Boolean(
+    (field as PhoneField | TimeField | TimezoneField | CityField)
+      .autoExtractUserData
+  );
+}
+
+function getExtractionLabel(field: AnyField): string {
+  if (field.kind === "checkbox") {
+    const target = (field as CheckboxField).autoExtractUserData?.target;
+    if (target === "shareInfoPublicly") {
+      return "Extracting into: Share info publicly";
+    }
+    return "Extracting into user data";
+  }
+  const labels: Record<string, string> = {
+    phone: "Extracting into: Phone number",
+    time: "Extracting into: Preferred reminder time",
+    timezone: "Extracting into: Time zone",
+    city: "Extracting into: City",
+  };
+  return labels[field.kind] || "Extracting into user data";
 }
 
 export function FieldWrapper<T extends AnyField>({
@@ -187,6 +237,28 @@ export function FieldWrapper<T extends AnyField>({
     } as Partial<T>);
   };
 
+  const handleExtractionToggle = (checked: boolean) => {
+    if (!isCurrentFormField || !supportsExtraction(field)) return;
+    if (field.kind === "checkbox") {
+      onUpdate({
+        autoExtractUserData: checked
+          ? { target: "shareInfoPublicly" }
+          : undefined,
+      } as unknown as Partial<T>);
+    } else {
+      onUpdate({ autoExtractUserData: checked } as unknown as Partial<T>);
+    }
+  };
+
+  const handleCheckboxExtractionTargetChange = (
+    target: CheckboxExtractionTarget | ""
+  ) => {
+    if (!isCurrentFormField || field.kind !== "checkbox") return;
+    onUpdate({
+      autoExtractUserData: target ? { target } : undefined,
+    } as unknown as Partial<T>);
+  };
+
   return (
     <div
       className={`group relative border rounded-lg transition-all [&_input,&_textarea]:bg-white ${
@@ -262,6 +334,47 @@ export function FieldWrapper<T extends AnyField>({
                   />
                   Use conditional visibility
                 </label>
+                {supportsExtraction(field) && (
+                  <>
+                    <div className="border-t border-gray-100 my-1" />
+                    {field.kind === "checkbox" ? (
+                      <div className="px-3 py-1.5">
+                        <label className="block text-gray-700 mb-1">
+                          Extract response into:
+                        </label>
+                        <select
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          value={
+                            (field as CheckboxField).autoExtractUserData
+                              ?.target || ""
+                          }
+                          onChange={(e) =>
+                            handleCheckboxExtractionTargetChange(
+                              e.target.value as CheckboxExtractionTarget | ""
+                            )
+                          }
+                        >
+                          <option value="">None</option>
+                          <option value="shareInfoPublicly">
+                            Share info publicly
+                          </option>
+                        </select>
+                      </div>
+                    ) : (
+                      <label className="flex cursor-pointer items-center px-3 py-1.5 text-gray-700">
+                        <input
+                          type="checkbox"
+                          className="mr-2"
+                          checked={hasExtractionEnabled(field)}
+                          onChange={(event) =>
+                            handleExtractionToggle(event.target.checked)
+                          }
+                        />
+                        Extract response into user data
+                      </label>
+                    )}
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -288,13 +401,31 @@ export function FieldWrapper<T extends AnyField>({
           )}
         </div>
         {isCurrentFormField && (
-          <div className="p-4 pt-0">
+          <div className="p-4 pt-0 mb-0">
             <RenderField
               field={field}
               disabled
               randomizationKey="preview"
               user={FORM_BUILDER_PREVIEW_USER}
             />
+            {hasExtractionEnabled(field) && (
+              <div className="mt-4 text-xs text-blue-600 flex items-center gap-1">
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                {getExtractionLabel(field)}
+              </div>
+            )}
           </div>
         )}
         {isCurrentFormField &&

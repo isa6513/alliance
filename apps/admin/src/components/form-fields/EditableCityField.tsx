@@ -1,5 +1,5 @@
 import type { CityField } from "@alliance/shared/forms/formschema";
-import { AutoExtractUserDataToggle, RequiredToggle } from "./CommonControls";
+import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
 import type { BaseFieldProps } from "./types";
@@ -39,16 +39,10 @@ export function EditableCityField({
           placeholder="Search for a city"
         />
       </div>
-      <div className="flex items-center space-x-4">
-        <RequiredToggle
-          checked={field.required}
-          onChange={(checked) => onUpdate({ required: checked })}
-        />
-        <AutoExtractUserDataToggle
-          checked={!!field.autoExtractUserData}
-          onChange={(checked) => onUpdate({ autoExtractUserData: checked })}
-        />
-      </div>
+      <RequiredToggle
+        checked={field.required}
+        onChange={(checked) => onUpdate({ required: checked })}
+      />
     </FieldWrapper>
   );
 }
