@@ -51,7 +51,7 @@ export default function HomeScreen() {
     limit: 8,
   });
 
-  if (!currentTask) {
+  if (!currentTask && !loading && !error) {
     return (
       <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
         <View className="w-12 h-12 rounded-full bg-green items-center justify-center mb-4">
