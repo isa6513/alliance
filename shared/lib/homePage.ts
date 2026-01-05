@@ -1,6 +1,10 @@
 import { useCallback, useMemo } from "react";
 import { ActionDto } from "../client";
-import { getPastEvents } from "./actionUtils";
+import {
+  ActionWithAwayStatus,
+  getPastEvents,
+  TaskAwayStatus,
+} from "./actionUtils";
 
 export function canCompleteAction(action: ActionDto) {
   return (
@@ -41,6 +45,7 @@ export function canJoinAction(action: ActionDto) {
     action.canParticipate
   );
 }
+
 function getDeadlineTimestamp(action: ActionDto): number {
   let i = 0;
   // Find first 'member_action' or 'gathering_commitments' event
@@ -68,6 +73,7 @@ function getDeadlineTimestamp(action: ActionDto): number {
 
   return new Date(nextEvent.date).getTime();
 }
+
 export function actionPriorityComparator(
   actionA: ActionDto,
   actionB: ActionDto
@@ -107,7 +113,7 @@ export function actionPriorityComparator(
   );
 }
 
-export function useHomePageActions(actions: ActionDto[] | null) {
+export function useHomePageActions(actions: ActionWithAwayStatus[] | null) {
   const todoActions = useMemo(() => {
     return (
       actions
@@ -158,7 +164,8 @@ export function useHomePageActions(actions: ActionDto[] | null) {
     [doesCurrentWeekHaveActions, isActionDeadlineWithinDays]
   );
 
-  const currentTask: ActionDto | null = newActions[0] || todoActions[0] || null;
+  const currentTask: ActionWithAwayStatus | null =
+    newActions[0] || todoActions[0] || null;
 
   const currentWeekTodoActions = todoActions.filter((action) => {
     return isActionInCurrentWeek(action);
@@ -169,7 +176,10 @@ export function useHomePageActions(actions: ActionDto[] | null) {
 
   const remainingTasksEstimatedTimeCurrentWeek = currentWeekTodoActions.reduce(
     (sum, action) => {
-      if (action.timeEstimate) {
+      if (
+        action.awayStatus === TaskAwayStatus.NOT_AWAY &&
+        action.timeEstimate
+      ) {
         return sum + action.timeEstimate;
       }
       return sum;

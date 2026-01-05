@@ -10,6 +10,13 @@ import {
   getLastAndNextEvent,
   LargeActionCardPropsShared,
 } from "@alliance/shared/lib/largeActionCard";
+import {
+  TASK_MESSAGE_AWAY_OVERLAPS,
+  TASK_MESSAGE_CURRENTLY_AWAY,
+  TASK_MESSAGE_WAS_AWAY,
+  TASK_MESSAGE_WILL_BE_AWAY,
+} from "@alliance/shared/lib/copy";
+import { TaskAwayStatus } from "@alliance/shared/lib/actionUtils";
 
 export interface LargeActionCardProps extends LargeActionCardPropsShared {
   showDetails?: boolean;
@@ -70,6 +77,18 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       } ${className} w-full relative 
          ${state === LargeActionCardState.Minified ? "pb-4" : ""}`}
     >
+      {action.awayStatus !== TaskAwayStatus.NOT_AWAY && (
+        <div className="text-center text-zinc-500">
+          {
+            {
+              [TaskAwayStatus.AWAY_CURRENTLY]: TASK_MESSAGE_CURRENTLY_AWAY,
+              [TaskAwayStatus.AWAY_LATER]: TASK_MESSAGE_WILL_BE_AWAY,
+              [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_MESSAGE_WAS_AWAY,
+            }[action.awayStatus]
+          }
+          {TASK_MESSAGE_AWAY_OVERLAPS}
+        </div>
+      )}
       <div className="p-0 sm:p-2">
         <div className="flex sm:flex-row gap-4 items-start mb-4 flex-col-reverse">
           <div className="flex flex-col flex-1 gap-y-2">

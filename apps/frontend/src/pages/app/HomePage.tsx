@@ -19,6 +19,7 @@ import {
   noTasksContractSuspended,
   noTasksToDoRightNow,
 } from "@alliance/shared/lib/copy";
+import { TaskAwayStatus } from "@alliance/shared/lib/actionUtils";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -128,7 +129,14 @@ const HomePage = () => {
     );
   }, [actions, loading, currentTask, user, friendActivities, navigate]);
 
+  const numTodo = todoActions.filter(
+    (action) => action.awayStatus === TaskAwayStatus.NOT_AWAY
+  ).length;
   const sidebarContent = useMemo(() => {
+    const currentWeekTodoActionsNotAway = currentWeekTodoActions.filter(
+      (action) => action.awayStatus === TaskAwayStatus.NOT_AWAY
+    );
+
     return (
       <div className="px-4 pt-12 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200">
         {todoActions.length + newActions.length > 0 && (
@@ -136,13 +144,15 @@ const HomePage = () => {
             <p className="font-semibold text-base font-serif text-black">
               Progress
             </p>
-            {currentWeekTodoActions.length + newActions.length > 0 && (
+            {currentWeekTodoActionsNotAway.length + newActions.length > 0 && (
               <p className="text-zinc-600 mb-2">
                 <span className="text-green font-medium mr-0.5">
-                  {currentWeekTodoActions.length} task
-                  {currentWeekTodoActions.length !== 1 ? "s" : ""} left{" "}
+                  {currentWeekTodoActionsNotAway.length} task
+                  {currentWeekTodoActionsNotAway.length !== 1
+                    ? "s"
+                    : ""} left{" "}
                 </span>
-                {todoActions.length > 0 &&
+                {numTodo > 0 &&
                   `for a total of ${remainingTasksEstimatedTimeCurrentWeek} minutes`}
               </p>
             )}
@@ -246,6 +256,7 @@ const HomePage = () => {
     nextWeekTodoActions,
     remainingTasksEstimatedTimeCurrentWeek,
     todoActions.length,
+    numTodo,
     visibleFriendActivityCount,
   ]);
 

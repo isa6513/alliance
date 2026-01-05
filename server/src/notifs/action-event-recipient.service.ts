@@ -50,6 +50,7 @@ export class ActionEventRecipientService {
     return lastEventBefore?.type === ContractEventType.SIGNED;
   }
 
+  /** Checks contract status and cohorts for event */
   public userShouldCompleteEvent(
     user: User,
     eventDate: Date,
@@ -68,25 +69,50 @@ export class ActionEventRecipientService {
     );
   }
 
+  getNextEvent(params: {
+    events: ActionEvent[];
+    currentEventId: number;
+  }): ActionEvent | null {
+    const { events, currentEventId } = params;
+    const sortedEvents = events.toSorted(
+      (a, b) => a.date.getTime() - b.date.getTime(),
+    );
+    const currentEventIndex = sortedEvents.findIndex(
+      (event) => event.id === currentEventId,
+    );
+    if (currentEventIndex === -1) {
+      return null;
+    }
+    return sortedEvents[currentEventIndex + 1] ?? null;
+  }
+
   public async getBaseUsersForEvent(
     eventStatus: ActionStatus,
     action: Action,
-    eventDate: Date,
+    eventId: number,
   ): Promise<User[]> {
     const targetTagIds = new Set(action.participatingTags.map((tag) => tag.id));
+    const event = action.events.find((event) => event.id === eventId);
+    if (!event) {
+      throw new Error(`Event not found: ${eventId}`);
+    }
 
-    const filterToEligible = (users: User[]) =>
-      users.filter(
-        (user) =>
-          this.userShouldCompleteEvent(
-            user,
-            eventDate,
-            targetTagIds,
-            action.everyoneShouldComplete,
-            action.useManualCohort,
-            action.manualCohortUsers,
-          ) === true && !this.userService.isUserAway(user, eventDate),
-      );
+    const filterToEligible = (user: User) =>
+      this.userShouldCompleteEvent(
+        user,
+        event.date,
+        targetTagIds,
+        action.everyoneShouldComplete,
+        action.useManualCohort,
+        action.manualCohortUsers,
+      ) === true &&
+      !this.userService.isUserAwayInRange(user, {
+        startDate: event.date,
+        endDate: this.getNextEvent({
+          events: action.events,
+          currentEventId: eventId,
+        })?.date,
+      });
 
     if (eventStatus === ActionStatus.MemberAction && !action.commitmentless) {
       const activities = await this.actionActivityRepository.find({
@@ -102,14 +128,18 @@ export class ActionEventRecipientService {
           },
         },
       });
-      return filterToEligible(activities.map((activity) => activity.user));
+      return activities
+        .map((activity) => activity.user)
+        .filter(filterToEligible);
     }
 
     if (
       eventStatus === ActionStatus.GatheringCommitments ||
       eventStatus === ActionStatus.MemberAction
     ) {
-      return filterToEligible(await this.userService.findActiveUsersWithTags());
+      return (await this.userService.findActiveUsersWithTags()).filter(
+        filterToEligible,
+      );
     }
 
     return [];
@@ -174,14 +204,14 @@ export class ActionEventRecipientService {
   }
 
   async getFilteredUsersForEvent(
-    event: Pick<ActionEvent, 'newStatus' | 'action' | 'date'>,
+    event: Pick<ActionEvent, 'newStatus' | 'action' | 'date' | 'id'>,
     type: ActionEventNotifType,
     suite?: ActionSuite,
   ): Promise<User[]> {
     const users = await this.getBaseUsersForEvent(
       event.newStatus,
       event.action,
-      event.date,
+      event.id,
     );
     return type === ActionEventNotifType.Announcement
       ? users

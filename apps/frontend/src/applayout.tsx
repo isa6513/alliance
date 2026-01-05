@@ -6,6 +6,7 @@ import {
   forumFindAllPosts,
   PostDto,
   ProfileDto,
+  userGetAwayRanges,
   userMyProfile,
 } from "@alliance/shared/client";
 import { isStaging } from "@alliance/sharedweb/lib/config";
@@ -23,6 +24,10 @@ import BugReportButton from "./components/BugReportButton";
 import Spinner from "./components/Spinner";
 import { useAuth } from "./lib/AuthContext";
 import { isFeatureEnabled } from "./lib/config";
+import {
+  ActionWithAwayStatus,
+  getAwayStatus,
+} from "@alliance/shared/lib/actionUtils";
 
 export interface RouteMatch {
   data: unknown;
@@ -50,7 +55,7 @@ export interface ActivitiesForAction {
 }
 
 export interface AppLayoutOutletContext {
-  actions: ActionDto[] | null;
+  actions: ActionWithAwayStatus[] | null;
   posts: PostDto[] | null;
   profile: ProfileDto | null;
   loading: boolean;
@@ -138,21 +143,26 @@ export default function AppLayout() {
     profile: profileLoader,
   } = useLoaderData<typeof clientLoader>();
 
-  const [actions, setActions] = useState<ActionDto[] | null>(null);
+  const [actions, setActions] = useState<ActionWithAwayStatus[] | null>(null);
   const [posts, setPosts] = useState<PostDto[] | null>(null);
   const [profile, setProfile] = useState<ProfileDto | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    actionDataLoader
-      .then((data) => {
-        if (data?.actions) {
-          setActions(data.actions);
-        }
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    void (async () => {
+      const response = await userGetAwayRanges();
+      const awayRanges = response.data ?? [];
+      const data = await actionDataLoader;
+      if (data?.actions) {
+        const now = new Date();
+        setActions(
+          data.actions.map((action) => ({
+            ...action,
+            awayStatus: getAwayStatus(action, awayRanges, now),
+          }))
+        );
+      }
+    })().finally(() => setLoading(false));
 
     postsLoader.then((data) => {
       if (data) {

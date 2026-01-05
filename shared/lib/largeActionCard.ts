@@ -1,9 +1,10 @@
 import { ActionDto, UserActionRelation } from "../client";
 import { ActionCompletedBarWithInfoPropsShared } from "./actionCompletedBarWithInfo";
+import { ActionWithAwayStatus } from "./actionUtils";
 
 export interface LargeActionCardPropsShared
   extends Pick<ActionCompletedBarWithInfoPropsShared, "friendActivities"> {
-  action: ActionDto;
+  action: ActionWithAwayStatus;
   userRelation: Extract<UserActionRelation, "joined" | "none">;
   onUpdateActionState: () => void;
 }

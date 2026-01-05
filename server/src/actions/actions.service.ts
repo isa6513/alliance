@@ -245,7 +245,12 @@ export class ActionsService {
   async computeUsersJoinedForAction(actionId: number): Promise<number[]> {
     const action = await this.actionRepository.findOneOrFail({
       where: { id: actionId },
-      relations: { events: true, participatingTags: true, activities: true, manualCohortUsers: true },
+      relations: {
+        events: true,
+        participatingTags: true,
+        activities: true,
+        manualCohortUsers: true,
+      },
     });
 
     if (action.commitmentless) {
@@ -287,7 +292,7 @@ export class ActionsService {
       await this.actionEventRecipientService.getBaseUsersForEvent(
         ActionStatus.MemberAction,
         action,
-        event.date,
+        event.id,
       );
 
     const deadlineEvents = await this.actionEventRepository.find({
@@ -305,7 +310,7 @@ export class ActionsService {
       deadlineEvents.length > 0
         ? baseUsers.filter(
             (user) =>
-              !this.userService.isUserAway(user, deadlineEvents[0].date),
+              !this.userService.isUserAwayAt(user, deadlineEvents[0].date),
           )
         : baseUsers;
 
@@ -2160,7 +2165,7 @@ export class ActionsService {
       await this.actionEventRecipientService.getBaseUsersForEvent(
         ActionStatus.MemberAction,
         action,
-        event.date,
+        event.id,
       );
 
     const completionActivities = await this.actionActivityRepository.find({
@@ -2179,16 +2184,6 @@ export class ActionsService {
         !completionActivities.some((activity) => activity.userId === user.id),
     );
     return didntComplete;
-  }
-
-  async getNextEvent(action: Action): Promise<ActionEvent | null> {
-    const memberActionIndex = action.events.findIndex(
-      (event) => event.newStatus === ActionStatus.MemberAction,
-    );
-    if (memberActionIndex === -1) {
-      return null;
-    }
-    return action.events[memberActionIndex + 1];
   }
 
   isActionPast(action: Action, now: Date): boolean {

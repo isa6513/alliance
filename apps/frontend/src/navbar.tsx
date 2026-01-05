@@ -8,6 +8,7 @@ import {
   canJoinAction,
   shouldCompleteAction,
 } from "@alliance/shared/lib/homePage";
+import { TaskAwayStatus } from "@alliance/shared/lib/actionUtils";
 
 function Navbar() {
   const context = useOutletContext<AppLayoutOutletContext>();
@@ -15,9 +16,16 @@ function Navbar() {
   const nTasks = useMemo(
     () =>
       context.actions
-        ? context.actions.filter((action) => shouldCompleteAction(action))
-            .length +
-          context.actions.filter((action) => canJoinAction(action)).length
+        ? context.actions.filter(
+            (action) =>
+              shouldCompleteAction(action) &&
+              action.awayStatus === TaskAwayStatus.NOT_AWAY
+          ).length +
+          context.actions.filter(
+            (action) =>
+              canJoinAction(action) &&
+              action.awayStatus === TaskAwayStatus.NOT_AWAY
+          ).length
         : 0,
     [context.actions]
   );
