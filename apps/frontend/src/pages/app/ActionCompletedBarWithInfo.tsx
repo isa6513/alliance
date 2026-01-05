@@ -44,10 +44,7 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
                 <p>
                   The denominator represents the number of members expected to
                   complete this action. Sometimes, different members are
-                  expected to complete different actions.
-                  <br />
-                  <br />
-                  The denominator is also affected by members who have marked
+                  expected to complete different actions, or may have marked
                   themselves as &quot;Away&quot; in settings.
                 </p>
               }

@@ -55,7 +55,7 @@ const InformationPage: React.FC = () => {
 
         <h2 className="text-2xl font-semibold mt-4">Action updates</h2>
 
-        <div className="flex flex-col gap-y-2 text-base">
+        <div className="flex flex-col gap-y-4 text-base">
           {updates
             .sort(
               (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()

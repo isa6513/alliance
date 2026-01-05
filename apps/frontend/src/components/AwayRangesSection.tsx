@@ -18,6 +18,7 @@ enum ReasonDropdownOption {
   EMERGENCY = "Emergency",
   OTHER = "Other",
 }
+
 const REASON_DROPDOWN_OPTION_TO_REASON_DTO = {
   [ReasonDropdownOption.UNSELECTED]: null,
   [ReasonDropdownOption.VACATION]: "vacation",
