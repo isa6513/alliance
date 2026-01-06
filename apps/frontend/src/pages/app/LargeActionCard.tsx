@@ -72,35 +72,40 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
 
   return (
     <>
-      <Button
-        className="self-end mb-2 gap-x-1"
-        color={ButtonColor.Grey}
-        onClick={handleDismissAction}
-      >
-        <X size={14} />
-        Dismiss
-      </Button>
-      <div
-        className={`p-6 border border-zinc-200 rounded transition-all duration-300 ${
+      {action.awayStatus !== TaskAwayStatus.NOT_AWAY && (
+        <Card
+          style={CardStyle.Grey}
+          className="gap-y-3 rounded-b-none border-b-0"
+        >
+          <div>
+            {
+              {
+                [TaskAwayStatus.AWAY_CURRENTLY]: TASK_MESSAGE_CURRENTLY_AWAY,
+                [TaskAwayStatus.AWAY_LATER]: TASK_MESSAGE_WILL_BE_AWAY,
+                [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_MESSAGE_WAS_AWAY,
+              }[action.awayStatus]
+            }
+          </div>
+          <Button
+            className="w-full gap-x-1"
+            color={ButtonColor.Grey}
+            onClick={handleDismissAction}
+          >
+            <X size={14} className="text-red-500" />
+            Dismiss action
+          </Button>
+        </Card>
+      )}
+      <Card
+        className={`p-6 border border-zinc-200 transition-all duration-300 ${
           state === LargeActionCardState.Closed
             ? "opacity-0 overflow-hidden"
             : "opacity-100"
         } ${className} w-full relative 
-         ${state === LargeActionCardState.Minified ? "pb-4" : ""}`}
+         ${state === LargeActionCardState.Minified ? "pb-4" : ""} ${
+          action.awayStatus === TaskAwayStatus.NOT_AWAY ? "rounded" : "rounded-t-none"
+        }`}
       >
-        {action.awayStatus !== TaskAwayStatus.NOT_AWAY && (
-          <div className="flex flex-col gap-y-3">
-            <Card style={CardStyle.Grey} className="mb-2">
-              {
-                {
-                  [TaskAwayStatus.AWAY_CURRENTLY]: TASK_MESSAGE_CURRENTLY_AWAY,
-                  [TaskAwayStatus.AWAY_LATER]: TASK_MESSAGE_WILL_BE_AWAY,
-                  [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_MESSAGE_WAS_AWAY,
-                }[action.awayStatus]
-              }
-            </Card>
-          </div>
-        )}
         <div className="p-0 sm:p-2">
           <div className="flex sm:flex-row gap-4 items-start mb-4 flex-col-reverse">
             <div className="flex flex-col flex-1 gap-y-2">
@@ -139,7 +144,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             />
           </div>
         </div>
-      </div>
+      </Card>
     </>
   );
 };
