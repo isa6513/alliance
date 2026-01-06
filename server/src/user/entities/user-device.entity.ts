@@ -11,11 +11,13 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class UserDevice {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  @ApiProperty()
+  id: string;
 
   @ManyToOne(() => User, (user) => user.devices, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })

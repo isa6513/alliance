@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDefined, IsEnum, IsOptional, IsString } from 'class-validator';
 import { ActionDto } from 'src/actions/dto/action.dto';
-import { UserDto } from 'src/user/user.dto';
+import { UserDto } from 'src/user/dto/user.dto';
 import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
 import { Ty } from './entities/type';

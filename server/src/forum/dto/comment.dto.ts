@@ -6,7 +6,7 @@ import {
 } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
-import { ProfileDto } from 'src/user/user.dto';
+import { ProfileDto } from 'src/user/dto/user.dto';
 import { Comment } from '../entities/comment.entity';
 import {
   CreateEditableContentDto,

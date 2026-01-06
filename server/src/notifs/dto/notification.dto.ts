@@ -1,5 +1,5 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { ProfileDto } from 'src/user/user.dto';
+import { ProfileDto } from 'src/user/dto/user.dto';
 import { Notification } from '../entities/notification.entity';
 
 export class NotificationDto extends PickType(Notification, [

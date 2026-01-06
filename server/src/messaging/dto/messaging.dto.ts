@@ -18,7 +18,7 @@ import {
   Min,
 } from 'class-validator';
 import { CommunityDto } from 'src/user/community.dto';
-import { ProfileDto } from 'src/user/user.dto';
+import { ProfileDto } from 'src/user/dto/user.dto';
 import {
   Conversation,
   ConversationType,

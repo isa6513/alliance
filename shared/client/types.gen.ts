@@ -751,6 +751,16 @@ export type CommunityMemberContactInfoDto = {
     awayRanges: Array<UserAwayRangeDto>;
 };
 
+export type RegisterDeviceDto = {
+    deviceType: string;
+    expoPushToken: string;
+    deviceId?: string;
+};
+
+export type UserDeviceDto = {
+    id: string;
+};
+
 export type StreamableFile = {
     [key: string]: unknown;
 };
@@ -3088,6 +3098,19 @@ export type UserLeaveCommunityData = {
 export type UserLeaveCommunityResponses = {
     200: unknown;
 };
+
+export type UserRegisterDeviceData = {
+    body: RegisterDeviceDto;
+    path?: never;
+    query?: never;
+    url: '/user/registerDevice';
+};
+
+export type UserRegisterDeviceResponses = {
+    200: UserDeviceDto;
+};
+
+export type UserRegisterDeviceResponse = UserRegisterDeviceResponses[keyof UserRegisterDeviceResponses];
 
 export type ImagesGetImageData = {
     body?: never;

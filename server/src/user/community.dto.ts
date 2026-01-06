@@ -2,7 +2,7 @@ import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsNumber } from 'class-validator';
 import { Community } from './entities/community.entity';
-import { ProfileDto } from './user.dto';
+import { ProfileDto } from './dto/user.dto';
 
 export class CommunityDto extends OmitType(Community, [
   'users',

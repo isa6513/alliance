@@ -7,9 +7,9 @@ import {
 import { instanceToPlain, Type } from 'class-transformer';
 import { Allow, IsOptional } from 'class-validator';
 import { getImageSource } from 'src/images/images.service';
-import { FriendStatus } from './entities/friend.entity';
-import { User } from './entities/user.entity';
-import { ContractEvent } from './entities/contract-event.entity';
+import { FriendStatus } from '../entities/friend.entity';
+import { User } from '../entities/user.entity';
+import { ContractEvent } from '../entities/contract-event.entity';
 
 export class FriendStatusDto {
   @ApiProperty({ enum: FriendStatus, nullable: true, enumName: 'FriendStatus' })

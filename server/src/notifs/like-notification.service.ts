@@ -6,7 +6,7 @@ import {
   NotificationCategory,
 } from './entities/notification.entity';
 import { User } from 'src/user/entities/user.entity';
-import { ProfileDto } from 'src/user/user.dto';
+import { ProfileDto } from 'src/user/dto/user.dto';
 
 export type LikeNotificationTarget = 'post' | 'comment' | 'activity';
 
@@ -111,7 +111,7 @@ export class LikeNotificationService {
         groupingKey,
         category: NotificationCategory.Likes,
       },
-      relations: {associatedUsers: true}
+      relations: { associatedUsers: true },
     });
 
     if (!notification) {

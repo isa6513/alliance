@@ -1,6 +1,8 @@
+import { local_ip } from "../local-ip";
+
 export const getApiUrl = (): string => {
-  const addr = "192.168.4.26";
   if (__DEV__) {
+    const addr = local_ip || "localhost";
     return "http://" + addr + ":3005";
   } else {
     return "https://worldalliance.org/api";

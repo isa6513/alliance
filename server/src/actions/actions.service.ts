@@ -42,7 +42,7 @@ import {
 import { ContractEventType } from 'src/user/entities/contract-event.entity';
 import { Tag } from 'src/user/entities/tag.entity';
 import { User } from 'src/user/entities/user.entity';
-import { ProfileDto } from 'src/user/user.dto';
+import { ProfileDto } from 'src/user/dto/user.dto';
 import { ILike, In, MoreThan, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import {

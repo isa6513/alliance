@@ -20,6 +20,7 @@ import { UserAwayRange } from './entities/user-away-range.entity';
 import { Community } from './entities/community.entity';
 import { CommunityInvite } from './entities/community-invite.entity';
 import { ContractEvent } from './entities/contract-event.entity';
+import { UserDevice } from './entities/user-device.entity';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ContractEvent } from './entities/contract-event.entity';
       Action,
       ActionActivity,
       Friend,
+      UserDevice,
       City,
       Notification,
       PrefillUser,

@@ -55,6 +55,7 @@
     "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.7",
     "date-fns": "^4.1.0",
+    "expo-server-sdk": "^4.0.0",
     "jest-ts-auto-mock": "^2.1.0",
     "libphonenumber-js": "^1.12.17",
     "nodemailer": "^7.0.3",

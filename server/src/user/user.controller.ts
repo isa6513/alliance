@@ -35,10 +35,10 @@ import {
   UpdateProfileDto,
   UserDto,
   userToDto,
-} from './user.dto';
+} from './dto/user.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
-import { AddUserToTagDto, CreateTagDto, TagDto } from './tag.dto';
+import { AddUserToTagDto, CreateTagDto, TagDto } from './dto/tag.dto';
 import { CommunityMemberContactInfoDto } from './dto/user-action-relations.dto';
 import {
   CommunityInviteDto,
@@ -55,6 +55,7 @@ import {
   UpdateCommunityDto,
 } from './community.dto';
 import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
+import { RegisterDeviceDto, UserDeviceDto } from './dto/device.dto';
 
 class VerifyEmailBody {
   @IsString()
@@ -739,5 +740,17 @@ export class UserController {
     @Request() req: JwtRequest,
   ) {
     await this.userService.leaveCommunity(communityId, req.user.sub);
+  }
+
+  @Post('registerDevice')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: UserDeviceDto })
+  async registerDevice(
+    @Request() req: JwtRequest,
+    @Body() body: RegisterDeviceDto,
+  ) {
+    const device = await this.userService.registerDevice(req.user.sub, body);
+    console.log('device: ', device);
+    return { id: device.id };
   }
 }

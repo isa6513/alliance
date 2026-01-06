@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { commentUrl, postUrl } from 'src/search/approutes';
-import { ProfileDto } from 'src/user/user.dto';
+import { ProfileDto } from 'src/user/dto/user.dto';
 import { ILike, In, Not, Repository } from 'typeorm';
 import {
   Notification,

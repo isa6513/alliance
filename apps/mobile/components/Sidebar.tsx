@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import {
   View,
   TouchableOpacity,
@@ -12,6 +12,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   runOnJS,
+  cancelAnimation,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
@@ -34,7 +35,7 @@ import { colors } from "../lib/style/colors";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SIDEBAR_WIDTH = SCREEN_WIDTH * 0.8;
-const EDGE_WIDTH = 100;
+const EDGE_WIDTH = 80;
 
 type NavItem = {
   name: string;
@@ -143,14 +144,13 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const translateX = useSharedValue(-SIDEBAR_WIDTH);
-  const overlayOpacity = useSharedValue(0);
+  const dragStartX = useSharedValue(-SIDEBAR_WIDTH);
 
   useEffect(() => {
     translateX.value = withTiming(isOpen ? 0 : -SIDEBAR_WIDTH, {
       duration: 250,
     });
-    overlayOpacity.value = withTiming(isOpen ? 0.5 : 0, { duration: 250 });
-  }, [isOpen, translateX, overlayOpacity]);
+  }, [isOpen, translateX]);
 
   const isActive = (matchPaths: string[]) => {
     return matchPaths.some((path) => {
@@ -166,51 +166,62 @@ export default function Sidebar({
     router.push(href as RelativePathString);
   };
 
+  const handleGestureEnd = useCallback(
+    (shouldOpen: boolean) => {
+      if (shouldOpen && !isOpen) {
+        onOpen();
+      } else if (!shouldOpen && isOpen) {
+        onClose();
+      }
+    },
+    [isOpen, onClose, onOpen]
+  );
+
   // Edge swipe gesture to open
   const edgePanGesture = Gesture.Pan()
+    .enabled(!isOpen)
     .hitSlop({ left: EDGE_WIDTH })
     .activeOffsetX(5)
-    .onUpdate((event) => {
-      if (event.translationX > 0) {
-        translateX.value = Math.min(0, -SIDEBAR_WIDTH + event.translationX);
-        overlayOpacity.value = Math.min(
-          0.5,
-          (event.translationX / SIDEBAR_WIDTH) * 0.5
-        );
-      }
+    .onBegin(() => {
+      cancelAnimation(translateX);
+      dragStartX.value = translateX.value;
     })
-    .onEnd((event) => {
-      if (event.translationX > SIDEBAR_WIDTH * 0.3) {
-        translateX.value = withTiming(0, { duration: 150 });
-        overlayOpacity.value = withTiming(0.5, { duration: 150 });
-        runOnJS(onOpen)();
-      } else {
-        translateX.value = withTiming(-SIDEBAR_WIDTH, { duration: 150 });
-        overlayOpacity.value = withTiming(0, { duration: 150 });
-      }
+    .onUpdate((event) => {
+      const nextX = Math.min(
+        0,
+        Math.max(-SIDEBAR_WIDTH, dragStartX.value + event.translationX)
+      );
+      translateX.value = nextX;
+    })
+    .onEnd(() => {
+      const shouldOpen = translateX.value > -SIDEBAR_WIDTH * 0.7;
+      translateX.value = withTiming(shouldOpen ? 0 : -SIDEBAR_WIDTH, {
+        duration: 150,
+      });
+      runOnJS(handleGestureEnd)(shouldOpen);
     });
 
   // Swipe gesture to close
   const closePanGesture = Gesture.Pan()
+    .enabled(isOpen)
     .activeOffsetX(-10)
-    .onUpdate((event) => {
-      if (event.translationX < 0) {
-        translateX.value = Math.max(-SIDEBAR_WIDTH, event.translationX);
-        overlayOpacity.value = Math.max(
-          0,
-          0.5 + (event.translationX / SIDEBAR_WIDTH) * 0.5
-        );
-      }
+    .onBegin(() => {
+      cancelAnimation(translateX);
+      dragStartX.value = translateX.value;
     })
-    .onEnd((event) => {
-      if (event.translationX < -SIDEBAR_WIDTH * 0.3) {
-        translateX.value = withTiming(-SIDEBAR_WIDTH, { duration: 150 });
-        overlayOpacity.value = withTiming(0, { duration: 150 });
-        runOnJS(onClose)();
-      } else {
-        translateX.value = withTiming(0, { duration: 150 });
-        overlayOpacity.value = withTiming(0.5, { duration: 150 });
-      }
+    .onUpdate((event) => {
+      const nextX = Math.min(
+        0,
+        Math.max(-SIDEBAR_WIDTH, dragStartX.value + event.translationX)
+      );
+      translateX.value = nextX;
+    })
+    .onEnd(() => {
+      const shouldOpen = translateX.value > -SIDEBAR_WIDTH * 0.7;
+      translateX.value = withTiming(shouldOpen ? 0 : -SIDEBAR_WIDTH, {
+        duration: 150,
+      });
+      runOnJS(handleGestureEnd)(shouldOpen);
     });
 
   const sidebarStyle = useAnimatedStyle(() => ({
@@ -218,8 +229,12 @@ export default function Sidebar({
   }));
 
   const overlayStyle = useAnimatedStyle(() => ({
-    opacity: overlayOpacity.value,
-    pointerEvents: overlayOpacity.value > 0 ? "auto" : "none",
+    opacity:
+      0.5 *
+      Math.min(
+        1,
+        Math.max(0, (translateX.value + SIDEBAR_WIDTH) / SIDEBAR_WIDTH)
+      ),
   }));
 
   return (
@@ -231,6 +246,7 @@ export default function Sidebar({
 
       {/* Overlay */}
       <Animated.View
+        pointerEvents={isOpen ? "auto" : "none"}
         style={[
           {
             position: "absolute",

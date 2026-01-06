@@ -7,7 +7,7 @@ import {
 import { Type } from 'class-transformer';
 import { IsDefined, ValidateNested } from 'class-validator';
 import { ActionDto } from 'src/actions/dto/action.dto';
-import { ProfileDto } from '../../user/user.dto';
+import { ProfileDto } from '../../user/dto/user.dto';
 import { Post } from '../entities/post.entity';
 import {
   CreateEditableContentDto,

@@ -131,49 +131,66 @@ export const AuthProvider: React.FC<
     })();
   }, [logout, getAccessToken, getRefreshToken, refreshAccessToken]);
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      console.log("sending LOGIN request:");
-      console.log({ email, password, mode: "header" });
-      const response = await authLogin({
-        body: { email, password, mode: "header" },
-      });
+  const login = useCallback(
+    async (email: string, password: string) => {
+      setIsLoading(true);
+      try {
+        console.log("sending LOGIN request:");
+        console.log({ email, password, mode: "header" });
+        const response = await authLogin({
+          body: { email, password, mode: "header" },
+        });
 
-      if (response.error || !response.data) {
-        throw new Error("Login failed");
+        if (response.error || !response.data) {
+          throw new Error("Login failed");
+        }
+
+        client.setConfig({
+          baseUrl: getApiUrl(),
+          headers: {
+            Authorization: `Bearer ${response.data.access_token}`,
+          },
+        });
+
+        if (response.data.access_token && response.data.refresh_token) {
+          await saveTokens(
+            response.data.access_token,
+            response.data.refresh_token
+          );
+        } else {
+          console.error("didn't recieve tokens: something went wrong");
+        }
+
+        const userProfile = await authMe();
+        if (!userProfile.data) {
+          throw new Error("Failed to fetch user profile");
+        }
+
+        setUser(userProfile.data?.user);
+
+        router.replace("/");
+      } catch (error) {
+        throw error;
+      } finally {
+        setIsLoading(false);
       }
+    },
+    [router, saveTokens]
+  );
 
-      client.setConfig({
-        baseUrl: getApiUrl(),
-        headers: {
-          Authorization: `Bearer ${response.data.access_token}`,
-        },
-      });
-
-      if (response.data.access_token && response.data.refresh_token) {
-        await saveTokens(
-          response.data.access_token,
-          response.data.refresh_token
-        );
-      } else {
-        console.error("didn't recieve tokens: something went wrong");
-      }
-
-      const userProfile = await authMe();
-      if (!userProfile.data) {
-        throw new Error("Failed to fetch user profile");
-      }
-
-      setUser(userProfile.data?.user);
-
-      router.replace("/");
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (
+      __DEV__ &&
+      process.env.EXPO_PUBLIC_DEV_AUTO_LOGIN === "true" &&
+      process.env.EXPO_PUBLIC_DEV_EMAIL &&
+      process.env.EXPO_PUBLIC_DEV_PASSWORD
+    ) {
+      login(
+        process.env.EXPO_PUBLIC_DEV_EMAIL,
+        process.env.EXPO_PUBLIC_DEV_PASSWORD
+      );
     }
-  };
+  }, [login]);
 
   const value: AuthContextType = {
     isAuthenticated: !!user,

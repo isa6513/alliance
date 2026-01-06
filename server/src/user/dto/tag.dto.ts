@@ -1,5 +1,5 @@
 import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
-import { Tag } from './entities/tag.entity';
+import { Tag } from '../entities/tag.entity';
 import { ProfileDto } from './user.dto';
 import { Type } from 'class-transformer';
 import { Allow, IsNumber } from 'class-validator';

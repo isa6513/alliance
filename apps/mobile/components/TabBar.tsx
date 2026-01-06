@@ -54,7 +54,11 @@ export default function TabBar() {
             onPress={() => router.push(tab.href)}
             activeOpacity={0.7}
           >
-            <Icon size={24} color={active ? colors.green : "#aaa"} />
+            <Icon
+              size={24}
+              color={active ? colors.green : "#888"}
+              strokeWidth={active ? 2.5 : 2}
+            />
           </TouchableOpacity>
         );
       })}

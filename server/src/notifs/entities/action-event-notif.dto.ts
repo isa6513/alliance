@@ -1,5 +1,5 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
-import { ProfileDto } from 'src/user/user.dto';
+import { ProfileDto } from 'src/user/dto/user.dto';
 import { ActionEventNotif } from './action-event-notif.entity';
 
 export class ActionEventNotifDto extends OmitType(ActionEventNotif, ['user']) {

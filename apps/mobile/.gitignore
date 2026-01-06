@@ -40,3 +40,6 @@ app-example
 
 ios/
 android/
+
+local-ip.ts
+.env

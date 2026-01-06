@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { IsISO8601 } from 'class-validator';
 import { ActionEventNotifType } from 'src/notifs/entities/action-event-notif.entity';
 import { ActionStatus } from '../entities/action-event.entity';
-import { ProfileDto } from 'src/user/user.dto';
+import { ProfileDto } from 'src/user/dto/user.dto';
 
 export class NotificationScheduleQueryDto {
   @ApiProperty({

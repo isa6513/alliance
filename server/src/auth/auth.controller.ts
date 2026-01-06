@@ -19,7 +19,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Response } from 'express';
-import { UserDto } from '../user/user.dto';
+import { UserDto } from '../user/dto/user.dto';
 import { AuthService } from './auth.service';
 import { AccessToken, AuthMeResponseDto } from './dto/authtokens.dto';
 import ForgotPasswordDto, { ResetPasswordDto } from './dto/forgotpassword.dto';

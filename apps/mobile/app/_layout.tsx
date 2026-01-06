@@ -1,7 +1,7 @@
 import { Slot } from "expo-router";
 import { AuthProvider } from "../lib/AuthContext";
 import { Platform } from "react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { client } from "@alliance/shared/client/client.gen";
 import WebTokenStore from "../lib/ExpoWebTokenStore";
 import SecureStorage from "../lib/SecureStorage";
@@ -13,6 +13,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
+import { userRegisterDevice } from "@alliance/shared/client";
+import * as SecureStore from "expo-secure-store";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -69,8 +71,6 @@ async function registerForPushNotificationsAsync() {
     } catch (e: unknown) {
       handleRegistrationError(`${e}`);
     }
-  } else {
-    handleRegistrationError("Must use physical device for push notifications");
   }
 }
 
@@ -96,15 +96,41 @@ export default function RootLayout() {
     return SecureStorage;
   }, []);
 
-  const [expoPushToken, setExpoPushToken] = useState("");
   const [notification, setNotification] = useState<
     Notifications.Notification | undefined
   >(undefined);
 
+  const registerToken = useCallback(async (token?: string) => {
+    if (!token) {
+      return;
+    }
+    const deviceId = await SecureStore.getItem("deviceId");
+    const registeredToken = await SecureStore.getItem("registeredToken");
+    if (registeredToken === token) {
+      return;
+    }
+    console.log("registering token: ", token);
+    const resp = await userRegisterDevice({
+      body: {
+        deviceType: Device.modelId ?? Device.modelName,
+        expoPushToken: token,
+        deviceId: deviceId ?? undefined,
+      },
+    });
+    if (resp.error) {
+      console.error("registerToken error: ", resp.error);
+    }
+    if (resp.data) {
+      const id = resp.data.id;
+      await SecureStore.setItemAsync("deviceId", id);
+      await SecureStore.setItemAsync("registeredToken", token);
+    }
+  }, []);
+
   useEffect(() => {
     registerForPushNotificationsAsync()
-      .then((token) => setExpoPushToken(token ?? ""))
-      .catch((error: any) => setExpoPushToken(`${error}`));
+      .then((token) => registerToken(token))
+      .catch((error: any) => console.error(`${error}`));
 
     const notificationListener = Notifications.addNotificationReceivedListener(
       (notification) => {

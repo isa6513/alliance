@@ -23,11 +23,11 @@ import {
   OnboardingDto,
   ProfileDto,
   UpdateProfileDto,
-} from './user.dto';
+} from './dto/user.dto';
 import { User } from './entities/user.entity';
 import { groupInvitesUrl, profileUrl } from 'src/search/approutes';
 import { Tag } from './entities/tag.entity';
-import { CreateTagDto } from './tag.dto';
+import { CreateTagDto } from './dto/tag.dto';
 import { Community } from './entities/community.entity';
 import { CreateCommunityDto, UpdateCommunityDto } from './community.dto';
 import { CommunityMemberContactInfoDto } from './dto/user-action-relations.dto';
@@ -57,6 +57,8 @@ import {
   ContractEventType,
 } from './entities/contract-event.entity';
 import { Relations } from 'src/utils/Repository';
+import { RegisterDeviceDto, UserDeviceDto } from './dto/device.dto';
+import { UserDevice } from './entities/user-device.entity';
 
 const defaultTimeZone = 'America/Los_Angeles';
 const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
@@ -95,6 +97,8 @@ export class UserService {
     private readonly contractEventRepository: Repository<ContractEvent>,
     @InjectRepository(CommunityInvite)
     private readonly communityInviteRepository: Repository<CommunityInvite>,
+    @InjectRepository(UserDevice)
+    private readonly userDeviceRepository: Repository<UserDevice>,
     private readonly jwtService: JwtService,
     private readonly imagesService: ImagesService,
     private readonly mailService: MailService,
@@ -1446,5 +1450,31 @@ export class UserService {
     return this.userRepository
       .find({ select: ['id'] })
       .then((users) => users.map((user) => user.id));
+  }
+
+  async registerDevice(
+    userId: number,
+    body: RegisterDeviceDto,
+  ): Promise<UserDeviceDto> {
+    const user = await this.findOneOrFail(userId, { devices: true });
+    if (body.deviceId) {
+      const existingDevice = await this.userDeviceRepository.findOne({
+        where: { id: body.deviceId, user: { id: userId } },
+      });
+      if (existingDevice) {
+        this.userDeviceRepository.update(existingDevice.id, {
+          expoPushToken: body.expoPushToken,
+        });
+        return existingDevice;
+      }
+    }
+
+    const device = this.userDeviceRepository.create({
+      deviceType: body.deviceType,
+      expoPushToken: body.expoPushToken,
+      user,
+    });
+    const savedDevice = await this.userDeviceRepository.save(device);
+    return savedDevice;
   }
 }

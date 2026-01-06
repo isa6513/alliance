@@ -19,7 +19,7 @@ import {
   CreateEditableContentDto,
   EditableContentDto,
 } from 'src/forum/dto/editablecontent.dto';
-import { ProfileDto } from 'src/user/user.dto';
+import { ProfileDto } from 'src/user/dto/user.dto';
 import { UserActionRelation } from '../actions.service';
 import { ActionActivity } from '../entities/action-activity.entity';
 import { ActionEvent, ActionStatus } from '../entities/action-event.entity';

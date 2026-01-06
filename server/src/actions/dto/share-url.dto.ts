@@ -1,6 +1,6 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { ActionShareUrl } from '../entities/action-share-url.entity';
-import { ProfileDto } from 'src/user/user.dto';
+import { ProfileDto } from 'src/user/dto/user.dto';
 import { Type } from 'class-transformer';
 export class ShareUrlDto extends PickType(ActionShareUrl, [
   'url',
