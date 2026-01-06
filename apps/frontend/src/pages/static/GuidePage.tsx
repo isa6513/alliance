@@ -82,9 +82,9 @@ const GuidePage: React.FC = () => {
               id="introduction"
               className=""
               markdownContent="
-The Alliance is a group of individuals cooperating to improve the world. Each member spends a small fraction of their time completing tasks that advance our shared goals.
+The Alliance is a global group of individuals cooperating to improve the world. Each member spends a small fraction of their time completing tasks that advance our shared goals.
 
-Our long-term goal is to unite humanity behind a global, expert-developed plan to end global crises. Right now, we are running experiments to test our organizational structures and processes.
+Our long-term goal is to unite humanity behind a democratic, expert-developed plan to end global crises. Right now, we are running experiments to test our organizational structures and processes.
 "
             />
 
