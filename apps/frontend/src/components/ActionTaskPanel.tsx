@@ -85,6 +85,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   }
 
   if (
+    !action.commitmentless &&
     (action.status === "gathering_commitments" ||
       action.status === "office_action") &&
     !missedDeadline
