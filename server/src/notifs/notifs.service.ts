@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/mail/mail.service';
 import { MmsService } from 'src/mms/mms.service';
 import { User } from 'src/user/entities/user.entity';
-import { LessThan, Repository } from 'typeorm';
+import { IsNull, LessThan, Repository } from 'typeorm';
 import { ActionEventNotif } from './entities/action-event-notif.entity';
 import {
   Notification,
@@ -73,12 +73,15 @@ export class NotifsService {
     if (notif.user.id !== userId) {
       throw new UnauthorizedException();
     }
-    return this.notifsRepository.update(id, { readAt: new Date() });
+    return this.notifsRepository.update(
+      { id: id, readAt: IsNull() },
+      { readAt: new Date() },
+    );
   }
 
   async setReadAll(userId: number) {
     return this.notifsRepository.update(
-      { user: { id: userId } },
+      { user: { id: userId }, readAt: IsNull() },
       { readAt: new Date() },
     );
   }
