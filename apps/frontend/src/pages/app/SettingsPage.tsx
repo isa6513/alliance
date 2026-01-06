@@ -19,6 +19,7 @@ import { href, useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
 import LargeCheckbox from "@alliance/sharedweb/ui/LargeCheckbox";
 import FormInput from "@alliance/sharedweb/ui/FormInput";
+import YesNoToggle from "@alliance/sharedweb/ui/YesNoToggle";
 import { useAuth } from "../../lib/AuthContext";
 import AwayRangesSection from "../../components/AwayRangesSection";
 import TimeZoneSelect from "@alliance/sharedweb/forms/TimeZoneSelect";
@@ -321,31 +322,11 @@ const SettingsPage: React.FC = () => {
                   </p>
                 </div>
                 <div className="flex flex-row gap-x-2">
-                  <Button
-                    color={
-                      editableUser.anonymous
-                        ? ButtonColor.Black
-                        : ButtonColor.Light
-                    }
-                    onClick={() =>
-                      updateEditableUser({
-                        anonymous: true,
-                        shareInfoPublicly: false,
-                      })
-                    }
-                  >
-                    Yes
-                  </Button>
-                  <Button
-                    color={
-                      !editableUser.anonymous
-                        ? ButtonColor.Black
-                        : ButtonColor.Light
-                    }
-                    onClick={() => updateEditableUser({ anonymous: false })}
-                  >
-                    No
-                  </Button>
+                  <YesNoToggle
+                    value={editableUser.anonymous}
+                    onChange={(next) => updateEditableUser({ anonymous: next })}
+                    ariaLabel="Anonymous account"
+                  />
                 </div>
               </Card>
 
@@ -363,32 +344,14 @@ const SettingsPage: React.FC = () => {
                   </p>
                 </div>
                 <div className="flex flex-row gap-x-2">
-                  <Button
-                    color={
-                      editableUser.shareInfoPublicly
-                        ? ButtonColor.Black
-                        : ButtonColor.Light
+                  <YesNoToggle
+                    value={editableUser.shareInfoPublicly}
+                    onChange={(next) =>
+                      updateEditableUser({ shareInfoPublicly: next })
                     }
-                    onClick={() =>
-                      updateEditableUser({ shareInfoPublicly: true })
-                    }
+                    ariaLabel="Share information publicly"
                     disabled={editableUser.anonymous}
-                  >
-                    Yes
-                  </Button>
-                  <Button
-                    color={
-                      !editableUser.shareInfoPublicly
-                        ? ButtonColor.Black
-                        : ButtonColor.Light
-                    }
-                    onClick={() =>
-                      updateEditableUser({ shareInfoPublicly: false })
-                    }
-                    disabled={editableUser.anonymous}
-                  >
-                    No
-                  </Button>
+                  />
                 </div>
               </Card>
             </div>

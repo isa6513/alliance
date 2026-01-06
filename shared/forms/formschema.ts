@@ -112,6 +112,7 @@ export const AUTO_EXTRACT_FIELD_KINDS = [
   "timezone",
   "city",
   "checkbox",
+  "custom",
 ] as const;
 export type AutoExtractFieldKind = (typeof AUTO_EXTRACT_FIELD_KINDS)[number];
 export type RadioField = BaseField<"radio"> & {
@@ -148,6 +149,7 @@ export type FileField = BaseField<"file">;
 export type CustomComponentField = BaseField<"custom"> & {
   componentId: string;
   componentConfig?: Record<string, unknown>;
+  autoExtractUserData?: { target: CheckboxExtractionTarget };
 };
 
 export type AnyField =

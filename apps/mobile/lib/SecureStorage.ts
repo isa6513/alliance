@@ -3,10 +3,10 @@ import { AuthTokenStore } from "./AuthContext";
 
 const SecureStorage: AuthTokenStore = {
   setItem: (key: string, value: string) => {
-    return SecureStore.setItemAsync(key, value);
+    return Promise.resolve(SecureStore.setItem(key, value));
   },
   getItem: (key: string) => {
-    return SecureStore.getItemAsync(key);
+    return Promise.resolve(SecureStore.getItem(key));
   },
   deleteItem: (key: string) => {
     return SecureStore.deleteItemAsync(key);

@@ -340,20 +340,16 @@ export function EditableCustomComponentField({
             onChange={(checked) => onUpdate({ required: checked })}
           />
 
-          <div className="space-y-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              Component Configuration
-            </label>
-            {selectedComponent?.configFields?.length ? (
+          {selectedComponent?.configFields?.length ? (
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Component Configuration
+              </label>
               <div className="space-y-3">
                 {selectedComponent.configFields.map(renderConfigField)}
               </div>
-            ) : (
-              <p className="text-xs text-gray-500">
-                This component does not require any configuration.
-              </p>
-            )}
-          </div>
+            </div>
+          ) : null}
         </div>
       )}
     </FieldWrapper>

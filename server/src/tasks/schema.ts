@@ -18,7 +18,8 @@ export type FieldKind =
   | 'time'
   | 'timezone'
   | 'file'
-  | 'city';
+  | 'city'
+  | 'custom';
 
 type Option<V extends string = string> = { label: string; value: V };
 
@@ -135,6 +136,11 @@ export type CityField = BaseField<'city'> & {
 };
 // Persist file answers as string URL/key
 export type FileField = BaseField<'file'>;
+export type CustomComponentField = BaseField<'custom'> & {
+  componentId: string;
+  componentConfig?: Record<string, unknown>;
+  autoExtractUserData?: { target: CheckboxExtractionTarget };
+};
 
 export type AnyField =
   | TextField
@@ -151,7 +157,8 @@ export type AnyField =
   | TimeField
   | TimezoneField
   | CityField
-  | FileField;
+  | FileField
+  | CustomComponentField;
 
 export class Page {
   id: string;

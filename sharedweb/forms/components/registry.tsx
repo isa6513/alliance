@@ -1,6 +1,7 @@
 import type { CustomComponentDefinition } from "./types";
 import ExampleContractComponent from "./ExampleContractComponent";
 import ActionShareUrlComponent from "./ActionShareUrlComponent";
+import ShareInfoPubliclyToggleComponent from "./ShareInfoPubliclyToggleComponent";
 
 export const customComponentRegistry: CustomComponentDefinition[] = [
   {
@@ -23,6 +24,12 @@ export const customComponentRegistry: CustomComponentDefinition[] = [
         type: "number",
       },
     ],
+  },
+  {
+    id: "share-info-publicly-toggle",
+    label: "Share Info Publicly Toggle",
+    description: "Toggle a member's public profile visibility setting.",
+    component: ShareInfoPubliclyToggleComponent,
   },
 ];
 

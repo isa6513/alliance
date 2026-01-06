@@ -79,6 +79,7 @@ const TestPushNotification: React.FC = () => {
         return;
       }
       setSuccess("Push notification sent.");
+      setError(null);
     } catch (err) {
       console.error("Failed to send push notification", err);
       setError("Failed to send push notification: " + (err as Error).message);

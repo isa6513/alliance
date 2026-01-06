@@ -4,6 +4,7 @@ import type {
   CheckboxField,
   CheckboxExtractionTarget,
   CityField,
+  CustomComponentField,
   PhoneField,
   TimeField,
   TimezoneField,
@@ -34,7 +35,8 @@ type ExtractableField =
   | TimeField
   | TimezoneField
   | CityField
-  | CheckboxField;
+  | CheckboxField
+  | CustomComponentField;
 
 function supportsExtraction(field: AnyField): field is ExtractableField {
   return AUTO_EXTRACT_FIELD_KINDS.includes(
@@ -44,8 +46,11 @@ function supportsExtraction(field: AnyField): field is ExtractableField {
 
 function hasExtractionEnabled(field: AnyField): boolean {
   if (!supportsExtraction(field)) return false;
-  if (field.kind === "checkbox") {
-    return Boolean((field as CheckboxField).autoExtractUserData?.target);
+  if (field.kind === "checkbox" || field.kind === "custom") {
+    return Boolean(
+      (field as CheckboxField | CustomComponentField).autoExtractUserData
+        ?.target
+    );
   }
   return Boolean(
     (field as PhoneField | TimeField | TimezoneField | CityField)
@@ -54,8 +59,9 @@ function hasExtractionEnabled(field: AnyField): boolean {
 }
 
 function getExtractionLabel(field: AnyField): string {
-  if (field.kind === "checkbox") {
-    const target = (field as CheckboxField).autoExtractUserData?.target;
+  if (field.kind === "checkbox" || field.kind === "custom") {
+    const target = (field as CheckboxField | CustomComponentField)
+      .autoExtractUserData?.target;
     if (target === "shareInfoPublicly") {
       return "Extracting into: Share info publicly";
     }
@@ -253,7 +259,11 @@ export function FieldWrapper<T extends AnyField>({
   const handleCheckboxExtractionTargetChange = (
     target: CheckboxExtractionTarget | ""
   ) => {
-    if (!isCurrentFormField || field.kind !== "checkbox") return;
+    if (
+      !isCurrentFormField ||
+      (field.kind !== "checkbox" && field.kind !== "custom")
+    )
+      return;
     onUpdate({
       autoExtractUserData: target ? { target } : undefined,
     } as unknown as Partial<T>);
@@ -337,7 +347,7 @@ export function FieldWrapper<T extends AnyField>({
                 {supportsExtraction(field) && (
                   <>
                     <div className="border-t border-gray-100 my-1" />
-                    {field.kind === "checkbox" ? (
+                    {field.kind === "checkbox" || field.kind === "custom" ? (
                       <div className="px-3 py-1.5">
                         <label className="block text-gray-700 mb-1">
                           Extract response into:
@@ -345,8 +355,8 @@ export function FieldWrapper<T extends AnyField>({
                         <select
                           className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                           value={
-                            (field as CheckboxField).autoExtractUserData
-                              ?.target || ""
+                            (field as CheckboxField | CustomComponentField)
+                              .autoExtractUserData?.target || ""
                           }
                           onChange={(e) =>
                             handleCheckboxExtractionTargetChange(

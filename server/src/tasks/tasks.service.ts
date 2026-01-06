@@ -41,6 +41,7 @@ import {
   CheckboxExtractionTarget,
   CheckboxField,
   CityFieldValue,
+  CustomComponentField,
   FormSchema,
   isQuestionField,
   isQuestionVisible,
@@ -446,18 +447,28 @@ export class TasksService {
         continue;
       }
       for (const field of page.fields) {
-        if (field.kind === 'checkbox') {
-          const checkboxField = field as CheckboxField;
-          if (checkboxField.autoExtractUserData?.target === target) {
-            const answer = answers[field.id];
-            // Only return a value if the checkbox was explicitly answered
-            if (typeof answer === 'boolean') {
-              return answer;
-            }
-            // Field wasn't answered - don't overwrite existing user setting
-            return null;
+        if (field.kind !== 'checkbox' && field.kind !== 'custom') {
+          continue;
+        }
+        const extractField = field as CheckboxField | CustomComponentField;
+        if (extractField.autoExtractUserData?.target !== target) {
+          continue;
+        }
+        const answer = answers[field.id];
+        if (typeof answer === 'boolean') {
+          return answer;
+        }
+        if (typeof answer === 'string') {
+          const normalized = answer.trim().toLowerCase();
+          if (normalized === 'true') {
+            return true;
+          }
+          if (normalized === 'false') {
+            return false;
           }
         }
+        // Field wasn't answered - don't overwrite existing user setting
+        return null;
       }
     }
 
