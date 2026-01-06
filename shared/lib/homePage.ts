@@ -165,7 +165,9 @@ export function useHomePageActions(actions: ActionWithAwayStatus[] | null) {
   );
 
   const currentTask: ActionWithAwayStatus | null =
-    newActions[0] || todoActions[0] || null;
+    (newActions.length > 0 && newActions[0]) ||
+    (todoActions.length > 0 && todoActions[0]) ||
+    null;
 
   const currentWeekTodoActions = todoActions.filter((action) => {
     return isActionInCurrentWeek(action);

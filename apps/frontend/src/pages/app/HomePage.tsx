@@ -99,16 +99,17 @@ const HomePage = () => {
     }
 
     const dismissProps: LargeActionCardProps["dismissProps"] =
-      currentTask.awayStatus === TaskAwayStatus.NOT_AWAY
-        ? undefined
-        : {
+    currentTask && 
+      currentTask.awayStatus !== TaskAwayStatus.NOT_AWAY 
+        ? {
             message: {
               [TaskAwayStatus.AWAY_CURRENTLY]: TASK_MESSAGE_CURRENTLY_AWAY,
               [TaskAwayStatus.AWAY_LATER]: TASK_MESSAGE_WILL_BE_AWAY,
               [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_MESSAGE_WAS_AWAY,
-            }[currentTask.awayStatus],
+            }[currentTask?.awayStatus],
             handleDismiss: () => handleDismissAction(currentTask.id),
-          };
+          }
+        : undefined;
 
     return (
       <div
