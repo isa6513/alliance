@@ -9,7 +9,7 @@ import Spinner from "../../components/Spinner";
 import TwoColumnLayout from "../../components/TwoColumnLayout";
 import { useAuth } from "../../lib/AuthContext";
 import { useCIDFromParams } from "../../lib/utils";
-import LargeActionCard from "./LargeActionCard";
+import LargeActionCard, { LargeActionCardProps } from "./LargeActionCard";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
@@ -18,6 +18,9 @@ import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import {
   noTasksContractSuspended,
   noTasksToDoRightNow,
+  TASK_MESSAGE_CURRENTLY_AWAY,
+  TASK_MESSAGE_WAS_AWAY,
+  TASK_MESSAGE_WILL_BE_AWAY,
 } from "@alliance/shared/lib/copy";
 import { TaskAwayStatus } from "@alliance/shared/lib/actionUtils";
 
@@ -95,6 +98,18 @@ const HomePage = () => {
       );
     }
 
+    const dismissProps: LargeActionCardProps["dismissProps"] =
+      currentTask.awayStatus === TaskAwayStatus.NOT_AWAY
+        ? undefined
+        : {
+            message: {
+              [TaskAwayStatus.AWAY_CURRENTLY]: TASK_MESSAGE_CURRENTLY_AWAY,
+              [TaskAwayStatus.AWAY_LATER]: TASK_MESSAGE_WILL_BE_AWAY,
+              [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_MESSAGE_WAS_AWAY,
+            }[currentTask.awayStatus],
+            handleDismiss: () => handleDismissAction(currentTask.id),
+          };
+
     return (
       <div
         className={
@@ -104,7 +119,7 @@ const HomePage = () => {
         {currentTask && currentTask.userRelation ? (
           <LargeActionCard
             action={currentTask}
-            handleDismissAction={() => handleDismissAction(currentTask.id)}
+            dismissProps={dismissProps}
             userRelation={currentTask.userRelation as "joined" | "none"}
             friendActivities={friendActivities.filter(
               (activity) => activity.actionId === currentTask.id

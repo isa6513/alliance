@@ -10,14 +10,8 @@ import {
   getLastAndNextEvent,
   LargeActionCardPropsShared,
 } from "@alliance/shared/lib/largeActionCard";
-import { TaskAwayStatus } from "@alliance/shared/lib/actionUtils";
 import { CardStyle } from "@alliance/shared/styles/card";
 import Card from "@alliance/sharedweb/ui/Card";
-import {
-  TASK_MESSAGE_CURRENTLY_AWAY,
-  TASK_MESSAGE_WAS_AWAY,
-  TASK_MESSAGE_WILL_BE_AWAY,
-} from "@alliance/shared/lib/copy";
 
 export interface LargeActionCardProps extends LargeActionCardPropsShared {
   showDetails?: boolean;
@@ -36,7 +30,7 @@ enum LargeActionCardState {
 
 const LargeActionCard: React.FC<LargeActionCardProps> = ({
   action,
-  handleDismissAction = () => {},
+  dismissProps,
   userRelation,
   friendActivities,
   onUpdateActionState,
@@ -72,24 +66,16 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
 
   return (
     <>
-      {action.awayStatus !== TaskAwayStatus.NOT_AWAY && (
+      {dismissProps && (
         <Card
           style={CardStyle.Grey}
           className="gap-y-3 rounded-b-none border-b-0"
         >
-          <div>
-            {
-              {
-                [TaskAwayStatus.AWAY_CURRENTLY]: TASK_MESSAGE_CURRENTLY_AWAY,
-                [TaskAwayStatus.AWAY_LATER]: TASK_MESSAGE_WILL_BE_AWAY,
-                [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_MESSAGE_WAS_AWAY,
-              }[action.awayStatus]
-            }
-          </div>
+          <div>{dismissProps.message}</div>
           <Button
             className="w-full gap-x-1"
             color={ButtonColor.Grey}
-            onClick={handleDismissAction}
+            onClick={dismissProps.handleDismiss}
           >
             <X size={14} className="text-red-500" />
             Dismiss action
@@ -103,7 +89,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             : "opacity-100"
         } ${className} w-full relative 
          ${state === LargeActionCardState.Minified ? "pb-4" : ""} ${
-          action.awayStatus === TaskAwayStatus.NOT_AWAY ? "rounded" : "rounded-t-none"
+          dismissProps ? "rounded-t-none" : "rounded"
         }`}
       >
         <div className="p-0 sm:p-2">
