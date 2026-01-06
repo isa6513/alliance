@@ -578,6 +578,16 @@ export class ActionsController {
     return this.actionsService.updateActivity(id, activityDto, req.user.sub);
   }
 
+  @Post('dismiss/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ActionActivityDto })
+  dismissAction(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: JwtRequest,
+  ): Promise<ActionActivityDto> {
+    return this.actionsService.dismissAction(req.user.sub, id);
+  }
+
   @Post('createActivity')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionActivityDto })

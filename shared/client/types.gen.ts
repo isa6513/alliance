@@ -222,7 +222,7 @@ export type ActionEvent = {
 /**
  * Type of action activity
  */
-export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete';
+export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete' | 'user_dismissed';
 
 export type FormResponse = {
     id: number;
@@ -3934,6 +3934,21 @@ export type ActionsUpdateActivityResponses = {
 };
 
 export type ActionsUpdateActivityResponse = ActionsUpdateActivityResponses[keyof ActionsUpdateActivityResponses];
+
+export type ActionsDismissActionData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/dismiss/{id}';
+};
+
+export type ActionsDismissActionResponses = {
+    200: ActionActivityDto;
+};
+
+export type ActionsDismissActionResponse = ActionsDismissActionResponses[keyof ActionsDismissActionResponses];
 
 export type ActionsCreateActivityData = {
     body: CreateActionActivityDto;

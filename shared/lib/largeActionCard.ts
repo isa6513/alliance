@@ -7,6 +7,7 @@ export interface LargeActionCardPropsShared
   action: ActionWithAwayStatus;
   userRelation: Extract<UserActionRelation, "joined" | "none">;
   onUpdateActionState: () => void;
+  handleDismissAction?: () => void;
 }
 export function getLastAndNextEvent(action: ActionDto) {
   const pastEvents = action.events.filter(

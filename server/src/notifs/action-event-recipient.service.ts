@@ -52,22 +52,38 @@ export class ActionEventRecipientService {
     return lastEventBefore?.type === ContractEventType.SIGNED;
   }
 
-  /** Checks contract status and cohorts for event */
-  public userShouldCompleteEvent(
-    user: User,
-    eventDate: Date,
-    targetTagIds: Set<number>,
-    everyoneShouldComplete: boolean,
-    useManualCohort: boolean,
-    manualCohortUsers?: User[],
-  ): boolean {
+  public userShouldParticipate(params: {
+    eventDate: Date;
+    everyoneShouldComplete: boolean;
+    manualCohortUsers?: User[];
+    targetTagIds: Set<number>;
+    useManualCohort: boolean;
+    user: User;
+    userDismissed: boolean;
+  }): boolean {
+    const {
+      eventDate,
+      everyoneShouldComplete,
+      manualCohortUsers,
+      targetTagIds,
+      useManualCohort,
+      user,
+      userDismissed,
+    } = params;
+
     if (useManualCohort) {
       return manualCohortUsers?.some((m) => m.id === user.id) ?? false;
     }
+
+    if (userDismissed) {
+      return false;
+    }
+    if (!user.tags.some((tag) => targetTagIds.has(tag.id))) {
+      return false;
+    }
     return (
-      (this.isContractActiveAtDate(user.contractEvents, eventDate) ||
-        everyoneShouldComplete) &&
-      user.tags.some((tag) => targetTagIds.has(tag.id))
+      this.isContractActiveAtDate(user.contractEvents, eventDate) ||
+      everyoneShouldComplete
     );
   }
 
@@ -108,15 +124,26 @@ export class ActionEventRecipientService {
       throw new Error(`Event not found: ${eventId}`);
     }
 
+    const usersDismissed = new Set(
+      (
+        await this.actionActivityRepository.find({
+          where: {
+            action: { id: action.id },
+            type: ActionActivityType.USER_DISMISSED,
+          },
+        })
+      ).map((a) => a.userId),
+    );
     const filterToEligible = (user: User) =>
-      this.userShouldCompleteEvent(
-        user,
-        event.date,
+      this.userShouldParticipate({
+        eventDate: event.date,
+        everyoneShouldComplete: action.everyoneShouldComplete,
+        manualCohortUsers: action.manualCohortUsers,
         targetTagIds,
-        action.everyoneShouldComplete,
-        action.useManualCohort,
-        action.manualCohortUsers,
-      ) === true &&
+        useManualCohort: action.useManualCohort,
+        user,
+        userDismissed: usersDismissed.has(user.id),
+      }) &&
       !this.userService.isUserAwayInRange(user, {
         startDate: event.date,
         endDate: this.getNextEvent({
@@ -170,17 +197,26 @@ export class ActionEventRecipientService {
     );
     const idToUser = new Map(usersWithTags.map((user) => [user.id, user]));
 
-    const filterToEligible = (users: User[]) =>
-      users.filter((user) =>
-        this.userShouldCompleteEvent(
-          idToUser.get(user.id)!,
-          event.date,
-          targetTagIds,
-          event.action.everyoneShouldComplete,
-          event.action.useManualCohort,
-          event.action.manualCohortUsers,
-        ),
-      );
+    const usersDismissed = new Set(
+      (
+        await this.actionActivityRepository.find({
+          where: {
+            action: { id: event.action.id },
+            type: ActionActivityType.USER_DISMISSED,
+          },
+        })
+      ).map((a) => a.userId),
+    );
+    const filterToEligible = (user: User) =>
+      this.userShouldParticipate({
+        eventDate: event.date,
+        everyoneShouldComplete: event.action.everyoneShouldComplete,
+        manualCohortUsers: event.action.manualCohortUsers,
+        targetTagIds,
+        useManualCohort: event.action.useManualCohort,
+        user: idToUser.get(user.id)!,
+        userDismissed: usersDismissed.has(user.id),
+      });
 
     const actions = actionSuite ? actionSuite.actions : [event.action];
 
@@ -209,9 +245,9 @@ export class ActionEventRecipientService {
       );
     }
 
-    return filterToEligible(users).filter(
-      (user) => !userToHasCompletedAllActions.get(user.id),
-    );
+    return users
+      .filter(filterToEligible)
+      .filter((user) => !userToHasCompletedAllActions.get(user.id));
   }
 
   async getFilteredUsersForEvent(

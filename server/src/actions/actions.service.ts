@@ -366,6 +366,18 @@ export class ActionsService {
       }
     }
 
+    const actionsDismissed = new Set(
+      (
+        await this.actionActivityRepository.find({
+          where: {
+            user: { id: userId },
+            type: ActionActivityType.USER_DISMISSED,
+            action: { id: In(filtered.map((action) => action.id)) },
+          },
+        })
+      ).map((activity) => activity.actionId),
+    );
+
     return await Promise.all(
       filtered.map(async (action) => {
         let shouldParticipate = false;
@@ -379,16 +391,17 @@ export class ActionsService {
             (action.participatingTags || []).map((tag) => tag.id),
           );
           shouldParticipate =
-            this.actionEventRecipientService.userShouldCompleteEvent(
-              user,
-              action.events.find(
+            this.actionEventRecipientService.userShouldParticipate({
+              eventDate: action.events.find(
                 (event) => event.newStatus === ActionStatus.MemberAction,
               )!.date,
+              everyoneShouldComplete: action.everyoneShouldComplete,
+              manualCohortUsers: action.manualCohortUsers,
               targetTagIds,
-              action.everyoneShouldComplete,
-              action.useManualCohort,
-              action.manualCohortUsers,
-            );
+              useManualCohort: action.useManualCohort,
+              user,
+              userDismissed: actionsDismissed.has(action.id),
+            });
         }
 
         return new ActionDto(action, {
@@ -534,6 +547,17 @@ export class ActionsService {
       where: { action: { id: actionId }, user: { id: userId } },
     });
     return this.getActionRelationFromActivities(activities);
+  }
+
+  async dismissAction(
+    userId: number,
+    actionId: number,
+  ): Promise<ActionActivityDto> {
+    return await this.createActionActivity(
+      actionId,
+      userId,
+      ActionActivityType.USER_DISMISSED,
+    );
   }
 
   async createActionActivity(

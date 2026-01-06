@@ -23,7 +23,8 @@ import { TaskAwayStatus } from "@alliance/shared/lib/actionUtils";
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { actions, loading } = useOutletContext<AppLayoutOutletContext>();
+  const { actions, loading, handleDismissAction } =
+    useOutletContext<AppLayoutOutletContext>();
 
   const { user } = useAuth();
 
@@ -103,6 +104,7 @@ const HomePage = () => {
         {currentTask && currentTask.userRelation ? (
           <LargeActionCard
             action={currentTask}
+            handleDismissAction={() => handleDismissAction(currentTask.id)}
             userRelation={currentTask.userRelation as "joined" | "none"}
             friendActivities={friendActivities.filter(
               (activity) => activity.actionId === currentTask.id
@@ -127,7 +129,15 @@ const HomePage = () => {
         )}
       </div>
     );
-  }, [actions, loading, currentTask, user, friendActivities, navigate]);
+  }, [
+    actions,
+    loading,
+    currentTask,
+    user,
+    friendActivities,
+    navigate,
+    handleDismissAction,
+  ]);
 
   const numTodo = todoActions.filter(
     (action) => action.awayStatus === TaskAwayStatus.NOT_AWAY

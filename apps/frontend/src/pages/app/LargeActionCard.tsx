@@ -5,17 +5,19 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ActionTaskPanel from "../../components/ActionTaskPanel";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 import TaskTimeInfo from "./TaskTimeInfo";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 import {
   getLastAndNextEvent,
   LargeActionCardPropsShared,
 } from "@alliance/shared/lib/largeActionCard";
+import { TaskAwayStatus } from "@alliance/shared/lib/actionUtils";
+import { CardStyle } from "@alliance/shared/styles/card";
+import Card from "@alliance/sharedweb/ui/Card";
 import {
   TASK_MESSAGE_CURRENTLY_AWAY,
   TASK_MESSAGE_WAS_AWAY,
   TASK_MESSAGE_WILL_BE_AWAY,
 } from "@alliance/shared/lib/copy";
-import { TaskAwayStatus } from "@alliance/shared/lib/actionUtils";
 
 export interface LargeActionCardProps extends LargeActionCardPropsShared {
   showDetails?: boolean;
@@ -34,6 +36,7 @@ enum LargeActionCardState {
 
 const LargeActionCard: React.FC<LargeActionCardProps> = ({
   action,
+  handleDismissAction = () => {},
   userRelation,
   friendActivities,
   onUpdateActionState,
@@ -68,64 +71,76 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   const { lastEvent, nextEvent } = getLastAndNextEvent(action);
 
   return (
-    <div
-      className={`p-6 border border-zinc-200 rounded transition-all duration-300 ${
-        state === LargeActionCardState.Closed
-          ? "opacity-0 overflow-hidden"
-          : "opacity-100"
-      } ${className} w-full relative 
+    <>
+      <Button
+        className="self-end mb-2 gap-x-1"
+        color={ButtonColor.Grey}
+        onClick={handleDismissAction}
+      >
+        <X size={14} />
+        Dismiss
+      </Button>
+      <div
+        className={`p-6 border border-zinc-200 rounded transition-all duration-300 ${
+          state === LargeActionCardState.Closed
+            ? "opacity-0 overflow-hidden"
+            : "opacity-100"
+        } ${className} w-full relative 
          ${state === LargeActionCardState.Minified ? "pb-4" : ""}`}
-    >
-      {action.awayStatus !== TaskAwayStatus.NOT_AWAY && (
-        <div className="text-center text-zinc-500">
-          {
-            {
-              [TaskAwayStatus.AWAY_CURRENTLY]: TASK_MESSAGE_CURRENTLY_AWAY,
-              [TaskAwayStatus.AWAY_LATER]: TASK_MESSAGE_WILL_BE_AWAY,
-              [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_MESSAGE_WAS_AWAY,
-            }[action.awayStatus]
-          }
-        </div>
-      )}
-      <div className="p-0 sm:p-2">
-        <div className="flex sm:flex-row gap-4 items-start mb-4 flex-col-reverse">
-          <div className="flex flex-col flex-1 gap-y-2">
-            <p className="font-semibold text-2xl font-serif">{action.name}</p>
-            <TaskTimeInfo
+      >
+        {action.awayStatus !== TaskAwayStatus.NOT_AWAY && (
+          <div className="flex flex-col gap-y-3">
+            <Card style={CardStyle.Grey} className="mb-2">
+              {
+                {
+                  [TaskAwayStatus.AWAY_CURRENTLY]: TASK_MESSAGE_CURRENTLY_AWAY,
+                  [TaskAwayStatus.AWAY_LATER]: TASK_MESSAGE_WILL_BE_AWAY,
+                  [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_MESSAGE_WAS_AWAY,
+                }[action.awayStatus]
+              }
+            </Card>
+          </div>
+        )}
+        <div className="p-0 sm:p-2">
+          <div className="flex sm:flex-row gap-4 items-start mb-4 flex-col-reverse">
+            <div className="flex flex-col flex-1 gap-y-2">
+              <p className="font-semibold text-2xl font-serif">{action.name}</p>
+              <TaskTimeInfo
+                action={action}
+                nextEvent={nextEvent}
+                lastEvent={lastEvent}
+              />
+            </div>
+            {showDetails && (
+              <Button
+                color={ButtonColor.Transparent}
+                onClick={goToActionPage}
+                className="!px-4 flex gap-x-1 text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
+              >
+                Details
+                <ChevronRight size="15" className="-mr-1" />
+              </Button>
+            )}
+          </div>
+          <p className="mb-8">{action.shortDescription}</p>
+          <ActionCompletedBarWithInfo
+            friendActivities={friendActivities}
+            action={action}
+            textSize="base"
+          />
+          <div className="mt-6 border-t border-zinc-200 pt-6">
+            <ActionTaskPanel
               action={action}
-              nextEvent={nextEvent}
-              lastEvent={lastEvent}
+              userRelation={userRelation}
+              onCompleteAction={handleUpdateActionState}
+              onJoinAction={handleUpdateActionState}
+              onDeclineAction={handleUpdateActionState}
+              onOptOutAction={handleUpdateActionState}
             />
           </div>
-          {showDetails && (
-            <Button
-              color={ButtonColor.Transparent}
-              onClick={goToActionPage}
-              className="!px-4 flex gap-x-1 text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
-            >
-              Details
-              <ChevronRight size="15" className="-mr-1" />
-            </Button>
-          )}
-        </div>
-        <p className="mb-8">{action.shortDescription}</p>
-        <ActionCompletedBarWithInfo
-          friendActivities={friendActivities}
-          action={action}
-          textSize="base"
-        />
-        <div className="mt-6 border-t border-zinc-200 pt-6">
-          <ActionTaskPanel
-            action={action}
-            userRelation={userRelation}
-            onCompleteAction={handleUpdateActionState}
-            onJoinAction={handleUpdateActionState}
-            onDeclineAction={handleUpdateActionState}
-            onOptOutAction={handleUpdateActionState}
-          />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

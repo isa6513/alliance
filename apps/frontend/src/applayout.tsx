@@ -1,6 +1,7 @@
 import {
   ActionActivityDto,
   ActionDto,
+  actionsDismissAction,
   actionsFindAllLoggedIn,
   actionsMyActivity,
   forumFindAllPosts,
@@ -11,7 +12,7 @@ import {
 } from "@alliance/shared/client";
 import { isStaging } from "@alliance/sharedweb/lib/config";
 import { Features } from "@alliance/shared/lib/features";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   href,
   Outlet,
@@ -59,6 +60,7 @@ export interface AppLayoutOutletContext {
   posts: PostDto[] | null;
   profile: ProfileDto | null;
   loading: boolean;
+  handleDismissAction: (actionId: number) => void;
 }
 
 const revalidateKey = "revalidate";
@@ -148,6 +150,29 @@ export default function AppLayout() {
   const [profile, setProfile] = useState<ProfileDto | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const handleDismissAction = useCallback(
+    async (actionId: number) => {
+      const action = actions?.find((a) => a.id === actionId);
+      if (!action) {
+        return;
+      }
+
+      await actionsDismissAction({
+        path: { id: action.id },
+      });
+
+      setActions(
+        (prev) =>
+          prev?.map((action) =>
+            action.id === actionId
+              ? { ...action, shouldParticipate: false }
+              : action
+          ) ?? null
+      );
+    },
+    [actions, setActions]
+  );
+
   useEffect(() => {
     void (async () => {
       const response = await userGetAwayRanges();
@@ -223,6 +248,7 @@ export default function AppLayout() {
             posts,
             profile,
             loading,
+            handleDismissAction,
           } satisfies AppLayoutOutletContext
         }
       />

@@ -25,6 +25,7 @@ export enum ActionActivityType {
   USER_COMPLETED = 'user_completed',
   USER_DECLINED = 'user_declined', // declining to commit
   USER_WONT_COMPLETE = 'user_wont_complete', //declining after commitment
+  USER_DISMISSED = 'user_dismissed',
 }
 
 @Entity()

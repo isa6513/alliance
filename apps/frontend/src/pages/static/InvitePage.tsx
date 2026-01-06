@@ -5,12 +5,12 @@ import {
   ProfileDto,
   userReferrerProfile,
   userOnetimeInvite,
-  ActionDto,
 } from "@alliance/shared/client";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import posthog from "posthog-js";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import { ActionWithAwayStatus, TaskAwayStatus } from "@alliance/shared/lib/actionUtils";
 
 const InvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -57,7 +57,7 @@ const InvitePage: React.FC = () => {
     );
   }
 
-  const exampleTask: ActionDto = {
+  const exampleTask: ActionWithAwayStatus = {
     name: "Ask your local cafe to switch to compostable cups",
     body: "The Alliance is a global group of people that abide by a process which governs the use of our collective power. We seek to unite millions to billions of people into one cooperative force that represents humanity's collective interests. \n \n Our mission is to build a civilization that serves all individuals in their pursuit of life, liberty, and happiness – a world in which we can take pride. Most pressingly, we seek to resolve ongoing global crises, which include environmental destruction, extreme poverty, democratic dysfunction, and unsafe technological development. It is our aim to end these crises in their entirety in the coming years, not to make incremental improvements \n\n\n The Alliance is a global group of people that abide by a process which governs the use of our collective power. We seek to unite millions to billions of people into one cooperative force that represents humanity's collective interests. \n \n Our mission is to build a civilization that serves all individuals in their pursuit of life, liberty, and happiness – a world in which we can take pride. Most pressingly, we seek to resolve ongoing global crises, which include environmental destruction, extreme poverty, democratic dysfunction, and unsafe technological development. It is our aim to end these crises in their entirety in the coming years, not to make incremental improvements",
     category: "Climate Change",
@@ -84,6 +84,7 @@ const InvitePage: React.FC = () => {
     updates: [],
     userRelation: "joined" as const,
     canParticipate: true,
+    awayStatus: TaskAwayStatus.NOT_AWAY,
     events: [
       {
         id: 1,
