@@ -119,7 +119,7 @@ const DatabaseSidebar: React.FC<DatabaseSidebarProps> = ({
             </div>
           </div>
         ) : (
-          <div className="p-4 space-y-1 pr-0">
+          <div className="p-4 space-y-1">
             {filteredTables.map((table) => (
               <div
                 key={table.name}
