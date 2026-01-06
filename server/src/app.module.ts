@@ -26,6 +26,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { UserModule } from './user/user.module';
 import { UserService } from './user/user.service';
 import { MessagingModule } from './messaging/messaging.module';
+import { PushModule } from './push/push.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { MessagingModule } from './messaging/messaging.module';
     MmsModule,
     AnalyticsModule,
     MessagingModule,
+    PushModule,
   ],
   controllers: [AppController],
 })

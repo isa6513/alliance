@@ -44,6 +44,7 @@ export default function HomeScreen() {
             awayStatus: getAwayStatus(action, awayRangesResponse.data, now),
           }))
         );
+        setError(null);
       }
       setLoading(false);
     } catch (err) {

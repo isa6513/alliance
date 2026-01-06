@@ -44,6 +44,7 @@ import { Participant } from 'src/messaging/entities/participant.entity';
 import { Ty } from 'src/tasks/entities/type';
 import { ContractEvent, ContractEventType } from './contract-event.entity';
 import { Action } from 'src/actions/entities/action.entity';
+import { UserDevice } from './user-device.entity';
 
 export enum NotificationPreference {
   All = 'all',
@@ -396,4 +397,7 @@ export class User {
   @ApiPropertyOptional({ type: () => Action, isArray: true })
   @Type(() => Action)
   authoredActions?: Ty<Action>[];
+
+  @OneToMany(() => UserDevice, (device) => device.user)
+  devices: Ty<UserDevice>[];
 }

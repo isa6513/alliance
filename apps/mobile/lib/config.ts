@@ -1,5 +1,5 @@
 export const getApiUrl = (): string => {
-  const addr = "localhost";
+  const addr = "192.168.4.26";
   if (__DEV__) {
     return "http://" + addr + ":3005";
   } else {

@@ -165,7 +165,7 @@ export default function PostDetailScreen() {
             </Text>
             {action && (
               <TouchableOpacity
-                onPress={() => router.push(`/action/${action.id}`)}
+                onPress={() => router.push(`/actions/${action.id}`)}
                 activeOpacity={0.8}
                 className="bg-green/20 px-3 py-1 rounded-lg"
               >
