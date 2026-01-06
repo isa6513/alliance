@@ -71,13 +71,13 @@ export class ActionEventRecipientService {
       userDismissed,
     } = params;
 
+    if (userDismissed) {
+      return false;
+    }
     if (useManualCohort) {
       return manualCohortUsers?.some((m) => m.id === user.id) ?? false;
     }
 
-    if (userDismissed) {
-      return false;
-    }
     if (!user.tags.some((tag) => targetTagIds.has(tag.id))) {
       return false;
     }
