@@ -30,7 +30,13 @@ export default function AppLayout() {
         onOpen={() => setSidebarOpen(true)}
         onClose={() => setSidebarOpen(false)}
       >
-        <Stack screenOptions={{ headerShown: false, animation: "none" }}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: "none",
+            gestureEnabled: false,
+          }}
+        >
           <Stack.Screen name="index" />
           <Stack.Screen name="actions/index" />
           <Stack.Screen name="information" />

@@ -761,6 +761,11 @@ export type UserDeviceDto = {
     id: string;
 };
 
+export type TestPushNotificationDto = {
+    userId: number;
+    message: string;
+};
+
 export type StreamableFile = {
     [key: string]: unknown;
 };
@@ -3111,6 +3116,17 @@ export type UserRegisterDeviceResponses = {
 };
 
 export type UserRegisterDeviceResponse = UserRegisterDeviceResponses[keyof UserRegisterDeviceResponses];
+
+export type UserSendPushNotificationData = {
+    body: TestPushNotificationDto;
+    path?: never;
+    query?: never;
+    url: '/user/sendPushNotification';
+};
+
+export type UserSendPushNotificationResponses = {
+    200: unknown;
+};
 
 export type ImagesGetImageData = {
     body?: never;

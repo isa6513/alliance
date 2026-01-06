@@ -20,6 +20,7 @@ import { UserAwayRange } from './entities/user-away-range.entity';
 import { Community } from './entities/community.entity';
 import { CommunityInvite } from './entities/community-invite.entity';
 import { ContractEvent } from './entities/contract-event.entity';
+import { PushModule } from 'src/push/push.module';
 import { UserDevice } from './entities/user-device.entity';
 
 @Module({
@@ -44,6 +45,7 @@ import { UserDevice } from './entities/user-device.entity';
     ImagesModule,
     MailModule,
     forwardRef(() => MessagingModule),
+    PushModule,
   ],
   controllers: [UserController],
   providers: [UserService, IsUserAlreadyExist],

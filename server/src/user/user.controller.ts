@@ -55,7 +55,11 @@ import {
   UpdateCommunityDto,
 } from './community.dto';
 import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
-import { RegisterDeviceDto, UserDeviceDto } from './dto/device.dto';
+import {
+  RegisterDeviceDto,
+  TestPushNotificationDto,
+  UserDeviceDto,
+} from './dto/device.dto';
 
 class VerifyEmailBody {
   @IsString()
@@ -752,5 +756,12 @@ export class UserController {
     const device = await this.userService.registerDevice(req.user.sub, body);
     console.log('device: ', device);
     return { id: device.id };
+  }
+
+  @Post('sendPushNotification')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async sendPushNotification(@Body() body: TestPushNotificationDto) {
+    await this.userService.testPushNotification(body.userId, body.message);
   }
 }

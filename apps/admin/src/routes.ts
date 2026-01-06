@@ -19,6 +19,7 @@ export default [
       route("/members/tags", "pages/TagManagement.tsx"),
       route("/member/:userId", "pages/UserDetailView.tsx"),
       route("/date", "pages/DateTest.tsx"),
+      route("/test-push", "pages/TestPushNotification.tsx"),
       route("/members", "pages/UsersList.tsx"),
       route("/image", "pages/ImageUpload.tsx"),
       route("/messaging", "pages/MessagingOverview.tsx"),

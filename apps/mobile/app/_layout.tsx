@@ -128,6 +128,7 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
+    //TODO: wait for auth
     registerForPushNotificationsAsync()
       .then((token) => registerToken(token))
       .catch((error: any) => console.error(`${error}`));
@@ -147,7 +148,7 @@ export default function RootLayout() {
       notificationListener.remove();
       responseListener.remove();
     };
-  }, []);
+  }, [registerToken]);
 
   if (Platform.OS === "web") {
     return (

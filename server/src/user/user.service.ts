@@ -59,6 +59,7 @@ import {
 import { Relations } from 'src/utils/Repository';
 import { RegisterDeviceDto, UserDeviceDto } from './dto/device.dto';
 import { UserDevice } from './entities/user-device.entity';
+import { PushService } from 'src/push/push.service';
 
 const defaultTimeZone = 'America/Los_Angeles';
 const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
@@ -103,6 +104,7 @@ export class UserService {
     private readonly imagesService: ImagesService,
     private readonly mailService: MailService,
     private readonly conversationService: ConversationService,
+    private readonly pushService: PushService,
   ) {}
 
   async create(data: DeepPartial<User>): Promise<User> {
@@ -1476,5 +1478,14 @@ export class UserService {
     });
     const savedDevice = await this.userDeviceRepository.save(device);
     return savedDevice;
+  }
+
+  async testPushNotification(userId: number, message: string): Promise<void> {
+    const user = await this.findOneOrFail(userId, { devices: true });
+    const device = user.devices?.[0];
+    if (!device || !device.expoPushToken) {
+      throw new BadRequestException('User has no expo push token');
+    }
+    await this.pushService.sendPushNotification(device.expoPushToken, message);
   }
 }
