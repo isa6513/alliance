@@ -1,4 +1,5 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { X } from "lucide-react";
 import type { TableMetadataDto } from "@alliance/shared/client/types.gen";
 import { isProduction } from "@alliance/sharedweb/lib/config";
 
@@ -16,10 +17,9 @@ const DatabaseSidebar: React.FC<DatabaseSidebarProps> = ({
   selectedTable,
   onSelectTable,
   loading,
-  isConnected,
   onNavigateHome,
 }) => {
-  const tableCount = tables.length;
+  const [searchTerm, setSearchTerm] = useState("");
 
   const sortedTables = useMemo(() => {
     return [...tables].sort((a, b) => {
@@ -29,9 +29,35 @@ const DatabaseSidebar: React.FC<DatabaseSidebarProps> = ({
     });
   }, [tables]);
 
+  const filteredTables = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) return sortedTables;
+    return sortedTables
+      .map((table, index) => {
+        const name = table.name.toLowerCase();
+        const entityName = table.entityName?.toLowerCase() ?? "";
+        const matches = name.includes(query) || entityName.includes(query);
+        if (!matches) return null;
+        const score = name.startsWith(query)
+          ? 0
+          : entityName.startsWith(query)
+          ? 1
+          : 2;
+        return { table, index, score };
+      })
+      .filter(
+        (
+          entry
+        ): entry is { table: TableMetadataDto; index: number; score: number } =>
+          Boolean(entry)
+      )
+      .sort((a, b) => a.score - b.score || a.index - b.index)
+      .map((entry) => entry.table);
+  }, [searchTerm, sortedTables]);
+
   return (
     <div className="w-75 border-r border-gray-200 flex flex-col">
-      <div className="p-6 border-b border-gray-200 bg-white">
+      <div className="p-6 border-b border-gray-200 bg-white pb-4">
         <div className="flex items-center space-x-3">
           <button
             onClick={onNavigateHome}
@@ -60,17 +86,27 @@ const DatabaseSidebar: React.FC<DatabaseSidebarProps> = ({
             Database Viewer
           </h1>
         </div>
-        <div className="flex items-center space-x-2 mt-2">
-          <p className="text-sm text-gray-600 mr-4">{tableCount} tables</p>
-          <div
-            className={`w-2 h-2 rounded-full ${
-              isConnected ? "bg-green-500" : "bg-red-500"
-            }`}
-          ></div>
-          <span className="text-xs text-gray-500">
-            {isConnected ? "Live updates active" : "Disconnected"}
-          </span>
-        </div>
+      </div>
+      <div className="relative">
+        <input
+          type="search"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder="Search tables"
+          aria-label="Search tables"
+          autoFocus
+          className="w-full rounded-none border-b border-gray-200 px-2 py-2 pr-7 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-0"
+        />
+        {searchTerm && (
+          <button
+            type="button"
+            onClick={() => setSearchTerm("")}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            aria-label="Clear search"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -83,8 +119,8 @@ const DatabaseSidebar: React.FC<DatabaseSidebarProps> = ({
             </div>
           </div>
         ) : (
-          <div className="p-4 space-y-1 pr-2">
-            {sortedTables.map((table) => (
+          <div className="p-4 space-y-1 pr-0">
+            {filteredTables.map((table) => (
               <div
                 key={table.name}
                 onClick={() => onSelectTable(table.name)}
@@ -117,6 +153,11 @@ const DatabaseSidebar: React.FC<DatabaseSidebarProps> = ({
                 </div>
               </div>
             ))}
+            {!filteredTables.length && (
+              <div className="p-3 text-sm text-gray-500">
+                No tables match that search.
+              </div>
+            )}
           </div>
         )}
       </div>
