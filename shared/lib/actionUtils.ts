@@ -46,7 +46,19 @@ export function getAwayStatus(
   awayRanges: UserAwayRangeDto[],
   date: Date
 ): TaskAwayStatus {
-  const { event, endDate } = getActionEventAt(action, date);
+  const lastMemberActionEvent = action.events.find(
+    (event) =>
+      new Date(event.date) <= date && event.newStatus === "member_action"
+  );
+  if (!lastMemberActionEvent) {
+    return TaskAwayStatus.NOT_AWAY;
+  }
+
+  const { event, endDate } = getActionEventAt(
+    action,
+    new Date(lastMemberActionEvent.date)
+  );
+
   if (!event) {
     return TaskAwayStatus.NOT_AWAY;
   }
