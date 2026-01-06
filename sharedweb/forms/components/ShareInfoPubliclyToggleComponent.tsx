@@ -30,12 +30,18 @@ const ShareInfoPubliclyToggleComponent = ({
     typeof user?.shareInfoPublicly === "boolean"
       ? user.shareInfoPublicly
       : null;
+  const fallbackDefault = false;
 
   useEffect(() => {
-    if (parsedValue === null && userDefault !== null) {
-      onChange(userDefault ? "true" : "false");
+    if (parsedValue !== null) {
+      return;
     }
-  }, [parsedValue, userDefault, onChange]);
+    if (userDefault !== null) {
+      onChange(userDefault ? "true" : "false");
+      return;
+    }
+    onChange(fallbackDefault ? "true" : "false");
+  }, [parsedValue, userDefault, onChange, fallbackDefault]);
 
   const label =
     typeof field.label === "string" && field.label.trim().length > 0
@@ -45,7 +51,7 @@ const ShareInfoPubliclyToggleComponent = ({
     typeof field.description === "string" && field.description.trim().length > 0
       ? field.description
       : DEFAULT_DESCRIPTION;
-  const resolvedValue = parsedValue ?? userDefault;
+  const resolvedValue = parsedValue ?? userDefault ?? fallbackDefault;
   const isDisabled = Boolean(disabled || user?.anonymous);
 
   return (
