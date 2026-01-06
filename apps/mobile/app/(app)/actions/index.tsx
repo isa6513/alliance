@@ -11,9 +11,9 @@ import { ActionDto, actionsFindAllLoggedIn } from "@alliance/shared/client";
 import { router } from "expo-router";
 import { FilterMode } from "@alliance/shared/lib/actionUtils";
 import { filterActions } from "@alliance/shared/lib/actionsListPage";
-import { Text } from "../../components/system";
+import { Text } from "../../../components/system";
 import { ChevronDown } from "lucide-react-native";
-import ActionItemCard from "../../components/ActionItemCard";
+import ActionItemCard from "../../../components/ActionItemCard";
 
 export default function ActionsScreen() {
   const [actions, setActions] = useState<ActionDto[]>([]);
@@ -56,7 +56,7 @@ export default function ActionsScreen() {
   );
 
   const navigateToAction = (actionId: number) => {
-    router.push(`/action/${actionId}`);
+    router.push(`/actions/${actionId}`);
   };
 
   return (

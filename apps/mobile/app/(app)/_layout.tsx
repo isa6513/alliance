@@ -32,13 +32,13 @@ export default function AppLayout() {
       >
         <Stack screenOptions={{ headerShown: false, animation: "none" }}>
           <Stack.Screen name="index" />
-          <Stack.Screen name="actions" />
+          <Stack.Screen name="actions/index" />
           <Stack.Screen name="information" />
           <Stack.Screen name="notifications" />
           <Stack.Screen name="profile" />
-          <Stack.Screen name="action/[id]" />
+          <Stack.Screen name="actions/[id]" />
           <Stack.Screen name="forum/index" />
-          <Stack.Screen name="user/settings" />
+          <Stack.Screen name="settings" />
         </Stack>
       </Sidebar>
       <TabBar />

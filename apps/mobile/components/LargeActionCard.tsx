@@ -32,7 +32,7 @@ export default function LargeActionCard({
             color={ButtonColor.White}
             size={ButtonSize.Small}
             onPress={() => {
-              router.push(`/action/${action.id}`);
+              router.push(`/actions/${action.id}`);
             }}
             className="mr-2 flex flex-row items-center gap-x-1"
           >

@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import type { ScrollView as ScrollViewType } from "react-native";
-import Markdown from "react-native-markdown-display";
+import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import type { UserDto } from "@alliance/shared/client";
 import {
   FormResponseDto,
@@ -82,15 +82,7 @@ function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
       );
     case "text":
       return block.markdown ? (
-        <Markdown
-          style={{
-            body: { color: "#18181b", fontSize: 15, lineHeight: 22 },
-            link: { color: "rgb(98, 161, 36)" },
-            paragraph: { marginBottom: 8 },
-          }}
-        >
-          {block.text}
-        </Markdown>
+        <AppMarkdownWrapper>{block.text}</AppMarkdownWrapper>
       ) : (
         <Text className="text-base text-zinc-800 leading-6">{block.text}</Text>
       );

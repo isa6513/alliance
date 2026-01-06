@@ -120,7 +120,7 @@ export default function ProfileScreen() {
 
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => router.push("/user/settings")}
+          onPress={() => router.push("/settings")}
         >
           <FontAwesomeIcon
             icon={faCog}

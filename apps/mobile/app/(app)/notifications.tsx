@@ -30,11 +30,6 @@ const normalizeLocation = (location: string | null) => {
   const [path, query] = normalized.split("?");
   const segments = path.split("/").filter(Boolean);
 
-  if (segments[0] === "actions" && segments[1]) {
-    const mapped = `/action/${segments[1]}`;
-    return query ? `${mapped}?${query}` : mapped;
-  }
-
   if (segments[0] === "tasks") {
     return "/";
   }
@@ -194,9 +189,7 @@ export default function NotificationsScreen() {
                         numberOfLines={2}
                       >
                         {notification.category === "action_update" && (
-                          <Text className="font-semibold">
-                            Action update:{" "}
-                          </Text>
+                          <Text className="font-semibold">Action update: </Text>
                         )}
                         {notification.message}
                       </Text>

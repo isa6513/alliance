@@ -26,10 +26,10 @@ import {
   NotificationChannelOption,
   FormDataPreferenceOption,
 } from "@alliance/shared/lib/settings";
-import { useAuth } from "../../../lib/AuthContext";
-import { Button, ButtonColor } from "../../../components/system";
-import TimeZoneSelect from "../../../components/forms/TimeZoneSelect";
-import AwayRangesSection from "../../../components/AwayRangesSection";
+import { useAuth } from "../../lib/AuthContext";
+import { Button, ButtonColor } from "../../components/system";
+import TimeZoneSelect from "../../components/forms/TimeZoneSelect";
+import AwayRangesSection from "../../components/AwayRangesSection";
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
@@ -193,7 +193,7 @@ export default function SettingsPage() {
 
   return (
     <ScrollView className="flex-1 bg-white">
-      <View className="p-4">
+      <View className="p-4 py-8">
         {/* Header */}
         <View className="flex-row items-center justify-between mb-6">
           <View className="flex-row items-center">
@@ -541,7 +541,11 @@ export default function SettingsPage() {
 
         {/* Logout */}
         <View className="mb-8">
-          <Button color={ButtonColor.Red} onPress={handleLogout} title="Log out" />
+          <Button
+            color={ButtonColor.Red}
+            onPress={handleLogout}
+            title="Log out"
+          />
         </View>
       </View>
 

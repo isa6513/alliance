@@ -120,7 +120,7 @@ const navSections: NavSection[] = [
       },
       {
         name: "Settings",
-        href: "/user/settings",
+        href: "/settings",
         icon: Settings,
         matchPaths: ["/user", "/settings"],
       },

@@ -1,8 +1,8 @@
 import React, { useMemo } from "react";
-import { Image, StyleSheet, View } from "react-native";
-import Markdown from "react-native-markdown-display";
+import { Image, View } from "react-native";
 import { EditableContentDto } from "@alliance/shared/client";
 import Text from "./system/Text";
+import AppMarkdownWrapper from "./AppMarkdownWrapper";
 
 interface EditableContentRendererProps {
   content: EditableContentDto;
@@ -11,17 +11,6 @@ interface EditableContentRendererProps {
   className?: string;
   truncated?: boolean;
 }
-
-const markdownStyles = StyleSheet.create({
-  body: {
-    fontSize: 15,
-    lineHeight: 20,
-    color: "#000",
-  },
-  link: {
-    color: "#62a124",
-  },
-});
 
 const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
   content,
@@ -61,7 +50,7 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
         </Text>
       );
     }
-    return <Markdown style={markdownStyles}>{body}</Markdown>;
+    return <AppMarkdownWrapper>{body}</AppMarkdownWrapper>;
   };
 
   return (

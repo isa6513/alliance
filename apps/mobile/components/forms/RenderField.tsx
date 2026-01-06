@@ -641,7 +641,7 @@ export function RenderField({
             <TouchableOpacity
               onPress={pickImage}
               disabled={disabled || uploading}
-              className="flex-1 justify-start border border-zinc-300 rounded-lg p-3"
+              className="flex-1 justify-start border border-zinc-200 rounded-lg p-3"
             >
               {uploading ? (
                 <Text className="text-sm text-blue-600">Uploading...</Text>

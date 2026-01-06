@@ -2,12 +2,11 @@ import { Check } from "lucide-react-native";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useCallback } from "react";
 import { ActivityIndicator, Image, ScrollView, View } from "react-native";
-import Markdown from "react-native-markdown-display";
-import { UserActionRelation } from "../../../../../shared/client";
+import AppMarkdownWrapper from "../../../components/AppMarkdownWrapper";
+import { UserActionRelation } from "@alliance/shared/client";
 import {
   Button,
   ButtonColor,
-  ButtonSize,
   Card,
   CardStyle,
   Text,
@@ -144,31 +143,10 @@ export default function ActionDetailScreen() {
             <Text className="text-xl font-semibold text-zinc-900">
               Description
             </Text>
-            <Markdown
-              style={{
-                body: {
-                  fontSize: 15,
-                  lineHeight: 20,
-                },
-              }}
-            >
-              {action.body}
-            </Markdown>
+            <AppMarkdownWrapper>{action.body}</AppMarkdownWrapper>
           </View>
         </View>
       </ScrollView>
-      {(!userRelation || userRelation === "none") &&
-        action.status === "gathering_commitments" && (
-          <View className="absolute bottom-0 left-0 right-0 p-5 pb-8 bg-white border-t border-zinc-200">
-            <Button
-              color={ButtonColor.Black}
-              size={ButtonSize.Large}
-              onPress={onJoinAction}
-              title="Confirm participation"
-              className="w-full"
-            />
-          </View>
-        )}
     </>
   );
 }

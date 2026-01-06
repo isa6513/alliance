@@ -1,6 +1,10 @@
 import { View, ScrollView, ActivityIndicator } from "react-native";
 import { useCallback, useEffect, useState } from "react";
-import { ActionDto, actionsFindAllLoggedIn } from "@alliance/shared/client";
+import {
+  ActionDto,
+  actionsFindAllLoggedIn,
+  userGetAwayRanges,
+} from "@alliance/shared/client";
 import { colors, Text } from "../../components/system";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import LargeActionCard from "../../components/LargeActionCard";
@@ -9,21 +13,38 @@ import useActivities, {
 } from "@alliance/shared/lib/useActivities";
 import { Check } from "lucide-react-native";
 import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
+import {
+  ActionWithAwayStatus,
+  getAwayStatus,
+} from "@alliance/shared/lib/actionUtils";
 
 export default function HomeScreen() {
-  const [actions, setActions] = useState<ActionDto[]>([]);
+  const [actions, setActions] = useState<ActionWithAwayStatus[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchActions = useCallback(async () => {
     try {
-      const response = await actionsFindAllLoggedIn({
-        query: { sorted: true },
-      });
-      if (response.error) {
-        throw new Error("Failed to fetch actions");
+      const [actionsResponse, awayRangesResponse] = await Promise.all([
+        actionsFindAllLoggedIn({
+          query: { sorted: true },
+        }),
+        userGetAwayRanges(),
+      ]);
+
+      if (actionsResponse.error || awayRangesResponse.error) {
+        setError("Failed to fetch actions");
       }
-      setActions(response.data || []);
+
+      if (actionsResponse.data && awayRangesResponse.data) {
+        const now = new Date();
+        setActions(
+          actionsResponse.data.map((action) => ({
+            ...action,
+            awayStatus: getAwayStatus(action, awayRangesResponse.data, now),
+          }))
+        );
+      }
       setLoading(false);
     } catch (err) {
       setError("Failed to load actions");
@@ -36,22 +57,22 @@ export default function HomeScreen() {
     fetchActions();
   }, [fetchActions]);
 
-  const {
-    currentTask,
-    todoActions,
-    newActions,
-    currentWeekTodoActions,
-    nextWeekTodoActions,
-    remainingTasksEstimatedTimeCurrentWeek,
-    completedActions,
-  } = useHomePageActions(actions);
+  const { currentTask } = useHomePageActions(actions);
 
-  const { activities: friendActivities, handleLikeActivity } = useActivities({
+  const { activities: friendActivities } = useActivities({
     list: ActivityList.Friends,
     limit: 8,
   });
 
-  if (!currentTask && !loading && !error) {
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
+        <ActivityIndicator size="large" color={colors.green} />
+      </View>
+    );
+  }
+
+  if (!currentTask && !error) {
     return (
       <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
         <View className="w-12 h-12 rounded-full bg-green items-center justify-center mb-4">
@@ -70,13 +91,7 @@ export default function HomeScreen() {
         Current task
       </Text>
       <View className="">
-        {loading ? (
-          <ActivityIndicator
-            size="large"
-            color={colors.green}
-            className="self-center mx-auto"
-          />
-        ) : error ? (
+        {error ? (
           <Text className="text-red-500 text-center py-4">{error}</Text>
         ) : (
           <LargeActionCard

@@ -1,5 +1,11 @@
 import React, { useEffect } from "react";
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import type { CitySearchDto } from "@alliance/shared/client";
 import {
   formatCityDisplay,
@@ -55,8 +61,8 @@ export default function CityAutosuggestMobile({
         activeOpacity={0.9}
         onPress={() => setOpen(true)}
         disabled={disabled}
-        className={`w-full rounded-lg border px-3 py-3 bg-white ${
-          disabled ? "opacity-60" : "border-zinc-300"
+        className={`w-full rounded-lg border border-zinc-300 px-3 py-3 bg-white ${
+          disabled ? "opacity-60" : ""
         }`}
       >
         <TextInput
