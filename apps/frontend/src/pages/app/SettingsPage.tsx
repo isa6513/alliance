@@ -246,363 +246,372 @@ const SettingsPage: React.FC = () => {
               </Button>
             </div>
           </div>
-          <div className="flex flex-col md:flex-row w-full items-center gap-4 *:gap-x-1">
-            <div className="flex-1 flex flex-col w-full">
-              <p className="mb-1">
-                Name{" "}
-                {editableUser.anonymous ? (
-                  <i className="text-gray-500">(Not shown)</i>
-                ) : (
-                  ""
+          <div className="flex flex-col *:py-8 divide-y divide-zinc-200">
+            <div className="flex flex-col gap-y-4">
+              <div className="flex flex-col md:flex-row w-full items-center gap-4 *:gap-x-1">
+                <div className="flex-1 flex flex-col w-full">
+                  <p className="mb-1">
+                    Name{" "}
+                    {editableUser.anonymous ? (
+                      <i className="text-zinc-500">(Not shown)</i>
+                    ) : (
+                      ""
+                    )}
+                  </p>
+                  <FormInput
+                    name="name"
+                    type="text"
+                    value={editableUser.name}
+                    onChange={(event) =>
+                      updateEditableUser({ name: event.target.value })
+                    }
+                    placeholder="Enter full name"
+                  />
+                </div>
+                <div className="flex-1 flex flex-col w-full">
+                  <p className="mb-1">Email</p>
+                  <FormInput
+                    name="email"
+                    type="email"
+                    value={user.email || ""}
+                    onChange={() => {}}
+                    disabled
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col md:flex-row w-full items-center gap-4 *:gap-x-1">
+                <div className="flex-1 flex flex-col w-full">
+                  <label className="block mb-1">Location</label>
+                  <CityAutosuggest
+                    onSelect={handleCitySelect}
+                    placeholder={
+                      location?.name ||
+                      editableUser.customCityString ||
+                      "Select a city"
+                    }
+                    className="flex-1"
+                  />
+                </div>
+                <div className="flex-1 flex flex-col w-full">
+                  <label className="block mb-1">Phone number</label>
+                  <FormInput
+                    name="phoneNumber"
+                    type="tel"
+                    value={editableUser.phoneNumber ?? ""}
+                    onChange={(event) =>
+                      updateEditableUser({ phoneNumber: event.target.value })
+                    }
+                    placeholder="Enter phone number"
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+
+              <Card
+                style={CardStyle.White}
+                className="flex flex-row gap-x-4 items-center justify-between"
+              >
+                <div>
+                  <label className="block font-medium mb-2">
+                    Anonymous account
+                  </label>
+                  <p className="text-zinc-500 text-sm">
+                    With an anonymous account, other members will not be able to
+                    see your name.
+                  </p>
+                </div>
+                <div className="flex flex-row gap-x-2">
+                  <Button
+                    color={
+                      editableUser.anonymous
+                        ? ButtonColor.Black
+                        : ButtonColor.Light
+                    }
+                    onClick={() =>
+                      updateEditableUser({
+                        anonymous: true,
+                        shareInfoPublicly: false,
+                      })
+                    }
+                  >
+                    Yes
+                  </Button>
+                  <Button
+                    color={
+                      !editableUser.anonymous
+                        ? ButtonColor.Black
+                        : ButtonColor.Light
+                    }
+                    onClick={() => updateEditableUser({ anonymous: false })}
+                  >
+                    No
+                  </Button>
+                </div>
+              </Card>
+
+              <Card
+                style={CardStyle.White}
+                className="flex flex-row gap-x-4 items-center justify-between"
+              >
+                <div>
+                  <label className="block font-medium mb-2">
+                    Share information publicly
+                  </label>
+                  <p className="text-zinc-500 text-sm">
+                    Allow your name, photo, and user bio to be listed in a
+                    public member directory.
+                  </p>
+                </div>
+                <div className="flex flex-row gap-x-2">
+                  <Button
+                    color={
+                      editableUser.shareInfoPublicly
+                        ? ButtonColor.Black
+                        : ButtonColor.Light
+                    }
+                    onClick={() =>
+                      updateEditableUser({ shareInfoPublicly: true })
+                    }
+                    disabled={editableUser.anonymous}
+                  >
+                    Yes
+                  </Button>
+                  <Button
+                    color={
+                      !editableUser.shareInfoPublicly
+                        ? ButtonColor.Black
+                        : ButtonColor.Light
+                    }
+                    onClick={() =>
+                      updateEditableUser({ shareInfoPublicly: false })
+                    }
+                    disabled={editableUser.anonymous}
+                  >
+                    No
+                  </Button>
+                </div>
+              </Card>
+            </div>
+
+            <div>
+              <h2 className="!font-semibold !text-2xl mb-4">Notifications</h2>
+
+              <div className="flex flex-col gap-y-2 mb-4">
+                <p className="!font-medium mb-0">Send action reminders via:</p>
+                <select
+                  className="border border-zinc-300 rounded px-3 py-2 self-start"
+                  value={editableUser.preferredActionReminderChannel}
+                  onChange={(event) =>
+                    updateEditableUser({
+                      preferredActionReminderChannel: event.target
+                        .value as NotificationChannel,
+                    })
+                  }
+                >
+                  <option value={"email"}>Email</option>
+                  <option value={"text"}>Text</option>
+                </select>
+              </div>
+              <p className="!font-medium mb-0">
+                Allowed notification channels:
+              </p>
+              <div>
+                {!(
+                  editableUser.emailNotifsEnabled ||
+                  // editableUser.pushNotifsEnabled ||
+                  editableUser.textNotifsEnabled
+                ) && (
+                  <p className="text-sm text-zinc-500">
+                    You will not receive any notifications. Please keep a
+                    notification channel enabled if you need reminders to
+                    complete actions on time.
+                  </p>
                 )}
-              </p>
-              <FormInput
-                name="name"
-                type="text"
-                value={editableUser.name}
-                onChange={(event) =>
-                  updateEditableUser({ name: event.target.value })
-                }
-                placeholder="Enter full name"
-              />
-            </div>
-            <div className="flex-1 flex flex-col w-full">
-              <p className="mb-1">Email</p>
-              <FormInput
-                name="email"
-                type="email"
-                value={user.email || ""}
-                onChange={() => {}}
-                disabled
-              />
-            </div>
-          </div>
-          <div className="flex flex-col md:flex-row w-full items-center gap-4 *:gap-x-1">
-            <div className="flex-1 flex flex-col w-full">
-              <label className="block mb-1">Location</label>
-              <CityAutosuggest
-                onSelect={handleCitySelect}
-                placeholder={
-                  location?.name ||
-                  editableUser.customCityString ||
-                  "Select a city"
-                }
-                className="flex-1"
-              />
-            </div>
-            <div className="flex-1 flex flex-col w-full">
-              <label className="block mb-1">Phone number</label>
-              <FormInput
-                name="phoneNumber"
-                type="tel"
-                value={editableUser.phoneNumber ?? ""}
-                onChange={(event) =>
-                  updateEditableUser({ phoneNumber: event.target.value })
-                }
-                placeholder="Enter phone number"
-                className="flex-1"
-              />
-            </div>
-          </div>
-
-          <Card
-            style={CardStyle.White}
-            className="flex flex-row gap-x-4 items-center justify-between"
-          >
-            <div>
-              <label className="block font-medium mb-2">
-                Anonymous account
-              </label>
-              <p className="text-zinc-500 text-sm">
-                With an anonymous account, other members will not be able to see
-                your name.
-              </p>
-            </div>
-            <div className="flex flex-row gap-x-2">
-              <Button
-                color={
-                  editableUser.anonymous ? ButtonColor.Black : ButtonColor.Light
-                }
-                onClick={() =>
-                  updateEditableUser({
-                    anonymous: true,
-                    shareInfoPublicly: false,
-                  })
-                }
-              >
-                Yes
-              </Button>
-              <Button
-                color={
-                  !editableUser.anonymous
-                    ? ButtonColor.Black
-                    : ButtonColor.Light
-                }
-                onClick={() => updateEditableUser({ anonymous: false })}
-              >
-                No
-              </Button>
-            </div>
-          </Card>
-
-          <Card
-            style={CardStyle.White}
-            className="flex flex-row gap-x-4 items-center justify-between"
-          >
-            <div>
-              <label className="block font-medium mb-2">
-                Share information publicly
-              </label>
-              <p className="text-zinc-500 text-sm">
-                Allow your name, photo, and user bio to be listed publicly in a
-                member directory.
-              </p>
-            </div>
-            <div className="flex flex-row gap-x-2">
-              <Button
-                color={
-                  editableUser.shareInfoPublicly
-                    ? ButtonColor.Black
-                    : ButtonColor.Light
-                }
-                onClick={() => updateEditableUser({ shareInfoPublicly: true })}
-                disabled={editableUser.anonymous}
-              >
-                Yes
-              </Button>
-              <Button
-                color={
-                  !editableUser.shareInfoPublicly
-                    ? ButtonColor.Black
-                    : ButtonColor.Light
-                }
-                onClick={() => updateEditableUser({ shareInfoPublicly: false })}
-                disabled={editableUser.anonymous}
-              >
-                No
-              </Button>
-            </div>
-          </Card>
-
-          <div>
-            <h2 className="!font-semibold !text-2xl mb-4">Notifications</h2>
-
-            <div className="flex flex-col gap-y-2 mb-4">
-              <p className="!font-medium mb-0">Send action reminders via:</p>
-              <select
-                className="border border-zinc-300 rounded px-3 py-2 self-start"
-                value={editableUser.preferredActionReminderChannel}
-                onChange={(event) =>
-                  updateEditableUser({
-                    preferredActionReminderChannel: event.target
-                      .value as NotificationChannel,
-                  })
-                }
-              >
-                <option value={"email"}>Email</option>
-                <option value={"text"}>Text</option>
-              </select>
-            </div>
-            <p className="!font-medium mb-0">Allowed notification channels:</p>
-            <div>
-              {!(
-                editableUser.emailNotifsEnabled ||
-                // editableUser.pushNotifsEnabled ||
-                editableUser.textNotifsEnabled
-              ) && (
-                <p className="text-sm text-zinc-500">
-                  You will not receive any notifications. Please keep a
-                  notification channel enabled if you need reminders to complete
-                  actions on time.
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-y-2 mt-2">
-              <LargeCheckbox
-                label="Email"
-                checked={!!editableUser.emailNotifsEnabled}
-                onChange={(checked) =>
-                  updateEditableUser({ emailNotifsEnabled: checked })
-                }
-              />
-              <LargeCheckbox
-                label="Text/SMS"
-                checked={!!editableUser.textNotifsEnabled}
-                onChange={(checked) =>
-                  updateEditableUser({ textNotifsEnabled: checked })
-                }
-              />
-              {/* <LargeCheckbox
+              </div>
+              <div className="flex flex-col gap-y-2 mt-2">
+                <LargeCheckbox
+                  label="Email"
+                  checked={!!editableUser.emailNotifsEnabled}
+                  onChange={(checked) =>
+                    updateEditableUser({ emailNotifsEnabled: checked })
+                  }
+                />
+                <LargeCheckbox
+                  label="Text/SMS"
+                  checked={!!editableUser.textNotifsEnabled}
+                  onChange={(checked) =>
+                    updateEditableUser({ textNotifsEnabled: checked })
+                  }
+                />
+                {/* <LargeCheckbox
                 label="Push"
                 checked={editableUser.textNotifsEnabled}
                 onChange={(checked) =>
                   updateEditableUser({ textNotifsEnabled: checked })
                 }
               /> */}
-            </div>
-          </div>
-          <div>
-            <p className="!font-medium mb-2">Preferred reminder time:</p>
-            <input
-              type="time"
-              className="border border-zinc-300 rounded px-3 py-2 self-start"
-              value={editableUser.preferredReminderTime}
-              onChange={(event) =>
-                updateEditableUser({
-                  preferredReminderTime: event.target.value,
-                })
-              }
-            />
-            <p className="!font-medium mt-4 mb-2">
-              Your time zone for reminders:
-            </p>
-            <TimeZoneSelect
-              value={editableUser.timeZone}
-              onChange={(tz) => updateEditableUser({ timeZone: tz })}
-            />
-          </div>
-
-          <hr className="border-zinc-300 mt-4" />
-
-          {user.communities.length > 0 && (
-            <div>
-              <h2 className="!font-semibold !text-2xl mb-4">Groups</h2>
-              <p>Contact info shared with your group lead:</p>
-              <div className="flex flex-col gap-y-2 mt-2">
-                <LargeCheckbox
-                  label="Email"
-                  checked={!!editableUser.shareEmailWithCommunityLead}
-                  onChange={(checked) =>
-                    updateEditableUser({ shareEmailWithCommunityLead: checked })
-                  }
-                />
-                <LargeCheckbox
-                  label="Phone number"
-                  checked={!!editableUser.sharePhoneNumberWithCommunityLead}
-                  onChange={(checked) =>
-                    updateEditableUser({
-                      sharePhoneNumberWithCommunityLead: checked,
-                    })
-                  }
-                />
               </div>
             </div>
-          )}
-
-          <hr className="border-zinc-300 mt-4" />
-
-          <div>
-            <AwayRangesSection />
-          </div>
-
-          <hr className="border-zinc-300 mt-4" />
-
-          <div>
-            <h2 className="!font-semibold text-2xl mb-4 ">Privacy</h2>
-            <div className="flex flex-col gap-y-2 mb-4">
-              <p className="mb-0">
-                Some parts of your completed tasks can be visible to other
-                members. Would you like for these to be visible by default?
-              </p>
-              <select
+            <div>
+              <p className="!font-medium mb-2">Preferred reminder time:</p>
+              <input
+                type="time"
                 className="border border-zinc-300 rounded px-3 py-2 self-start"
-                value={editableUser.formDataPreference}
+                value={editableUser.preferredReminderTime}
                 onChange={(event) =>
                   updateEditableUser({
-                    formDataPreference: event.target
-                      .value as PublicFormResponseDefault,
+                    preferredReminderTime: event.target.value,
                   })
                 }
-              >
-                <option value={"public"}>Default to visible</option>
-                <option value={"private"}>Default to hidden</option>
-              </select>
-              <p className="text-sm text-zinc-500">
-                You will still be able to control visibility for specific tasks.
+              />
+              <p className="!font-medium mt-4 mb-2">
+                Your time zone for reminders:
               </p>
+              <TimeZoneSelect
+                value={editableUser.timeZone}
+                onChange={(tz) => updateEditableUser({ timeZone: tz })}
+              />
             </div>
-          </div>
 
-          <div className="flex flex-col md:flex-row w-full items-start gap-4 *:gap-x-1">
-            <div className="flex-1 flex flex-col w-full">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <Button
-                  color={ButtonColor.Black}
-                  className="sm:self-start"
-                  onClick={handlePasswordReset}
-                  disabled={passwordResetLoading}
+            {user.communities.length > 0 && (
+              <div>
+                <h2 className="!font-semibold !text-2xl mb-4">Groups</h2>
+                <p>Contact info shared with your group lead:</p>
+                <div className="flex flex-col gap-y-2 mt-2">
+                  <LargeCheckbox
+                    label="Email"
+                    checked={!!editableUser.shareEmailWithCommunityLead}
+                    onChange={(checked) =>
+                      updateEditableUser({
+                        shareEmailWithCommunityLead: checked,
+                      })
+                    }
+                  />
+                  <LargeCheckbox
+                    label="Phone number"
+                    checked={!!editableUser.sharePhoneNumberWithCommunityLead}
+                    onChange={(checked) =>
+                      updateEditableUser({
+                        sharePhoneNumberWithCommunityLead: checked,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            )}
+
+            <div>
+              <AwayRangesSection />
+            </div>
+
+            <div>
+              <h2 className="!font-semibold text-2xl mb-4 ">Privacy</h2>
+              <div className="flex flex-col gap-y-2">
+                <p className="mb-0">
+                  Some parts of your completed tasks can be visible to other
+                  members. Would you like for these to be visible by default?
+                </p>
+                <select
+                  className="border border-zinc-300 rounded px-3 py-2 self-start"
+                  value={editableUser.formDataPreference}
+                  onChange={(event) =>
+                    updateEditableUser({
+                      formDataPreference: event.target
+                        .value as PublicFormResponseDefault,
+                    })
+                  }
                 >
-                  {passwordResetLoading
-                    ? "Sending reset link..."
-                    : "Reset password"}
-                </Button>
-                {!passwordResetMessage && (
-                  <p className="text-sm text-zinc-500">
-                    We&apos;ll send the reset link to{" "}
-                    {user.email || "your account email"}.
+                  <option value={"public"}>Default to visible</option>
+                  <option value={"private"}>Default to hidden</option>
+                </select>
+                <p className="text-sm text-zinc-500">
+                  You will still be able to control visibility for specific
+                  tasks.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row w-full items-start gap-4 *:gap-x-1">
+              <div className="flex-1 flex flex-col w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <Button
+                    color={ButtonColor.Black}
+                    className="sm:self-start"
+                    onClick={handlePasswordReset}
+                    disabled={passwordResetLoading}
+                  >
+                    {passwordResetLoading
+                      ? "Sending reset link..."
+                      : "Reset password"}
+                  </Button>
+                  {!passwordResetMessage && (
+                    <p className="text-sm text-zinc-500">
+                      We&apos;ll send the reset link to{" "}
+                      {user.email || "your account email"}.
+                    </p>
+                  )}
+                </div>
+                {passwordResetMessage && (
+                  <p className="text-sm text-green mt-2">
+                    {passwordResetMessage}
+                  </p>
+                )}
+                {passwordResetError && (
+                  <p className="text-sm text-red-700 mt-2">
+                    {passwordResetError}
                   </p>
                 )}
               </div>
-              {passwordResetMessage && (
-                <p className="text-sm text-green mt-2">
-                  {passwordResetMessage}
-                </p>
-              )}
-              {passwordResetError && (
-                <p className="text-sm text-red-700 mt-2">
-                  {passwordResetError}
-                </p>
-              )}
             </div>
-          </div>
 
-          {paymentMethod !== null && (
-            <div>
-              <hr className="border-zinc-300 mt-4" />
-              <h2 className="!font-semibold text-lg mb-4">Payment methods</h2>
-              <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center justify-center p-2 h-5 bg-blue-500 text-white text-xs font-semibold rounded">
-                    {paymentMethod.brand?.toUpperCase() || "CARD"}
+            {paymentMethod !== null && (
+              <div>
+                <hr className="border-zinc-300 mt-4" />
+                <h2 className="!font-semibold text-lg mb-4">Payment methods</h2>
+                <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center justify-center p-2 h-5 bg-blue-500 text-white text-xs font-semibold rounded">
+                      {paymentMethod.brand?.toUpperCase() || "CARD"}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        •••• •••• •••• {paymentMethod.last4}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Expires{" "}
+                        {paymentMethod.exp_month?.toString().padStart(2, "0")}/
+                        {paymentMethod.exp_year}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      •••• •••• •••• {paymentMethod.last4}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Expires{" "}
-                      {paymentMethod.exp_month?.toString().padStart(2, "0")}/
-                      {paymentMethod.exp_year}
-                    </p>
-                  </div>
+                  <button
+                    onClick={handleClearPaymentMethod}
+                    disabled={loadingPaymentMethod}
+                    className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                    title="Remove payment method"
+                  >
+                    {loadingPaymentMethod ? (
+                      <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                    ) : (
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    )}
+                  </button>
                 </div>
-                <button
-                  onClick={handleClearPaymentMethod}
-                  disabled={loadingPaymentMethod}
-                  className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                  title="Remove payment method"
-                >
-                  {loadingPaymentMethod ? (
-                    <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-                  ) : (
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  )}
-                </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
