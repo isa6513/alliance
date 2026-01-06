@@ -90,6 +90,7 @@ export enum UserActionRelation {
   Completed = 'completed',
   None = 'none',
   Declined = 'declined',
+  Dismissed = 'dismissed',
 }
 
 export class UserActionRelationDto {
@@ -521,6 +522,13 @@ export class ActionsService {
       )
     ) {
       return UserActionRelation.Declined;
+    }
+    if (
+      activities.some(
+        (activity) => activity.type === ActionActivityType.USER_DISMISSED,
+      )
+    ) {
+      return UserActionRelation.Dismissed;
     }
     if (
       activities.some(
