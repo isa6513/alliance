@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { CustomComponentProps } from "./types";
 import Card from "../../ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
@@ -31,17 +31,31 @@ const ShareInfoPubliclyToggleComponent = ({
       ? user.shareInfoPublicly
       : null;
   const fallbackDefault = false;
+  const lastSetByDefaultRef = useRef(false);
+
+  const setValueFromDefault = (next: boolean) => {
+    if (parsedValue === next) {
+      return;
+    }
+    lastSetByDefaultRef.current = true;
+    onChange(next ? "true" : "false");
+  };
 
   useEffect(() => {
-    if (parsedValue !== null) {
-      return;
-    }
     if (userDefault !== null) {
-      onChange(userDefault ? "true" : "false");
+      if (parsedValue === null) {
+        setValueFromDefault(userDefault);
+        return;
+      }
+      if (lastSetByDefaultRef.current && parsedValue !== userDefault) {
+        setValueFromDefault(userDefault);
+      }
       return;
     }
-    onChange(fallbackDefault ? "true" : "false");
-  }, [parsedValue, userDefault, onChange, fallbackDefault]);
+    if (parsedValue === null) {
+      setValueFromDefault(fallbackDefault);
+    }
+  }, [parsedValue, userDefault, fallbackDefault]);
 
   const label =
     typeof field.label === "string" && field.label.trim().length > 0
@@ -70,7 +84,10 @@ const ShareInfoPubliclyToggleComponent = ({
       </div>
       <YesNoToggle
         value={resolvedValue}
-        onChange={(next) => onChange(next ? "true" : "false")}
+        onChange={(next) => {
+          lastSetByDefaultRef.current = false;
+          onChange(next ? "true" : "false");
+        }}
         disabled={isDisabled}
         ariaLabel={label}
       />

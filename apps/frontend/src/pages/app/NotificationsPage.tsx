@@ -47,7 +47,7 @@ const NotificationsPage = () => {
                         key={user.id}
                         pfp={user.profilePicture}
                         size="small"
-                        className="mr-1"
+                        className="mr-1 -mt-px"
                       />
                     ))}
                   </div>
