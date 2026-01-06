@@ -213,11 +213,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
         </div>
 
         {/* Middle section: Reply content */}
-        <div
-          className={`${
-            compact ? `text-xs sm:text-sm mb-1` : `text-sm sm:text-base mb-2`
-          }`}
-        >
+        <div className={`text-base mb-1`}>
           {!isEditing && (
             <EditableContentRenderer
               content={reply.editableContent}
