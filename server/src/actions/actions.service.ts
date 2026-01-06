@@ -164,7 +164,6 @@ export class ActionsService {
         activities: true,
         participatingTags: true,
         suite: true,
-        manualCohortUsers: true,
       },
     });
   }
@@ -250,7 +249,6 @@ export class ActionsService {
         events: true,
         participatingTags: true,
         activities: true,
-        manualCohortUsers: true,
       },
     });
 
@@ -344,7 +342,6 @@ export class ActionsService {
       events: true,
       participatingTags: true,
       activities: true,
-      manualCohortUsers: true,
     };
     const actions = sorted
       ? await this.findAllSorted(relations)
@@ -397,7 +394,7 @@ export class ActionsService {
                 (event) => event.newStatus === ActionStatus.MemberAction,
               )!.date,
               everyoneShouldComplete: action.everyoneShouldComplete,
-              manualCohortUsers: action.manualCohortUsers,
+              manualCohortUserIds: action.manualCohortUserIds,
               targetTagIds,
               useManualCohort: action.useManualCohort,
               user,
@@ -465,7 +462,6 @@ export class ActionsService {
         events: true,
         activities: true,
         participatingTags: true,
-        manualCohortUsers: true,
         updates: true,
         suite: true,
         authors: true,
@@ -698,7 +694,6 @@ export class ActionsService {
       where: { id },
       relations: {
         participatingTags: true,
-        manualCohortUsers: true,
         authors: true,
       },
     });
@@ -1132,7 +1127,7 @@ export class ActionsService {
       return false;
     }
     if (action.useManualCohort) {
-      return action.manualCohortUsers?.some((m) => m.id === user.id) ?? false;
+      return action.manualCohortUserIds?.some((m) => m === user.id) ?? false;
     }
     const tags = action.participatingTags;
     const userTagIds = new Set((user.tags || []).map((tag) => tag.id));
@@ -1151,7 +1146,7 @@ export class ActionsService {
     }
 
     if (action.useManualCohort) {
-      if (action.manualCohortUsers?.some((m) => m.id === userId)) {
+      if (action.manualCohortUserIds?.some((m) => m === userId)) {
         return;
       } else {
         throw new ForbiddenException('This action is not available to you');
@@ -1774,7 +1769,6 @@ export class ActionsService {
         action: {
           events: true,
           participatingTags: true,
-          manualCohortUsers: true,
         },
       },
     });
@@ -1872,7 +1866,6 @@ export class ActionsService {
   ): Promise<ExportActionDto> {
     const relations: Relations<Action> = {
       participatingTags: true,
-      manualCohortUsers: true,
       authors: true,
       events: events || undefined,
       suite: suite || undefined,
@@ -1942,13 +1935,6 @@ export class ActionsService {
       }
       await this.actionEventRepository.save(newEvents);
       action.events = newEvents;
-    }
-
-    if (action.manualCohortUsers) {
-      const found = await this.userService.findByIds(
-        action.manualCohortUsers.map((user) => user.id),
-      );
-      action.manualCohortUsers = found;
     }
 
     if (action.participatingTags) {

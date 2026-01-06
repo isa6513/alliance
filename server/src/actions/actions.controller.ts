@@ -287,7 +287,6 @@ export class ActionsController {
         activities: true,
         participatingTags: true,
         suite: true,
-        manualCohortUsers: true,
       })
       .then((actions) => instanceToPlain(actions));
   }

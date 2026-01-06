@@ -168,12 +168,15 @@ export class Action {
   @IsDefined()
   useManualCohort: boolean;
 
-  @ManyToMany(() => User)
-  @JoinTable()
-  @ApiPropertyOptional({ type: () => User, isArray: true })
-  @Type(() => User)
+  @Column('int', { array: true, nullable: true })
+  @Allow()
+  @ApiPropertyOptional({
+    description: 'User IDs in the manual cohort',
+    type: Number,
+    isArray: true,
+  })
   @IsOptional()
-  manualCohortUsers?: Ty<User>[];
+  manualCohortUserIds?: number[];
 
   @Column({ default: false })
   @ApiPropertyOptional({

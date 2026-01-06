@@ -1,10 +1,4 @@
-import type {
-  Action,
-  ActionSuite,
-  Tag,
-  TagDto,
-  User,
-} from "@alliance/shared/client";
+import type { Action, ActionSuite, Tag, TagDto } from "@alliance/shared/client";
 import {
   ActionDto,
   actionsArchive,
@@ -254,7 +248,7 @@ const ActionDashboard: React.FC = () => {
     publicOnly: false,
     suiteId: undefined,
     priority: 0,
-    manualCohortUsers: [],
+    manualCohortUserIds: [],
     useManualCohort: false,
     authorIds: [],
   });
@@ -280,7 +274,7 @@ const ActionDashboard: React.FC = () => {
           ? parseInt(searchParams.get("suiteId")!)
           : undefined,
         priority: 0,
-        manualCohortUsers: [],
+        manualCohortUserIds: [],
         useManualCohort: false,
         authorIds: [],
       });
@@ -337,7 +331,7 @@ const ActionDashboard: React.FC = () => {
           ...formData
         } = actionData;
 
-        const manualCohortUsers = actionData.manualCohortUsers ?? [];
+        const manualCohortUserIds = actionData.manualCohortUserIds ?? [];
         const authors = actionData.authors ?? [];
         const authorIds = authors.map((user) => user.id);
 
@@ -346,7 +340,7 @@ const ActionDashboard: React.FC = () => {
           taskFormId: actionData.taskFormId,
           participatingTags: actionData.participatingTags ?? [],
           suiteId: suite?.id,
-          manualCohortUsers,
+          manualCohortUserIds,
           useManualCohort: actionData.useManualCohort ?? false,
           authorIds,
         });
@@ -354,30 +348,7 @@ const ActionDashboard: React.FC = () => {
         setSelectedTagIds(
           (actionData.participatingTags || []).map((tag) => tag.id)
         );
-        setManualCohortUserIds(manualCohortUsers.map((user) => user.id));
-        setAvailableUsers((prev) => {
-          const existingIds = new Set(prev.map((user) => user.id));
-          const manualUsers = manualCohortUsers.map<UserSelectUser>((user) => ({
-            id: user.id,
-            name:
-              (user as unknown as { displayName?: string }).displayName ??
-              user.name ??
-              `User #${user.id}`,
-            profilePicture: user.profilePicture,
-          }));
-          const authorUsers = authors.map<UserSelectUser>((user) => ({
-            id: user.id,
-            name:
-              (user as unknown as { displayName?: string }).displayName ??
-              user.name ??
-              `User #${user.id}`,
-            profilePicture: user.profilePicture,
-          }));
-          const additions = [...manualUsers, ...authorUsers].filter(
-            (user) => !existingIds.has(user.id)
-          );
-          return additions.length ? [...prev, ...additions] : prev;
-        });
+        setManualCohortUserIds(manualCohortUserIds);
 
         setImageKey(actionData.image ?? null);
         setImagePreview(actionData.image ?? null);
@@ -391,7 +362,7 @@ const ActionDashboard: React.FC = () => {
     };
 
     loadAction();
-  }, [actionId, isNew]);
+  }, [actionId, isNew, availableUsers]);
 
   // Load share URL stats for publicOnly actions
   useEffect(() => {
@@ -482,10 +453,10 @@ const ActionDashboard: React.FC = () => {
       }
       setForm((prev) => ({
         ...prev,
-        manualCohortUsers:
+        manualCohortUserIds:
           name === "useManualCohort" && !target.checked
             ? []
-            : prev.manualCohortUsers,
+            : prev.manualCohortUserIds,
         [name]: target.checked,
       }));
       return;
@@ -553,7 +524,7 @@ const ActionDashboard: React.FC = () => {
     setManualCohortUserIds(ids);
     setForm((prev) => ({
       ...prev,
-      manualCohortUsers: ids.map((id) => ({ id } as unknown as User)),
+      manualCohortUserIds: ids,
     }));
   }, []);
 
@@ -597,9 +568,7 @@ const ActionDashboard: React.FC = () => {
           (id) => ({ id } as unknown as Tag)
         ),
         image: imageKey ?? undefined,
-        manualCohortUsers: form.useManualCohort
-          ? manualCohortUserIds.map((id) => ({ id } as unknown as User))
-          : [],
+        manualCohortUserIds: form.useManualCohort ? manualCohortUserIds : [],
       };
 
       if (isNew) {
@@ -693,20 +662,6 @@ const ActionDashboard: React.FC = () => {
       }
     }
   };
-
-  const selectableUsers = useMemo(() => {
-    const manualUsers =
-      form.manualCohortUsers?.map<UserSelectUser>((user) => ({
-        id: user.id,
-        name: user.name,
-        profilePicture: user.profilePicture,
-      })) ?? [];
-
-    const merged = new Map<number, UserSelectUser>();
-    manualUsers.forEach((user) => merged.set(user.id, user));
-    availableUsers.forEach((user) => merged.set(user.id, user));
-    return Array.from(merged.values());
-  }, [availableUsers, form.manualCohortUsers]);
 
   const baseUrl = getApiUrl();
 
@@ -867,7 +822,7 @@ const ActionDashboard: React.FC = () => {
             suitesLoading={suitesLoading}
             selectedTagIds={selectedTagIds}
             onTagsChange={handleTagsChange}
-            availableUsers={selectableUsers}
+            availableUsers={availableUsers}
             usersLoading={usersLoading}
             manualCohortUserIds={manualCohortUserIds}
             onManualCohortChange={handleManualCohortChange}
@@ -1262,7 +1217,7 @@ const ActionDashboard: React.FC = () => {
                   suitesLoading={suitesLoading}
                   selectedTagIds={selectedTagIds}
                   onTagsChange={handleTagsChange}
-                  availableUsers={selectableUsers}
+                  availableUsers={availableUsers}
                   usersLoading={usersLoading}
                   manualCohortUserIds={manualCohortUserIds}
                   onManualCohortChange={handleManualCohortChange}

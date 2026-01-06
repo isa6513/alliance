@@ -160,7 +160,7 @@ describe('Actions (e2e)', () => {
 
     groupRestrictedAction = await actionRepo.findOneOrFail({
       where: { id: restricted.id },
-      relations: {participatingTags: true}
+      relations: { participatingTags: true },
     });
   }, 50000);
 
@@ -385,7 +385,7 @@ describe('Actions (e2e)', () => {
           taskContents: 'Manual cohort task',
           commitmentless: false,
           participatingTags: [ctx.defaultTag],
-          manualCohortUsers: [cohortMember],
+          manualCohortUserIds: [cohortMember.id],
           useManualCohort: true,
           showToNonparticipating: true,
           priority: 0,
@@ -1476,12 +1476,18 @@ describe('Actions (e2e)', () => {
       });
 
       // Action with sooner deadline
-      const soonerDeadlineAction = await createOrderingAction('Sooner Deadline', {
-        events: [
-          { status: ActionStatus.MemberAction, date: new Date(now - 3600000) }, // past MemberAction
-          { status: ActionStatus.Resolution, date: new Date(now + 1800000) }, // deadline 30 min from now
-        ],
-      });
+      const soonerDeadlineAction = await createOrderingAction(
+        'Sooner Deadline',
+        {
+          events: [
+            {
+              status: ActionStatus.MemberAction,
+              date: new Date(now - 3600000),
+            }, // past MemberAction
+            { status: ActionStatus.Resolution, date: new Date(now + 1800000) }, // deadline 30 min from now
+          ],
+        },
+      );
 
       const res = await request(ctx.app.getHttpServer())
         .get('/actions/loggedIn?sorted=true')
@@ -1504,18 +1510,30 @@ describe('Actions (e2e)', () => {
       const now = Date.now();
 
       // Action with past GatheringCommitments only (no MemberAction)
-      const noMemberActionAction = await createOrderingAction('No Member Action', {
-        events: [
-          { status: ActionStatus.GatheringCommitments, date: new Date(now - 3600000) },
-        ],
-      });
+      const noMemberActionAction = await createOrderingAction(
+        'No Member Action',
+        {
+          events: [
+            {
+              status: ActionStatus.GatheringCommitments,
+              date: new Date(now - 3600000),
+            },
+          ],
+        },
+      );
 
       // Action with past member action event
-      const memberActionAction = await createOrderingAction('Past Member Action', {
-        events: [
-          { status: ActionStatus.MemberAction, date: new Date(now - 3600000) },
-        ],
-      });
+      const memberActionAction = await createOrderingAction(
+        'Past Member Action',
+        {
+          events: [
+            {
+              status: ActionStatus.MemberAction,
+              date: new Date(now - 3600000),
+            },
+          ],
+        },
+      );
 
       const res = await request(ctx.app.getHttpServer())
         .get('/actions/loggedIn?sorted=true')
@@ -1623,20 +1641,32 @@ describe('Actions (e2e)', () => {
       });
 
       // 3. Action with recent past member action but no deadline (should be third)
-      const recentPastNoDeadline = await createOrderingAction('Recent Past No Deadline', {
-        events: [
-          { status: ActionStatus.MemberAction, date: new Date(now - 1800000) }, // 30 min ago
-        ],
-        priority: 5,
-      });
+      const recentPastNoDeadline = await createOrderingAction(
+        'Recent Past No Deadline',
+        {
+          events: [
+            {
+              status: ActionStatus.MemberAction,
+              date: new Date(now - 1800000),
+            }, // 30 min ago
+          ],
+          priority: 5,
+        },
+      );
 
       // 4. Action with older past member action but no deadline (should be fourth)
-      const olderPastNoDeadline = await createOrderingAction('Older Past No Deadline', {
-        events: [
-          { status: ActionStatus.MemberAction, date: new Date(now - 7200000) }, // 2 hours ago
-        ],
-        priority: 1,
-      });
+      const olderPastNoDeadline = await createOrderingAction(
+        'Older Past No Deadline',
+        {
+          events: [
+            {
+              status: ActionStatus.MemberAction,
+              date: new Date(now - 7200000),
+            }, // 2 hours ago
+          ],
+          priority: 1,
+        },
+      );
 
       const res = await request(ctx.app.getHttpServer())
         .get('/actions/loggedIn?sorted=true')
@@ -1644,7 +1674,12 @@ describe('Actions (e2e)', () => {
         .expect(200);
 
       const actionIds = res.body.map((a: ActionDto) => a.id);
-      const testActionIds = [soonestDeadline.id, laterDeadline.id, recentPastNoDeadline.id, olderPastNoDeadline.id];
+      const testActionIds = [
+        soonestDeadline.id,
+        laterDeadline.id,
+        recentPastNoDeadline.id,
+        olderPastNoDeadline.id,
+      ];
       const orderedTestActions = getRelativeOrder(actionIds, testActionIds);
 
       expect(orderedTestActions.length).toBe(4);
@@ -1669,20 +1704,35 @@ describe('Actions (e2e)', () => {
       const now = Date.now();
 
       // Action with older MemberAction (no deadline - Resolution is in the past)
-      const olderMemberAction = await createOrderingAction('Older MemberAction', {
-        events: [
-          { status: ActionStatus.GatheringCommitments, date: new Date(now - 10800000) }, // 3h ago
-          { status: ActionStatus.MemberAction, date: new Date(now - 7200000) }, // 2h ago
-          { status: ActionStatus.Resolution, date: new Date(now - 1800000) }, // 30min ago (past, not a deadline)
-        ],
-      });
+      const olderMemberAction = await createOrderingAction(
+        'Older MemberAction',
+        {
+          events: [
+            {
+              status: ActionStatus.GatheringCommitments,
+              date: new Date(now - 10800000),
+            }, // 3h ago
+            {
+              status: ActionStatus.MemberAction,
+              date: new Date(now - 7200000),
+            }, // 2h ago
+            { status: ActionStatus.Resolution, date: new Date(now - 1800000) }, // 30min ago (past, not a deadline)
+          ],
+        },
+      );
 
       // Action with more recent MemberAction (no deadline)
-      const newerMemberAction = await createOrderingAction('Newer MemberAction', {
-        events: [
-          { status: ActionStatus.MemberAction, date: new Date(now - 3600000) }, // 1h ago
-        ],
-      });
+      const newerMemberAction = await createOrderingAction(
+        'Newer MemberAction',
+        {
+          events: [
+            {
+              status: ActionStatus.MemberAction,
+              date: new Date(now - 3600000),
+            }, // 1h ago
+          ],
+        },
+      );
 
       const res = await request(ctx.app.getHttpServer())
         .get('/actions/loggedIn?sorted=true')

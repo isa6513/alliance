@@ -268,10 +268,6 @@ export class ActionEventReminderService {
       .leftJoinAndSelect('rg.memberActionEvent', 'event')
       .leftJoinAndSelect('event.action', 'eventAction')
       .leftJoinAndSelect('eventAction.participatingTags', 'eventActionTags')
-      .leftJoinAndSelect(
-        'eventAction.manualCohortUsers',
-        'eventActionManualCohortUsers',
-      )
       .leftJoinAndSelect('rg.deadlineEvent', 'deadline')
       .leftJoinAndSelect('rg.users', 'users')
       .leftJoinAndSelect('users.tags', 'userTags')
@@ -311,7 +307,6 @@ export class ActionEventReminderService {
         memberActionEvent: {
           action: {
             participatingTags: true,
-            manualCohortUsers: true,
           },
         },
         deadlineEvent: true,

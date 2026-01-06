@@ -427,6 +427,9 @@ const ActionForm: React.FC<ActionFormProps> = ({
     );
   };
 
+  console.log(availableUsers);
+  console.log(manualCohortUserIds);
+
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       {fieldDefs
@@ -527,7 +530,9 @@ const ActionForm: React.FC<ActionFormProps> = ({
       <div className="border border-gray-200 rounded-md p-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-3">
           <div>
-            <p className="text-sm font-medium text-black">Manual user cohort</p>
+            <p className="text-sm font-medium text-black">
+              Manual user cohort ({manualCohortUserIds.length})
+            </p>
           </div>
           <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
             <input

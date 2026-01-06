@@ -55,7 +55,7 @@ export class ActionEventRecipientService {
   public userShouldParticipate(params: {
     eventDate: Date;
     everyoneShouldComplete: boolean;
-    manualCohortUsers?: User[];
+    manualCohortUserIds?: number[];
     targetTagIds: Set<number>;
     useManualCohort: boolean;
     user: User;
@@ -64,7 +64,7 @@ export class ActionEventRecipientService {
     const {
       eventDate,
       everyoneShouldComplete,
-      manualCohortUsers,
+      manualCohortUserIds,
       targetTagIds,
       useManualCohort,
       user,
@@ -75,7 +75,7 @@ export class ActionEventRecipientService {
       return false;
     }
     if (useManualCohort) {
-      return manualCohortUsers?.some((m) => m.id === user.id) ?? false;
+      return manualCohortUserIds?.some((m) => m === user.id) ?? false;
     }
 
     if (!user.tags.some((tag) => targetTagIds.has(tag.id))) {
@@ -138,7 +138,7 @@ export class ActionEventRecipientService {
       this.userShouldParticipate({
         eventDate: event.date,
         everyoneShouldComplete: action.everyoneShouldComplete,
-        manualCohortUsers: action.manualCohortUsers,
+        manualCohortUserIds: action.manualCohortUserIds,
         targetTagIds,
         useManualCohort: action.useManualCohort,
         user,
@@ -211,7 +211,7 @@ export class ActionEventRecipientService {
       this.userShouldParticipate({
         eventDate: event.date,
         everyoneShouldComplete: event.action.everyoneShouldComplete,
-        manualCohortUsers: event.action.manualCohortUsers,
+        manualCohortUserIds: event.action.manualCohortUserIds,
         targetTagIds,
         useManualCohort: event.action.useManualCohort,
         user: idToUser.get(user.id)!,

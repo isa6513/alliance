@@ -156,7 +156,6 @@ export class ActionDto extends OmitType(Action, [
   ) {
     super();
     Object.assign(this, action);
-    this.manualCohortUsers = undefined;
     this.image = action.image ? getImageSource(action.image) : undefined;
     this.squareThumbnailImage = action.squareThumbnailImage
       ? getImageSource(action.squareThumbnailImage)

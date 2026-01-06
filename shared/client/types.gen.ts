@@ -428,7 +428,10 @@ export type Action = {
      * Whether to use a manual cohort for the action
      */
     useManualCohort: boolean;
-    manualCohortUsers?: Array<User>;
+    /**
+     * User IDs in the manual cohort
+     */
+    manualCohortUserIds?: Array<number>;
     /**
      * Whether to show the action to members who are not of participating groups
      */
@@ -1066,7 +1069,10 @@ export type ActionDto = {
      * Whether to use a manual cohort for the action
      */
     useManualCohort: boolean;
-    manualCohortUsers?: Array<User>;
+    /**
+     * User IDs in the manual cohort
+     */
+    manualCohortUserIds?: Array<number>;
     /**
      * Whether to show the action to members who are not of participating groups
      */
@@ -1187,7 +1193,10 @@ export type CreateActionDto = {
      * Whether to use a manual cohort for the action
      */
     useManualCohort: boolean;
-    manualCohortUsers?: Array<User>;
+    /**
+     * User IDs in the manual cohort
+     */
+    manualCohortUserIds?: Array<number>;
     /**
      * Whether to show the action to members who are not of participating groups
      */
@@ -1274,7 +1283,10 @@ export type UpdateActionDto = {
      * Whether to use a manual cohort for the action
      */
     useManualCohort?: boolean;
-    manualCohortUsers?: Array<User>;
+    /**
+     * User IDs in the manual cohort
+     */
+    manualCohortUserIds?: Array<number>;
     /**
      * Whether to show the action to members who are not of participating groups
      */
@@ -1541,7 +1553,10 @@ export type ExportActionDto = {
      * Whether to use a manual cohort for the action
      */
     useManualCohort: boolean;
-    manualCohortUsers?: Array<User>;
+    /**
+     * User IDs in the manual cohort
+     */
+    manualCohortUserIds?: Array<number>;
     /**
      * Whether to show the action to members who are not of participating groups
      */
