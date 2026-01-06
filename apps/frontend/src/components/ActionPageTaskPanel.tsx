@@ -72,7 +72,19 @@ const ActionPageTaskPanel = () => {
     case ActionPageTaskPanelState.ActiveButCantParticipate:
       return (
         <div>
-          <Card style={CardStyle.Grey}>{taskNotAssigned}</Card>
+          <Card style={CardStyle.Grey} className="rounded-b-none font-medium">
+            {taskNotAssigned}
+          </Card>
+          <Card style={CardStyle.Grey} className="rounded-t-none border-t-0">
+            <ActionTaskPanel
+              userRelation={"none"}
+              action={action}
+              {...panelHandlers}
+              missedDeadline={false}
+              disabled={true}
+              card={false}
+            />
+          </Card>
         </div>
       );
     case ActionPageTaskPanelState.MissingDataOrNotActive:
