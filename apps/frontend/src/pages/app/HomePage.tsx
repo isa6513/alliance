@@ -24,6 +24,7 @@ import {
   TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
 } from "@alliance/shared/lib/copy";
 import {
+  todoActionIsMandatory,
   deadlineHasPassed,
   TaskAwayStatus,
 } from "@alliance/shared/lib/actionUtils";
@@ -165,12 +166,10 @@ const HomePage = () => {
     handleDismissAction,
   ]);
 
-  const numTodo = todoActions.filter(
-    (action) => action.awayStatus === TaskAwayStatus.NOT_AWAY
-  ).length;
+  const numTodo = todoActions.filter(todoActionIsMandatory).length;
   const sidebarContent = useMemo(() => {
-    const currentWeekTodoActionsNotAway = currentWeekTodoActions.filter(
-      (action) => action.awayStatus === TaskAwayStatus.NOT_AWAY
+    const currentWeekMandatoryTodoActions = currentWeekTodoActions.filter(
+      todoActionIsMandatory
     );
 
     return (
@@ -180,11 +179,11 @@ const HomePage = () => {
             <p className="font-semibold text-base font-serif text-black">
               Progress
             </p>
-            {currentWeekTodoActionsNotAway.length + newActions.length > 0 && (
+            {currentWeekMandatoryTodoActions.length + newActions.length > 0 && (
               <p className="text-zinc-600 mb-2">
                 <span className="text-green font-medium mr-0.5">
-                  {currentWeekTodoActionsNotAway.length} task
-                  {currentWeekTodoActionsNotAway.length !== 1
+                  {currentWeekMandatoryTodoActions.length} task
+                  {currentWeekMandatoryTodoActions.length !== 1
                     ? "s"
                     : ""} left{" "}
                 </span>

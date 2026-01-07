@@ -112,6 +112,57 @@ export function getDeadlineTimestamp(action: ActionDto): number {
   return new Date(nextEvent.date).getTime();
 }
 
+export function canCompleteAction(action: ActionDto) {
+  return (
+    getPastEvents(action).some(
+      (event) => event.newStatus === "member_action"
+    ) &&
+    (action.userRelation === "joined" ||
+      (action.commitmentless && action.userRelation !== "completed")) &&
+    action.userRelation !== "declined" &&
+    (action.canParticipate || action.publicOnly)
+  );
+}
+
+export function shouldCompleteAction(action: ActionDto) {
+  return (
+    canCompleteAction(action) &&
+    action.shouldParticipate &&
+    (action.status === "member_action" ||
+      action.status === "gathering_commitments" ||
+      (action.shouldCompleteAfterDeadline &&
+        deadlineHasPassed(action, new Date()))) &&
+    !action.publicOnly
+  );
+}
+
+export function isCurrentlyCompletedAction(action: ActionDto) {
+  return (
+    action.shouldParticipate &&
+    (action.status === "member_action" ||
+      action.status === "gathering_commitments") &&
+    !action.everyoneShouldComplete &&
+    action.userRelation === "completed"
+  );
+}
+
+export function canJoinAction(action: ActionDto) {
+  return (
+    action.status === "gathering_commitments" &&
+    action.userRelation === "none" &&
+    action.canParticipate
+  );
+}
+
+export function todoActionIsMandatory(action: ActionWithAwayStatus) {
+  return (
+    (shouldCompleteAction(action) || canJoinAction(action)) &&
+    action.awayStatus === TaskAwayStatus.NOT_AWAY &&
+    !deadlineHasPassed(action, new Date()) &&
+    action.userRelation !== "dismissed"
+  );
+}
+
 export function deadlineHasPassed(action: ActionDto, date: Date): boolean {
   return (
     action.status !== "member_action" &&

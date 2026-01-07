@@ -2,61 +2,12 @@ import { useCallback, useMemo } from "react";
 import { ActionDto } from "../client";
 import {
   ActionWithAwayStatus,
-  deadlineHasPassed,
+  canJoinAction,
   getDeadlineTimestamp,
-  getPastEvents,
-  TaskAwayStatus,
+  isCurrentlyCompletedAction,
+  shouldCompleteAction,
+  todoActionIsMandatory,
 } from "./actionUtils";
-
-export function canCompleteAction(action: ActionDto) {
-  return (
-    getPastEvents(action).some(
-      (event) => event.newStatus === "member_action"
-    ) &&
-    (action.userRelation === "joined" ||
-      (action.commitmentless && action.userRelation !== "completed")) &&
-    action.userRelation !== "declined" &&
-    (action.canParticipate || action.publicOnly)
-  );
-}
-
-export function shouldCompleteAction(action: ActionDto) {
-  return (
-    canCompleteAction(action) &&
-    action.shouldParticipate &&
-    (action.status === "member_action" ||
-      action.status === "gathering_commitments" ||
-      action.shouldCompleteAfterDeadline) &&
-    !action.publicOnly
-  );
-}
-
-export function isCurrentlyCompletedAction(action: ActionDto) {
-  return (
-    action.shouldParticipate &&
-    (action.status === "member_action" ||
-      action.status === "gathering_commitments") &&
-    !action.everyoneShouldComplete &&
-    action.userRelation === "completed"
-  );
-}
-
-export function canJoinAction(action: ActionDto) {
-  return (
-    action.status === "gathering_commitments" &&
-    action.userRelation === "none" &&
-    action.canParticipate
-  );
-}
-
-export function actionContributesToTaskCount(action: ActionWithAwayStatus) {
-  return (
-    (shouldCompleteAction(action) || canJoinAction(action)) &&
-    action.awayStatus === TaskAwayStatus.NOT_AWAY &&
-    !deadlineHasPassed(action, new Date()) &&
-    action.userRelation !== "dismissed"
-  );
-}
 
 export function actionPriorityComparator(
   actionA: ActionDto,
@@ -160,10 +111,7 @@ export function useHomePageActions(actions: ActionWithAwayStatus[] | null) {
 
   const remainingTasksEstimatedTimeCurrentWeek = currentWeekTodoActions.reduce(
     (sum, action) => {
-      if (
-        action.awayStatus === TaskAwayStatus.NOT_AWAY &&
-        action.timeEstimate
-      ) {
+      if (todoActionIsMandatory(action) && action.timeEstimate) {
         return sum + action.timeEstimate;
       }
       return sum;
