@@ -3,7 +3,6 @@ import {
   UserActionRelationDetailDto,
   UserActionSummaryDto,
   UserDto,
-  UserActionRelationPillStatus,
 } from "@alliance/shared/client/types.gen";
 import Card from "@alliance/sharedweb/ui/Card";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
@@ -14,7 +13,7 @@ import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
 import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
 import { Link } from "react-router";
 import UserProgressPills, {
-  formatRelationStatus,
+  PILL_STATUS_DATA,
 } from "@alliance/sharedweb/ui/UserProgressPills";
 import { CardStyle } from "@alliance/shared/styles/card";
 
@@ -49,23 +48,6 @@ const UserCard = ({
       return acc;
     }, {} as Record<number, UserActionRelationDetailDto>);
   }, [actionRelations]);
-
-  const relationStatusColor = (status: UserActionRelationPillStatus) => {
-    switch (status) {
-      case "completed":
-        return "text-green";
-      case "not_required":
-        return "text-amber-600";
-      case "missed_deadline":
-        return "text-red-600";
-      case "wont_complete":
-        return "text-red-600";
-      case "todo":
-        return "text-zinc-500";
-      default:
-        throw new Error(`Invalid filter mode: ${status satisfies never}`);
-    }
-  };
 
   const humanize = (value?: string) => {
     if (!value) {
@@ -218,10 +200,9 @@ const UserCard = ({
           {isActionDetailsOpen && (
             <div className="mt-3 space-y-2">
               {actions.map((action) => {
-                const relation = relationByActionId[action.id] ?? {
-                  status: "none",
-                };
-                const statusLabel = formatRelationStatus(relation.status);
+                const relation = relationByActionId[action.id];
+                const { pillLabel, pillTextStyle } =
+                  PILL_STATUS_DATA[relation.status];
                 return (
                   <div
                     key={action.id}
@@ -232,11 +213,9 @@ const UserCard = ({
                         {action.name}
                       </span>
                       <span
-                        className={`font-semibold text-nowrap ${relationStatusColor(
-                          relation?.status
-                        )}`}
+                        className={`font-semibold text-nowrap ${pillTextStyle}`}
                       >
-                        {statusLabel}
+                        {pillLabel}
                       </span>
                     </div>
                     <div className="mt-1 flex flex-col gap-1 text-xs text-zinc-500">

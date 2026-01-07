@@ -28,6 +28,7 @@ import { Route } from "../../.react-router/types/src/pages/+types/UserDetailView
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import CreateActivityControls from "../components/CreateActivityControls";
 import { ChevronDown, ChevronRight, Mail, Phone } from "lucide-react";
+import { PILL_STATUS_DATA } from "@alliance/sharedweb/ui/UserProgressPills";
 
 export async function clientLoader({ params }: Route.LoaderArgs) {
   const userIdParam = params.userId;
@@ -369,7 +370,8 @@ const UserDetailView: React.FC = () => {
                   <tbody className="divide-y divide-zinc-100">
                     {actionSummaries.map((action) => {
                       const relation = relationByActionId[action.id];
-                      const relationStatus = relation?.status ?? "none";
+                      const { pillLabel, pillTextStyle } =
+                        PILL_STATUS_DATA[relation.status];
                       return (
                         <tr key={action.id} className="hover:bg-zinc-50">
                           <td className="px-3 py-2">
@@ -384,16 +386,12 @@ const UserDetailView: React.FC = () => {
                             {humanize(action.status)}
                           </td>
                           <td className="px-3 py-2">
-                            <span
-                              className={`font-medium ${relationStatusColor(
-                                relationStatus
-                              )}`}
-                            >
-                              {formatRelationStatus(relationStatus)}
+                            <span className={`font-medium ${pillTextStyle}`}>
+                              {pillLabel}
                             </span>
                           </td>
                           <td className="px-3 py-2 text-zinc-500">
-                            {relation?.latestActivityAt
+                            {relation.latestActivityAt
                               ? new Date(
                                   relation.latestActivityAt
                                 ).toLocaleDateString()
@@ -784,39 +782,6 @@ function awayRangeStatus(range: UserAwayRangeDto): AwayRangeStatus {
     return "upcoming";
   }
   return "past";
-}
-
-function formatRelationStatus(status: UserActionRelationDetailDto["status"]) {
-  switch (status) {
-    case "completed":
-      return "Completed";
-    case 'not_required':
-      return "Not required";
-    case "wont_complete":
-      return "Won't complete";
-    case "missed_deadline":
-      return "Missed deadline";
-    case "todo":
-      return "Not started";
-    default:
-      throw new Error(`Unknown relation status: ${status satisfies never}`);
-  }
-}
-
-function relationStatusColor(status: UserActionRelationDetailDto["status"]) {
-  switch (status) {
-    case "completed":
-      return "text-green";
-    case "not_required":
-      return "text-amber-600";
-    case "missed_deadline":
-    case "wont_complete":
-      return "text-red-600";
-    case "todo":
-      return "text-zinc-500";
-    default:
-      throw new Error(`Unknown relation status: ${status satisfies never}`);
-  }
 }
 
 function notifTimestamp(notif: ActionEventNotifDto) {
