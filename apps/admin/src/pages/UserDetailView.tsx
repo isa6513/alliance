@@ -790,15 +790,13 @@ function formatRelationStatus(status: UserActionRelationDetailDto["status"]) {
   switch (status) {
     case "completed":
       return "Completed";
-    case "joined":
-      return "Joined";
-    case "declined":
-      return "Declined";
+    case 'not_required':
+      return "Not required";
     case "wont_complete":
       return "Won't complete";
     case "missed_deadline":
       return "Missed deadline";
-    case "none":
+    case "todo":
       return "Not started";
     default:
       throw new Error(`Unknown relation status: ${status satisfies never}`);
@@ -809,14 +807,12 @@ function relationStatusColor(status: UserActionRelationDetailDto["status"]) {
   switch (status) {
     case "completed":
       return "text-green";
-    case "joined":
-      return "text-blue-600";
-    case "declined":
+    case "not_required":
       return "text-amber-600";
     case "missed_deadline":
     case "wont_complete":
       return "text-red-600";
-    case "none":
+    case "todo":
       return "text-zinc-500";
     default:
       throw new Error(`Unknown relation status: ${status satisfies never}`);

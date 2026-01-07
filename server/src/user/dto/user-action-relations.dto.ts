@@ -5,11 +5,10 @@ import { User } from '../entities/user.entity';
 import { Temporal } from '@js-temporal/polyfill';
 import { UserAwayRangeDto } from './away-range.dto';
 
-export enum UserActionRelationStatus {
-  None = 'none',
-  Joined = 'joined',
+export enum UserActionRelationPillStatus {
+  Todo = 'todo',
   Completed = 'completed',
-  Declined = 'declined',
+  NotRequired = 'not_required',
   WontComplete = 'wont_complete',
   MissedDeadline = 'missed_deadline',
 }
@@ -26,9 +25,6 @@ export class UserActionSummaryDto {
 
   @ApiProperty()
   allMembersParticipating: boolean;
-
-  @ApiProperty({ type: Number, isArray: true })
-  joinedUserIds: number[];
 
   @ApiPropertyOptional()
   suiteId?: number;
@@ -47,10 +43,10 @@ export class UserActionRelationDetailDto {
   actionId: number;
 
   @ApiProperty({
-    enum: UserActionRelationStatus,
-    enumName: 'UserActionRelationStatus',
+    enum: UserActionRelationPillStatus,
+    enumName: 'UserActionRelationPillStatus',
   })
-  status: UserActionRelationStatus;
+  status: UserActionRelationPillStatus;
 
   @ApiPropertyOptional({
     enum: ActionActivityType,

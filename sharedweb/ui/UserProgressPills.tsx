@@ -1,24 +1,23 @@
 import {
   UserActionRelationDetailDto,
-  UserActionRelationStatus,
+  UserActionRelationPillStatus,
   UserActionSummaryDto,
 } from "@alliance/shared/client";
+import { JSX } from "react";
 
 export const formatRelationStatus = (
-  status: UserActionRelationStatus
+  status: UserActionRelationPillStatus
 ): string => {
   switch (status) {
     case "completed":
       return "Completed";
-    case "joined":
-      return "Joined";
-    case "declined":
-      return "Declined";
+    case "not_required":
+      return "Not required";
     case "wont_complete":
       return "Won't complete";
     case "missed_deadline":
       return "Missed deadline";
-    case "none":
+    case "todo":
       return "Not started";
     default:
       throw new Error(`Invalid filter mode: ${status satisfies never}`);
@@ -27,14 +26,48 @@ export const formatRelationStatus = (
 
 export interface UserProgressPillsProps {
   actions: UserActionSummaryDto[];
-  userId: number;
   relationByActionId: Record<number, UserActionRelationDetailDto>;
   pillHeight?: string;
 }
 
+function pillBgStyle(status: UserActionRelationPillStatus): string {
+  switch (status) {
+    case "completed":
+      return "bg-green";
+    case "wont_complete":
+      return "bg-yellow-400";
+    case "missed_deadline":
+      return "bg-orange-600";
+    case "not_required":
+      return "bg-zinc-100 border border-zinc-200";
+    case "todo":
+      return "bg-white text-zinc-500 border border-green";
+    default:
+      throw new Error(`Invalid filter mode: ${status satisfies never}`);
+  }
+}
+
+function pillText(status: UserActionRelationPillStatus): JSX.Element {
+  switch (status) {
+    case "completed":
+      return <span className="text-green">Completed</span>;
+    case "wont_complete":
+      return <span className="text-yellow">Won't complete</span>;
+    case "missed_deadline":
+      return <span className="text-orange">Missed deadline</span>;
+    case "not_required":
+      return (
+        <span className="text-zinc-500">Member not expected to complete</span>
+      );
+    case "todo":
+      return <span className="text-zinc-500">Not yet completed</span>;
+    default:
+      throw new Error(`Invalid filter mode: ${status satisfies never}`);
+  }
+}
+
 const UserProgressPills = ({
   actions,
-  userId,
   relationByActionId,
   pillHeight = "h-3",
 }: UserProgressPillsProps) => {
@@ -46,18 +79,7 @@ const UserProgressPills = ({
           const relation = relationByActionId[action.id] ?? {
             status: "none",
           };
-          const isCompleted = relation.status === "completed";
-          const className = isCompleted
-            ? "bg-green"
-            : relation.status === "joined"
-            ? "bg-green/40"
-            : relation.status === "wont_complete"
-            ? "bg-yellow-400"
-            : relation.status === "missed_deadline"
-            ? "bg-orange-600"
-            : !action.joinedUserIds.includes(userId)
-            ? "bg-zinc-100 border border-zinc-200"
-            : "bg-white text-zinc-500 border border-green";
+          const className = pillBgStyle(relation.status);
           return relation ? (
             <div key={action.id} className="relative group flex-1">
               <div
@@ -69,17 +91,7 @@ const UserProgressPills = ({
               <div className="pointer-events-none absolute bottom-full mb-1 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] font-medium text-zinc-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100">
                 <div className="flex flex-col items-center justify-center">
                   {action.name}
-                  {!action.joinedUserIds.includes(userId) && (
-                    <span className="text-zinc-500">
-                      Member not expected to complete
-                    </span>
-                  )}
-                  {action.joinedUserIds.includes(userId) && !isCompleted && (
-                    <span className="text-zinc-500">Not yet completed</span>
-                  )}
-                  {action.joinedUserIds.includes(userId) && isCompleted && (
-                    <span className="text-green">Completed</span>
-                  )}
+                  {pillText(relation.status)}
                 </div>
               </div>
             </div>

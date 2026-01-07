@@ -36,7 +36,7 @@ import {
   UserActionRelationDetailDto,
   UserActionRelationsForUserDto,
   UserActionRelationsResponseDto,
-  UserActionRelationStatus,
+  UserActionRelationPillStatus,
   UserActionSummaryDto,
 } from 'src/user/dto/user-action-relations.dto';
 import { ContractEventType } from 'src/user/entities/contract-event.entity';
@@ -1985,148 +1985,188 @@ export class ActionsService {
     return this.getActionRelationsForUsers(users);
   }
 
+  someMemberActionPhaseIsOver(params: {
+    events: ActionEvent[];
+    date: Date;
+  }): boolean {
+    const { events, date } = params;
+
+    const prevMemberActionEvent = events.find(
+      (event) =>
+        event.newStatus === ActionStatus.MemberAction && event.date < date,
+    );
+    if (!prevMemberActionEvent) {
+      return false;
+    }
+
+    return events.some(
+      (event) =>
+        event.newStatus !== ActionStatus.MemberAction &&
+        event.date > prevMemberActionEvent.date &&
+        event.date <= date,
+    );
+  }
+
   async getActionRelationsForUsers(
     userIds: number[],
     actionLimit: number = 8,
   ): Promise<UserActionRelationsResponseDto> {
-    const actions = (
-      await this.findAllSorted(
-        { events: true, suite: true, participatingTags: true },
-        actionLimit,
-      )
-    ).filter(
-      (action) => action.status !== ActionStatus.Draft && !action.publicOnly,
+    const actionsPromise: Promise<Action[]> = this.findAllSorted(
+      { events: true, suite: true, participatingTags: true },
+      actionLimit,
+    ).then((actions) =>
+      actions.filter(
+        (action) =>
+          !action.archived &&
+          action.status !== ActionStatus.Draft &&
+          !action.publicOnly,
+      ),
     );
+
+    const joinedUsersPromise: Promise<Record<number, number[]>> =
+      actionsPromise.then(async (actions) => {
+        const joinedUsersPromises = actions.map(
+          async (action) =>
+            [
+              action.id,
+              await this.computeUsersJoinedForAction(action.id),
+            ] satisfies [number, number[]],
+        );
+
+        return Object.fromEntries(await Promise.all(joinedUsersPromises));
+      });
+
+    const suitesPromise: Promise<ActionSuiteSummaryDto[]> = actionsPromise
+      .then((actions) =>
+        this.actionSuiteRepository.find({
+          where: { id: In(actions.map((a) => a.suite?.id)) },
+        }),
+      )
+      .then((suites) =>
+        suites.map(
+          (suite) =>
+            ({
+              id: suite.id,
+              name: suite.name,
+            }) satisfies ActionSuiteSummaryDto,
+        ),
+      );
+
+    const allMembersTagIdPromise: Promise<number> = this.userService
+      .findTagByName('All Members')
+      .then((tag) => tag!.id);
 
     const now = new Date();
-    const memberActionPhaseEnded = new Map<number, boolean>();
-
-    for (const action of actions) {
-      const pastEvents = (action.events ?? [])
-        .filter((event) => event.date <= now)
-        .sort((a, b) => a.date.getTime() - b.date.getTime());
-      const memberActionIndex = pastEvents.findIndex(
-        (event) => event.newStatus === ActionStatus.MemberAction,
-      );
-      memberActionPhaseEnded.set(
-        action.id,
-        memberActionIndex !== -1 && memberActionIndex < pastEvents.length - 1,
-      );
-    }
-
-    const allMembersTagId = (
-      await this.userService.findTagByName('All Members')
-    )?.id;
-    const userIdSet = new Set(userIds);
-    const actionSummaryPromises: Promise<UserActionSummaryDto>[] = actions.map(
-      async (action) => {
-        const joinedUserIds = (
-          await this.computeUsersJoinedForAction(action.id)
-        ).filter((userId) => userIdSet.has(userId));
-
-        return {
-          id: action.id,
-          name: action.name,
-          status: action.status,
-          allMembersParticipating:
-            allMembersTagId !== undefined &&
-            !!action.participatingTags.find(
-              (tag) => tag.id === allMembersTagId,
-            ),
-          joinedUserIds,
-          suiteId: action.suite?.id,
-        } satisfies UserActionSummaryDto;
-      },
-    );
-    const actionSummaries: UserActionSummaryDto[] = await Promise.all(
-      actionSummaryPromises,
+    const actions = await actionsPromise;
+    const memberActionPhaseEnded: Record<number, boolean> = Object.fromEntries(
+      actions.map((action) => {
+        return [
+          action.id,
+          this.someMemberActionPhaseIsOver({
+            events: action.events,
+            date: now,
+          }),
+        ];
+      }),
     );
 
-    const actionIds = actionSummaries.map((summary) => summary.id);
+    const allMembersTagId = await allMembersTagIdPromise;
+    const actionSummaries: UserActionSummaryDto[] = actions.map((action) => {
+      return {
+        id: action.id,
+        name: action.name,
+        status: action.status,
+        allMembersParticipating:
+          allMembersTagId !== undefined &&
+          !!action.participatingTags.find((tag) => tag.id === allMembersTagId),
+        suiteId: action.suite?.id,
+      } satisfies UserActionSummaryDto;
+    });
+
+    const actionIds = actions.map((a) => a.id);
     const actionOrder = new Map(actionIds.map((id, index) => [id, index]));
 
     const activities = await this.actionActivityRepository.find({
       where: { actionId: In(actionIds), userId: In(userIds) },
-      select: ['actionId', 'userId', 'type', 'createdAt'],
       order: { createdAt: 'ASC' },
     });
 
-    const statusPriority: Record<UserActionRelationStatus, number> = {
-      [UserActionRelationStatus.Completed]: 5,
-      [UserActionRelationStatus.WontComplete]: 4,
-      [UserActionRelationStatus.Declined]: 3,
-      [UserActionRelationStatus.MissedDeadline]: 2,
-      [UserActionRelationStatus.Joined]: 1,
-      [UserActionRelationStatus.None]: 0,
-    };
-
-    const typeToStatus = (
-      type: ActionActivityType,
-    ): UserActionRelationStatus => {
-      switch (type) {
-        case ActionActivityType.USER_COMPLETED:
-          return UserActionRelationStatus.Completed;
-        case ActionActivityType.USER_WONT_COMPLETE:
-          return UserActionRelationStatus.WontComplete;
-        case ActionActivityType.USER_DECLINED:
-          return UserActionRelationStatus.Declined;
-        case ActionActivityType.USER_JOINED:
-          return UserActionRelationStatus.Joined;
-        default:
-          return UserActionRelationStatus.None;
-      }
-    };
-
-    const perUser = new Map<
+    const relationByUserThenAction = new Map<
       number,
       Map<
         number,
-        {
-          status: UserActionRelationStatus;
-          priority: number;
-          latestActivityType?: ActionActivityType;
+        Omit<UserActionRelationDetailDto, 'latestActivityAt'> & {
           latestActivityAt?: Date;
         }
       >
     >();
-
-    for (const activity of activities) {
-      const status = typeToStatus(activity.type);
-      if (status === UserActionRelationStatus.None) {
-        continue;
+    function getDetail(params: { userId: number; actionId: number }) {
+      const { userId, actionId } = params;
+      if (!relationByUserThenAction.has(userId)) {
+        relationByUserThenAction.set(userId, new Map());
       }
-
-      const userRelations = perUser.get(activity.userId) ?? new Map();
-      const existing = userRelations.get(activity.actionId);
-      const priority = statusPriority[status];
-
-      if (!existing || priority >= existing.priority) {
-        userRelations.set(activity.actionId, {
-          status,
-          priority,
-          latestActivityType: activity.type,
-          latestActivityAt: activity.createdAt,
+      if (!relationByUserThenAction.get(userId)!.has(actionId)) {
+        relationByUserThenAction.get(userId)!.set(actionId, {
+          actionId,
+          status: UserActionRelationPillStatus.NotRequired,
         });
       }
-
-      perUser.set(activity.userId, userRelations);
+      return relationByUserThenAction.get(userId)!.get(actionId)!;
     }
 
-    for (const [, actionMap] of perUser) {
-      for (const [actionId, detail] of actionMap) {
-        if (
-          detail.status === UserActionRelationStatus.Joined &&
-          memberActionPhaseEnded.get(actionId)
-        ) {
-          detail.status = UserActionRelationStatus.MissedDeadline;
-          detail.priority =
-            statusPriority[UserActionRelationStatus.MissedDeadline];
+    const joinedUsers = await joinedUsersPromise;
+    // Initialize defaults if no action was taken
+    for (const action of actions) {
+      for (const userId of userIds) {
+        getDetail({ userId, actionId: action.id });
+      }
+      for (const userId of joinedUsers[action.id]) {
+        const detail = getDetail({ userId, actionId: action.id });
+        detail.status = memberActionPhaseEnded[action.id]
+          ? UserActionRelationPillStatus.MissedDeadline
+          : UserActionRelationPillStatus.Todo;
+      }
+    }
+
+    function typeToStatus(
+      activityType: ActionActivityType,
+    ): UserActionRelationPillStatus | null {
+      switch (activityType) {
+        case ActionActivityType.USER_COMPLETED:
+          return UserActionRelationPillStatus.Completed;
+        case ActionActivityType.USER_WONT_COMPLETE:
+          return UserActionRelationPillStatus.WontComplete;
+        case ActionActivityType.USER_DECLINED:
+          return UserActionRelationPillStatus.WontComplete;
+        case ActionActivityType.USER_DISMISSED:
+        case ActionActivityType.USER_JOINED:
+          return null;
+        default:
+          throw new Error(
+            `Invalid activity type: ${activityType satisfies never}`,
+          );
+      }
+    }
+    for (const activity of activities) {
+      const detail = getDetail({
+        userId: activity.userId,
+        actionId: activity.actionId,
+      });
+      if (
+        !detail.latestActivityAt ||
+        detail.latestActivityAt < activity.createdAt
+      ) {
+        detail.latestActivityAt = activity.createdAt;
+        detail.latestActivityType = activity.type;
+        const status = typeToStatus(activity.type);
+        if (status) {
+          detail.status = status;
         }
       }
     }
 
     const users: UserActionRelationsForUserDto[] = Array.from(
-      perUser.entries(),
+      relationByUserThenAction.entries(),
     ).map(([userId, actionMap]) => {
       const relations: UserActionRelationDetailDto[] = Array.from(
         actionMap.entries(),
@@ -2149,21 +2189,9 @@ export class ActionsService {
       } satisfies UserActionRelationsForUserDto;
     });
 
-    const suiteIds: number[] = Array.from(
-      new Set(actionSummaries.map((a) => a.suiteId)),
-    ).filter((id): id is number => typeof id === 'number');
-    const suites: ActionSuiteSummaryDto[] = (
-      await this.actionSuiteRepository.find({
-        where: { id: In(suiteIds) },
-      })
-    ).map(
-      (suite) =>
-        ({ id: suite.id, name: suite.name }) satisfies ActionSuiteSummaryDto,
-    );
-
     return {
       actions: actionSummaries,
-      suites,
+      suites: await suitesPromise,
       users,
     };
   }

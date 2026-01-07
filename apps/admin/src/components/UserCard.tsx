@@ -2,8 +2,8 @@ import {
   TagDto,
   UserActionRelationDetailDto,
   UserActionSummaryDto,
-  UserActionRelationStatus,
   UserDto,
+  UserActionRelationPillStatus,
 } from "@alliance/shared/client/types.gen";
 import Card from "@alliance/sharedweb/ui/Card";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
@@ -50,19 +50,17 @@ const UserCard = ({
     }, {} as Record<number, UserActionRelationDetailDto>);
   }, [actionRelations]);
 
-  const relationStatusColor = (status: UserActionRelationStatus) => {
+  const relationStatusColor = (status: UserActionRelationPillStatus) => {
     switch (status) {
       case "completed":
         return "text-green";
-      case "joined":
-        return "text-blue-600";
-      case "declined":
+      case "not_required":
         return "text-amber-600";
       case "missed_deadline":
         return "text-red-600";
       case "wont_complete":
         return "text-red-600";
-      case "none":
+      case "todo":
         return "text-zinc-500";
       default:
         throw new Error(`Invalid filter mode: ${status satisfies never}`);
@@ -215,7 +213,6 @@ const UserCard = ({
           </div>
           <UserProgressPills
             actions={actions}
-            userId={user.id}
             relationByActionId={relationByActionId}
           />
           {isActionDetailsOpen && (

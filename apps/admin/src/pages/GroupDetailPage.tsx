@@ -25,6 +25,7 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
+import { calculateCompletionData } from "@alliance/shared/lib/actionUtils";
 
 const CommunityDetailPage: React.FC = () => {
   const { id } = useParams();
@@ -179,29 +180,10 @@ const CommunityDetailPage: React.FC = () => {
       };
     }
 
-    const completedAll: Record<number, boolean> = {};
-    for (const action of activeActions) {
-      for (const userId of action.joinedUserIds) {
-        completedAll[userId] = true;
-      }
-    }
-
-    for (const action of activeActions) {
-      for (const userId of action.joinedUserIds) {
-        const relation = userActionRelations[userId]?.find(
-          (relation) => relation.actionId === action.id
-        );
-        if (relation?.status !== "completed") {
-          completedAll[userId] = false;
-        }
-      }
-    }
-    const completedAllValues = Object.values(completedAll);
-    return {
-      completedAllCurrentActions: completedAll,
-      nCompleted: completedAllValues.filter((completed) => completed).length,
-      nTotal: completedAllValues.length,
-    };
+    return calculateCompletionData({
+      filteredActionIds: activeActions.map((a) => a.id),
+      userActionRelations,
+    });
   }, [activeActions, userActionRelations]);
 
   const handleUpdateDetails = async (

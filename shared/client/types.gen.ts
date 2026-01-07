@@ -313,6 +313,7 @@ export type Push = {
     receiptStatus?: string;
     errorCode?: string;
     errorMessage?: string;
+    lastCheckedStatusAt?: string;
 };
 
 export type ActionEventNotif = {
@@ -1656,7 +1657,6 @@ export type UserActionSummaryDto = {
     name: string;
     status: ActionStatus;
     allMembersParticipating: boolean;
-    joinedUserIds: Array<number>;
     suiteId?: number;
 };
 
@@ -1665,11 +1665,11 @@ export type ActionSuiteSummaryDto = {
     name: string;
 };
 
-export type UserActionRelationStatus = 'none' | 'joined' | 'completed' | 'declined' | 'wont_complete' | 'missed_deadline';
+export type UserActionRelationPillStatus = 'todo' | 'completed' | 'not_required' | 'wont_complete' | 'missed_deadline';
 
 export type UserActionRelationDetailDto = {
     actionId: number;
-    status: UserActionRelationStatus;
+    status: UserActionRelationPillStatus;
     latestActivityType?: ActionActivityType;
     latestActivityAt?: string;
 };

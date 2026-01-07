@@ -123,7 +123,6 @@ const CommunityMemberTableRow = ({
             {!!actions && (
               <UserProgressPills
                 actions={actions}
-                userId={profile.id}
                 relationByActionId={relationByActionId}
                 pillHeight="h-4"
               />

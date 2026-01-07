@@ -38,6 +38,7 @@ import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
 import { useMediaQuery } from "../../lib/useMediaQuery";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { calculateCompletionData } from "@alliance/shared/lib/actionUtils";
 
 type Tab = "activity" | "members" | "invites" | "about" | "edit" | "resources";
 
@@ -113,29 +114,10 @@ const CommunityPage = () => {
       };
     }
 
-    const completedAll: Record<number, boolean> = {};
-    for (const action of selectedActions) {
-      for (const userId of action.joinedUserIds) {
-        completedAll[userId] = true;
-      }
-    }
-
-    for (const action of selectedActions) {
-      for (const userId of action.joinedUserIds) {
-        const relation = userActionRelations[userId]?.find(
-          (relation) => relation.actionId === action.id
-        );
-        if (relation?.status !== "completed") {
-          completedAll[userId] = false;
-        }
-      }
-    }
-    const completedAllValues = Object.values(completedAll);
-    return {
-      completedAllCurrentActions: completedAll,
-      nCompleted: completedAllValues.filter((completed) => completed).length,
-      nTotal: completedAllValues.length,
-    };
+    return calculateCompletionData({
+      filteredActionIds: selectedActions.map((a) => a.id),
+      userActionRelations,
+    });
   }, [selectedActions, community, userActionRelations]);
 
   const [loading, setLoading] = useState(true);

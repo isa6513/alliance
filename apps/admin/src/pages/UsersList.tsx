@@ -25,6 +25,7 @@ import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import { href, Link, useSearchParams } from "react-router";
 import { LayoutGrid, List } from "lucide-react";
 import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
+import { calculateCompletionData } from "@alliance/shared/lib/actionUtils";
 
 type ViewMode = "cards" | "rows";
 
@@ -274,29 +275,10 @@ const UsersList: React.FC = () => {
       };
     }
 
-    const completedAll: Record<number, boolean> = {};
-    for (const action of activeActions) {
-      for (const userId of action.joinedUserIds) {
-        completedAll[userId] = true;
-      }
-    }
-
-    for (const action of activeActions) {
-      for (const userId of action.joinedUserIds) {
-        const relation = userActionRelations[userId]?.find(
-          (relation) => relation.actionId === action.id
-        );
-        if (relation?.status !== "completed") {
-          completedAll[userId] = false;
-        }
-      }
-    }
-    const completedAllValues = Object.values(completedAll);
-    return {
-      completedAllCurrentActions: completedAll,
-      nCompleted: completedAllValues.filter((completed) => completed).length,
-      nTotal: completedAllValues.length,
-    };
+    return calculateCompletionData({
+      filteredActionIds: activeActions.map((a) => a.id),
+      userActionRelations,
+    });
   }, [activeActions, userActionRelations]);
 
   const updateTagInState = useCallback((updatedTag: TagDto) => {

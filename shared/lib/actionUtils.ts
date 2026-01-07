@@ -1,4 +1,9 @@
-import { ActionDto, ActionEventDto, UserAwayRangeDto } from "../client";
+import {
+  ActionDto,
+  ActionEventDto,
+  UserActionRelationDetailDto,
+  UserAwayRangeDto,
+} from "../client";
 
 export enum FilterMode {
   All = "All",
@@ -174,4 +179,52 @@ export function deadlineHasPassed(action: ActionDto, date: Date): boolean {
           event.newStatus === "gathering_commitments")
     )
   );
+}
+
+export function calculateCompletionData(params: {
+  filteredActionIds: number[];
+  userActionRelations: Record<number, UserActionRelationDetailDto[]>;
+}): {
+  completedAllCurrentActions: Record<number, boolean>;
+  nCompleted: number;
+  nTotal: number;
+} {
+  const { filteredActionIds, userActionRelations } = params;
+
+  const filteredActionIdSet = new Set(filteredActionIds);
+  const anyComplete = new Set<number>();
+  const anyIncomplete = new Set<number>();
+  for (const [userIdKey, relationDetails] of Object.entries(
+    userActionRelations
+  )) {
+    const userId = Number(userIdKey);
+    for (const relationDetail of relationDetails) {
+      if (!filteredActionIdSet.has(relationDetail.actionId)) {
+        continue;
+      }
+      if (relationDetail.status === "completed") {
+        anyComplete.add(userId);
+      }
+      if (relationDetail.status === "todo") {
+        anyIncomplete.add(userId);
+      }
+    }
+  }
+
+  const completedAllCurrentActions: Record<number, boolean> = {};
+  for (const userIdKey of Object.keys(anyComplete)) {
+    const userId = Number(userIdKey);
+    if (anyComplete.has(userId)) {
+      completedAllCurrentActions[userId] = true;
+    }
+    if (anyIncomplete.has(userId)) {
+      completedAllCurrentActions[userId] = false;
+    }
+  }
+  const completedAllValues = Object.values(completedAllCurrentActions);
+  return {
+    completedAllCurrentActions,
+    nCompleted: completedAllValues.filter((completed) => completed).length,
+    nTotal: completedAllValues.length,
+  };
 }
