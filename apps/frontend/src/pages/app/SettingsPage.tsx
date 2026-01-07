@@ -24,6 +24,8 @@ import { useAuth } from "../../lib/AuthContext";
 import AwayRangesSection from "../../components/AwayRangesSection";
 import TimeZoneSelect from "@alliance/sharedweb/forms/TimeZoneSelect";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { isFeatureEnabled } from "../../lib/config";
+import { Features } from "@alliance/shared/lib/features";
 
 const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -219,6 +221,8 @@ const SettingsPage: React.FC = () => {
   if (!user || !editableUser) {
     return <div>Not found</div>;
   }
+
+  const showPushSettings = isFeatureEnabled(Features.PushNotifications);
 
   return (
     <div className="bg-page py-4 md:py-20 px-4 md:px-16">
@@ -437,38 +441,40 @@ const SettingsPage: React.FC = () => {
                 />
               </div>
             </div>
-            <div>
-              <h2 className="!font-semibold mb-4">
-                Recieve push notifications for:
-              </h2>
-              <div className="flex flex-row gap-6 mt-2">
-                <LargeCheckbox
-                  label="Likes"
-                  checked={editableUser.pushesForLikes ?? false}
-                  onChange={(checked) =>
-                    updateEditableUser({ pushesForLikes: checked })
-                  }
-                />
+            {showPushSettings && (
+              <div>
+                <h2 className="!font-semibold mb-4">
+                  Recieve push notifications for:
+                </h2>
+                <div className="flex flex-row gap-6 mt-2">
+                  <LargeCheckbox
+                    label="Likes"
+                    checked={editableUser.pushesForLikes ?? false}
+                    onChange={(checked) =>
+                      updateEditableUser({ pushesForLikes: checked })
+                    }
+                  />
+                </div>
+                <div className="flex flex-row gap-6 mt-2">
+                  <LargeCheckbox
+                    label="Comments"
+                    checked={editableUser.pushesForComments ?? false}
+                    onChange={(checked) =>
+                      updateEditableUser({ pushesForComments: checked })
+                    }
+                  />
+                </div>
+                <div className="flex flex-row gap-6 mt-2">
+                  <LargeCheckbox
+                    label="Friend requests"
+                    checked={editableUser.pushesForFriendRequests ?? false}
+                    onChange={(checked) =>
+                      updateEditableUser({ pushesForFriendRequests: checked })
+                    }
+                  />
+                </div>
               </div>
-              <div className="flex flex-row gap-6 mt-2">
-                <LargeCheckbox
-                  label="Comments"
-                  checked={editableUser.pushesForComments ?? false}
-                  onChange={(checked) =>
-                    updateEditableUser({ pushesForComments: checked })
-                  }
-                />
-              </div>
-              <div className="flex flex-row gap-6 mt-2">
-                <LargeCheckbox
-                  label="Friend requests"
-                  checked={editableUser.pushesForFriendRequests ?? false}
-                  onChange={(checked) =>
-                    updateEditableUser({ pushesForFriendRequests: checked })
-                  }
-                />
-              </div>
-            </div>
+            )}
 
             {user.communities.length > 0 && (
               <div>

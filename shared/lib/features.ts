@@ -19,7 +19,7 @@ export const DEV_FLAGS: Record<Features, boolean> = {
   [Features.PublicSignup]: false,
   [Features.BugReporting]: false,
   [Features.Messaging]: true,
-  [Features.PushNotifications]: true,
+  [Features.PushNotifications]: false,
 };
 
 export const isEnabled = (feature: Features, env: string) => {

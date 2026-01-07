@@ -14,7 +14,7 @@ export class NotifPushDispatcherWorker {
     private readonly pushService: PushService,
   ) {}
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  //   @Cron(CronExpression.EVERY_10_SECONDS)
   async dispatchPushes() {
     const now = new Date();
     console.log('dispatching pushes');
