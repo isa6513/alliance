@@ -6,7 +6,7 @@ import YesNoToggle from "../../ui/YesNoToggle";
 
 const DEFAULT_LABEL = "Share information publicly";
 const DEFAULT_DESCRIPTION =
-  "Allow your name, photo, and user bio to be listed in a public member directory.";
+  "Allow your name, profile photo, and bio to be listed in a public member directory.";
 
 const parseBooleanValue = (value: string | null): boolean | null => {
   if (value === "true") {

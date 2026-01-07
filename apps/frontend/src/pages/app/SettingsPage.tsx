@@ -339,7 +339,7 @@ const SettingsPage: React.FC = () => {
                     Share information publicly
                   </label>
                   <p className="text-zinc-500 text-sm">
-                    Allow your name, photo, and user bio to be listed in a
+                    Allow your name, profile photo, and bio to be listed in a
                     public member directory.
                   </p>
                 </div>
