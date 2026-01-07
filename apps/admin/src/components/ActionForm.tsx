@@ -189,6 +189,14 @@ const ActionForm: React.FC<ActionFormProps> = ({
           "all members (not just committed) will be shown this action to complete. (e.g. for onboarding)",
       },
       {
+        name: "shouldCompleteAfterDeadline",
+        label: "Should Complete After Deadline",
+        inGrid: true,
+        type: "checkbox",
+        helpText:
+          "Members will be shown this action in their task list even after the deadline.",
+      },
+      {
         name: "everyoneShouldComplete",
         label:
           "Everyone Should Complete (i.e. override contract signing requirements for showing in tasks)",

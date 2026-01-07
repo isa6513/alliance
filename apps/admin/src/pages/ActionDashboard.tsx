@@ -245,6 +245,7 @@ const ActionDashboard: React.FC = () => {
     taskFormId: undefined,
     participatingTags: [],
     everyoneShouldComplete: false,
+    shouldCompleteAfterDeadline: false,
     publicOnly: false,
     suiteId: undefined,
     priority: 0,
@@ -268,6 +269,7 @@ const ActionDashboard: React.FC = () => {
         preventCompletion: false,
         taskFormId: undefined,
         participatingTags: [],
+        shouldCompleteAfterDeadline: false,
         publicOnly: false,
         everyoneShouldComplete: false,
         suiteId: searchParams.get("suiteId")
