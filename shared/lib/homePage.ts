@@ -53,7 +53,7 @@ export function actionContributesToTaskCount(action: ActionWithAwayStatus) {
   return (
     (shouldCompleteAction(action) || canJoinAction(action)) &&
     action.awayStatus === TaskAwayStatus.NOT_AWAY &&
-    deadlineHasPassed(action, new Date()) &&
+    !deadlineHasPassed(action, new Date()) &&
     action.userRelation !== "dismissed"
   );
 }
