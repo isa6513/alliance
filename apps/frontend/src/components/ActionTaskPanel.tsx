@@ -53,7 +53,6 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   } = useTaskFormHandlers({
     action,
     onCompleteAction: handleCompleteAction,
-    userRelation,
     onJoinAction,
     onDeclineAction,
     onOptOutAction,

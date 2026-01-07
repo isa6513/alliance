@@ -1,7 +1,6 @@
 import { View, ScrollView, ActivityIndicator } from "react-native";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActionDto,
   actionsFindAllLoggedIn,
   userGetAwayRanges,
 } from "@alliance/shared/client";
@@ -92,12 +91,12 @@ export default function HomeScreen() {
         Current task
       </Text>
       <View className="">
-        {error ? (
+        {!currentTask ? (
           <Text className="text-red-500 text-center py-4">{error}</Text>
         ) : (
           <LargeActionCard
             action={currentTask}
-            userRelation={currentTask.userRelation as "joined" | "none"}
+            userRelation={currentTask.userRelation ?? 'none'}
             friendActivities={friendActivities.filter(
               (activity) => activity.actionId === currentTask.id
             )}

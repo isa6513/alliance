@@ -8,7 +8,6 @@ import { usePostHog } from "posthog-react-native";
 
 const ActionTaskPanel = ({
   action,
-  userRelation,
   onCompleteAction,
   onJoinAction,
   onDeclineAction,
@@ -23,7 +22,6 @@ const ActionTaskPanel = ({
   } = useTaskFormHandlers({
     action,
     onCompleteAction,
-    userRelation,
     onJoinAction,
     onDeclineAction,
     onOptOutAction,

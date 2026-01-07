@@ -5,7 +5,7 @@ import { ActionWithAwayStatus } from "./actionUtils";
 export interface LargeActionCardPropsShared
   extends Pick<ActionCompletedBarWithInfoPropsShared, "friendActivities"> {
   action: ActionWithAwayStatus;
-  userRelation: Extract<UserActionRelation, "joined" | "none">;
+  userRelation: UserActionRelation;
   onUpdateActionState: () => void;
   dismissProps?: {
     message: string;

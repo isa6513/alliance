@@ -65,6 +65,7 @@ import {
   UpdateActionActivityDto,
   UpdateActionDto,
   UpdateActionEventDto,
+  UserActionRelation,
 } from './dto/action.dto';
 import {
   ActionActivity,
@@ -84,14 +85,6 @@ import {
 } from './entities/reminder-group.entity';
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 import { Relations } from 'src/utils/Repository';
-
-export enum UserActionRelation {
-  Joined = 'joined',
-  Completed = 'completed',
-  None = 'none',
-  Declined = 'declined',
-  Dismissed = 'dismissed',
-}
 
 export class UserActionRelationDto {
   @ApiProperty({ enum: UserActionRelation, enumName: 'UserActionRelation' })

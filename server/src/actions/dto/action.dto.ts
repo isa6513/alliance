@@ -20,7 +20,6 @@ import {
   EditableContentDto,
 } from 'src/forum/dto/editablecontent.dto';
 import { ProfileDto } from 'src/user/dto/user.dto';
-import { UserActionRelation } from '../actions.service';
 import { ActionActivity } from '../entities/action-activity.entity';
 import { ActionEvent, ActionStatus } from '../entities/action-event.entity';
 import { Action } from '../entities/action.entity';
@@ -108,6 +107,15 @@ export class CreateActionEventDto extends OmitType(ActionEventDto, [
 
 export class UpdateActionEventDto extends PartialType(CreateActionEventDto) {}
 
+export enum UserActionRelation {
+  Joined = 'joined',
+  Completed = 'completed',
+  None = 'none',
+  Declined = 'declined',
+  Dismissed = 'dismissed',
+}
+
+
 export class ActionDto extends OmitType(Action, [
   'events',
   'updates',
@@ -134,7 +142,7 @@ export class ActionDto extends OmitType(Action, [
 
   @ApiPropertyOptional({
     enum: UserActionRelation,
-    type: 'string',
+    enumName: 'UserActionRelation',
   })
   userRelation?: UserActionRelation;
 

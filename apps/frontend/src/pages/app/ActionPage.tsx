@@ -1,4 +1,4 @@
-import { actionsFindOne, UserActionRelation } from "@alliance/shared/client";
+import { actionsFindOne } from "@alliance/shared/client";
 import { href, Navigate, Outlet, useNavigate, useParams } from "react-router";
 import ActionActivityList from "../../components/ActionActivityList";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
@@ -96,9 +96,7 @@ export default function ActionPage() {
             context={
               {
                 action,
-                userRelation:
-                  (action.userRelation as UserActionRelation | undefined) ??
-                  null,
+                userRelation: action.userRelation ?? null,
                 onCompleteAction,
                 onJoinAction,
                 onDeclineAction,

@@ -11,7 +11,7 @@ import {
 
 export interface ActionTaskPanelProps {
   action: ActionDto;
-  userRelation: Extract<UserActionRelation, "joined" | "none">;
+  userRelation: UserActionRelation;
   missedDeadline?: boolean;
   onCompleteAction: () => void;
   onJoinAction: () => void;
@@ -27,7 +27,14 @@ export const useTaskFormHandlers = ({
   onJoinAction,
   onDeclineAction,
   onOptOutAction,
-}: ActionTaskPanelProps) => {
+}: Pick<
+  ActionTaskPanelProps,
+  | "action"
+  | "onCompleteAction"
+  | "onJoinAction"
+  | "onDeclineAction"
+  | "onOptOutAction"
+>) => {
   const [actionError, setActionError] = useState<string | null>(null);
 
   const handleComplete = useCallback(

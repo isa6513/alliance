@@ -1,4 +1,3 @@
-import { UserActionRelation } from 'src/actions/actions.service';
 import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
 import { CommentParentObject } from 'src/forum/entities/comment.entity';
 import { UserService } from 'src/user/user.service';
@@ -9,6 +8,7 @@ import {
   ActionEventDto,
   CreateActionDto,
   CreateActionEventDto,
+  UserActionRelation,
 } from '../src/actions/dto/action.dto';
 import {
   ActionEvent,

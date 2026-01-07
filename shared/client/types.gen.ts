@@ -950,7 +950,7 @@ export type OptOutActionDto = {
     };
 };
 
-export type UserActionRelation = 'joined' | 'completed' | 'none' | 'declined';
+export type UserActionRelation = 'joined' | 'completed' | 'none' | 'declined' | 'dismissed';
 
 export type UserActionRelationDto = {
     relation: UserActionRelation;
@@ -1106,7 +1106,7 @@ export type ActionDto = {
     updates: Array<ActionUpdateDto>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
-    userRelation?: string;
+    userRelation?: UserActionRelation;
     reqAuthenticated?: boolean;
     authors?: Array<ProfileDto>;
 };
@@ -1219,7 +1219,7 @@ export type CreateActionDto = {
     publicOnly: boolean;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
-    userRelation?: string;
+    userRelation?: UserActionRelation;
     reqAuthenticated?: boolean;
     suiteId?: number | null;
     authorIds?: Array<number>;
@@ -1309,7 +1309,7 @@ export type UpdateActionDto = {
     publicOnly?: boolean;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
-    userRelation?: string;
+    userRelation?: UserActionRelation;
     reqAuthenticated?: boolean;
     suiteId?: number | null;
     authorIds?: Array<number>;

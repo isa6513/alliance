@@ -122,9 +122,7 @@ const ActionPageTaskPanel = () => {
             <p>{taskDeadlinePassedDescription}</p>
           </Card>
           <ActionTaskPanel
-            userRelation={
-              userRelation as Extract<UserActionRelation, "joined" | "none">
-            }
+            userRelation={userRelation ?? "none"}
             action={action}
             {...panelHandlers}
             missedDeadline={true}
@@ -136,9 +134,7 @@ const ActionPageTaskPanel = () => {
       return (
         <ActionTaskPanel
           action={action}
-          userRelation={
-            userRelation as Extract<UserActionRelation, "joined" | "none">
-          }
+          userRelation={userRelation ?? "none"}
           {...panelHandlers}
         />
       );

@@ -74,9 +74,7 @@ const ActionPageTaskPanel = ({
           </Card>
           <ActionTaskPanel
             action={action}
-            userRelation={
-              userRelation as Extract<UserActionRelation, "joined" | "none">
-            }
+            userRelation={userRelation ?? 'none'}
             {...panelHandlers}
           />
         </View>
@@ -85,9 +83,7 @@ const ActionPageTaskPanel = ({
       return (
         <ActionTaskPanel
           action={action}
-          userRelation={
-            userRelation as Extract<UserActionRelation, "joined" | "none">
-          }
+          userRelation={userRelation ?? 'none'}
           {...panelHandlers}
         />
       );
