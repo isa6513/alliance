@@ -27,7 +27,6 @@ interface ActionFormProps {
   baseUrl?: string;
   availableForms?: FormDto[];
   formsLoading: boolean;
-  availableAuthors: UserSelectUser[];
   availableTags?: TagDto[];
   tagsLoading: boolean;
   availableSuites?: ActionSuite[];
@@ -66,7 +65,6 @@ const ActionForm: React.FC<ActionFormProps> = ({
   onManualCohortChange,
   authorIds,
   onAuthorsChange,
-  availableAuthors,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -435,9 +433,6 @@ const ActionForm: React.FC<ActionFormProps> = ({
     );
   };
 
-  console.log(availableUsers);
-  console.log(manualCohortUserIds);
-
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       {fieldDefs
@@ -527,7 +522,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
       </div>
       <div className="border border-gray-200 rounded-md p-4">
         <UserSelect
-          users={availableAuthors}
+          users={availableUsers}
           selectedUserIds={authorIds}
           onChange={onAuthorsChange}
           loading={usersLoading}

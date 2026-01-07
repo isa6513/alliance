@@ -107,9 +107,7 @@ const ActionDashboard: React.FC = () => {
   const [availableUsers, setAvailableUsers] = useState<UserSelectUser[]>([]);
   const [usersLoading, setUsersLoading] = useState<boolean>(true);
   const [manualCohortUserIds, setManualCohortUserIds] = useState<number[]>([]);
-  const [availableAuthors, setAvailableAuthors] = useState<UserSelectUser[]>(
-    []
-  );
+
   const [shareUrlStats, setShareUrlStats] = useState<ShareUrlStatsDto[]>([]);
   const [shareUrlStatsLoading, setShareUrlStatsLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -207,14 +205,6 @@ const ActionDashboard: React.FC = () => {
             profilePicture: user.profilePicture,
           }));
           setAvailableUsers(mappedUsers);
-
-          const staffUsers = response.data.filter((user) => user.staff);
-          const mappedStaffUsers = staffUsers.map<UserSelectUser>((user) => ({
-            id: user.id,
-            name: user.displayName,
-            profilePicture: user.profilePicture,
-          }));
-          setAvailableAuthors(mappedStaffUsers);
         }
       } catch (err) {
         console.error("Failed to load users:", err);
@@ -830,7 +820,6 @@ const ActionDashboard: React.FC = () => {
             onManualCohortChange={handleManualCohortChange}
             authorIds={form.authorIds ?? []}
             onAuthorsChange={handleAuthorsChange}
-            availableAuthors={availableAuthors}
           />
         </div>
       ) : (
@@ -1225,7 +1214,6 @@ const ActionDashboard: React.FC = () => {
                   onManualCohortChange={handleManualCohortChange}
                   authorIds={form.authorIds ?? []}
                   onAuthorsChange={handleAuthorsChange}
-                  availableAuthors={availableAuthors}
                 />
               </Card>
             )}
