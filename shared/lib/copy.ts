@@ -10,13 +10,13 @@ export const taskDeadlinePassedDescription =
   "You do not need to complete this task, but you can still do so below if you would like.";
 
 export const TASK_DISMISS_MESSAGE_CURRENTLY_AWAY =
-  "You are currently away, so this task is optional for you. You can either complete it here or dismiss it.";
+  "You are currently away, so this task is optional for you. You can either complete it or dismiss it.";
 export const TASK_DISMISS_MESSAGE_WAS_AWAY =
-  "This task happened when you were away, so it is optional for you. You can either complete it here or dismiss it.";
+  "This task happened when you were away, so it is optional for you. You can either complete it or dismiss it.";
 export const TASK_DISMISS_MESSAGE_WILL_BE_AWAY =
-  "You will be away before this task is due, so it is optional for you. You can either complete it here or dismiss it.";
+  "You will be away before this task is due, so it is optional for you. You can either complete it or dismiss it.";
 export const TASK_DISMISS_MESSAGE_AFTER_DEADLINE =
-  "This task's deadline has passed. You can either complete it here or dismiss it.";
+  "You have missed this task's deadline. You can either complete it or dismiss it.";
 
 export const externalOnly =
   "This action is intended for external participants. Members cannot complete it.";
