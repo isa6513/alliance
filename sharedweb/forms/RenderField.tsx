@@ -364,41 +364,56 @@ export function RenderField({
       );
     }
 
-    case "checkbox":
+    case "checkbox": {
+      const checkboxPosition = field.checkboxPosition ?? "left";
+      const checkboxInput = (
+        <input
+          type="checkbox"
+          checked={!!value}
+          onChange={onChange ? (e) => onChange(e.target.checked) : undefined}
+          required={field.required}
+          disabled={disabled}
+          aria-invalid={hasError}
+          className={composeClassName(
+            `shrink-0 mt-1 h-5 w-5 cursor-pointer ${
+              checkboxPosition === "right" ? "ml-2 pr-5" : "mr-2"
+            } ${
+              hasError ? "text-red-600" : "text-blue-600"
+            } focus:outline-none rounded`,
+            {
+              normal: "border border-zinc-300 focus:ring-blue-500 focus:ring-2",
+              error: "border border-red-500 focus:ring-red-500 focus:ring-2",
+            }
+          )}
+        />
+      );
+      const checkboxLabel = (
+        <span className={hasError ? "text-red-600" : "text-zinc-700"}>
+          {field.label !== null && (
+            <FormMarkdownWrapper markdownContent={field.label} inline />
+          )}
+          {field.required && <span className="text-red-500 ml-1">*</span>}
+        </span>
+      );
       return (
-        <div className="space-y-1">
-          <label className="flex items-start">
-            <input
-              type="checkbox"
-              checked={!!value}
-              onChange={
-                onChange ? (e) => onChange(e.target.checked) : undefined
-              }
-              required={field.required}
-              disabled={disabled}
-              aria-invalid={hasError}
-              className={composeClassName(
-                `shrink-0 mt-1 mr-2 h-4 w-4 cursor-pointer ${
-                  hasError ? "text-red-600" : "text-blue-600"
-                } focus:outline-none rounded`,
-                {
-                  normal:
-                    "border border-zinc-300 focus:ring-blue-500 focus:ring-2",
-                  error:
-                    "border border-red-500 focus:ring-red-500 focus:ring-2",
-                }
-              )}
-            />
-            <span className={hasError ? "text-red-600" : "text-zinc-700"}>
-              {field.label !== null && (
-                <FormMarkdownWrapper markdownContent={field.label} inline />
-              )}
-              {field.required && <span className="text-red-500 ml-1">*</span>}
-            </span>
+        <div className="space-y-1 pr-5">
+          <label className={`flex items-start`}>
+            {checkboxPosition === "right" ? (
+              <>
+                {checkboxLabel}
+                {checkboxInput}
+              </>
+            ) : (
+              <>
+                {checkboxInput}
+                {checkboxLabel}
+              </>
+            )}
           </label>
           {renderValidationMessage()}
         </div>
       );
+    }
 
     case "radio": {
       const options = randomizedOptions ?? field.options;

@@ -100,9 +100,11 @@ export type RangeField = BaseField<"range"> & {
 };
 
 export type CheckboxExtractionTarget = "shareInfoPublicly";
+export type CheckboxPosition = "left" | "right";
 
 export type CheckboxField = BaseField<"checkbox"> & {
   autoExtractUserData?: { target: CheckboxExtractionTarget };
+  checkboxPosition?: CheckboxPosition;
 };
 
 // Field kinds that support auto-extraction into user data

@@ -35,7 +35,7 @@ const CommunityMembersTable = ({
   completedAllCurrentActions = {},
 }: CommunityMembersTableProps) => {
   const [filterMode, setFilterMode] = useState<CommunityMembersFilterMode>(
-    CommunityMembersFilterMode.All,
+    CommunityMembersFilterMode.All
   );
   const visibleActions = useMemo(() => {
     return actions.filter((action) => action.status !== "planned");
@@ -45,10 +45,10 @@ const CommunityMembersTable = ({
     return {
       [CommunityMembersFilterMode.All]: members,
       [CommunityMembersFilterMode.NotYetCompleted]: members.filter(
-        (user) => !completedAllCurrentActions[user.id],
+        (user) => !completedAllCurrentActions[user.id]
       ),
       [CommunityMembersFilterMode.Completed]: members.filter(
-        (user) => completedAllCurrentActions[user.id],
+        (user) => completedAllCurrentActions[user.id]
       ),
     };
   }, [completedAllCurrentActions, members]);

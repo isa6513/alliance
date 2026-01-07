@@ -101,9 +101,11 @@ export type RangeField = BaseField<'range'> & {
 };
 
 export type CheckboxExtractionTarget = 'shareInfoPublicly';
+export type CheckboxPosition = 'left' | 'right';
 
 export type CheckboxField = BaseField<'checkbox'> & {
   autoExtractUserData?: { target: CheckboxExtractionTarget };
+  checkboxPosition?: CheckboxPosition;
 };
 export type RadioField = BaseField<'radio'> & {
   options: Option<string>[];
