@@ -2,7 +2,6 @@ import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { useCallback, useMemo } from "react";
 import { useAuth } from "../lib/AuthContext";
-import { canCompleteAction } from "@alliance/shared/lib/homePage";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
 import ActionTaskPanelCommit from "./ActionTaskPanelCommit";
 import ActionTaskPanelForm from "./ActionTaskPanelForm";
@@ -13,6 +12,7 @@ import {
   useTaskFormHandlers,
 } from "@alliance/shared/lib/actionTaskPanel";
 import posthog from "posthog-js";
+import { canCompleteAction } from "@alliance/shared/lib/actionUtils";
 
 const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   action,
