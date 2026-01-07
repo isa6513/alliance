@@ -400,4 +400,19 @@ export class User {
 
   @OneToMany(() => UserDevice, (device) => device.user)
   devices: Ty<UserDevice>[];
+
+  @Column({ default: true })
+  @ApiProperty()
+  @Allow()
+  pushesForLikes: boolean;
+
+  @Column({ default: true })
+  @ApiProperty()
+  @Allow()
+  pushesForComments: boolean;
+
+  @Column({ default: true })
+  @ApiProperty()
+  @Allow()
+  pushesForFriendRequests: boolean;
 }

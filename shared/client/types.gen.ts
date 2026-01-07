@@ -157,6 +157,8 @@ export type Notification = {
     actionUpdate?: ActionUpdate;
     comment?: Comment;
     onetimeInvite?: OnetimeInvite;
+    shouldPush: boolean;
+    pushDispatchedAt?: string;
 };
 
 export type Tag = {
@@ -314,6 +316,7 @@ export type Push = {
     errorCode?: string;
     errorMessage?: string;
     lastCheckedStatusAt?: string;
+    idempotencyKey?: string;
 };
 
 export type ActionEventNotif = {
@@ -523,6 +526,9 @@ export type User = {
     formDataPreference: PublicFormResponseDefault;
     participants: Array<Participant>;
     authoredActions?: Array<Action>;
+    pushesForLikes: boolean;
+    pushesForComments: boolean;
+    pushesForFriendRequests: boolean;
 };
 
 export type Community = {
@@ -564,6 +570,9 @@ export type UserDto = {
     shareInfoPublicly: boolean;
     invitedCommunities: Array<CommunityInvite>;
     formDataPreference: PublicFormResponseDefault;
+    pushesForLikes: boolean;
+    pushesForComments: boolean;
+    pushesForFriendRequests: boolean;
     cityId?: number;
     email: string;
     hasActiveContract: boolean;
@@ -638,6 +647,9 @@ export type UpdateProfileDto = {
     anonymous?: boolean;
     shareInfoPublicly?: boolean;
     formDataPreference?: PublicFormResponseDefault;
+    pushesForLikes?: boolean;
+    pushesForComments?: boolean;
+    pushesForFriendRequests?: boolean;
     cityId?: number | null;
 };
 

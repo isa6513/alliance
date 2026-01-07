@@ -391,7 +391,7 @@ const SettingsPage: React.FC = () => {
                   </p>
                 )}
               </div>
-              <div className="flex flex-col gap-y-2 mt-2">
+              <div className="flex flex-row gap-6 mt-2">
                 <LargeCheckbox
                   label="Email"
                   checked={!!editableUser.emailNotifsEnabled}
@@ -415,25 +415,59 @@ const SettingsPage: React.FC = () => {
               /> */}
               </div>
             </div>
+            <div className="flex flex-col md:flex-row gap-y-2 gap-x-12 font-medium">
+              <div>
+                <p className=" mb-1">Preferred reminder time:</p>
+                <input
+                  type="time"
+                  className="border border-zinc-300 rounded px-3 py-3 self-start min-w-[200px]"
+                  value={editableUser.preferredReminderTime}
+                  onChange={(event) =>
+                    updateEditableUser({
+                      preferredReminderTime: event.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="flex-1">
+                <p className="mb-1">Your time zone for reminders:</p>
+                <TimeZoneSelect
+                  value={editableUser.timeZone}
+                  onChange={(tz) => updateEditableUser({ timeZone: tz })}
+                />
+              </div>
+            </div>
             <div>
-              <p className="!font-medium mb-2">Preferred reminder time:</p>
-              <input
-                type="time"
-                className="border border-zinc-300 rounded px-3 py-2 self-start"
-                value={editableUser.preferredReminderTime}
-                onChange={(event) =>
-                  updateEditableUser({
-                    preferredReminderTime: event.target.value,
-                  })
-                }
-              />
-              <p className="!font-medium mt-4 mb-2">
-                Your time zone for reminders:
-              </p>
-              <TimeZoneSelect
-                value={editableUser.timeZone}
-                onChange={(tz) => updateEditableUser({ timeZone: tz })}
-              />
+              <h2 className="!font-semibold mb-4">
+                Recieve push notifications for:
+              </h2>
+              <div className="flex flex-row gap-6 mt-2">
+                <LargeCheckbox
+                  label="Likes"
+                  checked={editableUser.pushesForLikes ?? false}
+                  onChange={(checked) =>
+                    updateEditableUser({ pushesForLikes: checked })
+                  }
+                />
+              </div>
+              <div className="flex flex-row gap-6 mt-2">
+                <LargeCheckbox
+                  label="Comments"
+                  checked={editableUser.pushesForComments ?? false}
+                  onChange={(checked) =>
+                    updateEditableUser({ pushesForComments: checked })
+                  }
+                />
+              </div>
+              <div className="flex flex-row gap-6 mt-2">
+                <LargeCheckbox
+                  label="Friend requests"
+                  checked={editableUser.pushesForFriendRequests ?? false}
+                  onChange={(checked) =>
+                    updateEditableUser({ pushesForFriendRequests: checked })
+                  }
+                />
+              </div>
             </div>
 
             {user.communities.length > 0 && (

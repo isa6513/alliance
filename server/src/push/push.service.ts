@@ -2,14 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
 import { Push } from './push.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, LessThan, Not, Repository } from 'typeorm';
+import {
+  IsNull,
+  LessThan,
+  Not,
+  Or,
+  QueryFailedError,
+  Repository,
+} from 'typeorm';
 import { PickType } from '@nestjs/swagger';
 import { UserDevice } from 'src/user/entities/user-device.entity';
 
 export class CreatePushMessage extends PickType(Push, [
   'expoPushToken',
   'body',
+  'idempotencyKey',
   'screen',
+  'notification',
 ]) {}
 
 @Injectable()
@@ -36,6 +45,23 @@ export class PushService {
     return (await this.sendMessages([message]))[0];
   }
 
+  async getPushForAllUserDevices(
+    userId: number,
+    message: Omit<CreatePushMessage, 'expoPushToken'>,
+  ): Promise<CreatePushMessage[]> {
+    const devices = await this.userDeviceRepository.find({
+      where: { user: { id: userId } },
+    });
+    const messages = devices
+      .filter((device) => !!device.expoPushToken)
+      .map((device) => ({
+        expoPushToken: device.expoPushToken!,
+        idempotencyKey: `${message.notification?.id}-${device.id}`,
+        ...message,
+      }));
+    return messages;
+  }
+
   async sendMessages(messages: CreatePushMessage[]): Promise<Push[]> {
     const expoMessages: ExpoPushMessage[] = [];
     const pushEntities: Push[] = [];
@@ -47,6 +73,15 @@ export class PushService {
         );
         continue;
       }
+      let pushEntity = this.pushRepository.create(message);
+      try {
+        pushEntity = await this.pushRepository.save(pushEntity);
+      } catch (error) {
+        if (error instanceof QueryFailedError) {
+          console.error(`skipping duplicate push: ${error.message}`);
+        }
+        continue;
+      }
 
       // Construct a message (see https://docs.expo.io/push-notifications/sending-notifications/)
       expoMessages.push({
@@ -56,8 +91,6 @@ export class PushService {
         data: { screen: message.screen },
       });
 
-      let pushEntity = this.pushRepository.create(message);
-      pushEntity = await this.pushRepository.save(pushEntity);
       pushEntities.push(pushEntity);
     }
 
@@ -109,8 +142,11 @@ export class PushService {
     const pendingPushes = await this.pushRepository.find({
       where: {
         receiptStatus: 'pending',
-        lastCheckedStatusAt: LessThan(
-          new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+        lastCheckedStatusAt: Or(
+          IsNull(),
+          LessThan(
+            new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+          ),
         ),
         receiptId: Not(IsNull()),
       },

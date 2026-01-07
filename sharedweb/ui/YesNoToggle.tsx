@@ -34,22 +34,22 @@ const YesNoToggle: React.FC<YesNoToggleProps> = ({
       <Button
         type="button"
         size={size}
-        color={isYes ? ButtonColor.Black : ButtonColor.Light}
+        color={isYes ? ButtonColor.Black : ButtonColor.White}
         onClick={() => onChange(true)}
         disabled={disabled}
         aria-pressed={isYes}
-        className="rounded-r-none"
+        className="rounded-r-none border-r-0"
       >
         {yesLabel}
       </Button>
       <Button
         type="button"
         size={size}
-        color={isNo ? ButtonColor.Black : ButtonColor.Light}
+        color={isNo ? ButtonColor.Black : ButtonColor.White}
         onClick={() => onChange(false)}
         disabled={disabled}
         aria-pressed={isNo}
-        className="rounded-l-none"
+        className="rounded-l-none border-l-0"
       >
         {noLabel}
       </Button>

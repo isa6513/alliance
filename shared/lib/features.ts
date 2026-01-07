@@ -3,6 +3,7 @@ export enum Features {
   PublicSignup = "public_signup",
   BugReporting = "bug_reporting",
   Messaging = "messaging",
+  PushNotifications = "push_notifications",
 }
 
 export const PROD_FLAGS: Record<Features, boolean> = {
@@ -10,6 +11,7 @@ export const PROD_FLAGS: Record<Features, boolean> = {
   [Features.PublicSignup]: false,
   [Features.BugReporting]: false,
   [Features.Messaging]: true,
+  [Features.PushNotifications]: false,
 };
 
 export const DEV_FLAGS: Record<Features, boolean> = {
@@ -17,6 +19,7 @@ export const DEV_FLAGS: Record<Features, boolean> = {
   [Features.PublicSignup]: false,
   [Features.BugReporting]: false,
   [Features.Messaging]: true,
+  [Features.PushNotifications]: true,
 };
 
 export const isEnabled = (feature: Features, env: string) => {

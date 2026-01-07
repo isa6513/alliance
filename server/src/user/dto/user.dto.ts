@@ -105,6 +105,9 @@ export class UserDto extends PickType(User, [
   'invitedCommunities',
   'referralCode',
   'anonymous',
+  'pushesForLikes',
+  'pushesForComments',
+  'pushesForFriendRequests',
   'preferredActionReminderChannel',
   'phoneNumber',
   'communities',
@@ -170,6 +173,9 @@ export class UpdateProfileDto extends PartialType(
     'isNotSignedUpPartialProfile',
     'shareInfoPublicly',
     'customCityString',
+    'pushesForLikes',
+    'pushesForComments',
+    'pushesForFriendRequests',
   ]),
 ) {
   @ApiPropertyOptional({ type: Number, nullable: true })

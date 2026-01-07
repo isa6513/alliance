@@ -1,7 +1,7 @@
-import { Slot } from "expo-router";
+import { RelativePathString, router, Slot } from "expo-router";
 import { AuthProvider } from "../lib/AuthContext";
 import { Platform } from "react-native";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { client } from "@alliance/shared/client/client.gen";
 import WebTokenStore from "../lib/ExpoWebTokenStore";
 import SecureStorage from "../lib/SecureStorage";
@@ -75,6 +75,20 @@ async function registerForPushNotificationsAsync() {
   }
 }
 
+type PushData = {
+  screen?: string;
+};
+
+function navigateFromNotificationData(data: PushData | undefined) {
+  if (!data) return;
+  // Prefer href if present
+  const href = data.screen;
+  if (typeof href === "string" && href.length > 0) {
+    const normalized = href.startsWith("/") ? href : `/${href}`;
+    router.push(normalized as RelativePathString);
+  }
+}
+
 export default function RootLayout() {
   useFonts({
     SourceSans3: require("../assets/fonts/SourceSans3.ttf"),
@@ -96,10 +110,6 @@ export default function RootLayout() {
     }
     return SecureStorage;
   }, []);
-
-  const [notification, setNotification] = useState<
-    Notifications.Notification | undefined
-  >(undefined);
 
   const registerToken = useCallback(async (token?: string) => {
     if (!token) {
@@ -133,23 +143,31 @@ export default function RootLayout() {
     registerForPushNotificationsAsync()
       .then((token) => registerToken(token))
       .catch((error: any) => console.error(`${error}`));
+  }, [registerToken]);
 
-    const notificationListener = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        setNotification(notification);
+  const responseSub = useRef<Notifications.EventSubscription | null>(null);
+
+  useEffect(() => {
+    Notifications.getLastNotificationResponseAsync().then((response) => {
+      const data = response?.notification.request.content.data as
+        | PushData
+        | undefined;
+      navigateFromNotificationData(data);
+    });
+
+    responseSub.current = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const data = response.notification.request.content.data as
+          | PushData
+          | undefined;
+        navigateFromNotificationData(data);
       }
     );
 
-    const responseListener =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
-      });
-
     return () => {
-      notificationListener.remove();
-      responseListener.remove();
+      responseSub.current?.remove();
     };
-  }, [registerToken]);
+  }, []);
 
   if (Platform.OS === "web") {
     return (

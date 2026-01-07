@@ -3,9 +3,22 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Notification } from 'src/notifs/entities/notification.entity';
+import { Ty } from 'src/tasks/entities/type';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
+@Index(['idempotencyKey'], {
+  unique: true,
+  where: '"idempotencyKey" IS NOT NULL',
+})
 export class Push {
   @PrimaryGeneratedColumn()
   @ApiProperty()
@@ -54,4 +67,15 @@ export class Push {
   @Column({ nullable: true })
   @ApiPropertyOptional()
   lastCheckedStatusAt?: Date;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  idempotencyKey?: string;
+
+  @ManyToOne(() => Notification, (notification) => notification.pushes, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'notificationId' })
+  notification?: Ty<Notification>;
 }
