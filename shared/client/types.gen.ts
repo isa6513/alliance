@@ -462,6 +462,10 @@ export type Action = {
      * Whether the action is visible to and supposed to only be completed by non-members
      */
     publicOnly: boolean;
+    /**
+     * Whether the action is visible and available to be completed after the deadline
+     */
+    shouldCompleteAfterDeadline: boolean;
     authors?: Array<User>;
 };
 
@@ -1102,6 +1106,10 @@ export type ActionDto = {
      * Whether the action is visible to and supposed to only be completed by non-members
      */
     publicOnly: boolean;
+    /**
+     * Whether the action is visible and available to be completed after the deadline
+     */
+    shouldCompleteAfterDeadline: boolean;
     events: Array<ActionEventDto>;
     updates: Array<ActionUpdateDto>;
     canParticipate?: boolean;
@@ -1217,6 +1225,10 @@ export type CreateActionDto = {
      * Whether the action is visible to and supposed to only be completed by non-members
      */
     publicOnly: boolean;
+    /**
+     * Whether the action is visible and available to be completed after the deadline
+     */
+    shouldCompleteAfterDeadline: boolean;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
     userRelation?: UserActionRelation;
@@ -1307,6 +1319,10 @@ export type UpdateActionDto = {
      * Whether the action is visible to and supposed to only be completed by non-members
      */
     publicOnly?: boolean;
+    /**
+     * Whether the action is visible and available to be completed after the deadline
+     */
+    shouldCompleteAfterDeadline?: boolean;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
     userRelation?: UserActionRelation;
@@ -1581,6 +1597,10 @@ export type ExportActionDto = {
      * Whether the action is visible to and supposed to only be completed by non-members
      */
     publicOnly: boolean;
+    /**
+     * Whether the action is visible and available to be completed after the deadline
+     */
+    shouldCompleteAfterDeadline: boolean;
     authors?: Array<User>;
     taskForm?: Form;
     reminderGroups?: Array<ReminderGroup>;

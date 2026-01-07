@@ -4,11 +4,7 @@ import { AppLayoutOutletContext } from "./applayout";
 import NavbarVertical from "./components/NavbarVertical";
 import Spinner from "./components/Spinner";
 import { NotificationsProvider } from "@alliance/shared/lib/useNotifications";
-import {
-  canJoinAction,
-  shouldCompleteAction,
-} from "@alliance/shared/lib/homePage";
-import { TaskAwayStatus } from "@alliance/shared/lib/actionUtils";
+import { actionContributesToTaskCount } from "@alliance/shared/lib/homePage";
 
 function Navbar() {
   const context = useOutletContext<AppLayoutOutletContext>();
@@ -16,16 +12,7 @@ function Navbar() {
   const nTasks = useMemo(
     () =>
       context.actions
-        ? context.actions.filter(
-            (action) =>
-              shouldCompleteAction(action) &&
-              action.awayStatus === TaskAwayStatus.NOT_AWAY
-          ).length +
-          context.actions.filter(
-            (action) =>
-              canJoinAction(action) &&
-              action.awayStatus === TaskAwayStatus.NOT_AWAY
-          ).length
+        ? context.actions.filter(actionContributesToTaskCount).length
         : 0,
     [context.actions]
   );

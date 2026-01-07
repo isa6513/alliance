@@ -2,6 +2,8 @@ import { useCallback, useMemo } from "react";
 import { ActionDto } from "../client";
 import {
   ActionWithAwayStatus,
+  deadlineHasPassed,
+  getDeadlineTimestamp,
   getPastEvents,
   TaskAwayStatus,
 } from "./actionUtils";
@@ -23,7 +25,8 @@ export function shouldCompleteAction(action: ActionDto) {
     canCompleteAction(action) &&
     action.shouldParticipate &&
     (action.status === "member_action" ||
-      action.status === "gathering_commitments") &&
+      action.status === "gathering_commitments" ||
+      action.shouldCompleteAfterDeadline) &&
     !action.publicOnly
   );
 }
@@ -46,32 +49,13 @@ export function canJoinAction(action: ActionDto) {
   );
 }
 
-function getDeadlineTimestamp(action: ActionDto): number {
-  let i = 0;
-  // Find first 'member_action' or 'gathering_commitments' event
-  while (
-    action.events[i] &&
-    action.events[i].newStatus !== "member_action" &&
-    action.events[i].newStatus !== "gathering_commitments"
-  ) {
-    i++;
-  }
-
-  // Find next non-'member_action' or 'gathering_commitments' event
-  while (
-    action.events[i] &&
-    (action.events[i].newStatus === "member_action" ||
-      action.events[i].newStatus === "gathering_commitments")
-  ) {
-    i++;
-  }
-
-  const nextEvent = action.events[i];
-  if (!nextEvent) {
-    return Infinity;
-  }
-
-  return new Date(nextEvent.date).getTime();
+export function actionContributesToTaskCount(action: ActionWithAwayStatus) {
+  return (
+    (shouldCompleteAction(action) || canJoinAction(action)) &&
+    action.awayStatus === TaskAwayStatus.NOT_AWAY &&
+    deadlineHasPassed(action, new Date()) &&
+    action.userRelation !== "dismissed"
+  );
 }
 
 export function actionPriorityComparator(
@@ -116,9 +100,7 @@ export function actionPriorityComparator(
 export function useHomePageActions(actions: ActionWithAwayStatus[] | null) {
   const todoActions = useMemo(() => {
     return (
-      actions
-        ?.filter((action) => shouldCompleteAction(action))
-        .sort(actionPriorityComparator) || []
+      actions?.filter(shouldCompleteAction).sort(actionPriorityComparator) ?? []
     );
   }, [actions]);
 

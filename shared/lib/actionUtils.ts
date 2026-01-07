@@ -83,3 +83,44 @@ export function getAwayStatus(
 }
 
 export type ActionWithAwayStatus = ActionDto & { awayStatus: TaskAwayStatus };
+
+export function getDeadlineTimestamp(action: ActionDto): number {
+  let i = 0;
+  // Find first 'member_action' or 'gathering_commitments' event
+  while (
+    action.events[i] &&
+    action.events[i].newStatus !== "member_action" &&
+    action.events[i].newStatus !== "gathering_commitments"
+  ) {
+    i++;
+  }
+
+  // Find next non-'member_action' or 'gathering_commitments' event
+  while (
+    action.events[i] &&
+    (action.events[i].newStatus === "member_action" ||
+      action.events[i].newStatus === "gathering_commitments")
+  ) {
+    i++;
+  }
+
+  const nextEvent = action.events[i];
+  if (!nextEvent) {
+    return Infinity;
+  }
+
+  return new Date(nextEvent.date).getTime();
+}
+
+export function deadlineHasPassed(action: ActionDto, date: Date): boolean {
+  return (
+    action.status !== "member_action" &&
+    action.status !== "gathering_commitments" &&
+    action.events.some(
+      (event) =>
+        new Date(event.date) < date &&
+        (event.newStatus === "member_action" ||
+          event.newStatus === "gathering_commitments")
+    )
+  );
+}

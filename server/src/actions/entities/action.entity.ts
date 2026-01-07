@@ -281,6 +281,14 @@ export class Action {
   @Allow()
   publicOnly: boolean;
 
+  @Column({ default: false })
+  @ApiProperty({
+    description:
+      'Whether the action shows up in the tasks page after the deadline',
+  })
+  @Allow()
+  shouldCompleteAfterDeadline: boolean;
+
   @ManyToMany(() => User, (user) => user.authoredActions, { cascade: true })
   @JoinTable()
   @ApiPropertyOptional({ type: () => User, isArray: true })

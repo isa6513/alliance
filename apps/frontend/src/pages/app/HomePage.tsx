@@ -18,11 +18,15 @@ import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import {
   noTasksContractSuspended,
   noTasksToDoRightNow,
-  TASK_MESSAGE_CURRENTLY_AWAY,
-  TASK_MESSAGE_WAS_AWAY,
-  TASK_MESSAGE_WILL_BE_AWAY,
+  TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
+  TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
+  TASK_DISMISS_MESSAGE_WAS_AWAY,
+  TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
 } from "@alliance/shared/lib/copy";
-import { TaskAwayStatus } from "@alliance/shared/lib/actionUtils";
+import {
+  deadlineHasPassed,
+  TaskAwayStatus,
+} from "@alliance/shared/lib/actionUtils";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -98,18 +102,24 @@ const HomePage = () => {
       );
     }
 
-    const dismissProps: LargeActionCardProps["dismissProps"] =
-    currentTask && 
-      currentTask.awayStatus !== TaskAwayStatus.NOT_AWAY 
-        ? {
-            message: {
-              [TaskAwayStatus.AWAY_CURRENTLY]: TASK_MESSAGE_CURRENTLY_AWAY,
-              [TaskAwayStatus.AWAY_LATER]: TASK_MESSAGE_WILL_BE_AWAY,
-              [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_MESSAGE_WAS_AWAY,
-            }[currentTask?.awayStatus],
-            handleDismiss: () => handleDismissAction(currentTask.id),
-          }
-        : undefined;
+    const dismissProps: LargeActionCardProps["dismissProps"] = !currentTask
+      ? undefined
+      : currentTask.awayStatus !== TaskAwayStatus.NOT_AWAY
+      ? {
+          message: {
+            [TaskAwayStatus.AWAY_CURRENTLY]:
+              TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
+            [TaskAwayStatus.AWAY_LATER]: TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
+            [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
+          }[currentTask?.awayStatus],
+          handleDismiss: () => handleDismissAction(currentTask.id),
+        }
+      : deadlineHasPassed(currentTask, new Date())
+      ? {
+          message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
+          handleDismiss: () => handleDismissAction(currentTask.id),
+        }
+      : undefined;
 
     return (
       <div

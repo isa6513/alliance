@@ -76,6 +76,7 @@ const InvitePage: React.FC = () => {
     priority: 0,
     preventCompletion: false,
     everyoneShouldComplete: false,
+    shouldCompleteAfterDeadline: false,
     archived: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
