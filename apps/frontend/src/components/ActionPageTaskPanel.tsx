@@ -135,6 +135,7 @@ const ActionPageTaskPanel = () => {
         <ActionTaskPanel
           action={action}
           userRelation={userRelation ?? "none"}
+          card={true}
           {...panelHandlers}
         />
       );
