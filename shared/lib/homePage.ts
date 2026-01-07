@@ -103,10 +103,10 @@ export function useHomePageActions(actions: ActionWithAwayStatus[] | null) {
     null;
 
   const currentWeekTodoActions = todoActions.filter((action) => {
-    return isActionInCurrentWeek(action);
+    return todoActionIsMandatory(action) && isActionInCurrentWeek(action);
   });
   const nextWeekTodoActions = todoActions.filter((action) => {
-    return !isActionInCurrentWeek(action);
+    return todoActionIsMandatory(action) && !isActionInCurrentWeek(action);
   });
 
   const remainingTasksEstimatedTimeCurrentWeek = currentWeekTodoActions.reduce(
