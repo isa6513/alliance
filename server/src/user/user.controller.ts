@@ -60,6 +60,7 @@ import {
   TestPushNotificationDto,
   UserDeviceDto,
 } from './dto/device.dto';
+import { Push } from 'src/push/push.entity';
 
 class VerifyEmailBody {
   @IsString()
@@ -760,8 +761,8 @@ export class UserController {
 
   @Post('sendPushNotification')
   @UseGuards(AdminGuard)
-  @ApiOkResponse()
+  @ApiOkResponse({ type: Push })
   async sendPushNotification(@Body() body: TestPushNotificationDto) {
-    await this.userService.testPushNotification(body.userId, body.message);
+    return this.userService.testPushNotification(body.userId, body.message);
   }
 }

@@ -22,8 +22,6 @@ import {
   CardStyle,
   ButtonColor,
 } from "../../../components/system";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faTimes, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 export default function CreatePostScreen() {
   const { user } = useAuth();
@@ -132,11 +130,7 @@ export default function CreatePostScreen() {
       <View style={styles.actionPickerHeader}>
         <Text style={styles.actionPickerTitle}>Select Action (Optional)</Text>
         <TouchableOpacity onPress={() => setShowActionPicker(false)}>
-          <FontAwesomeIcon
-            icon={faTimes}
-            size={20}
-            color={colors.text.tertiary}
-          />
+          <Text style={styles.actionPickerTitle}>Close</Text>
         </TouchableOpacity>
       </View>
 
@@ -219,11 +213,6 @@ export default function CreatePostScreen() {
                   ? selectedAction.name
                   : "Select Action (Optional)"}
               </Text>
-              <FontAwesomeIcon
-                icon={faChevronDown}
-                size={16}
-                color={colors.text.tertiary}
-              />
             </TouchableOpacity>
             {selectedAction && (
               <Text style={styles.selectedActionCategory}>

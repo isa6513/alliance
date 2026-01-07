@@ -301,12 +301,27 @@ export type Mms = {
     clickedLink: boolean;
 };
 
+export type Push = {
+    id: number;
+    expoPushToken: string;
+    createdAt: string;
+    body: string;
+    screen?: string;
+    updatedAt: string;
+    receiptId?: string;
+    ticketStatus?: string;
+    receiptStatus?: string;
+    errorCode?: string;
+    errorMessage?: string;
+};
+
 export type ActionEventNotif = {
     id: number;
     type: ActionEventNotifType;
     channel: NotificationChannel;
     mail: Mail | null;
     mms: Mms | null;
+    push: Push | null;
     reminderGroup?: ReminderGroup;
     /**
      * Indicates whether the notification has been sent
@@ -437,12 +452,12 @@ export type Action = {
      */
     showToNonparticipating?: boolean;
     usersJoined: number;
-    activities: Array<Array<ActionActivity>>;
-    status: ActionStatus;
     /**
      * Number of users who have completed the action
      */
     usersCompleted: number;
+    activities: Array<Array<ActionActivity>>;
+    status: ActionStatus;
     /**
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
@@ -463,7 +478,7 @@ export type Action = {
      */
     publicOnly: boolean;
     /**
-     * Whether the action is visible and available to be completed after the deadline
+     * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline: boolean;
     authors?: Array<User>;
@@ -1082,12 +1097,12 @@ export type ActionDto = {
      */
     showToNonparticipating?: boolean;
     usersJoined: number;
-    activities: Array<Array<ActionActivity>>;
-    status: ActionStatus;
     /**
      * Number of users who have completed the action
      */
     usersCompleted: number;
+    activities: Array<Array<ActionActivity>>;
+    status: ActionStatus;
     /**
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
@@ -1107,7 +1122,7 @@ export type ActionDto = {
      */
     publicOnly: boolean;
     /**
-     * Whether the action is visible and available to be completed after the deadline
+     * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline: boolean;
     events: Array<ActionEventDto>;
@@ -1226,7 +1241,7 @@ export type CreateActionDto = {
      */
     publicOnly: boolean;
     /**
-     * Whether the action is visible and available to be completed after the deadline
+     * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline: boolean;
     canParticipate?: boolean;
@@ -1320,7 +1335,7 @@ export type UpdateActionDto = {
      */
     publicOnly?: boolean;
     /**
-     * Whether the action is visible and available to be completed after the deadline
+     * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline?: boolean;
     canParticipate?: boolean;
@@ -1381,6 +1396,7 @@ export type ActionEventNotifDto = {
     channel: NotificationChannel;
     mail: Mail | null;
     mms: Mms | null;
+    push: Push | null;
     reminderGroup?: ReminderGroup;
     /**
      * Indicates whether the notification has been sent
@@ -1598,7 +1614,7 @@ export type ExportActionDto = {
      */
     publicOnly: boolean;
     /**
-     * Whether the action is visible and available to be completed after the deadline
+     * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline: boolean;
     authors?: Array<User>;
@@ -3160,8 +3176,10 @@ export type UserSendPushNotificationData = {
 };
 
 export type UserSendPushNotificationResponses = {
-    200: unknown;
+    200: Push;
 };
+
+export type UserSendPushNotificationResponse = UserSendPushNotificationResponses[keyof UserSendPushNotificationResponses];
 
 export type ImagesGetImageData = {
     body?: never;
@@ -4277,6 +4295,17 @@ export type ActionsReloadAllActionUsersJoinedData = {
 };
 
 export type ActionsReloadAllActionUsersJoinedResponses = {
+    200: unknown;
+};
+
+export type ActionsReloadAllActionUsersCompletedData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/reloadAllActionUsersCompleted';
+};
+
+export type ActionsReloadAllActionUsersCompletedResponses = {
     200: unknown;
 };
 

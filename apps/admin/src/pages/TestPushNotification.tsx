@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { userList, userSendPushNotification } from "@alliance/shared/client";
 import type {
+  Push,
   TestPushNotificationDto,
   UserDto,
 } from "@alliance/shared/client/types.gen";
@@ -16,6 +17,8 @@ const TestPushNotification: React.FC = () => {
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const [respData, setRespData] = useState<Push | null>(null);
 
   const selectableUsers = useMemo<UserSelectUser[]>(
     () =>
@@ -78,6 +81,9 @@ const TestPushNotification: React.FC = () => {
         );
         return;
       }
+      if (response.data) {
+        setRespData(response.data);
+      }
       setSuccess("Push notification sent.");
       setError(null);
     } catch (err) {
@@ -131,6 +137,11 @@ const TestPushNotification: React.FC = () => {
         {error && <p className="text-red-500 text-[10pt] mt-1">{error}</p>}
         {success && <p className="text-green text-[10pt] mt-1">{success}</p>}
       </div>
+      {respData && (
+        <pre className="text-sm text-zinc-500">
+          {JSON.stringify(respData, null, 2)}
+        </pre>
+      )}
     </div>
   );
 };

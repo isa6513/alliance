@@ -8,17 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { useAuth } from "../../lib/AuthContext";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faUser,
-  faBell,
-  faLock,
-  faCog,
-  faLanguage,
-  faQuestionCircle,
-  faInfoCircle,
-  faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
+
 import { colors } from "../../components/system";
 import { router } from "expo-router";
 import ProfileImage from "../../components/ProfileImage";
@@ -67,51 +57,15 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Account</Text>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesomeIcon
-            icon={faUser}
-            size={20}
-            color="#0D1B2A"
-            style={styles.menuIcon}
-          />
           <Text style={styles.menuText}>Edit Profile</Text>
-          <FontAwesomeIcon
-            icon={faChevronRight}
-            size={16}
-            color="#666"
-            style={styles.menuIcon}
-          />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesomeIcon
-            icon={faBell}
-            size={20}
-            color="#0D1B2A"
-            style={styles.menuIcon}
-          />
           <Text style={styles.menuText}>Notifications</Text>
-          <FontAwesomeIcon
-            icon={faChevronRight}
-            size={16}
-            color="#666"
-            style={styles.menuIcon}
-          />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesomeIcon
-            icon={faLock}
-            size={20}
-            color="#0D1B2A"
-            style={styles.menuIcon}
-          />
           <Text style={styles.menuText}>Privacy</Text>
-          <FontAwesomeIcon
-            icon={faChevronRight}
-            size={16}
-            color="#666"
-            style={styles.menuIcon}
-          />
         </TouchableOpacity>
       </View>
 
@@ -122,35 +76,11 @@ export default function ProfileScreen() {
           style={styles.menuItem}
           onPress={() => router.push("/settings")}
         >
-          <FontAwesomeIcon
-            icon={faCog}
-            size={20}
-            color="#0D1B2A"
-            style={styles.menuIcon}
-          />
           <Text style={styles.menuText}>Settings</Text>
-          <FontAwesomeIcon
-            icon={faChevronRight}
-            size={16}
-            color="#666"
-            style={styles.menuIcon}
-          />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesomeIcon
-            icon={faLanguage}
-            size={20}
-            color="#0D1B2A"
-            style={styles.menuIcon}
-          />
           <Text style={styles.menuText}>Language</Text>
-          <FontAwesomeIcon
-            icon={faChevronRight}
-            size={16}
-            color="#666"
-            style={styles.menuIcon}
-          />
         </TouchableOpacity>
       </View>
 
@@ -158,35 +88,11 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Support</Text>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesomeIcon
-            icon={faQuestionCircle}
-            size={20}
-            color="#0D1B2A"
-            style={styles.menuIcon}
-          />
           <Text style={styles.menuText}>Help & Support</Text>
-          <FontAwesomeIcon
-            icon={faChevronRight}
-            size={16}
-            color="#666"
-            style={styles.menuIcon}
-          />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <FontAwesomeIcon
-            icon={faInfoCircle}
-            size={20}
-            color="#0D1B2A"
-            style={styles.menuIcon}
-          />
           <Text style={styles.menuText}>About</Text>
-          <FontAwesomeIcon
-            icon={faChevronRight}
-            size={16}
-            color="#666"
-            style={styles.menuIcon}
-          />
         </TouchableOpacity>
       </View>
 

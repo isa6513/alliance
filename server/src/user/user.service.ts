@@ -60,6 +60,7 @@ import { Relations } from 'src/utils/Repository';
 import { RegisterDeviceDto, UserDeviceDto } from './dto/device.dto';
 import { UserDevice } from './entities/user-device.entity';
 import { PushService } from 'src/push/push.service';
+import { Push } from 'src/push/push.entity';
 
 const defaultTimeZone = 'America/Los_Angeles';
 const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
@@ -1480,12 +1481,12 @@ export class UserService {
     return savedDevice;
   }
 
-  async testPushNotification(userId: number, message: string): Promise<void> {
+  async testPushNotification(userId: number, message: string): Promise<Push> {
     const user = await this.findOneOrFail(userId, { devices: true });
     const device = user.devices?.[0];
     if (!device || !device.expoPushToken) {
       throw new BadRequestException('User has no expo push token');
     }
-    await this.pushService.sendPushNotification(device.expoPushToken, message);
+    return this.pushService.sendPushNotification(device.expoPushToken, message);
   }
 }

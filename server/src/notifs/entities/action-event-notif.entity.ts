@@ -16,6 +16,7 @@ import { ReminderGroup } from 'src/actions/entities/reminder-group.entity';
 import { Type } from 'class-transformer';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
 import { Ty } from 'src/tasks/entities/type';
+import { Push } from 'src/push/push.entity';
 
 export enum ActionEventNotifType {
   Announcement = 'announcement',
@@ -60,6 +61,11 @@ export class ActionEventNotif {
   @OneToOne(() => Mms, { nullable: true })
   @JoinColumn({ name: 'mmsId' })
   mms: Mms | null;
+
+  @ApiProperty({ type: Push, nullable: true })
+  @OneToOne(() => Push, { nullable: true })
+  @JoinColumn({ name: 'pushId' })
+  push: Push | null;
 
   @ManyToOne(
     () => ReminderGroup,

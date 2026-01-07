@@ -2,9 +2,11 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
@@ -17,6 +19,7 @@ import { Comment } from 'src/forum/entities/comment.entity';
 import { Type } from 'class-transformer';
 import { Ty } from 'src/tasks/entities/type';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
+import { Push } from 'src/push/push.entity';
 
 export enum NotificationCategory {
   ActionEvent = 'action_event',
@@ -83,6 +86,13 @@ export class Notification {
   @ApiProperty({ type: Date })
   @Type(() => Date)
   sendTime: Date;
+
+  @OneToOne(() => Push, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'pushId' })
+  push: Ty<Push>;
 
   @Column({ nullable: true })
   @ApiPropertyOptional()
