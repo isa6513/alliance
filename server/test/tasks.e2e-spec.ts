@@ -86,6 +86,7 @@ describe('Tasks (e2e)', () => {
         type: ActionTaskType.Activity,
         commitmentless: true,
         everyoneShouldComplete: false,
+        shouldCompleteAfterDeadline: false,
         participatingTags: [ctx.defaultTag],
         priority: 0,
         preventCompletion: false,

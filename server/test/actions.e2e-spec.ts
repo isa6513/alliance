@@ -177,6 +177,7 @@ describe('Actions (e2e)', () => {
         type: ActionTaskType.Activity,
         commitmentless: false,
         everyoneShouldComplete: false,
+        shouldCompleteAfterDeadline: false,
         participatingTags: [],
         useManualCohort: false,
         priority: 0,
