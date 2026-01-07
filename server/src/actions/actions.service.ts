@@ -229,10 +229,22 @@ export class ActionsService {
     }
   }
 
+  async reloadAllActionUsersCompleted(): Promise<void> {
+    const actions = await this.actionRepository.find();
+    for (const action of actions) {
+      await this.reloadUsersCompletedForAction(action.id);
+    }
+  }
+
   async reloadUsersJoinedForAction(actionId: number): Promise<void> {
     const usersJoined = (await this.computeUsersJoinedForAction(actionId))
       .length;
     await this.actionRepository.update(actionId, { usersJoined });
+  }
+
+  async reloadUsersCompletedForAction(actionId: number): Promise<void> {
+    const usersCompleted = await this.computeUsersCompletedForAction(actionId);
+    await this.actionRepository.update(actionId, { usersCompleted });
   }
 
   async computeUsersJoinedForAction(actionId: number): Promise<number[]> {
@@ -270,6 +282,15 @@ export class ActionsService {
       userIds.delete(activity.userId);
     }
     return Array.from(userIds);
+  }
+
+  async computeUsersCompletedForAction(actionId: number): Promise<number> {
+    return this.actionActivityRepository.count({
+      where: {
+        actionId,
+        type: ActionActivityType.USER_COMPLETED,
+      },
+    });
   }
 
   async getUsersJoinedForCommitmentlessAction(
@@ -334,7 +355,6 @@ export class ActionsService {
     const relations: Omit<Relations<Action>, 'usersCompleted' | 'status'> = {
       events: true,
       participatingTags: true,
-      activities: true,
     };
     const actions = sorted
       ? await this.findAllSorted(relations)
@@ -347,6 +367,7 @@ export class ActionsService {
           tags: true,
           awayRanges: true,
           contractEvents: true,
+          activities: true,
         })
       : null;
 
@@ -402,8 +423,8 @@ export class ActionsService {
           shouldParticipate: shouldParticipate,
           userRelation: user
             ? await this.getActionRelationFromActivities(
-                action.activities.filter(
-                  (activity) => activity.userId === user.id,
+                user.activities.filter(
+                  (activity) => activity.actionId === action.id,
                 ),
               )
             : undefined,
@@ -601,6 +622,9 @@ export class ActionsService {
     });
 
     await this.reloadUsersJoinedForAction(actionId);
+    if (type === ActionActivityType.USER_COMPLETED) {
+      await this.reloadUsersCompletedForAction(actionId);
+    }
 
     await this.checkAndProcessAutomaticTransitions(actionId);
 

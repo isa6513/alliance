@@ -21,7 +21,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ActionActivity, ActionActivityType } from './action-activity.entity';
+import { ActionActivity } from './action-activity.entity';
 import { ActionEvent, ActionStatus } from './action-event.entity';
 import { ActionSuite } from './action-suite.entity';
 import { ActionUpdate } from './action-update.entity';
@@ -192,6 +192,13 @@ export class Action {
   @Allow()
   usersJoined: number;
 
+  @Column({ default: 0 })
+  @ApiProperty({
+    description: 'Number of users who have completed the action',
+  })
+  @Allow()
+  usersCompleted: number;
+
   @OneToMany(() => ActionActivity, (activity) => activity.action)
   @ApiProperty({
     description: 'Activities associated with the action',
@@ -216,18 +223,6 @@ export class Action {
       return ActionStatus.Draft;
     }
     return pastEvents[pastEvents.length - 1].newStatus;
-  }
-
-  @Expose()
-  @ApiProperty({
-    description: 'Number of users who have completed the action',
-  })
-  get usersCompleted(): number {
-    return (
-      this.activities?.filter(
-        (activity) => activity.type === ActionActivityType.USER_COMPLETED,
-      ).length || 0
-    );
   }
 
   @Column({ default: false })

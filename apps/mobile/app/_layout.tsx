@@ -10,6 +10,7 @@ import { useFonts } from "expo-font";
 import "../global.css";
 import { PostHogProvider } from "posthog-react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
@@ -152,19 +153,23 @@ export default function RootLayout() {
 
   if (Platform.OS === "web") {
     return (
-      <AuthProvider tokenStore={tokenStore}>
-        <Slot />
-      </AuthProvider>
+      <KeyboardProvider>
+        <AuthProvider tokenStore={tokenStore}>
+          <Slot />
+        </AuthProvider>
+      </KeyboardProvider>
     );
   }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <PostHogProvider apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt">
-        <AuthProvider tokenStore={tokenStore}>
-          <Slot />
-        </AuthProvider>
-      </PostHogProvider>
+      <KeyboardProvider>
+        <PostHogProvider apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt">
+          <AuthProvider tokenStore={tokenStore}>
+            <Slot />
+          </AuthProvider>
+        </PostHogProvider>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }

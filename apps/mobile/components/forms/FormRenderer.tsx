@@ -9,6 +9,15 @@ import {
   View,
 } from "react-native";
 import type { ScrollView as ScrollViewType } from "react-native";
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
+import {
+  useKeyboardHandler,
+  useKeyboardAnimation,
+} from "react-native-keyboard-controller";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import type { UserDto } from "@alliance/shared/client";
 import {
@@ -235,19 +244,59 @@ const FormRenderer = ({
   const [customReason, setCustomReason] = useState("");
   const [hasEmittedStart, setHasEmittedStart] = useState(false);
 
-  // Refs for scrolling to invalid fields
   const scrollViewRef = useRef<ScrollViewType>(null);
   const fieldPositions = useRef<Record<string, number>>({});
+  const activeFieldIdRef = useRef<string | null>(null);
+  const keyboardHeight = useSharedValue(0);
+
+  // 1. we need to use hook to get an access to animated values
+  const { height, progress } = useKeyboardAnimation();
+
+  console.log("keyboard height", height);
 
   const scrollToField = useCallback((fieldId: string) => {
     const yPosition = fieldPositions.current[fieldId];
     if (yPosition !== undefined && scrollViewRef.current) {
+      console.log("field y position", yPosition);
       scrollViewRef.current.scrollTo({
         y: Math.max(0, yPosition - 20),
         animated: true,
       });
     }
   }, []);
+
+  const scrollToFocusedField = useCallback(() => {
+    console.log("scroll to focused field");
+    const fieldId = activeFieldIdRef.current;
+    if (fieldId) {
+      console.log("scroll to field", fieldId);
+      scrollToField(fieldId);
+    }
+  }, [scrollToField]);
+
+  useKeyboardHandler(
+    {
+      onMove: (event) => {
+        "worklet";
+        keyboardHeight.value = Math.max(0, event.height);
+      },
+      onEnd: (event) => {
+        "worklet";
+        keyboardHeight.value = Math.max(0, event.height);
+        if (event.height > 0) {
+          runOnJS(scrollToFocusedField)();
+        }
+      },
+    },
+    [scrollToFocusedField]
+  );
+
+  const keyboardSpacerStyle = useAnimatedStyle(() => {
+    if (keyboardHeight.value <= 0) {
+      return { height: 0 };
+    }
+    return { height: keyboardHeight.value + 24 };
+  });
 
   useEffect(() => {
     if (!user || Object.keys(publicAnswers).length > 0) {
@@ -606,8 +655,21 @@ const FormRenderer = ({
   const isFirstPage = currentPageIndex === 0;
   const isLastPage = currentPageIndex === maxPageIndex;
 
+  const scale = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 2],
+  });
+
   return (
     <View className="flex-1">
+      <Animated.View
+        style={{
+          width: 50,
+          height: 50,
+          backgroundColor: "#17fc03",
+          borderRadius: 15,
+        }}
+      />
       <ScrollView
         ref={scrollViewRef}
         className="flex-1"
@@ -637,6 +699,10 @@ const FormRenderer = ({
                 field={field}
                 value={formData[field.id]}
                 onChange={(value) => handleFieldChange(field.id, value)}
+                onFocus={() => {
+                  activeFieldIdRef.current = field.id;
+                  setTimeout(() => scrollToField(field.id), 80);
+                }}
                 disabled={readOnly}
                 error={fieldErrors[field.id]}
                 randomizationKey={randomizationKey}
@@ -645,6 +711,7 @@ const FormRenderer = ({
             </View>
           );
         })}
+        <Animated.View style={keyboardSpacerStyle} />
       </ScrollView>
 
       {!readOnly && (

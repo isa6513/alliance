@@ -33,6 +33,7 @@ export type RenderFieldProps = {
   field: AnyField;
   value?: FormValue;
   onChange?: (value: FormValue) => void;
+  onFocus?: () => void;
   disabled?: boolean;
   onFileSelected?: (file: unknown) => void;
   uploading?: boolean;
@@ -125,6 +126,7 @@ export function RenderField({
   field,
   value,
   onChange,
+  onFocus,
   disabled,
   onFileSelected,
   uploading,
@@ -176,6 +178,7 @@ export function RenderField({
             className={inputBase}
             value={(value as string) ?? ""}
             onChangeText={(text) => onChange?.(text)}
+            onFocus={onFocus}
             placeholder={field.placeholder}
             placeholderTextColor="#9ca3af"
             editable={!disabled}
@@ -192,6 +195,7 @@ export function RenderField({
             className={`${inputBase} min-h-[100px] text-base`}
             value={(value as string) ?? ""}
             onChangeText={(text) => onChange?.(text)}
+            onFocus={onFocus}
             placeholder={field.placeholder}
             placeholderTextColor="#9ca3af"
             editable={!disabled}
@@ -216,6 +220,7 @@ export function RenderField({
             className={inputBase}
             value={(value as string) ?? ""}
             onChangeText={(text) => onChange?.(text)}
+            onFocus={onFocus}
             placeholder="example@email.com"
             placeholderTextColor="#9ca3af"
             autoCapitalize="none"
@@ -237,6 +242,7 @@ export function RenderField({
               const sanitized = text.replace(/[^0-9+\-()\s]/g, "");
               onChange?.(sanitized);
             }}
+            onFocus={onFocus}
             placeholder={field.placeholder || "Enter phone number"}
             placeholderTextColor="#9ca3af"
             keyboardType="phone-pad"
@@ -261,6 +267,7 @@ export function RenderField({
               const next = parseFloat(text);
               onChange?.(Number.isNaN(next) ? "" : next);
             }}
+            onFocus={onFocus}
             keyboardType="numeric"
             editable={!disabled}
           />
@@ -538,6 +545,7 @@ export function RenderField({
             className={inputBase}
             value={(value as string) ?? ""}
             onChangeText={(text) => onChange?.(text)}
+            onFocus={onFocus}
             placeholder="YYYY-MM-DD"
             placeholderTextColor="#9ca3af"
             editable={!disabled}
@@ -552,6 +560,7 @@ export function RenderField({
           field={field as TimeField}
           value={value}
           onChange={onChange}
+          onFocus={onFocus}
           disabled={disabled}
           baseError={errorMessage}
         />
@@ -589,6 +598,7 @@ export function RenderField({
             disabled={disabled}
             allowCustomValue
             onSelect={(city) => onChange?.(city)}
+            onFocus={onFocus}
           />
           {renderValidationMessage(errorMessage)}
         </View>
@@ -681,6 +691,7 @@ type TimeInputFieldProps = {
   field: TimeField;
   value: FormValue | undefined;
   onChange?: (value: FormValue) => void;
+  onFocus?: () => void;
   disabled?: boolean;
   baseError: string | null;
 };
@@ -689,6 +700,7 @@ export function TimeInputField({
   field,
   value,
   onChange,
+  onFocus,
   disabled,
   baseError,
 }: TimeInputFieldProps) {
@@ -754,6 +766,7 @@ export function TimeInputField({
               setInputValue(text);
               setLocalError(null);
             }}
+            onFocus={onFocus}
             onBlur={commitValue}
             placeholder="7:30 PM"
             placeholderTextColor="#9ca3af"

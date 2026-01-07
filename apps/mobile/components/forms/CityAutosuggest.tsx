@@ -21,6 +21,7 @@ type Props = {
   debounceMs?: number;
   disabled?: boolean;
   allowCustomValue?: boolean;
+  onFocus?: () => void;
 };
 
 export default function CityAutosuggestMobile({
@@ -31,6 +32,7 @@ export default function CityAutosuggestMobile({
   debounceMs = 150,
   disabled = false,
   allowCustomValue = true,
+  onFocus,
 }: Props) {
   const {
     query,
@@ -68,7 +70,10 @@ export default function CityAutosuggestMobile({
         <TextInput
           value={query}
           onChangeText={(text) => setQuery(text)}
-          onFocus={() => setOpen(true)}
+          onFocus={() => {
+            onFocus?.();
+            setOpen(true);
+          }}
           onBlur={commitCustomValue}
           placeholder={placeholder}
           placeholderTextColor="#9ca3af"

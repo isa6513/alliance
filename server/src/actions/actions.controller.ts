@@ -749,6 +749,13 @@ export class ActionsController {
     return this.actionsService.reloadAllActionUsersJoined();
   }
 
+  @Get('reloadAllActionUsersCompleted')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async reloadAllActionUsersCompleted() {
+    return this.actionsService.reloadAllActionUsersCompleted();
+  }
+
   @Get('export/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ExportActionDto })

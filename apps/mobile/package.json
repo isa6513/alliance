@@ -16,7 +16,8 @@
     "build:ios": "eas build --profile ios-simulator --platform ios",
     "gen-api": "yarn openapi-ts",
     "eas-build-pre-install": "corepack enable && corepack prepare yarn@4.9.1 --activate",
-    "run:device": "npx expo prebuild && cd ios && pod install && cd .. && npx expo run:ios --device 00008030-001514A021B9802E"
+    "run:device": "npx expo prebuild && cd ios && pod install && cd .. && npx expo run:ios --device 00008030-001514A021B9802E",
+    "buildprod": "npx expo prebuild --clean && cd ios && pod repo update && pod install && cd .. && open ios/*.xcworkspace"
   },
   "dependencies": {
     "@alliance/shared": "workspace:*",
@@ -54,6 +55,7 @@
     "react-dom": "19.0.0",
     "react-native": "0.79.6",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-keyboard-controller": "^1.20.3",
     "react-native-localhost": "^1.0.0",
     "react-native-localize": "^3.6.1",
     "react-native-markdown-display": "^7.0.2",
