@@ -6,7 +6,9 @@ import {
   NotificationCategory,
 } from 'src/notifs/entities/notification.entity';
 import { CreatePushMessage, PushService } from './push.service';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class NotifPushDispatcherWorker {
   constructor(
     @InjectRepository(Notification)
