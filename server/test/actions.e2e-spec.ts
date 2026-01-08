@@ -15,7 +15,11 @@ import {
   ActionEvent,
   ActionStatus,
 } from '../src/actions/entities/action-event.entity';
-import { Action, ActionTaskType } from '../src/actions/entities/action.entity';
+import {
+  Action,
+  ActionTaskType,
+  VisibilityMode,
+} from '../src/actions/entities/action.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { Tag } from '../src/user/entities/tag.entity';
 import { User } from '../src/user/entities/user.entity';
@@ -53,7 +57,7 @@ describe('Actions (e2e)', () => {
         body: 'Body copy',
         taskContents: 'Task copy',
         shortDescription: `${name} short description`,
-        showToNonparticipating: true,
+        visibilityMode: VisibilityMode.Public,
         participatingTags: [ctx.defaultTag],
         ...options.actionOverrides,
       }),
@@ -87,7 +91,7 @@ describe('Actions (e2e)', () => {
       category: 'Test',
       body: 'Test action for forum tests',
       taskContents: 'Test action for forum tests',
-      showToNonparticipating: true,
+      visibilityMode: VisibilityMode.Public,
       participatingTags: [ctx.defaultTag],
     });
 
@@ -95,7 +99,7 @@ describe('Actions (e2e)', () => {
       name: 'Test Draft Action',
       category: 'Test',
       body: 'Test action for forum tests',
-      showToNonparticipating: true,
+      visibilityMode: VisibilityMode.Public,
       participatingTags: [ctx.defaultTag],
     });
 
@@ -146,7 +150,7 @@ describe('Actions (e2e)', () => {
         status: ActionStatus.GatheringCommitments,
         actionOverrides: {
           participatingTags: [restrictedTag],
-          showToNonparticipating: true,
+          visibilityMode: VisibilityMode.Public,
         },
       },
     );
@@ -155,7 +159,7 @@ describe('Actions (e2e)', () => {
       status: ActionStatus.GatheringCommitments,
       actionOverrides: {
         participatingTags: [restrictedTag],
-        showToNonparticipating: false,
+        visibilityMode: VisibilityMode.ParticipatingGroups,
       },
     });
 
@@ -174,6 +178,7 @@ describe('Actions (e2e)', () => {
         image: '',
         timeEstimate: 5,
         shortDescription: 'Do something important',
+        visibilityMode: VisibilityMode.Public,
         type: ActionTaskType.Activity,
         commitmentless: false,
         everyoneShouldComplete: false,
@@ -389,7 +394,7 @@ describe('Actions (e2e)', () => {
           participatingTags: [ctx.defaultTag],
           manualCohortUserIds: [cohortMember.id],
           useManualCohort: true,
-          showToNonparticipating: true,
+          visibilityMode: VisibilityMode.Public,
           priority: 0,
           preventCompletion: false,
           type: ActionTaskType.Activity,
@@ -1399,7 +1404,7 @@ describe('Actions (e2e)', () => {
           body: 'Ordering test action',
           taskContents: 'Ordering test task',
           shortDescription: `${name} short description`,
-          showToNonparticipating: true,
+          visibilityMode: VisibilityMode.Public,
           participatingTags: [ctx.defaultTag],
           priority: options.priority ?? 0,
         }),
