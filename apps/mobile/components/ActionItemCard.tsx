@@ -40,6 +40,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   action,
   onPress,
   friendCommitmentActivities,
+  index,
 }) => {
   return (
     <TouchableOpacity onPress={onPress} className="p-4" activeOpacity={0.7}>

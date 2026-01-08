@@ -9,7 +9,6 @@ import {
 import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import React, { useMemo, useRef } from "react";
 import { MarkdownTextArea } from "./MarkdownTextArea";
-import Card from "@alliance/sharedweb/ui/Card";
 
 interface ActionFormProps {
   form: CreateActionDto;
@@ -42,6 +41,23 @@ interface ActionFormProps {
   onAuthorsChange: (ids: number[]) => void;
   actionId?: number;
 }
+
+// Section wrapper component for visual grouping
+const FormSection: React.FC<{
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}> = ({ title, description, children }) => (
+  <div className="border border-gray-200 rounded-lg bg-white">
+    <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+      <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+      {description && (
+        <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+      )}
+    </div>
+    <div className="p-4">{children}</div>
+  </div>
+);
 
 const ActionForm: React.FC<ActionFormProps> = ({
   form,
@@ -91,21 +107,19 @@ const ActionForm: React.FC<ActionFormProps> = ({
     | "checkbox"
     | "markdowntextarea";
 
+  type FieldSection = "content" | "classification" | "behavior" | "media";
+
   type FieldDef = {
-    name: keyof CreateActionDto | "image"; // special case for file upload with preview
+    name: keyof CreateActionDto | "image";
     label: string;
     type: FieldType;
+    section: FieldSection;
     required?: boolean;
-    // Optional conditional display based on current form state
     show?: (f: ActionFormProps["form"]) => boolean;
-    // Optional helper text
     helpText?: string;
-    // For selects
     options?: { value: string | number; label: string }[];
-    // Layout hint: render in two-column grid row if true
-    inGrid?: boolean;
     rows?: number;
-    aboveGrid?: boolean;
+    gridCol?: boolean; // render in 2-col grid within section
   };
 
   const actionTypeOptions = useMemo(
@@ -140,130 +154,162 @@ const ActionForm: React.FC<ActionFormProps> = ({
     [availableSuites, suitesLoading]
   );
 
+  // Field definitions organized by section
+  // To add a new flag: just add an entry to the "behavior" section with type: "checkbox"
   const fieldDefs = useMemo(
     (): FieldDef[] => [
+      // === CONTENT SECTION ===
       {
         name: "name",
         label: "Name",
         type: "textarea",
+        section: "content",
         required: true,
-        inGrid: false,
         rows: 1,
-        aboveGrid: true,
-      },
-      {
-        name: "category",
-        label: "Category",
-        type: "text",
-        required: true,
-        inGrid: true,
-      },
-      {
-        name: "suiteId",
-        label: "Suite",
-        type: "select",
-        options: suiteSelectOptions,
-        inGrid: true,
-        helpText: suitesLoading ? "Fetching suites..." : undefined,
-      },
-      {
-        name: "type",
-        label: "Type",
-        type: "select",
-        required: true,
-        options: actionTypeOptions,
-        inGrid: true,
-      },
-      {
-        name: "visibilityMode",
-        label: "Visibility Mode",
-        type: "select",
-        options: visibilityModeOptions,
-        inGrid: true,
-      },
-      {
-        name: "timeEstimate",
-        label: "Time Estimate (minutes)",
-        type: "number",
-        inGrid: true,
-      },
-      {
-        name: "donationAmount",
-        label: "Donation amount (cents)",
-        type: "number",
-        show: (f) => f.type === "Funding",
-        helpText: "Suggested amount per person",
-        inGrid: true,
-      },
-      {
-        name: "commitmentless",
-        label: "Commitmentless",
-        inGrid: true,
-        type: "checkbox",
-        helpText:
-          "all members (not just committed) will be shown this action to complete. (e.g. for onboarding)",
-      },
-      {
-        name: "shouldCompleteAfterDeadline",
-        label: "Should Complete After Deadline",
-        inGrid: true,
-        type: "checkbox",
-        helpText:
-          "Members will be shown this action in their task list even after the deadline.",
-      },
-      {
-        name: "everyoneShouldComplete",
-        label:
-          "Everyone Should Complete (i.e. override contract signing requirements for showing in tasks)",
-        type: "checkbox",
-        inGrid: true,
-      },
-      {
-        name: "commitmentThreshold",
-        label: "Commitment Threshold",
-        type: "number",
-        helpText: "Number of commitments needed",
-        show: (f) => !f.commitmentless,
-        inGrid: true,
-      },
-      {
-        name: "publicOnly",
-        label: "Public Only",
-        type: "checkbox",
-        inGrid: true,
       },
       {
         name: "shortDescription",
         label: "Short Description",
         type: "textarea",
+        section: "content",
         required: true,
         rows: 2,
+      },
+      {
+        name: "body",
+        label: "Body",
+        type: "markdowntextarea",
+        section: "content",
+        required: true,
+      },
+
+      // === MEDIA SECTION ===
+      {
+        name: "image",
+        label: "Cover Image",
+        type: "file",
+        section: "media",
+      },
+      {
+        name: "squareThumbnailImage",
+        label: "Square Thumbnail URL",
+        type: "text",
+        section: "media",
+        gridCol: true,
+      },
+      {
+        name: "squareThumbnailImageAlt",
+        label: "Thumbnail Alt Text",
+        type: "text",
+        section: "media",
+        gridCol: true,
+      },
+
+      // === CLASSIFICATION SECTION ===
+      {
+        name: "type",
+        label: "Type",
+        type: "select",
+        section: "classification",
+        required: true,
+        options: actionTypeOptions,
+        gridCol: true,
+      },
+      {
+        name: "category",
+        label: "Category",
+        type: "text",
+        section: "classification",
+        required: true,
+        gridCol: true,
+      },
+      {
+        name: "suiteId",
+        label: "Suite",
+        type: "select",
+        section: "classification",
+        options: suiteSelectOptions,
+        gridCol: true,
+        helpText: suitesLoading ? "Fetching suites..." : undefined,
+      },
+      {
+        name: "visibilityMode",
+        label: "Visibility Mode",
+        type: "select",
+        section: "classification",
+        options: visibilityModeOptions,
+        gridCol: true,
+      },
+      {
+        name: "timeEstimate",
+        label: "Time Estimate (min)",
+        type: "number",
+        section: "classification",
+        gridCol: true,
       },
       {
         name: "priority",
         label: "Priority",
         type: "number",
-        helpText: "higher numbers shown first",
-        required: false,
-        inGrid: true,
+        section: "classification",
+        helpText: "Higher numbers shown first",
+        gridCol: true,
+      },
+      {
+        name: "donationAmount",
+        label: "Donation Amount (cents)",
+        type: "number",
+        section: "classification",
+        show: (f) => f.type === "Funding",
+        helpText: "Suggested amount per person",
+        gridCol: true,
+      },
+      {
+        name: "commitmentThreshold",
+        label: "Commitment Threshold",
+        type: "number",
+        section: "classification",
+        helpText: "Commitments needed to proceed",
+        show: (f) => !f.commitmentless,
+        gridCol: true,
+      },
+
+      // === BEHAVIOR FLAGS SECTION ===
+      // Add new boolean flags here - they'll automatically render in a clean grid
+      {
+        name: "commitmentless",
+        label: "Commitmentless",
+        type: "checkbox",
+        section: "behavior",
+        helpText: "Show to all members, not just committed (e.g. onboarding)",
+      },
+      {
+        name: "everyoneShouldComplete",
+        label: "Everyone Should Complete",
+        type: "checkbox",
+        section: "behavior",
+        helpText: "Override contract signing requirements",
+      },
+      {
+        name: "shouldCompleteAfterDeadline",
+        label: "Complete After Deadline",
+        type: "checkbox",
+        section: "behavior",
+        helpText: "Show in task list even after deadline passes",
       },
       {
         name: "preventCompletion",
         label: "Prevent Completion",
         type: "checkbox",
-        inGrid: true,
-      },
-      { name: "body", label: "Body", type: "markdowntextarea", required: true },
-      { name: "image", label: "Image", type: "file" },
-      {
-        name: "squareThumbnailImage",
-        label: "Square Thumbnail Image (url)",
-        type: "text",
+        section: "behavior",
+        helpText: "Users cannot mark this action as complete",
       },
       {
-        name: "squareThumbnailImageAlt",
-        label: "Square Thumbnail Image Alt/Title",
-        type: "text",
+        name: "publicOnly",
+        label: "Public Only",
+        type: "checkbox",
+        section: "behavior",
+        helpText: "Only visible on public pages",
       },
     ],
     [
@@ -274,13 +320,18 @@ const ActionForm: React.FC<ActionFormProps> = ({
     ]
   );
 
+  const getFieldsBySection = (section: FieldSection) =>
+    fieldDefs
+      .filter((f) => f.section === section)
+      .filter((f) => (f.show ? f.show(form) : true));
+
   const renderField = (f: FieldDef) => {
     if (f.type === "file") {
       return (
         <div key={String(f.name)}>
           <label
             htmlFor={String(f.name)}
-            className="block font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             {f.label}
           </label>
@@ -291,31 +342,23 @@ const ActionForm: React.FC<ActionFormProps> = ({
             accept="image/*"
             onChange={onImageChange}
             ref={fileInputRef}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
           />
-
           {imagePreview && (
-            <div className="mt-2">
-              <p className="text-sm font-medium text-gray-700 mb-1">
-                Image Preview
-              </p>
+            <div className="mt-3">
               <img
                 src={imagePreview}
                 alt="Preview"
-                className="w-full max-w-md h-auto rounded-md border border-gray-300 bg-white"
+                className="w-full max-w-sm h-auto rounded-md border border-gray-300"
               />
             </div>
           )}
-
           {!imagePreview && !isNew && form.image && baseUrl && (
-            <div className="mt-2">
-              <p className="text-sm font-medium text-gray-700 mb-1">
-                Current Image:
-              </p>
+            <div className="mt-3">
               <img
                 src={`${baseUrl}/images/${form.image}`}
                 alt="Current"
-                className="w-full max-w-md h-auto rounded-md border border-gray-300"
+                className="w-full max-w-sm h-auto rounded-md border border-gray-300"
               />
             </div>
           )}
@@ -328,7 +371,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         <div key={String(f.name)}>
           <label
             htmlFor={String(f.name)}
-            className="block font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             {f.label}
           </label>
@@ -338,11 +381,8 @@ const ActionForm: React.FC<ActionFormProps> = ({
             value={(form as any)[f.name] ?? ""}
             onChange={onInputChange}
             rows={f.rows || 6}
-            className="!text-base bg-white"
+            className="!text-sm bg-white"
           />
-          {f.helpText && (
-            <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>
-          )}
         </div>
       );
     }
@@ -352,7 +392,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         <div key={String(f.name)}>
           <label
             htmlFor={String(f.name)}
-            className="block font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             {f.label}
           </label>
@@ -362,11 +402,8 @@ const ActionForm: React.FC<ActionFormProps> = ({
             value={(form as any)[f.name] ?? ""}
             onChange={onInputChange}
             rows={f.rows || 3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
           />
-          {f.helpText && (
-            <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>
-          )}
         </div>
       );
     }
@@ -376,7 +413,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         <div key={String(f.name)}>
           <label
             htmlFor={String(f.name)}
-            className="block font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             {f.label}
           </label>
@@ -386,7 +423,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
             value={(form as any)[f.name] ?? ""}
             onChange={onInputChange}
             required={f.required}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
           >
             {f.options?.map((opt) => (
               <option key={String(opt.value)} value={String(opt.value)}>
@@ -403,36 +440,38 @@ const ActionForm: React.FC<ActionFormProps> = ({
 
     if (f.type === "checkbox") {
       return (
-        <Card key={String(f.name)}>
-          <div className="flex items-center flex-row gap-x-3">
-            <label
-              htmlFor={String(f.name)}
-              className="block font-medium text-gray-700"
-            >
-              {f.label}
-            </label>
-            <input
-              type="checkbox"
-              id={String(f.name)}
-              name={String(f.name)}
-              checked={Boolean(form[f.name])}
-              onChange={onInputChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-          </div>
-          {f.helpText && (
-            <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>
-          )}
-        </Card>
+        <label
+          key={String(f.name)}
+          className={`flex items-start gap-3 p-3 rounded-md border cursor-pointer transition-colors ${
+            Boolean(form[f.name])
+              ? "border-blue-400 bg-blue-50"
+              : "border-gray-200 hover:border-gray-300 bg-white"
+          }`}
+        >
+          <input
+            type="checkbox"
+            id={String(f.name)}
+            name={String(f.name)}
+            checked={Boolean(form[f.name])}
+            onChange={onInputChange}
+            className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+          <span className="flex flex-col min-w-0">
+            <span className="text-sm font-medium text-gray-900">{f.label}</span>
+            {f.helpText && (
+              <span className="text-xs text-gray-500 mt-0.5">{f.helpText}</span>
+            )}
+          </span>
+        </label>
       );
     }
 
-    // default to input
+    // text/number inputs
     return (
       <div key={String(f.name)}>
         <label
           htmlFor={String(f.name)}
-          className="block font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-gray-700 mb-1"
         >
           {f.label}
         </label>
@@ -445,8 +484,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
           required={f.required}
           min={f.name === "commitmentThreshold" ? 1 : undefined}
           step={f.name === "donationAmount" ? 0.01 : undefined}
-          placeholder={f.helpText}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
         />
         {f.helpText && (
           <p className="text-xs text-gray-500 mt-1">{f.helpText}</p>
@@ -455,142 +493,177 @@ const ActionForm: React.FC<ActionFormProps> = ({
     );
   };
 
+  const renderFieldsWithGrid = (fields: FieldDef[]) => {
+    const gridFields = fields.filter((f) => f.gridCol);
+    const nonGridFields = fields.filter((f) => !f.gridCol);
+
+    return (
+      <>
+        {nonGridFields.map(renderField)}
+        {gridFields.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {gridFields.map(renderField)}
+          </div>
+        )}
+      </>
+    );
+  };
+
+  const contentFields = getFieldsBySection("content");
+  const mediaFields = getFieldsBySection("media");
+  const classificationFields = getFieldsBySection("classification");
+  const behaviorFields = getFieldsBySection("behavior");
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      {fieldDefs
-        .filter((f) => f.aboveGrid)
-        .filter((f) => (f.show ? f.show(form) : true))
-        .map((f) => {
-          return renderField(f);
-        })}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-        {fieldDefs
-          .filter((f) => f.inGrid)
-          .filter((f) => (f.show ? f.show(form) : true))
-          .map((f) => {
-            return renderField(f);
-          })}
-      </div>
-      {fieldDefs
-        .filter((f) => !f.inGrid && !f.aboveGrid)
-        .filter((f) => (f.show ? f.show(form) : true))
-        .map((f) => {
-          return renderField(f);
-        })}
+    <form onSubmit={onSubmit} className="space-y-6">
+      {/* CONTENT SECTION */}
+      <FormSection title="Content" description="The main content users will see">
+        <div className="space-y-4">{contentFields.map(renderField)}</div>
+      </FormSection>
 
-      <div className="border border-gray-200 rounded-md p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-sm font-medium text-gray-700">
-              Participating tags
-            </p>
-            <p className="text-xs text-gray-500">
-              Determines which users can participate in the action. Actions
-              without tags will not be shown to any users.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleClearTags}
-            disabled={!selectedTagIds.length}
-            className="text-xs text-blue-600 hover:text-blue-800 disabled:text-gray-300"
-          >
-            Clear
-          </button>
+      {/* MEDIA SECTION */}
+      <FormSection title="Media" description="Images and thumbnails">
+        <div className="space-y-4">{renderFieldsWithGrid(mediaFields)}</div>
+      </FormSection>
+
+      {/* CLASSIFICATION SECTION */}
+      <FormSection
+        title="Classification"
+        description="Type, category, and organizational settings"
+      >
+        <div className="space-y-4">
+          {renderFieldsWithGrid(classificationFields)}
         </div>
-        {tagsLoading ? (
-          <p className="text-sm text-gray-500">Loading tags…</p>
-        ) : availableTags.length ? (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {availableTags.map((tag) => {
-              const checked = selectedTagIds.includes(tag.id);
-              return (
-                <label
-                  key={tag.id}
-                  className={`flex items-start gap-2 rounded-md border px-3 py-2 text-sm transition-colors ${
-                    checked
-                      ? "border-blue-400 bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    checked={checked}
-                    onChange={() => handleToggleTag(tag.id)}
-                  />
-                  <span className="flex flex-col">
-                    <span className="font-medium text-gray-800">
-                      {tag.name}
-                    </span>
-                    {tag.publicDisplayName && (
-                      <span className="text-xs text-gray-500">
-                        {tag.publicDisplayName}
+      </FormSection>
+
+      {/* BEHAVIOR FLAGS SECTION */}
+      <FormSection
+        title="Behavior Flags"
+        description="Toggle settings that control how this action behaves"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {behaviorFields.map(renderField)}
+        </div>
+      </FormSection>
+
+      {/* TARGETING SECTION */}
+      <FormSection
+        title="Targeting"
+        description="Control who can see and participate in this action"
+      >
+        <div className="space-y-6">
+          {/* Tags */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium text-gray-700">
+                Participating Tags
+              </label>
+              <button
+                type="button"
+                onClick={handleClearTags}
+                disabled={!selectedTagIds.length}
+                className="text-xs text-blue-600 hover:text-blue-800 disabled:text-gray-300"
+              >
+                Clear
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mb-3">
+              Actions without tags will not be shown to any users.
+            </p>
+            {tagsLoading ? (
+              <p className="text-sm text-gray-500">Loading tags...</p>
+            ) : availableTags.length ? (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {availableTags.map((tag) => {
+                  const checked = selectedTagIds.includes(tag.id);
+                  return (
+                    <label
+                      key={tag.id}
+                      className={`flex items-start gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${
+                        checked
+                          ? "border-blue-400 bg-blue-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        checked={checked}
+                        onChange={() => handleToggleTag(tag.id)}
+                      />
+                      <span className="flex flex-col min-w-0">
+                        <span className="font-medium text-gray-800">
+                          {tag.name}
+                        </span>
+                        {tag.publicDisplayName && (
+                          <span className="text-xs text-gray-500">
+                            {tag.publicDisplayName}
+                          </span>
+                        )}
                       </span>
-                    )}
-                    <span className="text-xs text-gray-500">
-                      {tag.description}
-                    </span>
-                  </span>
-                </label>
-              );
-            })}
+                    </label>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">
+                No tags available. Create one in the tags dashboard.
+              </p>
+            )}
           </div>
-        ) : (
-          <p className="text-sm text-gray-500">
-            No tags available yet. Create one in the tags dashboard.
-          </p>
-        )}
-      </div>
-      <div className="border border-gray-200 rounded-md p-4">
-        <UserSelect
-          users={availableUsers}
-          selectedUserIds={authorIds}
-          onChange={onAuthorsChange}
-          loading={usersLoading}
-          label="Action authors"
-        />
-      </div>
 
-      <div className="border border-gray-200 rounded-md p-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-3">
+          {/* Authors */}
           <div>
-            <p className="text-sm font-medium text-black">
-              Manual user cohort ({manualCohortUserIds.length})
-            </p>
-          </div>
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-            <input
-              type="checkbox"
-              name="useManualCohort"
-              checked={Boolean(form.useManualCohort)}
-              onChange={onInputChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            <UserSelect
+              users={availableUsers}
+              selectedUserIds={authorIds}
+              onChange={onAuthorsChange}
+              loading={usersLoading}
+              label="Action Authors"
             />
-            Use manual cohort
-          </label>
-        </div>
-        {form.useManualCohort ? (
-          <UserSelect
-            users={availableUsers}
-            selectedUserIds={manualCohortUserIds}
-            onChange={onManualCohortChange}
-            loading={usersLoading}
-            label="Select users"
-          />
-        ) : (
-          <p className="text-sm text-gray-500">
-            Enable manual cohorts to search for users and add them directly.
-          </p>
-        )}
-      </div>
+          </div>
 
-      <div className="flex justify-end space-x-3 pt-4">
+          {/* Manual Cohort */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium text-gray-700">
+                Manual User Cohort ({manualCohortUserIds.length})
+              </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="useManualCohort"
+                  checked={Boolean(form.useManualCohort)}
+                  onChange={onInputChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <span className="text-gray-700">Enable</span>
+              </label>
+            </div>
+            {form.useManualCohort ? (
+              <UserSelect
+                users={availableUsers}
+                selectedUserIds={manualCohortUserIds}
+                onChange={onManualCohortChange}
+                loading={usersLoading}
+                label="Select users"
+              />
+            ) : (
+              <p className="text-xs text-gray-500">
+                Enable to manually select specific users for this action.
+              </p>
+            )}
+          </div>
+        </div>
+      </FormSection>
+
+      {/* ACTION BUTTONS */}
+      <div className="flex justify-end gap-3 pt-2">
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm font-medium"
             disabled={saving}
           >
             Cancel
@@ -600,24 +673,24 @@ const ActionForm: React.FC<ActionFormProps> = ({
           <button
             type="button"
             onClick={onDelete}
-            className="px-4 py-2 bg-red-200 text-red-700 border border-red-400 rounded-md hover:bg-red-300/70 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            className="px-4 py-2 bg-red-100 text-red-700 border border-red-300 rounded-md hover:bg-red-200 text-sm font-medium"
             disabled={saving}
           >
-            Delete Action
+            Delete
           </button>
         )}
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-200 text-blue-700 border border-blue-400 rounded-md hover:bg-blue-300/70 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm font-medium"
           disabled={saving}
         >
           {saving
             ? isNew
               ? "Creating..."
-              : "Updating..."
+              : "Saving..."
             : isNew
-            ? "Create Action"
-            : "Update Action"}
+              ? "Create Action"
+              : "Save Changes"}
         </button>
       </div>
     </form>

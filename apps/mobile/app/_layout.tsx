@@ -53,7 +53,7 @@ async function registerForPushNotificationsAsync() {
     });
   }
 
-  if (Device.isDevice) {
+  if (Device.isDevice && Platform.OS !== "web") {
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -160,6 +160,9 @@ export default function RootLayout() {
   const responseSub = useRef<Notifications.EventSubscription | null>(null);
 
   useEffect(() => {
+    if (Platform.OS === "web") {
+      return;
+    }
     Notifications.getLastNotificationResponseAsync().then((response) => {
       const data = response?.notification.request.content.data as
         | PushData
