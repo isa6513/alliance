@@ -178,7 +178,6 @@ export class ActionsController {
     @Request() req: JwtRequest,
     @Query('sorted', new ParseBoolPipe({ optional: true })) sorted?: boolean,
   ): Promise<ActionDto[]> {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
     return this.actionsService.findPublic(req.user.sub, sorted);
   }
 
