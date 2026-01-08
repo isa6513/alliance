@@ -1,5 +1,5 @@
 import { View, ScrollView, ActivityIndicator } from "react-native";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   actionsFindAllLoggedIn,
   userGetAwayRanges,
@@ -64,6 +64,17 @@ export default function HomeScreen() {
     limit: 8,
   });
 
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  const scrollPageTo = useCallback((y: number) => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({
+        y: y,
+        animated: true,
+      });
+    }
+  }, []);
+
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
@@ -86,7 +97,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView ref={scrollViewRef} className="flex-1 bg-white">
       <Text className="text-green text-lg font-semibold p-6 mt-2 pb-0">
         Current task
       </Text>
@@ -96,11 +107,12 @@ export default function HomeScreen() {
         ) : (
           <LargeActionCard
             action={currentTask}
-            userRelation={currentTask.userRelation ?? 'none'}
+            userRelation={currentTask.userRelation ?? "none"}
             friendActivities={friendActivities.filter(
               (activity) => activity.actionId === currentTask.id
             )}
             onUpdateActionState={fetchActions}
+            scrollPageTo={scrollPageTo}
           />
         )}
       </View>

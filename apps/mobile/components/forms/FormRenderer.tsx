@@ -2,22 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import type { ScrollView as ScrollViewType } from "react-native";
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
-import {
-  useKeyboardHandler,
-  useKeyboardAnimation,
-} from "react-native-keyboard-controller";
+import { runOnJS, useSharedValue } from "react-native-reanimated";
+import { useKeyboardHandler } from "react-native-keyboard-controller";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import type { UserDto } from "@alliance/shared/client";
 import {
@@ -65,6 +56,7 @@ type FormRendererProps = {
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
   onSubmit: ((data: SubmitFormDto) => Promise<void>) | null;
+  scrollPageTo: (y: number) => void;
 };
 
 const DEVICE_TYPE: DeviceVisibilityTarget = "mobile";
@@ -159,6 +151,7 @@ const FormRenderer = ({
   initialPageIndex,
   phDistinctId,
   sessionReplayUrl,
+  scrollPageTo,
 }: FormRendererProps) => {
   const schema = form as unknown as FormSchema;
   const readOnly = !!renderFormAsCompleted || !onSubmit;
@@ -244,59 +237,19 @@ const FormRenderer = ({
   const [customReason, setCustomReason] = useState("");
   const [hasEmittedStart, setHasEmittedStart] = useState(false);
 
-  const scrollViewRef = useRef<ScrollViewType>(null);
   const fieldPositions = useRef<Record<string, number>>({});
-  const activeFieldIdRef = useRef<string | null>(null);
-  const keyboardHeight = useSharedValue(0);
+  const fieldScreenPositions = useRef<Record<string, number>>({});
 
-  // 1. we need to use hook to get an access to animated values
-  const { height, progress } = useKeyboardAnimation();
-
-  console.log("keyboard height", height);
-
-  const scrollToField = useCallback((fieldId: string) => {
-    const yPosition = fieldPositions.current[fieldId];
-    if (yPosition !== undefined && scrollViewRef.current) {
-      console.log("field y position", yPosition);
-      scrollViewRef.current.scrollTo({
-        y: Math.max(0, yPosition - 20),
-        animated: true,
-      });
-    }
-  }, []);
-
-  const scrollToFocusedField = useCallback(() => {
-    console.log("scroll to focused field");
-    const fieldId = activeFieldIdRef.current;
-    if (fieldId) {
-      console.log("scroll to field", fieldId);
-      scrollToField(fieldId);
-    }
-  }, [scrollToField]);
-
-  useKeyboardHandler(
-    {
-      onMove: (event) => {
-        "worklet";
-        keyboardHeight.value = Math.max(0, event.height);
-      },
-      onEnd: (event) => {
-        "worklet";
-        keyboardHeight.value = Math.max(0, event.height);
-        if (event.height > 0) {
-          runOnJS(scrollToFocusedField)();
-        }
-      },
+  const scrollToField = useCallback(
+    (fieldId: string) => {
+      const yPosition = fieldPositions.current[fieldId];
+      const screenPosition = fieldScreenPositions.current[fieldId];
+      if (yPosition !== undefined && screenPosition > 400) {
+        scrollPageTo(Math.max(0, yPosition));
+      }
     },
-    [scrollToFocusedField]
+    [scrollPageTo]
   );
-
-  const keyboardSpacerStyle = useAnimatedStyle(() => {
-    if (keyboardHeight.value <= 0) {
-      return { height: 0 };
-    }
-    return { height: keyboardHeight.value + 24 };
-  });
 
   useEffect(() => {
     if (!user || Object.keys(publicAnswers).length > 0) {
@@ -655,65 +608,49 @@ const FormRenderer = ({
   const isFirstPage = currentPageIndex === 0;
   const isLastPage = currentPageIndex === maxPageIndex;
 
-  const scale = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 2],
-  });
-
   return (
-    <View className="flex-1">
-      <Animated.View
-        style={{
-          width: 50,
-          height: 50,
-          backgroundColor: "#17fc03",
-          borderRadius: 15,
-        }}
-      />
-      <ScrollView
-        ref={scrollViewRef}
-        className="flex-1"
-        keyboardShouldPersistTaps="handled"
-        contentContainerClassName="flex flex-col gap-y-2"
-      >
-        {currentPage?.fields.map((element, idx) => {
-          if (!("label" in element)) {
-            return (
-              <View key={`block-${idx}`}>
-                <RenderDisplayBlockMobile block={element as DisplayBlock} />
-              </View>
-            );
-          }
-          const field = element as AnyField;
-          if (!isElementCurrentlyVisible(field)) {
-            return null;
-          }
+    <View className="flex-1 flex flex-col gap-y-2">
+      {currentPage?.fields.map((element, idx) => {
+        if (!("label" in element)) {
           return (
-            <View
-              key={field.id}
-              onLayout={(event) => {
-                fieldPositions.current[field.id] = event.nativeEvent.layout.y;
-              }}
-            >
-              <RenderField
-                field={field}
-                value={formData[field.id]}
-                onChange={(value) => handleFieldChange(field.id, value)}
-                onFocus={() => {
-                  activeFieldIdRef.current = field.id;
-                  setTimeout(() => scrollToField(field.id), 80);
-                }}
-                disabled={readOnly}
-                error={fieldErrors[field.id]}
-                randomizationKey={randomizationKey}
-                disableOptionRandomization={disableOptionRandomization}
-              />
+            <View key={`block-${idx}`}>
+              <RenderDisplayBlockMobile block={element as DisplayBlock} />
             </View>
           );
-        })}
-        <Animated.View style={keyboardSpacerStyle} />
-      </ScrollView>
-
+        }
+        const field = element as AnyField;
+        if (!isElementCurrentlyVisible(field)) {
+          return null;
+        }
+        return (
+          <View
+            key={field.id}
+            onLayout={(event) => {
+              fieldPositions.current[field.id] = event.nativeEvent.layout.y;
+            }}
+            ref={(ref) => {
+              if (ref) {
+                ref.measure((x, y, width, height, pageX, pageY) => {
+                  fieldScreenPositions.current[field.id] = pageY;
+                });
+              }
+            }}
+          >
+            <RenderField
+              field={field}
+              value={formData[field.id]}
+              onChange={(value) => handleFieldChange(field.id, value)}
+              onFocus={() => {
+                setTimeout(() => scrollToField(field.id), 80);
+              }}
+              disabled={readOnly}
+              error={fieldErrors[field.id]}
+              randomizationKey={randomizationKey}
+              disableOptionRandomization={disableOptionRandomization}
+            />
+          </View>
+        );
+      })}
       {!readOnly && (
         <View className="">
           <View className="flex-row justify-between items-center mb-3">

@@ -9,7 +9,7 @@ import {
   UserActionRelation,
 } from "../client";
 
-export interface ActionTaskPanelProps {
+export interface ActionTaskPanelPropsShared {
   action: ActionDto;
   userRelation: UserActionRelation;
   missedDeadline?: boolean;
@@ -28,7 +28,7 @@ export const useTaskFormHandlers = ({
   onDeclineAction,
   onOptOutAction,
 }: Pick<
-  ActionTaskPanelProps,
+  ActionTaskPanelPropsShared,
   | "action"
   | "onCompleteAction"
   | "onJoinAction"

@@ -11,12 +11,17 @@ import { router } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
 import ActionTaskPanel from "./ActionTaskPanel";
 
+export interface LargeActionCardProps extends LargeActionCardPropsShared {
+  scrollPageTo: (y: number) => void;
+}
+
 export default function LargeActionCard({
   action,
   userRelation,
   friendActivities,
   onUpdateActionState,
-}: LargeActionCardPropsShared) {
+  scrollPageTo,
+}: LargeActionCardProps) {
   const { nextEvent, lastEvent } = getLastAndNextEvent(action);
   return (
     <Card>
@@ -46,7 +51,7 @@ export default function LargeActionCard({
         action={action}
         friendActivities={friendActivities}
       />
-      <View className="mt-6 border-t border-zinc-200 pt-6">
+      <View className="mt-6 border-t border-zinc-200 pt-6 pb-[300px]">
         <ActionTaskPanel
           action={action}
           userRelation={userRelation}
@@ -54,6 +59,7 @@ export default function LargeActionCard({
           onJoinAction={onUpdateActionState}
           onDeclineAction={onUpdateActionState}
           onOptOutAction={onUpdateActionState}
+          scrollPageTo={scrollPageTo}
         />
       </View>
     </Card>

@@ -3,7 +3,7 @@ import Card from "@alliance/sharedweb/ui/Card";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
 import ActionTaskPanel from "./ActionTaskPanel";
-import { ActionTaskPanelProps } from "@alliance/shared/lib/actionTaskPanel";
+import { ActionTaskPanelPropsShared } from "@alliance/shared/lib/actionTaskPanel";
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import ActionTaskPanelDeclined from "./ActionTaskPanelDeclined";
 import { useAuth } from "../lib/AuthContext";
@@ -36,7 +36,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 }
 
 export interface TaskPanelContext
-  extends Omit<ActionTaskPanelProps, "userRelation"> {
+  extends Omit<ActionTaskPanelPropsShared, "userRelation"> {
   userRelation: UserActionRelation | null;
   activities: ActionActivityDto[];
   handleLikeActivity: (activityId: number) => Promise<unknown>;

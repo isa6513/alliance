@@ -25,6 +25,7 @@ interface ActionTaskPanelFormProps {
   ) => void;
   actionId: number;
   publicAction?: boolean;
+  scrollPageTo: (y: number) => void;
 }
 
 const ActionTaskPanelForm = ({
@@ -34,6 +35,7 @@ const ActionTaskPanelForm = ({
   onAbandonAction,
   actionId,
   publicAction = false,
+  scrollPageTo,
 }: ActionTaskPanelFormProps) => {
   const [form, setForm] = useState<FormDto | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -114,6 +116,7 @@ const ActionTaskPanelForm = ({
         onFormStarted={onFormStarted}
         onAbandonAction={onAbandonAction}
         actionId={actionId}
+        scrollPageTo={scrollPageTo}
       />
       {error && <Text className="text-red-500">{error}</Text>}
       <SuccessOverlay

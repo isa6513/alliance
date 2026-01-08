@@ -8,13 +8,13 @@ import ActionTaskPanelForm from "./ActionTaskPanelForm";
 import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
 import { StripeWrapper } from "./StripeWrapper";
 import {
-  ActionTaskPanelProps,
+  ActionTaskPanelPropsShared,
   useTaskFormHandlers,
 } from "@alliance/shared/lib/actionTaskPanel";
 import posthog from "posthog-js";
 import { canCompleteAction } from "@alliance/shared/lib/actionUtils";
 
-const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
+const ActionTaskPanel: React.FC<ActionTaskPanelPropsShared> = ({
   action,
   userRelation,
   missedDeadline = false,
@@ -24,7 +24,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   onOptOutAction,
   card = false,
   disabled = false,
-}: ActionTaskPanelProps) => {
+}: ActionTaskPanelPropsShared) => {
   const { isAuthenticated } = useAuth();
 
   const handleCompleteAction = useCallback(() => {

@@ -1,10 +1,14 @@
 import {
-  ActionTaskPanelProps,
+  ActionTaskPanelPropsShared,
   useTaskFormHandlers,
 } from "@alliance/shared/lib/actionTaskPanel";
 import ActionTaskPanelForm from "./ActionTaskPanelForm";
 import { useCallback } from "react";
 import { usePostHog } from "posthog-react-native";
+
+export interface ActionTaskPanelProps extends ActionTaskPanelPropsShared {
+  scrollPageTo: (y: number) => void;
+}
 
 const ActionTaskPanel = ({
   action,
@@ -12,6 +16,7 @@ const ActionTaskPanel = ({
   onJoinAction,
   onDeclineAction,
   onOptOutAction,
+  scrollPageTo,
 }: ActionTaskPanelProps) => {
   const {
     handleCompleteWithTracking,
@@ -42,6 +47,7 @@ const ActionTaskPanel = ({
     return (
       <ActionTaskPanelForm
         taskFormId={action.taskFormId}
+        scrollPageTo={scrollPageTo}
         onCompleteAction={handleCompleteWithTracking}
         onFormStarted={handleFormStarted}
         onAbandonAction={handleAbandonAction}
