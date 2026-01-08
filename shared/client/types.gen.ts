@@ -223,6 +223,8 @@ export type ActionEvent = {
     suiteManaged: boolean;
 };
 
+export type VisibilityMode = 'public' | 'all_members' | 'participating_groups';
+
 /**
  * Type of action activity
  */
@@ -454,10 +456,7 @@ export type Action = {
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number>;
-    /**
-     * Whether to show the action to members who are not of participating groups
-     */
-    showToNonparticipating?: boolean;
+    visibilityMode: VisibilityMode;
     usersJoined: number;
     /**
      * Number of users who have completed the action
@@ -1108,10 +1107,7 @@ export type ActionDto = {
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number>;
-    /**
-     * Whether to show the action to members who are not of participating groups
-     */
-    showToNonparticipating?: boolean;
+    visibilityMode: VisibilityMode;
     usersJoined: number;
     /**
      * Number of users who have completed the action
@@ -1236,10 +1232,7 @@ export type CreateActionDto = {
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number>;
-    /**
-     * Whether to show the action to members who are not of participating groups
-     */
-    showToNonparticipating?: boolean;
+    visibilityMode: VisibilityMode;
     /**
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
@@ -1330,10 +1323,7 @@ export type UpdateActionDto = {
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number>;
-    /**
-     * Whether to show the action to members who are not of participating groups
-     */
-    showToNonparticipating?: boolean;
+    visibilityMode?: VisibilityMode;
     /**
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
@@ -1606,10 +1596,7 @@ export type ExportActionDto = {
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number>;
-    /**
-     * Whether to show the action to members who are not of participating groups
-     */
-    showToNonparticipating?: boolean;
+    visibilityMode: VisibilityMode;
     activities: Array<Array<ActionActivity>>;
     /**
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)

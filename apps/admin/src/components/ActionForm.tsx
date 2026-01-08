@@ -4,6 +4,7 @@ import {
   CreateActionDto,
   FormDto,
   TagDto,
+  VisibilityMode,
 } from "@alliance/shared/client";
 import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import React, { useMemo, useRef } from "react";
@@ -116,6 +117,15 @@ const ActionForm: React.FC<ActionFormProps> = ({
     []
   );
 
+  const visibilityModeOptions = useMemo(
+    (): { value: VisibilityMode; label: string }[] => [
+      { value: "all_members", label: "All Members" },
+      { value: "participating_groups", label: "Participating Groups" },
+      { value: "public", label: "Public" },
+    ],
+    []
+  );
+
   const suiteSelectOptions = useMemo(
     () => [
       {
@@ -162,6 +172,13 @@ const ActionForm: React.FC<ActionFormProps> = ({
         type: "select",
         required: true,
         options: actionTypeOptions,
+        inGrid: true,
+      },
+      {
+        name: "visibilityMode",
+        label: "Visibility Mode",
+        type: "select",
+        options: visibilityModeOptions,
         inGrid: true,
       },
       {
@@ -249,7 +266,12 @@ const ActionForm: React.FC<ActionFormProps> = ({
         type: "text",
       },
     ],
-    [actionTypeOptions, suiteSelectOptions, suitesLoading]
+    [
+      actionTypeOptions,
+      suiteSelectOptions,
+      suitesLoading,
+      visibilityModeOptions,
+    ]
   );
 
   const renderField = (f: FieldDef) => {

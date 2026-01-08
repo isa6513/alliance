@@ -78,7 +78,11 @@ import {
   ActionUpdate,
   ActionUpdateNotifyType,
 } from './entities/action-update.entity';
-import { Action, ActionTaskType } from './entities/action.entity';
+import {
+  Action,
+  ActionTaskType,
+  VisibilityMode,
+} from './entities/action.entity';
 import {
   ReminderGroup,
   ReminderGroupTimingMode,
@@ -443,12 +447,16 @@ export class ActionsService {
     }
     if (
       !action.participatingTags?.length ||
-      action.showToNonparticipating === true
+      action.visibilityMode === VisibilityMode.Public
     ) {
       return true;
     }
+
     if (!user) {
       return false;
+    }
+    if (action.visibilityMode === VisibilityMode.AllMembers) {
+      return true;
     }
 
     if (!action.participatingTags?.length) {
