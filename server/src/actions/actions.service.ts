@@ -2023,13 +2023,16 @@ export class ActionsService {
       ),
     );
 
+    const userIdsSet = new Set(userIds);
     const joinedUsersPromise: Promise<Record<number, number[]>> =
       actionsPromise.then(async (actions) => {
         const joinedUsersPromises = actions.map(
           async (action) =>
             [
               action.id,
-              await this.computeUsersJoinedForAction(action.id),
+              (await this.computeUsersJoinedForAction(action.id)).filter(
+                (uid) => userIdsSet.has(uid),
+              ),
             ] satisfies [number, number[]],
         );
 
