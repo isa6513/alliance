@@ -56,7 +56,7 @@ type FormRendererProps = {
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
   onSubmit: ((data: SubmitFormDto) => Promise<void>) | null;
-  scrollPageTo: (y: number) => void;
+  scrollPageTo?: (y: number) => void;
 };
 
 const DEVICE_TYPE: DeviceVisibilityTarget = "mobile";
@@ -245,7 +245,7 @@ const FormRenderer = ({
       const yPosition = fieldPositions.current[fieldId];
       const screenPosition = fieldScreenPositions.current[fieldId];
       if (yPosition !== undefined && screenPosition > 400) {
-        scrollPageTo(Math.max(0, yPosition));
+        scrollPageTo?.(Math.max(0, yPosition));
       }
     },
     [scrollPageTo]

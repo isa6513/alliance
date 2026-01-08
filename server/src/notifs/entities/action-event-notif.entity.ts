@@ -65,7 +65,7 @@ export class ActionEventNotif {
   @ApiProperty({ type: Push, nullable: true })
   @OneToOne(() => Push, { nullable: true })
   @JoinColumn({ name: 'pushId' })
-  push: Push | null;
+  push: Ty<Push> | null;
 
   @ManyToOne(
     () => ReminderGroup,
