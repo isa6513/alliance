@@ -27,6 +27,7 @@ import { Action } from './entities/action.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ForumModule } from 'src/forum/forum.module';
 import { ReloadUsersJoinedWorker } from './reload-users-joined.worker';
+import { PushModule } from 'src/push/push.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ReloadUsersJoinedWorker } from './reload-users-joined.worker';
     NotifsModule,
     MailModule,
     MmsModule,
+    PushModule,
     ForumModule,
   ],
   controllers: [ActionsController],

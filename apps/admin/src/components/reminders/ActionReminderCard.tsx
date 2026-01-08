@@ -185,7 +185,7 @@ const ActionReminderCard = ({
         </div>
       </div>
       <div className={`${minified ? "hidden" : ""}`}>
-        <div className={`flex flex-row gap-2 p-4`}>
+        <div className={`flex flex-col gap-2 p-4`}>
           {editing && selectedEventId !== null ? (
             <ActionReminderGroupForm
               memberEvents={memberEvents}
@@ -208,7 +208,8 @@ const ActionReminderCard = ({
             />
           ) : (
             <>
-              <div className="flex flex-col gap-1 w-1/2">
+              <p className="text-sm font-semibold">Email message:</p>
+              <Card className="flex flex-col gap-1 !p-2">
                 <p className="text-sm font-semibold text-gray-900">
                   {group.emailSubject}
                 </p>
@@ -217,12 +218,17 @@ const ActionReminderCard = ({
                   editable={false}
                   onChange={() => {}}
                   keywords={[]}
+                  textareaClassName="!border-0 border-transparent"
                 />
-              </div>
-              <div className="flex flex-col gap-1 w-1/2">
-                <p className="text-xs font-semibold">Text message:</p>
+              </Card>
+              <p className="text-sm font-semibold">Text message:</p>
+              <Card className="flex flex-col gap-1 !p-2">
                 <p>{group.textMessage}</p>
-              </div>
+              </Card>
+              <p className="text-sm font-semibold">Push message:</p>
+              <Card className="flex flex-col gap-1 !p-2">
+                <p>{group.pushMessage}</p>
+              </Card>
             </>
           )}
         </div>

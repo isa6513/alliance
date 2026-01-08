@@ -25,7 +25,7 @@ interface ActionTaskPanelFormProps {
   ) => void;
   actionId: number;
   publicAction?: boolean;
-  scrollPageTo: (y: number) => void;
+  scrollPageTo?: (y: number) => void;
 }
 
 const ActionTaskPanelForm = ({

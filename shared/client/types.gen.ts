@@ -159,6 +159,8 @@ export type Notification = {
     onetimeInvite?: OnetimeInvite;
     shouldPush: boolean;
     pushDispatchedAt?: string;
+    pushClaimedBy?: string;
+    pushClaimedAt?: string;
 };
 
 export type Tag = {
@@ -325,7 +327,7 @@ export type ActionEventNotif = {
     channel: NotificationChannel;
     mail: Mail | null;
     mms: Mms | null;
-    push: Push | null;
+    pushes?: Array<Push>;
     reminderGroup?: ReminderGroup;
     /**
      * Indicates whether the notification has been sent
@@ -347,6 +349,7 @@ export type ReminderGroup = {
     emailMessage: string;
     emailSubject: string;
     textMessage: string;
+    pushMessage: string;
     notifications: Array<ActionEventNotif>;
     send_range_start?: string;
     send_range_end?: string;
@@ -1385,6 +1388,7 @@ export type CreateReminderGroupDto = {
     emailMessage: string;
     emailSubject: string;
     textMessage: string;
+    pushMessage: string;
     send_range_start?: string;
     send_range_end?: string;
     sendAtAbsolute?: string;
@@ -1409,7 +1413,7 @@ export type ActionEventNotifDto = {
     channel: NotificationChannel;
     mail: Mail | null;
     mms: Mms | null;
-    push: Push | null;
+    pushes?: Array<Push>;
     reminderGroup?: ReminderGroup;
     /**
      * Indicates whether the notification has been sent

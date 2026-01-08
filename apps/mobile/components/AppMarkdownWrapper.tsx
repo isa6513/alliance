@@ -267,6 +267,8 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
           </View>
         );
       },
+      paragraph: (node, children) => <>{children}</>,
+      body: (node, children) => <>{children}</>,
       fence: (node, children, parent, styles) => {
         const content = node.content || "";
         // The info string (language) for fenced code blocks can be in different properties
@@ -368,7 +370,7 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
         fontWeight: "600" as const,
       },
       link: {
-        color: "#2563eb",
+        color: colors.green,
         textDecorationLine: "underline" as const,
       },
       blockquote: {
