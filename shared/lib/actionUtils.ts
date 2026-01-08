@@ -212,7 +212,7 @@ export function calculateCompletionData(params: {
   }
 
   const completedAllCurrentActions: Record<number, boolean> = {};
-  for (const userIdKey of Object.keys(anyComplete)) {
+  for (const userIdKey of Object.keys(userActionRelations)) {
     const userId = Number(userIdKey);
     if (anyComplete.has(userId)) {
       completedAllCurrentActions[userId] = true;
