@@ -62,7 +62,7 @@ export class ActionEventNotif {
   @JoinColumn({ name: 'mmsId' })
   mms: Mms | null;
 
-  @ApiProperty({ type: Push, nullable: true })
+  @ApiProperty({ type: () => Push, nullable: true })
   @OneToOne(() => Push, { nullable: true })
   @JoinColumn({ name: 'pushId' })
   push: Ty<Push> | null;

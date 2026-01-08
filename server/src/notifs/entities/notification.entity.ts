@@ -18,7 +18,7 @@ import { Comment } from 'src/forum/entities/comment.entity';
 import { Type } from 'class-transformer';
 import { Ty } from 'src/tasks/entities/type';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
-import { Push } from 'src/push/push.entity';
+import type { Push } from 'src/push/push.entity';
 
 export enum NotificationCategory {
   ActionEvent = 'action_event',
@@ -86,7 +86,7 @@ export class Notification {
   @Type(() => Date)
   sendTime: Date;
 
-  @OneToMany(() => Push, (push) => push.notification, {
+  @OneToMany('Push', 'notification', {
     nullable: true,
     onDelete: 'CASCADE',
   })
