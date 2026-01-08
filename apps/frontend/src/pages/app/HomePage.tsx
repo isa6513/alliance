@@ -245,7 +245,8 @@ const HomePage = () => {
           {posts &&
             posts.slice(0, 1).map((post) => {
               return (
-                <div
+                <Link
+                  to={href("/forum/post/:id", { id: post.id.toString() })}
                   key={post.id}
                   className="flex flex-row gap-x-2 items-center flex-1 hover:bg-zinc-50 hover:p-2 hover:-m-2 rounded"
                 >
@@ -268,7 +269,7 @@ const HomePage = () => {
                       </span>
                     </p>
                   </div>
-                </div>
+                </Link>
               );
             })}
         </div>
