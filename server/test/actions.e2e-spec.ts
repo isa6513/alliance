@@ -1219,12 +1219,14 @@ describe('Actions (e2e)', () => {
 
       const activities = await request(ctx.app.getHttpServer())
         .get(`/actions/${action.id}/activities`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
         .expect(200);
 
       expect(activities.body.length).toBeGreaterThan(0);
 
       const single = await request(ctx.app.getHttpServer())
         .get(`/actions/activities/${activityId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
         .expect(200);
 
       expect(single.body.id).toBe(activityId);
