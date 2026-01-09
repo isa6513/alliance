@@ -684,6 +684,30 @@ export class UserService {
     return contractEvent.date;
   }
 
+  private validateAwayRange(
+    startDate: Date,
+    endDate: Date,
+    reason: UserAwayRangeReason,
+    note?: string,
+  ): void {
+    const now = new Date();
+
+    if (startDate.getTime() >= endDate.getTime()) {
+      throw new BadRequestException('End date must be after start date.');
+    }
+
+    // buffer to let ranges start in the current day
+    if (startDate.getTime() + 1000 * 60 * 60 * 24 < now.getTime()) {
+      throw new BadRequestException('Start date must be in the future.');
+    }
+
+    if (reason === UserAwayRangeReason.OTHER && !note) {
+      throw new BadRequestException(
+        'Please provide a note for your away period.',
+      );
+    }
+  }
+
   async createAwayRange(
     userId: number,
     data: CreateAwayRangeDto,
@@ -693,47 +717,30 @@ export class UserService {
     const endDay = Temporal.PlainDate.from(data.endDay);
     const user = await this.findOneOrFail(userId);
     const tz = user.timeZone ?? defaultTimeZone;
-    const now = new Date();
 
-    const startDate = startDay
-      .toZonedDateTime({
-        timeZone: tz,
-        plainTime: Temporal.PlainTime.from({ hour: 0 }),
-      })
-      .toInstant();
-    const endDate = endDay
-      .toZonedDateTime({
-        timeZone: tz,
-        plainTime: Temporal.PlainTime.from({ hour: 23, minute: 59 }),
-      })
-      .toInstant();
+    const startDate = new Date(
+      startDay
+        .toZonedDateTime({
+          timeZone: tz,
+          plainTime: Temporal.PlainTime.from({ hour: 0 }),
+        })
+        .toInstant().epochMilliseconds,
+    );
+    const endDate = new Date(
+      endDay
+        .toZonedDateTime({
+          timeZone: tz,
+          plainTime: Temporal.PlainTime.from({ hour: 23, minute: 59 }),
+        })
+        .toInstant().epochMilliseconds,
+    );
 
-    if (startDate.epochMilliseconds >= endDate.epochMilliseconds) {
-      throw new BadRequestException('End date must be after start date.');
-    }
-
-    // buffer to let ranges start in the current day
-    if (startDate.epochMilliseconds + 1000 * 60 * 60 * 24 < now.getTime()) {
-      throw new BadRequestException('Start date must be in the future.');
-    }
-
-    // const maxDuration = 14 * 24 * 60 * 60 * 1000; // 14 days in milliseconds
-    // if (endDate.epochMilliseconds - startDate.epochMilliseconds > maxDuration) {
-    //   throw new BadRequestException(
-    //     'Away period cannot exceed 14 days. Please email us if you need to be away for longer.',
-    //   );
-    // }
-
-    if (reason === UserAwayRangeReason.OTHER && !data.note) {
-      throw new BadRequestException(
-        'Please provide a note for your away period.',
-      );
-    }
+    this.validateAwayRange(startDate, endDate, reason, data.note);
 
     const awayRange = this.userAwayRangeRepository.create({
       userId,
-      startDate: new Date(startDate.epochMilliseconds),
-      endDate: new Date(endDate.epochMilliseconds),
+      startDate,
+      endDate,
       reason,
       note: data.note,
     });
@@ -807,6 +814,13 @@ export class UserService {
     if (data.note !== undefined) {
       awayRange.note = data.note;
     }
+
+    this.validateAwayRange(
+      awayRange.startDate,
+      awayRange.endDate,
+      awayRange.reason,
+      awayRange.note,
+    );
 
     return this.userAwayRangeRepository.save(awayRange);
   }
