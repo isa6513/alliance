@@ -109,8 +109,23 @@ const StatsPage: React.FC = () => {
     useState<ActionStatsRecord | null>(null);
   const [dailyStatsTableOpen, setDailyStatsTableOpen] = useState(false);
   const [actionStatsTableOpen, setActionStatsTableOpen] = useState(false);
+  const [hoveredCompletionPoint, setHoveredCompletionPoint] = useState<{
+    date: Date;
+    avgRate: number;
+    actionCount: number;
+  } | null>(null);
+  const [completionRateRange, setCompletionRateRange] = useState(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setMonth(start.getMonth() - 6);
+    return {
+      start: formatDateAsLocal(start),
+      end: formatDateAsLocal(end),
+    };
+  });
 
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const completionRateSvgRef = useRef<SVGSVGElement | null>(null);
   const actionsSvgRef = useRef<SVGSVGElement | null>(null);
 
   const loadStats = useCallback(async (startDate: string, endDate: string) => {
@@ -357,6 +372,102 @@ const StatsPage: React.FC = () => {
     };
   }, [chartActionStats]);
 
+  // Cumulative average completion rate data
+  const cumulativeCompletionData = useMemo(() => {
+    // Filter actions that have ended (have memberActionEndDate)
+    const completedActions = actionStats
+      .filter((a) => a.memberActionEndDate && a.showInChart)
+      .map((a) => ({
+        ...a,
+        endDate: new Date(a.memberActionEndDate!),
+      }))
+      .sort((a, b) => a.endDate.getTime() - b.endDate.getTime());
+
+    if (completedActions.length === 0) return [];
+
+    const rangeStart = new Date(completionRateRange.start);
+    const rangeEnd = new Date(completionRateRange.end);
+
+    // Generate data points for each day an action ended
+    const dataPoints: { date: Date; avgRate: number; actionCount: number }[] =
+      [];
+    let runningSum = 0;
+    let count = 0;
+
+    for (const action of completedActions) {
+      if (action.endDate < rangeStart) {
+        // Include in running average but don't plot
+        runningSum += action.completionRate;
+        count++;
+        continue;
+      }
+      if (action.endDate > rangeEnd) break;
+
+      runningSum += action.completionRate;
+      count++;
+      dataPoints.push({
+        date: action.endDate,
+        avgRate: runningSum / count,
+        actionCount: count,
+      });
+    }
+
+    return dataPoints;
+  }, [actionStats, completionRateRange]);
+
+  const completionRateChartGeometry = useMemo(() => {
+    if (cumulativeCompletionData.length === 0) return null;
+
+    const width = 1000;
+    const height = 350;
+    const margin = { top: 28, right: 32, bottom: 64, left: 72 };
+
+    const rangeStart = new Date(completionRateRange.start);
+    const rangeEnd = new Date(completionRateRange.end);
+
+    const xScale = d3
+      .scaleTime()
+      .domain([rangeStart, rangeEnd])
+      .range([margin.left, width - margin.right]);
+
+    const yScale = d3
+      .scaleLinear()
+      .domain([0, 1])
+      .range([height - margin.bottom, margin.top]);
+
+    const line = d3
+      .line<{ date: Date; avgRate: number }>()
+      .x((d) => xScale(d.date))
+      .y((d) => yScale(d.avgRate))
+      .curve(d3.curveStepAfter);
+
+    const linePath = line(cumulativeCompletionData) ?? "";
+
+    const area = d3
+      .area<{ date: Date; avgRate: number }>()
+      .x((d) => xScale(d.date))
+      .y0(height - margin.bottom)
+      .y1((d) => yScale(d.avgRate))
+      .curve(d3.curveStepAfter);
+
+    const areaPath = area(cumulativeCompletionData) ?? "";
+
+    const xTicks = xScale.ticks(8);
+    const yTicks = [0, 0.25, 0.5, 0.75, 1];
+
+    return {
+      width,
+      height,
+      margin,
+      xScale,
+      yScale,
+      linePath,
+      areaPath,
+      xTicks,
+      yTicks,
+    };
+  }, [cumulativeCompletionData, completionRateRange]);
+
   const activeDay = hoveredDay ?? parsedStats[parsedStats.length - 1];
   const activeActionsDay =
     hoveredActionsDay ?? parsedStats[parsedStats.length - 1];
@@ -428,6 +539,44 @@ const StatsPage: React.FC = () => {
       setHoveredActionsDay(parsedStats[clampedIndex]);
     },
     [actionsChartGeometry, parsedStats]
+  );
+
+  const handleCompletionRateHover = useCallback(
+    (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
+      if (
+        !completionRateChartGeometry ||
+        cumulativeCompletionData.length === 0 ||
+        !completionRateSvgRef.current
+      ) {
+        return;
+      }
+
+      const rect = completionRateSvgRef.current.getBoundingClientRect();
+      const relativeX = event.clientX - rect.left;
+      if (relativeX < 0) return;
+
+      const scaleX = completionRateChartGeometry.width / rect.width;
+      const pointerX = relativeX * scaleX;
+
+      const hoveredDate = completionRateChartGeometry.xScale.invert(pointerX);
+
+      // Find closest data point
+      let closestPoint = cumulativeCompletionData[0];
+      let closestDistance = Math.abs(
+        hoveredDate.getTime() - closestPoint.date.getTime()
+      );
+
+      for (const point of cumulativeCompletionData) {
+        const distance = Math.abs(hoveredDate.getTime() - point.date.getTime());
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestPoint = point;
+        }
+      }
+
+      setHoveredCompletionPoint(closestPoint);
+    },
+    [completionRateChartGeometry, cumulativeCompletionData]
   );
 
   return (
@@ -1020,6 +1169,262 @@ const StatsPage: React.FC = () => {
             <div className="w-4 h-4 rounded bg-gray-300" />
             <span className="text-sm text-gray-600">Joined (Expected)</span>
           </div>
+        </div>
+      </div>
+
+      {/* Cumulative Average Completion Rate Chart */}
+      <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-4 py-3 border-b border-gray-200">
+          <h3 className="font-semibold text-gray-900">
+            Cumulative Completion Rate
+          </h3>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-gray-600">
+                From
+              </label>
+              <input
+                type="date"
+                value={completionRateRange.start}
+                onChange={(e) =>
+                  setCompletionRateRange((prev) => ({
+                    ...prev,
+                    start: e.target.value,
+                  }))
+                }
+                className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-gray-600">To</label>
+              <input
+                type="date"
+                value={completionRateRange.end}
+                onChange={(e) =>
+                  setCompletionRateRange((prev) => ({
+                    ...prev,
+                    end: e.target.value,
+                  }))
+                }
+                className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="relative p-4">
+          {actionStatsLoading && cumulativeCompletionData.length === 0 && (
+            <p className="text-sm text-gray-600">Loading...</p>
+          )}
+          {!actionStatsLoading && cumulativeCompletionData.length === 0 && (
+            <p className="text-sm text-gray-600">
+              No completed actions in this date range.
+            </p>
+          )}
+          {completionRateChartGeometry &&
+            cumulativeCompletionData.length > 0 && (
+              <svg
+                ref={completionRateSvgRef}
+                viewBox={`0 0 ${completionRateChartGeometry.width} ${completionRateChartGeometry.height}`}
+                className="w-full"
+                onMouseMove={handleCompletionRateHover}
+                onMouseLeave={() => setHoveredCompletionPoint(null)}
+              >
+                {/* Grid lines */}
+                <g>
+                  {completionRateChartGeometry.yTicks.map((tick) => (
+                    <g key={`y-${tick}`}>
+                      <line
+                        x1={completionRateChartGeometry.margin.left}
+                        x2={
+                          completionRateChartGeometry.width -
+                          completionRateChartGeometry.margin.right
+                        }
+                        y1={completionRateChartGeometry.yScale(tick)}
+                        y2={completionRateChartGeometry.yScale(tick)}
+                        stroke="#e5e7eb"
+                        strokeDasharray="4 6"
+                      />
+                      <text
+                        x={completionRateChartGeometry.margin.left - 12}
+                        y={completionRateChartGeometry.yScale(tick)}
+                        textAnchor="end"
+                        dominantBaseline="middle"
+                        className="fill-gray-500 text-xs"
+                      >
+                        {Math.round(tick * 100)}%
+                      </text>
+                    </g>
+                  ))}
+                  {completionRateChartGeometry.xTicks.map((tick) => (
+                    <g key={`x-${tick.toISOString()}`}>
+                      <line
+                        x1={completionRateChartGeometry.xScale(tick)}
+                        x2={completionRateChartGeometry.xScale(tick)}
+                        y1={completionRateChartGeometry.margin.top}
+                        y2={
+                          completionRateChartGeometry.height -
+                          completionRateChartGeometry.margin.bottom
+                        }
+                        stroke="#f3f4f6"
+                      />
+                      <text
+                        x={completionRateChartGeometry.xScale(tick)}
+                        y={
+                          completionRateChartGeometry.height -
+                          completionRateChartGeometry.margin.bottom +
+                          24
+                        }
+                        textAnchor="middle"
+                        className="fill-gray-600 text-xs"
+                      >
+                        {dateFormatter.format(tick)}
+                      </text>
+                    </g>
+                  ))}
+                </g>
+
+                {/* Area fill */}
+                <path
+                  d={completionRateChartGeometry.areaPath}
+                  fill="rgba(22, 163, 74, 0.12)"
+                  stroke="none"
+                />
+
+                {/* Line */}
+                <path
+                  d={completionRateChartGeometry.linePath}
+                  fill="none"
+                  stroke="#16a34a"
+                  strokeWidth={2.5}
+                />
+
+                {/* Data points */}
+                {cumulativeCompletionData.map((point, idx) => (
+                  <circle
+                    key={idx}
+                    cx={completionRateChartGeometry.xScale(point.date)}
+                    cy={completionRateChartGeometry.yScale(point.avgRate)}
+                    r={4}
+                    fill="white"
+                    stroke="#16a34a"
+                    strokeWidth={2}
+                  />
+                ))}
+
+                {/* Hover indicator */}
+                {hoveredCompletionPoint && (
+                  <>
+                    <line
+                      x1={completionRateChartGeometry.xScale(
+                        hoveredCompletionPoint.date
+                      )}
+                      x2={completionRateChartGeometry.xScale(
+                        hoveredCompletionPoint.date
+                      )}
+                      y1={completionRateChartGeometry.margin.top}
+                      y2={
+                        completionRateChartGeometry.height -
+                        completionRateChartGeometry.margin.bottom
+                      }
+                      stroke="#6b7280"
+                      strokeWidth={1}
+                      strokeDasharray="4 4"
+                    />
+                    <circle
+                      cx={completionRateChartGeometry.xScale(
+                        hoveredCompletionPoint.date
+                      )}
+                      cy={completionRateChartGeometry.yScale(
+                        hoveredCompletionPoint.avgRate
+                      )}
+                      r={6}
+                      fill="white"
+                      stroke="#16a34a"
+                      strokeWidth={2.5}
+                    />
+
+                    {/* Hover box */}
+                    <rect
+                      x={Math.min(
+                        completionRateChartGeometry.xScale(
+                          hoveredCompletionPoint.date
+                        ) + 12,
+                        completionRateChartGeometry.width - 180
+                      )}
+                      y={completionRateChartGeometry.margin.top + 12}
+                      width={164}
+                      height={90}
+                      rx={10}
+                      fill="white"
+                      stroke="#e5e7eb"
+                      className="shadow-lg"
+                    />
+                    <text
+                      x={Math.min(
+                        completionRateChartGeometry.xScale(
+                          hoveredCompletionPoint.date
+                        ) + 24,
+                        completionRateChartGeometry.width - 166
+                      )}
+                      y={completionRateChartGeometry.margin.top + 34}
+                      className="fill-gray-900 text-sm font-semibold"
+                    >
+                      {fullDateFormatter.format(hoveredCompletionPoint.date)}
+                    </text>
+                    <text
+                      x={Math.min(
+                        completionRateChartGeometry.xScale(
+                          hoveredCompletionPoint.date
+                        ) + 24,
+                        completionRateChartGeometry.width - 166
+                      )}
+                      y={completionRateChartGeometry.margin.top + 58}
+                      className="fill-gray-600 text-xs"
+                    >
+                      Avg Rate:
+                    </text>
+                    <text
+                      x={Math.min(
+                        completionRateChartGeometry.xScale(
+                          hoveredCompletionPoint.date
+                        ) + 156,
+                        completionRateChartGeometry.width - 34
+                      )}
+                      y={completionRateChartGeometry.margin.top + 58}
+                      textAnchor="end"
+                      className="fill-green-600 text-xs font-semibold"
+                    >
+                      {Math.round(hoveredCompletionPoint.avgRate * 100)}%
+                    </text>
+                    <text
+                      x={Math.min(
+                        completionRateChartGeometry.xScale(
+                          hoveredCompletionPoint.date
+                        ) + 24,
+                        completionRateChartGeometry.width - 166
+                      )}
+                      y={completionRateChartGeometry.margin.top + 78}
+                      className="fill-gray-600 text-xs"
+                    >
+                      Actions:
+                    </text>
+                    <text
+                      x={Math.min(
+                        completionRateChartGeometry.xScale(
+                          hoveredCompletionPoint.date
+                        ) + 156,
+                        completionRateChartGeometry.width - 34
+                      )}
+                      y={completionRateChartGeometry.margin.top + 78}
+                      textAnchor="end"
+                      className="fill-gray-900 text-xs font-semibold"
+                    >
+                      {hoveredCompletionPoint.actionCount}
+                    </text>
+                  </>
+                )}
+              </svg>
+            )}
         </div>
       </div>
 
