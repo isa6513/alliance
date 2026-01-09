@@ -23,6 +23,7 @@ import {
   ContractEventType,
 } from 'src/user/entities/contract-event.entity';
 import { findLeast } from 'src/utils/filter';
+import { Tag } from 'src/user/entities/tag.entity';
 
 @Injectable()
 export class ActionEventRecipientService {
@@ -97,6 +98,25 @@ export class ActionEventRecipientService {
       return false;
     }
     return action.manualCohortUserIds?.some((m) => m === user.id) ?? false;
+  }
+
+  hasOverlappingTags(params: {
+    actionParticipatingTagIds: Set<number>;
+    userTags: Iterable<number> | Iterable<Tag>;
+  }): boolean {
+    const { actionParticipatingTagIds, userTags } = params;
+    for (const tagOrId of userTags) {
+      if (typeof tagOrId === 'number') {
+        if (actionParticipatingTagIds.has(tagOrId)) {
+          return true;
+        }
+      } else {
+        if (actionParticipatingTagIds.has(tagOrId.id)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   getLatestMemberActionWithDeadline(params: {
