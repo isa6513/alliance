@@ -87,6 +87,58 @@ export class ActionEventRecipientService {
     );
   }
 
+  getLatestMemberActionWithDeadline(params: {
+    action: Pick<Action, 'events'>;
+  }):
+    | { event: ActionEvent; endDate: Date }
+    | {
+        event: ActionEvent;
+        endDate: null;
+      }
+    | {
+        event: null;
+        endDate: null;
+      } {
+    const {
+      action: { events },
+    } = params;
+    const latestMemberActionEvent = events.reduce(
+      (acc, event) => {
+        if (
+          event.newStatus === ActionStatus.MemberAction &&
+          (acc === null || acc.date < event.date)
+        ) {
+          return event;
+        }
+        return acc;
+      },
+      null satisfies ActionEvent | null as ActionEvent | null,
+    );
+    if (!latestMemberActionEvent) {
+      return { event: null, endDate: null };
+    }
+
+    const earliestDeadline = events.reduce(
+      (acc, event) => {
+        if (
+          event.newStatus !== ActionStatus.MemberAction &&
+          event.date > latestMemberActionEvent.date &&
+          (acc === null || acc.date > event.date)
+        ) {
+          return event;
+        }
+
+        return acc;
+      },
+      null satisfies ActionEvent | null as ActionEvent | null,
+    );
+
+    return {
+      event: latestMemberActionEvent,
+      endDate: earliestDeadline?.date ?? null,
+    };
+  }
+
   getNextEvent(params: {
     events: ActionEvent[];
     currentEventId: number;
