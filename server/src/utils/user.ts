@@ -7,7 +7,7 @@ export function isUserAwayAt(params: {
 }): boolean {
   const { user, date } = params;
   return user.awayRanges.some(
-    (range) => date >= range.startDate && date <= range.endDate,
+    (range) => date >= range.startDate && date < range.endDate,
   );
 }
 
