@@ -4,7 +4,7 @@ date: "2026-01-07"
 authors: ["Sidney Hough", "Mark Xu"]
 ---
 
-Over the past 10 weeks, we ran weekly actions with a small number of members (30-50) to test and develop our basic organizational structures and processes. We completed 20 total actions.
+Over the past 10 weeks, we (the office) ran weekly actions with a small number of members (30-50) to test and develop our basic organizational structures and processes. We completed 20 total actions.
 
 In this time, we learned about factors that affect members’ reliability, built an understanding of how members experience the Alliance, and refined our process for action production.
 
