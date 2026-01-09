@@ -20,23 +20,26 @@ export default function ActionsScreen() {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const { data, isPending, error } = useQuery({
+  const {
+    data: response,
+    isPending,
+    error,
+  } = useQuery({
     queryKey: ["actions"],
-    queryFn: () =>
-      actionsFindAllLoggedIn({ query: { sorted: true } }).then(
-        (response) => response.data
-      ),
+    queryFn: () => actionsFindAllLoggedIn({ query: { sorted: true } }),
   });
 
   const counts = useMemo(() => {
     const result: Record<FilterMode, number> = {} as any;
     for (const mode of Object.values(FilterMode) as FilterMode[]) {
-      result[mode] = filterActions(data ?? [], mode).length;
+      result[mode] = filterActions(response?.data ?? [], mode).length;
     }
     return result;
-  }, [data]);
+  }, [response]);
 
-  const filteredActions = data ? filterActions(data, filterMode) : [];
+  const filteredActions = response?.data
+    ? filterActions(response.data, filterMode)
+    : [];
 
   console.log("filteredActions" + filteredActions.length);
 

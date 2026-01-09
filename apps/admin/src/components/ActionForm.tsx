@@ -68,7 +68,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
   imagePreview,
   isNew,
   onCancel,
-  onDelete,
+  //   onDelete,
   baseUrl,
   availableTags = [],
   tagsLoading,
@@ -92,11 +92,11 @@ const ActionForm: React.FC<ActionFormProps> = ({
     onTagsChange(nextSelection);
   };
 
-  const handleClearTags = () => {
-    if (selectedTagIds.length) {
-      onTagsChange([]);
-    }
-  };
+  //   const handleClearTags = () => {
+  //     if (selectedTagIds.length) {
+  //       onTagsChange([]);
+  //     }
+  //   };
 
   type FieldType =
     | "text"
@@ -107,7 +107,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
     | "checkbox"
     | "markdowntextarea";
 
-  type FieldSection = "content" | "classification" | "behavior" | "media";
+  type FieldSection = "content" | "settings";
 
   type FieldDef = {
     name: keyof CreateActionDto | "image";
@@ -120,6 +120,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
     options?: { value: string | number; label: string }[];
     rows?: number;
     gridCol?: boolean; // render in 2-col grid within section
+    inverted?: boolean; // for checkboxes: invert the displayed/stored value
   };
 
   const actionTypeOptions = useMemo(
@@ -155,10 +156,10 @@ const ActionForm: React.FC<ActionFormProps> = ({
   );
 
   // Field definitions organized by section
-  // To add a new flag: just add an entry to the "behavior" section with type: "checkbox"
+  // To add a new flag: just add an entry to the "settings" section with type: "checkbox"
   const fieldDefs = useMemo(
     (): FieldDef[] => [
-      // === CONTENT SECTION ===
+      // === CONTENT SECTION (includes media) ===
       {
         name: "name",
         label: "Name",
@@ -182,35 +183,33 @@ const ActionForm: React.FC<ActionFormProps> = ({
         section: "content",
         required: true,
       },
-
-      // === MEDIA SECTION ===
       {
         name: "image",
         label: "Cover Image",
         type: "file",
-        section: "media",
+        section: "content",
       },
       {
         name: "squareThumbnailImage",
         label: "Square Thumbnail URL",
         type: "text",
-        section: "media",
+        section: "content",
         gridCol: true,
       },
       {
         name: "squareThumbnailImageAlt",
         label: "Thumbnail Alt Text",
         type: "text",
-        section: "media",
+        section: "content",
         gridCol: true,
       },
 
-      // === CLASSIFICATION SECTION ===
+      // === SETTINGS SECTION (classification + behavior flags) ===
       {
         name: "type",
         label: "Type",
         type: "select",
-        section: "classification",
+        section: "settings",
         required: true,
         options: actionTypeOptions,
         gridCol: true,
@@ -219,7 +218,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         name: "category",
         label: "Category",
         type: "text",
-        section: "classification",
+        section: "settings",
         required: true,
         gridCol: true,
       },
@@ -227,7 +226,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         name: "suiteId",
         label: "Suite",
         type: "select",
-        section: "classification",
+        section: "settings",
         options: suiteSelectOptions,
         gridCol: true,
         helpText: suitesLoading ? "Fetching suites..." : undefined,
@@ -236,7 +235,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         name: "visibilityMode",
         label: "Visibility Mode",
         type: "select",
-        section: "classification",
+        section: "settings",
         options: visibilityModeOptions,
         gridCol: true,
       },
@@ -244,14 +243,14 @@ const ActionForm: React.FC<ActionFormProps> = ({
         name: "timeEstimate",
         label: "Time Estimate (min)",
         type: "number",
-        section: "classification",
+        section: "settings",
         gridCol: true,
       },
       {
         name: "priority",
         label: "Priority",
         type: "number",
-        section: "classification",
+        section: "settings",
         helpText: "Higher numbers shown first",
         gridCol: true,
       },
@@ -259,7 +258,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         name: "donationAmount",
         label: "Donation Amount (cents)",
         type: "number",
-        section: "classification",
+        section: "settings",
         show: (f) => f.type === "Funding",
         helpText: "Suggested amount per person",
         gridCol: true,
@@ -268,48 +267,49 @@ const ActionForm: React.FC<ActionFormProps> = ({
         name: "commitmentThreshold",
         label: "Commitment Threshold",
         type: "number",
-        section: "classification",
+        section: "settings",
         helpText: "Commitments needed to proceed",
         show: (f) => !f.commitmentless,
         gridCol: true,
       },
-
-      // === BEHAVIOR FLAGS SECTION ===
-      // Add new boolean flags here - they'll automatically render in a clean grid
+      // Behavior flags - add new boolean flags here
       {
         name: "commitmentless",
-        label: "Commitmentless",
+        label: "Use Commitment Mode",
         type: "checkbox",
-        section: "behavior",
-        helpText: "Show to all members, not just committed (e.g. onboarding)",
+        section: "settings",
+        helpText:
+          "Require users to commit via a gathering commitment phase before member action",
+        inverted: true, // UI shows "Use Commitment Mode" but field is "commitmentless"
       },
       {
         name: "everyoneShouldComplete",
         label: "Everyone Should Complete",
         type: "checkbox",
-        section: "behavior",
-        helpText: "Override contract signing requirements",
+        section: "settings",
+        helpText: "Override contract signing requirements (for onboarding)",
       },
       {
         name: "shouldCompleteAfterDeadline",
         label: "Complete After Deadline",
         type: "checkbox",
-        section: "behavior",
-        helpText: "Show in task list even after deadline passes",
+        section: "settings",
+        helpText: "Show in tasks view after deadline passes",
       },
       {
         name: "preventCompletion",
         label: "Prevent Completion",
         type: "checkbox",
-        section: "behavior",
-        helpText: "Users cannot mark this action as complete",
+        section: "settings",
+        helpText:
+          "Prevents members from completing the action even on the detail page",
       },
       {
         name: "publicOnly",
         label: "Public Only",
         type: "checkbox",
-        section: "behavior",
-        helpText: "Only visible on public pages",
+        section: "settings",
+        helpText: "For actions completed by non-members and not by members",
       },
     ],
     [
@@ -439,11 +439,34 @@ const ActionForm: React.FC<ActionFormProps> = ({
     }
 
     if (f.type === "checkbox") {
+      // For inverted fields, display is opposite of stored value
+      const isChecked = f.inverted
+        ? !Boolean(form[f.name])
+        : Boolean(form[f.name]);
+
+      const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (f.inverted) {
+          // Create a synthetic event with inverted value
+          const syntheticEvent = {
+            ...e,
+            target: {
+              ...e.target,
+              name: e.target.name,
+              type: "checkbox",
+              checked: !e.target.checked,
+            },
+          } as React.ChangeEvent<HTMLInputElement>;
+          onInputChange(syntheticEvent);
+        } else {
+          onInputChange(e);
+        }
+      };
+
       return (
         <label
           key={String(f.name)}
           className={`flex items-start gap-3 p-3 rounded-md border cursor-pointer transition-colors ${
-            Boolean(form[f.name])
+            isChecked
               ? "border-blue-400 bg-blue-50"
               : "border-gray-200 hover:border-gray-300 bg-white"
           }`}
@@ -452,8 +475,8 @@ const ActionForm: React.FC<ActionFormProps> = ({
             type="checkbox"
             id={String(f.name)}
             name={String(f.name)}
-            checked={Boolean(form[f.name])}
-            onChange={onInputChange}
+            checked={isChecked}
+            onChange={handleChange}
             className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
           <span className="flex flex-col min-w-0">
@@ -494,8 +517,11 @@ const ActionForm: React.FC<ActionFormProps> = ({
   };
 
   const renderFieldsWithGrid = (fields: FieldDef[]) => {
-    const gridFields = fields.filter((f) => f.gridCol);
-    const nonGridFields = fields.filter((f) => !f.gridCol);
+    const gridFields = fields.filter((f) => f.gridCol && f.type !== "checkbox");
+    const nonGridFields = fields.filter(
+      (f) => !f.gridCol && f.type !== "checkbox"
+    );
+    const checkboxFields = fields.filter((f) => f.type === "checkbox");
 
     return (
       <>
@@ -505,52 +531,45 @@ const ActionForm: React.FC<ActionFormProps> = ({
             {gridFields.map(renderField)}
           </div>
         )}
+        {checkboxFields.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            {checkboxFields.map(renderField)}
+          </div>
+        )}
       </>
     );
   };
 
   const contentFields = getFieldsBySection("content");
-  const mediaFields = getFieldsBySection("media");
-  const classificationFields = getFieldsBySection("classification");
-  const behaviorFields = getFieldsBySection("behavior");
+  const settingsFields = getFieldsBySection("settings");
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <form onSubmit={onSubmit} className="space-y-6 pb-6">
       {/* CONTENT SECTION */}
-      <FormSection title="Content" description="The main content users will see">
-        <div className="space-y-4">{contentFields.map(renderField)}</div>
-      </FormSection>
-
-      {/* MEDIA SECTION */}
-      <FormSection title="Media" description="Images and thumbnails">
-        <div className="space-y-4">{renderFieldsWithGrid(mediaFields)}</div>
-      </FormSection>
-
-      {/* CLASSIFICATION SECTION */}
-      <FormSection
-        title="Classification"
-        description="Type, category, and organizational settings"
-      >
+      <FormSection title="Content">
         <div className="space-y-4">
-          {renderFieldsWithGrid(classificationFields)}
+          {renderFieldsWithGrid(contentFields)}
+          {/* Authors in content section */}
+          <UserSelect
+            users={availableUsers}
+            selectedUserIds={authorIds}
+            onChange={onAuthorsChange}
+            loading={usersLoading}
+            label="Action Authors"
+          />
         </div>
       </FormSection>
 
-      {/* BEHAVIOR FLAGS SECTION */}
+      {/* SETTINGS SECTION */}
       <FormSection
-        title="Behavior Flags"
-        description="Toggle settings that control how this action behaves"
+        title="Settings"
+        description="Type, category, visibility, and behavior flags"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {behaviorFields.map(renderField)}
-        </div>
+        <div className="space-y-4">{renderFieldsWithGrid(settingsFields)}</div>
       </FormSection>
 
       {/* TARGETING SECTION */}
-      <FormSection
-        title="Targeting"
-        description="Control who can see and participate in this action"
-      >
+      <FormSection title="Participating users">
         <div className="space-y-6">
           {/* Tags */}
           <div>
@@ -558,14 +577,14 @@ const ActionForm: React.FC<ActionFormProps> = ({
               <label className="text-sm font-medium text-gray-700">
                 Participating Tags
               </label>
-              <button
+              {/* <button
                 type="button"
                 onClick={handleClearTags}
                 disabled={!selectedTagIds.length}
                 className="text-xs text-blue-600 hover:text-blue-800 disabled:text-gray-300"
               >
                 Clear
-              </button>
+              </button> */}
             </div>
             <p className="text-xs text-gray-500 mb-3">
               Actions without tags will not be shown to any users.
@@ -573,7 +592,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
             {tagsLoading ? (
               <p className="text-sm text-gray-500">Loading tags...</p>
             ) : availableTags.length ? (
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 sm:grid-cols-4">
                 {availableTags.map((tag) => {
                   const checked = selectedTagIds.includes(tag.id);
                   return (
@@ -612,22 +631,12 @@ const ActionForm: React.FC<ActionFormProps> = ({
             )}
           </div>
 
-          {/* Authors */}
-          <div>
-            <UserSelect
-              users={availableUsers}
-              selectedUserIds={authorIds}
-              onChange={onAuthorsChange}
-              loading={usersLoading}
-              label="Action Authors"
-            />
-          </div>
-
           {/* Manual Cohort */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm font-medium text-gray-700">
-                Manual User Cohort ({manualCohortUserIds.length})
+                Manual User Cohort{" "}
+                {form.useManualCohort ? `(${manualCohortUserIds.length})` : ""}
               </label>
               <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <input
@@ -669,7 +678,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
             Cancel
           </button>
         )}
-        {!isNew && onDelete && (
+        {/* {!isNew && onDelete && (
           <button
             type="button"
             onClick={onDelete}
@@ -678,10 +687,10 @@ const ActionForm: React.FC<ActionFormProps> = ({
           >
             Delete
           </button>
-        )}
+        )} */}
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm font-medium"
+          className="px-4 py-2 bg-green text-white rounded-md hover:green/80 focus:outline-none focus:ring-2 focus:ring-green focus:ring-offset-2 text-sm font-medium"
           disabled={saving}
         >
           {saving
@@ -689,8 +698,8 @@ const ActionForm: React.FC<ActionFormProps> = ({
               ? "Creating..."
               : "Saving..."
             : isNew
-              ? "Create Action"
-              : "Save Changes"}
+            ? "Create Action"
+            : "Save Changes"}
         </button>
       </div>
     </form>
