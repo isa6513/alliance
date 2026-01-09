@@ -274,7 +274,6 @@ ORDER BY pp.total_session_duration_seconds DESC
     this.logger.log('Starting action stats calculation');
 
     const now = new Date();
-    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     const actions = await this.actionRepository.find({
       relations: { events: true },
@@ -288,10 +287,10 @@ ORDER BY pp.total_session_duration_seconds DESC
 
       // Check if action has been completed more than 1 week ago
       const completedDate = this.getActionCompletedDate(action);
-      if (completedDate && completedDate < oneWeekAgo) {
-        // Skip recalculating for old completed actions
-        continue;
-      }
+      //   if (completedDate && completedDate < oneWeekAgo) {
+      //     // Skip recalculating for old completed actions
+      //     continue;
+      //   }
 
       const usersJoined = action.usersJoined;
       const usersCompleted = action.usersCompleted;
@@ -334,7 +333,8 @@ ORDER BY pp.total_session_duration_seconds DESC
         existingRecord.lastCalculatedAt = now;
         existingRecord.actionCompletedAt = completedDate ?? undefined;
         existingRecord.showInChart = showInChart;
-        existingRecord.memberActionStartDate = memberActionStartDate ?? undefined;
+        existingRecord.memberActionStartDate =
+          memberActionStartDate ?? undefined;
         existingRecord.memberActionEndDate = memberActionEndDate ?? undefined;
         await this.actionStatsRepository.save(existingRecord);
       } else {

@@ -439,7 +439,7 @@ const StatsPage: React.FC = () => {
       .line<{ date: Date; avgRate: number }>()
       .x((d) => xScale(d.date))
       .y((d) => yScale(d.avgRate))
-      .curve(d3.curveStepAfter);
+      .curve(d3.curveMonotoneX);
 
     const linePath = line(cumulativeCompletionData) ?? "";
 
@@ -448,7 +448,7 @@ const StatsPage: React.FC = () => {
       .x((d) => xScale(d.date))
       .y0(height - margin.bottom)
       .y1((d) => yScale(d.avgRate))
-      .curve(d3.curveStepAfter);
+      .curve(d3.curveMonotoneX);
 
     const areaPath = area(cumulativeCompletionData) ?? "";
 
