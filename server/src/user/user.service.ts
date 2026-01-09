@@ -45,7 +45,11 @@ import {
   UserAwayRange,
   UserAwayRangeReason,
 } from './entities/user-away-range.entity';
-import { CreateAwayRangeDto, UserAwayRangeDto } from './dto/away-range.dto';
+import {
+  CreateAwayRangeDto,
+  UpdateAwayRangeDto,
+  UserAwayRangeDto,
+} from './dto/away-range.dto';
 import { Temporal } from '@js-temporal/polyfill';
 import {
   CommunityInvite,
@@ -756,6 +760,75 @@ export class UserService {
     await this.userAwayRangeRepository.remove(awayRange);
   }
 
+  async updateAwayRange(
+    userId: number,
+    awayRangeId: number,
+    data: UpdateAwayRangeDto,
+  ): Promise<UserAwayRange> {
+    const awayRange = await this.userAwayRangeRepository.findOne({
+      where: { id: awayRangeId, userId },
+    });
+
+    if (!awayRange) {
+      throw new NotFoundException('Away range not found.');
+    }
+
+    const user = await this.findOneOrFail(userId);
+    const tz = user.timeZone ?? defaultTimeZone;
+
+    if (data.startDay) {
+      const startDay = Temporal.PlainDate.from(data.startDay);
+      awayRange.startDate = new Date(
+        startDay
+          .toZonedDateTime({
+            timeZone: tz,
+            plainTime: Temporal.PlainTime.from({ hour: 0 }),
+          })
+          .toInstant().epochMilliseconds,
+      );
+    }
+
+    if (data.endDay) {
+      const endDay = Temporal.PlainDate.from(data.endDay);
+      awayRange.endDate = new Date(
+        endDay
+          .toZonedDateTime({
+            timeZone: tz,
+            plainTime: Temporal.PlainTime.from({ hour: 23, minute: 59 }),
+          })
+          .toInstant().epochMilliseconds,
+      );
+    }
+
+    if (data.reason !== undefined) {
+      awayRange.reason = data.reason;
+    }
+
+    if (data.note !== undefined) {
+      awayRange.note = data.note;
+    }
+
+    return this.userAwayRangeRepository.save(awayRange);
+  }
+
+  isUserAwayAt(user: User, checkDate: Date): boolean {
+    return user.awayRanges.some(
+      (range) => checkDate >= range.startDate && checkDate <= range.endDate,
+    );
+  }
+
+  isUserAwayInRange(
+    user: User,
+    range: { startDate: Date; endDate?: Date },
+  ): boolean {
+    return user.awayRanges.some(
+      (awayRange) =>
+        !(
+          (range.endDate && range.endDate <= awayRange.startDate) ||
+          range.startDate >= awayRange.endDate
+        ),
+    );
+  }
 
   async isUserIdAway(
     userId: number,

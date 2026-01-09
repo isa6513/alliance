@@ -47,7 +47,11 @@ import {
   OnetimeInviteDto,
   RequestOnetimeInviteDto,
 } from './dto/invite.dto';
-import { CreateAwayRangeDto, UserAwayRangeDto } from './dto/away-range.dto';
+import {
+  CreateAwayRangeDto,
+  UpdateAwayRangeDto,
+  UserAwayRangeDto,
+} from './dto/away-range.dto';
 import {
   CommunityDto,
   CommunityMemberDto,
@@ -137,6 +141,18 @@ export class UserController {
   ) {
     await this.userService.deleteAwayRange(req.user.sub, id);
     return { success: true };
+  }
+
+  @Patch('awayranges/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: UserAwayRangeDto })
+  @ApiUnauthorizedResponse()
+  async updateAwayRange(
+    @Request() req: JwtRequest,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateAwayRangeDto,
+  ) {
+    return this.userService.updateAwayRange(req.user.sub, id, body);
   }
 
   @Get('awayranges/:id')

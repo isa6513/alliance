@@ -630,6 +630,13 @@ export type UserAwayRangeDto = {
     note?: string | null;
 };
 
+export type UpdateAwayRangeDto = {
+    reason: UserAwayRangeReason;
+    note?: string | null;
+    startDay?: string;
+    endDay?: string;
+};
+
 export type UpdateProfileDto = {
     name?: string;
     phoneNumber?: string;
@@ -2427,6 +2434,25 @@ export type UserGetAwayRangeForUserResponses = {
 };
 
 export type UserGetAwayRangeForUserResponse = UserGetAwayRangeForUserResponses[keyof UserGetAwayRangeForUserResponses];
+
+export type UserUpdateAwayRangeData = {
+    body: UpdateAwayRangeDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/user/awayranges/{id}';
+};
+
+export type UserUpdateAwayRangeErrors = {
+    401: unknown;
+};
+
+export type UserUpdateAwayRangeResponses = {
+    200: UserAwayRangeDto;
+};
+
+export type UserUpdateAwayRangeResponse = UserUpdateAwayRangeResponses[keyof UserUpdateAwayRangeResponses];
 
 export type UserUpdateData = {
     body: UpdateProfileDto;

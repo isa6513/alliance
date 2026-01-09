@@ -4,7 +4,9 @@ import { createPortal } from "react-dom";
 
 type ImageLightboxProps = {
   images: string[];
-  renderPreview: (openAtIndex: (idx: number) => void) => React.ReactNode;
+  renderPreview: (
+    openAtIndex: (idx: number, e: React.MouseEvent) => void
+  ) => React.ReactNode;
 };
 
 const ImageLightbox: React.FC<ImageLightboxProps> = ({
@@ -16,11 +18,13 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({
 
   const hasImages = images.length > 0;
 
-  const openLightbox = (idx: number) => {
+  const openLightbox = (idx: number, e: React.MouseEvent) => {
     if (!hasImages) return;
     const clampedIndex = Math.min(Math.max(idx, 0), images.length - 1);
     setIndex(clampedIndex);
     setIsOpen(true);
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const closeLightbox = () => setIsOpen(false);
