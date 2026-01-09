@@ -2095,6 +2095,50 @@ export type DailyStatsRecord = {
     invitesAccepted: number;
 };
 
+export type ActionStatsRecord = {
+    id: number;
+    /**
+     * ID of the action this record is for
+     */
+    actionId: number;
+    /**
+     * Name of the action (for display purposes)
+     */
+    actionName: string;
+    /**
+     * Number of users who have completed this action
+     */
+    usersCompleted: number;
+    /**
+     * Number of users who joined/were expected to complete
+     */
+    usersJoined: number;
+    /**
+     * Completion rate as a fraction (usersCompleted / usersJoined)
+     */
+    completionRate: number;
+    /**
+     * When these stats were last calculated
+     */
+    lastCalculatedAt: string;
+    /**
+     * When the action was completed (if applicable)
+     */
+    actionCompletedAt?: string;
+    /**
+     * Whether to show this action in the chart (false for publicOnly or actions without member_action event)
+     */
+    showInChart: boolean;
+    /**
+     * When the member_action phase started
+     */
+    memberActionStartDate?: string;
+    /**
+     * When the member_action phase ended (next status event date)
+     */
+    memberActionEndDate?: string;
+};
+
 export type AppHealthCheckData = {
     body?: never;
     path?: never;
@@ -5332,6 +5376,32 @@ export type AnalyticsGetDailyStatsResponses = {
 };
 
 export type AnalyticsGetDailyStatsResponse = AnalyticsGetDailyStatsResponses[keyof AnalyticsGetDailyStatsResponses];
+
+export type AnalyticsGetActionStatsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/action-stats';
+};
+
+export type AnalyticsGetActionStatsResponses = {
+    200: Array<ActionStatsRecord>;
+};
+
+export type AnalyticsGetActionStatsResponse = AnalyticsGetActionStatsResponses[keyof AnalyticsGetActionStatsResponses];
+
+export type AnalyticsRecalculateActionStatsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/action-stats/recalculate';
+};
+
+export type AnalyticsRecalculateActionStatsResponses = {
+    200: Array<ActionStatsRecord>;
+};
+
+export type AnalyticsRecalculateActionStatsResponse = AnalyticsRecalculateActionStatsResponses[keyof AnalyticsRecalculateActionStatsResponses];
 
 export type ClientOptions = {
     baseUrl: string;

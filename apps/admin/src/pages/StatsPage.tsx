@@ -1,5 +1,12 @@
-import { analyticsGetDailyStats } from "@alliance/shared/client";
-import { DailyStatsRecord } from "@alliance/shared/client/types.gen";
+import {
+  analyticsGetDailyStats,
+  analyticsGetActionStats,
+  analyticsRecalculateActionStats,
+} from "@alliance/shared/client";
+import {
+  DailyStatsRecord,
+  ActionStatsRecord,
+} from "@alliance/shared/client/types.gen";
 import * as d3 from "d3";
 import React, {
   useCallback,
@@ -91,11 +98,17 @@ const StatsPage: React.FC = () => {
   const [endInput, setEndInput] = useState<string>(defaultRange.end);
   const [queryRange, setQueryRange] = useState(defaultRange);
   const [stats, setStats] = useState<DailyStatsRecord[]>([]);
+  const [actionStats, setActionStats] = useState<ActionStatsRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [actionStatsLoading, setActionStatsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hoveredDay, setHoveredDay] = useState<ParsedDailyStats | null>(null);
   const [hoveredActionsDay, setHoveredActionsDay] =
     useState<ParsedDailyStats | null>(null);
+  const [hoveredActionBar, setHoveredActionBar] =
+    useState<ActionStatsRecord | null>(null);
+  const [dailyStatsTableOpen, setDailyStatsTableOpen] = useState(false);
+  const [actionStatsTableOpen, setActionStatsTableOpen] = useState(false);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const actionsSvgRef = useRef<SVGSVGElement | null>(null);
@@ -146,6 +159,34 @@ const StatsPage: React.FC = () => {
   useEffect(() => {
     void loadStats(queryRange.start, queryRange.end);
   }, [loadStats, queryRange.end, queryRange.start]);
+
+  const loadActionStats = useCallback(async () => {
+    setActionStatsLoading(true);
+    try {
+      const response = await analyticsGetActionStats();
+      setActionStats(response.data ?? []);
+    } catch (err) {
+      console.error("Failed to load action stats", err);
+    } finally {
+      setActionStatsLoading(false);
+    }
+  }, []);
+
+  const handleRecalculateActionStats = useCallback(async () => {
+    setActionStatsLoading(true);
+    try {
+      const response = await analyticsRecalculateActionStats();
+      setActionStats(response.data ?? []);
+    } catch (err) {
+      console.error("Failed to recalculate action stats", err);
+    } finally {
+      setActionStatsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadActionStats();
+  }, [loadActionStats]);
 
   const parsedStats = useMemo<ParsedDailyStats[]>(() => {
     return stats
@@ -274,6 +315,47 @@ const StatsPage: React.FC = () => {
     () => createChartGeometry(actionsMetric, true),
     [createChartGeometry, actionsMetric]
   );
+
+  const chartActionStats = useMemo(
+    () => actionStats.filter((a) => a.showInChart),
+    [actionStats]
+  );
+
+  const actionBarsGeometry = useMemo(() => {
+    if (chartActionStats.length === 0) {
+      return null;
+    }
+
+    const width = 1000;
+    const barHeight = 32;
+    const gap = 8;
+    const margin = { top: 28, right: 32, bottom: 32, left: 200 };
+    const height =
+      margin.top + margin.bottom + chartActionStats.length * (barHeight + gap);
+
+    const maxCompleted = d3.max(chartActionStats, (d) => d.usersCompleted) ?? 0;
+    const maxJoined = d3.max(chartActionStats, (d) => d.usersJoined) ?? 0;
+    const maxValue = Math.max(maxCompleted, maxJoined, 10);
+
+    const xScale = d3
+      .scaleLinear()
+      .domain([0, maxValue * 1.1])
+      .nice()
+      .range([margin.left, width - margin.right]);
+
+    const xTicks = xScale.ticks(6);
+
+    return {
+      width,
+      height,
+      barHeight,
+      gap,
+      margin,
+      xScale,
+      xTicks,
+      maxValue,
+    };
+  }, [chartActionStats]);
 
   const activeDay = hoveredDay ?? parsedStats[parsedStats.length - 1];
   const activeActionsDay =
@@ -747,47 +829,365 @@ const StatsPage: React.FC = () => {
         </>
       )}
 
-      <div className="overflow-auto border border-gray-200 rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
-            <tr className="text-gray-600">
-              <th className="px-4 py-3 text-left font-semibold">Date</th>
-              <th className="px-4 py-3 text-left font-semibold">
-                Actions completed
-              </th>
-              <th className="px-4 py-3 text-left font-semibold">Anon forms</th>
-              <th className="px-4 py-3 text-left font-semibold">
-                Members signed
-              </th>
-              <th className="px-4 py-3 text-left font-semibold">
-                Invites created
-              </th>
-              <th className="px-4 py-3 text-left font-semibold">
-                Invites accepted
-              </th>
-              <th className="px-4 py-3 text-left font-semibold">Suspended</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
-            {[...parsedStats].reverse().map((day) => (
-              <tr
-                key={day.dayId}
-                className="hover:bg-gray-50 transition-colors"
-              >
-                <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
-                  {fullDateFormatter.format(day.parsedDate)}
-                </td>
-                <td className="px-4 py-3">{day.actionsCompleted}</td>
-                <td className="px-4 py-3">{day.anonFormSubmissions}</td>
-                <td className="px-4 py-3">{day.signedMembers}</td>
-                <td className="px-4 py-3">{day.invitesCreated}</td>
-                <td className="px-4 py-3">{day.invitesAccepted}</td>
-                <td className="px-4 py-3">{day.suspendedMembers}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Action Stats Bar Chart */}
+      <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Action Completion Stats
+          </h3>
+          <button
+            onClick={handleRecalculateActionStats}
+            disabled={actionStatsLoading}
+            className="px-4 py-2 rounded-md text-sm bg-green text-white shadow hover:bg-green-500 disabled:opacity-50"
+          >
+            {actionStatsLoading ? "Calculating..." : "Recalculate"}
+          </button>
+        </div>
+        <div className="relative p-4">
+          {actionStatsLoading && actionStats.length === 0 && (
+            <p className="text-sm text-gray-600">Loading action stats...</p>
+          )}
+          {!actionStatsLoading && actionStats.length === 0 && (
+            <p className="text-sm text-gray-600">
+              No action stats available. Click Recalculate to generate.
+            </p>
+          )}
+          {actionBarsGeometry && chartActionStats.length > 0 && (
+            <svg
+              viewBox={`0 0 ${actionBarsGeometry.width} ${actionBarsGeometry.height}`}
+              className="w-full"
+            >
+              {/* X axis grid lines */}
+              <g>
+                {actionBarsGeometry.xTicks.map((tick) => (
+                  <g key={`x-${tick}`}>
+                    <line
+                      x1={actionBarsGeometry.xScale(tick)}
+                      x2={actionBarsGeometry.xScale(tick)}
+                      y1={actionBarsGeometry.margin.top}
+                      y2={
+                        actionBarsGeometry.height -
+                        actionBarsGeometry.margin.bottom
+                      }
+                      stroke="#f3f4f6"
+                    />
+                    <text
+                      x={actionBarsGeometry.xScale(tick)}
+                      y={
+                        actionBarsGeometry.height -
+                        actionBarsGeometry.margin.bottom +
+                        20
+                      }
+                      textAnchor="middle"
+                      className="fill-gray-600 text-xs"
+                    >
+                      {tick}
+                    </text>
+                  </g>
+                ))}
+              </g>
+
+              {/* Bars */}
+              {chartActionStats.map((action, idx) => {
+                const y =
+                  actionBarsGeometry.margin.top +
+                  idx * (actionBarsGeometry.barHeight + actionBarsGeometry.gap);
+                const joinedWidth =
+                  actionBarsGeometry.xScale(action.usersJoined) -
+                  actionBarsGeometry.margin.left;
+                const completedWidth =
+                  actionBarsGeometry.xScale(action.usersCompleted) -
+                  actionBarsGeometry.margin.left;
+                const isHovered =
+                  hoveredActionBar?.actionId === action.actionId;
+
+                return (
+                  <g
+                    key={action.actionId}
+                    onMouseEnter={() => setHoveredActionBar(action)}
+                    onMouseLeave={() => setHoveredActionBar(null)}
+                    className="cursor-pointer"
+                  >
+                    {/* Invisible hover target for the full row */}
+                    <rect
+                      x={0}
+                      y={y - actionBarsGeometry.gap / 2}
+                      width={actionBarsGeometry.width}
+                      height={
+                        actionBarsGeometry.barHeight + actionBarsGeometry.gap
+                      }
+                      fill="transparent"
+                    />
+
+                    {/* Action name */}
+                    <text
+                      x={actionBarsGeometry.margin.left - 8}
+                      y={y + actionBarsGeometry.barHeight / 2}
+                      textAnchor="end"
+                      dominantBaseline="middle"
+                      className={`text-xs ${
+                        isHovered
+                          ? "fill-gray-900 font-semibold"
+                          : "fill-gray-700"
+                      }`}
+                    >
+                      {action.actionName.length > 25
+                        ? action.actionName.substring(0, 22) + "..."
+                        : action.actionName}
+                    </text>
+
+                    {/* Joined bar (background) */}
+                    <rect
+                      x={actionBarsGeometry.margin.left}
+                      y={y}
+                      width={Math.max(joinedWidth, 0)}
+                      height={actionBarsGeometry.barHeight}
+                      rx={4}
+                      fill={isHovered ? "#d1d5db" : "#e5e7eb"}
+                    />
+
+                    {/* Completed bar (foreground) */}
+                    <rect
+                      x={actionBarsGeometry.margin.left}
+                      y={y}
+                      width={Math.max(completedWidth, 0)}
+                      height={actionBarsGeometry.barHeight}
+                      rx={4}
+                      fill={isHovered ? "#15803d" : "#16a34a"}
+                    />
+
+                    {/* Completion rate label */}
+                    <text
+                      x={
+                        actionBarsGeometry.margin.left +
+                        Math.max(joinedWidth, completedWidth) +
+                        8
+                      }
+                      y={y + actionBarsGeometry.barHeight / 2}
+                      dominantBaseline="middle"
+                      className="fill-gray-600 text-xs"
+                    >
+                      {action.usersCompleted}/{action.usersJoined}{" "}
+                      {action.usersJoined > 0
+                        ? `(${Math.round(action.completionRate * 100)}%)`
+                        : ""}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          )}
+
+          {/* Hover tooltip */}
+          {hoveredActionBar && (
+            <div className="absolute top-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 min-w-[200px] pointer-events-none">
+              <p className="font-semibold text-gray-900 mb-2 max-w-[350px]">
+                {hoveredActionBar.actionName}
+              </p>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Completed:</span>
+                  <span className="font-medium text-green-600">
+                    {hoveredActionBar.usersCompleted}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Joined:</span>
+                  <span className="font-medium text-gray-700">
+                    {hoveredActionBar.usersJoined}
+                  </span>
+                </div>
+                <div className="flex justify-between border-t pt-1 mt-1">
+                  <span className="text-gray-600">Rate:</span>
+                  <span className="font-semibold text-gray-900">
+                    {hoveredActionBar.usersJoined > 0
+                      ? `${Math.round(hoveredActionBar.completionRate * 100)}%`
+                      : "N/A"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Legend */}
+        <div className="flex items-center gap-6 px-4 pb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-green-600" />
+            <span className="text-sm text-gray-600">Completed</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-gray-300" />
+            <span className="text-sm text-gray-600">Joined (Expected)</span>
+          </div>
+        </div>
       </div>
+
+      <div className="border border-gray-200 rounded-lg overflow-hidden min-w-[1000px]">
+        <button
+          onClick={() => setDailyStatsTableOpen(!dailyStatsTableOpen)}
+          className="w-full px-4 py-3 bg-gray-50 flex items-center justify-between hover:bg-gray-100 transition-colors"
+        >
+          <span className="font-semibold text-gray-900">
+            Daily Stats ({parsedStats.length} days)
+          </span>
+          <svg
+            className={`w-5 h-5 text-gray-500 transition-transform ${
+              dailyStatsTableOpen ? "rotate-180" : ""
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
+        {dailyStatsTableOpen && (
+          <div className="overflow-auto">
+            <table className="min-w-full divide-y divide-gray-200 text-sm">
+              <thead className="bg-gray-50">
+                <tr className="text-gray-600">
+                  <th className="px-4 py-3 text-left font-semibold">Date</th>
+                  <th className="px-4 py-3 text-left font-semibold">
+                    Actions completed
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold">
+                    Anon forms
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold">
+                    Members signed
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold">
+                    Invites created
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold">
+                    Invites accepted
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold">
+                    Suspended
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 bg-white">
+                {[...parsedStats].reverse().map((day) => (
+                  <tr
+                    key={day.dayId}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+                      {fullDateFormatter.format(day.parsedDate)}
+                    </td>
+                    <td className="px-4 py-3">{day.actionsCompleted}</td>
+                    <td className="px-4 py-3">{day.anonFormSubmissions}</td>
+                    <td className="px-4 py-3">{day.signedMembers}</td>
+                    <td className="px-4 py-3">{day.invitesCreated}</td>
+                    <td className="px-4 py-3">{day.invitesAccepted}</td>
+                    <td className="px-4 py-3">{day.suspendedMembers}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {actionStats.length > 0 && (
+        <div className="border border-gray-200 rounded-lg overflow-hidden min-w-[800px]">
+          <button
+            onClick={() => setActionStatsTableOpen(!actionStatsTableOpen)}
+            className="w-full px-4 py-3 bg-gray-50 flex items-center justify-between hover:bg-gray-100 transition-colors"
+          >
+            <span className="font-semibold text-gray-900">
+              Action Stats ({actionStats.length} actions)
+            </span>
+            <svg
+              className={`w-5 h-5 text-gray-500 transition-transform ${
+                actionStatsTableOpen ? "rotate-180" : ""
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+          {actionStatsTableOpen && (
+            <div className="overflow-auto">
+              <table className="min-w-full divide-y divide-gray-200 text-sm">
+                <thead className="bg-gray-50">
+                  <tr className="text-gray-600">
+                    <th className="px-4 py-3 text-left font-semibold">
+                      Action
+                    </th>
+                    <th className="px-4 py-3 text-left font-semibold">
+                      Completed
+                    </th>
+                    <th className="px-4 py-3 text-left font-semibold">
+                      Joined
+                    </th>
+                    <th className="px-4 py-3 text-left font-semibold">
+                      Completion Rate
+                    </th>
+                    <th className="px-4 py-3 text-left font-semibold">
+                      Action Date
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 bg-white">
+                  {actionStats.map((action) => (
+                    <tr
+                      key={action.actionId}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-4 py-3 font-medium text-gray-900">
+                        {action.actionName}
+                      </td>
+                      <td className="px-4 py-3 text-green-600 font-medium">
+                        {action.usersCompleted}
+                      </td>
+                      <td className="px-4 py-3">{action.usersJoined}</td>
+                      <td className="px-4 py-3">
+                        {action.usersJoined > 0 ? (
+                          <span
+                            className={
+                              action.completionRate >= 0.9
+                                ? "text-green-600 font-medium"
+                                : action.completionRate >= 0.7
+                                ? "text-yellow-600"
+                                : "text-red-600"
+                            }
+                          >
+                            {Math.round(action.completionRate * 100)}%
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">N/A</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                        {action.memberActionStartDate
+                          ? new Date(
+                              action.memberActionStartDate
+                            ).toLocaleDateString()
+                          : "N/A"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

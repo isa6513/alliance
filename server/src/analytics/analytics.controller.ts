@@ -1,8 +1,9 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
 import { TimeSpentForUserDto } from './timespent.dto';
 import { DailyStatsRecord } from './dailystats.entity';
+import { ActionStatsRecord } from './actionstats.entity';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 
 @Controller('analytics')
@@ -31,5 +32,20 @@ export class AnalyticsController {
     @Query('endDate') endDate: string,
   ) {
     return this.analyticsService.getDailyStats(startDate, endDate);
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('action-stats')
+  @ApiOkResponse({ type: [ActionStatsRecord] })
+  getActionStats(): Promise<ActionStatsRecord[]> {
+    return this.analyticsService.getActionStats();
+  }
+
+  @UseGuards(AdminGuard)
+  @Post('action-stats/recalculate')
+  @ApiOkResponse({ type: [ActionStatsRecord] })
+  async recalculateActionStats(): Promise<ActionStatsRecord[]> {
+    await this.analyticsService.calculateActionStats();
+    return this.analyticsService.getActionStats();
   }
 }

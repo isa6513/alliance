@@ -3,6 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { UserService } from 'src/user/user.service';
 import { TimeSpentForUserDto } from './timespent.dto';
 import { DailyStatsRecord } from './dailystats.entity';
+import { ActionStatsRecord } from './actionstats.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, IsNull, Repository } from 'typeorm';
 import {
@@ -16,6 +17,8 @@ import {
 import { User } from 'src/user/entities/user.entity';
 import { ContractEventType } from 'src/user/entities/contract-event.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import { Action } from 'src/actions/entities/action.entity';
+import { ActionStatus } from 'src/actions/entities/action-event.entity';
 
 @Injectable()
 export class AnalyticsService {
@@ -73,6 +76,8 @@ ORDER BY pp.total_session_duration_seconds DESC
     private readonly userService: UserService,
     @InjectRepository(DailyStatsRecord)
     private readonly dailyStatsRepository: Repository<DailyStatsRecord>,
+    @InjectRepository(ActionStatsRecord)
+    private readonly actionStatsRepository: Repository<ActionStatsRecord>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(ActionActivity)
@@ -81,6 +86,8 @@ ORDER BY pp.total_session_duration_seconds DESC
     private readonly onetimeInviteRepository: Repository<OnetimeInvite>,
     @InjectRepository(FormResponse)
     private readonly formResponseRepository: Repository<FormResponse>,
+    @InjectRepository(Action)
+    private readonly actionRepository: Repository<Action>,
   ) {
     if (!process.env.POSTHOG_QUERY_KEY || !process.env.POSTHOG_PROJECT_ID) {
       this.logger.warn('POSTHOG_QUERY_KEY or POSTHOG_PROJECT_ID is not set');
@@ -88,6 +95,8 @@ ORDER BY pp.total_session_duration_seconds DESC
     }
     this.API_KEY = process.env.POSTHOG_QUERY_KEY;
     this.PROJECT_ID = process.env.POSTHOG_PROJECT_ID;
+
+    this.calculateActionStats();
   }
 
   async getPosthogData(
@@ -238,6 +247,119 @@ ORDER BY pp.total_session_duration_seconds DESC
       where: {
         date: Between(new Date(startDate), new Date(endDate)),
       },
+    });
+  }
+
+  private getActionCompletedDate(action: Action): Date | null {
+    if (!action.events) return null;
+
+    const completedStatuses = [
+      ActionStatus.Completed,
+      ActionStatus.Failed,
+      ActionStatus.Abandoned,
+      ActionStatus.Resolution,
+    ];
+
+    const completedEvent = action.events
+      .filter(
+        (e) => completedStatuses.includes(e.newStatus) && e.date < new Date(),
+      )
+      .sort((a, b) => b.date.getTime() - a.date.getTime())[0];
+
+    return completedEvent?.date ?? null;
+  }
+
+  @Cron('0 9 * * *') // Daily at 9 AM
+  async calculateActionStats() {
+    this.logger.log('Starting action stats calculation');
+
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const actions = await this.actionRepository.find({
+      relations: { events: true },
+    });
+
+    for (const action of actions) {
+      // Skip draft actions
+      if (action.status === ActionStatus.Draft) {
+        continue;
+      }
+
+      // Check if action has been completed more than 1 week ago
+      const completedDate = this.getActionCompletedDate(action);
+      if (completedDate && completedDate < oneWeekAgo) {
+        // Skip recalculating for old completed actions
+        continue;
+      }
+
+      const usersJoined = action.usersJoined;
+      const usersCompleted = action.usersCompleted;
+      const completionRate = usersJoined > 0 ? usersCompleted / usersJoined : 0;
+
+      // Find member_action event dates
+      const sortedEvents = (action.events ?? []).sort(
+        (a, b) => a.date.getTime() - b.date.getTime(),
+      );
+      const memberActionEvent = sortedEvents.find(
+        (e) => e.newStatus === ActionStatus.MemberAction,
+      );
+      const memberActionStartDate = memberActionEvent?.date ?? null;
+
+      // Find the end date (first event after member_action that changes status)
+      let memberActionEndDate: Date | null = null;
+      if (memberActionEvent) {
+        const endEvent = sortedEvents.find(
+          (e) =>
+            e.date > memberActionEvent.date &&
+            e.newStatus !== ActionStatus.MemberAction,
+        );
+        memberActionEndDate = endEvent?.date ?? null;
+      }
+
+      // Determine if action should show in chart:
+      // - not publicOnly
+      // - has a member_action event
+      const showInChart = !action.publicOnly && !!memberActionEvent;
+
+      const existingRecord = await this.actionStatsRepository.findOne({
+        where: { actionId: action.id },
+      });
+
+      if (existingRecord) {
+        existingRecord.actionName = action.name;
+        existingRecord.usersCompleted = usersCompleted;
+        existingRecord.usersJoined = usersJoined;
+        existingRecord.completionRate = completionRate;
+        existingRecord.lastCalculatedAt = now;
+        existingRecord.actionCompletedAt = completedDate ?? undefined;
+        existingRecord.showInChart = showInChart;
+        existingRecord.memberActionStartDate = memberActionStartDate ?? undefined;
+        existingRecord.memberActionEndDate = memberActionEndDate ?? undefined;
+        await this.actionStatsRepository.save(existingRecord);
+      } else {
+        const newRecord = this.actionStatsRepository.create({
+          actionId: action.id,
+          actionName: action.name,
+          usersCompleted,
+          usersJoined,
+          completionRate,
+          lastCalculatedAt: now,
+          actionCompletedAt: completedDate ?? undefined,
+          showInChart,
+          memberActionStartDate: memberActionStartDate ?? undefined,
+          memberActionEndDate: memberActionEndDate ?? undefined,
+        });
+        await this.actionStatsRepository.save(newRecord);
+      }
+    }
+
+    this.logger.log('Finished action stats calculation');
+  }
+
+  async getActionStats(): Promise<ActionStatsRecord[]> {
+    return this.actionStatsRepository.find({
+      order: { actionId: 'ASC' },
     });
   }
 }
