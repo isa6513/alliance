@@ -317,7 +317,10 @@ ORDER BY pp.total_session_duration_seconds DESC
       // Determine if action should show in chart:
       // - not publicOnly
       // - has a member_action event
-      const showInChart = !action.publicOnly && !!memberActionEvent;
+      const showInChart =
+        !action.publicOnly &&
+        !!memberActionEvent &&
+        !action.everyoneShouldComplete;
 
       const existingRecord = await this.actionStatsRepository.findOne({
         where: { actionId: action.id },
