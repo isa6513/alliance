@@ -120,12 +120,16 @@ const MessageInput = ({
     [handleFilesSelected]
   );
 
+  const triggerSend = useCallback(() => {
+    if (!isSending && canSend) {
+      onSend();
+    }
+  }, [isSending, canSend, onSend]);
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (!isSending && canSend) {
-        onSend();
-      }
+      triggerSend();
     }
     if (e.key === "Escape") {
       clearReplyingTo();
@@ -239,7 +243,7 @@ const MessageInput = ({
                 <Plus size={18} />
               </Button>
               <Button
-                onClick={onSend}
+                onClick={triggerSend}
                 color={ButtonColor.Transparent}
                 hoverText="Send message"
                 className="!px-2 h-full"
