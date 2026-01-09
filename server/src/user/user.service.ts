@@ -689,7 +689,9 @@ export class UserService {
     endDate: Date,
     reason: UserAwayRangeReason,
     note?: string,
+    options?: { validateStartDate?: boolean },
   ): void {
+    const { validateStartDate = true } = options ?? {};
     const now = new Date();
 
     if (startDate.getTime() >= endDate.getTime()) {
@@ -697,7 +699,10 @@ export class UserService {
     }
 
     // buffer to let ranges start in the current day
-    if (startDate.getTime() + 1000 * 60 * 60 * 24 < now.getTime()) {
+    if (
+      validateStartDate &&
+      startDate.getTime() + 1000 * 60 * 60 * 24 < now.getTime()
+    ) {
       throw new BadRequestException('Start date must be in the future.');
     }
 
@@ -820,6 +825,7 @@ export class UserService {
       awayRange.endDate,
       awayRange.reason,
       awayRange.note,
+      { validateStartDate: false },
     );
 
     return this.userAwayRangeRepository.save(awayRange);
