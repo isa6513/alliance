@@ -332,6 +332,7 @@ const HomePage = () => {
     nextWeekTodoActions,
     remainingTasksEstimatedTimeCurrentWeek,
     todoActions.length,
+    posts,
     numTodo,
     visibleFriendActivityCount,
   ]);
