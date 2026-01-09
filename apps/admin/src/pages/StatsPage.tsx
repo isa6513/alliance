@@ -2,11 +2,15 @@ import {
   analyticsGetDailyStats,
   analyticsGetActionStats,
   analyticsRecalculateActionStats,
+  analyticsGetMemberCompletionRetention,
 } from "@alliance/shared/client";
 import {
   DailyStatsRecord,
   ActionStatsRecord,
+  MemberCompletionRetentionCohortDto,
+  MemberCompletionRetentionPointDto,
 } from "@alliance/shared/client/types.gen";
+import chroma from "chroma-js";
 import * as d3 from "d3";
 import React, {
   useCallback,
@@ -99,8 +103,12 @@ const StatsPage: React.FC = () => {
   const [queryRange, setQueryRange] = useState(defaultRange);
   const [stats, setStats] = useState<DailyStatsRecord[]>([]);
   const [actionStats, setActionStats] = useState<ActionStatsRecord[]>([]);
+  const [retentionCohorts, setRetentionCohorts] = useState<
+    MemberCompletionRetentionCohortDto[]
+  >([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [actionStatsLoading, setActionStatsLoading] = useState<boolean>(false);
+  const [retentionLoading, setRetentionLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hoveredDay, setHoveredDay] = useState<ParsedDailyStats | null>(null);
   const [hoveredActionsDay, setHoveredActionsDay] =
@@ -113,6 +121,11 @@ const StatsPage: React.FC = () => {
     date: Date;
     avgRate: number;
     actionCount: number;
+  } | null>(null);
+  const [hoveredRetentionPoint, setHoveredRetentionPoint] = useState<{
+    cohort: MemberCompletionRetentionCohortDto;
+    point: MemberCompletionRetentionPointDto;
+    color: string;
   } | null>(null);
   const [completionRateRange, setCompletionRateRange] = useState(() => {
     const end = new Date();
@@ -187,6 +200,19 @@ const StatsPage: React.FC = () => {
     }
   }, []);
 
+  const loadRetentionCohorts = useCallback(async () => {
+    setRetentionLoading(true);
+    try {
+      const response = await analyticsGetMemberCompletionRetention();
+      console.log("response", response);
+      setRetentionCohorts(response.data ?? []);
+    } catch (err) {
+      console.error("Failed to load retention cohorts", err);
+    } finally {
+      setRetentionLoading(false);
+    }
+  }, []);
+
   const handleRecalculateActionStats = useCallback(async () => {
     setActionStatsLoading(true);
     try {
@@ -202,6 +228,10 @@ const StatsPage: React.FC = () => {
   useEffect(() => {
     void loadActionStats();
   }, [loadActionStats]);
+
+  useEffect(() => {
+    void loadRetentionCohorts();
+  }, [loadRetentionCohorts]);
 
   const parsedStats = useMemo<ParsedDailyStats[]>(() => {
     return stats
@@ -467,6 +497,83 @@ const StatsPage: React.FC = () => {
       yTicks,
     };
   }, [cumulativeCompletionData, completionRateRange]);
+
+  const sortedRetentionCohorts = useMemo(() => {
+    return retentionCohorts
+      .map((cohort) => ({
+        ...cohort,
+        points: [...cohort.points].sort((a, b) => a.weekIndex - b.weekIndex),
+      }))
+      .sort(
+        (a, b) =>
+          new Date(a.cohortStart).getTime() - new Date(b.cohortStart).getTime()
+      );
+  }, [retentionCohorts]);
+
+  const filteredRetentionCohorts = useMemo(() => {
+    return sortedRetentionCohorts.filter((cohort) =>
+      cohort.points.some((point) => point.completedCount > 0)
+    );
+  }, [sortedRetentionCohorts]);
+
+  const retentionChartGeometry = useMemo(() => {
+    if (filteredRetentionCohorts.length === 0) return null;
+
+    const width = 1000;
+    const height = 360;
+    const margin = { top: 28, right: 32, bottom: 64, left: 72 };
+
+    const maxWeekIndex =
+      d3.max(filteredRetentionCohorts, (cohort) =>
+        d3.max(cohort.points, (point) => point.weekIndex)
+      ) ?? 0;
+    const maxWeek = Math.max(maxWeekIndex, 1);
+
+    const xScale = d3
+      .scaleLinear()
+      .domain([0, maxWeek])
+      .range([margin.left, width - margin.right]);
+
+    const yScale = d3
+      .scaleLinear()
+      .domain([0, 1])
+      .range([height - margin.bottom, margin.top]);
+
+    const line = d3
+      .line<MemberCompletionRetentionPointDto>()
+      .x((d) => xScale(d.weekIndex))
+      .y((d) => yScale(d.completionRate))
+      .curve(d3.curveMonotoneX);
+
+    const cohortDates = filteredRetentionCohorts.map((cohort) =>
+      new Date(cohort.cohortStart).getTime()
+    );
+    const minDate = d3.min(cohortDates) ?? Date.now();
+    const maxDate = d3.max(cohortDates) ?? Date.now();
+    const colorScale = chroma
+      .scale(chroma.brewer.Spectral)
+      .domain([maxDate, minDate]);
+
+    const lines = filteredRetentionCohorts.map((cohort) => ({
+      cohort,
+      color: colorScale(new Date(cohort.cohortStart).getTime()).hex(),
+      path: line(cohort.points) ?? "",
+    }));
+
+    const xTicks = xScale.ticks(Math.min(8, maxWeek + 1));
+    const yTicks = [0, 0.25, 0.5, 0.75, 1];
+
+    return {
+      width,
+      height,
+      margin,
+      xScale,
+      yScale,
+      xTicks,
+      yTicks,
+      lines,
+    };
+  }, [filteredRetentionCohorts]);
 
   const activeDay = hoveredDay ?? parsedStats[parsedStats.length - 1];
   const activeActionsDay =
@@ -1425,6 +1532,182 @@ const StatsPage: React.FC = () => {
                 )}
               </svg>
             )}
+        </div>
+      </div>
+
+      {/* Cohort Completion Retention Chart */}
+      <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+          <h3 className="font-semibold text-gray-900">
+            Cohort Completion Reliability
+          </h3>
+        </div>
+        <div className="relative p-4">
+          {retentionLoading && filteredRetentionCohorts.length === 0 && (
+            <p className="text-sm text-gray-600">Loading retention data...</p>
+          )}
+          {!retentionLoading && filteredRetentionCohorts.length === 0 && (
+            <p className="text-sm text-gray-600">
+              No cohorts have completions yet.
+            </p>
+          )}
+          {retentionChartGeometry && filteredRetentionCohorts.length > 0 && (
+            <div className="relative min-w-[600px]">
+              <svg
+                viewBox={`0 0 ${retentionChartGeometry.width} ${retentionChartGeometry.height}`}
+                className="w-full"
+              >
+                <g>
+                  {retentionChartGeometry.yTicks.map((tick) => (
+                    <g key={`retention-y-${tick}`}>
+                      <line
+                        x1={retentionChartGeometry.margin.left}
+                        x2={
+                          retentionChartGeometry.width -
+                          retentionChartGeometry.margin.right
+                        }
+                        y1={retentionChartGeometry.yScale(tick)}
+                        y2={retentionChartGeometry.yScale(tick)}
+                        stroke="#e5e7eb"
+                        strokeDasharray="4 6"
+                      />
+                      <text
+                        x={retentionChartGeometry.margin.left - 12}
+                        y={retentionChartGeometry.yScale(tick)}
+                        textAnchor="end"
+                        dominantBaseline="middle"
+                        className="fill-gray-500 text-xs"
+                      >
+                        {Math.round(tick * 100)}%
+                      </text>
+                    </g>
+                  ))}
+                  {retentionChartGeometry.xTicks.map((tick) => (
+                    <g key={`retention-x-${tick}`}>
+                      <line
+                        x1={retentionChartGeometry.xScale(tick)}
+                        x2={retentionChartGeometry.xScale(tick)}
+                        y1={retentionChartGeometry.margin.top}
+                        y2={
+                          retentionChartGeometry.height -
+                          retentionChartGeometry.margin.bottom
+                        }
+                        stroke="#f3f4f6"
+                      />
+                      <text
+                        x={retentionChartGeometry.xScale(tick)}
+                        y={
+                          retentionChartGeometry.height -
+                          retentionChartGeometry.margin.bottom +
+                          24
+                        }
+                        textAnchor="middle"
+                        className="fill-gray-600 text-xs"
+                      >
+                        {Math.round(tick)}w
+                      </text>
+                    </g>
+                  ))}
+                </g>
+
+                {retentionChartGeometry.lines.map(({ cohort, color, path }) => {
+                  const isHovered =
+                    hoveredRetentionPoint?.cohort.cohortStart ===
+                    cohort.cohortStart;
+                  return (
+                    <path
+                      key={cohort.cohortStart}
+                      d={path}
+                      fill="none"
+                      stroke={color}
+                      strokeWidth={isHovered ? 3.2 : 2.2}
+                      opacity={
+                        hoveredRetentionPoint ? (isHovered ? 1 : 0.25) : 1
+                      }
+                    />
+                  );
+                })}
+
+                {retentionChartGeometry.lines.flatMap(({ cohort, color }) =>
+                  cohort.points.map((point) => {
+                    const isHovered =
+                      hoveredRetentionPoint?.cohort.cohortStart ===
+                        cohort.cohortStart &&
+                      hoveredRetentionPoint?.point.weekIndex ===
+                        point.weekIndex;
+                    return (
+                      <circle
+                        key={`${cohort.cohortStart}-${point.weekIndex}`}
+                        cx={retentionChartGeometry.xScale(point.weekIndex)}
+                        cy={retentionChartGeometry.yScale(point.completionRate)}
+                        r={isHovered ? 5 : 3}
+                        fill="white"
+                        stroke={color}
+                        strokeWidth={2}
+                        className="cursor-pointer"
+                        onMouseEnter={() =>
+                          setHoveredRetentionPoint({
+                            cohort,
+                            point,
+                            color,
+                          })
+                        }
+                        onMouseLeave={() => setHoveredRetentionPoint(null)}
+                      />
+                    );
+                  })
+                )}
+              </svg>
+
+              {hoveredRetentionPoint && (
+                <div className="absolute top-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 min-w-[220px] pointer-events-none">
+                  <p className="font-semibold text-gray-900 mb-2">
+                    Week of{" "}
+                    {fullDateFormatter.format(
+                      new Date(
+                        `${hoveredRetentionPoint.cohort.cohortStart}T00:00:00Z`
+                      )
+                    )}
+                  </p>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Weeks since join:</span>
+                      <span className="font-medium text-gray-900">
+                        {hoveredRetentionPoint.point.weekIndex}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Completion rate:</span>
+                      <span className="font-semibold text-gray-900">
+                        {Math.round(
+                          hoveredRetentionPoint.point.completionRate * 100
+                        )}
+                        %
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Completed:</span>
+                      <span className="font-medium text-green-600">
+                        {hoveredRetentionPoint.point.completedCount}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Joined:</span>
+                      <span className="font-medium text-gray-700">
+                        {hoveredRetentionPoint.point.joinedCount}
+                      </span>
+                    </div>
+                    <div className="flex justify-between border-t pt-1 mt-1">
+                      <span className="text-gray-600">Cohort size:</span>
+                      <span className="font-medium text-gray-900">
+                        {hoveredRetentionPoint.cohort.cohortSize}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

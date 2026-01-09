@@ -61,6 +61,7 @@ export class ActionEventRecipientService {
     useManualCohort: boolean;
     user: User;
     userDismissed: boolean;
+    includeSuspended?: boolean;
   }): boolean {
     const {
       eventDate,
@@ -70,6 +71,7 @@ export class ActionEventRecipientService {
       useManualCohort,
       user,
       userDismissed,
+      includeSuspended = false,
     } = params;
 
     if (userDismissed) {
@@ -81,6 +83,9 @@ export class ActionEventRecipientService {
 
     if (!user.tags.some((tag) => targetTagIds.has(tag.id))) {
       return false;
+    }
+    if (includeSuspended) {
+      return true;
     }
     return (
       this.isContractActiveAtDate(user.contractEvents, eventDate) ||
@@ -109,7 +114,9 @@ export class ActionEventRecipientService {
     eventStatus: ActionStatus,
     action: Action,
     eventId: number,
+    options?: { includeSuspended?: boolean },
   ): Promise<User[]> {
+    const includeSuspended = options?.includeSuspended ?? false;
     const targetTagIds = new Set(action.participatingTags.map((tag) => tag.id));
     const events =
       action.events ??
@@ -144,6 +151,7 @@ export class ActionEventRecipientService {
         useManualCohort: action.useManualCohort,
         user,
         userDismissed: usersDismissed.has(user.id),
+        includeSuspended,
       }) &&
       !isUserAwayInRange({
         user,

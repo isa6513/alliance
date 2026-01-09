@@ -64,6 +64,6 @@ import { PushModule } from 'src/push/push.module';
     ReloadUsersJoinedWorker,
     ContractSuspenderWorker,
   ],
-  exports: [ActionsService],
+  exports: [ActionsService, ActionEventRecipientService],
 })
 export class ActionsModule {}

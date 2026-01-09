@@ -1,7 +1,7 @@
 import { MessageDto } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
-import { Plus, X } from "lucide-react";
+import { Plus, Send, X } from "lucide-react";
 import {
   type ClipboardEvent,
   type Dispatch,
@@ -229,13 +229,24 @@ const MessageInput = ({
               <Spinner size="small" />
             </div>
           ) : (
-            <Button
-              onClick={triggerFilePicker}
-              color={ButtonColor.Transparent}
-              className="!px-2"
-            >
-              <Plus size={18} />
-            </Button>
+            <div className="flex flex-row gap-x-1 items-center">
+              <Button
+                onClick={triggerFilePicker}
+                color={ButtonColor.Transparent}
+                className="!px-2"
+                hoverText="Add image"
+              >
+                <Plus size={18} />
+              </Button>
+              <Button
+                onClick={onSend}
+                color={ButtonColor.Transparent}
+                hoverText="Send message"
+                className="!px-2 h-full"
+              >
+                <Send size={17} />
+              </Button>
+            </div>
           )}
         </div>
       </div>

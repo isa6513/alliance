@@ -2149,6 +2149,19 @@ export type ActionStatsRecord = {
     memberActionEndDate?: string;
 };
 
+export type MemberCompletionRetentionPointDto = {
+    weekIndex: number;
+    completionRate: number;
+    joinedCount: number;
+    completedCount: number;
+};
+
+export type MemberCompletionRetentionCohortDto = {
+    cohortStart: string;
+    cohortSize: number;
+    points: Array<MemberCompletionRetentionPointDto>;
+};
+
 export type AppHealthCheckData = {
     body?: never;
     path?: never;
@@ -5431,6 +5444,19 @@ export type AnalyticsRecalculateActionStatsResponses = {
 };
 
 export type AnalyticsRecalculateActionStatsResponse = AnalyticsRecalculateActionStatsResponses[keyof AnalyticsRecalculateActionStatsResponses];
+
+export type AnalyticsGetMemberCompletionRetentionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/member-completion-retention';
+};
+
+export type AnalyticsGetMemberCompletionRetentionResponses = {
+    200: Array<MemberCompletionRetentionCohortDto>;
+};
+
+export type AnalyticsGetMemberCompletionRetentionResponse = AnalyticsGetMemberCompletionRetentionResponses[keyof AnalyticsGetMemberCompletionRetentionResponses];
 
 export type ClientOptions = {
     baseUrl: string;

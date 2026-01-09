@@ -5,6 +5,7 @@ import { TimeSpentForUserDto } from './timespent.dto';
 import { DailyStatsRecord } from './dailystats.entity';
 import { ActionStatsRecord } from './actionstats.entity';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { MemberCompletionRetentionCohortDto } from './member-completion-retention.dto';
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -47,5 +48,12 @@ export class AnalyticsController {
   async recalculateActionStats(): Promise<ActionStatsRecord[]> {
     await this.analyticsService.calculateActionStats();
     return this.analyticsService.getActionStats();
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('member-completion-retention')
+  @ApiOkResponse({ type: [MemberCompletionRetentionCohortDto] })
+  getMemberCompletionRetention(): Promise<MemberCompletionRetentionCohortDto[]> {
+    return this.analyticsService.getMemberCompletionRetentionByCohort();
   }
 }

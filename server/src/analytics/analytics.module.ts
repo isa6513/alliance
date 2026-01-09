@@ -10,10 +10,13 @@ import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { Action } from 'src/actions/entities/action.entity';
+import { ContractEvent } from 'src/user/entities/contract-event.entity';
+import { ActionsModule } from 'src/actions/actions.module';
 
 @Module({
   imports: [
     UserModule,
+    ActionsModule,
     TypeOrmModule.forFeature([
       DailyStatsRecord,
       ActionStatsRecord,
@@ -22,6 +25,7 @@ import { Action } from 'src/actions/entities/action.entity';
       OnetimeInvite,
       FormResponse,
       Action,
+      ContractEvent,
     ]),
   ],
   controllers: [AnalyticsController],

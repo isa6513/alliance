@@ -19,6 +19,12 @@ import { ContractEventType } from 'src/user/entities/contract-event.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
+import { ContractEvent } from 'src/user/entities/contract-event.entity';
+import {
+  MemberCompletionRetentionCohortDto,
+  MemberCompletionRetentionPointDto,
+} from './member-completion-retention.dto';
+import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
 
 @Injectable()
 export class AnalyticsService {
@@ -88,6 +94,9 @@ ORDER BY pp.total_session_duration_seconds DESC
     private readonly formResponseRepository: Repository<FormResponse>,
     @InjectRepository(Action)
     private readonly actionRepository: Repository<Action>,
+    @InjectRepository(ContractEvent)
+    private readonly contractEventRepository: Repository<ContractEvent>,
+    private readonly actionEventRecipientService: ActionEventRecipientService,
   ) {
     if (!process.env.POSTHOG_QUERY_KEY || !process.env.POSTHOG_PROJECT_ID) {
       this.logger.warn('POSTHOG_QUERY_KEY or POSTHOG_PROJECT_ID is not set');
@@ -362,5 +371,159 @@ ORDER BY pp.total_session_duration_seconds DESC
     return this.actionStatsRepository.find({
       order: { actionId: 'ASC' },
     });
+  }
+
+  private getWeekStartDate(date: Date): Date {
+    const utcDate = new Date(
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+    );
+    const day = utcDate.getUTCDay();
+    const diff = (day + 6) % 7;
+    utcDate.setUTCDate(utcDate.getUTCDate() - diff);
+    return utcDate;
+  }
+
+  private formatDateKey(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
+  async getMemberCompletionRetentionByCohort(): Promise<
+    MemberCompletionRetentionCohortDto[]
+  > {
+    const signedEvents = await this.contractEventRepository
+      .createQueryBuilder('event')
+      .select('user.id', 'userId')
+      .addSelect('MIN(event.date)', 'signedAt')
+      .innerJoin('event.user', 'user')
+      .where('event.type = :type', { type: ContractEventType.SIGNED })
+      .groupBy('user.id')
+      .getRawMany<{ userId: number; signedAt: string }>();
+
+    const memberSignedAtByUserId = new Map<number, Date>();
+    const cohortMembers = new Map<string, Set<number>>();
+
+    for (const row of signedEvents) {
+      const userId = Number(row.userId);
+      if (Number.isNaN(userId)) {
+        continue;
+      }
+      const signedAt = new Date(row.signedAt);
+      if (Number.isNaN(signedAt.getTime())) {
+        continue;
+      }
+      memberSignedAtByUserId.set(userId, signedAt);
+      const cohortKey = this.formatDateKey(this.getWeekStartDate(signedAt));
+      const members = cohortMembers.get(cohortKey) ?? new Set<number>();
+      members.add(userId);
+      cohortMembers.set(cohortKey, members);
+    }
+
+    if (memberSignedAtByUserId.size === 0) {
+      console.log('No signed users found');
+      return [];
+    }
+
+    const completionActivities = await this.actionActivityRepository.find({
+      where: { type: ActionActivityType.USER_COMPLETED },
+      select: { userId: true, actionId: true },
+    });
+
+    const completedLookup = new Set<string>();
+    for (const activity of completionActivities) {
+      completedLookup.add(`${activity.userId}:${activity.actionId}`);
+    }
+
+    const cohortWeekTotals = new Map<
+      string,
+      Map<number, { joinedCount: number; completedCount: number }>
+    >();
+    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+    const actions = await this.actionRepository.find({
+      relations: { events: true, participatingTags: true },
+    });
+    const now = new Date();
+
+    for (const action of actions) {
+      if (action.publicOnly) {
+        continue;
+      }
+      const memberActionEvent = (action.events ?? [])
+        .filter(
+          (event) =>
+            event.newStatus === ActionStatus.MemberAction && event.date <= now,
+        )
+        .sort((a, b) => a.date.getTime() - b.date.getTime())[0];
+
+      if (!memberActionEvent) {
+        continue;
+      }
+
+      const baseUsers = await this.actionEventRecipientService.getBaseUsersForEvent(
+        ActionStatus.MemberAction,
+        action,
+        memberActionEvent.id,
+        { includeSuspended: true },
+      );
+
+      for (const user of baseUsers) {
+        const signedAt = memberSignedAtByUserId.get(user.id);
+        if (!signedAt || signedAt > memberActionEvent.date) {
+          continue;
+        }
+        const rawWeekIndex = Math.floor(
+          (memberActionEvent.date.getTime() - signedAt.getTime()) / msPerWeek,
+        );
+        const weekIndex = Math.max(0, rawWeekIndex);
+        const cohortKey = this.formatDateKey(this.getWeekStartDate(signedAt));
+
+        const weekMap =
+          cohortWeekTotals.get(cohortKey) ??
+          new Map<number, { joinedCount: number; completedCount: number }>();
+        const bucket = weekMap.get(weekIndex) ?? {
+          joinedCount: 0,
+          completedCount: 0,
+        };
+        bucket.joinedCount += 1;
+        if (completedLookup.has(`${user.id}:${action.id}`)) {
+          bucket.completedCount += 1;
+        }
+        weekMap.set(weekIndex, bucket);
+        cohortWeekTotals.set(cohortKey, weekMap);
+      }
+    }
+
+    return Array.from(cohortWeekTotals.entries())
+      .sort(
+        ([cohortA], [cohortB]) =>
+          new Date(cohortA).getTime() - new Date(cohortB).getTime(),
+      )
+      .map(([cohortStart, weekMap]) => {
+        const weeks = Array.from(weekMap.entries()).sort(
+          ([weekA], [weekB]) => weekA - weekB,
+        );
+        let cumulativeJoined = 0;
+        let cumulativeCompleted = 0;
+        const points: MemberCompletionRetentionPointDto[] = weeks.map(
+          ([weekIndex, counts]) => {
+            cumulativeJoined += counts.joinedCount;
+            cumulativeCompleted += counts.completedCount;
+            return {
+              weekIndex,
+              completionRate:
+                cumulativeJoined > 0
+                  ? cumulativeCompleted / cumulativeJoined
+                  : 0,
+              joinedCount: cumulativeJoined,
+              completedCount: cumulativeCompleted,
+            };
+          },
+        );
+
+        return {
+          cohortStart,
+          cohortSize: cohortMembers.get(cohortStart)?.size ?? 0,
+          points,
+        };
+      });
   }
 }
