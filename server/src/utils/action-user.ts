@@ -156,3 +156,18 @@ export function hasDismissed(params: {
       activity.type === ActionActivityType.USER_DISMISSED,
   );
 }
+
+export function getCurrentActionStatus(params: {
+  action: Pick<Action, 'events'>;
+  currentDate: Date;
+}): ActionStatus | null {
+  const { action, currentDate } = params;
+
+  const latestEventBeforeDate = findLeast(
+    action.events,
+    (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+    (event) => event.date < currentDate,
+  );
+
+  return latestEventBeforeDate && latestEventBeforeDate.newStatus;
+}
