@@ -4,7 +4,8 @@ import {
   actionsFindAllLoggedIn,
   userGetAwayRanges,
 } from "@alliance/shared/client";
-import { colors, Text } from "../../components/system";
+import { colors } from "../../lib/style/colors";
+import Text from "../../components/system/Text";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import LargeActionCard from "../../components/LargeActionCard";
 import useActivities, {
@@ -98,9 +99,11 @@ export default function HomeScreen() {
 
   return (
     <ScrollView ref={scrollViewRef} className="flex-1 bg-white">
-      <Text className="text-green text-lg font-semibold p-6 mt-2 pb-0">
-        Current task
-      </Text>
+      <View className="bg-green p-4 pt-11">
+        <Text className="text-white font-bold text-base mt-2 pb-0">
+          Current task
+        </Text>
+      </View>
       <View className="">
         {!currentTask ? (
           <Text className="text-red-500 text-center py-4">{error}</Text>

@@ -3,7 +3,8 @@ import { Linking, Image, View } from "react-native";
 import Markdown, { RenderRules } from "react-native-markdown-display";
 import { RelativePathString, router } from "expo-router";
 import { getApiUrl } from "../lib/config";
-import { colors, Text } from "./system";
+import { colors } from "../lib/style/colors";
+import Text from "./system/Text";
 
 /**
  * Route patterns that can be handled internally by the mobile app.

@@ -12,7 +12,7 @@ import { ActivityIndicator, View } from "react-native";
 import { useAuth } from "../lib/AuthContext";
 import { usePostHog } from "posthog-react-native";
 import SuccessOverlay from "./SuccessOverlay";
-import { Text } from "./system";
+import Text from "./system/Text";
 
 interface ActionTaskPanelFormProps {
   taskFormId: number;

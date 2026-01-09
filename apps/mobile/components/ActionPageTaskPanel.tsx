@@ -7,7 +7,8 @@ import {
   getActionPageTaskPanelState,
 } from "@alliance/shared/lib/actionPageTaskPanel";
 import ActionTaskPanel from "./ActionTaskPanel";
-import { Card, CardStyle, Text } from "./system";
+import Card, { CardStyle } from "./system/Card";
+import Text from "./system/Text";
 import {
   externalOnly,
   taskDeadlinePassed,

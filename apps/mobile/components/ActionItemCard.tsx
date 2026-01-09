@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity, Image } from "react-native";
-import { Text } from "./system";
+import Text from "./system/Text";
 import { MousePointerClick, Check } from "lucide-react-native";
 import { ActionCompletedBarWithInfo } from "./ActionCompletedBarWithInfo";
 import {
@@ -40,7 +40,6 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   action,
   onPress,
   friendCommitmentActivities,
-  index,
 }) => {
   return (
     <TouchableOpacity onPress={onPress} className="p-4" activeOpacity={0.7}>

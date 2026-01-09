@@ -155,11 +155,9 @@ const ActionForm: React.FC<ActionFormProps> = ({
     [availableSuites, suitesLoading]
   );
 
-  // Field definitions organized by section
-  // To add a new flag: just add an entry to the "settings" section with type: "checkbox"
   const fieldDefs = useMemo(
     (): FieldDef[] => [
-      // === CONTENT SECTION (includes media) ===
+      // === CONTENT SECTION ===
       {
         name: "name",
         label: "Name",
@@ -204,7 +202,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         gridCol: true,
       },
 
-      // === SETTINGS SECTION (classification + behavior flags) ===
+      // === SETTINGS SECTION  ===
       {
         name: "type",
         label: "Type",
@@ -272,7 +270,6 @@ const ActionForm: React.FC<ActionFormProps> = ({
         show: (f) => !f.commitmentless,
         gridCol: true,
       },
-      // Behavior flags - add new boolean flags here
       {
         name: "commitmentless",
         label: "Use Commitment Mode",
@@ -561,10 +558,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
       </FormSection>
 
       {/* SETTINGS SECTION */}
-      <FormSection
-        title="Settings"
-        description="Type, category, visibility, and behavior flags"
-      >
+      <FormSection title="Settings">
         <div className="space-y-4">{renderFieldsWithGrid(settingsFields)}</div>
       </FormSection>
 
@@ -690,7 +684,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         )} */}
         <button
           type="submit"
-          className="px-4 py-2 bg-green text-white rounded-md hover:green/80 focus:outline-none focus:ring-2 focus:ring-green focus:ring-offset-2 text-sm font-medium"
+          className="px-4 py-2 mr-3 bg-green text-white rounded-md hover:scale-102 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green focus:ring-offset-2 text-sm font-medium"
           disabled={saving}
         >
           {saving

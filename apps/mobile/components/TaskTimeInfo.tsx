@@ -4,7 +4,7 @@ import {
   TaskTimeInfoPropsShared,
 } from "@alliance/shared/lib/taskTimeInfo";
 import { View } from "react-native";
-import { Text } from "./system";
+import Text from "./system/Text";
 import { ClockIcon, Calendar } from "lucide-react-native";
 
 const TaskTimeInfo = ({

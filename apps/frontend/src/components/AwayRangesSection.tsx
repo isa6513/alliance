@@ -5,6 +5,7 @@ import {
   userDeleteAwayRange,
   userGetAwayRanges,
 } from "@alliance/shared/client";
+import { awayRangesDescription } from "@alliance/shared/lib/copy";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import FormInput from "@alliance/sharedweb/ui/FormInput";
@@ -150,11 +151,7 @@ const AwayRangesSection: React.FC = () => {
   return (
     <div>
       <h2 className="!font-semibold text-2xl mb-2">Away periods</h2>
-      <p className="text-sm text-zinc-500 mb-4">
-        You can schedule a period of time when you won&apos;t be able to
-        complete Alliance actions. This will let the office know not to expect
-        you to complete tasks while you&apos;re away.
-      </p>
+      <p className="text-sm text-zinc-500 mb-4">{awayRangesDescription}</p>
 
       {awayRanges.length > 0 && (
         <div className="mb-4 space-y-2">
