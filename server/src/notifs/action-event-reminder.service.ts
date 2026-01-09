@@ -309,7 +309,7 @@ export class ActionEventReminderService {
           },
         },
         deadlineEvent: true,
-        users: true,
+        users: { contractEvents: true },
         userTag: true,
         actionSuite: { actions: true },
       },
