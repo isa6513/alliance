@@ -11,7 +11,6 @@ import { Link, href } from "react-router";
 import Card from "@alliance/sharedweb/ui/Card";
 import List from "@alliance/sharedweb/ui/List";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import DeleteIcon from "@alliance/sharedweb/ui/icons/DeleteIcon";
 import { useAuth } from "../lib/AuthContext";
 import { useEffect, useMemo, useState } from "react";
 import CreateIcon from "@alliance/sharedweb/ui/icons/CreateIcon";
