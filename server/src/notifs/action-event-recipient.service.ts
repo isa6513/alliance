@@ -137,6 +137,43 @@ export class ActionEventRecipientService {
     };
   }
 
+  isContractActiveDuringEntireLatestMemberAction(params: {
+    action: Pick<Action, 'events'>;
+    user: Pick<User, 'contractEvents'>;
+  }): boolean {
+    const { action, user } = params;
+    const { event: latestMemberActionEvent, endDate } =
+      this.getLatestMemberActionWithDeadline({
+        action,
+      });
+
+    if (!latestMemberActionEvent) {
+      return false;
+    }
+
+    const latestContractEventBeforeMemberAction = findLeast(
+      user.contractEvents ?? [],
+      (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+      (event) => event.date < latestMemberActionEvent.date,
+    );
+    if (
+      !latestContractEventBeforeMemberAction ||
+      latestContractEventBeforeMemberAction.type === ContractEventType.SUSPENDED
+    ) {
+      return false;
+    }
+
+    const eventsDuringMemberAction = (user.contractEvents ?? []).filter(
+      (event) =>
+        event.date > latestMemberActionEvent.date &&
+        (!endDate || event.date < endDate),
+    );
+
+    return !eventsDuringMemberAction.some(
+      (event) => event.type === ContractEventType.SUSPENDED,
+    );
+  }
+
   getNextEvent(params: {
     events: ActionEvent[];
     currentEventId: number;
