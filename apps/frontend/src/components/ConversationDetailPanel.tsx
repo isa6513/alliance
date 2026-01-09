@@ -349,7 +349,8 @@ const ConversationDetailPanel = ({
     if (mode === "new") return false;
     return selectedConvo.participants.some(
       (participant) =>
-        participant.user.id === user?.id && participant.role === "admin"
+        (participant.user.id === user?.id && participant.role === "admin") ||
+        participant.role === "owner"
     );
   }, [mode, selectedConvo, user]);
 
