@@ -43,7 +43,7 @@ export function hasOverlappingTags(params: {
   return false;
 }
 
-export function getLatestMemberActionWithDeadline(params: {
+export function getLatestMemberActionAndDeadline(params: {
   action: Pick<Action, 'events'>;
 }):
   | { event: ActionEvent; endDate: Date }
@@ -87,7 +87,7 @@ export function isContractActiveDuringEntireLatestMemberAction(params: {
 }): boolean {
   const { action, user } = params;
   const { event: latestMemberActionEvent, endDate } =
-    this.getLatestMemberActionWithDeadline({
+    getLatestMemberActionAndDeadline({
       action,
     });
 
