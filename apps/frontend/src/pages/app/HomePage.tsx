@@ -176,7 +176,8 @@ const HomePage = () => {
 
     return (
       <div className="px-4 pt-12 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200">
-        {todoActions.length + newActions.length > 0 && (
+        {(todoActions.length + newActions.length > 0 ||
+          completedActions.length > 0) && (
           <div className="flex flex-col gap-y-2">
             <p className="font-semibold text-base font-serif text-black">
               Progress
