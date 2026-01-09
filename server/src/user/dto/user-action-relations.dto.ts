@@ -56,6 +56,15 @@ export class UserActionRelationDetailDto {
 
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   latestActivityAt?: string;
+
+  @ApiPropertyOptional()
+  declineReason?: string;
+
+  @ApiPropertyOptional()
+  isMoral?: boolean;
+
+  @ApiPropertyOptional()
+  outOfTime?: boolean;
 }
 
 export class UserActionRelationsForUserDto {

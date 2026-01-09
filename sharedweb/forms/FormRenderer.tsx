@@ -1134,7 +1134,7 @@ const FormRenderer = ({
                 <Button
                   color={ButtonColor.White}
                   className={`!items-start !justify-start text-left !font-normal ${
-                    outOfTimeSelected ? "!bg-zinc-100" : ""
+                    outOfTimeSelected ? "!bg-zinc-200" : ""
                   }`}
                   onClick={handleOutOfTime}
                 >

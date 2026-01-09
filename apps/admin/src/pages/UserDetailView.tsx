@@ -386,9 +386,35 @@ const UserDetailView: React.FC = () => {
                             {humanize(action.status)}
                           </td>
                           <td className="px-3 py-2">
-                            <span className={`font-medium ${pillTextStyle}`}>
-                              {pillLabel}
-                            </span>
+                            <div className="relative group inline-block">
+                              <span className={`font-medium ${pillTextStyle}`}>
+                                {pillLabel}
+                              </span>
+                              {relation.status === "wont_complete" &&
+                                (relation.declineReason ||
+                                  relation.isMoral ||
+                                  relation.outOfTime) && (
+                                  <div className="pointer-events-none absolute bottom-full mb-1 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-200 bg-white px-2 py-1 text-[11px] font-medium text-zinc-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100">
+                                    <div className="flex flex-col items-center gap-0.5">
+                                      {relation.outOfTime && (
+                                        <span className="text-orange-600">
+                                          Out of time
+                                        </span>
+                                      )}
+                                      {relation.isMoral && (
+                                        <span className="text-amber-600">
+                                          Moral objection
+                                        </span>
+                                      )}
+                                      {relation.declineReason && (
+                                        <span className="text-zinc-500">
+                                          {relation.declineReason}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                            </div>
                           </td>
                           <td className="px-3 py-2 text-zinc-500">
                             {relation.latestActivityAt

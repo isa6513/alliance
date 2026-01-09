@@ -592,7 +592,7 @@ export class ActionsService {
     type: ActionActivityType,
     taskFormResponse?: FormResponse,
     declineReason?: string,
-    isMoral?: boolean,
+    isOutOfTime?: boolean,
     adminCreated?: boolean,
   ): Promise<ActionActivityDto> {
     const action = await this.findOne(actionId, userId);
@@ -619,7 +619,7 @@ export class ActionsService {
       user: user,
       taskFormResponse,
       declineReason,
-      isMoral,
+      outOfTime: isOutOfTime,
     });
     const savedActivity = await this.actionActivityRepository.save(activity);
 
@@ -2120,6 +2120,9 @@ export class ActionsService {
         relationByUserThenAction.get(userId)!.set(actionId, {
           actionId,
           status: UserActionRelationPillStatus.NotRequired,
+          declineReason: undefined,
+          isMoral: undefined,
+          outOfTime: undefined,
         });
       }
       return relationByUserThenAction.get(userId)!.get(actionId)!;
@@ -2173,6 +2176,15 @@ export class ActionsService {
         if (status) {
           detail.status = status;
         }
+        // Capture withdrawal reason details for wont_complete and declined activities
+        if (
+          activity.type === ActionActivityType.USER_WONT_COMPLETE ||
+          activity.type === ActionActivityType.USER_DECLINED
+        ) {
+          detail.declineReason = activity.declineReason;
+          detail.isMoral = activity.isMoral;
+          detail.outOfTime = activity.outOfTime;
+        }
       }
     }
 
@@ -2187,6 +2199,9 @@ export class ActionsService {
           status: detail.status,
           latestActivityType: detail.latestActivityType,
           latestActivityAt: detail.latestActivityAt?.toISOString(),
+          declineReason: detail.declineReason,
+          isMoral: detail.isMoral,
+          outOfTime: detail.outOfTime,
         }))
         .sort(
           (a, b) =>

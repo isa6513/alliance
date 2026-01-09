@@ -59,8 +59,10 @@ const UserProgressPills = ({
       {actions
         .filter((action) => action.status !== "planned")
         .map((action) => {
+          const relation = relationByActionId[action.id];
           const { pillLabel, pillStyle, pillSubtitleText, pillTextStyle } =
-            PILL_STATUS_DATA[relationByActionId[action.id].status];
+            PILL_STATUS_DATA[relation.status];
+          const isWontComplete = relation.status === "wont_complete";
           return (
             <div key={action.id} className="relative group flex-1">
               <div
@@ -70,7 +72,16 @@ const UserProgressPills = ({
               <div className="pointer-events-none absolute bottom-full mb-1 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] font-medium text-zinc-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100">
                 <div className="flex flex-col items-center justify-center">
                   {action.name}
-                  <span className={pillTextStyle}>{pillSubtitleText}</span>
+                  <span className={pillTextStyle}>
+                    {pillSubtitleText}
+                    {isWontComplete
+                      ? relation.outOfTime
+                        ? ": Out of time"
+                        : relation.isMoral
+                        ? ": Moral objection"
+                        : ": Other reason"
+                      : null}
+                  </span>
                 </div>
               </div>
             </div>

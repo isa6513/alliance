@@ -203,6 +203,7 @@ const UserCard = ({
                 const relation = relationByActionId[action.id];
                 const { pillLabel, pillTextStyle } =
                   PILL_STATUS_DATA[relation.status];
+                const isWontComplete = relation.status === "wont_complete";
                 return (
                   <div
                     key={action.id}
@@ -223,6 +224,21 @@ const UserCard = ({
                         Action status:{" "}
                         {humanize(action.status) ?? action.status}
                       </span>
+                      {isWontComplete && (
+                        <>
+                          {relation.declineReason && (
+                            <span>Reason: {relation.declineReason}</span>
+                          )}
+                          {relation.isMoral && (
+                            <span className="text-amber-600">
+                              Moral objection
+                            </span>
+                          )}
+                          {relation.outOfTime && (
+                            <span className="text-orange-600">Out of time</span>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
                 );

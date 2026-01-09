@@ -1675,6 +1675,9 @@ export type UserActionRelationDetailDto = {
     status: UserActionRelationPillStatus;
     latestActivityType?: ActionActivityType;
     latestActivityAt?: string;
+    declineReason?: string;
+    isMoral?: boolean;
+    outOfTime?: boolean;
 };
 
 export type UserActionRelationsForUserDto = {
