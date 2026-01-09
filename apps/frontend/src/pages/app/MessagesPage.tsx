@@ -302,6 +302,7 @@ const MessagesPage = () => {
             (participant) => participant.user.id === userId
           )
       );
+      setMessagesOpen(true);
       if (existing) {
         setSelectedConvoId(existing.id);
         setCreatingNewConversation(false);
