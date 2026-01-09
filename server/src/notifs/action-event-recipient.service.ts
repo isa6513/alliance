@@ -22,6 +22,7 @@ import {
   ContractEvent,
   ContractEventType,
 } from 'src/user/entities/contract-event.entity';
+import { findLeast } from 'src/utils/filter';
 
 @Injectable()
 export class ActionEventRecipientService {
@@ -113,35 +114,21 @@ export class ActionEventRecipientService {
     const {
       action: { events },
     } = params;
-    const latestMemberActionEvent = events.reduce(
-      (acc, event) => {
-        if (
-          event.newStatus === ActionStatus.MemberAction &&
-          (acc === null || acc.date < event.date)
-        ) {
-          return event;
-        }
-        return acc;
-      },
-      null satisfies ActionEvent | null as ActionEvent | null,
+    const latestMemberActionEvent = findLeast(
+      events,
+      (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+      (event) => event.newStatus === ActionStatus.MemberAction,
     );
     if (!latestMemberActionEvent) {
       return { event: null, endDate: null };
     }
 
-    const earliestDeadline = events.reduce(
-      (acc, event) => {
-        if (
-          event.newStatus !== ActionStatus.MemberAction &&
-          event.date > latestMemberActionEvent.date &&
-          (acc === null || acc.date > event.date)
-        ) {
-          return event;
-        }
-
-        return acc;
-      },
-      null satisfies ActionEvent | null as ActionEvent | null,
+    const earliestDeadline = findLeast(
+      events,
+      (a, b) => a.date.getTime() - b.date.getTime(),
+      (event) =>
+        event.newStatus !== ActionStatus.MemberAction &&
+        event.date > latestMemberActionEvent.date,
     );
 
     return {
