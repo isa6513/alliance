@@ -22,6 +22,7 @@ import {
   ContractEvent,
   ContractEventType,
 } from 'src/user/entities/contract-event.entity';
+import { isUserAwayInRange } from 'src/utils/user';
 
 @Injectable()
 export class ActionEventRecipientService {
@@ -144,7 +145,8 @@ export class ActionEventRecipientService {
         user,
         userDismissed: usersDismissed.has(user.id),
       }) &&
-      !this.userService.isUserAwayInRange(user, {
+      !isUserAwayInRange({
+        user,
         startDate: event.date,
         endDate: this.getNextEvent({
           events,

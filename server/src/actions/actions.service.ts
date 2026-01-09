@@ -89,6 +89,7 @@ import {
 } from './entities/reminder-group.entity';
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 import { Relations } from 'src/utils/Repository';
+import { isUserAwayAt } from 'src/utils/user';
 
 export class UserActionRelationDto {
   @ApiProperty({ enum: UserActionRelation, enumName: 'UserActionRelation' })
@@ -326,8 +327,7 @@ export class ActionsService {
     const notAwayForDeadline =
       deadlineEvents.length > 0
         ? baseUsers.filter(
-            (user) =>
-              !this.userService.isUserAwayAt(user, deadlineEvents[0].date),
+            (user) => !isUserAwayAt({ user, date: deadlineEvents[0].date }),
           )
         : baseUsers;
 
