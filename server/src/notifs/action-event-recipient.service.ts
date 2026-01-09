@@ -87,6 +87,17 @@ export class ActionEventRecipientService {
     );
   }
 
+  isInManualCohort(params: {
+    action: Pick<Action, 'manualCohortUserIds' | 'useManualCohort'>;
+    user: Pick<User, 'id'>;
+  }): boolean {
+    const { user, action } = params;
+    if (!action.useManualCohort) {
+      return false;
+    }
+    return action.manualCohortUserIds?.some((m) => m === user.id) ?? false;
+  }
+
   getLatestMemberActionWithDeadline(params: {
     action: Pick<Action, 'events'>;
   }):
