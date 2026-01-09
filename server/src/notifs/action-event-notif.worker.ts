@@ -53,6 +53,7 @@ export class ActionEventNotifWorker {
     if (process.env.NODE_ENV === 'staging') {
       return;
     }
+    console.log('dispatchDueNotifs');
 
     const ran = await withPgAdvisoryLock(
       this.dataSource,
@@ -68,6 +69,7 @@ export class ActionEventNotifWorker {
           windowStart,
           now,
         );
+        console.log('duePlans', duePlans.length);
         for (const plan of duePlans) {
           await this.processOne(plan);
         }
@@ -107,7 +109,13 @@ export class ActionEventNotifWorker {
   private async processOne(plan: NotificationPlan) {
     const cid = generateCIDForNotif();
 
+    console.log('processOne', plan.user.name);
+
     const idempotency_key = `reminder:${plan.group.id}:${plan.user.id}`;
+
+    console.log('idempotency_key', idempotency_key);
+    console.log('shouldTextUser', shouldTextUser(plan.user));
+    console.log('shouldEmailUser', shouldEmailUser(plan.user));
 
     const plannedNotif = this.actionEventNotifsRepository.create({
       user: plan.user,
@@ -117,6 +125,8 @@ export class ActionEventNotifWorker {
       type: ActionEventNotifType.Reminder,
       idempotency_key,
     } satisfies Partial<ActionEventNotif>);
+
+    console.log('plannedNotif', plannedNotif);
 
     let notif: ActionEventNotif;
     try {
@@ -131,6 +141,7 @@ export class ActionEventNotifWorker {
 
     let sendingAnyNotif = false;
     if (shouldPushUser(plan.user)) {
+      console.log('shouldPushUser', plan.user.name);
       sendingAnyNotif = true;
       const pushMessage = await this.processCustomReminderText(
         plan.group.pushMessage,
@@ -154,18 +165,21 @@ export class ActionEventNotifWorker {
       }
     }
     if (!notif.sent && shouldTextUser(plan.user)) {
+      console.log('shouldTextUser', plan.user.name);
       sendingAnyNotif = true;
       const textMessage = await this.processCustomReminderText(
         plan.group.textMessage,
         plan,
         cid,
       );
+      console.log('textMessage', textMessage);
       const result = await this.mmsService.sendMms(
         plan.user.phoneNumber!,
         textMessage,
         [],
         cid,
       );
+      console.log('result', result);
 
       if (result && !result.errorCode) {
         notif.sent = true;
@@ -174,6 +188,7 @@ export class ActionEventNotifWorker {
       notif.mms = result;
     }
     if (!notif.sent && shouldEmailUser(plan.user)) {
+      console.log('shouldEmailUser', plan.user.name);
       sendingAnyNotif = true;
       notif.channel = NotificationChannel.Email;
 
