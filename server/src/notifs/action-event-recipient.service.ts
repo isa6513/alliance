@@ -22,8 +22,6 @@ import {
   ContractEvent,
   ContractEventType,
 } from 'src/user/entities/contract-event.entity';
-import { findLeast } from 'src/utils/filter';
-import { Tag } from 'src/user/entities/tag.entity';
 
 @Injectable()
 export class ActionEventRecipientService {
@@ -86,111 +84,6 @@ export class ActionEventRecipientService {
     return (
       this.isContractActiveAtDate(user.contractEvents, eventDate) ||
       everyoneShouldComplete
-    );
-  }
-
-  isInManualCohort(params: {
-    action: Pick<Action, 'manualCohortUserIds' | 'useManualCohort'>;
-    user: Pick<User, 'id'>;
-  }): boolean {
-    const { user, action } = params;
-    if (!action.useManualCohort) {
-      return false;
-    }
-    return action.manualCohortUserIds?.some((m) => m === user.id) ?? false;
-  }
-
-  hasOverlappingTags(params: {
-    actionParticipatingTagIds: Set<number>;
-    userTags: Iterable<number> | Iterable<Tag>;
-  }): boolean {
-    const { actionParticipatingTagIds, userTags } = params;
-    for (const tagOrId of userTags) {
-      if (typeof tagOrId === 'number') {
-        if (actionParticipatingTagIds.has(tagOrId)) {
-          return true;
-        }
-      } else {
-        if (actionParticipatingTagIds.has(tagOrId.id)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  getLatestMemberActionWithDeadline(params: {
-    action: Pick<Action, 'events'>;
-  }):
-    | { event: ActionEvent; endDate: Date }
-    | {
-        event: ActionEvent;
-        endDate: null;
-      }
-    | {
-        event: null;
-        endDate: null;
-      } {
-    const {
-      action: { events },
-    } = params;
-    const latestMemberActionEvent = findLeast(
-      events,
-      (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-      (event) => event.newStatus === ActionStatus.MemberAction,
-    );
-    if (!latestMemberActionEvent) {
-      return { event: null, endDate: null };
-    }
-
-    const earliestDeadline = findLeast(
-      events,
-      (a, b) => a.date.getTime() - b.date.getTime(),
-      (event) =>
-        event.newStatus !== ActionStatus.MemberAction &&
-        event.date > latestMemberActionEvent.date,
-    );
-
-    return {
-      event: latestMemberActionEvent,
-      endDate: earliestDeadline?.date ?? null,
-    };
-  }
-
-  isContractActiveDuringEntireLatestMemberAction(params: {
-    action: Pick<Action, 'events'>;
-    user: Pick<User, 'contractEvents'>;
-  }): boolean {
-    const { action, user } = params;
-    const { event: latestMemberActionEvent, endDate } =
-      this.getLatestMemberActionWithDeadline({
-        action,
-      });
-
-    if (!latestMemberActionEvent) {
-      return false;
-    }
-
-    const latestContractEventBeforeMemberAction = findLeast(
-      user.contractEvents ?? [],
-      (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-      (event) => event.date < latestMemberActionEvent.date,
-    );
-    if (
-      !latestContractEventBeforeMemberAction ||
-      latestContractEventBeforeMemberAction.type === ContractEventType.SUSPENDED
-    ) {
-      return false;
-    }
-
-    const eventsDuringMemberAction = (user.contractEvents ?? []).filter(
-      (event) =>
-        event.date > latestMemberActionEvent.date &&
-        (!endDate || event.date < endDate),
-    );
-
-    return !eventsDuringMemberAction.some(
-      (event) => event.type === ContractEventType.SUSPENDED,
     );
   }
 
