@@ -157,7 +157,6 @@ export class TasksController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: OptOutActionDto,
   ) {
-    console.log('optout', body);
     if (!body.partialFormData) {
       throw new BadRequestException('Partial form data is required');
     }
