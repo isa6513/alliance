@@ -4,7 +4,7 @@ date: "2026-01-07"
 authors: ["Sidney Hough", "Mark Xu"]
 ---
 
-Over the past 10 weeks, we (the office) ran weekly actions with a small number of members (30-50) to test and develop our basic organizational structures and processes. We completed 20 total actions.
+Over the past 10 weeks, we ran weekly actions with a small number of members (30-50) to test and develop our basic organizational structures and processes. We completed 20 total actions.
 
 In this time, we learned about factors that affect members’ reliability, built an understanding of how members experience the Alliance, and refined our process for action production.
 
@@ -12,7 +12,7 @@ In this time, we learned about factors that affect members’ reliability, built
 
 The reliability of members is foundational to the Alliance. Among many benefits, **reliability enables the office to make effective action plans** because we know exactly how many people we can depend on to participate in those plans.
 
-The first action that every member took on our platform was to sign our [membership contract](https://worldalliance.org/governance). The contract sets a formal expectation of reliability. This expectation also grounds other methods designed to build a general culture of reliability.
+The first action that every member took on our platform was to sign our [membership contract](https://worldalliance.org/governance). The contract sets a formal expectation of reliability. This expectation is reinforced by other methods designed to build a general culture of reliability.
 
 Members largely adhere to the contract. Only around 10% of people who signed the contract since we launched the platform have suspended their contract or had their contract suspended because they failed to complete their assigned tasks.
 
@@ -22,14 +22,14 @@ Other methods we employed to build a culture of reliability included:
 
 - **Sending automatic messages when members miss their deadlines.** These messages helped some members better understand our expectations.
 - **Maintaining collective expectations by automatically suspending contracts when members miss too many deadlines.** In other words, we define members to be those who keep their promises, which keeps action completion rates high. People whose contracts are suspended can re-sign their contract at any time. Some members reported being more motivated to complete tasks when they saw that actions had high completion rates.
-- **Creating smaller Alliance groups and assigning most new members to these groups.** Group leads are in charge of holding their members accountable and send them reminders when necessary. We believe some evolution of groups will be core to future members’ reliability and experience of the Alliance.
+- **Creating smaller Alliance groups and assigning most new members to these groups.** Group leads are in charge of holding their members accountable and send them reminders when necessary. Members report enjoying being part of groups and task completion rates are very high within groups, so we believe some evolution of groups will be core to future members’ reliability and experience of the Alliance.
 
-**Overall, task completion rates are 94% on average.** Most non-completions come from new members who are unfamiliar with our expectations. We hope that action completion rates will increase as we strengthen our culture and the proportion of members who are familiar with our expectations increases.
+**Overall, task completion rates are 95% on average.** Most non-completions come from new members who are unfamiliar with our expectations. We hope that action completion rates will increase as we strengthen our culture and the proportion of members who are familiar with our expectations increases.
 
 ![completion graph](https://dj92mxbdjuclo.cloudfront.net/1767912985953.webp)
 _Task completions throughout the week for [“Decide how to allocate $1,000 next week.”](https://worldalliance.org/actions/47) Typically, members complete tasks immediately or close to the deadline._
 
-Our expectation that members will complete tasks assigned to them has been enormously helpful in our current quest to properly set up the Alliance. If we need feedback, want to run an experiment, gather testimonials, announce new features, or interact with members in any way, all we have to do is launch an action.
+Member reliability has been enormously helpful in our current quest to properly set up the Alliance. If we need feedback, want to run an experiment, gather testimonials, announce new features, or interact with members in any way, all we have to do is launch an action.
 
 ## Member experience
 
@@ -46,7 +46,7 @@ In response to new members’ questions and comments, we took a number of steps 
 
 We chose to tie growth to the smaller Alliance groups we mentioned above: we currently require group leads to approve member invitations. While we need a more scalable solution to group assignment in the future, this constraint has ensured that most new members are accountable to and assisted by an existing member.
 
-**Members largely enjoy our tasks and are willing to invite new members in the future.** When we ran our first member oversight process in November, 94% of members expected more than 80% of their contributions to result in outcomes they approve of. The median willingness to invite new members was 8/10.
+**Members largely enjoy our tasks and are willing to invite new members in the future.** When we ran our first member oversight process in November, 94% of members believed that the vast majority of their future contributions would result in outcomes they approve of. The median willingness to invite new members was 8/10.
 
 Members regularly expressed that they want more social opportunities. We plan to offer more opportunities for members to interact with each other on the platform, especially via groups and actions. We also intend to plan some virtual events for members who want to meet other members.
 
@@ -64,7 +64,7 @@ Eventually, we hope that action production will be guided by subject matter expe
 
 We put great effort into designing actions that we think are worth the Alliance’s time. In the process of producing actions, we have found that there are nearly endless action possibilities and that the standards any particular action must meet are complex and difficult to satisfy.
 
-There is not a one-size-fits-all approach to the design of particular actions Often, however, concrete action plans develop around “seed” ideas. There are any number of “seed” ideas, many of which come from previous knowledge or random inspiration.
+There is not a one-size-fits-all approach to the design of particular actions. Often, however, concrete action plans develop around “seed” ideas. There are any number of “seed” ideas, many of which come from previous knowledge or random inspiration.
 
 As we develop an idea into a concrete plan, we think extensively about additional ways to derive value from the action, including learning opportunities, new relationships, social opportunities, or increased impact on the world. For instance, we took an initial idea to help members adjust privacy settings as an opportunity to recruit new members and launch a media campaign. In another example, we took an initial idea to vote on donations as an opportunity to learn about members’ opinions on the need for consensus.
 
