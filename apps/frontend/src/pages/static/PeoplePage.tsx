@@ -73,7 +73,7 @@ const PeoplePage: React.FC = () => {
             <div className="w-full flex flex-col gap-4 mb-8">
               <p className="text-zinc-900">
                 The Alliance was founded by Sidney Hough and Mark Xu, a couple
-                living in San Francisco, California.
+                living in San Francisco, California, U.S.A.
               </p>
               <img
                 src={sidneyandmark}
