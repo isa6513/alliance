@@ -8,6 +8,10 @@ import {
   ActionEvent,
   ActionStatus,
 } from 'src/actions/entities/action-event.entity';
+import {
+  ActionActivity,
+  ActionActivityType,
+} from 'src/actions/entities/action-activity.entity';
 
 export function isInManualCohort(params: {
   action: Pick<Action, 'manualCohortUserIds' | 'useManualCohort'>;
@@ -111,5 +115,44 @@ export function isContractActiveDuringEntireLatestMemberAction(params: {
 
   return !eventsDuringMemberAction.some(
     (event) => event.type === ContractEventType.SUSPENDED,
+  );
+}
+
+export function hasWithdrawn(params: {
+  actionActivities: Pick<ActionActivity, 'type' | 'userId'>[];
+  user: Pick<User, 'id'>;
+}): boolean {
+  const { actionActivities, user } = params;
+
+  return actionActivities.some(
+    (activity) =>
+      activity.userId === user.id &&
+      activity.type === ActionActivityType.USER_DECLINED,
+  );
+}
+
+export function hasCompleted(params: {
+  actionActivities: Pick<ActionActivity, 'type' | 'userId'>[];
+  user: Pick<User, 'id'>;
+}): boolean {
+  const { actionActivities, user } = params;
+
+  return actionActivities.some(
+    (activity) =>
+      activity.userId === user.id &&
+      activity.type === ActionActivityType.USER_COMPLETED,
+  );
+}
+
+export function hasDismissed(params: {
+  actionActivities: Pick<ActionActivity, 'type' | 'userId'>[];
+  user: Pick<User, 'id'>;
+}): boolean {
+  const { actionActivities, user } = params;
+
+  return actionActivities.some(
+    (activity) =>
+      activity.userId === user.id &&
+      activity.type === ActionActivityType.USER_DISMISSED,
   );
 }
