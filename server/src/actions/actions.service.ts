@@ -90,6 +90,7 @@ import {
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 import { Relations } from 'src/utils/Repository';
 import { isUserAwayAt } from 'src/utils/user';
+import { latestMemberActionPhaseExistsAndIsOver } from 'src/utils/action';
 
 export class UserActionRelationDto {
   @ApiProperty({ enum: UserActionRelation, enumName: 'UserActionRelation' })
@@ -1993,28 +1994,6 @@ export class ActionsService {
     return this.getActionRelationsForUsers(users);
   }
 
-  someMemberActionPhaseIsOver(params: {
-    events: ActionEvent[];
-    date: Date;
-  }): boolean {
-    const { events, date } = params;
-
-    const prevMemberActionEvent = events.find(
-      (event) =>
-        event.newStatus === ActionStatus.MemberAction && event.date < date,
-    );
-    if (!prevMemberActionEvent) {
-      return false;
-    }
-
-    return events.some(
-      (event) =>
-        event.newStatus !== ActionStatus.MemberAction &&
-        event.date > prevMemberActionEvent.date &&
-        event.date <= date,
-    );
-  }
-
   async getActionRelationsForUsers(
     userIds: number[],
     actionLimit: number = 8,
@@ -2073,8 +2052,8 @@ export class ActionsService {
       actions.map((action) => {
         return [
           action.id,
-          this.someMemberActionPhaseIsOver({
-            events: action.events,
+          latestMemberActionPhaseExistsAndIsOver({
+            action,
             date: now,
           }),
         ];

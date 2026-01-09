@@ -5,13 +5,10 @@ import { Action } from 'src/actions/entities/action.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Tag } from 'src/user/entities/tag.entity';
 import {
-  ActionEvent,
-  ActionStatus,
-} from 'src/actions/entities/action-event.entity';
-import {
   ActionActivity,
   ActionActivityType,
 } from 'src/actions/entities/action-activity.entity';
+import { getLatestMemberActionAndDeadline } from './action';
 
 export function isInManualCohort(params: {
   action: Pick<Action, 'manualCohortUserIds' | 'useManualCohort'>;
@@ -41,44 +38,6 @@ export function hasOverlappingTags(params: {
     }
   }
   return false;
-}
-
-export function getLatestMemberActionAndDeadline(params: {
-  action: Pick<Action, 'events'>;
-}):
-  | { event: ActionEvent; endDate: Date }
-  | {
-      event: ActionEvent;
-      endDate: null;
-    }
-  | {
-      event: null;
-      endDate: null;
-    } {
-  const {
-    action: { events },
-  } = params;
-  const latestMemberActionEvent = findLeast(
-    events,
-    (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-    (event) => event.newStatus === ActionStatus.MemberAction,
-  );
-  if (!latestMemberActionEvent) {
-    return { event: null, endDate: null };
-  }
-
-  const earliestDeadline = findLeast(
-    events,
-    (a, b) => a.date.getTime() - b.date.getTime(),
-    (event) =>
-      event.newStatus !== ActionStatus.MemberAction &&
-      event.date > latestMemberActionEvent.date,
-  );
-
-  return {
-    event: latestMemberActionEvent,
-    endDate: earliestDeadline?.date ?? null,
-  };
 }
 
 export function isContractActiveDuringEntireLatestMemberAction(params: {
@@ -155,21 +114,4 @@ export function hasDismissed(params: {
       activity.userId === user.id &&
       activity.type === ActionActivityType.USER_DISMISSED,
   );
-}
-
-export function getActionStatusAt(params: {
-  action: Pick<Action, 'events'>;
-  date: Date;
-}): ActionStatus {
-  const { action, date } = params;
-
-  const latestEventBeforeDate = findLeast(
-    action.events,
-    (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-    (event) => event.date < date,
-  );
-
-  return latestEventBeforeDate
-    ? latestEventBeforeDate.newStatus
-    : ActionStatus.Draft;
 }
