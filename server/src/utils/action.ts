@@ -58,7 +58,7 @@ export function latestMemberActionPhaseExistsAndIsOver(params: {
     return false;
   }
   if (!endDate) {
-    return true;
+    return false;
   }
   return endDate <= date;
 }
