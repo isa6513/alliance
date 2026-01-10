@@ -1103,7 +1103,7 @@ export class UserService {
   async findTagOrFail(id: number): Promise<Tag> {
     return this.tagRepository.findOneOrFail({
       where: { id },
-      relations: { users: true },
+      relations: { users: { contractEvents: true } },
     });
   }
 

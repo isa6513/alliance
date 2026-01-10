@@ -27,16 +27,6 @@ export function shouldEmailUser(user: User) {
 }
 
 export function shouldTextUser(user: User) {
-  console.log('user name:', user.name);
-  console.log('textNotifsEnabled', user.textNotifsEnabled);
-  console.log('turnedOffAllNotifs', user.turnedOffAllNotifs);
-  console.log('phoneNumber', user.phoneNumber);
-  console.log('hasActiveContract', user.hasActiveContract);
-  console.log('phoneNumberValidated', user.phoneNumberValidated);
-  console.log(
-    'preferredActionReminderChannel',
-    user.preferredActionReminderChannel,
-  );
   return (
     user.textNotifsEnabled &&
     !user.turnedOffAllNotifs &&
