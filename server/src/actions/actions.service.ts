@@ -2255,11 +2255,9 @@ export class ActionsService {
   }
 
   isActionPast(action: Action, now: Date): boolean {
-    return (
-      action.events.some(
-        (event) =>
-          event.newStatus === ActionStatus.MemberAction && event.date < now,
-      ) && action.status !== ActionStatus.MemberAction
+    return action.events.some(
+      (event) =>
+        event.newStatus === ActionStatus.MemberAction && event.date < now,
     );
   }
 
@@ -2299,11 +2297,13 @@ export class ActionsService {
     const orderedSuites = Array.from(suiteMap.values()).sort(
       (a, b) => a.orderIndex - b.orderIndex,
     );
+
     const pastSuites = orderedSuites.filter(({ actions }) =>
       actions.every((action) => this.isActionPast(action, now)),
     );
 
-    const failedUsersForSuites = new Map<number, number[]>();
+    const failedBySuite = new Map<number, Set<number>>();
+    const expectedBySuite = new Map<number, Set<number>>();
 
     const idToUser = new Map<number, User>();
 
@@ -2317,6 +2317,19 @@ export class ActionsService {
     };
 
     for (const suite of pastSuites) {
+      const baseCohort =
+        await this.actionEventRecipientService.getBaseUsersForEvent(
+          ActionStatus.MemberAction,
+          suite.actions[0],
+          suite.actions[0].events.find(
+            (event) => event.newStatus === ActionStatus.MemberAction,
+          )!.id,
+        );
+      expectedBySuite.set(
+        suite.suite.id,
+        new Set(baseCohort.map((user) => user.id)),
+      );
+
       for (const action of suite.actions) {
         const event = action.events.find(
           (event) => event.newStatus === ActionStatus.MemberAction,
@@ -2334,44 +2347,57 @@ export class ActionsService {
           idToUser.set(user.id, user);
         }
 
-        if (failedUsersForSuites.has(suite.suite.id)) {
-          failedUsersForSuites
-            .get(suite.suite.id)!
-            .push(...signedBeforeFailed.map((user) => user.id));
+        if (failedBySuite.has(suite.suite.id)) {
+          for (const user of signedBeforeFailed) {
+            failedBySuite.get(suite.suite.id)!.add(user.id);
+          }
         } else {
-          failedUsersForSuites.set(
+          failedBySuite.set(
             suite.suite.id,
-            signedBeforeFailed.map((user) => user.id),
+            new Set(signedBeforeFailed.map((user) => user.id)),
           );
         }
       }
     }
+
     const usersToSuspend = new Set<number>();
     const suspendReasonKeys = new Map<number, string>();
 
-    for (let i = 2; i < pastSuites.length; i++) {
-      const failedThis = failedUsersForSuites.get(pastSuites[i].suite.id);
-      const failedPrevious = failedUsersForSuites.get(
-        pastSuites[i - 1].suite.id,
-      );
-      const failedPreviousPrevious = failedUsersForSuites.get(
-        pastSuites[i - 2].suite.id,
-      );
-      if (!failedPrevious || !failedThis || !failedPreviousPrevious) {
-        continue;
-      }
-      const failedAll = failedThis
-        .filter((userId) => failedPrevious.includes(userId))
-        .filter((userId) => failedPreviousPrevious.includes(userId));
+    const allExpectedUsers = new Set<number>();
+    for (const s of expectedBySuite.values())
+      for (const id of s) allExpectedUsers.add(id);
 
-      for (const userId of failedAll) {
-        usersToSuspend.add(userId);
-        suspendReasonKeys.set(
-          userId,
-          `s-${pastSuites[i].suite.id}-${pastSuites[i - 1].suite.id}-${pastSuites[i - 2].suite.id}`,
-        );
+    for (const userId of allExpectedUsers) {
+      let streak = 0;
+      const lastThreeSuiteIds: number[] = [];
+
+      for (const suite of pastSuites) {
+        const suiteId = suite.suite.id;
+        const expectedSet = expectedBySuite.get(suiteId);
+        if (!expectedSet?.has(userId)) {
+          continue; // skip suites they were not expected to complete
+        }
+
+        const failedSet = failedBySuite.get(suiteId) ?? new Set<number>();
+        const failed = failedSet.has(userId);
+
+        if (failed) {
+          streak += 1;
+          lastThreeSuiteIds.push(suiteId);
+          if (lastThreeSuiteIds.length > 3) lastThreeSuiteIds.shift();
+          if (streak >= 3) {
+            usersToSuspend.add(userId);
+            suspendReasonKeys.set(userId, `s-${lastThreeSuiteIds.join('-')}`);
+            break;
+          }
+        } else {
+          // they were expected and did not fail => streak broken
+          streak = 0;
+          lastThreeSuiteIds.length = 0;
+        }
       }
     }
+
     return {
       usersToSuspend: Array.from(usersToSuspend).map(
         (userId) => idToUser.get(userId)!,

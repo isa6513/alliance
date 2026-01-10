@@ -17,7 +17,7 @@ import CreateIcon from "@alliance/sharedweb/ui/icons/CreateIcon";
 import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
 import ProfileImageEditor from "./ProfileImageEditor";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import Spinner from "./Spinner";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { CardStyle } from "@alliance/shared/styles/card";
 
 export interface ConversationInfoPanelProps {

@@ -3,7 +3,7 @@ import { href, Navigate, Outlet, useNavigate, useParams } from "react-router";
 import ActionActivityList from "../../components/ActionActivityList";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
-import Spinner from "../../components/Spinner";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useAuth } from "../../lib/AuthContext";
 import { useCIDFromParams } from "../../lib/utils";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";

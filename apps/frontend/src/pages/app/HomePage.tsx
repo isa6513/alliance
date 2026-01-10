@@ -5,7 +5,7 @@ import { AppLayoutOutletContext } from "../../applayout";
 import ActionActivityFeedItem from "../../components/ActionActivityFeedItem";
 import BasicErrorMessage from "../../components/BasicErrorMessage";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
-import Spinner from "../../components/Spinner";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
 import TwoColumnLayout from "../../components/TwoColumnLayout";
 import { useAuth } from "../../lib/AuthContext";
 import { useCIDFromParams } from "../../lib/utils";

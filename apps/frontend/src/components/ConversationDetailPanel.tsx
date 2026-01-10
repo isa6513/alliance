@@ -4,7 +4,7 @@ import {
   messageSendMessage,
   ProfileDto,
 } from "@alliance/shared/client";
-import Spinner from "./Spinner";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
 import Message from "./Message";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useAuth } from "../lib/AuthContext";

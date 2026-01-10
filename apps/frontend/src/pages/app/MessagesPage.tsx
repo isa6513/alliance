@@ -15,7 +15,7 @@ import { Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import ConversationDetailPanel from "../../components/ConversationDetailPanel";
-import Spinner from "../../components/Spinner";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useAuth } from "../../lib/AuthContext";
 import useLiveConvoMessages, {
   sortConversations,

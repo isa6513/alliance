@@ -12,7 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
-import Spinner from "./Spinner";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
 
 interface MessageInputProps {
   message: string;
