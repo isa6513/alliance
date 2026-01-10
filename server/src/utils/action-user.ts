@@ -9,6 +9,7 @@ import {
   ActionActivityType,
 } from 'src/actions/entities/action-activity.entity';
 import { getLatestMemberActionAndDeadline } from './action';
+import { isUserAwayInRange } from './user';
 
 export function isInManualCohort(params: {
   action: Pick<Action, 'manualCohortUserIds' | 'useManualCohort'>;
@@ -77,6 +78,28 @@ export function isContractActiveDuringEntireLatestMemberAction(params: {
   );
 }
 
+export function isAwayDuringAnyOfLastMemberAction(params: {
+  action: Pick<Action, 'events'>;
+  user: Pick<User, 'awayRanges'>;
+}): boolean {
+  const { action, user } = params;
+
+  const { event: lastMemberActionEvent, endDate } =
+    getLatestMemberActionAndDeadline({
+      action,
+    });
+
+  if (!lastMemberActionEvent) {
+    return false;
+  }
+
+  return isUserAwayInRange({
+    user,
+    startDate: lastMemberActionEvent.date,
+    endDate,
+  });
+}
+
 export function hasWithdrawn(params: {
   actionActivities: Pick<ActionActivity, 'type' | 'userId'>[];
   user: Pick<User, 'id'>;
@@ -113,5 +136,18 @@ export function hasDismissed(params: {
     (activity) =>
       activity.userId === user.id &&
       activity.type === ActionActivityType.USER_DISMISSED,
+  );
+}
+
+export function hasJoinedCommitmentfulAction(params: {
+  user: Pick<User, 'id'>;
+  actionActivities: Pick<ActionActivity, 'type' | 'userId'>[];
+}): boolean {
+  const { actionActivities, user } = params;
+
+  return actionActivities.some(
+    (activity) =>
+      activity.userId === user.id &&
+      activity.type === ActionActivityType.USER_JOINED,
   );
 }

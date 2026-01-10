@@ -13,8 +13,8 @@ export function isUserAwayAt(params: {
 
 export function isUserAwayInRange(params: {
   user: Pick<User, 'awayRanges'>;
-  startDate?: Date;
-  endDate?: Date;
+  startDate?: Date | null;
+  endDate?: Date | null;
 }): boolean {
   const { user, startDate, endDate } = params;
   return user.awayRanges.some(
