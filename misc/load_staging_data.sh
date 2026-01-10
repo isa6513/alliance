@@ -13,7 +13,7 @@ LOCAL_PGUSER="${LOCAL_PGUSER:-postgres}"
 
 RESET_LOCAL_DB="${RESET_LOCAL_DB:-1}"
 
-DUMP_DIR=""
+DUMP_DIR="${DUMP_DIR:-./db_dumps}"
 
 timestamp="$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$DUMP_DIR"
