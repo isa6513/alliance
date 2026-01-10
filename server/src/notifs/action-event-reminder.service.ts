@@ -270,6 +270,7 @@ export class ActionEventReminderService {
       .leftJoinAndSelect('rg.deadlineEvent', 'deadline')
       .leftJoinAndSelect('rg.users', 'users')
       .leftJoinAndSelect('users.tags', 'userTags')
+      .leftJoinAndSelect('users.contractEvents', 'contractEvents')
       .leftJoinAndSelect('rg.userTag', 'userTag')
       .leftJoinAndSelect('rg.actionSuite', 'actionSuite')
       .leftJoinAndSelect('actionSuite.actions', 'actionSuiteActions')
