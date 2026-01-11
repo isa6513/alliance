@@ -70,6 +70,7 @@ import {
 import {
   ActionActivity,
   ActionActivityType,
+  ActivitySource,
 } from './entities/action-activity.entity';
 import { ActionEvent, ActionStatus } from './entities/action-event.entity';
 import { ActionShareUrl } from './entities/action-share-url.entity';
@@ -580,22 +581,31 @@ export class ActionsService {
     userId: number,
     actionId: number,
   ): Promise<ActionActivityDto> {
-    return await this.createActionActivity(
+    return await this.createActionActivity({
       actionId,
       userId,
-      ActionActivityType.USER_DISMISSED,
-    );
+      type: ActionActivityType.USER_DISMISSED,
+    });
   }
 
-  async createActionActivity(
-    actionId: number,
-    userId: number,
-    type: ActionActivityType,
-    taskFormResponse?: FormResponse,
-    declineReason?: string,
-    isOutOfTime?: boolean,
-    adminCreated?: boolean,
-  ): Promise<ActionActivityDto> {
+  async createActionActivity(options: {
+    actionId: number;
+    userId: number;
+    type: ActionActivityType;
+    taskFormResponse?: FormResponse;
+    declineReason?: string;
+    isOutOfTime?: boolean;
+    adminCreated?: boolean;
+  }): Promise<ActionActivityDto> {
+    const {
+      actionId,
+      userId,
+      type,
+      taskFormResponse,
+      declineReason,
+      isOutOfTime,
+      adminCreated,
+    } = options;
     const action = await this.findOne(actionId, userId);
 
     if (
@@ -621,6 +631,9 @@ export class ActionsService {
       taskFormResponse,
       declineReason,
       outOfTime: isOutOfTime,
+      source: adminCreated
+        ? ActivitySource.ADMIN_OVERRIDE
+        : ActivitySource.USER,
     });
     const savedActivity = await this.actionActivityRepository.save(activity);
 
@@ -652,11 +665,11 @@ export class ActionsService {
       );
     }
 
-    return this.createActionActivity(
+    return this.createActionActivity({
       actionId,
       userId,
-      ActionActivityType.USER_JOINED,
-    );
+      type: ActionActivityType.USER_JOINED,
+    });
   }
 
   async declineAction(
@@ -688,14 +701,13 @@ export class ActionsService {
     reason: string,
     outOfTime: boolean,
   ): Promise<ActionActivityDto> {
-    return this.createActionActivity(
+    return this.createActionActivity({
       actionId,
       userId,
-      ActionActivityType.USER_WONT_COMPLETE,
-      undefined,
-      reason,
-      outOfTime,
-    );
+      type: ActionActivityType.USER_WONT_COMPLETE,
+      declineReason: reason,
+      isOutOfTime: outOfTime,
+    });
   }
 
   async completeAction(
@@ -703,12 +715,12 @@ export class ActionsService {
     userId: number,
     taskFormResponse?: FormResponse,
   ): Promise<ActionActivityDto> {
-    return this.createActionActivity(
+    return this.createActionActivity({
       actionId,
       userId,
-      ActionActivityType.USER_COMPLETED,
+      type: ActionActivityType.USER_COMPLETED,
       taskFormResponse,
-    );
+    });
   }
 
   async update(
@@ -1263,11 +1275,11 @@ export class ActionsService {
     });
     for (const action of actions) {
       if (action.status === ActionStatus.MemberAction) {
-        await this.createActionActivity(
-          action.id,
-          id,
-          ActionActivityType.USER_JOINED,
-        );
+        await this.createActionActivity({
+          actionId: action.id,
+          userId: id,
+          type: ActionActivityType.USER_JOINED,
+        });
       }
     }
   }
@@ -1547,15 +1559,12 @@ export class ActionsService {
   async adminCreateActivity(
     activityDto: CreateActionActivityDto,
   ): Promise<ActionActivityDto> {
-    return this.createActionActivity(
-      activityDto.actionId,
-      activityDto.userId,
-      activityDto.type,
-      undefined,
-      undefined,
-      undefined,
-      true,
-    );
+    return this.createActionActivity({
+      actionId: activityDto.actionId,
+      userId: activityDto.userId,
+      type: activityDto.type,
+      adminCreated: true,
+    });
   }
 
   async archive(id: number): Promise<ActionDto> {
