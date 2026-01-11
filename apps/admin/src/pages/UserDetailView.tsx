@@ -304,7 +304,7 @@ const UserDetailView: React.FC = () => {
             </span>
             {user.phoneNumber && (
               <span className="text-zinc-400">
-                <Phone size={16} className="text-zinc-500 inline mr-1" />+
+                <Phone size={16} className="text-zinc-500 inline mr-1" />
                 {user.phoneNumber}
               </span>
             )}
