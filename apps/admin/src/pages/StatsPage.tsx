@@ -577,6 +577,14 @@ const StatsPage: React.FC = () => {
       .scale(chroma.brewer.Spectral)
       .domain([maxDate, minDate]);
 
+    const legendStopCount = 9;
+    const legendStops = Array.from({ length: legendStopCount }, (_, index) => {
+      const t = index / (legendStopCount - 1);
+      const value = minDate + (maxDate - minDate) * t;
+      return colorScale(value).hex();
+    });
+    const legendGradient = `linear-gradient(90deg, ${legendStops.join(", ")})`;
+
     const lines = filteredRetentionCohorts.map((cohort) => ({
       cohort,
       color: colorScale(new Date(cohort.cohortStart).getTime()).hex(),
@@ -595,6 +603,7 @@ const StatsPage: React.FC = () => {
       xTicks,
       yTicks,
       lines,
+      legendGradient,
     };
   }, [filteredRetentionCohorts]);
 
@@ -716,10 +725,27 @@ const StatsPage: React.FC = () => {
       ) : aggregateStats ? (
         <div className="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center justify-between">
           <div className="flex flex-col gap-2">
-            <div className="flex flex-col">
-              <div className="text-sm text-gray-600">Total members</div>
-              <div className="text-3xl font-bold text-gray-900">
-                {aggregateStats.signedUsers}
+            <div className="flex flex-row gap-6">
+              <div className="flex flex-col">
+                <div className="text-sm text-gray-600">Total members</div>
+                <div className="text-3xl font-bold text-gray-900">
+                  {aggregateStats.signedUsers}
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-sm text-gray-600">
+                  Completion reliability
+                </div>
+                <div className="text-3xl font-bold text-gray-900">
+                  {cumulativeCompletionData.length > 0
+                    ? (
+                        cumulativeCompletionData[
+                          cumulativeCompletionData.length - 1
+                        ].avgRate * 100
+                      ).toFixed(2)
+                    : "[No data]"}
+                  %
+                </div>
               </div>
             </div>
             <div className="flex flex-col">
@@ -1621,7 +1647,7 @@ const StatsPage: React.FC = () => {
             <div className="relative min-w-[600px]">
               <svg
                 viewBox={`0 0 ${retentionChartGeometry.width} ${retentionChartGeometry.height}`}
-                className="w-full"
+                className="w-full -mb-6"
               >
                 <g>
                   {retentionChartGeometry.yTicks.map((tick) => (
@@ -1724,6 +1750,14 @@ const StatsPage: React.FC = () => {
                   })
                 )}
               </svg>
+              <div className="flex items-center gap-2 text-[11px] text-gray-500">
+                <span>Older</span>
+                <div
+                  className="h-2 w-40 rounded-full border border-gray-200"
+                  style={{ background: retentionChartGeometry.legendGradient }}
+                />
+                <span>Newer</span>
+              </div>
 
               {hoveredRetentionPoint && (
                 <div className="absolute top-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 min-w-[220px] pointer-events-none">
