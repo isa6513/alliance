@@ -1120,7 +1120,7 @@ const FormRenderer = ({
             <div className="relative">
               <Button
                 color={ButtonColor.White}
-                className="px-4 flex items-center cursor-pointer justify-center mt-0 text-zinc-800  !w-[35px] !h-[35px] md:!w-[45px] md:!h-[45px]"
+                className="px-4 flex items-center cursor-pointer justify-center mt-0 text-zinc-800  !w-[45px] !h-[45px]"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 ⋯

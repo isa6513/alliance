@@ -65,32 +65,30 @@ const Button: React.FC<ButtonProps> = ({
   }[size];
 
   return (
-    <div className="group relative">
-      <button
-        ref={ref}
-        type={type}
-        title={title}
-        className={`${sizeClass} font-medium rounded w-fit h-fit flex items-center justify-center border-box ${
-          disabled ? "opacity-50 !cursor-not-allowed" : ``
-        } ${color} ${
-          color === ButtonColor.Light ? "!text-zinc-800" : ""
-        } ${className} `}
-        style={{
-          fontWeight: 450,
-        }}
-        onClick={onClick}
-        disabled={disabled}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-      >
-        {children}
-      </button>
+    <button
+      ref={ref}
+      type={type}
+      title={title}
+      className={`${sizeClass} font-medium rounded w-fit h-fit flex items-center justify-center border-box group ${
+        disabled ? "opacity-50 !cursor-not-allowed" : ``
+      } ${color} ${
+        color === ButtonColor.Light ? "!text-zinc-800" : ""
+      } ${className} `}
+      style={{
+        fontWeight: 450,
+      }}
+      onClick={onClick}
+      disabled={disabled}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      {children}
       {hoverText && (
-        <div className="absolute -top-full left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-black/50 text-white text-sm p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+        <div className="absolute -top-2/3 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-black/50 text-white text-sm p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-150">
           {hoverText}
         </div>
       )}
-    </div>
+    </button>
   );
 };
 
