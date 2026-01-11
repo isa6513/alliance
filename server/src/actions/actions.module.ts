@@ -28,6 +28,7 @@ import { ReminderGroup } from './entities/reminder-group.entity';
 import { ForumModule } from 'src/forum/forum.module';
 import { ReloadUsersJoinedWorker } from './reload-users-joined.worker';
 import { PushModule } from 'src/push/push.module';
+import { SlackModule } from 'src/slack/slack.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { PushModule } from 'src/push/push.module';
     MmsModule,
     PushModule,
     ForumModule,
+    SlackModule,
   ],
   controllers: [ActionsController],
   providers: [

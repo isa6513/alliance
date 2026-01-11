@@ -9,6 +9,7 @@ import { suspensionMessage } from 'src/notifs/textnotifcontents';
 import { UserService } from 'src/user/user.service';
 import { DataSource } from 'typeorm';
 import { withPgAdvisoryLock } from '../notifs/lock-utils';
+import { SlackService } from 'src/slack/slack.service';
 
 const PROCESS_ONE_LOCK_KEY1 = 0xa11a;
 const PROCESS_ONE_LOCK_KEY2 = 0xce01;
@@ -22,6 +23,7 @@ export class ContractSuspenderWorker {
     private readonly mmsService: MmsService,
     private readonly actionsService: ActionsService,
     private readonly userService: UserService,
+    private readonly slackService: SlackService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_1AM)
@@ -55,6 +57,9 @@ export class ContractSuspenderWorker {
             user.id,
             true,
             suspendReasonKeys.get(user.id),
+          );
+          await this.slackService.sendMessage(
+            `[${process.env.NODE_ENV}]: Suspending contract for ${user.name} (${user.email}). failure code ${suspendReasonKeys.get(user.id)}`,
           );
           if (res) {
             const cid = generateCIDForNotif();
