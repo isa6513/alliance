@@ -3,12 +3,14 @@ import {
   analyticsGetActionStats,
   analyticsRecalculateActionStats,
   analyticsGetMemberCompletionRetention,
+  analyticsGetAggregateStats,
 } from "@alliance/shared/client";
 import {
   DailyStatsRecord,
   ActionStatsRecord,
   MemberCompletionRetentionCohortDto,
   MemberCompletionRetentionPointDto,
+  AggregateStatsDto,
 } from "@alliance/shared/client/types.gen";
 import chroma from "chroma-js";
 import * as d3 from "d3";
@@ -103,6 +105,10 @@ const StatsPage: React.FC = () => {
   const [queryRange, setQueryRange] = useState(defaultRange);
   const [stats, setStats] = useState<DailyStatsRecord[]>([]);
   const [actionStats, setActionStats] = useState<ActionStatsRecord[]>([]);
+  const [aggregateStats, setAggregateStats] =
+    useState<AggregateStatsDto | null>(null);
+  const [aggregateStatsLoading, setAggregateStatsLoading] =
+    useState<boolean>(false);
   const [retentionCohorts, setRetentionCohorts] = useState<
     MemberCompletionRetentionCohortDto[]
   >([]);
@@ -136,6 +142,7 @@ const StatsPage: React.FC = () => {
       end: formatDateAsLocal(end),
     };
   });
+  const [assumedHourlyRate, setAssumedHourlyRate] = useState<number>(15);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const completionRateSvgRef = useRef<SVGSVGElement | null>(null);
@@ -213,6 +220,18 @@ const StatsPage: React.FC = () => {
     }
   }, []);
 
+  const loadAggregateStats = useCallback(async () => {
+    setAggregateStatsLoading(true);
+    try {
+      const response = await analyticsGetAggregateStats();
+      setAggregateStats(response.data ?? null);
+    } catch (err) {
+      console.error("Failed to load aggregate stats", err);
+    } finally {
+      setAggregateStatsLoading(false);
+    }
+  }, []);
+
   const handleRecalculateActionStats = useCallback(async () => {
     setActionStatsLoading(true);
     try {
@@ -232,6 +251,10 @@ const StatsPage: React.FC = () => {
   useEffect(() => {
     void loadRetentionCohorts();
   }, [loadRetentionCohorts]);
+
+  useEffect(() => {
+    void loadAggregateStats();
+  }, [loadAggregateStats]);
 
   const parsedStats = useMemo<ParsedDailyStats[]>(() => {
     return stats
@@ -688,6 +711,49 @@ const StatsPage: React.FC = () => {
 
   return (
     <div className="p-6 md:p-8 space-y-6 text-gray-900 mx-auto">
+      {aggregateStatsLoading ? (
+        <div className="text-sm text-gray-600">Loading aggregate stats…</div>
+      ) : aggregateStats ? (
+        <div className="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center justify-between">
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col">
+              <div className="text-sm text-gray-600">Total members</div>
+              <div className="text-3xl font-bold text-gray-900">
+                {aggregateStats.signedUsers}
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <div className="text-sm text-gray-600">
+                Total expected weekly member time
+              </div>
+              <div className="text-base font-semibold text-gray-900">
+                {((aggregateStats.signedUsers * 15) / 60).toFixed(2)} hours /
+                week
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <div className="text-sm text-gray-600">
+                Annual expected value of member time (assuming{" "}
+                <input
+                  type="number"
+                  value={assumedHourlyRate}
+                  onChange={(e) => setAssumedHourlyRate(Number(e.target.value))}
+                  className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white w-16"
+                />{" "}
+                / hour)
+              </div>
+              <div className="text-base font-semibold text-gray-900">
+                $
+                {(
+                  ((aggregateStats.signedUsers * 15) / 60) *
+                  assumedHourlyRate *
+                  52
+                ).toFixed(2)}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div className="flex flex-wrap gap-3">
           <div className="flex flex-col gap-1">

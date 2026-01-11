@@ -458,12 +458,13 @@ ORDER BY pp.total_session_duration_seconds DESC
         continue;
       }
 
-      const baseUsers = await this.actionEventRecipientService.getBaseUsersForEvent(
-        ActionStatus.MemberAction,
-        action,
-        memberActionEvent.id,
-        { includeSuspended: true },
-      );
+      const baseUsers =
+        await this.actionEventRecipientService.getBaseUsersForEvent(
+          ActionStatus.MemberAction,
+          action,
+          memberActionEvent.id,
+          { includeSuspended: true },
+        );
 
       for (const user of baseUsers) {
         const signedAt = memberSignedAtByUserId.get(user.id);
@@ -525,5 +526,18 @@ ORDER BY pp.total_session_duration_seconds DESC
           points,
         };
       });
+  }
+
+  async getAggregateStats(): Promise<{ signedUsers: number }> {
+    const users = await this.userRepository.find({
+      relations: { contractEvents: true },
+    });
+    const signedUsers = users.filter(
+      (user) => user.hasActiveContract === true,
+    ).length;
+
+    return {
+      signedUsers: signedUsers,
+    };
   }
 }

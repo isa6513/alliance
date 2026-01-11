@@ -6,6 +6,7 @@ import { DailyStatsRecord } from './dailystats.entity';
 import { ActionStatsRecord } from './actionstats.entity';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { MemberCompletionRetentionCohortDto } from './member-completion-retention.dto';
+import { AggregateStatsDto } from './aggregatestats.dto';
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -53,7 +54,16 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('member-completion-retention')
   @ApiOkResponse({ type: [MemberCompletionRetentionCohortDto] })
-  getMemberCompletionRetention(): Promise<MemberCompletionRetentionCohortDto[]> {
+  getMemberCompletionRetention(): Promise<
+    MemberCompletionRetentionCohortDto[]
+  > {
     return this.analyticsService.getMemberCompletionRetentionByCohort();
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('aggregate-stats')
+  @ApiOkResponse({ type: AggregateStatsDto })
+  async getAggregateStats(): Promise<AggregateStatsDto> {
+    return await this.analyticsService.getAggregateStats();
   }
 }

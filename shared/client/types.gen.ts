@@ -2162,6 +2162,10 @@ export type MemberCompletionRetentionCohortDto = {
     points: Array<MemberCompletionRetentionPointDto>;
 };
 
+export type AggregateStatsDto = {
+    signedUsers: number;
+};
+
 export type AppHealthCheckData = {
     body?: never;
     path?: never;
@@ -5457,6 +5461,19 @@ export type AnalyticsGetMemberCompletionRetentionResponses = {
 };
 
 export type AnalyticsGetMemberCompletionRetentionResponse = AnalyticsGetMemberCompletionRetentionResponses[keyof AnalyticsGetMemberCompletionRetentionResponses];
+
+export type AnalyticsGetAggregateStatsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/aggregate-stats';
+};
+
+export type AnalyticsGetAggregateStatsResponses = {
+    200: AggregateStatsDto;
+};
+
+export type AnalyticsGetAggregateStatsResponse = AnalyticsGetAggregateStatsResponses[keyof AnalyticsGetAggregateStatsResponses];
 
 export type ClientOptions = {
     baseUrl: string;
