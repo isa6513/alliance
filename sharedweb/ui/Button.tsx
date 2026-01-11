@@ -69,7 +69,7 @@ const Button: React.FC<ButtonProps> = ({
       ref={ref}
       type={type}
       title={title}
-      className={`${sizeClass} font-medium rounded w-fit h-fit flex items-center justify-center border-box group ${
+      className={`${sizeClass} font-medium rounded w-fit h-fit flex items-center justify-center border-box relative group ${
         disabled ? "opacity-50 !cursor-not-allowed" : ``
       } ${color} ${
         color === ButtonColor.Light ? "!text-zinc-800" : ""
@@ -84,7 +84,7 @@ const Button: React.FC<ButtonProps> = ({
     >
       {children}
       {hoverText && (
-        <div className="absolute -top-2/3 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-black/50 text-white text-sm p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+        <div className="absolute -top-[110%] left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-black/50 text-white text-sm p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-150">
           {hoverText}
         </div>
       )}
