@@ -408,13 +408,16 @@ export class ActionsService {
           const targetTagIds = new Set(
             (action.participatingTags || []).map((tag) => tag.id),
           );
+          const manualCohortUserIdSet = action.manualCohortUserIds
+            ? new Set(action.manualCohortUserIds)
+            : undefined;
           shouldParticipate =
             this.actionEventRecipientService.computeShouldParticipate({
               eventDate: action.events.find(
                 (event) => event.newStatus === ActionStatus.MemberAction,
               )!.date,
               everyoneShouldComplete: action.everyoneShouldComplete,
-              manualCohortUserIds: new Set(action.manualCohortUserIds),
+              manualCohortUserIds: manualCohortUserIdSet,
               targetTagIds,
               useManualCohort: action.useManualCohort,
               user,
