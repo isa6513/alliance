@@ -110,13 +110,13 @@ export class ActionEventRecipientService {
     return sortedEvents[currentEventIndex + 1] ?? null;
   }
 
-  public async computeBaseUsersForEvent(
-    eventStatus: ActionStatus,
-    action: Action,
-    eventId: number,
-    options?: { includeSuspended?: boolean },
-  ): Promise<User[]> {
-    const includeSuspended = options?.includeSuspended ?? false;
+  public async computeBaseUsersForEvent(params: {
+    eventStatus: ActionStatus;
+    action: Action;
+    eventId: number;
+    includeSuspended?: boolean;
+  }): Promise<User[]> {
+    const { eventStatus, action, eventId, includeSuspended } = params;
     const targetTagIds = new Set(action.participatingTags.map((tag) => tag.id));
     const events =
       action.events ??
@@ -265,11 +265,11 @@ export class ActionEventRecipientService {
     type: ActionEventNotifType,
     suite?: ActionSuite,
   ): Promise<User[]> {
-    const users = await this.computeBaseUsersForEvent(
-      event.newStatus,
-      event.action,
-      event.id,
-    );
+    const users = await this.computeBaseUsersForEvent({
+      action: event.action,
+      eventId: event.id,
+      eventStatus: event.newStatus,
+    });
     return type === ActionEventNotifType.Announcement
       ? users
       : await this.filterForShouldRemind(users, event, suite);

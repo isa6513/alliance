@@ -459,12 +459,12 @@ ORDER BY pp.total_session_duration_seconds DESC
       }
 
       const baseUsers =
-        await this.actionEventRecipientService.computeBaseUsersForEvent(
-          ActionStatus.MemberAction,
+        await this.actionEventRecipientService.computeBaseUsersForEvent({
           action,
-          memberActionEvent.id,
-          { includeSuspended: true },
-        );
+          eventId: memberActionEvent.id,
+          eventStatus: ActionStatus.MemberAction,
+          includeSuspended: true,
+        });
 
       for (const user of baseUsers) {
         const signedAt = memberSignedAtByUserId.get(user.id);

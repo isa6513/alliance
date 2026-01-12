@@ -12,15 +12,16 @@ import {
   computeIsAwayInRange,
 } from './user';
 
-export function computeIsInManualCohort(params: {
-  action: Pick<Action, 'manualCohortUserIds' | 'useManualCohort'>;
+export function getIsInManualCohort(params: {
+  manualCohortUserIds?: Set<number>;
+  useManualCohort?: boolean;
   user: Pick<User, 'id'>;
 }): boolean {
-  const { user, action } = params;
-  if (!action.useManualCohort) {
+  const { user, manualCohortUserIds, useManualCohort } = params;
+  if (!useManualCohort) {
     return false;
   }
-  return action.manualCohortUserIds?.some((m) => m === user.id) ?? false;
+  return manualCohortUserIds?.has(user.id) ?? false;
 }
 
 export function computeHasOverlappingTags(params: {

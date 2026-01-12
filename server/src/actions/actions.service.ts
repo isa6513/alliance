@@ -309,11 +309,11 @@ export class ActionsService {
     if (!event) return [];
 
     const baseUsers =
-      await this.actionEventRecipientService.computeBaseUsersForEvent(
-        ActionStatus.MemberAction,
+      await this.actionEventRecipientService.computeBaseUsersForEvent({
+        eventId: event.id,
+        eventStatus: ActionStatus.MemberAction,
         action,
-        event.id,
-      );
+      });
 
     const deadlineEvents = await this.actionEventRepository.find({
       where: {
@@ -2239,11 +2239,11 @@ export class ActionsService {
     event: ActionEvent,
   ): Promise<User[]> {
     const baseUsers =
-      await this.actionEventRecipientService.computeBaseUsersForEvent(
-        ActionStatus.MemberAction,
+      await this.actionEventRecipientService.computeBaseUsersForEvent({
         action,
-        event.id,
-      );
+        eventId: event.id,
+        eventStatus: ActionStatus.MemberAction,
+      });
 
     const completionActivities = await this.actionActivityRepository.find({
       where: {
@@ -2327,13 +2327,13 @@ export class ActionsService {
 
     for (const suite of pastSuites) {
       const baseCohort =
-        await this.actionEventRecipientService.computeBaseUsersForEvent(
-          ActionStatus.MemberAction,
-          suite.actions[0],
-          suite.actions[0].events.find(
+        await this.actionEventRecipientService.computeBaseUsersForEvent({
+          eventStatus: ActionStatus.MemberAction,
+          action: suite.actions[0],
+          eventId: suite.actions[0].events.find(
             (event) => event.newStatus === ActionStatus.MemberAction,
           )!.id,
-        );
+        });
       expectedBySuite.set(
         suite.suite.id,
         new Set(baseCohort.map((user) => user.id)),
