@@ -38,7 +38,7 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
 
   beforeEach(() => {
     actionsService = {
-      getUncompletedTasks: jest.fn(),
+      findUncompletedTasks: jest.fn(),
     } as unknown as jest.Mocked<ActionsService>;
 
     worker = new ActionEventNotifWorker(
