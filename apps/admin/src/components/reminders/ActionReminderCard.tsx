@@ -296,21 +296,34 @@ const ActionReminderCard = ({
               sentReminders.map((notif) => (
                 <div
                   key={notif.id}
-                  className="p-3 flex flex-row gap-2 items-center"
+                  className="p-3 flex flex-row gap-2 items-center justify-between"
                 >
-                  <p className="text-zinc-500">({notif.channel})</p>
-                  <Link to={`/member/${notif.user.id}`} target="_blank">
-                    {notif.user.displayName}
-                  </Link>
-                  <p className="text-sm text-zinc-500">
-                    {formatDate(notif.createdAt, "MM/dd/yyyy hh:mm a")}
-                  </p>
-                  <Link
-                    to={`/database?table=action_event_notif&id=${notif.id}`}
-                    target="_blank"
+                  <div className="flex flex-row gap-2 items-center">
+                    <p className="text-zinc-500">({notif.channel})</p>
+                    <Link to={`/member/${notif.user.id}`} target="_blank">
+                      {notif.user.displayName}
+                    </Link>
+                    <p className="text-sm text-zinc-500">
+                      {formatDate(notif.createdAt, "MM/dd/yyyy hh:mm a")}
+                    </p>
+                    <Link
+                      to={`/database?table=action_event_notif&id=${notif.id}`}
+                      target="_blank"
+                    >
+                      <DatabaseIcon size="small" fill="gray" />
+                    </Link>
+                  </div>
+                  <p
+                    className={`text-sm ${
+                      notif.mms?.status === "undelivered"
+                        ? "text-red-500"
+                        : "text-zinc-500"
+                    }`}
                   >
-                    <DatabaseIcon size="small" fill="gray" />
-                  </Link>
+                    {notif.channel === "text"
+                      ? notif.mms?.status
+                      : notif.mail?.status}
+                  </p>
                 </div>
               ))
             )}

@@ -334,7 +334,7 @@ export class ActionEventReminderService {
   async getSentNotifsForGroup(groupId: number): Promise<ActionEventNotifDto[]> {
     const notifs = await this.actionEventNotifRepository.find({
       where: { reminderGroup: { id: groupId }, sent: true },
-      relations: { user: true },
+      relations: { user: true, mms: true, mail: true },
     });
     return notifs.map((notif) => new ActionEventNotifDto(notif));
   }
