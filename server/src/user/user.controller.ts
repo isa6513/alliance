@@ -329,6 +329,15 @@ export class UserController {
     );
   }
 
+  @Get('list-public')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: UserDto, isArray: true })
+  async listPublic(): Promise<UserDto[]> {
+    return (await this.userService.findAll({ contractEvents: true })).map(
+      (user) => new UserDto(user),
+    );
+  }
+
   // @Get('action-relations')
   // @UseGuards(AdminGuard)
   // @ApiOkResponse({ type: UserActionRelationsResponseDto })
@@ -341,6 +350,15 @@ export class UserController {
   @ApiOkResponse({ type: [ProfileDto] })
   async members(): Promise<ProfileDto[]> {
     return (await this.userService.findAll()).map(
+      (user) => new ProfileDto(user),
+    );
+  }
+
+  @Get('members-public')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [ProfileDto] })
+  async membersPublic(): Promise<ProfileDto[]> {
+    return (await this.userService.findAllMembersPublic()).map(
       (user) => new ProfileDto(user),
     );
   }

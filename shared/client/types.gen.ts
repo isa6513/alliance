@@ -253,6 +253,11 @@ export type FormResponse = {
     sid?: string;
 };
 
+/**
+ * Source of the activity
+ */
+export type ActivitySource = 'user' | 'admin_override';
+
 export type ActionActivity = {
     id: number;
     /**
@@ -270,6 +275,10 @@ export type ActionActivity = {
     declineReason?: string;
     isMoral?: boolean;
     outOfTime?: boolean;
+    /**
+     * Source of the activity
+     */
+    source: ActivitySource;
 };
 
 export type ReminderGroupTimingMode = 'absolute' | 'from_deadline' | 'within_range' | 'within_relative_range' | 'event_launch';
@@ -2677,6 +2686,19 @@ export type UserListResponses = {
 
 export type UserListResponse = UserListResponses[keyof UserListResponses];
 
+export type UserListPublicData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/list-public';
+};
+
+export type UserListPublicResponses = {
+    200: Array<UserDto>;
+};
+
+export type UserListPublicResponse = UserListPublicResponses[keyof UserListPublicResponses];
+
 export type UserMembersData = {
     body?: never;
     path?: never;
@@ -2689,6 +2711,19 @@ export type UserMembersResponses = {
 };
 
 export type UserMembersResponse = UserMembersResponses[keyof UserMembersResponses];
+
+export type UserMembersPublicData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/members-public';
+};
+
+export type UserMembersPublicResponses = {
+    200: Array<ProfileDto>;
+};
+
+export type UserMembersPublicResponse = UserMembersPublicResponses[keyof UserMembersPublicResponses];
 
 export type UserMembersWithFriendsData = {
     body?: never;

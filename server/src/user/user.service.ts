@@ -193,6 +193,16 @@ export class UserService {
     });
   }
 
+  async findAllMembersPublic(): Promise<User[]> {
+    const users = await this.userRepository.find({
+      where: { shareInfoPublicly: true },
+      relations: {
+        contractEvents: true,
+      },
+    });
+    return users.filter((user) => user.hasActiveContract);
+  }
+
   findOne(id: number, relations?: Relations<User>): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },
