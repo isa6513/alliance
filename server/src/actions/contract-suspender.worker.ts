@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { ActionsService } from 'src/actions/actions.service';
 import { MailService } from 'src/mail/mail.service';
 import { MmsService } from 'src/mms/mms.service';
@@ -26,12 +25,15 @@ export class ContractSuspenderWorker {
     private readonly slackService: SlackService,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async processSuspensions() {
     if (
       process.env.NODE_ENV === 'development' &&
       process.env.SEND_DEV_NOTIFS !== '1'
     ) {
+      return;
+    }
+
+    if (process.env.NODE_ENV === 'production') {
       return;
     }
 
