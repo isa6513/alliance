@@ -484,6 +484,7 @@ export type Action = {
      * Priority of the action
      */
     priority: number;
+    optional: boolean;
     /**
      * Prevent completion of the action (for old actions)
      */
@@ -1141,6 +1142,7 @@ export type ActionDto = {
      * Priority of the action
      */
     priority: number;
+    optional: boolean;
     /**
      * Prevent completion of the action (for old actions)
      */
@@ -1257,6 +1259,7 @@ export type CreateActionDto = {
      * Priority of the action
      */
     priority: number;
+    optional: boolean;
     /**
      * Prevent completion of the action (for old actions)
      */
@@ -1348,6 +1351,7 @@ export type UpdateActionDto = {
      * Priority of the action
      */
     priority?: number;
+    optional?: boolean;
     /**
      * Prevent completion of the action (for old actions)
      */
@@ -1625,6 +1629,7 @@ export type ExportActionDto = {
      * Priority of the action
      */
     priority: number;
+    optional: boolean;
     /**
      * Prevent completion of the action (for old actions)
      */

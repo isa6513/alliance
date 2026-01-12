@@ -615,7 +615,7 @@ jobs:
         run: |
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"Deploy ${{ github.ref_name == 'production' && 'production' || 'staging' }} failed for ${{ github.event.head_commit.message }}. <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Open run>\"}" \
-            ${{ secrets.SLACK_WEBHOOK_URL }}
+            ${{ secrets.SLACK_WEBHOOK_URL_DEPLOYMENT }}
   # build-mobile-app:
   #   runs-on: ubuntu-latest
   #   steps:

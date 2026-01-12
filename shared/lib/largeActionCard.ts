@@ -9,8 +9,8 @@ export interface LargeActionCardPropsShared
   onUpdateActionState: () => void;
   dismissProps?: {
     message: string;
-    handleDismiss: () => void;
   };
+  handleDismiss: () => void;
 }
 export function getLastAndNextEvent(action: ActionDto) {
   const pastEvents = action.events.filter(

@@ -308,6 +308,13 @@ const ActionForm: React.FC<ActionFormProps> = ({
         section: "settings",
         helpText: "For actions completed by non-members and not by members",
       },
+      {
+        name: "optional",
+        label: "Optional",
+        type: "checkbox",
+        section: "settings",
+        helpText: "Shows prominent dismiss dialog above task card",
+      },
     ],
     [
       actionTypeOptions,

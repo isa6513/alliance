@@ -268,6 +268,11 @@ export class Action {
   priority: number;
 
   @Column({ default: false })
+  @ApiProperty()
+  @Allow()
+  optional: boolean;
+
+  @Column({ default: false })
   @ApiProperty({
     description: 'Prevent completion of the action (for old actions)',
   })

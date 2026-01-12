@@ -115,12 +115,10 @@ const HomePage = () => {
             [TaskAwayStatus.AWAY_LATER]: TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
             [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
           }[currentTask?.awayStatus],
-          handleDismiss: () => handleDismissAction(currentTask.id),
         }
       : deadlineHasPassed(currentTask, new Date())
       ? {
           message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
-          handleDismiss: () => handleDismissAction(currentTask.id),
         }
       : undefined;
 
@@ -134,6 +132,7 @@ const HomePage = () => {
           <LargeActionCard
             action={currentTask}
             dismissProps={dismissProps}
+            handleDismiss={() => handleDismissAction(currentTask.id)}
             userRelation={currentTask.userRelation as "joined" | "none"}
             friendActivities={friendActivities.filter(
               (activity) => activity.actionId === currentTask.id

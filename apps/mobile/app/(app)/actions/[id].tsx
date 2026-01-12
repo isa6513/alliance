@@ -214,7 +214,7 @@ export default function ActionDetailScreen() {
           <View>
             {action.status !== "planned" ? (
               <View>
-                <View className="mb-2 flex flex-row items-center gap-2 w-full">
+                <View className="mb-2 flex flex-row items-center gap-2 w-full flex-wrap">
                   <View className="flex-1">
                     <Text className="text-xl font-semibold text-zinc-900">
                       Task
@@ -224,6 +224,7 @@ export default function ActionDetailScreen() {
                     action={action}
                     nextEvent={nextEvent}
                     lastEvent={lastEvent}
+                    className="flex-col items-end"
                   />
                 </View>
                 <ActionPageTaskPanel
@@ -290,12 +291,14 @@ export default function ActionDetailScreen() {
             resizeMode="cover"
           />
         )}
-        <View className="p-5 pt-8">
+        <View className="p-5 pt-15">
           <Text className="text-[24px] font-bold text-zinc-900 mb-2 font-serif-bold">
             {action.name}
           </Text>
           {action.shortDescription && (
-            <Text className="mb-1 text-zinc-600">{action.shortDescription}</Text>
+            <Text className="mb-1 text-zinc-600">
+              {action.shortDescription}
+            </Text>
           )}
           {action.authors && action.authors.length > 0 && (
             <Text className="mb-4 text-zinc-500">
@@ -324,7 +327,7 @@ export default function ActionDetailScreen() {
               <TouchableOpacity
                 key={tab.id}
                 onPress={() => setActiveTab(tab.id)}
-                className={`flex-1 py-3 items-center ${
+                className={`px-4 py-3 items-center ${
                   activeTab === tab.id ? "border-b-2 border-green" : ""
                 }`}
                 activeOpacity={0.7}

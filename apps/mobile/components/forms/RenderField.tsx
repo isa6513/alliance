@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ScrollView,
   Image,
@@ -27,7 +27,7 @@ import {
   formatTimeForDisplay,
   parseTimeInput,
 } from "@alliance/shared/forms/timeUtils";
-import AppMarkdownWrapper from "../AppMarkdownWrapper";
+import InlineLabelMarkdownWrapper from "../InlineLabelMarkdownWrapper";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -90,11 +90,12 @@ export function RenderLabel({
   error?: string | null;
 }) {
   if (field.label === null) return null;
+  console.log(field.label);
   return (
     <Text className="block mb-1">
-      <AppMarkdownWrapper>{field.label}</AppMarkdownWrapper>
+      <InlineLabelMarkdownWrapper>{field.label}</InlineLabelMarkdownWrapper>
       {field.required && (
-        <Text className="text-red-500 ml-px font-medium inline">*</Text>
+        <Text className="text-red-500 pl-1 font-medium inline">*</Text>
       )}
     </Text>
   );
@@ -328,15 +329,14 @@ export function RenderField({
 
     case "checkbox":
       return (
-        <View>
+        <View className="flex-row w-full">
           <Checkbox
             checked={!!value}
             onChange={(next) => onChange?.(next)}
             disabled={disabled}
-            label={field.label}
-            required={field.required}
             error={hasError}
           />
+          <RenderLabel field={field} error={errorMessage} />
           {renderValidationMessage(errorMessage)}
         </View>
       );
