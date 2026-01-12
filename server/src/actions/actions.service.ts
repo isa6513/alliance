@@ -2216,7 +2216,7 @@ export class ActionsService {
   async getMemberInfoByCommunityId(
     communityId: number,
   ): Promise<CommunityUserInfoDto> {
-    const userIds = await this.userService.getUserIdsForCommunity(communityId);
+    const userIds = await this.userService.findUserIdsForCommunity(communityId);
     const actionRelations = await this.getActionRelationsForUsers(userIds);
     return {
       actions: actionRelations.actions,
@@ -2226,7 +2226,7 @@ export class ActionsService {
   }
 
   async getMemberInfo(userId: number): Promise<CommunityUserInfoDto> {
-    const community = await this.userService.getCommunityForUserOrFail(userId);
+    const community = await this.userService.findCommunityForUserOrFail(userId);
     return this.getMemberInfoByCommunityId(community.id);
   }
 
