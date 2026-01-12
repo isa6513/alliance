@@ -1,5 +1,10 @@
 import { useCallback, useMemo } from "react";
-import { ActivityIndicator, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { router, RelativePathString } from "expo-router";
 import {
   NotificationDto,
@@ -27,7 +32,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { Check } from "lucide-react-native";
-import { colors } from "react-native-keyboard-controller/lib/typescript/components/KeyboardToolbar/colors";
 
 const SWIPE_THRESHOLD = -80;
 
@@ -104,7 +108,7 @@ function SwipeableNotification({
   });
 
   return (
-    <View className="overflow-hidden border border-b-0 mx-px border-zinc-300">
+    <View className="overflow-hidden border-t mx-px border-zinc-300">
       {/* Background action area */}
       <Animated.View
         style={[actionStyle]}
@@ -124,7 +128,7 @@ function SwipeableNotification({
           <TouchableOpacity
             activeOpacity={0.75}
             onPress={onPress}
-            className={`px-4 py-3 ${
+            className={`px-6 py-4 ${
               notification.readAt ? "bg-white" : "bg-red-50"
             }`}
           >
@@ -173,6 +177,7 @@ export default function NotificationsScreen() {
     data: response,
     isPending,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["notifications"],
     queryFn: () => notifsFindAll(),
@@ -289,9 +294,9 @@ export default function NotificationsScreen() {
       ) : (
         <LegendList
           ListHeaderComponent={
-            <View className="pt-6 pb-4">
+            <View className="pt-6 p-4">
               <View className="flex-row items-center justify-between gap-x-3">
-                <Text className="text-2xl font-semibold text-zinc-900">
+                <Text className="text-xl font-semibold text-zinc-900">
                   Notifications
                 </Text>
                 {unreadCount > 0 && (
@@ -307,10 +312,12 @@ export default function NotificationsScreen() {
           }
           data={notifications}
           keyExtractor={(item) => item.id.toString()}
+          refreshControl={
+            <RefreshControl refreshing={isPending} onRefresh={refetch} />
+          }
           recycleItems
           renderItem={renderNotification}
           contentContainerStyle={{
-            paddingHorizontal: 16,
             paddingBottom: 40,
           }}
         />

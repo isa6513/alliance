@@ -32,7 +32,7 @@ const PrelaunchLandingPage: React.FC = () => {
               </p>
 
               <p>
-                We are in an experimental phase. Membership is by invitation
+                We are in an experimental phase: membership is by invitation
                 only.
               </p>
             </div>
