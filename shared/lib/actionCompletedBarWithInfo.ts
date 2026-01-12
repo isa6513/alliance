@@ -36,7 +36,7 @@ export function getCompletedPercentage(
 
   const labelString = noDenominator ? value : `${value} / ${safeThreshold}`;
 
-  const percentage = (value / (noDenominator ? value : safeThreshold)) * 100;
+  const percentage = noDenominator ? 100 : (value / safeThreshold) * 100;
 
   return { labelString, percentage };
 }

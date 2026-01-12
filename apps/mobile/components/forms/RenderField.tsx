@@ -90,7 +90,6 @@ export function RenderLabel({
   error?: string | null;
 }) {
   if (field.label === null) return null;
-  console.log(field.label);
   return (
     <Text className="block mb-1">
       <InlineLabelMarkdownWrapper>{field.label}</InlineLabelMarkdownWrapper>
