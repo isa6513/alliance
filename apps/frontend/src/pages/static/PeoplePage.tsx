@@ -108,7 +108,11 @@ const PeoplePage: React.FC = () => {
               {staffProfiles
                 .filter((member) => member.id !== undefined)
                 .map((member) => (
-                  <PublicMemberDirectoryCard key={member.id} member={member} />
+                  <PublicMemberDirectoryCard
+                    key={member.id}
+                    member={member}
+                    showDescription={true}
+                  />
                 ))}
             </div>
           </div>
