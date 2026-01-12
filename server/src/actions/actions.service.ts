@@ -90,8 +90,8 @@ import {
 } from './entities/reminder-group.entity';
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 import { Relations } from 'src/utils/Repository';
-import { isUserAwayAt } from 'src/utils/user';
-import { latestMemberActionPhaseExistsAndIsOver } from 'src/utils/action';
+import { computeIsAwayAt } from 'src/utils/user';
+import { computeLatestMemberActionPhaseExistsAndIsOver } from 'src/utils/action';
 
 export class UserActionRelationDto {
   @ApiProperty({ enum: UserActionRelation, enumName: 'UserActionRelation' })
@@ -309,7 +309,7 @@ export class ActionsService {
     if (!event) return [];
 
     const baseUsers =
-      await this.actionEventRecipientService.getBaseUsersForEvent(
+      await this.actionEventRecipientService.computeBaseUsersForEvent(
         ActionStatus.MemberAction,
         action,
         event.id,
@@ -329,7 +329,7 @@ export class ActionsService {
     const notAwayForDeadline =
       deadlineEvents.length > 0
         ? baseUsers.filter(
-            (user) => !isUserAwayAt({ user, date: deadlineEvents[0].date }),
+            (user) => !computeIsAwayAt({ user, date: deadlineEvents[0].date }),
           )
         : baseUsers;
 
@@ -409,7 +409,7 @@ export class ActionsService {
             (action.participatingTags || []).map((tag) => tag.id),
           );
           shouldParticipate =
-            this.actionEventRecipientService.userShouldParticipate({
+            this.actionEventRecipientService.computeShouldParticipate({
               eventDate: action.events.find(
                 (event) => event.newStatus === ActionStatus.MemberAction,
               )!.date,
@@ -2061,7 +2061,7 @@ export class ActionsService {
       actions.map((action) => {
         return [
           action.id,
-          latestMemberActionPhaseExistsAndIsOver({
+          computeLatestMemberActionPhaseExistsAndIsOver({
             action,
             date: now,
           }),
@@ -2239,7 +2239,7 @@ export class ActionsService {
     event: ActionEvent,
   ): Promise<User[]> {
     const baseUsers =
-      await this.actionEventRecipientService.getBaseUsersForEvent(
+      await this.actionEventRecipientService.computeBaseUsersForEvent(
         ActionStatus.MemberAction,
         action,
         event.id,
@@ -2327,7 +2327,7 @@ export class ActionsService {
 
     for (const suite of pastSuites) {
       const baseCohort =
-        await this.actionEventRecipientService.getBaseUsersForEvent(
+        await this.actionEventRecipientService.computeBaseUsersForEvent(
           ActionStatus.MemberAction,
           suite.actions[0],
           suite.actions[0].events.find(

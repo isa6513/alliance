@@ -6,10 +6,13 @@ import {
   ActionActivity,
   ActionActivityType,
 } from 'src/actions/entities/action-activity.entity';
-import { getLatestMemberActionAndDeadline } from './action';
-import { computeIsContractActiveInFullRange, isUserAwayInRange } from './user';
+import { computeLatestMemberActionAndDeadline } from './action';
+import {
+  computeIsContractActiveInFullRange,
+  computeIsAwayInRange,
+} from './user';
 
-export function isInManualCohort(params: {
+export function computeIsInManualCohort(params: {
   action: Pick<Action, 'manualCohortUserIds' | 'useManualCohort'>;
   user: Pick<User, 'id'>;
 }): boolean {
@@ -20,7 +23,7 @@ export function isInManualCohort(params: {
   return action.manualCohortUserIds?.some((m) => m === user.id) ?? false;
 }
 
-export function hasOverlappingTags(params: {
+export function computeHasOverlappingTags(params: {
   actionParticipatingTagIds: Set<number>;
   userTags: Iterable<number> | Iterable<Tag>;
 }): boolean {
@@ -39,13 +42,13 @@ export function hasOverlappingTags(params: {
   return false;
 }
 
-export function isContractActiveDuringEntireLatestMemberAction(params: {
+export function computeIsContractActiveDuringEntireLatestMemberAction(params: {
   action: Pick<Action, 'events'>;
   user: Pick<User, 'contractEvents'>;
 }): boolean {
   const { action, user } = params;
   const { event: latestMemberActionEvent, endDate } =
-    getLatestMemberActionAndDeadline({
+    computeLatestMemberActionAndDeadline({
       action,
     });
 
@@ -60,14 +63,14 @@ export function isContractActiveDuringEntireLatestMemberAction(params: {
   });
 }
 
-export function isAwayDuringAnyOfLastMemberAction(params: {
+export function computeIsAwayDuringAnyOfLastMemberAction(params: {
   action: Pick<Action, 'events'>;
   user: Pick<User, 'awayRanges'>;
 }): boolean {
   const { action, user } = params;
 
   const { event: lastMemberActionEvent, endDate } =
-    getLatestMemberActionAndDeadline({
+    computeLatestMemberActionAndDeadline({
       action,
     });
 
@@ -75,14 +78,14 @@ export function isAwayDuringAnyOfLastMemberAction(params: {
     return false;
   }
 
-  return isUserAwayInRange({
+  return computeIsAwayInRange({
     user,
     startDate: lastMemberActionEvent.date,
     endDate,
   });
 }
 
-export function hasWithdrawn(params: {
+export function computeHasWithdrawn(params: {
   actionActivities: Pick<ActionActivity, 'type' | 'userId'>[];
   user: Pick<User, 'id'>;
 }): boolean {
@@ -95,7 +98,7 @@ export function hasWithdrawn(params: {
   );
 }
 
-export function hasCompleted(params: {
+export function computeHasCompleted(params: {
   actionActivities: Pick<ActionActivity, 'type' | 'userId'>[];
   user: Pick<User, 'id'>;
 }): boolean {
@@ -108,7 +111,7 @@ export function hasCompleted(params: {
   );
 }
 
-export function hasDismissed(params: {
+export function computeHasDismissed(params: {
   actionActivities: Pick<ActionActivity, 'type' | 'userId'>[];
   user: Pick<User, 'id'>;
 }): boolean {
@@ -121,7 +124,7 @@ export function hasDismissed(params: {
   );
 }
 
-export function hasJoinedCommitmentfulAction(params: {
+export function computeHasJoinedCommitmentfulAction(params: {
   user: Pick<User, 'id'>;
   actionActivities: Pick<ActionActivity, 'type' | 'userId'>[];
 }): boolean {

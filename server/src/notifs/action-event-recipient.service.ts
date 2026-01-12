@@ -22,7 +22,7 @@ import {
   ContractEvent,
   ContractEventType,
 } from 'src/user/entities/contract-event.entity';
-import { isUserAwayInRange } from 'src/utils/user';
+import { computeIsAwayInRange } from 'src/utils/user';
 
 @Injectable()
 export class ActionEventRecipientService {
@@ -53,7 +53,7 @@ export class ActionEventRecipientService {
     return lastEventBefore?.type === ContractEventType.SIGNED;
   }
 
-  public userShouldParticipate(params: {
+  public computeShouldParticipate(params: {
     eventDate: Date;
     everyoneShouldComplete: boolean;
     manualCohortUserIds?: number[];
@@ -110,7 +110,7 @@ export class ActionEventRecipientService {
     return sortedEvents[currentEventIndex + 1] ?? null;
   }
 
-  public async getBaseUsersForEvent(
+  public async computeBaseUsersForEvent(
     eventStatus: ActionStatus,
     action: Action,
     eventId: number,
@@ -143,7 +143,7 @@ export class ActionEventRecipientService {
       ).map((a) => a.userId),
     );
     const filterToEligible = (user: User) =>
-      this.userShouldParticipate({
+      this.computeShouldParticipate({
         eventDate: event.date,
         everyoneShouldComplete: action.everyoneShouldComplete,
         manualCohortUserIds: action.manualCohortUserIds,
@@ -153,7 +153,7 @@ export class ActionEventRecipientService {
         userDismissed: usersDismissed.has(user.id),
         includeSuspended,
       }) &&
-      !isUserAwayInRange({
+      !computeIsAwayInRange({
         user,
         startDate: event.date,
         endDate: this.getNextEvent({
@@ -218,7 +218,7 @@ export class ActionEventRecipientService {
       ).map((a) => a.userId),
     );
     const filterToEligible = (user: User) =>
-      this.userShouldParticipate({
+      this.computeShouldParticipate({
         eventDate: event.date,
         everyoneShouldComplete: event.action.everyoneShouldComplete,
         manualCohortUserIds: event.action.manualCohortUserIds,
@@ -265,7 +265,7 @@ export class ActionEventRecipientService {
     type: ActionEventNotifType,
     suite?: ActionSuite,
   ): Promise<User[]> {
-    const users = await this.getBaseUsersForEvent(
+    const users = await this.computeBaseUsersForEvent(
       event.newStatus,
       event.action,
       event.id,

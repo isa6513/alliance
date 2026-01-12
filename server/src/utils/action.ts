@@ -5,7 +5,7 @@ import {
 import { Action } from 'src/actions/entities/action.entity';
 import { findLeast } from './filter';
 
-export function getLatestMemberActionAndDeadline(params: {
+export function computeLatestMemberActionAndDeadline(params: {
   action: Pick<Action, 'events'>;
 }):
   | { event: ActionEvent; endDate: Date }
@@ -43,14 +43,14 @@ export function getLatestMemberActionAndDeadline(params: {
   };
 }
 
-export function latestMemberActionPhaseExistsAndIsOver(params: {
+export function computeLatestMemberActionPhaseExistsAndIsOver(params: {
   action: Pick<Action, 'events'>;
   date: Date;
 }): boolean {
   const { action, date } = params;
 
   const { event: latestMemberActionEvent, endDate } =
-    getLatestMemberActionAndDeadline({
+    computeLatestMemberActionAndDeadline({
       action,
     });
 
@@ -63,7 +63,7 @@ export function latestMemberActionPhaseExistsAndIsOver(params: {
   return endDate <= date;
 }
 
-export function getActionStatusAt(params: {
+export function computeActionStatusAt(params: {
   action: Pick<Action, 'events'>;
   date: Date;
 }): ActionStatus {

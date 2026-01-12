@@ -3,7 +3,7 @@ import { User } from 'src/user/entities/user.entity';
 import { findLeast } from './filter';
 import { ContractEventType } from 'src/user/entities/contract-event.entity';
 
-export function isUserAwayAt(params: {
+export function computeIsAwayAt(params: {
   user: Pick<User, 'awayRanges'>;
   date: Date;
 }): boolean {
@@ -45,7 +45,7 @@ export function computeIsContractActiveInFullRange(params: {
   });
 }
 
-export function isUserAwayInRange(params: {
+export function computeIsAwayInRange(params: {
   user: Pick<User, 'awayRanges'>;
   startDate?: Date | null;
   endDate?: Date | null;
