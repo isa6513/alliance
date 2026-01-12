@@ -1,6 +1,7 @@
 import { ProfileDto } from "@alliance/shared/client";
 import { href, Link } from "react-router";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 
 interface PublicMemberDirectoryCardProps {
   member: ProfileDto;
@@ -19,7 +20,11 @@ const PublicMemberDirectoryCard: React.FC<PublicMemberDirectoryCardProps> = ({
         <ProfileImage pfp={member.profilePicture ?? null} size="medium" />
         <div className="flex-1 min-w-0">
           <p className="text-zinc-900 text-base">{member.displayName}</p>
-          <p className="text-zinc-500 text-sm">{member.profileDescription}</p>
+          <div className="text-zinc-500 text-sm">
+            <AppMarkdownWrapper
+              markdownContent={member.profileDescription ?? ""}
+            />
+          </div>
         </div>
       </div>
     </Link>
