@@ -836,7 +836,7 @@ export class ActionsController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: UserActionRelationsResponseDto })
   async actionRelations(): Promise<UserActionRelationsResponseDto> {
-    return this.actionsService.getUserActionRelations();
+    return this.actionsService.findUserActionRelations();
   }
 
   @Get('communityMemberInfo/:communityId')
@@ -845,14 +845,14 @@ export class ActionsController {
   async getCommunityMemberInfoAdmin(
     @Param('communityId', ParseIntPipe) communityId: number,
   ) {
-    return this.actionsService.getMemberInfoByCommunityId(communityId);
+    return this.actionsService.findMemberInfoByCommunityId(communityId);
   }
 
   @Get('communityMemberInfo')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: CommunityUserInfoDto })
   async getCommunityMemberInfo(@Request() req: JwtRequest) {
-    return this.actionsService.getMemberInfo(req.user.sub);
+    return this.actionsService.findMemberInfo(req.user.sub);
   }
 
   // ====================================
