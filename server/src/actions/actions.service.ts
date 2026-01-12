@@ -414,7 +414,7 @@ export class ActionsService {
                 (event) => event.newStatus === ActionStatus.MemberAction,
               )!.date,
               everyoneShouldComplete: action.everyoneShouldComplete,
-              manualCohortUserIds: action.manualCohortUserIds,
+              manualCohortUserIds: new Set(action.manualCohortUserIds),
               targetTagIds,
               useManualCohort: action.useManualCohort,
               user,
