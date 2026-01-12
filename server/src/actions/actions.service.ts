@@ -2227,14 +2227,7 @@ export class ActionsService {
 
   async getMemberInfo(userId: number): Promise<CommunityUserInfoDto> {
     const community = await this.userService.getCommunityForUserOrFail(userId);
-    const userIds = await this.userService.getUserIdsForCommunity(community.id);
-    const actionRelations = await this.getActionRelationsForUsers(userIds);
-
-    return {
-      actions: actionRelations.actions,
-      suites: actionRelations.suites,
-      users: actionRelations.users,
-    };
+    return this.getMemberInfoByCommunityId(community.id);
   }
 
   async getFailedUsersForEvent(
