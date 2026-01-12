@@ -14,7 +14,7 @@ const ExampleContractComponent = ({
           Your contract was signed on:{" "}
           <b>
             {new Date(
-              user?.contractEvents?.[0]?.date ?? new Date()
+              user?.contractEvents[0]?.date ?? new Date()
             ).toLocaleDateString()}
           </b>
         </p>

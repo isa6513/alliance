@@ -35,7 +35,7 @@ export class ActionEventRecipientService {
   ) {}
 
   private isContractActiveAtDate(
-    contractEvents: ContractEvent[] | null,
+    contractEvents: ContractEvent[],
     date: Date,
   ): boolean {
     if (contractEvents === null || contractEvents === undefined) {
