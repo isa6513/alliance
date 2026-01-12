@@ -110,7 +110,7 @@ export class ActionEventRecipientService {
     return sortedEvents[currentEventIndex + 1] ?? null;
   }
 
-  public async computeBaseUsersForEvent(params: {
+  public async findBaseUsersForEvent(params: {
     eventStatus: ActionStatus;
     action: Action;
     eventId: number;
@@ -260,12 +260,12 @@ export class ActionEventRecipientService {
       .filter((user) => !userToHasCompletedAllActions.get(user.id));
   }
 
-  async getFilteredUsersForEvent(
+  async findFilteredUsersForEvent(
     event: Pick<ActionEvent, 'newStatus' | 'action' | 'date' | 'id'>,
     type: ActionEventNotifType,
     suite?: ActionSuite,
   ): Promise<User[]> {
-    const users = await this.computeBaseUsersForEvent({
+    const users = await this.findBaseUsersForEvent({
       action: event.action,
       eventId: event.id,
       eventStatus: event.newStatus,
@@ -275,7 +275,7 @@ export class ActionEventRecipientService {
       : await this.filterForShouldRemind(users, event, suite);
   }
 
-  async getReminderGroupCohort(group: ReminderGroup): Promise<User[]> {
+  async findReminderGroupCohort(group: ReminderGroup): Promise<User[]> {
     let users: User[];
     switch (group.cohortType) {
       case ReminderCohortType.Custom:
@@ -285,7 +285,7 @@ export class ActionEventRecipientService {
         users = group.users;
         break;
       case ReminderCohortType.AllUncompleted:
-        users = await this.getFilteredUsersForEvent(
+        users = await this.findFilteredUsersForEvent(
           group.memberActionEvent,
           ActionEventNotifType.PersonalReminder,
           group.actionSuite,

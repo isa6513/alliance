@@ -309,7 +309,7 @@ export class ActionsService {
     if (!event) return [];
 
     const baseUsers =
-      await this.actionEventRecipientService.computeBaseUsersForEvent({
+      await this.actionEventRecipientService.findBaseUsersForEvent({
         eventId: event.id,
         eventStatus: ActionStatus.MemberAction,
         action,
@@ -1857,7 +1857,7 @@ export class ActionsService {
       }
     }
 
-    const plans = await this.actionEventReminderService.getPlansForGroup(
+    const plans = await this.actionEventReminderService.findPlansForGroup(
       withDeadlineEvent,
       new Date(Date.now() - NOTIFICATION_LOOKBACK_WINDOW_MS),
       new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
@@ -2239,7 +2239,7 @@ export class ActionsService {
     event: ActionEvent,
   ): Promise<User[]> {
     const baseUsers =
-      await this.actionEventRecipientService.computeBaseUsersForEvent({
+      await this.actionEventRecipientService.findBaseUsersForEvent({
         action,
         eventId: event.id,
         eventStatus: ActionStatus.MemberAction,
@@ -2327,7 +2327,7 @@ export class ActionsService {
 
     for (const suite of pastSuites) {
       const baseCohort =
-        await this.actionEventRecipientService.computeBaseUsersForEvent({
+        await this.actionEventRecipientService.findBaseUsersForEvent({
           eventStatus: ActionStatus.MemberAction,
           action: suite.actions[0],
           eventId: suite.actions[0].events.find(

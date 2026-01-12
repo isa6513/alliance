@@ -504,7 +504,7 @@ export class ActionsController {
   async plansForGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
   ): Promise<PreviewNotificationPlan[]> {
-    return this.actionEventReminderService.getNotificationPlansForGroup(
+    return this.actionEventReminderService.findNotificationPlansForGroup(
       groupId,
     );
   }

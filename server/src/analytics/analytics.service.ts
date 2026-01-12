@@ -459,7 +459,7 @@ ORDER BY pp.total_session_duration_seconds DESC
       }
 
       const baseUsers =
-        await this.actionEventRecipientService.computeBaseUsersForEvent({
+        await this.actionEventRecipientService.findBaseUsersForEvent({
           action,
           eventId: memberActionEvent.id,
           eventStatus: ActionStatus.MemberAction,
