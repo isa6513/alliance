@@ -125,8 +125,8 @@ const PeoplePage: React.FC = () => {
               only.
             </p>
             <p className="text-zinc-500 text-base mb-4">
-              Below are members who have chosen to make their information
-              public.
+              This directory only includes members who have chosen to make their
+              information public.
             </p>
 
             <div className="mb-4">
