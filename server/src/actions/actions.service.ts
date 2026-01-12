@@ -2002,7 +2002,7 @@ export class ActionsService {
   // TODO move ==================================
 
   async findActionRelationsForUsers(
-    users: User[],
+    usersPromise: Promise<User[]>,
     actionLimit: number = 8,
   ): Promise<UserActionRelationsResponseDto> {
     const actionsPromise: Promise<Action[]> = this.findAllSorted(
@@ -2017,16 +2017,21 @@ export class ActionsService {
       ),
     );
 
-    const userIds = users.map((user) => user.id);
-    const userIdsSet = new Set(userIds);
+    const userIdsPromise = usersPromise.then((users) =>
+      users.map((user) => user.id),
+    );
+    const userIdsSetPromise = userIdsPromise.then(
+      (userIds) => new Set(userIds),
+    );
     const joinedUsersPromise: Promise<Record<number, number[]>> =
       actionsPromise.then(async (actions) => {
+        const userIdsSet = await userIdsSetPromise;
         const joinedUsersPromises = actions.map(
           async (action) =>
             [
               action.id,
               (await this.computeUsersJoinedForAction(action.id)).filter(
-                (uid) => userIdsSet.has(uid),
+                async (uid) => userIdsSet.has(uid),
               ),
             ] satisfies [number, number[]],
         );
@@ -2084,6 +2089,7 @@ export class ActionsService {
     const actionIds = actions.map((a) => a.id);
     const actionOrder = new Map(actionIds.map((id, index) => [id, index]));
 
+    const userIds = await userIdsPromise;
     const activities = await this.actionActivityRepository.find({
       where: { actionId: In(actionIds), userId: In(userIds) },
       order: { createdAt: 'ASC' },
@@ -2210,27 +2216,28 @@ export class ActionsService {
   }
 
   async findUserActionRelations(): Promise<UserActionRelationsResponseDto> {
-    const users = await this.userService.findAll();
-    return this.findActionRelationsForUsers(users);
+    const usersPromise = this.userService.findAll();
+    return this.findActionRelationsForUsers(usersPromise);
   }
 
   async findMemberInfoByCommunityId(
     communityId: number,
   ): Promise<CommunityUserInfoDto> {
-    const community = await this.userService.findCommunityOrFail(communityId, {
-      users: true,
-    });
-    return this.findActionRelationsForUsers(community.users);
+    const usersPromise = this.userService
+      .findCommunityOrFail(communityId, {
+        users: true,
+      })
+      .then((community) => community.users);
+    return this.findActionRelationsForUsers(usersPromise);
   }
 
   async findMemberInfo(userId: number): Promise<CommunityUserInfoDto> {
-    const community = await this.userService.findCommunityForUserOrFail(
-      userId,
-      {
+    const usersPromise = this.userService
+      .findCommunityForUserOrFail(userId, {
         users: true,
-      },
-    );
-    return this.findActionRelationsForUsers(community.users);
+      })
+      .then((community) => community.users);
+    return this.findActionRelationsForUsers(usersPromise);
   }
 
   async getFailedUsersForEvent(
