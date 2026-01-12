@@ -1872,7 +1872,7 @@ export class ActionsService {
     }));
   }
 
-  async getUncompletedTasks(
+  async findUncompletedTasks(
     userId: number,
     suiteId?: number,
   ): Promise<ActionDto[]> {
