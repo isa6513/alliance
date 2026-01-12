@@ -1,6 +1,4 @@
 /** @fileoverview Utils for relationships between actions and users */
-import { ContractEventType } from 'src/user/entities/contract-event.entity';
-import { findLeast } from './filter';
 import { Action } from 'src/actions/entities/action.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Tag } from 'src/user/entities/tag.entity';
@@ -9,7 +7,7 @@ import {
   ActionActivityType,
 } from 'src/actions/entities/action-activity.entity';
 import { getLatestMemberActionAndDeadline } from './action';
-import { isUserAwayInRange } from './user';
+import { computeIsContractActiveInFullRange, isUserAwayInRange } from './user';
 
 export function isInManualCohort(params: {
   action: Pick<Action, 'manualCohortUserIds' | 'useManualCohort'>;
@@ -55,27 +53,11 @@ export function isContractActiveDuringEntireLatestMemberAction(params: {
     return false;
   }
 
-  const latestContractEventBeforeMemberAction = findLeast(
-    user.contractEvents ?? [],
-    (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-    (event) => event.date < latestMemberActionEvent.date,
-  );
-  if (
-    !latestContractEventBeforeMemberAction ||
-    latestContractEventBeforeMemberAction.type === ContractEventType.SUSPENDED
-  ) {
-    return false;
-  }
-
-  const eventsDuringMemberAction = (user.contractEvents ?? []).filter(
-    (event) =>
-      event.date > latestMemberActionEvent.date &&
-      (!endDate || event.date < endDate),
-  );
-
-  return !eventsDuringMemberAction.some(
-    (event) => event.type === ContractEventType.SUSPENDED,
-  );
+  return computeIsContractActiveInFullRange({
+    user,
+    startDate: latestMemberActionEvent.date,
+    endDate,
+  });
 }
 
 export function isAwayDuringAnyOfLastMemberAction(params: {
