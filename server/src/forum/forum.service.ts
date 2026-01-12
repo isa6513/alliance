@@ -412,12 +412,13 @@ export class ForumService {
 
     await this.commentRepository.save(reply);
 
+    // TODO: real notif system
     if (
       createCommentDto.parentObjectType === CommentParentObject.Action &&
       process.env.NODE_ENV === 'production'
     ) {
       this.slackService.sendMessage(
-        `New comment on action ${createCommentDto.parentObjectId} <@U0A89S0NM41> - <https://worldalliance.org/actions/${createCommentDto.parentObjectId}|Open action>`,
+        `New comment on action ${createCommentDto.parentObjectId} <@U0A89S0NM41> - <https://worldalliance.org/actions/${createCommentDto.parentObjectId}?replyId=${reply.id}|Open action>`,
       );
     }
 
