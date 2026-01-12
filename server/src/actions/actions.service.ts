@@ -2320,7 +2320,7 @@ export class ActionsService {
       return (
         user.contractEvents
           ?.filter((event) => event.type === ContractEventType.SIGNED)
-          .sort((a, b) => b.date.getTime() - a.date.getTime())[0]?.date ??
+          ?.sort((a, b) => b.date.getTime() - a.date.getTime())[0]?.date ??
         new Date(0)
       );
     };
