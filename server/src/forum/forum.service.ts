@@ -25,6 +25,7 @@ import { EditableContent } from './entities/editablecontent.entity';
 import { Post } from './entities/post.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
+import { SlackService } from 'src/slack/slack.service';
 
 @Injectable()
 export class ForumService {
@@ -44,6 +45,7 @@ export class ForumService {
     @InjectRepository(EditableContent)
     private editableContentRepository: Repository<EditableContent>,
     private readonly likeNotificationService: LikeNotificationService,
+    private readonly slackService: SlackService,
   ) {}
 
   async createPost(
@@ -409,6 +411,15 @@ export class ForumService {
     });
 
     await this.commentRepository.save(reply);
+
+    if (
+      createCommentDto.parentObjectType === CommentParentObject.Action &&
+      process.env.NODE_ENV === 'production'
+    ) {
+      this.slackService.sendMessage(
+        `New comment on action ${createCommentDto.parentObjectId} <@U0A89S0NM41> - <https://worldalliance.org/actions/${createCommentDto.parentObjectId}|Open action>`,
+      );
+    }
 
     const replyWithAuthor = await this.commentRepository.findOneOrFail({
       where: { id: reply.id },

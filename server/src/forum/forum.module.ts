@@ -13,6 +13,7 @@ import { MailModule } from 'src/mail/mail.module';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { ForumDigestService } from './forum-digest.service';
 import { ForumDigestLog } from './entities/forum-digest-log.entity';
+import { SlackModule } from 'src/slack/slack.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ForumDigestLog } from './entities/forum-digest-log.entity';
     ]),
     MailModule,
     NotifsModule,
+    SlackModule,
   ],
   controllers: [ForumController],
   providers: [ForumService, ForumDigestService],
