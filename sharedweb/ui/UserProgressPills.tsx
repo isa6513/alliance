@@ -19,9 +19,9 @@ export const PILL_STATUS_DATA = Object.freeze({
   }) satisfies PillStatusData,
   missed_deadline: Object.freeze({
     pillLabel: "Missed deadline",
-    pillStyle: "bg-zinc-700",
+    pillStyle: "bg-orange-600",
     pillSubtitleText: "Missed deadline",
-    pillTextStyle: "text-black",
+    pillTextStyle: "text-red-400",
   }) satisfies PillStatusData,
   not_required: Object.freeze({
     pillLabel: "Not required",
