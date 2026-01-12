@@ -209,7 +209,7 @@ ORDER BY pp.total_session_duration_seconds DESC
 
     const suspendedUsers = users.filter(
       (user) =>
-        user.contractEvents.some(
+        user.contractEvents!.some(
           (event) => event.type === ContractEventType.SUSPENDED,
         ) && user.hasActiveContract === false,
     ).length;

@@ -182,7 +182,7 @@ const UserDetailView: React.FC = () => {
     );
   }, [sortedAwayRanges]);
 
-  const latestEvent = user.contractEvents.length
+  const latestEvent = user.contractEvents?.length
     ? user.contractEvents.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       )[0]
@@ -703,7 +703,7 @@ const UserDetailView: React.FC = () => {
                 </span>
               </div>
             </div>
-            {user.contractEvents.length > 0 ? (
+            {user.contractEvents?.length > 0 ? (
               <div className="space-y-1 max-h-32 overflow-y-auto">
                 {[...user.contractEvents]
                   .sort(

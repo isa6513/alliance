@@ -2319,7 +2319,7 @@ export class ActionsService {
     const getLastSignedDate = (user: User) => {
       return (
         user.contractEvents
-          .filter((event) => event.type === ContractEventType.SIGNED)
+          ?.filter((event) => event.type === ContractEventType.SIGNED)
           .sort((a, b) => b.date.getTime() - a.date.getTime())[0]?.date ??
         new Date(0)
       );
