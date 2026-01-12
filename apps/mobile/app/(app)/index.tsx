@@ -1,5 +1,5 @@
 import { View, ScrollView, ActivityIndicator } from "react-native";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import {
   actionsFindAllLoggedIn,
   userGetAwayRanges,
@@ -17,48 +17,36 @@ import {
   ActionWithAwayStatus,
   getAwayStatus,
 } from "@alliance/shared/lib/actionUtils";
+import { useQuery } from "@tanstack/react-query";
 
 export default function HomeScreen() {
-  const [actions, setActions] = useState<ActionWithAwayStatus[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: actions,
+    isPending,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["actions"],
+    queryFn: () =>
+      actionsFindAllLoggedIn({ query: { sorted: true } }).then(
+        (response) => response.data ?? []
+      ),
+  });
 
-  const fetchActions = useCallback(async () => {
-    try {
-      const [actionsResponse, awayRangesResponse] = await Promise.all([
-        actionsFindAllLoggedIn({
-          query: { sorted: true },
-        }),
-        userGetAwayRanges(),
-      ]);
+  const { data: awayRanges } = useQuery({
+    queryKey: ["awayRanges"],
+    queryFn: () => userGetAwayRanges().then((response) => response.data ?? []),
+  });
 
-      if (actionsResponse.error || awayRangesResponse.error) {
-        setError("Failed to fetch actions");
-      }
+  const actionsWithAwayStatus = useMemo((): ActionWithAwayStatus[] => {
+    if (!actions || !awayRanges) return [];
+    return actions.map((action) => ({
+      ...action,
+      awayStatus: getAwayStatus(action, awayRanges, new Date()),
+    }));
+  }, [actions, awayRanges]);
 
-      if (actionsResponse.data && awayRangesResponse.data) {
-        const now = new Date();
-        setActions(
-          actionsResponse.data.map((action) => ({
-            ...action,
-            awayStatus: getAwayStatus(action, awayRangesResponse.data, now),
-          }))
-        );
-        setError(null);
-      }
-      setLoading(false);
-    } catch (err) {
-      setError("Failed to load actions");
-      setLoading(false);
-      console.error("Error fetching actions:", err);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchActions();
-  }, [fetchActions]);
-
-  const { currentTask } = useHomePageActions(actions);
+  const { currentTask } = useHomePageActions(actionsWithAwayStatus);
 
   const { activities: friendActivities } = useActivities({
     list: ActivityList.Friends,
@@ -76,7 +64,7 @@ export default function HomeScreen() {
     }
   }, []);
 
-  if (loading) {
+  if (isPending) {
     return (
       <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
         <ActivityIndicator size="large" color={colors.green} />
@@ -106,7 +94,9 @@ export default function HomeScreen() {
       </View>
       <View className="">
         {!currentTask ? (
-          <Text className="text-red-500 text-center py-4">{error}</Text>
+          <Text className="text-red-500 text-center py-4">
+            {error?.message}
+          </Text>
         ) : (
           <LargeActionCard
             action={currentTask}
@@ -114,7 +104,7 @@ export default function HomeScreen() {
             friendActivities={friendActivities.filter(
               (activity) => activity.actionId === currentTask.id
             )}
-            onUpdateActionState={fetchActions}
+            onUpdateActionState={refetch}
             scrollPageTo={scrollPageTo}
           />
         )}

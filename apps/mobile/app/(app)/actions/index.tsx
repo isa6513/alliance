@@ -21,25 +21,26 @@ export default function ActionsScreen() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const {
-    data: response,
+    data: actions,
     isPending,
     error,
   } = useQuery({
     queryKey: ["actions"],
-    queryFn: () => actionsFindAllLoggedIn({ query: { sorted: true } }),
+    queryFn: () =>
+      actionsFindAllLoggedIn({ query: { sorted: true } }).then(
+        (response) => response.data ?? []
+      ),
   });
 
   const counts = useMemo(() => {
     const result: Record<FilterMode, number> = {} as any;
     for (const mode of Object.values(FilterMode) as FilterMode[]) {
-      result[mode] = filterActions(response?.data ?? [], mode).length;
+      result[mode] = filterActions(actions ?? [], mode).length;
     }
     return result;
-  }, [response]);
+  }, [actions]);
 
-  const filteredActions = response?.data
-    ? filterActions(response.data, filterMode)
-    : [];
+  const filteredActions = actions ? filterActions(actions, filterMode) : [];
 
   const navigateToAction = useCallback((actionId: number) => {
     router.push(`/actions/${actionId}`);
