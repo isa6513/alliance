@@ -1009,8 +1009,13 @@ export class UserService {
     });
   }
 
-  async findCommunityForUserOrFail(userId: number): Promise<Community> {
-    const user = await this.findOneOrFail(userId, { communities: true });
+  async findCommunityForUserOrFail(
+    userId: number,
+    relations?: Relations<Community, 8>,
+  ): Promise<Community> {
+    const user = await this.findOneOrFail(userId, {
+      communities: relations ?? true,
+    });
     const community = user.communities.length > 0 ? user.communities[0] : null;
     if (!community) {
       throw new NotFoundException('User is not a member of any community.');

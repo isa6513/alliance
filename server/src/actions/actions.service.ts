@@ -2002,7 +2002,7 @@ export class ActionsService {
   // TODO move ==================================
 
   async findActionRelationsForUsers(
-    userIds: number[],
+    users: User[],
     actionLimit: number = 8,
   ): Promise<UserActionRelationsResponseDto> {
     const actionsPromise: Promise<Action[]> = this.findAllSorted(
@@ -2017,6 +2017,7 @@ export class ActionsService {
       ),
     );
 
+    const userIds = users.map((user) => user.id);
     const userIdsSet = new Set(userIds);
     const joinedUsersPromise: Promise<Record<number, number[]>> =
       actionsPromise.then(async (actions) => {
@@ -2174,7 +2175,7 @@ export class ActionsService {
       }
     }
 
-    const users: UserActionRelationsForUserDto[] = Array.from(
+    const userRelations: UserActionRelationsForUserDto[] = Array.from(
       relationByUserThenAction.entries(),
     ).map(([userId, actionMap]) => {
       const relations: UserActionRelationDetailDto[] = Array.from(
@@ -2204,30 +2205,32 @@ export class ActionsService {
     return {
       actions: actionSummaries,
       suites: await suitesPromise,
-      users,
+      users: userRelations,
     };
   }
 
   async findUserActionRelations(): Promise<UserActionRelationsResponseDto> {
-    const users = await this.userService.getAllUserIds();
+    const users = await this.userService.findAll();
     return this.findActionRelationsForUsers(users);
   }
 
   async findMemberInfoByCommunityId(
     communityId: number,
   ): Promise<CommunityUserInfoDto> {
-    const userIds = await this.userService.findUserIdsForCommunity(communityId);
-    const actionRelations = await this.findActionRelationsForUsers(userIds);
-    return {
-      actions: actionRelations.actions,
-      suites: actionRelations.suites,
-      users: actionRelations.users,
-    };
+    const community = await this.userService.findCommunityOrFail(communityId, {
+      users: true,
+    });
+    return this.findActionRelationsForUsers(community.users);
   }
 
   async findMemberInfo(userId: number): Promise<CommunityUserInfoDto> {
-    const community = await this.userService.findCommunityForUserOrFail(userId);
-    return this.findMemberInfoByCommunityId(community.id);
+    const community = await this.userService.findCommunityForUserOrFail(
+      userId,
+      {
+        users: true,
+      },
+    );
+    return this.findActionRelationsForUsers(community.users);
   }
 
   async getFailedUsersForEvent(
