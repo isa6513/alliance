@@ -33,10 +33,12 @@ export default function HomeScreen() {
       ),
   });
 
-  const { data: awayRanges } = useQuery({
+  const { data: awayRanges, isPending: awayRangesPending } = useQuery({
     queryKey: ["awayRanges"],
     queryFn: () => userGetAwayRanges().then((response) => response.data ?? []),
   });
+
+  const loading = isPending || awayRangesPending;
 
   const actionsWithAwayStatus = useMemo((): ActionWithAwayStatus[] => {
     if (!actions || !awayRanges) return [];
@@ -64,7 +66,7 @@ export default function HomeScreen() {
     }
   }, []);
 
-  if (isPending) {
+  if (loading) {
     return (
       <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
         <ActivityIndicator size="large" color={colors.green} />
