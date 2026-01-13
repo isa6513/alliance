@@ -87,17 +87,7 @@ const useActivities = ({
       .then(async (resp) => {
         const data =
           resp.data?.filter((a) => a.type === "user_completed") ?? [];
-        // if (list === ActivityList.Global) {
-        //   const extraFriendActivity = await actionsFriendActivity({
-        //     query: { comments, limit: limit.toString() },
-        //   });
-        //   const set = new Set(data.map((a) => a.id));
-        //   extraFriendActivity.data?.forEach((a) => {
-        //     if (!set.has(a.id)) {
-        //       data.push(a);
-        //     }
-        //   });
-        // }
+
         const respActivities = data.sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
