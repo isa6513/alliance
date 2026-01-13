@@ -7,7 +7,8 @@ export const useActionsQuery = () =>
     queryKey: ["actions"],
     queryFn: () =>
       actionsFindAllLoggedIn({ query: { sorted: true } }).then(
-        (response) => response.data ?? []
+        (response) =>
+          response.data?.filter((action) => action.status !== "draft") ?? []
       ),
   });
 
