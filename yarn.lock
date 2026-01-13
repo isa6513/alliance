@@ -114,6 +114,7 @@ __metadata:
     "@stripe/react-stripe-js": "npm:^3.7.0"
     "@stripe/stripe-js": "npm:^8.6.0"
     "@tailwindcss/vite": "npm:^4.1.4"
+    "@tanstack/react-query": "npm:^5.90.16"
     "@types/compression": "npm:^1"
     "@types/d3": "npm:^7.4.3"
     "@types/express": "npm:^5"
