@@ -80,7 +80,7 @@ const ContractPage: React.FC = () => {
     <CenterLayout>
       <div className="mt-4 md:mt-8 gap-y-2 flex flex-col text-base md:text-lg">
         <p className="font-serif text-3xl md:text-4xl font-semibold mb-1">
-          Contract
+          Membership contract
         </p>
         <p className="text-zinc-900">Notes:</p>
         <ul className="text-zinc-900 mb-4 list-disc list-inside">
