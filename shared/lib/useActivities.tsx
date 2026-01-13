@@ -85,7 +85,8 @@ const useActivities = ({
     }
     apiCall
       .then(async (resp) => {
-        const data = resp.data ?? [];
+        const data =
+          resp.data?.filter((a) => a.type === "user_completed") ?? [];
         // if (list === ActivityList.Global) {
         //   const extraFriendActivity = await actionsFriendActivity({
         //     query: { comments, limit: limit.toString() },
