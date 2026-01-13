@@ -91,6 +91,7 @@ const ActionPageTaskPanel = ({
       return (
         <ActionTaskPanel
           action={action}
+          scrollPageTo={scrollPageTo}
           userRelation={userRelation ?? "none"}
           {...panelHandlers}
         />

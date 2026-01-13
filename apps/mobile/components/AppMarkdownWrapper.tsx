@@ -387,6 +387,10 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
       bullet_list: {
         marginVertical: 8,
       },
+      bullet_list_icon: {
+        fontSize: 35,
+        top: 7,
+      },
       ordered_list: {
         marginVertical: 8,
       },
