@@ -55,7 +55,7 @@ jobs:
           raw_json="$(
             claude -p "$(cat "$prompt_file")" \
               --output-format json \
-              --model claude-opus-4-5-20251101 \
+              --model claude-opus-4-5 \
               --allowedTools "Read,Bash(git diff:*),Bash(git show:*),Bash(git status:*),Bash(git log:*)" \
               --max-turns 6
           )"
