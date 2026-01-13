@@ -1,6 +1,6 @@
 import { Check } from "lucide-react-native";
 import { Stack, router, useLocalSearchParams } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -180,6 +180,8 @@ export default function ActionDetailScreen() {
     onOptOutAction,
   } = useActionHandlers(parseInt(id), true, reloadTasks);
 
+  const scrollViewRef = useRef<ScrollView>(null);
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center p-5 bg-white">
@@ -203,6 +205,10 @@ export default function ActionDetailScreen() {
       </View>
     );
   }
+
+  const scrollPageTo = (y: number) => {
+    scrollViewRef.current?.scrollTo({ y, animated: true });
+  };
 
   const userRelation = action.userRelation as UserActionRelation | undefined;
   const { nextEvent, lastEvent } = getLastAndNextEvent(action);
@@ -228,6 +234,7 @@ export default function ActionDetailScreen() {
                   />
                 </View>
                 <ActionPageTaskPanel
+                  scrollPageTo={scrollPageTo}
                   action={action}
                   userRelation={userRelation ?? null}
                   onCompleteAction={onCompleteAction}
@@ -283,7 +290,7 @@ export default function ActionDetailScreen() {
           headerShown: false,
         }}
       />
-      <ScrollView className="flex-1 bg-white">
+      <ScrollView className="flex-1 bg-white" ref={scrollViewRef}>
         {action.image && (
           <Image
             source={{ uri: action.image }}

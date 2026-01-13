@@ -26,7 +26,7 @@ export default function LargeActionCard({
 }: LargeActionCardProps) {
   const { nextEvent, lastEvent } = getLastAndNextEvent(action);
   return (
-    <Card>
+    <Card className="p-7!">
       <View>
         <Text className="font-semibold text-2xl font-serif">{action.name}</Text>
         <View className="flex flex-row items-center justify-between mt-2">

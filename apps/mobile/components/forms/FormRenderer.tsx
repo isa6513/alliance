@@ -241,10 +241,7 @@ const FormRenderer = ({
   const scrollToField = useCallback(
     (fieldId: string) => {
       const yPosition = fieldPositions.current[fieldId];
-      const screenPosition = fieldScreenPositions.current[fieldId];
-      if (yPosition !== undefined && screenPosition > 400) {
-        scrollPageTo?.(Math.max(0, yPosition));
-      }
+      scrollPageTo?.(Math.max(0, yPosition + 100));
     },
     [scrollPageTo]
   );
@@ -606,6 +603,14 @@ const FormRenderer = ({
   const isFirstPage = currentPageIndex === 0;
   const isLastPage = currentPageIndex === maxPageIndex;
 
+  const handleFocusField = (fieldId: string) => {
+    const screenPosition = fieldScreenPositions.current[fieldId];
+    const yPosition = fieldPositions.current[fieldId];
+    if (yPosition !== undefined && screenPosition > 400) {
+      scrollToField(fieldId);
+    }
+  };
+
   return (
     <View className="flex-1 flex flex-col gap-y-2">
       {currentPage?.fields.map((element, idx) => {
@@ -639,7 +644,7 @@ const FormRenderer = ({
               value={formData[field.id]}
               onChange={(value) => handleFieldChange(field.id, value)}
               onFocus={() => {
-                setTimeout(() => scrollToField(field.id), 80);
+                handleFocusField(field.id);
               }}
               disabled={readOnly}
               error={fieldErrors[field.id]}
@@ -703,8 +708,7 @@ const FormRenderer = ({
             <View className="flex-row gap-2">
               {Object.entries(fieldErrors).map(([fieldId, error]) => (
                 <Text key={fieldId} className="text-red-500 text-base p-2">
-                  Your form has errors. Please scroll up and fix before
-                  submitting.
+                  Your form has errors. Please fix before submitting.
                 </Text>
               ))}
             </View>

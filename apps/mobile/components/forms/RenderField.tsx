@@ -82,6 +82,11 @@ const getRangeValues = (field: RangeField): number[] => {
   return Array.from({ length: optionCount }, (_, index) => index + 1);
 };
 
+const renderValidationMessage = (message: string | null) =>
+  message ? (
+    <Text className="text-base text-red-500 mt-1">{message}</Text>
+  ) : null;
+
 export function RenderLabel({
   field,
   error,
@@ -91,17 +96,16 @@ export function RenderLabel({
 }) {
   if (field.label === null) return null;
   return (
-    <Text className="block mb-1">
-      <InlineLabelMarkdownWrapper>{field.label}</InlineLabelMarkdownWrapper>
-      {field.required && (
-        <Text className="text-red-500 pl-1 font-medium inline">*</Text>
-      )}
-    </Text>
+    <>
+      <Text className="block mb-1">
+        <InlineLabelMarkdownWrapper>{field.label}</InlineLabelMarkdownWrapper>
+        {field.required && (
+          <Text className="text-red-500 font-medium inline"> *</Text>
+        )}
+      </Text>
+    </>
   );
 }
-
-const renderValidationMessage = (message: string | null) =>
-  message ? <Text className="text-xs text-red-500 mt-1">{message}</Text> : null;
 
 export function RenderField({
   field,
@@ -327,15 +331,18 @@ export function RenderField({
     }
 
     case "checkbox":
+      console.log("checkbox", errorMessage);
       return (
-        <View className="flex-row w-full">
-          <Checkbox
-            checked={!!value}
-            onChange={(next) => onChange?.(next)}
-            disabled={disabled}
-            error={hasError}
-          />
-          <RenderLabel field={field} error={errorMessage} />
+        <View>
+          <View className="flex-row w-full">
+            <Checkbox
+              checked={!!value}
+              onChange={(next) => onChange?.(next)}
+              disabled={disabled}
+              error={hasError}
+            />
+            <RenderLabel field={field} error={errorMessage} />
+          </View>
           {renderValidationMessage(errorMessage)}
         </View>
       );
