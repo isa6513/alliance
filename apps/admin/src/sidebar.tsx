@@ -172,6 +172,9 @@ const Sidebar: React.FC = () => {
         className={`overflow-y-auto max-h-screen overflow-x-hidden flex flex-col justify-between relative transition-all duration-100 bg-[#f4f4f4]`}
         style={{
           width: `${sidebarWidth}px`,
+          ...(isSidebarOpen
+            ? { overflowY: `auto` }
+            : { overflowY: `hidden`, backgroundColor: `transparent` }),
         }}
       >
         <div
