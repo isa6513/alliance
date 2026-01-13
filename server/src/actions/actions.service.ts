@@ -2065,9 +2065,9 @@ export class ActionsService {
       });
     });
 
-    const allMembersTagIdP: Promise<number> = run(async () => {
+    const allMembersTagIdP: Promise<number | null> = run(async () => {
       const tag = await this.userService.findTagByName('All Members');
-      return tag!.id;
+      return tag?.id ?? null;
     });
 
     // --- end of promise defs ---
@@ -2094,7 +2094,7 @@ export class ActionsService {
           name: action.name,
           status: action.status,
           allMembersParticipating:
-            allMembersTagId !== undefined &&
+            allMembersTagId !== null &&
             !!action.participatingTags.find(
               (tag) => tag.id === allMembersTagId,
             ),
