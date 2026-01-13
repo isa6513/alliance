@@ -14,6 +14,7 @@ import { NotifsModule } from 'src/notifs/notifs.module';
 import { ForumDigestService } from './forum-digest.service';
 import { ForumDigestLog } from './entities/forum-digest-log.entity';
 import { SlackModule } from 'src/slack/slack.module';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { SlackModule } from 'src/slack/slack.module';
     MailModule,
     NotifsModule,
     SlackModule,
+    UserModule,
   ],
   controllers: [ForumController],
   providers: [ForumService, ForumDigestService],

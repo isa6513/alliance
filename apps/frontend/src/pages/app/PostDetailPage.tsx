@@ -21,10 +21,13 @@ import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useCIDFromParams } from "../../lib/utils";
 import { CardStyle } from "@alliance/shared/styles/card";
 
+type CommentFilter = "all" | "answered" | "unanswered";
+
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
   const [post, setPost] = useState<PostDto | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [commentFilter, setCommentFilter] = useState<CommentFilter>("all");
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -213,7 +216,33 @@ const PostDetailPage: React.FC = () => {
             </div>
           </Card>
         </div>
-        <Comments objectId={post.id} type={"post"} />
+        {post.qaMode && (
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-sm font-medium text-zinc-700">Q&A Mode</span>
+            <div className="flex gap-1 bg-zinc-100 p-px rounded">
+              {(["all", "answered", "unanswered"] as const).map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setCommentFilter(filter)}
+                  className={`px-3 py-1 text-sm rounded transition-colors border border-transparent ${
+                    commentFilter === filter
+                      ? "bg-white border-zinc-300 text-black"
+                      : "text-zinc-600 hover:text-zinc-900"
+                  }`}
+                >
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <Comments
+          objectId={post.id}
+          type={"post"}
+          expertIds={post.qaMode ? post.expertIds ?? [] : []}
+          expertLabel={post.qaMode ? post.expertLabel : undefined}
+          commentFilter={post.qaMode ? commentFilter : "all"}
+        />
       </div>
     </div>
   );

@@ -548,7 +548,7 @@ export type Community = {
     name: string;
     description: string;
     photo?: string;
-    users?: Array<User>;
+    users: Array<User>;
     leaders?: Array<User>;
     invites?: Array<OnetimeInvite>;
     internalInvites: Array<CommunityInvite>;
@@ -1755,6 +1755,9 @@ export type PostDto = {
     pinned: boolean;
     updatedAt: string;
     visibleAt?: string;
+    qaMode: boolean;
+    expertLabel?: string;
+    expertIds: Array<number>;
     action?: ActionDto;
     author: ProfileDto;
     commentCount?: number;
@@ -1762,6 +1765,7 @@ export type PostDto = {
     likes?: Array<ProfileDto>;
     lastComment?: CommentDto;
     likeCount?: number;
+    experts?: Array<ProfileDto>;
 };
 
 export type UserCommentDto = {
@@ -1792,6 +1796,12 @@ export type UpdateCommentDto = {
     parentObjectId?: number;
     parentId?: number;
     editableContent?: CreateEditableContentDto;
+};
+
+export type UpdatePostExpertsDto = {
+    expertIds: Array<number>;
+    qaMode: boolean;
+    expertLabel?: string;
 };
 
 export type CitySearchDto = {
@@ -4931,6 +4941,34 @@ export type ForumUnlikePostResponses = {
 };
 
 export type ForumUnlikePostResponse = ForumUnlikePostResponses[keyof ForumUnlikePostResponses];
+
+export type ForumGetPostsForAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/forum/admin/posts';
+};
+
+export type ForumGetPostsForAdminResponses = {
+    200: Array<PostDto>;
+};
+
+export type ForumGetPostsForAdminResponse = ForumGetPostsForAdminResponses[keyof ForumGetPostsForAdminResponses];
+
+export type ForumUpdatePostExpertsData = {
+    body: UpdatePostExpertsDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/forum/admin/posts/{id}/experts';
+};
+
+export type ForumUpdatePostExpertsResponses = {
+    200: PostDto;
+};
+
+export type ForumUpdatePostExpertsResponse = ForumUpdatePostExpertsResponses[keyof ForumUpdatePostExpertsResponses];
 
 export type GeoSearchCityData = {
     body?: never;

@@ -759,4 +759,41 @@ export class ForumService {
       where: { title: ILike(`%${title}%`), deleted: false },
     });
   }
+
+  async updatePostExperts(
+    postId: number,
+    expertIds: number[],
+    qaMode: boolean,
+    expertLabel?: string,
+  ): Promise<Post> {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: { author: true, action: true, editableContent: true },
+    });
+
+    if (!post) {
+      throw new NotFoundException(`Post with ID "${postId}" not found`);
+    }
+
+    const experts =
+      expertIds.length > 0
+        ? await this.userRepository.find({
+            where: { id: In(expertIds) },
+          })
+        : [];
+
+    post.experts = experts;
+    post.qaMode = qaMode;
+    post.expertLabel = expertLabel;
+
+    return this.postRepository.save(post);
+  }
+
+  async getPostsForAdmin(): Promise<Post[]> {
+    return this.postRepository.find({
+      where: { deleted: false },
+      relations: { author: true, experts: true },
+      order: { createdAt: 'DESC' },
+    });
+  }
 }
