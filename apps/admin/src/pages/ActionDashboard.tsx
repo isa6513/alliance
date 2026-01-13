@@ -42,6 +42,7 @@ import EventManagementTab from "../components/EventManagementTab";
 import { FormBuilder } from "../components/FormBuilder";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 
 // Status color mapping
 export const getStatusColor = (status: ActionDto["status"]) => {
@@ -493,8 +494,16 @@ const ActionDashboard: React.FC = () => {
     }
   };
 
+  const { confirm } = useToast();
+
   const handleArchive = useCallback(async () => {
-    if (actionId) {
+    const confirmed =
+      action?.archived ||
+      (await confirm({
+        title: "Confirm Archive",
+        message: "Are you sure you want to archive this action?",
+      }));
+    if (confirmed && actionId) {
       if (action?.archived) {
         await actionsUnarchive({
           path: { id: actionId },
@@ -506,7 +515,7 @@ const ActionDashboard: React.FC = () => {
       }
       window.location.reload();
     }
-  }, [actionId, action?.archived]);
+  }, [actionId, action?.archived, confirm]);
 
   const handleTagsChange = useCallback((ids: number[]) => {
     setSelectedTagIds(ids);
