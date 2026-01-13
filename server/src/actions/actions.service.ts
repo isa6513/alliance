@@ -230,11 +230,18 @@ export class ActionsService {
     return actionIds.map((id) => actionMap.get(id)!);
   }
 
-  async reloadAllActionUsersJoined(): Promise<void> {
-    const actions = await this.actionRepository.find();
-    for (const action of actions) {
-      await this.reloadUsersJoinedForAction(action.id);
-    }
+  async findUsersCompletedForAction(actionId: number): Promise<number> {
+    return this.actionActivityRepository.count({
+      where: {
+        actionId,
+        type: ActionActivityType.USER_COMPLETED,
+      },
+    });
+  }
+
+  async reloadUsersCompletedForAction(actionId: number): Promise<void> {
+    const usersCompleted = await this.findUsersCompletedForAction(actionId);
+    await this.actionRepository.update(actionId, { usersCompleted });
   }
 
   async reloadAllActionUsersCompleted(): Promise<void> {
@@ -244,18 +251,20 @@ export class ActionsService {
     }
   }
 
+  async reloadAllActionUsersJoined(): Promise<void> {
+    const actions = await this.actionRepository.find();
+    for (const action of actions) {
+      await this.reloadUsersJoinedForAction(action.id);
+    }
+  }
+
   async reloadUsersJoinedForAction(actionId: number): Promise<void> {
-    const usersJoined = (await this.computeUsersJoinedForAction(actionId))
+    const usersJoined = (await this.findUsersJoinedForActionById(actionId))
       .length;
     await this.actionRepository.update(actionId, { usersJoined });
   }
 
-  async reloadUsersCompletedForAction(actionId: number): Promise<void> {
-    const usersCompleted = await this.computeUsersCompletedForAction(actionId);
-    await this.actionRepository.update(actionId, { usersCompleted });
-  }
-
-  async computeUsersJoinedForAction(actionId: number): Promise<number[]> {
+  async findUsersJoinedForActionById(actionId: number): Promise<number[]> {
     const action = await this.actionRepository.findOneOrFail({
       where: { id: actionId },
       relations: {
@@ -265,10 +274,18 @@ export class ActionsService {
       },
     });
 
-    if (action.commitmentless) {
-      return await this.getUsersJoinedForCommitmentlessAction(action);
-    }
+    return this.findUsersJoinedForAction(action);
+  }
 
+  async findUsersJoinedForAction(action: Action): Promise<number[]> {
+    return action.commitmentless
+      ? this.findUsersJoinedForCommitmentlessAction(action)
+      : this.findUsersJoinedForCommitmentfulAction(action);
+  }
+
+  async findUsersJoinedForCommitmentfulAction(
+    action: Action,
+  ): Promise<number[]> {
     const activities = await this.actionActivityRepository.find({
       where: {
         actionId: action.id,
@@ -292,16 +309,7 @@ export class ActionsService {
     return Array.from(userIds);
   }
 
-  async computeUsersCompletedForAction(actionId: number): Promise<number> {
-    return this.actionActivityRepository.count({
-      where: {
-        actionId,
-        type: ActionActivityType.USER_COMPLETED,
-      },
-    });
-  }
-
-  async getUsersJoinedForCommitmentlessAction(
+  async findUsersJoinedForCommitmentlessAction(
     action: Action,
   ): Promise<number[]> {
     const event = action.events.find(
@@ -2027,7 +2035,7 @@ export class ActionsService {
       const joinedUsersPromises = await Promise.all(
         actions.map(async (action) => ({
           actionId: action.id,
-          usersJoined: await this.computeUsersJoinedForAction(action.id),
+          usersJoined: await this.findUsersJoinedForAction(action),
         })),
       );
 
