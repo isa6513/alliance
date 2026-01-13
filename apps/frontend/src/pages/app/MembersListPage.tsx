@@ -145,7 +145,7 @@ const MembersListPage = () => {
           {(filterMode === MemberFilterMode.All ||
             filterMode === MemberFilterMode.FriendsOfFriends) && (
             <>
-              <p className="font-medium text-zinc-500 mt-4">
+              <p className="font-medium text-zinc-500 mt-2">
                 Friends of friends ({friendsOfFriends.length})
               </p>
               {friendsOfFriends.length > 0 ? (
@@ -158,7 +158,7 @@ const MembersListPage = () => {
 
           {filterMode === MemberFilterMode.All && (
             <>
-              <p className="font-medium text-zinc-500 mt-4">
+              <p className="font-medium text-zinc-500 mt-2">
                 Others ({otherMembers.length})
               </p>
               {otherMembers.length > 0 ? (
