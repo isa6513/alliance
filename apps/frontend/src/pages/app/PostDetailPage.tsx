@@ -218,13 +218,13 @@ const PostDetailPage: React.FC = () => {
         </div>
         {post.qaMode && (
           <div className="flex items-center gap-3 mb-3">
-            <span className="text-sm font-medium text-zinc-700">Q&A Mode</span>
+            <span className="text-sm font-medium text-zinc-700">Q&A mode</span>
             <div className="flex gap-1 bg-zinc-100 p-px rounded">
               {(["all", "answered", "unanswered"] as const).map((filter) => (
                 <button
                   key={filter}
                   onClick={() => setCommentFilter(filter)}
-                  className={`px-3 py-1 text-sm rounded transition-colors border border-transparent ${
+                  className={`px-3 py-1 text-sm rounded border border-transparent ${
                     commentFilter === filter
                       ? "bg-white border-zinc-300 text-black"
                       : "text-zinc-600 hover:text-zinc-900"
