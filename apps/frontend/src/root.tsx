@@ -15,6 +15,9 @@ import { AuthProvider } from "./lib/AuthContext";
 import { ToastProvider } from "@alliance/sharedweb/ui/ToastProvider";
 import { client } from "@alliance/shared/client/client.gen";
 import { getApiUrl } from "@alliance/sharedweb/lib/config";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 client.setConfig({
   baseUrl: getApiUrl(),
@@ -86,6 +89,16 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const inner = (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ToastProvider>
+          <HtmlBackgroundManager>{children}</HtmlBackgroundManager>
+        </ToastProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+
   return (
     <html lang="en">
       <head>
@@ -102,18 +115,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
             options={options}
           >
-            <AuthProvider>
-              <ToastProvider>
-                <HtmlBackgroundManager>{children}</HtmlBackgroundManager>
-              </ToastProvider>
-            </AuthProvider>
+            {inner}
           </PostHogProvider>
         ) : (
-          <AuthProvider>
-            <ToastProvider>
-              <HtmlBackgroundManager>{children}</HtmlBackgroundManager>
-            </ToastProvider>
-          </AuthProvider>
+          inner
         )}
         <ScrollRestoration />
         <Scripts />

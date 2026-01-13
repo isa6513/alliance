@@ -5607,6 +5607,7 @@ __metadata:
   resolution: "alliance@workspace:."
   dependencies:
     "@eslint/js": "npm:^9.28.0"
+    "@tanstack/react-query": "npm:^5.90.16"
     eslint: "npm:^9.28.0"
     react: "npm:19.0.0"
     react-dom: "npm:19.0.0"

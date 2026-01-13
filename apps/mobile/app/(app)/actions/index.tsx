@@ -6,31 +6,22 @@ import {
   Pressable,
 } from "react-native";
 import { useCallback, useMemo, useState } from "react";
-import { actionsFindAllLoggedIn } from "@alliance/shared/client";
 import { router } from "expo-router";
 import { FilterMode } from "@alliance/shared/lib/actionUtils";
-import { filterActions } from "@alliance/shared/lib/actionsListPage";
+import {
+  filterActions,
+  useActionsQuery,
+} from "@alliance/shared/lib/actionsListPage";
 import Text from "../../../components/system/Text";
 import { ChevronDown } from "lucide-react-native";
 import ActionItemCard from "../../../components/ActionItemCard";
-import { useQuery } from "@tanstack/react-query";
 import { LegendList } from "@legendapp/list";
 
 export default function ActionsScreen() {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const {
-    data: actions,
-    isPending,
-    error,
-  } = useQuery({
-    queryKey: ["actions"],
-    queryFn: () =>
-      actionsFindAllLoggedIn({ query: { sorted: true } }).then(
-        (response) => response.data ?? []
-      ),
-  });
+  const { data: actions, isPending, error } = useActionsQuery();
 
   const counts = useMemo(() => {
     const result: Record<FilterMode, number> = {} as any;
