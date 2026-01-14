@@ -98,10 +98,8 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       >
         {action.optional && (
           <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">
-            <p className="font-bold">This action is optional.</p>
-            <p className="mb-3">
-              You can complete as usual or skip it by pressing dismiss.
-            </p>
+            <p className="font-semibold">This action is optional.</p>
+            <p className="mb-3">You can complete as usual or dismiss it.</p>
             <Button
               color={ButtonColor.White}
               onClick={handleDismiss}

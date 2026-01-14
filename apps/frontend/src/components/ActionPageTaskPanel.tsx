@@ -153,8 +153,8 @@ const ActionPageTaskPanel = () => {
             >
               <p className="font-semibold">This action is optional.</p>
               <p>
-                You are not required to complete the below task, but can if you
-                would like.
+                You are not required to complete the task, but can if you would
+                like.
               </p>
             </Card>
           )}
