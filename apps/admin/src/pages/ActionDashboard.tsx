@@ -445,9 +445,6 @@ const ActionDashboard: React.FC = () => {
     const { name, value, type } = target;
 
     if (type === "checkbox") {
-      if (name === "useManualCohort" && !target.checked) {
-        setManualCohortUserIds([]);
-      }
       setForm((prev) => ({
         ...prev,
         manualCohortUserIds:
