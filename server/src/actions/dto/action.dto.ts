@@ -171,7 +171,7 @@ export class ActionDto extends OmitType(Action, [
     this.squareThumbnailImageAlt =
       action.squareThumbnailImageAlt ?? action.name;
     this.usersCompleted = action.usersCompleted || 0;
-    this.status = action.status || ActionStatus.Draft;
+    this.status = (action.events && action.status) ?? ActionStatus.Draft;
     this.events =
       action.events?.map((event) => new ActionEventDto(event)) || [];
     this.canParticipate = extra?.canParticipate;

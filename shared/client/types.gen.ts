@@ -472,7 +472,6 @@ export type Action = {
      */
     usersCompleted: number;
     activities: Array<Array<ActionActivity>>;
-    status: ActionStatus;
     /**
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
@@ -498,6 +497,7 @@ export type Action = {
      */
     shouldCompleteAfterDeadline: boolean;
     authors?: Array<User>;
+    status: ActionStatus;
 };
 
 export type User = {
@@ -1130,7 +1130,6 @@ export type ActionDto = {
      */
     usersCompleted: number;
     activities: Array<Array<ActionActivity>>;
-    status: ActionStatus;
     /**
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
@@ -1154,6 +1153,7 @@ export type ActionDto = {
      * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline: boolean;
+    status: ActionStatus;
     events: Array<ActionEventDto>;
     updates: Array<ActionUpdateDto>;
     canParticipate?: boolean;
