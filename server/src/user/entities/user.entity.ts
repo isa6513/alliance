@@ -45,6 +45,7 @@ import { Ty } from 'src/tasks/entities/type';
 import { ContractEvent, ContractEventType } from './contract-event.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { UserDevice } from './user-device.entity';
+import { Mms } from 'src/mms/mms.entity';
 
 export enum NotificationPreference {
   All = 'all',
@@ -88,9 +89,9 @@ export class User {
   @ApiProperty()
   phoneNumberValidated: boolean;
 
-  @Column({ type: 'timestamptz', nullable: true })
-  @ApiPropertyOptional()
-  sentTextOptInMessageAt?: Date;
+  @OneToOne(() => Mms, { nullable: true })
+  @JoinColumn({ name: 'optInMmsId' })
+  optInMms?: Mms;
 
   @Column({ default: false })
   @ApiProperty()

@@ -210,7 +210,6 @@ const StatsPage: React.FC = () => {
     setRetentionLoading(true);
     try {
       const response = await analyticsGetMemberCompletionRetention();
-      console.log("response", response);
       setRetentionCohorts(response.data ?? []);
     } catch (err) {
       console.error("Failed to load retention cohorts", err);
