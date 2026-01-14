@@ -61,7 +61,7 @@ const PeoplePage: React.FC = () => {
               Members
             </h2>
             <p className="text-zinc-900">
-              The Alliance has 70 members. Membership is currently by invitation
+              The Alliance has 73 members. Membership is currently by invitation
               only.
             </p>
           </div>
