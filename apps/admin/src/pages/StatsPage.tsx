@@ -2171,14 +2171,14 @@ const StatsPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <div
               className="w-4 h-4 rounded"
-              style={{ backgroundColor: "rgba(22, 163, 74, 0.7)" }}
+              style={{ backgroundColor: "rgba(22, 163, 74, 0.8)" }}
             />
             <span className="text-sm text-gray-600">Active Members</span>
           </div>
           <div className="flex items-center gap-2">
             <div
               className="w-4 h-4 rounded"
-              style={{ backgroundColor: "rgba(239, 68, 68, 0.6)" }}
+              style={{ backgroundColor: "rgba(239, 68, 68, 0.9)" }}
             />
             <span className="text-sm text-gray-600">Churned Members</span>
           </div>
