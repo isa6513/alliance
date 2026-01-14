@@ -2,8 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Temporal } from '@js-temporal/polyfill';
-import { ContractEvent } from 'src/user/entities/contract-event.entity';
-import { User } from 'src/user/entities/user.entity';
 import {
   EntityManager,
   EntityTarget,
@@ -14,7 +12,6 @@ import {
   FindOneOptions,
   RemoveOptions,
   ObjectId,
-  FindOptionsRelations,
 } from 'typeorm';
 
 type Equal<A, B> =
@@ -210,14 +207,6 @@ type _typecheck_NoRelations =
         {}
       >
     >;
-type asdf = $EagerEvaluation<
-  WithRelations<
-    {
-      param: Promise<{ subparam: string }>;
-    },
-    { param: true }
-  >
->;
 
 type ResolveRelationProp<Prop, R> =
   Prop extends Promise<infer I>
