@@ -84,7 +84,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
         </Card>
       )}
       <Card
-        className={`p-6 transition-all duration-300 ${
+        className={`p-4 sm:p-6 transition-all duration-300 ${
           state === LargeActionCardState.Closed
             ? "opacity-0 overflow-hidden"
             : "opacity-100"

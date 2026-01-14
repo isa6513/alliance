@@ -135,11 +135,16 @@ const PostDetailPage: React.FC = () => {
               </span>
             </Card>
           )}
-          <Card className="py-6 px-5 mb-3" style={CardStyle.White}>
+          <Card
+            className="py-3 sm:py-6 px-3 sm:px-5 mb-3"
+            style={CardStyle.White}
+          >
             <div className="flex justify-between items-start">
               <div className="flex flex-row gap-x-1 items-center w-full ">
                 {post.pinned && <PinnedIcon size="large" />}
-                <h1 className="!text-xl !font-medium -mt-1">{post.title}</h1>
+                <h1 className="!text-lg sm:!text-xl !font-medium -mt-1">
+                  {post.title}
+                </h1>
               </div>
             </div>
             <div className="flex flex-row gap-x-2 mb-2 sm:mb-4 mt-1 items-center text-sm sm:text-base">
@@ -185,7 +190,7 @@ const PostDetailPage: React.FC = () => {
             <div className="text-sm sm:text-base">
               <EditableContentRenderer content={post.editableContent} />
             </div>
-            <div className="flex items-center mt-2 sm:mt-4 gap-x-1.5 -mb-2">
+            <div className="flex items-center mt-2 sm:mt-4 gap-x-1.5 sm:-mb-2">
               <div className="">
                 <PostLikeButton
                   liked={
