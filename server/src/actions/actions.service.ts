@@ -1967,6 +1967,7 @@ export class ActionsService {
 
       const inserted = await actionRepo.insert({
         ...actionCols,
+        id: undefined,
       });
 
       const actionId = inserted.identifiers[0].id as number;
@@ -2025,11 +2026,6 @@ export class ActionsService {
 
       const saved = await actionRepo.findOneOrFail({
         where: { id: actionId },
-        relations: {
-          suite: true,
-          events: true,
-          participatingTags: true,
-        },
       });
 
       return new ActionDto(saved);
