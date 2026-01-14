@@ -91,6 +91,10 @@ const ActionTaskPanelForm = ({
           }
           onCompleteAction(false); //tasksSubmitForm handles completion here
         } else {
+          if ((response.error as Error).message === "Form already submitted") {
+            window.location.reload();
+            return;
+          }
           console.error(response.error);
           posthog.captureException(response.error, {
             event: "form_submit_error",

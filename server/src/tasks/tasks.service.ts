@@ -203,6 +203,16 @@ export class TasksService {
     const form = await this.getForm(formId);
     const user = await this.userService.findOneOrFail(userId);
 
+    const existingFormResponse = await this.formResponseRepository.findOne({
+      where: {
+        formId,
+        user: { id: userId },
+      },
+    });
+    if (existingFormResponse) {
+      throw new BadRequestException('Form already submitted');
+    }
+
     const validatorResults = await this.validateFormSubmission(
       form,
       submitFormDto,
