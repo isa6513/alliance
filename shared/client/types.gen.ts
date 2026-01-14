@@ -2190,6 +2190,25 @@ export type AggregateStatsDto = {
     signedUsers: number;
 };
 
+export type ContractStatusPointDto = {
+    /**
+     * The date for this data point
+     */
+    date: string;
+    /**
+     * Number of users with active contracts
+     */
+    activeCount: number;
+    /**
+     * Number of users who signed but are no longer active
+     */
+    churnedCount: number;
+    /**
+     * Total users who ever signed up to this point
+     */
+    totalEverSigned: number;
+};
+
 export type AppHealthCheckData = {
     body?: never;
     path?: never;
@@ -5552,6 +5571,22 @@ export type AnalyticsGetAggregateStatsResponses = {
 };
 
 export type AnalyticsGetAggregateStatsResponse = AnalyticsGetAggregateStatsResponses[keyof AnalyticsGetAggregateStatsResponses];
+
+export type AnalyticsGetContractStatusHistoryData = {
+    body?: never;
+    path?: never;
+    query: {
+        startDate: string;
+        endDate: string;
+    };
+    url: '/analytics/contract-status-history';
+};
+
+export type AnalyticsGetContractStatusHistoryResponses = {
+    200: Array<ContractStatusPointDto>;
+};
+
+export type AnalyticsGetContractStatusHistoryResponse = AnalyticsGetContractStatusHistoryResponses[keyof AnalyticsGetContractStatusHistoryResponses];
 
 export type ClientOptions = {
     baseUrl: string;

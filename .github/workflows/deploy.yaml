@@ -110,6 +110,9 @@ jobs:
       - name: Build React App
         run: corepack yarn workspace @alliance/frontend build --mode "$env_name"
         working-directory: ./
+        env:
+          VITE_APP_GIT_SHA: ${{ github.sha }}
+          VITE_APP_VERSION: ${{ github.ref_name }}
 
       - name: Inject & upload source maps to PostHog
         continue-on-error: true

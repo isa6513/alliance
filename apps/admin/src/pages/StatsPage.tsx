@@ -4,6 +4,7 @@ import {
   analyticsRecalculateActionStats,
   analyticsGetMemberCompletionRetention,
   analyticsGetAggregateStats,
+  analyticsGetContractStatusHistory,
 } from "@alliance/shared/client";
 import {
   DailyStatsRecord,
@@ -11,6 +12,7 @@ import {
   MemberCompletionRetentionCohortDto,
   MemberCompletionRetentionPointDto,
   AggregateStatsDto,
+  ContractStatusPointDto,
 } from "@alliance/shared/client/types.gen";
 import chroma from "chroma-js";
 import * as d3 from "d3";
@@ -133,6 +135,9 @@ const StatsPage: React.FC = () => {
     point: MemberCompletionRetentionPointDto;
     color: string;
   } | null>(null);
+  const [hoveredContractPoint, setHoveredContractPoint] = useState<
+    (ContractStatusPointDto & { parsedDate: Date }) | null
+  >(null);
   const [completionRateRange, setCompletionRateRange] = useState(() => {
     const end = new Date();
     const start = new Date();
@@ -143,10 +148,25 @@ const StatsPage: React.FC = () => {
     };
   });
   const [assumedHourlyRate, setAssumedHourlyRate] = useState<number>(15);
+  const [contractStatusHistory, setContractStatusHistory] = useState<
+    ContractStatusPointDto[]
+  >([]);
+  const [contractStatusLoading, setContractStatusLoading] =
+    useState<boolean>(false);
+  const [contractStatusRange, setContractStatusRange] = useState(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setMonth(start.getMonth() - 6);
+    return {
+      start: formatDateAsLocal(start),
+      end: formatDateAsLocal(end),
+    };
+  });
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const completionRateSvgRef = useRef<SVGSVGElement | null>(null);
   const actionsSvgRef = useRef<SVGSVGElement | null>(null);
+  const contractStatusSvgRef = useRef<SVGSVGElement | null>(null);
 
   const loadStats = useCallback(async (startDate: string, endDate: string) => {
     setLoading(true);
@@ -255,6 +275,27 @@ const StatsPage: React.FC = () => {
   useEffect(() => {
     void loadAggregateStats();
   }, [loadAggregateStats]);
+
+  const loadContractStatusHistory = useCallback(async () => {
+    setContractStatusLoading(true);
+    try {
+      const response = await analyticsGetContractStatusHistory({
+        query: {
+          startDate: contractStatusRange.start,
+          endDate: contractStatusRange.end,
+        },
+      });
+      setContractStatusHistory(response.data ?? []);
+    } catch (err) {
+      console.error("Failed to load contract status history", err);
+    } finally {
+      setContractStatusLoading(false);
+    }
+  }, [contractStatusRange]);
+
+  useEffect(() => {
+    void loadContractStatusHistory();
+  }, [loadContractStatusHistory]);
 
   const parsedStats = useMemo<ParsedDailyStats[]>(() => {
     return stats
@@ -607,6 +648,76 @@ const StatsPage: React.FC = () => {
     };
   }, [filteredRetentionCohorts]);
 
+  const parsedContractStatusHistory = useMemo(() => {
+    return contractStatusHistory.map((point) => ({
+      ...point,
+      parsedDate: new Date(point.date),
+    }));
+  }, [contractStatusHistory]);
+
+  const contractStatusChartGeometry = useMemo(() => {
+    if (parsedContractStatusHistory.length === 0) return null;
+
+    const width = 1000;
+    const height = 350;
+    const margin = { top: 28, right: 32, bottom: 64, left: 72 };
+
+    const dateExtent = d3.extent(
+      parsedContractStatusHistory,
+      (d) => d.parsedDate
+    );
+    if (!dateExtent[0] || !dateExtent[1]) return null;
+
+    const xScale = d3
+      .scaleTime()
+      .domain(dateExtent)
+      .range([margin.left, width - margin.right]);
+
+    const maxTotal =
+      d3.max(parsedContractStatusHistory, (d) => d.totalEverSigned) ?? 10;
+
+    const yScale = d3
+      .scaleLinear()
+      .domain([0, maxTotal * 1.1])
+      .nice()
+      .range([height - margin.bottom, margin.top]);
+
+    // Area for active users (green, bottom)
+    const activeArea = d3
+      .area<(typeof parsedContractStatusHistory)[0]>()
+      .x((d) => xScale(d.parsedDate))
+      .y0(height - margin.bottom)
+      .y1((d) => yScale(d.activeCount))
+      .curve(d3.curveMonotoneX);
+
+    // Area for churned users (red, stacked on top of active)
+    const churnedArea = d3
+      .area<(typeof parsedContractStatusHistory)[0]>()
+      .x((d) => xScale(d.parsedDate))
+      .y0((d) => yScale(d.activeCount))
+      .y1((d) => yScale(d.activeCount + d.churnedCount))
+      .curve(d3.curveMonotoneX);
+
+    const activeAreaPath = activeArea(parsedContractStatusHistory) ?? "";
+    const churnedAreaPath = churnedArea(parsedContractStatusHistory) ?? "";
+
+    const xTicks = xScale.ticks(8);
+    const yTicks = yScale.ticks(6);
+
+    return {
+      width,
+      height,
+      margin,
+      xScale,
+      yScale,
+      activeAreaPath,
+      churnedAreaPath,
+      xTicks,
+      yTicks,
+      maxTotal,
+    };
+  }, [parsedContractStatusHistory]);
+
   const activeDay = hoveredDay ?? parsedStats[parsedStats.length - 1];
   const activeActionsDay =
     hoveredActionsDay ?? parsedStats[parsedStats.length - 1];
@@ -718,6 +829,46 @@ const StatsPage: React.FC = () => {
     [completionRateChartGeometry, cumulativeCompletionData]
   );
 
+  const handleContractStatusHover = useCallback(
+    (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
+      if (
+        !contractStatusChartGeometry ||
+        parsedContractStatusHistory.length === 0 ||
+        !contractStatusSvgRef.current
+      ) {
+        return;
+      }
+
+      const rect = contractStatusSvgRef.current.getBoundingClientRect();
+      const relativeX = event.clientX - rect.left;
+      if (relativeX < 0) return;
+
+      const scaleX = contractStatusChartGeometry.width / rect.width;
+      const pointerX = relativeX * scaleX;
+
+      const hoveredDate = contractStatusChartGeometry.xScale.invert(pointerX);
+
+      // Find closest data point
+      let closestPoint = parsedContractStatusHistory[0];
+      let closestDistance = Math.abs(
+        hoveredDate.getTime() - closestPoint.parsedDate.getTime()
+      );
+
+      for (const point of parsedContractStatusHistory) {
+        const distance = Math.abs(
+          hoveredDate.getTime() - point.parsedDate.getTime()
+        );
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestPoint = point;
+        }
+      }
+
+      setHoveredContractPoint(closestPoint);
+    },
+    [contractStatusChartGeometry, parsedContractStatusHistory]
+  );
+
   return (
     <div className="p-6 md:p-8 space-y-6 text-gray-900 mx-auto">
       {aggregateStatsLoading ? (
@@ -743,6 +894,26 @@ const StatsPage: React.FC = () => {
                           cumulativeCompletionData.length - 1
                         ].avgRate * 100
                       ).toFixed(2)
+                    : "[No data]"}
+                  %
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-sm text-gray-600">Churn rate</div>
+                <div className="text-3xl font-bold text-gray-900">
+                  {parsedContractStatusHistory.length > 0
+                    ? (() => {
+                        const latest =
+                          parsedContractStatusHistory[
+                            parsedContractStatusHistory.length - 1
+                          ];
+                        return latest.totalEverSigned > 0
+                          ? (
+                              (latest.churnedCount / latest.totalEverSigned) *
+                              100
+                            ).toFixed(1)
+                          : "0";
+                      })()
                     : "[No data]"}
                   %
                 </div>
@@ -1808,6 +1979,209 @@ const StatsPage: React.FC = () => {
               )}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Contract Status History Chart */}
+      <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-4 p-3 border-b border-gray-200">
+          <h3 className="font-semibold text-gray-900">
+            Signed member retention
+          </h3>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-gray-600">
+                From
+              </label>
+              <input
+                type="date"
+                value={contractStatusRange.start}
+                onChange={(e) =>
+                  setContractStatusRange((prev) => ({
+                    ...prev,
+                    start: e.target.value,
+                  }))
+                }
+                className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-gray-600">To</label>
+              <input
+                type="date"
+                value={contractStatusRange.end}
+                onChange={(e) =>
+                  setContractStatusRange((prev) => ({
+                    ...prev,
+                    end: e.target.value,
+                  }))
+                }
+                className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="relative p-4 pb-0">
+          {contractStatusLoading &&
+            parsedContractStatusHistory.length === 0 && (
+              <p className="text-sm text-gray-600">Loading...</p>
+            )}
+          {!contractStatusLoading &&
+            parsedContractStatusHistory.length === 0 && (
+              <p className="text-sm text-gray-600">
+                No contract status data in this date range.
+              </p>
+            )}
+          {contractStatusChartGeometry &&
+            parsedContractStatusHistory.length > 0 && (
+              <svg
+                ref={contractStatusSvgRef}
+                viewBox={`0 0 ${contractStatusChartGeometry.width} ${contractStatusChartGeometry.height}`}
+                className="w-full"
+                onMouseMove={handleContractStatusHover}
+                onMouseLeave={() => setHoveredContractPoint(null)}
+              >
+                {/* Grid lines */}
+                <g>
+                  {contractStatusChartGeometry.yTicks.map((tick) => (
+                    <g key={`contract-y-${tick}`}>
+                      <line
+                        x1={contractStatusChartGeometry.margin.left}
+                        x2={
+                          contractStatusChartGeometry.width -
+                          contractStatusChartGeometry.margin.right
+                        }
+                        y1={contractStatusChartGeometry.yScale(tick)}
+                        y2={contractStatusChartGeometry.yScale(tick)}
+                        stroke="#e5e7eb"
+                        strokeDasharray="4 6"
+                      />
+                      <text
+                        x={contractStatusChartGeometry.margin.left - 12}
+                        y={contractStatusChartGeometry.yScale(tick)}
+                        textAnchor="end"
+                        dominantBaseline="middle"
+                        className="fill-gray-500 text-xs"
+                      >
+                        {tick}
+                      </text>
+                    </g>
+                  ))}
+                  {contractStatusChartGeometry.xTicks.map((tick) => (
+                    <g key={`contract-x-${tick.toISOString()}`}>
+                      <line
+                        x1={contractStatusChartGeometry.xScale(tick)}
+                        x2={contractStatusChartGeometry.xScale(tick)}
+                        y1={contractStatusChartGeometry.margin.top}
+                        y2={
+                          contractStatusChartGeometry.height -
+                          contractStatusChartGeometry.margin.bottom
+                        }
+                        stroke="#f3f4f6"
+                      />
+                      <text
+                        x={contractStatusChartGeometry.xScale(tick)}
+                        y={
+                          contractStatusChartGeometry.height -
+                          contractStatusChartGeometry.margin.bottom +
+                          24
+                        }
+                        textAnchor="middle"
+                        className="fill-gray-600 text-xs"
+                      >
+                        {dateFormatter.format(tick)}
+                      </text>
+                    </g>
+                  ))}
+                </g>
+
+                {/* Churned area (red, on top) */}
+                <path
+                  d={contractStatusChartGeometry.churnedAreaPath}
+                  fill="rgba(239, 68, 68, 0.9)"
+                  stroke="none"
+                />
+
+                {/* Active area (green, bottom) */}
+                <path
+                  d={contractStatusChartGeometry.activeAreaPath}
+                  fill="rgba(22, 163, 74, 0.8)"
+                  stroke="none"
+                />
+
+                {/* Hover indicator */}
+                {hoveredContractPoint && (
+                  <>
+                    <line
+                      x1={contractStatusChartGeometry.xScale(
+                        hoveredContractPoint.parsedDate
+                      )}
+                      x2={contractStatusChartGeometry.xScale(
+                        hoveredContractPoint.parsedDate
+                      )}
+                      y1={contractStatusChartGeometry.margin.top}
+                      y2={
+                        contractStatusChartGeometry.height -
+                        contractStatusChartGeometry.margin.bottom
+                      }
+                      stroke="#6b7280"
+                      strokeWidth={1}
+                      strokeDasharray="4 4"
+                    />
+
+                    {/* Small hover box */}
+                    <rect
+                      x={Math.min(
+                        contractStatusChartGeometry.xScale(
+                          hoveredContractPoint.parsedDate
+                        ) + 12,
+                        contractStatusChartGeometry.width - 100
+                      )}
+                      y={contractStatusChartGeometry.margin.top + 12}
+                      width={88}
+                      height={32}
+                      rx={6}
+                      fill="white"
+                      stroke="#e5e7eb"
+                    />
+                    <text
+                      x={Math.min(
+                        contractStatusChartGeometry.xScale(
+                          hoveredContractPoint.parsedDate
+                        ) + 24,
+                        contractStatusChartGeometry.width - 88
+                      )}
+                      y={contractStatusChartGeometry.margin.top + 33}
+                      className="fill-black text-sm font-semibold"
+                    >
+                      {hoveredContractPoint.totalEverSigned > 0
+                        ? `${Math.round(
+                            (hoveredContractPoint.churnedCount /
+                              hoveredContractPoint.totalEverSigned) *
+                              100
+                          )}% churn`
+                        : "0% churn"}
+                    </text>
+                  </>
+                )}
+              </svg>
+            )}
+        </div>
+        <div className="flex items-center gap-6 px-4 pb-4 -mt-4">
+          <div className="flex items-center gap-2">
+            <div
+              className="w-4 h-4 rounded"
+              style={{ backgroundColor: "rgba(22, 163, 74, 0.7)" }}
+            />
+            <span className="text-sm text-gray-600">Active Members</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div
+              className="w-4 h-4 rounded"
+              style={{ backgroundColor: "rgba(239, 68, 68, 0.6)" }}
+            />
+            <span className="text-sm text-gray-600">Churned Members</span>
+          </div>
         </div>
       </div>
 

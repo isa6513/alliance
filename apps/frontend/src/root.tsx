@@ -16,6 +16,7 @@ import { ToastProvider } from "@alliance/sharedweb/ui/ToastProvider";
 import { client } from "@alliance/shared/client/client.gen";
 import { getApiUrl } from "@alliance/sharedweb/lib/config";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import PosthogBuildTag from "./lib/PosthogBuildTag";
 
 const queryClient = new QueryClient();
 
@@ -115,6 +116,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
             options={options}
           >
+            <PosthogBuildTag />
             {inner}
           </PostHogProvider>
         ) : (
