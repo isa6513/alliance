@@ -12,6 +12,9 @@ import {
 } from "@alliance/shared/lib/largeActionCard";
 import { CardStyle } from "@alliance/shared/styles/card";
 import Card from "@alliance/sharedweb/ui/Card";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
 
 export interface LargeActionCardProps extends LargeActionCardPropsShared {
   showDetails?: boolean;
@@ -32,7 +35,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   action,
   dismissProps,
   userRelation,
-  friendActivities,
   onUpdateActionState,
   handleDismiss,
   showDetails = true,
@@ -43,6 +45,13 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   const [state, setState] = useState<LargeActionCardState>(
     LargeActionCardState.Default
   );
+
+  const { activities: friendActivities } = useActivities({
+    list: ActivityList.FriendsForAction,
+    objectId: action.id,
+    comments: false,
+    limit: 8,
+  });
 
   useEffect(() => {
     setState(LargeActionCardState.Default);

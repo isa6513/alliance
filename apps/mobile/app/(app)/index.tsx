@@ -122,9 +122,6 @@ export default function HomeScreen() {
             <LargeActionCard
               action={currentTask}
               userRelation={currentTask.userRelation ?? "none"}
-              friendActivities={friendActivities.filter(
-                (activity) => activity.actionId === currentTask.id
-              )}
               onUpdateActionState={refetch}
               scrollPageTo={scrollPageTo}
               handleDismiss={() => handleDismissAction(currentTask.id)}

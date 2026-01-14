@@ -7,12 +7,14 @@ import {
   actionsCommunityActivity,
   actionsLikeActivity,
   actionsUnlikeActivity,
+  actionsFriendActivityForAction,
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useState } from "react";
 import posthog from "posthog-js";
 
 export enum ActivityList {
   Friends = "friends",
+  FriendsForAction = "friendsForAction",
   User = "user",
   Action = "action",
   Global = "global",
@@ -23,7 +25,11 @@ export type UseActivitiesProps = {
   comments?: boolean;
 } & (
   | {
-      list: ActivityList.User | ActivityList.Action | ActivityList.Community;
+      list:
+        | ActivityList.User
+        | ActivityList.Action
+        | ActivityList.Community
+        | ActivityList.FriendsForAction;
       objectId: number;
       limit?: number;
     }
@@ -61,6 +67,15 @@ const useActivities = ({
         apiCall = actionsGetActionActivities({
           path: { id: objectId },
           query: { limit: limit, comments },
+        });
+        break;
+      case ActivityList.FriendsForAction:
+        if (!objectId) {
+          throw new Error("objectId is required for FriendsForAction");
+        }
+        apiCall = actionsFriendActivityForAction({
+          path: { actionId: objectId },
+          query: { comments, limit: limit.toString() },
         });
         break;
       case ActivityList.Community:

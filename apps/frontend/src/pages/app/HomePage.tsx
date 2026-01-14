@@ -134,9 +134,6 @@ const HomePage = () => {
             dismissProps={dismissProps}
             handleDismiss={() => handleDismissAction(currentTask.id)}
             userRelation={currentTask.userRelation as "joined" | "none"}
-            friendActivities={friendActivities.filter(
-              (activity) => activity.actionId === currentTask.id
-            )}
             onUpdateActionState={() => navigate(href("/tasks"))}
           />
         ) : (

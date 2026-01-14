@@ -357,6 +357,26 @@ export class ActionsController {
     return counters$;
   }
 
+  @Get('friendActivity/:actionId')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [ActionActivityDto] })
+  async friendActivityForAction(
+    @Param('actionId', ParseIntPipe) actionId: number,
+    @Request() req: JwtRequest,
+    @Query('comments', new ParseBoolPipe({ optional: true }))
+    comments?: boolean,
+    @Query('limit', new ParseIntPipe({ optional: true }))
+    limit?: string,
+  ) {
+    const limitNum = limit ? parseInt(limit) : 20;
+    return this.actionsService.friendActivityForAction(
+      req.user.sub,
+      actionId,
+      comments,
+      limitNum,
+    );
+  }
+
   @Get('friendActivity')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [ActionActivityDto] })

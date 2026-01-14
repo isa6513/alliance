@@ -3888,6 +3888,24 @@ export type ActionsLiveListResponses = {
     200: unknown;
 };
 
+export type ActionsFriendActivityForActionData = {
+    body?: never;
+    path: {
+        actionId: number;
+    };
+    query: {
+        comments: boolean;
+        limit: string;
+    };
+    url: '/actions/friendActivity/{actionId}';
+};
+
+export type ActionsFriendActivityForActionResponses = {
+    200: Array<ActionActivityDto>;
+};
+
+export type ActionsFriendActivityForActionResponse = ActionsFriendActivityForActionResponses[keyof ActionsFriendActivityForActionResponses];
+
 export type ActionsFriendActivityData = {
     body?: never;
     path?: never;

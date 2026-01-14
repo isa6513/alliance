@@ -1350,6 +1350,45 @@ export class ActionsService {
     );
   }
 
+  async friendActivityForAction(
+    userId: number,
+    actionId: number,
+    comments?: boolean,
+    limit?: number,
+  ): Promise<ActionActivityDto[]> {
+    const friends = await this.userService.findFriends(userId);
+
+    if (friends.length === 0) {
+      return [];
+    }
+
+    const friendActivities = await this.buildActivityFeedQuery({
+      limit: limit ?? 20,
+      userIds: friends.map((f) => f.id),
+      actionId,
+    }).getMany();
+
+    if (friendActivities.length === 0) {
+      return [];
+    }
+
+    const likedIds = await this.getLikedActivityIds(
+      friendActivities.map((a) => a.id),
+      userId,
+    );
+
+    if (comments) {
+      return this.attachComments(friendActivities, userId);
+    }
+
+    return friendActivities.map(
+      (activity) =>
+        new ActionActivityDto(activity, {
+          likedByMe: likedIds.has(activity.id),
+        }),
+    );
+  }
+
   async communityActivity(
     limitNum: number = 20,
     beforeDate: Date | undefined,
