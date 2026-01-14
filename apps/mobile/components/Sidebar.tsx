@@ -90,7 +90,7 @@ const navSections: NavSection[] = [
       { name: "Activity", href: "/feed", icon: Globe, matchPaths: ["/feed"] },
       {
         name: "Forum",
-        href: "/forum/forum",
+        href: "/forum",
         icon: MessagesSquare,
         matchPaths: ["/forum"],
       },

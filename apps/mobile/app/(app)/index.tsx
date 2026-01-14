@@ -9,6 +9,7 @@ import { colors } from "../../lib/style/colors";
 import Text from "../../components/system/Text";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import LargeActionCard from "../../components/LargeActionCard";
+import GreenHeader from "../../components/GreenHeader";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
@@ -105,14 +106,14 @@ export default function HomeScreen() {
   }
 
   return (
-    <View className="bg-green flex-1">
-      <ScrollView ref={scrollViewRef} className="flex-1 z-10">
+    <GreenHeader>
+      <ScrollView ref={scrollViewRef} className="flex-1">
         <View className="bg-green p-4 pt-11">
           <Text className="text-white font-bold text-base mt-2 pb-0">
             Current task:
           </Text>
         </View>
-        <View className="">
+        <View>
           {!currentTask ? (
             <Text className="text-red-500 text-center py-4">
               {error?.message}
@@ -131,7 +132,6 @@ export default function HomeScreen() {
           )}
         </View>
       </ScrollView>
-      <View className="bg-white absolute bottom-0 left-0 right-0 h-[300px] z-0"></View>
-    </View>
+    </GreenHeader>
   );
 }

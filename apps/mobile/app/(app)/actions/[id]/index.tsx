@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import AppMarkdownWrapper from "../../../components/AppMarkdownWrapper";
+import AppMarkdownWrapper from "../../../../components/AppMarkdownWrapper";
 import {
   ActionActivityDto,
   UserActionRelation,
@@ -16,20 +16,20 @@ import {
   actionsLikeActivity,
   actionsUnlikeActivity,
 } from "@alliance/shared/client";
-import Card, { CardStyle } from "../../../components/system/Card";
-import Text from "../../../components/system/Text";
-import ActionEventsPanel from "../../../components/ActionEventsPanel";
-import TaskTimeInfo from "../../../components/TaskTimeInfo";
+import Card, { CardStyle } from "../../../../components/system/Card";
+import Text from "../../../../components/system/Text";
+import ActionEventsPanel from "../../../../components/ActionEventsPanel";
+import TaskTimeInfo from "../../../../components/TaskTimeInfo";
 import { getLastAndNextEvent } from "@alliance/shared/lib/largeActionCard";
-import ActionPageTaskPanel from "../../../components/ActionPageTaskPanel";
+import ActionPageTaskPanel from "../../../../components/ActionPageTaskPanel";
 import { useActionHandlers } from "@alliance/shared/lib/actionPage";
-import Button, { ButtonColor } from "../../../components/system/Button";
-import Comments from "../../../components/Comments";
-import ProfileImage from "../../../components/ProfileImage";
+import Button, { ButtonColor } from "../../../../components/system/Button";
+import Comments from "../../../../components/Comments";
+import ProfileImage from "../../../../components/ProfileImage";
 import { formatTime } from "@alliance/shared/lib/utils";
-import LikeButton from "../../../components/LikeButton";
+import LikeButton from "../../../../components/LikeButton";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { colors } from "../../../lib/style/colors";
+import { colors } from "../../../../lib/style/colors";
 
 type TabId = "task" | "activity" | "description" | "comments";
 

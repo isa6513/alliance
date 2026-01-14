@@ -13,6 +13,7 @@ import {
   useActionsQuery,
 } from "@alliance/shared/lib/actionsListPage";
 import Text from "../../../components/system/Text";
+import GreenHeader from "../../../components/GreenHeader";
 import { ChevronDown } from "lucide-react-native";
 import ActionItemCard from "../../../components/ActionItemCard";
 import { LegendList } from "@legendapp/list";
@@ -38,7 +39,7 @@ export default function ActionsScreen() {
   }, []);
 
   return (
-    <View className="bg-green">
+    <GreenHeader>
       {isPending ? (
         <View className="py-5 items-center justify-center">
           <ActivityIndicator size="large" color="#0D1B2A" />
@@ -116,6 +117,6 @@ export default function ActionsScreen() {
           )}
         />
       )}
-    </View>
+    </GreenHeader>
   );
 }
