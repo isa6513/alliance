@@ -1011,7 +1011,7 @@ export class UserService {
 
   async findCommunityForUserOrFail(
     userId: number,
-    relations?: Relations<Community, 8>,
+    relations?: Relations<Community>,
   ): Promise<Community> {
     const user = await this.findOneOrFail(userId, {
       communities: relations ?? true,
