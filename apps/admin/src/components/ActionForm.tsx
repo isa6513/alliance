@@ -588,7 +588,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
               </button> */}
             </div>
             <p className="text-xs text-gray-500 mb-3">
-              Actions without tags will not be shown to any users.
+              Actions without tags will not be shown to any users, unless Manual User Cohort is enabled.
             </p>
             {tagsLoading ? (
               <p className="text-sm text-gray-500">Loading tags...</p>
