@@ -103,9 +103,7 @@ const ActionTaskPanelForm = ({
               $exception_fingerprint: "FormSubmitError",
             },
           });
-          setError(
-            "Failed to submit action. We have been notified of the problem and will take a look. You can also try again later."
-          );
+          setError("Failed to submit action.");
         }
       }
     : null;
