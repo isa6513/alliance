@@ -337,6 +337,14 @@ export class User {
   @ManyToMany(() => Tag, (tag) => tag.users, { onDelete: 'CASCADE' })
   @Type(() => Tag)
   tags: Ty<Tag>[];
+  @IsOptional()
+  private _tagIdSet: Set<number> | null = null;
+  get tagIdSet(): Set<number> {
+    if (this._tagIdSet === null) {
+      this._tagIdSet = new Set(this.tags.map((t) => t.id));
+    }
+    return this._tagIdSet;
+  }
 
   @ManyToMany(() => Community, (community) => community.users, {
     onDelete: 'CASCADE',
