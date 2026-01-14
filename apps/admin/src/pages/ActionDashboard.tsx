@@ -1229,6 +1229,7 @@ const ActionDashboard: React.FC = () => {
               <FormBuilder
                 formId={action.taskFormId}
                 setFormId={setTaskFormId}
+                actionName={action.name}
               />
             )}
 
