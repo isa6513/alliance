@@ -1943,69 +1943,97 @@ export class ActionsService {
   async importAction(json: string): Promise<ActionDto> {
     const importaction = JSON.parse(json) as ExportActionDto;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { taskForm, reminderGroups, ...action } = importaction;
+    const {
+      taskForm,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      reminderGroups,
+      suite,
+      events,
+      participatingTags,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      activities,
+      authors,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      updates,
+      ...actionCols
+    } = importaction;
 
-    if (action.suite) {
-      const suite = await this.actionSuiteRepository.findOne({
-        where: { name: action.suite.name },
+    return await this.actionRepository.manager.transaction(async (em) => {
+      const actionRepo = em.getRepository(Action);
+      const suiteRepo = em.getRepository(ActionSuite);
+      const formRepo = em.getRepository(Form);
+      const eventRepo = em.getRepository(ActionEvent);
+      const tagRepo = em.getRepository(Tag);
+
+      const inserted = await actionRepo.insert({
+        ...actionCols,
       });
+
+      const actionId = inserted.identifiers[0].id as number;
+
       if (suite) {
-        action.suite = suite;
-      } else {
-        const newSuite = this.actionSuiteRepository.create({
-          name: action.suite.name,
+        let foundSuite = await suiteRepo.findOne({
+          where: { name: suite.name },
         });
-        await this.actionSuiteRepository.save(newSuite);
-        action.suite = newSuite;
+        if (!foundSuite) {
+          foundSuite = await suiteRepo.save(
+            suiteRepo.create({ name: suite.name }),
+          );
+        }
+        await actionRepo.update(actionId, { suite: { id: foundSuite.id } });
       }
-    }
 
-    if (taskForm) {
-      const newTaskForm = this.formRepository.create({
-        ...taskForm,
-        id: undefined,
-      });
-      await this.formRepository.save(newTaskForm);
-      action.taskFormId = newTaskForm.id;
-    }
-
-    if (action.events) {
-      const newEvents: ActionEvent[] = [];
-      for (const event of action.events) {
-        const newEvent = this.actionEventRepository.create({
-          ...event,
-          id: undefined,
-          action: undefined,
-        });
-        newEvents.push(newEvent);
+      if (authors?.length) {
+        await actionRepo
+          .createQueryBuilder()
+          .relation(Action, 'authors')
+          .of(actionId)
+          .add(authors.map((a) => ({ id: a.id })));
       }
-      await this.actionEventRepository.save(newEvents);
-      action.events = newEvents;
-    }
 
-    if (action.participatingTags) {
-      const existingTags: Tag[] = [];
-      for (const tag of action.participatingTags) {
-        const found = await this.tagRepository.findOne({
-          where: {
-            id: tag.id,
-          },
-        });
-        if (found) {
-          existingTags.push(found);
+      if (taskForm) {
+        const newTaskForm = await formRepo.save(
+          formRepo.create({ ...taskForm, id: undefined }),
+        );
+        await actionRepo.update(actionId, { taskFormId: newTaskForm.id });
+      }
+
+      if (events?.length) {
+        await eventRepo.insert(
+          events.map((e) => ({
+            ...e,
+            updates: undefined,
+            id: undefined,
+            action: { id: actionId },
+          })),
+        );
+      }
+
+      if (participatingTags?.length) {
+        const tagIds = (
+          await tagRepo.findBy({ id: In(participatingTags.map((t) => t.id)) })
+        ).map((t) => t.id);
+
+        if (tagIds.length) {
+          await actionRepo
+            .createQueryBuilder()
+            .relation(Action, 'participatingTags')
+            .of(actionId)
+            .add(tagIds);
         }
       }
-      action.participatingTags = existingTags;
-    }
 
-    const newAction = this.actionRepository.create({
-      ...action,
-      id: undefined,
+      const saved = await actionRepo.findOneOrFail({
+        where: { id: actionId },
+        relations: {
+          suite: true,
+          events: true,
+          participatingTags: true,
+        },
+      });
+
+      return new ActionDto(saved);
     });
-    await this.actionRepository.save(newAction);
-
-    return new ActionDto(newAction);
   }
 
   // TODO move ==================================
