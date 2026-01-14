@@ -1,7 +1,7 @@
 // announcement
 
 export const defaultAnnouncementEmailSubject =
-  "new Alliance task#{s} need#{s|} completion within #{days}";
+  "#{n} new Alliance task#{s} need#{s|} completion within #{days}";
 
 export const defaultAnnouncementEmailContents = `Hi #{firstname},
 
