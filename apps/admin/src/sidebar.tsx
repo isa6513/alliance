@@ -208,11 +208,7 @@ const Sidebar: React.FC = () => {
                 label: "Groups",
                 icon: <UsersRound size={16} />,
               },
-              {
-                to: "/scheduled",
-                label: "Scheduled Plans",
-                icon: <Calendar size={16} />,
-              },
+
               {
                 to: "/stats",
                 label: "Stats",
@@ -248,6 +244,11 @@ const Sidebar: React.FC = () => {
                     to: "/posts",
                     label: "Forum Posts",
                     icon: <MessageSquare size={16} />,
+                  },
+                  {
+                    to: "/scheduled",
+                    label: "Scheduled Plans",
+                    icon: <Calendar size={16} />,
                   },
                   {
                     to: "/image",

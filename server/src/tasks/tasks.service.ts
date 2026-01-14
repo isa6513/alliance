@@ -267,9 +267,11 @@ export class TasksService {
             user.optInMms = mms;
             userNeedsUpdate = true;
           } else {
-            this.slackService.sendMessage(
-              `Failed to send opt-in MMS to ${parsedNumber.number}`,
-            );
+            if (process.env.NODE_ENV === 'production') {
+              await this.slackService.sendMessage(
+                `Failed to send opt-in MMS to ${parsedNumber.number}`,
+              );
+            }
           }
         }
       } else {
