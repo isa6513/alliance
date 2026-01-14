@@ -67,7 +67,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
 
   return (
     <>
-      {dismissProps && (
+      {dismissProps && !action.optional && (
         <Card
           style={CardStyle.Grey}
           className="gap-y-3 rounded-b-none border-b-0"
