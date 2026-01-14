@@ -24,7 +24,7 @@ import {
   TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
 } from "@alliance/shared/lib/copy";
 import {
-  todoActionIsMandatory,
+  showActionInSidebarList,
   deadlineHasPassed,
   TaskAwayStatus,
 } from "@alliance/shared/lib/actionUtils";
@@ -167,29 +167,28 @@ const HomePage = () => {
     handleDismissAction,
   ]);
 
-  const numTodo = todoActions.filter(todoActionIsMandatory).length;
+  const numTodo = todoActions.filter(showActionInSidebarList).length;
   const sidebarContent = useMemo(() => {
-    const currentWeekMandatoryTodoActions = currentWeekTodoActions.filter(
-      todoActionIsMandatory
+    const currentWeekSidebarActions = currentWeekTodoActions.filter(
+      showActionInSidebarList
     );
 
     return (
       <div className="px-4 pt-12 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200">
-        {(currentWeekMandatoryTodoActions.length > 0 ||
+        {(currentWeekSidebarActions.length > 0 ||
           completedActions.length > 0) && (
           <div className="flex flex-col gap-y-2">
             <p className="font-semibold text-base font-serif text-black">
               Progress
             </p>
-            {currentWeekMandatoryTodoActions.length + newActions.length > 0 && (
+            {currentWeekSidebarActions.length + newActions.length > 0 && (
               <p className="text-zinc-600 mb-2">
                 <span className="text-green font-medium mr-0.5">
-                  {currentWeekMandatoryTodoActions.length} task
-                  {currentWeekMandatoryTodoActions.length !== 1
-                    ? "s"
-                    : ""} left{" "}
+                  {currentWeekSidebarActions.length} task
+                  {currentWeekSidebarActions.length !== 1 ? "s" : ""} left{" "}
                 </span>
                 {numTodo > 0 &&
+                  remainingTasksEstimatedTimeCurrentWeek > 0 &&
                   `for a total of ${remainingTasksEstimatedTimeCurrentWeek} minutes`}
               </p>
             )}
@@ -201,6 +200,7 @@ const HomePage = () => {
                     to={href("/actions/:id", { id: action.id.toString() })}
                     className="text-zinc-400 line-through"
                   >
+                    {action.optional && "(Optional) "}
                     {action.name}
                   </Link>
                 </div>
@@ -212,6 +212,7 @@ const HomePage = () => {
                     to={href("/actions/:id", { id: action.id.toString() })}
                     className="text-zinc-600"
                   >
+                    {action.optional && "(Optional) "}
                     {action.name}
                   </Link>
                 </div>
