@@ -219,7 +219,7 @@ const HomePage = () => {
               ))}
               {nextWeekTodoActions.length > 0 && (
                 <>
-                  <p className="text-zinc-500 mt-3 font-medium">Next week</p>
+                  <p className="text-zinc-500 mt-3 font-medium">Upcoming</p>
                   {nextWeekTodoActions.map((action) => (
                     <div key={action.id} className="text-zinc-600 flex gap-x-2">
                       <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
