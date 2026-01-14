@@ -41,7 +41,7 @@ In response to new members’ questions and comments, we took a number of steps 
 
 1. We simplified our [guide](https://worldalliance.org/guide) and moved more formal materials into separate documents.
 2. We combined our sign-up page with an invitation letter that provides basic information about the Alliance.
-3. We included examples of past actions on our website (and suggested inviters’ include them in verbal descriptions), which help prospective members understand the Alliance much more efficiently.
+3. We included examples of past actions on our website (and suggested that inviters include them in verbal descriptions), which help prospective members understand the Alliance much more efficiently.
 4. We gathered and answered frequently asked questions in a public [FAQ](https://worldalliance.org/faq).
 
 We chose to tie growth to the smaller Alliance groups we mentioned above: we currently require group leads to approve member invitations. While we need a more scalable solution to group assignment in the future, this constraint has ensured that most new members are accountable to and assisted by an existing member.
