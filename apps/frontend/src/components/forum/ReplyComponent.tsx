@@ -196,9 +196,9 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
               to={href("/member/:id", { id: reply.author.id.toString() })}
               className="text-zinc-800 font-medium"
             >
+              {/* we do not want to show group lead status in replies currently */}
               <UserDisplayName
                 staff={reply.author.staff}
-                grouplead={reply.author.isCommunityLeader}
                 expert={isExpert}
                 expertLabel={expertLabel}
               >
