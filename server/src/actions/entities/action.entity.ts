@@ -231,48 +231,6 @@ export class Action {
     return pastEvents[pastEvents.length - 1].newStatus;
   }
 
-  @IsOptional()
-  private _latestMemberActionEvent:
-    | { event: ActionEvent; deadline: Date | null }
-    | {
-        event: null;
-        deadline: null;
-      }
-    | null = null;
-  get latestMemberActionEvent(): typeof this._latestMemberActionEvent {
-    populateCache: if (this._latestMemberActionEvent !== null) {
-      if (!this.events) {
-        throw new Error('Action has no events');
-      }
-
-      const latestMemberActionEvent = findLeast(
-        this.events,
-        (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-      );
-      if (!latestMemberActionEvent) {
-        this._latestMemberActionEvent = {
-          event: null,
-          deadline: null,
-        };
-        break populateCache;
-      }
-
-      const latestMemberActionDeadline = findLeast(
-        this.events,
-        (a, b) => a.date.getTime() - b.date.getTime(),
-        (event) =>
-          event.newStatus !== ActionStatus.MemberAction &&
-          event.date >= latestMemberActionEvent.date,
-      );
-
-      return {
-        event: latestMemberActionEvent,
-        deadline: latestMemberActionDeadline?.date ?? null,
-      };
-    }
-    return this._latestMemberActionEvent;
-  }
-
   @Column({ default: false })
   @ApiProperty({
     description:
