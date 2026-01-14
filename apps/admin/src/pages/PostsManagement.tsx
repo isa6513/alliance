@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { href, useParams, useNavigate } from "react-router";
 import {
   forumGetPostsForAdmin,
@@ -27,31 +27,33 @@ const PostsManagementPage: React.FC = () => {
   const [expertLabel, setExpertLabel] = useState("");
   const { success, error: pushError } = useToast();
 
-  const loadPosts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await forumGetPostsForAdmin();
-      setPosts(response.data ?? []);
-      if (postId) {
-        const match = response.data?.find((p) => p.id === Number(postId));
-        if (match) {
-          setSelectedPost(match);
-          setExpertSelection(match.expertIds ?? []);
-          setQaMode(match.qaMode ?? false);
-          setExpertLabel(match.expertLabel ?? "");
-        }
+  useEffect(() => {
+    const loadPosts = async () => {
+      setLoading(true);
+      try {
+        const response = await forumGetPostsForAdmin();
+        setPosts(response.data ?? []);
+      } catch (err) {
+        console.error("Failed to load posts", err);
+        pushError("Failed to load posts");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Failed to load posts", err);
-      pushError("Failed to load posts");
-    } finally {
-      setLoading(false);
-    }
-  }, [postId, pushError]);
+    };
+    void loadPosts();
+  }, [pushError]);
 
   useEffect(() => {
-    void loadPosts();
-  }, [loadPosts]);
+    if (postId && posts.length > 0) {
+      const match = posts.find((p) => p.id === Number(postId));
+      if (match && selectedPost?.id !== match.id) {
+        setSelectedPost(match);
+        setExpertSelection(match.expertIds ?? []);
+        setQaMode(match.qaMode ?? false);
+        setExpertLabel(match.expertLabel ?? "");
+      }
+    }
+  }, [postId, posts, selectedPost?.id]);
 
   useEffect(() => {
     setUsersLoading(true);
