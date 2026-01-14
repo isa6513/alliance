@@ -25,6 +25,7 @@ import { ActionActivity } from './action-activity.entity';
 import { ActionEvent, ActionStatus } from './action-event.entity';
 import { ActionSuite } from './action-suite.entity';
 import { ActionUpdate } from './action-update.entity';
+import { findLeast } from 'src/utils/filter';
 
 export enum ActionTaskType {
   Funding = 'Funding', //giving money to a particular cause
@@ -216,21 +217,6 @@ export class Action {
   @Type(() => ActionActivity)
   activities: ActionActivity[];
 
-  @Expose()
-  @ApiProperty({ enum: ActionStatus, enumName: 'ActionStatus' })
-  get status(): ActionStatus {
-    if (!this.events) {
-      return ActionStatus.Draft;
-    }
-    const pastEvents = this.events
-      .filter((e) => e.date < new Date())
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
-    if (pastEvents.length === 0) {
-      return ActionStatus.Draft;
-    }
-    return pastEvents[pastEvents.length - 1].newStatus;
-  }
-
   @Column({ default: false })
   @ApiProperty({
     description:
@@ -301,4 +287,25 @@ export class Action {
   @Type(() => User)
   @IsOptional()
   authors?: Ty<User>[];
+
+  @IsOptional()
+  private _status: ActionStatus | null = null;
+  @Expose()
+  @ApiProperty({ enum: ActionStatus, enumName: 'ActionStatus' })
+  get status(): ActionStatus {
+    if (!this.events) {
+      throw new Error('`events` relation is not loaded');
+    }
+    if (this._status === null) {
+      const latestPastEvent = findLeast(
+        this.events,
+        (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+        (event) => event.date < new Date(),
+      );
+      this._status = latestPastEvent
+        ? latestPastEvent.newStatus
+        : ActionStatus.Draft;
+    }
+    return this._status;
+  }
 }
