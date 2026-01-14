@@ -8,7 +8,7 @@ import {
 } from "@alliance/shared/client";
 import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import React, { useMemo, useRef } from "react";
-import { MarkdownTextArea } from "./MarkdownTextArea";
+import FormTextarea from "./FormTextarea";
 
 interface ActionFormProps {
   form: CreateActionDto;
@@ -379,13 +379,13 @@ const ActionForm: React.FC<ActionFormProps> = ({
           >
             {f.label}
           </label>
-          <MarkdownTextArea
+          <FormTextarea
             id={String(f.name)}
             name={String(f.name)}
             value={(form as any)[f.name] ?? ""}
             onChange={onInputChange}
             rows={f.rows || 6}
-            className="!text-sm bg-white"
+            className="!text-sm bg-white w-full border border-zinc-300 rounded-md p-3"
           />
         </div>
       );
@@ -588,7 +588,8 @@ const ActionForm: React.FC<ActionFormProps> = ({
               </button> */}
             </div>
             <p className="text-xs text-gray-500 mb-3">
-              Actions without tags will not be shown to any users, unless Manual User Cohort is enabled.
+              Actions without tags will not be shown to any users, unless Manual
+              User Cohort is enabled.
             </p>
             {tagsLoading ? (
               <p className="text-sm text-gray-500">Loading tags...</p>
