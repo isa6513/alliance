@@ -215,7 +215,7 @@ const Sidebar: React.FC = () => {
               },
               {
                 to: "/stats",
-                label: "Stats (wip)",
+                label: "Stats",
                 icon: <BarChart2 size={16} />,
               },
             ].map((link) => (
