@@ -725,6 +725,12 @@ const ActionDashboard: React.FC = () => {
         fixTab: "details",
       },
       {
+        id: "tags",
+        label: "Participating tags set",
+        isReady: (action.participatingTags?.length ?? 0) > 0,
+        fixTab: "details",
+      },
+      {
         id: "authors",
         label: "Action authors set",
         isReady: (action.authors?.length ?? 0) > 0,
