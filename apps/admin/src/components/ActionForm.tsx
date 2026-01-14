@@ -168,7 +168,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
       },
       {
         name: "shortDescription",
-        label: "Short Description",
+        label: "Short description",
         type: "textarea",
         section: "content",
         required: true,
@@ -176,14 +176,14 @@ const ActionForm: React.FC<ActionFormProps> = ({
       },
       {
         name: "body",
-        label: "Body",
+        label: "Action page description",
         type: "markdowntextarea",
         section: "content",
         required: true,
       },
       {
         name: "image",
-        label: "Cover Image",
+        label: "Cover image",
         type: "file",
         section: "content",
       },
