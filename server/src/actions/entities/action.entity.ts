@@ -25,6 +25,7 @@ import { ActionActivity } from './action-activity.entity';
 import { ActionEvent, ActionStatus } from './action-event.entity';
 import { ActionSuite } from './action-suite.entity';
 import { ActionUpdate } from './action-update.entity';
+import { findLeast } from 'src/utils/filter';
 
 export enum ActionTaskType {
   Funding = 'Funding', //giving money to a particular cause
@@ -167,6 +168,17 @@ export class Action {
   @Type(() => Tag)
   participatingTags: Tag[];
 
+  @IsOptional()
+  private _participatingTagIdSet: Set<number> | null = null;
+  get participatingTagIdSet(): Set<number> {
+    if (this._participatingTagIdSet === null) {
+      this._participatingTagIdSet = new Set(
+        this.participatingTags.map((t) => t.id),
+      );
+    }
+    return this._participatingTagIdSet;
+  }
+
   @Column({ default: false })
   @ApiProperty({
     description: 'Whether to use a manual cohort for the action',
@@ -183,6 +195,17 @@ export class Action {
   })
   @IsOptional()
   manualCohortUserIds?: number[];
+
+  @IsOptional()
+  private _manualCohortUserIdSet: Set<number> | undefined | null = null;
+  get manualCohortUserIdSet(): Set<number> | undefined {
+    if (this._manualCohortUserIdSet === null) {
+      this._manualCohortUserIdSet = this.manualCohortUserIds
+        ? new Set(this.manualCohortUserIds)
+        : undefined;
+    }
+    return this._manualCohortUserIdSet;
+  }
 
   @Column({
     type: 'enum',
@@ -216,19 +239,27 @@ export class Action {
   @Type(() => ActionActivity)
   activities: ActionActivity[];
 
+  @IsOptional()
+  private _status: ActionStatus | null = null;
   @Expose()
   @ApiProperty({ enum: ActionStatus, enumName: 'ActionStatus' })
   get status(): ActionStatus {
-    if (!this.events) {
-      return ActionStatus.Draft;
+    if (this._status === null) {
+      if (!this.events) {
+        throw new Error('Action has no events');
+      }
+
+      const mostRecentPastEvent = findLeast(
+        this.events.sort((a, b) => a.date.getTime() - b.date.getTime()),
+        (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+        (event) => event.date < new Date(),
+      );
+      this._status = mostRecentPastEvent
+        ? mostRecentPastEvent.newStatus
+        : ActionStatus.Draft;
     }
-    const pastEvents = this.events
-      .filter((e) => e.date < new Date())
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
-    if (pastEvents.length === 0) {
-      return ActionStatus.Draft;
-    }
-    return pastEvents[pastEvents.length - 1].newStatus;
+
+    return this._status;
   }
 
   @Column({ default: false })
