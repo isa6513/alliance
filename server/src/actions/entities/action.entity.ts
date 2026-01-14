@@ -51,8 +51,8 @@ export class Action {
   name: string;
 
   @Column()
-  @ApiProperty({ description: 'Category of the action' })
-  @IsNotEmpty()
+  @ApiProperty({ description: 'Category of the action', default: '' })
+  @Allow()
   category: string;
 
   @Column({ nullable: true })

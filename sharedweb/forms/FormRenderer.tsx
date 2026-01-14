@@ -646,11 +646,17 @@ const FormRenderer = ({
       reader.onload = async () => {
         if (typeof reader.result === "string") {
           try {
-            const { data } = await imagesUploadImage({
+            const { data, error } = await imagesUploadImage({
               body: { file: reader.result },
             });
             if (data) {
               updateField(fieldId, data.key);
+            } else if (error) {
+              setUploadErrors((prev) => ({
+                ...prev,
+                [fieldId]:
+                  (error as Error)?.message ?? "Failed to upload image",
+              }));
             }
           } catch (error) {
             console.error("Failed to upload image:", error);

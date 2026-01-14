@@ -217,7 +217,6 @@ const ActionForm: React.FC<ActionFormProps> = ({
         label: "Category",
         type: "text",
         section: "settings",
-        required: true,
         gridCol: true,
       },
       {
