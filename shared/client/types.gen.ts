@@ -505,7 +505,6 @@ export type User = {
     name: string;
     phoneNumber?: string;
     phoneNumberValidated: boolean;
-    sentTextOptInMessageAt?: string;
     emailVerified: boolean;
     preferredReminderTime?: string;
     timeZone?: string;
