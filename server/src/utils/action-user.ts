@@ -6,7 +6,6 @@ import {
   ActionActivity,
   ActionActivityType,
 } from 'src/actions/entities/action-activity.entity';
-import { computeLatestMemberActionAndDeadline } from './action';
 import {
   computeIsContractActiveInFullRange,
   computeIsAwayInRange,
@@ -44,14 +43,12 @@ export function computeHasOverlappingTags(params: {
 }
 
 export function computeIsContractActiveDuringEntireLatestMemberAction(params: {
-  action: Pick<Action, 'events'>;
+  action: Pick<Action, 'events' | 'latestMemberActionEvent'>;
   user: Pick<User, 'contractEvents'>;
 }): boolean {
   const { action, user } = params;
-  const { event: latestMemberActionEvent, endDate } =
-    computeLatestMemberActionAndDeadline({
-      action,
-    });
+  const { event: latestMemberActionEvent, deadline } =
+    action.latestMemberActionEvent;
 
   if (!latestMemberActionEvent) {
     return false;
@@ -60,20 +57,18 @@ export function computeIsContractActiveDuringEntireLatestMemberAction(params: {
   return computeIsContractActiveInFullRange({
     user,
     startDate: latestMemberActionEvent.date,
-    endDate,
+    endDate: deadline,
   });
 }
 
 export function computeIsAwayDuringAnyOfLastMemberAction(params: {
-  action: Pick<Action, 'events'>;
+  action: Pick<Action, 'events' | 'latestMemberActionEvent'>;
   user: Pick<User, 'awayRanges'>;
 }): boolean {
   const { action, user } = params;
 
-  const { event: lastMemberActionEvent, endDate } =
-    computeLatestMemberActionAndDeadline({
-      action,
-    });
+  const { event: lastMemberActionEvent, deadline } =
+    action.latestMemberActionEvent;
 
   if (!lastMemberActionEvent) {
     return false;
@@ -82,7 +77,7 @@ export function computeIsAwayDuringAnyOfLastMemberAction(params: {
   return computeIsAwayInRange({
     user,
     startDate: lastMemberActionEvent.date,
-    endDate,
+    endDate: deadline,
   });
 }
 

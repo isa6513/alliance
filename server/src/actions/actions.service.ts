@@ -91,7 +91,6 @@ import {
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 import { Relations } from 'src/utils/Repository';
 import { computeIsAwayAt } from 'src/utils/user';
-import { computeLatestMemberActionPhaseExistsAndIsOver } from 'src/utils/action';
 import { run } from 'src/utils/promise';
 
 export class UserActionRelationDto {
@@ -2137,17 +2136,6 @@ export class ActionsService {
 
     const now = new Date();
     const actions = await actionsP;
-    const memberActionPhaseEnded: Record<number, boolean> = Object.fromEntries(
-      actions.map((action) => {
-        return [
-          action.id,
-          computeLatestMemberActionPhaseExistsAndIsOver({
-            action,
-            date: now,
-          }),
-        ];
-      }),
-    );
 
     const allMembersTagId = await allMembersTagIdP;
     const actionSummaries: UserActionSummaryDto[] = await actions.map(
@@ -2204,7 +2192,8 @@ export class ActionsService {
         const detail = getDetail({ userId, actionId: action.id });
         detail.status = action.optional
           ? UserActionRelationPillStatus.OptionalTask
-          : memberActionPhaseEnded[action.id]
+          : action.latestMemberActionEvent?.deadline &&
+              action.latestMemberActionEvent.deadline < now
             ? UserActionRelationPillStatus.MissedDeadline
             : UserActionRelationPillStatus.Todo;
       }
