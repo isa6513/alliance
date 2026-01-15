@@ -67,6 +67,8 @@ export enum PublicFormResponseDefault {
 
 @Entity()
 export class User {
+  // Fields
+
   @PrimaryGeneratedColumn()
   @ApiProperty()
   id: number;
@@ -106,16 +108,6 @@ export class User {
   @ApiPropertyOptional({ type: 'string' })
   timeZone?: Temporal.TimeZoneLike;
 
-  @OneToMany(() => ContractEvent, (event) => event.user, { cascade: true })
-  @Type(() => ContractEvent)
-  @ApiProperty({ type: () => ContractEvent, isArray: true })
-  contractEvents: Ty<ContractEvent>[];
-
-  @Expose()
-  get hasActiveContract(): boolean {
-    return this.hasActiveContractAt(new Date());
-  }
-
   @Column({
     type: 'enum',
     enum: NotificationChannel,
@@ -139,6 +131,7 @@ export class User {
   // @IsOptional()
   // @IsEnum(NotificationChannel)
   // primaryNotificationChannel: NotificationChannel;
+
   @Column({
     default: true,
   })
@@ -224,6 +217,78 @@ export class User {
   @ApiProperty({ nullable: true })
   profileDescription: string;
 
+  @Column({ nullable: true })
+  @ApiProperty({ nullable: true })
+  referralCode: string;
+
+  @Column({ nullable: true, unique: true })
+  @ApiProperty({ nullable: true })
+  @Allow()
+  stripeCustomerId: string;
+
+  @Column({ default: false })
+  @ApiProperty()
+  @Allow()
+  isNotSignedUpPartialProfile: boolean;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional({ nullable: true })
+  @Allow()
+  customCityString?: string;
+
+  @Column({ nullable: true })
+  @ApiProperty({ nullable: true })
+  @Allow()
+  over18: boolean;
+
+  @Column({ default: false })
+  @ApiProperty()
+  @Allow()
+  onboardingComplete: boolean;
+
+  @Column({ default: false })
+  @ApiProperty()
+  @Allow()
+  anonymous: boolean;
+
+  @Column({ default: false })
+  @ApiProperty()
+  @Allow()
+  shareInfoPublicly: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: PublicFormResponseDefault,
+    default: PublicFormResponseDefault.Public,
+  })
+  @ApiProperty({
+    enum: PublicFormResponseDefault,
+    enumName: 'PublicFormResponseDefault',
+  })
+  formDataPreference: PublicFormResponseDefault;
+
+  @Column({ default: true })
+  @ApiProperty()
+  @Allow()
+  pushesForLikes: boolean;
+
+  @Column({ default: true })
+  @ApiProperty()
+  @Allow()
+  pushesForComments: boolean;
+
+  @Column({ default: true })
+  @ApiProperty()
+  @Allow()
+  pushesForFriendRequests: boolean;
+
+  // Relations
+
+  @OneToMany(() => ContractEvent, (event) => event.user, { cascade: true })
+  @Type(() => ContractEvent)
+  @ApiProperty({ type: () => ContractEvent, isArray: true })
+  contractEvents: Ty<ContractEvent>[];
+
   @OneToMany(() => ActionActivity, (activity) => activity.user)
   activities: ActionActivity[];
 
@@ -245,9 +310,66 @@ export class User {
   @OneToMany(() => User, (user) => user.referredBy)
   referredUsers: User[];
 
-  @Column({ nullable: true })
-  @ApiProperty({ nullable: true })
-  referralCode: string;
+  @ManyToOne(() => City, { nullable: true, onDelete: 'SET NULL' })
+  @IsOptional()
+  @Type(() => City)
+  city?: City | null;
+
+  @OneToMany(() => ActionEventNotif, (notif) => notif.user)
+  actionEventNotifs: ActionEventNotif[];
+
+  @OneToMany(() => UserAwayRange, (awayRange) => awayRange.user)
+  awayRanges: UserAwayRange[];
+
+  @OneToOne(() => Mail, { nullable: true })
+  @JoinColumn({ name: 'welcomeMailId' })
+  welcomeMail: Mail | null;
+
+  @ManyToMany(() => Tag, (tag) => tag.users, { onDelete: 'CASCADE' })
+  @Type(() => Tag)
+  tags: Ty<Tag>[];
+
+  @ManyToMany(() => Community, (community) => community.users, {
+    onDelete: 'CASCADE',
+  })
+  @ApiProperty({ type: () => Community, isArray: true })
+  @Type(() => Community)
+  communities: Community[];
+
+  @ManyToMany(() => Community, (community) => community.leaders, {
+    onDelete: 'CASCADE',
+  })
+  @Type(() => Community)
+  leaderOf: Community[];
+
+  @RelationId((user: User) => user.leaderOf)
+  leaderOfIds: number[];
+
+  @OneToMany(() => CommunityInvite, (invite) => invite.invitedUser)
+  @ApiProperty({ type: () => CommunityInvite, isArray: true })
+  @Type(() => CommunityInvite)
+  @IsDefined()
+  invitedCommunities: CommunityInvite[];
+
+  @OneToMany(() => Participant, (participant) => participant.user)
+  @ApiProperty({ type: () => Participant, isArray: true })
+  @Type(() => Participant)
+  participants: Ty<Participant>[];
+
+  @ManyToMany(() => Action, (action) => action.authors)
+  @ApiPropertyOptional({ type: () => Action, isArray: true })
+  @Type(() => Action)
+  authoredActions?: Ty<Action>[];
+
+  @OneToMany(() => UserDevice, (device) => device.user)
+  devices: Ty<UserDevice>[];
+
+  // Methods
+
+  @Expose()
+  get hasActiveContract(): boolean {
+    return this.hasActiveContractAt(new Date());
+  }
 
   get friends(): User[] {
     const sentAccepted =
@@ -283,78 +405,6 @@ export class User {
     return await bcrypt.compare(plainPassword, this.password);
   }
 
-  @Column({ nullable: true, unique: true })
-  @ApiProperty({ nullable: true })
-  @Allow()
-  stripeCustomerId: string;
-
-  @Column({ default: false })
-  @ApiProperty()
-  @Allow()
-  isNotSignedUpPartialProfile: boolean;
-
-  // -- onboarding info --
-
-  @ManyToOne(() => City, { nullable: true, onDelete: 'SET NULL' })
-  @IsOptional()
-  @Type(() => City)
-  city?: City | null;
-
-  @Column({ nullable: true })
-  @ApiPropertyOptional({ nullable: true })
-  @Allow()
-  customCityString?: string;
-
-  @Column({ nullable: true })
-  @ApiProperty({ nullable: true })
-  @Allow()
-  over18: boolean;
-
-  @Column({ default: false })
-  @ApiProperty()
-  @Allow()
-  onboardingComplete: boolean;
-
-  @Column({ default: false })
-  @ApiProperty()
-  @Allow()
-  anonymous: boolean;
-
-  @OneToMany(() => ActionEventNotif, (notif) => notif.user)
-  actionEventNotifs: ActionEventNotif[];
-
-  @OneToMany(() => UserAwayRange, (awayRange) => awayRange.user)
-  awayRanges: UserAwayRange[];
-
-  @OneToOne(() => Mail, { nullable: true })
-  @JoinColumn({ name: 'welcomeMailId' })
-  welcomeMail: Mail | null;
-
-  @ManyToMany(() => Tag, (tag) => tag.users, { onDelete: 'CASCADE' })
-  @Type(() => Tag)
-  tags: Ty<Tag>[];
-
-  @ManyToMany(() => Community, (community) => community.users, {
-    onDelete: 'CASCADE',
-  })
-  @ApiProperty({ type: () => Community, isArray: true })
-  @Type(() => Community)
-  communities: Community[];
-
-  @ManyToMany(() => Community, (community) => community.leaders, {
-    onDelete: 'CASCADE',
-  })
-  @Type(() => Community)
-  leaderOf: Community[];
-
-  @RelationId((user: User) => user.leaderOf)
-  leaderOfIds: number[];
-
-  @Column({ default: false })
-  @ApiProperty()
-  @Allow()
-  shareInfoPublicly: boolean;
-
   @Expose()
   @ApiProperty()
   get isCommunityLeader(): boolean {
@@ -366,51 +416,6 @@ export class User {
     }
     return false;
   }
-
-  @OneToMany(() => CommunityInvite, (invite) => invite.invitedUser)
-  @ApiProperty({ type: () => CommunityInvite, isArray: true })
-  @Type(() => CommunityInvite)
-  @IsDefined()
-  invitedCommunities: CommunityInvite[];
-
-  @Column({
-    type: 'enum',
-    enum: PublicFormResponseDefault,
-    default: PublicFormResponseDefault.Public,
-  })
-  @ApiProperty({
-    enum: PublicFormResponseDefault,
-    enumName: 'PublicFormResponseDefault',
-  })
-  formDataPreference: PublicFormResponseDefault;
-
-  @OneToMany(() => Participant, (participant) => participant.user)
-  @ApiProperty({ type: () => Participant, isArray: true })
-  @Type(() => Participant)
-  participants: Ty<Participant>[];
-
-  @ManyToMany(() => Action, (action) => action.authors)
-  @ApiPropertyOptional({ type: () => Action, isArray: true })
-  @Type(() => Action)
-  authoredActions?: Ty<Action>[];
-
-  @OneToMany(() => UserDevice, (device) => device.user)
-  devices: Ty<UserDevice>[];
-
-  @Column({ default: true })
-  @ApiProperty()
-  @Allow()
-  pushesForLikes: boolean;
-
-  @Column({ default: true })
-  @ApiProperty()
-  @Allow()
-  pushesForComments: boolean;
-
-  @Column({ default: true })
-  @ApiProperty()
-  @Allow()
-  pushesForFriendRequests: boolean;
 
   @Exclude()
   private _hasActiveContractAt = new Map<number, boolean>();

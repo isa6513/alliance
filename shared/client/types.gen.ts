@@ -26,6 +26,14 @@ export type AccessToken = {
     access_token: string;
 };
 
+export type NotificationChannel = 'text' | 'email' | 'push';
+
+export type NotificationPreference = 'all' | 'digest' | 'none';
+
+export type ForumDigestPreference = 'off' | 'daily' | 'weekly';
+
+export type PublicFormResponseDefault = 'public' | 'private';
+
 export type ContractEventType = 'signed' | 'suspended';
 
 export type ContractEvent = {
@@ -34,12 +42,6 @@ export type ContractEvent = {
     automatic: boolean;
     autoSuspendKey?: string;
 };
-
-export type NotificationChannel = 'text' | 'email' | 'push';
-
-export type NotificationPreference = 'all' | 'digest' | 'none';
-
-export type ForumDigestPreference = 'off' | 'daily' | 'weekly';
 
 export type CommunityInviteStatus = 'pending' | 'accepted' | 'rejected' | 'cancelled';
 
@@ -52,8 +54,6 @@ export type CommunityInvite = {
     updatedAt: string;
     community: Community;
 };
-
-export type PublicFormResponseDefault = 'public' | 'private';
 
 export type ParticipantRole = 'admin' | 'member' | 'owner';
 
@@ -508,7 +508,6 @@ export type User = {
     emailVerified: boolean;
     preferredReminderTime?: string;
     timeZone?: string;
-    contractEvents: Array<ContractEvent>;
     preferredActionReminderChannel: NotificationChannel;
     emailNotifsEnabled: boolean;
     textNotifsEnabled: boolean;
@@ -530,16 +529,17 @@ export type User = {
     over18: boolean | null;
     onboardingComplete: boolean;
     anonymous: boolean;
-    communities: Array<Community>;
     shareInfoPublicly: boolean;
-    isCommunityLeader: boolean;
-    invitedCommunities: Array<CommunityInvite>;
     formDataPreference: PublicFormResponseDefault;
-    participants: Array<Participant>;
-    authoredActions?: Array<Action>;
     pushesForLikes: boolean;
     pushesForComments: boolean;
     pushesForFriendRequests: boolean;
+    contractEvents: Array<ContractEvent>;
+    communities: Array<Community>;
+    invitedCommunities: Array<CommunityInvite>;
+    participants: Array<Participant>;
+    authoredActions?: Array<Action>;
+    isCommunityLeader: boolean;
 };
 
 export type Community = {
@@ -559,7 +559,6 @@ export type UserDto = {
     phoneNumber?: string;
     preferredReminderTime?: string;
     timeZone?: string;
-    contractEvents: Array<ContractEvent>;
     preferredActionReminderChannel: NotificationChannel;
     emailNotifsEnabled: boolean;
     textNotifsEnabled: boolean;
@@ -577,13 +576,14 @@ export type UserDto = {
     customCityString?: string | null;
     onboardingComplete: boolean;
     anonymous: boolean;
-    communities: Array<Community>;
     shareInfoPublicly: boolean;
-    invitedCommunities: Array<CommunityInvite>;
     formDataPreference: PublicFormResponseDefault;
     pushesForLikes: boolean;
     pushesForComments: boolean;
     pushesForFriendRequests: boolean;
+    contractEvents: Array<ContractEvent>;
+    communities: Array<Community>;
+    invitedCommunities: Array<CommunityInvite>;
     cityId?: number;
     email: string;
     hasActiveContract: boolean;
