@@ -1688,7 +1688,7 @@ export type ActionSuiteSummaryDto = {
     name: string;
 };
 
-export type UserActionRelationPillStatus = 'todo' | 'completed' | 'not_required' | 'wont_complete' | 'missed_deadline';
+export type UserActionRelationPillStatus = 'todo' | 'completed' | 'not_required' | 'optional_task' | 'wont_complete' | 'missed_deadline';
 
 export type UserActionRelationDetailDto = {
     actionId: number;

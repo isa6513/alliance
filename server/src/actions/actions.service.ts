@@ -2202,9 +2202,11 @@ export class ActionsService {
       }
       for (const userId of (await joinedUsersP)[action.id]) {
         const detail = getDetail({ userId, actionId: action.id });
-        detail.status = memberActionPhaseEnded[action.id]
-          ? UserActionRelationPillStatus.MissedDeadline
-          : UserActionRelationPillStatus.Todo;
+        detail.status = action.optional
+          ? UserActionRelationPillStatus.OptionalTask
+          : memberActionPhaseEnded[action.id]
+            ? UserActionRelationPillStatus.MissedDeadline
+            : UserActionRelationPillStatus.Todo;
       }
     }
 
