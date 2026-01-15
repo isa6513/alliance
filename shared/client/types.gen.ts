@@ -84,6 +84,8 @@ export type Participant = {
  */
 export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
 
+export type VisibilityMode = 'public' | 'all_members' | 'participating_groups';
+
 /**
  * New status of the action after the event
  */
@@ -222,8 +224,6 @@ export type ActionEvent = {
     updates: Array<ActionUpdate>;
     suiteManaged: boolean;
 };
-
-export type VisibilityMode = 'public' | 'all_members' | 'participating_groups';
 
 /**
  * Type of action activity
@@ -453,11 +453,6 @@ export type Action = {
      */
     updatedAt: string;
     /**
-     * Events associated with the action
-     */
-    events: Array<ActionEvent>;
-    participatingTags: Array<Tag>;
-    /**
      * Whether to use a manual cohort for the action
      */
     useManualCohort: boolean;
@@ -471,14 +466,11 @@ export type Action = {
      * Number of users who have completed the action
      */
     usersCompleted: number;
-    activities: Array<Array<ActionActivity>>;
     /**
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
     everyoneShouldComplete: boolean;
     archived: boolean;
-    updates: Array<ActionUpdate>;
-    suite?: ActionSuite;
     /**
      * Priority of the action
      */
@@ -496,6 +488,14 @@ export type Action = {
      * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline: boolean;
+    /**
+     * Events associated with the action
+     */
+    events: Array<ActionEvent>;
+    participatingTags: Array<Tag>;
+    activities: Array<Array<ActionActivity>>;
+    updates: Array<ActionUpdate>;
+    suite?: ActionSuite;
     authors?: Array<User>;
     status: ActionStatus;
 };
@@ -1114,7 +1114,6 @@ export type ActionDto = {
      * Timestamp when the action was last updated
      */
     updatedAt: string;
-    participatingTags: Array<Tag>;
     /**
      * Whether to use a manual cohort for the action
      */
@@ -1129,13 +1128,11 @@ export type ActionDto = {
      * Number of users who have completed the action
      */
     usersCompleted: number;
-    activities: Array<Array<ActionActivity>>;
     /**
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
     everyoneShouldComplete: boolean;
     archived: boolean;
-    suite?: ActionSuite;
     /**
      * Priority of the action
      */
@@ -1153,6 +1150,9 @@ export type ActionDto = {
      * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline: boolean;
+    participatingTags: Array<Tag>;
+    activities: Array<Array<ActionActivity>>;
+    suite?: ActionSuite;
     status: ActionStatus;
     events: Array<ActionEventDto>;
     updates: Array<ActionUpdateDto>;
@@ -1240,7 +1240,6 @@ export type CreateActionDto = {
      * Form associated with the action
      */
     taskFormId?: number;
-    participatingTags: Array<Tag>;
     /**
      * Whether to use a manual cohort for the action
      */
@@ -1271,6 +1270,7 @@ export type CreateActionDto = {
      * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline: boolean;
+    participatingTags: Array<Tag>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
     userRelation?: UserActionRelation;
@@ -1332,7 +1332,6 @@ export type UpdateActionDto = {
      * Form associated with the action
      */
     taskFormId?: number;
-    participatingTags?: Array<Tag>;
     /**
      * Whether to use a manual cohort for the action
      */
@@ -1363,6 +1362,7 @@ export type UpdateActionDto = {
      * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline?: boolean;
+    participatingTags?: Array<Tag>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
     userRelation?: UserActionRelation;
@@ -1603,11 +1603,6 @@ export type ExportActionDto = {
      */
     updatedAt: string;
     /**
-     * Events associated with the action
-     */
-    events: Array<ActionEvent>;
-    participatingTags: Array<Tag>;
-    /**
      * Whether to use a manual cohort for the action
      */
     useManualCohort: boolean;
@@ -1616,14 +1611,11 @@ export type ExportActionDto = {
      */
     manualCohortUserIds?: Array<number>;
     visibilityMode: VisibilityMode;
-    activities: Array<Array<ActionActivity>>;
     /**
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
     everyoneShouldComplete: boolean;
     archived: boolean;
-    updates: Array<ActionUpdate>;
-    suite?: ActionSuite;
     /**
      * Priority of the action
      */
@@ -1641,6 +1633,14 @@ export type ExportActionDto = {
      * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline: boolean;
+    /**
+     * Events associated with the action
+     */
+    events: Array<ActionEvent>;
+    participatingTags: Array<Tag>;
+    activities: Array<Array<ActionActivity>>;
+    updates: Array<ActionUpdate>;
+    suite?: ActionSuite;
     authors?: Array<User>;
     taskForm?: Form;
     reminderGroups?: Array<ReminderGroup>;

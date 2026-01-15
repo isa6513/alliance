@@ -41,6 +41,8 @@ export enum VisibilityMode {
 
 @Entity()
 export class Action {
+  // Fields
+
   @PrimaryGeneratedColumn()
   @ApiProperty({ description: 'Unique identifier for the action' })
   @Allow()
@@ -148,26 +150,6 @@ export class Action {
   @Type(() => Date)
   updatedAt: Date;
 
-  @OneToMany(() => ActionEvent, (event) => event.action)
-  @ApiProperty({
-    description: 'Events associated with the action',
-    type: () => ActionEvent,
-    isArray: true,
-  })
-  @Allow()
-  @IsArray()
-  @Type(() => ActionEvent)
-  events: Ty<ActionEvent>[];
-
-  @ManyToMany(() => Tag, (tag) => tag.participatingIn, {
-    onDelete: 'CASCADE',
-  })
-  @ApiProperty({ type: () => Tag, isArray: true })
-  @Allow()
-  @JoinTable()
-  @Type(() => Tag)
-  participatingTags: Tag[];
-
   @Column({ default: false })
   @ApiProperty({
     description: 'Whether to use a manual cohort for the action',
@@ -206,17 +188,6 @@ export class Action {
   @Allow()
   usersCompleted: number;
 
-  @OneToMany(() => ActionActivity, (activity) => activity.action)
-  @ApiProperty({
-    description: 'Activities associated with the action',
-    type: () => [ActionActivity],
-    isArray: true,
-  })
-  @Allow()
-  @IsArray()
-  @Type(() => ActionActivity)
-  activities: ActionActivity[];
-
   @Column({ default: false })
   @ApiProperty({
     description:
@@ -232,21 +203,6 @@ export class Action {
   })
   @Allow()
   archived: boolean;
-
-  @OneToMany(() => ActionUpdate, (update) => update.action)
-  @ApiProperty({
-    type: () => ActionUpdate,
-    isArray: true,
-  })
-  @Allow()
-  @Type(() => ActionUpdate)
-  updates: ActionUpdate[];
-
-  @ManyToOne(() => ActionSuite, (suite) => suite.actions, { nullable: true })
-  @ApiPropertyOptional({ type: () => ActionSuite })
-  @Type(() => ActionSuite)
-  @IsOptional()
-  suite?: ActionSuite | null;
 
   @Column({ default: 0 })
   @ApiProperty({ description: 'Priority of the action' })
@@ -281,12 +237,62 @@ export class Action {
   @Allow()
   shouldCompleteAfterDeadline: boolean;
 
+  // Relations
+
+  @OneToMany(() => ActionEvent, (event) => event.action)
+  @ApiProperty({
+    description: 'Events associated with the action',
+    type: () => ActionEvent,
+    isArray: true,
+  })
+  @Allow()
+  @IsArray()
+  @Type(() => ActionEvent)
+  events: Ty<ActionEvent>[];
+
+  @ManyToMany(() => Tag, (tag) => tag.participatingIn, {
+    onDelete: 'CASCADE',
+  })
+  @ApiProperty({ type: () => Tag, isArray: true })
+  @Allow()
+  @JoinTable()
+  @Type(() => Tag)
+  participatingTags: Tag[];
+
+  @OneToMany(() => ActionActivity, (activity) => activity.action)
+  @ApiProperty({
+    description: 'Activities associated with the action',
+    type: () => [ActionActivity],
+    isArray: true,
+  })
+  @Allow()
+  @IsArray()
+  @Type(() => ActionActivity)
+  activities: ActionActivity[];
+
+  @OneToMany(() => ActionUpdate, (update) => update.action)
+  @ApiProperty({
+    type: () => ActionUpdate,
+    isArray: true,
+  })
+  @Allow()
+  @Type(() => ActionUpdate)
+  updates: ActionUpdate[];
+
+  @ManyToOne(() => ActionSuite, (suite) => suite.actions, { nullable: true })
+  @ApiPropertyOptional({ type: () => ActionSuite })
+  @Type(() => ActionSuite)
+  @IsOptional()
+  suite?: ActionSuite | null;
+
   @ManyToMany(() => User, (user) => user.authoredActions, { cascade: true })
   @JoinTable()
   @ApiPropertyOptional({ type: () => User, isArray: true })
   @Type(() => User)
   @IsOptional()
   authors?: Ty<User>[];
+
+  // Methods
 
   @IsOptional()
   private _status: ActionStatus | null = null;
