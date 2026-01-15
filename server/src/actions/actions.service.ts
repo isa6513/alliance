@@ -90,7 +90,6 @@ import {
 } from './entities/reminder-group.entity';
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 import { Relations } from 'src/utils/Repository';
-import { computeIsAwayAt } from 'src/utils/user';
 import { run } from 'src/utils/promise';
 
 export class UserActionRelationDto {
@@ -336,9 +335,7 @@ export class ActionsService {
     });
     const notAwayForDeadline =
       deadlineEvents.length > 0
-        ? baseUsers.filter(
-            (user) => !computeIsAwayAt({ user, date: deadlineEvents[0].date }),
-          )
+        ? baseUsers.filter((user) => !user.isAwayAt(deadlineEvents[0].date))
         : baseUsers;
 
     const completionActivities = await this.actionActivityRepository.find({
