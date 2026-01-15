@@ -500,7 +500,7 @@ export class User {
 
     let isAway = this._isAwayAtAnyPointInRange.get(key);
     if (isAway === undefined) {
-      isAway = this.awayRanges?.some(
+      isAway = !!this.awayRanges?.some(
         (awayRange) =>
           awayRange.startDate.getTime() < endTime &&
           awayRange.endDate.getTime() > startTime,
