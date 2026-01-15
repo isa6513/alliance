@@ -373,4 +373,15 @@ export class Action {
     }
     return this._manualCohortUserIdSet;
   }
+
+  @IsOptional()
+  private _participatingTagIdSet: Set<number> | null = null;
+  get participatingTagIdSet(): Set<number> {
+    if (!this._participatingTagIdSet) {
+      this._participatingTagIdSet = new Set(
+        this.participatingTags.map((tag) => tag.id),
+      );
+    }
+    return this._participatingTagIdSet;
+  }
 }

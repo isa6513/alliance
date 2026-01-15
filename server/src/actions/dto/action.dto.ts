@@ -120,6 +120,7 @@ export class ActionDto extends OmitType(Action, [
   'authors',
   'events',
   'manualCohortUserIdSet',
+  'participatingTagIdSet',
   'updates',
 ]) {
   @ApiProperty()
@@ -429,6 +430,7 @@ export class ActionSuiteDto extends OmitType(ActionSuite, ['actions']) {
 export class ExportActionDto extends OmitType(Action, [
   'latestMemberActionEvent',
   'manualCohortUserIdSet',
+  'participatingTagIdSet',
   'status',
   'usersJoined',
   'usersCompleted',
