@@ -434,16 +434,16 @@ export class User {
   }
 
   @Exclude()
-  private _hasActiveContractInRange = new Map<string, boolean>();
-  hasActiveContractInRange(range: {
-    startDate?: Date;
-    endDate?: Date;
+  private _hasActiveContractInFullRange = new Map<string, boolean>();
+  hasActiveContractInFullRange(range: {
+    startDate?: Date | null;
+    endDate?: Date | null;
   }): boolean {
     const { startDate, endDate } = range;
     const startTime = startDate?.getTime() ?? -Infinity;
     const endTime = endDate?.getTime() ?? Infinity;
     const key = `${startTime}_${endTime}`;
-    let hasActiveContract = this._hasActiveContractInRange.get(key);
+    let hasActiveContract = this._hasActiveContractInFullRange.get(key);
 
     populateCache: if (hasActiveContract === undefined) {
       const latestContractEventBeforeStart = this.contractEvents
@@ -465,7 +465,7 @@ export class User {
           event.type !== ContractEventType.SIGNED,
       );
 
-      this._hasActiveContractInRange.set(key, hasActiveContract);
+      this._hasActiveContractInFullRange.set(key, hasActiveContract);
     }
     return hasActiveContract;
   }

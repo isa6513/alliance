@@ -83,6 +83,6 @@ export const testUser = new User({
   | 'isCommunityLeader'
   | '_hasActiveContractAt'
   | 'hasActiveContractAt'
-  | '_hasActiveContractInRange'
-  | 'hasActiveContractInRange'
+  | '_hasActiveContractInFullRange'
+  | 'hasActiveContractInFullRange'
 >);
