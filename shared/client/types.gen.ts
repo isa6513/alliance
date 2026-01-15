@@ -1679,6 +1679,7 @@ export type UserActionSummaryDto = {
     id: number;
     name: string;
     status: ActionStatus;
+    weekNumber: number | null;
     allMembersParticipating: boolean;
     suiteId?: number;
 };
@@ -1688,7 +1689,7 @@ export type ActionSuiteSummaryDto = {
     name: string;
 };
 
-export type UserActionRelationPillStatus = 'todo' | 'completed' | 'not_required' | 'optional_task' | 'wont_complete' | 'missed_deadline';
+export type UserActionRelationPillStatus = 'away' | 'completed' | 'missed_deadline' | 'not_required' | 'optional_task' | 'todo' | 'wont_complete';
 
 export type UserActionRelationDetailDto = {
     actionId: number;

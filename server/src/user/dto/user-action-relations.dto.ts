@@ -6,12 +6,13 @@ import { Temporal } from '@js-temporal/polyfill';
 import { UserAwayRangeDto } from './away-range.dto';
 
 export enum UserActionRelationPillStatus {
-  Todo = 'todo',
+  Away = 'away',
   Completed = 'completed',
+  MissedDeadline = 'missed_deadline',
   NotRequired = 'not_required',
   OptionalTask = 'optional_task',
+  Todo = 'todo',
   WontComplete = 'wont_complete',
-  MissedDeadline = 'missed_deadline',
 }
 
 export class UserActionSummaryDto {
@@ -23,6 +24,9 @@ export class UserActionSummaryDto {
 
   @ApiProperty({ enum: ActionStatus, enumName: 'ActionStatus' })
   status: ActionStatus;
+
+  @ApiProperty({ type: Number, nullable: true })
+  weekNumber: number | null;
 
   @ApiProperty()
   allMembersParticipating: boolean;
