@@ -2100,12 +2100,12 @@ export type CustomValidatorResponseDto = {
 export type CustomValidatorDto = {
     id: number;
     type: CustomValidatorType;
-    idArgument?: number;
+    idArgument?: string;
 };
 
 export type CreateCustomValidatorDto = {
     type: CustomValidatorType;
-    idArgument?: number;
+    idArgument?: string;
 };
 
 export type CreateCustomValidatorResponseDto = {
