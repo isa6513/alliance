@@ -200,6 +200,7 @@ export class CreateActionDto extends OmitType(ActionDto, [
   'authors',
   'createdAt',
   'updatedAt',
+  'deadlineWeekNumber',
 ]) {
   @ApiPropertyOptional({
     type: Number,
