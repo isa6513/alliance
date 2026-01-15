@@ -166,7 +166,7 @@ export type Notification = {
 };
 
 export type Tag = {
-    id: number;
+    id: string;
     users: Array<User>;
     participatingIn: Array<Action>;
     name: string;
@@ -741,7 +741,7 @@ export type CreateTagDto = {
 };
 
 export type TagDto = {
-    id: number;
+    id: string;
     name: string;
     description: string;
     publicDisplayName?: string;
@@ -2975,7 +2975,7 @@ export type UserGetTagsResponse = UserGetTagsResponses[keyof UserGetTagsResponse
 export type UserAddUserToTagData = {
     body: AddUserToTagDto;
     path: {
-        tagId: number;
+        tagId: string;
     };
     query?: never;
     url: '/user/tags/{tagId}/addUser';
@@ -2990,7 +2990,7 @@ export type UserAddUserToTagResponse = UserAddUserToTagResponses[keyof UserAddUs
 export type UserRemoveUserFromTagData = {
     body: AddUserToTagDto;
     path: {
-        tagId: number;
+        tagId: string;
     };
     query?: never;
     url: '/user/tags/{tagId}/removeUser';
@@ -3005,7 +3005,7 @@ export type UserRemoveUserFromTagResponse = UserRemoveUserFromTagResponses[keyof
 export type UserUpdateTagData = {
     body: CreateTagDto;
     path: {
-        tagId: number;
+        tagId: string;
     };
     query?: never;
     url: '/user/tags/{tagId}/update';
@@ -3020,7 +3020,7 @@ export type UserUpdateTagResponse = UserUpdateTagResponses[keyof UserUpdateTagRe
 export type UserDeleteTagData = {
     body?: never;
     path: {
-        tagId: number;
+        tagId: string;
     };
     query?: never;
     url: '/user/tags/{tagId}';

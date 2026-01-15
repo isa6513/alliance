@@ -1141,7 +1141,7 @@ export class ActionsService {
 
     const ids = tags
       .map((tag) => tag?.id)
-      .filter((id): id is number => typeof id === 'number');
+      .filter((id): id is string => typeof id === 'string');
 
     if (ids.length === 0) {
       return [];
@@ -2174,7 +2174,7 @@ export class ActionsService {
       });
     });
 
-    const allMembersTagIdP: Promise<number | null> = run(async () => {
+    const allMembersTagIdP: Promise<string | null> = run(async () => {
       const tag = await this.userService.findTagByName('All Members');
       return tag?.id ?? null;
     });
