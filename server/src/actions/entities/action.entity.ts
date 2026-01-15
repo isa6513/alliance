@@ -308,4 +308,56 @@ export class Action {
     }
     return this._status;
   }
+
+  @IsOptional()
+  private _latestMemberActionEvent:
+    | {
+        event: ActionEvent;
+        deadline: Date | null;
+      }
+    | {
+        event: null;
+        deadline: null;
+      }
+    | null = null;
+  get latestMemberActionEvent(): NonNullable<
+    typeof this._latestMemberActionEvent
+  > {
+    populateCache: if (!this._latestMemberActionEvent) {
+      if (!this.events) {
+        this._latestMemberActionEvent = {
+          event: null,
+          deadline: null,
+        };
+        break populateCache;
+      }
+
+      const latestMemberActionEvent = findLeast(
+        this.events,
+        (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+        (event) => event.newStatus === ActionStatus.MemberAction,
+      );
+
+      if (!latestMemberActionEvent) {
+        this._latestMemberActionEvent = {
+          event: null,
+          deadline: null,
+        };
+        break populateCache;
+      }
+
+      const deadlineEvent = findLeast(
+        this.events,
+        (a, b) => a.date.getTime() - b.date.getTime(),
+        (event) =>
+          event.date > latestMemberActionEvent.date &&
+          event.newStatus !== ActionStatus.MemberAction,
+      );
+      this._latestMemberActionEvent = {
+        event: latestMemberActionEvent,
+        deadline: deadlineEvent?.date ?? null,
+      };
+    }
+    return this._latestMemberActionEvent;
+  }
 }

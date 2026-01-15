@@ -98,6 +98,10 @@ describe('Tasks (e2e)', () => {
         optional: false,
         useManualCohort: false,
         publicOnly: false,
+        latestMemberActionEvent: {
+          event: null,
+          deadline: null,
+        }
       } satisfies CreateActionDto),
     );
 
