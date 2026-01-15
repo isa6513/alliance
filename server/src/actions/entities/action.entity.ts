@@ -360,4 +360,17 @@ export class Action {
     }
     return this._latestMemberActionEvent;
   }
+
+  @IsOptional()
+  private _manualCohortUserIdSet: Set<number> | null | undefined = undefined;
+  get manualCohortUserIdSet(): Set<number> | null {
+    populateCache: if (this._manualCohortUserIdSet === undefined) {
+      if (!this.manualCohortUserIds) {
+        this._manualCohortUserIdSet = null;
+      } else {
+        this._manualCohortUserIdSet = new Set(this.manualCohortUserIds);
+      }
+    }
+    return this._manualCohortUserIdSet;
+  }
 }

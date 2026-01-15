@@ -117,9 +117,10 @@ export enum UserActionRelation {
 }
 
 export class ActionDto extends OmitType(Action, [
-  'events',
-  'updates',
   'authors',
+  'events',
+  'manualCohortUserIdSet',
+  'updates',
 ]) {
   @ApiProperty()
   usersCompleted: number;
@@ -427,6 +428,7 @@ export class ActionSuiteDto extends OmitType(ActionSuite, ['actions']) {
 
 export class ExportActionDto extends OmitType(Action, [
   'latestMemberActionEvent',
+  'manualCohortUserIdSet',
   'status',
   'usersJoined',
   'usersCompleted',
