@@ -62,6 +62,7 @@ export class ActionEventRecipientService {
     user: User;
     userDismissed: boolean;
     includeSuspended?: boolean;
+    includeDismissed?: boolean;
   }): boolean {
     const {
       eventDate,
@@ -72,9 +73,10 @@ export class ActionEventRecipientService {
       user,
       userDismissed,
       includeSuspended = false,
+      includeDismissed = false,
     } = params;
 
-    if (userDismissed) {
+    if (!includeDismissed && userDismissed) {
       return false;
     }
     if (useManualCohort) {
@@ -115,8 +117,10 @@ export class ActionEventRecipientService {
     action: Action;
     eventId: number;
     includeSuspended?: boolean;
+    includeDismissed?: boolean;
   }): Promise<User[]> {
-    const { eventStatus, action, eventId, includeSuspended } = params;
+    const { eventStatus, action, eventId, includeSuspended, includeDismissed } =
+      params;
     const targetTagIds = new Set(action.participatingTags.map((tag) => tag.id));
     const events =
       action.events ??
@@ -155,6 +159,7 @@ export class ActionEventRecipientService {
         user,
         userDismissed: usersDismissed.has(user.id),
         includeSuspended,
+        includeDismissed,
       }) &&
       !computeIsAwayInRange({
         user,

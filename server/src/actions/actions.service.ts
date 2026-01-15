@@ -320,6 +320,7 @@ export class ActionsService {
         eventId: event.id,
         eventStatus: ActionStatus.MemberAction,
         action,
+        includeDismissed: true,
       });
 
     const deadlineEvents = await this.actionEventRepository.find({
