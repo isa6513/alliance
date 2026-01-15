@@ -3,6 +3,7 @@ import {
   UserActionRelationPillStatus,
   UserActionSummaryDto,
 } from "@alliance/shared/client";
+import React, { Fragment } from "react";
 import { JSX, ReactNode, useMemo } from "react";
 
 export type PillStatusData = {
@@ -57,7 +58,7 @@ export const PILL_STATUS_DATA = Object.freeze({
   }) satisfies PillStatusData,
   optional_task: Object.freeze({
     pillLabel: "Optional",
-    pillStyle: "bg-blue-300",
+    pillStyle: "bg-blue-200 border border-blue",
     pillSubtitleText: "Optional",
     pillTextStyle: "text-blue-500",
   }) satisfies PillStatusData,
@@ -78,13 +79,16 @@ export function useMaxActionsPerWeek(params: {
         acc[action.id] = action.weekNumber;
       }
       return acc;
-    }, {} as Record<number, number>);
+    }, {} as Record<number, number | null>);
 
     const maxActionsPerWeek: Record<number, number> = {};
     for (const relations of Object.values(userActionRelations)) {
       const counts = relations.reduce((acc, relation) => {
         if (PILL_STATUS_DATA[relation.status].pillStyle) {
           const weekNumber = weekNumberByActionId[relation.actionId];
+          if (weekNumber === null) {
+            return acc;
+          }
           acc[weekNumber] = (acc[weekNumber] ?? 0) + 1;
         }
         return acc;
@@ -184,8 +188,7 @@ const UserProgressPills = ({
       return acc;
     }, new Map<number, UserActionSummaryDto>());
 
-    const weekNumbers =
-      maxActionsPerWeek && Object.keys(maxActionsPerWeek).map(Number).sort();
+    const weekNumbers = Object.keys(maxActionsPerWeek).map(Number).sort();
     const relationsPerWeek = actions.reduce((acc, action) => {
       if (action.weekNumber) {
         acc.set(action.weekNumber, [
@@ -229,7 +232,13 @@ const UserProgressPills = ({
     return pills;
   }, [actions, maxActionsPerWeek, relationByActionId]);
 
-  return <div className="flex gap-1 w-full">{pills}</div>;
+  return (
+    <div className="flex gap-1 w-full">
+      {pills.map((pill, i) => (
+        <Fragment key={i}>{pill}</Fragment>
+      ))}
+    </div>
+  );
 };
 
 export default UserProgressPills;

@@ -91,6 +91,8 @@ import {
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 import { Relations } from 'src/utils/Repository';
 import { run } from 'src/utils/promise';
+import { CachedFilter } from 'src/utils/cached-filter';
+import { computeIsAwayDuringAnyOfLastMemberAction } from 'src/utils/action-user';
 
 const MS_IN_WEEK = 7 * 24 * 60 * 60 * 1000;
 
@@ -2182,6 +2184,7 @@ export class ActionsService {
     // --- end of promise defs ---
 
     const now = new Date();
+    const userCachedFilter = new CachedFilter(await usersP);
     const actions = await actionsP;
 
     const allMembersTagId = await allMembersTagIdP;
@@ -2191,7 +2194,7 @@ export class ActionsService {
           id: action.id,
           name: action.name,
           status: action.status,
-          weekNumber: this.calculateDeadlineWeekNumber(action.events),
+          weekNumber: action.deadlineWeekNumber,
           allMembersParticipating:
             allMembersTagId !== null &&
             !!action.participatingTags.find(
@@ -2233,9 +2236,6 @@ export class ActionsService {
 
     // Initialize defaults if no action was taken
     for (const action of actions) {
-      for (const userId of await userIdsP) {
-        getDetail({ userId, actionId: action.id });
-      }
       for (const userId of (await joinedUsersP)[action.id]) {
         const detail = getDetail({ userId, actionId: action.id });
         detail.status = action.optional
@@ -2244,6 +2244,18 @@ export class ActionsService {
               action.latestMemberActionEvent.deadline < now
             ? UserActionRelationPillStatus.MissedDeadline
             : UserActionRelationPillStatus.Todo;
+      }
+      for (const userId of await userIdsP) {
+        const detail = getDetail({ userId, actionId: action.id });
+        if (
+          computeIsAwayDuringAnyOfLastMemberAction({
+            user: userCachedFilter.filtered({ id: userId })[0]!,
+            action,
+          }) &&
+          (!action.useManualCohort || action.manualCohortUserIdSet?.has(userId))
+        ) {
+          detail.status = UserActionRelationPillStatus.Away;
+        }
       }
     }
 
@@ -2333,7 +2345,9 @@ export class ActionsService {
   }
 
   async findUserActionRelations(): Promise<UserActionRelationsResponseDto> {
-    const usersPromise = this.userService.findAll();
+    const usersPromise = this.userService.findAll({
+      awayRanges: true,
+    });
     return this.findActionRelationsForUsers(usersPromise);
   }
 
@@ -2342,7 +2356,7 @@ export class ActionsService {
   ): Promise<CommunityUserInfoDto> {
     const usersPromise = this.userService
       .findCommunityOrFail(communityId, {
-        users: true,
+        users: { awayRanges: true },
       })
       .then((community) => community.users);
     return this.findActionRelationsForUsers(usersPromise);
@@ -2351,7 +2365,7 @@ export class ActionsService {
   async findMemberInfo(userId: number): Promise<CommunityUserInfoDto> {
     const usersPromise = this.userService
       .findCommunityForUserOrFail(userId, {
-        users: true,
+        users: { awayRanges: true },
       })
       .then((community) => community.users);
     return this.findActionRelationsForUsers(usersPromise);
