@@ -423,6 +423,7 @@ export class User {
         ? findLeast(
             this.contractEvents,
             (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+            (event) => event.date <= date,
           )
         : null;
       hasActiveContract =
@@ -450,7 +451,7 @@ export class User {
         ? findLeast(
             this.contractEvents,
             (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-            (event) => event.date.getTime() < startTime,
+            (event) => event.date.getTime() <= startTime,
           )
         : null;
       if (latestContractEventBeforeStart?.type !== ContractEventType.SIGNED) {
@@ -477,7 +478,7 @@ export class User {
     let isAway = this._isAwayAt.get(key);
 
     if (isAway === undefined) {
-      isAway = this.awayRanges?.some(
+      isAway = !!this.awayRanges?.some(
         (awayRange) => awayRange.startDate <= date && date <= awayRange.endDate,
       );
 
