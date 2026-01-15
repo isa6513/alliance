@@ -2355,6 +2355,7 @@ export class ActionsService {
     const usersPromise = this.userService.findAll({
       awayRanges: true,
       contractEvents: true,
+      tags: true,
     });
     return this.findActionRelationsForUsers(usersPromise);
   }
@@ -2364,7 +2365,7 @@ export class ActionsService {
   ): Promise<CommunityUserInfoDto> {
     const usersPromise = this.userService
       .findCommunityOrFail(communityId, {
-        users: { awayRanges: true, contractEvents: true },
+        users: { awayRanges: true, contractEvents: true, tags: true },
       })
       .then((community) => community.users);
     return this.findActionRelationsForUsers(usersPromise);
@@ -2373,7 +2374,7 @@ export class ActionsService {
   async findMemberInfo(userId: number): Promise<CommunityUserInfoDto> {
     const usersPromise = this.userService
       .findCommunityForUserOrFail(userId, {
-        users: { awayRanges: true, contractEvents: true },
+        users: { awayRanges: true, contractEvents: true, tags: true },
       })
       .then((community) => community.users);
     return this.findActionRelationsForUsers(usersPromise);
