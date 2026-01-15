@@ -52,7 +52,7 @@ export class CreateReminderGroupDto extends PickType(ReminderGroup, [
   @IsOptional()
   userIds?: number[];
 
-  @ApiPropertyOptional({ type: Number })
+  @ApiPropertyOptional()
   @IsOptional()
   userTagId?: string;
 
@@ -406,7 +406,7 @@ export class CreateActionUpdateDto extends PickType(ActionUpdate, [
   @IsOptional()
   associatedEventId?: number;
 
-  @ApiPropertyOptional({ type: Number })
+  @ApiPropertyOptional()
   @IsOptional()
   tagId?: string;
 }

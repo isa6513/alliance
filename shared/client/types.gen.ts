@@ -1406,7 +1406,7 @@ export type CreateReminderGroupDto = {
     relative_range_end_seconds_from_deadline?: number;
     useSuiteTaskCount: boolean;
     userIds?: Array<number>;
-    userTagId?: number;
+    userTagId?: string;
     suiteId?: number;
 };
 
@@ -1472,7 +1472,7 @@ export type CreateActionUpdateDto = {
     notifyType: ActionUpdateNotifyType;
     content: CreateEditableContentDto;
     associatedEventId?: number;
-    tagId?: number;
+    tagId?: string;
 };
 
 export type ActionSuiteDto = {
