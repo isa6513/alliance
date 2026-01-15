@@ -38,3 +38,25 @@ export function computeIsAwayDuringAnyOfLastMemberAction(params: {
     endDate: deadline,
   });
 }
+
+export function computeIsTaggedOrInManualCohort(params: {
+  user: User;
+  action: Action;
+  includeSuspended: boolean;
+}): boolean {
+  const { user, action, includeSuspended } = params;
+
+  if (action.useManualCohort) {
+    return !!action.manualCohortUserIdSet?.has(user.id);
+  }
+
+  return (
+    user.tags.some((tag) => action.participatingTagIdSet.has(tag.id)) &&
+    (includeSuspended ||
+      action.everyoneShouldComplete ||
+      user.hasActiveContractInFullRange({
+        startDate: action.latestMemberActionEvent?.event?.date,
+        endDate: action.latestMemberActionEvent?.deadline,
+      }))
+  );
+}

@@ -92,7 +92,10 @@ import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 import { Relations } from 'src/utils/Repository';
 import { run } from 'src/utils/promise';
 import { CachedFilter } from 'src/utils/cached-filter';
-import { computeIsAwayDuringAnyOfLastMemberAction } from 'src/utils/action-user';
+import {
+  computeIsAwayDuringAnyOfLastMemberAction,
+  computeIsTaggedOrInManualCohort,
+} from 'src/utils/action-user';
 
 const MS_IN_WEEK = 7 * 24 * 60 * 60 * 1000;
 
@@ -2252,7 +2255,11 @@ export class ActionsService {
             user: userCachedFilter.filtered({ id: userId })[0]!,
             action,
           }) &&
-          (!action.useManualCohort || action.manualCohortUserIdSet?.has(userId))
+          computeIsTaggedOrInManualCohort({
+            action,
+            user: userCachedFilter.filtered({ id: userId })[0]!,
+            includeSuspended: false,
+          })
         ) {
           detail.status = UserActionRelationPillStatus.Away;
         }
@@ -2347,6 +2354,7 @@ export class ActionsService {
   async findUserActionRelations(): Promise<UserActionRelationsResponseDto> {
     const usersPromise = this.userService.findAll({
       awayRanges: true,
+      contractEvents: true,
     });
     return this.findActionRelationsForUsers(usersPromise);
   }
@@ -2356,7 +2364,7 @@ export class ActionsService {
   ): Promise<CommunityUserInfoDto> {
     const usersPromise = this.userService
       .findCommunityOrFail(communityId, {
-        users: { awayRanges: true },
+        users: { awayRanges: true, contractEvents: true },
       })
       .then((community) => community.users);
     return this.findActionRelationsForUsers(usersPromise);
@@ -2365,7 +2373,7 @@ export class ActionsService {
   async findMemberInfo(userId: number): Promise<CommunityUserInfoDto> {
     const usersPromise = this.userService
       .findCommunityForUserOrFail(userId, {
-        users: { awayRanges: true },
+        users: { awayRanges: true, contractEvents: true },
       })
       .then((community) => community.users);
     return this.findActionRelationsForUsers(usersPromise);
