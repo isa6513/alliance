@@ -469,4 +469,44 @@ export class User {
     }
     return hasActiveContract;
   }
+
+  @Exclude()
+  private _isAwayAt = new Map<number, boolean>();
+  isAwayAt(date: Date): boolean {
+    const key = date.getTime();
+    let isAway = this._isAwayAt.get(key);
+
+    if (isAway === undefined) {
+      isAway = this.awayRanges?.some(
+        (awayRange) => awayRange.startDate <= date && date <= awayRange.endDate,
+      );
+
+      this._isAwayAt.set(key, isAway);
+    }
+    return isAway;
+  }
+
+  @Exclude()
+  private _isAwayAtAnyPointInRange = new Map<string, boolean>();
+  isAwayAtAnyPointInRange(range: {
+    startDate?: Date | null;
+    endDate?: Date | null;
+  }): boolean {
+    const { startDate, endDate } = range;
+    const startTime = startDate?.getTime() ?? -Infinity;
+    const endTime = endDate?.getTime() ?? Infinity;
+    const key = `${startTime}_${endTime}`;
+
+    let isAway = this._isAwayAtAnyPointInRange.get(key);
+    if (isAway === undefined) {
+      isAway = this.awayRanges?.some(
+        (awayRange) =>
+          awayRange.startDate.getTime() < endTime &&
+          awayRange.endDate.getTime() > startTime,
+      );
+
+      this._isAwayAtAnyPointInRange.set(key, isAway);
+    }
+    return isAway;
+  }
 }
