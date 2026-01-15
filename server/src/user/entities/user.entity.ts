@@ -432,4 +432,41 @@ export class User {
     }
     return hasActiveContract;
   }
+
+  @Exclude()
+  private _hasActiveContractInRange = new Map<string, boolean>();
+  hasActiveContractInRange(range: {
+    startDate?: Date;
+    endDate?: Date;
+  }): boolean {
+    const { startDate, endDate } = range;
+    const startTime = startDate?.getTime() ?? -Infinity;
+    const endTime = endDate?.getTime() ?? Infinity;
+    const key = `${startTime}_${endTime}`;
+    let hasActiveContract = this._hasActiveContractInRange.get(key);
+
+    populateCache: if (hasActiveContract === undefined) {
+      const latestContractEventBeforeStart = this.contractEvents
+        ? findLeast(
+            this.contractEvents,
+            (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+            (event) => event.date.getTime() < startTime,
+          )
+        : null;
+      if (latestContractEventBeforeStart?.type !== ContractEventType.SIGNED) {
+        hasActiveContract = false;
+        break populateCache;
+      }
+
+      hasActiveContract = !this.contractEvents?.some(
+        (event) =>
+          event.date.getTime() >= startTime &&
+          event.date.getTime() < endTime &&
+          event.type !== ContractEventType.SIGNED,
+      );
+
+      this._hasActiveContractInRange.set(key, hasActiveContract);
+    }
+    return hasActiveContract;
+  }
 }

@@ -25,7 +25,6 @@ export const testUser = new User({
       user: { id: -1 } as User,
     },
   ],
-  hasActiveContract: true,
   shareInfoPublicly: false,
   emailNotifsEnabled: false,
   textNotifsEnabled: true,
@@ -40,7 +39,6 @@ export const testUser = new User({
   admin: false,
   staff: false,
   leaderOfIds: [],
-  isCommunityLeader: false,
   profilePicture: '',
   profileDescription: '',
   activities: [],
@@ -55,7 +53,6 @@ export const testUser = new User({
   shareEmailWithCommunityLead: true,
   sharePhoneNumberWithCommunityLead: true,
   referralCode: '',
-  friends: [],
   hashPassword: function (): Promise<void> {
     throw new Error('Function not implemented.');
   },
@@ -79,4 +76,13 @@ export const testUser = new User({
   leaderOf: [],
   invitedCommunities: [],
   participants: [],
-} satisfies Omit<User, '_hasActiveContractAt' | 'hasActiveContractAt'>);
+} satisfies Omit<
+  User,
+  | 'friends'
+  | 'hasActiveContract'
+  | 'isCommunityLeader'
+  | '_hasActiveContractAt'
+  | 'hasActiveContractAt'
+  | '_hasActiveContractInRange'
+  | 'hasActiveContractInRange'
+>);
