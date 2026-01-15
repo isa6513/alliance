@@ -7,7 +7,7 @@ import {
 import { NotificationChannel } from './notif-utils';
 import { ContractEventType } from 'src/user/entities/contract-event.entity';
 
-export const testUser: User = {
+export const testUser = new User({
   id: -1,
   name: 'Test User',
   email: 'test@example.com',
@@ -79,4 +79,4 @@ export const testUser: User = {
   leaderOf: [],
   invitedCommunities: [],
   participants: [],
-};
+} satisfies Omit<User, '_hasActiveContractAt' | 'hasActiveContractAt'>);

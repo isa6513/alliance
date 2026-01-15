@@ -2,7 +2,7 @@
 /* eslint-disable @darraghor/nestjs-typed/all-properties-are-whitelisted */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import * as bcrypt from 'bcryptjs';
-import { Expose, Type } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import {
   Allow,
   IsDefined,
@@ -46,6 +46,7 @@ import { ContractEvent, ContractEventType } from './contract-event.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { UserDevice } from './user-device.entity';
 import { Mms } from 'src/mms/mms.entity';
+import { findLeast } from 'src/utils/filter';
 
 export enum NotificationPreference {
   All = 'all',
@@ -112,13 +113,7 @@ export class User {
 
   @Expose()
   get hasActiveContract(): boolean {
-    if (!this.contractEvents || this.contractEvents.length === 0) {
-      return false;
-    }
-    return (
-      this.contractEvents.sort((a, b) => b.date.getTime() - a.date.getTime())[0]
-        .type === ContractEventType.SIGNED
-    );
+    return this.hasActiveContractAt(new Date());
   }
 
   @Column({
@@ -416,4 +411,25 @@ export class User {
   @ApiProperty()
   @Allow()
   pushesForFriendRequests: boolean;
+
+  @Exclude()
+  private _hasActiveContractAt = new Map<number, boolean>();
+  hasActiveContractAt(date: Date): boolean {
+    const key = date.getTime();
+    let hasActiveContract = this._hasActiveContractAt.get(key);
+
+    if (hasActiveContract === undefined) {
+      const latestContractEvent = this.contractEvents
+        ? findLeast(
+            this.contractEvents,
+            (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+          )
+        : null;
+      hasActiveContract =
+        latestContractEvent?.type === ContractEventType.SIGNED;
+
+      this._hasActiveContractAt.set(key, hasActiveContract);
+    }
+    return hasActiveContract;
+  }
 }
