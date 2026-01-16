@@ -181,6 +181,19 @@ export function deadlineHasPassed(action: ActionDto, date: Date): boolean {
   );
 }
 
+const STATUS_TO_COMPLETION: Record<
+  UserActionRelationDetailDto["status"],
+  "complete" | "incomplete" | "none"
+> = {
+  away: "none",
+  completed: "complete",
+  missed_deadline: "incomplete",
+  not_required: "none",
+  optional_task: "none",
+  todo: "incomplete",
+  wont_complete: "none",
+};
+
 export function calculateCompletionData(params: {
   filteredActionIds: number[];
   userActionRelations: Record<number, UserActionRelationDetailDto[]>;
@@ -202,10 +215,11 @@ export function calculateCompletionData(params: {
       if (!filteredActionIdSet.has(relationDetail.actionId)) {
         continue;
       }
-      if (relationDetail.status === "completed") {
+      const completion = STATUS_TO_COMPLETION[relationDetail.status];
+      if (completion === "complete") {
         anyComplete.add(userId);
       }
-      if (relationDetail.status === "todo") {
+      if (completion === "incomplete") {
         anyIncomplete.add(userId);
       }
     }
