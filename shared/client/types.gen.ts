@@ -1682,6 +1682,7 @@ export type UserActionSummaryDto = {
     weekNumber: number | null;
     allMembersParticipating: boolean;
     suiteId?: number;
+    latestMemberActionDeadline: number | null;
 };
 
 export type ActionSuiteSummaryDto = {

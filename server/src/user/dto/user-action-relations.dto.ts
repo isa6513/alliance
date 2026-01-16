@@ -33,6 +33,9 @@ export class UserActionSummaryDto {
 
   @ApiPropertyOptional()
   suiteId?: number;
+
+  @ApiProperty({ type: Number, nullable: true })
+  latestMemberActionDeadline: number | null;
 }
 
 export class ActionSuiteSummaryDto {

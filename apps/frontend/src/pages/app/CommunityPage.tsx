@@ -43,6 +43,9 @@ import { useMaxActionsPerWeek } from "@alliance/sharedweb/ui/UserProgressPills";
 
 type Tab = "activity" | "members" | "invites" | "about" | "edit" | "resources";
 
+const CURRENT_ACTION_INTERVAL_SIZE_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+const CURRENT_ACTIONS_DROPDOWN_DISPLAY = "Current actions";
+
 const CommunityPage = () => {
   const [community, setCommunity] = useState<CommunityDto | null>(null);
   const [memberContactInfo, setMemberContactInfo] = useState<Record<
@@ -99,11 +102,21 @@ const CommunityPage = () => {
     const suite = activeActionSuites?.find(
       (suite) => suite.name === selectedSuite
     );
-    if (suite === undefined) {
-      return activeActions;
+    if (suite !== undefined) {
+      return activeActions.filter((action) => action.suiteId === suite.id);
     }
 
-    return activeActions.filter((action) => action.suiteId === suite.id);
+    const earliestDeadline = Math.min(
+      ...activeActions
+        .map((action) => action.latestMemberActionDeadline)
+        .filter((timestamp) => timestamp !== null)
+    );
+    return activeActions.filter(
+      (action) =>
+        action.latestMemberActionDeadline !== null &&
+        action.latestMemberActionDeadline <
+          earliestDeadline + CURRENT_ACTION_INTERVAL_SIZE_MS
+    );
   }, [activeActions, activeActionSuites, selectedSuite]);
 
   const { completedAllCurrentActions, nCompleted, nTotal } = useMemo<{
@@ -182,7 +195,7 @@ const CommunityPage = () => {
         setActionSummaries(resp.data.actions);
         const actionsWithSuites = resp.data.actions.filter(
           (action): action is typeof action & { suiteId: number } =>
-            action.suiteId !== undefined && action.allMembersParticipating
+            action.suiteId !== undefined
         );
         if (actionsWithSuites.length === 0) {
           return;
@@ -201,7 +214,6 @@ const CommunityPage = () => {
           setActiveActions(
             actionsWithSuites.filter((action) => action.suiteId === lastSuiteId)
           );
-          setSelectedSuite(lastSuite.name);
           setCurrentActionsSelected(false);
           return;
         }
@@ -212,7 +224,6 @@ const CommunityPage = () => {
         );
         setActiveActionSuites(activeSuites);
         setActiveActions(activeActions);
-        setSelectedSuite(activeSuites[0].name);
         setCurrentActionsSelected(true);
       }
     });
@@ -237,10 +248,19 @@ const CommunityPage = () => {
       return null;
     }
 
-    return Object.fromEntries(
-      activeActionSuites.map((suite) => [suite.id, suite.name])
-    );
+    return Object.fromEntries([
+      [CURRENT_ACTIONS_DROPDOWN_DISPLAY, CURRENT_ACTIONS_DROPDOWN_DISPLAY],
+      ...activeActionSuites.map((suite) => [`suite_${suite.id}`, suite.name]),
+    ]) as Record<string, string>;
   }, [activeActionSuites]);
+  useEffect(() => {
+    if (
+      suiteDropdownOptions &&
+      suiteDropdownOptions[CURRENT_ACTIONS_DROPDOWN_DISPLAY]
+    ) {
+      setSelectedSuite(suiteDropdownOptions[CURRENT_ACTIONS_DROPDOWN_DISPLAY]);
+    }
+  }, [suiteDropdownOptions]);
 
   const setTab = useCallback(
     (tab: Tab) => {
@@ -288,16 +308,22 @@ const CommunityPage = () => {
 
   const actionDisplay = useMemo(() => {
     if (selectedActions.length === 1) {
-      if (currentActionsSelected) {
+      if (selectedSuite === CURRENT_ACTIONS_DROPDOWN_DISPLAY) {
         return "the current action";
+      }
+      if (currentActionsSelected) {
+        return "the selected action";
       }
       return "the previous action";
     }
-    if (currentActionsSelected) {
+    if (selectedSuite === CURRENT_ACTIONS_DROPDOWN_DISPLAY) {
       return "current actions";
     }
+    if (currentActionsSelected) {
+      return "selected actions";
+    }
     return "the previous actions";
-  }, [selectedActions.length, currentActionsSelected]);
+  }, [selectedActions.length, currentActionsSelected, selectedSuite]);
 
   if (!community) {
     if (loading) {

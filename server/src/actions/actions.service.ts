@@ -2204,6 +2204,8 @@ export class ActionsService {
               (tag) => tag.id === allMembersTagId,
             ),
           suiteId: action.suite?.id,
+          latestMemberActionDeadline:
+            action.latestMemberActionEvent?.deadline?.getTime() ?? null,
         } satisfies UserActionSummaryDto;
       },
     );
