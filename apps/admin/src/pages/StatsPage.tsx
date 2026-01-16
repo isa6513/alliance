@@ -5,6 +5,7 @@ import {
   analyticsGetMemberCompletionRetention,
   analyticsGetAggregateStats,
   analyticsGetContractStatusHistory,
+  analyticsGetTimeToChurnSamples,
 } from "@alliance/shared/client";
 import {
   TimeSeriesChart,
@@ -20,6 +21,7 @@ import {
   MemberCompletionRetentionCohortDto,
   AggregateStatsDto,
   ContractStatusPointDto,
+  TimeToChurnSampleDto,
 } from "@alliance/shared/client/types.gen";
 import chroma from "chroma-js";
 import * as d3 from "d3";
@@ -114,6 +116,10 @@ const StatsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [hoveredActionBar, setHoveredActionBar] =
     useState<ActionStatsRecord | null>(null);
+  const [timeToChurnSamples, setTimeToChurnSamples] = useState<
+    TimeToChurnSampleDto[]
+  >([]);
+  const [timeToChurnLoading, setTimeToChurnLoading] = useState<boolean>(false);
   const [dailyStatsTableOpen, setDailyStatsTableOpen] = useState(false);
   const [actionStatsTableOpen, setActionStatsTableOpen] = useState(false);
   const [weekRange, setWeekRange] = useState({ min: 0, max: 20 });
@@ -230,6 +236,18 @@ const StatsPage: React.FC = () => {
     }
   }, []);
 
+  const loadTimeToChurnSamples = useCallback(async () => {
+    setTimeToChurnLoading(true);
+    try {
+      const response = await analyticsGetTimeToChurnSamples();
+      setTimeToChurnSamples(response.data ?? []);
+    } catch (err) {
+      console.error("Failed to load time to churn samples", err);
+    } finally {
+      setTimeToChurnLoading(false);
+    }
+  }, []);
+
   const handleRecalculateActionStats = useCallback(async () => {
     setActionStatsLoading(true);
     try {
@@ -253,6 +271,10 @@ const StatsPage: React.FC = () => {
   useEffect(() => {
     void loadAggregateStats();
   }, [loadAggregateStats]);
+
+  useEffect(() => {
+    void loadTimeToChurnSamples();
+  }, [loadTimeToChurnSamples]);
 
   const loadContractStatusHistory = useCallback(async () => {
     setContractStatusLoading(true);
@@ -498,6 +520,62 @@ const StatsPage: React.FC = () => {
 
     return { multiLineData, legendGradient, cohortMap };
   }, [filteredRetentionCohorts]);
+
+  const churnDurationsWeeks = useMemo(() => {
+    return timeToChurnSamples
+      .map((sample) => sample.daysToChurn / 7)
+      .filter((value) => Number.isFinite(value) && value >= 0);
+  }, [timeToChurnSamples]);
+
+  const churnHistogramGeometry = useMemo(() => {
+    if (churnDurationsWeeks.length === 0) return null;
+
+    const width = 1000;
+    const height = 320;
+    const margin = { top: 28, right: 24, bottom: 56, left: 64 };
+    const maxWeeks = d3.max(churnDurationsWeeks) ?? 0;
+    const xMax = Math.max(1, maxWeeks);
+
+    const xScale = d3
+      .scaleLinear()
+      .domain([0, xMax])
+      .nice()
+      .range([margin.left, width - margin.right]);
+
+    const binCount = Math.min(
+      16,
+      Math.max(6, Math.round(Math.sqrt(churnDurationsWeeks.length)))
+    );
+
+    const bins = d3
+      .bin<number, number>()
+      .domain(xScale.domain() as [number, number])
+      .thresholds(xScale.ticks(binCount))(churnDurationsWeeks);
+
+    const maxCount = d3.max(bins, (bin) => bin.length) ?? 0;
+    const yScale = d3
+      .scaleLinear()
+      .domain([0, Math.max(1, maxCount)])
+      .nice()
+      .range([height - margin.bottom, margin.top]);
+
+    const tickStep = Math.max(1, Math.round(xMax / 6));
+    const xTicks = d3
+      .range(0, Math.ceil(xMax) + tickStep, tickStep)
+      .filter((tick) => tick <= xMax + 0.0001);
+    const yTicks = yScale.ticks(5);
+
+    return {
+      width,
+      height,
+      margin,
+      xScale,
+      yScale,
+      xTicks,
+      yTicks,
+      bins,
+    };
+  }, [churnDurationsWeeks]);
 
   const parsedContractStatusHistory = useMemo(() => {
     return contractStatusHistory.map((point) => ({
@@ -1268,6 +1346,141 @@ const StatsPage: React.FC = () => {
             />
             <span className="text-sm text-gray-600">Churned Members</span>
           </div>
+        </div>
+      </div>
+
+      <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-4 py-3 border-b border-gray-200">
+          <div className="flex flex-col">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Time to churn
+            </h3>
+            <span className="text-xs text-gray-500">
+              From signing to last completed action
+            </span>
+          </div>
+          <div className="text-xs text-gray-500">
+            {timeToChurnSamples.length > 0
+              ? `${timeToChurnSamples.length} churned members`
+              : "No churned members yet"}
+          </div>
+        </div>
+        <div className="relative p-4 pb-2">
+          {timeToChurnLoading && churnDurationsWeeks.length === 0 && (
+            <p className="text-sm text-gray-600">Loading time to churn...</p>
+          )}
+          {!timeToChurnLoading && churnDurationsWeeks.length === 0 && (
+            <p className="text-sm text-gray-600">No churned members yet.</p>
+          )}
+          {churnHistogramGeometry && churnDurationsWeeks.length > 0 && (
+            <svg
+              viewBox={`0 0 ${churnHistogramGeometry.width} ${churnHistogramGeometry.height}`}
+              className="w-full"
+            >
+              {/* Grid lines */}
+              <g>
+                {churnHistogramGeometry.yTicks.map((tick) => (
+                  <g key={`churn-y-${tick}`}>
+                    <line
+                      x1={churnHistogramGeometry.margin.left}
+                      x2={
+                        churnHistogramGeometry.width -
+                        churnHistogramGeometry.margin.right
+                      }
+                      y1={churnHistogramGeometry.yScale(tick)}
+                      y2={churnHistogramGeometry.yScale(tick)}
+                      stroke="#e5e7eb"
+                      strokeDasharray="4 6"
+                    />
+                    <text
+                      x={churnHistogramGeometry.margin.left - 10}
+                      y={churnHistogramGeometry.yScale(tick)}
+                      textAnchor="end"
+                      dominantBaseline="middle"
+                      className="fill-gray-500 text-xs"
+                    >
+                      {tick}
+                    </text>
+                  </g>
+                ))}
+                {churnHistogramGeometry.xTicks.map((tick) => (
+                  <g key={`churn-x-${tick}`}>
+                    <line
+                      x1={churnHistogramGeometry.xScale(tick)}
+                      x2={churnHistogramGeometry.xScale(tick)}
+                      y1={churnHistogramGeometry.margin.top}
+                      y2={
+                        churnHistogramGeometry.height -
+                        churnHistogramGeometry.margin.bottom
+                      }
+                      stroke="#f3f4f6"
+                    />
+                    <text
+                      x={churnHistogramGeometry.xScale(tick)}
+                      y={
+                        churnHistogramGeometry.height -
+                        churnHistogramGeometry.margin.bottom +
+                        24
+                      }
+                      textAnchor="middle"
+                      className="fill-gray-600 text-xs"
+                    >
+                      {Math.round(tick)}w
+                    </text>
+                  </g>
+                ))}
+              </g>
+
+              {/* Bars */}
+              {churnHistogramGeometry.bins.map((bin, index) => {
+                const x0 = bin.x0 ?? 0;
+                const x1 = bin.x1 ?? x0;
+                const barWidth = Math.max(
+                  0,
+                  churnHistogramGeometry.xScale(x1) -
+                    churnHistogramGeometry.xScale(x0) -
+                    2
+                );
+                const barHeight =
+                  churnHistogramGeometry.yScale(0) -
+                  churnHistogramGeometry.yScale(bin.length);
+                const x = churnHistogramGeometry.xScale(x0) + 1;
+                const y = churnHistogramGeometry.yScale(bin.length);
+                const labelStart = Math.round(x0);
+                const labelEnd = Math.round(x1);
+
+                return (
+                  <g key={`churn-bin-${index}`}>
+                    <rect
+                      x={x}
+                      y={y}
+                      width={barWidth}
+                      height={barHeight}
+                      fill="rgba(239, 68, 68, 0.75)"
+                      rx={4}
+                    >
+                      <title>{`${labelStart}-${labelEnd}w: ${bin.length} members`}</title>
+                    </rect>
+                  </g>
+                );
+              })}
+
+              <text
+                x={
+                  (churnHistogramGeometry.width -
+                    churnHistogramGeometry.margin.left -
+                    churnHistogramGeometry.margin.right) /
+                    2 +
+                  churnHistogramGeometry.margin.left
+                }
+                y={churnHistogramGeometry.height - 12}
+                textAnchor="middle"
+                className="fill-gray-500 text-xs"
+              >
+                Weeks since signing
+              </text>
+            </svg>
+          )}
         </div>
       </div>
 

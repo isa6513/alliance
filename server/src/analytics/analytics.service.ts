@@ -24,6 +24,7 @@ import {
   MemberCompletionRetentionCohortDto,
   MemberCompletionRetentionPointDto,
 } from './member-completion-retention.dto';
+import { TimeToChurnSampleDto } from './time-to-churn.dto';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
 
 @Injectable()
@@ -526,6 +527,96 @@ ORDER BY pp.total_session_duration_seconds DESC
           points,
         };
       });
+  }
+
+  async getTimeToChurnSamples(): Promise<TimeToChurnSampleDto[]> {
+    const allEvents = await this.contractEventRepository.find({
+      relations: { user: true },
+      order: { date: 'ASC' },
+    });
+
+    const userEvents = new Map<
+      number,
+      { date: Date; type: ContractEventType }[]
+    >();
+
+    for (const event of allEvents) {
+      const userId = event.user?.id;
+      if (!userId) continue;
+
+      const events = userEvents.get(userId) ?? [];
+      events.push({ date: event.date, type: event.type });
+      userEvents.set(userId, events);
+    }
+
+    const churnedUsers = new Map<number, Date>();
+    for (const [userId, events] of userEvents) {
+      events.sort((a, b) => a.date.getTime() - b.date.getTime());
+      const latestEvent = events[events.length - 1];
+      if (!latestEvent || latestEvent.type === ContractEventType.SIGNED) {
+        continue;
+      }
+
+      for (let index = events.length - 1; index >= 0; index -= 1) {
+        if (events[index].type === ContractEventType.SIGNED) {
+          churnedUsers.set(userId, events[index].date);
+          break;
+        }
+      }
+    }
+
+    if (churnedUsers.size === 0) {
+      return [];
+    }
+
+    const churnedUserIds = Array.from(churnedUsers.keys());
+    const lastCompletions = await this.actionActivityRepository
+      .createQueryBuilder('activity')
+      .select('activity.userId', 'userId')
+      .addSelect('MAX(activity.createdAt)', 'lastCompletedAt')
+      .where('activity.type = :type', {
+        type: ActionActivityType.USER_COMPLETED,
+      })
+      .andWhere('activity.userId IN (:...userIds)', {
+        userIds: churnedUserIds,
+      })
+      .groupBy('activity.userId')
+      .getRawMany<{ userId: string; lastCompletedAt: string }>();
+
+    const lastCompletionByUserId = new Map<number, Date>();
+    for (const row of lastCompletions) {
+      const userId = Number(row.userId);
+      if (Number.isNaN(userId) || !row.lastCompletedAt) {
+        continue;
+      }
+      const lastCompletedAt = new Date(row.lastCompletedAt);
+      if (Number.isNaN(lastCompletedAt.getTime())) {
+        continue;
+      }
+      lastCompletionByUserId.set(userId, lastCompletedAt);
+    }
+
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const samples: TimeToChurnSampleDto[] = [];
+
+    for (const [userId, signedAt] of churnedUsers) {
+      const lastCompletedAt = lastCompletionByUserId.get(userId);
+      if (!lastCompletedAt) {
+        samples.push({ daysToChurn: 0 });
+        continue;
+      }
+      if (lastCompletedAt < signedAt) {
+        continue;
+      }
+      const daysToChurn =
+        (lastCompletedAt.getTime() - signedAt.getTime()) / msPerDay;
+      if (daysToChurn < 0) {
+        continue;
+      }
+      samples.push({ daysToChurn });
+    }
+
+    return samples;
   }
 
   async getAggregateStats(): Promise<{ signedUsers: number }> {

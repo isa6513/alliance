@@ -193,7 +193,7 @@ export default function SettingsPage() {
 
   return (
     <ScrollView className="flex-1 bg-white">
-      <View className="p-4 py-8">
+      <View className="p-4 py-12">
         {/* Header */}
         <View className="flex-row items-center justify-between mb-6">
           <View className="flex-row items-center">

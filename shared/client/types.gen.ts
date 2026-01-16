@@ -2186,6 +2186,13 @@ export type MemberCompletionRetentionCohortDto = {
     points: Array<MemberCompletionRetentionPointDto>;
 };
 
+export type TimeToChurnSampleDto = {
+    /**
+     * Days between signing and the last completed action for churned members.
+     */
+    daysToChurn: number;
+};
+
 export type AggregateStatsDto = {
     signedUsers: number;
 };
@@ -5576,6 +5583,19 @@ export type AnalyticsGetMemberCompletionRetentionResponses = {
 };
 
 export type AnalyticsGetMemberCompletionRetentionResponse = AnalyticsGetMemberCompletionRetentionResponses[keyof AnalyticsGetMemberCompletionRetentionResponses];
+
+export type AnalyticsGetTimeToChurnSamplesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/time-to-churn';
+};
+
+export type AnalyticsGetTimeToChurnSamplesResponses = {
+    200: Array<TimeToChurnSampleDto>;
+};
+
+export type AnalyticsGetTimeToChurnSamplesResponse = AnalyticsGetTimeToChurnSamplesResponses[keyof AnalyticsGetTimeToChurnSamplesResponses];
 
 export type AnalyticsGetAggregateStatsData = {
     body?: never;

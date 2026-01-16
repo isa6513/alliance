@@ -7,11 +7,15 @@ import type {
 import Card from "@alliance/sharedweb/ui/Card";
 import FormMarkdownWrapper from "@alliance/sharedweb/ui/FormMarkdownWrapper";
 import React, { useMemo } from "react";
-import { type FormWithSchema } from "../pages/FormResponses";
+import {
+  type FormResponseFilter,
+  type FormWithSchema,
+} from "../pages/FormResponses";
 
 export interface FormResponseStatisticsProps {
   form: FormWithSchema | null;
   responses: FormResponseDto[];
+  onFilterSelect?: (filter: FormResponseFilter) => void;
 }
 
 type StatsFieldKind =
@@ -27,6 +31,7 @@ type StatRow = {
   label: string;
   count: number;
   useMarkdown?: boolean;
+  filter?: FormResponseFilter;
 };
 
 type FieldStats = {
@@ -213,11 +218,13 @@ const buildFieldStats = (
           key: "checked",
           label: "Checked",
           count: checkedCount,
+          filter: { fieldId: field.id, op: "equals", value: "true" },
         },
         {
           key: "unchecked",
           label: "Not checked",
           count: uncheckedCount,
+          filter: { fieldId: field.id, op: "equals", value: "false" },
         },
       ];
       if (noResponseCount > 0) {
@@ -225,6 +232,7 @@ const buildFieldStats = (
           key: "no-response",
           label: "No response",
           count: noResponseCount,
+          filter: { fieldId: field.id, op: "no-response" },
         });
       }
 
@@ -264,6 +272,7 @@ const buildFieldStats = (
         label: option.label,
         count: counts.get(option.value) ?? 0,
         useMarkdown: true,
+        filter: { fieldId: field.id, op: "equals", value: option.value },
       }));
       if (unknownCount > 0) {
         rows.push({
@@ -277,6 +286,7 @@ const buildFieldStats = (
           key: "no-response",
           label: "No response",
           count: noResponseCount,
+          filter: { fieldId: field.id, op: "no-response" },
         });
       }
 
@@ -325,6 +335,7 @@ const buildFieldStats = (
         label: option.label,
         count: counts.get(option.value) ?? 0,
         useMarkdown: true,
+        filter: { fieldId: field.id, op: "includes", value: option.value },
       }));
       if (unknownResponses > 0) {
         rows.push({
@@ -338,6 +349,7 @@ const buildFieldStats = (
           key: "no-response",
           label: "No response",
           count: noResponseCount,
+          filter: { fieldId: field.id, op: "no-response" },
         });
       }
 
@@ -375,6 +387,7 @@ const buildFieldStats = (
         key: String(value),
         label: String(value),
         count: counts.get(value) ?? 0,
+        filter: { fieldId: field.id, op: "equals", value: String(value) },
       }));
       if (unknownCount > 0) {
         rows.push({
@@ -388,6 +401,7 @@ const buildFieldStats = (
           key: "no-response",
           label: "No response",
           count: noResponseCount,
+          filter: { fieldId: field.id, op: "no-response" },
         });
       }
 
@@ -441,10 +455,11 @@ const StatBar: React.FC<{
   label: React.ReactNode;
   count: number;
   total: number;
-}> = ({ label, count, total }) => {
+  onClick?: () => void;
+}> = ({ label, count, total, onClick }) => {
   const percent = total > 0 ? (count / total) * 100 : 0;
   const width = Math.min(percent, 100);
-  return (
+  const content = (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
       <div className="text-sm text-gray-700 sm:w-48">{label}</div>
       <div className="flex items-center gap-3 flex-1">
@@ -460,6 +475,18 @@ const StatBar: React.FC<{
       </div>
     </div>
   );
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="w-full text-left rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:bg-gray-50"
+      >
+        {content}
+      </button>
+    );
+  }
+  return content;
 };
 
 const renderRowLabel = (row: StatRow) => {
@@ -472,6 +499,7 @@ const renderRowLabel = (row: StatRow) => {
 const FormResponseStatistics: React.FC<FormResponseStatisticsProps> = ({
   form,
   responses,
+  onFilterSelect,
 }) => {
   const totalResponses = responses.length;
 
@@ -584,6 +612,11 @@ const FormResponseStatistics: React.FC<FormResponseStatisticsProps> = ({
                     label={renderRowLabel(row)}
                     count={row.count}
                     total={stat.totalResponses}
+                    onClick={
+                      row.filter && onFilterSelect
+                        ? () => onFilterSelect(row.filter!)
+                        : undefined
+                    }
                   />
                 ))}
               </div>

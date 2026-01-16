@@ -8,6 +8,7 @@ import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { MemberCompletionRetentionCohortDto } from './member-completion-retention.dto';
 import { AggregateStatsDto } from './aggregatestats.dto';
 import { ContractStatusPointDto } from './contract-status-history.dto';
+import { TimeToChurnSampleDto } from './time-to-churn.dto';
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -59,6 +60,13 @@ export class AnalyticsController {
     MemberCompletionRetentionCohortDto[]
   > {
     return this.analyticsService.getMemberCompletionRetentionByCohort();
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('time-to-churn')
+  @ApiOkResponse({ type: [TimeToChurnSampleDto] })
+  getTimeToChurnSamples(): Promise<TimeToChurnSampleDto[]> {
+    return this.analyticsService.getTimeToChurnSamples();
   }
 
   @UseGuards(AdminGuard)

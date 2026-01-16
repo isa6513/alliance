@@ -8,6 +8,7 @@ import {
 } from "@alliance/shared/client";
 import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import type {
+  AnyField,
   FieldKind,
   FormSchema,
   Page,
@@ -44,7 +45,23 @@ const ANSWER_FIELD_KINDS = new Set<FieldKind>([
   "file",
 ]);
 
+const FILTERABLE_FIELD_KINDS = new Set<FieldKind>([
+  "checkbox",
+  "radio",
+  "select",
+  "multiselect",
+  "range",
+]);
+
 type Tab = "responses" | "stats";
+
+type ResponseFilterOp = "equals" | "includes" | "no-response";
+
+export type FormResponseFilter = {
+  fieldId: string;
+  op: ResponseFilterOp;
+  value?: string;
+};
 
 const isAnswerField = (
   node: unknown
@@ -59,12 +76,85 @@ const isAnswerField = (
   );
 };
 
+const isResponseFilterOp = (value: string | null): value is ResponseFilterOp =>
+  value === "equals" || value === "includes" || value === "no-response";
+
 const sortResponsesByCreatedAtDesc = (
   list: FormResponseDto[]
 ): FormResponseDto[] => {
   return [...list].sort((a, b) => {
     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
   });
+};
+
+const normalizeBoolean = (value: unknown): boolean | null => {
+  if (value === true || value === false) return value;
+  if (value === "true") return true;
+  if (value === "false") return false;
+  if (value === 1) return true;
+  if (value === 0) return false;
+  return null;
+};
+
+const isNoResponseValue = (value: unknown): boolean => {
+  if (value === null || value === undefined) return true;
+  if (Array.isArray(value)) return value.length === 0;
+  if (typeof value === "string") return value.trim() === "";
+  return false;
+};
+
+const getSelections = (value: unknown): string[] => {
+  if (Array.isArray(value)) return value.map(String);
+  if (value === null || value === undefined || value === "") return [];
+  return [String(value)];
+};
+
+const getOptionLabel = (
+  field: AnyField,
+  value: string | undefined
+): string | undefined => {
+  if (!value) return undefined;
+  const options =
+    (field as { options?: Array<{ value: string; label: string }> }).options ??
+    [];
+  return options.find((option) => String(option.value) === value)?.label;
+};
+
+const matchesResponseFilter = (
+  response: FormResponseDto,
+  filter: FormResponseFilter,
+  field: AnyField
+): boolean => {
+  const rawValue = response.answers?.[filter.fieldId];
+  if (filter.op === "no-response") {
+    return isNoResponseValue(rawValue);
+  }
+
+  switch (field.kind) {
+    case "checkbox": {
+      if (filter.op !== "equals") return false;
+      const desired = normalizeBoolean(filter.value);
+      const actual = normalizeBoolean(rawValue);
+      if (desired === null || actual === null) return false;
+      return actual === desired;
+    }
+    case "multiselect": {
+      if (filter.op !== "includes") return false;
+      const selections = getSelections(rawValue);
+      return selections.includes(filter.value ?? "");
+    }
+    case "radio":
+    case "select":
+    case "range": {
+      if (filter.op !== "equals") return false;
+      if (rawValue === null || rawValue === undefined || rawValue === "") {
+        return false;
+      }
+      return String(rawValue) === (filter.value ?? "");
+    }
+    default:
+      return false;
+  }
 };
 const FormResponses: React.FC = () => {
   const { formId } = useParams<{ formId: string }>();
@@ -82,6 +172,39 @@ const FormResponses: React.FC = () => {
 
   const [params, setParams] = useSearchParams();
   const tab = (params.get("tab") as Tab) ?? "responses";
+  const filterFieldId = params.get("filterField")?.trim() ?? "";
+  const filterOpParam = params.get("filterOp");
+  const filterValueParam = params.get("filterValue");
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | null | undefined>) => {
+      const next = new URLSearchParams(params);
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === null || value === undefined) {
+          next.delete(key);
+        } else {
+          next.set(key, value);
+        }
+      });
+      setParams(next);
+    },
+    [params, setParams]
+  );
+
+  const activeFilter = useMemo<FormResponseFilter | null>(() => {
+    if (!filterFieldId || !isResponseFilterOp(filterOpParam)) return null;
+    if (
+      (filterOpParam === "equals" || filterOpParam === "includes") &&
+      (filterValueParam === null || filterValueParam === "")
+    ) {
+      return null;
+    }
+    return {
+      fieldId: filterFieldId,
+      op: filterOpParam,
+      value: filterValueParam ?? undefined,
+    };
+  }, [filterFieldId, filterOpParam, filterValueParam]);
 
   const numericFormId = useMemo(
     () => (formId ? Number(formId) : NaN),
@@ -130,16 +253,6 @@ const FormResponses: React.FC = () => {
     loadData();
   }, [loadData]);
 
-  useEffect(() => {
-    // Keep current page in range when responses length changes
-    const totalPages = Math.max(1, responses.length);
-    if (page > totalPages) setPage(totalPages);
-  }, [responses, page]);
-
-  const total = responses.length;
-  const totalPages = Math.max(1, responses.length);
-  const currentResponse = responses[page - 1];
-
   const fieldLabels = useMemo(() => {
     const labels: Record<string, string> = {};
     const schema = form?.schema as unknown as {
@@ -175,6 +288,115 @@ const FormResponses: React.FC = () => {
     });
     return ids;
   }, [form]);
+
+  const fieldsById = useMemo(() => {
+    const fields: Record<string, AnyField> = {};
+    form?.schema?.pages?.forEach((page) => {
+      page.fields.forEach((field) => {
+        const candidate = field as AnyField;
+        if (
+          candidate &&
+          typeof candidate === "object" &&
+          typeof candidate.id === "string" &&
+          typeof candidate.kind === "string"
+        ) {
+          fields[candidate.id] = candidate;
+        }
+      });
+    });
+    return fields;
+  }, [form]);
+
+  const activeFilterField = useMemo(() => {
+    if (!activeFilter) return null;
+    const field = fieldsById[activeFilter.fieldId];
+    if (!field || !FILTERABLE_FIELD_KINDS.has(field.kind)) return null;
+    return field;
+  }, [activeFilter, fieldsById]);
+
+  const filteredResponses = useMemo(() => {
+    if (!activeFilter || !activeFilterField) return responses;
+    return responses.filter((response) =>
+      matchesResponseFilter(response, activeFilter, activeFilterField)
+    );
+  }, [responses, activeFilter, activeFilterField]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filterFieldId, filterOpParam, filterValueParam]);
+
+  useEffect(() => {
+    // Keep current page in range when filtered responses change
+    const totalPages = Math.max(1, filteredResponses.length);
+    if (page > totalPages) setPage(totalPages);
+  }, [filteredResponses.length, page]);
+
+  const total = responses.length;
+  const filteredTotal = filteredResponses.length;
+  const totalPages = Math.max(1, filteredTotal);
+  const currentResponse = filteredResponses[page - 1];
+
+  const filterSummary = useMemo(() => {
+    if (!activeFilter || !activeFilterField) return null;
+    const fieldLabel = activeFilterField.label?.trim() || "Untitled question";
+    if (activeFilter.op === "no-response") {
+      return { fieldLabel, description: "No response" };
+    }
+    const valueLabel = activeFilter.value ?? "";
+    switch (activeFilterField.kind) {
+      case "checkbox": {
+        const normalized = normalizeBoolean(activeFilter.value);
+        if (normalized === true) {
+          return { fieldLabel, description: "Checked" };
+        }
+        if (normalized === false) {
+          return { fieldLabel, description: "Not checked" };
+        }
+        return null;
+      }
+      case "multiselect": {
+        const optionLabel = getOptionLabel(activeFilterField, activeFilter.value);
+        return {
+          fieldLabel,
+          description: `Includes ${optionLabel ?? valueLabel}`,
+        };
+      }
+      case "radio":
+      case "select": {
+        const optionLabel = getOptionLabel(activeFilterField, activeFilter.value);
+        return { fieldLabel, description: optionLabel ?? valueLabel };
+      }
+      case "range":
+        return { fieldLabel, description: `Value ${valueLabel}` };
+      default:
+        return null;
+    }
+  }, [activeFilter, activeFilterField]);
+
+  const emptyStateMessage = filterSummary
+    ? "No responses match this filter."
+    : "No responses yet for this form.";
+
+  const handleStatFilter = useCallback(
+    (filter: FormResponseFilter) => {
+      updateParams({
+        tab: "responses",
+        filterField: filter.fieldId,
+        filterOp: filter.op,
+        filterValue: filter.value ?? null,
+      });
+      setPage(1);
+    },
+    [updateParams]
+  );
+
+  const clearFilter = useCallback(() => {
+    updateParams({
+      filterField: null,
+      filterOp: null,
+      filterValue: null,
+    });
+  }, [updateParams]);
 
   const formatValue = useCallback((v: unknown): string => {
     if (v == null || v === undefined) return "NULL";
@@ -284,7 +506,7 @@ const FormResponses: React.FC = () => {
               </div>
               <div className="flex items-center gap-2 ml-3">
                 <Button
-                  onClick={() => setParams({ tab: "responses" })}
+                  onClick={() => updateParams({ tab: "responses" })}
                   color={
                     tab === "responses" ? ButtonColor.Black : ButtonColor.White
                   }
@@ -293,7 +515,7 @@ const FormResponses: React.FC = () => {
                   Responses
                 </Button>
                 <Button
-                  onClick={() => setParams({ tab: "stats" })}
+                  onClick={() => updateParams({ tab: "stats" })}
                   color={
                     tab === "stats" ? ButtonColor.Black : ButtonColor.White
                   }
@@ -332,14 +554,44 @@ const FormResponses: React.FC = () => {
             <div className="flex items-center justify-center py-12">
               <p className="text-red-500">{error}</p>
             </div>
-          ) : total === 0 ? (
-            <Card style={CardStyle.White}>
-              <p className="text-gray-600">No responses yet for this form.</p>
+          ) : filteredTotal === 0 ? (
+            <Card style={CardStyle.White} className="flex items-center gap-3">
+              <p className="text-gray-600">{emptyStateMessage}</p>
+              {filterSummary && (
+                <Button
+                  onClick={clearFilter}
+                  color={ButtonColor.White}
+                  size="small"
+                >
+                  Clear filter
+                </Button>
+              )}
             </Card>
           ) : (
             <>
               {/* Response Navigator */}
               <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+                {filterSummary && (
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <div className="text-sm text-gray-600">
+                      Filtered:{" "}
+                      <span className="font-medium text-gray-900">
+                        {filterSummary.fieldLabel}
+                      </span>{" "}
+                      — {filterSummary.description}{" "}
+                      <span className="text-gray-400">
+                        ({filteredTotal} of {total})
+                      </span>
+                    </div>
+                    <Button
+                      onClick={clearFilter}
+                      color={ButtonColor.White}
+                      size="small"
+                    >
+                      Clear filter
+                    </Button>
+                  </div>
+                )}
                 <div className="flex items-center justify-between flex-wrap md:flex-nowrap">
                   {/* Pagination Controls */}
                   <div className="flex items-center gap-1">
@@ -448,7 +700,11 @@ const FormResponses: React.FC = () => {
         </div>
       )}
       {tab === "stats" && (
-        <FormResponseStatistics form={form} responses={responses} />
+        <FormResponseStatistics
+          form={form}
+          responses={responses}
+          onFilterSelect={handleStatFilter}
+        />
       )}
     </div>
   );
