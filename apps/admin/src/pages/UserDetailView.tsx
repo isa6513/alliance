@@ -344,7 +344,7 @@ const UserDetailView: React.FC = () => {
         {/* Left Column */}
         <div className="lg:col-span-3 space-y-4">
           {/* Actions Table */}
-          <section>
+          <section className="max-h-128 overflow-y-auto">
             {actionSummaries.length ? (
               <div className="border border-zinc-200 rounded overflow-hidden">
                 <table className="w-full text-sm">
