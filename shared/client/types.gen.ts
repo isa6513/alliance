@@ -4619,6 +4619,21 @@ export type ActionsActionRelationsResponses = {
 
 export type ActionsActionRelationsResponse = ActionsActionRelationsResponses[keyof ActionsActionRelationsResponses];
 
+export type ActionsActionRelationsForUserData = {
+    body?: never;
+    path: {
+        userId: number;
+    };
+    query?: never;
+    url: '/actions/action-relations/{userId}';
+};
+
+export type ActionsActionRelationsForUserResponses = {
+    200: UserActionRelationsResponseDto;
+};
+
+export type ActionsActionRelationsForUserResponse = ActionsActionRelationsForUserResponses[keyof ActionsActionRelationsForUserResponses];
+
 export type ActionsGetCommunityMemberInfoAdminData = {
     body?: never;
     path: {

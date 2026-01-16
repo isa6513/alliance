@@ -338,13 +338,6 @@ export class UserController {
     );
   }
 
-  // @Get('action-relations')
-  // @UseGuards(AdminGuard)
-  // @ApiOkResponse({ type: UserActionRelationsResponseDto })
-  // async actionRelations(): Promise<UserActionRelationsResponseDto> {
-  //   return this.actionsService.getUserActionRelations();
-  // }
-
   @Get('members')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [ProfileDto] })

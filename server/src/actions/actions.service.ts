@@ -2362,6 +2362,19 @@ export class ActionsService {
     return this.findActionRelationsForUsers(usersPromise);
   }
 
+  async findUserActionRelationsForUser(
+    userId: number,
+  ): Promise<UserActionRelationsResponseDto> {
+    const userPromise = this.userService
+      .findOneOrFail(userId, {
+        awayRanges: true,
+        contractEvents: true,
+        tags: true,
+      })
+      .then((user) => [user]);
+    return this.findActionRelationsForUsers(userPromise, 100);
+  }
+
   async findMemberInfoByCommunityId(
     communityId: number,
   ): Promise<CommunityUserInfoDto> {

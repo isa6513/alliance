@@ -859,6 +859,15 @@ export class ActionsController {
     return this.actionsService.findUserActionRelations();
   }
 
+  @Get('action-relations/:userId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: UserActionRelationsResponseDto })
+  async actionRelationsForUser(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<UserActionRelationsResponseDto> {
+    return this.actionsService.findUserActionRelationsForUser(userId);
+  }
+
   @Get('communityMemberInfo/:communityId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CommunityUserInfoDto })

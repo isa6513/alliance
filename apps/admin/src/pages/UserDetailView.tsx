@@ -2,13 +2,13 @@ import {
   analyticsGetTimeSpentPerUser,
   analyticsGetTimeSpentPerUserTotal,
   notifsNotifsForUser,
-  actionsActionRelations as userGetActionRelations,
   userAddUserToTag,
   userGetTags,
   userList,
   userRemoveUserFromTag,
   userGetAwayRangeForUser,
   tasksGetFormsForUserSid,
+  actionsActionRelationsForUser,
 } from "@alliance/shared/client";
 import { getApiUrl } from "@alliance/sharedweb/lib/config";
 import {
@@ -53,7 +53,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
     userList(),
     userGetAwayRangeForUser({ path: { id: userId } }),
     userGetTags(),
-    userGetActionRelations(),
+    actionsActionRelationsForUser({ path: { userId } }),
     analyticsGetTimeSpentPerUser(),
     analyticsGetTimeSpentPerUserTotal(),
     notifsNotifsForUser({ path: { id: userId } }),
@@ -209,7 +209,7 @@ const UserDetailView: React.FC = () => {
       ? "Signed"
       : "Suspended";
   const tagKey = useCallback(
-    (tagId: number) => `${user.id}-${tagId}`,
+    (tagId: string) => `${user.id}-${tagId}`,
     [user.id]
   );
 
@@ -224,7 +224,7 @@ const UserDetailView: React.FC = () => {
   }, []);
 
   const handleTagToggle = useCallback(
-    async (tagId: number, nextChecked: boolean) => {
+    async (tagId: string, nextChecked: boolean) => {
       const key = tagKey(tagId);
       setPendingTagOps((prev) => {
         const next = new Set(prev);
