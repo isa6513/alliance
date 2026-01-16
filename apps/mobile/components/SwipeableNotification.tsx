@@ -11,11 +11,12 @@ import {
   GestureDetector,
   TouchableOpacity,
 } from "react-native-gesture-handler";
-import { Check, View } from "lucide-react-native";
+import { Check } from "lucide-react-native";
 import { formatTime } from "@alliance/shared/lib/utils";
 import Text from "./system/Text";
 import ProfileImage from "./ProfileImage";
 import { NotificationDto } from "@alliance/shared/client";
+import { View } from "react-native";
 
 const SWIPE_THRESHOLD = -80;
 
