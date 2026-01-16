@@ -111,12 +111,14 @@ const CommunityPage = () => {
         .map((action) => action.latestMemberActionDeadline)
         .filter((timestamp) => timestamp !== null)
     );
-    return activeActions.filter(
-      (action) =>
-        action.latestMemberActionDeadline !== null &&
-        action.latestMemberActionDeadline <
-          earliestDeadline + CURRENT_ACTION_INTERVAL_SIZE_MS
-    );
+    return Number.isFinite(earliestDeadline)
+      ? activeActions.filter(
+          (action) =>
+            action.latestMemberActionDeadline !== null &&
+            action.latestMemberActionDeadline <
+              earliestDeadline + CURRENT_ACTION_INTERVAL_SIZE_MS
+        )
+      : activeActions;
   }, [activeActions, activeActionSuites, selectedSuite]);
 
   const { completedAllCurrentActions, nCompleted, nTotal } = useMemo<{
@@ -308,21 +310,21 @@ const CommunityPage = () => {
 
   const actionDisplay = useMemo(() => {
     if (selectedActions.length === 1) {
-      if (selectedSuite === CURRENT_ACTIONS_DROPDOWN_DISPLAY) {
-        return "the current action";
+      if (!currentActionsSelected) {
+        return "the previous action";
       }
-      if (currentActionsSelected) {
-        return "the selected action";
-      }
-      return "the previous action";
+      return selectedSuite === CURRENT_ACTIONS_DROPDOWN_DISPLAY ||
+        selectedSuite === null
+        ? "the current action"
+        : "the selected action";
     }
-    if (selectedSuite === CURRENT_ACTIONS_DROPDOWN_DISPLAY) {
-      return "current actions";
+    if (!currentActionsSelected) {
+      return "the previous actions";
     }
-    if (currentActionsSelected) {
-      return "selected actions";
-    }
-    return "the previous actions";
+    return selectedSuite === CURRENT_ACTIONS_DROPDOWN_DISPLAY ||
+      selectedSuite === null
+      ? "current actions"
+      : "selected actions";
   }, [selectedActions.length, currentActionsSelected, selectedSuite]);
 
   if (!community) {
@@ -381,7 +383,7 @@ const CommunityPage = () => {
                   <DropdownSelect
                     options={suiteDropdownOptions}
                     value={selectedSuite}
-                    onChange={(_, suiteId) => setSelectedSuite(suiteId)}
+                    onChange={(_, suiteName) => setSelectedSuite(suiteName)}
                   ></DropdownSelect>
                   <br />
                 </>
