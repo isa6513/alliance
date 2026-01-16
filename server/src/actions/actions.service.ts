@@ -411,32 +411,17 @@ export class ActionsService {
 
     return await Promise.all(
       filtered.map(async (action) => {
-        let shouldParticipate = false;
-        if (
-          user &&
+        const shouldParticipate =
+          !!user &&
           action.events.some(
             (event) => event.newStatus === ActionStatus.MemberAction,
-          )
-        ) {
-          const targetTagIds = new Set(
-            (action.participatingTags || []).map((tag) => tag.id),
-          );
-          const manualCohortUserIdSet = action.manualCohortUserIds
-            ? new Set(action.manualCohortUserIds)
-            : undefined;
-          shouldParticipate =
-            this.actionEventRecipientService.computeShouldParticipate({
-              eventDate: action.events.find(
-                (event) => event.newStatus === ActionStatus.MemberAction,
-              )!.date,
-              everyoneShouldComplete: action.everyoneShouldComplete,
-              manualCohortUserIds: manualCohortUserIdSet,
-              targetTagIds,
-              useManualCohort: action.useManualCohort,
-              user,
-              userDismissed: actionsDismissed.has(action.id),
-            });
-        }
+          ) &&
+          !actionsDismissed.has(action.id) &&
+          computeIsTaggedOrInManualCohort({
+            action,
+            user,
+            includeSuspended: false,
+          });
 
         return new ActionDto(action, {
           canParticipate: user
