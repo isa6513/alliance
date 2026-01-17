@@ -18,12 +18,14 @@ const links: NavbarPage[] = [
 interface PrelaunchNavbarProps {
   transparent?: boolean;
   absolute?: boolean;
+  showLogo?: boolean;
   ref?: React.RefObject<HTMLDivElement | null>;
 }
 
 const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
   transparent = true,
   absolute = true,
+  showLogo = true,
   ref,
 }: PrelaunchNavbarProps) => {
   const { isAuthenticated } = useAuth();
@@ -40,21 +42,25 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
     <div
       className={`
       flex flex-col sm:flex-row md:gap-y-4 ${absolute ? "absolute" : "relative"}
-      w-screen justify-between items-center py-4 md:py-5 px-24 top-0 left-0 z-10 text-[14pt] transition-[padding,background-color] duration-300 ${
+      w-screen ${
+        showLogo ? "justify-between" : "justify-end"
+      } items-center py-4 md:py-5 px-24 top-0 left-0 z-10 text-[14pt] transition-[padding,background-color] duration-300 ${
         transparent
           ? "bg-transparent text-white"
           : "text-black bg-white border-b md:border-none border-zinc-200"
       }`}
       ref={ref}
     >
-      <h1
-        className="font-bold font-berlingske text-lg md:text-2xl cursor-pointer text-nowrap"
-        onClick={() => {
-          navigate(href("/"));
-        }}
-      >
-        THE ALLIANCE
-      </h1>
+      {showLogo && (
+        <h1
+          className="font-bold font-berlingske text-lg md:text-2xl cursor-pointer text-nowrap"
+          onClick={() => {
+            navigate(href("/"));
+          }}
+        >
+          THE ALLIANCE
+        </h1>
+      )}
       <div className="flex flex-row items-center gap-x-5 sm:gap-x-10 text-base sm:text-lg">
         {links.map((link) => (
           <>
