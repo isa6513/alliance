@@ -15,8 +15,8 @@ const PeoplePage: React.FC = () => {
       "Mark Xu": 10,
       "Sidney Hough": 7,
       "Casey Manning": 15,
-      "Eamon OCearuil": 24,
       "Charles Lien": 64,
+      "Shreshth Srivastava": 23
     };
   }, []);
 
