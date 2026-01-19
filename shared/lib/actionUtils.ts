@@ -1,7 +1,9 @@
 import {
   ActionDto,
   ActionEventDto,
+  CommunityUserInfoDto,
   UserActionRelationDetailDto,
+  UserActionSummaryDto,
   UserAwayRangeDto,
 } from "../client";
 
@@ -194,51 +196,168 @@ const STATUS_TO_COMPLETION: Record<
   wont_complete: "none",
 };
 
-export function calculateCompletionData(params: {
-  filteredActionIds: number[];
-  userActionRelations: Record<number, UserActionRelationDetailDto[]>;
-}): {
+export type CompletionData = {
   completedAllCurrentActions: Record<number, boolean>;
+  nActions: number;
   nCompleted: number;
   nTotal: number;
-} {
-  const { filteredActionIds, userActionRelations } = params;
-
-  const filteredActionIdSet = new Set(filteredActionIds);
-  const anyComplete = new Set<number>();
-  const anyIncomplete = new Set<number>();
-  for (const [userIdKey, relationDetails] of Object.entries(
-    userActionRelations
-  )) {
-    const userId = Number(userIdKey);
-    for (const relationDetail of relationDetails) {
-      if (!filteredActionIdSet.has(relationDetail.actionId)) {
-        continue;
-      }
-      const completion = STATUS_TO_COMPLETION[relationDetail.status];
-      if (completion === "complete") {
-        anyComplete.add(userId);
-      }
-      if (completion === "incomplete") {
-        anyIncomplete.add(userId);
-      }
+};
+export function calculateAllCompletionData(params: {
+  actions: CommunityUserInfoDto["actions"];
+  users: CommunityUserInfoDto["users"];
+  actionDeadlineWindowMs: number;
+}):
+  | {
+      previous: undefined;
+      current: CompletionData;
+      bySuiteId: Map<number, CompletionData>;
     }
+  | {
+      previous: CompletionData;
+      current: undefined;
+      bySuiteId: undefined;
+    } {
+  const { actions, users, actionDeadlineWindowMs } = params;
+
+  const relationDetailByActionThenUser = users.reduce(
+    (acc, { userId, relations }) => {
+      for (const relation of relations) {
+        let details = acc.get(relation.actionId);
+        if (!details) {
+          details = new Map();
+          acc.set(relation.actionId, details);
+        }
+
+        details.set(userId, relation);
+      }
+      return acc;
+    },
+    new Map<number, Map<number, UserActionRelationDetailDto>>()
+  );
+
+  function calculateCompletionData(
+    actionIds: UserActionSummaryDto[]
+  ): CompletionData {
+    const { anyComplete, anyIncomplete } = actionIds.reduce(
+      (acc, action) => {
+        const relationDetailByUser = relationDetailByActionThenUser.get(
+          action.id
+        );
+        if (!relationDetailByUser) {
+          return acc;
+        }
+        for (const [userId, relationDetail] of relationDetailByUser) {
+          const completion = STATUS_TO_COMPLETION[relationDetail.status];
+          if (completion === "complete") {
+            acc.anyComplete.add(userId);
+          }
+          if (completion === "incomplete") {
+            acc.anyIncomplete.add(userId);
+          }
+        }
+        return acc;
+      },
+      {
+        anyComplete: new Set<number>(),
+        anyIncomplete: new Set<number>(),
+      }
+    );
+
+    const completedAllCurrentActions = Object.fromEntries(
+      Array.from(anyComplete.union(anyIncomplete)).map((userId) => [
+        userId,
+        !anyIncomplete.has(userId),
+      ])
+    );
+    const completedAllValues = Object.values(completedAllCurrentActions);
+    return {
+      completedAllCurrentActions,
+      nCompleted: completedAllValues.filter((completed) => completed).length,
+      nTotal: completedAllValues.length,
+      nActions: actionIds.length,
+    };
   }
 
-  const completedAllCurrentActions: Record<number, boolean> = {};
-  for (const userIdKey of Object.keys(userActionRelations)) {
-    const userId = Number(userIdKey);
-    if (anyComplete.has(userId)) {
-      completedAllCurrentActions[userId] = true;
-    }
-    if (anyIncomplete.has(userId)) {
-      completedAllCurrentActions[userId] = false;
-    }
+  const actionsWithUserRelations = actions.filter(
+    (
+      action
+    ): action is typeof action & {
+      latestMemberActionDeadline: number;
+    } =>
+      action.latestMemberActionDeadline !== null &&
+      calculateCompletionData([action]).nTotal > 0
+  );
+  if (actionsWithUserRelations.length === 0) {
+    return {
+      previous: undefined,
+      current: calculateCompletionData([]),
+      bySuiteId: new Map(),
+    };
   }
-  const completedAllValues = Object.values(completedAllCurrentActions);
+
+  const activeActions = actionsWithUserRelations.filter(
+    (
+      action
+    ): action is typeof action & {
+      suiteId: number;
+    } => action.status === "member_action" && action.suiteId !== undefined
+  );
+  if (activeActions.length === 0) {
+    const previousActions = actionsWithUserRelations.filter(
+      (action) => action.latestMemberActionDeadline < Date.now()
+    );
+    if (previousActions.length === 0) {
+      return {
+        previous: undefined,
+        current: calculateCompletionData([]),
+        bySuiteId: new Map(),
+      };
+    }
+
+    const latestPreviousDeadline = Math.max(
+      ...previousActions.map((action) => action.latestMemberActionDeadline)
+    );
+    const selectedPreviousActions = previousActions.filter(
+      (action) =>
+        action.latestMemberActionDeadline >=
+        latestPreviousDeadline - actionDeadlineWindowMs
+    );
+    return {
+      previous: calculateCompletionData(selectedPreviousActions),
+      current: undefined,
+      bySuiteId: undefined,
+    };
+  }
+
+  const earliestDeadline = Math.min(
+    ...activeActions.map((action) => action.latestMemberActionDeadline)
+  );
+  const currentActions = activeActions.filter(
+    (action) =>
+      action.latestMemberActionDeadline <
+      earliestDeadline + actionDeadlineWindowMs
+  );
+  const actionsBySuite = activeActions.reduce((acc, action) => {
+    let actions = acc.get(action.suiteId);
+    if (!actions) {
+      actions = [];
+      acc.set(action.suiteId, actions);
+    }
+
+    actions.push(action);
+    return acc;
+  }, new Map<number, typeof activeActions>());
+
+  const bySuiteId = new Map(
+    Array.from(actionsBySuite).map(([suiteId, actions]) => [
+      suiteId,
+      calculateCompletionData(actions),
+    ])
+  );
+
   return {
-    completedAllCurrentActions,
-    nCompleted: completedAllValues.filter((completed) => completed).length,
-    nTotal: completedAllValues.length,
+    previous: undefined,
+    current: calculateCompletionData(currentActions),
+    bySuiteId,
   };
 }
