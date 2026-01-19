@@ -264,7 +264,7 @@ export function calculateAllCompletionData(params: {
     );
 
     const completedAllCurrentActions = Object.fromEntries(
-      Array.from(anyComplete.union(anyIncomplete)).map((userId) => [
+      Array.from(new Set([...anyComplete, ...anyIncomplete])).map((userId) => [
         userId,
         !anyIncomplete.has(userId),
       ])
