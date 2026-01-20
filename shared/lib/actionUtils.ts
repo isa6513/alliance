@@ -202,6 +202,57 @@ export type CompletionData = {
   nCompleted: number;
   nTotal: number;
 };
+
+export function calculateCompletionData(params: {
+  filteredActionIds: number[];
+  userActionRelations: Record<number, UserActionRelationDetailDto[]>;
+}): {
+  completedAllCurrentActions: Record<number, boolean>;
+  nCompleted: number;
+  nTotal: number;
+} {
+  const { filteredActionIds, userActionRelations } = params;
+
+  const filteredActionIdSet = new Set(filteredActionIds);
+  const anyComplete = new Set<number>();
+  const anyIncomplete = new Set<number>();
+  for (const [userIdKey, relationDetails] of Object.entries(
+    userActionRelations
+  )) {
+    const userId = Number(userIdKey);
+    for (const relationDetail of relationDetails) {
+      if (!filteredActionIdSet.has(relationDetail.actionId)) {
+        continue;
+      }
+      const completion = STATUS_TO_COMPLETION[relationDetail.status];
+      if (completion === "complete") {
+        anyComplete.add(userId);
+      }
+      if (completion === "incomplete") {
+        anyIncomplete.add(userId);
+      }
+    }
+  }
+
+  const completedAllCurrentActions: Record<number, boolean> = {};
+  for (const userIdKey of Object.keys(userActionRelations)) {
+    const userId = Number(userIdKey);
+    if (anyComplete.has(userId)) {
+      completedAllCurrentActions[userId] = true;
+    }
+    if (anyIncomplete.has(userId)) {
+      completedAllCurrentActions[userId] = false;
+    }
+  }
+  const completedAllValues = Object.values(completedAllCurrentActions);
+
+  return {
+    completedAllCurrentActions,
+    nCompleted: completedAllValues.filter((completed) => completed).length,
+    nTotal: completedAllValues.length,
+  };
+}
+
 export function calculateAllCompletionData(params: {
   actions: CommunityUserInfoDto["actions"];
   users: CommunityUserInfoDto["users"];
