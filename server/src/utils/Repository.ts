@@ -2,16 +2,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Temporal } from '@js-temporal/polyfill';
-import { User } from 'src/user/entities/user.entity';
 import {
-  EntityManager,
-  EntityTarget,
   ObjectLiteral,
-  QueryRunner,
   Repository as TypeOrmRepository,
   FindManyOptions,
   FindOneOptions,
-  RemoveOptions,
   ObjectId,
 } from 'typeorm';
 
@@ -70,9 +65,7 @@ type $EagerEvaluation<T> =
         ? {
             [K in keyof T as [T[K]] extends [never]
               ? never
-              : [T[K]] extends [undefined]
-                ? never
-                : K]: $EagerEvaluation<T[K]>;
+              : K]: $EagerEvaluation<T[K]>;
           }
         : T;
 type _typecheck_StripItems =
@@ -84,9 +77,11 @@ type _typecheck_StripItems =
       >
     >
   | Assert<Equal<$EagerEvaluation<{ param: never }>, {}>>
-  | Assert<Equal<$EagerEvaluation<{ param: undefined }>, {}>>
-  | Assert<Equal<$EagerEvaluation<{ param?: never }>, {}>>
-  | Assert<Equal<$EagerEvaluation<{ param?: undefined }>, {}>>
+  | Assert<Equal<$EagerEvaluation<{ param: undefined }>, { param: undefined }>>
+  | Assert<Equal<$EagerEvaluation<{ param?: never }>, { param?: never }>>
+  | Assert<
+      Equal<$EagerEvaluation<{ param?: undefined }>, { param?: undefined }>
+    >
   | Assert<Equal<$EagerEvaluation<{ param?: null }>, { param?: null }>>
   | Assert<
       Equal<
@@ -216,7 +211,7 @@ type ResolveRelationProp<Prop, R> =
       ? Array<ResolveRelationProp<NonNullable<I>, R> | (I & (null | undefined))>
       : IsRelation<Prop> extends true
         ? R extends true
-          ? NoRelations<Prop>
+          ? WithRelations<Prop, {}>
           : R extends Relations<Prop>
             ? WithRelations<Prop, R>
             : never
@@ -225,13 +220,23 @@ export type WithRelations<
   Entity,
   R extends Relations<Entity>,
 > = NoRelations<Entity> & {
-  [K in keyof R as R[K] extends undefined | never
-    ? never
-    : K]: K extends keyof Entity
-    ?
-        | ResolveRelationProp<NonNullable<Entity[K]>, R[K]>
-        | (Entity[K] & (null | undefined))
+  [K in keyof Entity as K extends keyof Relations<Entity>
+    ? K extends keyof R
+      ? R[K] extends undefined
+        ? never
+        : K
+      : never
+    : never]-?: K extends keyof R
+    ? ResolveRelationProp<NonNullable<Entity[K]>, R[K]> | (Entity[K] & null)
     : never;
+} & {
+  [K in keyof Entity as K extends keyof Relations<Entity>
+    ? K extends keyof R
+      ? R[K] extends undefined
+        ? K
+        : never
+      : K
+    : never]: undefined;
 };
 type _typecheck_WithRelations =
   | Assert<
@@ -270,7 +275,9 @@ type _typecheck_WithRelations =
             {}
           >
         >,
-        {}
+        {
+          param: undefined;
+        }
       >
     >
   | Assert<
@@ -283,7 +290,9 @@ type _typecheck_WithRelations =
             { param: undefined }
           >
         >,
-        {}
+        {
+          param: undefined;
+        }
       >
     >
   | Assert<
@@ -309,7 +318,7 @@ type _typecheck_WithRelations =
             { param: true }
           >
         >,
-        { param: { subparam: string } | undefined }
+        { param: { subparam: string } }
       >
     >
   | Assert<
@@ -335,7 +344,7 @@ type _typecheck_WithRelations =
             { param: true }
           >
         >,
-        { param: { subparam: string }[] | undefined }
+        { param: { subparam: string }[] }
       >
     >
   | Assert<
@@ -348,7 +357,7 @@ type _typecheck_WithRelations =
             { param: true }
           >
         >,
-        { param: ({ subparam: string } | null)[] | undefined }
+        { param: ({ subparam: string } | null)[] }
       >
     >
   | Assert<
@@ -374,7 +383,7 @@ type _typecheck_WithRelations =
             { param: true }
           >
         >,
-        { param: Promise<{ subparam: string }> | undefined }
+        { param: Promise<{ subparam: string }> }
       >
     >
   | Assert<
@@ -387,7 +396,7 @@ type _typecheck_WithRelations =
             { param: true }
           >
         >,
-        { param: Promise<{ subparam: string } | null> | undefined }
+        { param: Promise<{ subparam: string } | null> }
       >
     >
   | Assert<
@@ -403,7 +412,7 @@ type _typecheck_WithRelations =
             { param: true }
           >
         >,
-        { param: { subparam: string } }
+        { param: { subparam: string; subparam2: undefined } }
       >
     >
   | Assert<
@@ -419,7 +428,7 @@ type _typecheck_WithRelations =
             { param: { subparam2: undefined } }
           >
         >,
-        { param: { subparam: string } }
+        { param: { subparam: string; subparam2: undefined } }
       >
     >
   | Assert<
@@ -451,7 +460,7 @@ type _typecheck_WithRelations =
             { param: true }
           >
         >,
-        { param: { subparam1: string } | undefined }
+        { param: { subparam1: string; subparam2: undefined } }
       >
     >;
 
