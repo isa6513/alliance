@@ -351,11 +351,11 @@ const UsersList: React.FC = () => {
         <div className="flex flex-row gap-3 items-center">
           <DropdownSelect
             options={UserFilterMode}
-            secondaryLabel={(_, mode) =>
+            secondaryLabel={([, mode]) =>
               (modeToUsers[mode]?.length ?? 0).toString()
             }
             value={filterMode}
-            onChange={(_, mode) => setFilterMode(mode)}
+            onChange={([, mode]) => setFilterMode(mode)}
           />
           <div className="relative" ref={tagDropdownRef}>
             <button

@@ -354,8 +354,7 @@ const CommunityPage = () => {
                   <DropdownSelect
                     options={suiteDropdownOptions}
                     value={suiteDropdownOptions[selectedSuite]}
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    onChange={(selectedSuite, $unused) =>
+                    onChange={([selectedSuite]) =>
                       setSelectedSuite(selectedSuite)
                     }
                   ></DropdownSelect>

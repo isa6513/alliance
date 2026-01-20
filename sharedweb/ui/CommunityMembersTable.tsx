@@ -149,11 +149,11 @@ const CommunityMembersTable = ({
                   </p>
                   <DropdownSelect
                     options={CommunityMembersFilterMode}
-                    secondaryLabel={(_, mode) =>
+                    secondaryLabel={([, mode]) =>
                       membersByFilterMode[mode].length.toString()
                     }
                     value={filterMode}
-                    onChange={(_, mode) => setFilterMode(mode)}
+                    onChange={([, mode]) => setFilterMode(mode)}
                   />
                 </div>
               </td>

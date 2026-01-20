@@ -37,9 +37,9 @@ const ActionsListPage = () => {
         <p>Filter by:</p>
         <DropdownSelect
           options={FilterMode}
-          secondaryLabel={(_, mode) => modeToActions[mode].length.toString()}
+          secondaryLabel={([, mode]) => modeToActions[mode].length.toString()}
           value={filterMode}
-          onChange={(_, mode) => setFilterMode(mode)}
+          onChange={([, mode]) => setFilterMode(mode)}
         />
       </div>
 

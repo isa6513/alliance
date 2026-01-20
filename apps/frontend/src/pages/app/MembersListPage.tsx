@@ -114,9 +114,9 @@ const MembersListPage = () => {
 
         <DropdownSelect
           options={MemberFilterMode}
-          secondaryLabel={(_, mode) => secondaryLabels[mode]}
+          secondaryLabel={([, mode]) => secondaryLabels[mode]}
           value={filterMode}
-          onChange={(_, mode) => setFilterMode(mode)}
+          onChange={([, mode]) => setFilterMode(mode)}
         />
       </div>
 

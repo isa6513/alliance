@@ -10,9 +10,9 @@ type KVPair<T extends EnumType> = {
 
 type DropdownSelectProps<T extends EnumType> = {
   options: T;
-  secondaryLabel?: (...args: KVPair<T>) => string | undefined;
+  secondaryLabel?: (args: KVPair<T>) => string | undefined;
   value: T[keyof T];
-  onChange: (...args: KVPair<T>) => void;
+  onChange: (args: KVPair<T>) => void;
 };
 
 function DropdownSelect<T extends EnumType>({
@@ -45,7 +45,7 @@ function DropdownSelect<T extends EnumType>({
           <button
             key={value}
             onClick={() => {
-              onChange(key, value);
+              onChange([key, value]);
               setIsOpen(false);
             }}
             className="px-3 pr-3 py-2 hover:bg-zinc-50 text-left font-ibm text-sm"
@@ -55,9 +55,9 @@ function DropdownSelect<T extends EnumType>({
           >
             <div className="flex flex-row justify-between items-center">
               <span>{value}</span>
-              {secondaryLabel?.(key, value) && (
+              {secondaryLabel?.([key, value]) && (
                 <span className="text-zinc-500 !font-mono">
-                  {secondaryLabel(key, value)}
+                  {secondaryLabel([key, value])}
                 </span>
               )}
             </div>

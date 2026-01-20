@@ -291,7 +291,7 @@ const AwayRangesSection: React.FC = () => {
                     <DropdownSelect
                       options={ReasonDropdownOption}
                       value={editReason}
-                      onChange={(_, reason) => setEditReason(reason)}
+                      onChange={([, reason]) => setEditReason(reason)}
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -420,7 +420,7 @@ const AwayRangesSection: React.FC = () => {
             <DropdownSelect
               options={ReasonDropdownOption}
               value={selectedReason}
-              onChange={(_, reason) => setSelectedReason(reason)}
+              onChange={([, reason]) => setSelectedReason(reason)}
             />
           </div>
           <div className="flex flex-col gap-1">
