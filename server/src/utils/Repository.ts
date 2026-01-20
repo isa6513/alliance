@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Temporal } from '@js-temporal/polyfill';
+import { User } from 'src/user/entities/user.entity';
 import {
   EntityManager,
   EntityTarget,
@@ -454,64 +455,19 @@ type _typecheck_WithRelations =
       >
     >;
 
-export class Repository<
-  Entity extends ObjectLiteral,
-> extends TypeOrmRepository<Entity> {
-  constructor(
-    target: EntityTarget<Entity>,
-    manager: EntityManager,
-    queryRunner?: QueryRunner,
-  ) {
-    super(target, manager, queryRunner);
-  }
-
-  /** @deprecated use {@link findTyped} instead */
-  find = super.find;
-  findTyped<R extends Relations<Entity>>(
+export type Repository<Entity extends ObjectLiteral> = Omit<
+  TypeOrmRepository<Entity>,
+  'find' | 'findOne' | 'findOneOrFail' | 'remove'
+> & {
+  find<R extends Relations<Entity>>(
     options: FindManyOptions<Entity> & { relations?: R },
-  ): Promise<WithRelations<Entity, R>[]> {
-    return super.find(options) as unknown as Promise<
-      WithRelations<Entity, R>[]
-    >;
-  }
+  ): Promise<WithRelations<Entity, R>[]>;
 
-  /** @deprecated use {@link findOneTyped} instead */
-  findOne = super.findOne;
-  findOneTyped<R extends Relations<Entity>>(
+  findOne<R extends Relations<Entity>>(
     options: FindOneOptions<Entity> & { relations?: R },
-  ): Promise<WithRelations<Entity, R> | null> {
-    return super.findOne(options) as unknown as Promise<WithRelations<
-      Entity,
-      R
-    > | null>;
-  }
+  ): Promise<WithRelations<Entity, R> | null>;
 
-  /** @deprecated use {@link findOneOrFailTyped} instead */
-  findOneOrFail = super.findOneOrFail;
-  findOneOrFailTyped<R extends Relations<Entity>>(
+  findOneOrFail<R extends Relations<Entity>>(
     options: FindOneOptions<Entity> & { relations?: R },
-  ): Promise<WithRelations<Entity, R>> {
-    return super.findOneOrFail(options) as unknown as Promise<
-      WithRelations<Entity, R>
-    >;
-  }
-
-  removeTyped(
-    entities: NoRelations<Entity>[],
-    options?: RemoveOptions,
-  ): Promise<Entity[]>;
-  removeTyped(
-    entities: NoRelations<Entity>,
-    options?: RemoveOptions,
-  ): Promise<Entity>;
-
-  removeTyped(
-    entities: NoRelations<Entity>[] | NoRelations<Entity>,
-    options?: RemoveOptions,
-  ): Promise<Entity[]> | Promise<Entity> {
-    if (Array.isArray(entities)) {
-      return super.remove(entities as Entity[], options);
-    }
-    return super.remove(entities as Entity, options);
-  }
-}
+  ): Promise<WithRelations<Entity, R>>;
+};
