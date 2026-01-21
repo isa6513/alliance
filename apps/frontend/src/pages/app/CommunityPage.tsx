@@ -315,7 +315,6 @@ const CommunityPage = () => {
   const nonLeaderMembers = community.users.filter(
     (user) => !leaders.some((leader) => leader.id === user.id)
   );
-  console.log({ communities }, "asdf");
 
   return (
     <TwoColumnLayout
@@ -324,22 +323,9 @@ const CommunityPage = () => {
           <div className="flex flex-col gap-y-2 my-8 px-5 md:px-0">
             <div className="flex flex-row gap-x-2 items-start justify-between">
               <div className="flex flex-col gap-y-4 mb-8">
-                {communities && (
-                  <DropdownSelect
-                    options={Object.fromEntries(
-                      communities.map((community) => [
-                        community.id,
-                        community.name,
-                      ])
-                    )}
-                    value={"world"}
-                    onChange={() => {}}
-                  />
-                )}
                 <p className="font-serif font-semibold text-3xl md:text-4xl">
                   {community.name}
                 </p>
-
                 <AppMarkdownWrapper markdownContent={community.description} />
               </div>
 
