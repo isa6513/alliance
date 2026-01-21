@@ -104,15 +104,14 @@ const CommunityPage = () => {
 
   useEffect(() => {
     userGetMyCommunities().then((resp) => {
-      if (!resp.data || resp.data.length === 0) {
-        setLoading(false);
-        return;
+      if (resp.data && resp.data.length > 0) {
+        const community = resp.data[0];
+        community.users = community.users.filter(
+          (user) => user.hasActiveContract
+        );
+        setCommunity(community);
       }
-      const community = resp.data[0];
-      community.users = community.users.filter(
-        (user) => user.hasActiveContract
-      );
-      setCommunity(community);
+      setLoading(false);
     });
   }, []);
 
