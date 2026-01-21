@@ -4,7 +4,7 @@ import {
   UserActionSummaryDto,
   userGetCommunityMemberContactInfo,
   actionsGetCommunityMemberInfo,
-  userGetMyCommunity,
+  userGetMyCommunities,
   userLeaveCommunity,
   userGetOnetimeInvitesByCommunity,
   CommunityMemberContactInfoDto,
@@ -103,14 +103,16 @@ const CommunityPage = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    userGetMyCommunity().then((resp) => {
-      if (resp.data) {
-        resp.data.users = resp.data.users.filter(
-          (user) => user.hasActiveContract
-        );
-        setCommunity(resp.data);
+    userGetMyCommunities().then((resp) => {
+      if (!resp.data || resp.data.length === 0) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+      const community = resp.data[0];
+      community.users = community.users.filter(
+        (user) => user.hasActiveContract
+      );
+      setCommunity(community);
     });
   }, []);
 

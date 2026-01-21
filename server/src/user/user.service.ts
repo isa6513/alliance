@@ -992,21 +992,25 @@ export class UserService {
     return updated;
   }
 
-  async findUserCommunity(userId: number): Promise<Community | null> {
+  async findUserCommunities(userId: number): Promise<Community[]> {
     const user = await this.findOneOrFail(userId, { communities: true });
-    const communityId =
-      user.communities.length > 0 ? user.communities[0].id : null;
 
-    if (!communityId) {
-      return null;
-    }
-
-    return this.findCommunityOrFail(communityId, {
-      users: {
-        contractEvents: true,
+    const communities = await this.communityRepository.find({
+      where: { id: In(user.communities.map((c) => c.id)) },
+      relations: {
+        users: {
+          contractEvents: true,
+        },
+        leaders: true,
       },
-      leaders: true,
     });
+    function leaderKey(community: Community) {
+      return (community.leaders?.some((leader) => leader.id === userId) ??
+        false)
+        ? 0
+        : 1;
+    }
+    return communities.sort((a, b) => leaderKey(a) - leaderKey(b));
   }
 
   async findCommunityForUserOrFail(

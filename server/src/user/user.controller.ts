@@ -700,15 +700,14 @@ export class UserController {
     );
   }
 
-  @Get('myCommunity')
+  @Get('myCommunities')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: CommunityDto })
-  async getMyCommunity(@Request() req: JwtRequest) {
-    const community = await this.userService.findUserCommunity(req.user.sub);
-    if (!community) {
-      return null;
-    }
-    return new CommunityDto(community);
+  @ApiOkResponse({ type: CommunityDto, isArray: true })
+  async getMyCommunities(@Request() req: JwtRequest) {
+    const communities = await this.userService.findUserCommunities(
+      req.user.sub,
+    );
+    return communities.map((community) => new CommunityDto(community));
   }
 
   // @Get('communityMemberInfo')

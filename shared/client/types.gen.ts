@@ -3232,18 +3232,18 @@ export type UserGetOnetimeInvitesByRequesterResponses = {
 
 export type UserGetOnetimeInvitesByRequesterResponse = UserGetOnetimeInvitesByRequesterResponses[keyof UserGetOnetimeInvitesByRequesterResponses];
 
-export type UserGetMyCommunityData = {
+export type UserGetMyCommunitiesData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/user/myCommunity';
+    url: '/user/myCommunities';
 };
 
-export type UserGetMyCommunityResponses = {
-    200: CommunityDto;
+export type UserGetMyCommunitiesResponses = {
+    200: Array<CommunityDto>;
 };
 
-export type UserGetMyCommunityResponse = UserGetMyCommunityResponses[keyof UserGetMyCommunityResponses];
+export type UserGetMyCommunitiesResponse = UserGetMyCommunitiesResponses[keyof UserGetMyCommunitiesResponses];
 
 export type UserGetCommunityMemberContactInfoData = {
     body?: never;
