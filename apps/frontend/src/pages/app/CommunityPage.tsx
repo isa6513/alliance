@@ -123,11 +123,12 @@ const CommunityPage = () => {
         );
         setCommunities(resp.data);
         setCommunity(
-          (communityId
-            ? resp.data?.find(
-                (community) => community.id.toString() === communityId
-              )
-            : resp.data?.[0]) ?? null
+          ((communityId !== null &&
+            resp.data?.find(
+              (community) => community.id.toString() === communityId
+            )) ||
+            resp.data?.[0]) ??
+            null
         );
       }
       setLoading(false);
@@ -363,7 +364,8 @@ const CommunityPage = () => {
                     }}
                     className="font-serif font-semibold text-3xl md:text-4xl"
                   >
-                    {community.name}&nbsp;<ChevronDown />
+                    {community.name}&nbsp;
+                    <ChevronDown />
                   </Button>
                 ) : (
                   <p className="font-serif font-semibold text-3xl md:text-4xl">
