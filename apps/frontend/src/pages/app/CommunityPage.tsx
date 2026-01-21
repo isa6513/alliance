@@ -29,11 +29,12 @@ import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import CommunityActivityTab from "../../components/CommunityActivityTab";
 import TwoColumnLayout from "../../components/TwoColumnLayout";
 import FloatingChatPanel from "../../components/FloatingChatpanel";
-import { MessageSquare } from "lucide-react";
+import { ChevronDown, MessageSquare } from "lucide-react";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../../lib/config";
 import CommunityInvitesTabLeader from "../../components/CommunityInvitesTabLeader";
 import CommunityInvitesTabMember from "../../components/CommunityInvitesTabMember";
+import CommunitySelect from "../../components/CommunitySelect";
 import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
 import { useMediaQuery } from "../../lib/useMediaQuery";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
@@ -44,7 +45,14 @@ import {
 } from "@alliance/shared/lib/actionUtils";
 import { useMaxActionsPerWeek } from "@alliance/sharedweb/ui/UserProgressPills";
 
-type Tab = "activity" | "members" | "invites" | "about" | "edit" | "resources";
+type Tab =
+  | "activity"
+  | "members"
+  | "invites"
+  | "about"
+  | "edit"
+  | "resources"
+  | "select";
 
 const CURRENT_ACTION_WINDOW_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
 const CURRENT_ACTIONS_DROPDOWN_DISPLAY = "Current actions";
@@ -67,6 +75,7 @@ const CommunityPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tab = searchParams.get("tab") ?? "activity";
+  const communityId = searchParams.get("communityId");
 
   const maxActionsPerWeek = useMaxActionsPerWeek({
     actionSummaries: actionSummaries,
@@ -85,7 +94,7 @@ const CommunityPage = () => {
   > | null>(null);
 
   const [chatOpen, setChatOpen] = useState(false);
-  const community = communities?.[0] ?? null;
+  const [community, setCommunity] = useState<CommunityDto | null>(null);
 
   useEffect(() => {
     if (!community?.id) {
@@ -113,10 +122,17 @@ const CommunityPage = () => {
             ))
         );
         setCommunities(resp.data);
+        setCommunity(
+          (communityId
+            ? resp.data?.find(
+                (community) => community.id.toString() === communityId
+              )
+            : resp.data?.[0]) ?? null
+        );
       }
       setLoading(false);
     });
-  }, []);
+  }, [communityId]);
 
   const messagingEnabled = useMemo(() => {
     return isFeatureEnabled(Features.Messaging);
@@ -205,6 +221,22 @@ const CommunityPage = () => {
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev);
         next.set("tab", tab);
+        return next;
+      });
+    },
+    [setSearchParams]
+  );
+
+  const setCommunityId = useCallback(
+    (communityId: number | null) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        if (communityId === null) {
+          next.delete("communityId");
+        } else {
+          next.set("communityId", communityId.toString());
+        }
+        next.delete("tab");
         return next;
       });
     },
@@ -323,9 +355,21 @@ const CommunityPage = () => {
           <div className="flex flex-col gap-y-2 my-8 px-5 md:px-0">
             <div className="flex flex-row gap-x-2 items-start justify-between">
               <div className="flex flex-col gap-y-4 mb-8">
-                <p className="font-serif font-semibold text-3xl md:text-4xl">
-                  {community.name}
-                </p>
+                {communities && communities.length > 1 ? (
+                  <Button
+                    color={ButtonColor.Transparent}
+                    onClick={() => {
+                      setTab("select");
+                    }}
+                    className="font-serif font-semibold text-3xl md:text-4xl"
+                  >
+                    {community.name}&nbsp;<ChevronDown />
+                  </Button>
+                ) : (
+                  <p className="font-serif font-semibold text-3xl md:text-4xl">
+                    {community.name}
+                  </p>
+                )}
                 <AppMarkdownWrapper markdownContent={community.description} />
               </div>
 
@@ -453,6 +497,13 @@ const CommunityPage = () => {
                 }}
               />
             </Card>
+          )}
+          {tab === "select" && (
+            <CommunitySelect
+              currentCommunityId={community.id}
+              onSelectCommunity={setCommunityId}
+              communities={communities}
+            />
           )}
           <BottomSpacer />
           {!chatOpen && messagingEnabled && isLargeScreen && (
