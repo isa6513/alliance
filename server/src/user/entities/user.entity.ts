@@ -282,6 +282,11 @@ export class User {
   @Allow()
   pushesForFriendRequests: boolean;
 
+  @Column({ default: true })
+  @ApiProperty()
+  @Allow()
+  inOnboardingPhase: boolean;
+
   // Relations
 
   @OneToMany(() => ContractEvent, (event) => event.user, { cascade: true })
