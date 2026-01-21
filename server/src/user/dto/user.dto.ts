@@ -121,6 +121,7 @@ export class UserDto extends PickType(User, [
   'contractEvents',
   'shareInfoPublicly',
   'customCityString',
+  'isIntroductoryGroupMember',
 ]) {
   @ApiPropertyOptional()
   @IsOptional()

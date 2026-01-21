@@ -582,6 +582,7 @@ export type UserDto = {
     pushesForLikes: boolean;
     pushesForComments: boolean;
     pushesForFriendRequests: boolean;
+    isIntroductoryGroupMember: boolean;
     contractEvents: Array<ContractEvent>;
     communities: Array<Community>;
     invitedCommunities: Array<CommunityInvite>;
