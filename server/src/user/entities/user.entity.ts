@@ -285,7 +285,7 @@ export class User {
   @Column({ default: true })
   @ApiProperty()
   @Allow()
-  inOnboardingPhase: boolean;
+  isIntroductoryGroupMember: boolean;
 
   // Relations
 
