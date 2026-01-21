@@ -50,7 +50,7 @@ const CURRENT_ACTION_WINDOW_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
 const CURRENT_ACTIONS_DROPDOWN_DISPLAY = "Current actions";
 
 const CommunityPage = () => {
-  const [community, setCommunity] = useState<CommunityDto | null>(null);
+  const [communities, setCommunities] = useState<CommunityDto[] | null>(null);
   const [memberContactInfo, setMemberContactInfo] = useState<Record<
     number,
     CommunityMemberContactInfoDto
@@ -85,6 +85,7 @@ const CommunityPage = () => {
   > | null>(null);
 
   const [chatOpen, setChatOpen] = useState(false);
+  const community = communities?.[0] ?? null;
 
   useEffect(() => {
     if (!community?.id) {
@@ -104,12 +105,8 @@ const CommunityPage = () => {
 
   useEffect(() => {
     userGetMyCommunities().then((resp) => {
-      if (resp.data && resp.data.length > 0) {
-        const community = resp.data[0];
-        community.users = community.users.filter(
-          (user) => user.hasActiveContract
-        );
-        setCommunity(community);
+      if (resp.data) {
+        setCommunities(resp.data);
       }
       setLoading(false);
     });
