@@ -534,7 +534,7 @@ export type User = {
     pushesForLikes: boolean;
     pushesForComments: boolean;
     pushesForFriendRequests: boolean;
-    isOnboardingGroupMember: boolean;
+    isIntroductoryGroupMember: boolean;
     contractEvents: Array<ContractEvent>;
     communities: Array<Community>;
     invitedCommunities: Array<CommunityInvite>;
