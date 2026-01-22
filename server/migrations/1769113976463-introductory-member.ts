@@ -5,11 +5,6 @@ export class IntroductoryMember1769113976463 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      ALTER TABLE "user"
-      SET "isIntroductoryGroupMember" boolean NOT NULL DEFAULT true
-    `);
-
-    await queryRunner.query(`
       UPDATE "user" u
       SET "isIntroductoryGroupMember" = false
       FROM (
