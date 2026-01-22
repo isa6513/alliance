@@ -178,7 +178,7 @@ const CommunityMembersTable = ({
                         scope="col"
                         className="font-medium md:whitespace-nowrap"
                       >
-                        Next action due
+                        Next task due
                       </th>
                     </>
                   )}
@@ -235,7 +235,7 @@ const CommunityMembersTable = ({
                     Preferred contact time
                   </th>
                   <th scope="col" className="font-medium md:whitespace-nowrap">
-                    Next action due
+                    Next task due
                   </th>
                 </>
               )}
