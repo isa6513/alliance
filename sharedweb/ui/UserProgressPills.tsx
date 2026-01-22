@@ -169,7 +169,7 @@ const UserProgressPills = ({
   relationByActionId,
   pillHeight = "h-3",
 }: UserProgressPillsProps) => {
-  const pills: (JSX.Element | null)[] = useMemo(() => {
+  const pills: ReactNode[] = useMemo(() => {
     if (!maxActionsPerWeek) {
       return actions.map((action) => {
         const relation = relationByActionId[action.id];
