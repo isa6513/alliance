@@ -75,7 +75,7 @@ const CommunityMembersTable = ({
         return [+userIdKey, deadline];
       })
     );
-  }, [visibleActions]);
+  }, [visibleActions, userActionRelations]);
 
   const membersByFilterMode = useMemo(() => {
     return {
@@ -125,7 +125,13 @@ const CommunityMembersTable = ({
       }
       return 0;
     });
-  }, [amLeader, filterMode, memberContactInfo, membersByFilterMode]);
+  }, [
+    amLeader,
+    filterMode,
+    memberContactInfo,
+    membersByFilterMode,
+    deadlineTimestampByUserId,
+  ]);
 
   return (
     <div className="flex flex-col py-4">
