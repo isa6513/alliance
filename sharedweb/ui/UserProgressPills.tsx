@@ -4,7 +4,7 @@ import {
   UserActionSummaryDto,
 } from "@alliance/shared/client";
 import React, { Fragment } from "react";
-import { JSX, ReactNode, useMemo } from "react";
+import { JSX, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
 export type PillStatusData = {
   pillLabel: string;
@@ -114,7 +114,7 @@ export interface UserProgressPillsProps {
 }
 
 function EmptyPill() {
-  return <div className="relative group flex-1" />;
+  return <div className="relative group flex-1 min-w-4" />;
 }
 function Pill({
   action,
@@ -130,9 +130,9 @@ function Pill({
   const { pillLabel, pillStyle, pillSubtitleText, pillTextStyle } =
     pillStatusData;
   return (
-    <div key={action.id} className="relative group flex-1">
+    <div key={action.id} className="relative group flex-1 min-w-4">
       <div
-        className={`rounded flex items-center justify-center text-xs font-semibold min-w-2 ${pillStyle} ${pillHeight}`}
+        className={`rounded flex items-center justify-center text-xs font-semibold min-w-4 ${pillStyle} ${pillHeight}`}
         aria-label={`${action.name} – ${pillLabel}`}
       ></div>
       {pillStyle && (
@@ -169,6 +169,33 @@ const UserProgressPills = ({
   relationByActionId,
   pillHeight = "h-3",
 }: UserProgressPillsProps) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [maxVisiblePills, setMaxVisiblePills] = useState<number | null>(null);
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) {
+      return;
+    }
+
+    const minPillWidthPx = 24;
+    const pillGapPx = 4;
+    const updateMaxVisible = () => {
+      const availableWidth = element.clientWidth;
+      const maxPills = Math.max(
+        1,
+        Math.floor((availableWidth + pillGapPx) / (minPillWidthPx + pillGapPx))
+      );
+      console.log({ maxPills, availableWidth }, "asdf");
+      setMaxVisiblePills(maxPills);
+    };
+
+    updateMaxVisible();
+    const observer = new ResizeObserver(updateMaxVisible);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
   const pills: ReactNode[] = useMemo(() => {
     if (!maxActionsPerWeek) {
       return actions.map((action) => {
@@ -245,9 +272,17 @@ const UserProgressPills = ({
     return pills;
   }, [actions, maxActionsPerWeek, relationByActionId]);
 
+  const visiblePills = useMemo(() => {
+    const definedPills = pills.filter(Boolean);
+    if (maxVisiblePills && definedPills.length > maxVisiblePills) {
+      return definedPills.slice(-maxVisiblePills);
+    }
+    return definedPills;
+  }, [pills, maxVisiblePills]);
+
   return (
-    <div className="flex gap-1 w-full">
-      {pills.map((pill, i) => (
+    <div ref={containerRef} className="flex gap-1 w-full">
+      {visiblePills.map((pill, i) => (
         <Fragment key={i}>{pill}</Fragment>
       ))}
     </div>
