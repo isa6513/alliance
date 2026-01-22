@@ -138,11 +138,24 @@ function Pill({
       {pillStyle && (
         <div className="pointer-events-none absolute bottom-full mb-1 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] font-medium text-zinc-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100">
           <div className="flex flex-col items-center justify-center">
-            {action.name}
-            <span className={pillTextStyle}>
+            <p>{action.name}</p>
+            <p className="text-zinc-500">
+              {action.latestMemberActionDeadline === null
+                ? "No deadline"
+                : `Due ${new Date(
+                    action.latestMemberActionDeadline
+                  ).toLocaleString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}`}
+            </p>
+            <p className={pillTextStyle}>
               {pillSubtitleText}
               {additionalSubtitleText}
-            </span>
+            </p>
           </div>
         </div>
       )}
