@@ -181,19 +181,19 @@ const UserProgressPills = ({
     const minPillWidthPx = 24;
     const pillGapPx = 4;
     const updateMaxVisible = () => {
-      const availableWidth = element.clientWidth;
-      const maxPills = Math.max(
-        1,
-        Math.floor((availableWidth + pillGapPx) / (minPillWidthPx + pillGapPx))
+      setMaxVisiblePills(
+        Math.max(
+          1,
+          Math.floor(
+            (element.clientWidth + pillGapPx) / (minPillWidthPx + pillGapPx)
+          )
+        )
       );
-      console.log({ maxPills, availableWidth }, "asdf");
-      setMaxVisiblePills(maxPills);
     };
 
     updateMaxVisible();
     const observer = new ResizeObserver(updateMaxVisible);
     observer.observe(element);
-    return () => observer.disconnect();
   }, []);
 
   const pills: ReactNode[] = useMemo(() => {
