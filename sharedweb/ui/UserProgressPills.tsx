@@ -194,6 +194,7 @@ const UserProgressPills = ({
     updateMaxVisible();
     const observer = new ResizeObserver(updateMaxVisible);
     observer.observe(element);
+    return () => observer.disconnect();
   }, []);
 
   const pills: ReactNode[] = useMemo(() => {
