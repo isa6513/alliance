@@ -11,6 +11,7 @@ import ProfileImage from "./ProfileImage";
 import UserProgressPills from "./UserProgressPills";
 import DropdownIcon from "./icons/DropdownIcon";
 import UserDisplayName from "./UserDisplayName";
+import { formatDistance } from "date-fns";
 
 const CommunityMemberTableRow = ({
   profile,
@@ -20,6 +21,7 @@ const CommunityMemberTableRow = ({
   actionRelations,
   actions,
   maxActionsPerWeek,
+  deadlineTimestamp,
 }: {
   profile: ProfileDto;
   canExpand?: boolean;
@@ -28,6 +30,7 @@ const CommunityMemberTableRow = ({
   actions: UserActionSummaryDto[];
   maxActionsPerWeek: Record<number, number> | null;
   actionRelations: UserActionRelationDetailDto[];
+  deadlineTimestamp?: number | null;
 }) => {
   const relationByActionId = useMemo(() => {
     return actionRelations.reduce((acc, relation) => {
@@ -130,9 +133,24 @@ const CommunityMemberTableRow = ({
           </div>
         </td>
         {amLeader && (
-          <td className="w-px whitespace-nowrap text-sm md:text-base table-cell">
-            <p>{contactInfo?.preferredReminderTimeLeaderTz || "Anytime"}</p>
-          </td>
+          <>
+            <td className="w-px whitespace-nowrap text-sm md:text-base table-cell">
+              <p>{contactInfo?.preferredReminderTimeLeaderTz || "Anytime"}</p>
+            </td>
+            <td className="w-px whitespace-nowrap text-sm md:text-base table-cell">
+              {Number.isFinite(deadlineTimestamp ?? Infinity) ? (
+                <p>
+                  {formatDistance(
+                    new Date(deadlineTimestamp ?? Infinity),
+                    new Date(),
+                    { addSuffix: true }
+                  )}
+                </p>
+              ) : (
+                <p className="text-green">Complete</p>
+              )}
+            </td>
+          </>
         )}
       </tr>
       {expanded && (

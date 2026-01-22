@@ -3,6 +3,7 @@ import {
   CommunityMemberContactInfoDto,
   ProfileDto,
   UserActionRelationDetailDto,
+  UserActionRelationPillStatus,
   UserActionSummaryDto,
 } from "@alliance/shared/client";
 import { parseTimeInput } from "../forms/timeUtils";
@@ -14,6 +15,16 @@ export enum CommunityMembersFilterMode {
   Completed = "Completed",
   NotYetCompleted = "Not yet completed",
 }
+
+const DEADLINE_IN_CONSIDERATION = {
+  away: false,
+  completed: false,
+  missed_deadline: false,
+  not_required: false,
+  optional_task: false,
+  todo: true,
+  wont_complete: false,
+} satisfies Record<UserActionRelationPillStatus, boolean>;
 
 type CommunityMembersTableProps = {
   leaders: ProfileDto[];
@@ -42,6 +53,29 @@ const CommunityMembersTable = ({
   const visibleActions = useMemo(() => {
     return actions.filter((action) => action.status !== "planned");
   }, [actions]);
+  const deadlineTimestampByUserId = useMemo(() => {
+    const visibleActionsById = new Map(
+      visibleActions.map((action) => [action.id, action])
+    );
+
+    return new Map(
+      Object.entries(userActionRelations).map(([userIdKey, relations]) => {
+        let deadline = Infinity;
+        for (const relation of relations) {
+          const action = visibleActionsById.get(relation.actionId);
+          if (
+            !action ||
+            !DEADLINE_IN_CONSIDERATION[relation.status] ||
+            action.latestMemberActionDeadline === null
+          ) {
+            continue;
+          }
+          deadline = Math.min(deadline, action.latestMemberActionDeadline);
+        }
+        return [+userIdKey, deadline];
+      })
+    );
+  }, [visibleActions]);
 
   const membersByFilterMode = useMemo(() => {
     return {
@@ -63,6 +97,14 @@ const CommunityMembersTable = ({
         return 0;
       }
 
+      const deadlineA = deadlineTimestampByUserId.get(a.id) ?? Infinity;
+      const deadlineB = deadlineTimestampByUserId.get(b.id) ?? Infinity;
+      if (deadlineA < deadlineB) {
+        return -1;
+      }
+      if (deadlineA > deadlineB) {
+        return 1;
+      }
       const preferredTimeA =
         memberContactInfo?.[a.id]?.preferredReminderTimeLeaderTz ?? "";
       const preferredTimeB =
@@ -88,17 +130,22 @@ const CommunityMembersTable = ({
   return (
     <div className="flex flex-col py-4">
       <div className="">
-        <table className="w-full border-collapse table-fixed overflow-x-clip">
+        <table className="w-full border-collapse table-auto overflow-x-clip">
           <colgroup>
             <col className="w-[140px] md:w-[200px]" />
             <col />
-            {amLeader && <col className={`w-[90px] md:w-[180px]`} />}
+            {amLeader && (
+              <>
+                <col className="w-[1%]" />
+                <col className="w-[1%]" />
+              </>
+            )}
           </colgroup>
           {leaders.length > 0 && (
             <>
               <thead className="text-left bg-white">
                 <tr>
-                  <td colSpan={amLeader ? 3 : 2} className="px-0 pb-6">
+                  <td colSpan={amLeader ? 4 : 2} className="px-0 pb-6">
                     <p className="text-xl md:text-2xl font-semibold px-5 md:px-0">
                       Lead{leaders.length !== 1 ? "s" : ""}
                     </p>
@@ -114,12 +161,20 @@ const CommunityMembersTable = ({
                     Action history
                   </th>
                   {amLeader && (
-                    <th
-                      scope="col"
-                      className="font-medium md:whitespace-nowrap"
-                    >
-                      Preferred contact time
-                    </th>
+                    <>
+                      <th
+                        scope="col"
+                        className="font-medium md:whitespace-nowrap"
+                      >
+                        Preferred contact time
+                      </th>
+                      <th
+                        scope="col"
+                        className="font-medium md:whitespace-nowrap"
+                      >
+                        Next action due
+                      </th>
+                    </>
                   )}
                 </tr>
               </thead>
@@ -134,6 +189,7 @@ const CommunityMembersTable = ({
                     actionRelations={userActionRelations?.[user.id] ?? []}
                     actions={visibleActions}
                     maxActionsPerWeek={maxActionsPerWeek}
+                    deadlineTimestamp={deadlineTimestampByUserId.get(user.id)}
                   />
                 ))}
               </tbody>
@@ -141,7 +197,7 @@ const CommunityMembersTable = ({
           )}
           <thead className="text-left">
             <tr>
-              <td colSpan={amLeader ? 3 : 2} className="px-5 md:px-0 pb-6 pt-6">
+              <td colSpan={amLeader ? 4 : 2} className="px-5 md:px-0 pb-6 pt-6">
                 <div className="flex flex-col gap-y-2">
                   <p className="text-xl md:text-2xl font-semibold">Members</p>
                   <p className="text-zinc-500 text-sm">
@@ -168,9 +224,14 @@ const CommunityMembersTable = ({
                 Action history
               </th>
               {amLeader && (
-                <th scope="col" className="font-medium md:whitespace-nowrap">
-                  Preferred contact time
-                </th>
+                <>
+                  <th scope="col" className="font-medium md:whitespace-nowrap">
+                    Preferred contact time
+                  </th>
+                  <th scope="col" className="font-medium md:whitespace-nowrap">
+                    Next action due
+                  </th>
+                </>
               )}
             </tr>
           </thead>
@@ -185,6 +246,7 @@ const CommunityMembersTable = ({
                 actionRelations={userActionRelations?.[user.id] ?? []}
                 actions={visibleActions}
                 maxActionsPerWeek={maxActionsPerWeek}
+                deadlineTimestamp={deadlineTimestampByUserId.get(user.id)}
               />
             ))}
           </tbody>
