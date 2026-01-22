@@ -261,12 +261,10 @@ export function calculateAllCompletionData(params: {
   | {
       previous: undefined;
       current: CompletionData;
-      bySuiteId: Map<number, CompletionData>;
     }
   | {
       previous: CompletionData;
       current: undefined;
-      bySuiteId: undefined;
     } {
   const { actions, users, actionDeadlineWindowMs } = params;
 
@@ -342,16 +340,11 @@ export function calculateAllCompletionData(params: {
     return {
       previous: undefined,
       current: calculateCompletionData([]),
-      bySuiteId: new Map(),
     };
   }
 
   const activeActions = actionsWithUserRelations.filter(
-    (
-      action
-    ): action is typeof action & {
-      suiteId: number;
-    } => action.status === "member_action" && action.suiteId !== undefined
+    (action) => action.status === "member_action"
   );
   if (activeActions.length === 0) {
     const previousActions = actionsWithUserRelations.filter(
@@ -361,7 +354,6 @@ export function calculateAllCompletionData(params: {
       return {
         previous: undefined,
         current: calculateCompletionData([]),
-        bySuiteId: new Map(),
       };
     }
 
@@ -376,7 +368,6 @@ export function calculateAllCompletionData(params: {
     return {
       previous: calculateCompletionData(selectedPreviousActions),
       current: undefined,
-      bySuiteId: undefined,
     };
   }
 
@@ -388,27 +379,9 @@ export function calculateAllCompletionData(params: {
       action.latestMemberActionDeadline <
       earliestDeadline + actionDeadlineWindowMs
   );
-  const actionsBySuite = activeActions.reduce((acc, action) => {
-    let actions = acc.get(action.suiteId);
-    if (!actions) {
-      actions = [];
-      acc.set(action.suiteId, actions);
-    }
-
-    actions.push(action);
-    return acc;
-  }, new Map<number, typeof activeActions>());
-
-  const bySuiteId = new Map(
-    Array.from(actionsBySuite).map(([suiteId, actions]) => [
-      suiteId,
-      calculateCompletionData(actions),
-    ])
-  );
 
   return {
     previous: undefined,
     current: calculateCompletionData(currentActions),
-    bySuiteId,
   };
 }

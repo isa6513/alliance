@@ -9,7 +9,6 @@ import {
   userGetOnetimeInvitesByCommunity,
   CommunityMemberContactInfoDto,
   conversationGetCommunityConversations,
-  ActionSuiteSummaryDto,
 } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
@@ -37,7 +36,6 @@ import CommunityInvitesTabMember from "../../components/CommunityInvitesTabMembe
 import CommunitySelect from "../../components/CommunitySelect";
 import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
 import { useMediaQuery } from "../../lib/useMediaQuery";
-import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import { CardStyle } from "@alliance/shared/styles/card";
 import {
   calculateAllCompletionData,
@@ -55,7 +53,6 @@ type Tab =
   | "select";
 
 const CURRENT_ACTION_WINDOW_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
-const CURRENT_ACTIONS_DROPDOWN_DISPLAY = "Current actions";
 
 const CommunityPage = () => {
   const [communities, setCommunities] = useState<CommunityDto[] | null>(null);
@@ -82,13 +79,6 @@ const CommunityPage = () => {
     userActionRelations,
   });
   const [inviteNotifCount, setInviteNotifCount] = useState(0);
-  const [suites, setSuites] = useState<Map<
-    number,
-    ActionSuiteSummaryDto
-  > | null>(null);
-  const [selectedSuite, setSelectedSuite] = useState<
-    typeof CURRENT_ACTIONS_DROPDOWN_DISPLAY | `s${number}`
-  >(CURRENT_ACTIONS_DROPDOWN_DISPLAY);
   const [allCompletionData, setAllCompletionData] = useState<ReturnType<
     typeof calculateAllCompletionData
   > | null>(null);
@@ -183,8 +173,6 @@ const CommunityPage = () => {
         actionDeadlineWindowMs: CURRENT_ACTION_WINDOW_MS,
       });
       setAllCompletionData(completionData);
-      setSuites(new Map(resp.data.suites.map((suite) => [suite.id, suite])));
-      setSelectedSuite(CURRENT_ACTIONS_DROPDOWN_DISPLAY);
     });
   }, []);
 
@@ -202,20 +190,6 @@ const CommunityPage = () => {
       });
     }
   }, [amLeader]);
-  const suiteDropdownOptions = useMemo(() => {
-    if (!suites || !allCompletionData?.bySuiteId) {
-      return null;
-    }
-    return Object.fromEntries([
-      [CURRENT_ACTIONS_DROPDOWN_DISPLAY, CURRENT_ACTIONS_DROPDOWN_DISPLAY],
-      ...Array.from(suites)
-        .filter(([suiteId]) => allCompletionData.bySuiteId.has(suiteId))
-        .map(([suiteId, suite]) => [`s${suiteId}`, suite.name]),
-    ]) as Record<
-      typeof CURRENT_ACTIONS_DROPDOWN_DISPLAY | `s${number}`,
-      string
-    >;
-  }, [suites, allCompletionData]);
 
   const setTab = useCallback(
     (tab: Tab) => {
@@ -286,21 +260,8 @@ const CommunityPage = () => {
         nActions: 0,
       };
     }
-    if (allCompletionData.previous) {
-      return allCompletionData.previous;
-    }
-    if (selectedSuite === CURRENT_ACTIONS_DROPDOWN_DISPLAY) {
-      return allCompletionData.current;
-    }
-    return (
-      allCompletionData.bySuiteId.get(Number(selectedSuite.slice(1))) ?? {
-        completedAllCurrentActions: {},
-        nCompleted: 0,
-        nTotal: 0,
-        nActions: 0,
-      }
-    );
-  }, [allCompletionData, selectedSuite]);
+    return allCompletionData.previous ?? allCompletionData.current;
+  }, [allCompletionData]);
   const actionDisplay = useMemo(() => {
     if (!allCompletionData) {
       return "current actions";
@@ -312,24 +273,10 @@ const CommunityPage = () => {
         : "previous actions";
     }
 
-    if (selectedSuite === CURRENT_ACTIONS_DROPDOWN_DISPLAY) {
       return allCompletionData.current.nActions !== 1
         ? "current actions"
         : "the current action";
-    }
-
-    const suiteId = selectedSuite ? Number(selectedSuite.slice(1)) : null;
-    if (suiteId === null) {
-      return "current actions";
-    }
-    const suiteCompletionData = allCompletionData.bySuiteId.get(suiteId);
-    if (!suiteCompletionData) {
-      return "current actions";
-    }
-    return suiteCompletionData.nActions === 1
-      ? "the selected action"
-      : "selected actions";
-  }, [selectedSuite, allCompletionData]);
+  }, [allCompletionData]);
 
   if (!community) {
     if (loading) {
@@ -399,19 +346,6 @@ const CommunityPage = () => {
                 completionData.nTotal === 0 ? " invisible" : ""
               }`}
             >
-              {amLeader && suiteDropdownOptions && (
-                <>
-                  <DropdownSelect
-                    options={suiteDropdownOptions}
-                    value={suiteDropdownOptions[selectedSuite]}
-                    onChange={([selectedSuite]) =>
-                      setSelectedSuite(selectedSuite)
-                    }
-                  ></DropdownSelect>
-                  <br />
-                </>
-              )}
-
               <p className="text-sm">
                 {completionData.nCompleted} / {completionData.nTotal} have
                 completed {actionDisplay}
