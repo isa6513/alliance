@@ -27,7 +27,9 @@ export default function TwoColumnLayout({
       <div
         className={`absolute rounded-lg top-0 left-0 bottom-0 right-0 flex flex-row items-center overflow-hidden`}
       >
-        <div className="w-full h-full overflow-y-auto">{main}</div>
+        <div className="w-full h-full overflow-y-auto [scrollbar-gutter:stable]">
+          {main}
+        </div>
         {sidebar && (
           <div
             style={{ width: `${sidebarWidth}px` }}
@@ -37,7 +39,7 @@ export default function TwoColumnLayout({
       </div>
       {!!sidebar && (
         <div
-          className={`ml-auto sticky top-0 h-screen bg-page px-2 flex-col gap-y-5 items-stretch overflow-y-auto transition-all duration-200 ease-in-out `}
+          className={`ml-auto sticky top-0 h-screen bg-page px-2 flex-col gap-y-5 items-stretch overflow-y-auto transition-all duration-200 ease-in-out overflow-x-hidden`}
           style={{
             width: `${sidebarWidth}px`,
             overflowY:
