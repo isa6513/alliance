@@ -11,7 +11,6 @@ const PeoplePage: React.FC = () => {
       "Mark Xu": 10,
       "Sidney Hough": 7,
       "Casey Manning": 15,
-      "Eamon OCearuil": 24,
       "Charles Lien": 64,
     };
   }, []);
@@ -21,7 +20,6 @@ const PeoplePage: React.FC = () => {
       "Mark Xu": "https://markxu.com/",
       "Sidney Hough": "https://sidney.com/",
       "Casey Manning": "https://caseymanning.github.io/",
-      "Eamon OCearuil": "https://worldalliance.org/member/24",
       "Charles Lien": "https://worldalliance.org/member/64",
     };
   }, []);

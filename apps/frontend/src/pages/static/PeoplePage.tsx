@@ -16,7 +16,6 @@ const PeoplePage: React.FC = () => {
       "Sidney Hough": 7,
       "Casey Manning": 15,
       "Charles Lien": 64,
-      "Shreshth Srivastava": 23
     };
   }, []);
 
