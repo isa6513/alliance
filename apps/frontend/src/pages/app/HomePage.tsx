@@ -341,7 +341,6 @@ const HomePage = () => {
           onClick={() => setIsSidebarVisible(!isSidebarVisible)}
           color={ButtonColor.Transparent}
           className="hover:bg-transparent"
-          aria-expanded={isSidebarVisible}
         >
           Progress&nbsp;
           {isSidebarVisible ? (
