@@ -336,13 +336,13 @@ const HomePage = () => {
     <TwoColumnLayout main={mainContent} sidebar={sidebarContent} />
   ) : (
     <div className="h-full">
-      <div className="px-4 pt-6">
+      <div className="px-4 pt-4">
         <Button
           onClick={() => setIsSidebarVisible(!isSidebarVisible)}
           color={ButtonColor.Transparent}
-          className="hover:bg-transparent"
+          className="hover:bg-transparent border border-zinc-200 !px-3"
         >
-          Progress&nbsp;
+          Switch task&nbsp;
           {isSidebarVisible ? (
             <ChevronUp size="15" />
           ) : (

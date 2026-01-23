@@ -4,7 +4,7 @@ import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 
 const GroupOrganizerGuidelines = () => {
   return (
-    <div className="flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-4 px-2 md:px-0">
       <Expandable title="Running your group">
         <AppMarkdownWrapper
           markdownContent={`
