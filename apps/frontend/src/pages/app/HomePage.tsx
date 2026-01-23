@@ -30,6 +30,8 @@ import {
 } from "@alliance/shared/lib/actionUtils";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { formatTime } from "@alliance/shared/lib/utils";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -154,15 +156,7 @@ const HomePage = () => {
         )}
       </div>
     );
-  }, [
-    actions,
-    loading,
-    currentTask,
-    user,
-    friendActivities,
-    navigate,
-    handleDismissAction,
-  ]);
+  }, [actions, loading, currentTask, user, navigate, handleDismissAction]);
 
   const numTodo = todoActions.filter(showActionInSidebarList).length;
   const sidebarContent = useMemo(() => {
@@ -336,11 +330,29 @@ const HomePage = () => {
   useWhiteBackground();
 
   const isLargeScreen = useMediaQuery("(min-width: 1150px)");
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   return isLargeScreen ? (
     <TwoColumnLayout main={mainContent} sidebar={sidebarContent} />
   ) : (
-    <div className="h-full">{mainContent}</div>
+    <div className="h-full">
+      <div className="px-4 pt-6">
+        <Button
+          onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+          color={ButtonColor.Transparent}
+          className="hover:bg-transparent"
+          aria-expanded={isSidebarVisible}
+        >
+          Progress&nbsp;
+          {isSidebarVisible ? (
+            <ChevronUp size="15" />
+          ) : (
+            <ChevronDown size="15" />
+          )}
+        </Button>
+      </div>
+      {isSidebarVisible ? sidebarContent : mainContent}
+    </div>
   );
 };
 
