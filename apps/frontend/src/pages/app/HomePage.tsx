@@ -100,6 +100,8 @@ const HomePage = () => {
 
   const numTodo = todoActions.filter(showActionInSidebarList).length;
 
+  const isLargeScreen = useMediaQuery("(min-width: 1150px)");
+
   const tasksListContent = useMemo(() => {
     const currentWeekSidebarActions = currentWeekTodoActions.filter(
       showActionInSidebarList
@@ -207,16 +209,17 @@ const HomePage = () => {
           "flex flex-col py-4 sm:py-8 md:py-18 px-4 max-w-3xl mx-auto min-h-full"
         }
       >
-        <div className="md:hidden pb-4 md:py-0">
-          <Button
-            onClick={() => setShowingTasksList(!showingTasksList)}
-            color={ButtonColor.Transparent}
-            className="hover:bg-transparent"
-          >
-            All tasks {showingTasksList ? <ChevronUp size="15" /> : <ChevronDown size="15" />}
-          </Button>
-          {showingTasksList && <div className="px-2 sm:px-4 flex flex-col *:py-4 *:px-2 divide-y divide-zinc-200 border border-zinc-200 rounded">{tasksListContent}</div>}
-        </div>
+        {!isLargeScreen && (
+          <div className="pb-4">
+            <Button
+              onClick={() => setShowingTasksList(!showingTasksList)}
+              color={ButtonColor.Transparent}
+              className="hover:bg-transparent"
+            >
+              All tasks {showingTasksList ? <ChevronUp size="15" /> : <ChevronDown size="15" />}
+            </Button>
+            {showingTasksList && <div className="px-2 sm:px-4 flex flex-col *:py-4 *:px-2 divide-y divide-zinc-200 border border-zinc-200 rounded">{tasksListContent}</div>}
+          </div>)}
         {currentTask && currentTask.userRelation ? (
           <LargeActionCard
             action={currentTask}
@@ -243,9 +246,7 @@ const HomePage = () => {
         )}
       </div>
     );
-  }, [actions, loading, currentTask, user, navigate, handleDismissAction, showingTasksList, tasksListContent]);
-
-
+  }, [actions, loading, currentTask, user, navigate, handleDismissAction, showingTasksList, tasksListContent, isLargeScreen]);
 
   const sidebarContent = useMemo(() => {
     return (
@@ -347,8 +348,6 @@ const HomePage = () => {
   ]);
 
   useWhiteBackground();
-
-  const isLargeScreen = useMediaQuery("(min-width: 1150px)");
 
   return isLargeScreen ? (
     <TwoColumnLayout main={mainContent} sidebar={sidebarContent} />
