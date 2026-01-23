@@ -603,7 +603,7 @@ const UserDetailView: React.FC = () => {
           {/* Tags */}
           <section className="border border-zinc-200 rounded p-3">
             <h2 className="text-sm font-semibold text-zinc-700 mb-2">
-              Groups ({userTags.length})
+              Tags ({userTags.length})
             </h2>
             {tagMutationError && (
               <p className="text-xs text-red-500 mb-2">{tagMutationError}</p>
