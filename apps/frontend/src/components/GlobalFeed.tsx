@@ -66,7 +66,7 @@ const ActivityGroupItem = ({ item, date }: ActivityGroupItemProps) => {
             {item.users[0].displayName}
           </Link>
         ) : (
-          <span className="font-medium">{item.count} people</span>
+          <span className="font-medium">{item.count} members</span>
         )}
         <span className="text-zinc-500"> {verb} </span>
         <Link
@@ -156,7 +156,7 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
         {isSingle ? (
           <span className="font-medium">{item.users[0].displayName}</span>
         ) : (
-          <span className="font-medium">{item.count} people</span>
+          <span className="font-medium">{item.count} members</span>
         )}
         <span className="text-zinc-500"> commented on </span>
         <span className="text-green font-medium">{item.postTitle}</span>
