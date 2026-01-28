@@ -1173,6 +1173,52 @@ describe('Forum (e2e)', () => {
       expect(targetPost.authors).toHaveLength(2);
     });
 
+    it('returns authors from public post endpoints', async () => {
+      const { user: coAuthor } = await createExtraUserAndToken();
+
+      const postResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          title: 'Post With Authors For Public Endpoints',
+          editableContent: { body: 'Body', attachments: [] },
+          visibleAt: new Date(),
+        } satisfies CreatePostDto)
+        .expect(201);
+
+      const postId = postResponse.body.id;
+
+      await request(ctx.app.getHttpServer())
+        .patch(`/forum/admin/posts/${postId}/authors`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ authorIds: [ctx.testUserId, coAuthor.id] })
+        .expect(200);
+
+      // GET /forum/posts/:id should include authors
+      const singlePost = await request(ctx.app.getHttpServer())
+        .get(`/forum/posts/${postId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+
+      expect(singlePost.body.authorIds).toEqual(
+        expect.arrayContaining([ctx.testUserId, coAuthor.id]),
+      );
+      expect(singlePost.body.authors).toHaveLength(2);
+
+      // GET /forum/posts should include authors on each post
+      const allPosts = await request(ctx.app.getHttpServer())
+        .get('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(200);
+
+      const matchedPost = allPosts.body.find((p) => p.id === postId);
+      expect(matchedPost).toBeDefined();
+      expect(matchedPost.authorIds).toEqual(
+        expect.arrayContaining([ctx.testUserId, coAuthor.id]),
+      );
+      expect(matchedPost.authors).toHaveLength(2);
+    });
+
     it('rejects non-admin from updating post authors', async () => {
       const postResponse = await request(ctx.app.getHttpServer())
         .post('/forum/posts')

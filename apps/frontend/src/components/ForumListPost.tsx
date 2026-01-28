@@ -88,16 +88,6 @@ const ForumListPost = ({
         </div>
         <div className="flex flex-col md:flex-row md:justify-between md:items-end text-sm text-zinc-500 gap-y-1 md:gap-y-0">
           <div className="flex flex-row gap-x-1.5 items-center">
-            {(post.authors?.length ? post.authors : [post.author])
-              .slice(0, 3)
-              .map((a, i) => (
-                <ProfileImage
-                  key={a.id}
-                  pfp={a.profilePicture}
-                  size="small"
-                  className={i > 0 ? "-ml-2" : ""}
-                />
-              ))}
             <p>
               {(post.authors?.length ? post.authors : [post.author]).map(
                 (a, i, arr) => (
@@ -111,6 +101,11 @@ const ForumListPost = ({
                         );
                       }}
                     >
+                      <ProfileImage
+                        pfp={a.profilePicture}
+                        size="small"
+                        className="mr-1 -mt-1"
+                      />
                       <UserDisplayName
                         staff={a.staff}
                         grouplead={a.isCommunityLeader}
@@ -119,7 +114,7 @@ const ForumListPost = ({
                       </UserDisplayName>
                     </span>
                     {i < arr.length - 1 && (
-                      <span className="text-zinc-400"> & </span>
+                      <span className="text-zinc-500"> and </span>
                     )}
                   </span>
                 ),
@@ -168,8 +163,8 @@ const ForumListPost = ({
           navigate(
             post.lastComment && showReply
               ? `${href("/forum/post/:id", {
-                  id: post.id.toString(),
-                })}?replyId=${post.lastComment.id}`
+                id: post.id.toString(),
+              })}?replyId=${post.lastComment.id}`
               : href("/forum/post/:id", { id: post.id.toString() })
           );
         }}

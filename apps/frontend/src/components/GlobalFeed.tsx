@@ -95,7 +95,7 @@ const ActionUpdateItem = ({ item }: ActionUpdateItemProps) => {
     >
       <div className="flex flex-row gap-x-2 items-center">
         <p className="text-zinc-500 text-sm">
-          <Info className="text-green inline-block -mt-1" size={16} />
+          <Info className="text-green inline-block -mt-1" size={14} />
           {" "}Update on <span className="text-green">{item.actionName}</span>
         </p>
       </div>

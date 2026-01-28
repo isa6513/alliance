@@ -131,7 +131,19 @@ export class ForumService {
     const raw = visible.map((v) => v.raw);
     const postIds = posts.map((p) => p.id);
 
-    // 2) Fetch last comment per post in one query using DISTINCT ON (Postgres)
+    // 2) Fetch authors per post (ManyToMany can't be joined in the grouped query)
+    const postsWithAuthors = await this.postRepository.find({
+      where: { id: In(postIds) },
+      relations: { authors: true },
+    });
+    const authorsByPostId = new Map(
+      postsWithAuthors.map((p) => [p.id, p.authors]),
+    );
+    for (const post of posts) {
+      post.authors = authorsByPostId.get(post.id) ?? [];
+    }
+
+    // 3) Fetch last comment per post in one query using DISTINCT ON (Postgres)
     const lastComments = await this.commentRepository
       .createQueryBuilder('comment')
       .leftJoinAndSelect('comment.author', 'author')
@@ -165,7 +177,7 @@ export class ForumService {
     const posts = (
       await this.postRepository.find({
         where: { actionId, deleted: false },
-        relations: { author: true, action: true, editableContent: true },
+        relations: { author: true, action: true, editableContent: true, authors: true },
         order: { updatedAt: 'DESC' },
       })
     ).filter((post) => this.postIsVisible(post));
@@ -191,7 +203,7 @@ export class ForumService {
   async findOnePost(id: number, userId?: number): Promise<Post> {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: { author: true, action: true, editableContent: true },
+      relations: { author: true, action: true, editableContent: true, authors: true },
     });
 
     if (!post || !this.postIsVisible(post, userId)) {
