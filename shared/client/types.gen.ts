@@ -1170,6 +1170,46 @@ export type LatLonDto = {
     longitude: number;
 };
 
+export type GlobalFeedItemType = 'activity_group' | 'action_update' | 'new_members' | 'forum_comments';
+
+export type GlobalFeedActivityGroupDto = {
+    users: Array<ProfileDto>;
+    actionId: number;
+    actionName: string;
+    activityType: string;
+    count: number;
+};
+
+export type GlobalFeedActionUpdateDto = {
+    id: number;
+    title: string;
+    content: EditableContentDto;
+    date: string;
+    actionId: number;
+    actionName: string;
+};
+
+export type GlobalFeedNewMembersDto = {
+    users: Array<ProfileDto>;
+    count: number;
+};
+
+export type GlobalFeedForumCommentsDto = {
+    users: Array<ProfileDto>;
+    postId: number;
+    postTitle: string;
+    count: number;
+};
+
+export type GlobalFeedItemDto = {
+    type: GlobalFeedItemType;
+    date: string;
+    activityGroup?: GlobalFeedActivityGroupDto;
+    actionUpdate?: GlobalFeedActionUpdateDto;
+    newMembers?: GlobalFeedNewMembersDto;
+    forumComments?: GlobalFeedForumCommentsDto;
+};
+
 export type NotificationScheduleMetadataDto = {
     currentEventId?: number;
     nextEventId?: number;
@@ -3789,6 +3829,21 @@ export type ActionsGetActivityFeedResponses = {
 };
 
 export type ActionsGetActivityFeedResponse = ActionsGetActivityFeedResponses[keyof ActionsGetActivityFeedResponses];
+
+export type ActionsGetGlobalFeedData = {
+    body?: never;
+    path?: never;
+    query: {
+        limit: number;
+    };
+    url: '/actions/globalFeed';
+};
+
+export type ActionsGetGlobalFeedResponses = {
+    200: Array<GlobalFeedItemDto>;
+};
+
+export type ActionsGetGlobalFeedResponse = ActionsGetGlobalFeedResponses[keyof ActionsGetGlobalFeedResponses];
 
 export type ActionsGetActivityData = {
     body?: never;

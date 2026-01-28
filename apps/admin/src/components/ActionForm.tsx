@@ -31,8 +31,8 @@ interface ActionFormProps {
   tagsLoading: boolean;
   availableSuites?: ActionSuite[];
   suitesLoading: boolean;
-  selectedTagIds: number[];
-  onTagsChange: (ids: number[]) => void;
+  selectedTagIds: string[];
+  onTagsChange: (ids: string[]) => void;
   availableUsers?: UserSelectUser[];
   usersLoading?: boolean;
   manualCohortUserIds: number[];
@@ -85,7 +85,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleToggleTag = (tagId: number) => {
+  const handleToggleTag = (tagId: string) => {
     const nextSelection = selectedTagIds.includes(tagId)
       ? selectedTagIds.filter((id) => id !== tagId)
       : [...selectedTagIds, tagId];
