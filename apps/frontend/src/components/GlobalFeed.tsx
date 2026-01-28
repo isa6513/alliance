@@ -12,7 +12,6 @@ import {
   ProfileDto,
 } from "@alliance/shared/client";
 import { Info } from "lucide-react";
-import Card from "@alliance/sharedweb/ui/Card";
 
 interface ProfilePicRowProps {
   users: ProfileDto[];
@@ -58,7 +57,7 @@ const ActivityGroupItem = ({ item, date }: ActivityGroupItemProps) => {
   return (
     <div className="py-3">
       <p className="text-zinc-700  mt-1.5">
-      <ProfilePicRow users={item.users} />
+        <ProfilePicRow users={item.users} />
         {isSingle ? (
           <Link
             to={href("/member/:id", { id: item.users[0].id.toString() })}
@@ -92,22 +91,18 @@ const ActionUpdateItem = ({ item }: ActionUpdateItemProps) => {
   return (
     <Link
       to={href("/actions/:id", { id: item.actionId.toString() })}
-      className="block py-3 hover:bg-zinc-50 -mx-5 px-2 rounded -my-[12px]"
+      className="block py-3 hover:bg-zinc-50 px-2 rounded"
     >
-      <Card className="border-zinc-300">
-        <div className="flex flex-row gap-x-2 items-center">
-          <div className="w-4 h-4 bg-green/10 rounded-full flex items-center justify-center flex-shrink-0">
-            <Info className="text-green" />
-          </div>
-          <p className="text-zinc-500 text-sm">
-            Update on <span className="text-green">{item.actionName}</span>
-          </p>
-        </div>
-        <p className="text-black font-medium mt-1">{item.title}</p>
-        <p className="text-zinc-400 text-sm mt-0.5">
-          {formatTime(new Date(item.date), { addSuffix: true })}
+      <div className="flex flex-row gap-x-2 items-center">
+        <p className="text-zinc-500 text-sm">
+          <Info className="text-green inline-block -mt-1" size={16} />
+          {" "}Update on <span className="text-green">{item.actionName}</span>
         </p>
-      </Card>
+      </div>
+      <p className="text-black font-medium mt-1">{item.title}</p>
+      <p className="text-zinc-400 text-sm mt-0.5">
+        {formatTime(new Date(item.date), { addSuffix: true })}
+      </p>
     </Link>
   );
 };
@@ -123,7 +118,7 @@ const NewMembersItem = ({ item, date }: NewMembersItemProps) => {
   return (
     <div className="py-3">
       <p className="text-zinc-700  mt-1.5">
-      <ProfilePicRow users={item.users} />
+        <ProfilePicRow users={item.users} />
         {isSingle ? (
           <Link
             to={href("/member/:id", { id: item.users[0].id.toString() })}
@@ -134,7 +129,7 @@ const NewMembersItem = ({ item, date }: NewMembersItemProps) => {
         ) : (
           <span className="font-medium">{item.count} new members</span>
         )}
-        <span className="text-zinc-500">{isSingle ?  " signed their contract and has become a new member of the Alliance!" : " have signed their contracts and joined the Alliance!"}</span>
+        <span className="text-zinc-500">{isSingle ? " signed their contract and has become a new member of the Alliance!" : " have signed their contracts and joined the Alliance!"}</span>
       </p>
       <p className="text-zinc-400 text-sm mt-0.5">
         {formatTime(new Date(date), { addSuffix: true })}
