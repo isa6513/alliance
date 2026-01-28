@@ -106,6 +106,8 @@ export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 
 
 export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'community_invite_rejected' | 'community_invite_accepted' | 'onetime_invite_request_created' | 'onetime_invite_request_approved' | 'onetime_invite_request_rejected';
 
+export type NotifPriority = 'low' | 'high';
+
 export type CommentParentObject = 'post' | 'action' | 'activity';
 
 export type Comment = {
@@ -147,6 +149,7 @@ export type Notification = {
     id: number;
     category: NotificationCategory;
     message: string;
+    priority: NotifPriority;
     targetContent?: string;
     webAppLocation: string | null;
     mobileAppLocation: string | null;
@@ -1801,6 +1804,7 @@ export type PostDto = {
     qaMode: boolean;
     expertLabel?: string;
     expertIds: Array<number>;
+    authorIds: Array<number>;
     action?: ActionDto;
     author: ProfileDto;
     commentCount?: number;
@@ -1809,6 +1813,7 @@ export type PostDto = {
     lastComment?: CommentDto;
     likeCount?: number;
     experts?: Array<ProfileDto>;
+    authors?: Array<ProfileDto>;
 };
 
 export type UserCommentDto = {
@@ -1845,6 +1850,10 @@ export type UpdatePostExpertsDto = {
     expertIds: Array<number>;
     qaMode: boolean;
     expertLabel?: string;
+};
+
+export type UpdatePostAuthorsDto = {
+    authorIds: Array<number>;
 };
 
 export type CitySearchDto = {
@@ -5086,6 +5095,21 @@ export type ForumUpdatePostExpertsResponses = {
 };
 
 export type ForumUpdatePostExpertsResponse = ForumUpdatePostExpertsResponses[keyof ForumUpdatePostExpertsResponses];
+
+export type ForumUpdatePostAuthorsData = {
+    body: UpdatePostAuthorsDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/forum/admin/posts/{id}/authors';
+};
+
+export type ForumUpdatePostAuthorsResponses = {
+    200: PostDto;
+};
+
+export type ForumUpdatePostAuthorsResponse = ForumUpdatePostAuthorsResponses[keyof ForumUpdatePostAuthorsResponses];
 
 export type GeoSearchCityData = {
     body?: never;
