@@ -28,7 +28,7 @@ const ProfilePicRow = ({ users, maxDisplay = 20 }: ProfilePicRowProps) => {
         <Link
           key={user.id}
           to={href("/member/:id", { id: user.id.toString() })}
-          className="hover:z-10 transition-transform hover:scale-110"
+          className="hover:z-10 transition-transform hover:scale-110 duration-75"
           style={{ zIndex: displayUsers.length - i }}
         >
           <ProfileImage
