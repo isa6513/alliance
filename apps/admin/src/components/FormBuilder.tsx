@@ -183,7 +183,7 @@ const applyOptionValueToConditionalVisibility = (
 
     const result = getUpdatedVisibilityConditions(
       (candidate as AnyField).visibleIf ??
-        (candidate as DisplayBlock).visibleIf,
+      (candidate as DisplayBlock).visibleIf,
       controllerId,
       previousValue,
       nextValue
@@ -214,18 +214,18 @@ export function FormBuilder({
     initialSchema
       ? ensureOutputViews(initialSchema)
       : {
-          title: !!actionName ? actionName + " form" : "Untitled Form",
-          description: "",
-          pages: [
-            {
-              id: "page-1",
-              title: "Page 1",
-              fields: [],
-            },
-          ],
-          submit: { label: "Complete" },
-          outputViews: [],
-        };
+        title: !!actionName ? actionName + " form" : "Untitled Form",
+        description: "",
+        pages: [
+          {
+            id: "page-1",
+            title: "Page 1",
+            fields: [],
+          },
+        ],
+        submit: { label: "Complete" },
+        outputViews: [],
+      };
 
   const [schema, setSchema] = useState<FormSchema>(buildInitialSchema);
   const [lastSavedSchemaJSON, setLastSavedSchemaJSON] = useState<string>(() =>
@@ -600,7 +600,6 @@ export function FormBuilder({
           kind: "text",
           id: blockId,
           text: "Text content",
-          markdown: false,
         };
         break;
       case "label":
@@ -1005,11 +1004,10 @@ export function FormBuilder({
                         {element.name}
                       </span>
                       <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          element.type === "field"
+                        className={`text-xs px-2 py-1 rounded-full ${element.type === "field"
                             ? "bg-blue-100 text-blue-800"
                             : "bg-green-100 text-green-800"
-                        }`}
+                          }`}
                       >
                         {element.type === "field" ? "Field" : "Block"}
                       </span>
@@ -1047,12 +1045,12 @@ export function FormBuilder({
     const updateField = (updates: Partial<AnyField | DisplayBlock>) => {
       const optionValueChange =
         (field as AnyField).kind === "multiselect" &&
-        "options" in updates &&
-        updates.options
+          "options" in updates &&
+          updates.options
           ? findSingleOptionValueChange(
-              (field as MultiSelectField).options,
-              updates.options as MultiSelectField["options"]
-            )
+            (field as MultiSelectField).options,
+            updates.options as MultiSelectField["options"]
+          )
           : null;
 
       const nextPages = schema.pages.map((page, pageIndex) => {
@@ -1154,190 +1152,190 @@ export function FormBuilder({
           {/* Check if it's a form field (has 'label' property) vs display block */}
           {"label" in field
             ? (() => {
-                const formField = field as AnyField;
-                switch (formField.kind) {
-                  case "text":
-                    return (
-                      <EditableTextField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "textarea":
-                    return (
-                      <EditableTextareaField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "email":
-                    return (
-                      <EditableEmailField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "phone":
-                    return (
-                      <EditablePhoneField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "number":
-                    return (
-                      <EditableNumberField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "range":
-                    return (
-                      <EditableRangeField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "checkbox":
-                    return (
-                      <EditableCheckboxField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "radio":
-                    return (
-                      <EditableRadioField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "select":
-                    return (
-                      <EditableSelectField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "multiselect":
-                    return (
-                      <EditableMultiSelectField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "date":
-                    return (
-                      <EditableDateField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "time":
-                    return (
-                      <EditableTimeField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "timezone":
-                    return (
-                      <EditableTimezoneField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "city":
-                    return (
-                      <EditableCityField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "file":
-                    return (
-                      <EditableFileField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "custom":
-                    return (
-                      <EditableCustomComponentField
-                        field={formField as any}
-                        {...commonProps}
-                      />
-                    );
-                  default:
-                    return null;
-                }
-              })()
+              const formField = field as AnyField;
+              switch (formField.kind) {
+                case "text":
+                  return (
+                    <EditableTextField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "textarea":
+                  return (
+                    <EditableTextareaField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "email":
+                  return (
+                    <EditableEmailField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "phone":
+                  return (
+                    <EditablePhoneField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "number":
+                  return (
+                    <EditableNumberField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "range":
+                  return (
+                    <EditableRangeField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "checkbox":
+                  return (
+                    <EditableCheckboxField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "radio":
+                  return (
+                    <EditableRadioField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "select":
+                  return (
+                    <EditableSelectField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "multiselect":
+                  return (
+                    <EditableMultiSelectField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "date":
+                  return (
+                    <EditableDateField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "time":
+                  return (
+                    <EditableTimeField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "timezone":
+                  return (
+                    <EditableTimezoneField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "city":
+                  return (
+                    <EditableCityField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "file":
+                  return (
+                    <EditableFileField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                case "custom":
+                  return (
+                    <EditableCustomComponentField
+                      field={formField as any}
+                      {...commonProps}
+                    />
+                  );
+                default:
+                  return null;
+              }
+            })()
             : (() => {
-                const block = field as DisplayBlock;
-                switch (block.kind) {
-                  case "header":
-                    return (
-                      <EditableHeaderBlock
-                        block={block as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "text":
-                    return (
-                      <EditableTextBlock
-                        block={block as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "label":
-                    return (
-                      <EditableLabelBlock
-                        block={block as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "divider":
-                    return (
-                      <EditableDividerBlock
-                        block={block as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "spacer":
-                    return (
-                      <EditableSpacerBlock
-                        block={block as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "html":
-                    return (
-                      <EditableHtmlBlock
-                        block={block as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "image":
-                    return (
-                      <EditableImageBlock
-                        block={block as any}
-                        {...commonProps}
-                      />
-                    );
-                  case "quote":
-                    return (
-                      <EditableQuoteBlock
-                        block={block as any}
-                        {...commonProps}
-                      />
-                    );
-                  default:
-                    console.error(
-                      `Unknown block kind: ${block satisfies never}`
-                    );
-                    return null;
-                }
-              })()}
+              const block = field as DisplayBlock;
+              switch (block.kind) {
+                case "header":
+                  return (
+                    <EditableHeaderBlock
+                      block={block as any}
+                      {...commonProps}
+                    />
+                  );
+                case "text":
+                  return (
+                    <EditableTextBlock
+                      block={block as any}
+                      {...commonProps}
+                    />
+                  );
+                case "label":
+                  return (
+                    <EditableLabelBlock
+                      block={block as any}
+                      {...commonProps}
+                    />
+                  );
+                case "divider":
+                  return (
+                    <EditableDividerBlock
+                      block={block as any}
+                      {...commonProps}
+                    />
+                  );
+                case "spacer":
+                  return (
+                    <EditableSpacerBlock
+                      block={block as any}
+                      {...commonProps}
+                    />
+                  );
+                case "html":
+                  return (
+                    <EditableHtmlBlock
+                      block={block as any}
+                      {...commonProps}
+                    />
+                  );
+                case "image":
+                  return (
+                    <EditableImageBlock
+                      block={block as any}
+                      {...commonProps}
+                    />
+                  );
+                case "quote":
+                  return (
+                    <EditableQuoteBlock
+                      block={block as any}
+                      {...commonProps}
+                    />
+                  );
+                default:
+                  console.error(
+                    `Unknown block kind: ${block satisfies never}`
+                  );
+                  return null;
+              }
+            })()}
         </div>
 
         {/* Insertion bar after */}
@@ -1394,29 +1392,27 @@ export function FormBuilder({
                 {isSaving
                   ? "Saving..."
                   : hasUnsavedChanges
-                  ? "Save Form"
-                  : "No changes"}
+                    ? "Save Form"
+                    : "No changes"}
               </Button>
             </div>
             <div className="inline-flex rounded-md bg-gray-200 p-0.5 text-sm font-medium text-gray-600">
               <button
                 type="button"
-                className={`px-3 py-2 rounded-md text-nowrap ${
-                  activeEditor === "form"
+                className={`px-3 py-2 rounded-md text-nowrap ${activeEditor === "form"
                     ? "bg-white shadow text-gray-900"
                     : "text-gray-600"
-                }`}
+                  }`}
                 onClick={() => setActiveEditor("form")}
               >
                 Form builder
               </button>
               <button
                 type="button"
-                className={`px-3 py-1 rounded-md text-nowrap ${
-                  activeEditor === "outputs"
+                className={`px-3 py-1 rounded-md text-nowrap ${activeEditor === "outputs"
                     ? "bg-white shadow text-gray-900"
                     : "text-gray-600"
-                }`}
+                  }`}
                 onClick={() => setActiveEditor("outputs")}
               >
                 Output views
@@ -1510,11 +1506,10 @@ export function FormBuilder({
                       onDragEnd={handlePageDragEnd}
                       onDragOver={handlePageDragOver(index)}
                       onDrop={handlePageDrop(index)}
-                      className={`flex items-center rounded-md text-sm font-medium cursor-move pr-2 transition-all border ${
-                        selectedPageIndex === index
+                      className={`flex items-center rounded-md text-sm font-medium cursor-move pr-2 transition-all border ${selectedPageIndex === index
                           ? "bg-blue-100 text-blue-700 border-blue-200"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-transparent"
-                      } ${isDragging ? "opacity-50 scale-95" : ""}`}
+                        } ${isDragging ? "opacity-50 scale-95" : ""}`}
                     >
                       {/* Drag handle */}
                       <div
