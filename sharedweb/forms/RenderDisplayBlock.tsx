@@ -33,13 +33,9 @@ export default function RenderDisplayBlock({ block }: Props) {
     case "text":
       return (
         <div className="text-zinc-900">
-          {block.markdown ? (
-            <div className="prose prose-sm max-w-none">
-              <FormMarkdownWrapper markdownContent={block.text} />
-            </div>
-          ) : (
-            <p className="whitespace-pre-wrap">{block.text}</p>
-          )}
+          <div className="prose prose-sm max-w-none">
+            <FormMarkdownWrapper markdownContent={block.text} />
+          </div>
         </div>
       );
 

@@ -36,16 +36,7 @@ export function EditableTextBlock({
             style={{ resize: "vertical" }}
           />
 
-          <div className="flex items-center justify-between gap-2">
-            <label className="flex items-center text-xs text-gray-500">
-              <input
-                type="checkbox"
-                checked={activeBlock.markdown || false}
-                onChange={(e) => handleUpdate({ markdown: e.target.checked })}
-                className="mr-1"
-              />
-              Markdown formatting
-            </label>
+          <div className="flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={() => setShowPreview((prev) => !prev)}

@@ -13,6 +13,7 @@ import { MailService } from 'src/mail/mail.service';
 import {
   Notification,
   NotificationCategory,
+  NotifPriority,
 } from 'src/notifs/entities/notification.entity';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
 import { DeepPartial, ILike, In, Not, Repository } from 'typeorm';
@@ -328,6 +329,7 @@ export class UserService {
       const notif = this.notifRepository.create({
         user: addressee,
         category: NotificationCategory.FriendRequest,
+        priority: NotifPriority.High,
         message: `${requester.name} wants to be friends`,
         webAppLocation: profileUrl(requesterId),
         associatedUsers: [requester],

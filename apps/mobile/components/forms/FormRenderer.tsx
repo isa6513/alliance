@@ -80,11 +80,7 @@ function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
         </Text>
       );
     case "text":
-      return block.markdown ? (
-        <AppMarkdownWrapper>{block.text}</AppMarkdownWrapper>
-      ) : (
-        <Text className="text-base text-zinc-800 leading-6">{block.text}</Text>
-      );
+      return <AppMarkdownWrapper>{block.text}</AppMarkdownWrapper>;
     case "label":
       return (
         <Text className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
