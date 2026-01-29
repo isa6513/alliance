@@ -147,7 +147,9 @@ export class ActionEventRecipientService {
           relations: { events: true },
         })
       ).events;
-    const event = events.find((event) => event.id === eventId);
+    const eventIndex = events.findIndex((event) => event.id === eventId);
+    const event = events[eventIndex];
+    const deadlineEvent = eventIndex < events.length - 1 ? events[eventIndex + 1] : null;
 
     if (!event) {
       throw new Error(`Event not found: ${eventId}`);
@@ -186,7 +188,10 @@ export class ActionEventRecipientService {
           events,
           currentEventId: eventId,
         })?.date,
-      });
+      }) && (!deadlineEvent || user.hasActiveContractInFullRange({
+        startDate: event.date,
+        endDate: deadlineEvent.date,
+      }));
 
     if (eventStatus === ActionStatus.MemberAction && !action.commitmentless) {
       const activities = await this.actionActivityRepository.find({
