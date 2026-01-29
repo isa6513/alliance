@@ -56,7 +56,7 @@ const ActivityGroupItem = ({ item, date }: ActivityGroupItemProps) => {
 
   return (
     <div className="py-3">
-      <p className="text-zinc-700  mt-1.5">
+      <p className="text-zinc-700 mt-1.5">
         <ProfilePicRow users={item.users} />
         {isSingle ? (
           <Link
@@ -147,8 +147,8 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
       to={href("/forum/post/:id", { id: item.postId.toString() })}
       className="block py-3 hover:bg-zinc-50 -mx-2 px-2 rounded"
     >
-      <ProfilePicRow users={item.users} />
       <p className="text-zinc-700 mt-1.5">
+        <ProfilePicRow users={item.users} />
         {isSingle ? (
           <span className="font-medium">{item.users[0].displayName}</span>
         ) : (
