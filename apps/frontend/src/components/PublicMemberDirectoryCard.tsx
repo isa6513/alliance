@@ -25,7 +25,7 @@ const PublicMemberDirectoryCard: React.FC<PublicMemberDirectoryCardProps> = ({
       className="p-3 border border-zinc-200 rounded-lg hover:bg-zinc-50 cursor-pointer"
     >
       <div
-        className={`flex flex-col md:flex-row ${(showDescription || descriptionOpen) ? "items-start" : "items-center"
+        className={`flex flex-col md:flex-row ${(showDescription || descriptionOpen) ? "items-start" : "md:items-center"
           } gap-2`}
       >
         <ProfileImage pfp={member.profilePicture ?? null} size="medium" />
