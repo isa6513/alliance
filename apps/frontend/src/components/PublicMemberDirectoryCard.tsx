@@ -31,7 +31,7 @@ const PublicMemberDirectoryCard: React.FC<PublicMemberDirectoryCardProps> = ({
         <ProfileImage pfp={member.profilePicture ?? null} size="medium" />
         <div className="flex-1 min-w-0">
           <p className="text-zinc-900 text-base">{member.displayName}</p>
-          {showDescription || descriptionOpen && (
+          {(showDescription || descriptionOpen) && (
             <div className="text-zinc-500 text-sm">
               <AppMarkdownWrapper
                 markdownContent={member.profileDescription ?? ""}
