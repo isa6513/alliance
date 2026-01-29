@@ -455,7 +455,7 @@ const StatsPage: React.FC = () => {
     const y =
       actionBarsGeometry.margin.top +
       hoveredActionBar.index *
-        (actionBarsGeometry.barHeight + actionBarsGeometry.gap);
+      (actionBarsGeometry.barHeight + actionBarsGeometry.gap);
     const centerY = y + actionBarsGeometry.barHeight / 2;
     return (centerY / actionBarsGeometry.height) * 100;
   }, [hoveredActionBar, actionBarsGeometry]);
@@ -826,10 +826,10 @@ const StatsPage: React.FC = () => {
                 <div className="text-3xl font-bold text-gray-900">
                   {cumulativeCompletionData.length > 0
                     ? (
-                        cumulativeCompletionData[
-                          cumulativeCompletionData.length - 1
-                        ].avgRate * 100
-                      ).toFixed(2)
+                      cumulativeCompletionData[
+                        cumulativeCompletionData.length - 1
+                      ].avgRate * 100
+                    ).toFixed(2)
                     : "[No data]"}
                   %
                 </div>
@@ -839,17 +839,17 @@ const StatsPage: React.FC = () => {
                 <div className="text-3xl font-bold text-gray-900">
                   {parsedContractStatusHistory.length > 0
                     ? (() => {
-                        const latest =
-                          parsedContractStatusHistory[
-                            parsedContractStatusHistory.length - 1
-                          ];
-                        return latest.totalEverSigned > 0
-                          ? (
-                              (latest.churnedCount / latest.totalEverSigned) *
-                              100
-                            ).toFixed(1)
-                          : "0";
-                      })()
+                      const latest =
+                        parsedContractStatusHistory[
+                        parsedContractStatusHistory.length - 1
+                        ];
+                      return latest.totalEverSigned > 0
+                        ? (
+                          (latest.churnedCount / latest.totalEverSigned) *
+                          100
+                        ).toFixed(1)
+                        : "0";
+                    })()
                     : "[No data]"}
                   %
                 </div>
@@ -1093,11 +1093,10 @@ const StatsPage: React.FC = () => {
                       y={y + actionBarsGeometry.barHeight / 2}
                       textAnchor="end"
                       dominantBaseline="middle"
-                      className={`text-xs ${
-                        isHovered
+                      className={`text-xs ${isHovered
                           ? "fill-gray-900 font-semibold"
                           : "fill-gray-700"
-                      }`}
+                        }`}
                     >
                       {action.actionName.length > 25
                         ? action.actionName.substring(0, 22) + "..."
@@ -1211,13 +1210,13 @@ const StatsPage: React.FC = () => {
                   <span className="font-semibold text-gray-900">
                     {hoveredActionBar.action.usersJoined +
                       (hoveredActionBar.action.usersWithdrawn ?? 0) >
-                    0
+                      0
                       ? `${Math.round(
-                          (hoveredActionBar.action.usersCompleted /
-                            (hoveredActionBar.action.usersJoined +
-                              (hoveredActionBar.action.usersWithdrawn ?? 0))) *
-                            100
-                        )}%`
+                        (hoveredActionBar.action.usersCompleted /
+                          (hoveredActionBar.action.usersJoined +
+                            (hoveredActionBar.action.usersWithdrawn ?? 0))) *
+                        100
+                      )}%`
                       : "N/A"}
                   </span>
                 </div>
@@ -1501,10 +1500,10 @@ const StatsPage: React.FC = () => {
                     >
                       {hoveredContractPoint.totalEverSigned > 0
                         ? `${Math.round(
-                            (hoveredContractPoint.churnedCount /
-                              hoveredContractPoint.totalEverSigned) *
-                              100
-                          )}% churn`
+                          (hoveredContractPoint.churnedCount /
+                            hoveredContractPoint.totalEverSigned) *
+                          100
+                        )}% churn`
                         : "0% churn"}
                     </text>
                   </>
@@ -1606,7 +1605,7 @@ const StatsPage: React.FC = () => {
                       textAnchor="middle"
                       className="fill-gray-600 text-xs"
                     >
-                      {tick.label}w
+                      {tick.label}
                     </text>
                   </g>
                 ))}
@@ -1619,8 +1618,8 @@ const StatsPage: React.FC = () => {
                 const barWidth = Math.max(
                   0,
                   churnHistogramGeometry.xScale(x1) -
-                    churnHistogramGeometry.xScale(x0) -
-                    2
+                  churnHistogramGeometry.xScale(x0) -
+                  2
                 );
                 const barHeight =
                   churnHistogramGeometry.yScale(0) -
@@ -1651,7 +1650,7 @@ const StatsPage: React.FC = () => {
                   (churnHistogramGeometry.width -
                     churnHistogramGeometry.margin.left -
                     churnHistogramGeometry.margin.right) /
-                    2 +
+                  2 +
                   churnHistogramGeometry.margin.left
                 }
                 y={churnHistogramGeometry.height - 12}
@@ -1674,9 +1673,8 @@ const StatsPage: React.FC = () => {
             Daily Stats ({parsedStats.length} days)
           </span>
           <svg
-            className={`w-5 h-5 text-gray-500 transition-transform ${
-              dailyStatsTableOpen ? "rotate-180" : ""
-            }`}
+            className={`w-5 h-5 text-gray-500 transition-transform ${dailyStatsTableOpen ? "rotate-180" : ""
+              }`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -1748,9 +1746,8 @@ const StatsPage: React.FC = () => {
               Action Stats ({actionStats.length} actions)
             </span>
             <svg
-              className={`w-5 h-5 text-gray-500 transition-transform ${
-                actionStatsTableOpen ? "rotate-180" : ""
-              }`}
+              className={`w-5 h-5 text-gray-500 transition-transform ${actionStatsTableOpen ? "rotate-180" : ""
+                }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -1805,8 +1802,8 @@ const StatsPage: React.FC = () => {
                               action.completionRate >= 0.9
                                 ? "text-green-600 font-medium"
                                 : action.completionRate >= 0.7
-                                ? "text-yellow-600"
-                                : "text-red-600"
+                                  ? "text-yellow-600"
+                                  : "text-red-600"
                             }
                           >
                             {Math.round(action.completionRate * 100)}%
@@ -1818,8 +1815,8 @@ const StatsPage: React.FC = () => {
                       <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
                         {action.memberActionStartDate
                           ? new Date(
-                              action.memberActionStartDate
-                            ).toLocaleDateString()
+                            action.memberActionStartDate
+                          ).toLocaleDateString()
                           : "N/A"}
                       </td>
                     </tr>
