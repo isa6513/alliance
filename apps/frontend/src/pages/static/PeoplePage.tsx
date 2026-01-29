@@ -1,6 +1,5 @@
 import {
   ProfileDto,
-  userFindOne,
   userMembersPublic,
 } from "@alliance/shared/client";
 import React, { useEffect, useMemo, useState } from "react";
@@ -10,12 +9,12 @@ import sidneyandmark from "../../assets/sidneyandmark.jpg";
 import PublicMemberDirectoryCard from "../../components/PublicMemberDirectoryCard";
 
 const PeoplePage: React.FC = () => {
-  const staffIds: Record<string, number> = useMemo(() => {
+  const staffIds: Record<number, string> = useMemo(() => {
     return {
-      "Mark Xu": 10,
-      "Sidney Hough": 7,
-      "Casey Manning": 15,
-      "Charles Lien": 64,
+      10: "Mark Xu",
+      7: "Sidney Hough",
+      15: "Casey Manning",
+      64: "Charles Lien",
     };
   }, []);
 
@@ -29,24 +28,10 @@ const PeoplePage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const staffProfilesResponse = await Promise.all(
-        Object.values(staffIds).map(async (id) => {
-          const result = await userFindOne({ path: { id } });
-          const { data: profile } = result;
-
-          return profile;
-        })
-      );
-
-      setStaffProfiles(
-        staffProfilesResponse.filter(
-          (profile): profile is ProfileDto => profile !== undefined
-        ) ?? []
-      );
-
       const membersRes = await userMembersPublic();
 
       setMembers(membersRes.data ?? []);
+      setStaffProfiles(membersRes.data?.filter((member) => Object.keys(staffIds).includes(member.id.toString())) ?? []);
     };
 
     fetchData();
@@ -145,6 +130,7 @@ const PeoplePage: React.FC = () => {
                     <PublicMemberDirectoryCard
                       key={member.id}
                       member={member}
+
                     />
                   ))}
                 </div>
