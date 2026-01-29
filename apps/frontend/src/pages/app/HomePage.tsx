@@ -209,13 +209,13 @@ const HomePage = () => {
       <div className="px-4 pt-12 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200 h-full">
         {tasksListContent}
         <div className="flex-1 min-h-0 flex flex-col">
-          <div className="flex flex-row justify-between items-center mb-2 shrink-0">
+          <div className="flex flex-row justify-between items-center shrink-0">
             <p className="font-semibold text-base font-serif text-black">
               Activity
             </p>
             <Link
               to={href("/feed")}
-              className="text-zinc-500 text-sm hover:underline"
+              className="text-zinc-500 text-base hover:underline"
             >
               See all
             </Link>

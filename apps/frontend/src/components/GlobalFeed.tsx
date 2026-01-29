@@ -75,9 +75,7 @@ const ActivityGroupItem = ({ item, date }: ActivityGroupItemProps) => {
         >
           {item.actionName}
         </Link>
-      </p>
-      <p className="text-zinc-400 text-sm mt-0.5">
-        {formatTime(new Date(date), { addSuffix: true })}
+        <span className="text-zinc-500">{" "}{formatTime(new Date(date), { addSuffix: true })}</span>
       </p>
     </div>
   );
@@ -129,10 +127,8 @@ const NewMembersItem = ({ item, date }: NewMembersItemProps) => {
         ) : (
           <span className="font-medium">{item.count} new members</span>
         )}
-        <span className="text-zinc-500">{isSingle ? " signed their contract and has become a new member of the Alliance!" : " have signed their contracts and joined the Alliance!"}</span>
-      </p>
-      <p className="text-zinc-400 text-sm mt-0.5">
-        {formatTime(new Date(date), { addSuffix: true })}
+        <span className="text-zinc-500">{isSingle ? " has become a new member of the Alliance" : " joined the Alliance"}</span>
+        <span className="text-zinc-500">{" "}{formatTime(new Date(date), { addSuffix: true })}</span>
       </p>
     </div>
   );
@@ -160,9 +156,7 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
         )}
         <span className="text-zinc-500"> commented on </span>
         <span className="text-green font-medium">{item.postTitle}</span>
-      </p>
-      <p className="text-zinc-400 text-sm mt-0.5">
-        {formatTime(new Date(date), { addSuffix: true })}
+        <span className="text-zinc-500">{" "}{formatTime(new Date(date), { addSuffix: true })}</span>
       </p>
     </Link>
   );
@@ -268,9 +262,9 @@ const GlobalFeed = ({ items, loading, fitToHeight = false }: GlobalFeedProps) =>
             {item.type === "activity_group" && item.activityGroup && (
               <ActivityGroupItem item={item.activityGroup} date={item.date} />
             )}
-            {item.type === "action_update" && item.actionUpdate && (
+            {/* {item.type === "action_update" && item.actionUpdate && (
               <ActionUpdateItem item={item.actionUpdate} />
-            )}
+            )} */}
             {item.type === "new_members" && item.newMembers && (
               <NewMembersItem item={item.newMembers} date={item.date} />
             )}
