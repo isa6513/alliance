@@ -473,6 +473,10 @@ export type Action = {
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
     everyoneShouldComplete: boolean;
+    /**
+     * Whether the action is an onboarding action (hide for existing members)
+     */
+    onboarding: boolean;
     archived: boolean;
     /**
      * Priority of the action
@@ -1137,6 +1141,10 @@ export type ActionDto = {
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
     everyoneShouldComplete: boolean;
+    /**
+     * Whether the action is an onboarding action (hide for existing members)
+     */
+    onboarding: boolean;
     archived: boolean;
     /**
      * Priority of the action
@@ -1299,6 +1307,10 @@ export type CreateActionDto = {
      */
     everyoneShouldComplete: boolean;
     /**
+     * Whether the action is an onboarding action (hide for existing members)
+     */
+    onboarding: boolean;
+    /**
      * Priority of the action
      */
     priority: number;
@@ -1390,6 +1402,10 @@ export type UpdateActionDto = {
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
     everyoneShouldComplete?: boolean;
+    /**
+     * Whether the action is an onboarding action (hide for existing members)
+     */
+    onboarding?: boolean;
     /**
      * Priority of the action
      */
@@ -1660,6 +1676,10 @@ export type ExportActionDto = {
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
     everyoneShouldComplete: boolean;
+    /**
+     * Whether the action is an onboarding action (hide for existing members)
+     */
+    onboarding: boolean;
     archived: boolean;
     /**
      * Priority of the action

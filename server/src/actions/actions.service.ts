@@ -151,7 +151,7 @@ export class ActionsService {
     private readonly actionEventReminderService: ActionEventReminderService,
     private readonly likeNotificationService: LikeNotificationService,
     private readonly forumService: ForumService,
-  ) {}
+  ) { }
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
     const { participatingTags, suiteId, authorIds, ...rest } = createActionDto;
@@ -393,16 +393,16 @@ export class ActionsService {
     const actions = sorted
       ? await this.findAllSorted(relations)
       : await this.actionRepository.find({
-          relations,
-        });
+        relations,
+      });
 
     const user = userId
       ? await this.userService.findOne(userId, {
-          tags: true,
-          awayRanges: true,
-          contractEvents: true,
-          activities: true,
-        })
+        tags: true,
+        awayRanges: true,
+        contractEvents: true,
+        activities: true,
+      })
       : null;
 
     const filtered: Action[] = [];
@@ -445,10 +445,10 @@ export class ActionsService {
           shouldParticipate: shouldParticipate,
           userRelation: user
             ? await this.getActionRelationFromActivities(
-                user.activities.filter(
-                  (activity) => activity.actionId === action.id,
-                ),
-              )
+              user.activities.filter(
+                (activity) => activity.actionId === action.id,
+              ),
+            )
             : undefined,
           reqAuthenticated: !!user,
         });
@@ -494,7 +494,7 @@ export class ActionsService {
     serverSide = false,
   ): Promise<Action> {
     const user = userId
-      ? await this.userService.findOne(userId, { tags: true })
+      ? await this.userService.findOne(userId, { tags: true, contractEvents: true })
       : null;
     const action = await this.actionRepository.findOne({
       where: { id },
@@ -528,7 +528,7 @@ export class ActionsService {
   ): Promise<ActionDto> {
     const action = await this.findOne(id, userId, serverSide);
     const user = userId
-      ? await this.userService.findOne(userId, { tags: true })
+      ? await this.userService.findOne(userId, { tags: true, contractEvents: true })
       : null;
     return new ActionDto(action, {
       canParticipate: user
@@ -874,9 +874,9 @@ export class ActionsService {
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(
-          activities.map((a) => a.id),
-          requestingUserId,
-        )
+        activities.map((a) => a.id),
+        requestingUserId,
+      )
       : new Set<number>();
 
     if (comments) {
@@ -979,9 +979,9 @@ export class ActionsService {
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(
-          activities.map((a) => a.id),
-          requestingUserId,
-        )
+        activities.map((a) => a.id),
+        requestingUserId,
+      )
       : new Set<number>();
 
     if (comments) {
@@ -1120,9 +1120,9 @@ export class ActionsService {
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(
-          activities.map((a) => a.id),
-          requestingUserId,
-        )
+        activities.map((a) => a.id),
+        requestingUserId,
+      )
       : new Set<number>();
 
     if (comments) {
@@ -1186,6 +1186,11 @@ export class ActionsService {
     const tags = action.participatingTags;
     const userTagIds = new Set((user.tags || []).map((tag) => tag.id));
     const isMember = tags.some((tag) => userTagIds.has(tag.id));
+
+    if (action.onboarding && user.contractEvents[0].date < action.events[0].date) {
+      return false;
+    }
+
     return isMember;
   }
 
@@ -1420,9 +1425,9 @@ export class ActionsService {
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(
-          memberActivities.map((a) => a.id),
-          requestingUserId,
-        )
+        memberActivities.map((a) => a.id),
+        requestingUserId,
+      )
       : new Set<number>();
 
     if (comments) {
@@ -1904,7 +1909,7 @@ export class ActionsService {
         fakeGroup.send_range_start &&
         fakeGroup.send_range_end &&
         new Date(fakeGroup.send_range_start).getTime() >
-          new Date(fakeGroup.send_range_end).getTime()
+        new Date(fakeGroup.send_range_end).getTime()
       ) {
         throw new BadRequestException(
           'Send range start must be before the end',
@@ -1970,13 +1975,13 @@ export class ActionsService {
       ...action,
       taskForm: taskForm
         ? await this.formRepository.findOneOrFail({
-            where: { id: action.taskFormId },
-          })
+          where: { id: action.taskFormId },
+        })
         : undefined,
       reminderGroups: reminders
         ? await this.actionEventReminderService.getReminderGroupsForEvent(
-            action.id,
-          )
+          action.id,
+        )
         : undefined,
     };
 
@@ -2246,7 +2251,7 @@ export class ActionsService {
         detail.status = action.optional
           ? UserActionRelationPillStatus.OptionalTask
           : action.latestMemberActionEvent?.deadline &&
-              action.latestMemberActionEvent.deadline < now
+            action.latestMemberActionEvent.deadline < now
             ? UserActionRelationPillStatus.MissedDeadline
             : UserActionRelationPillStatus.Todo;
       }

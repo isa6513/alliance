@@ -199,6 +199,7 @@ export class Action {
   @Allow()
   everyoneShouldComplete: boolean;
 
+  @Column({ default: false })
   @ApiProperty({
     description: 'Whether the action is an onboarding action (hide for existing members)',
     default: false,

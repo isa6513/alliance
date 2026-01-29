@@ -127,7 +127,7 @@ export default function RenderDisplayBlock({ block }: Props) {
               {block.text}
             </span>
           </Card>
-        </Link >
+        </Link>
       );
 
     default:
