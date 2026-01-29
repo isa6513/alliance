@@ -11,8 +11,8 @@ import PublicMemberDirectoryCard from "../../components/PublicMemberDirectoryCar
 const PeoplePage: React.FC = () => {
   const staffIds: Record<number, string> = useMemo(() => {
     return {
-      1: "Mark Xu", // 10
-      3: "Sidney Hough", // 7
+      10: "Mark Xu",
+      7: "Sidney Hough",
       15: "Casey Manning",
       64: "Charles Lien",
     };
