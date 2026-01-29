@@ -128,7 +128,7 @@ const NewMembersItem = ({ item, date }: NewMembersItemProps) => {
           <span className="font-medium">{item.count} new members</span>
         )}
         <span className="text-zinc-500">{isSingle ? " has become a new member of the Alliance" : " joined the Alliance"}</span>
-        <span className="text-zinc-500">{" "}{formatTime(new Date(date), { addSuffix: true })}</span>
+        {/* <span className="text-zinc-500">{" "}{formatTime(new Date(date), { addSuffix: true })}</span> */}
       </p>
     </div>
   );
