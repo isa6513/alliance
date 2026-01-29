@@ -1212,32 +1212,9 @@ export class ActionsService {
   }
 
   async ensureUserEligibleForAction(action: Action, userId: number) {
-    const user = await this.userService.findOne(userId, { tags: true });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    if (action.preventCompletion) {
-      throw new ForbiddenException('This action is no longer available');
-    }
-
-    if (action.useManualCohort) {
-      if (action.manualCohortUserIds?.some((m) => m === userId)) {
-        return;
-      } else {
-        throw new ForbiddenException('This action is not available to you');
-      }
-    }
-
-    const userTagIds = new Set((user.tags || []).map((tag) => tag.id));
-    const isMember = action.participatingTags.some((tag) =>
-      userTagIds.has(tag.id),
-    );
-
-    if (!isMember) {
-      throw new ForbiddenException(
-        'This action is not available to your tags.',
-      );
+    const user = await this.userService.findOneOrFail(userId, { tags: true, contractEvents: true });
+    if (!(await this.isEligibleForAction(action, user))) {
+      throw new ForbiddenException('This action is not available to you');
     }
   }
 
@@ -2474,6 +2451,7 @@ export class ActionsService {
     for (let i = 0; i < actions.length; i++) {
       const action = actions[i];
       if (!action.suite) continue;
+      if (action.onboarding) continue;
 
       const suiteId = action.suite.id;
       if (!suiteMap.has(suiteId)) {

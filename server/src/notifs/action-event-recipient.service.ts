@@ -23,6 +23,7 @@ import {
   ContractEventType,
 } from 'src/user/entities/contract-event.entity';
 import { computeIsAwayInRange } from 'src/utils/user';
+import { findLeast } from 'src/utils/filter';
 
 @Injectable()
 export class ActionEventRecipientService {
@@ -32,7 +33,7 @@ export class ActionEventRecipientService {
     @InjectRepository(Action)
     private readonly actionRepository: Repository<Action>,
     private readonly userService: UserService,
-  ) {}
+  ) { }
 
   private isContractActiveAtDate(
     contractEvents: ContractEvent[] | null,
@@ -53,7 +54,7 @@ export class ActionEventRecipientService {
     return lastEventBefore?.type === ContractEventType.SIGNED;
   }
 
-  public computeShouldParticipate(params: {
+  computeShouldParticipate(params: {
     eventDate: Date;
     everyoneShouldComplete: boolean;
     manualCohortUserIds?: Set<number>;
@@ -61,6 +62,7 @@ export class ActionEventRecipientService {
     useManualCohort: boolean;
     user: User;
     userDismissed: boolean;
+    onboarding: boolean;
     includeSuspended?: boolean;
     includeDismissed?: boolean;
   }): boolean {
@@ -72,6 +74,7 @@ export class ActionEventRecipientService {
       useManualCohort,
       user,
       userDismissed,
+      onboarding,
       includeSuspended = false,
       includeDismissed = false,
     } = params;
@@ -86,6 +89,20 @@ export class ActionEventRecipientService {
     if (!user.tags.some((tag) => targetTagIds.has(tag.id))) {
       return false;
     }
+
+    if (onboarding) {
+      const earliestContractEvent = findLeast(
+        user.contractEvents ?? [],
+        (a, b) => a.date.getTime() - b.date.getTime(),
+      );
+      if (
+        earliestContractEvent &&
+        earliestContractEvent.date < eventDate
+      ) {
+        return false;
+      }
+    }
+
     if (includeSuspended) {
       return true;
     }
@@ -158,6 +175,7 @@ export class ActionEventRecipientService {
         useManualCohort: action.useManualCohort,
         user,
         userDismissed: usersDismissed.has(user.id),
+        onboarding: action.onboarding,
         includeSuspended,
         includeDismissed,
       }) &&
@@ -237,6 +255,7 @@ export class ActionEventRecipientService {
         useManualCohort: event.action.useManualCohort,
         user: idToUser.get(user.id)!,
         userDismissed: usersDismissed.has(user.id),
+        onboarding: event.action.onboarding,
       });
 
     const actions = actionSuite ? actionSuite.actions : [event.action];
