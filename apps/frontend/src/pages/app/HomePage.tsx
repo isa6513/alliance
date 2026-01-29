@@ -162,7 +162,7 @@ const HomePage = () => {
     return (
       <div
         className={
-          "flex flex-col py-4 sm:py-8 md:py-18 px-4 max-w-3xl mx-auto min-h-full"
+          "flex flex-col py-4 sm:py-8 md:py-18 px-4 max-w-3xl mx-auto min-h-full relative"
         }
       >
         {!isLargeScreen && (
@@ -185,7 +185,7 @@ const HomePage = () => {
             onUpdateActionState={() => navigate(href("/tasks"))}
           />
         ) : (
-          <div className="mt-4 px-2 py-2 mx-auto flex flex-col items-center gap-y-4 h-full justify-center">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-y-4">
             {user && !user.hasActiveContract ? (
               <p className="text-center text-zinc-500">
                 {noTasksContractSuspended}
