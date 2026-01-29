@@ -149,7 +149,7 @@ const PostDetailPage: React.FC = () => {
             </div>
             <div className="flex flex-row gap-x-2 mb-2 sm:mb-4 mt-1 items-center text-sm sm:text-base flex-wrap">
               {(post.authors?.length ? post.authors : [post.author]).map(
-                (author, index, arr) => (
+                (author) => (
                   <React.Fragment key={author.id}>
                     <Link
                       to={href("/member/:id", {
@@ -160,15 +160,15 @@ const PostDetailPage: React.FC = () => {
                       <div className="hidden sm:inline">
                         <ProfileImage
                           pfp={author.profilePicture}
-                          size="medium"
-                          className="mr-2"
+                          size="small"
+                          className="mr-1.5"
                         />
                       </div>
                       <div className="inline sm:hidden">
                         <ProfileImage
                           pfp={author.profilePicture}
                           size="small"
-                          className="mr-2"
+                          className="mr-1.5"
                         />
                       </div>
                       <UserDisplayName
@@ -178,9 +178,6 @@ const PostDetailPage: React.FC = () => {
                         {author.displayName}
                       </UserDisplayName>
                     </Link>
-                    {index < arr.length - 1 && (
-                      <span className="text-zinc-500">and</span>
-                    )}
                   </React.Fragment>
                 ),
               )}
