@@ -56,6 +56,7 @@ export class ActionEventRecipientService {
 
   computeShouldParticipate(params: {
     eventDate: Date;
+    deadlineDate: Date | null;
     everyoneShouldComplete: boolean;
     manualCohortUserIds?: Set<number>;
     targetTagIds: Set<string>;
@@ -68,6 +69,7 @@ export class ActionEventRecipientService {
   }): boolean {
     const {
       eventDate,
+      deadlineDate,
       everyoneShouldComplete,
       manualCohortUserIds,
       targetTagIds,
@@ -87,6 +89,13 @@ export class ActionEventRecipientService {
     }
 
     if (!user.tags.some((tag) => targetTagIds.has(tag.id))) {
+      return false;
+    }
+
+    if (deadlineDate && !user.hasActiveContractInFullRange({
+      startDate: eventDate,
+      endDate: deadlineDate,
+    })) {
       return false;
     }
 
@@ -172,6 +181,7 @@ export class ActionEventRecipientService {
     const filterToEligible = (user: User) =>
       this.computeShouldParticipate({
         eventDate: event.date,
+        deadlineDate: deadlineEvent?.date ?? null,
         everyoneShouldComplete: action.everyoneShouldComplete,
         manualCohortUserIds: manualCohortUserIdsSet,
         targetTagIds,
@@ -189,10 +199,7 @@ export class ActionEventRecipientService {
           events,
           currentEventId: eventId,
         })?.date,
-      }) && (!deadlineEvent || user.hasActiveContractInFullRange({
-        startDate: event.date,
-        endDate: deadlineEvent.date,
-      }));
+      });
 
     if (eventStatus === ActionStatus.MemberAction && !action.commitmentless) {
       const activities = await this.actionActivityRepository.find({
@@ -228,6 +235,7 @@ export class ActionEventRecipientService {
   async filterForShouldRemind(
     users: User[],
     event: Pick<ActionEvent, 'newStatus' | 'action' | 'date'>,
+    deadlineEvent: Pick<ActionEvent, 'newStatus' | 'action' | 'date'> | null,
     actionSuite?: ActionSuite,
   ): Promise<User[]> {
     const targetTagIds = new Set(
@@ -255,6 +263,7 @@ export class ActionEventRecipientService {
     const filterToEligible = (user: User) =>
       this.computeShouldParticipate({
         eventDate: event.date,
+        deadlineDate: deadlineEvent?.date ?? null,
         everyoneShouldComplete: event.action.everyoneShouldComplete,
         manualCohortUserIds: manualCohortUserIdsSet,
         targetTagIds,
@@ -298,6 +307,7 @@ export class ActionEventRecipientService {
 
   async findFilteredUsersForEvent(
     event: Pick<ActionEvent, 'newStatus' | 'action' | 'date' | 'id'>,
+    deadlineEvent: Pick<ActionEvent, 'newStatus' | 'action' | 'date'> | null,
     type: ActionEventNotifType,
     suite?: ActionSuite,
   ): Promise<User[]> {
@@ -308,7 +318,7 @@ export class ActionEventRecipientService {
     });
     return type === ActionEventNotifType.Announcement
       ? users
-      : await this.filterForShouldRemind(users, event, suite);
+      : await this.filterForShouldRemind(users, event, deadlineEvent, suite);
   }
 
   async findReminderGroupCohort(group: ReminderGroup): Promise<User[]> {
@@ -323,6 +333,7 @@ export class ActionEventRecipientService {
       case ReminderCohortType.AllUncompleted:
         users = await this.findFilteredUsersForEvent(
           group.memberActionEvent,
+          group.deadlineEvent ?? null,
           ActionEventNotifType.PersonalReminder,
           group.actionSuite,
         );
@@ -342,6 +353,7 @@ export class ActionEventRecipientService {
     return this.filterForShouldRemind(
       users,
       group.memberActionEvent,
+      group.deadlineEvent ?? null,
       group.actionSuite,
     );
   }

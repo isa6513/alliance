@@ -1003,7 +1003,7 @@ describe('Forum (e2e)', () => {
     });
 
     it('notifies all authors when a comment is posted', async () => {
-      const { user: coAuthor, token: coAuthorToken } =
+      const { user: coAuthor } =
         await createExtraUserAndToken();
 
       const postResponse = await request(ctx.app.getHttpServer())
@@ -1111,7 +1111,7 @@ describe('Forum (e2e)', () => {
     });
 
     it('includes co-authored posts in findPostsByUser', async () => {
-      const { user: coAuthor, token: coAuthorToken } =
+      const { user: coAuthor } =
         await createExtraUserAndToken();
 
       const postResponse = await request(ctx.app.getHttpServer())
