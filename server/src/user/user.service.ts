@@ -623,6 +623,10 @@ export class UserService {
     await this.userRepository.update(userId, { stripeCustomerId });
   }
 
+  async setOptInMms(userId: number, mmsId: number) {
+    await this.userRepository.update(userId, { optInMms: { id: mmsId } });
+  }
+
   async findAllUsers(): Promise<User[]> {
     return this.userRepository.find({
       where: {
