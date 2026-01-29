@@ -88,7 +88,7 @@ const PeoplePage: React.FC = () => {
               platform.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2">
               {staffProfiles
                 .filter((member) => member.id !== undefined)
                 .map((member) => (
@@ -125,12 +125,11 @@ const PeoplePage: React.FC = () => {
 
             {filteredMembers.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2">
                   {displayedMembers.map((member) => (
                     <PublicMemberDirectoryCard
                       key={member.id}
                       member={member}
-
                     />
                   ))}
                 </div>
