@@ -9,7 +9,8 @@ export type DisplayKind =
   | "spacer" // vertical space
   | "html" // controlled/allowlisted HTML snippet
   | "image" // decorative image
-  | "quote"; // quote block
+  | "quote" // quote block
+  | "biglink"; // prominent link card
 
 interface BaseBlock {
   kind: DisplayKind;
@@ -67,6 +68,12 @@ export type ImageBlock = BaseBlock & {
   caption?: string;
 };
 
+export type BigLinkBlock = BaseBlock & {
+  kind: "biglink";
+  text: string;
+  url: string;
+};
+
 export type DisplayBlock =
   | HeaderBlock
   | TextBlock
@@ -75,7 +82,8 @@ export type DisplayBlock =
   | DividerBlock
   | SpacerBlock
   | HtmlBlock
-  | ImageBlock;
+  | ImageBlock
+  | BigLinkBlock;
 
 export type ManualDisplayBlockContent = Omit<
   DisplayBlock,

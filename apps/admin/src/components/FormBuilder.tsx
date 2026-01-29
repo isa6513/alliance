@@ -21,6 +21,7 @@ import type {
 import type { UserDto } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  EditableBigLinkBlock,
   EditableDividerBlock,
   EditableHeaderBlock,
   EditableHtmlBlock,
@@ -331,6 +332,7 @@ export function FormBuilder({
       { id: "html", name: "HTML Block", type: "block" as const },
       { id: "image", name: "Image Block", type: "block" as const },
       { id: "quote", name: "Quote Block", type: "block" as const },
+      { id: "biglink", name: "Big Link Block", type: "block" as const },
     ],
     []
   );
@@ -628,6 +630,14 @@ export function FormBuilder({
         break;
       case "quote":
         newBlock = { kind: "quote", id: blockId, text: "body text" };
+        break;
+      case "biglink":
+        newBlock = {
+          kind: "biglink",
+          id: blockId,
+          text: "Link title",
+          url: "/",
+        };
         break;
       default:
         console.error(`Unknown block kind: ${kind satisfies never}`);
@@ -1325,6 +1335,13 @@ export function FormBuilder({
                 case "quote":
                   return (
                     <EditableQuoteBlock
+                      block={block as any}
+                      {...commonProps}
+                    />
+                  );
+                case "biglink":
+                  return (
+                    <EditableBigLinkBlock
                       block={block as any}
                       {...commonProps}
                     />

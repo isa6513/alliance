@@ -199,6 +199,13 @@ export class Action {
   @Allow()
   everyoneShouldComplete: boolean;
 
+  @ApiProperty({
+    description: 'Whether the action is an onboarding action (hide for existing members)',
+    default: false,
+  })
+  @Allow()
+  onboarding: boolean;
+
   @Column({ default: false })
   @ApiProperty({
     default: false,
@@ -320,13 +327,13 @@ export class Action {
   @IsOptional()
   private _latestMemberActionEvent:
     | {
-        event: ActionEvent;
-        deadline: Date | null;
-      }
+      event: ActionEvent;
+      deadline: Date | null;
+    }
     | {
-        event: null;
-        deadline: null;
-      }
+      event: null;
+      deadline: null;
+    }
     | null = null;
   get latestMemberActionEvent(): NonNullable<
     typeof this._latestMemberActionEvent

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Linking,
   Text,
   TextInput,
   TouchableOpacity,
@@ -64,17 +65,16 @@ function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
     case "header":
       return (
         <Text
-          className={`font-semibold text-zinc-900 my-2 ${
-            block.level === 1
+          className={`font-semibold text-zinc-900 my-2 ${block.level === 1
               ? "text-3xl"
               : block.level === 2
-              ? "text-2xl"
-              : block.level === 3
-              ? "text-xl"
-              : block.level === 4
-              ? "text-lg"
-              : "text-base"
-          }`}
+                ? "text-2xl"
+                : block.level === 3
+                  ? "text-xl"
+                  : block.level === 4
+                    ? "text-lg"
+                    : "text-base"
+            }`}
         >
           {block.text}
         </Text>
@@ -122,6 +122,20 @@ function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
             </Text>
           )}
         </View>
+      );
+    case "biglink":
+      return (
+        <TouchableOpacity
+          className="rounded-lg border border-zinc-200 bg-white px-5 py-4"
+          onPress={() => Linking.openURL(block.url)}
+        >
+          <Text className="text-base font-medium text-blue-600">
+            {block.text}
+          </Text>
+          <Text className="mt-1 text-sm text-zinc-500" numberOfLines={1}>
+            {block.url}
+          </Text>
+        </TouchableOpacity>
       );
     default:
       return null;
@@ -262,8 +276,8 @@ const FormRenderer = ({
         const conditions = Array.isArray(element.visibleIf)
           ? element.visibleIf
           : element.visibleIf
-          ? [element.visibleIf]
-          : [];
+            ? [element.visibleIf]
+            : [];
         for (const condition of conditions) {
           if ("validatorId" in condition) {
             ids.add(condition.validatorId);
@@ -724,11 +738,10 @@ const FormRenderer = ({
           <View className="gap-2 mb-3">
             <TouchableOpacity
               activeOpacity={0.8}
-              className={`border rounded-lg px-3 py-3 ${
-                outOfTimeSelected
+              className={`border rounded-lg px-3 py-3 ${outOfTimeSelected
                   ? "border-green-600 bg-green/20"
                   : "border-zinc-200"
-              }`}
+                }`}
               onPress={() => {
                 setOutOfTimeSelected((prev) => !prev);
                 if (!outOfTimeSelected) {
@@ -742,11 +755,10 @@ const FormRenderer = ({
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.8}
-              className={`border rounded-lg px-3 py-3 ${
-                otherReasonSelected
+              className={`border rounded-lg px-3 py-3 ${otherReasonSelected
                   ? "border-green-600 bg-green/20"
                   : "border-zinc-200"
-              }`}
+                }`}
               onPress={() => {
                 setOtherReasonSelected((prev) => !prev);
                 if (!otherReasonSelected) {

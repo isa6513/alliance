@@ -2,6 +2,10 @@ import React from "react";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import { getApiUrl } from "../lib/config";
+import { Link } from "react-router";
+import Card from "../ui/Card";
+import { MessagesSquare } from "lucide-react";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 type Props = {
   block: DisplayBlock;
@@ -13,19 +17,18 @@ export default function RenderDisplayBlock({ block }: Props) {
       return React.createElement(
         `h${block.level || 2}`,
         {
-          className: `!font-semibold text-zinc-900 ${
-            (block.level || 2) === 1
-              ? "text-3xl"
-              : (block.level || 2) === 2
+          className: `!font-semibold text-zinc-900 ${(block.level || 2) === 1
+            ? "text-3xl"
+            : (block.level || 2) === 2
               ? "text-2xl"
               : (block.level || 2) === 3
-              ? "text-xl"
-              : (block.level || 2) === 4
-              ? "text-lg"
-              : (block.level || 2) === 5
-              ? "text-base"
-              : ""
-          }`,
+                ? "text-xl"
+                : (block.level || 2) === 4
+                  ? "text-lg"
+                  : (block.level || 2) === 5
+                    ? "text-base"
+                    : ""
+            }`,
         },
         block.text
       );
@@ -45,36 +48,34 @@ export default function RenderDisplayBlock({ block }: Props) {
     case "divider":
       return (
         <hr
-          className={`border-gray-300 ${
-            block.thickness === "hairline"
-              ? "border-t"
-              : block.thickness === "thin"
+          className={`border-gray-300 ${block.thickness === "hairline"
+            ? "border-t"
+            : block.thickness === "thin"
               ? "border-t"
               : block.thickness === "medium"
-              ? "border-t-2"
-              : block.thickness === "thick"
-              ? "border-t-4"
-              : "border-t"
-          }`}
+                ? "border-t-2"
+                : block.thickness === "thick"
+                  ? "border-t-4"
+                  : "border-t"
+            }`}
         />
       );
 
     case "spacer":
       return (
         <div
-          className={`${
-            block.size === "xs"
-              ? "h-2"
-              : block.size === "sm"
+          className={`${block.size === "xs"
+            ? "h-2"
+            : block.size === "sm"
               ? "h-4"
               : block.size === "md"
-              ? "h-8"
-              : block.size === "lg"
-              ? "h-16"
-              : block.size === "xl"
-              ? "h-24"
-              : "h-8"
-          }`}
+                ? "h-8"
+                : block.size === "lg"
+                  ? "h-16"
+                  : block.size === "xl"
+                    ? "h-24"
+                    : "h-8"
+            }`}
         />
       );
 
@@ -112,6 +113,21 @@ export default function RenderDisplayBlock({ block }: Props) {
         <div className="prose prose-sm max-w-none bg-zinc-100 px-5 py-4">
           <FormMarkdownWrapper markdownContent={block.text} />
         </div>
+      );
+
+    case "biglink":
+      return (
+        <Link
+          to={block.url}
+          className="block transition-all group text-black hover:text-green"
+        >
+          <Card className="flex flex-row items-center gap-2" style={CardStyle.Grey}>
+            <MessagesSquare size={16} />
+            <span className="text-base" style={{ fontWeight: 450 }}>
+              {block.text}
+            </span>
+          </Card>
+        </Link >
       );
 
     default:
