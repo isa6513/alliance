@@ -113,7 +113,7 @@ jobs:
             --arg claude "$CLAUDE_FINAL_MESSAGE" \
             --arg codex "$CODEX_FINAL_MESSAGE" \
             '{
-              model: "gpt-5.1-mini",
+              model: "gpt-5.2",
               messages: [
                 { "role": "developer", "content": $instructions },
                 {
@@ -129,6 +129,10 @@ jobs:
               -H "Authorization: Bearer $OPENAI_API_KEY" \
               -d "$payload"
           )"
+
+          echo "Response:"
+          echo "----------"
+          printf '%s\n' "$response"
 
           combined="$(printf "%s" "$response" | jq -r '.choices[0].message.content // ""')"
 
