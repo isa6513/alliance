@@ -176,6 +176,8 @@ const StatsPage: React.FC = () => {
   const [hoveredContractPoint, setHoveredContractPoint] = useState<
     (ContractStatusPointDto & { parsedDate: Date }) | null
   >(null);
+  const [completionRateAbsolute, setCompletionRateAbsolute] =
+    useState<boolean>(false);
   const [completionRateRange, setCompletionRateRange] = useState(() => {
     const end = new Date();
     const start = new Date();
@@ -508,6 +510,31 @@ const StatsPage: React.FC = () => {
       actionCount: d.actionCount,
     }));
   }, [cumulativeCompletionData]);
+
+  const completionRateYDomain = useMemo(() => {
+    if (completionRateAbsolute) {
+      return [0, 1] as [number, number];
+    }
+    const values = completionRateChartData
+      .map((d) => d.avgRate)
+      .filter((value): value is number => typeof value === "number")
+      .filter((value) => Number.isFinite(value));
+    if (values.length === 0) {
+      return undefined;
+    }
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    const range = Math.max(0, maxValue - minValue);
+    const padding = Math.max(0.01, range * 0.1);
+    let paddedMin = Math.max(0, minValue - padding);
+    let paddedMax = Math.min(1, maxValue + padding);
+    if (paddedMax === paddedMin) {
+      const bump = Math.min(0.05, Math.max(0.01, paddedMax * 0.1));
+      paddedMin = Math.max(0, paddedMin - bump);
+      paddedMax = Math.min(1, paddedMax + bump);
+    }
+    return [paddedMin, paddedMax] as [number, number];
+  }, [completionRateAbsolute, completionRateChartData]);
 
   const completionRateSeries: ChartSeries[] = useMemo(
     () => [
@@ -1226,16 +1253,31 @@ const StatsPage: React.FC = () => {
         showArea
         areaSeriesKey="avgRate"
         areaColor="rgba(22, 163, 74, 0.12)"
-        yDomain={[0, 1]}
+        yDomain={completionRateYDomain}
         yAxisFormat={(v) => `${Math.round(v * 100)}%`}
+        showHoverOnlyOnHover
+        yTickLabelDedup
         dateRange={completionRateRange}
         onDateRangeChange={setCompletionRateRange}
+        headerContent={
+          <label className="flex items-center gap-2 text-xs font-semibold text-gray-600 md:ml-auto">
+            <input
+              type="checkbox"
+              checked={completionRateAbsolute}
+              onChange={(event) =>
+                setCompletionRateAbsolute(event.target.checked)
+              }
+              className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-400"
+            />
+            Absolute
+          </label>
+        }
         getHoverContent={(point) => ({
           title: fullDateFormatter.format(point.date),
           items: [
             {
               label: "Avg Rate",
-              value: `${Math.round((point.avgRate as number) * 100)}%`,
+              value: `${((point.avgRate as number) * 100).toFixed(2)}%`,
               color: "#16a34a",
             },
             {
