@@ -29,8 +29,6 @@ import {
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-//test issue: this needs to be removed!!!!
-
 const HomePage = () => {
   const navigate = useNavigate();
   const { actions, loading, handleDismissAction } =
