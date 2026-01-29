@@ -66,6 +66,7 @@ import { RegisterDeviceDto, UserDeviceDto } from './dto/device.dto';
 import { UserDevice } from './entities/user-device.entity';
 import { PushService } from 'src/push/push.service';
 import { Push } from 'src/push/push.entity';
+import { SlackService } from 'src/slack/slack.service';
 
 const defaultTimeZone = 'America/Los_Angeles';
 const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
@@ -111,7 +112,8 @@ export class UserService {
     private readonly mailService: MailService,
     private readonly conversationService: ConversationService,
     private readonly pushService: PushService,
-  ) {}
+    private readonly slackService: SlackService,
+  ) { }
 
   async create(data: DeepPartial<User>): Promise<User> {
     const user = this.userRepository.create(data);
@@ -128,8 +130,8 @@ export class UserService {
         const city =
           (data.cityId
             ? await this.cityRepository.findOne({
-                where: { id: data.cityId },
-              })
+              where: { id: data.cityId },
+            })
             : undefined) ?? undefined;
 
         if (data.cityId && !city) {
@@ -286,8 +288,8 @@ export class UserService {
 
     const city = body.cityId
       ? await this.cityRepository.findOne({
-          where: { id: body.cityId },
-        })
+        where: { id: body.cityId },
+      })
       : null;
 
     if (city) {
@@ -496,13 +498,13 @@ export class UserService {
     const rels =
       direction === 'sent'
         ? await this.friendRepository.find({
-            where: { requester: { id: userId }, status: FriendStatus.Pending },
-            relations: { addressee: true },
-          })
+          where: { requester: { id: userId }, status: FriendStatus.Pending },
+          relations: { addressee: true },
+        })
         : await this.friendRepository.find({
-            where: { addressee: { id: userId }, status: FriendStatus.Pending },
-            relations: { requester: true },
-          });
+          where: { addressee: { id: userId }, status: FriendStatus.Pending },
+          relations: { requester: true },
+        });
     const users =
       direction === 'sent'
         ? rels.map((r) => r.addressee)
@@ -677,6 +679,11 @@ export class UserService {
       date: new Date(),
     });
     await this.contractEventRepository.save(contractEvent);
+
+    await this.slackService.sendMessage(
+      `${user.name} signed their contract :)`,
+    );
+
     return contractEvent.date;
   }
 
@@ -697,6 +704,13 @@ export class UserService {
       autoSuspendKey,
     });
     await this.contractEventRepository.save(contractEvent);
+
+    if (!automatic) {
+      await this.slackService.sendMessage(
+        `${user.name} suspended their contract :(`,
+      );
+    }
+
     return contractEvent.date;
   }
 
