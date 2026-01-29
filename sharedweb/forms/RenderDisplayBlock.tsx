@@ -119,13 +119,18 @@ export default function RenderDisplayBlock({ block }: Props) {
       return (
         <Link
           to={block.url}
-          className="block transition-all group text-black hover:text-green"
+          className="block group text-black "
         >
-          <Card className="flex flex-row items-center gap-2" style={CardStyle.Grey}>
+          <Card className="flex flex-row items-center gap-2 hover:bg-zinc-100" style={CardStyle.Grey}>
             <MessagesSquare size={16} />
-            <span className="text-base" style={{ fontWeight: 450 }}>
-              {block.text}
-            </span>
+            <div>
+              <p className="text-base" style={{ fontWeight: 450 }}>
+                {block.text}
+              </p>
+              <p className="text-sm text-green">
+                {block.url}
+              </p>
+            </div>
           </Card>
         </Link>
       );

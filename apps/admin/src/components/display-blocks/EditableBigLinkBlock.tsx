@@ -38,7 +38,7 @@ export function EditableBigLinkBlock({
             type="text"
             value={activeBlock.url}
             onChange={(e) => handleUpdate({ url: e.target.value })}
-            className="w-full text-gray-600 text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full text-zinc-600 text-sm border border-zinc-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="/path or https://..."
           />
 
