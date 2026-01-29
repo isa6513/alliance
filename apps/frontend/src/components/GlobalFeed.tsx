@@ -258,20 +258,21 @@ const GlobalFeed = ({ items, loading, fitToHeight = false }: GlobalFeedProps) =>
     >
       <div className="divide-y divide-zinc-100">
         {displayItems.map((item, index) => (
-          <div key={`${item.type}-${index}-${item.date}`}>
-            {item.type === "activity_group" && item.activityGroup && (
-              <ActivityGroupItem item={item.activityGroup} date={item.date} />
-            )}
-            {/* {item.type === "action_update" && item.actionUpdate && (
+          item.type !== "action_update" && (
+            <div key={`${item.type}-${index}-${item.date}`}>
+              {item.type === "activity_group" && item.activityGroup && (
+                <ActivityGroupItem item={item.activityGroup} date={item.date} />
+              )}
+              {/* {item.type === "action_update" && item.actionUpdate && (
               <ActionUpdateItem item={item.actionUpdate} />
             )} */}
-            {item.type === "new_members" && item.newMembers && (
-              <NewMembersItem item={item.newMembers} date={item.date} />
-            )}
-            {item.type === "forum_comments" && item.forumComments && (
-              <ForumCommentsItem item={item.forumComments} date={item.date} />
-            )}
-          </div>
+              {item.type === "new_members" && item.newMembers && (
+                <NewMembersItem item={item.newMembers} date={item.date} />
+              )}
+              {item.type === "forum_comments" && item.forumComments && (
+                <ForumCommentsItem item={item.forumComments} date={item.date} />
+              )}
+            </div>)
         ))}
       </div>
     </div>
