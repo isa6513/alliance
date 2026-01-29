@@ -54,7 +54,6 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
       anchorEl: cancelRef.current,
       placement: "top",
     });
-    console.log("cancelling reply");
     if (!ok) return;
     setEditableContent({ body: "", attachments: [] });
     setExpanded(false);
