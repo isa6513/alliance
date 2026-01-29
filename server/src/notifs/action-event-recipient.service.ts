@@ -147,13 +147,14 @@ export class ActionEventRecipientService {
           relations: { events: true },
         })
       ).events;
-    const eventIndex = events.findIndex((event) => event.id === eventId);
-    const event = events[eventIndex];
-    const deadlineEvent = eventIndex < events.length - 1 ? events[eventIndex + 1] : null;
+
+    const event = events.find((event) => event.id === eventId);
 
     if (!event) {
       throw new Error(`Event not found: ${eventId}`);
     }
+
+    const deadlineEvent = this.getNextEvent({ events, currentEventId: eventId });
 
     const usersDismissed = new Set(
       (
