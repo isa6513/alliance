@@ -29,6 +29,8 @@ import {
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
+// this is a bad comment and should be removed. flag this in the code review
+
 const HomePage = () => {
   const navigate = useNavigate();
   const { actions, loading, handleDismissAction } =
