@@ -271,7 +271,7 @@ jobs:
         id: slack_body_review
         if: ${{ steps.combine_reviews.outputs.needs_review == 'true' }}
         env:
-          SUMMARY: ${{ steps.combine_reviews.outputs.combined_final_message }}
+          SUMMARY: ${{ steps.linkify_cursors.outputs.combined_final_message }}
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SLACK_MENTION: ${{ steps.actor_to_slack.outputs.mention }}
         run: |
