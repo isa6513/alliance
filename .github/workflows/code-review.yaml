@@ -183,12 +183,13 @@ jobs:
           instructions="You will be given a short markdown review message that may mention files like \`apps/frontend/src/pages/app/HomePage.tsx:32\` or \`server/src/foo/bar.ts\`.
           
           Your job is:
-          - Turn each file reference into a markdown link that opens Cursor on macOS.
-          - Use the URL pattern: \${CURSOR_FILE_PREFIX}/<repo-relative-path>:<line>
+          - Turn each file reference into a Slack mrkdwn link that opens Cursor on macOS.
+          - Use the URL pattern: <\${CURSOR_FILE_PREFIX}/<repo-relative-path>:<line>|<file-label>>
           - Example:
             Input text: \`apps/frontend/src/pages/app/HomePage.tsx:32\`
-            Output: [HomePage.tsx:32](\${CURSOR_FILE_PREFIX}/apps/frontend/src/pages/app/HomePage.tsx:32)
-          - If there is no line number, link the file without a :line suffix.
+            Output: <\${CURSOR_FILE_PREFIX}/apps/frontend/src/pages/app/HomePage.tsx:32|HomePage.tsx:32>
+          - The file-label should usually be \"HomePage.tsx:32\" or similar.
+          - If there is no line number, link the file without a :line suffix in the URL and label.
           - Do NOT change the wording of bullets except wrapping the file references in links.
           - Preserve the overall structure and any trailing token like [NEEDS_ATTENTION] exactly if present."
 
