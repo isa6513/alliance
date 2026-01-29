@@ -11,8 +11,8 @@ import PublicMemberDirectoryCard from "../../components/PublicMemberDirectoryCar
 const PeoplePage: React.FC = () => {
   const staffIds: Record<number, string> = useMemo(() => {
     return {
-      10: "Mark Xu",
-      7: "Sidney Hough",
+      1: "Mark Xu", // 10
+      3: "Sidney Hough", // 7
       15: "Casey Manning",
       64: "Charles Lien",
     };
@@ -31,7 +31,9 @@ const PeoplePage: React.FC = () => {
       const membersRes = await userMembersPublic();
 
       setMembers(membersRes.data ?? []);
-      setStaffProfiles(membersRes.data?.filter((member) => Object.keys(staffIds).includes(member.id.toString())) ?? []);
+
+      // sort staff by names alphabetically
+      setStaffProfiles(membersRes.data?.filter((member) => Object.keys(staffIds).includes(member.id.toString())).sort((a, b) => (a.displayName ?? "").localeCompare(b.displayName ?? "", undefined, { sensitivity: "base" })) ?? []);
     };
 
     fetchData();
@@ -62,45 +64,42 @@ const PeoplePage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex-1 container mx-auto pt-16 md:pt-28 pb-56 flex flex-col px-5">
-        <div className="mx-auto w-full flex flex-col text-base md:text-lg gap-y-8 md:gap-y-12">
-          <h2 className="font-semibold text-3xl md:text-5xl font-serif">
+        <div className="mx-auto w-full flex flex-col text-base md:text-lg">
+          <h2 className="max-w-4xl w-full mx-auto font-semibold text-3xl md:text-5xl font-serif mb-8 md:mb-12">
             People
           </h2>
-          <div>
+          <div className="mx-auto w-full max-w-4xl flex flex-col md:flex-row md:items-center gap-6">
+            <p className="text-zinc-900">
+              The Alliance was founded by Sidney Hough and Mark Xu, a couple
+              living in San Francisco, California, U.S.A.
+            </p>
+            <img
+              src={sidneyandmark}
+              alt="Sidney and Mark"
+              className="max-w-96 h-auto rounded-md"
+            />
+          </div>
+          <div className="mx-auto max-w-4xl w-full mt-8 md:mt-16">
             <h2 className="!font-semibold !text-xl md:!text-2xl mb-4">
               Strategic office
             </h2>
-
-            <div className="w-full flex flex-col gap-4">
-              <p className="text-zinc-900">
-                The Alliance was founded by Sidney Hough and Mark Xu, a couple
-                living in San Francisco, California, U.S.A.
-              </p>
-              <img
-                src={sidneyandmark}
-                alt="Sidney and Mark"
-                className="max-w-96 h-auto rounded-md"
-              />
-            </div>
-
-            <p className="my-4 text-zinc-900">
+            <p className="mb-4 text-zinc-900">
               Members of the office plan actions and develop our online
               platform.
             </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2">
-              {staffProfiles
-                .filter((member) => member.id !== undefined)
-                .map((member) => (
-                  <PublicMemberDirectoryCard
-                    key={member.id}
-                    member={member}
-                    showDescription={true}
-                  />
-                ))}
-            </div>
           </div>
-          <div>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            {staffProfiles
+              .filter((member) => member.id !== undefined)
+              .map((member) => (
+                <PublicMemberDirectoryCard
+                  key={member.id}
+                  member={member}
+                  showDescription={true}
+                />
+              ))}
+          </div>
+          <div className="max-w-4xl w-full mx-auto mt-8 md:mt-16">
             <h2 className="!font-semibold !text-xl md:!text-2xl mb-4">
               Members
             </h2>
@@ -122,39 +121,38 @@ const PeoplePage: React.FC = () => {
                 className="w-full border bg-white border-zinc-200 py-2 px-3 rounded text-base"
               />
             </div>
-
-            {filteredMembers.length > 0 ? (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                  {displayedMembers.map((member) => (
-                    <PublicMemberDirectoryCard
-                      key={member.id}
-                      member={member}
-                    />
-                  ))}
-                </div>
-                {hasMoreMembers && (
-                  <div className="mt-4 flex justify-center">
-                    <button
-                      onClick={() =>
-                        setDisplayCount(displayCount + defaultDisplayCount)
-                      }
-                      className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50"
-                    >
-                      Show more ({filteredMembers.length - displayCount}{" "}
-                      remaining)
-                    </button>
-                  </div>
-                )}
-              </>
-            ) : (
-              <p className="text-zinc-500 text-center py-8">
-                {searchQuery.trim()
-                  ? "No members found matching your search."
-                  : "Loading members..."}
-              </p>
-            )}
           </div>
+          {filteredMembers.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {displayedMembers.map((member) => (
+                  <PublicMemberDirectoryCard
+                    key={member.id}
+                    member={member}
+                  />
+                ))}
+              </div>
+              {hasMoreMembers && (
+                <div className="mt-4 flex justify-center">
+                  <button
+                    onClick={() =>
+                      setDisplayCount(displayCount + defaultDisplayCount)
+                    }
+                    className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50"
+                  >
+                    Show more ({filteredMembers.length - displayCount}{" "}
+                    remaining)
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="text-zinc-500 text-center py-8">
+              {searchQuery.trim()
+                ? "No members found matching your search."
+                : "Loading members..."}
+            </p>
+          )}
         </div>
       </div>
       <Footer />
