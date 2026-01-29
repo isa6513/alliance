@@ -103,6 +103,7 @@ import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 import { Relations } from 'src/utils/Repository';
 import { run } from 'src/utils/promise';
 import { CachedFilter } from 'src/utils/cached-filter';
+import { findLeast } from 'src/utils/filter';
 import {
   computeIsAwayDuringAnyOfLastMemberAction,
   computeIsTaggedOrInManualCohort,
@@ -1169,7 +1170,7 @@ export class ActionsService {
     userId: number,
   ): Promise<boolean> {
     const action = await this.findOne(actionId, userId);
-    const user = await this.userService.findOne(userId, { tags: true });
+    const user = await this.userService.findOne(userId, { tags: true, contractEvents: true });
     if (!user) {
       return false;
     }
@@ -1187,8 +1188,24 @@ export class ActionsService {
     const userTagIds = new Set((user.tags || []).map((tag) => tag.id));
     const isMember = tags.some((tag) => userTagIds.has(tag.id));
 
-    if (action.onboarding && user.contractEvents[0].date < action.events[0].date) {
-      return false;
+    if (action.onboarding) {
+      const earliestContractEvent = findLeast(
+        user.contractEvents ?? [],
+        (a, b) => a.date.getTime() - b.date.getTime(),
+      );
+      const earliestActionEvent = findLeast(
+        action.events ?? [],
+        (a, b) => a.date.getTime() - b.date.getTime(),
+      );
+      if (!earliestContractEvent) {
+        return isMember;
+      }
+      if (
+        !earliestActionEvent ||
+        earliestContractEvent.date < earliestActionEvent.date
+      ) {
+        return false;
+      }
     }
 
     return isMember;
