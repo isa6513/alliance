@@ -140,6 +140,7 @@ describe('Tasks (e2e)', () => {
         optional: false,
         useManualCohort: false,
         publicOnly: false,
+        onboarding: false,
         latestMemberActionEvent: {
           event: null,
           deadline: null,
@@ -315,6 +316,7 @@ describe('Tasks (e2e)', () => {
             event: null,
             deadline: null,
           },
+          onboarding: false,
         } satisfies CreateActionDto),
       );
 

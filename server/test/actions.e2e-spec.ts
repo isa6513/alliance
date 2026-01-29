@@ -1,4 +1,4 @@
-import {} from 'src/actions/actions.service';
+import { } from 'src/actions/actions.service';
 import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
 import { CommentParentObject } from 'src/forum/entities/comment.entity';
 import { UserService } from 'src/user/user.service';
@@ -189,6 +189,7 @@ describe('Actions (e2e)', () => {
         priority: 0,
         preventCompletion: false,
         publicOnly: false,
+        onboarding: false,
         latestMemberActionEvent: {
           event: null,
           deadline: null,
