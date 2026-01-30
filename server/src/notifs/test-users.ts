@@ -51,6 +51,7 @@ export const testUser = new User({
   referredBy: null,
   referredUsers: [],
   shareEmailWithCommunityLead: true,
+  undergoingGroupAssignment: false,
   sharePhoneNumberWithCommunityLead: true,
   referralCode: '',
   hashPassword: function (): Promise<void> {
