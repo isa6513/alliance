@@ -28,6 +28,7 @@ import { Public } from '../auth/public.decorator';
 import { FriendStatus } from './entities/friend.entity';
 import { PrefillUserDto } from './prefill-user.dto';
 import {
+  AssignGroupsDto,
   FriendStatusDto,
   OnboardingDto,
   ProfileDto,
@@ -45,6 +46,7 @@ import {
   CreateCommunityInviteDto,
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
+  RequestCommunityInviteDto,
   RequestOnetimeInviteDto,
 } from './dto/invite.dto';
 import {
@@ -412,11 +414,23 @@ export class UserController {
     return this.userService.verifyEmail(body.token);
   }
 
-  @Post('communities')
+  @Post('communities/admin')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CommunityDto })
-  async createCommunity(@Body() body: CreateCommunityDto) {
-    return new CommunityDto(await this.userService.createCommunity(body));
+  async createCommunityAdmin(@Body() body: CreateCommunityDto) {
+    return new CommunityDto(await this.userService.createCommunityAdmin(body));
+  }
+
+  @Post('communities')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async createCommunity(
+    @Request() req: JwtRequest,
+    @Body() body: CreateCommunityDto,
+  ) {
+    return new CommunityDto(
+      await this.userService.createCommunity(req.user.sub, body),
+    );
   }
 
   @Get('communities')
@@ -425,6 +439,27 @@ export class UserController {
   async getCommunities() {
     return (await this.userService.findAllCommunities()).map(
       (community) => new CommunityDto(community),
+    );
+  }
+
+  @Get('communities/public')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [CommunityDto] })
+  async getPublicCommunities() {
+    return (await this.userService.findPublicCommunities()).map(
+      (community) => new CommunityDto(community),
+    );
+  }
+
+  @Post('communities/:communityId/join')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async joinPublicCommunity(
+    @Request() req: JwtRequest,
+    @Param('communityId', ParseIntPipe) communityId: number,
+  ) {
+    return new CommunityDto(
+      await this.userService.joinPublicCommunity(req.user.sub, communityId),
     );
   }
 
@@ -441,13 +476,23 @@ export class UserController {
     );
   }
 
-  @Delete('communities/:communityId')
+  @Delete('communities/:communityId/admin')
   @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async deleteCommunityAdmin(
+    @Param('communityId', ParseIntPipe) communityId: number,
+  ) {
+    await this.userService.deleteCommunityAdmin(communityId);
+  }
+
+  @Delete('communities/:communityId')
+  @UseGuards(AuthGuard)
   @ApiOkResponse()
   async deleteCommunity(
     @Param('communityId', ParseIntPipe) communityId: number,
+    @Request() req: JwtRequest,
   ) {
-    await this.userService.deleteCommunity(communityId);
+    await this.userService.deleteCommunity(req.user.sub, communityId);
   }
 
   @Post('communities/:communityId/addMember')
@@ -458,19 +503,43 @@ export class UserController {
     @Body() body: CommunityMemberDto,
   ) {
     return new CommunityDto(
-      await this.userService.addUserToCommunity(communityId, body.userId),
+      await this.userService.addUserToCommunity({
+        communityId,
+        userId: body.userId,
+        sendNotif: true,
+      }),
     );
   }
 
-  @Post('communities/:communityId/removeMember')
+  @Post('communities/:communityId/removeMember/admin')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CommunityDto })
-  async removeMemberFromCommunity(
+  async removeMemberFromCommunityAdmin(
     @Param('communityId', ParseIntPipe) communityId: number,
     @Body() body: CommunityMemberDto,
   ) {
     return new CommunityDto(
-      await this.userService.removeUserFromCommunity(communityId, body.userId),
+      await this.userService.removeUserFromCommunityAdmin(
+        communityId,
+        body.userId,
+      ),
+    );
+  }
+
+  @Post('communities/:communityId/removeMember')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async removeMemberFromCommunity(
+    @Request() req: JwtRequest,
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Body() body: CommunityMemberDto,
+  ) {
+    return new CommunityDto(
+      await this.userService.removeUserFromCommunity({
+        userId: req.user.sub,
+        removeeId: body.userId,
+        communityId,
+      }),
     );
   }
 
@@ -582,7 +651,9 @@ export class UserController {
     @Body() body: RequestOnetimeInviteDto,
     @Request() req: JwtRequest,
   ) {
-    return this.userService.requestOnetimeInvite(body, req.user.sub);
+    return new OnetimeInviteDto(
+      await this.userService.requestOnetimeInvite(body, req.user.sub),
+    );
   }
 
   @Post('onetimeInvite/:inviteId/approve')
@@ -593,7 +664,10 @@ export class UserController {
     @Request() req: JwtRequest,
   ) {
     return new OnetimeInviteDto(
-      await this.userService.approveOnetimeInvite(inviteId, req.user.sub),
+      await this.userService.approveOnetimeInviteRequest(
+        inviteId,
+        req.user.sub,
+      ),
     );
   }
 
@@ -604,11 +678,11 @@ export class UserController {
     @Param('inviteId', ParseIntPipe) inviteId: number,
     @Request() req: JwtRequest,
   ) {
-    return this.userService.rejectOnetimeInvite(inviteId, req.user.sub);
+    return this.userService.rejectOnetimeInviteRequest(inviteId, req.user.sub);
   }
 
   @Post('onetimeInvite/create')
-  @UseGuards(CommunityLeaderGuard)
+  @UseGuards(AuthGuard)
   @ApiOkResponse({ type: OnetimeInviteDto })
   async createOnetimeInvite(
     @Body() body: CreateOnetimeInviteDto,
@@ -629,6 +703,43 @@ export class UserController {
     return new CommunityInviteDto(
       await this.userService.createCommunityInvite(body, req.user.sub),
     );
+  }
+
+  @Post('communityInvites/request')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CommunityInviteDto })
+  async requestCommunityInvite(
+    @Body() body: RequestCommunityInviteDto,
+    @Request() req: JwtRequest,
+  ): Promise<CommunityInviteDto> {
+    return new CommunityInviteDto(
+      await this.userService.requestCommunityInvite(body, req.user.sub),
+    );
+  }
+
+  @Post('communityInvites/:inviteId/approveRequest')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse({ type: CommunityInviteDto })
+  async approveCommunityInviteRequest(
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @Request() req: JwtRequest,
+  ): Promise<CommunityInviteDto> {
+    return new CommunityInviteDto(
+      await this.userService.approveCommunityInviteRequest(
+        inviteId,
+        req.user.sub,
+      ),
+    );
+  }
+
+  @Post('communityInvites/:inviteId/rejectRequest')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse()
+  async rejectCommunityInviteRequest(
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @Request() req: JwtRequest,
+  ): Promise<void> {
+    await this.userService.rejectCommunityInviteRequest(inviteId, req.user.sub);
   }
 
   @Get('communityInvites/:communityId')
@@ -663,8 +774,8 @@ export class UserController {
   @Get('communityInvites')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [CommunityInviteDto] })
-  async getCommunityInvitesForUser(@Request() req: JwtRequest) {
-    return this.userService.findCommunityInvitesForUser(req.user.sub);
+  async getIncomingCommunityInvitesForUser(@Request() req: JwtRequest) {
+    return this.userService.findIncomingCommunityInvitesForUser(req.user.sub);
   }
 
   @Get('onetimeInvites')
@@ -674,6 +785,17 @@ export class UserController {
     return (await this.userService.findAllOnetimeInvites()).map(
       (invite) => new OnetimeInviteDto(invite),
     );
+  }
+
+  @Get('onetimeInvites/overview')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: OnetimeInviteDto, isArray: true })
+  async getOnetimeInvitesOverview(
+    @Request() req: JwtRequest,
+  ): Promise<OnetimeInviteDto[]> {
+    return (
+      await this.userService.findOnetimeInvitesOverviewForUser(req.user.sub)
+    ).map((invite) => new OnetimeInviteDto(invite));
   }
 
   @Get('onetimeInvites/:communityId')
@@ -768,6 +890,36 @@ export class UserController {
     @Request() req: JwtRequest,
   ) {
     await this.userService.leaveCommunity(communityId, req.user.sub);
+  }
+
+  @Post('groupAssignment/join')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async joinGroupAssignment(@Request() req: JwtRequest) {
+    await this.userService.joinGroupAssignment(req.user.sub);
+  }
+
+  @Post('groupAssignment/leave')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async leaveGroupAssignment(@Request() req: JwtRequest) {
+    await this.userService.leaveGroupAssignment(req.user.sub);
+  }
+
+  @Post('groupAssignment/members')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: UserDto, isArray: true })
+  async getGroupAssignmentMembers(): Promise<UserDto[]> {
+    return (await this.userService.findGroupAssignmentMembers()).map(
+      (user) => new UserDto(user),
+    );
+  }
+
+  @Post('groupAssignment/assign')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async assignGroupsAdmin(@Body() body: AssignGroupsDto) {
+    await this.userService.assignGroupsAdmin(body);
   }
 
   @Post('registerDevice')

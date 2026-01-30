@@ -43,15 +43,16 @@ export type ContractEvent = {
     autoSuspendKey?: string;
 };
 
-export type CommunityInviteStatus = 'pending' | 'accepted' | 'rejected' | 'cancelled';
+export type CommunityInviteStatus = 'request_pending' | 'request_rejected' | 'invitee_pending' | 'invitee_accepted' | 'invitee_rejected' | 'cancelled';
 
 export type CommunityInvite = {
     id: number;
-    invitingUser?: User;
-    invitedUser: User;
     status: CommunityInviteStatus;
     createdAt: string;
     updatedAt: string;
+    deletedAt: string | null;
+    invitingUser?: User;
+    invitedUser: User;
     community: Community;
 };
 
@@ -104,7 +105,7 @@ export type EditableContent = {
 
 export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 'tag';
 
-export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'community_invite_rejected' | 'community_invite_accepted' | 'onetime_invite_request_created' | 'onetime_invite_request_approved' | 'onetime_invite_request_rejected';
+export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'community_invite_created' | 'community_invite_rejected' | 'community_invite_accepted' | 'removed_from_community' | 'left_community_reminder' | 'member_left_community' | 'member_joined_community' | 'community_assigned' | 'onetime_invite_request_created' | 'onetime_invite_request_approved' | 'onetime_invite_request_rejected' | 'community_invite_request_created' | 'community_invite_request_rejected';
 
 export type NotifPriority = 'low' | 'high';
 
@@ -137,9 +138,10 @@ export type OnetimeInvite = {
     invitee: string;
     inviteeDescription?: string;
     code: string;
-    invitingUser: User;
     createdAt: string;
     status: OnetimeInviteStatus;
+    deletedAt: string | null;
+    invitingUser: User;
     community?: Community;
     communityId?: number;
     notifs: Array<Notification>;
@@ -542,6 +544,7 @@ export type User = {
     pushesForComments: boolean;
     pushesForFriendRequests: boolean;
     isIntroductoryGroupMember: boolean;
+    undergoingGroupAssignment: boolean;
     contractEvents: Array<ContractEvent>;
     communities: Array<Community>;
     invitedCommunities: Array<CommunityInvite>;
@@ -555,6 +558,8 @@ export type Community = {
     name: string;
     description: string;
     photo?: string;
+    public: boolean;
+    maxCapacity: number | null;
     users: Array<User>;
     leaders?: Array<User>;
     invites?: Array<OnetimeInvite>;
@@ -590,6 +595,7 @@ export type UserDto = {
     pushesForComments: boolean;
     pushesForFriendRequests: boolean;
     isIntroductoryGroupMember: boolean;
+    undergoingGroupAssignment: boolean;
     contractEvents: Array<ContractEvent>;
     communities: Array<Community>;
     invitedCommunities: Array<CommunityInvite>;
@@ -658,6 +664,7 @@ export type UpdateAwayRangeDto = {
 export type UpdateProfileDto = {
     name?: string;
     phoneNumber?: string;
+    phoneNumberValidated?: boolean;
     preferredReminderTime?: string;
     timeZone?: string;
     preferredActionReminderChannel?: NotificationChannel;
@@ -721,6 +728,8 @@ export type CreateCommunityDto = {
     name: string;
     description: string;
     photo?: string;
+    public: boolean;
+    maxCapacity: number | null;
 };
 
 export type CommunityDto = {
@@ -728,6 +737,8 @@ export type CommunityDto = {
     name: string;
     description: string;
     photo?: string;
+    public: boolean;
+    maxCapacity: number | null;
     internalInvites: Array<CommunityInvite>;
     users: Array<ProfileDto>;
     leaders: Array<ProfileDto>;
@@ -737,6 +748,8 @@ export type UpdateCommunityDto = {
     name?: string;
     description?: string;
     photo?: string;
+    public?: boolean;
+    maxCapacity?: number | null;
 };
 
 export type CommunityMemberDto = {
@@ -802,6 +815,11 @@ export type CommunityInviteDto = {
     invitingUser?: ProfileDto;
 };
 
+export type RequestCommunityInviteDto = {
+    communityId: number;
+    invitedUserId: number;
+};
+
 export type CommunityMemberContactInfoDto = {
     id: number;
     timeZone?: string;
@@ -811,6 +829,15 @@ export type CommunityMemberContactInfoDto = {
     preferredReminderTimeUserTz?: string;
     preferredReminderTimeLeaderTz?: string;
     awayRanges: Array<UserAwayRangeDto>;
+};
+
+export type SingleGroupAssignmentDto = {
+    userId: number;
+    communityId: number;
+};
+
+export type AssignGroupsDto = {
+    assignments: Array<SingleGroupAssignmentDto>;
 };
 
 export type RegisterDeviceDto = {
@@ -2220,6 +2247,10 @@ export type ActionStatsRecord = {
      */
     usersJoined: number;
     /**
+     * Number of users who withdrew from this action (declined or wont_complete)
+     */
+    usersWithdrawn: number;
+    /**
      * Completion rate as a fraction (usersCompleted / usersJoined)
      */
     completionRate: number;
@@ -2911,6 +2942,19 @@ export type UserVerifyEmailResponses = {
 
 export type UserVerifyEmailResponse = UserVerifyEmailResponses[keyof UserVerifyEmailResponses];
 
+export type UserCreateCommunityAdminData = {
+    body: CreateCommunityDto;
+    path?: never;
+    query?: never;
+    url: '/user/communities/admin';
+};
+
+export type UserCreateCommunityAdminResponses = {
+    200: CommunityDto;
+};
+
+export type UserCreateCommunityAdminResponse = UserCreateCommunityAdminResponses[keyof UserCreateCommunityAdminResponses];
+
 export type UserGetCommunitiesData = {
     body?: never;
     path?: never;
@@ -2936,6 +2980,34 @@ export type UserCreateCommunityResponses = {
 };
 
 export type UserCreateCommunityResponse = UserCreateCommunityResponses[keyof UserCreateCommunityResponses];
+
+export type UserGetPublicCommunitiesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/communities/public';
+};
+
+export type UserGetPublicCommunitiesResponses = {
+    200: Array<CommunityDto>;
+};
+
+export type UserGetPublicCommunitiesResponse = UserGetPublicCommunitiesResponses[keyof UserGetPublicCommunitiesResponses];
+
+export type UserJoinPublicCommunityData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/communities/{communityId}/join';
+};
+
+export type UserJoinPublicCommunityResponses = {
+    200: CommunityDto;
+};
+
+export type UserJoinPublicCommunityResponse = UserJoinPublicCommunityResponses[keyof UserJoinPublicCommunityResponses];
 
 export type UserDeleteCommunityData = {
     body?: never;
@@ -2965,6 +3037,19 @@ export type UserUpdateCommunityResponses = {
 
 export type UserUpdateCommunityResponse = UserUpdateCommunityResponses[keyof UserUpdateCommunityResponses];
 
+export type UserDeleteCommunityAdminData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/communities/{communityId}/admin';
+};
+
+export type UserDeleteCommunityAdminResponses = {
+    200: unknown;
+};
+
 export type UserAddMemberToCommunityData = {
     body: CommunityMemberDto;
     path: {
@@ -2979,6 +3064,21 @@ export type UserAddMemberToCommunityResponses = {
 };
 
 export type UserAddMemberToCommunityResponse = UserAddMemberToCommunityResponses[keyof UserAddMemberToCommunityResponses];
+
+export type UserRemoveMemberFromCommunityAdminData = {
+    body: CommunityMemberDto;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/communities/{communityId}/removeMember/admin';
+};
+
+export type UserRemoveMemberFromCommunityAdminResponses = {
+    200: CommunityDto;
+};
+
+export type UserRemoveMemberFromCommunityAdminResponse = UserRemoveMemberFromCommunityAdminResponses[keyof UserRemoveMemberFromCommunityAdminResponses];
 
 export type UserRemoveMemberFromCommunityData = {
     body: CommunityMemberDto;
@@ -3206,6 +3306,47 @@ export type UserCreateCommunityInviteResponses = {
 
 export type UserCreateCommunityInviteResponse = UserCreateCommunityInviteResponses[keyof UserCreateCommunityInviteResponses];
 
+export type UserRequestCommunityInviteData = {
+    body: RequestCommunityInviteDto;
+    path?: never;
+    query?: never;
+    url: '/user/communityInvites/request';
+};
+
+export type UserRequestCommunityInviteResponses = {
+    200: CommunityInviteDto;
+};
+
+export type UserRequestCommunityInviteResponse = UserRequestCommunityInviteResponses[keyof UserRequestCommunityInviteResponses];
+
+export type UserApproveCommunityInviteRequestData = {
+    body?: never;
+    path: {
+        inviteId: number;
+    };
+    query?: never;
+    url: '/user/communityInvites/{inviteId}/approveRequest';
+};
+
+export type UserApproveCommunityInviteRequestResponses = {
+    200: CommunityInviteDto;
+};
+
+export type UserApproveCommunityInviteRequestResponse = UserApproveCommunityInviteRequestResponses[keyof UserApproveCommunityInviteRequestResponses];
+
+export type UserRejectCommunityInviteRequestData = {
+    body?: never;
+    path: {
+        inviteId: number;
+    };
+    query?: never;
+    url: '/user/communityInvites/{inviteId}/rejectRequest';
+};
+
+export type UserRejectCommunityInviteRequestResponses = {
+    200: unknown;
+};
+
 export type UserGetCommunityInvitesData = {
     body?: never;
     path: {
@@ -3247,18 +3388,18 @@ export type UserDeleteCommunityInviteResponses = {
     200: unknown;
 };
 
-export type UserGetCommunityInvitesForUserData = {
+export type UserGetIncomingCommunityInvitesForUserData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/user/communityInvites';
 };
 
-export type UserGetCommunityInvitesForUserResponses = {
+export type UserGetIncomingCommunityInvitesForUserResponses = {
     200: Array<CommunityInviteDto>;
 };
 
-export type UserGetCommunityInvitesForUserResponse = UserGetCommunityInvitesForUserResponses[keyof UserGetCommunityInvitesForUserResponses];
+export type UserGetIncomingCommunityInvitesForUserResponse = UserGetIncomingCommunityInvitesForUserResponses[keyof UserGetIncomingCommunityInvitesForUserResponses];
 
 export type UserGetOnetimeInvitesData = {
     body?: never;
@@ -3272,6 +3413,19 @@ export type UserGetOnetimeInvitesResponses = {
 };
 
 export type UserGetOnetimeInvitesResponse = UserGetOnetimeInvitesResponses[keyof UserGetOnetimeInvitesResponses];
+
+export type UserGetOnetimeInvitesOverviewData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/onetimeInvites/overview';
+};
+
+export type UserGetOnetimeInvitesOverviewResponses = {
+    200: Array<OnetimeInviteDto>;
+};
+
+export type UserGetOnetimeInvitesOverviewResponse = UserGetOnetimeInvitesOverviewResponses[keyof UserGetOnetimeInvitesOverviewResponses];
 
 export type UserGetOnetimeInvitesByCommunityData = {
     body?: never;
@@ -3393,6 +3547,52 @@ export type UserLeaveCommunityData = {
 };
 
 export type UserLeaveCommunityResponses = {
+    200: unknown;
+};
+
+export type UserJoinGroupAssignmentData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/groupAssignment/join';
+};
+
+export type UserJoinGroupAssignmentResponses = {
+    200: unknown;
+};
+
+export type UserLeaveGroupAssignmentData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/groupAssignment/leave';
+};
+
+export type UserLeaveGroupAssignmentResponses = {
+    200: unknown;
+};
+
+export type UserGetGroupAssignmentMembersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/groupAssignment/members';
+};
+
+export type UserGetGroupAssignmentMembersResponses = {
+    200: Array<UserDto>;
+};
+
+export type UserGetGroupAssignmentMembersResponse = UserGetGroupAssignmentMembersResponses[keyof UserGetGroupAssignmentMembersResponses];
+
+export type UserAssignGroupsAdminData = {
+    body: AssignGroupsDto;
+    path?: never;
+    query?: never;
+    url: '/user/groupAssignment/assign';
+};
+
+export type UserAssignGroupsAdminResponses = {
     200: unknown;
 };
 
@@ -4726,7 +4926,7 @@ export type ActionsGetCommunityMemberInfoAdminData = {
         communityId: number;
     };
     query?: never;
-    url: '/actions/communityMemberInfo/{communityId}';
+    url: '/actions/communityMemberInfo/{communityId}/admin';
 };
 
 export type ActionsGetCommunityMemberInfoAdminResponses = {
@@ -4737,9 +4937,11 @@ export type ActionsGetCommunityMemberInfoAdminResponse = ActionsGetCommunityMemb
 
 export type ActionsGetCommunityMemberInfoData = {
     body?: never;
-    path?: never;
+    path: {
+        communityId: number;
+    };
     query?: never;
-    url: '/actions/communityMemberInfo';
+    url: '/actions/communityMemberInfo/{communityId}';
 };
 
 export type ActionsGetCommunityMemberInfoResponses = {

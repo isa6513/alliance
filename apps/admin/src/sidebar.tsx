@@ -31,6 +31,7 @@ import {
   MoreHorizontal,
   TowerControl,
 } from "lucide-react";
+import { useGroupAssignment } from "./lib/GroupAssignmentContext";
 
 const Sidebar: React.FC = () => {
   const [actions, setActions] = useState<Action[]>([]);
@@ -38,6 +39,7 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
 
   const { logout, user, loading: authLoading } = useAuth();
+  const { membersUndergoingGroupAssignment } = useGroupAssignment();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
 
@@ -124,44 +126,41 @@ const Sidebar: React.FC = () => {
     name: string;
     actions: Action[];
   }[] = [
-      {
-        name: "Active",
-        actions: filteredActions.filter(
-          (action) =>
-            (action.status === "member_action" ||
-              action.status === "gathering_commitments") &&
-            !action.onboarding
-        ),
-      },
-      {
-        name: "Pending",
-        actions: filteredActions.filter(
-          (action) =>
-            action.status !== "draft" &&
-            action.status !== "member_action" &&
-            action.status !== "gathering_commitments" &&
-            !action.onboarding &&
-            action.status !== "completed"
-        ),
-      },
-      {
-        name: "Draft",
-        actions: filteredActions.filter((action) => action.status === "draft"),
-      },
-      {
-        name: "Onboarding",
-        actions: filteredActions.filter(
-          (action) =>
-            action.onboarding
-        ),
-      },
-      {
-        name: "Completed",
-        actions: filteredActions.filter(
-          (action) => action.status === "completed"
-        ),
-      },
-    ];
+    {
+      name: "Active",
+      actions: filteredActions.filter(
+        (action) =>
+          (action.status === "member_action" ||
+            action.status === "gathering_commitments") &&
+          !action.onboarding
+      ),
+    },
+    {
+      name: "Pending",
+      actions: filteredActions.filter(
+        (action) =>
+          action.status !== "draft" &&
+          action.status !== "member_action" &&
+          action.status !== "gathering_commitments" &&
+          !action.onboarding &&
+          action.status !== "completed"
+      ),
+    },
+    {
+      name: "Draft",
+      actions: filteredActions.filter((action) => action.status === "draft"),
+    },
+    {
+      name: "Onboarding",
+      actions: filteredActions.filter((action) => action.onboarding),
+    },
+    {
+      name: "Completed",
+      actions: filteredActions.filter(
+        (action) => action.status === "completed"
+      ),
+    },
+  ];
 
   const isProd = isProduction();
 
@@ -177,12 +176,14 @@ const Sidebar: React.FC = () => {
         }}
       >
         <div
-          className={`flex flex-col gap-y-3 sticky p-5 py-6 w-[320px] ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
+          className={`flex flex-col gap-y-3 sticky p-5 py-6 w-[320px] ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
         >
           <h1
-            className={`text-[14pt] font-bold pb-0 ${isProd ? "text-red-500" : "text-gray-900"
-              }`}
+            className={`text-[14pt] font-bold pb-0 ${
+              isProd ? "text-red-500" : "text-gray-900"
+            }`}
           >
             Alliance Admin
           </h1>
@@ -204,8 +205,8 @@ const Sidebar: React.FC = () => {
                 to: "/groups",
                 label: "Groups",
                 icon: <UsersRound size={16} />,
+                notifCount: membersUndergoingGroupAssignment.length,
               },
-
               {
                 to: "/stats",
                 label: "Stats",
@@ -219,6 +220,13 @@ const Sidebar: React.FC = () => {
               >
                 {link.icon}
                 {link.label}
+                {!!link.notifCount ? (
+                  <div
+                    className={`justify-self-end font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-5 h-5`}
+                  >
+                    {link.notifCount}
+                  </div>
+                ) : null}
               </Link>
             ))}
             <button
@@ -336,8 +344,9 @@ const Sidebar: React.FC = () => {
                       <div
                         key={action.id}
                         onClick={() => handleEditAction(action.id)}
-                        className={`cursor-pointer hover:bg-zinc-200 p-2 py-3 rounded-md ${currentActionId === action.id ? "bg-zinc-200" : ""
-                          }`}
+                        className={`cursor-pointer hover:bg-zinc-200 p-2 py-3 rounded-md ${
+                          currentActionId === action.id ? "bg-zinc-200" : ""
+                        }`}
                       >
                         <p className="text-sm">{action.name}</p>
                       </div>

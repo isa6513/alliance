@@ -287,6 +287,11 @@ export class User {
   @Allow()
   isIntroductoryGroupMember: boolean;
 
+  @Column({ default: false })
+  @ApiProperty()
+  @Allow()
+  undergoingGroupAssignment: boolean;
+
   // Relations
 
   @OneToMany(() => ContractEvent, (event) => event.user, { cascade: true })
@@ -519,5 +524,14 @@ export class User {
       this._isAwayAtAnyPointInRange.set(key, isAway);
     }
     return isAway;
+  }
+
+  @Exclude()
+  private _leaderOfIdSet: Set<number> | null = null;
+  get leaderOfIdSet(): Set<number> {
+    if (this._leaderOfIdSet === null) {
+      this._leaderOfIdSet = new Set(this.leaderOfIds);
+    }
+    return this._leaderOfIdSet;
   }
 }

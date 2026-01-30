@@ -23,14 +23,13 @@ import UserSelect, {
 } from "@alliance/sharedweb/ui/UserSelect";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import Card from "@alliance/sharedweb/ui/Card";
-import CommunityInviteListItem from "./CommunityInviteListItem";
-import { Link } from "react-router";
-import OneTimeInviteRequestLeaderListItem from "./OneTimeInviteRequestLeaderListItem";
-import OneTimeInviteLeaderListItem from "./OneTimeInviteLeaderListItem";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { CardStyle } from "@alliance/shared/styles/card";
+import CommunityInviteListItem from "./CommunityInviteListItem";
+import OnetimeInviteListItem from "./OnetimeInviteListItem";
+import OnetimeInviteForm from "./OnetimeInviteForm";
 
-export interface CommunityInvitesTabLeaderProps {
+export interface CommunityInvitesLeaderTabProps {
   communityId: number;
   existingMembers: ProfileDto[];
   setInviteNotifCount: (count: number) => void;
@@ -48,11 +47,11 @@ function createdAtComparator(
   return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 }
 
-const CommunityInvitesTabLeader = ({
+const CommunityInvitesLeaderTab = ({
   communityId,
   existingMembers,
   setInviteNotifCount,
-}: CommunityInvitesTabLeaderProps) => {
+}: CommunityInvitesLeaderTabProps) => {
   const [name, setName] = useState("");
   const { user } = useAuth();
 
@@ -76,7 +75,7 @@ const CommunityInvitesTabLeader = ({
         (user) =>
           !existingMembers.some((member) => member.id === user.id) &&
           !existingMemberInvites
-            .filter((invite) => invite.status === "pending")
+            .filter((invite) => invite.status === "invitee_pending")
             .some((invite) => invite.invitedUser?.id === user.id)
       ),
     [allUsers, existingMembers, existingMemberInvites]
@@ -146,7 +145,6 @@ const CommunityInvitesTabLeader = ({
     userCreateOnetimeInvite({ body })
       .then((response) => {
         if (response.data) {
-          console.log("Invite created", response.data);
           setName("");
           setNewUserInvites((prev) => [response.data, ...prev]);
           setError(null);
@@ -282,44 +280,13 @@ const CommunityInvitesTabLeader = ({
         />
 
         {inviteMode === InviteMode.NewMember ? (
-          <Card style={CardStyle.Grey}>
-            <div className="flex flex-col gap-y-2">
-              <p className="font-semibold">
-                Invite a new member to the Alliance and your group
-              </p>
-              <p className="text-zinc-500">
-                This will create a personalized invite page that explains the
-                Alliance and how to sign up.
-              </p>
-              <p className="text-zinc-500">
-                When the new member signs up, they will automatically be added
-                to your group.
-              </p>
-              <Link
-                to="/groups?tab=resources"
-                className="text-green hover:underline"
-              >
-                Invite guide
-              </Link>
-              <div className="flex flex-row gap-x-2 mt-2">
-                <input
-                  type="text"
-                  className="border border-zinc-300 rounded px-3 h-10 flex-1"
-                  placeholder="Enter the invitee's first name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-                <Button
-                  color={ButtonColor.Black}
-                  onClick={handleInvite}
-                  className="!h-10"
-                  disabled={creatingInvite || !name}
-                >
-                  {creatingInvite ? "Creating invite..." : "Create invite"}
-                </Button>
-              </div>
-            </div>
-          </Card>
+          <OnetimeInviteForm
+            inviteeName={name}
+            setInviteeName={setName}
+            creatingInvite={creatingInvite}
+            onCreateInvite={handleInvite}
+            isLeader={true}
+          />
         ) : (
           <Card style={CardStyle.Grey}>
             <div className="flex flex-col gap-y-2">
@@ -365,9 +332,10 @@ const CommunityInvitesTabLeader = ({
           <p className="font-semibold text-xl">Invite requests</p>
           <List>
             {pendingRequests.map((request) => (
-              <OneTimeInviteRequestLeaderListItem
+              <OnetimeInviteListItem
                 key={request.id}
-                request={request}
+                invite={request}
+                selfInvited={!!(user && user.id === request.invitingUser?.id)}
                 onApprove={onApproveOnetimeInvite}
                 onReject={onRejectOnetimeInvite}
               />
@@ -381,12 +349,15 @@ const CommunityInvitesTabLeader = ({
           <p className="font-semibold text-xl">Past invites</p>
           <List>
             {combinedPastInvites.map((entry) => {
+              const selfInvited = !!(
+                user && user.id === entry.data.invitingUser?.id
+              );
               switch (entry.type) {
                 case "new_member":
                   return (
-                    <OneTimeInviteLeaderListItem
+                    <OnetimeInviteListItem
                       key={entry.data.id}
-                      leaderId={user?.id}
+                      selfInvited={selfInvited}
                       invite={entry.data}
                       onDelete={handleDeleteInvite}
                       onCopy={copyToClipboard}
@@ -397,6 +368,7 @@ const CommunityInvitesTabLeader = ({
                     <CommunityInviteListItem
                       key={entry.data.id}
                       invite={entry.data}
+                      selfInvited={selfInvited}
                       onDelete={handleDeleteCommunityInvite}
                     />
                   );
@@ -411,4 +383,4 @@ const CommunityInvitesTabLeader = ({
   );
 };
 
-export default CommunityInvitesTabLeader;
+export default CommunityInvitesLeaderTab;

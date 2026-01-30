@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Link, href } from "react-router";
 import {
   CommunityMemberContactInfoDto,
@@ -6,17 +6,23 @@ import {
   UserActionRelationDetailDto,
   UserActionSummaryDto,
   UserAwayRangeDto,
+  userRemoveMemberFromCommunity,
 } from "@alliance/shared/client";
 import ProfileImage from "./ProfileImage";
 import UserProgressPills from "./UserProgressPills";
 import DropdownIcon from "./icons/DropdownIcon";
 import UserDisplayName from "./UserDisplayName";
 import { formatDistance } from "date-fns";
+import Button, { ButtonColor } from "./Button";
+import { useToast } from "./ToastProvider";
 
 const CommunityMemberTableRow = ({
   profile,
   canExpand = false,
   amLeader,
+  canRemove,
+  communityId,
+  onRemoveMember,
   contactInfo,
   actionRelations,
   actions,
@@ -26,6 +32,9 @@ const CommunityMemberTableRow = ({
   profile: ProfileDto;
   canExpand?: boolean;
   amLeader?: boolean;
+  canRemove?: boolean;
+  communityId: number;
+  onRemoveMember?: (memberId: number) => void;
   contactInfo?: CommunityMemberContactInfoDto;
   actions: UserActionSummaryDto[];
   maxActionsPerWeek: Record<number, number> | null;
@@ -81,6 +90,28 @@ const CommunityMemberTableRow = ({
 
   const formatAwayReason = (reason?: string) =>
     reason ? reason.charAt(0).toUpperCase() + reason.slice(1) : "";
+
+  const { confirm } = useToast();
+
+  const handleRemoveMember = useCallback(async (anchor: HTMLElement | null) => {
+    const ok = await confirm({
+      title: "Remove member?",
+      message: `Are you sure you want to remove ${profile.displayName} from this group?`,
+      confirmLabel: "Yes, remove",
+      cancelLabel: "No",
+      anchorEl: anchor,
+      placement: "topleft",
+    });
+    if (ok) {
+      await userRemoveMemberFromCommunity({
+        path: { communityId },
+        body: {
+          userId: profile.id,
+        },
+      });
+      onRemoveMember?.(profile.id);
+    }
+  }, []);
 
   return (
     <>
@@ -153,85 +184,100 @@ const CommunityMemberTableRow = ({
       </tr>
       {expanded && (
         <tr>
-          <td colSpan={3}>
-            {!!contactInfo && (
-              <div className="px-4 pt-2 pb-6">
-                <div className="flex flex-col gap-y-3">
-                  <p>
-                    <span className="font-semibold">Email:</span>{" "}
-                    {contactInfo.email}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Phone:</span>{" "}
-                    {contactInfo.phoneNumber ?? (
-                      <span className="text-zinc-500">Not provided</span>
-                    )}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Time zone:</span>{" "}
-                    {contactInfo.timeZone ?? (
-                      <span className="text-zinc-500">Not provided</span>
-                    )}
-                  </p>
-                  {contactInfo.preferredReminderTimeUserTz ===
-                    contactInfo.preferredReminderTimeLeaderTz ? (
+          <td colSpan={4}>
+            <div className="w-full flex flex-row justify-between">
+              {!!contactInfo && (
+                <div className="px-4 pt-2 pb-6">
+                  <div className="flex flex-col gap-y-3">
                     <p>
-                      <span className="font-semibold">
-                        Contact time:
-                      </span>{" "}
-                      {contactInfo.preferredReminderTimeUserTz ?? "Anytime"} in
-                      your time zone
+                      <span className="font-semibold">Email:</span>{" "}
+                      {contactInfo.email}
                     </p>
-                  ) : (
-                    <div>
+                    <p>
+                      <span className="font-semibold">Phone:</span>{" "}
+                      {contactInfo.phoneNumber ?? (
+                        <span className="text-zinc-500">Not provided</span>
+                      )}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Time zone:</span>{" "}
+                      {contactInfo.timeZone ?? (
+                        <span className="text-zinc-500">Not provided</span>
+                      )}
+                    </p>
+                    {contactInfo.preferredReminderTimeUserTz ===
+                    contactInfo.preferredReminderTimeLeaderTz ? (
                       <p>
                         <span className="font-semibold">
                           Contact time:
-                        </span>
+                        </span>{" "}
+                        {contactInfo.preferredReminderTimeUserTz ?? "Anytime"}{" "}
+                        in your time zone
                       </p>
-                      <p>
-                        {contactInfo.preferredReminderTimeUserTz ?? "Anytime"}
-                        <span className="text-zinc-500">
-                          {" "}
-                          in {profile.displayName}&apos;s time zone
-                        </span>
-                      </p>
-                      <p>
-                        {contactInfo.preferredReminderTimeLeaderTz ?? "Anytime"}
-                        <span className="text-zinc-500">
-                          {" "}
-                          in your time zone
-                        </span>
-                      </p>
-                    </div>
-                  )}
-                  {!!upcomingOrCurrentAwayRanges.length && (
-                    <div className="flex flex-col gap-y-2 border-t border-zinc-200 pt-3">
-                      <p className="font-semibold">Away ranges</p>
-                      <div className="flex flex-col gap-y-2 text-sm text-zinc-700">
-                        {upcomingOrCurrentAwayRanges.map((range) => (
-                          <div
-                            key={range.id}
-                            className="flex flex-col gap-y-0.5"
-                          >
-                            <p>
-                              {formatAwayRange(range)}
-                              {currentAwayRange?.id === range.id
-                                ? " (current)"
-                                : ""}
-                            </p>
-                            <p className="text-xs text-zinc-500">
-                              {formatAwayReason(range.reason)}
-                              {range.note ? ` — ${range.note}` : ""}
-                            </p>
-                          </div>
-                        ))}
+                    ) : (
+                      <div>
+                        <p>
+                          <span className="font-semibold">
+                            Contact time:
+                          </span>
+                        </p>
+                        <p>
+                          {contactInfo.preferredReminderTimeUserTz ?? "Anytime"}
+                          <span className="text-zinc-500">
+                            {" "}
+                            in {profile.displayName}&apos;s time zone
+                          </span>
+                        </p>
+                        <p>
+                          {contactInfo.preferredReminderTimeLeaderTz ??
+                            "Anytime"}
+                          <span className="text-zinc-500">
+                            {" "}
+                            in your time zone
+                          </span>
+                        </p>
                       </div>
-                    </div>
-                  )}
+                    )}
+                    {!!upcomingOrCurrentAwayRanges.length && (
+                      <div className="flex flex-col gap-y-2 border-t border-zinc-200 pt-3">
+                        <p className="font-semibold">Away ranges</p>
+                        <div className="flex flex-col gap-y-2 text-sm text-zinc-700">
+                          {upcomingOrCurrentAwayRanges.map((range) => (
+                            <div
+                              key={range.id}
+                              className="flex flex-col gap-y-0.5"
+                            >
+                              <p>
+                                {formatAwayRange(range)}
+                                {currentAwayRange?.id === range.id
+                                  ? " (current)"
+                                  : ""}
+                              </p>
+                              <p className="text-xs text-zinc-500">
+                                {formatAwayReason(range.reason)}
+                                {range.note ? ` — ${range.note}` : ""}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+              )}
+              <div className="flex flex-col justify-end m-4">
+                {canRemove && (
+                  <Button
+                    color={ButtonColor.Red}
+                    onClick={(event) =>
+                      void handleRemoveMember(event.currentTarget)
+                    }
+                  >
+                    Remove
+                  </Button>
+                )}
               </div>
-            )}
+            </div>
           </td>
         </tr>
       )}

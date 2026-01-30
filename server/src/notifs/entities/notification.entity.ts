@@ -27,11 +27,19 @@ export enum NotificationCategory {
   FriendRequestAccepted = 'friend_request_accepted',
   ActionUpdate = 'action_update',
   Likes = 'likes',
+  CommunityInviteCreated = 'community_invite_created',
   CommunityInviteRejected = 'community_invite_rejected',
   CommunityInviteAccepted = 'community_invite_accepted',
+  RemovedFromCommunity = 'removed_from_community',
+  LeftCommunityReminder = 'left_community_reminder',
+  MemberLeftCommunity = 'member_left_community',
+  MemberJoinedCommunity = 'member_joined_community',
+  CommunityAssigned = 'community_assigned',
   OnetimeInviteRequestCreated = 'onetime_invite_request_created',
   OnetimeInviteRequestApproved = 'onetime_invite_request_approved',
   OnetimeInviteRequestRejected = 'onetime_invite_request_rejected',
+  CommunityInviteRequestCreated = 'community_invite_request_created',
+  CommunityInviteRequestRejected = 'community_invite_request_rejected',
 }
 
 export enum NotifPriority {

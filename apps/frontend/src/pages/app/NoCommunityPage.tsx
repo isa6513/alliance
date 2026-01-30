@@ -1,97 +1,58 @@
-import { useCallback, useEffect, useState } from "react";
-import {
-  CommunityInviteDto,
-  userAcceptCommunityInvite,
-  userGetCommunityInvitesForUser,
-  userRejectCommunityInvite,
-} from "@alliance/shared/client";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
-import List from "@alliance/sharedweb/ui/List";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import { useSearchParams } from "react-router";
+import { useAuth } from "../../lib/AuthContext";
+import { useCallback } from "react";
+import { Tab } from "./CommunityPage";
+import CommunityCreateForm from "../../components/CommunityCreateForm";
+import MyGroupsPage from "./MyGroupsPage";
 
 const NoCommunityPage = () => {
-  const [communityInvites, setCommunityInvites] = useState<
-    CommunityInviteDto[]
-  >([]);
-  const [loading, setLoading] = useState(true);
+  const { user, refreshUser } = useAuth();
 
-  useEffect(() => {
-    userGetCommunityInvitesForUser()
-      .then((response) => {
-        if (response.data) {
-          setCommunityInvites(response.data);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const tab = (searchParams.get("tab") as Tab | undefined) ?? "groups";
+
+  const setParams = useCallback(
+    (params: { tab?: Tab; communityId?: number | null }) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        for (const [key, value] of Object.entries(params)) {
+          if (value === null || value === undefined) {
+            next.delete(key);
+          } else {
+            next.set(key, value.toString());
+          }
         }
-      })
-      .finally(() => {
-        setLoading(false);
+        return next;
       });
-  }, []);
-
-  const handleAcceptInvite = useCallback((inviteId: number) => {
-    userAcceptCommunityInvite({ path: { inviteId } }).then((response) => {
-      if (response.data) {
-        window.location.reload();
-      }
-    });
-  }, []);
-
-  const handleDeclineInvite = useCallback((inviteId: number) => {
-    userRejectCommunityInvite({ path: { inviteId } }).then((response) => {
-      if (response.data) {
-        setCommunityInvites((prev) =>
-          prev.filter((invite) => invite.id !== inviteId)
-        );
-      }
-    });
-  }, []);
-  if (loading) {
-    return <Spinner />;
-  }
-  if (communityInvites.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-[calc(100vh-var(--nav-height))]">
-        <div className="flex flex-col gap-y-2 m-4">
-          <p className="font-medium">You are not a member of a group yet</p>
-          <p>
-            If you receive a group invite, you will be able to join the
-            community here.
-          </p>
-        </div>
-      </div>
-    );
-  }
+    },
+    [setSearchParams]
+  );
 
   return (
-    <CenterLayout>
-      <div className="flex flex-col gap-y-2 m-4">
-        <p className="font-medium">You have pending group invites</p>
+    <div className="p-5 xl:p-10 xl:pr-5 max-w-[900px] mx-auto px-0 md:px-3">
+      <div className="flex flex-col gap-y-2 my-8 px-5 md:px-0">
+        <p className="font-serif font-semibold text-3xl md:text-4xl">
+          Manage groups
+        </p>
+        {tab === "create" ? (
+          <CommunityCreateForm
+            name={user?.name}
+            onCancel={() => setParams({ tab: "groups" })}
+            onSuccess={(community) => {
+              setParams({ communityId: community.id, tab: "groups" });
+              refreshUser();
+            }}
+          />
+        ) : (
+          <MyGroupsPage
+            onSelectCommunity={(communityId) => setParams({ communityId })}
+            communities={[]}
+            isOnboardingGroupMember={user?.isIntroductoryGroupMember ?? true}
+          />
+        )}
       </div>
-      <List>
-        {communityInvites.map((invite) => (
-          <div
-            key={invite.id}
-            className="flex flex-row gap-x-2 p-4 justify-between items-center"
-          >
-            <p>{invite.community.name}</p>
-            <div className="flex flex-row gap-3 items-center">
-              <Button
-                onClick={() => handleAcceptInvite(invite.id)}
-                color={ButtonColor.Green}
-              >
-                Accept
-              </Button>
-              <Button
-                onClick={() => handleDeclineInvite(invite.id)}
-                color={ButtonColor.Light}
-              >
-                Decline
-              </Button>
-            </div>
-          </div>
-        ))}
-      </List>
-    </CenterLayout>
+    </div>
   );
 };
 

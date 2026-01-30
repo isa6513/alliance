@@ -74,11 +74,19 @@ export class NotifPushDispatcherWorker {
         [NotificationCategory.FriendRequestAccepted]:
           notif.user.pushesForFriendRequests,
         [NotificationCategory.Likes]: notif.user.pushesForLikes,
+        [NotificationCategory.CommunityInviteCreated]: true,
         [NotificationCategory.CommunityInviteRejected]: true,
         [NotificationCategory.CommunityInviteAccepted]: true,
+        [NotificationCategory.RemovedFromCommunity]: true,
+        [NotificationCategory.LeftCommunityReminder]: false,
+        [NotificationCategory.MemberLeftCommunity]: true,
+        [NotificationCategory.MemberJoinedCommunity]: true,
+        [NotificationCategory.CommunityAssigned]: true,
         [NotificationCategory.OnetimeInviteRequestCreated]: true,
         [NotificationCategory.OnetimeInviteRequestApproved]: true,
         [NotificationCategory.OnetimeInviteRequestRejected]: true,
+        [NotificationCategory.CommunityInviteRequestCreated]: true,
+        [NotificationCategory.CommunityInviteRequestRejected]: true,
       };
       if (!notifTypeToSendable[notif.category]) {
         console.log(`notif ${notif.id} not sendable`);

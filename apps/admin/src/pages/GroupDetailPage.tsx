@@ -4,7 +4,7 @@ import {
   actionsGetCommunityMemberInfoAdmin,
   userAddLeaderToCommunity,
   userAddMemberToCommunity,
-  userDeleteCommunity,
+  userDeleteCommunityAdmin,
   userGetCommunities,
   userGetCommunityMemberContactInfoAdmin,
   userList,
@@ -15,6 +15,7 @@ import {
 import type {
   CommunityDto,
   CommunityMemberContactInfoDto,
+  CreateCommunityDto,
   UpdateCommunityDto,
   UserActionRelationDetailDto,
   UserActionSummaryDto,
@@ -27,6 +28,7 @@ import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
 import { calculateCompletionData } from "@alliance/shared/lib/actionUtils";
 import { useMaxActionsPerWeek } from "@alliance/sharedweb/ui/UserProgressPills";
+import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
 
 const CommunityDetailPage: React.FC = () => {
   const { id } = useParams();
@@ -38,11 +40,14 @@ const CommunityDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [savingDetails, setSavingDetails] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [formValues, setFormValues] = useState({
+  const [formValues, setFormValues] = useState<CreateCommunityDto>({
     name: "",
     description: "",
     photo: "",
+    public: false,
+    maxCapacity: GROUP_MAX_CAPACITY_DEFAULT,
   });
+  const [allowStaffAssignments, setAllowStaffAssignments] = useState(false);
   const [users, setUsers] = useState<UserSelectUser[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [memberSelection, setMemberSelection] = useState<number[]>([]);
@@ -168,7 +173,12 @@ const CommunityDetailPage: React.FC = () => {
         name: community.name,
         description: community.description,
         photo: community.photo ?? "",
+        public: community.public,
+        maxCapacity: community.maxCapacity,
       });
+      setAllowStaffAssignments(
+        community.public || community.maxCapacity !== null
+      );
     }
   }, [community]);
 
@@ -196,14 +206,26 @@ const CommunityDetailPage: React.FC = () => {
   ) => {
     event.preventDefault();
     if (!community) return;
+    const requiresMaxCapacity = formValues.public || allowStaffAssignments;
+    const normalizedMaxCapacity = requiresMaxCapacity
+      ? formValues.maxCapacity
+      : null;
     const payload: UpdateCommunityDto = {
       name: formValues.name.trim(),
       description: formValues.description.trim(),
-      photo: formValues.photo.trim() ? formValues.photo.trim() : undefined,
+      photo: formValues.photo?.trim() ? formValues.photo.trim() : undefined,
+      public: formValues.public,
+      maxCapacity: normalizedMaxCapacity,
     };
     if (!payload.name || !payload.description) {
       setError("Name and description are required.");
       return;
+    }
+    if (requiresMaxCapacity) {
+      if (!normalizedMaxCapacity || normalizedMaxCapacity <= 0) {
+        setError("Member capacity is required.");
+        return;
+      }
     }
     setSavingDetails(true);
     setError(null);
@@ -378,7 +400,7 @@ const CommunityDetailPage: React.FC = () => {
     setDeleting(true);
     setError(null);
     try {
-      await userDeleteCommunity({ path: { communityId } });
+      await userDeleteCommunityAdmin({ path: { communityId } });
       success("Community deleted", community.name);
       navigate(href("/groups"));
     } catch (err) {
@@ -445,6 +467,15 @@ const CommunityDetailPage: React.FC = () => {
     );
   }
 
+  const backToGroupsLink = (
+    <Link
+      to={href("/groups")}
+      className="text-blue-600 text-sm hover:underline"
+    >
+      ← Back to groups
+    </Link>
+  );
+
   if (!community) {
     return (
       <div className="p-6 pt-20">
@@ -453,12 +484,7 @@ const CommunityDetailPage: React.FC = () => {
         ) : (
           <p className="text-sm text-zinc-500">Community not found.</p>
         )}
-        <Link
-          to={href("/groups")}
-          className="text-blue-600 text-sm hover:underline"
-        >
-          ← Back to groups
-        </Link>
+        {backToGroupsLink}
       </div>
     );
   }
@@ -468,12 +494,7 @@ const CommunityDetailPage: React.FC = () => {
       <div className="p-6 pt-20 flex flex-col gap-6 max-w-5xl">
         <div className="flex flex-row items-center justify-between gap-3">
           <div>
-            <Link
-              to={href("/groups")}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              ← Back to groups
-            </Link>
+            {backToGroupsLink}
             <h1 className="text-2xl font-semibold mt-2">{community.name}</h1>
             <p className="text-sm text-zinc-500">
               Manage group details, membership, and leadership.
@@ -525,6 +546,60 @@ const CommunityDetailPage: React.FC = () => {
                   }))
                 }
               />
+            </div>
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+              <div className="flex flex-col gap-y-3">
+                <label className="flex items-center gap-x-2 text-sm font-medium text-zinc-700">
+                  <input
+                    type="checkbox"
+                    checked={formValues.public}
+                    onChange={(event) => {
+                      const checked = event.target.checked;
+                      setFormValues((prev) => ({
+                        ...prev,
+                        public: checked,
+                      }));
+                      if (checked) {
+                        setAllowStaffAssignments(true);
+                      }
+                    }}
+                  />
+                  Public
+                </label>
+                <label className="flex items-center gap-x-2 text-sm font-medium text-zinc-700">
+                  <input
+                    type="checkbox"
+                    checked={allowStaffAssignments}
+                    onChange={(event) =>
+                      setAllowStaffAssignments(event.target.checked)
+                    }
+                    disabled={formValues.public}
+                  />
+                  Group assignment
+                </label>
+              </div>
+              {(formValues.public || allowStaffAssignments) && (
+                <div className="mt-4">
+                  <label className="text-sm font-medium text-zinc-700">
+                    Member capacity
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    className="mt-2 border border-zinc-300 rounded px-3 py-2 text-sm w-full bg-white"
+                    value={formValues.maxCapacity ?? ""}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      const parsed = Number(value);
+                      setFormValues((prev) => ({
+                        ...prev,
+                        maxCapacity:
+                          value === "" || Number.isNaN(parsed) ? null : parsed,
+                      }));
+                    }}
+                  />
+                </div>
+              )}
             </div>
             <Button
               type="submit"
@@ -706,6 +781,7 @@ const CommunityDetailPage: React.FC = () => {
           leaders={sortedLeaders}
           members={sortedMembers}
           amLeader={true}
+          communityId={community.id}
           userActionRelations={userActionRelations ?? undefined}
           actions={actionSummaries}
           maxActionsPerWeek={maxActionsPerWeek}

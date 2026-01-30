@@ -13,6 +13,7 @@ import {
   MessagesSquare,
   Search,
   Settings,
+  UserPlus,
   Users,
 } from "lucide-react";
 import {
@@ -29,6 +30,7 @@ import { useAuth } from "../lib/AuthContext";
 import { isFeatureEnabled } from "../lib/config";
 import { useNotifications } from "@alliance/shared/lib/useNotifications";
 import { useMessagingUnread } from "../pages/app/messages";
+import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
 
 export enum NavbarPage {
   Tasks = "Tasks",
@@ -43,6 +45,7 @@ export enum NavbarPage {
   Search = "Search",
   Groups = "Groups",
   Messages = "Messages",
+  Invite = "Invites",
 }
 
 export const destinations: Record<NavbarPage, string> = {
@@ -58,6 +61,7 @@ export const destinations: Record<NavbarPage, string> = {
   [NavbarPage.Settings]: href("/settings"),
   [NavbarPage.Groups]: href("/groups"),
   [NavbarPage.Messages]: href("/messages"),
+  [NavbarPage.Invite]: href("/invites"),
 };
 
 const getIcon = (page: NavbarPage, size: number) => {
@@ -84,7 +88,12 @@ const getIcon = (page: NavbarPage, size: number) => {
       return <Users size={size} />;
     case NavbarPage.Activity:
       return <Globe size={size} />;
+    case NavbarPage.Invite:
+      return <UserPlus size={size} />;
+    case NavbarPage.Profile:
+      return null;
     default:
+      page satisfies never;
       return null;
   }
 };
@@ -98,6 +107,8 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
 
   const { unreadCount } = useNotifications();
 
+  const { pendingCommunityInvites } = useIncomingCommunityInvites();
+
   const {
     unread: unreadMessages,
     hasUpdates,
@@ -109,8 +120,6 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
   const [open, setOpen] = useState(false);
   const navRef = useRef<HTMLDivElement | null>(null);
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
-
-  const { user } = useAuth();
 
   const navSections = [
     {
@@ -155,21 +164,23 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
           page: NavbarPage.Forum,
           destination: destinations[NavbarPage.Forum],
         },
-        ...((!!user && user.communities.length) ||
-        user?.invitedCommunities.filter((invite) => invite.status === "pending")
-          .length
-          ? [
-              {
-                page: NavbarPage.Groups,
-                destination: destinations[NavbarPage.Groups],
-              },
-            ]
-          : []),
+        {
+          page: NavbarPage.Groups,
+          destination: destinations[NavbarPage.Groups],
+        },
         ...(isFeatureEnabled(Features.Messaging)
           ? [
               {
                 page: NavbarPage.Messages,
                 destination: destinations[NavbarPage.Messages],
+              },
+            ]
+          : []),
+        ...(isFeatureEnabled(Features.InvitesPage)
+          ? [
+              {
+                page: NavbarPage.Invite,
+                destination: destinations[NavbarPage.Invite],
               },
             ]
           : []),
@@ -275,16 +286,17 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     return {
       [NavbarPage.Notifications]: unreadCount,
       [NavbarPage.Tasks]: todoActions,
-      [NavbarPage.Groups]:
-        !!user && user.communities.length
-          ? 0
-          : user?.invitedCommunities.filter(
-              (invite) => invite.status === "pending"
-            ).length,
+      [NavbarPage.Groups]: pendingCommunityInvites.length,
       [NavbarPage.Messages]:
         currentLocation !== NavbarPage.Messages ? unreadMessages : 0,
     };
-  }, [unreadCount, todoActions, user, unreadMessages, currentLocation]);
+  }, [
+    unreadCount,
+    todoActions,
+    pendingCommunityInvites,
+    unreadMessages,
+    currentLocation,
+  ]);
 
   const { isAuthenticated } = useAuth();
 
