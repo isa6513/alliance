@@ -89,9 +89,8 @@ const ReplyForm = ({
     content.body.trim() !== "" || (content.attachments?.length ?? 0) > 0;
   return (
     <View
-      className={`border border-zinc-200 rounded ${
-        compact ? "p-2" : "p-3"
-      } bg-white`}
+      className={`border border-zinc-200 rounded ${compact ? "p-2" : "p-3"
+        } bg-white`}
     >
       <EditableContentForm
         value={content}
@@ -112,7 +111,7 @@ const ReplyForm = ({
         <Button
           color={ButtonColor.Black}
           size={ButtonSize.Small}
-          title={isSubmitting ? "Posting..." : "Post Comment"}
+          title={isSubmitting ? "Posting..." : "Post"}
           onPress={() => onSubmit(content, parentId)}
           disabled={!canSubmit || isSubmitting}
         />
@@ -183,9 +182,8 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
   return (
     <View
       style={{ marginLeft: Math.min(depth * 12, maxDepth * 12) }}
-      className={`rounded ${containerBorder} ${containerBg} ${containerSpacing} ${
-        isHighlighted ? "border-l-2 border-blue-500" : ""
-      }`}
+      className={`rounded ${containerBorder} ${containerBg} ${containerSpacing} ${isHighlighted ? "border-l-2 border-blue-500" : ""
+        }`}
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-x-2">
@@ -263,10 +261,10 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
             onPress={
               shared.user
                 ? () =>
-                    shared.onLikeReply(
-                      reply.id,
-                      reply.likes.some((like) => like.id === shared.user?.id)
-                    )
+                  shared.onLikeReply(
+                    reply.id,
+                    reply.likes.some((like) => like.id === shared.user?.id)
+                  )
                 : undefined
             }
           />

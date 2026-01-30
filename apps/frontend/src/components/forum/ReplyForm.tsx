@@ -111,7 +111,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
               }
               className={`transition disabled:opacity-50 text-nowrap`}
             >
-              {isSubmitting ? "Posting..." : "Post Comment"}
+              {isSubmitting ? "Posting..." : "Post"}
             </Button>
           </div>
         )}
