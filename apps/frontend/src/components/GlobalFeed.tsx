@@ -56,7 +56,7 @@ const ActivityGroupItem = ({ item, date }: ActivityGroupItemProps) => {
 
   return (
     <div className="py-3">
-      <p className="text-zinc-700 mt-1.5">
+      <div className="text-zinc-700 mt-1.5">
         <ProfilePicRow users={item.users} />
         {isSingle ? (
           <Link
@@ -75,8 +75,11 @@ const ActivityGroupItem = ({ item, date }: ActivityGroupItemProps) => {
         >
           {item.actionName}
         </Link>
-        <span className="text-zinc-500">{" "}{formatTime(new Date(date), { addSuffix: true })}</span>
-      </p>
+        <span className="text-zinc-500">
+          {" "}
+          {formatTime(new Date(date), { addSuffix: true })}
+        </span>
+      </div>
     </div>
   );
 };
@@ -93,8 +96,8 @@ const ActionUpdateItem = ({ item }: ActionUpdateItemProps) => {
     >
       <div className="flex flex-row gap-x-2 items-center">
         <p className="text-zinc-500 text-sm">
-          <Info className="text-green inline-block -mt-1" size={14} />
-          {" "}Update on <span className="text-green">{item.actionName}</span>
+          <Info className="text-green inline-block -mt-1" size={14} /> Update on{" "}
+          <span className="text-green">{item.actionName}</span>
         </p>
       </div>
       <p className="text-black font-medium mt-1">{item.title}</p>
@@ -127,7 +130,11 @@ const NewMembersItem = ({ item, date }: NewMembersItemProps) => {
         ) : (
           <span className="font-medium">{item.count} new members</span>
         )}
-        <span className="text-zinc-500">{isSingle ? " has become a new member of the Alliance" : " joined the Alliance"}</span>
+        <span className="text-zinc-500">
+          {isSingle
+            ? " has become a new member of the Alliance"
+            : " joined the Alliance"}
+        </span>
         {/* <span className="text-zinc-500">{" "}{formatTime(new Date(date), { addSuffix: true })}</span> */}
       </p>
     </div>
@@ -147,7 +154,7 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
       to={href("/forum/post/:id", { id: item.postId.toString() })}
       className="block py-3 hover:bg-zinc-50 -mx-2 px-2 rounded"
     >
-      <p className="text-zinc-700 mt-1.5">
+      <div className="text-zinc-700 mt-1.5">
         <ProfilePicRow users={item.users} />
         {isSingle ? (
           <span className="font-medium">{item.users[0].displayName}</span>
@@ -156,8 +163,11 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
         )}
         <span className="text-zinc-500"> commented on </span>
         <span className="text-green font-medium">{item.postTitle}</span>
-        <span className="text-zinc-500">{" "}{formatTime(new Date(date), { addSuffix: true })}</span>
-      </p>
+        <span className="text-zinc-500">
+          {" "}
+          {formatTime(new Date(date), { addSuffix: true })}
+        </span>
+      </div>
     </Link>
   );
 };
@@ -168,14 +178,16 @@ interface GlobalFeedProps {
   fitToHeight?: boolean;
 }
 
-const GlobalFeed = ({ items, loading, fitToHeight = false }: GlobalFeedProps) => {
+const GlobalFeed = ({
+  items,
+  loading,
+  fitToHeight = false,
+}: GlobalFeedProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState<number | null>(null);
 
   const displayItems =
-    fitToHeight && visibleCount !== null
-      ? items.slice(0, visibleCount)
-      : items;
+    fitToHeight && visibleCount !== null ? items.slice(0, visibleCount) : items;
 
   // When items change, reset to render all items for measurement
   useLayoutEffect(() => {
@@ -257,23 +269,31 @@ const GlobalFeed = ({ items, loading, fitToHeight = false }: GlobalFeedProps) =>
       className={fitToHeight ? "flex-1 min-h-0 overflow-hidden" : ""}
     >
       <div className="divide-y divide-zinc-100">
-        {displayItems.map((item, index) => (
-          item.type !== "action_update" && (
-            <div key={`${item.type}-${index}-${item.date}`}>
-              {item.type === "activity_group" && item.activityGroup && (
-                <ActivityGroupItem item={item.activityGroup} date={item.date} />
-              )}
-              {/* {item.type === "action_update" && item.actionUpdate && (
+        {displayItems.map(
+          (item, index) =>
+            item.type !== "action_update" && (
+              <div key={`${item.type}-${index}-${item.date}`}>
+                {item.type === "activity_group" && item.activityGroup && (
+                  <ActivityGroupItem
+                    item={item.activityGroup}
+                    date={item.date}
+                  />
+                )}
+                {/* {item.type === "action_update" && item.actionUpdate && (
               <ActionUpdateItem item={item.actionUpdate} />
             )} */}
-              {item.type === "new_members" && item.newMembers && (
-                <NewMembersItem item={item.newMembers} date={item.date} />
-              )}
-              {item.type === "forum_comments" && item.forumComments && (
-                <ForumCommentsItem item={item.forumComments} date={item.date} />
-              )}
-            </div>)
-        ))}
+                {item.type === "new_members" && item.newMembers && (
+                  <NewMembersItem item={item.newMembers} date={item.date} />
+                )}
+                {item.type === "forum_comments" && item.forumComments && (
+                  <ForumCommentsItem
+                    item={item.forumComments}
+                    date={item.date}
+                  />
+                )}
+              </div>
+            )
+        )}
       </div>
     </div>
   );
