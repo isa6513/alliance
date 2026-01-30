@@ -9,7 +9,7 @@ import {
 } from "@alliance/shared/client";
 import List from "@alliance/sharedweb/ui/List";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../lib/AuthContext";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
@@ -26,17 +26,18 @@ const InvitesPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [invites, setInvites] = useState<OnetimeInviteDto[]>([]);
 
-  const refreshCommunities = () => {
-    userGetMyCommunities().then((resp) => {
+
+  const refreshCommunities = useCallback(() => {
+    void userGetMyCommunities().then((resp) => {
       if (resp.data) {
         setCommunities(resp.data);
       }
     });
-  };
+  }, []);
 
   useEffect(() => {
     refreshCommunities();
-  }, []);
+  }, [refreshCommunities]);
 
   useEffect(() => {
     void (async () => {
