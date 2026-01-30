@@ -116,7 +116,7 @@ export class UserService {
     private readonly conversationService: ConversationService,
     private readonly pushService: PushService,
     private readonly slackService: SlackService,
-  ) { }
+  ) {}
 
   async create(data: DeepPartial<User>): Promise<User> {
     const user = this.userRepository.create(data);
@@ -133,8 +133,8 @@ export class UserService {
         const city =
           (data.cityId
             ? await this.cityRepository.findOne({
-              where: { id: data.cityId },
-            })
+                where: { id: data.cityId },
+              })
             : undefined) ?? undefined;
 
         if (data.cityId && !city) {
@@ -294,8 +294,8 @@ export class UserService {
 
     const city = body.cityId
       ? await this.cityRepository.findOne({
-        where: { id: body.cityId },
-      })
+          where: { id: body.cityId },
+        })
       : null;
 
     if (city) {
@@ -504,13 +504,13 @@ export class UserService {
     const rels =
       direction === 'sent'
         ? await this.friendRepository.find({
-          where: { requester: { id: userId }, status: FriendStatus.Pending },
-          relations: { addressee: true },
-        })
+            where: { requester: { id: userId }, status: FriendStatus.Pending },
+            relations: { addressee: true },
+          })
         : await this.friendRepository.find({
-          where: { addressee: { id: userId }, status: FriendStatus.Pending },
-          relations: { requester: true },
-        });
+            where: { addressee: { id: userId }, status: FriendStatus.Pending },
+            relations: { requester: true },
+          });
     const users =
       direction === 'sent'
         ? rels.map((r) => r.addressee)
@@ -1139,17 +1139,17 @@ export class UserService {
 
     const notifs: Notification[] = sendNotif
       ? community.leaders!.map((leader) =>
-        this.notifRepository.create({
-          user: leader,
-          category: NotificationCategory.MemberJoinedCommunity,
-          message: `${user.name} joined your group (${community.name})`,
-          webAppLocation: groupUrl({
-            tab: 'members',
-            communityId: community.id,
+          this.notifRepository.create({
+            user: leader,
+            category: NotificationCategory.MemberJoinedCommunity,
+            message: `${user.name} joined your group (${community.name})`,
+            webAppLocation: groupUrl({
+              tab: 'members',
+              communityId: community.id,
+            }),
+            associatedUsers: [user],
           }),
-          associatedUsers: [user],
-        }),
-      )
+        )
       : [];
 
     const updatedP = this.communityRepository.save(community);
@@ -1446,15 +1446,18 @@ export class UserService {
       ...rest
     } = body;
 
-    const userP = this.findOneOrFail(userId, { leaderOf: true });
+    const userP = this.findOne(userId, { leaderOf: true });
     const communityP =
       communityId !== undefined
-        ? this.communityRepository.findOneOrFail({
-          where: { id: communityId },
-        })
+        ? this.communityRepository.findOne({
+            where: { id: communityId },
+          })
         : undefined;
 
     const user = await userP;
+    if (user === null) {
+      throw new BadRequestException('User not found');
+    }
     const isAdmin = user.admin;
     if (!isAdmin && communityId && !user.leaderOfIdSet.has(communityId)) {
       throw new BadRequestException(
@@ -1471,6 +1474,9 @@ export class UserService {
         : await this.findOneOrFail(invitingUserId);
 
     const community = await communityP;
+    if (community === null) {
+      throw new BadRequestException('Community not found');
+    }
     const invite = this.onetimeInviteRepository.create({
       ...rest,
       code,
@@ -1900,17 +1906,17 @@ export class UserService {
       }),
       ...(invite.invitingUser
         ? [
-          this.notifRepository.create({
-            user: invite.invitingUser,
-            category: NotificationCategory.CommunityInviteCreated,
-            message: `Your request to invite ${invite.invitedUser.name} was approved`,
-            webAppLocation: groupUrl({
-              tab: 'groups',
-              communityId: invite.community.id,
+            this.notifRepository.create({
+              user: invite.invitingUser,
+              category: NotificationCategory.CommunityInviteCreated,
+              message: `Your request to invite ${invite.invitedUser.name} was approved`,
+              webAppLocation: groupUrl({
+                tab: 'groups',
+                communityId: invite.community.id,
+              }),
+              associatedUsers: [],
             }),
-            associatedUsers: [],
-          }),
-        ]
+          ]
         : []),
     ];
     await this.notifRepository.save(notifs);
