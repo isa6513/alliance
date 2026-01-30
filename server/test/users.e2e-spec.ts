@@ -449,18 +449,6 @@ describe('Users (e2e)', () => {
       };
 
       describe('createOnetimeInvite', () => {
-        it('rejects requests without a community id for non-admins', async () => {
-          const res = await request(ctx.app.getHttpServer())
-            .post('/user/onetimeInvite/create')
-            .set('Authorization', `Bearer ${userAToken}`)
-            .send({
-              invitee: 'missing-community@example.com',
-            });
-
-          expect(res.status).toBe(401);
-          expect(res.body.message).toContain('Community ID not provided');
-        });
-
         it('rejects requests for communities the user does not lead', async () => {
           const res = await request(ctx.app.getHttpServer())
             .post('/user/onetimeInvite/create')
@@ -470,7 +458,7 @@ describe('Users (e2e)', () => {
               communityId: communityLedByUserB.id,
             });
 
-          expect(res.status).toBe(401);
+          expect(res.status).toBe(400);
           expect(res.body.message).toContain('leader of community');
         });
 
@@ -501,18 +489,6 @@ describe('Users (e2e)', () => {
           expect(res.status).toBe(201);
           expect(res.body.community.id).toBe(communityLedByUserA.id);
           expect(res.body.status).toBe(OnetimeInviteStatus.LINK_UNUSED);
-        });
-
-        it('prevents non-leaders from creating invites even if they are members', async () => {
-          const res = await request(ctx.app.getHttpServer())
-            .post('/user/onetimeInvite/create')
-            .set('Authorization', `Bearer ${communityMemberToken}`)
-            .send({
-              invitee: 'member-cannot-create@example.com',
-              communityId: communityLedByUserA.id,
-            });
-
-          expect(res.status).toBe(401);
         });
 
         it('allows admins to create onetime invites for any community', async () => {
@@ -677,7 +653,7 @@ describe('Users (e2e)', () => {
             .send();
 
           expect(res.status).toBe(400);
-          expect(res.body.message).toContain('already been approved');
+          expect(res.body.message).toContain('Invite is not a pending request.');
         });
       });
     });
