@@ -9,6 +9,7 @@ import {
   ActionEventDto,
   CreateActionDto,
   CreateActionEventDto,
+  GlobalFeedItemType,
   UserActionRelation,
 } from '../src/actions/dto/action.dto';
 import {
@@ -1385,6 +1386,76 @@ describe('Actions (e2e)', () => {
       );
 
       await actionRepo.delete(action.id);
+    });
+  });
+
+  describe('Global feed', () => {
+    let activeUser: User | null = null;
+    let suspendedUser: User | null = null;
+
+    afterEach(async () => {
+      if (activeUser) {
+        await userRepo.delete(activeUser.id);
+        activeUser = null;
+      }
+      if (suspendedUser) {
+        await userRepo.delete(suspendedUser.id);
+        suspendedUser = null;
+      }
+    });
+
+    it('excludes suspended members from new member feed items', async () => {
+      const now = Date.now();
+
+      activeUser = await userService.create({
+        email: `active-${now}@example.com`,
+        password: 'Password123!',
+        name: 'Active Member',
+        tags: [ctx.defaultTag],
+        contractEvents: [
+          {
+            type: ContractEventType.SIGNED,
+            date: new Date(now - 60_000),
+            automatic: false,
+          },
+        ],
+      });
+
+      suspendedUser = await userService.create({
+        email: `suspended-${now}@example.com`,
+        password: 'Password123!',
+        name: 'Suspended Member',
+        tags: [ctx.defaultTag],
+        contractEvents: [
+          {
+            type: ContractEventType.SIGNED,
+            date: new Date(now - 120_000),
+            automatic: false,
+          },
+          {
+            type: ContractEventType.SUSPENDED,
+            date: new Date(now - 30_000),
+            automatic: false,
+          },
+        ],
+      });
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/actions/globalFeed')
+        .query({ limit: 20 })
+        .expect(200);
+
+      const newMembersItem = res.body.find(
+        (item) => item.type === GlobalFeedItemType.NewMembers,
+      );
+
+      expect(newMembersItem).toBeDefined();
+      const newMemberIds = newMembersItem.newMembers.users.map(
+        (user) => user.id,
+      );
+
+      expect(newMemberIds).toContain(activeUser.id);
+      expect(newMemberIds).not.toContain(suspendedUser.id);
     });
   });
 

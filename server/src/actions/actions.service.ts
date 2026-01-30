@@ -2899,19 +2899,20 @@ export class ActionsService {
     // Combine all new members into one feed item
     if (signedEvents.length > 0) {
       const uniqueNewMembers = new Map<number, ProfileDto>();
-      let latestMemberDate = signedEvents[0]?.date || now;
+      let latestMemberDate: Date | null = null;
 
       for (const event of signedEvents) {
-        if (!event.user) continue;
-        if (!uniqueNewMembers.has(event.user.id)) {
-          uniqueNewMembers.set(event.user.id, new ProfileDto(event.user));
+        const user = event.user;
+        if (!user?.hasActiveContract) continue;
+        if (!uniqueNewMembers.has(user.id)) {
+          uniqueNewMembers.set(user.id, new ProfileDto(user));
         }
-        if (event.date > latestMemberDate) {
+        if (!latestMemberDate || event.date > latestMemberDate) {
           latestMemberDate = event.date;
         }
       }
 
-      if (uniqueNewMembers.size > 0) {
+      if (uniqueNewMembers.size > 0 && latestMemberDate) {
         const newMembers: GlobalFeedNewMembersDto = {
           users: Array.from(uniqueNewMembers.values()).slice(0, 8),
           count: uniqueNewMembers.size,
