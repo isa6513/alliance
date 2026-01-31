@@ -118,7 +118,7 @@ const NewMembersItem = ({ item, date }: NewMembersItemProps) => {
 
   return (
     <div className="py-3">
-      <p className="text-zinc-700  mt-1.5">
+      <div className="text-zinc-700  mt-1.5">
         <ProfilePicRow users={item.users} />
         {isSingle ? (
           <Link
@@ -136,7 +136,7 @@ const NewMembersItem = ({ item, date }: NewMembersItemProps) => {
             : " joined the Alliance"}
         </span>
         {/* <span className="text-zinc-500">{" "}{formatTime(new Date(date), { addSuffix: true })}</span> */}
-      </p>
+      </div>
     </div>
   );
 };
@@ -150,10 +150,7 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
   const isSingle = item.count === 1 && item.users.length > 0;
 
   return (
-    <Link
-      to={href("/forum/post/:id", { id: item.postId.toString() })}
-      className="block py-3 hover:bg-zinc-50 -mx-2 px-2 rounded"
-    >
+    <div className="block py-3 hover:bg-zinc-50 -mx-2 px-2 rounded">
       <div className="text-zinc-700 mt-1.5">
         <ProfilePicRow users={item.users} />
         {isSingle ? (
@@ -162,13 +159,18 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
           <span className="font-medium">{item.count} members</span>
         )}
         <span className="text-zinc-500"> commented on </span>
-        <span className="text-green font-medium">{item.postTitle}</span>
+        <Link
+          to={href("/forum/post/:id", { id: item.postId.toString() })}
+          className="text-green font-medium hover:underline"
+        >
+          {item.postTitle}
+        </Link>
         <span className="text-zinc-500">
           {" "}
           {formatTime(new Date(date), { addSuffix: true })}
         </span>
       </div>
-    </Link>
+    </div>
   );
 };
 
