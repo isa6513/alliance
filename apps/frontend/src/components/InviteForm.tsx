@@ -93,12 +93,8 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
     }
 
     if (responsibilityChoice === "responsible") {
-      if (!selectedCommunityId) {
-        errorToast("Please select a group");
-        return;
-      }
       if (selectedCommunityId === null) {
-        errorToast("Please create a group first");
+        errorToast("Please select a group");
         return;
       }
     }
@@ -144,7 +140,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
   const handleCreateCommunity = useCallback(
     async (community: CommunityDto) => {
       try {
-        refreshCommunities(false);
+        await refreshCommunities(false);
         setSelectedCommunityId(community.id);
         successToast("Group created successfully!");
       } catch {
