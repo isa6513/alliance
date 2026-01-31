@@ -150,7 +150,7 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
   const isSingle = item.count === 1 && item.users.length > 0;
 
   return (
-    <div className="block py-3 hover:bg-zinc-50 -mx-2 px-2 rounded">
+    <div className="block py-3 -mx-2 px-2 rounded">
       <div className="text-zinc-700 mt-1.5">
         <ProfilePicRow users={item.users} />
         {isSingle ? (
