@@ -35,35 +35,55 @@ export const editGroupPublicGroupExplanation =
 export const editGroupGroupAssignmentExplanation =
   "Members may occasionally be assigned to this group by Alliance staff.";
 
-export const onetimeInviteCreationTitle = "Invite a new member to the Alliance";
-export const onetimeInviteCreationExplanation = [
-  "We strongly encourage you to invite new members to join a group that you lead. This will ensure they are initially supported by someone they already know.",
-  "You do not need to support them indefinitely. They can transfer to another group later.",
-  "Who do you want to be responsible for the new member?",
-];
-export const onetimeInviteCreationResponsibilityChoiceYes = "Myself";
-export const onetimeInviteCreationResponsibilityChoiceNo = "Someone else";
+export const onetimeInviteCreation = {
+  title: "Invite a new member to the Alliance",
+  explanation: [
+    "We strongly encourage you to invite new members to join a group that you lead. This will ensure they are initially supported by someone they already know.",
+    "You do not need to support them indefinitely. They can transfer to another group later.",
+    "Who do you want to be responsible for the new member?",
+  ],
+  responsible: {
+    buttonText: "Myself",
+    leader: {
+      title: "Select the group for the new member to join",
+      invite: {
+        title: "Create an invite",
+        explanation: [
+          "This will create a personalized invite page that explains the Alliance and how to sign up.",
+          "When the new member signs up, they will automatically be added to your group.",
+        ],
+      },
+    },
+    nonLeader: {
+      title:
+        "You need to create a group. This will allow you to easily view your new member's progress.",
+    },
+  },
+  not_responsible: {
+    buttonText: "Someone else",
+    title: "Enter the name of the invitee",
+    explanation: [
+      "This will create a personalized invite link that you can share with the invitee.",
+      "When the invitee signs up, they will be assigned a group.",
+    ],
+  },
+} as const;
 
-export const groupLeaderOnetimeInviteTitle =
-  "Invite a new member to the Alliance and your group";
-export const groupLeaderOnetimeInviteExplanation = [
-  "This will create a personalized invite page that explains the Alliance and how to sign up.",
-  "When the new member signs up, they will automatically be added to your group.",
-];
-
-export const groupMemberOnetimeInviteTitle =
-  "Invite a new member to the Alliance and this group";
-export const groupMemberOnetimeInviteExplanation =
-  "A group leader will review and approve your request.";
-export const groupMemberOnetimeInviteExplanationBullets = [
-  "A group lead will first need to approve the request for the invitee.",
-  "Once approved, you will receive a personalized invite link that you can share with the invitee.",
-  "When the invitee signs up, they will automatically be added to your group.",
-];
-
-export const unaffiliatedOnetimeInviteTitle =
-  "Invite a new member to the Alliance";
-export const unaffiliatedOnetimeInviteExplanation = [
-  "This will create a personalized invite link that you can share with the invitee.",
-  "When the invitee signs up, they will be assigned a group.",
-];
+export const onetimeInviteCreationGroup = {
+  leader: {
+    title: "Invite a new member to the Alliance and your group",
+    explanation: [
+      "This will create a personalized invite page that explains the Alliance and how to sign up.",
+      "When the new member signs up, they will automatically be added to your group.",
+    ],
+  },
+  member: {
+    title: "Invite a new member to the Alliance and this group",
+    explanation: "A group leader will review and approve your request.",
+    bullets: [
+      "A group lead will first need to approve the request for the invitee.",
+      "Once approved, you will receive a personalized invite link that you can share with the invitee.",
+      "When the invitee signs up, they will automatically be added to your group.",
+    ],
+  },
+} as const;

@@ -1,10 +1,4 @@
-import {
-  groupLeaderOnetimeInviteExplanation,
-  groupLeaderOnetimeInviteTitle,
-  groupMemberOnetimeInviteExplanation,
-  groupMemberOnetimeInviteExplanationBullets,
-  groupMemberOnetimeInviteTitle,
-} from "@alliance/shared/lib/copy";
+import { onetimeInviteCreationGroup } from "@alliance/shared/lib/copy";
 import { CardStyle } from "@alliance/shared/styles/card";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -60,8 +54,10 @@ const OnetimeInviteForm = ({
     <Card style={CardStyle.Grey}>
       {isLeader ? (
         <div className="flex flex-col gap-y-2">
-          <p className="font-semibold">{groupLeaderOnetimeInviteTitle}</p>
-          {groupLeaderOnetimeInviteExplanation.map((block, index) => (
+          <p className="font-semibold">
+            {onetimeInviteCreationGroup.leader.title}
+          </p>
+          {onetimeInviteCreationGroup.leader.explanation.map((block, index) => (
             <p className="text-zinc-500" key={index}>
               {block}
             </p>
@@ -92,10 +88,14 @@ const OnetimeInviteForm = ({
         </div>
       ) : (
         <div className="flex flex-col gap-y-3">
-          <p className="font-semibold">{groupMemberOnetimeInviteTitle}</p>
-          <p className="text-zinc-500">{groupMemberOnetimeInviteExplanation}</p>
+          <p className="font-semibold">
+            {onetimeInviteCreationGroup.member.title}
+          </p>
+          <p className="text-zinc-500">
+            {onetimeInviteCreationGroup.member.explanation}
+          </p>
           <ol className="text-zinc-500 list-decimal list-inside mb-2">
-            {groupMemberOnetimeInviteExplanationBullets.map((block, index) => (
+            {onetimeInviteCreationGroup.member.bullets.map((block, index) => (
               <li key={index}>{block}</li>
             ))}
           </ol>

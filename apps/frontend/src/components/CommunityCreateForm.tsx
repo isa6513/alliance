@@ -15,7 +15,7 @@ import { useCallback, useMemo, useState } from "react";
 
 export type CommunityCreateFormProps = {
   name?: string;
-  onCancel: () => void;
+  onCancel?: () => void;
   onSuccess: (community: CommunityDto) => void;
 };
 
@@ -196,13 +196,15 @@ const CommunityCreateForm = (props: CommunityCreateFormProps) => {
       </div>
       <div className="flex flex-row justify-end">
         <div className="flex gap-x-1 mt-1">
-          <Button
-            onClick={props.onCancel}
-            color={ButtonColor.Grey}
-            className="!h-9"
-          >
-            Cancel
-          </Button>
+          {props.onCancel && (
+            <Button
+              onClick={props.onCancel}
+              color={ButtonColor.Grey}
+              className="!h-9"
+            >
+              Cancel
+            </Button>
+          )}
           <Button
             onClick={handleSubmit}
             color={ButtonColor.Black}

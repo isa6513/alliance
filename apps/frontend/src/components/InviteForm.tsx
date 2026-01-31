@@ -1,85 +1,92 @@
 import {
   CommunityDto,
   CreateOnetimeInviteDto,
+  OnetimeInviteDto,
   userCreateOnetimeInvite,
+  userGetCommunities,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import CommunityCreateForm from "./CommunityCreateForm";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
-import {
-  groupLeaderOnetimeInviteExplanation,
-  groupLeaderOnetimeInviteTitle,
-  onetimeInviteCreationExplanation,
-  onetimeInviteCreationResponsibilityChoiceNo,
-  onetimeInviteCreationResponsibilityChoiceYes,
-  onetimeInviteCreationTitle,
-  unaffiliatedOnetimeInviteExplanation,
-  unaffiliatedOnetimeInviteTitle,
-} from "@alliance/shared/lib/copy";
-import { ArrowLeft } from "lucide-react";
+import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
 
 type ResponsibilityChoice = "responsible" | "not_responsible" | null;
 
 type InviteFormProps = {
-  communities: CommunityDto[];
-  onInviteCreated: () => void;
-  onCommunitiesRefresh: () => void;
+  onInviteCreated: (invite: OnetimeInviteDto) => void;
 };
 
-const InviteForm = ({
-  communities,
-  onInviteCreated,
-  onCommunitiesRefresh,
-}: InviteFormProps) => {
+const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
   const { user } = useAuth();
   const { error: errorToast, success: successToast } = useToast();
   const [responsibilityChoice, setResponsibilityChoice] =
     useState<ResponsibilityChoice>(null);
   const [inviteeName, setInviteeName] = useState("");
-  const [selectedCommunityId, setSelectedCommunityId] = useState<
-    number | "new" | null
-  >(null);
+  const [selectedCommunityId, setSelectedCommunityId] = useState<number | null>(
+    null
+  );
   const [creatingInvite, setCreatingInvite] = useState(false);
+  const [communities, setCommunities] = useState<CommunityDto[]>([]);
+
+  const refreshCommunities = useCallback(
+    async (resetSelectedCommunityId: boolean) => {
+      const response = await userGetCommunities();
+      if (response.data) {
+        setCommunities(response.data);
+        if (resetSelectedCommunityId && user) {
+          setSelectedCommunityId(
+            response.data.find((community) =>
+              community.leaders.some((leader) => leader.id === user.id)
+            )?.id ?? null
+          );
+        }
+      }
+    },
+    [user]
+  );
+  useEffect(() => {
+    void refreshCommunities(true);
+  }, [refreshCommunities]);
 
   const leaderCommunities = useMemo(() => {
     if (!user) {
       return [];
     }
     return communities.filter((community) =>
-      community.leaders.some((leader) => leader.id === user.id)
+      community.leaders?.some((leader) => leader.id === user.id)
     );
   }, [communities, user]);
 
   const isLeader = leaderCommunities.length > 0;
 
-  const communityOptions = useMemo(() => {
-    const options: Record<string, string | number> = {};
-    leaderCommunities.forEach((community) => {
-      options[`community_${community.id}`] = community.name;
-    });
-    options["new"] = "Create a new group";
-    return options;
+  const leaderCommunitiesById = useMemo(() => {
+    return new Map(
+      leaderCommunities.map((community) => [community.id, community])
+    );
   }, [leaderCommunities]);
+  const selectedCommunity = useMemo(() => {
+    return leaderCommunitiesById.get(selectedCommunityId as number) ?? null;
+  }, [leaderCommunitiesById, selectedCommunityId]);
 
-  // Auto-select first group when user chooses "responsible" and is a leader
-  useEffect(() => {
-    if (responsibilityChoice === "responsible" && !selectedCommunityId) {
-      if (isLeader && leaderCommunities.length > 0) {
-        // Select the first group
-        setSelectedCommunityId(leaderCommunities[0].id);
-      } else if (!isLeader) {
-        // If not a leader, the create group form will be shown automatically
-        // by the conditional rendering logic below
-      }
-    }
-  }, [responsibilityChoice, selectedCommunityId, isLeader, leaderCommunities]);
+  const communityOptions = useMemo<Record<`c${number}` | "new", string>>(
+    () => ({
+      ...Object.fromEntries(
+        leaderCommunities.map((community) => [
+          `c${community.id}`,
+          community.name,
+        ])
+      ),
+      new: "Create a new group",
+    }),
+    [leaderCommunities]
+  );
 
-  const handleCreateInvite = async () => {
+  const handleCreateInvite = useCallback(async () => {
     if (!inviteeName.trim()) {
       errorToast("Please enter the invitee's name");
       return;
@@ -90,7 +97,7 @@ const InviteForm = ({
         errorToast("Please select a group");
         return;
       }
-      if (selectedCommunityId === "new") {
+      if (selectedCommunityId === null) {
         errorToast("Please create a group first");
         return;
       }
@@ -101,7 +108,6 @@ const InviteForm = ({
       const body: CreateOnetimeInviteDto = {
         invitee: inviteeName.trim(),
         ...(responsibilityChoice === "responsible" &&
-          selectedCommunityId !== "new" &&
           selectedCommunityId !== null && {
             communityId: selectedCommunityId,
           }),
@@ -113,7 +119,7 @@ const InviteForm = ({
         setInviteeName("");
         setSelectedCommunityId(null);
         setResponsibilityChoice(null);
-        onInviteCreated();
+        onInviteCreated(response.data);
       } else {
         errorToast(
           `Failed to create invite: ${
@@ -126,241 +132,187 @@ const InviteForm = ({
     } finally {
       setCreatingInvite(false);
     }
-  };
+  }, [
+    inviteeName,
+    responsibilityChoice,
+    selectedCommunityId,
+    errorToast,
+    successToast,
+    onInviteCreated,
+  ]);
 
-  const handleCreateCommunity = async (community: CommunityDto) => {
-    try {
-      // Refresh communities list in parent
-      onCommunitiesRefresh();
-      // Set the newly created community as selected
-      setSelectedCommunityId(community.id);
-      successToast("Group created successfully!");
-    } catch {
-      errorToast("Failed to refresh groups");
-    }
-  };
+  const handleCreateCommunity = useCallback(
+    async (community: CommunityDto) => {
+      try {
+        refreshCommunities(false);
+        setSelectedCommunityId(community.id);
+        successToast("Group created successfully!");
+      } catch {
+        errorToast("Failed to refresh groups");
+      }
+    },
+    [errorToast, successToast, refreshCommunities]
+  );
 
-  // Step 1: Responsibility choice
-  if (responsibilityChoice === null) {
-    return (
-      <Card style={CardStyle.Grey}>
+  return (
+    <Card style={CardStyle.Grey}>
+      <div className="flex flex-col gap-y-6">
         <div className="flex flex-col gap-y-4">
           <div className="flex flex-col gap-y-2">
             <p className="font-semibold text-xl">
-              {onetimeInviteCreationTitle}
+              {onetimeInviteCreation.title}
             </p>
-            <div className="flex flex-col gap-y-2">
-              {onetimeInviteCreationExplanation.map((block, index) => (
-                <p className="text-zinc-500" key={index}>
-                  {block}
-                </p>
-              ))}
-            </div>
+            {onetimeInviteCreation.explanation.map((block, index) => (
+              <p className="text-zinc-500" key={index}>
+                {block}
+              </p>
+            ))}
           </div>
           <div className="flex flex-row gap-2">
             <Button
               color={ButtonColor.Green}
               onClick={() => setResponsibilityChoice("responsible")}
+              disabled={responsibilityChoice === "responsible"}
               className="w-full"
             >
-              {onetimeInviteCreationResponsibilityChoiceYes}
+              {onetimeInviteCreation.responsible.buttonText}
             </Button>
             <Button
               color={ButtonColor.Grey}
               onClick={() => setResponsibilityChoice("not_responsible")}
+              disabled={responsibilityChoice === "not_responsible"}
               className="w-full"
             >
-              {onetimeInviteCreationResponsibilityChoiceNo}
+              {onetimeInviteCreation.not_responsible.buttonText}
             </Button>
           </div>
         </div>
-      </Card>
-    );
-  }
 
-  // Step 2: Not responsible - simple form
-  if (responsibilityChoice === "not_responsible") {
-    return (
-      <Card style={CardStyle.Grey}>
-        <div className="flex flex-col gap-y-4">
-          <Button
-            color={ButtonColor.Grey}
-            className="flex flex-row gap-x-1"
-            onClick={() => {
-              setResponsibilityChoice(null);
-              setInviteeName("");
-            }}
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Button>
-          <div className="flex flex-col gap-y-2">
-            <p className="font-semibold text-xl">
-              {unaffiliatedOnetimeInviteTitle}
-            </p>
-            {unaffiliatedOnetimeInviteExplanation.map((block, index) => (
-              <p className="text-zinc-500" key={index}>
-                {block}
+        {responsibilityChoice === "not_responsible" && (
+          <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
+            <div className="flex flex-col gap-y-2">
+              <p className="font-semibold text-xl">
+                {onetimeInviteCreation.not_responsible.title}
               </p>
-            ))}
-          </div>
-          <div className="flex flex-col gap-y-2">
-            <div className="flex flex-row gap-x-2">
-              <input
-                type="text"
-                className="border border-zinc-300 rounded px-3 py-2 flex-1"
-                placeholder="Enter the invitee's first name"
-                value={inviteeName}
-                onChange={(e) => setInviteeName(e.target.value)}
-              />
-              <Button
-                color={ButtonColor.Black}
-                onClick={handleCreateInvite}
-                disabled={creatingInvite || !inviteeName.trim()}
-              >
-                {creatingInvite ? "Creating..." : "Create invite"}
-              </Button>
+              {onetimeInviteCreation.not_responsible.explanation.map(
+                (block, index) => (
+                  <p className="text-zinc-500" key={index}>
+                    {block}
+                  </p>
+                )
+              )}
+            </div>
+            <div className="flex flex-col gap-y-2">
+              <div className="flex flex-row gap-x-2">
+                <input
+                  type="text"
+                  className="border border-zinc-300 rounded px-3 py-2 flex-1"
+                  placeholder="Enter the invitee's first name"
+                  value={inviteeName}
+                  onChange={(e) => setInviteeName(e.target.value)}
+                />
+                <Button
+                  color={ButtonColor.Black}
+                  onClick={handleCreateInvite}
+                  disabled={creatingInvite || !inviteeName.trim()}
+                >
+                  {creatingInvite ? "Creating..." : "Create invite"}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
-    );
-  }
+        )}
 
-  // Step 3: Responsible - check if leader
-  if (responsibilityChoice === "responsible") {
-    // If not a leader and haven't selected a community yet, show create group form
-    if (!isLeader && !selectedCommunityId) {
-      return (
-        <Card style={CardStyle.Grey}>
-          <div className="flex flex-col gap-y-4">
-            <p className="font-semibold">
-              First, you need to create a group. This will allow you to easily
-              view your new member&apos;s progress.
-            </p>
-            <CommunityCreateForm
-              name={user?.name}
-              onCancel={() => {
-                setResponsibilityChoice(null);
-              }}
-              onSuccess={handleCreateCommunity}
-            />
-          </div>
-        </Card>
-      );
-    }
+        {responsibilityChoice === "responsible" && (
+          <>
+            <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
+              {/* Group selection */}
+              {isLeader ? (
+                <>
+                  <p className="text-xl font-semibold">
+                    {onetimeInviteCreation.responsible.leader.title}
+                  </p>
+                  <div>
+                    <DropdownSelect
+                      options={communityOptions}
+                      value={selectedCommunity?.name ?? communityOptions["new"]}
+                      onChange={([key]) => {
+                        if (key === "new") {
+                          setSelectedCommunityId(null);
+                        } else {
+                          setSelectedCommunityId(Number(key.slice(1)));
+                        }
+                      }}
+                      titleOverride={
+                        selectedCommunityId &&
+                        typeof selectedCommunityId === "number"
+                          ? selectedCommunity?.name || "Select a group"
+                          : selectedCommunityId === null
+                          ? "Create a new group"
+                          : "Select a group"
+                      }
+                    />
+                  </div>
+                </>
+              ) : (
+                <p className="font-semibold">
+                  {onetimeInviteCreation.responsible.nonLeader.title}
+                </p>
+              )}
+            </div>
 
-    // If creating a new group (when already a leader choosing "new")
-    if (selectedCommunityId === "new") {
-      return (
-        <Card style={CardStyle.Grey}>
-          <div className="flex flex-col gap-y-4">
-            <p className="text-xl font-semibold">Create a new group</p>
-            <CommunityCreateForm
-              name={user?.name}
-              onCancel={() => {
-                setSelectedCommunityId(null);
-              }}
-              onSuccess={handleCreateCommunity}
-            />
-          </div>
-        </Card>
-      );
-    }
-
-    // If leader (or just created a group), show dropdown and form
-    // Note: If user just created a group, selectedCommunityId will be set
-    // and we'll show the form even if isLeader hasn't updated yet
-    const selectedCommunity =
-      selectedCommunityId && typeof selectedCommunityId === "number"
-        ? leaderCommunities.find((c) => c.id === selectedCommunityId) ||
-          communities.find((c) => c.id === selectedCommunityId)
-        : null;
-
-    return (
-      <Card style={CardStyle.Grey}>
-        <div className="flex flex-col gap-y-4">
-          <Button
-            color={ButtonColor.Grey}
-            className="flex flex-row gap-x-1"
-            onClick={() => {
-              setResponsibilityChoice(null);
-              setInviteeName("");
-              setSelectedCommunityId(null);
-            }}
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Button>
-          <div className="flex flex-col gap-y-2">
-            <p className="text-xl font-semibold">
-              {groupLeaderOnetimeInviteTitle}
-            </p>
-            {groupLeaderOnetimeInviteExplanation.map((block, index) => (
-              <p className="text-zinc-500" key={index}>
-                {block}
-              </p>
-            ))}
-          </div>
-          <div className="flex flex-col gap-y-2">
-            {isLeader && leaderCommunities.length > 0 && (
-              <div>
-                <DropdownSelect
-                  options={communityOptions}
-                  value={
-                    selectedCommunityId &&
-                    typeof selectedCommunityId === "number"
-                      ? communityOptions[`community_${selectedCommunityId}`] ||
-                        selectedCommunity?.name ||
-                        "Select a group"
-                      : "Select a group"
-                  }
-                  onChange={([key]) => {
-                    if (key === "new") {
-                      setSelectedCommunityId("new");
-                    } else {
-                      const communityId = parseInt(
-                        key.replace("community_", "")
-                      );
-                      setSelectedCommunityId(communityId);
-                    }
-                  }}
-                  titleOverride={
-                    selectedCommunityId &&
-                    typeof selectedCommunityId === "number"
-                      ? selectedCommunity?.name || "Select a group"
-                      : "Select a group"
-                  }
+            {selectedCommunity ? (
+              <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
+                {/* Invite creation */}
+                <div className="flex flex-col gap-y-2">
+                  <p className="text-xl font-semibold">
+                    {onetimeInviteCreation.responsible.leader.invite.title}
+                  </p>
+                  {onetimeInviteCreation.responsible.leader.invite.explanation.map(
+                    (block, index) => (
+                      <p className="text-zinc-500" key={index}>
+                        {block}
+                      </p>
+                    )
+                  )}
+                </div>
+                <div className="flex flex-col gap-y-2">
+                  <div className="flex flex-row gap-x-2">
+                    <input
+                      type="text"
+                      className="border border-zinc-300 rounded px-3 py-2 flex-1"
+                      placeholder="Enter the invitee's first name"
+                      value={inviteeName}
+                      onChange={(e) => setInviteeName(e.target.value)}
+                    />
+                    <Button
+                      color={ButtonColor.Black}
+                      onClick={handleCreateInvite}
+                      disabled={
+                        creatingInvite ||
+                        !inviteeName.trim() ||
+                        typeof selectedCommunityId !== "number"
+                      }
+                    >
+                      {creatingInvite ? "Creating invite..." : "Create invite"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
+                <p className="text-xl font-semibold">Create a new group</p>
+                <CommunityCreateForm
+                  name={user?.name}
+                  onSuccess={handleCreateCommunity}
                 />
               </div>
             )}
-            <div className="flex flex-row gap-x-2">
-              <input
-                type="text"
-                className="border border-zinc-300 rounded px-3 py-2 flex-1"
-                placeholder="Enter the invitee's first name"
-                value={inviteeName}
-                onChange={(e) => setInviteeName(e.target.value)}
-              />
-              <Button
-                color={ButtonColor.Black}
-                onClick={handleCreateInvite}
-                disabled={
-                  creatingInvite ||
-                  !inviteeName.trim() ||
-                  typeof selectedCommunityId !== "number"
-                }
-              >
-                {creatingInvite ? "Creating invite..." : "Create invite"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Card>
-    );
-  }
-
-  return null;
+          </>
+        )}
+      </div>
+    </Card>
+  );
 };
 
 export default InviteForm;

@@ -1,9 +1,7 @@
 import {
-  CommunityDto,
   OnetimeInviteDto,
   userApproveOnetimeInvite,
   userDeleteOnetimeInvite,
-  userGetMyCommunities,
   userGetOnetimeInvitesOverview,
   userRejectOnetimeInvite,
 } from "@alliance/shared/client";
@@ -21,23 +19,9 @@ import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 const InvitesPage = () => {
   const { user } = useAuth();
   const { error: errorToast, confirm } = useToast();
-  const [communities, setCommunities] = useState<CommunityDto[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [invites, setInvites] = useState<OnetimeInviteDto[]>([]);
-
-
-  const refreshCommunities = useCallback(() => {
-    void userGetMyCommunities().then((resp) => {
-      if (resp.data) {
-        setCommunities(resp.data);
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    refreshCommunities();
-  }, [refreshCommunities]);
 
   useEffect(() => {
     void (async () => {
@@ -58,13 +42,14 @@ const InvitesPage = () => {
       return new Set<number>();
     }
     return new Set(
-      communities
-        .filter((community) =>
-          community.leaders.some((leader) => leader.id === user.id)
+      user.communities
+        .filter(
+          (community) =>
+            community.leaders?.some((leader) => leader.id === user.id) ?? false
         )
         .map((community) => community.id)
     );
-  }, [communities, user]);
+  }, [user]);
 
   const { actionable, unverifiableActionable, waitingForResponse, settled } =
     useMemo(() => {
@@ -83,97 +68,94 @@ const InvitesPage = () => {
       });
     }, [invites, leaderCommunityIds, user]);
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = useCallback((text: string) => {
     const baseUrl = getBaseUrl();
     const url = `${baseUrl}/signup?ref=${text}`;
     navigator.clipboard.writeText(url);
-  };
+  }, []);
 
-  const handleApproveInvite = (inviteId: number) => {
+  const handleApproveInvite = useCallback(
+    (inviteId: number) => {
+      void (async () => {
+        const response = await userApproveOnetimeInvite({
+          path: { inviteId },
+        });
+        if (!response.data) {
+          errorToast(
+            `Failed to approve invite: ${response.response.statusText}`
+          );
+          return;
+        }
+
+        setInvites((prev) =>
+          prev.map((invite) =>
+            invite.id === inviteId ? response.data : invite
+          )
+        );
+      })();
+    },
+    [errorToast]
+  );
+
+  const handleRejectInvite = useCallback(
+    (inviteId: number) => {
+      void (async () => {
+        const response = await userRejectOnetimeInvite({
+          path: { inviteId },
+        });
+
+        if (response.error) {
+          errorToast(
+            `Failed to reject invite: ${response.response.statusText}`
+          );
+          return;
+        }
+
+        setInvites((prev) => prev.filter((request) => request.id !== inviteId));
+      })();
+    },
+    [errorToast]
+  );
+
+  const handleDeleteInvite = useCallback(
+    (inviteId: number, event: React.MouseEvent<HTMLElement>) => {
+      void (async () => {
+        const ok = await confirm({
+          message: "Are you sure you want to delete this invite?",
+          confirmLabel: "Yes, delete it!",
+          cancelLabel: "No, keep it",
+          anchorEl: event.currentTarget,
+          placement: "topleft",
+        });
+        if (!ok) {
+          return;
+        }
+
+        const response = await userDeleteOnetimeInvite({ path: { inviteId } });
+        if (!response.error) {
+          setInvites((prev) => prev.filter((invite) => invite.id !== inviteId));
+        }
+      })();
+    },
+    [confirm]
+  );
+
+  const handleDeleteRequest = useCallback((inviteId: number) => {
     void (async () => {
-      const response = await userApproveOnetimeInvite({
-        path: { inviteId },
-      });
-      if (!response.data) {
-        errorToast(`Failed to approve invite: ${response.response.statusText}`);
-        return;
-      }
-
-      setInvites((prev) =>
-        prev.map((invite) => (invite.id === inviteId ? response.data : invite))
-      );
-    })();
-  };
-
-  const handleRejectInvite = (inviteId: number) => {
-    void (async () => {
-      const response = await userRejectOnetimeInvite({
-        path: { inviteId },
-      });
-
-      if (response.error) {
-        errorToast(`Failed to reject invite: ${response.response.statusText}`);
-        return;
-      }
-
-      setInvites((prev) => prev.filter((request) => request.id !== inviteId));
-    })();
-  };
-
-  const handleDeleteInvite = (
-    inviteId: number,
-    event: React.MouseEvent<HTMLElement>
-  ) => {
-    void (async () => {
-      const ok = await confirm({
-        message: "Are you sure you want to delete this invite?",
-        confirmLabel: "Yes, delete it!",
-        cancelLabel: "No, keep it",
-        anchorEl: event.currentTarget,
-        placement: "topleft",
-      });
-      if (!ok) {
-        return;
-      }
-
       const response = await userDeleteOnetimeInvite({ path: { inviteId } });
       if (!response.error) {
         setInvites((prev) => prev.filter((invite) => invite.id !== inviteId));
       }
     })();
-  };
+  }, []);
 
-  const handleDeleteRequest = (inviteId: number) => {
-    void (async () => {
-      const response = await userDeleteOnetimeInvite({ path: { inviteId } });
-      if (!response.error) {
-        setInvites((prev) => prev.filter((invite) => invite.id !== inviteId));
-      }
-    })();
-  };
-
-  const handleInviteCreated = () => {
-    // Refresh invites list
-    void (async () => {
-      const response = await userGetOnetimeInvitesOverview();
-      if (response.data) {
-        setInvites(response.data);
-        setError(null);
-      }
-    })();
-  };
+  const handleInviteCreated = useCallback((invite: OnetimeInviteDto) => {
+    setInvites((prev) => [invite, ...prev]);
+  }, []);
 
   if (!user || loadingInvites) {
     return <Spinner />;
   }
-
-  const inviteForm = (
-    <InviteForm
-      communities={communities}
-      onInviteCreated={handleInviteCreated}
-      onCommunitiesRefresh={refreshCommunities}
-    />
-  );
 
   return (
     <CenterLayout>
@@ -182,7 +164,7 @@ const InvitesPage = () => {
           <p className="font-serif font-semibold text-2xl md:text-3xl">
             Invites
           </p>
-          {inviteForm}
+          {<InviteForm onInviteCreated={handleInviteCreated} />}
           {error && <p className="text-red-500 text-sm">{error}</p>}
         </div>
 
