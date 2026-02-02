@@ -1,25 +1,133 @@
 import React from "react";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import { Link, href } from "react-router";
 
 const GroupsGuidePage: React.FC = () => {
   useWhiteBackground();
 
   return (
     <CenterLayout>
-      <div className="gap-y-4 flex flex-col text-base md:text-lg">
-        <p className="font-serif text-3xl md:text-4xl font-semibold mb-4">
+      <div className="gap-y-4 flex flex-col text-base md:text-lg text-zinc-900">
+        <Link to={href("/groups")} className="text-link hover:underline mb-2">
+          ← Back to Groups
+        </Link>
+        <p className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black">
           Groups
         </p>
         <p>
-          The Alliance is organized into accountability groups. Group leads are
-          responsible for ensuring group members complete their tasks on time.
-          Group members are accountable to their lead.
+          The Alliance is organized into{" "}
+          <span className="font-semibold">accountability groups</span>.
+        </p>
+        <p>
+          <span className="font-semibold">Group leads</span> are responsible for
+          ensuring <span className="font-semibold">group members</span> complete
+          their tasks on time. Group members are accountable to their lead.
         </p>
         <p>
           Accountability groups are intended to help the Alliance build a
-          culture of trust and reliability, as well as to ensure members are
-          supported.
+          culture of trust and reliability, as well as to provide support to
+          members.
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold text-black">
+          Leading a group
+        </h2>
+        <h3 className="text-xl font-semibold text-black mt-2">
+          Responsibilities
+        </h3>
+        <p>
+          The main responsibility of a group lead is to ensure the members of
+          their group complete their tasks on time.
+        </p>
+        <p>
+          Group leads also serve as informal guides to the Alliance for their
+          group members. For example, they sometimes clarify tasks or tell
+          members about features on the platform.
+        </p>
+        <p>
+          Any member of the Alliance can create and lead an accountability
+          group. Group leads can, but are not expected to, be members of another
+          accountability group.
+        </p>
+        <h3 className="text-xl font-semibold mt-2 text-black">
+          Should I lead a group?
+        </h3>
+
+        <p>There are two main reasons to lead a group:</p>
+        <ol className="list-decimal list-inside pl-4 space-y-1">
+          <li>
+            <span className="font-semibold">
+              You want to invite new members.
+            </span>{" "}
+            In this case, your group can be temporary: once your members become
+            familiar with the Alliance, they can transfer to other groups or
+            start their own.
+          </li>
+          <li>
+            <span className="font-semibold">
+              You want to help the Alliance.
+            </span>{" "}
+            In this case, you can start a long-term group that anyone can join.
+          </li>
+        </ol>
+        <p>
+          Running a small, temporary group is a good way to learn whether you
+          are interested in running a larger, long-term group.
+        </p>
+        <p>
+          Current group leads report spending{" "}
+          <span className="font-semibold">5–30 minutes</span> running their
+          groups per week.
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold text-black">
+          Being a member of a group
+        </h2>
+
+        <p>
+          You can only be a member of one accountability group. Being a member
+          of an accountability group is strongly encouraged, but not required.
+        </p>
+        <h3 className="text-xl font-semibold mt-2 text-black">
+          Joining and leaving groups
+        </h3>
+
+        <p>
+          When a new member joins the Alliance, they are placed in an
+          accountability group. The inviting member may either add them to their
+          own group or request that they be assigned to another group.
+        </p>
+
+        <p>
+          At any time (
+          <Link to={href("/groups")} className="text-link hover:underline">
+            Groups
+          </Link>{" "}
+          &gt; My groups &gt; Manage groups ), you can:
+        </p>
+        <ol className="list-decimal list-inside pl-4 space-y-1">
+          <li>Leave your current group.</li>
+          <li>Join a public group.</li>
+          <li>Request to be assigned to different group.</li>
+        </ol>
+
+        <h3 className="text-xl font-semibold mt-2 text-black">
+          Group assignment
+        </h3>
+        <p>
+          A semi-automatic assignment process runs when a group member asks to
+          be reassigned, or an inviting member asks for their invitee to be
+          assigned to someone else’s group.
+        </p>
+        <p>
+          In most cases, a staff member will manually assign the member to a
+          group with available space. This may take 3-5 days. If there are no
+          groups with available space, then the member will not be assigned to a
+          group until space becomes available.
+        </p>
+        <p>
+          If an inviting member asks for their invitee to be assigned to someone
+          else’s group, we will first check if there is any space available in
+          the invitee’s lead’s group.
         </p>
       </div>
     </CenterLayout>

@@ -41,7 +41,7 @@ const CommunitySelectDropdown = ({
     for (const c of ordered) {
       options[String(c.id)] = c.name;
     }
-    options[MANAGE_GROUPS_KEY] = "Manage my groups" + notifSuffix;
+    options[MANAGE_GROUPS_KEY] = "Manage groups" + notifSuffix;
 
     const current = ordered.find((c) => c.id === currentCommunityId);
     const value = current?.name ?? ordered[0]?.name ?? "";

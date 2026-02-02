@@ -468,11 +468,8 @@ const CommunityDetailPage: React.FC = () => {
   }
 
   const backToGroupsLink = (
-    <Link
-      to={href("/groups")}
-      className="text-blue-600 text-sm hover:underline"
-    >
-      ← Back to groups
+    <Link to={href("/groups")} className="text-link hover:underline">
+      ← Back to Groups
     </Link>
   );
 
