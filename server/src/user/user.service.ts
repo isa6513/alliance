@@ -1254,11 +1254,8 @@ export class UserService {
   }
 
   async findUserCommunities(userId: number): Promise<Community[]> {
-    const user = await this.findOneOrFail(userId, { communities: true });
-
-    const communities = await this.communityRepository.find({
-      where: { id: In(user.communities.map((c) => c.id)) },
-      relations: {
+    const user = await this.findOneOrFail(userId, {
+      communities: {
         users: {
           contractEvents: true,
         },
@@ -1271,7 +1268,7 @@ export class UserService {
         ? 0
         : 1;
     }
-    return communities.sort((a, b) => leaderKey(a) - leaderKey(b));
+    return user.communities.sort((a, b) => leaderKey(a) - leaderKey(b));
   }
 
   async findOneCommunityWithUserOrFail(
