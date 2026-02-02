@@ -2,6 +2,7 @@ import React from "react";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import { Link, href } from "react-router";
+import groupPillsExample from "../../assets/group-pills-example.png";
 
 const GroupsGuidePage: React.FC = () => {
   useWhiteBackground();
@@ -29,6 +30,19 @@ const GroupsGuidePage: React.FC = () => {
           culture of trust and reliability, as well as to provide support to
           members.
         </p>
+        <div className="flex flex-col items-center justify-center gap-y-2">
+          <div className="flex flex-col items-center justify-center p-6 md:p-8 bg-zinc-50 rounded">
+            <img
+              src={groupPillsExample}
+              alt="Group pills example"
+              className="w-full h-auto border border-zinc-200 rounded"
+            />
+          </div>
+          <p className="text-zinc-500 text-sm text-center">
+            Group leads can easily view the progress of their group members.
+          </p>
+        </div>
+
         <h2 className="mt-2 text-2xl font-semibold text-black">
           Leading a group
         </h2>
