@@ -67,68 +67,75 @@ const HomePage = () => {
       <>
         {(currentWeekSidebarActions.length > 0 ||
           completedActions.length > 0) && (
-            <div className="flex flex-col gap-y-2">
-              <p className="font-semibold text-base font-serif text-black">
-                Progress
+          <div className="flex flex-col gap-y-2">
+            <p className="font-semibold text-base font-serif text-black">
+              Progress
+            </p>
+            {currentWeekSidebarActions.length + newActions.length > 0 && (
+              <p className="text-zinc-600 mb-2">
+                <span className="text-green font-medium mr-0.5">
+                  {currentWeekSidebarActions.length} task
+                  {currentWeekSidebarActions.length !== 1 ? "s" : ""} left{" "}
+                </span>
+                {numTodo > 0 &&
+                  remainingTasksEstimatedTimeCurrentWeek > 0 &&
+                  `for a total of ${remainingTasksEstimatedTimeCurrentWeek} minutes`}
               </p>
-              {currentWeekSidebarActions.length + newActions.length > 0 && (
-                <p className="text-zinc-600 mb-2">
-                  <span className="text-green font-medium mr-0.5">
-                    {currentWeekSidebarActions.length} task
-                    {currentWeekSidebarActions.length !== 1 ? "s" : ""} left{" "}
-                  </span>
-                  {numTodo > 0 &&
-                    remainingTasksEstimatedTimeCurrentWeek > 0 &&
-                    `for a total of ${remainingTasksEstimatedTimeCurrentWeek} minutes`}
-                </p>
+            )}
+            <ul className="space-y-2 list-disc">
+              {completedActions.map((action) => (
+                <div key={action.id} className="text-zinc-600 flex gap-x-2">
+                  <CheckIcon size="line" />
+                  <Link
+                    to={href("/actions/:id", { id: action.id.toString() })}
+                    className="text-zinc-400 line-through"
+                  >
+                    {action.optional && "(Optional) "}
+                    {action.name}
+                  </Link>
+                </div>
+              ))}
+              {currentWeekTodoActions.map((action) => (
+                <div key={action.id} className="text-zinc-600 flex gap-x-2">
+                  <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
+                  <Link
+                    to={href("/actions/:id", { id: action.id.toString() })}
+                    className="text-zinc-600"
+                  >
+                    {action.optional && "(Optional) "}
+                    {action.name}
+                  </Link>
+                </div>
+              ))}
+              {nextWeekTodoActions.length > 0 && (
+                <>
+                  <p className="text-zinc-500 mt-3 font-medium">Upcoming</p>
+                  {nextWeekTodoActions.map((action) => (
+                    <div key={action.id} className="text-zinc-600 flex gap-x-2">
+                      <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
+                      <Link
+                        to={href("/actions/:id", { id: action.id.toString() })}
+                        className="text-zinc-600"
+                      >
+                        {action.name}
+                      </Link>
+                    </div>
+                  ))}
+                </>
               )}
-              <ul className="space-y-2 list-disc">
-                {completedActions.map((action) => (
-                  <div key={action.id} className="text-zinc-600 flex gap-x-2">
-                    <CheckIcon size="line" />
-                    <Link
-                      to={href("/actions/:id", { id: action.id.toString() })}
-                      className="text-zinc-400 line-through"
-                    >
-                      {action.optional && "(Optional) "}
-                      {action.name}
-                    </Link>
-                  </div>
-                ))}
-                {currentWeekTodoActions.map((action) => (
-                  <div key={action.id} className="text-zinc-600 flex gap-x-2">
-                    <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
-                    <Link
-                      to={href("/actions/:id", { id: action.id.toString() })}
-                      className="text-zinc-600"
-                    >
-                      {action.optional && "(Optional) "}
-                      {action.name}
-                    </Link>
-                  </div>
-                ))}
-                {nextWeekTodoActions.length > 0 && (
-                  <>
-                    <p className="text-zinc-500 mt-3 font-medium">Upcoming</p>
-                    {nextWeekTodoActions.map((action) => (
-                      <div key={action.id} className="text-zinc-600 flex gap-x-2">
-                        <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
-                        <Link
-                          to={href("/actions/:id", { id: action.id.toString() })}
-                          className="text-zinc-600"
-                        >
-                          {action.name}
-                        </Link>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </ul>
-            </div>
-          )}
-
-      </>);
-  }, [completedActions, currentWeekTodoActions, newActions, nextWeekTodoActions, numTodo, remainingTasksEstimatedTimeCurrentWeek]);
+            </ul>
+          </div>
+        )}
+      </>
+    );
+  }, [
+    completedActions,
+    currentWeekTodoActions,
+    newActions,
+    nextWeekTodoActions,
+    numTodo,
+    remainingTasksEstimatedTimeCurrentWeek,
+  ]);
 
   const mainContent = useMemo(() => {
     if (actions === null) {
@@ -144,7 +151,7 @@ const HomePage = () => {
     const dismissProps: LargeActionCardProps["dismissProps"] = !currentTask
       ? undefined
       : currentTask.awayStatus !== TaskAwayStatus.NOT_AWAY
-        ? {
+      ? {
           message: {
             [TaskAwayStatus.AWAY_CURRENTLY]:
               TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
@@ -152,12 +159,11 @@ const HomePage = () => {
             [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
           }[currentTask?.awayStatus],
         }
-        : deadlineHasPassed(currentTask, new Date())
-          ? {
-            message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
-          }
-          : undefined;
-
+      : deadlineHasPassed(currentTask, new Date())
+      ? {
+          message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
+        }
+      : undefined;
 
     return (
       <div
@@ -172,10 +178,20 @@ const HomePage = () => {
               color={ButtonColor.Transparent}
               className="hover:bg-transparent"
             >
-              All tasks {showingTasksList ? <ChevronUp size="15" /> : <ChevronDown size="15" />}
+              All tasks{" "}
+              {showingTasksList ? (
+                <ChevronUp size="15" />
+              ) : (
+                <ChevronDown size="15" />
+              )}
             </Button>
-            {showingTasksList && <div className="px-2 sm:px-4 flex flex-col *:py-4 *:px-2 divide-y divide-zinc-200 border border-zinc-200 rounded">{tasksListContent}</div>}
-          </div>)}
+            {showingTasksList && (
+              <div className="px-2 sm:px-4 flex flex-col *:py-4 *:px-2 divide-y divide-zinc-200 border border-zinc-200 rounded">
+                {tasksListContent}
+              </div>
+            )}
+          </div>
+        )}
         {currentTask && currentTask.userRelation ? (
           <LargeActionCard
             action={currentTask}
@@ -202,7 +218,17 @@ const HomePage = () => {
         )}
       </div>
     );
-  }, [actions, loading, currentTask, user, navigate, handleDismissAction, showingTasksList, tasksListContent, isLargeScreen]);
+  }, [
+    actions,
+    loading,
+    currentTask,
+    user,
+    navigate,
+    handleDismissAction,
+    showingTasksList,
+    tasksListContent,
+    isLargeScreen,
+  ]);
 
   const sidebarContent = useMemo(() => {
     return (
@@ -220,20 +246,24 @@ const HomePage = () => {
               See all
             </Link>
           </div>
-          <GlobalFeed items={globalFeedItems} loading={globalFeedLoading} fitToHeight />
+          <GlobalFeed
+            items={globalFeedItems}
+            loading={globalFeedLoading}
+            fitToHeight
+          />
         </div>
       </div>
     );
-  }, [
-    tasksListContent,
-    globalFeedItems,
-    globalFeedLoading,
-  ]);
+  }, [tasksListContent, globalFeedItems, globalFeedLoading]);
 
   useWhiteBackground();
 
   return isLargeScreen ? (
-    <TwoColumnLayout main={mainContent} sidebar={sidebarContent} noSidebarOverflow />
+    <TwoColumnLayout
+      main={mainContent}
+      sidebar={sidebarContent}
+      noSidebarOverflow
+    />
   ) : (
     <div className="h-full">{mainContent}</div>
   );
