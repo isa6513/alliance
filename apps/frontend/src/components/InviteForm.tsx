@@ -296,6 +296,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 <CommunityCreateForm
                   name={user?.name}
                   onSuccess={handleCreateCommunity}
+                  includePhotoEditor={false}
                 />
               </div>
             )}

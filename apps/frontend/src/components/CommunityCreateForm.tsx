@@ -20,9 +20,14 @@ export type CommunityCreateFormProps = {
   onSuccess: (community: CommunityDto) => void;
 };
 
-const CommunityCreateForm = (props: CommunityCreateFormProps) => {
+const CommunityCreateForm = ({
+  name,
+  includePhotoEditor = true,
+  onCancel,
+  onSuccess,
+}: CommunityCreateFormProps) => {
   const initialFormValues = useMemo<CreateCommunityDto>(() => {
-    const firstName = props.name?.split(" ")[0];
+    const firstName = name?.split(" ")[0];
     return {
       name: firstName ? `${firstName}'s Group` : "",
       description: firstName
@@ -31,7 +36,7 @@ const CommunityCreateForm = (props: CommunityCreateFormProps) => {
       public: false,
       maxCapacity: GROUP_MAX_CAPACITY_DEFAULT,
     };
-  }, [props.name]);
+  }, [name]);
 
   const [formValues, setFormValues] =
     useState<CreateCommunityDto>(initialFormValues);
@@ -73,7 +78,7 @@ const CommunityCreateForm = (props: CommunityCreateFormProps) => {
         },
       });
       if (response.data) {
-        props.onSuccess(response.data);
+        onSuccess(response.data);
       } else {
         setError(`Failed to create community`);
       }
@@ -83,13 +88,19 @@ const CommunityCreateForm = (props: CommunityCreateFormProps) => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [allowStaffAssignments, formValues, photoUrl, props, requiresMaxCapacity]);
+  }, [
+    allowStaffAssignments,
+    formValues,
+    photoUrl,
+    onSuccess,
+    requiresMaxCapacity,
+  ]);
 
   const isPhotoUploadPending = isSubmitting && photoUrl !== null;
 
   return (
     <div className="flex flex-col gap-y-2">
-      {props.includePhotoEditor && (
+      {includePhotoEditor && (
         <div className="mb-4">
           <ImageEditor
             initialImageUrl={photoUrl}
@@ -199,9 +210,9 @@ const CommunityCreateForm = (props: CommunityCreateFormProps) => {
       </div>
       <div className="flex flex-row justify-end">
         <div className="flex gap-x-1 mt-1">
-          {props.onCancel && (
+          {onCancel && (
             <Button
-              onClick={props.onCancel}
+              onClick={onCancel}
               color={ButtonColor.Grey}
               className="!h-9"
             >
