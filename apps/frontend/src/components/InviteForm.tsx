@@ -3,7 +3,7 @@ import {
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
   userCreateOnetimeInvite,
-  userGetCommunities,
+  userGetMyCommunities,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -35,7 +35,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
 
   const refreshCommunities = useCallback(
     async (resetSelectedCommunityId: boolean) => {
-      const response = await userGetCommunities();
+      const response = await userGetMyCommunities();
       if (response.data) {
         setCommunities(response.data);
         if (resetSelectedCommunityId && user) {
