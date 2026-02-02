@@ -4,14 +4,12 @@ import { formatTime } from "@alliance/shared/lib/utils";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import {
-  GlobalFeedActionUpdateDto,
   GlobalFeedActivityGroupDto,
   GlobalFeedForumCommentsDto,
   GlobalFeedItemDto,
   GlobalFeedNewMembersDto,
   ProfileDto,
 } from "@alliance/shared/client";
-import { Info } from "lucide-react";
 
 interface ProfilePicRowProps {
   users: ProfileDto[];
@@ -84,36 +82,36 @@ const ActivityGroupItem = ({ item, date }: ActivityGroupItemProps) => {
   );
 };
 
-interface ActionUpdateItemProps {
-  item: GlobalFeedActionUpdateDto;
-}
+// interface ActionUpdateItemProps {
+//   item: GlobalFeedActionUpdateDto;
+// }
 
-const ActionUpdateItem = ({ item }: ActionUpdateItemProps) => {
-  return (
-    <Link
-      to={href("/actions/:id", { id: item.actionId.toString() })}
-      className="block py-3 hover:bg-zinc-50 px-2 rounded"
-    >
-      <div className="flex flex-row gap-x-2 items-center">
-        <p className="text-zinc-500 text-sm">
-          <Info className="text-green inline-block -mt-1" size={14} /> Update on{" "}
-          <span className="text-green">{item.actionName}</span>
-        </p>
-      </div>
-      <p className="text-black font-medium mt-1">{item.title}</p>
-      <p className="text-zinc-400 text-sm mt-0.5">
-        {formatTime(new Date(item.date), { addSuffix: true })}
-      </p>
-    </Link>
-  );
-};
+// const ActionUpdateItem = ({ item }: ActionUpdateItemProps) => {
+//   return (
+//     <Link
+//       to={href("/actions/:id", { id: item.actionId.toString() })}
+//       className="block py-3 hover:bg-zinc-50 px-2 rounded"
+//     >
+//       <div className="flex flex-row gap-x-2 items-center">
+//         <p className="text-zinc-500 text-sm">
+//           <Info className="text-green inline-block -mt-1" size={14} /> Update on{" "}
+//           <span className="text-green">{item.actionName}</span>
+//         </p>
+//       </div>
+//       <p className="text-black font-medium mt-1">{item.title}</p>
+//       <p className="text-zinc-400 text-sm mt-0.5">
+//         {formatTime(new Date(item.date), { addSuffix: true })}
+//       </p>
+//     </Link>
+//   );
+// };
 
 interface NewMembersItemProps {
   item: GlobalFeedNewMembersDto;
   date: string;
 }
 
-const NewMembersItem = ({ item, date }: NewMembersItemProps) => {
+const NewMembersItem = ({ item }: NewMembersItemProps) => {
   const isSingle = item.count === 1 && item.users.length > 0;
 
   return (

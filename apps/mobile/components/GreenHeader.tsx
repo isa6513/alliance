@@ -11,8 +11,7 @@ interface GreenHeaderProps {
  * - Green overscroll when pulling down at the top
  * - White overscroll when scrolling past the bottom
  *
- * Children should typically be a ScrollView or LegendList that starts with
- * a green header section (using bg-green).
+ * Doesnt actually render the header - ListHeader.tsx does that
  */
 export default function GreenHeader({ children }: GreenHeaderProps) {
   return (

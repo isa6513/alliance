@@ -2,6 +2,7 @@ import { View, TouchableOpacity } from "react-native";
 import { usePathname, router } from "expo-router";
 import { Bell, Layers, ListTodo, User } from "lucide-react-native";
 import { colors } from "../lib/style/colors";
+import { useAuth } from "../lib/AuthContext";
 
 const tabs = [
   {
@@ -28,6 +29,7 @@ const tabs = [
 
 export default function TabBar() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   const isActive = (matchPaths: string[]) => {
     return matchPaths.some((path) => {
@@ -43,11 +45,14 @@ export default function TabBar() {
       {tabs.map((tab) => {
         const active = isActive(tab.matchPaths);
         const Icon = tab.icon;
+        const isProfileTab = tab.href === "/profile";
+        const targetHref =
+          isProfileTab && user?.id ? (`/user/${user.id}` as const) : tab.href;
         return (
           <TouchableOpacity
             key={tab.href}
             className="flex-1 items-center justify-center py-2"
-            onPress={() => router.push(tab.href)}
+            onPress={() => router.push(targetHref)}
             activeOpacity={0.7}
           >
             <Icon

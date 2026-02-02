@@ -140,9 +140,6 @@ export default function RootLayout() {
         deviceId: deviceId ?? undefined,
       },
     });
-    if (resp.error) {
-      console.error("registerToken error: ", resp.error);
-    }
     if (resp.data) {
       const id = resp.data.id;
       await SecureStore.setItemAsync("deviceId", id);

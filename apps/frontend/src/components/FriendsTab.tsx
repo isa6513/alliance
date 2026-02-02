@@ -173,7 +173,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
           {friends.map((friend) => (
             <div
               key={friend.id}
-              className="flex items-center p-3 hover:bg-zinc-100"
+              className="flex items-center p-3 hover:bg-zinc-100 group"
             >
               <Link
                 className="flex items-center flex-1"
@@ -189,7 +189,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
                   onClick={(e) => handleRemoveFriend(e, friend.id)}
                   color={ButtonColor.Red}
                   disabled={processingIds[friend.id]}
-                  className="text-sm bg-transparent hover:!text-red-700"
+                  className="text-sm bg-transparent hover:!text-red-700 hidden group-hover:block"
                 >
                   {processingIds[friend.id] ? "Removing..." : "Remove friend"}
                 </Button>

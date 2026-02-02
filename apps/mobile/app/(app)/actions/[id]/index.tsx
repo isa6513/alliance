@@ -4,7 +4,6 @@ import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  ScrollView,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -30,6 +29,7 @@ import { formatTime } from "@alliance/shared/lib/utils";
 import LikeButton from "../../../../components/LikeButton";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { colors } from "../../../../lib/style/colors";
+import { KeyboardAwareScrollView, KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 
 type TabId = "task" | "activity" | "description" | "comments";
 
@@ -180,7 +180,7 @@ export default function ActionDetailScreen() {
     onOptOutAction,
   } = useActionHandlers(parseInt(id), true, reloadTasks);
 
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<KeyboardAwareScrollViewRef>(null);
 
   if (loading) {
     return (
@@ -290,7 +290,7 @@ export default function ActionDetailScreen() {
           headerShown: false,
         }}
       />
-      <ScrollView className="flex-1 bg-white" ref={scrollViewRef}>
+      <KeyboardAwareScrollView className="bg-white" ref={scrollViewRef} bottomOffset={72}>
         {action.image && (
           <Image
             source={{ uri: action.image }}
@@ -349,11 +349,10 @@ export default function ActionDetailScreen() {
               </TouchableOpacity>
             ))}
           </View>
-
           {/* Tab Content */}
           <View className="pb-10">{renderTabContent()}</View>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </>
   );
 }

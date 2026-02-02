@@ -30,6 +30,7 @@ import { useAuth } from "../../lib/AuthContext";
 import Button, { ButtonColor } from "../../components/system/Button";
 import TimeZoneSelect from "../../components/forms/TimeZoneSelect";
 import AwayRangesSection from "../../components/AwayRangesSection";
+import { useMutation } from "@tanstack/react-query";
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
@@ -47,10 +48,6 @@ export default function SettingsPage() {
   const [passwordResetMessage, setPasswordResetMessage] = useState<
     string | null
   >(null);
-  const [passwordResetError, setPasswordResetError] = useState<string | null>(
-    null
-  );
-  const [passwordResetLoading, setPasswordResetLoading] = useState(false);
 
   // Modal states
   const [reminderChannelModalOpen, setReminderChannelModalOpen] =
@@ -83,37 +80,17 @@ export default function SettingsPage() {
     return hasSettingsChanges(editableUser, initialUser);
   }, [editableUser, initialUser]);
 
+  const forgotPassword = useMutation({
+    mutationFn: (email: string) => authForgotPassword({ body: { email } }),
+  });
+
   const handlePasswordReset = useCallback(async () => {
+    setPasswordResetMessage(null);
     if (!user?.email) {
-      setPasswordResetMessage(null);
-      setPasswordResetError("No email available for password reset.");
       return;
     }
-
-    setPasswordResetMessage(null);
-    setPasswordResetError(null);
-    setPasswordResetLoading(true);
-
-    try {
-      const resp = await authForgotPassword({
-        body: { email: user.email },
-      });
-
-      if (resp.error) {
-        setPasswordResetError("Error sending password reset email.");
-        console.error(resp.error);
-      } else {
-        setPasswordResetMessage(
-          "A link to reset your password has been sent to your email address."
-        );
-      }
-    } catch (error) {
-      console.error(error);
-      setPasswordResetError("Error sending password reset email.");
-    } finally {
-      setPasswordResetLoading(false);
-    }
-  }, [user?.email]);
+    forgotPassword.mutate(user.email);
+  }, [user?.email, forgotPassword]);
 
   const handleSave = useCallback(async (userPayload: UpdateProfileDto) => {
     setSaving(true);
@@ -511,9 +488,9 @@ export default function SettingsPage() {
             <Button
               color={ButtonColor.Black}
               onPress={handlePasswordReset}
-              disabled={passwordResetLoading}
+              disabled={forgotPassword.isPending}
               title={
-                passwordResetLoading
+                forgotPassword.isPending
                   ? "Sending reset link..."
                   : "Reset password"
               }
@@ -529,9 +506,9 @@ export default function SettingsPage() {
                 {passwordResetMessage}
               </Text>
             )}
-            {passwordResetError && (
+            {forgotPassword.isError && (
               <Text className="text-sm text-red-700 mt-2">
-                {passwordResetError}
+                {forgotPassword.error?.message}
               </Text>
             )}
           </View>

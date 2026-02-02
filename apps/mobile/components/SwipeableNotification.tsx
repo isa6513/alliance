@@ -80,7 +80,7 @@ function SwipeableNotification({
   });
 
   return (
-    <View className="overflow-hidden border-t mx-px border-zinc-300 p-3">
+    <View className="overflow-hidden border-t mx-px border-zinc-300 p-4">
       {/* Background action area */}
       <Animated.View
         style={[actionStyle]}

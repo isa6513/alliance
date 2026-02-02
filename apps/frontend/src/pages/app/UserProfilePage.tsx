@@ -1,20 +1,4 @@
-import {
-  FriendStatusDto,
-  PostDto,
-  ProfileDto,
-  UpdateProfileDto,
-  UserCommentDto,
-  forumFindCommentsByUser,
-  forumFindPostsByUser,
-  userAcceptFriendRequest,
-  userFindOne,
-  userListFriends,
-  userMyFriendRelationship,
-  userMyProfile,
-  userRemoveFriend,
-  userRequestFriend,
-  userUpdate,
-} from "@alliance/shared/client";
+import { UpdateProfileDto } from "@alliance/shared/client";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -22,7 +6,7 @@ import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, useLocation, useNavigate, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
-import { setRevalidate, useAppLoaderData } from "../../applayout";
+import { setRevalidate } from "../../applayout";
 import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
 import FriendsTab from "../../components/FriendsTab";
@@ -41,6 +25,18 @@ import { MessageSquare } from "lucide-react";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../../lib/config";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import {
+  buildForumActivityItems,
+  useAcceptFriendRequestMutation,
+  useRemoveFriendMutation,
+  useSendFriendRequestMutation,
+  useUpdateProfileMutation,
+  useUserForumCommentsQuery,
+  useUserForumPostsQuery,
+  useUserFriendStatusQuery,
+  useUserFriendsQuery,
+  useUserProfileQuery,
+} from "@alliance/shared/lib/user";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -70,56 +66,44 @@ const UserProfilePage: React.FC = () => {
   const { openFriends } = state || false;
   const { confirm } = useToast();
 
-  const [profile, setProfile] = useState<ProfileDto | null>(null);
-  useAppLoaderData().profile.then((data) => {
-    if (!profile && isMe) {
-      setProfile(data ?? null);
-    }
+  const userId = id ? parseInt(id, 10) : undefined;
+
+  const {
+    data: profile,
+    isPending: profilePending,
+    isError: profileError,
+  } = useUserProfileQuery(userId);
+
+  const { data: friendStatus } = useUserFriendStatusQuery(userId, {
+    enabled: isAuthenticated && !isMe,
   });
-  const [friendStatus, setFriendStatus] = useState<FriendStatusDto | null>(
-    null
-  );
+
+  const { data: forumPosts = [] } = useUserForumPostsQuery(userId);
+  const { data: forumComments = [] } = useUserForumCommentsQuery(userId);
+  const { data: friends = [] } = useUserFriendsQuery(userId);
 
   const [selectedTab, setSelectedTab] = useState(ProfileTabs.Activity);
-
   const [isEditing, setIsEditing] = useState(false);
 
-  const [forumPosts, setForumPosts] = useState<PostDto[]>([]);
-  const [forumComments, setForumComments] = useState<UserCommentDto[]>([]);
-  const [friends, setFriends] = useState<ProfileDto[] | null>(null);
-
-  // Edit mode state
   const [editName, setEditName] = useState<string>(user?.name ?? "");
-  const [editBio, setEditBio] = useState<string>(
-    profile?.profileDescription ?? ""
-  );
-  const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(
-    profile?.profilePicture ?? null
-  );
+  const [editBio, setEditBio] = useState<string>("");
+  const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(null);
   const [avatarEditorKey, setAvatarEditorKey] = useState(0);
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const [loading, setLoading] = useState(true);
+
+  const updateProfileMutation = useUpdateProfileMutation(userId);
+  const sendFriendRequest = useSendFriendRequestMutation();
+  const acceptFriendRequest = useAcceptFriendRequestMutation();
+  const removeFriend = useRemoveFriendMutation();
+
+  const isSavingProfile = updateProfileMutation.isPending;
   const currentProfilePicture = profile?.profilePicture ?? null;
   const isProfileImageUploadPending =
     isSavingProfile && editAvatarUrl !== currentProfilePicture;
 
-  const forumActivityItems = useMemo(() => {
-    const postItems = forumPosts.map((post) => ({
-      type: "post" as const,
-      createdAt: post.createdAt,
-      post,
-    }));
-
-    const commentItems = forumComments.map((comment) => ({
-      type: "comment" as const,
-      createdAt: comment.createdAt,
-      comment,
-    }));
-
-    return [...postItems, ...commentItems].sort((a, b) => {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-  }, [forumPosts, forumComments]);
+  const forumActivityItems = useMemo(
+    () => buildForumActivityItems(forumPosts, forumComments),
+    [forumPosts, forumComments]
+  );
 
   const forumActivityCount = forumActivityItems.length;
 
@@ -129,77 +113,22 @@ const UserProfilePage: React.FC = () => {
     updateActivity,
   } = useActivities({
     list: ActivityList.User,
-    objectId: parseInt(id!),
+    objectId: userId ?? 0,
     comments: true,
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!id) return;
-      setLoading(true);
-
-      const userId = parseInt(id);
-
-      try {
-        const userRes = await userFindOne({
-          path: { id: userId },
-        });
-
-        if (!userRes.data) {
-          return;
-        }
-
-        if (userRes.data && userRes.data.displayName) {
-          setProfile(userRes.data);
-          if (isMe) {
-            setEditName(userRes.data.displayName);
-            setEditBio(userRes.data.profileDescription || "");
-            setEditAvatarUrl(userRes.data.profilePicture || null);
-          }
-        }
-
-        const results = await Promise.allSettled([
-          userMyFriendRelationship({ path: { id: userId } }),
-          forumFindPostsByUser({ path: { id: userId } }),
-          forumFindCommentsByUser({ path: { id: userId } }),
-          userListFriends({ path: { id: userId } }),
-        ]);
-
-        const friendRel =
-          results[0].status === "fulfilled" ? results[0].value.data : null;
-        const posts =
-          results[1].status === "fulfilled" ? results[1].value.data : [];
-        const comments =
-          results[2].status === "fulfilled" ? results[2].value.data : [];
-        const friendsList =
-          results[3].status === "fulfilled" ? results[3].value.data : [];
-
-        setFriendStatus(friendRel ?? null);
-        setForumPosts(posts ?? []);
-        setForumComments(comments ?? []);
-        setFriends(friendsList ?? []);
-      } catch (err) {
-        console.error("Failed to load data:", err);
-        setProfile(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchData();
-    }
-  }, [id, user, isMe]);
+    if (!profile || !isMe || isEditing) return;
+    setEditName(profile.displayName || "");
+    setEditBio(profile.profileDescription || "");
+    setEditAvatarUrl(profile.profilePicture || null);
+  }, [profile, isMe, isEditing]);
 
   // reset tab and edit mode on user change
   useEffect(() => {
     setSelectedTab(ProfileTabs.Activity);
     setIsEditing(false);
-    setProfile(null);
-    setFriends(null);
-    setFriendStatus(null);
-    setForumPosts([]);
-    setForumComments([]);
+    setAvatarEditorKey((prev) => prev + 1);
   }, [id]);
 
   useEffect(() => {
@@ -209,35 +138,29 @@ const UserProfilePage: React.FC = () => {
   }, [openFriendRequest, openFriends]);
 
   const handleSendFriendRequest = useCallback(async () => {
-    if (!id || !user) return;
+    if (!userId || !user) return;
     try {
-      await userRequestFriend({ path: { targetUserId: parseInt(id) } });
-      setFriendStatus({ status: "pending", didReceiveRequest: false });
+      await sendFriendRequest.mutateAsync(userId);
     } catch (error) {
       console.error("Error sending friend request:", error);
     }
-  }, [id, user]);
+  }, [userId, user, sendFriendRequest]);
 
   const handleAcceptFriendRequest = useCallback(async () => {
-    if (!id || !user) return;
-    const response = await userAcceptFriendRequest({
-      path: { requesterId: parseInt(id) },
-    });
-    setRevalidate();
-    if (!response.error) {
-      setFriendStatus({ status: "accepted", didReceiveRequest: false });
+    if (!userId || !user) return;
+    try {
+      await acceptFriendRequest.mutateAsync(userId);
+      setRevalidate();
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
     }
-    const profile = await userMyProfile();
-    if (profile.data) {
-      setFriends((prev) => (prev ? [...prev, profile.data] : prev));
-    }
-  }, [id, user]);
+  }, [userId, user, acceptFriendRequest]);
 
   const navigate = useNavigate();
 
   const handleRemoveFriend = useCallback(
     async (e: React.MouseEvent<HTMLElement>) => {
-      if (!id || !user) return;
+      if (!userId || !user) return;
       const ok = await confirm({
         message: "Are you sure you want to remove this friend?",
         confirmLabel: "Yes",
@@ -247,39 +170,32 @@ const UserProfilePage: React.FC = () => {
 
       if (!ok) return;
       try {
-        await userRemoveFriend({ path: { targetUserId: parseInt(id) } });
-        setFriendStatus({ status: "none", didReceiveRequest: false });
+        await removeFriend.mutateAsync(userId);
       } catch (error) {
         console.error("Error removing friend:", error);
       }
     },
-    [id, user, confirm]
+    [userId, user, confirm, removeFriend]
   );
 
   const handleSave = async () => {
     if (!user || isSavingProfile) return;
 
-    setIsSavingProfile(true);
     try {
       const payload: UpdateProfileDto = {
         name: editName,
         profileDescription: editBio,
         profilePicture: editAvatarUrl ?? undefined,
       };
-      const response = await userUpdate({
-        body: payload,
-      });
+      const response = await updateProfileMutation.mutateAsync(payload);
 
-      if (response.data && id) {
-        setProfile(response.data);
+      if (response && id) {
         setIsEditing(false);
         setRevalidate();
         navigate(href("/member/:id", { id })); // to make navbar pfp reload
       }
     } catch (err: unknown) {
       console.error(err);
-    } finally {
-      setIsSavingProfile(false);
     }
   };
 
@@ -295,11 +211,23 @@ const UserProfilePage: React.FC = () => {
 
   const messagingEnabled = isFeatureEnabled(Features.Messaging);
 
-  if (!profile && loading) {
+  if (profilePending) {
     return (
       <div className="bg-page pt-20 px-8 md:px-16">
         <div className="absolute inset-0 flex items-center justify-center">
           <Spinner size="large" />
+        </div>
+      </div>
+    );
+  }
+
+  if (profileError) {
+    return (
+      <div className="bg-page pt-20 px-8 md:px-16">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <p className="text-center text-zinc-500">
+            Failed to load user profile
+          </p>
         </div>
       </div>
     );
@@ -370,7 +298,7 @@ const UserProfilePage: React.FC = () => {
                     </div>
                   </div>
                 )}
-                {!profile.hasActiveContract && !loading && (
+                {!profile.hasActiveContract && !profilePending && (
                   <div className="text-xs bg-zinc-100 text-zinc-600 px-2 py-1 rounded-sm self-center relative group">
                     Observer
                     <div className="pointer-events-none absolute -top-8 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] font-medium text-zinc-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100">
@@ -416,15 +344,15 @@ const UserProfilePage: React.FC = () => {
               onClick={() => setSelectedTab(ProfileTabs.Forum)}
             />
             <UserProfileTab
-              number={friends?.length ?? 0}
-              label={`friend${friends?.length === 1 ? "" : "s"}`}
+              number={friends.length}
+              label={`friend${friends.length === 1 ? "" : "s"}`}
               selected={selectedTab === ProfileTabs.Friends}
               onClick={() => setSelectedTab(ProfileTabs.Friends)}
             />
           </div>
           {/* button row */}
           <div className="absolute right-0 top-0 space-x-3 flex flex-row p-5">
-            {isAuthenticated && !isMe && friendStatus !== null && (
+            {isAuthenticated && !isMe && friendStatus != null && (
               <FriendRequestButton
                 friendStatus={friendStatus}
                 handleSendFriendRequest={handleSendFriendRequest}
@@ -538,7 +466,7 @@ const UserProfilePage: React.FC = () => {
               userId={profile.id}
               isMe={isMe}
               originalTab={openFriendRequest ? "received" : "friends"}
-              friends={friends ?? []}
+              friends={friends}
               className="mt-4"
             />
           )}

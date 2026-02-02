@@ -3,7 +3,7 @@ import { NativeModules } from 'react-native';
 export const getApiUrl = (): string => {
   if (__DEV__) {
     const url = NativeModules.SourceCode.getConstants().scriptURL;
-    const ip = url.split(":")[1].substring(2);
+    const ip = !!url ? url.split(":")[1].substring(2) : undefined;
     const addr = ip ?? process.env.EXPO_PUBLIC_DEV_API_URL ?? "localhost";
     return "http://" + addr + ":3005";
   } else {

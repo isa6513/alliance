@@ -1,6 +1,7 @@
 import { Image, View } from "react-native";
 import { User } from "lucide-react-native";
 import { colors } from "../lib/style/colors";
+import { getApiUrl, getImageSource } from "../lib/config";
 
 type ProfileImageSize = "mini" | "small" | "medium" | "large" | "huge";
 
@@ -34,6 +35,43 @@ interface ProfileImageProps {
   className?: string;
 }
 
+//TODO
+const isLocalhostHost = (hostname: string) =>
+  hostname === "localhost" ||
+  hostname === "127.0.0.1" ||
+  hostname === "0.0.0.0" ||
+  hostname === "::1";
+
+const resolveProfileImageUri = (pfp: string) => {
+  if (pfp.startsWith("data:") || pfp.startsWith("file:")) {
+    return pfp;
+  }
+
+  if (!pfp.startsWith("http")) {
+    return getImageSource(pfp);
+  }
+
+  if (!__DEV__) {
+    return pfp;
+  }
+
+  try {
+    const parsed = new URL(pfp);
+    if (!isLocalhostHost(parsed.hostname)) {
+      return pfp;
+    }
+
+    const match = parsed.pathname.match(/\/images\/(.+)/);
+    if (match?.[1]) {
+      return getImageSource(match[1]);
+    }
+
+    return `${getApiUrl()}${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return pfp;
+  }
+};
+
 export default function ProfileImage({
   pfp,
   size = "large",
@@ -46,7 +84,7 @@ export default function ProfileImage({
   if (pfp) {
     return (
       <Image
-        source={{ uri: pfp }}
+        source={{ uri: resolveProfileImageUri(pfp) }}
         resizeMode="cover"
         style={baseStyle}
         className={`bg-white shrink-0 ${className ?? ""}`}

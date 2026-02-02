@@ -75,7 +75,7 @@ function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
                     ? "text-lg"
                     : "text-base"
             }`}
-        >
+         selectable>
           {block.text}
         </Text>
       );
@@ -613,16 +613,9 @@ const FormRenderer = ({
   const isFirstPage = currentPageIndex === 0;
   const isLastPage = currentPageIndex === maxPageIndex;
 
-  const handleFocusField = (fieldId: string) => {
-    const screenPosition = fieldScreenPositions.current[fieldId];
-    const yPosition = fieldPositions.current[fieldId];
-    if (yPosition !== undefined && screenPosition > 400) {
-      scrollToField(fieldId);
-    }
-  };
-
   return (
-    <View className="flex-1 flex flex-col gap-y-2">
+    <View className="flex flex-col gap-y-2"
+    >
       {currentPage?.fields.map((element, idx) => {
         if (!("label" in element)) {
           return (
@@ -638,9 +631,6 @@ const FormRenderer = ({
         return (
           <View
             key={field.id}
-            onLayout={(event) => {
-              fieldPositions.current[field.id] = event.nativeEvent.layout.y;
-            }}
             ref={(ref) => {
               if (ref) {
                 ref.measure((x, y, width, height, pageX, pageY) => {
@@ -653,9 +643,9 @@ const FormRenderer = ({
               field={field}
               value={formData[field.id]}
               onChange={(value) => handleFieldChange(field.id, value)}
-              onFocus={() => {
-                handleFocusField(field.id);
-              }}
+              // onFocus={() => {
+              //   handleFocusField(field.id);
+              // }}
               disabled={readOnly}
               error={fieldErrors[field.id]}
               randomizationKey={randomizationKey}

@@ -1,10 +1,10 @@
 import {
   View,
-  ActivityIndicator,
   TouchableOpacity,
   Modal,
   Pressable,
   RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { useCallback, useMemo, useState } from "react";
 import { router } from "expo-router";
@@ -19,12 +19,13 @@ import ListHeader from "../../../components/ListHeader";
 import { ChevronDown } from "lucide-react-native";
 import ActionItemCard from "../../../components/ActionItemCard";
 import { LegendList } from "@legendapp/list";
+import { colors } from "../../../lib/style/colors";
 
 export default function ActionsScreen() {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const { data: actions, isPending, isRefetching, error, refetch } = useActionsQuery();
+  const { data: actions, isPending, isRefetching, refetch } = useActionsQuery();
 
   const counts = useMemo(() => {
     const result: Record<FilterMode, number> = {} as any;
@@ -42,19 +43,18 @@ export default function ActionsScreen() {
 
   return (
     <GreenHeader>
-      {isPending ? (
-        <View className="py-5 items-center justify-center">
-          <ActivityIndicator size="large" color="#0D1B2A" />
+        {isPending ? (
+        <View className="flex-1">
+          <ListHeader className="pt-12">
+            <Text className="text-white font-bold">All Actions</Text>
+          </ListHeader>
+          <View className="flex-1 items-center justify-center bg-white">
+            <ActivityIndicator size="large" color={colors.green} />
+          </View>
         </View>
-      ) : error ? (
-        <Text className="text-center text-red-500 py-4">{error.message}</Text>
-      ) : filteredActions.length === 0 ? (
-        <Text className="text-center text-zinc-500 py-5">
-          No matching actions
-        </Text>
       ) : (
         <LegendList
-          contentContainerStyle={{ backgroundColor: "white" }}
+          contentContainerStyle={{ backgroundColor: "white", minHeight: "80%" }}
           ListHeaderComponent={
             <ListHeader>
               <Text className="text-white font-bold">All Actions</Text>
@@ -119,9 +119,9 @@ export default function ActionsScreen() {
                 onPress={() => navigateToAction(item.id)}
               />
             </View>
-          )}
-        />
-      )}
+            )}
+          />
+        )}
     </GreenHeader>
   );
 }
