@@ -46,8 +46,9 @@ const CommunityDetailPage: React.FC = () => {
     photo: "",
     public: false,
     maxCapacity: GROUP_MAX_CAPACITY_DEFAULT,
+    allowMemberInvites: true,
+    allowStaffAssignments: true,
   });
-  const [allowStaffAssignments, setAllowStaffAssignments] = useState(false);
   const [users, setUsers] = useState<UserSelectUser[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [memberSelection, setMemberSelection] = useState<number[]>([]);
@@ -61,6 +62,10 @@ const CommunityDetailPage: React.FC = () => {
     () => new Set<number>()
   );
   const { confirm, success, error: pushError } = useToast();
+  const requiresMaxCapacity =
+    formValues.public ||
+    formValues.allowStaffAssignments ||
+    formValues.allowMemberInvites;
 
   const loadCommunity = useCallback(async () => {
     if (Number.isNaN(communityId)) {
@@ -175,10 +180,9 @@ const CommunityDetailPage: React.FC = () => {
         photo: community.photo ?? "",
         public: community.public,
         maxCapacity: community.maxCapacity,
+        allowMemberInvites: community.allowMemberInvites,
+        allowStaffAssignments: community.allowStaffAssignments,
       });
-      setAllowStaffAssignments(
-        community.public || community.maxCapacity !== null
-      );
     }
   }, [community]);
 
@@ -201,51 +205,63 @@ const CommunityDetailPage: React.FC = () => {
     });
   }, [activeActions, userActionRelations]);
 
-  const handleUpdateDetails = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
-    event.preventDefault();
-    if (!community) return;
-    const requiresMaxCapacity = formValues.public || allowStaffAssignments;
-    const normalizedMaxCapacity = requiresMaxCapacity
-      ? formValues.maxCapacity
-      : null;
-    const payload: UpdateCommunityDto = {
-      name: formValues.name.trim(),
-      description: formValues.description.trim(),
-      photo: formValues.photo?.trim() ? formValues.photo.trim() : undefined,
-      public: formValues.public,
-      maxCapacity: normalizedMaxCapacity,
-    };
-    if (!payload.name || !payload.description) {
-      setError("Name and description are required.");
-      return;
-    }
-    if (requiresMaxCapacity) {
-      if (!normalizedMaxCapacity || normalizedMaxCapacity <= 0) {
-        setError("Member capacity is required.");
+  const handleUpdateDetails = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      if (!community) {
         return;
       }
-    }
-    setSavingDetails(true);
-    setError(null);
-    try {
-      const response = await userUpdateCommunity({
-        path: { communityId },
-        body: payload,
-      });
-      if (response.data) {
-        setCommunity(response.data);
-        success("Community updated", response.data.name);
+      let normalizedMaxCapacity: number | null = null;
+      if (requiresMaxCapacity) {
+        if (!formValues.maxCapacity || formValues.maxCapacity <= 0) {
+          setError("Member capacity is required.");
+          return;
+        }
+        normalizedMaxCapacity = formValues.maxCapacity;
       }
-    } catch (err) {
-      console.error("Failed to update community", err);
-      setError("Unable to update community. Please try again.");
-      pushError("Unable to update community. Please try again.");
-    } finally {
-      setSavingDetails(false);
-    }
-  };
+      const payload: UpdateCommunityDto = {
+        name: formValues.name.trim(),
+        description: formValues.description.trim(),
+        photo: formValues.photo?.trim() ? formValues.photo.trim() : undefined,
+        public: formValues.public,
+        maxCapacity: normalizedMaxCapacity,
+        allowMemberInvites: formValues.allowMemberInvites,
+        allowStaffAssignments: formValues.allowStaffAssignments,
+      };
+      if (!payload.name || !payload.description) {
+        setError("Name and description are required.");
+        return;
+      }
+      setSavingDetails(true);
+      setError(null);
+      try {
+        const response = await userUpdateCommunity({
+          path: { communityId },
+          body: payload,
+        });
+        if (response.data) {
+          setCommunity(response.data);
+          success("Community updated", response.data.name);
+        }
+      } catch (err) {
+        console.error("Failed to update community", err);
+        setError("Unable to update community. Please try again.");
+        pushError("Unable to update community. Please try again.");
+      } finally {
+        setSavingDetails(false);
+      }
+    },
+    [
+      community,
+      communityId,
+      formValues,
+      requiresMaxCapacity,
+      pushError,
+      setCommunity,
+      success,
+      setError,
+    ]
+  );
 
   const mutateMembers = useCallback(
     async (
@@ -384,7 +400,7 @@ const CommunityDetailPage: React.FC = () => {
     ]
   );
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!community) return;
     const confirmed = await confirm({
       title: `Delete ${community.name}?`,
@@ -410,7 +426,16 @@ const CommunityDetailPage: React.FC = () => {
     } finally {
       setDeleting(false);
     }
-  };
+  }, [
+    community,
+    communityId,
+    confirm,
+    success,
+    navigate,
+    pushError,
+    setError,
+    setDeleting,
+  ]);
 
   const leaderIds = useMemo(() => {
     return new Set(community?.leaders.map((leader) => leader.id) ?? []);
@@ -551,14 +576,12 @@ const CommunityDetailPage: React.FC = () => {
                     type="checkbox"
                     checked={formValues.public}
                     onChange={(event) => {
-                      const checked = event.target.checked;
                       setFormValues((prev) => ({
                         ...prev,
-                        public: checked,
+                        public: event.target.checked,
+                        allowStaffAssignments: true,
+                        allowMemberInvites: true,
                       }));
-                      if (checked) {
-                        setAllowStaffAssignments(true);
-                      }
                     }}
                   />
                   Public
@@ -566,16 +589,33 @@ const CommunityDetailPage: React.FC = () => {
                 <label className="flex items-center gap-x-2 text-sm font-medium text-zinc-700">
                   <input
                     type="checkbox"
-                    checked={allowStaffAssignments}
+                    checked={formValues.allowMemberInvites}
                     onChange={(event) =>
-                      setAllowStaffAssignments(event.target.checked)
+                      setFormValues((prev) => ({
+                        ...prev,
+                        allowMemberInvites: event.target.checked,
+                      }))
                     }
                     disabled={formValues.public}
                   />
-                  Group assignment
+                  Member invites
+                </label>
+                <label className="flex items-center gap-x-2 text-sm font-medium text-zinc-700">
+                  <input
+                    type="checkbox"
+                    checked={formValues.allowStaffAssignments}
+                    onChange={(event) =>
+                      setFormValues((prev) => ({
+                        ...prev,
+                        allowStaffAssignments: event.target.checked,
+                      }))
+                    }
+                    disabled={formValues.public}
+                  />
+                  Staff assignments
                 </label>
               </div>
-              {(formValues.public || allowStaffAssignments) && (
+              {requiresMaxCapacity && (
                 <div className="mt-4">
                   <label className="text-sm font-medium text-zinc-700">
                     Member capacity

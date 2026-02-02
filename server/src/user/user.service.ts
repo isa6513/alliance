@@ -964,13 +964,15 @@ export class UserService {
     return communities.sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  async findUserCommunityWithCapacity(user: User): Promise<Community | null> {
+  async findUserCommunityForNewMember(user: User): Promise<Community | null> {
     const communities = await this.communityRepository.find({
       where: {
         maxCapacity: Not(IsNull()),
         id: In(user.communities.map((c) => c.id)),
+        allowMemberInvites: true,
       },
       relations: {
+        leaders: true,
         users: true,
       },
     });
@@ -978,7 +980,10 @@ export class UserService {
       return null;
     }
     for (const community of communities) {
-      if (community.users.length < community.maxCapacity!) {
+      if (
+        community.users.length < community.maxCapacity! &&
+        !community.leaders?.some((leader) => leader.id === user.id)
+      ) {
         return community;
       }
     }

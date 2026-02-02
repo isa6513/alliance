@@ -30,10 +30,27 @@ export const leaveGroupConfirmation =
 export const requestGroupAssignmentConfirmation =
   "Are you sure you want to be reassigned to a different group? During this process, you will be removed from your current group. Note that this process may take a few days.";
 
-export const editGroupPublicGroupExplanation =
-  "Anyone can join a public group without the group lead's approval.";
-export const editGroupGroupAssignmentExplanation =
-  "Members may occasionally be assigned to this group by Alliance staff.";
+export const groupSettings = {
+  public: {
+    name: "Let anyone join this group",
+    explanation:
+      "Anyone can join this group without the group lead's approval.",
+  },
+  allowMemberInvites: {
+    name: "Let group members invite new members to this group",
+    explanation:
+      "When group members invite new members to the Alliance, they will be added to this group (capacity permitting).",
+  },
+  allowStaffAssignments: {
+    name: "Let staff assign members to this group",
+    explanation:
+      "Members may occasionally be assigned to this group by Alliance staff.",
+  },
+  maxCapacity: {
+    name: "Member capacity",
+    explanation: "The maximum number of members that can be in this group.",
+  },
+} as const;
 
 export const onetimeInviteCreation = {
   title: "Invite a new member to the Alliance",
@@ -58,10 +75,16 @@ export const onetimeInviteCreation = {
   not_responsible: {
     buttonText: "Someone else",
     title: "Enter the name of the invitee",
-    explanation: [
-      "This will create a personalized invite link that you can share with the invitee.",
-      "When the invitee signs up, they will be assigned a group.",
-    ],
+    explanations: {
+      genericGroup: [
+        "This will create a personalized invite link that you can share with the invitee.",
+        "When the invitee signs up, they will be assigned to a group.",
+      ],
+      yourGroup: [
+        "This will create a personalized invite link that you can share with the invitee.",
+        "When the invitee signs up, they will be assigned to your group if the group has capacity.",
+      ],
+    },
   },
 } as const;
 

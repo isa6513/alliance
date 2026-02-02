@@ -19,7 +19,18 @@ import { OnetimeInvite } from './onetime-invite.entity';
 import { CommunityInvite } from './community-invite.entity';
 
 @Entity()
-@Check(`("public" = false) OR ("maxCapacity" IS NOT NULL)`)
+@Check(
+  // Max capacity is required if the community is public or allows member invites or staff assignments
+  '("public" = false AND "allowMemberInvites" = false AND "allowStaffAssignments" = false) OR ("maxCapacity" IS NOT NULL)',
+)
+@Check(
+  'chk_public_requires_member_invites',
+  '("public" = false) OR ("allowMemberInvites" = true)',
+)
+@Check(
+  'chk_public_requires_staff_assignments',
+  '("public" = false) OR ("allowStaffAssignments" = true)',
+)
 export class Community {
   // Fields
 
@@ -57,6 +68,16 @@ export class Community {
   @ApiProperty()
   @Allow()
   public: boolean;
+
+  @Column({ default: true })
+  @ApiProperty()
+  @Allow()
+  allowMemberInvites: boolean;
+
+  @Column({ default: true })
+  @ApiProperty()
+  @Allow()
+  allowStaffAssignments: boolean;
 
   @Column({ type: 'int', nullable: true })
   @ApiProperty({ type: Number, nullable: true })

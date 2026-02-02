@@ -11,10 +11,7 @@ import {
   userUpdateCommunity,
   userDeleteCommunity,
 } from "@alliance/shared/client";
-import {
-  editGroupGroupAssignmentExplanation,
-  editGroupPublicGroupExplanation,
-} from "@alliance/shared/lib/copy";
+import { groupSettings } from "@alliance/shared/lib/copy";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -104,7 +101,10 @@ const CommunityPage = () => {
   const [editName, setEditName] = useState<string>("");
   const [editDescription, setEditDescription] = useState<string>("");
   const [editPublic, setEditPublic] = useState<boolean>(false);
-  const [allowStaffAssignments, setAllowStaffAssignments] = useState(false);
+  const [editAllowMemberInvites, setEditAllowMemberInvites] =
+    useState<boolean>(true);
+  const [editAllowStaffAssignments, setEditAllowStaffAssignments] =
+    useState<boolean>(true);
   const [editMaxCapacity, setEditMaxCapacity] = useState<number | null>(null);
   const [editPhotoUrl, setEditPhotoUrl] = useState<string | null>(null);
   const [photoEditorKey, setPhotoEditorKey] = useState(0);
@@ -112,6 +112,8 @@ const CommunityPage = () => {
   const [error, setError] = useState<string | null>(null);
   const currentPhoto = community?.photo ?? null;
   const isPhotoUploadPending = isSaving && editPhotoUrl !== currentPhoto;
+  const useMaxCapacity =
+    editPublic || editAllowMemberInvites || editAllowStaffAssignments;
 
   useEffect(() => {
     if (!community?.id) {
@@ -156,9 +158,8 @@ const CommunityPage = () => {
       setEditName(community.name);
       setEditDescription(community.description);
       setEditPublic(community.public);
-      setAllowStaffAssignments(
-        community.public || community.maxCapacity !== null
-      );
+      setEditAllowMemberInvites(community.allowMemberInvites ?? true);
+      setEditAllowStaffAssignments(community.allowStaffAssignments ?? true);
       setEditMaxCapacity(community.maxCapacity);
       setEditPhotoUrl(community.photo ?? null);
       setIsEditing(false);
@@ -268,11 +269,6 @@ const CommunityPage = () => {
     });
   }, []);
 
-  const requiresMaxCapacity = useMemo(
-    () => editPublic || allowStaffAssignments,
-    [editPublic, allowStaffAssignments]
-  );
-
   const handleSave = useCallback(async () => {
     if (!community || isSaving) return;
 
@@ -282,13 +278,13 @@ const CommunityPage = () => {
       return;
     }
 
-    const normalizedMaxCapacity =
-      allowStaffAssignments || editPublic ? editMaxCapacity : null;
-    if (requiresMaxCapacity) {
-      if (!normalizedMaxCapacity || normalizedMaxCapacity <= 0) {
+    let normalizedMaxCapacity: number | null = null;
+    if (useMaxCapacity) {
+      if (!editMaxCapacity || editMaxCapacity <= 0) {
         setError("Capacity is required");
         return;
       }
+      normalizedMaxCapacity = editMaxCapacity;
     }
 
     setIsSaving(true);
@@ -302,6 +298,8 @@ const CommunityPage = () => {
           photo: editPhotoUrl ?? undefined,
           public: editPublic,
           maxCapacity: normalizedMaxCapacity,
+          allowMemberInvites: editAllowMemberInvites,
+          allowStaffAssignments: editAllowStaffAssignments,
         },
       });
 
@@ -334,11 +332,12 @@ const CommunityPage = () => {
     editName,
     editDescription,
     editPublic,
-    allowStaffAssignments,
+    editAllowMemberInvites,
+    editAllowStaffAssignments,
     editMaxCapacity,
     editPhotoUrl,
-    requiresMaxCapacity,
     isSaving,
+    useMaxCapacity,
   ]);
 
   const handleCancel = useCallback(() => {
@@ -346,9 +345,8 @@ const CommunityPage = () => {
       setEditName(community.name);
       setEditDescription(community.description);
       setEditPublic(community.public);
-      setAllowStaffAssignments(
-        community.public || community.maxCapacity !== null
-      );
+      setEditAllowStaffAssignments(community.allowStaffAssignments ?? true);
+      setEditAllowMemberInvites(community.allowMemberInvites ?? true);
       setEditMaxCapacity(community.maxCapacity);
       setEditPhotoUrl(community.photo ?? null);
     }
@@ -536,56 +534,83 @@ const CommunityPage = () => {
                                 const checked = e.target.checked;
                                 setEditPublic(checked);
                                 if (checked) {
-                                  setAllowStaffAssignments(true);
+                                  setEditAllowMemberInvites(true);
+                                  setEditAllowStaffAssignments(true);
                                 }
                               }}
                               className="mt-1"
                             />
                             <div>
                               <p className="text-base font-medium">
-                                Let anyone join this group
+                                {groupSettings.public.name}
                               </p>
                               <p className="text-sm text-zinc-500 font-normal">
-                                {editGroupPublicGroupExplanation}
+                                {groupSettings.public.explanation}
                               </p>
                             </div>
                           </label>
                           <label
                             className="flex items-start gap-x-2 text-black text-sm font-semibold"
-                            htmlFor="allowAssignments"
+                            htmlFor="allowMemberInvites"
                           >
                             <input
-                              id="allowAssignments"
+                              id="allowMemberInvites"
                               type="checkbox"
-                              checked={allowStaffAssignments}
+                              checked={editAllowMemberInvites}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setEditAllowMemberInvites(checked);
+                              }}
+                              disabled={editPublic}
+                              className="mt-1"
+                            />
+                            <div>
+                              <p className="text-base font-medium">
+                                {groupSettings.allowMemberInvites.name}
+                              </p>
+                              <p className="text-sm text-zinc-500 font-normal">
+                                {groupSettings.allowMemberInvites.explanation}
+                              </p>
+                            </div>
+                          </label>
+                          <label
+                            className="flex items-start gap-x-2 text-black text-sm font-semibold"
+                            htmlFor="allowStaffAssignments"
+                          >
+                            <input
+                              id="allowStaffAssignments"
+                              type="checkbox"
+                              checked={editAllowStaffAssignments}
                               onChange={(e) =>
-                                setAllowStaffAssignments(e.target.checked)
+                                setEditAllowStaffAssignments(e.target.checked)
                               }
                               disabled={editPublic}
                               className="mt-1"
                             />
                             <div>
                               <p className="text-base font-medium">
-                                Let staff assign members to this group
+                                {groupSettings.allowStaffAssignments.name}
                               </p>
                               <p className="text-sm text-zinc-500 font-normal">
-                                {editGroupGroupAssignmentExplanation}
+                                {
+                                  groupSettings.allowStaffAssignments
+                                    .explanation
+                                }
                               </p>
                             </div>
                           </label>
                         </div>
-                        {requiresMaxCapacity && (
+                        {useMaxCapacity && (
                           <div className="mt-4">
                             <label
                               className="text-black font-medium"
                               htmlFor="maxCapacity"
                             >
                               <p className="text-base font-medium">
-                                Member capacity
+                                {groupSettings.maxCapacity.name}
                               </p>
                               <p className="text-sm text-zinc-500 font-normal">
-                                The maximum number of members that can join this
-                                group.
+                                {groupSettings.maxCapacity.explanation}
                               </p>
                             </label>
                             <input

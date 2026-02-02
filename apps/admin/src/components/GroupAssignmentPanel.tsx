@@ -216,7 +216,9 @@ const GroupAssignmentPanel: React.FC<GroupAssignmentPanelProps> = ({
   const overCapacityByCommunityId = useMemo(() => {
     const overages = new Map<number, number>();
     communities.forEach((community) => {
-      if (community.maxCapacity === null) return;
+      if (!community.allowStaffAssignments || community.maxCapacity === null) {
+        return;
+      }
       const currentCount = community.users.length;
       const pending = pendingAssignmentsByCommunityId[community.id] ?? 0;
       const total = currentCount + pending;
@@ -251,8 +253,9 @@ const GroupAssignmentPanel: React.FC<GroupAssignmentPanelProps> = ({
         : community.name;
       return `${member.name}: ${groupTransitionSummary}`;
     });
-    return `You're about to assign ${assignmentPreview.length} member${assignmentPreview.length === 1 ? "" : "s"
-      }:\n\n${lines.join("\n")}`;
+    return `You're about to assign ${assignmentPreview.length} member${
+      assignmentPreview.length === 1 ? "" : "s"
+    }:\n\n${lines.join("\n")}`;
   }, [assignmentPreview, memberGroupsByMemberId]);
 
   const canConfirm =
@@ -270,10 +273,17 @@ const GroupAssignmentPanel: React.FC<GroupAssignmentPanelProps> = ({
       };
       const options = sortedCommunities
         .filter((community) => {
-          if (community.maxCapacity === null) return false;
+          if (
+            !community.allowStaffAssignments ||
+            community.maxCapacity === null
+          ) {
+            return false;
+          }
           const pending = pendingAssignmentsByCommunityId[community.id] ?? 0;
           const isSelected = selection === community.id.toString();
-          if (isSelected) return true;
+          if (isSelected) {
+            return true;
+          }
           return community.users.length + pending < community.maxCapacity;
         })
         .map((community) => ({

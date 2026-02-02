@@ -559,6 +559,8 @@ export type Community = {
     description: string;
     photo?: string;
     public: boolean;
+    allowMemberInvites: boolean;
+    allowStaffAssignments: boolean;
     maxCapacity: number | null;
     users: Array<User>;
     leaders?: Array<User>;
@@ -729,6 +731,8 @@ export type CreateCommunityDto = {
     description: string;
     photo?: string;
     public: boolean;
+    allowMemberInvites: boolean;
+    allowStaffAssignments: boolean;
     maxCapacity: number | null;
 };
 
@@ -738,6 +742,8 @@ export type CommunityDto = {
     description: string;
     photo?: string;
     public: boolean;
+    allowMemberInvites: boolean;
+    allowStaffAssignments: boolean;
     maxCapacity: number | null;
     internalInvites: Array<CommunityInvite>;
     users: Array<ProfileDto>;
@@ -749,6 +755,8 @@ export type UpdateCommunityDto = {
     description?: string;
     photo?: string;
     public?: boolean;
+    allowMemberInvites?: boolean;
+    allowStaffAssignments?: boolean;
     maxCapacity?: number | null;
 };
 

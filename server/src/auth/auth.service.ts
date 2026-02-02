@@ -105,7 +105,7 @@ export class AuthService {
       });
     } else if (referredBy) {
       const community =
-        await this.usersService.findUserCommunityWithCapacity(referredBy);
+        await this.usersService.findUserCommunityForNewMember(referredBy);
       if (community) {
         await this.usersService.addUserToCommunity({
           communityId: community.id,

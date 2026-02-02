@@ -21,6 +21,8 @@ const INITIAL_COMMUNITY: CreateCommunityDto = {
   description: "",
   photo: "",
   public: false,
+  allowMemberInvites: true,
+  allowStaffAssignments: true,
   maxCapacity: GROUP_MAX_CAPACITY_DEFAULT,
 };
 
@@ -35,7 +37,11 @@ const GroupsPage: React.FC = () => {
   const [newCommunity, setNewCommunity] =
     useState<CreateCommunityDto>(INITIAL_COMMUNITY);
   const [creating, setCreating] = useState(false);
-  const [allowStaffAssignments, setAllowStaffAssignments] = useState(true);
+
+  const requiresMaxCapacity =
+    newCommunity.public ||
+    newCommunity.allowStaffAssignments ||
+    newCommunity.allowMemberInvites;
 
   const loadCommunities = useCallback(async () => {
     setLoading(true);
@@ -70,16 +76,18 @@ const GroupsPage: React.FC = () => {
   }, [communities]);
 
   const totalUnusedCapacity = useMemo(() => {
-    return communities.reduce((total, community) => {
-      if (community.maxCapacity === null) {
-        return total;
-      }
-      const pending = pendingAssignmentsByCommunityId[community.id] ?? 0;
-      const remaining =
-        community.maxCapacity - community.users.length - pending;
-      return total + Math.max(remaining, 0);
-    }, 0);
-  }, [communities, pendingAssignmentsByCommunityId]);
+    return Math.max(
+      0,
+      communities.reduce(
+        (acc, community) =>
+          acc +
+          (community.maxCapacity === null
+            ? 0
+            : Math.max(0, community.maxCapacity - community.users.length)),
+        0
+      ) - membersUndergoingGroupAssignment.length
+    );
+  }, [communities, membersUndergoingGroupAssignment.length]);
 
   const handleCreateCommunity = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
@@ -87,19 +95,17 @@ const GroupsPage: React.FC = () => {
       const name = newCommunity.name.trim();
       const description = newCommunity.description.trim();
       const photo = newCommunity.photo?.trim();
-      const requiresMaxCapacity = newCommunity.public || allowStaffAssignments;
-      const normalizedMaxCapacity = requiresMaxCapacity
-        ? newCommunity.maxCapacity
-        : null;
-      if (!name || !description) {
-        setError("Name and description are required.");
-        return;
-      }
+      let normalizedMaxCapacity: number | null = null;
       if (requiresMaxCapacity) {
-        if (!normalizedMaxCapacity || normalizedMaxCapacity <= 0) {
+        if (!newCommunity.maxCapacity || newCommunity.maxCapacity <= 0) {
           setError("Member capacity is required.");
           return;
         }
+        normalizedMaxCapacity = newCommunity.maxCapacity;
+      }
+      if (!name || !description) {
+        setError("Name and description are required.");
+        return;
       }
       setCreating(true);
       setError(null);
@@ -110,13 +116,14 @@ const GroupsPage: React.FC = () => {
             description,
             photo: photo ? photo : undefined,
             public: newCommunity.public,
+            allowMemberInvites: newCommunity.allowMemberInvites,
+            allowStaffAssignments: newCommunity.allowStaffAssignments,
             maxCapacity: normalizedMaxCapacity,
           },
         });
         if (response.data) {
           setCommunities((prev) => [...prev, response.data]);
           setNewCommunity(INITIAL_COMMUNITY);
-          setAllowStaffAssignments(true);
         }
       } catch (err) {
         console.error("Failed to create community", err);
@@ -125,7 +132,7 @@ const GroupsPage: React.FC = () => {
         setCreating(false);
       }
     },
-    [newCommunity, allowStaffAssignments]
+    [newCommunity, requiresMaxCapacity]
   );
 
   return (
@@ -244,32 +251,53 @@ const GroupsPage: React.FC = () => {
                     setNewCommunity((prev) => ({
                       ...prev,
                       public: checked,
+                      allowMemberInvites: true,
+                      allowStaffAssignments: true,
                     }));
-                    if (checked) {
-                      setAllowStaffAssignments(true);
-                    }
                   }}
                 />
                 Public
               </label>
               <label
                 className="flex items-center gap-x-2 text-sm font-medium text-zinc-700"
-                htmlFor="group-assignments"
+                htmlFor="member-invites"
               >
                 <input
-                  id="group-assignments"
+                  id="member-invites"
                   type="checkbox"
-                  checked={allowStaffAssignments}
+                  checked={newCommunity.allowMemberInvites}
                   onChange={(event) => {
                     setError(null);
-                    setAllowStaffAssignments(event.target.checked);
+                    setNewCommunity((prev) => ({
+                      ...prev,
+                      allowMemberInvites: event.target.checked,
+                    }));
                   }}
                   disabled={newCommunity.public}
                 />
-                Group assignment
+                Member invites
+              </label>
+              <label
+                className="flex items-center gap-x-2 text-sm font-medium text-zinc-700"
+                htmlFor="staff-assignments"
+              >
+                <input
+                  id="staff-assignments"
+                  type="checkbox"
+                  checked={newCommunity.allowStaffAssignments}
+                  onChange={(event) => {
+                    setError(null);
+                    setNewCommunity((prev) => ({
+                      ...prev,
+                      allowStaffAssignments: event.target.checked,
+                    }));
+                  }}
+                  disabled={newCommunity.public}
+                />
+                Staff assignments
               </label>
             </div>
-            {(newCommunity.public || allowStaffAssignments) && (
+            {requiresMaxCapacity && (
               <div className="mt-4">
                 <label
                   className="text-sm font-medium text-zinc-700"
@@ -323,7 +351,9 @@ const CommunityCard: React.FC<CommunityCardProps> = ({
   const memberCount = community.users.length;
   const effectiveMemberCount = memberCount + pendingAssignments;
   const leaderCount = community.leaders.length;
-  const capacity = community.maxCapacity;
+  const capacity = community.allowStaffAssignments
+    ? community.maxCapacity
+    : null;
 
   return (
     <Link

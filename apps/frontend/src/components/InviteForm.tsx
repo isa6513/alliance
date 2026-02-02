@@ -54,13 +54,20 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
     void refreshCommunities(true);
   }, [refreshCommunities]);
 
-  const leaderCommunities = useMemo(() => {
+  const { leaderCommunities, memberCommunities } = useMemo(() => {
+    const leaderCommunities: CommunityDto[] = [];
+    const memberCommunities: CommunityDto[] = [];
     if (!user) {
-      return [];
+      return { leaderCommunities, memberCommunities };
     }
-    return communities.filter((community) =>
-      community.leaders?.some((leader) => leader.id === user.id)
-    );
+    for (const community of communities) {
+      if (community.leaders?.some((leader) => leader.id === user.id)) {
+        leaderCommunities.push(community);
+      } else {
+        memberCommunities.push(community);
+      }
+    }
+    return { leaderCommunities, memberCommunities };
   }, [communities, user]);
 
   const isLeader = leaderCommunities.length > 0;
@@ -191,13 +198,32 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
               <p className="font-semibold text-xl">
                 {onetimeInviteCreation.not_responsible.title}
               </p>
-              {onetimeInviteCreation.not_responsible.explanation.map(
-                (block, index) => (
-                  <p className="text-zinc-500" key={index}>
-                    {block}
-                  </p>
-                )
-              )}
+              {memberCommunities[0]?.allowMemberInvites
+                ? [
+                    ...onetimeInviteCreation.not_responsible.explanations.yourGroup.map(
+                      (block, index) => (
+                        <p className="text-zinc-500" key={index}>
+                          {block}
+                        </p>
+                      )
+                    ),
+                    <p
+                      className="text-zinc-500"
+                      key={
+                        onetimeInviteCreation.not_responsible.explanations
+                          .yourGroup.length
+                      }
+                    >
+                      {`Your current group: ${memberCommunities[0].name}`}
+                    </p>,
+                  ]
+                : onetimeInviteCreation.not_responsible.explanations.genericGroup.map(
+                    (block, index) => (
+                      <p className="text-zinc-500" key={index}>
+                        {block}
+                      </p>
+                    )
+                  )}
             </div>
             <div className="flex flex-col gap-y-2">
               <div className="flex flex-row gap-x-2">

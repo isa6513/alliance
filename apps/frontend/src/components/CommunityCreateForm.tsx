@@ -4,10 +4,7 @@ import {
   userCreateCommunity,
 } from "@alliance/shared/client";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
-import {
-  editGroupGroupAssignmentExplanation,
-  editGroupPublicGroupExplanation,
-} from "@alliance/shared/lib/copy";
+import { groupSettings } from "@alliance/shared/lib/copy";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ImageEditor from "./ImageEditor";
 import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
@@ -35,36 +32,34 @@ const CommunityCreateForm = ({
         : "",
       public: false,
       maxCapacity: GROUP_MAX_CAPACITY_DEFAULT,
+      allowMemberInvites: true,
+      allowStaffAssignments: true,
     };
   }, [name]);
 
   const [formValues, setFormValues] =
     useState<CreateCommunityDto>(initialFormValues);
-  const [allowStaffAssignments, setAllowStaffAssignments] = useState(true);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const useMaxCapacity =
+    formValues.public ||
+    formValues.allowMemberInvites ||
+    formValues.allowStaffAssignments;
 
   const [error, setError] = useState<string | null>(null);
-
-  const requiresMaxCapacity = useMemo(
-    () => formValues.public || allowStaffAssignments,
-    [formValues.public, allowStaffAssignments]
-  );
 
   const handleSubmit = useCallback(async () => {
     if (!formValues.name.trim()) {
       setError("Name is required");
       return;
     }
-    const normalizedMaxCapacity =
-      allowStaffAssignments || formValues.public
-        ? formValues.maxCapacity
-        : null;
-    if (requiresMaxCapacity) {
-      if (!normalizedMaxCapacity || normalizedMaxCapacity <= 0) {
+    let normalizedMaxCapacity: number | null = null;
+    if (useMaxCapacity) {
+      if (!formValues.maxCapacity || formValues.maxCapacity <= 0) {
         setError("Capacity is required");
         return;
       }
+      normalizedMaxCapacity = formValues.maxCapacity;
     }
 
     setIsSubmitting(true);
@@ -80,21 +75,15 @@ const CommunityCreateForm = ({
       if (response.data) {
         onSuccess(response.data);
       } else {
-        setError(`Failed to create group`);
+        setError(`Failed to create community`);
       }
     } catch (err) {
-      console.error("Failed to create group:", err);
-      setError("Failed to create group");
+      console.error("Failed to create community:", err);
+      setError("Failed to create community");
     } finally {
       setIsSubmitting(false);
     }
-  }, [
-    allowStaffAssignments,
-    formValues,
-    photoUrl,
-    onSuccess,
-    requiresMaxCapacity,
-  ]);
+  }, [useMaxCapacity, formValues, photoUrl, onSuccess]);
 
   const isPhotoUploadPending = isSubmitting && photoUrl !== null;
 
@@ -147,19 +136,47 @@ const CommunityCreateForm = ({
               checked={formValues.public}
               onChange={(e) => {
                 const checked = e.target.checked;
-                setFormValues({ ...formValues, public: checked });
-                if (checked) {
-                  setAllowStaffAssignments(true);
-                }
+                setFormValues({
+                  ...formValues,
+                  public: checked,
+                  allowMemberInvites: true,
+                  allowStaffAssignments: true,
+                });
               }}
               className="mt-1"
             />
             <div>
               <p className="text-base font-medium">
-                Let anyone join this group
+                {groupSettings.public.name}
               </p>
               <p className="text-sm text-zinc-500 font-normal">
-                {editGroupPublicGroupExplanation}
+                {groupSettings.public.explanation}
+              </p>
+            </div>
+          </label>
+          <label
+            className="flex items-start gap-x-2 text-black text-sm font-semibold"
+            htmlFor="allowMemberInvites"
+          >
+            <input
+              id="allowMemberInvites"
+              type="checkbox"
+              checked={formValues.allowMemberInvites}
+              onChange={(e) => {
+                setFormValues({
+                  ...formValues,
+                  allowMemberInvites: e.target.checked,
+                });
+              }}
+              disabled={formValues.public}
+              className="mt-1"
+            />
+            <div>
+              <p className="text-base font-medium">
+                {groupSettings.allowMemberInvites.name}
+              </p>
+              <p className="text-sm text-zinc-500 font-normal">
+                {groupSettings.allowMemberInvites.explanation}
               </p>
             </div>
           </label>
@@ -170,27 +187,34 @@ const CommunityCreateForm = ({
             <input
               id="allowAssignments"
               type="checkbox"
-              checked={allowStaffAssignments}
-              onChange={(e) => setAllowStaffAssignments(e.target.checked)}
+              checked={formValues.allowStaffAssignments}
+              onChange={(e) =>
+                setFormValues({
+                  ...formValues,
+                  allowStaffAssignments: e.target.checked,
+                })
+              }
               disabled={formValues.public}
               className="mt-1"
             />
             <div>
               <p className="text-base font-medium">
-                Let staff assign members to this group
+                {groupSettings.allowStaffAssignments.name}
               </p>
               <p className="text-sm text-zinc-500 font-normal">
-                {editGroupGroupAssignmentExplanation}
+                {groupSettings.allowStaffAssignments.explanation}
               </p>
             </div>
           </label>
         </div>
-        {requiresMaxCapacity && (
+        {useMaxCapacity && (
           <div className="mt-4">
             <label className="text-black font-medium" htmlFor="maxCapacity">
-              <p className="text-base font-medium">Member capacity</p>
+              <p className="text-base font-medium">
+                {groupSettings.maxCapacity.name}
+              </p>
               <p className="text-sm text-zinc-500 font-normal">
-                The maximum number of members that can join this group.
+                {groupSettings.maxCapacity.explanation}
               </p>
             </label>
             <input
