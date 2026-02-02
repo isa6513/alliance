@@ -265,7 +265,9 @@ const HomePage = () => {
       noSidebarOverflow
     />
   ) : (
-    <div className="h-full">{mainContent}</div>
+    <div className="w-full h-[calc(100vh-var(--mobile-nav-height))] bg-white">
+      {mainContent}
+    </div>
   );
 };
 

@@ -1,5 +1,8 @@
 import { ReactNode } from "react";
 
+export const TWO_COLUMN_LAYOUT_CLASSNAME =
+  "w-full h-[calc(100vh-var(--mobile-nav-height))] bg-white";
+
 interface TwoColumnLayoutProps {
   main: ReactNode; // main content on the left
   sidebar?: ReactNode; // optional right column content
@@ -21,9 +24,7 @@ export default function TwoColumnLayout({
   noSidebarOverflow = false,
 }: TwoColumnLayoutProps) {
   return (
-    <div
-      className={`w-full h-[calc(100vh-var(--mobile-nav-height))] bg-white  ${className}`}
-    >
+    <div className={`${TWO_COLUMN_LAYOUT_CLASSNAME} ${className}`}>
       <div
         className={`absolute rounded-lg top-0 left-0 bottom-0 right-0 flex flex-row items-center overflow-hidden`}
       >
