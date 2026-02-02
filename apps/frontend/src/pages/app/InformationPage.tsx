@@ -13,7 +13,7 @@ const InformationPage: React.FC = () => {
 
   return (
     <CenterLayout>
-      <div className="md:mt-8 gap-y-4 flex flex-col text-base md:text-lg">
+      <div className="gap-y-4 flex flex-col text-base md:text-lg">
         <p className="font-serif text-3xl md:text-4xl font-semibold mb-4">
           Information
         </p>

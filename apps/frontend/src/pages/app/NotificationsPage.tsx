@@ -15,7 +15,7 @@ const NotificationsPage = () => {
 
   return (
     <CenterLayout>
-      <div className="md:mt-8 flex flex-col items-center w-[calc(min(650px,100%))] gap-y-6">
+      <div className="flex flex-col items-center w-[calc(min(650px,100%))] gap-y-6">
         <div className="w-full flex flex-row justify-between items-end">
           <h2 className="!font-semibold font-serif !text-3xl md:!text-4xl">
             Notifications

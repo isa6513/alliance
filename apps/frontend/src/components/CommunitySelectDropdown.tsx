@@ -79,6 +79,7 @@ const CommunitySelectDropdown = ({
       keyIcons={{
         [MANAGE_GROUPS_KEY]: <Settings />,
       }}
+      dropdownAlignment="right"
     />
   );
 };

@@ -25,10 +25,7 @@ import { useAuth } from "../../lib/AuthContext";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
 import CompletedBar from "../../components/CompletedBar";
-import {
-  GroupMemberGuidelines,
-  GroupOrganizerGuidelines,
-} from "../../components/GroupGuidelines";
+import { GroupOrganizerGuidelines } from "../../components/GroupGuidelines";
 import CommunityCreateForm from "../../components/CommunityCreateForm";
 import { useSearchParams } from "react-router";
 import CommunityActivityTab from "../../components/CommunityActivityTab";
@@ -50,12 +47,12 @@ import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommuni
 import NoCommunityPage from "./NoCommunityPage";
 import CommunitySelectDropdown from "../../components/CommunitySelectDropdown";
 import MyGroupsPage from "./MyGroupsPage";
+import { Link } from "react-router";
 
 export type Tab =
   | "activity"
   | "members"
   | "invites"
-  | "about"
   | "resources"
   | "groups"
   | "create";
@@ -64,7 +61,6 @@ const TAB_DISPLAY_NAMES = {
   activity: "Activity",
   members: "Members",
   invites: "Invites",
-  about: "About",
   resources: "Resources",
 } satisfies Partial<Record<Tab, string>>;
 
@@ -392,7 +388,7 @@ const CommunityPage = () => {
 
   const tabs: (keyof typeof TAB_DISPLAY_NAMES)[] = amLeader
     ? ["activity", "members", "invites", "resources"]
-    : ["activity", "members", "invites", "about"];
+    : ["activity", "members", "invites"];
 
   const isLargeScreen = useMediaQuery("(min-width: 1250px)");
   const isChatOpen = messagingEnabled && chatOpen;
@@ -453,59 +449,60 @@ const CommunityPage = () => {
                   ) : (
                     <ProfileImage pfp={community.photo ?? null} size="huge" />
                   )}
-                  <div className="flex flex-row gap-x-1">
-                    <CommunitySelectDropdown
-                      communities={communities}
-                      currentCommunityId={community.id}
-                      onSelectCommunity={(communityId) => {
-                        setParams({ communityId, tab: "activity" });
-                      }}
-                      onManageGroups={() => setParams({ tab: "groups" })}
-                      titleOverride={"My groups"}
-                      notifCount={pendingCommunityInvites.length}
-                    />
-                    {amLeader && (
-                      <>
-                        {isEditing ? (
-                          <div className="flex flex-row gap-x-1 items-start">
-                            {canDelete && (
+                  <div className="flex flex-col gap-y-1 sm:gap-y-2 items-end">
+                    <div className="flex flex-col items-end sm:flex-row sm:items-start gap-y-1 gap-x-1">
+                      {amLeader && (
+                        <>
+                          {isEditing ? (
+                            <div className="flex flex-row gap-x-1 items-start">
+                              {canDelete && (
+                                <Button
+                                  color={ButtonColor.Red}
+                                  onClick={handleDelete}
+                                  disabled={isSaving}
+                                  className="!text-sm"
+                                >
+                                  Delete
+                                </Button>
+                              )}
                               <Button
-                                color={ButtonColor.Red}
-                                onClick={handleDelete}
+                                color={ButtonColor.Light}
+                                onClick={handleCancel}
                                 disabled={isSaving}
                                 className="!text-sm"
                               >
-                                Delete
+                                Cancel
                               </Button>
-                            )}
+                              <Button
+                                color={ButtonColor.Blue}
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="!text-sm"
+                              >
+                                {isSaving ? "Saving..." : "Save"}
+                              </Button>
+                            </div>
+                          ) : (
                             <Button
-                              color={ButtonColor.Light}
-                              onClick={handleCancel}
-                              disabled={isSaving}
-                              className="!text-sm"
+                              color={ButtonColor.White}
+                              onClick={() => setIsEditing(true)}
                             >
-                              Cancel
+                              Edit
                             </Button>
-                            <Button
-                              color={ButtonColor.Blue}
-                              onClick={handleSave}
-                              disabled={isSaving}
-                              className="!text-sm"
-                            >
-                              {isSaving ? "Saving..." : "Save"}
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button
-                            color={ButtonColor.White}
-                            onClick={() => setIsEditing(true)}
-                            className="!text-sm"
-                          >
-                            Edit
-                          </Button>
-                        )}
-                      </>
-                    )}
+                          )}
+                        </>
+                      )}
+                      <CommunitySelectDropdown
+                        communities={communities}
+                        currentCommunityId={community.id}
+                        onSelectCommunity={(communityId) => {
+                          setParams({ communityId, tab: "activity" });
+                        }}
+                        onManageGroups={() => setParams({ tab: "groups" })}
+                        titleOverride={"My groups"}
+                        notifCount={pendingCommunityInvites.length}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="flex flex-col gap-y-4 mb-8">
@@ -647,27 +644,35 @@ const CommunityPage = () => {
                   />
                 </div>
               </div>
-              <div className="flex flex-row gap-x-2 justify-start mb-4 border-b border-zinc-200">
-                {tabs.map((m) => (
-                  <Button
-                    color={ButtonColor.Transparent}
-                    key={m}
-                    onClick={() => setParams({ tab: m })}
-                    aria-pressed={m === tab}
-                    className={`!border-b-[1.5px] rounded-none ${
-                      m === tab ? "!border-b-green" : "!border-b-transparent"
-                    }`}
-                  >
-                    <div className="flex flex-row gap-x-2">
-                      <span>{TAB_DISPLAY_NAMES[m]}</span>
-                      {m === "invites" && inviteNotifCount > 0 && (
-                        <span className="font-semibold text-xs text-white bg-zinc-500 rounded-md flex justify-center items-center w-5 h-5">
-                          {inviteNotifCount}
-                        </span>
-                      )}
-                    </div>
-                  </Button>
-                ))}
+              <div className=" mb-4 border-b border-zinc-200 flex flex-row items-end justify-between">
+                <div className="flex flex-row gap-x-2 justify-start">
+                  {tabs.map((m) => (
+                    <Button
+                      color={ButtonColor.Transparent}
+                      key={m}
+                      onClick={() => setParams({ tab: m })}
+                      aria-pressed={m === tab}
+                      className={`!border-b-[1.5px] rounded-none ${
+                        m === tab ? "!border-b-green" : "!border-b-transparent"
+                      }`}
+                    >
+                      <div className="flex flex-row gap-x-2">
+                        <span>{TAB_DISPLAY_NAMES[m]}</span>
+                        {m === "invites" && inviteNotifCount > 0 && (
+                          <span className="font-semibold text-xs text-white bg-zinc-500 rounded-md flex justify-center items-center w-5 h-5">
+                            {inviteNotifCount}
+                          </span>
+                        )}
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+                <Link
+                  to={"/groups-guide"}
+                  className="text-zinc-500 hover:text-black py-2"
+                >
+                  About groups
+                </Link>
               </div>
             </>
           )}
@@ -693,11 +698,6 @@ const CommunityPage = () => {
                 completionData.completedAllCurrentActions
               }
             />
-          )}
-          {tab === "about" && (
-            <div className="flex flex-col gap-y-4 py-4">
-              <GroupMemberGuidelines />
-            </div>
           )}
           {tab === "resources" && (
             <div className="flex flex-col gap-y-4 py-4">

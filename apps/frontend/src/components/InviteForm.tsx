@@ -14,6 +14,7 @@ import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import CommunityCreateForm from "./CommunityCreateForm";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
+import { Link } from "react-router";
 
 type ResponsibilityChoice = "responsible" | "not_responsible" | null;
 
@@ -292,7 +293,23 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
               </div>
             ) : (
               <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
-                <p className="text-xl font-semibold">Create a new group</p>
+                <div className="flex flex-col gap-y-2">
+                  <p className="text-xl font-semibold">Create a new group</p>
+                  <p className="text-zinc-500">
+                    You do not lead a group yet. Once you create a group, you
+                    will be able to continue with your invite.
+                  </p>
+                  <p className="text-zinc-500">
+                    You can learn more about groups on our{" "}
+                    <Link
+                      to={"/groups-guide"}
+                      className="text-green hover:underline"
+                    >
+                      groups guide
+                    </Link>
+                    .
+                  </p>
+                </div>
                 <CommunityCreateForm
                   name={user?.name}
                   onSuccess={handleCreateCommunity}

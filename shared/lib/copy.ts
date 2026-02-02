@@ -69,7 +69,7 @@ export const onetimeInviteCreationGroup = {
   leader: {
     title: "Invite a new member to the Alliance and your group",
     explanation: [
-      "This will create a personalized invite page that explains the Alliance and how to sign up.",
+      "This will create a personalized sign-up page that explains the Alliance.",
       "When the new member signs up, they will automatically be added to your group.",
     ],
   },
@@ -78,7 +78,7 @@ export const onetimeInviteCreationGroup = {
     explanation: "A group leader will review and approve your request.",
     bullets: [
       "A group lead will first need to approve the request for the invitee.",
-      "Once approved, you will receive a personalized invite link that you can share with the invitee.",
+      "Once approved, you will receive a personalized sign-up link that you can share with the invitee.",
       "When the invitee signs up, they will automatically be added to your group.",
     ],
   },

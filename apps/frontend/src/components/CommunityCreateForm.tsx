@@ -80,11 +80,11 @@ const CommunityCreateForm = ({
       if (response.data) {
         onSuccess(response.data);
       } else {
-        setError(`Failed to create community`);
+        setError(`Failed to create group`);
       }
     } catch (err) {
-      console.error("Failed to create community:", err);
-      setError("Failed to create community");
+      console.error("Failed to create group:", err);
+      setError("Failed to create group");
     } finally {
       setIsSubmitting(false);
     }
