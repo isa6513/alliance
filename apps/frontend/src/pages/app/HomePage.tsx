@@ -197,7 +197,7 @@ const HomePage = () => {
             action={currentTask}
             dismissProps={dismissProps}
             handleDismiss={() => handleDismissAction(currentTask.id)}
-            userRelation={currentTask.userRelation as "joined" | "none"}
+            userRelation={currentTask.userRelation}
             onUpdateActionState={() => navigate(href("/tasks"))}
           />
         ) : (
