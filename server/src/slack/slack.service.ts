@@ -10,7 +10,7 @@ export class SlackService {
       this.logger.warn('SLACK_WEBHOOK_URL is not set; skipping Slack message');
       return;
     }
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'production') {
       this.logger.log(`Skipping Slack message in development: ${message}`);
       return;
     }

@@ -222,7 +222,6 @@ export default function UserActivityCard({
 
       {/* Comments section */}
       {completed && (
-        <View className="px-4">
           <Comments
             objectId={activity.id}
             type="activity"
@@ -231,7 +230,6 @@ export default function UserActivityCard({
             showForm={showCommentForm}
             autofocus={showCommentForm}
           />
-        </View>
       )}
     </View>
   );

@@ -16,6 +16,7 @@ import UserActivityCard from "../../components/UserActivityCard";
 import { LegendList } from "@legendapp/list";
 import ListHeader from "../../components/ListHeader";
 import GreenHeader from "../../components/GreenHeader";
+import { KeyboardAvoidingView, KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 type Mode = "friends" | "everyone";
 
@@ -90,7 +91,7 @@ export default function FeedScreen() {
   const renderActivity = useCallback(
     ({ item: activity }: { item: ActionActivityDto }) => {
       return (
-        <View className="border-b border-zinc-200">
+        <View className="border-b border-zinc-200 ">
           <UserActivityCard
             activity={activity}
             handleLike={() => handleLikeActivity(activity.id, mode)}
@@ -165,6 +166,7 @@ export default function FeedScreen() {
           </View>
         </View>
       ) : (
+        <KeyboardAvoidingView behavior="position">
         <LegendList
           key={mode}
           ListHeaderComponent={listHeader}
@@ -176,10 +178,11 @@ export default function FeedScreen() {
           }
           recycleItems
           contentContainerStyle={{
-            paddingBottom: 40,
+            paddingBottom: 40,  
             backgroundColor: "white",
-          }}
-        />
+            }}
+          />
+        </KeyboardAvoidingView>
       )}
     </GreenHeader>
   );

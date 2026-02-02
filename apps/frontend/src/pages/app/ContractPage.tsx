@@ -1,8 +1,4 @@
-import {
-  ContractEvent,
-  userSignContract,
-  userSuspendContract,
-} from "@alliance/shared/client";
+import { userSignContract, userSuspendContract } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import React, { useEffect, useState } from "react";
 import MemberContract from "../../components/MemberContract";
@@ -11,26 +7,24 @@ import { useAuth } from "../../lib/AuthContext";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
+import {
+  ContractEventState,
+  getLastContractEvent,
+  getSuspensionMessage,
+  getSignedMessage,
+} from "@alliance/shared/lib/contract";
 
 const ContractPage: React.FC = () => {
   const { user, loading, refreshUser } = useAuth();
 
   const [editName, setEditName] = useState("");
 
-  const [lastContractEvent, setLastContractEvent] = useState<Pick<
-    ContractEvent,
-    "type" | "date" | "automatic"
-  > | null>(null);
+  const [lastContractEvent, setLastContractEvent] =
+    useState<ContractEventState>(null);
 
   useEffect(() => {
     if (user) {
-      setLastContractEvent(
-        user.contractEvents?.length
-          ? user.contractEvents?.sort(
-              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-            )[0]
-          : null
-      );
+      setLastContractEvent(getLastContractEvent(user.contractEvents));
     }
   }, [user]);
 
@@ -94,10 +88,10 @@ const ContractPage: React.FC = () => {
         {lastContractEvent?.type === "suspended" && (
           <Card style={CardStyle.Red}>
             <p>
-              {lastContractEvent.automatic
-                ? "Your contract was suspended automatically on "
-                : "You suspended your contract on "}
-              {new Date(lastContractEvent.date).toLocaleDateString()}.
+              {getSuspensionMessage(
+                lastContractEvent.date,
+                lastContractEvent.automatic
+              )}
             </p>
           </Card>
         )}
@@ -125,8 +119,7 @@ const ContractPage: React.FC = () => {
         {lastContractEvent?.type === "signed" && (
           <div className="mt-4 flex flex-col gap-y-2 sm:flex-row justify-between sm:items-center">
             <p className="text-green">
-              You signed this contract on{" "}
-              {new Date(lastContractEvent.date).toLocaleDateString()}.
+              {getSignedMessage(lastContractEvent.date)}
             </p>
             <Button onClick={handleContractSuspend} color={ButtonColor.Red}>
               Suspend contract

@@ -89,8 +89,7 @@ const ReplyForm = ({
     content.body.trim() !== "" || (content.attachments?.length ?? 0) > 0;
   return (
     <View
-      className={`border border-zinc-200 rounded ${compact ? "p-2" : "p-3"
-        } bg-white`}
+      className={`p-4 bg-zinc-100`}
     >
       <EditableContentForm
         value={content}
@@ -349,7 +348,7 @@ export default function Comments({
   compact,
   homeStyle,
   autofocus,
-  showForm = true,
+  showForm: showFormProp = true,
   initialComments,
   highlightedReplyId,
 }: CommentsProps) {
@@ -370,6 +369,7 @@ export default function Comments({
     body: "",
     attachments: [],
   });
+  const [showForm, setShowForm] = useState(showFormProp);
 
   const fetchComments = useCallback(async () => {
     let response;
@@ -442,6 +442,7 @@ export default function Comments({
         await fetchComments();
         setEditableContent({ body: "", attachments: [] });
         setNestedDraft({ body: "", attachments: [] });
+        setShowForm(false);
         setReplyingTo(null);
         setError(null);
       } catch (err) {
@@ -569,7 +570,7 @@ export default function Comments({
       {error && <Text className="text-red-500">{error}</Text>}
 
       {sortedComments && sortedComments.length > 0 ? (
-        <View className="gap-y-3">
+        <View className="gap-y-3 pb-3">
           {sortedComments.map((reply) => (
             <ReplyItem
               key={reply.id}

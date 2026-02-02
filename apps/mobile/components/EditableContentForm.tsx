@@ -198,7 +198,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   return (
     <View className={className}>
       <TextInput
-        className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-base text-zinc-900"
+        className="w-full px-3 py-2 text-base text-zinc-900"
         value={value.body}
         onChangeText={(text) => onChange({ ...value, body: text })}
         placeholder={placeholder}

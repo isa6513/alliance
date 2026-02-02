@@ -537,20 +537,18 @@ export default function UserProfileScreen() {
 
       <View className="border-t border-zinc-200">
         {selectedTab === "actions" && (
-          <LegendList
-            data={completedActions}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <View key={item.id} className="border-b border-zinc-200">
+          <View>
+            {completedActions.map((activity) => (
+              <View key={activity.id} className="border-b border-zinc-200">
                 <UserActivityCard
-                  activity={item}
+                  activity={activity}
                   handleLike={handleLikeActivity}
                   onActivityUpdate={updateActivity}
                   canEdit={isMe}
                 />
               </View>
-            )}
-          />
+            ))}
+          </View>
         )}
 
         {selectedTab === "forum" && (
