@@ -45,7 +45,7 @@ export const onetimeInviteCreation = {
   responsible: {
     buttonText: "Myself",
     leader: {
-      title: "Select the group for the new member to join",
+      title: "Select a group for the new member to join",
       invite: {
         title: "Create an invite",
         explanation: [
@@ -53,10 +53,6 @@ export const onetimeInviteCreation = {
           "When the new member signs up, they will automatically be added to your group.",
         ],
       },
-    },
-    nonLeader: {
-      title:
-        "You need to create a group. This will allow you to easily view your new member's progress.",
     },
   },
   not_responsible: {

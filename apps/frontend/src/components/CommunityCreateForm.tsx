@@ -15,6 +15,7 @@ import { useCallback, useMemo, useState } from "react";
 
 export type CommunityCreateFormProps = {
   name?: string;
+  includePhotoEditor?: boolean;
   onCancel?: () => void;
   onSuccess: (community: CommunityDto) => void;
 };
@@ -88,14 +89,16 @@ const CommunityCreateForm = (props: CommunityCreateFormProps) => {
 
   return (
     <div className="flex flex-col gap-y-2">
-      <div className="mb-4">
-        <ImageEditor
-          initialImageUrl={photoUrl}
-          onChange={setPhotoUrl}
-          allowedMimeTypes={sharp_allowed_mime_types}
-          isUploading={isPhotoUploadPending}
-        />
-      </div>
+      {props.includePhotoEditor && (
+        <div className="mb-4">
+          <ImageEditor
+            initialImageUrl={photoUrl}
+            onChange={setPhotoUrl}
+            allowedMimeTypes={sharp_allowed_mime_types}
+            isUploading={isPhotoUploadPending}
+          />
+        </div>
+      )}
       <label className="text-black text-sm font-semibold" htmlFor="name">
         Name
       </label>

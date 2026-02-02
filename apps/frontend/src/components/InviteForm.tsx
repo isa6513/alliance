@@ -221,41 +221,36 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
 
         {responsibilityChoice === "responsible" && (
           <>
-            <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
-              {/* Group selection */}
-              {isLeader ? (
-                <>
-                  <p className="text-xl font-semibold">
-                    {onetimeInviteCreation.responsible.leader.title}
-                  </p>
-                  <div>
-                    <DropdownSelect
-                      options={communityOptions}
-                      value={selectedCommunity?.name ?? communityOptions["new"]}
-                      onChange={([key]) => {
-                        if (key === "new") {
-                          setSelectedCommunityId(null);
-                        } else {
-                          setSelectedCommunityId(Number(key.slice(1)));
-                        }
-                      }}
-                      titleOverride={
-                        selectedCommunityId &&
-                        typeof selectedCommunityId === "number"
-                          ? selectedCommunity?.name || "Select a group"
-                          : selectedCommunityId === null
-                          ? "Create a new group"
-                          : "Select a group"
-                      }
-                    />
-                  </div>
-                </>
-              ) : (
-                <p className="font-semibold">
-                  {onetimeInviteCreation.responsible.nonLeader.title}
+            {isLeader && (
+              <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
+                {/* Group selection */}
+
+                <p className="text-xl font-semibold">
+                  {onetimeInviteCreation.responsible.leader.title}
                 </p>
-              )}
-            </div>
+                <div>
+                  <DropdownSelect
+                    options={communityOptions}
+                    value={selectedCommunity?.name ?? communityOptions["new"]}
+                    onChange={([key]) => {
+                      if (key === "new") {
+                        setSelectedCommunityId(null);
+                      } else {
+                        setSelectedCommunityId(Number(key.slice(1)));
+                      }
+                    }}
+                    titleOverride={
+                      selectedCommunityId &&
+                      typeof selectedCommunityId === "number"
+                        ? selectedCommunity?.name || "Select a group"
+                        : selectedCommunityId === null
+                        ? "Create a new group"
+                        : "Select a group"
+                    }
+                  />
+                </div>
+              </div>
+            )}
 
             {selectedCommunity ? (
               <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
