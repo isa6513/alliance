@@ -73,28 +73,10 @@ const ContractPage: React.FC = () => {
   return (
     <CenterLayout>
       <div className="gap-y-2 flex flex-col text-base md:text-lg">
-        <p className="font-serif text-3xl md:text-4xl font-semibold mb-1">
+        <p className="font-serif text-3xl md:text-4xl font-semibold mb-4">
           Membership contract
         </p>
-        <p className="text-zinc-900">Notes:</p>
-        <ul className="text-zinc-900 mb-4 list-disc list-inside">
-          <li>You can terminate your membership at any time.</li>
-          <li>
-            If you miss 3 or more of the last 10 tasks you were assigned, your
-            contract will be suspended automatically. You can re-sign the
-            contract to re-join the Alliance.
-          </li>
-        </ul>
-        {lastContractEvent?.type === "suspended" && (
-          <Card style={CardStyle.Red}>
-            <p>
-              {getSuspensionMessage(
-                lastContractEvent.date,
-                lastContractEvent.automatic
-              )}
-            </p>
-          </Card>
-        )}
+
         <MemberContract />
 
         {lastContractEvent?.type !== "signed" && (
@@ -121,11 +103,48 @@ const ContractPage: React.FC = () => {
             <p className="text-green">
               {getSignedMessage(lastContractEvent.date)}
             </p>
-            <Button onClick={handleContractSuspend} color={ButtonColor.Red}>
-              Suspend contract
-            </Button>
           </div>
         )}
+        <div className="mt-4 flex flex-col gap-y-2">
+          <div>
+            <h2 className="text-lg font-semibold mt-2 text-black">
+              What happens if I don&apos;t follow the contract?
+            </h2>
+            <p className="text-zinc-900">
+              If you miss 3 or more of the last 10 tasks you were assigned, your
+              contract will be suspended automatically. You can re-sign the
+              contract to re-join the Alliance.
+            </p>
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold mt-2 text-black">
+              How do I end my membership?
+            </h2>
+            <p className="text-zinc-900">
+              You can end your membership at any time by suspending your
+              contract.
+            </p>
+            {lastContractEvent?.type === "signed" && (
+              <Button
+                onClick={handleContractSuspend}
+                color={ButtonColor.Red}
+                className="mt-4"
+              >
+                Suspend contract
+              </Button>
+            )}
+            {lastContractEvent?.type === "suspended" && (
+              <Card style={CardStyle.Red} className="mt-4 text-base">
+                <p>
+                  {getSuspensionMessage(
+                    lastContractEvent.date,
+                    lastContractEvent.automatic
+                  )}
+                </p>
+              </Card>
+            )}
+          </div>
+        </div>
       </div>
     </CenterLayout>
   );
