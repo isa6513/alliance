@@ -213,6 +213,19 @@ export class ForumService {
     return post;
   }
 
+  async findCommentsForPostRaw(postId: number): Promise<Comment[]> {
+    const allComments = await this.commentRepository.find({
+      where: {
+        parentObjectId: postId,
+        parentObjectType: CommentParentObject.Post,
+      },
+      relations: { author: true },
+      order: { createdAt: 'ASC' },
+    });
+
+    return allComments;
+  }
+
   async findCommentsForPost(postId: number): Promise<Comment[]> {
     const allComments = await this.commentRepository.find({
       where: {

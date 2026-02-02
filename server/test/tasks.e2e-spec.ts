@@ -470,6 +470,102 @@ describe('Tasks (e2e)', () => {
       expect(result.isValid).toBe(true);
     });
 
+    it('distinguishes between top-level and child comments for forum reply validators', async () => {
+      const testUser = await userRepo.findOneOrFail({
+        where: { id: ctx.testUserId },
+      });
+
+      // Create another user to make the initial top-level comment
+      const otherUser = await userRepo.findOneOrFail({
+        where: { id: ctx.adminUserId },
+      });
+
+      const post = await postRepo.save(
+        postRepo.create({
+          title: 'Discussion Post',
+          author: otherUser,
+          authorId: otherUser.id,
+          editableContent: editableContentRepo.create({
+            body: 'Discussion topic',
+            attachments: [],
+          }),
+        }),
+      );
+
+      // Create both validators
+      const topLevelOnlyValidatorId = await createValidator(
+        CustomValidatorType.RepliedToForumPost,
+        post.id.toString(),
+      );
+      const anyReplyValidatorId = await createValidator(
+        CustomValidatorType.RepliedToForumPostOrChild,
+        post.id.toString(),
+      );
+
+      // Initially both should fail
+      let topLevelResult = await runValidator(topLevelOnlyValidatorId);
+      let anyReplyResult = await runValidator(anyReplyValidatorId);
+      expect(topLevelResult.isValid).toBe(false);
+      expect(anyReplyResult.isValid).toBe(false);
+
+      // Create a top-level comment from another user (to reply to)
+      const otherUserComment = await commentRepo.save(
+        commentRepo.create({
+          author: otherUser,
+          authorId: otherUser.id,
+          parentObjectType: CommentParentObject.Post,
+          parentObjectId: post.id,
+          editableContent: editableContentRepo.create({
+            body: 'First comment from other user',
+            attachments: [],
+          }),
+        }),
+      );
+
+      // Create a child comment (reply to the other user's comment) by the test user
+      await commentRepo.save(
+        commentRepo.create({
+          author: testUser,
+          authorId: testUser.id,
+          parentObjectType: CommentParentObject.Post,
+          parentObjectId: post.id,
+          parentId: otherUserComment.id,
+          editableContent: editableContentRepo.create({
+            body: 'Reply to comment (child comment)',
+            attachments: [],
+          }),
+        }),
+      );
+
+      // RepliedToForumPostOrChild should pass (child comment counts)
+      // RepliedToForumPost should fail (only top-level comments count)
+      topLevelResult = await runValidator(topLevelOnlyValidatorId);
+      anyReplyResult = await runValidator(anyReplyValidatorId);
+      expect(topLevelResult.isValid).toBe(false);
+      expect(topLevelResult.message).toContain('replied');
+      expect(anyReplyResult.isValid).toBe(true);
+
+      // Now add a top-level comment by the test user
+      await commentRepo.save(
+        commentRepo.create({
+          author: testUser,
+          authorId: testUser.id,
+          parentObjectType: CommentParentObject.Post,
+          parentObjectId: post.id,
+          editableContent: editableContentRepo.create({
+            body: 'Top-level comment from test user',
+            attachments: [],
+          }),
+        }),
+      );
+
+      // Both should now pass
+      topLevelResult = await runValidator(topLevelOnlyValidatorId);
+      anyReplyResult = await runValidator(anyReplyValidatorId);
+      expect(topLevelResult.isValid).toBe(true);
+      expect(anyReplyResult.isValid).toBe(true);
+    });
+
     it('validates phone number presence and format', async () => {
       const hasPhoneValidatorId = await createValidator(
         CustomValidatorType.HasPhoneNumber,

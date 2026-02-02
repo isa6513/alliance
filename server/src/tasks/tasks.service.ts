@@ -628,6 +628,21 @@ export class TasksService {
           };
         }
         break;
+      case CustomValidatorType.RepliedToForumPostOrChild:
+        if (!validator.idArgument) {
+          throw new BadRequestException('Validator has no id argument');
+        }
+        const replies2 = await this.forumService.findCommentsForPostRaw(
+          Number(validator.idArgument),
+        );
+        if (!replies2.some((reply) => reply.authorId === user.id)) {
+          return {
+            isValid: false,
+            message:
+              'You have not replied to the discussion yet - please do that now.',
+          };
+        }
+        break;
       case CustomValidatorType.HasPhoneNumber:
         if (!user.phoneNumber) {
           //TODO: check for validation (but inform the user)
