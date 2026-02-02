@@ -543,7 +543,7 @@ const CommunityPage = () => {
                             />
                             <div>
                               <p className="text-base font-medium">
-                                Public group
+                                Let anyone join this group
                               </p>
                               <p className="text-sm text-zinc-500 font-normal">
                                 {editGroupPublicGroupExplanation}
@@ -566,7 +566,7 @@ const CommunityPage = () => {
                             />
                             <div>
                               <p className="text-base font-medium">
-                                Accept member assignments
+                                Let staff assign members to this group
                               </p>
                               <p className="text-sm text-zinc-500 font-normal">
                                 {editGroupGroupAssignmentExplanation}

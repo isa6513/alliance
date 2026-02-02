@@ -155,7 +155,9 @@ const CommunityCreateForm = ({
               className="mt-1"
             />
             <div>
-              <p className="text-base font-medium">Public group</p>
+              <p className="text-base font-medium">
+                Let anyone join this group
+              </p>
               <p className="text-sm text-zinc-500 font-normal">
                 {editGroupPublicGroupExplanation}
               </p>
@@ -174,7 +176,9 @@ const CommunityCreateForm = ({
               className="mt-1"
             />
             <div>
-              <p className="text-base font-medium">Accept member assignments</p>
+              <p className="text-base font-medium">
+                Let staff assign members to this group
+              </p>
               <p className="text-sm text-zinc-500 font-normal">
                 {editGroupGroupAssignmentExplanation}
               </p>
