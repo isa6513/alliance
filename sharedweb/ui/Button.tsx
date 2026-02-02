@@ -1,7 +1,6 @@
 import React from "react";
 
 type ButtonProps = React.PropsWithChildren & {
-  ref?: React.RefObject<HTMLButtonElement | null>;
   className?: string;
   color?: ButtonColor;
   hoverText?: string;
@@ -9,19 +8,33 @@ type ButtonProps = React.PropsWithChildren & {
   disabled?: boolean;
   size?: "small" | "medium" | "large" | "mediumDynamic";
 } & (
-    | {
-        type: "submit";
-        onClick?: (e: React.FormEvent) => void;
-      }
-    | {
+    | ({
+        asDiv?: false;
+        ref?: React.RefObject<HTMLButtonElement | null>;
+      } & Pick<
+        React.HTMLAttributes<HTMLButtonElement>,
+        "onMouseEnter" | "onMouseLeave"
+      > &
+        (
+          | {
+              type: "submit";
+              onClick?: (e: React.FormEvent) => void;
+            }
+          | {
+              type?: "button" | "reset";
+              onClick: (e: React.MouseEvent<HTMLElement>) => void;
+            }
+        ))
+    | ({
+        asDiv: true;
+        ref?: React.RefObject<HTMLDivElement | null>;
         type?: "button" | "reset";
         onClick: (e: React.MouseEvent<HTMLElement>) => void;
-      }
-  ) &
-  Pick<
-    React.HTMLAttributes<HTMLButtonElement>,
-    "onMouseEnter" | "onMouseLeave"
-  >;
+      } & Pick<
+        React.HTMLAttributes<HTMLDivElement>,
+        "onMouseEnter" | "onMouseLeave"
+      >)
+  );
 
 export enum ButtonColor {
   Stone = "bg-gray-4 text-white hover:bg-[#444]",
@@ -54,6 +67,7 @@ const Button: React.FC<ButtonProps> = ({
   hoverText,
   onMouseLeave,
   size = "medium",
+  asDiv,
 }) => {
   const color = colorProp ?? ButtonColor.White;
 
@@ -64,30 +78,49 @@ const Button: React.FC<ButtonProps> = ({
     large: "px-6 py-3 text-lg",
   }[size];
 
+  const baseClassName = `${sizeClass} font-medium rounded w-fit h-fit flex items-center justify-center border-box relative group ${
+    disabled ? "opacity-50 !cursor-not-allowed" : ``
+  } ${color} ${
+    color === ButtonColor.Light ? "!text-zinc-800" : ""
+  } ${className} `;
+
+  const baseStyle = {
+    fontWeight: 450,
+  };
+  const hoverClassName =
+    "absolute -top-[110%] left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-black/50 text-white text-sm p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-150";
+
+  if (asDiv) {
+    return (
+      <div
+        ref={ref}
+        title={title}
+        className={`${baseClassName} ${disabled ? "" : "cursor-pointer"}`}
+        style={baseStyle}
+        onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      >
+        {children}
+        {hoverText && <div className={hoverClassName}>{hoverText}</div>}
+      </div>
+    );
+  }
+
   return (
     <button
       ref={ref}
       type={type}
       title={title}
-      className={`${sizeClass} font-medium rounded w-fit h-fit flex items-center justify-center border-box relative group ${
-        disabled ? "opacity-50 !cursor-not-allowed" : ``
-      } ${color} ${
-        color === ButtonColor.Light ? "!text-zinc-800" : ""
-      } ${className} `}
-      style={{
-        fontWeight: 450,
-      }}
+      className={baseClassName}
+      style={baseStyle}
       onClick={onClick}
       disabled={disabled}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
       {children}
-      {hoverText && (
-        <div className="absolute -top-[110%] left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-black/50 text-white text-sm p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-          {hoverText}
-        </div>
-      )}
+      {hoverText && <div className={hoverClassName}>{hoverText}</div>}
     </button>
   );
 };

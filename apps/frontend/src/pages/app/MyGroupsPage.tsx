@@ -382,6 +382,7 @@ const MyGroupsPage = ({
                   color={ButtonColor.White}
                   className="w-full !rounded-none border-none !p-4"
                   onClick={() => onSelectCommunity(community.id)}
+                  asDiv={true}
                 >
                   <div className={"w-full flex flex-row justify-between"}>
                     <div className="flex flex-row gap-x-3">
