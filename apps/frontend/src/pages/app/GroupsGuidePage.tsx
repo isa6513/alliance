@@ -11,7 +11,16 @@ const GroupsGuidePage: React.FC = () => {
         <p className="font-serif text-3xl md:text-4xl font-semibold mb-4">
           Groups
         </p>
-        <p>Groups, they exist.</p>
+        <p>
+          The Alliance is organized into accountability groups. Group leads are
+          responsible for ensuring group members complete their tasks on time.
+          Group members are accountable to their lead.
+        </p>
+        <p>
+          Accountability groups are intended to help the Alliance build a
+          culture of trust and reliability, as well as to ensure members are
+          supported.
+        </p>
       </div>
     </CenterLayout>
   );
