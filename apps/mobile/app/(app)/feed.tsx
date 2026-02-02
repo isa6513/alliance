@@ -14,6 +14,8 @@ import { colors } from "../../lib/style/colors";
 import Text from "../../components/system/Text";
 import UserActivityCard from "../../components/UserActivityCard";
 import { LegendList } from "@legendapp/list";
+import ListHeader from "../../components/ListHeader";
+import GreenHeader from "../../components/GreenHeader";
 
 type Mode = "friends" | "everyone";
 
@@ -103,63 +105,69 @@ export default function FeedScreen() {
     [handleLikeActivity, updateActivity, mode, user?.id]
   );
 
-  return (
-    <View className="flex-1 bg-white">
-      {/* Fixed header */}
-      <View className="bg-green p-4 pt-12 pb-3 z-10 flex-row items-center justify-between">
-        <Text className="text-white font-bold">Activity</Text>
-
-        {/* Segmented control */}
-        <View className="flex-row bg-white/20 rounded-lg p-1">
-          <TouchableOpacity
-            onPress={() => setMode("friends")}
-            activeOpacity={0.7}
-            className={`px-3 py-1.5 rounded-md ${
-              mode === "friends" ? "bg-white" : ""
+  const listHeader = (
+    <ListHeader>
+      <Text className="text-white font-bold">Activity</Text>
+      <View className="flex-row bg-white/20 rounded-lg p-1">
+        <TouchableOpacity
+          onPress={() => setMode("friends")}
+          activeOpacity={0.7}
+          className={`px-3 py-1.5 rounded-md ${
+            mode === "friends" ? "bg-white" : ""
+          }`}
+        >
+          <Text
+            className={`text-sm font-medium ${
+              mode === "friends" ? "text-zinc-900" : "text-white"
             }`}
           >
-            <Text
-              className={`text-sm font-medium ${
-                mode === "friends" ? "text-zinc-900" : "text-white"
-              }`}
-            >
-              Friends
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setMode("everyone")}
-            activeOpacity={0.7}
-            className={`px-3 py-1.5 rounded-md ${
-              mode === "everyone" ? "bg-white" : ""
+            Friends
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setMode("everyone")}
+          activeOpacity={0.7}
+          className={`px-3 py-1.5 rounded-md ${
+            mode === "everyone" ? "bg-white" : ""
+          }`}
+        >
+          <Text
+            className={`text-sm font-medium ${
+              mode === "everyone" ? "text-zinc-900" : "text-white"
             }`}
           >
-            <Text
-              className={`text-sm font-medium ${
-                mode === "everyone" ? "text-zinc-900" : "text-white"
-              }`}
-            >
-              Everyone
-            </Text>
-          </TouchableOpacity>
-        </View>
+            Everyone
+          </Text>
+        </TouchableOpacity>
       </View>
+    </ListHeader>
+  );
 
+  return (
+    <GreenHeader>
       {/* Content area */}
       {loading ? (
-        <View className="flex-1 items-center justify-center bg-white">
-          <ActivityIndicator size="large" color={colors.green} />
+        <View className="flex-1">
+          {listHeader}
+          <View className="flex-1 items-center justify-center bg-white">
+            <ActivityIndicator size="large" color={colors.green} />
+          </View>
         </View>
       ) : activities.length === 0 ? (
-        <View className="flex-1 items-center justify-center bg-white">
-          <Text className="text-zinc-500">
-            {mode === "friends"
-              ? "No friend activity yet"
-              : "No activity yet"}
-          </Text>
+        <View className="flex-1">
+          {listHeader}
+          <View className="flex-1 items-center justify-center bg-white">
+            <Text className="text-zinc-500">
+              {mode === "friends"
+                ? "No friend activity yet"
+                : "No activity yet"}
+            </Text>
+          </View>
         </View>
       ) : (
         <LegendList
           key={mode}
+          ListHeaderComponent={listHeader}
           data={activities}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderActivity}
@@ -173,6 +181,6 @@ export default function FeedScreen() {
           }}
         />
       )}
-    </View>
+    </GreenHeader>
   );
 }

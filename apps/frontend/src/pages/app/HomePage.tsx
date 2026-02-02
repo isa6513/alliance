@@ -162,7 +162,7 @@ const HomePage = () => {
     return (
       <div
         className={
-          "flex flex-col py-4 sm:py-8 md:py-18 px-4 max-w-3xl mx-auto min-h-full relative"
+          "flex flex-col py-4 sm:py-8 md:py-18 px-4 lg:pr-0 max-w-3xl mx-auto min-h-full relative"
         }
       >
         {!isLargeScreen && (
@@ -206,7 +206,7 @@ const HomePage = () => {
 
   const sidebarContent = useMemo(() => {
     return (
-      <div className="px-4 pt-12 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200 h-full">
+      <div className="px-4 pt-12 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200 h-full border-l border-zinc-200">
         {tasksListContent}
         <div className="flex-1 min-h-0 flex flex-col">
           <div className="flex flex-row justify-between items-center shrink-0">

@@ -75,7 +75,7 @@ const ActionPageTaskPanel = ({
     case ActionPageTaskPanelState.ShowTaskWithMissedDeadline:
       return (
         <View>
-          <Card cardStyle={CardStyle.Grey}>
+          <Card cardStyle={CardStyle.Grey} className="bg-zinc-100 my-2">
             <Text className="font-medium">{taskDeadlinePassed}</Text>
             <Text>{taskDeadlinePassedDescription}</Text>
           </Card>

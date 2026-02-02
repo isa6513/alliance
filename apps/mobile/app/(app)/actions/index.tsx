@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   Modal,
   Pressable,
+  RefreshControl,
 } from "react-native";
 import { useCallback, useMemo, useState } from "react";
 import { router } from "expo-router";
@@ -14,6 +15,7 @@ import {
 } from "@alliance/shared/lib/actionsListPage";
 import Text from "../../../components/system/Text";
 import GreenHeader from "../../../components/GreenHeader";
+import ListHeader from "../../../components/ListHeader";
 import { ChevronDown } from "lucide-react-native";
 import ActionItemCard from "../../../components/ActionItemCard";
 import { LegendList } from "@legendapp/list";
@@ -22,7 +24,7 @@ export default function ActionsScreen() {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const { data: actions, isPending, error } = useActionsQuery();
+  const { data: actions, isPending, isRefetching, error, refetch } = useActionsQuery();
 
   const counts = useMemo(() => {
     const result: Record<FilterMode, number> = {} as any;
@@ -54,7 +56,7 @@ export default function ActionsScreen() {
         <LegendList
           contentContainerStyle={{ backgroundColor: "white" }}
           ListHeaderComponent={
-            <View className="flex-row items-center gap-x-3 border-b border-zinc-200 p-4 pt-12 justify-between bg-green pb-3">
+            <ListHeader>
               <Text className="text-white font-bold">All Actions</Text>
               <View className="flex-row items-center gap-x-2">
                 <Text className="text-sm text-white font-medium">
@@ -102,11 +104,14 @@ export default function ActionsScreen() {
                   </Modal>
                 </View>
               </View>
-            </View>
+            </ListHeader>
           }
           data={filteredActions}
           keyExtractor={(item) => item.id.toString()}
           recycleItems
+          refreshControl={
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+          }
           renderItem={({ item }) => (
             <View key={item.id} className="border-b border-zinc-200">
               <ActionItemCard

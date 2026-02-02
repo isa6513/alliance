@@ -1,6 +1,6 @@
 import { RelativePathString, router, Slot } from "expo-router";
 import { AuthProvider } from "../lib/AuthContext";
-import { Platform } from "react-native";
+import { Platform , View } from "react-native";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { client } from "@alliance/shared/client/client.gen";
 import WebTokenStore from "../lib/ExpoWebTokenStore";
@@ -79,7 +79,6 @@ async function registerForPushNotificationsAsync() {
           projectId,
         })
       ).data;
-      console.log(pushTokenString);
       return pushTokenString;
     } catch (e: unknown) {
       handleRegistrationError(`${e}`);
@@ -113,6 +112,7 @@ export default function RootLayout() {
   useEffect(() => {
     client.setConfig({
       baseUrl: getApiUrl(),
+      throwOnError: true,
     });
   }, []);
 

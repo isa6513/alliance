@@ -6,6 +6,7 @@
     "apps/frontend",
     "apps/admin",
     "apps/mobile",
+    "citesting",
     "shared",
     "sharedweb"
   ],

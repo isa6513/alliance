@@ -331,7 +331,6 @@ export function RenderField({
     }
 
     case "checkbox":
-      console.log("checkbox", errorMessage);
       return (
         <View>
           <View className="flex-row w-full">

@@ -1,5 +1,5 @@
 import { View, ScrollView, ActivityIndicator } from "react-native";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   actionsDismissAction,
   actionsFindAllLoggedIn,
@@ -108,7 +108,7 @@ export default function HomeScreen() {
   return (
     <GreenHeader>
       <ScrollView ref={scrollViewRef} className="flex-1">
-        <View className="bg-green p-4 pt-11">
+        <View className="bg-green p-4 pt-12">
           <Text className="text-white font-bold text-base mt-2 pb-0">
             Current task:
           </Text>

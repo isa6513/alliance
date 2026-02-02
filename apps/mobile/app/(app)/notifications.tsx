@@ -14,6 +14,7 @@ import Button, {
 } from "../../components/system/Button";
 import Text from "../../components/system/Text";
 import GreenHeader from "../../components/GreenHeader";
+import ListHeader from "../../components/ListHeader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LegendList } from "@legendapp/list";
 import SwipeableNotification, {
@@ -40,6 +41,7 @@ export default function NotificationsScreen() {
   const {
     data: response,
     isPending,
+    isRefetching,
     error,
     refetch,
   } = useQuery({
@@ -147,27 +149,27 @@ export default function NotificationsScreen() {
     <GreenHeader>
       {isPending ? (
         <View className="flex-1">
-          <View className="bg-green p-4 pt-12 pb-3 flex-row items-center justify-between">
+          <ListHeader className="pt-12">
             <Text className="text-white font-bold">Notifications</Text>
-          </View>
+          </ListHeader>
           <View className="flex-1 items-center justify-center bg-white">
             <ActivityIndicator size="large" color="#0D1B2A" />
           </View>
         </View>
       ) : error ? (
         <View className="flex-1">
-          <View className="bg-green p-4 pt-12 pb-3 flex-row items-center justify-between">
+          <ListHeader className="pt-12">
             <Text className="text-white font-bold">Notifications</Text>
-          </View>
+          </ListHeader>
           <View className="flex-1 items-center justify-center bg-white">
             <Text className="text-center text-red-500">{error.message}</Text>
           </View>
         </View>
       ) : notifications.length === 0 ? (
         <View className="flex-1">
-          <View className="bg-green p-4 pt-12 pb-3 flex-row items-center justify-between">
+          <ListHeader className="pt-12">
             <Text className="text-white font-bold">Notifications</Text>
-          </View>
+          </ListHeader>
           <View className="flex-1 items-center justify-center bg-white">
             <Text className="text-zinc-500">You&apos;re all caught up.</Text>
           </View>
@@ -175,7 +177,7 @@ export default function NotificationsScreen() {
       ) : (
         <LegendList
           ListHeaderComponent={
-            <View className="bg-green p-4 pt-12 pb-3 flex-row items-center justify-between">
+            <ListHeader>
               <Text className="text-white font-bold">Notifications</Text>
               {unreadCount > 0 && (
                 <Button
@@ -185,12 +187,12 @@ export default function NotificationsScreen() {
                   title="Mark all as read"
                 />
               )}
-            </View>
+            </ListHeader>
           }
           data={notifications}
           keyExtractor={(item) => item.id.toString()}
           refreshControl={
-            <RefreshControl refreshing={isPending} onRefresh={refetch} />
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
           }
           recycleItems
           renderItem={renderNotification}
