@@ -250,12 +250,7 @@ const CommunityCreateForm = ({
           <Button
             onClick={handleSubmit}
             color={ButtonColor.Black}
-            disabled={
-              isSubmitting ||
-              createDisabled ||
-              !formValues.name.trim() ||
-              !formValues.description.trim()
-            }
+            disabled={isSubmitting || createDisabled || !formValues.name.trim()}
           >
             {isSubmitting
               ? "Creating..."
