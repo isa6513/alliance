@@ -40,14 +40,61 @@ export type UseActivitiesProps = {
     }
 );
 
+const CACHE_PREFIX = "useActivities.cache.";
+
+const generateCacheKey = (
+  list: ActivityList,
+  objectId: number | undefined,
+  limit: number,
+  comments: boolean
+): string => {
+  return `${CACHE_PREFIX}${list}_${objectId ?? "none"}_${limit}_${comments}`;
+};
+
+const getCachedActivities = (cacheKey: string): ActionActivityDto[] | null => {
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (!cached) {
+      return null;
+    }
+    return JSON.parse(cached);
+  } catch {
+    return null;
+  }
+};
+
+const setCachedActivities = (
+  cacheKey: string,
+  activities: ActionActivityDto[]
+): void => {
+  try {
+    localStorage.setItem(cacheKey, JSON.stringify(activities));
+  } catch {}
+};
+
 const useActivities = ({
   list,
   objectId,
   limit = 50,
   comments = false,
 }: UseActivitiesProps) => {
-  const [activities, setActivities] = useState<ActionActivityDto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = generateCacheKey(list, objectId, limit, comments);
+
+  const [activities, setActivitiesWithoutCache] = useState<ActionActivityDto[]>(
+    getCachedActivities(cacheKey) ?? []
+  );
+  const setActivities = useCallback(
+    (setStateActivities: React.SetStateAction<ActionActivityDto[]>) => {
+      const newActivities =
+        typeof setStateActivities === "function"
+          ? setStateActivities(activities)
+          : setStateActivities;
+      setActivitiesWithoutCache(setStateActivities);
+      setCachedActivities(cacheKey, newActivities);
+    },
+    [cacheKey]
+  );
+  const [loading, setLoading] = useState(activities.length === 0);
 
   useEffect(() => {
     let apiCall;
