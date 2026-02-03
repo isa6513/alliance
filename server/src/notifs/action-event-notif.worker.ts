@@ -24,6 +24,7 @@ import {
 import { withPgAdvisoryLock } from './lock-utils';
 import { generateCIDForNotif, NotificationChannel } from './notif-utils';
 import { PushService } from 'src/push/push.service';
+import { ReminderCohortType } from 'src/actions/entities/reminder-group.entity';
 
 const PROCESS_ONE_LOCK_KEY1 = 0xa11a;
 const PROCESS_ONE_LOCK_KEY2 = 0xce01;
@@ -40,7 +41,7 @@ export class ActionEventNotifWorker {
     private readonly actionEventNotifsRepository: Repository<ActionEventNotif>,
     private readonly reminderService: ActionEventReminderService,
     private readonly pushService: PushService,
-  ) { }
+  ) {   }
 
   @Cron('*/3 * * * *')
   async dispatchDueNotifs() {
@@ -89,12 +90,21 @@ export class ActionEventNotifWorker {
       plan.group.useSuiteTaskCount ? plan.group.actionSuite?.id : undefined,
     );
 
+    let uncompletedMembersInGroupCount: number | undefined = undefined;
+    if(plan.group.cohortType === ReminderCohortType.GroupLeadsWithUncompleted) {
+      uncompletedMembersInGroupCount = (await this.reminderService.findUncompletedMembersInCommunities(
+        plan.group,
+        plan.user,
+      )).length;
+    }
+
     return processKeywordReplacements(text, {
       user: plan.user,
       action: plan.group.memberActionEvent.action,
       deadlineEvent: plan.group.deadlineEvent,
       cid,
       uncompletedTasksCount: uncompletedTasks.length,
+      uncompletedMembersInGroupCount,
       uncompletedTasksNames: uncompletedTasks.map((task) => task.name),
       uncompletedTasksTime:
         uncompletedTasks.reduce(

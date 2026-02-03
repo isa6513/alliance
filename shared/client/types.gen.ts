@@ -288,7 +288,7 @@ export type ActionActivity = {
 
 export type ReminderGroupTimingMode = 'absolute' | 'from_deadline' | 'within_range' | 'within_relative_range' | 'event_launch';
 
-export type ReminderCohortType = 'all_uncompleted' | 'tag' | 'custom';
+export type ReminderCohortType = 'all_uncompleted' | 'group_leads_with_uncompleted' | 'tag' | 'custom';
 
 export type ActionEventNotifType = 'announcement' | 'misseddeadline' | 'reminder' | 'personalreminder';
 
@@ -545,8 +545,10 @@ export type User = {
     pushesForFriendRequests: boolean;
     isIntroductoryGroupMember: boolean;
     undergoingGroupAssignment: boolean;
+    remindAboutUncompletedGroupMembers: boolean;
     contractEvents?: Array<ContractEvent>;
     communities: Array<Community>;
+    leaderOfIds: Array<number>;
     invitedCommunities: Array<CommunityInvite>;
     participants: Array<Participant>;
     authoredActions?: Array<Action>;
@@ -598,8 +600,10 @@ export type UserDto = {
     pushesForFriendRequests: boolean;
     isIntroductoryGroupMember: boolean;
     undergoingGroupAssignment: boolean;
+    remindAboutUncompletedGroupMembers: boolean;
     contractEvents?: Array<ContractEvent>;
     communities: Array<Community>;
+    leaderOfIds: Array<number>;
     invitedCommunities: Array<CommunityInvite>;
     cityId?: number;
     email: string;
@@ -686,6 +690,7 @@ export type UpdateProfileDto = {
     pushesForLikes?: boolean;
     pushesForComments?: boolean;
     pushesForFriendRequests?: boolean;
+    remindAboutUncompletedGroupMembers?: boolean;
     cityId?: number | null;
 };
 

@@ -42,6 +42,11 @@ export function tasksUrl(full = false) {
   return full ? `${process.env.APP_URL}${path}` : path;
 }
 
+export function groupMembersListUrl(full = false) {
+  const path = `/groups?tab=members`; //TODO: multiple groups
+  return full ? `${process.env.APP_URL}${path}` : path;
+}
+
 export function postUrl(postId: number) {
   return `/forum/post/${postId}`;
 }

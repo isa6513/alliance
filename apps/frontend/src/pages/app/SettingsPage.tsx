@@ -90,7 +90,7 @@ const SettingsPage: React.FC = () => {
       if (response.data) {
         setPaymentMethod(response.data);
       }
-    } catch {}
+    } catch { }
   }, []);
 
   const handleClearPaymentMethod = useCallback(async () => {
@@ -239,8 +239,8 @@ const SettingsPage: React.FC = () => {
                 {saving
                   ? "Saving..."
                   : hasChanges
-                  ? "Unsaved changes"
-                  : "All changes saved"}
+                    ? "Unsaved changes"
+                    : "All changes saved"}
               </p>
               <Button
                 onClick={handleLogout}
@@ -279,7 +279,7 @@ const SettingsPage: React.FC = () => {
                     name="email"
                     type="email"
                     value={user.email || ""}
-                    onChange={() => {}}
+                    onChange={() => { }}
                     disabled
                   />
                 </div>
@@ -389,12 +389,12 @@ const SettingsPage: React.FC = () => {
                   // editableUser.pushNotifsEnabled ||
                   editableUser.textNotifsEnabled
                 ) && (
-                  <p className="text-sm text-zinc-500">
-                    You will not receive any notifications. Please keep a
-                    notification channel enabled if you need reminders to
-                    complete actions on time.
-                  </p>
-                )}
+                    <p className="text-sm text-zinc-500">
+                      You will not receive any notifications. Please keep a
+                      notification channel enabled if you need reminders to
+                      complete actions on time.
+                    </p>
+                  )}
               </div>
               <div className="flex flex-row gap-6 mt-2">
                 <LargeCheckbox
@@ -421,6 +421,26 @@ const SettingsPage: React.FC = () => {
                   />
                 )}
               </div>
+              {user.leaderOfIds.length > 0 ? (
+                <div><p className="!font-medium mb-0 mt-5">
+                  Recieve reminders for group members with uncompleted tasks?
+                </p>
+                  <div className="flex flex-row gap-6 mt-2">
+                    <select
+                      className="border border-zinc-300 rounded px-3 py-2 self-start"
+                      value={editableUser.remindAboutUncompletedGroupMembers ? "yes" : "no"}
+                      onChange={(event) =>
+                        updateEditableUser({
+                          remindAboutUncompletedGroupMembers: event.target
+                            .value === "yes",
+                        })
+                      }
+                    >
+                      <option value={"email"}>Yes</option>
+                      <option value={"no"}>No</option>
+                    </select>
+                  </div>
+                </div>) : null}
             </div>
             <div className="flex flex-col md:flex-row gap-y-2 gap-x-12 font-medium">
               <div>

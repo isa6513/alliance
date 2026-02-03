@@ -292,6 +292,11 @@ export class User {
   @Allow()
   undergoingGroupAssignment: boolean;
 
+  @Column({ default: true })
+  @ApiProperty()
+  @Allow()
+  remindAboutUncompletedGroupMembers: boolean;
+
   // Relations
 
   @OneToMany(() => ContractEvent, (event) => event.user, { cascade: true })
@@ -353,6 +358,7 @@ export class User {
   leaderOf: Community[];
 
   @RelationId((user: User) => user.leaderOf)
+  @ApiProperty({ type: Number, isArray: true })
   leaderOfIds: number[];
 
   @OneToMany(() => CommunityInvite, (invite) => invite.invitedUser)

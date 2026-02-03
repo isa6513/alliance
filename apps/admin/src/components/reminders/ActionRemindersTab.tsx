@@ -387,16 +387,14 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           roundingMethod: "floor",
         });
         return {
-          primary: `Sends ${distance} ${
-            seconds >= 0 ? "before" : "after"
-          } ${referenceTitle}`,
+          primary: `Sends ${distance} ${seconds >= 0 ? "before" : "after"
+            } ${referenceTitle}`,
           secondary: `${format(
             sendDate,
             DISPLAY_DATETIME_FORMAT
           )} • Deadline ${format(deadlineDate, DISPLAY_DATETIME_FORMAT)}`,
-          pastTense: `${distance} ${
-            seconds >= 0 ? "before" : "after"
-          } ${referenceTitle}`,
+          pastTense: `${distance} ${seconds >= 0 ? "before" : "after"
+            } ${referenceTitle}`,
         };
       }
       return {
@@ -483,16 +481,16 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       return {
         primary: launchDate
           ? `Sends when launch event begins (${format(
-              launchDate,
-              DISPLAY_DATETIME_FORMAT
-            )})`
+            launchDate,
+            DISPLAY_DATETIME_FORMAT
+          )})`
           : "Sends when launch event begins",
         secondary: null,
         pastTense: launchDate
           ? `when launch event began (${format(
-              launchDate,
-              DISPLAY_DATETIME_FORMAT
-            )})`
+            launchDate,
+            DISPLAY_DATETIME_FORMAT
+          )})`
           : "when launch event began",
       };
     }
@@ -533,41 +531,54 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
 
     const deadlineEvent = nextEventById.get(selectedEventId);
     if (deadlineEvent) {
-      const twoDay = await actionsCreateReminderGroup({
+      reminders.push(await actionsCreateReminderGroup({
         path: { eventId: selectedEventId },
         body: {
           suiteId: suite.id,
           ...reminderPresets["Two Day Range"],
         },
-      });
-      reminders.push(twoDay);
+      }));
 
-      const oneDay = await actionsCreateReminderGroup({
+      reminders.push(await actionsCreateReminderGroup({
         path: { eventId: selectedEventId },
         body: {
           suiteId: suite.id,
           ...reminderPresets["One Day Range"],
         },
-      });
-      reminders.push(oneDay);
+      }));
 
-      const threeHour = await actionsCreateReminderGroup({
+      reminders.push(await actionsCreateReminderGroup({
         path: { eventId: selectedEventId },
         body: {
           suiteId: suite.id,
           ...reminderPresets["Three Hour"],
         },
-      });
-      reminders.push(threeHour);
+      }));
 
-      const missedDeadline = await actionsCreateReminderGroup({
+      reminders.push(await actionsCreateReminderGroup({
         path: { eventId: selectedEventId },
         body: {
           suiteId: suite.id,
           ...reminderPresets["Missed Deadline"],
         },
-      });
-      reminders.push(missedDeadline);
+      }));
+
+      reminders.push(await actionsCreateReminderGroup({
+        path: { eventId: selectedEventId },
+        body: {
+          suiteId: suite.id,
+          ...reminderPresets["Group Leads 3 days"],
+        },
+      }));
+
+      reminders.push(await actionsCreateReminderGroup({
+        path: { eventId: selectedEventId },
+        body: {
+          suiteId: suite.id,
+          ...reminderPresets["Group Leads 2 days"],
+        },
+      }));
+      console.log(reminders.map((reminder) => reminder.data));
     }
     const error = reminders.some(
       (reminder) => (reminder as unknown as { error: string | undefined }).error
@@ -575,8 +586,12 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     if (error) {
       setCreateError("Failed to create reminders.");
     }
-    if (reminders.every((reminder) => reminder.data)) {
+    if (reminders.every((reminder) => reminder.data) && reminders.length) {
       setCreateSuccess("Reminders created successfully.");
+    }
+    if (reminders.length === 0) {
+      console.log('no reminders created');
+      setCreateError("No reminders created - does this event have a deadline?");
     }
     setReminderGroups((prev) => [
       ...prev,
@@ -647,43 +662,43 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
 
   const handleEditGroupSubmit =
     (groupId: number) =>
-    async (payload: ActionReminderGroupFormSubmitPayload) => {
-      setEditError(null);
-      setEditSuccess(null);
-      setEditSubmitting(true);
-      try {
-        const { memberActionEventId: eventId, ...body } = payload;
-        const updatedBody = {
-          ...body,
-          suiteId: suite.id,
-        };
-        if (!eventId) {
-          throw new Error("Select a member action event first.");
-        }
+      async (payload: ActionReminderGroupFormSubmitPayload) => {
+        setEditError(null);
+        setEditSuccess(null);
+        setEditSubmitting(true);
+        try {
+          const { memberActionEventId: eventId, ...body } = payload;
+          const updatedBody = {
+            ...body,
+            suiteId: suite.id,
+          };
+          if (!eventId) {
+            throw new Error("Select a member action event first.");
+          }
 
-        const response = await actionsUpdateReminderGroup({
-          path: { groupId },
-          body: updatedBody,
-        });
+          const response = await actionsUpdateReminderGroup({
+            path: { groupId },
+            body: updatedBody,
+          });
 
-        if (!response.data) {
-          throw new Error(
-            (response.error as string) ?? "Failed to update reminder."
+          if (!response.data) {
+            throw new Error(
+              (response.error as string) ?? "Failed to update reminder."
+            );
+          }
+
+          await refreshReminderGroups(eventId);
+          setEditSuccess("Reminder group updated successfully.");
+          setEditingGroupId(null);
+        } catch (err) {
+          console.error(err);
+          setEditError(
+            err instanceof Error ? err.message : "Failed to update reminder."
           );
+        } finally {
+          setEditSubmitting(false);
         }
-
-        await refreshReminderGroups(eventId);
-        setEditSuccess("Reminder group updated successfully.");
-        setEditingGroupId(null);
-      } catch (err) {
-        console.error(err);
-        setEditError(
-          err instanceof Error ? err.message : "Failed to update reminder."
-        );
-      } finally {
-        setEditSubmitting(false);
-      }
-    };
+      };
 
   const handleEditGroupStart = (groupId: number) => {
     setEditingGroupId(groupId);
@@ -836,6 +851,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           {!createGroupExpanded && createSuccess && (
             <p className="text-sm text-green">{createSuccess}</p>
           )}
+          {createError && <p className="text-sm text-red-600 mb-2">{createError}</p>}
           {createGroupExpanded && selectedEventId !== null && (
             <>
               <ActionReminderGroupForm

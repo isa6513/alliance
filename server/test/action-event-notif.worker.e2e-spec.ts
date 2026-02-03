@@ -14,6 +14,7 @@ import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity'
 import { NotificationChannel } from 'src/notifs/notif-utils';
 import { Tag } from 'src/user/entities/tag.entity';
 import { User } from 'src/user/entities/user.entity';
+import { Community } from 'src/user/entities/community.entity';
 import { Repository } from 'typeorm';
 import {
   ActionActivity,
@@ -38,6 +39,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
   let tagRepo: Repository<Tag>;
   let actionSuiteRepo: Repository<ActionSuite>;
   let contractEventRepo: Repository<ContractEvent>;
+  let communityRepo: Repository<Community>;
 
   const baseMessages = {
     emailMessage: 'Reminder for #{firstname} on #{action}',
@@ -60,6 +62,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
     tagRepo = ctx.dataSource.getRepository(Tag);
     actionSuiteRepo = ctx.dataSource.getRepository(ActionSuite);
     contractEventRepo = ctx.dataSource.getRepository(ContractEvent);
+    communityRepo = ctx.dataSource.getRepository(Community);
   });
 
   afterAll(async () => {
@@ -997,6 +1000,331 @@ describe('ActionEventNotifWorker (e2e)', () => {
     expect(notifs.map((n) => n.user.id)).toHaveLength(0);
 
     await userRepo.delete({ id: completeUser.id });
+  });
+
+  it('notifies group leaders about suite gaps and fills #{nmembers}', async () => {
+    const now = Date.now();
+
+    const suite = await actionSuiteRepo.save(
+      actionSuiteRepo.create({
+        name: uniqueName('leader-suite'),
+      }),
+    );
+
+    const eventDate = new Date(now - 60 * 60 * 1000);
+
+    const { action: firstAction, memberEvent } =
+      await createActionWithMemberEvent({
+        name: uniqueName('leader-suite-one'),
+        eventDate,
+        suite,
+        suiteManaged: true,
+      });
+
+    const { action: secondAction } = await createActionWithMemberEvent({
+      name: uniqueName('leader-suite-two'),
+      eventDate,
+      suite,
+      suiteManaged: true,
+    });
+
+    const suiteWithActions = await actionSuiteRepo.findOneOrFail({
+      where: { id: suite.id },
+      relations: { actions: true },
+    });
+
+    const createSignedUser = async (
+      label: string,
+      phoneSuffix: string,
+      overrides: Partial<User> = {},
+    ) =>
+      userRepo.save(
+        userRepo.create({
+          email: `${uniqueName(
+            `leader-${label.toLowerCase().replace(/\s+/g, '-')}`,
+          )}@example.com`,
+          password: 'pass',
+          name: label,
+          tags: [ctx.defaultTag],
+          contractEvents: [
+            {
+              type: ContractEventType.SIGNED,
+              date: new Date(now - 7 * 24 * 60 * 60 * 1000),
+              automatic: false,
+            } as ContractEvent,
+          ],
+          textNotifsEnabled: true,
+          phoneNumber: `+1555555${phoneSuffix}`,
+          phoneNumberValidated: true,
+          emailNotifsEnabled: false,
+          turnedOffAllNotifs: false,
+          preferredActionReminderChannel: NotificationChannel.Text,
+          ...overrides,
+        }),
+      );
+
+    const leaderWithGaps = await createSignedUser('Lead With Gaps', '6101', {
+      remindAboutUncompletedGroupMembers: true,
+    });
+    const leaderComplete = await createSignedUser('Lead Complete', '6102', {
+      remindAboutUncompletedGroupMembers: true,
+    });
+
+    const communityWithGaps = await communityRepo.save(
+      communityRepo.create({
+        name: uniqueName('community-gaps'),
+        description: 'Community with uncompleted members',
+        leaders: [leaderWithGaps],
+        users: [leaderWithGaps],
+      }),
+    );
+
+    const communityComplete = await communityRepo.save(
+      communityRepo.create({
+        name: uniqueName('community-complete'),
+        description: 'Community with completed members',
+        leaders: [leaderComplete],
+        users: [leaderComplete],
+      }),
+    );
+
+    const memberWithOneCompletion = await createSignedUser(
+      'Member One Completion',
+      '6103',
+      {
+        communities: [communityWithGaps],
+        textNotifsEnabled: false,
+      },
+    );
+
+    const memberWithNoCompletion = await createSignedUser(
+      'Member No Completion',
+      '6104',
+      {
+        communities: [communityWithGaps],
+        textNotifsEnabled: false,
+      },
+    );
+
+    const completeMemberOne = await createSignedUser(
+      'Member Complete One',
+      '6105',
+      {
+        communities: [communityComplete],
+        textNotifsEnabled: false,
+      },
+    );
+
+    const completeMemberTwo = await createSignedUser(
+      'Member Complete Two',
+      '6106',
+      {
+        communities: [communityComplete],
+        textNotifsEnabled: false,
+      },
+    );
+
+    await recordCompletion(memberWithOneCompletion, firstAction);
+    await recordCompletion(leaderWithGaps, firstAction);
+    await recordCompletion(leaderWithGaps, secondAction);
+    await recordCompletion(leaderComplete, firstAction);
+    await recordCompletion(leaderComplete, secondAction);
+    await recordCompletion(completeMemberOne, firstAction);
+    await recordCompletion(completeMemberOne, secondAction);
+    await recordCompletion(completeMemberTwo, firstAction);
+    await recordCompletion(completeMemberTwo, secondAction);
+
+    const reminderGroup = await createReminderGroup(
+      memberEvent,
+      ReminderGroupTimingMode.Absolute,
+      ReminderCohortType.GroupLeadsWithUncompleted,
+      {
+        sendAtAbsolute: new Date(now - 5 * 60 * 1000),
+        actionSuite: suiteWithActions,
+        textMessage: 'Leader reminder: #{nmembers} members need help.',
+      },
+    );
+
+    await worker.dispatchDueNotifs();
+
+    const notifs = await fetchNotifsForGroup(reminderGroup);
+    const notifiedIds = notifs.map((notif) => notif.user.id);
+
+    expect(notifiedIds).toHaveLength(1);
+    expect(notifiedIds).toContain(leaderWithGaps.id);
+    expect(notifiedIds).not.toContain(leaderComplete.id);
+    expect(notifs[0].channel).toBe(NotificationChannel.Text);
+
+    const leaderWithGapsForText = await userRepo.findOneOrFail({
+      where: { id: leaderWithGaps.id },
+      loadRelationIds: { relations: ['leaderOf'] },
+    });
+    if (
+      !leaderWithGapsForText.leaderOfIds ||
+      leaderWithGapsForText.leaderOfIds.length === 0
+    ) {
+      leaderWithGapsForText.leaderOfIds = [communityWithGaps.id];
+    }
+
+    const leaderText = await worker.processCustomReminderText(
+      reminderGroup.textMessage,
+      {
+        user: leaderWithGapsForText,
+        group: reminderGroup,
+        scheduledFor: new Date(),
+      },
+      'cid-group-leads',
+    );
+
+    expect(leaderText).toBe('Leader reminder: 2 members need help.');
+
+    await userRepo.delete([
+      leaderWithGaps.id,
+      leaderComplete.id,
+      memberWithOneCompletion.id,
+      memberWithNoCompletion.id,
+      completeMemberOne.id,
+      completeMemberTwo.id,
+    ]);
+    await communityRepo.delete([communityWithGaps.id, communityComplete.id]);
+  });
+
+  it('excludes the leader from #{nmembers} counts', async () => {
+    const now = Date.now();
+
+    const suite = await actionSuiteRepo.save(
+      actionSuiteRepo.create({
+        name: uniqueName('leader-count-suite'),
+      }),
+    );
+
+    const eventDate = new Date(now - 60 * 60 * 1000);
+
+    const { memberEvent } = await createActionWithMemberEvent({
+      name: uniqueName('leader-count-action'),
+      eventDate,
+      suite,
+      suiteManaged: true,
+    });
+
+    await createActionWithMemberEvent({
+      name: uniqueName('leader-count-action-two'),
+      eventDate,
+      suite,
+      suiteManaged: true,
+    });
+
+    const suiteWithActions = await actionSuiteRepo.findOneOrFail({
+      where: { id: suite.id },
+      relations: { actions: true },
+    });
+
+    const createSignedUser = async (
+      label: string,
+      phoneSuffix: string,
+      overrides: Partial<User> = {},
+    ) =>
+      userRepo.save(
+        userRepo.create({
+          email: `${uniqueName(
+            `leader-count-${label.toLowerCase().replace(/\s+/g, '-')}`,
+          )}@example.com`,
+          password: 'pass',
+          name: label,
+          tags: [ctx.defaultTag],
+          contractEvents: [
+            {
+              type: ContractEventType.SIGNED,
+              date: new Date(now - 7 * 24 * 60 * 60 * 1000),
+              automatic: false,
+            } as ContractEvent,
+          ],
+          textNotifsEnabled: true,
+          phoneNumber: `+1555555${phoneSuffix}`,
+          phoneNumberValidated: true,
+          emailNotifsEnabled: false,
+          turnedOffAllNotifs: false,
+          preferredActionReminderChannel: NotificationChannel.Text,
+          ...overrides,
+        }),
+      );
+
+    const leader = await createSignedUser('Leader Count', '6201', {
+      remindAboutUncompletedGroupMembers: true,
+    });
+    const member = await createSignedUser('Member Count', '6202', {
+      textNotifsEnabled: false,
+    });
+
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: uniqueName('community-leader-count'),
+        description: 'Community for leader count',
+        leaders: [leader],
+        users: [leader, member],
+      }),
+    );
+
+    const reminderGroup = await createReminderGroup(
+      memberEvent,
+      ReminderGroupTimingMode.Absolute,
+      ReminderCohortType.GroupLeadsWithUncompleted,
+      {
+        sendAtAbsolute: new Date(now - 5 * 60 * 1000),
+        actionSuite: suiteWithActions,
+        textMessage: 'Leaders need to help #{nmembers} members.',
+      },
+    );
+
+    await worker.dispatchDueNotifs();
+
+    const notifs = await fetchNotifsForGroup(reminderGroup);
+    expect(notifs.map((notif) => notif.user.id)).toEqual([leader.id]);
+
+    const leaderForText = await userRepo.findOneOrFail({
+      where: { id: leader.id },
+      loadRelationIds: { relations: ['leaderOf'] },
+    });
+    if (!leaderForText.leaderOfIds || leaderForText.leaderOfIds.length === 0) {
+      leaderForText.leaderOfIds = [community.id];
+    }
+
+    const leaderText = await worker.processCustomReminderText(
+      reminderGroup.textMessage,
+      {
+        user: leaderForText,
+        group: reminderGroup,
+        scheduledFor: new Date(),
+      },
+      'cid-leader-count',
+    );
+
+    expect(leaderText).toBe('Leaders need to help 1 members.');
+
+    await userRepo.update(leader.id, {
+      remindAboutUncompletedGroupMembers: false,
+    });
+
+    const reminderGroupNoLeader = await createReminderGroup(
+      memberEvent,
+      ReminderGroupTimingMode.Absolute,
+      ReminderCohortType.GroupLeadsWithUncompleted,
+      {
+        sendAtAbsolute: new Date(now - 4 * 60 * 1000),
+        actionSuite: suiteWithActions,
+        textMessage: 'Leaders need to help #{nmembers} members.',
+      },
+    );
+
+    await worker.dispatchDueNotifs();
+
+    const notifsWithoutLeader = await fetchNotifsForGroup(
+      reminderGroupNoLeader,
+    );
+    expect(notifsWithoutLeader).toHaveLength(0);
+
+    await userRepo.delete([leader.id, member.id]);
+    await communityRepo.delete({ id: community.id });
   });
 
   it('uses suite-aware #{n} and #{tasktime} counts when configured', async () => {

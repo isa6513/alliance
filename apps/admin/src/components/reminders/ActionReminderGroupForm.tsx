@@ -78,27 +78,32 @@ export const keywords = [
   "#{timeremaining}",
   "#{tasktime}",
   "#{tasknames}",
+  "#{nmembers}",
+  "#{grouplink}",
 ];
 
 const TIMING_MODE_OPTIONS: Array<{
   value: ReminderGroupTimingMode;
   label: string;
 }> = [
-  { value: "within_range", label: "Personalized window" },
-  { value: "absolute", label: "Absolute time" },
-  { value: "from_deadline", label: "Relative to deadline" },
-  {
-    value: "within_relative_range",
-    label: "Relative personalized window",
-  },
-  { value: "event_launch", label: "Event launch" },
-];
+    { value: "within_range", label: "Personalized window" },
+    { value: "absolute", label: "Absolute time" },
+    { value: "from_deadline", label: "Relative to deadline" },
+    {
+      value: "within_relative_range",
+      label: "Relative personalized window",
+    },
+    { value: "event_launch", label: "Event launch" },
+  ];
 
-const COHORT_OPTIONS: Array<{ value: ReminderCohortType; label: string }> = [
-  { value: "all_uncompleted", label: "All uncompleted" },
-  { value: "tag", label: "User tag" },
-  { value: "custom", label: "Custom recipients" },
-];
+const COHORT_OPTION_OBJ: Record<ReminderCohortType, string> = {
+  all_uncompleted: "All uncompleted",
+  tag: "User tag",
+  custom: "Custom recipients",
+  group_leads_with_uncompleted: "Group leads with uncompleted members",
+};
+
+const COHORT_OPTIONS = Object.entries(COHORT_OPTION_OBJ).map(([value, label]) => ({ value, label }));
 
 interface ActionReminderFormProps {
   memberEvents: ActionEventDto[];
@@ -216,7 +221,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>(
     initialValues.users.map((user) => user.id)
   );
-  const [selectedTagId, setSelectedTagId] = useState<number | null>(
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(
     initialValues.reminderGroup?.userTag?.id ?? null
   );
   const [localError, setLocalError] = useState<string | null>(null);
@@ -490,7 +495,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     setSendRangeStart(nextGroup?.send_range_start ?? new Date().toISOString());
     setSendRangeEnd(
       nextGroup?.send_range_end ??
-        new Date(Date.now() + 60 * 60 * 1000).toISOString()
+      new Date(Date.now() + 60 * 60 * 1000).toISOString()
     );
     setRelativeRangeStartHours(
       nextGroup?.relative_range_start_seconds_from_deadline != null
@@ -891,9 +896,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
           <select
             value={selectedTagId ?? ""}
             onChange={(event) =>
-              setSelectedTagId(
-                event.target.value ? Number(event.target.value) : null
-              )
+              setSelectedTagId(event.target.value)
             }
             disabled={loadingUserTags}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-500"
@@ -1086,9 +1089,8 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       </div>
 
       <div
-        className={`border border-gray-200 rounded-md bg-zinc-100 ${
-          !keywordsHelpExpanded ? "hover:border-gray-300" : ""
-        }`}
+        className={`border border-gray-200 rounded-md bg-zinc-100 ${!keywordsHelpExpanded ? "hover:border-gray-300" : ""
+          }`}
       >
         <button
           type="button"
@@ -1224,11 +1226,10 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       <div className="flex justify-end gap-3">
         {tentativePlans.length > 0 && (
           <p
-            className={`px-4 py-2 rounded self-start ${
-              tentativePlans.length > 0 && isProd
-                ? "bg-yellow-600 text-white"
-                : "border border-gray-200"
-            }`}
+            className={`px-4 py-2 rounded self-start ${tentativePlans.length > 0 && isProd
+              ? "bg-yellow-600 text-white"
+              : "border border-gray-200"
+              }`}
           >
             {isProd && "⚠️"} This will send <b>{tentativePlans.length}</b>{" "}
             reminders
@@ -1240,7 +1241,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
             )}
             {firstTentativePlan &&
               Date.now() >
-                new Date(firstTentativePlan.scheduledFor).getTime() && (
+              new Date(firstTentativePlan.scheduledFor).getTime() && (
                 <span className="text-red-500"> (immediately)</span>
               )}
           </p>

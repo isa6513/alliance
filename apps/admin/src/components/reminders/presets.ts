@@ -11,22 +11,23 @@ import {
   defaultMissedDeadlineTextMessage,
   defaultPushMessage,
   defaultTextMessage,
+  defaultGroupLeadsEmailContents,
+  defaultGroupLeadsEmailSubject,
+  defaultGroupLeadsTextMessage,
 } from "./defaultReminderContents";
 
-export type ReminderPresetName =
-  | "Announcement"
-  | "Two Day Range"
-  | "One Day Range"
-  | "Three Hour"
-  | "Missed Deadline";
-
-export const presetNames: ReminderPresetName[] = [
+export const presetNames = [
   "Announcement",
   "Two Day Range",
   "One Day Range",
   "Three Hour",
   "Missed Deadline",
-];
+  "Group Leads 3 days",
+  "Group Leads 2 days",
+] as const;
+
+export type ReminderPresetName = typeof presetNames[number];
+
 
 export const reminderPresets: Record<
   ReminderPresetName,
@@ -86,6 +87,30 @@ export const reminderPresets: Record<
     emailSubject: defaultMissedDeadlineEmailSubject,
     name: "Missed deadline message",
     pushMessage: defaultMissedDeadlineTextMessage,
+    useSuiteTaskCount: true,
+  },
+  "Group Leads 3 days": {
+    timingMode: "within_relative_range",
+    relative_range_start_seconds_from_deadline: 3 * 24 * 60 * 60,
+    relative_range_end_seconds_from_deadline: 2 * 24 * 60 * 60,
+    cohortType: "group_leads_with_uncompleted",
+    textMessage: defaultGroupLeadsTextMessage,
+    emailSubject: defaultGroupLeadsEmailSubject,
+    emailMessage: defaultGroupLeadsEmailContents,
+    name: "Group leads 3 days reminder",
+    pushMessage: defaultGroupLeadsTextMessage,
+    useSuiteTaskCount: true,
+  },
+  "Group Leads 2 days": {
+    timingMode: "within_relative_range",
+    relative_range_start_seconds_from_deadline: 2 * 24 * 60 * 60,
+    relative_range_end_seconds_from_deadline: 1 * 24 * 60 * 60,
+    cohortType: "group_leads_with_uncompleted",
+    textMessage: defaultGroupLeadsTextMessage,
+    emailSubject: defaultGroupLeadsEmailSubject,
+    emailMessage: defaultGroupLeadsEmailContents,
+    name: "Group leads 2 days reminder",
+    pushMessage: defaultGroupLeadsTextMessage,
     useSuiteTaskCount: true,
   },
 };

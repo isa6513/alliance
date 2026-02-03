@@ -2,7 +2,7 @@ import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ActionEvent } from 'src/actions/entities/action-event.entity';
-import { tasksUrl, withCid } from 'src/search/approutes';
+import { groupMembersListUrl, tasksUrl, withCid } from 'src/search/approutes';
 import { Repository } from 'typeorm';
 import { EmailStatus, EmailType, Mail } from './mail.entity';
 import { getTimeLeftString } from 'src/notifs/textnotifcontents';
@@ -20,6 +20,7 @@ export function processKeywordReplacements(
     uncompletedTasksTime: string;
     uncompletedTasksNames: string[];
     dateNow?: Date;
+    uncompletedMembersInGroupCount?: number;
   },
 ): string {
   const names = context.user.name.split(' ');
@@ -36,6 +37,8 @@ export function processKeywordReplacements(
   let str = text
     .replaceAll('#{fullname}', context.user.name)
     .replaceAll('#{firstname}', firstname)
+    .replaceAll('#{nmembers}', () => context.uncompletedMembersInGroupCount!.toString())
+    .replaceAll('#{grouplink}', withCid(groupMembersListUrl(true), context.cid))
     .replaceAll('#{lastname}', lastname)
     .replaceAll('#{action}', context.action.name)
     .replaceAll('#{tasknames}', context.uncompletedTasksNames.join(', '))

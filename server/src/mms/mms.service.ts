@@ -62,7 +62,7 @@ export class MmsService {
     mediaUrls: string[],
     cid?: string,
   ): Promise<Mms | null> {
-    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'staging') {
+    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'staging' || to === '15550100') {
       return null;
     }
     this.logger.log(

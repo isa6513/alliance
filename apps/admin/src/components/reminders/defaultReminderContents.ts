@@ -53,3 +53,17 @@ If you do not complete the next action, we will suspend your contract on your be
 export const defaultMissedDeadlineTextMessage = `You failed to complete the current Alliance task. The deadline has now passed. If you have completed it, please contact us — we may have made a mistake. 
   
   If you are no longer interested in being a member of the Alliance, please suspend your contract. If you do not complete the next task, we will suspend your contract on your behalf.`;
+
+// group leads reminder
+
+export const defaultGroupLeadsEmailSubject =
+`#{nmembers} of your Alliance group members have not yet completed their upcoming task`;
+
+export const defaultGroupLeadsEmailContents = `Hi #{firstname},
+
+#{nmembers} of your Alliance group members have not yet completed their upcoming task. You are responsible for ensuring that they do so over the next #{days}. Consider sending them a reminder.
+
+See the full list of members here: #{grouplink}
+`;
+
+export const defaultGroupLeadsTextMessage = `#{nmembers} of your Alliance group members have not yet completed their upcoming task. See here: #{grouplink}`;

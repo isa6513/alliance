@@ -2347,4 +2347,27 @@ export class UserService {
     }
     return this.pushService.sendPushNotification(device.expoPushToken, message);
   }
+
+  async findLeadersOfCommunitiesWithUsers(userIds: number[]): Promise<User[]> {
+    const communities = await this.communityRepository.find({
+      where: {
+        users: {
+          id: In(userIds),
+        },
+      },
+      relations: { leaders: { contractEvents: true }, users: true },
+    });
+
+    const usersByLeader = new Map<number, User[]>();
+    for (const community of communities) {
+      for (const leader of community.leaders!) {
+        if (!usersByLeader.has(leader.id)) {
+          usersByLeader.set(leader.id, []);
+        }
+        usersByLeader.get(leader.id)!.push(...community.users.filter((user) => user.id !== leader.id));
+      }
+    }
+
+    return communities.flatMap((community) => community.leaders!).filter((leader) => usersByLeader.get(leader.id)?.length);
+  }
 }

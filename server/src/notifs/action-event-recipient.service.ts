@@ -305,6 +305,28 @@ export class ActionEventRecipientService {
       .filter((user) => !userToHasCompletedAllActions.get(user.id));
   }
 
+  async findFilteredGroupLeads(
+    event: Pick<ActionEvent, 'newStatus' | 'action' | 'date' | 'id'>,
+    deadlineEvent: Pick<ActionEvent, 'newStatus' | 'action' | 'date'> | null,
+    type: ActionEventNotifType,
+    suite?: ActionSuite,
+  ): Promise<User[]> {
+    const uncompleted = (await this.findFilteredUsersForEvent(
+      event,
+      deadlineEvent,
+      ActionEventNotifType.PersonalReminder,
+      suite,
+    )).map((user) => user.id);
+    
+    const leaders = await this.userService.findLeadersOfCommunitiesWithUsers(
+      uncompleted,
+    );
+
+    return leaders.filter(
+      (leader) => leader.remindAboutUncompletedGroupMembers,
+    );
+  }
+
   async findFilteredUsersForEvent(
     event: Pick<ActionEvent, 'newStatus' | 'action' | 'date' | 'id'>,
     deadlineEvent: Pick<ActionEvent, 'newStatus' | 'action' | 'date'> | null,
@@ -338,6 +360,13 @@ export class ActionEventRecipientService {
           group.actionSuite,
         );
         break;
+      case ReminderCohortType.GroupLeadsWithUncompleted:
+        return await this.findFilteredGroupLeads(
+          group.memberActionEvent,
+          group.deadlineEvent ?? null,
+          ActionEventNotifType.PersonalReminder,
+          group.actionSuite,
+        );
       case ReminderCohortType.Tag:
         if (!group.userTag) {
           throw new Error('Group cohort type requires user tag');

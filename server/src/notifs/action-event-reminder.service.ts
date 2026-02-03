@@ -422,6 +422,31 @@ export class ActionEventReminderService {
     });
   }
 
+
+  async findUncompletedMembersInCommunities(group: ReminderGroup, leader: User): Promise<User[]> {
+    const baseUsers = await this.recipientService.findFilteredUsersForEvent(
+      group.memberActionEvent,
+      group.deadlineEvent ?? null,
+      ActionEventNotifType.PersonalReminder,
+      group.actionSuite,
+    );
+
+    const usersWithCommunities = await this.userService.findByIds(
+      baseUsers.map((user) => user.id),
+      { communities: true },
+    );
+
+    const leaderCommunityIds = new Set(
+      leader.leaderOfIds ?? leader.leaderOf?.map((community) => community.id),
+    );
+
+    const inCommunities = usersWithCommunities.filter((user) =>
+      user.communities.some((community) => leaderCommunityIds.has(community.id)),
+    );
+    return inCommunities.filter((user) => user.id !== leader.id);
+  }
+
+
   async loadEventsForPreview(
     eventId: number,
   ): Promise<{ deadlineEvent: ActionEvent | undefined; event: ActionEvent }> {
