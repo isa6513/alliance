@@ -226,22 +226,21 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                   )}
             </div>
             <div className="flex flex-col gap-y-2">
-              <div className="flex flex-row gap-x-2">
-                <input
-                  type="text"
-                  className="border border-zinc-300 rounded px-3 py-2 flex-1"
-                  placeholder="Enter the invitee's first name"
-                  value={inviteeName}
-                  onChange={(e) => setInviteeName(e.target.value)}
-                />
-                <Button
-                  color={ButtonColor.Black}
-                  onClick={() => handleCreateInvite(null)}
-                  disabled={creatingInvite || !inviteeName.trim()}
-                >
-                  {creatingInvite ? "Creating..." : "Create invite"}
-                </Button>
-              </div>
+              <input
+                type="text"
+                className="border border-zinc-300 rounded px-3 py-2 flex-1"
+                placeholder="Enter the invitee's first name"
+                value={inviteeName}
+                onChange={(e) => setInviteeName(e.target.value)}
+              />
+              <Button
+                color={ButtonColor.Black}
+                onClick={() => handleCreateInvite(null)}
+                disabled={creatingInvite || !inviteeName.trim()}
+                className="w-full"
+              >
+                {creatingInvite ? "Creating..." : "Create invite"}
+              </Button>
             </div>
           </div>
         )}
@@ -281,40 +280,39 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 <p className="text-xl font-semibold">
                   {onetimeInviteCreation.responsible.leader.title}
                 </p>
-                <div className="flex flex-row justify-between">
-                  <DropdownSelect
-                    options={communityOptions}
-                    value={selectedCommunity?.name ?? communityOptions["new"]}
-                    onChange={([key]) => {
-                      if (key === "new") {
-                        setSelectedCommunityId(null);
-                      } else {
-                        setSelectedCommunityId(Number(key.slice(1)));
-                      }
-                    }}
-                    titleOverride={
-                      selectedCommunityId &&
-                      typeof selectedCommunityId === "number"
-                        ? selectedCommunity?.name || "Select a group"
-                        : selectedCommunityId === null
-                        ? "Create a new group"
-                        : "Select a group"
+                <DropdownSelect
+                  options={communityOptions}
+                  value={selectedCommunity?.name ?? communityOptions["new"]}
+                  onChange={([key]) => {
+                    if (key === "new") {
+                      setSelectedCommunityId(null);
+                    } else {
+                      setSelectedCommunityId(Number(key.slice(1)));
                     }
-                  />
-                  {!!selectedCommunity && (
-                    <Button
-                      color={ButtonColor.Black}
-                      onClick={() => handleCreateInvite(selectedCommunityId)}
-                      disabled={
-                        creatingInvite ||
-                        !inviteeName.trim() ||
-                        selectedCommunityId === null
-                      }
-                    >
-                      {creatingInvite ? "Creating invite..." : "Create invite"}
-                    </Button>
-                  )}
-                </div>
+                  }}
+                  titleOverride={
+                    selectedCommunityId &&
+                    typeof selectedCommunityId === "number"
+                      ? selectedCommunity?.name || "Select a group"
+                      : selectedCommunityId === null
+                      ? "Create a new group"
+                      : "Select a group"
+                  }
+                />
+                {!!selectedCommunity && (
+                  <Button
+                    color={ButtonColor.Black}
+                    onClick={() => handleCreateInvite(selectedCommunityId)}
+                    disabled={
+                      creatingInvite ||
+                      !inviteeName.trim() ||
+                      selectedCommunityId === null
+                    }
+                    className="w-full"
+                  >
+                    {creatingInvite ? "Creating invite..." : "Create invite"}
+                  </Button>
+                )}
               </div>
             )}
 
@@ -353,6 +351,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                   createDisabled={creatingInvite || !inviteeName.trim()}
                   onSuccess={onCreateCommunity}
                   includePhotoEditor={false}
+                  fullWidthButtons={true}
                 />
               </div>
             )}

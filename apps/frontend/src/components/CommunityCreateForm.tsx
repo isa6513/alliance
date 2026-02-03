@@ -15,6 +15,7 @@ export type CommunityCreateFormProps = {
   includePhotoEditor?: boolean;
   createButtonTextOverride?: string;
   createDisabled?: boolean;
+  fullWidthButtons?: boolean;
   onCancel?: () => void;
   onSuccess: (community: CommunityDto) => void;
 };
@@ -24,6 +25,7 @@ const CommunityCreateForm = ({
   includePhotoEditor = true,
   createButtonTextOverride,
   createDisabled,
+  fullWidthButtons,
   onCancel,
   onSuccess,
 }: CommunityCreateFormProps) => {
@@ -241,9 +243,15 @@ const CommunityCreateForm = ({
         )}
       </div>
       <div className="flex flex-row justify-end">
-        <div className="flex gap-x-1 mt-1">
+        <div
+          className={`flex gap-x-1 mt-1 ${fullWidthButtons ? "w-full" : ""}`}
+        >
           {onCancel && (
-            <Button onClick={onCancel} color={ButtonColor.Grey}>
+            <Button
+              onClick={onCancel}
+              color={ButtonColor.Grey}
+              className="flex-1"
+            >
               Cancel
             </Button>
           )}
@@ -251,6 +259,7 @@ const CommunityCreateForm = ({
             onClick={handleSubmit}
             color={ButtonColor.Black}
             disabled={isSubmitting || createDisabled || !formValues.name.trim()}
+            className="flex-1"
           >
             {isSubmitting
               ? "Creating..."
