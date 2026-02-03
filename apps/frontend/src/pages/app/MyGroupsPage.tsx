@@ -486,7 +486,10 @@ const MyGroupsPage = ({
                       <span className="text-zinc-500">
                         {community.users.length}
                         {community.maxCapacity !== null
-                          ? ` / ${community.maxCapacity}`
+                          ? ` / ${Math.max(
+                              community.maxCapacity,
+                              community.users.length
+                            )}`
                           : ""}{" "}
                         members
                       </span>

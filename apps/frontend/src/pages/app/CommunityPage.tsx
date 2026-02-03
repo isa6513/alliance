@@ -132,12 +132,6 @@ const CommunityPage = () => {
   useEffect(() => {
     userGetMyCommunities().then((resp) => {
       if (resp.data) {
-        resp.data.forEach(
-          (community) =>
-            (community.users = community.users.filter(
-              (user) => user.hasActiveContract
-            ))
-        );
         setCommunities(resp.data);
         setCommunity(
           ((communityId !== null &&
@@ -159,7 +153,11 @@ const CommunityPage = () => {
       setEditPublic(community.public);
       setEditAllowMemberInvites(community.allowMemberInvites ?? true);
       setEditAllowStaffAssignments(community.allowStaffAssignments ?? true);
-      setEditMaxCapacity(community.maxCapacity);
+      setEditMaxCapacity(
+        community.maxCapacity === null
+          ? null
+          : Math.max(community.maxCapacity, community.users.length)
+      );
       setEditPhotoUrl(community.photo ?? null);
       setIsEditing(false);
       setError(null);
@@ -285,6 +283,15 @@ const CommunityPage = () => {
       }
       normalizedMaxCapacity = editMaxCapacity;
     }
+    if (
+      normalizedMaxCapacity !== null &&
+      normalizedMaxCapacity < community.users.length
+    ) {
+      setError(
+        `Capacity cannot be less than the current number of members (${community.users.length})`
+      );
+      return;
+    }
 
     setIsSaving(true);
     setError(null);
@@ -308,12 +315,6 @@ const CommunityPage = () => {
         // Refresh communities list
         userGetMyCommunities().then((resp) => {
           if (resp.data) {
-            resp.data.forEach(
-              (community) =>
-                (community.users = community.users.filter(
-                  (user) => user.hasActiveContract
-                ))
-            );
             setCommunities(resp.data);
           }
         });
@@ -346,7 +347,11 @@ const CommunityPage = () => {
       setEditPublic(community.public);
       setEditAllowStaffAssignments(community.allowStaffAssignments ?? true);
       setEditAllowMemberInvites(community.allowMemberInvites ?? true);
-      setEditMaxCapacity(community.maxCapacity);
+      setEditMaxCapacity(
+        community.maxCapacity === null
+          ? null
+          : Math.max(community.maxCapacity, community.users.length)
+      );
       setEditPhotoUrl(community.photo ?? null);
     }
     setPhotoEditorKey((prev) => prev + 1);
