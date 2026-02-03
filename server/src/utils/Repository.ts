@@ -466,7 +466,7 @@ type _typecheck_WithRelations =
 
 export type Repository<Entity extends ObjectLiteral> = Omit<
   TypeOrmRepository<Entity>,
-  'find' | 'findOne' | 'findOneOrFail' | 'remove'
+  'find' | 'findOne' | 'findOneOrFail'
 > & {
   find<R extends Relations<Entity>>(
     options: FindManyOptions<Entity> & { relations?: R },
