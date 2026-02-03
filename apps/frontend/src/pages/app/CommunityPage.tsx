@@ -32,7 +32,6 @@ import { MessageSquare } from "lucide-react";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../../lib/config";
 import CommunityInvitesLeaderTab from "../../components/CommunityInvitesLeaderTab";
-import CommunityInvitesMemberTab from "../../components/CommunityInvitesMemberTab";
 import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
 import { useMediaQuery } from "../../lib/useMediaQuery";
 import {
@@ -386,7 +385,7 @@ const CommunityPage = () => {
 
   const tabs: (keyof typeof TAB_DISPLAY_NAMES)[] = amLeader
     ? ["activity", "members", "invites", "resources"]
-    : ["activity", "members", "invites"];
+    : ["activity", "members"];
 
   const isLargeScreen = useMediaQuery("(min-width: 1250px)");
   const isChatOpen = messagingEnabled && chatOpen;
@@ -729,16 +728,13 @@ const CommunityPage = () => {
               <GroupOrganizerGuidelines />
             </div>
           )}
-          {tab === "invites" &&
-            (amLeader ? (
-              <CommunityInvitesLeaderTab
-                communityId={community.id}
-                existingMembers={community.users}
-                setInviteNotifCount={setInviteNotifCount}
-              />
-            ) : (
-              <CommunityInvitesMemberTab communityId={community.id} />
-            ))}
+          {tab === "invites" && (
+            <CommunityInvitesLeaderTab
+              communityId={community.id}
+              existingMembers={community.users}
+              setInviteNotifCount={setInviteNotifCount}
+            />
+          )}
           {tab === "groups" && (
             <div className="flex flex-col gap-y-6">
               <MyGroupsPage
