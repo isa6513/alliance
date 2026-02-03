@@ -42,13 +42,10 @@ export type UseActivitiesProps = {
 
 const CACHE_PREFIX = "useActivities.cache.";
 
-const generateCacheKey = (
-  list: ActivityList,
-  objectId: number | undefined,
-  limit: number,
-  comments: boolean
-): string => {
-  return `${CACHE_PREFIX}${list}_${objectId ?? "none"}_${limit}_${comments}`;
+const generateCacheKey = (props: UseActivitiesProps): string => {
+  return `${CACHE_PREFIX}${props.list}_${props.objectId ?? "none"}_${
+    props.limit
+  }_${props.comments}`;
 };
 
 const getCachedActivities = (cacheKey: string): ActionActivityDto[] | null => {
@@ -72,13 +69,9 @@ const setCachedActivities = (
   } catch {}
 };
 
-const useActivities = ({
-  list,
-  objectId,
-  limit = 50,
-  comments = false,
-}: UseActivitiesProps) => {
-  const cacheKey = generateCacheKey(list, objectId, limit, comments);
+const useActivities = (props: UseActivitiesProps) => {
+  const cacheKey = generateCacheKey(props);
+  const { list, objectId, limit = 50, comments = false } = props;
 
   const [activities, setActivitiesWithoutCache] = useState<ActionActivityDto[]>(
     getCachedActivities(cacheKey) ?? []
