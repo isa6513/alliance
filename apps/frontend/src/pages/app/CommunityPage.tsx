@@ -478,7 +478,7 @@ const CommunityPage = () => {
                               <Button
                                 color={ButtonColor.Blue}
                                 onClick={handleSave}
-                                disabled={isSaving}
+                                disabled={isSaving || !editName.trim()}
                                 className="!text-sm"
                               >
                                 {isSaving ? "Saving..." : "Save"}
