@@ -89,10 +89,10 @@ const useActivities = ({
         typeof setStateActivities === "function"
           ? setStateActivities(activities)
           : setStateActivities;
-      setActivitiesWithoutCache(setStateActivities);
+      setActivitiesWithoutCache(newActivities);
       setCachedActivities(cacheKey, newActivities);
     },
-    [cacheKey]
+    [cacheKey, activities]
   );
   const [loading, setLoading] = useState(activities.length === 0);
 
