@@ -21,12 +21,18 @@ const HomeNotifsCard = () => {
         <Link to={href("/notifications")} className="text-sm text-green">See all</Link>
       </div>
       <div className="flex flex-col divide-y divide-zinc-200">
-        {priority.slice(0, 3).map((notification) => (
-          <div className="flex flex-row items-center justify-between gap-x-2 hover:bg-zinc-100 py-2 rounded-md text-sm cursor-pointer p-3" key={notification.id}>
-            <NotificationText notification={notification} handleNotifClick={handleNotifClick} className="py-2" />
-            <ArrowRight size="16" className="shrink-0 text-green mx-2" />
-          </div>
-        ))}
+        {priority.slice(0, 3).map((notification) => {
+          const handleClick = (e: React.MouseEvent) => {
+            e.preventDefault();
+            handleNotifClick(notification.id, notification.webAppLocation)();
+          };
+          return (
+            <div className="flex flex-row items-center justify-between gap-x-2 hover:bg-zinc-100 py-2 rounded-md text-sm cursor-pointer p-3" key={notification.id} onClick={handleClick}>
+              <NotificationText notification={notification} handleNotifClick={() => () => { }} className="py-2" />
+              <ArrowRight size="16" className="shrink-0 text-green mx-2" />
+            </div>
+          );
+        })}
       </div>
     </Card>
   );

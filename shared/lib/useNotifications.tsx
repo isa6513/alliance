@@ -66,14 +66,6 @@ export const NotificationsProvider = ({
     (id: number, webAppLocation: string | null) => () => {
       notifsSetRead({ path: { id } });
 
-      setNotifications((prev) => {
-        const readAt = new Date().toISOString();
-        return prev.map(
-          (n) => (n.id === id ? { ...n, readAt } : n) satisfies NotificationDto
-        );
-      });
-      setUnreadCount((prev) => Math.max(prev - 1, 0));
-
       const clickedNotif = notifications.find((n) => n.id === id);
       const path = webAppLocation
         ? getWebAppLocation(webAppLocation)
@@ -92,6 +84,15 @@ export const NotificationsProvider = ({
       } else {
         navigate(path);
       }
+
+      setNotifications((prev) => {
+        const readAt = new Date().toISOString();
+        return prev.map(
+          (n) => (n.id === id ? { ...n, readAt } : n) satisfies NotificationDto
+        );
+      });
+      setUnreadCount((prev) => Math.max(prev - 1, 0));
+
     },
     [navigate, notifications]
   );

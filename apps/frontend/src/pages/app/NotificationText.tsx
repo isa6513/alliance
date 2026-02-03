@@ -10,7 +10,6 @@ export interface NotificationTextProps {
 
 const NotificationText = ({ notification, handleNotifClick, className }: NotificationTextProps) => {
   return <div
-    key={notification.id}
     className={`${className}`}
     onClick={handleNotifClick(
       notification.id,
