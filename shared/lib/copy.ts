@@ -66,23 +66,27 @@ export const onetimeInviteCreation = {
       invite: {
         title: "Create an invite",
         explanation: [
-          "This will create a personalized invite page that explains the Alliance and how to sign up.",
-          "When the new member signs up, they will automatically be added to your group.",
+          "This will create a personalized invite link that explains the Alliance and how to sign up.",
+          "When the invitee signs up, they will be automatically added to your group.",
         ],
+      },
+      newGroup: {
+        title: "Create a group",
+        createButtonText: "Create group and invite",
       },
     },
   },
   not_responsible: {
     buttonText: "Someone else",
-    title: "Enter the name of the invitee",
+    title: "Create an invite",
     explanations: {
       genericGroup: [
-        "This will create a personalized invite link that you can share with the invitee.",
+        "This will create a personalized invite link that explains the Alliance and how to sign up.",
         "When the invitee signs up, they will be assigned to a group.",
       ],
       yourGroup: [
-        "This will create a personalized invite link that you can share with the invitee.",
-        "When the invitee signs up, they will be assigned to your group if the group has capacity.",
+        "This will create a personalized invite link that explains the Alliance and how to sign up.",
+        "When the invitee signs up, they will be automatically added to your group if it has capacity.",
       ],
     },
   },

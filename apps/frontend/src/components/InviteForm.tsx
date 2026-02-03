@@ -94,68 +94,70 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
     [leaderCommunities]
   );
 
-  const handleCreateInvite = useCallback(async () => {
-    if (!inviteeName.trim()) {
-      errorToast("Please enter the invitee's name");
-      return;
-    }
-
-    if (responsibilityChoice === "responsible") {
-      if (selectedCommunityId === null) {
-        errorToast("Please select a group");
+  const handleCreateInvite = useCallback(
+    async (communityId: number | null) => {
+      if (!inviteeName.trim()) {
+        errorToast("Please enter the invitee's name");
         return;
       }
-    }
 
-    setCreatingInvite(true);
-    try {
-      const body: CreateOnetimeInviteDto = {
-        invitee: inviteeName.trim(),
-        ...(responsibilityChoice === "responsible" &&
-          selectedCommunityId !== null && {
-            communityId: selectedCommunityId,
-          }),
-      };
-
-      const response = await userCreateOnetimeInvite({ body });
-      if (response.data) {
-        successToast("Invite created successfully!");
-        setInviteeName("");
-        setSelectedCommunityId(null);
-        setResponsibilityChoice(null);
-        onInviteCreated(response.data);
-      } else {
-        errorToast(
-          `Failed to create invite: ${
-            response.response?.statusText || "Unknown error"
-          }`
-        );
+      if (responsibilityChoice === "responsible") {
+        if (communityId === null) {
+          errorToast("Please select a group");
+          return;
+        }
       }
-    } catch {
-      errorToast("Failed to create invite");
-    } finally {
-      setCreatingInvite(false);
-    }
-  }, [
-    inviteeName,
-    responsibilityChoice,
-    selectedCommunityId,
-    errorToast,
-    successToast,
-    onInviteCreated,
-  ]);
 
-  const handleCreateCommunity = useCallback(
+      setCreatingInvite(true);
+      try {
+        const body: CreateOnetimeInviteDto = {
+          invitee: inviteeName.trim(),
+          ...(responsibilityChoice === "responsible" &&
+            communityId !== null && {
+              communityId,
+            }),
+        };
+
+        const response = await userCreateOnetimeInvite({ body });
+        if (response.data) {
+          successToast("Invite created successfully!");
+          setInviteeName("");
+          setSelectedCommunityId(null);
+          setResponsibilityChoice(null);
+          onInviteCreated(response.data);
+        } else {
+          errorToast(
+            `Failed to create invite: ${
+              response.response?.statusText || "Unknown error"
+            }`
+          );
+        }
+      } catch {
+        errorToast("Failed to create invite");
+      } finally {
+        setCreatingInvite(false);
+      }
+    },
+    [
+      inviteeName,
+      responsibilityChoice,
+      errorToast,
+      successToast,
+      onInviteCreated,
+    ]
+  );
+
+  const onCreateCommunity = useCallback(
     async (community: CommunityDto) => {
       try {
+        await handleCreateInvite(community.id);
         await refreshCommunities(false);
         setSelectedCommunityId(community.id);
-        successToast("Group created successfully!");
       } catch {
         errorToast("Failed to refresh groups");
       }
     },
-    [errorToast, successToast, refreshCommunities]
+    [errorToast, refreshCommunities, handleCreateInvite]
   );
 
   return (
@@ -236,7 +238,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 />
                 <Button
                   color={ButtonColor.Black}
-                  onClick={handleCreateInvite}
+                  onClick={() => handleCreateInvite(null)}
                   disabled={creatingInvite || !inviteeName.trim()}
                 >
                   {creatingInvite ? "Creating..." : "Create invite"}
@@ -248,14 +250,40 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
 
         {responsibilityChoice === "responsible" && (
           <>
+            {/* Invitee name input */}
+            <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
+              <div className="flex flex-col gap-y-2">
+                <p className="text-xl font-semibold">
+                  {onetimeInviteCreation.responsible.leader.invite.title}
+                </p>
+                {onetimeInviteCreation.responsible.leader.invite.explanation.map(
+                  (block, index) => (
+                    <p className="text-zinc-500" key={index}>
+                      {block}
+                    </p>
+                  )
+                )}
+              </div>
+              <div className="flex flex-col gap-y-2">
+                <div className="flex flex-row gap-x-2">
+                  <input
+                    type="text"
+                    className="border border-zinc-300 rounded px-3 py-2 flex-1"
+                    placeholder="Enter the invitee's first name"
+                    value={inviteeName}
+                    onChange={(e) => setInviteeName(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
             {isLeader && (
               <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
                 {/* Group selection */}
-
                 <p className="text-xl font-semibold">
                   {onetimeInviteCreation.responsible.leader.title}
                 </p>
-                <div>
+                <div className="flex flex-row justify-between">
                   <DropdownSelect
                     options={communityOptions}
                     value={selectedCommunity?.name ?? communityOptions["new"]}
@@ -275,52 +303,30 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                         : "Select a group"
                     }
                   />
-                </div>
-              </div>
-            )}
-
-            {selectedCommunity ? (
-              <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
-                {/* Invite creation */}
-                <div className="flex flex-col gap-y-2">
-                  <p className="text-xl font-semibold">
-                    {onetimeInviteCreation.responsible.leader.invite.title}
-                  </p>
-                  {onetimeInviteCreation.responsible.leader.invite.explanation.map(
-                    (block, index) => (
-                      <p className="text-zinc-500" key={index}>
-                        {block}
-                      </p>
-                    )
-                  )}
-                </div>
-                <div className="flex flex-col gap-y-2">
-                  <div className="flex flex-row gap-x-2">
-                    <input
-                      type="text"
-                      className="border border-zinc-300 rounded px-3 py-2 flex-1"
-                      placeholder="Enter the invitee's first name"
-                      value={inviteeName}
-                      onChange={(e) => setInviteeName(e.target.value)}
-                    />
+                  {!!selectedCommunity && (
                     <Button
                       color={ButtonColor.Black}
-                      onClick={handleCreateInvite}
+                      onClick={() => handleCreateInvite(selectedCommunityId)}
                       disabled={
                         creatingInvite ||
                         !inviteeName.trim() ||
-                        typeof selectedCommunityId !== "number"
+                        selectedCommunityId === null
                       }
                     >
                       {creatingInvite ? "Creating invite..." : "Create invite"}
                     </Button>
-                  </div>
+                  )}
                 </div>
               </div>
-            ) : (
+            )}
+
+            {!selectedCommunity && (
               <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
+                {/* Group creation */}
                 <div className="flex flex-col gap-y-2">
-                  <p className="text-xl font-semibold">Create a new group</p>
+                  <p className="text-xl font-semibold">
+                    {onetimeInviteCreation.responsible.leader.newGroup.title}
+                  </p>
                   {!isLeader && (
                     <p className="text-zinc-500">
                       You do not lead a group yet. Once you create a group, you
@@ -340,7 +346,14 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 </div>
                 <CommunityCreateForm
                   name={user?.name}
-                  onSuccess={handleCreateCommunity}
+                  createButtonTextOverride={
+                    creatingInvite
+                      ? "Creating invite..."
+                      : onetimeInviteCreation.responsible.leader.newGroup
+                          .createButtonText
+                  }
+                  createDisabled={creatingInvite || !inviteeName.trim()}
+                  onSuccess={onCreateCommunity}
                   includePhotoEditor={false}
                 />
               </div>

@@ -13,6 +13,8 @@ import { useCallback, useMemo, useState } from "react";
 export type CommunityCreateFormProps = {
   name?: string;
   includePhotoEditor?: boolean;
+  createButtonTextOverride?: string;
+  createDisabled?: boolean;
   onCancel?: () => void;
   onSuccess: (community: CommunityDto) => void;
 };
@@ -20,6 +22,8 @@ export type CommunityCreateFormProps = {
 const CommunityCreateForm = ({
   name,
   includePhotoEditor = true,
+  createButtonTextOverride,
+  createDisabled,
   onCancel,
   onSuccess,
 }: CommunityCreateFormProps) => {
@@ -239,21 +243,23 @@ const CommunityCreateForm = ({
       <div className="flex flex-row justify-end">
         <div className="flex gap-x-1 mt-1">
           {onCancel && (
-            <Button
-              onClick={onCancel}
-              color={ButtonColor.Grey}
-              className="!h-9"
-            >
+            <Button onClick={onCancel} color={ButtonColor.Grey}>
               Cancel
             </Button>
           )}
           <Button
             onClick={handleSubmit}
             color={ButtonColor.Black}
-            className="!h-9"
-            disabled={isSubmitting}
+            disabled={
+              isSubmitting ||
+              createDisabled ||
+              !formValues.name.trim() ||
+              !formValues.description.trim()
+            }
           >
-            {isSubmitting ? "Creating..." : "Create"}
+            {isSubmitting
+              ? "Creating..."
+              : createButtonTextOverride ?? "Create"}
           </Button>
         </div>
       </div>
