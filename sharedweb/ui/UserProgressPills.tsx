@@ -201,6 +201,9 @@ const UserProgressPills = ({
     if (!maxActionsPerWeek) {
       return actions.map((action) => {
         const relation = relationByActionId[action.id];
+        if (!relation) {
+          return null;
+        }
         const pillStatusData = PILL_STATUS_DATA[relation.status];
         if (!pillStatusData.pillStyle) {
           return null;
@@ -232,10 +235,13 @@ const UserProgressPills = ({
     const weekNumbers = Object.keys(maxActionsPerWeek).map(Number).sort();
     const relationsPerWeek = actions.reduce((acc, action) => {
       if (action.weekNumber) {
-        acc.set(action.weekNumber, [
-          ...(acc.get(action.weekNumber) ?? []),
-          relationByActionId[action.id],
-        ]);
+        const relation = relationByActionId[action.id];
+        if (relation) {
+          acc.set(action.weekNumber, [
+            ...(acc.get(action.weekNumber) ?? []),
+            relation,
+          ]);
+        }
       }
       return acc;
     }, new Map<number, UserActionRelationDetailDto[]>());

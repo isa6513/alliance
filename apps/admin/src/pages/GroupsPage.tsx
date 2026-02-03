@@ -15,6 +15,7 @@ import List from "@alliance/sharedweb/ui/List";
 import GroupAssignmentPanel from "../components/GroupAssignmentPanel";
 import { useGroupAssignment } from "../lib/GroupAssignmentContext";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
+import { groupSettings } from "@alliance/shared/lib/copy";
 
 const INITIAL_COMMUNITY: CreateCommunityDto = {
   name: "",
@@ -238,7 +239,7 @@ const GroupsPage: React.FC = () => {
           <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
             <div className="flex flex-col gap-y-3">
               <label
-                className="flex items-center gap-x-2 text-sm font-medium text-zinc-700"
+                className="flex items-start gap-x-2 text-sm font-medium text-zinc-700"
                 htmlFor="group-public"
               >
                 <input
@@ -255,11 +256,19 @@ const GroupsPage: React.FC = () => {
                       allowStaffAssignments: true,
                     }));
                   }}
+                  className="mt-1"
                 />
-                Public
+                <div>
+                  <p className="text-base font-medium">
+                    {groupSettings.public.name}
+                  </p>
+                  <p className="text-sm text-zinc-500 font-normal">
+                    {groupSettings.public.explanation}
+                  </p>
+                </div>
               </label>
               <label
-                className="flex items-center gap-x-2 text-sm font-medium text-zinc-700"
+                className="flex items-start gap-x-2 text-sm font-medium text-zinc-700"
                 htmlFor="member-invites"
               >
                 <input
@@ -274,11 +283,19 @@ const GroupsPage: React.FC = () => {
                     }));
                   }}
                   disabled={newCommunity.public}
+                  className="mt-1"
                 />
-                Member invites
+                <div>
+                  <p className="text-base font-medium">
+                    {groupSettings.allowMemberInvites.name}
+                  </p>
+                  <p className="text-sm text-zinc-500 font-normal">
+                    {groupSettings.allowMemberInvites.explanation}
+                  </p>
+                </div>
               </label>
               <label
-                className="flex items-center gap-x-2 text-sm font-medium text-zinc-700"
+                className="flex items-start gap-x-2 text-sm font-medium text-zinc-700"
                 htmlFor="staff-assignments"
               >
                 <input
@@ -293,17 +310,30 @@ const GroupsPage: React.FC = () => {
                     }));
                   }}
                   disabled={newCommunity.public}
+                  className="mt-1"
                 />
-                Staff assignments
+                <div>
+                  <p className="text-base font-medium">
+                    {groupSettings.allowStaffAssignments.name}
+                  </p>
+                  <p className="text-sm text-zinc-500 font-normal">
+                    {groupSettings.allowStaffAssignments.explanation}
+                  </p>
+                </div>
               </label>
             </div>
             {requiresMaxCapacity && (
               <div className="mt-4">
                 <label
-                  className="text-sm font-medium text-zinc-700"
+                  className="text-black font-medium"
                   htmlFor="group-capacity"
                 >
-                  Member capacity
+                  <p className="text-base font-medium">
+                    {groupSettings.maxCapacity.name}
+                  </p>
+                  <p className="text-sm text-zinc-500 font-normal">
+                    {groupSettings.maxCapacity.explanation}
+                  </p>
                 </label>
                 <input
                   id="group-capacity"

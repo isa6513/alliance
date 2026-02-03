@@ -9,7 +9,7 @@ import {
   userGetCommunityMemberContactInfoAdmin,
   userList,
   userRemoveLeaderFromCommunity,
-  userRemoveMemberFromCommunity,
+  userRemoveMemberFromCommunityAdmin,
   userUpdateCommunity,
 } from "@alliance/shared/client";
 import type {
@@ -29,6 +29,7 @@ import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable"
 import { calculateCompletionData } from "@alliance/shared/lib/actionUtils";
 import { useMaxActionsPerWeek } from "@alliance/sharedweb/ui/UserProgressPills";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
+import { groupSettings } from "@alliance/shared/lib/copy";
 
 const CommunityDetailPage: React.FC = () => {
   const { id } = useParams();
@@ -117,7 +118,7 @@ const CommunityDetailPage: React.FC = () => {
     CommunityMemberContactInfoDto
   > | null>(null);
 
-  useEffect(() => {
+  const refreshUserActionRelations = useCallback(() => {
     actionsGetCommunityMemberInfoAdmin({ path: { communityId } }).then(
       (resp) => {
         if (resp.data) {
@@ -152,6 +153,8 @@ const CommunityDetailPage: React.FC = () => {
       }
     );
   }, [communityId]);
+
+  useEffect(() => refreshUserActionRelations(), [refreshUserActionRelations]);
 
   useEffect(() => {
     setUsersLoading(true);
@@ -299,7 +302,7 @@ const CommunityDetailPage: React.FC = () => {
               next.add(userId);
               return next;
             });
-            const response = await userRemoveMemberFromCommunity({
+            const response = await userRemoveMemberFromCommunityAdmin({
               path: { communityId },
               body: { userId },
             });
@@ -370,6 +373,7 @@ const CommunityDetailPage: React.FC = () => {
             break;
           }
         }
+        void refreshUserActionRelations();
       } catch (err) {
         console.error("Community mutation failed", err);
         setError("Operation failed. Please try again.");
@@ -397,6 +401,7 @@ const CommunityDetailPage: React.FC = () => {
       community,
       pushError,
       setAddingLeader,
+      refreshUserActionRelations,
     ]
   );
 
@@ -571,7 +576,7 @@ const CommunityDetailPage: React.FC = () => {
             </div>
             <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
               <div className="flex flex-col gap-y-3">
-                <label className="flex items-center gap-x-2 text-sm font-medium text-zinc-700">
+                <label className="flex items-start gap-x-2 text-sm font-medium text-zinc-700">
                   <input
                     type="checkbox"
                     checked={formValues.public}
@@ -583,10 +588,18 @@ const CommunityDetailPage: React.FC = () => {
                         allowMemberInvites: true,
                       }));
                     }}
+                    className="mt-1"
                   />
-                  Public
+                  <div>
+                    <p className="text-base font-medium">
+                      {groupSettings.public.name}
+                    </p>
+                    <p className="text-sm text-zinc-500 font-normal">
+                      {groupSettings.public.explanation}
+                    </p>
+                  </div>
                 </label>
-                <label className="flex items-center gap-x-2 text-sm font-medium text-zinc-700">
+                <label className="flex items-start gap-x-2 text-sm font-medium text-zinc-700">
                   <input
                     type="checkbox"
                     checked={formValues.allowMemberInvites}
@@ -597,10 +610,18 @@ const CommunityDetailPage: React.FC = () => {
                       }))
                     }
                     disabled={formValues.public}
+                    className="mt-1"
                   />
-                  Member invites
+                  <div>
+                    <p className="text-base font-medium">
+                      {groupSettings.allowMemberInvites.name}
+                    </p>
+                    <p className="text-sm text-zinc-500 font-normal">
+                      {groupSettings.allowMemberInvites.explanation}
+                    </p>
+                  </div>
                 </label>
-                <label className="flex items-center gap-x-2 text-sm font-medium text-zinc-700">
+                <label className="flex items-start gap-x-2 text-sm font-medium text-zinc-700">
                   <input
                     type="checkbox"
                     checked={formValues.allowStaffAssignments}
@@ -611,16 +632,33 @@ const CommunityDetailPage: React.FC = () => {
                       }))
                     }
                     disabled={formValues.public}
+                    className="mt-1"
                   />
-                  Staff assignments
+                  <div>
+                    <p className="text-base font-medium">
+                      {groupSettings.allowStaffAssignments.name}
+                    </p>
+                    <p className="text-sm text-zinc-500 font-normal">
+                      {groupSettings.allowStaffAssignments.explanation}
+                    </p>
+                  </div>
                 </label>
               </div>
               {requiresMaxCapacity && (
                 <div className="mt-4">
-                  <label className="text-sm font-medium text-zinc-700">
-                    Member capacity
+                  <label
+                    className="text-black font-medium"
+                    htmlFor="maxCapacity"
+                  >
+                    <p className="text-base font-medium">
+                      {groupSettings.maxCapacity.name}
+                    </p>
+                    <p className="text-sm text-zinc-500 font-normal">
+                      {groupSettings.maxCapacity.explanation}
+                    </p>
                   </label>
                   <input
+                    id="maxCapacity"
                     type="number"
                     min={1}
                     className="mt-2 border border-zinc-300 rounded px-3 py-2 text-sm w-full bg-white"
