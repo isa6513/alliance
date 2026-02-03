@@ -122,8 +122,6 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
         if (response.data) {
           successToast("Invite created successfully!");
           setInviteeName("");
-          setSelectedCommunityId(null);
-          setResponsibilityChoice(null);
           onInviteCreated(response.data);
         } else {
           errorToast(
