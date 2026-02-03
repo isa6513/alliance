@@ -423,7 +423,7 @@ const SettingsPage: React.FC = () => {
               </div>
               {user.leaderOfIds.length > 0 ? (
                 <div><p className="!font-medium mb-0 mt-5">
-                  Recieve reminders for group members with uncompleted tasks?
+                  Receive reminders for group members with uncompleted tasks?
                 </p>
                   <div className="flex flex-row gap-6 mt-2">
                     <select
@@ -436,7 +436,7 @@ const SettingsPage: React.FC = () => {
                         })
                       }
                     >
-                      <option value={"email"}>Yes</option>
+                      <option value={"yes"}>Yes</option>
                       <option value={"no"}>No</option>
                     </select>
                   </div>

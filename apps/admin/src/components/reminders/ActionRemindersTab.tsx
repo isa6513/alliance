@@ -578,7 +578,6 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           ...reminderPresets["Group Leads 2 days"],
         },
       }));
-      console.log(reminders.map((reminder) => reminder.data));
     }
     const error = reminders.some(
       (reminder) => (reminder as unknown as { error: string | undefined }).error
