@@ -1828,6 +1828,7 @@ export type NotificationDto = {
     id: number;
     category: NotificationCategory;
     message: string;
+    priority: NotifPriority;
     webAppLocation: string | null;
     mobileAppLocation: string | null;
     readAt?: string;

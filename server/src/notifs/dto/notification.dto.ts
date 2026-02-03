@@ -10,6 +10,7 @@ export class NotificationDto extends PickType(Notification, [
   'mobileAppLocation',
   'readAt',
   'createdAt',
+  'priority',
   'updatedAt',
   'sendTime',
 ]) {

@@ -28,6 +28,7 @@ import {
 } from "@alliance/shared/lib/actionUtils";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import HomeNotifsCard from "../../components/HomeNotifsCard";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -67,65 +68,65 @@ const HomePage = () => {
       <>
         {(currentWeekSidebarActions.length > 0 ||
           completedActions.length > 0) && (
-          <div className="flex flex-col gap-y-2">
-            <p className="font-semibold text-base font-serif text-black">
-              Progress
-            </p>
-            {currentWeekSidebarActions.length + newActions.length > 0 && (
-              <p className="text-zinc-600 mb-2">
-                <span className="text-green font-medium mr-0.5">
-                  {currentWeekSidebarActions.length} task
-                  {currentWeekSidebarActions.length !== 1 ? "s" : ""} left{" "}
-                </span>
-                {numTodo > 0 &&
-                  remainingTasksEstimatedTimeCurrentWeek > 0 &&
-                  `for a total of ${remainingTasksEstimatedTimeCurrentWeek} minutes`}
+            <div className="flex flex-col gap-y-2">
+              <p className="font-semibold text-base font-serif text-black">
+                Progress
               </p>
-            )}
-            <ul className="space-y-2 list-disc">
-              {completedActions.map((action) => (
-                <div key={action.id} className="text-zinc-600 flex gap-x-2">
-                  <CheckIcon size="line" />
-                  <Link
-                    to={href("/actions/:id", { id: action.id.toString() })}
-                    className="text-zinc-400 line-through"
-                  >
-                    {action.optional && "(Optional) "}
-                    {action.name}
-                  </Link>
-                </div>
-              ))}
-              {currentWeekTodoActions.map((action) => (
-                <div key={action.id} className="text-zinc-600 flex gap-x-2">
-                  <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
-                  <Link
-                    to={href("/actions/:id", { id: action.id.toString() })}
-                    className="text-zinc-600"
-                  >
-                    {action.optional && "(Optional) "}
-                    {action.name}
-                  </Link>
-                </div>
-              ))}
-              {nextWeekTodoActions.length > 0 && (
-                <>
-                  <p className="text-zinc-500 mt-3 font-medium">Upcoming</p>
-                  {nextWeekTodoActions.map((action) => (
-                    <div key={action.id} className="text-zinc-600 flex gap-x-2">
-                      <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
-                      <Link
-                        to={href("/actions/:id", { id: action.id.toString() })}
-                        className="text-zinc-600"
-                      >
-                        {action.name}
-                      </Link>
-                    </div>
-                  ))}
-                </>
+              {currentWeekSidebarActions.length + newActions.length > 0 && (
+                <p className="text-zinc-600 mb-2">
+                  <span className="text-green font-medium mr-0.5">
+                    {currentWeekSidebarActions.length} task
+                    {currentWeekSidebarActions.length !== 1 ? "s" : ""} left{" "}
+                  </span>
+                  {numTodo > 0 &&
+                    remainingTasksEstimatedTimeCurrentWeek > 0 &&
+                    `for a total of ${remainingTasksEstimatedTimeCurrentWeek} minutes`}
+                </p>
               )}
-            </ul>
-          </div>
-        )}
+              <ul className="space-y-2 list-disc">
+                {completedActions.map((action) => (
+                  <div key={action.id} className="text-zinc-600 flex gap-x-2">
+                    <CheckIcon size="line" />
+                    <Link
+                      to={href("/actions/:id", { id: action.id.toString() })}
+                      className="text-zinc-400 line-through"
+                    >
+                      {action.optional && "(Optional) "}
+                      {action.name}
+                    </Link>
+                  </div>
+                ))}
+                {currentWeekTodoActions.map((action) => (
+                  <div key={action.id} className="text-zinc-600 flex gap-x-2">
+                    <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
+                    <Link
+                      to={href("/actions/:id", { id: action.id.toString() })}
+                      className="text-zinc-600"
+                    >
+                      {action.optional && "(Optional) "}
+                      {action.name}
+                    </Link>
+                  </div>
+                ))}
+                {nextWeekTodoActions.length > 0 && (
+                  <>
+                    <p className="text-zinc-500 mt-3 font-medium">Upcoming</p>
+                    {nextWeekTodoActions.map((action) => (
+                      <div key={action.id} className="text-zinc-600 flex gap-x-2">
+                        <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
+                        <Link
+                          to={href("/actions/:id", { id: action.id.toString() })}
+                          className="text-zinc-600"
+                        >
+                          {action.name}
+                        </Link>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </ul>
+            </div>
+          )}
       </>
     );
   }, [
@@ -151,7 +152,7 @@ const HomePage = () => {
     const dismissProps: LargeActionCardProps["dismissProps"] = !currentTask
       ? undefined
       : currentTask.awayStatus !== TaskAwayStatus.NOT_AWAY
-      ? {
+        ? {
           message: {
             [TaskAwayStatus.AWAY_CURRENTLY]:
               TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
@@ -159,11 +160,11 @@ const HomePage = () => {
             [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
           }[currentTask?.awayStatus],
         }
-      : deadlineHasPassed(currentTask, new Date())
-      ? {
-          message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
-        }
-      : undefined;
+        : deadlineHasPassed(currentTask, new Date())
+          ? {
+            message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
+          }
+          : undefined;
 
     return (
       <div
@@ -201,22 +202,29 @@ const HomePage = () => {
             onUpdateActionState={() => navigate(href("/tasks"))}
           />
         ) : (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-y-4">
+          <div className="w-full flex-1 flex flex-col items-center justify-center gap-y-4">
             {user && !user.hasActiveContract ? (
               <p className="text-center text-zinc-500">
                 {noTasksContractSuspended}
               </p>
             ) : (
               <>
-                <CheckIcon size="large" />
-                <p className="text-center text-zinc-500 text-lg lg:text-xl">
-                  {noTasksToDoRightNow}
-                </p>
+                <div className="flex flex-col items-center justify-evenly max-h-[30%] flex-8 gap-y-4">
+                  <div className="flex flex-col items-center gap-y-4">
+                    <CheckIcon size="large" />
+                    <p className="text-center text-zinc-500 text-lg lg:text-xl">
+                      {noTasksToDoRightNow}
+                    </p>
+                  </div>
+                  <HomeNotifsCard />
+                </div>
+                <div className="flex-2" />
               </>
             )}
           </div>
-        )}
-      </div>
+        )
+        }
+      </div >
     );
   }, [
     actions,
