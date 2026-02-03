@@ -1039,6 +1039,7 @@ export class UserService {
         user: leader,
         category: NotificationCategory.MemberJoinedCommunity,
         message: `${user.name} joined your public group (${community.name})`,
+        priority: NotifPriority.High,
         webAppLocation: groupUrl({
           tab: 'members',
           communityId: community.id,
@@ -1153,6 +1154,7 @@ export class UserService {
               communityId: community.id,
             }),
             associatedUsers: [user],
+            priority: NotifPriority.High,
           }),
         )
       : [];
@@ -1558,6 +1560,7 @@ export class UserService {
           }),
           associatedUsers: [user],
           onetimeInvite: savedInvite,
+          priority: NotifPriority.High,
         });
         this.notifRepository.save(notif);
       }
