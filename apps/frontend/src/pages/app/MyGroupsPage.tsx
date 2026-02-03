@@ -309,7 +309,11 @@ const MyGroupsPage = ({
                       color={
                         showCreateForm ? ButtonColor.Light : ButtonColor.White
                       }
-                      className="w-full !rounded-none border-t border-t-zinc-200 border-x-0 border-b-0"
+                      className={`w-full !rounded-none ${
+                        leaderCommunities.length
+                          ? "border-t border-t-zinc-200 border-x-0 border-b-0"
+                          : "border-0"
+                      }`}
                     >
                       <div className="w-full flex flex-row gap-x-2 items-center justify-center p-2 text-zinc-500">
                         {showCreateForm ? (
