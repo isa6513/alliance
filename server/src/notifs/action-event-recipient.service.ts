@@ -33,7 +33,7 @@ export class ActionEventRecipientService {
     @InjectRepository(Action)
     private readonly actionRepository: Repository<Action>,
     private readonly userService: UserService,
-  ) { }
+  ) {}
 
   private isContractActiveAtDate(
     contractEvents: ContractEvent[] | null,
@@ -92,10 +92,13 @@ export class ActionEventRecipientService {
       return false;
     }
 
-    if (deadlineDate && !user.hasActiveContractInFullRange({
-      startDate: eventDate,
-      endDate: deadlineDate,
-    })) {
+    if (
+      deadlineDate &&
+      !user.hasActiveContractInFullRange({
+        startDate: eventDate,
+        endDate: deadlineDate,
+      })
+    ) {
       return false;
     }
 
@@ -104,10 +107,7 @@ export class ActionEventRecipientService {
         user.contractEvents ?? [],
         (a, b) => a.date.getTime() - b.date.getTime(),
       );
-      if (
-        earliestContractEvent &&
-        earliestContractEvent.date < eventDate
-      ) {
+      if (earliestContractEvent && earliestContractEvent.date < eventDate) {
         return false;
       }
     }
@@ -115,10 +115,7 @@ export class ActionEventRecipientService {
     if (includeSuspended) {
       return true;
     }
-    return (
-      this.isContractActiveAtDate(user.contractEvents, eventDate) ||
-      everyoneShouldComplete
-    );
+    return user.hasActiveContractAt(eventDate) || everyoneShouldComplete;
   }
 
   getNextEvent(params: {
@@ -163,7 +160,10 @@ export class ActionEventRecipientService {
       throw new Error(`Event not found: ${eventId}`);
     }
 
-    const deadlineEvent = this.getNextEvent({ events, currentEventId: eventId });
+    const deadlineEvent = this.getNextEvent({
+      events,
+      currentEventId: eventId,
+    });
 
     const usersDismissed = new Set(
       (

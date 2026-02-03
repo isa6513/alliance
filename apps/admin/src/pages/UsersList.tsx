@@ -177,15 +177,21 @@ const UsersList: React.FC = () => {
   const modeToUsers = useMemo(() => {
     return Object.values(UserFilterMode).reduce((acc, mode) => {
       acc[mode] = filteredBySearch.filter((user) => {
-        if (mode === UserFilterMode.ALL) return true;
-        const lastEvent = user.contractEvents.sort(
+        if (mode === UserFilterMode.ALL) {
+          return true;
+        }
+        const lastEvent = user.contractEvents?.sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         )[0];
-        if (mode === UserFilterMode.NOT_SIGNED)
-          return user.contractEvents.length === 0;
-        if (mode === UserFilterMode.SIGNED) return lastEvent?.type === "signed";
-        if (mode === UserFilterMode.SUSPENDED)
+        if (mode === UserFilterMode.NOT_SIGNED) {
+          return user.contractEvents?.length === 0;
+        }
+        if (mode === UserFilterMode.SIGNED) {
+          return lastEvent?.type === "signed";
+        }
+        if (mode === UserFilterMode.SUSPENDED) {
           return lastEvent?.type === "suspended";
+        }
       });
       return acc;
     }, {} as Record<UserFilterMode, UserDto[]>);
@@ -233,7 +239,7 @@ const UsersList: React.FC = () => {
 
   const usersAsProfiles = useMemo((): ProfileDto[] => {
     return (modeToUsers[filterMode] ?? []).map((user) => {
-      const lastEvent = user.contractEvents.sort(
+      const lastEvent = user.contractEvents?.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       )[0];
       return {

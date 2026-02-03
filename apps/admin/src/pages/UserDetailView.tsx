@@ -700,7 +700,7 @@ const UserDetailView: React.FC = () => {
                 </span>
               </div>
             </div>
-            {user.contractEvents?.length > 0 ? (
+            {user.contractEvents && user.contractEvents.length > 0 ? (
               <div className="space-y-1 max-h-32 overflow-y-auto">
                 {[...user.contractEvents]
                   .sort(

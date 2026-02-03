@@ -545,7 +545,7 @@ export type User = {
     pushesForFriendRequests: boolean;
     isIntroductoryGroupMember: boolean;
     undergoingGroupAssignment: boolean;
-    contractEvents: Array<ContractEvent>;
+    contractEvents?: Array<ContractEvent>;
     communities: Array<Community>;
     invitedCommunities: Array<CommunityInvite>;
     participants: Array<Participant>;
@@ -598,7 +598,7 @@ export type UserDto = {
     pushesForFriendRequests: boolean;
     isIntroductoryGroupMember: boolean;
     undergoingGroupAssignment: boolean;
-    contractEvents: Array<ContractEvent>;
+    contractEvents?: Array<ContractEvent>;
     communities: Array<Community>;
     invitedCommunities: Array<CommunityInvite>;
     cityId?: number;

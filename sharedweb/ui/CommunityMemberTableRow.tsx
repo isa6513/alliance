@@ -33,7 +33,7 @@ const CommunityMemberTableRow = ({
   canExpand?: boolean;
   amLeader?: boolean;
   canRemove?: boolean;
-  communityId: number;
+  communityId?: number;
   onRemoveMember?: (memberId: number) => void;
   contactInfo?: CommunityMemberContactInfoDto;
   actions: UserActionSummaryDto[];
@@ -94,6 +94,9 @@ const CommunityMemberTableRow = ({
   const { confirm } = useToast();
 
   const handleRemoveMember = useCallback(async (anchor: HTMLElement | null) => {
+    if (!communityId) {
+      return;
+    }
     const ok = await confirm({
       title: "Remove member?",
       message: `Are you sure you want to remove ${profile.displayName} from this group?`,
@@ -116,8 +119,9 @@ const CommunityMemberTableRow = ({
   return (
     <>
       <tr
-        className={`*:py-4 *:px-2 *:md:px-4 bg-white ${canExpand ? "hover:bg-zinc-50 cursor-pointer" : ""
-          }`}
+        className={`*:py-4 *:px-2 *:md:px-4 bg-white ${
+          canExpand ? "hover:bg-zinc-50 cursor-pointer" : ""
+        }`}
         onClick={canExpand ? () => setExpanded(!expanded) : undefined}
       >
         <td>
@@ -140,8 +144,9 @@ const CommunityMemberTableRow = ({
               <UserDisplayName
                 staff={profile.staff}
                 underline={false}
-                className={`${currentAwayRange ? "text-zinc-400" : undefined
-                  } group-hover:underline`}
+                className={`${
+                  currentAwayRange ? "text-zinc-400" : undefined
+                } group-hover:underline`}
               >
                 {profile.displayName}
                 {currentAwayRange && " (away)"}
@@ -208,18 +213,14 @@ const CommunityMemberTableRow = ({
                     {contactInfo.preferredReminderTimeUserTz ===
                     contactInfo.preferredReminderTimeLeaderTz ? (
                       <p>
-                        <span className="font-semibold">
-                          Contact time:
-                        </span>{" "}
+                        <span className="font-semibold">Contact time:</span>{" "}
                         {contactInfo.preferredReminderTimeUserTz ?? "Anytime"}{" "}
                         in your time zone
                       </p>
                     ) : (
                       <div>
                         <p>
-                          <span className="font-semibold">
-                            Contact time:
-                          </span>
+                          <span className="font-semibold">Contact time:</span>
                         </p>
                         <p>
                           {contactInfo.preferredReminderTimeUserTz ?? "Anytime"}
@@ -266,7 +267,7 @@ const CommunityMemberTableRow = ({
                 </div>
               )}
               <div className="flex flex-col justify-end m-4">
-                {canRemove && (
+                {canRemove && communityId && (
                   <Button
                     color={ButtonColor.Red}
                     onClick={(event) =>
