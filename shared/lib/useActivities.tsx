@@ -99,6 +99,10 @@ const useActivities = ({
   const [loading, setLoading] = useState(activities.length === 0);
 
   useEffect(() => {
+    setActivitiesWithoutCache(getCachedActivities(cacheKey) ?? []);
+  }, [cacheKey]);
+
+  useEffect(() => {
     let apiCall;
     switch (list) {
       case ActivityList.Friends:
