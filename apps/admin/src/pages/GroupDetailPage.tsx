@@ -247,7 +247,7 @@ const CommunityDetailPage: React.FC = () => {
           success("Community updated", response.data.name);
         }
       } catch (err) {
-        console.error("Failed to update community", err);
+        console.error("Failed to update group", err);
         setError("Unable to update community. Please try again.");
         pushError("Unable to update community. Please try again.");
       } finally {
@@ -472,9 +472,8 @@ const CommunityDetailPage: React.FC = () => {
       const anchorEl = event.currentTarget;
       const ok = await confirm({
         title: "Make leader?",
-        message: `Promote ${displayName ?? "this member"} to a leader of ${
-          community.name
-        }?`,
+        message: `Promote ${displayName ?? "this member"} to a leader of ${community.name
+          }?`,
         confirmLabel: "Make leader",
         cancelLabel: "Cancel",
         anchorEl,

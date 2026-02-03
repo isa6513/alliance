@@ -139,7 +139,7 @@ const CommunityPage = () => {
               (community) => community.id.toString() === communityId
             )) ||
             resp.data?.[0]) ??
-            null
+          null
         );
       }
     });
@@ -319,11 +319,11 @@ const CommunityPage = () => {
           }
         });
       } else {
-        setError("Failed to update community");
+        setError("Failed to update group");
       }
     } catch (err) {
-      console.error("Failed to update community:", err);
-      setError("Failed to update community");
+      console.error("Failed to update group:", err);
+      setError("Failed to update group");
     } finally {
       setIsSaving(false);
     }
@@ -653,9 +653,8 @@ const CommunityPage = () => {
                 </div>
 
                 <div
-                  className={`max-w-[400px] ${
-                    completionData.nTotal === 0 ? " invisible" : ""
-                  }`}
+                  className={`max-w-[400px] ${completionData.nTotal === 0 ? " invisible" : ""
+                    }`}
                 >
                   <p className="text-sm">
                     {completionData.nCompleted} / {completionData.nTotal} have
@@ -666,7 +665,7 @@ const CommunityPage = () => {
                       completionData.nTotal === 0
                         ? 100
                         : (completionData.nCompleted / completionData.nTotal) *
-                          100
+                        100
                     }
                     height="h-4"
                     dark
@@ -681,9 +680,8 @@ const CommunityPage = () => {
                       key={m}
                       onClick={() => setParams({ tab: m })}
                       aria-pressed={m === tab}
-                      className={`!border-b-[1.5px] rounded-none ${
-                        m === tab ? "!border-b-green" : "!border-b-transparent"
-                      }`}
+                      className={`!border-b-[1.5px] rounded-none ${m === tab ? "!border-b-green" : "!border-b-transparent"
+                        }`}
                     >
                       <div className="flex flex-row gap-x-2">
                         <span>{TAB_DISPLAY_NAMES[m]}</span>

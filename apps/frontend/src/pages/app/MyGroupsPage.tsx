@@ -119,13 +119,13 @@ const MyGroupsPage = ({
       const message = getRemovalMessage();
       const ok = message
         ? await confirm({
-            title: "Accept invite?",
-            message,
-            confirmLabel: "Accept",
-            cancelLabel: "Cancel",
-            anchorEl: anchor,
-            placement: "topleft",
-          })
+          title: "Accept invite?",
+          message,
+          confirmLabel: "Accept",
+          cancelLabel: "Cancel",
+          anchorEl: anchor,
+          placement: "topleft",
+        })
         : true;
 
       if (ok) {
@@ -171,13 +171,13 @@ const MyGroupsPage = ({
     async (anchor?: HTMLElement | null) => {
       const ok = !!nonLeaderCommunities.length
         ? await confirm({
-            title: "Group assignment",
-            message: requestGroupAssignmentConfirmation,
-            confirmLabel: "Yes, reassign me",
-            cancelLabel: "No",
-            anchorEl: anchor,
-            placement: "topleft",
-          })
+          title: "Group assignment",
+          message: requestGroupAssignmentConfirmation,
+          confirmLabel: "Yes, reassign me",
+          cancelLabel: "No",
+          anchorEl: anchor,
+          placement: "topleft",
+        })
         : true;
       if (ok) {
         await userJoinGroupAssignment();
@@ -197,13 +197,13 @@ const MyGroupsPage = ({
       const message = getRemovalMessage(community.name);
       const ok = message
         ? await confirm({
-            title: "Join public group?",
-            message,
-            confirmLabel: "Join group",
-            cancelLabel: "Cancel",
-            anchorEl: anchor,
-            placement: "topleft",
-          })
+          title: "Join public group?",
+          message,
+          confirmLabel: "Join group",
+          cancelLabel: "Cancel",
+          anchorEl: anchor,
+          placement: "topleft",
+        })
         : true;
       if (!ok) {
         return;
@@ -214,13 +214,13 @@ const MyGroupsPage = ({
           path: { communityId: community.id },
         });
         if (!response.data) {
-          throw new Error("No community returned");
+          throw new Error("No group returned");
         }
         success(`You joined ${community.name}.`);
         await refreshUser();
         onSelectCommunity(response.data.id);
       } catch (err) {
-        console.error("Failed to join public community", err);
+        console.error("Failed to join public group", err);
         showError("Unable to join that group right now.");
       } finally {
         setJoiningCommunityId(null);
@@ -309,11 +309,10 @@ const MyGroupsPage = ({
                       color={
                         showCreateForm ? ButtonColor.Light : ButtonColor.White
                       }
-                      className={`w-full !rounded-none ${
-                        leaderCommunities.length
+                      className={`w-full !rounded-none ${leaderCommunities.length
                           ? "border-t border-t-zinc-200 border-x-0 border-b-0"
                           : "border-0"
-                      }`}
+                        }`}
                     >
                       <div className="w-full flex flex-row gap-x-2 items-center justify-center p-2 text-zinc-500">
                         {showCreateForm ? (
@@ -350,8 +349,8 @@ const MyGroupsPage = ({
               {!user?.undergoingGroupAssignment
                 ? ""
                 : nonLeaderCommunities.length
-                ? " (reassigning...)"
-                : " (assigning...)"}
+                  ? " (reassigning...)"
+                  : " (assigning...)"}
             </p>
             <p className="text-zinc-500 text-base">
               For now, you can only be a member of one group.
@@ -468,12 +467,12 @@ const MyGroupsPage = ({
               const joinLabel = isLeader
                 ? "Leader"
                 : isMember
-                ? "Member"
-                : isFull
-                ? "Full"
-                : isJoining
-                ? "Joining..."
-                : "Join";
+                  ? "Member"
+                  : isFull
+                    ? "Full"
+                    : isJoining
+                      ? "Joining..."
+                      : "Join";
 
               return (
                 <div
@@ -491,9 +490,9 @@ const MyGroupsPage = ({
                         {community.users.length}
                         {community.maxCapacity !== null
                           ? ` / ${Math.max(
-                              community.maxCapacity,
-                              community.users.length
-                            )}`
+                            community.maxCapacity,
+                            community.users.length
+                          )}`
                           : ""}{" "}
                         members
                       </span>
