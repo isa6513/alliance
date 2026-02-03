@@ -257,6 +257,7 @@ __metadata:
     eslint-plugin-react-refresh: "npm:^0.4.20"
     lucide-react: "npm:^0.555.0"
     react-router: "npm:7.6.2"
+    socket.io-client: "npm:^4.8.1"
     typescript: "npm:~5.7.2"
   peerDependencies:
     react: "*"
