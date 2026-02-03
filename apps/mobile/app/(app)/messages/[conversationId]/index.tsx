@@ -271,7 +271,7 @@ export default function ConversationScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <View className="flex-row items-center gap-3 border-b border-zinc-200 px-4 pt-16 pb-6 bg-white">
+      <View className="flex-row items-center gap-3 border-b border-zinc-200 px-4 pt-16 pb-6 bg-white z-200">
         <TouchableOpacity onPress={() => router.back()}>
           <ChevronLeft size={22} color="#111827" />
         </TouchableOpacity>

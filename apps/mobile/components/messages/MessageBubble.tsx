@@ -102,8 +102,8 @@ export default function MessageBubble({
   });
 
   return (
-    <View className={`px-4 ${isFocused ? "bg-green-100" : ""}`}>
-      <View className="overflow-hidden">
+    <View className={`${isFocused ? "bg-green-100" : ""}`}>
+      <View className="overflow-hidden px-4">
         <Animated.View
           style={[actionStyle]}
           className="absolute right-0 top-0 bottom-0 bg-zinc-200 items-center justify-center"
