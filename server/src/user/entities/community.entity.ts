@@ -79,8 +79,8 @@ export class Community {
   @Allow()
   allowStaffAssignments: boolean;
 
-  @Column({ type: 'int', nullable: true })
-  @ApiProperty({ type: Number, nullable: true })
+  @Column({ type: 'int', nullable: true, default: 10 })
+  @ApiProperty({ type: Number, nullable: true, default: 10 })
   @IsOptional()
   maxCapacity: number | null;
 
