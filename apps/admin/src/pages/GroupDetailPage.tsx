@@ -244,12 +244,12 @@ const CommunityDetailPage: React.FC = () => {
         });
         if (response.data) {
           setCommunity(response.data);
-          success("Community updated", response.data.name);
+          success("Group updated", response.data.name);
         }
       } catch (err) {
         console.error("Failed to update group", err);
-        setError("Unable to update community. Please try again.");
-        pushError("Unable to update community. Please try again.");
+        setError("Unable to update group. Please try again.");
+        pushError("Unable to update group. Please try again.");
       } finally {
         setSavingDetails(false);
       }
