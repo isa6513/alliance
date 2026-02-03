@@ -24,6 +24,7 @@ const HomeNotifsCard = () => {
         {priority.slice(0, 3).map((notification) => {
           const handleClick = (e: React.MouseEvent) => {
             e.preventDefault();
+            e.stopPropagation();
             handleNotifClick(notification.id, notification.webAppLocation)();
           };
           return (
