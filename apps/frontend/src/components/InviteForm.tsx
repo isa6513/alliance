@@ -210,13 +210,13 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                       )
                     ),
                     <p
-                      className="text-zinc-500"
-                      key={
-                        onetimeInviteCreation.not_responsible.explanations
-                          .yourGroup.length
-                      }
+                      key="your-current-group"
+                      className="border border-zinc-300 rounded px-3 py-2"
                     >
-                      {`Your current group: ${memberCommunities[0].name}`}
+                      Your current group:{" "}
+                      <span className="font-semibold">
+                        {memberCommunities[0].name}
+                      </span>
                     </p>,
                   ]
                 : onetimeInviteCreation.not_responsible.explanations.genericGroup.map(
