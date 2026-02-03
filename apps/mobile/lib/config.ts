@@ -14,3 +14,15 @@ export const getApiUrl = (): string => {
 export const getImageSource = (string: string) => {
   return `${getApiUrl()}/images/${string}`;
 };
+
+export const getWebSocketUrl = (): string => {
+  const apiUrl = getApiUrl();
+  const baseUrl = apiUrl.replace(/\/api\/?$/, "");
+  if (baseUrl.startsWith("https://")) {
+    return baseUrl.replace("https://", "wss://");
+  }
+  if (baseUrl.startsWith("http://")) {
+    return baseUrl.replace("http://", "ws://");
+  }
+  return baseUrl;
+};

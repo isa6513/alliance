@@ -66,7 +66,7 @@ export default function InformationScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white">
-      <View className="px-4 pt-6 pb-10 gap-y-6">
+      <View className="px-4 pt-12 pb-10 gap-y-6">
         <Text className="text-2xl font-semibold text-zinc-900">
           Information
         </Text>

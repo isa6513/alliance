@@ -42,7 +42,7 @@ export default function AppLayout() {
           <Stack.Screen name="information" />
           <Stack.Screen name="notifications" />
           <Stack.Screen name="profile" />
-          <Stack.Screen name="actions/[id]" />
+          <Stack.Screen name="actions/[id]/index" />
           <Stack.Screen name="forum/index" />
           <Stack.Screen name="settings" />
         </Stack>

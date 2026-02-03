@@ -24,8 +24,8 @@ interface AuthContextType {
   isLoading: boolean;
 }
 
-const ACCESS_KEY = "accessToken";
-const REFRESH_KEY = "refreshToken";
+export const ACCESS_TOKEN_KEY = "accessToken";
+export const REFRESH_TOKEN_KEY = "refreshToken";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -47,22 +47,22 @@ export const AuthProvider: React.FC<
 
   const saveTokens = useCallback(
     async (access: string, refresh: string) => {
-      await tokenStore.setItem(ACCESS_KEY, access);
-      await tokenStore.setItem(REFRESH_KEY, refresh);
+      await tokenStore.setItem(ACCESS_TOKEN_KEY, access);
+      await tokenStore.setItem(REFRESH_TOKEN_KEY, refresh);
     },
     [tokenStore]
   );
 
   const clearTokens = useCallback(async () => {
-    await tokenStore.deleteItem(ACCESS_KEY);
-    await tokenStore.deleteItem(REFRESH_KEY);
+    await tokenStore.deleteItem(ACCESS_TOKEN_KEY);
+    await tokenStore.deleteItem(REFRESH_TOKEN_KEY);
   }, [tokenStore]);
 
   const getAccessToken = useCallback(async () => {
-    return await tokenStore.getItem(ACCESS_KEY);
+    return await tokenStore.getItem(ACCESS_TOKEN_KEY);
   }, [tokenStore]);
   const getRefreshToken = useCallback(async () => {
-    return await tokenStore.getItem(REFRESH_KEY);
+    return await tokenStore.getItem(REFRESH_TOKEN_KEY);
   }, [tokenStore]);
 
   const logout = useCallback(async () => {

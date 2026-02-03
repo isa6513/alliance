@@ -409,17 +409,20 @@ export default function UserProfileScreen() {
     <ScrollView className="flex-1 bg-white">
       <View className="p-4 pt-24 gap-4">
         <View className="items-center gap-3">
-          <ProfileImage
-            pfp={isEditing ? editAvatarUrl : profile.profilePicture}
-            size="huge"
-          />
-          {isEditing && (
-            <Button
-              title={isPickingAvatar ? "Choosing photo..." : "Change photo"}
-              color={ButtonColor.Light}
-              size={ButtonSize.Small}
-              onPress={handlePickAvatar}
-              disabled={isPickingAvatar}
+          {isEditing ? (
+            <TouchableOpacity onPress={handlePickAvatar} className="border-zinc-200 rounded-lg p-1 border-dashed border-2 relative">
+              <ProfileImage
+                pfp={editAvatarUrl}
+                size="huge"
+              />
+              <View className="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center ">
+                <Edit size={24} color="#fff" />
+              </View>
+            </TouchableOpacity>
+          ) : (
+            <ProfileImage
+              pfp={profile.profilePicture}
+              size="huge"
             />
           )}
         </View>
@@ -479,10 +482,11 @@ export default function UserProfileScreen() {
           ) : profile.profileDescription ? (
             <AppMarkdownWrapper>{profile.profileDescription}</AppMarkdownWrapper>
           ) : (
-            <Text className="text-zinc-500">No bio yet.</Text>
+          null
           )}
         </View>
 
+      {(!isMe || isEditing) && (
         <View className="flex-row items-center justify-end gap-3">
           {isMe ? (
             isEditing ? (
@@ -508,7 +512,7 @@ export default function UserProfileScreen() {
             renderFriendAction()
           )}
         </View>
-
+        )}
         <View className="flex-row bg-zinc-100 rounded-lg p-1">
           {tabs.map((tab) => {
             const isSelected = selectedTab === tab.id;

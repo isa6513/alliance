@@ -15,7 +15,7 @@ import {
 } from "@alliance/shared/lib/contract";
 
 const ContractPage: React.FC = () => {
-  const { user, loading, refreshUser } = useAuth();
+  const { user, refreshUser } = useAuth();
 
   const [editName, setEditName] = useState("");
 
@@ -65,10 +65,6 @@ const ContractPage: React.FC = () => {
       alert("There was an error suspending the contract. Please try again.");
     }
   };
-
-  if (!user && !loading) {
-    return <div>Not found</div>;
-  }
 
   return (
     <CenterLayout>

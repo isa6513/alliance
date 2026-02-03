@@ -10,6 +10,7 @@ export enum ButtonColor {
   Light = "light",
   Outline = "outline",
   White = "white",
+  Transparent = "transparent",
 }
 
 export enum ButtonSize {
@@ -36,6 +37,7 @@ const colorClasses: Record<ButtonColor, string> = {
   [ButtonColor.Light]: "bg-stone-200 border border-stone-300",
   [ButtonColor.Outline]: "bg-transparent border border-stone-300",
   [ButtonColor.White]: "bg-white border border-stone-300",
+  [ButtonColor.Transparent]: "bg-transparent border border-transparent",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -52,6 +54,7 @@ const textColorClasses: Record<ButtonColor, string> = {
   [ButtonColor.Light]: "text-zinc-800",
   [ButtonColor.Outline]: "text-zinc-800",
   [ButtonColor.White]: "text-zinc-800",
+  [ButtonColor.Transparent]: "text-zinc-800",
 };
 
 export default function Button({

@@ -63,7 +63,7 @@ const ActionPageTaskPanel = ({
         </Card>
       );
     case ActionPageTaskPanelState.NotAssigned:
-      return <Card cardStyle={CardStyle.Grey}>{taskNotAssigned}</Card>;
+      return <Card cardStyle={CardStyle.Grey}><Text>{taskNotAssigned}</Text></Card>;
     case ActionPageTaskPanelState.MissingDataOrNotActive:
       return null;
     case ActionPageTaskPanelState.Completed:

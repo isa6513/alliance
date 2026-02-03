@@ -1,0 +1,208 @@
+import { MessageDto } from "@alliance/shared/client";
+import { formatTime } from "@alliance/shared/lib/utils";
+import { Reply, X } from "lucide-react-native";
+import { useMemo, useState } from "react";
+import {
+  Dimensions,
+  Image,
+  Modal,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Animated, {
+  Extrapolation,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { getImageSource } from "../../lib/config";
+import AppMarkdownWrapper from "../AppMarkdownWrapper";
+import ProfileImage from "../ProfileImage";
+import Text from "../system/Text";
+
+interface MessageBubbleProps {
+  message: MessageDto;
+  isFirstInGroup?: boolean;
+  isFirstInReplyGroup?: boolean;
+  isFocused?: boolean;
+  onReply?: (messageId: string) => void;
+  onFocusReply?: (messageId: string) => void;
+}
+
+const SWIPE_THRESHOLD = -80;
+
+const resolveAttachmentUri = (attachment: string) => {
+  if (
+    attachment.startsWith("data:") ||
+    attachment.startsWith("file:") ||
+    attachment.startsWith("http")
+  ) {
+    return attachment;
+  }
+  return getImageSource(attachment);
+};
+
+export default function MessageBubble({
+  message,
+  isFirstInGroup = false,
+  isFirstInReplyGroup = false,
+  isFocused = false,
+  onReply,
+  onFocusReply,
+}: MessageBubbleProps) {
+  const attachments = message.attachments ?? [];
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const lightboxSrc =
+    lightboxIndex !== null ? resolveAttachmentUri(attachments[lightboxIndex]) : null;
+  const { width, height } = Dimensions.get("window");
+  const lightboxSize = Math.min(width * 0.9, height * 0.7);
+  const translateX = useSharedValue(0);
+
+  const timeLabel = useMemo(() => {
+    return formatTime(new Date(message.createdAt), { addSuffix: true }).replace(
+      "less than a minute ago",
+      "now"
+    );
+  }, [message.createdAt]);
+
+  const panGesture = Gesture.Pan()
+    .enabled(!!onReply)
+    .activeOffsetX([-10, 10])
+    .onUpdate((event) => {
+      translateX.value = Math.min(0, event.translationX);
+    })
+    .onEnd(() => {
+      if (translateX.value < SWIPE_THRESHOLD && onReply) {
+        runOnJS(onReply)(message.id);
+      }
+      translateX.value = withSpring(0, { damping: 20, stiffness: 200 });
+    });
+
+  const contentStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
+
+  const actionStyle = useAnimatedStyle(() => {
+    const width = interpolate(
+      translateX.value,
+      [SWIPE_THRESHOLD, 0],
+      [-SWIPE_THRESHOLD, 0],
+      Extrapolation.CLAMP
+    );
+    const opacity = interpolate(
+      translateX.value,
+      [SWIPE_THRESHOLD, -20, 0],
+      [1, 0.4, 0],
+      Extrapolation.CLAMP
+    );
+    return { width, opacity };
+  });
+
+  return (
+    <View className={`px-4 ${isFocused ? "bg-green-100" : ""}`}>
+      <View className="overflow-hidden">
+        <Animated.View
+          style={[actionStyle]}
+          className="absolute right-0 top-0 bottom-0 bg-zinc-200 items-center justify-center"
+        >
+          <View className="w-16 items-center justify-center">
+            <Reply size={18} />
+          </View>
+        </Animated.View>
+
+        <GestureDetector gesture={panGesture}>
+          <Animated.View style={contentStyle}>
+            {message.replyTo && isFirstInReplyGroup && (
+              <TouchableOpacity
+                className="flex-row items-center gap-2 ml-10 mb-1"
+                onPress={() => onFocusReply?.(message.replyTo!.id)}
+              >
+                <Reply size={14} color="#71717a" />
+                <ProfileImage
+                  pfp={message.replyTo.author.profilePicture}
+                  size="mini"
+                />
+                <Text className="text-xs text-zinc-500" numberOfLines={1}>
+                  Replying to: {message.replyTo.body || "image"}
+                </Text>
+              </TouchableOpacity>
+            )}
+            <View className="flex-row gap-3">
+              <View className="w-8">
+                {isFirstInGroup && (
+                  <ProfileImage
+                    pfp={message.author.profilePicture}
+                    size="medium"
+                  />
+                )}
+              </View>
+              <View className="flex-1">
+                {isFirstInGroup && (
+                  <View className="flex-row items-center gap-2">
+                    <Text className="font-medium text-zinc-900">
+                      {message.author.displayName}
+                    </Text>
+                    <Text className="text-xs text-zinc-500">{timeLabel}</Text>
+                  </View>
+                )}
+                {message.body ? (
+                  <AppMarkdownWrapper>{message.body}</AppMarkdownWrapper>
+                ) : null}
+                {attachments.length > 0 && (
+                  <View className="flex-row flex-wrap gap-2 mt-2">
+                    {attachments.map((attachment, idx) => {
+                      const uri = resolveAttachmentUri(attachment);
+                      return (
+                        <TouchableOpacity
+                          key={`${message.id}-attachment-${idx}`}
+                          onPress={() => setLightboxIndex(idx)}
+                          activeOpacity={0.9}
+                        >
+                          <Image
+                            source={{ uri }}
+                            className="w-24 h-24 rounded border border-zinc-200"
+                          />
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                )}
+              </View>
+            </View>
+          </Animated.View>
+        </GestureDetector>
+      </View>
+      <Modal
+        visible={!!lightboxSrc}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setLightboxIndex(null)}
+      >
+        <TouchableOpacity
+          className="flex-1 bg-black/80 items-center justify-center"
+          onPress={() => setLightboxIndex(null)}
+          activeOpacity={1}
+        >
+          <View className="max-w-[90%] max-h-[80%]">
+            {lightboxSrc && (
+              <Image
+                source={{ uri: lightboxSrc }}
+                style={{ width: lightboxSize, height: lightboxSize }}
+                resizeMode="contain"
+              />
+            )}
+            <TouchableOpacity
+              onPress={() => setLightboxIndex(null)}
+              className="absolute -top-10 right-0"
+            >
+              <X size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
+  );
+}

@@ -1,0 +1,156 @@
+import { MessageDto } from "@alliance/shared/client";
+import { type Dispatch, type SetStateAction, useCallback, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { ImagePlus, Send, X } from "lucide-react-native";
+import Text from "../system/Text";
+import { colors } from "../../lib/style/colors";
+
+interface MessageComposerProps {
+  message: string;
+  setMessage: (value: string) => void;
+  attachments: string[];
+  setAttachments: Dispatch<SetStateAction<string[]>>;
+  onSend: () => Promise<void>;
+  isSending?: boolean;
+  replyingTo?: MessageDto | null;
+  clearReplyingTo?: () => void;
+  placeholder?: string;
+}
+
+export default function MessageComposer({
+  message,
+  setMessage,
+  attachments,
+  setAttachments,
+  onSend,
+  isSending = false,
+  replyingTo,
+  clearReplyingTo,
+  placeholder = "Message",
+}: MessageComposerProps) {
+  const [picking, setPicking] = useState(false);
+  const canSend = message.trim().length > 0 || attachments.length > 0;
+
+  const handlePickImages = useCallback(async () => {
+    if (picking) return;
+    setPicking(true);
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert("Permission required", "Allow photo access to add images.");
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        base64: true,
+        quality: 0.8,
+      });
+      if (result.canceled) return;
+      const newAttachments = result.assets
+        .map((asset) => {
+          if (!asset.base64) return null;
+          const mimeType = asset.mimeType ?? "image/jpeg";
+          return `data:${mimeType};base64,${asset.base64}`;
+        })
+        .filter((value): value is string => !!value);
+      if (newAttachments.length > 0) {
+        setAttachments((prev) => [...prev, ...newAttachments]);
+      }
+    } catch (error) {
+      console.error("Failed to pick images", error);
+    } finally {
+      setPicking(false);
+    }
+  }, [picking, setAttachments]);
+
+  const handleRemoveAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
+  const handleSend = useCallback(() => {
+    if (!canSend || isSending) return;
+    onSend();
+  }, [canSend, isSending, onSend]);
+
+  return (
+    <View className="border-t border-zinc-200 bg-white px-4 py-3">
+      {replyingTo && (
+        <View className="flex-row items-center justify-between bg-zinc-100 rounded p-3 mb-3">
+          <View className="flex-row items-center gap-2 flex-1">
+            <Text className="text-sm text-zinc-500">Replying to:</Text>
+            <Text className="text-sm text-zinc-900 max-w-[250px]" numberOfLines={1} style={{textOverflow: "ellipsis"}}>
+              {replyingTo.body || "image"}
+            </Text>
+          </View>
+          {clearReplyingTo && (
+            <TouchableOpacity onPress={clearReplyingTo}>
+              <X size={16} color="#52525b" />
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
+      {attachments.length > 0 && (
+        <View className="flex-row flex-wrap gap-2 mb-3">
+          {attachments.map((attachment, index) => (
+            <View key={`${attachment.slice(0, 12)}-${index}`} className="relative">
+              <Image
+                source={{ uri: attachment }}
+                className="w-16 h-16 rounded border border-zinc-200"
+              />
+              <TouchableOpacity
+                onPress={() => handleRemoveAttachment(index)}
+                className="absolute -top-2 -right-2 bg-black/70 rounded-full w-5 h-5 items-center justify-center"
+              >
+                <Text className="text-white text-xs">×</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      )}
+
+      <View className="flex-row items-end gap-2">
+        <TouchableOpacity
+          onPress={handlePickImages}
+          className="items-center justify-center rounded border border-zinc-200 p-2"
+          disabled={picking}
+        >
+          <ImagePlus size={21} color={colors.text.secondary} />
+        </TouchableOpacity>
+        <View className="flex-1 border border-zinc-200 rounded bg-zinc-50 px-3 pb-2">
+          <TextInput
+            value={message}
+            onChangeText={setMessage}
+            placeholder={placeholder}
+            placeholderTextColor="#9ca3af"
+            multiline
+            className="text-base text-zinc-900"
+            textAlignVertical="top"
+          />
+        </View>
+        <TouchableOpacity
+          onPress={handleSend}
+          className={`w-10 h-10 items-center justify-center rounded ${
+            canSend ? "bg-green" : "bg-zinc-300"
+          }`}
+          disabled={!canSend || isSending}
+        >
+          {isSending ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Send size={18} color="#fff" />
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}

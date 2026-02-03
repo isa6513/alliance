@@ -18,10 +18,10 @@ import ConversationDetailPanel from "../../components/ConversationDetailPanel";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useAuth } from "../../lib/AuthContext";
 import useLiveConvoMessages, {
-  sortConversations,
   useConversations,
 } from "./messages";
 import { useMediaQuery } from "../../lib/useMediaQuery";
+import { buildGroupConversationTitle, findMatchingConversation, getConversationPreview, getJoinedConversations, getMessageRequestPreview, getPendingInvites, mergeConversationUpdate, sortConversations, updateConversationsForLastMessage } from "@alliance/shared/lib/messages";
 
 const MessagesPage = () => {
   const [params, setParams] = useSearchParams();
@@ -53,38 +53,18 @@ const MessagesPage = () => {
 
   const setConvoLastMessage = useCallback(
     (message: MessageDto) => {
-      setConversations((prev) => {
-        if (!prev) return null;
-        const existing = prev.find(
-          (convo) => convo.id === message.conversationId
-        );
-        if (!existing) {
-          return prev;
-        }
-        const updated = { ...existing, lastMessage: message };
-        return [updated, ...prev.filter((convo) => convo.id !== updated.id)];
-      });
+      setConversations((prev) =>
+        updateConversationsForLastMessage(prev, message)
+      );
     },
     [setConversations]
   );
 
   const handleConversationUpdated = useCallback(
     (updatedConversation: ConversationDto) => {
-      setConversations((prev) => {
-        if (!prev) {
-          return prev;
-        }
-        const existing = prev.find(
-          (convo) => convo.id === updatedConversation.id
-        );
-        if (!existing) {
-          return prev;
-        }
-        const merged = { ...existing, ...updatedConversation };
-        return [merged, ...prev.filter((convo) => convo.id !== merged.id)].sort(
-          sortConversations
-        );
-      });
+      setConversations((prev) =>
+        mergeConversationUpdate(prev, updatedConversation)
+      );
     },
     [setConversations]
   );
@@ -175,10 +155,7 @@ const MessagesPage = () => {
         if (user && !user.anonymous) {
           names.push(user.name);
         }
-        const moreThan5 = names.length > 3;
-        const title = moreThan5
-          ? names.slice(0, 3).join(", ") + ` +${names.length - 3} more`
-          : names.join(", ");
+        const title = buildGroupConversationTitle(names);
 
         const response = await conversationCreateGroupConversation({
           body: {
@@ -201,23 +178,15 @@ const MessagesPage = () => {
       user,
     ]);
 
-  const joinedConversations = useMemo(() => {
-    return conversations?.filter((convo) =>
-      convo.participants?.some(
-        (participant) =>
-          participant.user.id === user?.id && participant.state === "joined"
-      )
-    );
-  }, [conversations, user]);
+  const joinedConversations = useMemo(
+    () => getJoinedConversations(conversations, user?.id),
+    [conversations, user?.id]
+  );
 
-  const pendingInvites = useMemo(() => {
-    return conversations?.filter((convo) =>
-      convo.participants?.some(
-        (participant) =>
-          participant.user.id === user?.id && participant.state === "invited"
-      )
-    );
-  }, [conversations, user]);
+  const pendingInvites = useMemo(
+    () => getPendingInvites(conversations, user?.id),
+    [conversations, user?.id]
+  );
 
   const handleAcceptMessageRequest = useCallback(() => {
     if (!selectedConvo) return;
@@ -271,21 +240,8 @@ const MessagesPage = () => {
   const handleUpdateRecipientIds = useCallback(
     (ids: number[]) => {
       setSendingNewMessageToIds(ids);
-      let matchingConvoId: number | null = null;
-      for (const convo of conversations ?? []) {
-        const usersWithoutCurrent = convo.participants
-          .filter((participant) => participant.user.id !== user?.id)
-          .map((participant) => participant.user.id);
-        if (
-          usersWithoutCurrent.every((id) => ids.includes(id)) &&
-          ids.every((id) => usersWithoutCurrent.includes(id)) &&
-          ((convo.type === "multiple" && usersWithoutCurrent.length > 1) ||
-            (convo.type === "direct" && usersWithoutCurrent.length === 1))
-        ) {
-          matchingConvoId = convo.id;
-        }
-      }
-      setSelectedConvoId(matchingConvoId);
+      const matching = findMatchingConversation(conversations, user?.id, ids);
+      setSelectedConvoId(matching ? matching.id : null);
     },
     [conversations, setSelectedConvoId, user?.id]
   );
@@ -403,15 +359,7 @@ const MessagesPage = () => {
                             {conversation.title}
                           </span>
                           <span className="text-sm text-zinc-500 line-clamp-1">
-                            {!!conversation.lastMessage
-                              ? conversation.type === "direct"
-                                ? conversation.lastMessage.body
-                                : conversation.lastMessage.author.displayName +
-                                  ": " +
-                                  conversation.lastMessage.body
-                              : conversation.type === "direct"
-                              ? "Wants to start a conversation"
-                              : "You were invited to a group"}
+                            {getMessageRequestPreview(conversation)}
                           </span>
                         </div>
                       </div>
@@ -446,15 +394,7 @@ const MessagesPage = () => {
                       {conversation.title}
                     </span>
                     <span className="text-sm text-zinc-500 line-clamp-1">
-                      {!!conversation.lastMessage
-                        ? conversation.type === "direct"
-                          ? conversation.lastMessage.author.id === user?.id
-                            ? "you: " + conversation.lastMessage.body
-                            : conversation.lastMessage.body
-                          : conversation.lastMessage.author.displayName +
-                            ": " +
-                            conversation.lastMessage.body
-                        : "No messages yet"}
+                      {getConversationPreview(conversation, user?.id)}
                     </span>
                   </div>
                 </div>
