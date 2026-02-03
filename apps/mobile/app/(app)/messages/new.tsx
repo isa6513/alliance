@@ -6,6 +6,7 @@ import {
   View,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import {
   ConversationDto,
   conversationCreateDirectConversation,
@@ -182,32 +183,34 @@ export default function NewMessageScreen() {
         </Text>
         <View className="w-20" />
       </View>
-
-      <ScrollView className="flex-1 px-4">
-        <View className="border border-zinc-200 rounded bg-white p-4 flex flex-row">
-          <Text className="text-sm text-zinc-600 my-3 mr-2">To</Text>
-          {loadingUsers ? (
-            <ActivityIndicator size="small" color={colors.green} />
-          ) : (
-            <MessageRecipientSelect
-              users={messageableUsers}
-              selectedUserIds={selectedUserIds}
-              onChange={setSelectedUserIds}
-            />
-          )}
-        </View>
-        <View className="h-4" />
-      </ScrollView>
-
-      <MessageComposer
-        message={message}
-        setMessage={setMessage}
-        attachments={attachments}
-        setAttachments={setAttachments}
-        onSend={handleSend}
-        isSending={isSending}
-        placeholder="Write a message..."
-      />
+        <ScrollView className="flex-1 px-4">
+          <View className="border border-zinc-200 rounded bg-white p-4 flex flex-row">
+            <Text className="text-sm text-zinc-600 my-3 mr-2">To</Text>
+            {loadingUsers ? (
+              <ActivityIndicator size="small" color={colors.green} />
+            ) : (
+              <MessageRecipientSelect
+                users={messageableUsers}
+                selectedUserIds={selectedUserIds}
+                onChange={setSelectedUserIds}
+              />
+            )}
+          </View>
+          <View className="h-4" />
+        </ScrollView>
+        <KeyboardAvoidingView
+        behavior="position"
+      >
+        <MessageComposer
+          message={message}
+          setMessage={setMessage}
+          attachments={attachments}
+          setAttachments={setAttachments}
+          onSend={handleSend}
+          isSending={isSending}
+          placeholder="Write a message..."
+        />
+      </KeyboardAvoidingView>
     </View>
   );
 }

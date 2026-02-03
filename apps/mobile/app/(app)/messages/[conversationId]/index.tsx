@@ -329,13 +329,16 @@ export default function ConversationScreen() {
               data={convoMessages}
               keyExtractor={(item) => item.id}
               style={{ flex: 1 }}
+              onLayout={() => {
+                listRef.current?.scrollToEnd?.({ animated: false });
+              }}
               contentContainerStyle={{
                 paddingVertical: 12,
                 paddingBottom: 16,
               }}
               alignItemsAtEnd
               maintainScrollAtEnd
-              maintainScrollAtEndThreshold={0.1}
+              maintainScrollAtEndThreshold={0.3}
               ListEmptyComponent={
                 <View className="flex-1 items-center justify-center py-16">
                   <Text className="text-zinc-500">No messages yet.</Text>
