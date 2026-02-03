@@ -177,9 +177,9 @@ const HomePage = () => {
             <Button
               onClick={() => setShowingTasksList(!showingTasksList)}
               color={ButtonColor.Transparent}
-              className="hover:bg-transparent"
+              className="hover:bg-transparent gap-x-1"
             >
-              All tasks{" "}
+              Task list
               {showingTasksList ? (
                 <ChevronUp size="15" />
               ) : (
