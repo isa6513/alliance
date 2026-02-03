@@ -184,7 +184,7 @@ const UsersList: React.FC = () => {
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         )[0];
         if (mode === UserFilterMode.NOT_SIGNED) {
-          return user.contractEvents?.length === 0;
+          return !user.contractEvents?.length;
         }
         if (mode === UserFilterMode.SIGNED) {
           return lastEvent?.type === "signed";
