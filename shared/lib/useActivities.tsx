@@ -85,12 +85,14 @@ const useActivities = ({
   );
   const setActivities = useCallback(
     (setStateActivities: React.SetStateAction<ActionActivityDto[]>) => {
-      const newActivities =
-        typeof setStateActivities === "function"
-          ? setStateActivities(activities)
-          : setStateActivities;
-      setActivitiesWithoutCache(newActivities);
-      setCachedActivities(cacheKey, newActivities);
+      setActivitiesWithoutCache((prev) => {
+        const newActivities =
+          typeof setStateActivities === "function"
+            ? setStateActivities(prev)
+            : setStateActivities;
+        setCachedActivities(cacheKey, newActivities);
+        return newActivities;
+      });
     },
     [cacheKey, activities]
   );
