@@ -129,8 +129,8 @@ const GroupsGuidePage: React.FC = () => {
         </h3>
         <p>
           A semi-automatic assignment process runs when a group member asks to
-          be reassigned, or an inviting member asks for their invitee to be
-          assigned to someone else’s group.
+          be reassigned, or a new member joins the Alliance and the inviting
+          member does not lead a group.
         </p>
         <p>
           In most cases, a staff member will manually assign the member to a
@@ -139,9 +139,9 @@ const GroupsGuidePage: React.FC = () => {
           group until space becomes available.
         </p>
         <p>
-          If an inviting member asks for their invitee to be assigned to someone
-          else’s group, we will first check if there is any space available in
-          the invitee’s lead’s group.
+          If a new member joins the Alliance and the inviting member does not
+          lead a group, we will first check whether there is space in the
+          inviting member’s lead’s group.
         </p>
       </div>
     </CenterLayout>
