@@ -59,7 +59,7 @@ const UsersList: React.FC = () => {
     actionSummaries,
     userActionRelations,
   });
-  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [filterMode, setFilterMode] = useState<UserFilterMode>(
     UserFilterMode.ALL
   );
@@ -213,7 +213,7 @@ const UsersList: React.FC = () => {
     return `${selectedTagIds.length} tags`;
   }, [selectedTagIds, selectedTagNames]);
 
-  const toggleTagSelection = (tagId: number) => {
+  const toggleTagSelection = (tagId: string) => {
     setSelectedTagIds((prev) => {
       if (prev.includes(tagId)) {
         return prev.filter((id) => id !== tagId);
@@ -303,7 +303,7 @@ const UsersList: React.FC = () => {
   }, []);
 
   const handleUserTagToggle = useCallback(
-    async (userId: number, tagId: number, nextChecked: boolean) => {
+    async (userId: number, tagId: string, nextChecked: boolean) => {
       const key = `${userId}-${tagId}`;
       setPendingTagOps((prev) => {
         const next = new Set(prev);

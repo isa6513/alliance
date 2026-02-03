@@ -23,8 +23,8 @@ export interface UserCardProps {
   timeSpentTotal: number;
   tags: TagDto[];
   allTags: TagDto[];
-  onToggleTag: (tagId: number, nextChecked: boolean) => void | Promise<void>;
-  isTagPending: (tagId: number) => boolean;
+  onToggleTag: (tagId: string, nextChecked: boolean) => void | Promise<void>;
+  isTagPending: (tagId: string) => boolean;
   actions: UserActionSummaryDto[];
   maxActionsPerWeek: Record<number, number> | null;
   actionRelations: UserActionRelationDetailDto[];

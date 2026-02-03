@@ -24,10 +24,10 @@ const TagManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [newTag, setNewTag] = useState<CreateTagDto>(INITIAL_NEW_TAG);
   const [creating, setCreating] = useState(false);
-  const [updatingTags, setUpdatingTags] = useState<Set<number>>(
+  const [updatingTags, setUpdatingTags] = useState<Set<string>>(
     () => new Set()
   );
-  const [deletingTags, setDeletingTags] = useState<Set<number>>(
+  const [deletingTags, setDeletingTags] = useState<Set<string>>(
     () => new Set()
   );
 
@@ -90,7 +90,7 @@ const TagManagement: React.FC = () => {
   );
 
   const handleUpdateTag = useCallback(
-    async (tagId: number, values: CreateTagDto) => {
+    async (tagId: string, values: CreateTagDto) => {
       setUpdatingTags((prev) => {
         const next = new Set(prev);
         next.add(tagId);
@@ -127,7 +127,7 @@ const TagManagement: React.FC = () => {
     []
   );
 
-  const handleDeleteTag = useCallback(async (tagId: number) => {
+  const handleDeleteTag = useCallback(async (tagId: string) => {
     setDeletingTags((prev) => {
       const next = new Set(prev);
       next.add(tagId);

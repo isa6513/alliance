@@ -221,9 +221,7 @@ const ActionUpdatesTab = ({
                     onChange={(e) =>
                       setNewUpdate({
                         ...newUpdate,
-                        tagId: e.target.value
-                          ? Number(e.target.value)
-                          : undefined,
+                        tagId: e.target.value ? e.target.value : undefined,
                       })
                     }
                   >

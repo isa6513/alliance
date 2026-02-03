@@ -245,6 +245,7 @@ const ActionDashboard: React.FC = () => {
     manualCohortUserIds: [],
     useManualCohort: false,
     authorIds: [],
+    onboarding: false,
   });
 
   // Reset form when switching to new action mode
@@ -274,6 +275,7 @@ const ActionDashboard: React.FC = () => {
         manualCohortUserIds: [],
         useManualCohort: false,
         authorIds: [],
+        onboarding: false,
       });
       setImageKey(null);
       setImagePreview(null);
