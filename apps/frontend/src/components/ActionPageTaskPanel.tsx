@@ -68,7 +68,7 @@ const ActionPageTaskPanel = () => {
       return (
         <div>
           <Card style={CardStyle.Grey} className="bg-zinc-200 rounded-b-none">
-            Log in or refresh the page to complete this task
+            Log in to complete this task
           </Card>
           <Card style={CardStyle.Grey} className="rounded-t-none border-t-0">
             <ActionTaskPanel
