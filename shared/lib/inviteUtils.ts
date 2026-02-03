@@ -1,4 +1,4 @@
-import { OnetimeInviteDto } from "../client";
+import { CommunityInviteDto, OnetimeInviteDto } from "../client";
 
 const createdAtComparator = (
   a: { createdAt: string },
@@ -55,6 +55,52 @@ export function bucketOnetimeInvitesByActionability(params: {
   return {
     actionable: actionable.sort(createdAtComparator),
     unverifiableActionable: unverifiableActionable.sort(createdAtComparator),
+    waitingForResponse: waitingForResponse.sort(createdAtComparator),
+    settled: settled.sort(createdAtComparator),
+  };
+}
+
+export function bucketCommunityInvitesByActionability(params: {
+  invites: CommunityInviteDto[];
+  userId: number;
+}): {
+  actionable: CommunityInviteDto[];
+  waitingForResponse: CommunityInviteDto[];
+  settled: CommunityInviteDto[];
+} {
+  const { invites, userId } = params;
+
+  const actionable: CommunityInviteDto[] = [];
+  const waitingForResponse: CommunityInviteDto[] = [];
+  const settled: CommunityInviteDto[] = [];
+
+  for (const invite of invites) {
+    switch (invite.status) {
+      case "cancelled":
+      case "invitee_rejected":
+      case "invitee_accepted":
+      case "request_rejected":
+        settled.push(invite);
+        break;
+      case "invitee_pending":
+        waitingForResponse.push(invite);
+        break;
+      case "request_pending":
+        if (invite.invitingUser?.id === userId) {
+          waitingForResponse.push(invite);
+        } else {
+          actionable.push(invite);
+        }
+        break;
+      default:
+        throw new Error(
+          `Unknown invite status: ${invite.status satisfies never}`
+        );
+    }
+  }
+
+  return {
+    actionable: actionable.sort(createdAtComparator),
     waitingForResponse: waitingForResponse.sort(createdAtComparator),
     settled: settled.sort(createdAtComparator),
   };

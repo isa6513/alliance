@@ -28,6 +28,14 @@ import { CardStyle } from "@alliance/shared/styles/card";
 import CommunityInviteListItem from "./CommunityInviteListItem";
 import OnetimeInviteListItem from "./OnetimeInviteListItem";
 import OnetimeInviteForm from "./OnetimeInviteForm";
+import {
+  bucketOnetimeInvitesByActionability,
+  bucketCommunityInvitesByActionability,
+} from "@alliance/shared/lib/inviteUtils";
+import {
+  inviteBuckets,
+  deleteInviteConfirmation,
+} from "@alliance/shared/lib/copy";
 
 export interface CommunityInvitesLeaderTabProps {
   communityId: number;
@@ -40,13 +48,6 @@ export enum InviteMode {
   CurrentMember = "Current Alliance member",
 }
 
-function createdAtComparator(
-  a: { createdAt: string },
-  b: { createdAt: string }
-) {
-  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-}
-
 const CommunityInvitesLeaderTab = ({
   communityId,
   existingMembers,
@@ -57,12 +58,8 @@ const CommunityInvitesLeaderTab = ({
 
   const [creatingInvite, setCreatingInvite] = useState(false);
 
-  const [pendingRequests, setPendingRequests] = useState<OnetimeInviteDto[]>(
-    []
-  );
-
-  const [newUserInvites, setNewUserInvites] = useState<OnetimeInviteDto[]>([]);
-  const [existingMemberInvites, setExistingMemberInvites] = useState<
+  const [onetimeInvites, setOnetimeInvites] = useState<OnetimeInviteDto[]>([]);
+  const [communityInvites, setCommunityInvites] = useState<
     CommunityInviteDto[]
   >([]);
   const { error: errorToast, confirm } = useToast();
@@ -74,11 +71,11 @@ const CommunityInvitesLeaderTab = ({
       allUsers.filter(
         (user) =>
           !existingMembers.some((member) => member.id === user.id) &&
-          !existingMemberInvites
+          !communityInvites
             .filter((invite) => invite.status === "invitee_pending")
             .some((invite) => invite.invitedUser?.id === user.id)
       ),
-    [allUsers, existingMembers, existingMemberInvites]
+    [allUsers, existingMembers, communityInvites]
   );
 
   const [selectedUser, setSelectedUser] = useState<UserSelectUser | null>(null);
@@ -93,20 +90,7 @@ const CommunityInvitesLeaderTab = ({
     userGetOnetimeInvitesByCommunity({ path: { communityId } }).then(
       (response) => {
         if (response.data) {
-          setNewUserInvites(
-            response.data
-              .filter(
-                (invite) =>
-                  invite.status === "link_unused" ||
-                  invite.status === "link_used"
-              )
-              .sort(createdAtComparator)
-          );
-          setPendingRequests(
-            response.data
-              .filter((invite) => invite.status === "request_pending")
-              .sort(createdAtComparator)
-          );
+          setOnetimeInvites(response.data);
         } else {
           setError("Failed to load new member invites");
         }
@@ -114,16 +98,59 @@ const CommunityInvitesLeaderTab = ({
     );
     userGetCommunityInvites({ path: { communityId } }).then((response) => {
       if (response.data) {
-        setExistingMemberInvites(response.data);
+        setCommunityInvites(response.data);
       } else {
         setError("Failed to load existing member invites");
       }
     });
   }, [communityId]);
 
+  const leaderCommunityIds = useMemo(() => {
+    return new Set([communityId]);
+  }, [communityId]);
+
+  const {
+    actionable: onetimeActionable,
+    unverifiableActionable: onetimeUnverifiableActionable,
+    waitingForResponse: onetimeWaitingForResponse,
+    settled: onetimeSettled,
+  } = useMemo(() => {
+    if (!user) {
+      return {
+        actionable: [],
+        unverifiableActionable: [],
+        waitingForResponse: [],
+        settled: [],
+      };
+    }
+    return bucketOnetimeInvitesByActionability({
+      invites: onetimeInvites,
+      leaderCommunityIds,
+      userId: user.id,
+    });
+  }, [onetimeInvites, leaderCommunityIds, user]);
+
+  const {
+    actionable: communityActionable,
+    waitingForResponse: communityWaitingForResponse,
+    settled: communitySettled,
+  } = useMemo(() => {
+    if (!user) {
+      return {
+        actionable: [],
+        waitingForResponse: [],
+        settled: [],
+      };
+    }
+    return bucketCommunityInvitesByActionability({
+      invites: communityInvites,
+      userId: user.id,
+    });
+  }, [communityInvites, user]);
+
   useEffect(() => {
-    setInviteNotifCount(pendingRequests.length);
-  }, [pendingRequests, setInviteNotifCount]);
+    setInviteNotifCount(onetimeActionable.length);
+  }, [onetimeActionable.length, setInviteNotifCount]);
 
   const copyToClipboard = (text: string) => {
     const baseUrl = getBaseUrl();
@@ -146,7 +173,7 @@ const CommunityInvitesLeaderTab = ({
       .then((response) => {
         if (response.data) {
           setName("");
-          setNewUserInvites((prev) => [response.data, ...prev]);
+          setOnetimeInvites((prev) => [response.data, ...prev]);
           setError(null);
         }
       })
@@ -165,7 +192,7 @@ const CommunityInvitesLeaderTab = ({
     })
       .then((response) => {
         if (response.data) {
-          setExistingMemberInvites((prev) => [response.data, ...prev]);
+          setCommunityInvites((prev) => [response.data, ...prev]);
           setSelectedUser(null);
           setError(null);
         } else {
@@ -189,10 +216,9 @@ const CommunityInvitesLeaderTab = ({
         return;
       }
 
-      setPendingRequests((prev) =>
-        prev.filter((request) => request.id !== inviteId)
+      setOnetimeInvites((prev) =>
+        prev.map((invite) => (invite.id === inviteId ? response.data : invite))
       );
-      setNewUserInvites((prev) => [...prev, response.data]);
     })();
   };
 
@@ -207,8 +233,8 @@ const CommunityInvitesLeaderTab = ({
         return;
       }
 
-      setPendingRequests((prev) =>
-        prev.filter((request) => request.id !== inviteId)
+      setOnetimeInvites((prev) =>
+        prev.filter((invite) => invite.id !== inviteId)
       );
     })();
   };
@@ -219,9 +245,9 @@ const CommunityInvitesLeaderTab = ({
   ) => {
     void (async () => {
       const ok = await confirm({
-        message: "Are you sure you want to delete this invite?",
-        confirmLabel: "Yes, delete it!",
-        cancelLabel: "No, keep it",
+        message: deleteInviteConfirmation.message,
+        confirmLabel: deleteInviteConfirmation.confirmLabel,
+        cancelLabel: deleteInviteConfirmation.cancelLabel,
         anchorEl: event.currentTarget,
         placement: "topleft",
       });
@@ -231,7 +257,7 @@ const CommunityInvitesLeaderTab = ({
 
       userDeleteOnetimeInvite({ path: { inviteId } }).then((response) => {
         if (!response.error) {
-          setNewUserInvites((prev) =>
+          setOnetimeInvites((prev) =>
             prev.filter((invite) => invite.id !== inviteId)
           );
         }
@@ -242,30 +268,12 @@ const CommunityInvitesLeaderTab = ({
   const handleDeleteCommunityInvite = (inviteId: number) => {
     userDeleteCommunityInvite({ path: { inviteId } }).then((response) => {
       if (response.data) {
-        setExistingMemberInvites((prev) =>
+        setCommunityInvites((prev) =>
           prev.filter((invite) => invite.id !== inviteId)
         );
       }
     });
   };
-
-  const combinedPastInvites = useMemo(() => {
-    return [
-      ...newUserInvites.map((invite) => ({
-        type: "new_member" as const,
-        data: invite,
-      })),
-      ...existingMemberInvites.map((invite) => ({
-        type: "existing_member" as const,
-        data: invite,
-      })),
-    ].sort((a, b) => {
-      return (
-        new Date(b.data.createdAt).getTime() -
-        new Date(a.data.createdAt).getTime()
-      );
-    });
-  }, [newUserInvites, existingMemberInvites]);
 
   return (
     <div className="flex flex-col gap-y-8 py-4 px-2 md:px-0">
@@ -327,11 +335,13 @@ const CommunityInvitesLeaderTab = ({
         {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
 
-      {pendingRequests.length > 0 && (
+      {onetimeActionable.length > 0 && (
         <div className="flex flex-col gap-y-2">
-          <p className="font-semibold text-xl">Invite requests</p>
+          <p className="font-semibold text-xl">
+            {inviteBuckets.actionable.title}
+          </p>
           <List>
-            {pendingRequests.map((request) => (
+            {onetimeActionable.map((request) => (
               <OnetimeInviteListItem
                 key={request.id}
                 invite={request}
@@ -344,38 +354,104 @@ const CommunityInvitesLeaderTab = ({
         </div>
       )}
 
-      {combinedPastInvites.length > 0 && (
+      {communityActionable.length > 0 && (
         <div className="flex flex-col gap-y-2">
-          <p className="font-semibold text-xl">Past invites</p>
+          <p className="font-semibold text-xl">
+            {inviteBuckets.actionable.title}
+          </p>
           <List>
-            {combinedPastInvites.map((entry) => {
-              const selfInvited = !!(
-                user && user.id === entry.data.invitingUser?.id
-              );
-              switch (entry.type) {
-                case "new_member":
-                  return (
-                    <OnetimeInviteListItem
-                      key={entry.data.id}
-                      selfInvited={selfInvited}
-                      invite={entry.data}
-                      onDelete={handleDeleteInvite}
-                      onCopy={copyToClipboard}
-                    />
-                  );
-                case "existing_member":
-                  return (
-                    <CommunityInviteListItem
-                      key={entry.data.id}
-                      invite={entry.data}
-                      selfInvited={selfInvited}
-                      onDelete={handleDeleteCommunityInvite}
-                    />
-                  );
-                default:
-                  entry satisfies never;
-              }
-            })}
+            {communityActionable.map((invite) => (
+              <CommunityInviteListItem
+                key={invite.id}
+                invite={invite}
+                selfInvited={!!(user && user.id === invite.invitingUser?.id)}
+                onDelete={handleDeleteCommunityInvite}
+              />
+            ))}
+          </List>
+        </div>
+      )}
+
+      {onetimeUnverifiableActionable.length > 0 && (
+        <div className="flex flex-col gap-y-2">
+          <div className="flex flex-col gap-y-1">
+            <p className="font-semibold text-xl">
+              {inviteBuckets.unverifiableActionable.title}
+            </p>
+            <p className="text-zinc-500">
+              {inviteBuckets.unverifiableActionable.description}
+            </p>
+          </div>
+          <List>
+            {onetimeUnverifiableActionable.map((invite) => (
+              <OnetimeInviteListItem
+                key={invite.id}
+                invite={invite}
+                selfInvited={!!(user && user.id === invite.invitingUser?.id)}
+                onDelete={handleDeleteInvite}
+                onCopy={copyToClipboard}
+              />
+            ))}
+          </List>
+        </div>
+      )}
+
+      {(onetimeWaitingForResponse.length > 0 ||
+        communityWaitingForResponse.length > 0) && (
+        <div className="flex flex-col gap-y-2">
+          <div className="flex flex-col gap-y-1">
+            <p className="font-semibold text-xl">
+              {inviteBuckets.waitingForResponse.title}
+            </p>
+            <p className="text-zinc-500">
+              {inviteBuckets.waitingForResponse.description}
+            </p>
+          </div>
+          <List>
+            {onetimeWaitingForResponse.map((request) => (
+              <OnetimeInviteListItem
+                key={request.id}
+                invite={request}
+                selfInvited={!!(user && user.id === request.invitingUser?.id)}
+                onDelete={handleDeleteInvite}
+              />
+            ))}
+            {communityWaitingForResponse.map((invite) => (
+              <CommunityInviteListItem
+                key={invite.id}
+                invite={invite}
+                selfInvited={!!(user && user.id === invite.invitingUser?.id)}
+                onDelete={handleDeleteCommunityInvite}
+              />
+            ))}
+          </List>
+        </div>
+      )}
+
+      {(onetimeSettled.length > 0 || communitySettled.length > 0) && (
+        <div className="flex flex-col gap-y-2">
+          <div className="flex flex-col gap-y-1">
+            <p className="font-semibold text-xl">
+              {inviteBuckets.settled.title}
+            </p>
+            <p className="text-zinc-500">{inviteBuckets.settled.description}</p>
+          </div>
+          <List>
+            {onetimeSettled.map((invite) => (
+              <OnetimeInviteListItem
+                key={invite.id}
+                invite={invite}
+                selfInvited={!!(user && user.id === invite.invitingUser?.id)}
+                onCopy={copyToClipboard}
+              />
+            ))}
+            {communitySettled.map((invite) => (
+              <CommunityInviteListItem
+                key={invite.id}
+                invite={invite}
+                selfInvited={!!(user && user.id === invite.invitingUser?.id)}
+              />
+            ))}
           </List>
         </div>
       )}

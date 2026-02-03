@@ -13,6 +13,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import OnetimeInviteListItem from "./OnetimeInviteListItem";
 import OnetimeInviteForm from "./OnetimeInviteForm";
+import {
+  inviteBuckets,
+  deleteInviteConfirmation,
+} from "@alliance/shared/lib/copy";
 
 function createdAtComparator(
   a: { createdAt: string },
@@ -131,9 +135,9 @@ const CommunityInvitesMemberTab = ({
   ) => {
     void (async () => {
       const ok = await confirm({
-        message: "Are you sure you want to delete this invite?",
-        confirmLabel: "Yes, delete it!",
-        cancelLabel: "No, keep it",
+        message: deleteInviteConfirmation.message,
+        confirmLabel: deleteInviteConfirmation.confirmLabel,
+        cancelLabel: deleteInviteConfirmation.cancelLabel,
         anchorEl: event.currentTarget,
         placement: "topleft",
       });
@@ -214,7 +218,7 @@ const CommunityInvitesMemberTab = ({
 
       {invitesSettled.length > 0 && (
         <div className="flex flex-col gap-y-2">
-          <p className="font-semibold text-xl">Past invites</p>
+          <p className="font-semibold text-xl">{inviteBuckets.settled.title}</p>
           <List>
             {invitesSettled.map((invite) => (
               <OnetimeInviteListItem

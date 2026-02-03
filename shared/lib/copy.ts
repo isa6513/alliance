@@ -106,3 +106,27 @@ export const onetimeInviteCreationGroup = {
     ],
   },
 } as const;
+
+export const inviteBuckets = {
+  actionable: {
+    title: "Invites that need approval",
+  },
+  unverifiableActionable: {
+    title: "Invites to be sent",
+    description: "These invites are ready to be sent.",
+  },
+  waitingForResponse: {
+    title: "No action needed",
+    description: "Other members need to approve or send these invites.",
+  },
+  settled: {
+    title: "Past invites",
+    description: "These invites have been accepted or rejected.",
+  },
+} as const;
+
+export const deleteInviteConfirmation = {
+  message: "Are you sure you want to delete this invite?",
+  confirmLabel: "Yes, delete it!",
+  cancelLabel: "No, keep it",
+} as const;

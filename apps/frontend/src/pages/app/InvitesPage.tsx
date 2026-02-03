@@ -13,6 +13,10 @@ import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import OnetimeInviteListItem from "../../components/OnetimeInviteListItem";
 import { bucketOnetimeInvitesByActionability } from "@alliance/shared/lib/inviteUtils";
+import {
+  inviteBuckets,
+  deleteInviteConfirmation,
+} from "@alliance/shared/lib/copy";
 import InviteForm from "../../components/InviteForm";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 
@@ -121,9 +125,9 @@ const InvitesPage = () => {
     (inviteId: number, event: React.MouseEvent<HTMLElement>) => {
       void (async () => {
         const ok = await confirm({
-          message: "Are you sure you want to delete this invite?",
-          confirmLabel: "Yes, delete it!",
-          cancelLabel: "No, keep it",
+          message: deleteInviteConfirmation.message,
+          confirmLabel: deleteInviteConfirmation.confirmLabel,
+          cancelLabel: deleteInviteConfirmation.cancelLabel,
           anchorEl: event.currentTarget,
           placement: "topleft",
         });
@@ -170,7 +174,9 @@ const InvitesPage = () => {
 
         {actionable.length > 0 && (
           <div className="flex flex-col gap-y-2">
-            <p className="font-semibold text-2xl">Invites that need approval</p>
+            <p className="font-semibold text-2xl">
+              {inviteBuckets.actionable.title}
+            </p>
             <List>
               {actionable.map((request) => (
                 <OnetimeInviteListItem
@@ -190,9 +196,11 @@ const InvitesPage = () => {
         {unverifiableActionable.length > 0 && (
           <div className="flex flex-col gap-y-2">
             <div className="flex flex-col gap-y-1">
-              <p className="font-semibold text-2xl">Invites to be sent</p>
+              <p className="font-semibold text-2xl">
+                {inviteBuckets.unverifiableActionable.title}
+              </p>
               <p className="text-zinc-500">
-                These invites are ready to be sent.
+                {inviteBuckets.unverifiableActionable.description}
               </p>
             </div>
             <List>
@@ -214,9 +222,11 @@ const InvitesPage = () => {
         {waitingForResponse.length > 0 && (
           <div className="flex flex-col gap-y-2">
             <div className="flex flex-col gap-y-1">
-              <p className="font-semibold text-2xl">No action needed</p>
+              <p className="font-semibold text-2xl">
+                {inviteBuckets.waitingForResponse.title}
+              </p>
               <p className="text-zinc-500">
-                Other members need to approve or send these invites.
+                {inviteBuckets.waitingForResponse.description}
               </p>
             </div>
             <List>
@@ -237,9 +247,11 @@ const InvitesPage = () => {
         {settled.length > 0 && (
           <div className="flex flex-col gap-y-2">
             <div className="flex flex-col gap-y-1">
-              <p className="font-semibold text-2xl">Past invites</p>
+              <p className="font-semibold text-2xl">
+                {inviteBuckets.settled.title}
+              </p>
               <p className="text-zinc-500">
-                These invites have been accepted or rejected.
+                {inviteBuckets.settled.description}
               </p>
             </div>
             <List>
