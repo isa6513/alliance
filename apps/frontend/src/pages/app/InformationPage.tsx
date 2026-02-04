@@ -1,8 +1,7 @@
 import React from "react";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
-import { href } from "react-router";
+import { href, Link } from "react-router";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
-import ResourceButton from "../../components/ResourceButton";
 import ActionUpdateCard from "@alliance/sharedweb/ui/ActionUpdateCard";
 import { useActionUpdates } from "@alliance/shared/lib/informationPage";
 
@@ -10,6 +9,40 @@ const InformationPage: React.FC = () => {
   useWhiteBackground();
 
   const { updates, error } = useActionUpdates();
+
+  const publicResources = [
+    {
+      href: href("/guide"),
+      title: "Guide to the Alliance",
+    },
+    {
+      href: href("/foundation"),
+      title: "Foundation",
+    },
+    {
+      href: href("/governance"),
+      title: "Governance",
+    },
+    {
+      href: href("/faq"),
+      title: "FAQ",
+    },
+  ];
+
+  const memberResources = [
+    {
+      href: href("/members"),
+      title: "Member directory",
+    },
+    {
+      href: href("/groups-guide"),
+      title: "About groups",
+    },
+    {
+      title: "Email the office",
+      href: "mailto:contact@worldalliance.org",
+    },
+  ];
 
   return (
     <CenterLayout>
@@ -20,25 +53,30 @@ const InformationPage: React.FC = () => {
 
         <h2 className="text-2xl font-semibold">Resources</h2>
 
-        <div className="grid grid-cols-2 gap-x-2 gap-y-2">
-          <ResourceButton to={href("/guide")}>
-            <p className="text-base">Guide</p>
-          </ResourceButton>
-          <ResourceButton to={href("/foundation")}>
-            <p className="text-base">Foundation</p>
-          </ResourceButton>
-          <ResourceButton to={href("/governance")}>
-            <p className="text-base">Governance</p>
-          </ResourceButton>
-          <ResourceButton to={href("/faq")}>
-            <p className="text-base">FAQ</p>
-          </ResourceButton>
-          <ResourceButton to={href("/members")}>
-            <p className="text-base">Members</p>
-          </ResourceButton>
-          <ResourceButton to="mailto:contact@worldalliance.org">
-            <p className="text-base">Email the office</p>
-          </ResourceButton>
+        <div className="flex flex-col gap-y-2">
+          <p className="text-zinc-500">Public resources</p>
+          <div className="grid grid-cols-2 gap-x-2 gap-y-1 grid-flow-row">
+            {publicResources.map((resource) => (
+              <div key={resource.href}>
+                <Link to={resource.href} className="text-link">
+                  {resource.title}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-y-2">
+          <p className="text-zinc-500">Member resources</p>
+          <div className="grid grid-cols-2 gap-x-2 gap-y-1 grid-flow-row">
+            {memberResources.map((resource) => (
+              <div key={resource.href}>
+                <Link to={resource.href} className="text-link">
+                  {resource.title}
+                </Link>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="flex flex-col mt-4">
