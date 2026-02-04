@@ -467,7 +467,7 @@ export class UserService {
     ]);
 
     const friends = rels.map((r) =>
-      r.requester!.id === userId ? r.addressee : r.requester,
+      r.requester!.id === userId ? r.addressee! : r.requester!,
     );
 
     const byId = new Map<number, User>();
