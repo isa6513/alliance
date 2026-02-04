@@ -55,7 +55,7 @@ export const groupSettings = {
 export const onetimeInviteCreation = {
   title: "Invite a new member to the Alliance",
   explanation: [
-    "New members tend to have a better experience when they know their [group lead](https://worldalliance.org/groups-guide) personally. Once they are familiar with the Alliance, they can stay in your group or transfer to a different group.",
+    "New members tend to have a better experience when they know their [group lead](https://worldalliance.org/groups-guide) personally. As their initial group lead, you would be responsible for ensuring they complete tasks on time. Once they become familiar with the Alliance, they can stay in your group or transfer to a different group.",
     "If you do not want to be their group lead, they can be assigned to a different group.",
     "Who would you like the new member's initial group lead to be?",
   ],

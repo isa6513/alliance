@@ -16,6 +16,7 @@ import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
 import { Link } from "react-router";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 
 type ResponsibilityChoice = "responsible" | "not_responsible" | null;
 
@@ -239,47 +240,55 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 {onetimeInviteCreation.not_responsible.title}
               </p>
               {!memberCommunityAllowsMemberInvites ? (
-                <p className="text-zinc-500">
+                <div className="text-zinc-500">
                   <AppMarkdownWrapper
                     markdownContent={onetimeInviteCreation.not_responsible.explanations.genericGroup.join(
                       "\n\n"
                     )}
                   />
-                </p>
+                </div>
               ) : memberCommunityRemainingCapacity > 0 ? (
                 <>
-                  <p className="text-zinc-500">
+                  <div className="text-zinc-500">
                     <AppMarkdownWrapper
                       markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroup.join(
                         "\n\n"
                       )}
                     />
-                  </p>
-                  <p
+                  </div>
+                  <Link
+                    to={`/groups?communityId=${memberCommunities[0].id}`}
+                    onClick={(e) => e.stopPropagation()}
                     key="your-current-group"
-                    className="mt-2 border border-zinc-200 bg-white rounded px-3 py-2 flex flex-row justify-between items-center"
+                    className="mt-2 border border-zinc-200 bg-white hover:bg-zinc-50 rounded px-3 py-2 flex flex-col gap-y-2 self-start"
                   >
-                    <span>
-                      {"Your group: "}
-                      <span className="font-semibold">
-                        {memberCommunities[0].name}
-                      </span>
-                    </span>
-                    <span className="text-zinc-500">
-                      {`${memberCommunityRemainingCapacity} open seat${
-                        memberCommunityRemainingCapacity === 1 ? "" : "s"
-                      }`}
-                    </span>
-                  </p>
+                    <p className="text-sm text-zinc-500">Your current group</p>
+                    <div className="flex flex-row justify-between items-center gap-x-1.5">
+                      <ProfileImage
+                        pfp={memberCommunities[0].photo ?? null}
+                        size="small"
+                      />
+                      <div className="flex flex-row gap-2">
+                        <p className="font-semibold">
+                          {memberCommunities[0].name}
+                        </p>
+                        <p className="text-zinc-500">
+                          {`${memberCommunityRemainingCapacity} open seat${
+                            memberCommunityRemainingCapacity === 1 ? "" : "s"
+                          }`}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
                 </>
               ) : (
-                <p className="text-zinc-500">
+                <div className="text-zinc-500">
                   <AppMarkdownWrapper
                     markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroupNoCapacity.join(
                       "\n\n"
                     )}
                   />
-                </p>
+                </div>
               )}
             </div>
             <div className="flex flex-col gap-y-2">
@@ -321,13 +330,13 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 <p className="text-xl font-semibold">
                   {onetimeInviteCreation.responsible.leader.invite.title}
                 </p>
-                <p className="text-zinc-500">
+                <div className="text-zinc-500">
                   <AppMarkdownWrapper
                     markdownContent={onetimeInviteCreation.responsible.leader.invite.explanation.join(
                       "\n\n"
                     )}
                   />
-                </p>
+                </div>
               </div>
               <div className="flex flex-col gap-y-2">
                 <div className="flex flex-row gap-x-2">
