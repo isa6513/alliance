@@ -15,7 +15,6 @@ import LikeButton from "./LikeButton";
 import Comments from "./Comments";
 import EditableContentForm from "./EditableContentForm";
 import EditableContentRenderer from "./EditableContentRenderer";
-import Button, { ButtonColor, ButtonSize } from "./system/Button";
 import Text from "./system/Text";
 
 interface UserActivityCardProps {
@@ -82,7 +81,7 @@ export default function UserActivityCard({
           return img;
         })
       );
-      const attachmentKeys = uploads.filter((key) => key !== undefined);
+      const attachmentKeys = uploads.filter((key) => key !== undefined) as string[];
 
       const response = await actionsUpdateActivity({
         path: { id: activity.id },
@@ -148,7 +147,6 @@ export default function UserActivityCard({
           </View>
         </View>
 
-        {/* Content */}
         {isEditing ? (
           <View className="mt-3 border border-zinc-200 rounded p-3 bg-zinc-50">
             <EditableContentForm
@@ -156,32 +154,19 @@ export default function UserActivityCard({
               onChange={setEditContent}
               placeholder="Add a description..."
               restoreDraft={false}
+              isSubmitting={isSaving}
+              onSubmit={handleSave}
+              onCancel={handleCancel}
             />
-            <View className="flex-row justify-end gap-x-2 mt-3">
-              <Button
-                color={ButtonColor.White}
-                size={ButtonSize.Small}
-                title="Cancel"
-                onPress={handleCancel}
-                disabled={isSaving}
-              />
-              <Button
-                color={ButtonColor.Black}
-                size={ButtonSize.Small}
-                title={isSaving ? "Saving..." : "Save"}
-                onPress={handleSave}
-                disabled={isSaving}
-              />
-            </View>
           </View>
         ) : (
           <>
             {(!!activity.editableContent?.body ||
               (activity.editableContent?.attachments?.length ?? 0) > 0) && (
-              <View className="mt-3">
-                <EditableContentRenderer content={activity.editableContent} />
-              </View>
-            )}
+                <View className="mt-3">
+                  <EditableContentRenderer content={activity.editableContent} />
+                </View>
+              )}
           </>
         )}
 
@@ -222,14 +207,14 @@ export default function UserActivityCard({
 
       {/* Comments section */}
       {completed && (
-          <Comments
-            objectId={activity.id}
-            type="activity"
-            initialComments={activity.comments}
-            compact
-            showForm={showCommentForm}
-            autofocus={showCommentForm}
-          />
+        <Comments
+          objectId={activity.id}
+          type="activity"
+          initialComments={activity.comments}
+          compact
+          showForm={showCommentForm}
+          autofocus={showCommentForm}
+        />
       )}
     </View>
   );
