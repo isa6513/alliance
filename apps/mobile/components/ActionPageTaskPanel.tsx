@@ -94,7 +94,7 @@ const ActionPageTaskPanel = ({
       return (
         <View>
           <Card cardStyle={CardStyle.Grey} className="bg-zinc-100 my-2">
-            <Text className="font-medium">Please sign your the contract before continuing with the onboarding process.</Text>
+            <Text className="font-medium">Please sign the contract before continuing with the onboarding process.</Text>
             <Link href="/" className="text-green flex items-center gap-x-2">Go back</Link>
           </Card>
           <ActionTaskPanel
