@@ -933,6 +933,12 @@ export class UserService {
   }
 
   async createCommunityAdmin(body: CreateCommunityDto): Promise<Community> {
+    if (body.photo && body.photo.length > 100) {
+      const key = await this.imagesService.processAndUploadProfileImage(
+        body.photo,
+      );
+      body.photo = key;
+    }
     const community = this.communityRepository.create(body);
     const savedCommunity = await this.communityRepository.save(community);
     await this.conversationService.syncCommunityConversationMembers(
