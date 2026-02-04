@@ -161,23 +161,20 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
   const {
     memberCommunityAllowsMemberInvites,
     memberCommunityRemainingCapacity,
-  } = useMemo(() => {
-    const memberCommunity = memberCommunities[0] as CommunityDto | undefined;
-    if (
-      !memberCommunity?.allowMemberInvites ||
-      memberCommunity.maxCapacity === null
-    ) {
-      return {
-        memberCommunityAllowsMemberInvites: false,
-        memberCommunityRemainingCapacity: 0,
-      };
-    }
-    return {
-      memberCommunityAllowsMemberInvites: true,
-      memberCommunityRemainingCapacity:
-        memberCommunity.maxCapacity - memberCommunity.users.length,
-    };
-  }, [memberCommunities]);
+  } =
+    !memberCommunities.length ||
+    memberCommunities[0].allowMemberInvites ||
+    memberCommunities[0].maxCapacity === null
+      ? {
+          memberCommunityAllowsMemberInvites: false,
+          memberCommunityRemainingCapacity: 0,
+        }
+      : {
+          memberCommunityAllowsMemberInvites: true,
+          memberCommunityRemainingCapacity:
+            memberCommunities[0].maxCapacity -
+            memberCommunities[0].users.length,
+        };
 
   return (
     <Card style={CardStyle.Grey}>
