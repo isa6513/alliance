@@ -368,7 +368,7 @@ export class UserService {
       relations: { requester: true, addressee: true },
     });
 
-    if (!rel) {
+    if (!rel || !rel.requester || !rel.addressee) {
       throw new NotFoundException('No pending request found');
     }
 
@@ -408,7 +408,7 @@ export class UserService {
     });
 
     const others = rels.map((r) =>
-      r.requester.id === userId ? r.addressee : r.requester,
+      r.requester!.id === userId ? r.addressee! : r.requester!,
     );
 
     return others.map((o) => new ProfileDto(o));
@@ -467,7 +467,7 @@ export class UserService {
     ]);
 
     const friends = rels.map((r) =>
-      r.requester.id === userId ? r.addressee : r.requester,
+      r.requester!.id === userId ? r.addressee : r.requester,
     );
 
     const byId = new Map<number, User>();
@@ -501,20 +501,26 @@ export class UserService {
     userId: number,
     direction: 'sent' | 'received',
   ): Promise<ProfileDto[]> {
-    const rels =
-      direction === 'sent'
-        ? await this.friendRepository.find({
-            where: { requester: { id: userId }, status: FriendStatus.Pending },
-            relations: { addressee: true },
-          })
-        : await this.friendRepository.find({
-            where: { addressee: { id: userId }, status: FriendStatus.Pending },
-            relations: { requester: true },
-          });
     const users =
       direction === 'sent'
-        ? rels.map((r) => r.addressee)
-        : rels.map((r) => r.requester);
+        ? (
+            await this.friendRepository.find({
+              where: {
+                requester: { id: userId },
+                status: FriendStatus.Pending,
+              },
+              relations: { addressee: true },
+            })
+          ).map((r) => r.addressee!)
+        : (
+            await this.friendRepository.find({
+              where: {
+                addressee: { id: userId },
+                status: FriendStatus.Pending,
+              },
+              relations: { requester: true },
+            })
+          ).map((r) => r.requester!);
 
     return users.map((u) => new ProfileDto(u));
   }
@@ -537,7 +543,7 @@ export class UserService {
     return {
       status,
       didReceiveRequest:
-        status === FriendStatus.Pending && rel?.addressee.id === userId,
+        status === FriendStatus.Pending && rel?.addressee!.id === userId,
     };
   }
 

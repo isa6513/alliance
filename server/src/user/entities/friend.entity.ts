@@ -25,20 +25,10 @@ export enum FriendStatus {
 @Entity()
 @Unique(['requester', 'addressee']) // a user can only request once per counterpart
 export class Friend {
+  // Fields
+
   @PrimaryGeneratedColumn()
   id: number;
-
-  /** User who initiated the request */
-  @ManyToOne(() => User, (user) => user.sentFriendRequests, {
-    onDelete: 'CASCADE',
-  })
-  requester: Ty<User>;
-
-  /** User who received the request */
-  @ManyToOne(() => User, (user) => user.receivedFriendRequests, {
-    onDelete: 'CASCADE',
-  })
-  addressee: Ty<User>;
 
   @Column({ type: 'enum', enum: FriendStatus, default: FriendStatus.None })
   @ApiProperty({ enum: FriendStatus, enumName: 'FriendStatus' })
@@ -52,6 +42,18 @@ export class Friend {
 
   @UpdateDateColumnTz()
   updatedAt: Date;
+
+  // Relations
+
+  @ManyToOne(() => User, (user) => user.sentFriendRequests, {
+    onDelete: 'CASCADE',
+  })
+  requester?: Ty<User>;
+
+  @ManyToOne(() => User, (user) => user.receivedFriendRequests, {
+    onDelete: 'CASCADE',
+  })
+  addressee?: Ty<User>;
 
   @OneToOne(() => Notification, {
     cascade: true,

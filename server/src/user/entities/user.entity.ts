@@ -308,10 +308,10 @@ export class User {
   activities?: ActionActivity[];
 
   @OneToMany(() => Friend, (friend) => friend.requester)
-  sentFriendRequests: Friend[];
+  sentFriendRequests?: Friend[];
 
   @OneToMany(() => Friend, (friend) => friend.addressee)
-  receivedFriendRequests: Friend[];
+  receivedFriendRequests?: Friend[];
 
   @OneToMany(() => Notification, (notification) => notification.user)
   notifications: Notification[];
@@ -390,11 +390,23 @@ export class User {
   get friends(): User[] {
     const sentAccepted =
       this.sentFriendRequests
-        ?.filter((f) => f.status === FriendStatus.Accepted)
+        ?.filter(
+          (
+            f,
+          ): f is typeof f & {
+            addressee: User;
+          } => f.status === FriendStatus.Accepted && !!f.addressee,
+        )
         .map((f) => f.addressee) || [];
     const receivedAccepted =
       this.receivedFriendRequests
-        ?.filter((f) => f.status === FriendStatus.Accepted)
+        ?.filter(
+          (
+            f,
+          ): f is typeof f & {
+            requester: User;
+          } => f.status === FriendStatus.Accepted && !!f.requester,
+        )
         .map((f) => f.requester) || [];
     return [...sentAccepted, ...receivedAccepted];
   }
