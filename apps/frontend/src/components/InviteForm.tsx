@@ -8,7 +8,7 @@ import {
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import CommunityCreateForm from "./CommunityCreateForm";
@@ -29,11 +29,13 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
   const [responsibilityChoice, setResponsibilityChoice] =
     useState<ResponsibilityChoice>(null);
   const [inviteeName, setInviteeName] = useState("");
+  const [info, setInfo] = useState("");
   const [selectedCommunityId, setSelectedCommunityId] = useState<number | null>(
     null
   );
   const [creatingInvite, setCreatingInvite] = useState(false);
   const [communities, setCommunities] = useState<CommunityDto[]>([]);
+  const infoInputRef = useRef<HTMLTextAreaElement | null>(null);
 
   const refreshCommunities = useCallback(
     async (resetSelectedCommunityId: boolean) => {
@@ -54,6 +56,15 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
   useEffect(() => {
     void refreshCommunities(true);
   }, [refreshCommunities]);
+
+  useEffect(() => {
+    const infoInput = infoInputRef.current;
+    if (!infoInput) {
+      return;
+    }
+    infoInput.style.height = "auto";
+    infoInput.style.height = infoInput.scrollHeight + "px";
+  }, [info]);
 
   const { leaderCommunities, memberCommunities } = useMemo(() => {
     const leaderCommunities: CommunityDto[] = [];
@@ -119,6 +130,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
       try {
         const body: CreateOnetimeInviteDto = {
           invitee: inviteeName.trim(),
+          ...(info.trim() && { info: info.trim() }),
           ...(responsibilityChoice === "responsible" &&
             communityId !== null && {
               communityId,
@@ -129,6 +141,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
         if (response.data) {
           successToast("Invite created successfully!");
           setInviteeName("");
+          setInfo("");
           onInviteCreated(response.data);
         } else {
           errorToast(
@@ -145,6 +158,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
     },
     [
       inviteeName,
+      info,
       responsibilityChoice,
       errorToast,
       successToast,
@@ -276,6 +290,17 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 value={inviteeName}
                 onChange={(e) => setInviteeName(e.target.value)}
               />
+              <textarea
+                ref={infoInputRef}
+                className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
+                placeholder="Context about invitee (optional)"
+                value={info}
+                onChange={(e) => {
+                  setInfo(e.target.value);
+                }}
+                rows={2}
+                style={{ resize: "none" }}
+              />
               <Button
                 color={ButtonColor.Black}
                 onClick={() => handleCreateInvite(null)}
@@ -314,6 +339,17 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                     onChange={(e) => setInviteeName(e.target.value)}
                   />
                 </div>
+                <textarea
+                  ref={infoInputRef}
+                  className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
+                  placeholder="Context about invitee"
+                  value={info}
+                  onChange={(e) => {
+                    setInfo(e.target.value);
+                  }}
+                  rows={2}
+                  style={{ resize: "none" }}
+                />
               </div>
             </div>
 

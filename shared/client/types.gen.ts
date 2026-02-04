@@ -137,6 +137,7 @@ export type OnetimeInvite = {
     id: number;
     invitee: string;
     inviteeDescription?: string;
+    info?: string;
     code: string;
     createdAt: string;
     status: OnetimeInviteStatus;
@@ -813,6 +814,7 @@ export type RequestOnetimeInviteDto = {
 
 export type CreateOnetimeInviteDto = {
     invitee: string;
+    info?: string;
     invitingUserId?: number;
     communityId?: number;
 };

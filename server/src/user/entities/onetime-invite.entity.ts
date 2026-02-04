@@ -42,6 +42,11 @@ export class OnetimeInvite {
   @IsOptional()
   inviteeDescription?: string;
 
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  @IsOptional()
+  info?: string;
+
   @ApiProperty()
   @Column()
   @Allow()
