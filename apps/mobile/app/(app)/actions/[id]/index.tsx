@@ -284,7 +284,7 @@ export default function ActionDetailScreen() {
           headerShown: false,
         }}
       />
-      <KeyboardAwareScrollView className="bg-white" ref={scrollViewRef} bottomOffset={72}>
+      <KeyboardAwareScrollView className="bg-white" ref={scrollViewRef} bottomOffset={72} keyboardShouldPersistTaps="handled">
         {action.image && (
           <Image
             source={{ uri: action.image }}

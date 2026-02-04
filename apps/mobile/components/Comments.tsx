@@ -23,7 +23,6 @@ import EditableContentForm from "./EditableContentForm";
 import EditableContentRenderer from "./EditableContentRenderer";
 import LikeButton from "./LikeButton";
 import ProfileImage from "./ProfileImage";
-import Button, { ButtonColor, ButtonSize } from "./system/Button";
 import Text from "./system/Text";
 import { colors } from "../lib/style/colors";
 
@@ -85,8 +84,6 @@ const ReplyForm = ({
   isSubmitting,
   onSubmit,
 }: ReplyFormProps) => {
-  const canSubmit =
-    content.body.trim() !== "" || (content.attachments?.length ?? 0) > 0;
   return (
     <View
       className={`p-4 bg-zinc-100`}
@@ -97,24 +94,11 @@ const ReplyForm = ({
         placeholder="Add a comment..."
         expanded={autofocus || parentId !== null}
         draftKey={`reply-${parentId ?? "root"}-${objectId}`}
+        onSubmit={() => onSubmit(content, parentId)}
+        onCancel={onCancel}
+        submitLabel="Post"
+        isSubmitting={isSubmitting}
       />
-      <View className="flex-row justify-end gap-x-2 mt-3">
-        {onCancel && (
-          <Button
-            color={ButtonColor.Light}
-            size={ButtonSize.Small}
-            title="Cancel"
-            onPress={onCancel}
-          />
-        )}
-        <Button
-          color={ButtonColor.Black}
-          size={ButtonSize.Small}
-          title={isSubmitting ? "Posting..." : "Post"}
-          onPress={() => onSubmit(content, parentId)}
-          disabled={!canSubmit || isSubmitting}
-        />
-      </View>
     </View>
   );
 };
@@ -209,39 +193,21 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
         {isEditing ? (
           <View className="gap-y-2">
             <EditableContentForm
+              isSubmitting={shared.isSubmitting}
               value={editContent}
               onChange={setEditContent}
               placeholder="Edit your reply..."
               expanded
               draftKey={`edit-reply-${reply.id}`}
+              onSubmit={() => shared.onUpdateReply(reply.id, editContent)}
+              onCancel={() => {
+                setEditContent({
+                  body: reply.editableContent.body ?? "",
+                  attachments: reply.editableContent.attachments ?? [],
+                });
+                setIsEditing(false);
+              }}
             />
-            <View className="flex-row justify-end gap-x-2">
-              <Button
-                color={ButtonColor.Light}
-                size={ButtonSize.Small}
-                title="Cancel"
-                onPress={() => {
-                  setEditContent({
-                    body: reply.editableContent.body ?? "",
-                    attachments: reply.editableContent.attachments ?? [],
-                  });
-                  setIsEditing(false);
-                }}
-              />
-              <Button
-                color={ButtonColor.Black}
-                size={ButtonSize.Small}
-                title="Save"
-                onPress={async () => {
-                  await shared.onUpdateReply(reply.id, editContent);
-                  setIsEditing(false);
-                }}
-                disabled={
-                  editContent.body.trim() === "" &&
-                  editContent.attachments.length === 0
-                }
-              />
-            </View>
           </View>
         ) : (
           <EditableContentRenderer

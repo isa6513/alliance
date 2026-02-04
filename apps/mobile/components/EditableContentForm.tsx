@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
+  Pressable,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -9,8 +11,8 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { CreateEditableContentDto } from "@alliance/shared/client";
-import Button, { ButtonColor, ButtonSize } from "./system/Button";
 import Text from "./system/Text";
+import { KeyboardExtender } from "react-native-keyboard-controller";
 
 interface EditableContentFormProps {
   value: CreateEditableContentDto;
@@ -18,6 +20,10 @@ interface EditableContentFormProps {
   className?: string;
   placeholder?: string;
   expanded?: boolean;
+  onCancel?: () => void;
+  onSubmit: () => void;
+  isSubmitting?: boolean;
+  submitLabel?: string;
 
   /** Optional namespace to distinguish drafts across pages/users/entities */
   draftKey?: string;
@@ -56,11 +62,15 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   className,
   placeholder,
   expanded,
+  onCancel,
+  onSubmit,
+  submitLabel = "Post",
   draftKey,
   autosaveMs = 1200,
   restoreDraft,
   onDraftRestored,
   clearDraftSignal,
+  isSubmitting,
 }) => {
   const [inputHeight, setInputHeight] = useState(0);
   const [isPicking, setIsPicking] = useState(false);
@@ -195,6 +205,9 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
     onChange({ ...value, attachments: next });
   };
 
+  const canSubmit =
+    value.body.trim() !== "" || (value.attachments?.length ?? 0) > 0;
+
   return (
     <View className={className}>
       <TextInput
@@ -217,18 +230,6 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
           },
         ]}
       />
-      <View className="mt-3 flex-row items-center gap-3">
-        <Button
-          title="Add photos"
-          color={ButtonColor.Light}
-          size={ButtonSize.Small}
-          onPress={handlePickImages}
-          loading={isPicking}
-        />
-        {pickerError ? (
-          <Text className="text-xs text-red-500">{pickerError}</Text>
-        ) : null}
-      </View>
       {(value.attachments ?? []).length > 0 && (
         <View className="mt-3 flex-row flex-wrap gap-2">
           {(value.attachments ?? []).map((img, idx) => (
@@ -249,6 +250,39 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
           ))}
         </View>
       )}
+      <KeyboardExtender>
+        <View className="p-2 flex-row items-center gap-3 bg-white border-y border-zinc-200 justify-between">
+          <Pressable
+            onPress={handlePickImages}
+            disabled={isPicking}
+            className="px-3 py-1.5"
+            onStartShouldSetResponder={() => false}
+          >
+            {isPicking ? (
+              <ActivityIndicator size="small" color="#444" />
+            ) : (
+              <Text className="text-zinc-800">Add photos</Text>
+            )}
+          </Pressable>
+          {pickerError ? (
+            <Text className="text-xs text-red-500">{pickerError}</Text>
+          ) : null}
+          <View className="flex-row items-center gap-3">
+            {onCancel && (
+              <Pressable onPress={onCancel} className="px-3 py-1.5">
+                <Text className="text-zinc-500">Cancel</Text>
+              </Pressable>
+            )}
+            <Pressable
+              onPress={onSubmit}
+              disabled={!canSubmit || isSubmitting}
+              className={`px-3 py-1.5 bg-zinc-800 rounded-sm ${!canSubmit || isSubmitting ? "opacity-50" : ""}`}
+            >
+              <Text className="text-white">{isSubmitting ? "Posting..." : submitLabel}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </KeyboardExtender>
     </View>
   );
 };
