@@ -1185,7 +1185,7 @@ export class UserService {
     notifFor: (params: {
       leader: User;
       community: Community;
-    }) => { message: string } | boolean;
+    }) => { message: string; users: User[] } | boolean;
   }): Promise<Community> {
     const { communityId, userId, notifFor: notifFor } = params;
 
@@ -1216,7 +1216,7 @@ export class UserService {
             tab: 'members',
             communityId: community.id,
           }),
-          associatedUsers: [user],
+          associatedUsers: notif === true ? [user] : notif.users,
           priority: NotifPriority.High,
         });
       })

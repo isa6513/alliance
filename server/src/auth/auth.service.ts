@@ -106,12 +106,22 @@ export class AuthService {
       leader: User;
       community: Community;
     }) {
-      const leaderIsReferrer = leader.id === referredBy?.id;
-      sentNotifToReferrer ||= leaderIsReferrer;
+      if (referredBy) {
+        if (leader.id === referredBy.id) {
+          sentNotifToReferrer = true;
+          return {
+            message: `${user.name} joined the Alliance and your group (${community.name})`,
+            users: [user],
+          };
+        }
+        return {
+          message: `${user.name} (referred by ${referredBy?.name}) joined the Alliance and your group (${community.name})`,
+          users: [user, referredBy],
+        };
+      }
       return {
-        message: leaderIsReferrer
-          ? `${user.name} joined the Alliance and your group (${community.name})`
-          : `${user.name} joined your group (${community.name})`,
+        message: `${user.name} joined the Alliance and your group (${community.name})`,
+        users: [user],
       };
     }
 
