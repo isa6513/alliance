@@ -115,7 +115,7 @@ export class AuthService {
           };
         }
         return {
-          message: `${user.name} (referred by ${referredBy?.name}) joined the Alliance and your group (${community.name})`,
+          message: `${user.name} (referred by ${referredBy.name}) joined the Alliance and your group (${community.name})`,
           users: [user, referredBy],
         };
       }
