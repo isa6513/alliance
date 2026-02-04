@@ -1,15 +1,20 @@
-import { useState } from "react";
-import { View, ActivityIndicator } from "react-native";
-import { Redirect, Stack } from "expo-router";
+import { View, ActivityIndicator, Dimensions } from "react-native";
+import { Redirect, withLayoutContext } from "expo-router";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 
 import { useAuth } from "../../lib/AuthContext";
 import TabBar from "../../components/TabBar";
 import Sidebar from "../../components/Sidebar";
 import { colors } from "../../lib/style/colors";
 
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const DRAWER_WIDTH = Math.round(SCREEN_WIDTH * 0.8);
+
+const { Navigator } = createDrawerNavigator();
+const Drawer = withLayoutContext(Navigator);
+
 export default function AppLayout() {
   const { isAuthenticated, isLoading } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -25,28 +30,27 @@ export default function AppLayout() {
 
   return (
     <View className="flex-1 bg-white">
-      <Sidebar
-        isOpen={sidebarOpen}
-        onOpen={() => setSidebarOpen(true)}
-        onClose={() => setSidebarOpen(false)}
+      <Drawer
+        drawerContent={(props) => <Sidebar {...props} />}
+        screenOptions={{
+          headerShown: false,
+          drawerType: "front",
+          overlayColor: "rgba(0, 0, 0, 0.5)",
+          drawerStyle: { width: DRAWER_WIDTH, backgroundColor: "#fafafa" },
+        }}
       >
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            animation: "none",
-            gestureEnabled: false,
-          }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="actions/index" />
-          <Stack.Screen name="information" />
-          <Stack.Screen name="notifications" />
-          <Stack.Screen name="profile" />
-          <Stack.Screen name="actions/[id]/index" />
-          <Stack.Screen name="forum/index" />
-          <Stack.Screen name="settings" />
-        </Stack>
-      </Sidebar>
+        <Drawer.Screen name="index" />
+        <Drawer.Screen name="actions/index" />
+        <Drawer.Screen name="actions/[id]/index" />
+        <Drawer.Screen name="information" />
+        <Drawer.Screen name="notifications" />
+        <Drawer.Screen name="feed" />
+        <Drawer.Screen name="forum/index" />
+        <Drawer.Screen name="messages/index" />
+        <Drawer.Screen name="contract" />
+        <Drawer.Screen name="profile" />
+        <Drawer.Screen name="settings" />
+      </Drawer>
       <TabBar />
     </View>
   );

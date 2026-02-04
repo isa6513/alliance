@@ -1,20 +1,9 @@
-import { useCallback, useEffect } from "react";
-import {
-  View,
-  TouchableOpacity,
-  Dimensions,
-  Pressable,
-  ScrollView,
-} from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { usePathname, router, RelativePathString } from "expo-router";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  runOnJS,
-  cancelAnimation,
-} from "react-native-reanimated";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import {
+  DrawerContentComponentProps,
+  DrawerContentScrollView,
+} from "@react-navigation/drawer";
 import {
   Bell,
   BookText,
@@ -32,9 +21,6 @@ import {
 } from "lucide-react-native";
 import Text from "./system/Text";
 import { colors } from "../lib/style/colors";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const SIDEBAR_WIDTH = SCREEN_WIDTH * 0.8;
 
 type NavItem = {
   name: string;
@@ -128,28 +114,9 @@ const navSections: NavSection[] = [
   },
 ];
 
-interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onOpen: () => void;
-  children: React.ReactNode;
-}
-
-export default function Sidebar({
-  isOpen,
-  onClose,
-  onOpen,
-  children,
-}: SidebarProps) {
+export default function Sidebar(props: DrawerContentComponentProps) {
+  const { navigation } = props;
   const pathname = usePathname();
-  const translateX = useSharedValue(-SIDEBAR_WIDTH);
-  const dragStartX = useSharedValue(-SIDEBAR_WIDTH);
-
-  useEffect(() => {
-    translateX.value = withTiming(isOpen ? 0 : -SIDEBAR_WIDTH, {
-      duration: 250,
-    });
-  }, [isOpen, translateX]);
 
   const isActive = (matchPaths: string[]) => {
     return matchPaths.some((path) => {
@@ -161,202 +128,72 @@ export default function Sidebar({
   };
 
   const handleNavigate = (href: string) => {
-    onClose();
+    navigation.closeDrawer();
     router.push(href as RelativePathString);
   };
 
-  const handleGestureEnd = useCallback(
-    (shouldOpen: boolean) => {
-      if (shouldOpen && !isOpen) {
-        onOpen();
-      } else if (!shouldOpen && isOpen) {
-        onClose();
-      }
-    },
-    [isOpen, onClose, onOpen]
-  );
-
-  // Edge swipe gesture to open
-  const edgePanGesture = Gesture.Pan()
-    .enabled(!isOpen)
-    .activeOffsetX(5)
-    .onBegin(() => {
-      cancelAnimation(translateX);
-      dragStartX.value = translateX.value;
-    })
-    .onUpdate((event) => {
-      const nextX = Math.min(
-        0,
-        Math.max(-SIDEBAR_WIDTH, dragStartX.value + event.translationX)
-      );
-      translateX.value = nextX;
-    })
-    .onEnd((event) => {
-      const flickOpen = event.velocityX > 800;
-      const flickClose = event.velocityX < -800;
-
-      const shouldOpen = flickOpen
-        ? true
-        : flickClose
-        ? false
-        : translateX.value > -SIDEBAR_WIDTH * 0.8;
-
-      const dest = shouldOpen ? 0 : -SIDEBAR_WIDTH;
-
-      translateX.value = withTiming(dest, { duration: 150 }, (finished) => {
-        if (finished) runOnJS(handleGestureEnd)(shouldOpen);
-      });
-    });
-
-  // Swipe gesture to close
-  const closePanGesture = Gesture.Pan()
-    .enabled(isOpen)
-    .activeOffsetX(-10)
-    .onBegin(() => {
-      cancelAnimation(translateX);
-      dragStartX.value = translateX.value;
-    })
-    .onUpdate((event) => {
-      const nextX = Math.min(
-        0,
-        Math.max(-SIDEBAR_WIDTH, dragStartX.value + event.translationX)
-      );
-      translateX.value = nextX;
-    })
-    .onEnd((event) => {
-      const flickOpen = event.velocityX > 800;
-      const flickClose = event.velocityX < -800;
-
-      const shouldOpen = flickOpen
-        ? true
-        : flickClose
-        ? false
-        : translateX.value > -SIDEBAR_WIDTH * 0.7;
-
-      const dest = shouldOpen ? 0 : -SIDEBAR_WIDTH;
-
-      translateX.value = withTiming(dest, { duration: 150 }, (finished) => {
-        if (finished) runOnJS(handleGestureEnd)(shouldOpen);
-      });
-    });
-
-  const sidebarStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
-
-  const overlayStyle = useAnimatedStyle(() => ({
-    opacity:
-      0.5 *
-      Math.min(
-        1,
-        Math.max(0, (translateX.value + SIDEBAR_WIDTH) / SIDEBAR_WIDTH)
-      ),
-  }));
-
   return (
-    <>
-      {/* Main content with edge swipe gesture */}
-      <GestureDetector gesture={edgePanGesture}>
-        <View className="flex-1">{children}</View>
-      </GestureDetector>
+    <DrawerContentScrollView
+      {...props}
+      contentContainerStyle={{ paddingTop: 48, paddingBottom: 0 }}
+      style={{ backgroundColor: "#fafafa" }}
+    >
+      <View className="flex-1">
+        {/* Close button */}
+        <View className="flex-row justify-end px-4 mb-4">
+          <TouchableOpacity
+            onPress={() => navigation.closeDrawer()}
+            className="p-2"
+          >
+            <X size={24} color="#71717a" />
+          </TouchableOpacity>
+        </View>
 
-      {/* Overlay */}
-      <Animated.View
-        pointerEvents={isOpen ? "auto" : "none"}
-        style={[
-          {
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "black",
-            zIndex: 45,
-          },
-          overlayStyle,
-        ]}
-      >
-        <Pressable className="flex-1" onPress={onClose} />
-      </Animated.View>
-
-      {/* Sidebar */}
-      <GestureDetector gesture={closePanGesture}>
-        <Animated.View
-          style={[
-            {
-              position: "absolute",
-              top: 0,
-              left: 0,
-              bottom: 0,
-              width: SIDEBAR_WIDTH,
-              backgroundColor: "#fafafa",
-              zIndex: 50,
-              elevation: 10,
-            },
-            sidebarStyle,
-          ]}
+        {/* Logo */}
+        <TouchableOpacity
+          onPress={() => handleNavigate("/")}
+          className="px-6 mb-8"
         >
-          <ScrollView className="flex-1 pt-12">
-            {/* Close button */}
-            <View className="flex-row justify-end px-4 mb-4">
-              <TouchableOpacity onPress={onClose} className="p-2">
-                <X size={24} color="#71717a" />
-              </TouchableOpacity>
-            </View>
+          <Text className="font-serif text-xl uppercase font-bold">
+            The Alliance
+          </Text>
+        </TouchableOpacity>
 
-            {/* Logo */}
-            <TouchableOpacity
-              onPress={() => handleNavigate("/")}
-              className="px-6 mb-8"
+        {/* Navigation sections */}
+        <View className="px-4">
+          {navSections.map((section, sectionIndex) => (
+            <View
+              key={section.title || `section-${sectionIndex}`}
+              className={`pb-4 mb-2 ${sectionIndex < navSections.length - 1
+                ? "border-b border-zinc-200"
+                : ""
+                }`}
             >
-              <Text className="font-serif text-xl uppercase font-bold">
-                The Alliance
-              </Text>
-            </TouchableOpacity>
-
-            {/* Navigation sections */}
-            <View className="px-4">
-              {navSections.map((section, sectionIndex) => (
-                <View
-                  key={section.title || `section-${sectionIndex}`}
-                  className={`pb-4 mb-2 ${
-                    sectionIndex < navSections.length - 1
-                      ? "border-b border-zinc-200"
-                      : ""
-                  }`}
-                >
-                  {section.items.map((item) => {
-                    const active = isActive(item.matchPaths);
-                    const Icon = item.icon;
-                    return (
-                      <TouchableOpacity
-                        key={item.name}
-                        onPress={() => handleNavigate(item.href)}
-                        className={`flex-row items-center px-3 py-2.5 rounded-lg mb-0.5 ${
-                          active ? "bg-zinc-200" : ""
+              {section.items.map((item) => {
+                const active = isActive(item.matchPaths);
+                const Icon = item.icon;
+                return (
+                  <TouchableOpacity
+                    key={item.name}
+                    onPress={() => handleNavigate(item.href)}
+                    className={`flex-row items-center px-3 py-2.5 rounded-lg mb-0.5 ${active ? "bg-zinc-200" : ""
+                      }`}
+                    activeOpacity={0.7}
+                  >
+                    <Icon size={18} color={active ? colors.green : "#52525b"} />
+                    <Text
+                      className={`ml-3 ${active ? "font-medium" : "text-zinc-900"
                         }`}
-                        activeOpacity={0.7}
-                      >
-                        <Icon
-                          size={18}
-                          color={active ? colors.green : "#52525b"}
-                        />
-                        <Text
-                          className={`ml-3 ${
-                            active ? "font-medium" : "text-zinc-900"
-                          }`}
-                        >
-                          {item.name}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              ))}
+                    >
+                      {item.name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
-          </ScrollView>
-        </Animated.View>
-      </GestureDetector>
-    </>
+          ))}
+        </View>
+      </View>
+    </DrawerContentScrollView>
   );
 }
