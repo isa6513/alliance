@@ -154,9 +154,8 @@ export class UserService {
 
     if (profilePicture && profilePicture.length > 100) {
       //TODO: differentiate between file and url
-      const key = profilePicture
-        ? await this.imagesService.processAndUploadProfileImage(profilePicture)
-        : undefined;
+      const key =
+        await this.imagesService.processAndUploadProfileImage(profilePicture);
 
       const updateDataWithPfp = {
         ...updateData,
@@ -166,6 +165,9 @@ export class UserService {
       Object.assign(user, updateDataWithPfp);
     } else {
       Object.assign(user, updateData);
+      if (profilePicture !== undefined) {
+        user.profilePicture = profilePicture;
+      }
     }
 
     await this.userRepository.save(user);
@@ -1111,11 +1113,31 @@ export class UserService {
     }
 
     const community = await this.findCommunityOrFail(communityId);
-    Object.assign(community, body);
-    community.name = community.name.trim();
+
+    const { name, photo, ...updateData } = body;
+
+    community.name = name?.trim() ?? community.name;
     if (community.name.length === 0) {
       throw new BadRequestException('Name cannot be empty');
     }
+
+    if (photo && photo.length > 100) {
+      //TODO: differentiate between file and url
+      const key = await this.imagesService.processAndUploadProfileImage(photo);
+
+      const updateDataWithPhoto = {
+        ...updateData,
+        photo: key,
+      };
+
+      Object.assign(community, updateDataWithPhoto);
+    } else {
+      Object.assign(community, updateData);
+      if (photo !== undefined) {
+        community.photo = photo;
+      }
+    }
+
     const updated = await this.communityRepository.save(community);
     await this.conversationService.syncCommunityConversationMembers(updated.id);
     return updated;

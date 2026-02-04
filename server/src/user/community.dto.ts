@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import { Allow, IsNumber } from 'class-validator';
 import { Community } from './entities/community.entity';
 import { ProfileDto } from './dto/user.dto';
+import { getImageSource } from 'src/images/images.service';
 
 export class CommunityDto extends OmitType(Community, [
   'users',
@@ -28,6 +29,7 @@ export class CommunityDto extends OmitType(Community, [
     this.leaders = community.leaders
       ? community.leaders.map((user) => new ProfileDto(user))
       : [];
+    this.photo = community.photo ? getImageSource(community.photo) : undefined;
   }
 }
 
