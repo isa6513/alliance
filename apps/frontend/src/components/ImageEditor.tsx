@@ -60,6 +60,7 @@ const DEFAULT_MAX_FILE_SIZE_MB = 20;
 const ABS_MIN_CROP_SIZE = 80;
 const MIN_CROP_RATIO = 0.45;
 const MAX_PREVIEW_SIZE = 1200;
+const CROPPED_IMAGE_STRING_MAX_LENGTH = 50_000_000;
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
@@ -602,6 +603,15 @@ const ImageEditor: FC<ImageEditorProps> = ({
     const generate = async () => {
       try {
         const cropped = await getCroppedImage(imageSrc, pixelCrop, rotation);
+        console.log({ croppedLength: cropped.length }, "asdf");
+        if (cropped.length > CROPPED_IMAGE_STRING_MAX_LENGTH) {
+          if (!isCancelled) {
+            setError(
+              "The cropped image is too large. Please crop a smaller area or use a smaller image."
+            );
+          }
+          return;
+        }
         if (!isCancelled) {
           lastGeneratedRef.current = cropped;
           onChange(cropped);
