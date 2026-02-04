@@ -270,6 +270,7 @@ const CommunityPage = () => {
   }, []);
 
   const handleSave = useCallback(async () => {
+    setError(null);
     if (!community || isSaving) return;
 
     // Validation
@@ -288,10 +289,12 @@ const CommunityPage = () => {
     }
     if (
       normalizedMaxCapacity !== null &&
-      normalizedMaxCapacity < community.users.length
+      normalizedMaxCapacity < community.users.length - community.leaders.length
     ) {
       setError(
-        `Capacity cannot be less than the current number of members (${community.users.length})`
+        `Capacity cannot be less than the current number of members (${
+          community.users.length - community.leaders.length
+        })`
       );
       return;
     }
@@ -353,7 +356,10 @@ const CommunityPage = () => {
       setEditMaxCapacity(
         community.maxCapacity === null
           ? null
-          : Math.max(community.maxCapacity, community.users.length - community.leaders.length)
+          : Math.max(
+              community.maxCapacity,
+              community.users.length - community.leaders.length
+            )
       );
       setEditPhotoUrl(community.photo ?? null);
     }
