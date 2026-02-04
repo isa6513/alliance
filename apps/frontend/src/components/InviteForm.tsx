@@ -163,7 +163,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
     memberCommunityRemainingCapacity,
   } =
     !memberCommunities.length ||
-    memberCommunities[0].allowMemberInvites ||
+    !memberCommunities[0].allowMemberInvites ||
     memberCommunities[0].maxCapacity === null
       ? {
           memberCommunityAllowsMemberInvites: false,
