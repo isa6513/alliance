@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
 import { TimeSpentForUserDto } from './timespent.dto';
 import { DailyStatsRecord } from './dailystats.entity';
@@ -47,6 +47,15 @@ export class AnalyticsController {
   }
 
   @UseGuards(AdminGuard)
+  @Get('action-stats/:actionId')
+  @ApiOkResponse({ type: ActionStatsWithOnboardingDto })
+  getActionStatsById(
+    @Param('actionId') actionId: string,
+  ): Promise<ActionStatsWithOnboardingDto | null> {
+    return this.analyticsService.getActionStatsById(Number(actionId));
+  }
+
+  @UseGuards(AdminGuard)
   @Post('action-stats/recalculate')
   @ApiOkResponse({ type: [ActionStatsWithOnboardingDto] })
   async recalculateActionStats(): Promise<ActionStatsWithOnboardingDto[]> {
@@ -66,8 +75,12 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('action-completion-curves')
   @ApiOkResponse({ type: [ActionCompletionCurveDto] })
-  getActionCompletionCurves(): Promise<ActionCompletionCurveDto[]> {
-    return this.analyticsService.getActionCompletionCurves();
+  @ApiQuery({ name: 'actionId', required: false, type: String })
+  getActionCompletionCurves(
+    @Query('actionId') actionId?: string,
+  ): Promise<ActionCompletionCurveDto[]> {
+    const parsedActionId = actionId ? Number(actionId) : undefined;
+    return this.analyticsService.getActionCompletionCurves(parsedActionId);
   }
 
   @UseGuards(AdminGuard)

@@ -424,11 +424,40 @@ ORDER BY pp.total_session_duration_seconds DESC
     }));
   }
 
-  async getActionCompletionCurves(): Promise<ActionCompletionCurveDto[]> {
+  async getActionStatsById(
+    actionId: number,
+  ): Promise<ActionStatsWithOnboardingDto | null> {
+    const record = await this.actionStatsRepository.findOne({
+      where: { actionId },
+    });
+
+    if (!record) {
+      return null;
+    }
+
+    const action = await this.actionRepository.findOne({
+      where: { id: actionId },
+      select: { id: true, onboarding: true },
+    });
+
+    return {
+      ...record,
+      onboarding: action?.onboarding ?? false,
+    };
+  }
+
+  async getActionCompletionCurves(
+    actionId?: number,
+  ): Promise<ActionCompletionCurveDto[]> {
+    const whereClause: { showInChart: boolean; actionId?: number } = {
+      showInChart: true,
+    };
+    if (actionId !== undefined) {
+      whereClause.actionId = actionId;
+    }
+
     const actionStats = await this.actionStatsRepository.find({
-      where: {
-        showInChart: true,
-      },
+      where: whereClause,
       order: { actionId: 'ASC' },
     });
 

@@ -5942,6 +5942,21 @@ export type AnalyticsGetActionStatsResponses = {
 
 export type AnalyticsGetActionStatsResponse = AnalyticsGetActionStatsResponses[keyof AnalyticsGetActionStatsResponses];
 
+export type AnalyticsGetActionStatsByIdData = {
+    body?: never;
+    path: {
+        actionId: string;
+    };
+    query?: never;
+    url: '/analytics/action-stats/{actionId}';
+};
+
+export type AnalyticsGetActionStatsByIdResponses = {
+    200: ActionStatsWithOnboardingDto;
+};
+
+export type AnalyticsGetActionStatsByIdResponse = AnalyticsGetActionStatsByIdResponses[keyof AnalyticsGetActionStatsByIdResponses];
+
 export type AnalyticsRecalculateActionStatsData = {
     body?: never;
     path?: never;
@@ -5971,7 +5986,9 @@ export type AnalyticsGetMemberCompletionRetentionResponse = AnalyticsGetMemberCo
 export type AnalyticsGetActionCompletionCurvesData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        actionId?: string;
+    };
     url: '/analytics/action-completion-curves';
 };
 

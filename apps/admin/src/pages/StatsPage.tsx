@@ -952,44 +952,6 @@ const StatsPage: React.FC = () => {
         <p className="text-sm text-gray-600">No daily stats for this range.</p>
       )}
 
-      {/* Members & Invites Chart */}
-      <TimeSeriesChart
-        title="Members & Invites"
-        data={dailyStatsChartData}
-        series={mainChartSeries}
-        loading={loading}
-        emptyMessage="No daily stats for this range."
-        height={420}
-        getHoverContent={(point) => ({
-          title: fullDateFormatter.format(point.date!),
-          items: mainChartSeries.map((s) => ({
-            label: s.label,
-            value: s.getValue(point),
-            color: s.color,
-          })),
-        })}
-      />
-
-      {/* Actions & Public Responses Chart */}
-      <TimeSeriesChart
-        title="Actions & Public Responses"
-        data={dailyStatsChartData}
-        series={actionsChartSeries}
-        loading={loading}
-        emptyMessage="No daily stats for this range."
-        height={420}
-        showArea
-        areaSeriesKey="actionsCompleted"
-        getHoverContent={(point) => ({
-          title: fullDateFormatter.format(point.date!),
-          items: actionsChartSeries.map((s) => ({
-            label: s.label,
-            value: s.getValue(point),
-            color: s.color,
-          })),
-        })}
-      />
-
       {/* Action Stats Bar Chart */}
       <div className="relative overflow-visible rounded-xl border border-gray-200 bg-white">
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">

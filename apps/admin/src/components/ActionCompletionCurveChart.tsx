@@ -39,6 +39,7 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
   const loadActionCompletionCurves = useCallback(async () => {
     setLoading(true);
     try {
+      // Always fetch all curves - needed to compute the average line
       const response = await analyticsGetActionCompletionCurves();
       setActionCompletionCurves(response.data ?? []);
     } catch (err) {

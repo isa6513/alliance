@@ -119,12 +119,12 @@ const buildNumberStats = (
     const rows =
       totalResponses > 0
         ? [
-            {
-              key: "no-response",
-              label: "No response",
-              count: totalResponses,
-            },
-          ]
+          {
+            key: "no-response",
+            label: "No response",
+            count: totalResponses,
+          },
+        ]
         : [];
     return { rows, answeredCount: 0 };
   }
@@ -310,8 +310,8 @@ const buildFieldStats = (
         const selections = Array.isArray(rawValue)
           ? rawValue.map(String)
           : rawValue
-          ? [String(rawValue)]
-          : [];
+            ? [String(rawValue)]
+            : [];
         if (selections.length === 0) {
           noResponseCount += 1;
           return;

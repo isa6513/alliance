@@ -10,7 +10,7 @@ import {
   actionsShareUrlStats,
   actionsUnarchive,
   actionsUpdate,
-  analyticsGetActionStats,
+  analyticsGetActionStatsById,
   CreateActionDto,
   FormDto,
   FormResponseDto,
@@ -412,11 +412,10 @@ const ActionDashboard: React.FC = () => {
 
     const loadActionStats = async () => {
       try {
-        const response = await analyticsGetActionStats();
-        if (response.data) {
-          const stats = response.data.find((s) => s.actionId === actionId);
-          setActionStats(stats ?? null);
-        }
+        const response = await analyticsGetActionStatsById({
+          path: { actionId },
+        });
+        setActionStats(response.data ?? null);
       } catch (err) {
         console.error("Failed to load action stats:", err);
       }
@@ -1055,7 +1054,7 @@ const ActionDashboard: React.FC = () => {
                         <span className="text-gray-600">
                           {action.usersCompleted} / {action.usersJoined} (
                           {Math.round(
-                            (action.usersCompleted / action.usersJoined) * 100
+                            (action.usersCompleted / (action.usersJoined || 1)) * 100
                           )}
                           %)
                         </span>
@@ -1065,7 +1064,7 @@ const ActionDashboard: React.FC = () => {
                           className="h-full bg-green rounded-full transition-all duration-300"
                           style={{
                             width: `${Math.min(
-                              (action.usersCompleted / action.usersJoined) * 100,
+                              (action.usersCompleted / (action.usersJoined || 1)) * 100,
                               100
                             )}%`,
                           }}
