@@ -287,45 +287,57 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                 </button>
               )}
             </div>
-            {user &&
-              !isEditing &&
-              reply.author.id === user.id &&
-              !reply.deleted && (
-                <div className="relative" ref={dropdownRef}>
-                  <button
-                    onClick={() => setShowDropdown(!showDropdown)}
-                    className="text-gray-500 hover:text-gray-700 p-1"
-                    aria-label="More options"
+            {!isEditing && !reply.deleted && (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="text-gray-500 hover:text-gray-700 p-1"
+                  aria-label="More options"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
                   >
-                    <svg
-                      className="w-4 h-4"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
+                {showDropdown && (
+                  <div className="absolute right-0 bottom-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[140px]">
+                    <button
+                      onClick={() => {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set("replyId", reply.id.toString());
+                        navigator.clipboard.writeText(url.toString());
+                        setShowDropdown(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                     >
-                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                    </svg>
-                  </button>
-                  {showDropdown && (
-                    <div className="absolute right-0 bottom-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-                      <button
-                        onClick={handleStartEdit}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => {
-                          handleDeleteReply(reply.id);
-                          setShowDropdown(false);
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+                      Copy link
+                    </button>
+                    {user && reply.author.id === user.id && (
+                      <>
+                        <button
+                          onClick={handleStartEdit}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleDeleteReply(reply.id);
+                            setShowDropdown(false);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -468,8 +480,8 @@ const ReplyComponent = ({
                     <div key={childReply.id}>
                       <div
                         className={`${compact
-                            ? "my-3"
-                            : "border-t border-zinc-200 my-3 sm:my-4"
+                          ? "my-3"
+                          : "border-t border-zinc-200 my-3 sm:my-4"
                           } -mx-2 sm:-mx-4`}
                       ></div>
                       <div>

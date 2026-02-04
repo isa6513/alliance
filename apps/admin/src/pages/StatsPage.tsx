@@ -549,6 +549,12 @@ const StatsPage: React.FC = () => {
         };
       });
 
+    type AveragePoint = {
+      x: number;
+      completionFraction: number;
+      actionCount: number;
+    };
+
     const averageData = sumByDay
       .map((sum, offset) => {
         const count = countByDay[offset];
@@ -559,7 +565,7 @@ const StatsPage: React.FC = () => {
           actionCount: count,
         };
       })
-      .filter((point): point is DataPoint => point !== null);
+      .filter((point): point is AveragePoint => point !== null);
 
     const averageSeries: MultiLineSeries = {
       key: "average",
