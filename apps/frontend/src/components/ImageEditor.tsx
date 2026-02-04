@@ -603,7 +603,6 @@ const ImageEditor: FC<ImageEditorProps> = ({
     const generate = async () => {
       try {
         const cropped = await getCroppedImage(imageSrc, pixelCrop, rotation);
-        console.log({ croppedLength: cropped.length }, "asdf");
         if (cropped.length > CROPPED_IMAGE_STRING_MAX_LENGTH) {
           if (!isCancelled) {
             setError(
