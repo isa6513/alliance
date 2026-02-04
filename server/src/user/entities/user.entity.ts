@@ -320,10 +320,10 @@ export class User {
     nullable: true,
     onDelete: 'SET NULL',
   })
-  referredBy: User | null;
+  referredBy?: User | null;
 
   @OneToMany(() => User, (user) => user.referredBy)
-  referredUsers: User[];
+  referredUsers?: User[];
 
   @ManyToOne(() => City, { nullable: true, onDelete: 'SET NULL' })
   @IsOptional()

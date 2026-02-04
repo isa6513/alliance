@@ -587,7 +587,7 @@ export class UserService {
       where: { id },
       relations: { referredUsers: true },
     });
-    return user?.referredUsers.length ?? 0;
+    return user?.referredUsers!.length ?? 0;
   }
 
   async getUserLocation(userId: number): Promise<City | undefined> {
@@ -2367,10 +2367,14 @@ export class UserService {
         if (!usersByLeader.has(leader.id)) {
           usersByLeader.set(leader.id, []);
         }
-        usersByLeader.get(leader.id)!.push(...community.users.filter((user) => user.id !== leader.id));
+        usersByLeader
+          .get(leader.id)!
+          .push(...community.users.filter((user) => user.id !== leader.id));
       }
     }
 
-    return communities.flatMap((community) => community.leaders!).filter((leader) => usersByLeader.get(leader.id)?.length);
+    return communities
+      .flatMap((community) => community.leaders!)
+      .filter((leader) => usersByLeader.get(leader.id)?.length);
   }
 }
