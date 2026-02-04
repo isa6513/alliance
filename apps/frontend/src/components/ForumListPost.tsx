@@ -142,7 +142,7 @@ const ForumListPost = ({
                 size="small"
               />
               <span onClick={lastCommentAuthorClick}>
-                <UserDisplayName staff={post.lastComment.author.staff}>
+                <UserDisplayName>
                   {post.lastComment.author.displayName}
                 </UserDisplayName>
                 {` replied ${formatTime(new Date(post.lastComment.createdAt), {
