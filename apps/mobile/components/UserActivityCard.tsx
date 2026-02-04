@@ -157,6 +157,7 @@ export default function UserActivityCard({
               isSubmitting={isSaving}
               onSubmit={handleSave}
               onCancel={handleCancel}
+              submitLabel="Save"
             />
           </View>
         ) : (

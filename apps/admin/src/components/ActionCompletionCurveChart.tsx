@@ -18,7 +18,7 @@ type ActionCompletionCurveChartProps = {
 const LOCKED_MAX_DAY = 7;
 
 const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
-  title = "Action Completion Curves",
+  title = "Completions throughout week",
   actionId,
   showSelector = true,
   refreshKey,
