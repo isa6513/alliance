@@ -157,47 +157,28 @@ const SignupPage: React.FC = () => {
                 </span>
               </div>
               <p className="text-sm text-zinc-500">
-                You will be added as friends
-                {communityId ? ` and join their group` : ""} automatically.
+                You will be added as friends automatically.
               </p>
             </div>
             <p className="flex flex-row flex-wrap gap-x-1 items-center">
               Hi {inviteeName},
             </p>
             <p>
-              I invite you to join the Alliance, a group of individuals
-              coordinating to solve the world&apos;s largest problems.
+              I invite you to join me as a member of the Alliance. We are an online community of about 75 people cooperating to improve the world.
             </p>
+            <ol className="list-decimal list-inside space-y-3 pl-2">
+              <li>
+                <span className="font-bold">We take action in creative, effective ways.</span> A core component of the Alliance is that members reliably complete tasks; this allows actions to be designed for learning and impact, not mass appeal.
+              </li>
+              <li>
+                <span className="font-bold">Participation is straightforward and rewarding.</span> Tasks only take 15 minutes per week and have tangible results – for example, our <Link to={href("/actions/14")} className="text-link">bring your own cup campaign</Link> and an <Link to={href("/actions/56")} className="text-link">AI privacy survey</Link> we ran both made the news.
+              </li>
+              <li>
+                <span className="font-bold">We are cautious and deliberate.</span> Right now, we’re running small experiments, growing only when we are ready to do so. We hope to set ourselves up for long-term success, with millions of members who take large-scale action to reduce poverty, restore the environment, and more.
+              </li>
+            </ol>
             <p>
-              <span className="font-bold">Our model is effective.</span> Members
-              make a commitment to complete tasks on time. Since we can trust
-              one another to show up, we can execute concrete, effective action
-              plans.
-            </p>
-            <p>
-              <span className="font-bold">
-                Participation is straightforward.
-              </span>{" "}
-              Tasks only require 15 minutes per week. Each task is broken down
-              into simple steps.
-            </p>
-            <p>
-              <span className="font-bold">
-                We have the potential to become a major global force.
-              </span>{" "}
-              Right now, we&apos;re running small experiments to test our model
-              and strategies. One day, we could have enormous collective power:
-              for instance, we could call on millions of members to boycott a
-              corporation acting unethically, simultaneously make lifestyle
-              changes to curtail waste, or fund new scientific research
-              neglected by governments and markets.
-            </p>
-            <p>
-              You can read more about how we work in our{" "}
-              <Link to={"/guide"} className="text-green hover:underline">
-                guide
-              </Link>
-              .
+              If you want to learn more, our <Link to={href("/guide")} className="text-link">guide</Link> goes into more detail about our structure and priorities, and gives some examples of past actions.
             </p>
           </div>
         )}
