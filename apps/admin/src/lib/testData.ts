@@ -14,6 +14,10 @@ export const FORM_BUILDER_PREVIEW_USER: UserDto = {
   shareEmailWithCommunityLead: true,
   sharePhoneNumberWithCommunityLead: true,
   preferredActionReminderChannel: "text",
+  profileDescription: "I am a preview user",
+  shareInfoPublicly: true,
+  pushesForLikes: true,
+  pushesForComments: true,
   profilePicture: null,
   communities: [],
   formDataPreference: "public",
@@ -26,10 +30,15 @@ export const FORM_BUILDER_PREVIEW_USER: UserDto = {
   contractEvents: [
     {
       type: "signed",
-      date: new Date().toISOString(),
+      date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString(),
       automatic: false,
     },
   ],
+  pushesForFriendRequests: false,
+  isIntroductoryGroupMember: false,
+  undergoingGroupAssignment: false,
+  remindAboutUncompletedGroupMembers: false,
+  leaderOfIds: []
 };
 
 export const testActions: CreateActionDto[] = [
@@ -58,8 +67,7 @@ We can outpace these mining companies by purchasing the land directly and placin
 4. Long-term stewardship is established
 
 This is our chance to take direct action against environmental destruction. Every contribution makes a difference.`,
-    shortDescription:
-      "Gold mining companies are expressing interest in a highly biodiverse area. We can outpace them by purchasing the land.",
+    shortDescription: "Gold mining companies are expressing interest in a highly biodiverse area. We can outpace them by purchasing the land.",
     type: "Funding",
     commitmentThreshold: 100,
     donationAmount: 1000,
@@ -70,6 +78,11 @@ This is our chance to take direct action against environmental destruction. Ever
     everyoneShouldComplete: false,
     priority: 0,
     preventCompletion: false,
+    visibilityMode: "public",
+    onboarding: false,
+    optional: false,
+    publicOnly: false,
+    shouldCompleteAfterDeadline: false
   },
   {
     name: "Use public transportation instead of driving",
@@ -114,8 +127,7 @@ Public transit creates:
 - **"It's not convenient"** - Plan routes in advance and build habits
 
 Your commitment to public transit is an investment in a sustainable future.`,
-    shortDescription:
-      "Reduce your carbon footprint by using public transportation for daily commutes.",
+    shortDescription: "Reduce your carbon footprint by using public transportation for daily commutes.",
     type: "Ongoing",
 
     commitmentThreshold: 150,
@@ -125,5 +137,10 @@ Your commitment to public transit is an investment in a sustainable future.`,
     everyoneShouldComplete: false,
     priority: 0,
     preventCompletion: false,
+    visibilityMode: "public",
+    onboarding: false,
+    optional: false,
+    publicOnly: false,
+    shouldCompleteAfterDeadline: false
   },
 ];

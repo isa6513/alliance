@@ -707,9 +707,7 @@ export class TasksService {
         if (!validator.expression) {
           throw new BadRequestException('Validator has no expression');
         }
-        console.log("validator.expression", validator.expression);
         const expressionFn = eval(validator.expression) as (user: User) => unknown;
-        console.log("expression", expressionFn(user));
         return { isValid: expressionFn(user) as boolean };
       default:
         console.warn(

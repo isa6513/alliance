@@ -11,6 +11,7 @@ import {
   CustomValidatorTypeDto,
   tasksCustomValidators,
   tasksFindOneCustomValidator,
+  type UserDto,
 } from "@alliance/shared/client";
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import {
@@ -32,6 +33,7 @@ import {
   isDraftValidatorId,
   useCustomValidatorDrafts,
 } from "./customValidatorDrafts";
+import { FORM_BUILDER_PREVIEW_USER } from "../../lib/testData";
 
 const DEVICE_LABELS: Record<DeviceVisibilityTarget, string> = {
   mobile: "Mobile",
@@ -1008,6 +1010,10 @@ export function CustomValidatorSelect({
   filter,
 }: CustomValidatorSelectProps) {
   const { validators, loading, error } = useCustomValidators();
+  const [expressionTest, setExpressionTest] = useState<{
+    result?: boolean;
+    error?: string;
+  } | null>(null);
   const availableValidators = useMemo(() => {
     if (!filter) {
       return validators;
@@ -1036,6 +1042,38 @@ export function CustomValidatorSelect({
   };
 
   const hasValidators = availableValidators.length > 0;
+  const hasExpression = Boolean(expression?.trim());
+
+  useEffect(() => {
+    setExpressionTest(null);
+  }, [expression, type]);
+
+  const runExpressionTest = () => {
+    if (type !== "CustomExpression") {
+      return;
+    }
+    if (!expression?.trim()) {
+      setExpressionTest({ error: "Expression is empty." });
+      return;
+    }
+    try {
+      const expressionFn = eval(expression) as unknown;
+      if (typeof expressionFn !== "function") {
+        throw new Error("Expression must evaluate to a function.");
+      }
+      const result = (expressionFn as (user: UserDto) => unknown)(
+        FORM_BUILDER_PREVIEW_USER
+      );
+      if (typeof result !== "boolean") {
+        throw new Error("Expression must return a boolean.");
+      }
+      setExpressionTest({ result });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Expression failed to run.";
+      setExpressionTest({ error: message });
+    }
+  };
 
   return (
     <div className={`space-y-1 ${className}`}>
@@ -1066,14 +1104,37 @@ export function CustomValidatorSelect({
             />
           )}
       </div>
-      {type === 'CustomExpression' && (
-        <textarea
-          value={expression ?? ""}
-          onChange={(e) =>
-            onChange(type, idArgument, e.target.value)
-          }
-          className="px-2 py-1 text-xs border border-gray-300 rounded bg-white w-full font-mono"
-        />
+      {type === "CustomExpression" && (
+        <div className="space-y-1">
+          <textarea
+            value={expression ?? ""}
+            onChange={(e) => onChange(type, idArgument, e.target.value)}
+            className="px-2 py-1 text-xs border border-gray-300 rounded bg-white w-full font-mono"
+          />
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={runExpressionTest}
+              disabled={!hasExpression}
+              className="text-[11px] text-blue-600 hover:text-blue-700 disabled:text-gray-400"
+            >
+              Test expression
+            </button>
+            <span className="text-[10px] text-gray-400">
+              Uses preview user from testData.ts
+            </span>
+          </div>
+          {expressionTest?.error && (
+            <p className="text-[11px] text-red-500">{expressionTest.error}</p>
+          )}
+          {expressionTest &&
+            expressionTest.result !== undefined &&
+            !expressionTest.error && (
+              <p className="text-[11px] text-green-600">
+                Result: {String(expressionTest.result)}
+              </p>
+            )}
+        </div>
       )}
       {loading && (
         <p className="text-[11px] text-gray-500">Loading validators…</p>
