@@ -693,7 +693,7 @@ export class UserService {
   }
 
   async signContract(userId: number): Promise<Date> {
-    const user = await this.findOneOrFail(userId, { contractEvents: true });
+    const user = await this.findOneOrFail(userId, { contractEvents: true, referredBy: true });
     if (user.hasActiveContract) {
       throw new BadRequestException('Member already has an active contract.');
     }
@@ -705,7 +705,7 @@ export class UserService {
     await this.contractEventRepository.save(contractEvent);
 
     await this.slackService.sendMessage(
-      `${user.name} signed their contract :)`,
+      `${user.name} (referred by ${user.referredBy?.name}) signed their contract :)`,
     );
 
     return contractEvent.date;
