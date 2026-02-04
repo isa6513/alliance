@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreateReminderGroupDto,
   PreviewEmailHtmlDto,
+  PreviewEmailHtmlResponse,
   PreviewTextDto,
 } from 'src/actions/dto/action.dto';
 import { NotificationScheduleEntryDto } from 'src/actions/dto/notification-schedule.dto';
@@ -497,15 +498,20 @@ export class ActionEventReminderService {
     eventId: number,
     dto: PreviewEmailHtmlDto,
     sendTime?: Date,
-  ): Promise<string> {
-    const replaced = processKeywordReplacements(
-      dto.emailMessage,
-      await this.getKeywordContextForPreview(eventId, dto, sendTime),
-    );
+  ): Promise<PreviewEmailHtmlResponse> {
+    const context = await this.getKeywordContextForPreview(eventId, dto, sendTime);
 
-    return this.mailService.renderHtml(EmailType.CustomActionReminder, {
-      customMessage: replaced.replace(/\n/g, '<br>'),
+    const replacedMessage = processKeywordReplacements(dto.emailMessage, context);
+    const replacedSubject = processKeywordReplacements(dto.emailSubject, context);
+
+    const html = await this.mailService.renderHtml(EmailType.CustomActionReminder, {
+      customMessage: replacedMessage.replace(/\n/g, '<br>'),
     });
+
+    return {
+      subject: replacedSubject,
+      html,
+    };
   }
 
   async previewTextMessage(

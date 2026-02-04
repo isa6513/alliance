@@ -1615,6 +1615,11 @@ export type PreviewEmailHtmlDto = {
     taskCount: number;
 };
 
+export type PreviewEmailHtmlResponse = {
+    subject: string;
+    html: string;
+};
+
 export type PreviewTextDto = {
     textMessage: string;
     taskCount: number;
@@ -4800,7 +4805,7 @@ export type ActionsPreviewEmailHtmlData = {
 };
 
 export type ActionsPreviewEmailHtmlResponses = {
-    200: string;
+    200: PreviewEmailHtmlResponse;
 };
 
 export type ActionsPreviewEmailHtmlResponse = ActionsPreviewEmailHtmlResponses[keyof ActionsPreviewEmailHtmlResponses];

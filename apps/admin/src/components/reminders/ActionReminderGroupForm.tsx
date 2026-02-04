@@ -231,9 +231,15 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   const [previewEmail1TaskHtml, setPreviewEmail1TaskHtml] = useState<
     string | null
   >(null);
+  const [previewEmail1TaskSubject, setPreviewEmail1TaskSubject] = useState<
+    string | null
+  >(null);
 
   const [previewingEmail2Task, setPreviewingEmail2Task] = useState(false);
   const [previewEmail2TaskHtml, setPreviewEmail2TaskHtml] = useState<
+    string | null
+  >(null);
+  const [previewEmail2TaskSubject, setPreviewEmail2TaskSubject] = useState<
     string | null
   >(null);
 
@@ -373,7 +379,8 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
           setLocalError((response.error as Error).message);
           return;
         }
-        setPreviewEmail1TaskHtml(response.data ?? "");
+        setPreviewEmail1TaskHtml(response.data?.html ?? "");
+        setPreviewEmail1TaskSubject(response.data?.subject ?? "");
       });
     }
     if (previewingEmail2Task) {
@@ -391,7 +398,8 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
           setLocalError((response.error as Error).message);
           return;
         }
-        setPreviewEmail2TaskHtml(response.data ?? "");
+        setPreviewEmail2TaskHtml(response.data?.html ?? "");
+        setPreviewEmail2TaskSubject(response.data?.subject ?? "");
       });
     }
   }, [
@@ -966,12 +974,14 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         </div>
         {previewingEmail1Task ? (
           <Card className="p-4">
+            <p className="font-bold mb-4">{previewEmail1TaskSubject}</p>
             <div
               dangerouslySetInnerHTML={{ __html: previewEmail1TaskHtml ?? "" }}
             />
           </Card>
         ) : previewingEmail2Task ? (
           <Card className="p-4">
+            <p className="font-bold mb-4">{previewEmail2TaskSubject}</p>
             <div
               dangerouslySetInnerHTML={{ __html: previewEmail2TaskHtml ?? "" }}
             />

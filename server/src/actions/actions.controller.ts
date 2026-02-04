@@ -61,6 +61,7 @@ import {
   OptOutActionDto,
   PasteJsonDto,
   PreviewEmailHtmlDto,
+  PreviewEmailHtmlResponse,
   PreviewTextDto,
   PreviewTextMessageResponse,
   ReminderGroupPlanDto,
@@ -752,11 +753,11 @@ export class ActionsController {
 
   @Post('previewEmailHtml/:eventId')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: String })
+  @ApiOkResponse({ type: PreviewEmailHtmlResponse })
   async previewEmailHtml(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: PreviewEmailHtmlDto,
-  ): Promise<string> {
+  ): Promise<PreviewEmailHtmlResponse> {
     return this.actionEventReminderService.previewEmailHtml(eventId, body);
   }
 

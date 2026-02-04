@@ -96,9 +96,8 @@ const ActionReminderCard = ({
     <Card
       key={group.id}
       ref={highlightedReminder === group.id ? ref : undefined}
-      className={`bg-white text-sm !p-0 overflow-hidden transition-all duration-300 ${
-        highlightedReminder === group.id ? "!border-red-500" : ""
-      }`}
+      className={`bg-white text-sm !p-0 overflow-hidden transition-all duration-300 ${highlightedReminder === group.id ? "!border-red-500" : ""
+        }`}
     >
       <div className="flex flex-row gap-2 w-full bg-zinc-100 p-4 items-center justify-between">
         <div className="flex flex-row gap-4 items-center">
@@ -106,9 +105,8 @@ const ActionReminderCard = ({
             type="button"
             color={ButtonColor.Transparent}
             onClick={() => setMinified(!minified)}
-            className={`!p-0 -my-1 transition-transform duration-100 ${
-              minified ? "rotate-180" : ""
-            }`}
+            className={`!p-2 -my-1 transition-transform duration-100 ${minified ? "rotate-180" : ""
+              }`}
           >
             <DropdownIcon size="small" fill="black" />
           </Button>
@@ -116,9 +114,8 @@ const ActionReminderCard = ({
             <div className="flex flex-row gap-2 items-center">
               {relativeSendLabel && (
                 <p
-                  className={`text-sm ${
-                    isFinished ? "text-gray-500" : "text-blue-500"
-                  }`}
+                  className={`text-sm ${isFinished ? "text-gray-500" : "text-blue-500"
+                    }`}
                 >
                   {relativeSendLabel}
                 </p>
@@ -216,7 +213,7 @@ const ActionReminderCard = ({
                 <TextareaWithHighlights
                   value={group.emailMessage}
                   editable={false}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   keywords={[]}
                   textareaClassName="!border-0 border-transparent"
                 />
@@ -253,9 +250,8 @@ const ActionReminderCard = ({
           </div>
           <div
             className={`divide-y divide-gray-200 border-t border-gray-200 
-                    overflow-y-auto transition-[max-height] duration-300 ${
-                      showPlans ? "max-h-[300px]" : "max-h-[0px]"
-                    }`}
+                    overflow-y-auto transition-[max-height] duration-300 ${showPlans ? "max-h-[300px]" : "max-h-[0px]"
+              }`}
           >
             {reminderPlans === undefined ? (
               <p className="text-sm text-zinc-500 p-5">
@@ -282,9 +278,8 @@ const ActionReminderCard = ({
           </div>
           <div
             className={`divide-y divide-gray-200 border-t border-gray-200 
-                    overflow-y-auto transition-[max-height] duration-300 ${
-                      showSentReminders ? "max-h-[300px]" : "max-h-[0px]"
-                    }`}
+                    overflow-y-auto transition-[max-height] duration-300 ${showSentReminders ? "max-h-[300px]" : "max-h-[0px]"
+              }`}
           >
             {sentReminders === undefined ? (
               <p className="text-sm text-zinc-500 p-5">
@@ -314,11 +309,10 @@ const ActionReminderCard = ({
                     </Link>
                   </div>
                   <p
-                    className={`text-sm ${
-                      notif.mms?.status === "undelivered"
-                        ? "text-red-500"
-                        : "text-zinc-500"
-                    }`}
+                    className={`text-sm ${notif.mms?.status === "undelivered"
+                      ? "text-red-500"
+                      : "text-zinc-500"
+                      }`}
                   >
                     {notif.channel === "text"
                       ? notif.mms?.status

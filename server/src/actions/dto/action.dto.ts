@@ -87,6 +87,18 @@ export class PreviewTextMessageResponse {
   text: string;
 }
 
+export class PreviewEmailHtmlResponse {
+  @ApiProperty({ type: String })
+  @IsDefined()
+  @IsString()
+  subject: string;
+
+  @ApiProperty({ type: String })
+  @IsDefined()
+  @IsString()
+  html: string;
+}
+
 export class ActionEventDto extends PickType(ActionEvent, [
   'id',
   'title',
