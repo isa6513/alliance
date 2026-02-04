@@ -47,7 +47,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   const handleCancel = useCallback(async () => {
-    const ok = editableContent.body.length < 20 ? true : await confirm({
+    const ok = editableContent.body.length < 10 ? true : await confirm({
       title: "Discard draft?",
       confirmLabel: "Discard",
       cancelLabel: "Keep writing",
