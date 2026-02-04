@@ -470,7 +470,6 @@ const CommunityPage = () => {
                                   color={ButtonColor.Red}
                                   onClick={handleDelete}
                                   disabled={isSaving}
-                                  className="!text-sm"
                                 >
                                   Delete
                                 </Button>
@@ -479,7 +478,6 @@ const CommunityPage = () => {
                                 color={ButtonColor.Light}
                                 onClick={handleCancel}
                                 disabled={isSaving}
-                                className="!text-sm"
                               >
                                 Cancel
                               </Button>
@@ -487,7 +485,6 @@ const CommunityPage = () => {
                                 color={ButtonColor.Blue}
                                 onClick={handleSave}
                                 disabled={isSaving || !editName.trim()}
-                                className="!text-sm"
                               >
                                 {isSaving ? "Saving..." : "Save"}
                               </Button>

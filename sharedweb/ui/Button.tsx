@@ -9,31 +9,31 @@ type ButtonProps = React.PropsWithChildren & {
   size?: "small" | "medium" | "large" | "mediumDynamic";
 } & (
     | ({
-        asDiv?: false;
-        ref?: React.RefObject<HTMLButtonElement | null>;
-      } & Pick<
-        React.HTMLAttributes<HTMLButtonElement>,
-        "onMouseEnter" | "onMouseLeave"
-      > &
-        (
-          | {
-              type: "submit";
-              onClick?: (e: React.FormEvent) => void;
-            }
-          | {
-              type?: "button" | "reset";
-              onClick: (e: React.MouseEvent<HTMLElement>) => void;
-            }
-        ))
+      asDiv?: false;
+      ref?: React.RefObject<HTMLButtonElement | null>;
+    } & Pick<
+      React.HTMLAttributes<HTMLButtonElement>,
+      "onMouseEnter" | "onMouseLeave"
+    > &
+      (
+        | {
+          type: "submit";
+          onClick?: (e: React.FormEvent) => void;
+        }
+        | {
+          type?: "button" | "reset";
+          onClick: (e: React.MouseEvent<HTMLElement>) => void;
+        }
+      ))
     | ({
-        asDiv: true;
-        ref?: React.RefObject<HTMLDivElement | null>;
-        type?: "button" | "reset";
-        onClick: (e: React.MouseEvent<HTMLElement>) => void;
-      } & Pick<
-        React.HTMLAttributes<HTMLDivElement>,
-        "onMouseEnter" | "onMouseLeave"
-      >)
+      asDiv: true;
+      ref?: React.RefObject<HTMLDivElement | null>;
+      type?: "button" | "reset";
+      onClick: (e: React.MouseEvent<HTMLElement>) => void;
+    } & Pick<
+      React.HTMLAttributes<HTMLDivElement>,
+      "onMouseEnter" | "onMouseLeave"
+    >)
   );
 
 export enum ButtonColor {
@@ -44,7 +44,7 @@ export enum ButtonColor {
   RedOutline = "border border-red-500 text-red-500",
   Light = "bg-zinc-200/60 border border-[#efeff1]",
   LightHover = "bg-zinc-200/60 hover:bg-zinc-200/80 !text-zinc-500",
-  Blue = "bg-[#318dde] text-white",
+  Blue = "bg-[#318dde] text-white border border-[#318dde]",
   BlueOutline = "border border-[#318dde] text-[#318dde] hover:bg-[#318dde]/10",
   Yellow = "bg-yellow-600",
   Transparent = "bg-transparent hover:bg-black/5 text-black !px-2",
@@ -78,11 +78,9 @@ const Button: React.FC<ButtonProps> = ({
     large: "px-6 py-3 text-lg",
   }[size];
 
-  const baseClassName = `${sizeClass} font-medium rounded w-fit h-fit flex items-center justify-center border-box relative group ${
-    disabled ? "opacity-50 !cursor-not-allowed" : ``
-  } ${color} ${
-    color === ButtonColor.Light ? "!text-zinc-800" : ""
-  } ${className} `;
+  const baseClassName = `${sizeClass} font-medium rounded w-fit h-fit flex items-center justify-center border-box relative group ${disabled ? "opacity-50 !cursor-not-allowed" : ``
+    } ${color} ${color === ButtonColor.Light ? "!text-zinc-800" : ""
+    } ${className} `;
 
   const baseStyle = {
     fontWeight: 450,
