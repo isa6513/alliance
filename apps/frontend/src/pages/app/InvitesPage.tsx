@@ -72,6 +72,10 @@ const InvitesPage = () => {
       });
     }, [invites, leaderCommunityIds, user]);
 
+  const acceptedInvites = useMemo(() => {
+    return invites.filter((invite) => invite.status === "link_used");
+  }, [invites]);
+
   const copyToClipboard = useCallback((text: string) => {
     const baseUrl = getBaseUrl();
     const url = `${baseUrl}/signup?ref=${text}`;
@@ -165,9 +169,18 @@ const InvitesPage = () => {
     <CenterLayout>
       <div className="flex flex-col gap-y-12">
         <div className="flex flex-col gap-y-3">
-          <p className="font-serif font-semibold text-2xl md:text-3xl">
-            Invites
-          </p>
+          <div className="flex flex-row justify-between items-center gap-x-2">
+            <p className="font-serif font-semibold text-2xl md:text-3xl">
+              Invites
+            </p>
+            <p className="text-zinc-500 text-base sm:text-lg">
+              Accepted invites:{" "}
+              <span className="font-semibold text-black">
+                {acceptedInvites.length}
+              </span>
+            </p>
+          </div>
+
           {<InviteForm onInviteCreated={handleInviteCreated} />}
           {error && <p className="text-red-500 text-sm">{error}</p>}
         </div>

@@ -191,7 +191,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
               </p>
             ))}
           </div>
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-col md:flex-row gap-2">
             <Button
               color={ButtonColor.Green}
               onClick={() => setResponsibilityChoice("responsible")}
@@ -236,17 +236,19 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                     ),
                     <p
                       key="your-current-group"
-                      className="border border-zinc-300 rounded px-3 py-2 flex flex-row justify-between items-center"
+                      className="border border-zinc-200 bg-white rounded px-3 py-2 flex flex-row justify-between items-center"
                     >
                       <span>
-                        {"Your current group: "}
+                        {"Your group: "}
                         <span className="font-semibold">
                           {memberCommunities[0].name}
                         </span>
                       </span>
-                      {`${memberCommunityRemainingCapacity} open seat${
-                        memberCommunityRemainingCapacity === 1 ? "" : "s"
-                      }`}
+                      <span className="text-zinc-500">
+                        {`${memberCommunityRemainingCapacity} open seat${
+                          memberCommunityRemainingCapacity === 1 ? "" : "s"
+                        }`}
+                      </span>
                     </p>,
                   ]
                 : onetimeInviteCreation.not_responsible.explanations.yourGroupNoCapacity.map(

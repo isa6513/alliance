@@ -67,7 +67,7 @@ export const onetimeInviteCreation = {
         title: "Create an invite",
         explanation: [
           "This will create a personalized invite link that explains the Alliance and how to sign up.",
-          "When the invitee signs up, they will be automatically added to your group.",
+          "When the invitee signs up, they will be added to your group automatically.",
         ],
       },
       newGroup: {
@@ -86,7 +86,7 @@ export const onetimeInviteCreation = {
       ],
       yourGroup: [
         "This will create a personalized invite link that explains the Alliance and how to sign up.",
-        "When the invitee signs up, they will be automatically added to your group if it has capacity.",
+        "When the invitee signs up, they will be added to your current group if it has capacity; otherwise, they will be assigned to a different group.",
       ],
       yourGroupNoCapacity: [
         "This will create a personalized invite link that explains the Alliance and how to sign up.",
