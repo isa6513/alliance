@@ -114,8 +114,8 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
           invitee: inviteeName.trim(),
           ...(responsibilityChoice === "responsible" &&
             communityId !== null && {
-              communityId,
-            }),
+            communityId,
+          }),
         };
 
         const response = await userCreateOnetimeInvite({ body });
@@ -125,8 +125,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
           onInviteCreated(response.data);
         } else {
           errorToast(
-            `Failed to create invite: ${
-              response.response?.statusText || "Unknown error"
+            `Failed to create invite: ${response.response?.statusText || "Unknown error"
             }`
           );
         }
@@ -163,18 +162,18 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
     memberCommunityRemainingCapacity,
   } =
     !memberCommunities.length ||
-    !memberCommunities[0].allowMemberInvites ||
-    memberCommunities[0].maxCapacity === null
+      !memberCommunities[0].allowMemberInvites ||
+      memberCommunities[0].maxCapacity === null
       ? {
-          memberCommunityAllowsMemberInvites: false,
-          memberCommunityRemainingCapacity: 0,
-        }
+        memberCommunityAllowsMemberInvites: false,
+        memberCommunityRemainingCapacity: 0,
+      }
       : {
-          memberCommunityAllowsMemberInvites: true,
-          memberCommunityRemainingCapacity:
-            memberCommunities[0].maxCapacity -
-            memberCommunities[0].users.length,
-        };
+        memberCommunityAllowsMemberInvites: true,
+        memberCommunityRemainingCapacity:
+          memberCommunities[0].maxCapacity -
+          memberCommunities[0].users.length,
+      };
 
   return (
     <Card style={CardStyle.Grey}>
@@ -218,14 +217,14 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
               </p>
               {!memberCommunityAllowsMemberInvites
                 ? onetimeInviteCreation.not_responsible.explanations.genericGroup.map(
-                    (block, index) => (
-                      <p className="text-zinc-500" key={index}>
-                        {block}
-                      </p>
-                    )
+                  (block, index) => (
+                    <p className="text-zinc-500" key={index}>
+                      {block}
+                    </p>
                   )
+                )
                 : memberCommunityRemainingCapacity > 0
-                ? [
+                  ? [
                     ...onetimeInviteCreation.not_responsible.explanations.yourGroup.map(
                       (block, index) => (
                         <p className="text-zinc-500" key={index}>
@@ -243,12 +242,11 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                           {memberCommunities[0].name}
                         </span>
                       </span>
-                      {`${memberCommunityRemainingCapacity} seat${
-                        memberCommunityRemainingCapacity === 1 ? "" : "s"
-                      } remaining`}
+                      {`${memberCommunityRemainingCapacity} open seat${memberCommunityRemainingCapacity === 1 ? "" : "s"
+                        }`}
                     </p>,
                   ]
-                : onetimeInviteCreation.not_responsible.explanations.yourGroupNoCapacity.map(
+                  : onetimeInviteCreation.not_responsible.explanations.yourGroupNoCapacity.map(
                     (block, index) => (
                       <p className="text-zinc-500" key={index}>
                         {block}
@@ -323,11 +321,11 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                   }}
                   titleOverride={
                     selectedCommunityId &&
-                    typeof selectedCommunityId === "number"
+                      typeof selectedCommunityId === "number"
                       ? selectedCommunity?.name || "Select a group"
                       : selectedCommunityId === null
-                      ? "Create a new group"
-                      : "Select a group"
+                        ? "Create a new group"
+                        : "Select a group"
                   }
                 />
                 {!!selectedCommunity && (
@@ -377,7 +375,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                     creatingInvite
                       ? "Creating invite..."
                       : onetimeInviteCreation.responsible.leader.newGroup
-                          .createButtonText
+                        .createButtonText
                   }
                   createDisabled={creatingInvite || !inviteeName.trim()}
                   onSuccess={onCreateCommunity}
