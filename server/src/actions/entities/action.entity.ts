@@ -159,6 +159,13 @@ export class Action {
   @IsDefined()
   useManualCohort: boolean;
 
+  @Column({ default: false })
+  @ApiProperty({
+    description: 'special case for contract signing (prevent doing other onboarding actions)',
+  })
+  @IsDefined()
+  isContractSigningAction: boolean;
+
   @Column('int', { array: true, nullable: true })
   @Allow()
   @ApiPropertyOptional({

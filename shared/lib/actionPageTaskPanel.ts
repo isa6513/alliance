@@ -4,6 +4,7 @@ import { getLatestEvent } from "./actionUtils";
 export enum ActionPageTaskPanelState {
   PublicOnly = "public_only",
   NotAuthenticated = "not_authenticated",
+  OnboardingSignContractFirst = "onboarding_sign_contract_first",
   NotAssigned = "not_assigned",
   Completed = "completed",
   Declined = "declined",
@@ -15,7 +16,8 @@ export enum ActionPageTaskPanelState {
 
 export function getActionPageTaskPanelState(
   action: ActionDto,
-  userRelation: UserActionRelation | null
+  userRelation: UserActionRelation | null,
+  contractSigned: boolean
 ): ActionPageTaskPanelState {
   if (action.publicOnly) return ActionPageTaskPanelState.PublicOnly;
 
@@ -27,6 +29,10 @@ export function getActionPageTaskPanelState(
     !action.preventCompletion
   )
     return ActionPageTaskPanelState.NotAssigned;
+
+  if (action.onboarding && !contractSigned && !action.isContractSigningAction) {
+    return ActionPageTaskPanelState.OnboardingSignContractFirst;
+  }
 
   if (
     !userRelation ||

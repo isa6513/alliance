@@ -83,52 +83,6 @@ const buildRoundedRightPath = (
     "Z",
   ].join(" ");
 };
-type MetricKey =
-  | "actionsCompleted"
-  | "anonFormSubmissions"
-  | "signedMembers"
-  | "invitesAccepted"
-  | "invitesCreated"
-  | "suspendedMembers";
-
-type MetricDefinition = {
-  key: MetricKey;
-  label: string;
-  color: string;
-};
-
-const metricDefinitions: MetricDefinition[] = [
-  {
-    key: "actionsCompleted",
-    label: "Actions completed",
-    color: "#0891b2",
-  },
-  {
-    key: "anonFormSubmissions",
-    label: "Public responses",
-    color: "#8b5cf6",
-  },
-  {
-    key: "signedMembers",
-    label: "Members signed",
-    color: "#16a34a",
-  },
-  {
-    key: "invitesAccepted",
-    label: "Invites accepted",
-    color: "#f97316",
-  },
-  {
-    key: "invitesCreated",
-    label: "Invites created",
-    color: "#2563eb",
-  },
-  {
-    key: "suspendedMembers",
-    label: "Members suspended",
-    color: "#111827",
-  },
-];
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -361,51 +315,6 @@ const StatsPage: React.FC = () => {
       }))
       .filter((record) => !Number.isNaN(record.parsedDate.getTime()));
   }, [stats]);
-
-  // Convert parsedStats to DataPoint format for TimeSeriesChart
-  const dailyStatsChartData: DataPoint[] = useMemo(() => {
-    return parsedStats.map((d) => ({
-      date: d.parsedDate,
-      signedMembers: d.signedMembers,
-      invitesAccepted: d.invitesAccepted,
-      invitesCreated: d.invitesCreated,
-      suspendedMembers: d.suspendedMembers,
-      actionsCompleted: d.actionsCompleted,
-      anonFormSubmissions: d.anonFormSubmissions,
-    }));
-  }, [parsedStats]);
-
-  // Series definitions for main chart (members, invites)
-  const mainChartSeries: ChartSeries[] = useMemo(
-    () =>
-      metricDefinitions
-        .filter(
-          (m) => m.key !== "actionsCompleted" && m.key !== "anonFormSubmissions"
-        )
-        .map((m) => ({
-          key: m.key,
-          label: m.label,
-          color: m.color,
-          getValue: (d: DataPoint) => (d[m.key] as number) ?? 0,
-        })),
-    []
-  );
-
-  // Series definitions for actions chart
-  const actionsChartSeries: ChartSeries[] = useMemo(
-    () =>
-      metricDefinitions
-        .filter(
-          (m) => m.key === "actionsCompleted" || m.key === "anonFormSubmissions"
-        )
-        .map((m) => ({
-          key: m.key,
-          label: m.label,
-          color: m.color,
-          getValue: (d: DataPoint) => (d[m.key] as number) ?? 0,
-        })),
-    []
-  );
 
   const chartActionStats = useMemo(
     () => actionStats.filter((a) => a.showInChart),

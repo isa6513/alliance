@@ -462,6 +462,10 @@ export type Action = {
      */
     useManualCohort: boolean;
     /**
+     * special case for contract signing (prevent doing other onboarding actions)
+     */
+    isContractSigningAction: boolean;
+    /**
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number>;
@@ -1168,6 +1172,10 @@ export type ActionDto = {
      */
     useManualCohort: boolean;
     /**
+     * special case for contract signing (prevent doing other onboarding actions)
+     */
+    isContractSigningAction: boolean;
+    /**
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number>;
@@ -1339,6 +1347,10 @@ export type CreateActionDto = {
      */
     useManualCohort: boolean;
     /**
+     * special case for contract signing (prevent doing other onboarding actions)
+     */
+    isContractSigningAction: boolean;
+    /**
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number>;
@@ -1434,6 +1446,10 @@ export type UpdateActionDto = {
      * Whether to use a manual cohort for the action
      */
     useManualCohort?: boolean;
+    /**
+     * special case for contract signing (prevent doing other onboarding actions)
+     */
+    isContractSigningAction?: boolean;
     /**
      * User IDs in the manual cohort
      */
@@ -1713,6 +1729,10 @@ export type ExportActionDto = {
      * Whether to use a manual cohort for the action
      */
     useManualCohort: boolean;
+    /**
+     * special case for contract signing (prevent doing other onboarding actions)
+     */
+    isContractSigningAction: boolean;
     /**
      * User IDs in the manual cohort
      */

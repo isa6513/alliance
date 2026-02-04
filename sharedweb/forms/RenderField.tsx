@@ -233,10 +233,10 @@ export function RenderField({
             onChange={
               onChange
                 ? (e) => {
-                    const raw = e.target.value;
-                    const sanitized = raw.replace(/[^0-9+\-()\s]/g, "");
-                    onChange(sanitized);
-                  }
+                  const raw = e.target.value;
+                  const sanitized = raw.replace(/[^0-9+\-()\s]/g, "");
+                  onChange(sanitized);
+                }
                 : undefined
             }
             required={field.required}
@@ -264,9 +264,9 @@ export function RenderField({
             onChange={
               onChange
                 ? (e) =>
-                    onChange(
-                      e.target.value === "" ? "" : parseFloat(e.target.value)
-                    )
+                  onChange(
+                    e.target.value === "" ? "" : parseFloat(e.target.value)
+                  )
                 : undefined
             }
             required={field.required}
@@ -283,8 +283,8 @@ export function RenderField({
               {field.min !== undefined && field.max !== undefined
                 ? `Range: ${field.min} - ${field.max}`
                 : field.min !== undefined
-                ? `Minimum: ${field.min}`
-                : `Maximum: ${field.max}`}
+                  ? `Minimum: ${field.min}`
+                  : `Maximum: ${field.max}`}
             </p>
           ) : null}
         </div>
@@ -296,8 +296,8 @@ export function RenderField({
         typeof value === "number"
           ? value
           : typeof value === "string" && value.trim().length > 0
-          ? Number(value)
-          : undefined;
+            ? Number(value)
+            : undefined;
       const normalizedValue = Number.isFinite(numericValue)
         ? Number(numericValue)
         : undefined;
@@ -315,13 +315,11 @@ export function RenderField({
               return (
                 <label
                   key={optionValue}
-                  className={`flex flex-col items-center text-sm font-medium  flex-1 w-[${
-                    100 / values.length
-                  }%] ${
-                    disabled
+                  className={`flex flex-col items-center text-sm font-medium  flex-1 w-[${100 / values.length
+                    }%] ${disabled
                       ? "opacity-60 cursor-not-allowed"
                       : "cursor-pointer"
-                  }`}
+                    }`}
                 >
                   <input
                     type="radio"
@@ -337,13 +335,12 @@ export function RenderField({
                     disabled={disabled}
                   />
                   <span
-                    className={`w-full rounded-none border-y  px-3 py-1 text-center ${
-                      checked
+                    className={`w-full rounded-none border-y  px-3 py-1 text-center ${checked
                         ? "bg-green text-white border-green"
                         : hasError
-                        ? "border-red-500 text-red-600"
-                        : "border-zinc-300 text-zinc-700"
-                    }`}
+                          ? "border-red-500 text-red-600"
+                          : "border-zinc-300 text-zinc-700"
+                      }`}
                   >
                     {optionValue}
                   </span>
@@ -376,10 +373,8 @@ export function RenderField({
           disabled={disabled}
           aria-invalid={hasError}
           className={composeClassName(
-            `shrink-0 mt-1 h-5 w-5 cursor-pointer ${
-              checkboxPosition === "right" ? "ml-2 pr-5" : "mr-2"
-            } ${
-              hasError ? "text-red-600" : "text-blue-600"
+            `shrink-0 mt-px h-5 w-5 cursor-pointer ${checkboxPosition === "right" ? "ml-2 pr-5" : "mr-2"
+            } ${hasError ? "text-red-600" : "text-blue-600"
             } focus:outline-none rounded`,
             {
               normal: "border border-zinc-300 focus:ring-blue-500 focus:ring-2",
@@ -422,9 +417,8 @@ export function RenderField({
         <div className="space-y-2">
           <RenderLabel field={field} error={errorMessage} />
           <div
-            className={`space-y-2 ${
-              hasError ? "border-l-2 border-red-500 pl-3" : ""
-            }`}
+            className={`space-y-2 ${hasError ? "border-l-2 border-red-500 pl-3" : ""
+              }`}
           >
             {options.map((option, optIndex) => (
               <label key={optIndex} className="flex items-start">
@@ -440,8 +434,7 @@ export function RenderField({
                   disabled={disabled}
                   aria-invalid={hasError}
                   className={composeClassName(
-                    `shrink-0 mt-1 mr-2 h-4 w-4 ${
-                      hasError ? "text-red-600" : "text-blue-600"
+                    `shrink-0 mt-1 mr-2 h-4 w-4 ${hasError ? "text-red-600" : "text-blue-600"
                     } focus:outline-none`,
                     {
                       normal:
@@ -475,7 +468,7 @@ export function RenderField({
             aria-invalid={hasError}
             className={composeClassName(
               sharedInputClasses +
-                " has-[option.placeholder:checked]:text-zinc-400"
+              " has-[option.placeholder:checked]:text-zinc-400"
             )}
           >
             <option value="" className="placeholder" disabled>
@@ -507,9 +500,8 @@ export function RenderField({
         <div className="space-y-2">
           <RenderLabel field={field} error={errorMessage} />
           <div
-            className={`space-y-2 ${
-              hasError ? "border-l-2 border-red-500 pl-3" : ""
-            }`}
+            className={`space-y-2 ${hasError ? "border-l-2 border-red-500 pl-3" : ""
+              }`}
           >
             {options.map((option, optIndex) => (
               <label key={optIndex} className="flex">
@@ -520,17 +512,17 @@ export function RenderField({
                   onChange={
                     onChange
                       ? (e) => {
-                          const currentValues = Array.isArray(value)
-                            ? value
-                            : [];
-                          if (e.target.checked) {
-                            onChange([...currentValues, option.value]);
-                          } else {
-                            onChange(
-                              currentValues.filter((v) => v !== option.value)
-                            );
-                          }
+                        const currentValues = Array.isArray(value)
+                          ? value
+                          : [];
+                        if (e.target.checked) {
+                          onChange([...currentValues, option.value]);
+                        } else {
+                          onChange(
+                            currentValues.filter((v) => v !== option.value)
+                          );
                         }
+                      }
                       : undefined
                   }
                   required={
@@ -543,8 +535,7 @@ export function RenderField({
                   aria-invalid={hasError}
                   style={{ marginTop: "4px" }}
                   className={composeClassName(
-                    `shrink-0 mr-2 h-4 w-4 disabled:ring-1 disabled:ring-zinc-400 ${
-                      hasError ? "text-red-600" : "text-blue-600"
+                    `shrink-0 mr-2 h-4 w-4 disabled:ring-1 disabled:ring-zinc-400 ${hasError ? "text-red-600" : "text-blue-600"
                     } focus:outline-none rounded`,
                     {
                       normal:
@@ -620,8 +611,8 @@ export function RenderField({
         cityValue !== undefined
           ? formatCityValue(cityValue)
           : typeof value === "string"
-          ? value
-          : "";
+            ? value
+            : "";
       return (
         <div className="space-y-1">
           <RenderLabel field={field as CityField} error={errorMessage} />
@@ -691,7 +682,7 @@ export function RenderField({
                 aria-invalid={hasError}
                 className={composeClassName(
                   sharedInputClasses +
-                    " max-w-full flex-1 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+                  " max-w-full flex-1 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
                 )}
               />
               {isUploading && (
@@ -861,11 +852,10 @@ export function TimeInputField({
           required={field.required}
           disabled={disabled}
           aria-invalid={hasError}
-          className={`w-full px-3 py-2 rounded-md focus:outline-none bg-white disabled:!bg-transparent ${
-            hasError
+          className={`w-full px-3 py-2 rounded-md focus:outline-none bg-white disabled:!bg-transparent ${hasError
               ? "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent"
               : "border border-zinc-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          }`}
+            }`}
           inputMode="text"
         />
 
@@ -890,9 +880,8 @@ export function TimeInputField({
                 key={t}
                 type="button"
                 onClick={() => handleSelectTime(t)}
-                className={`w-full text-left px-3 py-2 bg-white text-sm hover:bg-zinc-50 ${
-                  t === inputValue ? "bg-zinc-50 font-medium" : ""
-                }`}
+                className={`w-full text-left px-3 py-2 bg-white text-sm hover:bg-zinc-50 ${t === inputValue ? "bg-zinc-50 font-medium" : ""
+                  }`}
               >
                 {t}
               </button>
