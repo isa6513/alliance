@@ -74,19 +74,16 @@ export function useMaxActionsPerWeek(params: {
     if (!actionSummaries || !userActionRelations) {
       return null;
     }
-    const weekNumberByActionId = actionSummaries.reduce((acc, action) => {
-      if (action.weekNumber !== null) {
-        acc[action.id] = action.weekNumber;
-      }
-      return acc;
-    }, {} as Record<number, number | null>);
+    const weekNumberByActionId = new Map(
+      actionSummaries.map((action) => [action.id, action.weekNumber])
+    );
 
     const maxActionsPerWeek: Record<number, number> = {};
     for (const relations of Object.values(userActionRelations)) {
       const counts = relations.reduce((acc, relation) => {
         if (PILL_STATUS_DATA[relation.status].pillStyle) {
-          const weekNumber = weekNumberByActionId[relation.actionId];
-          if (weekNumber === null) {
+          const weekNumber = weekNumberByActionId.get(relation.actionId);
+          if (weekNumber === null || weekNumber === undefined) {
             return acc;
           }
           acc[weekNumber] = (acc[weekNumber] ?? 0) + 1;
