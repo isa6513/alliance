@@ -150,7 +150,7 @@ const ActionPageTaskPanel = () => {
       return (
         <>
           <Card style={CardStyle.White} className="gap-y-2 flex-row justify-between rounded-b-none">
-            <p className="font-semibold">Please sign your the contract before continuing with the onboarding process.</p>
+            <p className="font-semibold">Please sign the contract before continuing with the onboarding process.</p>
             <Link to="/tasks" className="text-green flex items-center gap-x-2">Go back
               <ArrowRight className="w-4 h-4" /></Link>
           </Card>

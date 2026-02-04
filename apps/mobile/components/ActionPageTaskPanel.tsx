@@ -18,6 +18,8 @@ import {
 import ActionTaskPanelDeclined from "./ActionTaskPanelDeclined";
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import { View } from "react-native";
+import { useAuth } from "../lib/AuthContext";
+import { Link } from "expo-router";
 
 export interface ActionPageTaskPanelProps {
   action: ActionDto;
@@ -38,7 +40,8 @@ const ActionPageTaskPanel = ({
   onOptOutAction,
   scrollPageTo,
 }: ActionPageTaskPanelProps) => {
-  const state = getActionPageTaskPanelState(action, userRelation);
+  const { user } = useAuth();
+  const state = getActionPageTaskPanelState(action, userRelation, user?.hasActiveContract ?? false);
 
   const panelHandlers = {
     onCompleteAction,
@@ -84,6 +87,22 @@ const ActionPageTaskPanel = ({
             userRelation={userRelation ?? "none"}
             scrollPageTo={scrollPageTo}
             {...panelHandlers}
+          />
+        </View>
+      );
+    case ActionPageTaskPanelState.OnboardingSignContractFirst:
+      return (
+        <View>
+          <Card cardStyle={CardStyle.Grey} className="bg-zinc-100 my-2">
+            <Text className="font-medium">Please sign your the contract before continuing with the onboarding process.</Text>
+            <Link href="/" className="text-green flex items-center gap-x-2">Go back</Link>
+          </Card>
+          <ActionTaskPanel
+            action={action}
+            userRelation={userRelation ?? "none"}
+            scrollPageTo={scrollPageTo}
+            {...panelHandlers}
+            disabled
           />
         </View>
       );

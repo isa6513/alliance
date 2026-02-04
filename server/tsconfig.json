@@ -33,7 +33,7 @@
     "require": [
       "tsconfig-paths/register"
     ],
-    "target": "ES2023",
+    "target": "esnext",
     "transpileOnly": true
   }
 }
