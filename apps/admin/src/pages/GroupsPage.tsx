@@ -84,7 +84,12 @@ const GroupsPage: React.FC = () => {
           acc +
           (community.maxCapacity === null
             ? 0
-            : Math.max(0, community.maxCapacity - community.users.length)),
+            : Math.max(
+                0,
+                community.maxCapacity -
+                  (community.users.length - community.leaders.length)
+              )),
+
         0
       ) - membersUndergoingGroupAssignment.length
     );

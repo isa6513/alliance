@@ -460,7 +460,7 @@ const MyGroupsPage = ({
               );
               const isFull =
                 community.maxCapacity !== null &&
-                community.users.length >= community.maxCapacity;
+                community.users.length - community.leaders.length >= community.maxCapacity;
               const isJoining = joiningCommunityId === community.id;
               const joinDisabled = isMember || isLeader || isFull || isJoining;
 
@@ -491,7 +491,7 @@ const MyGroupsPage = ({
                         {community.maxCapacity !== null
                           ? ` / ${Math.max(
                             community.maxCapacity,
-                            community.users.length
+                            community.users.length - community.leaders.length
                           )}`
                           : ""}{" "}
                         members

@@ -219,11 +219,14 @@ const GroupAssignmentPanel: React.FC<GroupAssignmentPanelProps> = ({
       if (!community.allowStaffAssignments || community.maxCapacity === null) {
         return;
       }
-      const currentCount = community.users.length;
       const pending = pendingAssignmentsByCommunityId[community.id] ?? 0;
-      const total = currentCount + pending;
-      if (pending > 0 && total > community.maxCapacity) {
-        overages.set(community.id, total - community.maxCapacity);
+      const openSlots =
+        community.users.length -
+        community.leaders.length +
+        pending -
+        community.maxCapacity;
+      if (pending > 0 && openSlots > 0) {
+        overages.set(community.id, openSlots);
       }
     });
     return overages;
@@ -284,7 +287,10 @@ const GroupAssignmentPanel: React.FC<GroupAssignmentPanelProps> = ({
           if (isSelected) {
             return true;
           }
-          return community.users.length + pending < community.maxCapacity;
+          return (
+            community.users.length - community.leaders.length + pending <
+            community.maxCapacity
+          );
         })
         .map((community) => ({
           value: community.id.toString(),

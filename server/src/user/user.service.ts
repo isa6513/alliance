@@ -999,7 +999,8 @@ export class UserService {
     }
     for (const community of communities) {
       if (
-        community.users.length < community.maxCapacity! &&
+        community.users.length - community.leaders!.length <
+          community.maxCapacity! &&
         !community.leaders?.some((leader) => leader.id === user.id)
       ) {
         return community;
@@ -1036,7 +1037,10 @@ export class UserService {
       );
     }
 
-    if (community.users.length >= community.maxCapacity!) {
+    if (
+      community.users.length - community.leaders!.length >=
+      community.maxCapacity!
+    ) {
       throw new BadRequestException('Community is full');
     }
 
