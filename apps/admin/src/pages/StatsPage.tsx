@@ -582,14 +582,13 @@ const StatsPage: React.FC = () => {
         );
 
     const displayedSeries = [...selectedActionSeries, averageSeries];
-    const displayedValues = displayedSeries.flatMap((series) =>
+    const allSeries = [...actionSeries, averageSeries];
+    const allValues = allSeries.flatMap((series) =>
       series.data
         .map((point) => point.completionFraction as number)
         .filter((value) => Number.isFinite(value))
     );
-    const maxValue = displayedValues.length
-      ? Math.max(...displayedValues)
-      : 0;
+    const maxValue = allValues.length ? Math.max(...allValues) : 0;
     const paddedMax =
       maxValue > 0
         ? Math.min(1, Math.max(0.05, maxValue * 1.1))
