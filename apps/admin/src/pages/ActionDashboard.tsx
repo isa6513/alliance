@@ -245,6 +245,7 @@ const ActionDashboard: React.FC = () => {
     shortDescription: "",
     visibilityMode: "all_members",
     commitmentless: true,
+    isContractSigningAction: false,
     type: "Activity",
     preventCompletion: false,
     taskFormId: undefined,
@@ -280,6 +281,7 @@ const ActionDashboard: React.FC = () => {
         shouldCompleteAfterDeadline: false,
         publicOnly: false,
         everyoneShouldComplete: false,
+        isContractSigningAction: false,
         suiteId: searchParams.get("suiteId")
           ? parseInt(searchParams.get("suiteId")!)
           : undefined,
@@ -413,7 +415,7 @@ const ActionDashboard: React.FC = () => {
     const loadActionStats = async () => {
       try {
         const response = await analyticsGetActionStatsById({
-          path: { actionId },
+          path: { actionId: actionId.toString() },
         });
         setActionStats(response.data ?? null);
       } catch (err) {
