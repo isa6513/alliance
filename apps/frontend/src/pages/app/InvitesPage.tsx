@@ -173,17 +173,28 @@ const InvitesPage = () => {
             <p className="font-serif font-semibold text-2xl md:text-3xl">
               Invites
             </p>
-            <p className="text-zinc-500 text-base sm:text-lg">
-              Accepted invites:{" "}
-              <span className="font-semibold text-black">
-                {acceptedInvites.length}
-              </span>
-            </p>
+            {acceptedInvites.length > 0 && (
+              <p className="text-zinc-500 text-base sm:text-lg">
+                Accepted invites:{" "}
+                <span className="font-semibold text-black">
+                  {acceptedInvites.length}
+                </span>
+              </p>
+            )}
           </div>
 
           {<InviteForm onInviteCreated={handleInviteCreated} />}
           {error && <p className="text-red-500 text-sm">{error}</p>}
         </div>
+
+        {actionable.length === 0 &&
+          unverifiableActionable.length === 0 &&
+          waitingForResponse.length === 0 &&
+          settled.length === 0 && (
+            <p className="text-zinc-500 text-center text-base sm:text-lg">
+              Your invites will appear here once you create them.
+            </p>
+          )}
 
         {actionable.length > 0 && (
           <div className="flex flex-col gap-y-2">

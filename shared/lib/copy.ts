@@ -135,6 +135,6 @@ export const inviteBuckets = {
 
 export const deleteInviteConfirmation = {
   message: "Are you sure you want to delete this invite?",
-  confirmLabel: "Yes, delete it!",
+  confirmLabel: "Yes, delete it",
   cancelLabel: "No, keep it",
 } as const;
