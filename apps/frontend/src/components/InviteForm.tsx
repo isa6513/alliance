@@ -64,7 +64,6 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
     for (const community of communities) {
       if (community.leaders?.some((leader) => leader.id === user.id)) {
         leaderCommunities.push(community);
-        setResponsibilityChoice("responsible");
       } else {
         memberCommunities.push(community);
       }
@@ -73,6 +72,12 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
   }, [communities, user]);
 
   const isLeader = leaderCommunities.length > 0;
+
+  useEffect(() => {
+    if (isLeader) {
+      setResponsibilityChoice("responsible");
+    }
+  }, [isLeader]);
 
   const leaderCommunitiesById = useMemo(() => {
     return new Map(
