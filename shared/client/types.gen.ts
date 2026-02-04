@@ -2244,7 +2244,7 @@ export type DailyStatsRecord = {
     invitesAccepted: number;
 };
 
-export type ActionStatsRecord = {
+export type ActionStatsWithOnboardingDto = {
     id: number;
     /**
      * ID of the action this record is for
@@ -2290,6 +2290,10 @@ export type ActionStatsRecord = {
      * When the member_action phase ended (next status event date)
      */
     memberActionEndDate?: string;
+    /**
+     * Whether the action is marked as onboarding.
+     */
+    onboarding: boolean;
 };
 
 export type MemberCompletionRetentionPointDto = {
@@ -2303,6 +2307,45 @@ export type MemberCompletionRetentionCohortDto = {
     cohortStart: string;
     cohortSize: number;
     points: Array<MemberCompletionRetentionPointDto>;
+};
+
+export type ActionCompletionCurveDto = {
+    /**
+     * ID of the action this record is for
+     */
+    actionId: number;
+    /**
+     * Name of the action (for display purposes)
+     */
+    actionName: string;
+    /**
+     * Number of users who joined/were expected to complete
+     */
+    usersJoined: number;
+    /**
+     * When the member_action phase started
+     */
+    memberActionStartDate?: string;
+    /**
+     * When the member_action phase ended (next status event date)
+     */
+    memberActionEndDate?: string;
+    /**
+     * Bucket size in days used to group completions.
+     */
+    bucketDays: number;
+    /**
+     * Bucket offsets (in days) from the member_action start date.
+     */
+    dayOffsets: Array<number>;
+    /**
+     * Completion counts per bucket.
+     */
+    completedCounts: Array<number>;
+    /**
+     * Completion fraction per bucket (completedCounts / usersJoined).
+     */
+    completionFractions: Array<number>;
 };
 
 export type TimeToChurnSampleDto = {
@@ -5888,7 +5931,7 @@ export type AnalyticsGetActionStatsData = {
 };
 
 export type AnalyticsGetActionStatsResponses = {
-    200: Array<ActionStatsRecord>;
+    200: Array<ActionStatsWithOnboardingDto>;
 };
 
 export type AnalyticsGetActionStatsResponse = AnalyticsGetActionStatsResponses[keyof AnalyticsGetActionStatsResponses];
@@ -5901,7 +5944,7 @@ export type AnalyticsRecalculateActionStatsData = {
 };
 
 export type AnalyticsRecalculateActionStatsResponses = {
-    200: Array<ActionStatsRecord>;
+    200: Array<ActionStatsWithOnboardingDto>;
 };
 
 export type AnalyticsRecalculateActionStatsResponse = AnalyticsRecalculateActionStatsResponses[keyof AnalyticsRecalculateActionStatsResponses];
@@ -5918,6 +5961,19 @@ export type AnalyticsGetMemberCompletionRetentionResponses = {
 };
 
 export type AnalyticsGetMemberCompletionRetentionResponse = AnalyticsGetMemberCompletionRetentionResponses[keyof AnalyticsGetMemberCompletionRetentionResponses];
+
+export type AnalyticsGetActionCompletionCurvesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/action-completion-curves';
+};
+
+export type AnalyticsGetActionCompletionCurvesResponses = {
+    200: Array<ActionCompletionCurveDto>;
+};
+
+export type AnalyticsGetActionCompletionCurvesResponse = AnalyticsGetActionCompletionCurvesResponses[keyof AnalyticsGetActionCompletionCurvesResponses];
 
 export type AnalyticsGetTimeToChurnSamplesData = {
     body?: never;

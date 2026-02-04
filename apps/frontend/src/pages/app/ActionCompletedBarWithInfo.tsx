@@ -1,4 +1,4 @@
-import CompletedBar from "../../components/CompletedBar";
+import CompletedBar from "@alliance/sharedweb/ui/CompletedBar";
 import UserProfilePicRow from "../../components/UserProfilePicRow";
 import InfoTooltip from "../../components/InfoTooltip";
 import {

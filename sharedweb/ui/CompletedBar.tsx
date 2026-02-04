@@ -11,9 +11,8 @@ const CompletedBar: React.FC<CompletedBarProps> = ({
 }: CompletedBarProps) => {
   return (
     <div
-      className={`w-full ${height} ${
-        dark ? "bg-zinc-200" : "bg-zinc-100"
-      } rounded-full outline outline-zinc-200 mt-0.5`}
+      className={`w-full ${height} ${dark ? "bg-zinc-200" : "bg-zinc-100"
+        } rounded-full outline outline-zinc-200 mt-0.5`}
     >
       {percentage > 0 && (
         <div

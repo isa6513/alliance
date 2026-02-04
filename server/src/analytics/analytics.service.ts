@@ -5,7 +5,7 @@ import { TimeSpentForUserDto } from './timespent.dto';
 import { DailyStatsRecord } from './dailystats.entity';
 import { ActionStatsRecord } from './actionstats.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, IsNull, Repository } from 'typeorm';
+import { Between, In, IsNull, Repository } from 'typeorm';
 import {
   ActionActivity,
   ActionActivityType,
@@ -26,6 +26,8 @@ import {
 } from './member-completion-retention.dto';
 import { TimeToChurnSampleDto } from './time-to-churn.dto';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
+import { ActionCompletionCurveDto } from './action-completion-curve.dto';
+import { ActionStatsWithOnboardingDto } from './actionstats-with-onboarding.dto';
 
 @Injectable()
 export class AnalyticsService {
@@ -397,9 +399,145 @@ ORDER BY pp.total_session_duration_seconds DESC
     this.logger.log('Finished action stats calculation');
   }
 
-  async getActionStats(): Promise<ActionStatsRecord[]> {
-    return this.actionStatsRepository.find({
+  async getActionStats(): Promise<ActionStatsWithOnboardingDto[]> {
+    const records = await this.actionStatsRepository.find({
       order: { actionId: 'ASC' },
+    });
+
+    if (records.length === 0) {
+      return [];
+    }
+
+    const actionIds = records.map((record) => record.actionId);
+    const actions = await this.actionRepository.find({
+      where: { id: In(actionIds) },
+      select: { id: true, onboarding: true },
+    });
+    const onboardingByActionId = new Map<number, boolean>();
+    for (const action of actions) {
+      onboardingByActionId.set(action.id, action.onboarding);
+    }
+
+    return records.map((record) => ({
+      ...record,
+      onboarding: onboardingByActionId.get(record.actionId) ?? false,
+    }));
+  }
+
+  async getActionCompletionCurves(): Promise<ActionCompletionCurveDto[]> {
+    const actionStats = await this.actionStatsRepository.find({
+      where: {
+        showInChart: true,
+      },
+      order: { actionId: 'ASC' },
+    });
+
+    if (actionStats.length === 0) {
+      return [];
+    }
+
+    const now = new Date();
+    const actionIds = actionStats.map((record) => record.actionId);
+    const actions = await this.actionRepository.find({
+      where: { id: In(actionIds) },
+      select: { id: true, onboarding: true },
+    });
+
+    const onboardingByActionId = new Map<number, boolean>();
+    for (const action of actions) {
+      onboardingByActionId.set(action.id, action.onboarding);
+    }
+
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const maxDurationDays = 21;
+
+    const eligibleActions = actionStats.filter((record) => {
+      if (
+        !record.memberActionStartDate ||
+        record.usersJoined <= 0
+      ) {
+        return false;
+      }
+      if (record.memberActionStartDate > now) {
+        return false;
+      }
+      if (onboardingByActionId.get(record.actionId)) {
+        return false;
+      }
+      const plannedEnd = record.memberActionEndDate ?? now;
+      const durationDays = Math.ceil(
+        (plannedEnd.getTime() - record.memberActionStartDate.getTime()) /
+          msPerDay,
+      );
+      if (!Number.isFinite(durationDays) || durationDays <= 0) {
+        return false;
+      }
+      return durationDays <= maxDurationDays;
+    });
+
+    if (eligibleActions.length === 0) {
+      return [];
+    }
+
+    const eligibleActionIds = eligibleActions.map((record) => record.actionId);
+    const completionActivities = await this.actionActivityRepository.find({
+      where: {
+        actionId: In(eligibleActionIds),
+        type: ActionActivityType.USER_COMPLETED,
+      },
+      select: { actionId: true, createdAt: true },
+      order: { createdAt: 'ASC' },
+    });
+
+    const completionsByActionId = new Map<number, Date[]>();
+    for (const activity of completionActivities) {
+      const list = completionsByActionId.get(activity.actionId) ?? [];
+      list.push(activity.createdAt);
+      completionsByActionId.set(activity.actionId, list);
+    }
+
+    return eligibleActions.map((record) => {
+      const startDate = new Date(record.memberActionStartDate!);
+      const plannedEndDate = record.memberActionEndDate
+        ? new Date(record.memberActionEndDate)
+        : null;
+      const endDate =
+        plannedEndDate && plannedEndDate < now ? plannedEndDate : now;
+      const durationDays = Math.max(
+        1,
+        Math.ceil((endDate.getTime() - startDate.getTime()) / msPerDay),
+      );
+
+      const counts = new Array<number>(durationDays).fill(0);
+      const completions = completionsByActionId.get(record.actionId) ?? [];
+
+      for (const completionDate of completions) {
+        if (completionDate < startDate || completionDate > endDate) {
+          continue;
+        }
+        const rawIndex = Math.floor(
+          (completionDate.getTime() - startDate.getTime()) / msPerDay,
+        );
+        const bucketIndex = Math.max(
+          0,
+          Math.min(durationDays - 1, rawIndex),
+        );
+        counts[bucketIndex] += 1;
+      }
+
+      const fractions = counts.map((count) => count / record.usersJoined);
+
+      return {
+        actionId: record.actionId,
+        actionName: record.actionName,
+        usersJoined: record.usersJoined,
+        memberActionStartDate: record.memberActionStartDate!,
+        memberActionEndDate: record.memberActionEndDate ?? undefined,
+        bucketDays: 1,
+        dayOffsets: Array.from({ length: durationDays }, (_, index) => index),
+        completedCounts: counts,
+        completionFractions: fractions,
+      } satisfies ActionCompletionCurveDto;
     });
   }
 
@@ -474,7 +612,7 @@ ORDER BY pp.total_session_duration_seconds DESC
     const now = new Date();
 
     for (const action of actions) {
-      if (action.publicOnly) {
+      if (action.publicOnly || action.onboarding) {
         continue;
       }
       const memberActionEvent = (action.events ?? [])

@@ -3,12 +3,13 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
 import { TimeSpentForUserDto } from './timespent.dto';
 import { DailyStatsRecord } from './dailystats.entity';
-import { ActionStatsRecord } from './actionstats.entity';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { MemberCompletionRetentionCohortDto } from './member-completion-retention.dto';
 import { AggregateStatsDto } from './aggregatestats.dto';
 import { ContractStatusPointDto } from './contract-status-history.dto';
 import { TimeToChurnSampleDto } from './time-to-churn.dto';
+import { ActionCompletionCurveDto } from './action-completion-curve.dto';
+import { ActionStatsWithOnboardingDto } from './actionstats-with-onboarding.dto';
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -40,15 +41,15 @@ export class AnalyticsController {
 
   @UseGuards(AdminGuard)
   @Get('action-stats')
-  @ApiOkResponse({ type: [ActionStatsRecord] })
-  getActionStats(): Promise<ActionStatsRecord[]> {
+  @ApiOkResponse({ type: [ActionStatsWithOnboardingDto] })
+  getActionStats(): Promise<ActionStatsWithOnboardingDto[]> {
     return this.analyticsService.getActionStats();
   }
 
   @UseGuards(AdminGuard)
   @Post('action-stats/recalculate')
-  @ApiOkResponse({ type: [ActionStatsRecord] })
-  async recalculateActionStats(): Promise<ActionStatsRecord[]> {
+  @ApiOkResponse({ type: [ActionStatsWithOnboardingDto] })
+  async recalculateActionStats(): Promise<ActionStatsWithOnboardingDto[]> {
     await this.analyticsService.calculateActionStats();
     return this.analyticsService.getActionStats();
   }
@@ -60,6 +61,13 @@ export class AnalyticsController {
     MemberCompletionRetentionCohortDto[]
   > {
     return this.analyticsService.getMemberCompletionRetentionByCohort();
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('action-completion-curves')
+  @ApiOkResponse({ type: [ActionCompletionCurveDto] })
+  getActionCompletionCurves(): Promise<ActionCompletionCurveDto[]> {
+    return this.analyticsService.getActionCompletionCurves();
   }
 
   @UseGuards(AdminGuard)

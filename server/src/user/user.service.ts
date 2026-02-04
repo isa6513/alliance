@@ -705,7 +705,7 @@ export class UserService {
     await this.contractEventRepository.save(contractEvent);
 
     await this.slackService.sendMessage(
-      `${user.name} ${user.referredBy ? `(referred by ${user.referredBy.name})` : ''} signed their contract :)`,
+      `${user.name} ${user.referredBy ? `(referred by ${user.referredBy.name}) ` : ''}signed their contract :)`,
     );
 
     return contractEvent.date;
