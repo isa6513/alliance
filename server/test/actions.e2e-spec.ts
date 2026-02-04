@@ -181,6 +181,7 @@ describe('Actions (e2e)', () => {
         shortDescription: 'Do something important',
         visibilityMode: VisibilityMode.Public,
         type: ActionTaskType.Activity,
+        isContractSigningAction: false,
         commitmentless: false,
         everyoneShouldComplete: false,
         shouldCompleteAfterDeadline: false,

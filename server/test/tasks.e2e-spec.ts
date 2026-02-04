@@ -145,6 +145,7 @@ describe('Tasks (e2e)', () => {
         useManualCohort: false,
         publicOnly: false,
         onboarding: false,
+        isContractSigningAction: false,
         latestMemberActionEvent: {
           event: null,
           deadline: null,
@@ -316,6 +317,7 @@ describe('Tasks (e2e)', () => {
           optional: false,
           useManualCohort: false,
           publicOnly: false,
+          isContractSigningAction: false,
           latestMemberActionEvent: {
             event: null,
             deadline: null,
