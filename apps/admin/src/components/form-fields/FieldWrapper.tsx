@@ -19,10 +19,13 @@ import type { FieldWrapperProps } from "./types";
 import RenderField from "@alliance/sharedweb/forms/RenderField";
 import {
   CustomValidatorType,
-  tasksCreateCustomValidator,
   tasksFindOneCustomValidator,
 } from "@alliance/shared/client";
 import { FORM_BUILDER_PREVIEW_USER } from "../../lib/testData";
+import {
+  isDraftValidatorId,
+  useCustomValidatorDrafts,
+} from "./customValidatorDrafts";
 
 function isFormField(field: unknown): field is AnyField {
   return Boolean(
@@ -87,6 +90,8 @@ export function FieldWrapper<T extends AnyField>({
   isDragging,
 }: FieldWrapperProps<T>) {
   const isCurrentFormField = isFormField(field);
+  const { createDraftId, drafts, removeDraft, setDraft } =
+    useCustomValidatorDrafts();
   const [isExtraMenuOpen, setIsExtraMenuOpen] = useState(false);
   const [showCustomValidatorControl, setShowCustomValidatorControl] = useState(
     () => (isCurrentFormField ? Boolean(field.customValidatorId) : false)
@@ -95,8 +100,8 @@ export function FieldWrapper<T extends AnyField>({
     isCurrentFormField && Array.isArray(field.visibleIf)
       ? field.visibleIf.length
       : isCurrentFormField && field.visibleIf
-      ? 1
-      : 0;
+        ? 1
+        : 0;
   const [
     showConditionalVisibilityControl,
     setShowConditionalVisibilityControl,
@@ -107,8 +112,14 @@ export function FieldWrapper<T extends AnyField>({
     CustomValidatorType | undefined
   >(undefined);
   const [customValidatorIdArgument, setCustomValidatorIdArgument] = useState<
-    number | undefined
+    string | undefined
   >(undefined);
+  const [customValidatorExpression, setCustomValidatorExpression] = useState<
+    string | undefined
+  >(undefined);
+  const [loadedValidatorId, setLoadedValidatorId] = useState<number | null>(
+    null
+  );
 
   useEffect(() => {
     if (!isCurrentFormField) {
@@ -117,28 +128,49 @@ export function FieldWrapper<T extends AnyField>({
       return;
     }
 
-    if (field.customValidatorId) {
+    const validatorId = field.customValidatorId;
+    if (validatorId) {
       setShowCustomValidatorControl(true);
-      if (!customValidatorType) {
+      if (isDraftValidatorId(validatorId)) {
+        const draft = drafts[validatorId];
+        if (draft) {
+          setCustomValidatorType(draft.type);
+          setCustomValidatorIdArgument(draft.idArgument);
+          setCustomValidatorExpression(draft.expression);
+          setLoadedValidatorId(validatorId);
+        } else {
+          setCustomValidatorType(undefined);
+          setCustomValidatorIdArgument(undefined);
+          setCustomValidatorExpression(undefined);
+          setLoadedValidatorId(null);
+        }
+      } else if (loadedValidatorId !== validatorId) {
         tasksFindOneCustomValidator({
           path: {
-            id: field.customValidatorId,
+            id: validatorId,
           },
         }).then((customValidator) => {
           if (customValidator.data) {
             setCustomValidatorType(customValidator.data.type);
             setCustomValidatorIdArgument(customValidator.data.idArgument);
+            setCustomValidatorExpression(customValidator.data.expression);
+            setLoadedValidatorId(validatorId);
           }
         });
       }
+    } else if (loadedValidatorId !== null) {
+      setCustomValidatorType(undefined);
+      setCustomValidatorIdArgument(undefined);
+      setCustomValidatorExpression(undefined);
+      setLoadedValidatorId(null);
     }
 
     const conditionCount =
       isCurrentFormField && Array.isArray(field.visibleIf)
         ? field.visibleIf.length
         : isCurrentFormField && field.visibleIf
-        ? 1
-        : 0;
+          ? 1
+          : 0;
 
     if (conditionCount > 0 && !showConditionalVisibilityControl) {
       setShowConditionalVisibilityControl(true);
@@ -146,9 +178,10 @@ export function FieldWrapper<T extends AnyField>({
   }, [
     field,
     isCurrentFormField,
+    drafts,
+    loadedValidatorId,
     showConditionalVisibilityControl,
     showCustomValidatorControl,
-    customValidatorType,
   ]);
 
   useEffect(() => {
@@ -177,27 +210,32 @@ export function FieldWrapper<T extends AnyField>({
 
   const handleValidatorChange = async (
     validatorType: CustomValidatorType | undefined,
-    idArgument?: number
+    idArgument?: string,
+    expression?: string,
   ) => {
     console.log("handlevalidatorchange", validatorType, idArgument);
     if (!validatorType) {
+      if (field.customValidatorId && isDraftValidatorId(field.customValidatorId)) {
+        removeDraft(field.customValidatorId);
+      }
       onUpdate({ customValidatorId: undefined } as Partial<T>);
       setCustomValidatorType(undefined);
       setCustomValidatorIdArgument(undefined);
+      setCustomValidatorExpression(undefined);
       return;
     }
 
     setCustomValidatorType(validatorType);
     setCustomValidatorIdArgument(idArgument);
-    const newValidatorId = await tasksCreateCustomValidator({
-      body: {
-        type: validatorType,
-        idArgument,
-      },
-    });
-    if (newValidatorId.data) {
-      onUpdate({ customValidatorId: newValidatorId.data.id } as Partial<T>);
+    setCustomValidatorExpression(expression);
+    const existingValidatorId = field.customValidatorId;
+    const draftId = isDraftValidatorId(existingValidatorId)
+      ? existingValidatorId
+      : createDraftId();
+    if (!isDraftValidatorId(existingValidatorId)) {
+      onUpdate({ customValidatorId: draftId } as Partial<T>);
     }
+    setDraft(draftId, { type: validatorType, idArgument, expression });
   };
 
   const handleVisibilityChange = (updates: {
@@ -271,11 +309,10 @@ export function FieldWrapper<T extends AnyField>({
 
   return (
     <div
-      className={`group relative border rounded-lg transition-all [&_input,&_textarea]:bg-white ${
-        isDragging
-          ? "border-blue-400 shadow-lg opacity-50"
-          : "border-gray-200 hover:border-gray-300"
-      }`}
+      className={`group relative border rounded-lg transition-all [&_input,&_textarea]:bg-white ${isDragging
+        ? "border-blue-400 shadow-lg opacity-50"
+        : "border-gray-200 hover:border-gray-300"
+        }`}
     >
       {/* Drag handle */}
       <div
@@ -445,6 +482,7 @@ export function FieldWrapper<T extends AnyField>({
                 <CustomValidatorSelect
                   type={customValidatorType}
                   idArgument={customValidatorIdArgument}
+                  expression={customValidatorExpression}
                   onChange={handleValidatorChange}
                 />
               )}

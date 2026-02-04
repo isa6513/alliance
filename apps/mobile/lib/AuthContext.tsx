@@ -102,9 +102,7 @@ export const AuthProvider: React.FC<
   useEffect(() => {
     (async () => {
       try {
-        console.log("getting access token");
         const accessToken = await getAccessToken();
-        console.log("got access token: ", accessToken);
         if (accessToken) {
           client.setConfig({
             baseUrl: getApiUrl(),

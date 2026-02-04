@@ -37,6 +37,7 @@ export default function AppLayout() {
           drawerType: "front",
           overlayColor: "rgba(0, 0, 0, 0.5)",
           drawerStyle: { width: DRAWER_WIDTH, backgroundColor: "#fafafa" },
+          swipeEdgeWidth: 100,
         }}
       >
         <Drawer.Screen name="index" />
@@ -46,7 +47,7 @@ export default function AppLayout() {
         <Drawer.Screen name="notifications" />
         <Drawer.Screen name="feed" />
         <Drawer.Screen name="forum/index" />
-        <Drawer.Screen name="messages/index" />
+        <Drawer.Screen name="messages" />
         <Drawer.Screen name="contract" />
         <Drawer.Screen name="profile" />
         <Drawer.Screen name="settings" />

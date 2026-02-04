@@ -31,6 +31,10 @@ export class CreateCustomValidatorDto {
   @ApiPropertyOptional()
   @IsOptional()
   idArgument?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  expression?: string;
 }
 
 export class CustomValidatorDto extends CustomValidator {}

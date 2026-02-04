@@ -51,6 +51,7 @@ import { ActionDto } from 'src/actions/dto/action.dto';
 import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
 import { SlackService } from 'src/slack/slack.service';
 import { UpdateProfileDto } from 'src/user/dto/user.dto';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class TasksService {
@@ -551,18 +552,20 @@ export class TasksService {
   async findOrCreateCustomValidator(
     type: CustomValidatorType,
     idArg?: string,
-  ): Promise<number> {
+    expression?: string,
+  ): Promise<CustomValidator> {
     let validator = await this.customValidatorRepository.findOne({
-      where: { type, idArgument: idArg },
+      where: { type, idArgument: idArg, expression: expression },
     });
     if (!validator) {
       validator = this.customValidatorRepository.create({
         type,
         idArgument: idArg,
+        expression: expression,
       });
       await this.customValidatorRepository.save(validator);
     }
-    return validator.id;
+    return validator;
   }
 
   async findOneCustomValidator(id: number): Promise<CustomValidatorDto> {
@@ -700,6 +703,14 @@ export class TasksService {
           return { isValid: false };
         }
         return { isValid: true };
+      case CustomValidatorType.CustomExpression:
+        if (!validator.expression) {
+          throw new BadRequestException('Validator has no expression');
+        }
+        console.log("validator.expression", validator.expression);
+        const expressionFn = eval(validator.expression) as (user: User) => unknown;
+        console.log("expression", expressionFn(user));
+        return { isValid: expressionFn(user) as boolean };
       default:
         console.warn(
           `Unknown validator type: ${validator.type satisfies never}`,

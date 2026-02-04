@@ -2192,7 +2192,7 @@ export type FormDto = {
     usedInAction?: ActionDto;
 };
 
-export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'RepliedToForumPostOrChild' | 'HasPhoneNumber' | 'IsPhoneNumberValid' | 'MemberTag' | 'MemberCommunity' | 'AnyCommunity';
+export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'RepliedToForumPostOrChild' | 'HasPhoneNumber' | 'IsPhoneNumberValid' | 'MemberTag' | 'MemberCommunity' | 'AnyCommunity' | 'CustomExpression';
 
 export type CustomValidatorTypeDto = {
     name: string;
@@ -2214,11 +2214,13 @@ export type CustomValidatorDto = {
     id: number;
     type: CustomValidatorType;
     idArgument?: string;
+    expression?: string;
 };
 
 export type CreateCustomValidatorDto = {
     type: CustomValidatorType;
     idArgument?: string;
+    expression?: string;
 };
 
 export type CreateCustomValidatorResponseDto = {

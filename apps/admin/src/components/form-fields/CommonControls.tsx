@@ -9,7 +9,6 @@ import {
 import {
   CustomValidatorType,
   CustomValidatorTypeDto,
-  tasksCreateCustomValidator,
   tasksCustomValidators,
   tasksFindOneCustomValidator,
 } from "@alliance/shared/client";
@@ -29,6 +28,10 @@ import {
   type TextField,
   type TextareaField,
 } from "@alliance/shared/forms/formschema";
+import {
+  isDraftValidatorId,
+  useCustomValidatorDrafts,
+} from "./customValidatorDrafts";
 
 const DEVICE_LABELS: Record<DeviceVisibilityTarget, string> = {
   mobile: "Mobile",
@@ -221,6 +224,8 @@ export function ConditionalVisibility({
     loading: validatorsLoading,
     error: validatorsError,
   } = useCustomValidators();
+  const { createDraftId, drafts, removeDraft, setDraft } =
+    useCustomValidatorDrafts();
   const usableValidators = useMemo(
     () => validators.filter((validator) => validator.usableForVisibility),
     [validators]
@@ -286,10 +291,18 @@ export function ConditionalVisibility({
 
   const removeCondition = useCallback(
     (index: number) => {
+      const existing = conditions[index];
+      if (
+        existing &&
+        isValidatorCondition(existing) &&
+        isDraftValidatorId(existing.validatorId)
+      ) {
+        removeDraft(existing.validatorId);
+      }
       const next = conditions.filter((_, idx) => idx !== index);
       updateConditions(next);
     },
-    [conditions, updateConditions]
+    [conditions, removeDraft, updateConditions]
   );
 
   const createDefaultFieldCondition = useCallback((): FieldCondition | null => {
@@ -319,7 +332,7 @@ export function ConditionalVisibility({
   }, [usableValidators]);
 
   const [validatorConfigs, setValidatorConfigs] = useState<
-    Record<number, { type: CustomValidatorType; idArgument?: string }>
+    Record<number, { type: CustomValidatorType; idArgument?: string; expression?: string }>
   >({});
 
   const pendingValidatorFetch = useRef<Set<number>>(new Set());
@@ -330,6 +343,7 @@ export function ConditionalVisibility({
       .map((condition) => condition.validatorId)
       .filter(
         (id) =>
+          !isDraftValidatorId(id) &&
           validatorConfigs[id] === undefined &&
           !pendingValidatorFetch.current.has(id)
       );
@@ -349,7 +363,11 @@ export function ConditionalVisibility({
           }
           return [
             id,
-            { type: response.data.type, idArgument: response.data.idArgument },
+            {
+              type: response.data.type,
+              idArgument: response.data.idArgument,
+              expression: response.data.expression,
+            },
           ] as const;
         } catch (error) {
           console.error("Failed to load visibility validator", error);
@@ -373,28 +391,12 @@ export function ConditionalVisibility({
       });
   }, [conditions, validatorConfigs]);
 
-  const ensureValidatorRecord = useCallback(
-    async (type: CustomValidatorType, idArgument?: string) => {
-      const result = await tasksCreateCustomValidator({
-        body: { type, idArgument },
-      });
-      if (!result.data) {
-        throw new Error("createCustomValidator returned no data");
-      }
-      setValidatorConfigs((prev) => ({
-        ...prev,
-        [result.data.id]: { type, idArgument },
-      }));
-      return result.data.id;
-    },
-    []
-  );
-
   const addValidatorCondition = useCallback(
     async (opts?: {
       type?: CustomValidatorType;
       idArgument?: string;
       resultEquals?: boolean;
+      expression?: string;
     }): Promise<boolean> => {
       const desiredType = opts?.type ?? pickDefaultValidatorType();
       if (!desiredType) {
@@ -403,30 +405,25 @@ export function ConditionalVisibility({
         );
         return false;
       }
-      try {
-        const validatorId = await ensureValidatorRecord(
-          desiredType,
-          opts?.idArgument
-        );
-        const nextCondition: ValidatorCondition = {
-          validatorId,
-          resultEquals: opts?.resultEquals ?? true,
-        };
-        const next = [...conditions, nextCondition];
-        updateConditions(next);
-        return true;
-      } catch (error) {
-        console.error("Failed to configure visibility validator", error);
-        setConditionError(
-          "Unable to configure the selected validator right now."
-        );
-        return false;
-      }
+      const draftId = createDraftId();
+      setDraft(draftId, {
+        type: desiredType,
+        idArgument: opts?.idArgument,
+        expression: opts?.expression,
+      });
+      const nextCondition: ValidatorCondition = {
+        validatorId: draftId,
+        resultEquals: opts?.resultEquals ?? true,
+      };
+      const next = [...conditions, nextCondition];
+      updateConditions(next);
+      return true;
     },
     [
       conditions,
-      ensureValidatorRecord,
+      createDraftId,
       pickDefaultValidatorType,
+      setDraft,
       updateConditions,
     ]
   );
@@ -504,13 +501,13 @@ export function ConditionalVisibility({
         next[index] =
           value === ANY_SELECTED_VALUE
             ? {
-                when: controller.id,
-                anySelected: true,
-              }
+              when: controller.id,
+              anySelected: true,
+            }
             : {
-                when: controller.id,
-                includesOption: value,
-              };
+              when: controller.id,
+              includesOption: value,
+            };
       } else if (controller.kind === "range") {
         next[index] = {
           when: controller.id,
@@ -531,35 +528,38 @@ export function ConditionalVisibility({
     async (
       index: number,
       validatorType: CustomValidatorType | undefined,
-      idArgument?: string
+      idArgument?: string,
+      expression?: string
     ) => {
       if (!validatorType) {
         removeCondition(index);
         return;
       }
-      try {
-        const validatorId = await ensureValidatorRecord(
-          validatorType,
-          idArgument
-        );
-        const next = [...conditions];
-        const existing = next[index];
-        const resultEquals = isValidatorCondition(existing)
-          ? existing.resultEquals ?? true
-          : true;
-        next[index] = {
-          validatorId,
-          resultEquals,
-        };
-        updateConditions(next);
-      } catch (error) {
-        console.error("Failed to configure visibility validator", error);
-        setConditionError(
-          "Unable to configure the selected validator right now."
-        );
-      }
+      console.log(
+        "handleValidatorSelection",
+        validatorType,
+        idArgument,
+        expression
+      );
+      const next = [...conditions];
+      const existing = next[index];
+      const resultEquals = isValidatorCondition(existing)
+        ? existing.resultEquals ?? true
+        : true;
+      const existingValidatorId = isValidatorCondition(existing)
+        ? existing.validatorId
+        : undefined;
+      const draftId = isDraftValidatorId(existingValidatorId)
+        ? existingValidatorId
+        : createDraftId();
+      setDraft(draftId, { type: validatorType, idArgument, expression });
+      next[index] = {
+        validatorId: draftId,
+        resultEquals,
+      };
+      updateConditions(next);
     },
-    [conditions, ensureValidatorRecord, removeCondition, updateConditions]
+    [conditions, createDraftId, removeCondition, setDraft, updateConditions]
   );
 
   const handleValidatorExpectationChange = useCallback(
@@ -588,10 +588,10 @@ export function ConditionalVisibility({
         ? isAnySelectedCondition(condition)
           ? ANY_SELECTED_VALUE
           : isIncludesOptionCondition(condition)
-          ? condition.includesOption ?? ""
-          : isEqualsCondition(condition) && typeof condition.equals === "string"
-          ? condition.equals
-          : ""
+            ? condition.includesOption ?? ""
+            : isEqualsCondition(condition) && typeof condition.equals === "string"
+              ? condition.equals
+              : ""
         : "";
     const rangeValues =
       controller?.kind === "range" ? getRangeValues(controller) : [];
@@ -622,8 +622,8 @@ export function ConditionalVisibility({
               {isTextContentController(controller)
                 ? "has content"
                 : controller.kind === "multiselect"
-                ? "includes option"
-                : "equals"}
+                  ? "includes option"
+                  : "equals"}
             </label>
             {isTextContentController(controller) ? (
               <select
@@ -714,14 +714,17 @@ export function ConditionalVisibility({
     condition: ValidatorCondition,
     index: number
   ) => {
-    const config = validatorConfigs[condition.validatorId];
+    const config = isDraftValidatorId(condition.validatorId)
+      ? drafts[condition.validatorId]
+      : validatorConfigs[condition.validatorId];
     return (
       <div className="space-y-2">
         <CustomValidatorSelect
           type={config?.type}
           idArgument={config?.idArgument}
-          onChange={(validatorType, idArgument) =>
-            void handleValidatorSelection(index, validatorType, idArgument)
+          expression={config?.expression}
+          onChange={(validatorType, idArgument, expression) =>
+            void handleValidatorSelection(index, validatorType, idArgument, expression)
           }
           filter={(validator) => validator.usableForVisibility}
           label="Visibility validator"
@@ -984,9 +987,11 @@ function useCustomValidators(): {
 type CustomValidatorSelectProps = {
   type?: CustomValidatorType;
   idArgument?: string;
+  expression?: string;
   onChange: (
     validatorType: CustomValidatorType | undefined,
-    idArgument?: string
+    idArgument?: string,
+    expression?: string
   ) => void;
   className?: string;
   label?: string;
@@ -996,6 +1001,7 @@ type CustomValidatorSelectProps = {
 export function CustomValidatorSelect({
   type,
   idArgument,
+  expression,
   onChange,
   className = "",
   label = "Custom validator",
@@ -1050,16 +1056,25 @@ export function CustomValidatorSelect({
         </select>
         {!!validators.find((validator) => validator.id === type)
           ?.withIdField && (
-          <input
-            type="text"
-            value={idArgument ?? ""}
-            onChange={(e) =>
-              onChange(type, e.target.value === "" ? undefined : e.target.value)
-            }
-            className="px-2 py-1 text-xs border border-gray-300 rounded bg-white w-24"
-          />
-        )}
+            <input
+              type="text"
+              value={idArgument ?? ""}
+              onChange={(e) =>
+                onChange(type, e.target.value === "" ? undefined : e.target.value, expression)
+              }
+              className="px-2 py-1 text-xs border border-gray-300 rounded bg-white w-24"
+            />
+          )}
       </div>
+      {type === 'CustomExpression' && (
+        <textarea
+          value={expression ?? ""}
+          onChange={(e) =>
+            onChange(type, idArgument, e.target.value)
+          }
+          className="px-2 py-1 text-xs border border-gray-300 rounded bg-white w-full font-mono"
+        />
+      )}
       {loading && (
         <p className="text-[11px] text-gray-500">Loading validators…</p>
       )}

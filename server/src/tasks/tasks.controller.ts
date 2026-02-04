@@ -142,11 +142,12 @@ export class TasksController {
   async createCustomValidator(
     @Body() body: CreateCustomValidatorDto,
   ): Promise<CreateCustomValidatorResponseDto> {
-    const id = await this.tasksService.findOrCreateCustomValidator(
+    const validator = await this.tasksService.findOrCreateCustomValidator(
       body.type,
       body.idArgument,
+      body.expression,
     );
-    return { id };
+    return validator;
   }
 
   @Post('optout/:id')

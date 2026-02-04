@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   tasksCreateForm,
+  tasksCreateCustomValidator,
   tasksGetForm,
   tasksUpdateForm,
   userList,
@@ -56,6 +57,11 @@ import { customComponentRegistry } from "@alliance/sharedweb/forms/components";
 import { FORM_BUILDER_PREVIEW_USER } from "../lib/testData";
 import { OutputBuilder } from "./OutputBuilder";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import {
+  CustomValidatorDraft,
+  CustomValidatorDraftsContext,
+  isDraftValidatorId,
+} from "./form-fields/customValidatorDrafts";
 
 interface FormBuilderProps {
   onSave?: (schema: FormSchema) => void;
@@ -127,6 +133,10 @@ const findSingleOptionValueChange = (
 
   return null;
 };
+
+const isSchemaFormField = (
+  field: AnyField | DisplayBlock
+): field is AnyField => "label" in field;
 
 const getUpdatedVisibilityConditions = (
   visibleIf: Condition[] | Condition | undefined,
@@ -283,6 +293,40 @@ export function FormBuilder({
   const [searchResults, setSearchResults] = useState<
     Array<{ id: string; name: string; type: "field" | "block" }>
   >([]);
+  const [customValidatorDrafts, setCustomValidatorDrafts] = useState<
+    Record<number, CustomValidatorDraft>
+  >({});
+  const draftValidatorIdRef = useRef(-1);
+  const createDraftId = useCallback(() => {
+    const nextId = draftValidatorIdRef.current;
+    draftValidatorIdRef.current -= 1;
+    return nextId;
+  }, []);
+  const setDraft = useCallback(
+    (draftId: number, draft: CustomValidatorDraft) => {
+      setCustomValidatorDrafts((prev) => ({ ...prev, [draftId]: draft }));
+    },
+    []
+  );
+  const removeDraft = useCallback((draftId: number) => {
+    setCustomValidatorDrafts((prev) => {
+      if (!(draftId in prev)) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[draftId];
+      return next;
+    });
+  }, []);
+  const customValidatorDraftContext = useMemo(
+    () => ({
+      drafts: customValidatorDrafts,
+      setDraft,
+      removeDraft,
+      createDraftId,
+    }),
+    [createDraftId, customValidatorDrafts, removeDraft, setDraft]
+  );
   const contentScrollRef = useRef<HTMLDivElement | null>(null);
 
   const currentPage = schema.pages[selectedPageIndex];
@@ -301,6 +345,54 @@ export function FormBuilder({
       : resolvedPreviewUser?.id ?? "preview";
 
   const { success: showSuccessToast, error: showErrorToast } = useToast();
+
+  useEffect(() => {
+    if (Object.keys(customValidatorDrafts).length === 0) {
+      return;
+    }
+    const activeDraftIds = new Set<number>();
+
+    const collectFromConditions = (visibleIf?: Condition[] | Condition) => {
+      if (!visibleIf) return;
+      const conditions = Array.isArray(visibleIf) ? visibleIf : [visibleIf];
+      conditions.forEach((condition) => {
+        if ("validatorId" in condition && isDraftValidatorId(condition.validatorId)) {
+          activeDraftIds.add(condition.validatorId);
+        }
+      });
+    };
+
+    schema.pages.forEach((page) => {
+      page.fields.forEach((field) => {
+        if (isSchemaFormField(field)) {
+          if (isDraftValidatorId(field.customValidatorId)) {
+            activeDraftIds.add(field.customValidatorId);
+          }
+        }
+        collectFromConditions(field.visibleIf);
+      });
+    });
+
+    schema.outputViews.forEach((view) => {
+      view.blocks.forEach((block) => {
+        collectFromConditions(block.visibleIf);
+      });
+    });
+
+    setCustomValidatorDrafts((prev) => {
+      const next: Record<number, CustomValidatorDraft> = {};
+      let hasChanges = false;
+      Object.entries(prev).forEach(([id, draft]) => {
+        const numericId = Number(id);
+        if (activeDraftIds.has(numericId)) {
+          next[numericId] = draft;
+        } else {
+          hasChanges = true;
+        }
+      });
+      return hasChanges ? next : prev;
+    });
+  }, [customValidatorDrafts, schema]);
 
   // Available elements for search
   const availableElements = useMemo(
@@ -660,6 +752,130 @@ export function FormBuilder({
     setSchema(ensureOutputViews(newSchema));
   };
 
+  const resolveCustomValidatorDrafts = useCallback(
+    async (schemaToSave: FormSchema) => {
+      const draftIds = new Set<number>();
+
+      const collectFromConditions = (visibleIf?: Condition[] | Condition) => {
+        if (!visibleIf) return;
+        const conditions = Array.isArray(visibleIf) ? visibleIf : [visibleIf];
+        conditions.forEach((condition) => {
+          if (
+            "validatorId" in condition &&
+            isDraftValidatorId(condition.validatorId)
+          ) {
+            draftIds.add(condition.validatorId);
+          }
+        });
+      };
+
+      schemaToSave.pages.forEach((page) => {
+        page.fields.forEach((field) => {
+          if (
+            isSchemaFormField(field) &&
+            isDraftValidatorId(field.customValidatorId)
+          ) {
+            draftIds.add(field.customValidatorId);
+          }
+          collectFromConditions(field.visibleIf);
+        });
+      });
+
+      schemaToSave.outputViews.forEach((view) => {
+        view.blocks.forEach((block) => {
+          collectFromConditions(block.visibleIf);
+        });
+      });
+
+      if (draftIds.size === 0) {
+        return { schema: schemaToSave, resolvedDraftIds: [] as number[] };
+      }
+
+      const resolvedIds = new Map<number, number>();
+      await Promise.all(
+        [...draftIds].map(async (draftId) => {
+          const draft = customValidatorDrafts[draftId];
+          if (!draft) {
+            throw new Error("Missing custom validator draft configuration.");
+          }
+          const response = await tasksCreateCustomValidator({
+            body: {
+              type: draft.type,
+              idArgument: draft.idArgument,
+              expression: draft.expression,
+            },
+          });
+          if (!response.data) {
+            throw new Error("createCustomValidator returned no data");
+          }
+          resolvedIds.set(draftId, response.data.id);
+        })
+      );
+
+      const mapCondition = (condition: Condition): Condition => {
+        if (
+          "validatorId" in condition &&
+          isDraftValidatorId(condition.validatorId)
+        ) {
+          const nextId = resolvedIds.get(condition.validatorId);
+          if (!nextId) {
+            return condition;
+          }
+          return { ...condition, validatorId: nextId };
+        }
+        return condition;
+      };
+
+      const mapVisibleIf = (
+        visibleIf?: Condition[] | Condition
+      ): Condition[] | undefined => {
+        if (!visibleIf) return undefined;
+        const conditions = Array.isArray(visibleIf) ? visibleIf : [visibleIf];
+        return conditions.map(mapCondition);
+      };
+
+      const nextSchema: FormSchema = {
+        ...schemaToSave,
+        pages: schemaToSave.pages.map((page) => ({
+          ...page,
+          fields: page.fields.map((field) => {
+            const nextVisibleIf = mapVisibleIf(field.visibleIf);
+            if (isSchemaFormField(field)) {
+              const nextValidatorId = isDraftValidatorId(
+                field.customValidatorId
+              )
+                ? resolvedIds.get(field.customValidatorId) ??
+                  field.customValidatorId
+                : field.customValidatorId;
+              return {
+                ...field,
+                customValidatorId: nextValidatorId,
+                visibleIf: nextVisibleIf,
+              };
+            }
+            return {
+              ...field,
+              visibleIf: nextVisibleIf,
+            };
+          }),
+        })),
+        outputViews: schemaToSave.outputViews.map((view) => ({
+          ...view,
+          blocks: view.blocks.map((block) => ({
+            ...block,
+            visibleIf: mapVisibleIf(block.visibleIf),
+          })),
+        })),
+      };
+
+      return {
+        schema: nextSchema,
+        resolvedDraftIds: [...resolvedIds.keys()],
+      };
+    },
+    [customValidatorDrafts]
+  );
+
   useEffect(() => {
     const currentSchemaJSON = JSON.stringify(schema);
     setHasUnsavedChanges(currentSchemaJSON !== lastSavedSchemaJSON);
@@ -758,6 +974,11 @@ export function FormBuilder({
     setSaveError(null);
 
     try {
+      const { schema: schemaForSave, resolvedDraftIds } =
+        await resolveCustomValidatorDrafts(schema);
+      if (resolvedDraftIds.length > 0) {
+        setSchema(schemaForSave);
+      }
       let response;
 
       if (formId) {
@@ -765,24 +986,33 @@ export function FormBuilder({
         response = await tasksUpdateForm({
           path: { formId },
           body: {
-            title: schema.title,
-            schema: schema as unknown as Record<string, unknown>,
+            title: schemaForSave.title,
+            schema: schemaForSave as unknown as Record<string, unknown>,
           },
         });
       } else {
         // Create new form
         response = await tasksCreateForm({
           body: {
-            title: schema.title,
-            schema: schema as unknown as Record<string, unknown>,
+            title: schemaForSave.title,
+            schema: schemaForSave as unknown as Record<string, unknown>,
           },
         });
       }
 
       if (response.response.ok && response.data) {
         setFormId(response.data.id);
-        setLastSavedSchemaJSON(JSON.stringify(schema));
+        setLastSavedSchemaJSON(JSON.stringify(schemaForSave));
         setHasUnsavedChanges(false);
+        if (resolvedDraftIds.length > 0) {
+          setCustomValidatorDrafts((prev) => {
+            const next = { ...prev };
+            resolvedDraftIds.forEach((draftId) => {
+              delete next[draftId];
+            });
+            return next;
+          });
+        }
         showSuccessToast("Form saved successfully");
       } else {
         const fallbackMessage = "Could not save form";
@@ -792,7 +1022,7 @@ export function FormBuilder({
 
       // Call the optional onSave callback if provided
       if (onSave) {
-        onSave(schema);
+        onSave(schemaForSave);
       }
 
       // Clear success message after 3 seconds
@@ -805,7 +1035,15 @@ export function FormBuilder({
     } finally {
       setIsSaving(false);
     }
-  }, [formId, onSave, schema, setFormId, showErrorToast, showSuccessToast]);
+  }, [
+    formId,
+    onSave,
+    resolveCustomValidatorDrafts,
+    schema,
+    setFormId,
+    showErrorToast,
+    showSuccessToast,
+  ]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -1366,7 +1604,8 @@ export function FormBuilder({
   };
 
   return (
-    <div className="flex h-[calc(100vh-40px)] bg-gray-50">
+    <CustomValidatorDraftsContext.Provider value={customValidatorDraftContext}>
+      <div className="flex h-[calc(100vh-40px)] bg-gray-50">
       {!isPreviewMode && activeEditor === "form" && (
         <ElementSelect
           onAddField={addField}
@@ -1801,6 +2040,7 @@ export function FormBuilder({
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </CustomValidatorDraftsContext.Provider>
   );
 }

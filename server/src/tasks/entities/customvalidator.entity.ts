@@ -13,6 +13,7 @@ export enum CustomValidatorType {
   MemberTag = 'MemberTag',
   MemberCommunity = 'MemberCommunity',
   AnyCommunity = 'AnyCommunity',
+  CustomExpression = 'CustomExpression',
 }
 
 export const typeName: Record<CustomValidatorType, string> = {
@@ -26,6 +27,7 @@ export const typeName: Record<CustomValidatorType, string> = {
   [CustomValidatorType.MemberTag]: 'Member has tag',
   [CustomValidatorType.MemberCommunity]: 'Member is in specific community',
   [CustomValidatorType.AnyCommunity]: 'Member is in any community',
+  [CustomValidatorType.CustomExpression]: 'Custom expression',
 };
 
 export const typeUsesIdArgument: Record<CustomValidatorType, boolean> = {
@@ -39,6 +41,7 @@ export const typeUsesIdArgument: Record<CustomValidatorType, boolean> = {
   [CustomValidatorType.MemberTag]: true,
   [CustomValidatorType.MemberCommunity]: true,
   [CustomValidatorType.AnyCommunity]: false,
+  [CustomValidatorType.CustomExpression]: false,
 };
 
 export const typeUsableForVisibility: Record<CustomValidatorType, boolean> = {
@@ -52,6 +55,7 @@ export const typeUsableForVisibility: Record<CustomValidatorType, boolean> = {
   [CustomValidatorType.MemberTag]: true,
   [CustomValidatorType.MemberCommunity]: true,
   [CustomValidatorType.AnyCommunity]: true,
+  [CustomValidatorType.CustomExpression]: true,
 };
 
 @Entity()
@@ -73,4 +77,9 @@ export class CustomValidator {
   @ApiPropertyOptional()
   @IsOptional()
   idArgument?: string;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  @IsOptional()
+  expression?: string;
 }
