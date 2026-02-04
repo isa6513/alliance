@@ -305,7 +305,7 @@ export class User {
   contractEvents?: Ty<ContractEvent>[];
 
   @OneToMany(() => ActionActivity, (activity) => activity.user)
-  activities: ActionActivity[];
+  activities?: ActionActivity[];
 
   @OneToMany(() => Friend, (friend) => friend.requester)
   sentFriendRequests: Friend[];
