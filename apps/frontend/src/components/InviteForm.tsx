@@ -63,6 +63,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
     for (const community of communities) {
       if (community.leaders?.some((leader) => leader.id === user.id)) {
         leaderCommunities.push(community);
+        setResponsibilityChoice("responsible");
       } else {
         memberCommunities.push(community);
       }
