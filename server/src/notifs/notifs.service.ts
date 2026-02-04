@@ -10,6 +10,7 @@ import { User } from 'src/user/entities/user.entity';
 import { IsNull, LessThan, Repository } from 'typeorm';
 import { ActionEventNotif } from './entities/action-event-notif.entity';
 import {
+  NotifPriority,
   Notification,
   NotificationCategory,
 } from './entities/notification.entity';
@@ -55,7 +56,7 @@ export class NotifsService {
     private readonly actionEventNotifsRepository: Repository<ActionEventNotif>,
     private readonly mailService: MailService,
     private readonly mmsService: MmsService,
-  ) {}
+  ) { }
 
   async findAll(userId: number) {
     const notifs = await this.notifsRepository.find({
@@ -124,6 +125,7 @@ export class NotifsService {
       webAppLocation: actionUrl(actionUpdate.action.id),
       mobileAppLocation: actionUrl(actionUpdate.action.id),
       sendTime: actionUpdate.date,
+      priority: NotifPriority.High
     });
     return this.notifsRepository.save(notif);
   }
