@@ -35,6 +35,7 @@ export enum NotificationCategory {
   MemberLeftCommunity = 'member_left_community',
   MemberJoinedCommunity = 'member_joined_community',
   CommunityAssigned = 'community_assigned',
+  NewMemberReferred = 'new_member_referred',
   OnetimeInviteRequestCreated = 'onetime_invite_request_created',
   OnetimeInviteRequestApproved = 'onetime_invite_request_approved',
   OnetimeInviteRequestRejected = 'onetime_invite_request_rejected',

@@ -121,6 +121,7 @@ export class AuthService {
 
     if (referredBy) {
       await this.usersService.makeFriendsAutomated(referredBy.id, user.id);
+      await this.usersService.notifyReferrerOfNewMember(referredBy, user);
     }
 
     await this.usersService.sendWelcomeEmail(user.id);

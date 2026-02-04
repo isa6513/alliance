@@ -478,6 +478,18 @@ export class UserService {
     return [...byId.values()].map((o) => new ProfileDto(o));
   }
 
+  async notifyReferrerOfNewMember(referrer: User, newMember: User) {
+    await this.notifRepository.save(
+      this.notifRepository.create({
+        user: referrer,
+        category: NotificationCategory.NewMemberReferred,
+        message: `${newMember.name} has joined the Alliance`,
+        webAppLocation: profileUrl(newMember.id),
+        associatedUsers: [newMember],
+      }),
+    );
+  }
+
   /**
    * Make two users friends without sending any notifications. Used sed when a user signs up with a referral code.
    */
