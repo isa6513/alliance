@@ -128,9 +128,7 @@ const NewMembersItem = ({ item }: NewMembersItemProps) => {
             >
               {item.users[0].displayName}
             </Link>
-            <span className="text-zinc-500">
-              {" has become a new member of the Alliance"}
-            </span>
+            <span className="text-zinc-500">{" joined the Alliance"}</span>
           </>
         ) : (
           <button
@@ -157,13 +155,8 @@ const NewMembersItem = ({ item }: NewMembersItemProps) => {
                 to={href("/member/:id", { id: user.id.toString() })}
                 className="flex items-center gap-2 hover:bg-zinc-50 rounded py-2 -ml-2"
               >
-                <ProfileImage
-                  pfp={user.profilePicture ?? null}
-                  size="small"
-                />
-                <span className="text-zinc-700">
-                  {user.displayName}
-                </span>
+                <ProfileImage pfp={user.profilePicture ?? null} size="small" />
+                <span className="text-zinc-700">{user.displayName}</span>
               </Link>
             ))}
           </div>
@@ -180,9 +173,12 @@ interface ForumCommentsItemProps {
 
 const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
   const isSingle = item.count === 1 && item.users.length > 0;
-  const postUrl = isSingle && item.commentId
-    ? `${href("/forum/post/:id", { id: item.postId.toString() })}?replyId=${item.commentId}`
-    : href("/forum/post/:id", { id: item.postId.toString() });
+  const postUrl =
+    isSingle && item.commentId
+      ? `${href("/forum/post/:id", { id: item.postId.toString() })}?replyId=${
+          item.commentId
+        }`
+      : href("/forum/post/:id", { id: item.postId.toString() });
 
   return (
     <div className="block py-3 -mx-2 px-2 rounded">
@@ -194,10 +190,7 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
           <span className="font-medium">{item.count} members</span>
         )}
         <span className="text-zinc-500"> commented on </span>
-        <Link
-          to={postUrl}
-          className="text-green font-medium hover:underline"
-        >
+        <Link to={postUrl} className="text-green font-medium hover:underline">
           {item.postTitle}
         </Link>
         <span className="text-zinc-500">

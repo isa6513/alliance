@@ -14,7 +14,7 @@ const GroupsGuidePage: React.FC = () => {
           ← Back to Groups
         </Link>
         <p className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black">
-          Groups
+          About groups
         </p>
         <p>
           The Alliance is organized into{" "}

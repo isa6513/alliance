@@ -55,14 +55,14 @@ export const groupSettings = {
 export const onetimeInviteCreation = {
   title: "Invite a new member to the Alliance",
   explanation: [
-    "We strongly encourage you to invite new members to join a group that you lead. This will ensure they are initially supported by someone they already know.",
-    "You do not need to support them indefinitely. They can transfer to another group later.",
-    "Who do you want to be responsible for the new member?",
+    "New members tend to have a better experience when they know their [group lead](https://worldalliance.org/groups-guide) personally. Once they are familiar with the Alliance, they can stay in your group or transfer to a different group.",
+    "If you do not want to be their group lead, they can be assigned to a different group.",
+    "Who would you like the new member's initial group lead to be?",
   ],
   responsible: {
     buttonText: "Myself",
     leader: {
-      title: "Select a group for the new member to join",
+      title: "Select a group",
       invite: {
         title: "Create an invite",
         explanation: [

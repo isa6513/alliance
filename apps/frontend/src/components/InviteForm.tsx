@@ -15,6 +15,7 @@ import CommunityCreateForm from "./CommunityCreateForm";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
 import { Link } from "react-router";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 
 type ResponsibilityChoice = "responsible" | "not_responsible" | null;
 
@@ -186,11 +187,11 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
             <p className="font-semibold text-xl">
               {onetimeInviteCreation.title}
             </p>
-            {onetimeInviteCreation.explanation.map((block, index) => (
-              <p className="text-zinc-500" key={index}>
-                {block}
-              </p>
-            ))}
+            <p className="text-zinc-500">
+              <AppMarkdownWrapper
+                markdownContent={onetimeInviteCreation.explanation.join("\n\n")}
+              />
+            </p>
           </div>
           <div className="flex flex-col md:flex-row gap-2">
             <Button
@@ -218,47 +219,49 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
               <p className="font-semibold text-xl">
                 {onetimeInviteCreation.not_responsible.title}
               </p>
-              {!memberCommunityAllowsMemberInvites
-                ? onetimeInviteCreation.not_responsible.explanations.genericGroup.map(
-                    (block, index) => (
-                      <p className="text-zinc-500" key={index}>
-                        {block}
-                      </p>
-                    )
-                  )
-                : memberCommunityRemainingCapacity > 0
-                ? [
-                    ...onetimeInviteCreation.not_responsible.explanations.yourGroup.map(
-                      (block, index) => (
-                        <p className="text-zinc-500" key={index}>
-                          {block}
-                        </p>
-                      )
-                    ),
-                    <p
-                      key="your-current-group"
-                      className="border border-zinc-200 bg-white rounded px-3 py-2 flex flex-row justify-between items-center"
-                    >
-                      <span>
-                        {"Your group: "}
-                        <span className="font-semibold">
-                          {memberCommunities[0].name}
-                        </span>
+              {!memberCommunityAllowsMemberInvites ? (
+                <p className="text-zinc-500">
+                  <AppMarkdownWrapper
+                    markdownContent={onetimeInviteCreation.not_responsible.explanations.genericGroup.join(
+                      "\n\n"
+                    )}
+                  />
+                </p>
+              ) : memberCommunityRemainingCapacity > 0 ? (
+                <>
+                  <p className="text-zinc-500">
+                    <AppMarkdownWrapper
+                      markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroup.join(
+                        "\n\n"
+                      )}
+                    />
+                  </p>
+                  <p
+                    key="your-current-group"
+                    className="mt-2 border border-zinc-200 bg-white rounded px-3 py-2 flex flex-row justify-between items-center"
+                  >
+                    <span>
+                      {"Your group: "}
+                      <span className="font-semibold">
+                        {memberCommunities[0].name}
                       </span>
-                      <span className="text-zinc-500">
-                        {`${memberCommunityRemainingCapacity} open seat${
-                          memberCommunityRemainingCapacity === 1 ? "" : "s"
-                        }`}
-                      </span>
-                    </p>,
-                  ]
-                : onetimeInviteCreation.not_responsible.explanations.yourGroupNoCapacity.map(
-                    (block, index) => (
-                      <p className="text-zinc-500" key={index}>
-                        {block}
-                      </p>
-                    )
-                  )}
+                    </span>
+                    <span className="text-zinc-500">
+                      {`${memberCommunityRemainingCapacity} open seat${
+                        memberCommunityRemainingCapacity === 1 ? "" : "s"
+                      }`}
+                    </span>
+                  </p>
+                </>
+              ) : (
+                <p className="text-zinc-500">
+                  <AppMarkdownWrapper
+                    markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroupNoCapacity.join(
+                      "\n\n"
+                    )}
+                  />
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-y-2">
               <input
@@ -288,13 +291,13 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 <p className="text-xl font-semibold">
                   {onetimeInviteCreation.responsible.leader.invite.title}
                 </p>
-                {onetimeInviteCreation.responsible.leader.invite.explanation.map(
-                  (block, index) => (
-                    <p className="text-zinc-500" key={index}>
-                      {block}
-                    </p>
-                  )
-                )}
+                <p className="text-zinc-500">
+                  <AppMarkdownWrapper
+                    markdownContent={onetimeInviteCreation.responsible.leader.invite.explanation.join(
+                      "\n\n"
+                    )}
+                  />
+                </p>
               </div>
               <div className="flex flex-col gap-y-2">
                 <div className="flex flex-row gap-x-2">
