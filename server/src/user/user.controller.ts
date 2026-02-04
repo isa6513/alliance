@@ -76,7 +76,7 @@ class VerifyEmailBody {
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Get('me')
   @UseGuards(AuthGuard)
@@ -506,7 +506,7 @@ export class UserController {
       await this.userService.addUserToCommunity({
         communityId,
         userId: body.userId,
-        sendNotif: true,
+        notifFor: () => true,
       }),
     );
   }

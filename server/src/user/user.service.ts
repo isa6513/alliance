@@ -485,7 +485,7 @@ export class UserService {
       this.notifRepository.create({
         user: referrer,
         category: NotificationCategory.NewMemberReferred,
-        message: `${newMember.name} has joined the Alliance`,
+        message: `${newMember.name} joined the Alliance`,
         webAppLocation: profileUrl(newMember.id),
         associatedUsers: [newMember],
       }),
@@ -695,7 +695,10 @@ export class UserService {
   }
 
   async signContract(userId: number): Promise<Date> {
-    const user = await this.findOneOrFail(userId, { contractEvents: true, referredBy: true });
+    const user = await this.findOneOrFail(userId, {
+      contractEvents: true,
+      referredBy: true,
+    });
     if (user.hasActiveContract) {
       throw new BadRequestException('Member already has an active contract.');
     }
@@ -1173,9 +1176,12 @@ export class UserService {
   async addUserToCommunity(params: {
     communityId: number;
     userId: number;
-    sendNotif: boolean;
+    notifFor: (params: {
+      leader: User;
+      community: Community;
+    }) => { message: string } | boolean;
   }): Promise<Community> {
-    const { communityId, userId, sendNotif } = params;
+    const { communityId, userId, notifFor: notifFor } = params;
 
     const [community, user] = await Promise.all([
       this.findCommunityOrFail(communityId),
@@ -1187,21 +1193,28 @@ export class UserService {
       community.users.push(user);
     }
 
-    const notifs: Notification[] = sendNotif
-      ? community.leaders!.map((leader) =>
-          this.notifRepository.create({
-            user: leader,
-            category: NotificationCategory.MemberJoinedCommunity,
-            message: `${user.name} joined your group (${community.name})`,
-            webAppLocation: groupUrl({
-              tab: 'members',
-              communityId: community.id,
-            }),
-            associatedUsers: [user],
-            priority: NotifPriority.High,
+    const notifs: Notification[] = community
+      .leaders!.map((leader) => {
+        const notif = notifFor({ leader, community });
+        if (!notif) {
+          return null;
+        }
+        return this.notifRepository.create({
+          user: leader,
+          category: NotificationCategory.MemberJoinedCommunity,
+          message:
+            notif === true
+              ? `${user.name} joined your group (${community.name})`
+              : notif.message,
+          webAppLocation: groupUrl({
+            tab: 'members',
+            communityId: community.id,
           }),
-        )
-      : [];
+          associatedUsers: [user],
+          priority: NotifPriority.High,
+        });
+      })
+      .filter((notif) => !!notif);
 
     const updatedP = this.communityRepository.save(community);
     await Promise.all([

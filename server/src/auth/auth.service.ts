@@ -13,6 +13,7 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { SignInResponseDto } from './dto/signin.dto';
 import { JWTTokenType, JwtPayload } from './guards/auth.guard';
 import { OnetimeInviteStatus } from 'src/user/entities/onetime-invite.entity';
+import { Community } from 'src/user/entities/community.entity';
 
 @Injectable()
 export class AuthService {
@@ -97,11 +98,28 @@ export class AuthService {
       tags: defaultTag ? [defaultTag] : undefined,
     });
 
+    let sentNotifToReferrer = false;
+    function notifFor({
+      leader,
+      community,
+    }: {
+      leader: User;
+      community: Community;
+    }) {
+      const leaderIsReferrer = leader.id === referredBy?.id;
+      sentNotifToReferrer ||= leaderIsReferrer;
+      return {
+        message: leaderIsReferrer
+          ? `${user.name} joined the Alliance and your group (${community.name})`
+          : `${user.name} joined your group (${community.name})`,
+      };
+    }
+
     if (inviteCommunityId) {
       await this.usersService.addUserToCommunity({
         communityId: inviteCommunityId,
         userId: user.id,
-        sendNotif: true,
+        notifFor,
       });
     } else if (referredBy) {
       const community =
@@ -110,7 +128,7 @@ export class AuthService {
         await this.usersService.addUserToCommunity({
           communityId: community.id,
           userId: user.id,
-          sendNotif: true,
+          notifFor,
         });
       } else {
         await this.usersService.joinGroupAssignment(user.id);
@@ -121,7 +139,9 @@ export class AuthService {
 
     if (referredBy) {
       await this.usersService.makeFriendsAutomated(referredBy.id, user.id);
-      await this.usersService.notifyReferrerOfNewMember(referredBy, user);
+      if (!sentNotifToReferrer) {
+        await this.usersService.notifyReferrerOfNewMember(referredBy, user);
+      }
     }
 
     await this.usersService.sendWelcomeEmail(user.id);
