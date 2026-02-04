@@ -112,29 +112,63 @@ interface NewMembersItemProps {
 }
 
 const NewMembersItem = ({ item }: NewMembersItemProps) => {
+  const [expanded, setExpanded] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
   const isSingle = item.count === 1 && item.users.length > 0;
 
   return (
     <div className="py-3">
-      <div className="text-zinc-700  mt-1.5">
+      <div className="text-zinc-700 mt-1.5">
         <ProfilePicRow users={item.users} />
         {isSingle ? (
-          <Link
-            to={href("/member/:id", { id: item.users[0].id.toString() })}
-            className="font-medium hover:underline"
-          >
-            {item.users[0].displayName}
-          </Link>
+          <>
+            <Link
+              to={href("/member/:id", { id: item.users[0].id.toString() })}
+              className="font-medium hover:underline"
+            >
+              {item.users[0].displayName}
+            </Link>
+            <span className="text-zinc-500">
+              {" has become a new member of the Alliance"}
+            </span>
+          </>
         ) : (
-          <span className="font-medium">{item.count} new members</span>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="cursor-pointer text-left hover:text-zinc-900"
+          >
+            <span className="font-medium">{item.count} new members</span>
+            <span className="text-zinc-500"> joined the Alliance</span>
+          </button>
         )}
-        <span className="text-zinc-500">
-          {isSingle
-            ? " has become a new member of the Alliance"
-            : " joined the Alliance"}
-        </span>
-        {/* <span className="text-zinc-500">{" "}{formatTime(new Date(date), { addSuffix: true })}</span> */}
       </div>
+      {!isSingle && (
+        <div
+          className="overflow-hidden transition-all duration-300 ease-in-out"
+          style={{
+            maxHeight: expanded ? contentRef.current?.scrollHeight ?? 0 : 0,
+            opacity: expanded ? 1 : 0,
+          }}
+        >
+          <div ref={contentRef} className="pt-3 pl-2 space-y-1">
+            {item.users.map((user) => (
+              <Link
+                key={user.id}
+                to={href("/member/:id", { id: user.id.toString() })}
+                className="flex items-center gap-2 hover:bg-zinc-50 rounded py-2 -ml-2"
+              >
+                <ProfileImage
+                  pfp={user.profilePicture ?? null}
+                  size="small"
+                />
+                <span className="text-zinc-700">
+                  {user.displayName}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

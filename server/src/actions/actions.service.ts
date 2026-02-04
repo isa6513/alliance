@@ -2770,9 +2770,7 @@ export class ActionsService {
   async getGlobalFeed(limit: number = 15): Promise<GlobalFeedItemDto[]> {
     const feedItems: GlobalFeedItemDto[] = [];
     const now = new Date();
-    const oneWeekAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-
-    const filteredOutActionIds = [9, 10, 11]; //TODO: real onboarding flag
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     // 1. Fetch recent activities (last week) and group by action + type (no day bucketing)
     const recentActivities = await this.actionActivityRepository
@@ -2793,6 +2791,7 @@ export class ActionsService {
         'user.profileDescription',
         'action.id',
         'action.name',
+        'action.onboarding',
       ])
       .loadRelationIdAndMap('user.leaderOfIds', 'user.leaderOf')
       .where('activity.type IN (:...types)', {
@@ -2801,10 +2800,8 @@ export class ActionsService {
           ActionActivityType.USER_COMPLETED,
         ],
       })
+      .andWhere('action.onboarding = false')
       .andWhere('activity.createdAt > :oneWeekAgo', { oneWeekAgo })
-      .andWhere('activity.actionId NOT IN (:...filteredOutActionIds)', {
-        filteredOutActionIds,
-      })
       .orderBy('activity.createdAt', 'DESC')
       .getMany();
 

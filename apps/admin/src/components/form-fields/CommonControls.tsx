@@ -1048,7 +1048,7 @@ export function CustomValidatorSelect({
     setExpressionTest(null);
   }, [expression, type]);
 
-  const runExpressionTest = () => {
+  const runExpressionTest = useCallback(() => {
     if (type !== "CustomExpression") {
       return;
     }
@@ -1073,7 +1073,7 @@ export function CustomValidatorSelect({
         err instanceof Error ? err.message : "Expression failed to run.";
       setExpressionTest({ error: message });
     }
-  };
+  }, [expression, type]);
 
   return (
     <div className={`space-y-1 ${className}`}>
