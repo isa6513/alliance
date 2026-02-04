@@ -2964,7 +2964,11 @@ export class ActionsService {
     // Group comments by post
     const commentGroups = new Map<
       number,
-      { users: Map<number, ProfileDto>; latestDate: Date; postId: number }
+      {
+        users: Map<number, { profile: ProfileDto; commentId: number }>;
+        latestDate: Date;
+        postId: number;
+      }
     >();
 
     for (const comment of recentComments) {
@@ -2979,7 +2983,10 @@ export class ActionsService {
       }
       const group = commentGroups.get(postId)!;
       if (comment.author && !group.users.has(comment.author.id)) {
-        group.users.set(comment.author.id, new ProfileDto(comment.author));
+        group.users.set(comment.author.id, {
+          profile: new ProfileDto(comment.author),
+          commentId: comment.id,
+        });
       }
       if (comment.createdAt > group.latestDate) {
         group.latestDate = comment.createdAt;
@@ -3004,11 +3011,13 @@ export class ActionsService {
         const postTitle = postTitleMap.get(group.postId);
         if (!postTitle) continue; // Skip if post was deleted
 
+        const usersArray = Array.from(group.users.values());
         const forumComments: GlobalFeedForumCommentsDto = {
-          users: Array.from(group.users.values()).slice(0, 8),
+          users: usersArray.slice(0, 8).map((u) => u.profile),
           postId: group.postId,
           postTitle,
           count: group.users.size,
+          commentId: usersArray.length === 1 ? usersArray[0].commentId : undefined,
         };
 
         feedItems.push({

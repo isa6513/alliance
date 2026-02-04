@@ -180,6 +180,9 @@ interface ForumCommentsItemProps {
 
 const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
   const isSingle = item.count === 1 && item.users.length > 0;
+  const postUrl = isSingle && item.commentId
+    ? `${href("/forum/post/:id", { id: item.postId.toString() })}?replyId=${item.commentId}`
+    : href("/forum/post/:id", { id: item.postId.toString() });
 
   return (
     <div className="block py-3 -mx-2 px-2 rounded">
@@ -192,7 +195,7 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
         )}
         <span className="text-zinc-500"> commented on </span>
         <Link
-          to={href("/forum/post/:id", { id: item.postId.toString() })}
+          to={postUrl}
           className="text-green font-medium hover:underline"
         >
           {item.postTitle}

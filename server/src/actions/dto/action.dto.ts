@@ -558,6 +558,9 @@ export class GlobalFeedForumCommentsDto {
 
   @ApiProperty()
   count: number;
+
+  @ApiPropertyOptional()
+  commentId?: number;
 }
 
 export class GlobalFeedItemDto {

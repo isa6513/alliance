@@ -1250,6 +1250,7 @@ export type GlobalFeedForumCommentsDto = {
     postId: number;
     postTitle: string;
     count: number;
+    commentId?: number;
 };
 
 export type GlobalFeedItemDto = {

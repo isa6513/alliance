@@ -10,16 +10,21 @@ import {
   actionsShareUrlStats,
   actionsUnarchive,
   actionsUpdate,
+  analyticsGetActionStats,
   CreateActionDto,
   FormDto,
+  FormResponseDto,
   imagesUploadImage,
   tasksCreateForm,
   tasksGetForm,
+  tasksGetFormResponses,
   tasksListForms,
   userGetTags,
   userMembers,
 } from "@alliance/shared/client";
-import type { ShareUrlStatsDto } from "@alliance/shared/client/types.gen";
+import type { ActionStatsWithOnboardingDto, ShareUrlStatsDto } from "@alliance/shared/client/types.gen";
+import FormResponseStatistics from "../components/FormResponseStatistics";
+import type { FormWithSchema } from "./FormResponses";
 import { getApiUrl, getBaseUrl } from "@alliance/sharedweb/lib/config";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -35,7 +40,12 @@ import {
   ChevronDown,
   ChevronUp,
   ListChecks,
+  Users,
+  UserCheck,
+  UserMinus,
+  TrendingUp,
 } from "lucide-react";
+import ActionCompletionCurveChart from "../components/ActionCompletionCurveChart";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import ActionForm from "../components/ActionForm";
 import ActionUpdatesTab from "../components/ActionUpdatesTab";
@@ -111,6 +121,9 @@ const ActionDashboard: React.FC = () => {
 
   const [shareUrlStats, setShareUrlStats] = useState<ShareUrlStatsDto[]>([]);
   const [shareUrlStatsLoading, setShareUrlStatsLoading] = useState(false);
+  const [actionStats, setActionStats] = useState<ActionStatsWithOnboardingDto | null>(null);
+  const [taskForm, setTaskForm] = useState<FormWithSchema | null>(null);
+  const [formResponses, setFormResponses] = useState<FormResponseDto[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const selectedTab = (searchParams.get("tab") as Tab) ?? "overview";
@@ -389,6 +402,56 @@ const ActionDashboard: React.FC = () => {
 
     loadShareUrlStats();
   }, [action, actionId]);
+
+  // Load action stats for withdrawal count and completion rate
+  useEffect(() => {
+    if (!actionId) {
+      setActionStats(null);
+      return;
+    }
+
+    const loadActionStats = async () => {
+      try {
+        const response = await analyticsGetActionStats();
+        if (response.data) {
+          const stats = response.data.find((s) => s.actionId === actionId);
+          setActionStats(stats ?? null);
+        }
+      } catch (err) {
+        console.error("Failed to load action stats:", err);
+      }
+    };
+
+    loadActionStats();
+  }, [actionId]);
+
+  // Load task form and responses for statistics
+  useEffect(() => {
+    if (!action?.taskFormId) {
+      setTaskForm(null);
+      setFormResponses([]);
+      return;
+    }
+
+    const loadFormData = async () => {
+      try {
+        const [formRes, respRes] = await Promise.all([
+          tasksGetForm({ path: { id: action.taskFormId! } }),
+          tasksGetFormResponses({ path: { id: action.taskFormId! } }),
+        ]);
+        if (formRes.data) {
+          setTaskForm(formRes.data as unknown as FormWithSchema);
+        }
+        if (respRes.data) {
+          setFormResponses(respRes.data);
+        }
+      } catch (err) {
+        console.error("Failed to load form responses:", err);
+      }
+    };
+
+    loadFormData();
+  }, [action?.taskFormId]);
 
   const handleActionCreated = useCallback(
     (action: ActionDto) => {
@@ -691,6 +754,15 @@ const ActionDashboard: React.FC = () => {
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     )[0]?.id;
 
+  const hasMemberActionStarted = useMemo(() => {
+    if (!action?.events) return false;
+    return action.events.some(
+      (event) =>
+        event.newStatus === "member_action" &&
+        new Date(event.date).getTime() < new Date().getTime()
+    );
+  }, [action?.events]);
+
   const readinessChecklist = useMemo<ReadinessCheckItem[]>(() => {
     if (!action) {
       return [];
@@ -959,55 +1031,121 @@ const ActionDashboard: React.FC = () => {
                     {action.archived ? "Unarchive Action" : "Archive Action"}
                   </Button>
                 </div>
+                {/* Status Header */}
                 <Card style={CardStyle.White}>
-                  <h2 className="text-lg font-semibold mb-0">
-                    Current Status:{" "}
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full cursor-pointer text-[14px] font-normal ${getStatusColor(
-                        action.status
-                      )}`}
-                      onClick={() => {
-                        onTabChange("events");
-                      }}
-                    >
-                      {formatStatus(action.status)}
-                    </span>
-                  </h2>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="text-sm text-gray-600">
-                        <strong>Users Completed:</strong>{" "}
-                        {action.usersCompleted}
-                      </div>
-                      {action.type === "Funding" && (
-                        <>
-                          {action.donationAmount && (
-                            <div className="text-sm text-gray-600">
-                              <strong>Suggested Donation:</strong> $
-                              {action.donationAmount / 100}
-                            </div>
-                          )}
-                        </>
-                      )}
-                      {action.commitmentThreshold && (
-                        <div className="text-sm text-gray-600">
-                          <strong>Commitment Threshold:</strong>{" "}
-                          {action.commitmentThreshold}
-                        </div>
-                      )}
-                      <div className="text-sm text-gray-600">
-                        <strong>Action ID:</strong> {action.id}
-                      </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-lg font-semibold">Status</h2>
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full cursor-pointer text-sm font-medium ${getStatusColor(
+                          action.status
+                        )}`}
+                        onClick={() => onTabChange("events")}
+                      >
+                        {formatStatus(action.status)}
+                      </span>
                     </div>
                   </div>
+
+                  {/* Progress Bar */}
+                  {action.usersJoined > 0 && (
+                    <div className="mt-4">
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="font-medium">Completion Progress</span>
+                        <span className="text-gray-600">
+                          {action.usersCompleted} / {action.usersJoined} (
+                          {Math.round(
+                            (action.usersCompleted / action.usersJoined) * 100
+                          )}
+                          %)
+                        </span>
+                      </div>
+                      <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-green rounded-full transition-all duration-300"
+                          style={{
+                            width: `${Math.min(
+                              (action.usersCompleted / action.usersJoined) * 100,
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </Card>
 
-                {/* Events Timeline */}
+                {/* Stats Grid - only show after member_action has started */}
+                {hasMemberActionStarted && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Card style={CardStyle.White} className="!p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <Users className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold">{action.usersJoined}</p>
+                          <p className="text-xs text-gray-500">Joined</p>
+                        </div>
+                      </div>
+                    </Card>
+                    <Card style={CardStyle.White} className="!p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-100 rounded-lg">
+                          <UserCheck className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold">{action.usersCompleted}</p>
+                          <p className="text-xs text-gray-500">Completed</p>
+                        </div>
+                      </div>
+                    </Card>
+                    <Card style={CardStyle.White} className="!p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-red-100 rounded-lg">
+                          <UserMinus className="h-5 w-5 text-red-600" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold">
+                            {actionStats?.usersWithdrawn ?? 0}
+                          </p>
+                          <p className="text-xs text-gray-500">Withdrawn</p>
+                        </div>
+                      </div>
+                    </Card>
+                    <Card style={CardStyle.White} className="!p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-purple-100 rounded-lg">
+                          <TrendingUp className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold">
+                            {action.usersJoined > 0
+                              ? Math.round(
+                                (action.usersCompleted / action.usersJoined) * 100
+                              )
+                              : 0}
+                            %
+                          </p>
+                          <p className="text-xs text-gray-500">Completion Rate</p>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Completion Curve Chart - only show after member_action has started */}
+                {hasMemberActionStarted && !action.publicOnly && (
+                  <ActionCompletionCurveChart
+                    title="Completion over time"
+                    actionId={action.id}
+                    showSelector={false}
+                  />
+                )}
+
                 <Card style={CardStyle.White}>
-                  <h2 className="text-lg font-semibold mb-4">
-                    Status Timeline
-                  </h2>
-                  <div className="space-y-3">
+                  <h2 className="text-lg font-semibold mb-3">Timeline</h2>
+                  <div className="space-y-2">
                     {action.events && action.events.length > 0 ? (
                       action.events
                         .sort(
@@ -1018,52 +1156,34 @@ const ActionDashboard: React.FC = () => {
                         .map((event) => (
                           <div
                             key={event.id}
-                            className="flex items-center space-x-3"
+                            className="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0"
                           >
-                            <div className="flex-shrink-0">
-                              <div
-                                className={`w-3 h-3 rounded-full ${event.id === currentEventId
-                                  ? "bg-blue-500"
-                                  : "bg-gray-300"
-                                  }`}
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm">
+                            <div
+                              className={`w-2 h-2 rounded-full flex-shrink-0 ${event.id === currentEventId
+                                ? "bg-blue-500"
+                                : "bg-gray-300"
+                                }`}
+                            />
+                            <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
                                 <span className="">{event.title}</span>
-                                <span
-                                  className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs ${getStatusColor(
-                                    event.newStatus
-                                  )}`}
-                                >
-                                  {formatStatus(event.newStatus)}
-                                </span>
                               </div>
-                              <div className="text-xs text-gray-500">
-                                {new Date(event.date).toLocaleString(
+                              <span className="text-xs text-gray-500 flex-shrink-0">
+                                {new Date(event.date).toLocaleDateString(
                                   undefined,
                                   {
-                                    year: "numeric",
                                     month: "short",
                                     day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    timeZoneName: "short",
+                                    year: "numeric",
                                   }
                                 )}
-                              </div>
-                              {event.description && (
-                                <div className="text-xs text-gray-600 mt-1">
-                                  {event.description}
-                                </div>
-                              )}
+                              </span>
                             </div>
                           </div>
                         ))
                     ) : (
                       <div className="text-sm text-gray-500">
-                        No events yet. This action is in Draft status by
-                        default.
+                        No events yet. This action is in Draft status by default.
                       </div>
                     )}
                   </div>
@@ -1128,6 +1248,30 @@ const ActionDashboard: React.FC = () => {
                         No invites yet.
                       </div>
                     )}
+                  </Card>
+                )}
+
+                {/* Form Response Statistics - only show after member_action has started */}
+                {hasMemberActionStarted && action.taskFormId && taskForm && formResponses.length > 0 && (
+                  <Card style={CardStyle.White}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold">
+                        Response Statistics ({formResponses.length} responses)
+                      </h2>
+                      <Button
+                        onClick={() =>
+                          navigate(`/forms/${action.taskFormId}/responses`)
+                        }
+                        color={ButtonColor.White}
+                        size="small"
+                      >
+                        View All Responses →
+                      </Button>
+                    </div>
+                    <FormResponseStatistics
+                      form={taskForm}
+                      responses={formResponses}
+                    />
                   </Card>
                 )}
               </div>

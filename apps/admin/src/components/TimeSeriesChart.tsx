@@ -177,15 +177,15 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
     const dedupeLabels = new Set<string>();
     const yTicks = props.yTickLabelDedup
       ? rawYTicks.filter((tick) => {
-          const label = yAxisFormat ? yAxisFormat(tick) : String(tick);
-          const key = label ?? String(tick);
-          if (!key) return true;
-          if (!dedupeLabels.has(key)) {
-            dedupeLabels.add(key);
-            return true;
-          }
-          return false;
-        })
+        const label = yAxisFormat ? yAxisFormat(tick) : String(tick);
+        const key = label ?? String(tick);
+        if (!key) return true;
+        if (!dedupeLabels.has(key)) {
+          dedupeLabels.add(key);
+          return true;
+        }
+        return false;
+      })
       : rawYTicks;
 
     const bisectDate = d3.bisector<DataPoint, Date>((d) => d.date!).center;
@@ -251,15 +251,15 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
     const dedupeLabels = new Set<string>();
     const yTicks = props.yTickLabelDedup
       ? rawYTicks.filter((tick) => {
-          const label = yAxisFormat ? yAxisFormat(tick) : String(tick);
-          const key = label ?? String(tick);
-          if (!key) return true;
-          if (!dedupeLabels.has(key)) {
-            dedupeLabels.add(key);
-            return true;
-          }
-          return false;
-        })
+        const label = yAxisFormat ? yAxisFormat(tick) : String(tick);
+        const key = label ?? String(tick);
+        if (!key) return true;
+        if (!dedupeLabels.has(key)) {
+          dedupeLabels.add(key);
+          return true;
+        }
+        return false;
+      })
       : rawYTicks;
 
     return {
@@ -297,7 +297,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
 
   const hasData = isNumericAxis(props)
     ? props.multiLineData.length > 0 &&
-      props.multiLineData.some((s) => s.data.length > 0)
+    props.multiLineData.some((s) => s.data.length > 0)
     : props.data.length > 0;
 
   // For date charts
@@ -305,7 +305,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
     ? props.showHoverOnlyOnHover
       ? hoveredPoint
       : hoveredPoint ??
-        (props.data.length > 0 ? props.data[props.data.length - 1] : null)
+      (props.data.length > 0 ? props.data[props.data.length - 1] : null)
     : null;
   const hoverContent =
     activePoint && !isNumericAxis(props) && props.getHoverContent
@@ -315,14 +315,14 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
   // For numeric charts
   const numericHoverContent =
     hoveredPoint &&
-    hoveredSeries &&
-    isNumericAxis(props) &&
-    props.getHoverContent
+      hoveredSeries &&
+      isNumericAxis(props) &&
+      props.getHoverContent
       ? props.getHoverContent(hoveredPoint, hoveredSeries)
       : null;
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
+    <div className="relative overflow-hidden rounded border border-gray-200 bg-white">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-4 py-3 border-b border-gray-200">
         <h3 className="font-semibold text-gray-900">{title}</h3>
         {!isNumericAxis(props) &&

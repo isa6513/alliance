@@ -6,7 +6,6 @@ import {
   analyticsGetAggregateStats,
   analyticsGetContractStatusHistory,
   analyticsGetTimeToChurnSamples,
-  analyticsGetActionCompletionCurves,
 } from "@alliance/shared/client";
 import {
   TimeSeriesChart,
@@ -19,7 +18,6 @@ import {
 import {
   DailyStatsRecord,
   ActionStatsWithOnboardingDto,
-  ActionCompletionCurveDto,
   MemberCompletionRetentionCohortDto,
   AggregateStatsDto,
   ContractStatusPointDto,
@@ -34,6 +32,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import ActionCompletionCurveChart from "../components/ActionCompletionCurveChart";
 
 type ParsedDailyStats = DailyStatsRecord & { parsedDate: Date };
 type ActionStatsWithWithdrawals = ActionStatsWithOnboardingDto & {
@@ -155,9 +154,6 @@ const StatsPage: React.FC = () => {
   const [actionStats, setActionStats] = useState<ActionStatsWithWithdrawals[]>(
     []
   );
-  const [actionCompletionCurves, setActionCompletionCurves] = useState<
-    ActionCompletionCurveDto[]
-  >([]);
   const [aggregateStats, setAggregateStats] =
     useState<AggregateStatsDto | null>(null);
   const [aggregateStatsLoading, setAggregateStatsLoading] =
@@ -167,8 +163,8 @@ const StatsPage: React.FC = () => {
   >([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [actionStatsLoading, setActionStatsLoading] = useState<boolean>(false);
-  const [actionCompletionCurvesLoading, setActionCompletionCurvesLoading] =
-    useState<boolean>(false);
+  const [completionCurveRefreshKey, setCompletionCurveRefreshKey] =
+    useState<number>(0);
   const [retentionLoading, setRetentionLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hoveredActionBar, setHoveredActionBar] =
@@ -209,8 +205,6 @@ const StatsPage: React.FC = () => {
       end: formatDateAsLocal(end),
     };
   });
-  const [selectedCompletionActionId, setSelectedCompletionActionId] =
-    useState<string>("all");
 
   const contractStatusSvgRef = useRef<SVGSVGElement | null>(null);
 
@@ -285,18 +279,6 @@ const StatsPage: React.FC = () => {
     }
   }, []);
 
-  const loadActionCompletionCurves = useCallback(async () => {
-    setActionCompletionCurvesLoading(true);
-    try {
-      const response = await analyticsGetActionCompletionCurves();
-      setActionCompletionCurves(response.data ?? []);
-    } catch (err) {
-      console.error("Failed to load action completion curves", err);
-    } finally {
-      setActionCompletionCurvesLoading(false);
-    }
-  }, []);
-
   const loadAggregateStats = useCallback(async () => {
     setAggregateStatsLoading(true);
     try {
@@ -323,29 +305,20 @@ const StatsPage: React.FC = () => {
 
   const handleRecalculateActionStats = useCallback(async () => {
     setActionStatsLoading(true);
-    setActionCompletionCurvesLoading(true);
     try {
-      const [actionStatsResponse, curveResponse] = await Promise.all([
-        analyticsRecalculateActionStats(),
-        analyticsGetActionCompletionCurves(),
-      ]);
+      const actionStatsResponse = await analyticsRecalculateActionStats();
       setActionStats(actionStatsResponse.data ?? []);
-      setActionCompletionCurves(curveResponse.data ?? []);
+      setCompletionCurveRefreshKey((prev) => prev + 1);
     } catch (err) {
       console.error("Failed to recalculate action stats", err);
     } finally {
       setActionStatsLoading(false);
-      setActionCompletionCurvesLoading(false);
     }
   }, []);
 
   useEffect(() => {
     void loadActionStats();
   }, [loadActionStats]);
-
-  useEffect(() => {
-    void loadActionCompletionCurves();
-  }, [loadActionCompletionCurves]);
 
   useEffect(() => {
     void loadRetentionCohorts();
@@ -490,167 +463,6 @@ const StatsPage: React.FC = () => {
     const centerY = y + actionBarsGeometry.barHeight / 2;
     return (centerY / actionBarsGeometry.height) * 100;
   }, [hoveredActionBar, actionBarsGeometry]);
-
-  const actionCompletionCurveChartData = useMemo(() => {
-    const eligibleCurves = actionCompletionCurves.filter(
-      (curve) =>
-        (curve.dayOffsets?.length ?? 0) > 0 &&
-        (curve.completionFractions?.length ?? 0) ===
-        (curve.dayOffsets?.length ?? 0)
-    );
-
-    if (eligibleCurves.length === 0) {
-      return {
-        multiLineData: [] as MultiLineSeries[],
-        maxDay: 0,
-        yDomain: undefined,
-      };
-    }
-
-    const lockedMaxDay = 7;
-
-    const colorScale = chroma
-      .scale(["#0ea5e9", "#6366f1", "#14b8a6"])
-      .mode("lch")
-      .domain([0, Math.max(1, eligibleCurves.length - 1)]);
-
-    const sumByDay = new Array<number>(lockedMaxDay + 1).fill(0);
-    const countByDay = new Array<number>(lockedMaxDay + 1).fill(0);
-
-    const actionSeries: MultiLineSeries[] = eligibleCurves
-      .slice()
-      .sort((a, b) => a.actionName.localeCompare(b.actionName))
-      .map((curve, index) => {
-        const data: DataPoint[] = [];
-        curve.dayOffsets.forEach((offset, idx) => {
-          if (!Number.isFinite(offset) || offset < 0 || offset > lockedMaxDay) {
-            return;
-          }
-          const completionFraction = curve.completionFractions[idx] ?? 0;
-          if (Number.isFinite(completionFraction)) {
-            sumByDay[offset] += completionFraction;
-            countByDay[offset] += 1;
-          }
-          data.push({
-            x: offset,
-            completionFraction,
-            completionCount: curve.completedCounts[idx] ?? 0,
-            usersJoined: curve.usersJoined,
-            actionId: curve.actionId,
-            actionName: curve.actionName,
-          });
-        });
-
-        return {
-          key: `action-${curve.actionId}`,
-          label: curve.actionName,
-          color: chroma(colorScale(index)).alpha(0.45).css(),
-          data,
-        };
-      });
-
-    type AveragePoint = {
-      x: number;
-      completionFraction: number;
-      actionCount: number;
-    };
-
-    const averageData = sumByDay
-      .map((sum, offset) => {
-        const count = countByDay[offset];
-        if (!count) return null;
-        return {
-          x: offset,
-          completionFraction: sum / count,
-          actionCount: count,
-        };
-      })
-      .filter((point): point is AveragePoint => point !== null);
-
-    const averageSeries: MultiLineSeries = {
-      key: "average",
-      label: "Average trend",
-      color: "#111827",
-      data: averageData,
-    };
-
-    const selectedActionSeries =
-      selectedCompletionActionId === "all"
-        ? actionSeries
-        : actionSeries.filter(
-          (series) => series.key === `action-${selectedCompletionActionId}`
-        );
-
-    const displayedSeries = [...selectedActionSeries, averageSeries];
-    const allSeries = [...actionSeries, averageSeries];
-    const allValues = allSeries.flatMap((series) =>
-      series.data
-        .map((point) => point.completionFraction as number)
-        .filter((value) => Number.isFinite(value))
-    );
-    const maxValue = allValues.length ? Math.max(...allValues) : 0;
-    const paddedMax =
-      maxValue > 0
-        ? Math.min(1, Math.max(0.05, maxValue * 1.1))
-        : 0.1;
-
-    return {
-      multiLineData: displayedSeries,
-      maxDay: lockedMaxDay,
-      yDomain: [0, paddedMax] as [number, number],
-    };
-  }, [actionCompletionCurves, selectedCompletionActionId]);
-
-  const completionCurveActionOptions = useMemo(() => {
-    return actionCompletionCurves
-      .slice()
-      .sort((a, b) => {
-        const dateA = a.memberActionStartDate
-          ? new Date(a.memberActionStartDate).getTime()
-          : Number.NEGATIVE_INFINITY;
-        const dateB = b.memberActionStartDate
-          ? new Date(b.memberActionStartDate).getTime()
-          : Number.NEGATIVE_INFINITY;
-        if (dateA !== dateB) {
-          return dateB - dateA;
-        }
-        return a.actionName.localeCompare(b.actionName);
-      })
-      .map((curve) => ({
-        id: String(curve.actionId),
-        name: curve.actionName,
-      }));
-  }, [actionCompletionCurves]);
-
-  const completionCurveActionOrder = useMemo(
-    () => ["all", ...completionCurveActionOptions.map((option) => option.id)],
-    [completionCurveActionOptions]
-  );
-
-  const stepCompletionAction = useCallback(
-    (direction: -1 | 1) => {
-      if (completionCurveActionOrder.length === 0) return;
-      const currentIndex = completionCurveActionOrder.indexOf(
-        selectedCompletionActionId
-      );
-      const startIndex = currentIndex >= 0 ? currentIndex : 0;
-      const nextIndex =
-        (startIndex + direction + completionCurveActionOrder.length) %
-        completionCurveActionOrder.length;
-      setSelectedCompletionActionId(completionCurveActionOrder[nextIndex]);
-    },
-    [completionCurveActionOrder, selectedCompletionActionId]
-  );
-
-  useEffect(() => {
-    if (selectedCompletionActionId === "all") return;
-    const exists = completionCurveActionOptions.some(
-      (option) => option.id === selectedCompletionActionId
-    );
-    if (!exists) {
-      setSelectedCompletionActionId("all");
-    }
-  }, [completionCurveActionOptions, selectedCompletionActionId]);
 
   // Cumulative average completion rate data
   const cumulativeCompletionData = useMemo(() => {
@@ -1435,90 +1247,7 @@ const StatsPage: React.FC = () => {
       </div>
 
       {/* Action Completion Curves */}
-      <TimeSeriesChart
-        title="Action Completion Curves"
-        xType="number"
-        loading={actionCompletionCurvesLoading}
-        emptyMessage="No action completion curves available."
-        multiLineData={actionCompletionCurveChartData.multiLineData}
-        getXValue={(d) => (d.x as number) ?? 0}
-        getYValue={(d) => (d.completionFraction as number) ?? 0}
-        xAxisFormat={(v) => `${Math.round(v)}d`}
-        xRange={{ min: 0, max: 7 }}
-        yDomain={actionCompletionCurveChartData.yDomain}
-        yAxisFormat={(v) => `${Math.round(v * 100)}%`}
-        height={360}
-        headerContent={
-          <div className="flex flex-wrap items-center gap-3 text-xs md:ml-auto">
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-semibold text-zinc-600">
-                Action
-              </label>
-              <select
-                value={selectedCompletionActionId}
-                onChange={(event) =>
-                  setSelectedCompletionActionId(event.target.value)
-                }
-                onKeyDown={(event) => {
-                  if (event.key === "ArrowLeft") {
-                    event.preventDefault();
-                    stepCompletionAction(-1);
-                  }
-                  if (event.key === "ArrowRight") {
-                    event.preventDefault();
-                    stepCompletionAction(1);
-                  }
-                }}
-                className="rounded-md border border-gray-300 px-2 py-1 text-xs bg-white"
-              >
-                <option value="all">All actions</option>
-                {completionCurveActionOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        }
-        getHoverContent={(point, series) => {
-          const completionRate =
-            typeof point.completionFraction === "number"
-              ? point.completionFraction
-              : 0;
-          const items = [
-            { label: "Day", value: point.x as number },
-            {
-              label: "Completion rate",
-              value: `${(completionRate * 100).toFixed(2)}%`,
-              color: series.color,
-            },
-          ];
-
-          if (series.key === "average") {
-            items.push({
-              label: "Actions",
-              value: point.actionCount as number,
-            });
-          } else {
-            items.push(
-              {
-                label: "Completed",
-                value: point.completionCount as number,
-              },
-              {
-                label: "Joined",
-                value: point.usersJoined as number,
-              }
-            );
-          }
-
-          return {
-            title: series.label,
-            items,
-          };
-        }}
-      />
+      <ActionCompletionCurveChart refreshKey={completionCurveRefreshKey} />
 
       {/* Cumulative Average Completion Rate Chart */}
       <TimeSeriesChart
