@@ -17,7 +17,7 @@ export class NotifCategoryNewMemberReferred1770165396360 implements MigrationInt
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`CREATE TYPE "public"."ActionEventNotifType_old" AS ENUM('announcement', 'misseddeadline', 'reminder', 'personalreminder', 'group_leads_with_incomplete')`);
+        await queryRunner.query(`CREATE TYPE "public"."ActionEventNotifType_old" AS ENUM('announcement', 'misseddeadline', 'reminder', 'personalreminder')`);
         await queryRunner.query(`ALTER TABLE "action_event_notif" ALTER COLUMN "type" DROP DEFAULT`);
         await queryRunner.query(`ALTER TABLE "action_event_notif" ALTER COLUMN "type" TYPE "public"."ActionEventNotifType_old" USING "type"::"text"::"public"."ActionEventNotifType_old"`);
         await queryRunner.query(`ALTER TABLE "action_event_notif" ALTER COLUMN "type" SET DEFAULT 'announcement'`);
