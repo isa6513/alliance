@@ -158,6 +158,27 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
     [errorToast, refreshCommunities, handleCreateInvite]
   );
 
+  const {
+    memberCommunityAllowsMemberInvites,
+    memberCommunityRemainingCapacity,
+  } = useMemo(() => {
+    const memberCommunity = memberCommunities[0] as CommunityDto | undefined;
+    if (
+      !memberCommunity?.allowMemberInvites ||
+      memberCommunity.maxCapacity === null
+    ) {
+      return {
+        memberCommunityAllowsMemberInvites: false,
+        memberCommunityRemainingCapacity: 0,
+      };
+    }
+    return {
+      memberCommunityAllowsMemberInvites: true,
+      memberCommunityRemainingCapacity:
+        memberCommunity.maxCapacity - memberCommunity.users.length,
+    };
+  }, [memberCommunities]);
+
   return (
     <Card style={CardStyle.Grey}>
       <div className="flex flex-col gap-y-6">
@@ -198,7 +219,15 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
               <p className="font-semibold text-xl">
                 {onetimeInviteCreation.not_responsible.title}
               </p>
-              {memberCommunities[0]?.allowMemberInvites
+              {!memberCommunityAllowsMemberInvites
+                ? onetimeInviteCreation.not_responsible.explanations.genericGroup.map(
+                    (block, index) => (
+                      <p className="text-zinc-500" key={index}>
+                        {block}
+                      </p>
+                    )
+                  )
+                : memberCommunityRemainingCapacity > 0
                 ? [
                     ...onetimeInviteCreation.not_responsible.explanations.yourGroup.map(
                       (block, index) => (
@@ -209,15 +238,20 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                     ),
                     <p
                       key="your-current-group"
-                      className="border border-zinc-300 rounded px-3 py-2"
+                      className="border border-zinc-300 rounded px-3 py-2 flex flex-row justify-between items-center"
                     >
-                      Your current group:{" "}
-                      <span className="font-semibold">
-                        {memberCommunities[0].name}
+                      <span>
+                        {"Your current group: "}
+                        <span className="font-semibold">
+                          {memberCommunities[0].name}
+                        </span>
                       </span>
+                      {`${memberCommunityRemainingCapacity} seat${
+                        memberCommunityRemainingCapacity === 1 ? "" : "s"
+                      } remaining`}
                     </p>,
                   ]
-                : onetimeInviteCreation.not_responsible.explanations.genericGroup.map(
+                : onetimeInviteCreation.not_responsible.explanations.yourGroupNoCapacity.map(
                     (block, index) => (
                       <p className="text-zinc-500" key={index}>
                         {block}

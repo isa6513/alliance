@@ -88,6 +88,10 @@ export const onetimeInviteCreation = {
         "This will create a personalized invite link that explains the Alliance and how to sign up.",
         "When the invitee signs up, they will be automatically added to your group if it has capacity.",
       ],
+      yourGroupNoCapacity: [
+        "This will create a personalized invite link that explains the Alliance and how to sign up.",
+        "Your current group does not have capacity for new members. When the invitee signs up, they will be assigned to a different group.",
+      ],
     },
   },
 } as const;
