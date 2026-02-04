@@ -354,8 +354,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                   </p>
                   {!isLeader && (
                     <p className="text-zinc-500">
-                      You do not lead a group yet. Once you create a group, you
-                      will be able to continue with your invite.
+                      You do not lead a group yet. You must create a group to be responsible for the new member.
                     </p>
                   )}
                   <p className="text-zinc-500">
