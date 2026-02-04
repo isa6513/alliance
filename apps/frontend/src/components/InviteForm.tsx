@@ -342,7 +342,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 <textarea
                   ref={infoInputRef}
                   className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
-                  placeholder="Context about invitee"
+                  placeholder="Context about invitee (optional)"
                   value={info}
                   onChange={(e) => {
                     setInfo(e.target.value);
