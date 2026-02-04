@@ -46,8 +46,6 @@ interface ActivityItemProps {
 }
 
 function ActivityItem({ activity, onLike }: ActivityItemProps) {
-  const verb = activity.type === "user_joined" ? "committed to" : "completed";
-
   if (
     !(activity.type === "user_joined" || activity.type === "user_completed")
   ) {
@@ -60,10 +58,6 @@ function ActivityItem({ activity, onLike }: ActivityItemProps) {
       <View className="flex-1">
         <Text className="font-medium text-zinc-900">
           {activity.user.displayName}
-        </Text>
-        <Text className="text-zinc-500 text-sm">
-          {verb}{" "}
-          <Text className="text-green font-medium">{activity.actionName}</Text>
         </Text>
         <Text className="text-zinc-400 text-xs mt-1">
           {formatTime(new Date(activity.createdAt), { addSuffix: true })}
@@ -119,11 +113,11 @@ function ActivityTabContent({ actionId }: ActivityTabContentProps) {
               data: oldData.data.map((a) =>
                 a.id === activityId
                   ? {
-                      ...a,
-                      likes: response.data!.likes,
-                      likesCount: response.data!.likesCount,
-                      likedByMe: response.data!.likedByMe,
-                    }
+                    ...a,
+                    likes: response.data!.likes,
+                    likesCount: response.data!.likesCount,
+                    likedByMe: response.data!.likedByMe,
+                  }
                   : a
               ),
             };
@@ -334,15 +328,13 @@ export default function ActionDetailScreen() {
               <TouchableOpacity
                 key={tab.id}
                 onPress={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 items-center ${
-                  activeTab === tab.id ? "border-b-2 border-green" : ""
-                }`}
+                className={`px-4 py-3 items-center ${activeTab === tab.id ? "border-b-2 border-green" : ""
+                  }`}
                 activeOpacity={0.7}
               >
                 <Text
-                  className={`text-sm font-medium ${
-                    activeTab === tab.id ? "text-green" : "text-zinc-500"
-                  }`}
+                  className={`text-sm font-medium ${activeTab === tab.id ? "text-green" : "text-zinc-500"
+                    }`}
                 >
                   {tab.label}
                 </Text>

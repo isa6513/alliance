@@ -66,16 +66,16 @@ function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
       return (
         <Text
           className={`font-semibold text-zinc-900 my-2 ${block.level === 1
-              ? "text-3xl"
-              : block.level === 2
-                ? "text-2xl"
-                : block.level === 3
-                  ? "text-xl"
-                  : block.level === 4
-                    ? "text-lg"
-                    : "text-base"
+            ? "text-3xl"
+            : block.level === 2
+              ? "text-2xl"
+              : block.level === 3
+                ? "text-xl"
+                : block.level === 4
+                  ? "text-lg"
+                  : "text-base"
             }`}
-         selectable>
+          selectable>
           {block.text}
         </Text>
       );
@@ -643,9 +643,6 @@ const FormRenderer = ({
               field={field}
               value={formData[field.id]}
               onChange={(value) => handleFieldChange(field.id, value)}
-              // onFocus={() => {
-              //   handleFocusField(field.id);
-              // }}
               disabled={readOnly}
               error={fieldErrors[field.id]}
               randomizationKey={randomizationKey}
@@ -729,8 +726,8 @@ const FormRenderer = ({
             <TouchableOpacity
               activeOpacity={0.8}
               className={`border rounded-lg px-3 py-3 ${outOfTimeSelected
-                  ? "border-green-600 bg-green/20"
-                  : "border-zinc-200"
+                ? "border-green-600 bg-green/20"
+                : "border-zinc-200"
                 }`}
               onPress={() => {
                 setOutOfTimeSelected((prev) => !prev);
@@ -746,8 +743,8 @@ const FormRenderer = ({
             <TouchableOpacity
               activeOpacity={0.8}
               className={`border rounded-lg px-3 py-3 ${otherReasonSelected
-                  ? "border-green-600 bg-green/20"
-                  : "border-zinc-200"
+                ? "border-green-600 bg-green/20"
+                : "border-zinc-200"
                 }`}
               onPress={() => {
                 setOtherReasonSelected((prev) => !prev);

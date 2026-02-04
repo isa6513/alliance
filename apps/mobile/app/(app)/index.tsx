@@ -1,4 +1,4 @@
-import { View, ScrollView, ActivityIndicator } from "react-native";
+import { View, ScrollView, ActivityIndicator, KeyboardAvoidingView } from "react-native";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   actionsDismissAction,
@@ -20,6 +20,7 @@ import {
   getAwayStatus,
 } from "@alliance/shared/lib/actionUtils";
 import { useQuery } from "@tanstack/react-query";
+import { KeyboardAwareScrollView, KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 
 export default function HomeScreen() {
   const {
@@ -73,7 +74,7 @@ export default function HomeScreen() {
     limit: 8,
   });
 
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<KeyboardAwareScrollViewRef>(null);
 
   const scrollPageTo = useCallback((y: number) => {
     if (scrollViewRef.current) {
@@ -107,7 +108,7 @@ export default function HomeScreen() {
 
   return (
     <GreenHeader>
-      <ScrollView ref={scrollViewRef} className="flex-1">
+      <KeyboardAwareScrollView ref={scrollViewRef} className="flex-1" bottomOffset={72}>
         <View className="bg-green p-4 pt-12">
           <Text className="text-white font-bold text-base mt-2 pb-0">
             Current task:
@@ -128,7 +129,7 @@ export default function HomeScreen() {
             />
           )}
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </GreenHeader>
   );
 }
