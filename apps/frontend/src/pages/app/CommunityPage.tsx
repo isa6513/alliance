@@ -155,8 +155,13 @@ const CommunityPage = () => {
     return community?.leaders.some((leader) => leader.id === user?.id);
   }, [community, user]);
 
+  const queryKey = useMemo(
+    () => ["communityMemberInfo", community?.id ?? null],
+    [community?.id]
+  );
+
   const { data: communityMemberInfo } = useQuery({
-    queryKey: ["communityMemberInfo", community?.id],
+    queryKey,
     queryFn: () =>
       community
         ? actionsGetCommunityMemberInfo({
