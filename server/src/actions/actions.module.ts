@@ -10,6 +10,7 @@ import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.s
 import { ActionEventReminderService } from 'src/notifs/action-event-reminder.service';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { NotifsModule } from 'src/notifs/notifs.module';
+import { CustomValidator } from 'src/tasks/entities/customvalidator.entity';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { ContractEvent } from '../user/entities/contract-event.entity';
@@ -26,6 +27,7 @@ import { ActionShareUrl } from './entities/action-share-url.entity';
 import { ActionSuite } from './entities/action-suite.entity';
 import { ActionUpdate } from './entities/action-update.entity';
 import { Action } from './entities/action.entity';
+import { ForumActionCompleterWorker } from './forum-action-completer.worker';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ForumModule } from 'src/forum/forum.module';
 import { ReloadUsersJoinedWorker } from './reload-users-joined.worker';
@@ -47,6 +49,7 @@ import { SlackModule } from 'src/slack/slack.module';
       ReminderGroup,
       ActionEventNotif,
       ActionSuite,
+      CustomValidator,
       Form,
       FormResponse,
       ActionShareUrl,
@@ -69,7 +72,8 @@ import { SlackModule } from 'src/slack/slack.module';
     ActionEventReminderService,
     ReloadUsersJoinedWorker,
     ContractSuspenderWorker,
+    ForumActionCompleterWorker,
   ],
   exports: [ActionsService, ActionEventRecipientService],
 })
-export class ActionsModule {}
+export class ActionsModule { }

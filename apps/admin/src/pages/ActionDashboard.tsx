@@ -250,6 +250,7 @@ const ActionDashboard: React.FC = () => {
     preventCompletion: false,
     taskFormId: undefined,
     participatingTags: [],
+    isForumParticipationAction: false,
     everyoneShouldComplete: false,
     shouldCompleteAfterDeadline: false,
     publicOnly: false,
@@ -280,6 +281,7 @@ const ActionDashboard: React.FC = () => {
         participatingTags: [],
         shouldCompleteAfterDeadline: false,
         publicOnly: false,
+        isForumParticipationAction: false,
         everyoneShouldComplete: false,
         isContractSigningAction: false,
         suiteId: searchParams.get("suiteId")

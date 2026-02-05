@@ -65,6 +65,7 @@ import {
   PreviewTextDto,
   PreviewTextMessageResponse,
   ReminderGroupPlanDto,
+  ScheduledPlansOverviewDto,
   SuspensionPlanDto,
   UpdateActionActivityDto,
   UpdateActionDto,
@@ -79,6 +80,7 @@ import { ActionSuite } from './entities/action-suite.entity';
 import { Action } from './entities/action.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
+import { ForumActionCompleterWorker } from './forum-action-completer.worker';
 
 @Controller('actions')
 export class ActionsController {
@@ -87,6 +89,7 @@ export class ActionsController {
     private readonly actionsService: ActionsService,
     private readonly eventEmitter: EventEmitter2,
     private readonly actionEventReminderService: ActionEventReminderService,
+    private readonly forumActionCompleterWorker: ForumActionCompleterWorker,
   ) {
     this.delta$ = fromEvent<{ actionId: number; delta: number }>(
       this.eventEmitter,
@@ -823,6 +826,26 @@ export class ActionsController {
   @ApiOkResponse({ type: ReminderGroupPlanDto, isArray: true })
   reminderPlansOverview(): Promise<ReminderGroupPlanDto[]> {
     return this.actionsService.getReminderPlansOverview();
+  }
+
+  @Get('scheduledPlans')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ScheduledPlansOverviewDto })
+  async scheduledPlans(
+    @Query('rangeStart') rangeStart: Date,
+    @Query('rangeEnd') rangeEnd: Date,
+  ): Promise<ScheduledPlansOverviewDto> {
+    const start = new Date(rangeStart);
+    const end = new Date(rangeEnd);
+    const [suspensionPlans, forumAutocompletePlans] = await Promise.all([
+      this.actionsService.getSuspendPlans(start, end, 6),
+      this.forumActionCompleterWorker.getAutocompletePlans(start, end),
+    ]);
+
+    const response = new ScheduledPlansOverviewDto();
+    response.suspensionPlans = suspensionPlans;
+    response.forumAutocompletePlans = forumAutocompletePlans;
+    return response;
   }
 
   @Get('suspendPlans')

@@ -135,6 +135,7 @@ describe('Tasks (e2e)', () => {
         shortDescription: 'Short copy',
         type: ActionTaskType.Activity,
         commitmentless: true,
+        isForumParticipationAction: false,
         everyoneShouldComplete: false,
         shouldCompleteAfterDeadline: false,
         participatingTags: [ctx.defaultTag],
@@ -318,6 +319,7 @@ describe('Tasks (e2e)', () => {
           useManualCohort: false,
           publicOnly: false,
           isContractSigningAction: false,
+          isForumParticipationAction: false,
           latestMemberActionEvent: {
             event: null,
             deadline: null,
@@ -753,6 +755,7 @@ describe('Tasks (e2e)', () => {
           shortDescription: 'Short copy',
           type: ActionTaskType.Activity,
           commitmentless: true,
+          isForumParticipationAction: false,
           everyoneShouldComplete: false,
           shouldCompleteAfterDeadline: false,
           participatingTags: [ctx.defaultTag],

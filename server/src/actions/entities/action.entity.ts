@@ -254,6 +254,23 @@ export class Action {
   @Allow()
   shouldCompleteAfterDeadline: boolean;
 
+  @Column({ default: false })
+  @ApiProperty({
+    description:
+      'Whether to autocomplete action based on forum participation',
+  })
+  @Allow()
+  isForumParticipationAction: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiPropertyOptional({
+    description:
+      'Date and time when the action was computed for autocomplete',
+  })
+  @IsOptional()
+  @Type(() => Date)
+  computedAutocompleteAt?: Date;
+
   // Relations
 
   @OneToMany(() => ActionEvent, (event) => event.action)

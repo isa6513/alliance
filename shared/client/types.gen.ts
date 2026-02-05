@@ -388,6 +388,14 @@ export type Action = {
      */
     shouldCompleteAfterDeadline: boolean;
     /**
+     * Whether to autocomplete action based on forum participation
+     */
+    isForumParticipationAction: boolean;
+    /**
+     * Date and time when the action was computed for autocomplete
+     */
+    computedAutocompleteAt?: string;
+    /**
      * Events associated with the action
      */
     events: Array<ActionEvent>;
@@ -1219,6 +1227,14 @@ export type ActionDto = {
      * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline: boolean;
+    /**
+     * Whether to autocomplete action based on forum participation
+     */
+    isForumParticipationAction: boolean;
+    /**
+     * Date and time when the action was computed for autocomplete
+     */
+    computedAutocompleteAt?: string;
     participatingTags: Array<Tag>;
     activities: Array<Array<ActionActivity>>;
     suite?: ActionSuite;
@@ -1388,6 +1404,14 @@ export type CreateActionDto = {
      * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline: boolean;
+    /**
+     * Whether to autocomplete action based on forum participation
+     */
+    isForumParticipationAction: boolean;
+    /**
+     * Date and time when the action was computed for autocomplete
+     */
+    computedAutocompleteAt?: string;
     participatingTags: Array<Tag>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
@@ -1488,6 +1512,14 @@ export type UpdateActionDto = {
      * Whether the action shows up in the tasks page after the deadline
      */
     shouldCompleteAfterDeadline?: boolean;
+    /**
+     * Whether to autocomplete action based on forum participation
+     */
+    isForumParticipationAction?: boolean;
+    /**
+     * Date and time when the action was computed for autocomplete
+     */
+    computedAutocompleteAt?: string;
     participatingTags?: Array<Tag>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
@@ -1773,6 +1805,14 @@ export type ExportActionDto = {
      */
     shouldCompleteAfterDeadline: boolean;
     /**
+     * Whether to autocomplete action based on forum participation
+     */
+    isForumParticipationAction: boolean;
+    /**
+     * Date and time when the action was computed for autocomplete
+     */
+    computedAutocompleteAt?: string;
+    /**
      * Events associated with the action
      */
     events: Array<ActionEvent>;
@@ -1797,6 +1837,28 @@ export type ReminderGroupPlanDto = {
 export type SuspensionPlanDto = {
     date: string;
     users: Array<ProfileDto>;
+};
+
+export type ActionSummaryDto = {
+    /**
+     * Unique identifier for the action
+     */
+    id: number;
+    /**
+     * Name of the action
+     */
+    name: string;
+};
+
+export type ForumAutocompletePlanDto = {
+    date: string;
+    users: Array<ProfileDto>;
+    action: ActionSummaryDto;
+};
+
+export type ScheduledPlansOverviewDto = {
+    suspensionPlans: Array<SuspensionPlanDto>;
+    forumAutocompletePlans: Array<ForumAutocompletePlanDto>;
 };
 
 export type ShareUrlDto = {
@@ -4954,6 +5016,22 @@ export type ActionsReminderPlansOverviewResponses = {
 };
 
 export type ActionsReminderPlansOverviewResponse = ActionsReminderPlansOverviewResponses[keyof ActionsReminderPlansOverviewResponses];
+
+export type ActionsScheduledPlansData = {
+    body?: never;
+    path?: never;
+    query: {
+        rangeStart: string;
+        rangeEnd: string;
+    };
+    url: '/actions/scheduledPlans';
+};
+
+export type ActionsScheduledPlansResponses = {
+    200: ScheduledPlansOverviewDto;
+};
+
+export type ActionsScheduledPlansResponse = ActionsScheduledPlansResponses[keyof ActionsScheduledPlansResponses];
 
 export type ActionsSuspendPlansData = {
     body?: never;

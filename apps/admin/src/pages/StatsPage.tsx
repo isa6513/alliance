@@ -565,12 +565,6 @@ const StatsPage: React.FC = () => {
       .mode("lab");
   }, []);
 
-  const retentionHeatmapLegend = useMemo(() => {
-    const stopCount = 7;
-    const stops = retentionHeatmapScale.colors(stopCount);
-    return `linear-gradient(90deg, ${stops.join(", ")})`;
-  }, [retentionHeatmapScale]);
-
   const retentionGridData = useMemo<RetentionGridData>(() => {
     if (filteredRetentionCohorts.length === 0) {
       return { weeks: [], rows: [] };

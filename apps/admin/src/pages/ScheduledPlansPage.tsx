@@ -1,6 +1,6 @@
 import {
-  actionsSuspendPlans,
-  SuspensionPlanDto,
+  actionsScheduledPlans,
+  ScheduledPlansOverviewDto,
 } from "@alliance/shared/client";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -11,9 +11,7 @@ import { Link } from "react-router";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 
 const ScheduledPlansPage = () => {
-  const [suspensionPlans, setSuspensionPlans] = useState<SuspensionPlanDto[]>(
-    []
-  );
+  const [plans, setPlans] = useState<ScheduledPlansOverviewDto | null>(null);
   const [expandedPlans, setExpandedPlans] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +24,7 @@ const ScheduledPlansPage = () => {
       setError(null);
 
       try {
-        const response = await actionsSuspendPlans({
+        const response = await actionsScheduledPlans({
           query: {
             rangeStart: new Date(Date.now()).toISOString(),
             rangeEnd: new Date(
@@ -36,12 +34,12 @@ const ScheduledPlansPage = () => {
         });
 
         if (!cancelled) {
-          setSuspensionPlans(response.data ?? []);
+          setPlans(response.data ?? null);
         }
       } catch (err) {
-        console.error("Failed to load suspension plans", err);
+        console.error("Failed to load scheduled plans", err);
         if (!cancelled) {
-          setError("Unable to load scheduled suspension plans.");
+          setError("Unable to load scheduled plans.");
         }
       } finally {
         if (!cancelled) {
@@ -57,13 +55,30 @@ const ScheduledPlansPage = () => {
     };
   }, []);
 
-  const sortedPlans = useMemo(
-    () =>
-      [...suspensionPlans].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      ),
-    [suspensionPlans]
-  );
+  const timelineItems = useMemo(() => {
+    const suspensionItems = (plans?.suspensionPlans ?? []).map(
+      (plan, index) => ({
+        kind: "suspension" as const,
+        key: `suspension-${plan.date}-${index}`,
+        date: plan.date,
+        users: plan.users ?? [],
+      })
+    );
+
+    const forumItems = (plans?.forumAutocompletePlans ?? []).map(
+      (plan, index) => ({
+        kind: "forum" as const,
+        key: `forum-${plan.date}-${plan.action.id}-${index}`,
+        date: plan.date,
+        users: plan.users ?? [],
+        action: plan.action,
+      })
+    );
+
+    return [...suspensionItems, ...forumItems].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+  }, [plans]);
 
   const togglePlan = (key: string) => {
     setExpandedPlans((prev) => {
@@ -100,7 +115,7 @@ const ScheduledPlansPage = () => {
   return (
     <CenterLayout width="3xl">
       <div className="mb-6 flex flex-col gap-1 min-w-3xl">
-        <h1 className="font-semibold text-lg">Suspension plans</h1>
+        <h1 className="font-semibold text-lg">Scheduled plans</h1>
         <p className="text-gray-600">Timeline of future automated actions</p>
       </div>
 
@@ -108,45 +123,55 @@ const ScheduledPlansPage = () => {
         {isLoading && (
           <div className="flex flex-row items-center justify-center gap-2">
             <Spinner size="small" />
-            <p className="text-gray-500">Loading suspension plans...</p>
+            <p className="text-gray-500">Loading scheduled plans...</p>
           </div>
         )}
 
         {!isLoading && error && <p className="text-red-600">{error}</p>}
 
-        {!isLoading && !error && sortedPlans.length === 0 && (
+        {!isLoading && !error && timelineItems.length === 0 && (
           <p className="text-gray-500">
-            No planned suspensions in this window.
+            No planned automated actions in this window.
           </p>
         )}
 
-        {!isLoading && !error && sortedPlans.length > 0 && (
+        {!isLoading && !error && timelineItems.length > 0 && (
           <div className="relative">
             <ul className="space-y-6">
-              {sortedPlans.map((plan, index) => {
-                const key = `${plan.date}-${index}`;
-                const { dayLabel } = formatPlanDate(plan.date);
-                const isExpanded = expandedPlans.has(key);
-                const userCount = plan.users?.length ?? 0;
+              {timelineItems.map((item) => {
+                const { dayLabel } = formatPlanDate(item.date);
+                const isExpanded = expandedPlans.has(item.key);
+                const userCount = item.users?.length ?? 0;
 
                 return (
-                  <li key={key} className="relative">
+                  <li key={item.key} className="relative">
                     <div className="flex flex-col gap-3">
                       <button
                         type="button"
                         className="flex items-center justify-between gap-4 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-left transition hover:border-zinc-300"
                         aria-expanded={isExpanded}
-                        onClick={() => togglePlan(key)}
+                        onClick={() => togglePlan(item.key)}
                       >
                         <div className="flex flex-col gap-1">
                           <div className="flex flex-wrap items-center gap-3 text-sm text-gray-700">
                             <span className="font-semibold">{dayLabel}</span>
-                            {/* {timeLabel && (
-                              <span className="text-gray-500">
-                                by {timeLabel}
-                              </span>
-                            )} */}
+                            <span className="rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-xs font-medium text-gray-600">
+                              {item.kind === "suspension"
+                                ? "Suspension"
+                                : "Forum action auto-complete"}
+                            </span>
                           </div>
+                          {item.kind === "forum" && (
+                            <div className="text-sm text-gray-600">
+                              Auto-complete for{" "}
+                              <Link
+                                to={`/actions/${item.action.id}`}
+                                className="font-medium text-gray-900 hover:underline"
+                              >
+                                {item.action.name}
+                              </Link>
+                            </div>
+                          )}
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Users size={16} className="text-gray-500" />
                             <span>
@@ -157,15 +182,14 @@ const ScheduledPlansPage = () => {
                         </div>
                         <ChevronDown
                           size={18}
-                          className={`text-gray-500 transition-transform duration-150 ${
-                            isExpanded ? "-rotate-180" : ""
-                          }`}
+                          className={`text-gray-500 transition-transform duration-150 ${isExpanded ? "-rotate-180" : ""
+                            }`}
                         />
                       </button>
 
                       {isExpanded && (
                         <div className="grid gap-2 sm:grid-cols-2">
-                          {plan.users?.map((user) => (
+                          {item.users?.map((user) => (
                             <Link
                               key={user.id}
                               className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-2 hover:bg-zinc-100"

@@ -478,6 +478,33 @@ export class SuspensionPlanDto {
   users: ProfileDto[];
 }
 
+export class ActionSummaryDto extends PickType(Action, ['id', 'name']) {
+  constructor(action: Pick<Action, 'id' | 'name'>) {
+    super();
+    this.id = action.id;
+    this.name = action.name;
+  }
+}
+
+export class ForumAutocompletePlanDto extends SuspensionPlanDto {
+  @ApiProperty({ type: () => ActionSummaryDto })
+  @Type(() => ActionSummaryDto)
+  @IsDefined()
+  action: ActionSummaryDto;
+}
+
+export class ScheduledPlansOverviewDto {
+  @ApiProperty({ type: () => SuspensionPlanDto, isArray: true })
+  @Type(() => SuspensionPlanDto)
+  @IsDefined()
+  suspensionPlans: SuspensionPlanDto[];
+
+  @ApiProperty({ type: () => ForumAutocompletePlanDto, isArray: true })
+  @Type(() => ForumAutocompletePlanDto)
+  @IsDefined()
+  forumAutocompletePlans: ForumAutocompletePlanDto[];
+}
+
 export class ReminderGroupPlanDto {
   @ApiProperty({ type: () => ReminderGroup })
   @Type(() => ReminderGroup)

@@ -355,7 +355,7 @@ export class TasksService {
     await this.actionsService.completeAction(
       submitFormDto.actionId,
       userId,
-      savedForm,
+      { taskFormResponse: savedForm },
     );
 
     return savedForm;

@@ -736,13 +736,17 @@ export class ActionsService {
   async completeAction(
     actionId: number,
     userId: number,
-    taskFormResponse?: FormResponse,
+    options: {
+      taskFormResponse?: FormResponse;
+      adminCreated?: boolean;
+    } = {},
   ): Promise<ActionActivityDto> {
     return this.createActionActivity({
       actionId,
       userId,
       type: ActionActivityType.USER_COMPLETED,
-      taskFormResponse,
+      taskFormResponse: options.taskFormResponse,
+      adminCreated: options.adminCreated,
     });
   }
 

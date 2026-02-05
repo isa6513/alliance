@@ -6,6 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import {
+  appHealthCheck,
   authLogin,
   authLogout,
   authMe,
@@ -18,6 +19,7 @@ import { getApiUrl } from "./config";
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  canConnectToServer: boolean;
   user: UserDto | undefined;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -42,7 +44,7 @@ export const AuthProvider: React.FC<
 > = ({ children, tokenStore }) => {
   const [user, setUser] = useState<UserDto | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
+  const [canConnectToServer, setCanConnectToServer] = useState<boolean>(true);
   const router = useRouter();
 
   const saveTokens = useCallback(
@@ -129,6 +131,17 @@ export const AuthProvider: React.FC<
     })();
   }, [logout, getAccessToken, getRefreshToken, refreshAccessToken]);
 
+  useEffect(() => {
+    (async () => {
+      const resp = await appHealthCheck();
+      if (resp.response.ok) {
+        setCanConnectToServer(true);
+      } else {
+        setCanConnectToServer(false);
+      }
+    })();
+  }, []);
+
   const login = useCallback(
     async (email: string, password: string) => {
       setIsLoading(true);
@@ -201,6 +214,7 @@ export const AuthProvider: React.FC<
     user,
     login,
     logout,
+    canConnectToServer,
     isLoading,
   };
 

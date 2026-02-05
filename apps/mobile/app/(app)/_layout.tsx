@@ -14,7 +14,7 @@ const { Navigator } = createDrawerNavigator();
 const Drawer = withLayoutContext(Navigator);
 
 export default function AppLayout() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, canConnectToServer } = useAuth();
 
   if (isLoading) {
     return (
@@ -24,7 +24,7 @@ export default function AppLayout() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && canConnectToServer) {
     return <Redirect href="/auth/login" />;
   }
 

@@ -275,7 +275,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         type: "checkbox",
         section: "settings",
         helpText:
-          "Require users to commit via a gathering commitment phase before member action",
+          "Require users to commit before member action",
         inverted: true, // UI shows "Use Commitment Mode" but field is "commitmentless"
       },
 
@@ -322,6 +322,13 @@ const ActionForm: React.FC<ActionFormProps> = ({
         type: "checkbox",
         section: "settings",
         helpText: "Shows prominent dismiss dialog above task card",
+      },
+      {
+        name: "isForumParticipationAction",
+        label: "Forum Participation Action",
+        type: "checkbox",
+        section: "settings",
+        helpText: "Autocomplete action for users who leave comment but dont hit complete",
       },
     ],
     [

@@ -185,6 +185,7 @@ describe('Actions (e2e)', () => {
         commitmentless: false,
         everyoneShouldComplete: false,
         shouldCompleteAfterDeadline: false,
+        isForumParticipationAction: false,
         participatingTags: [],
         useManualCohort: false,
         optional: false,
