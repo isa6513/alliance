@@ -169,10 +169,9 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
       )}
 
       {/* Profile picture column */}
-      <div>
+      <div className="flex-shrink-0">
         <Link
           to={href("/member/:id", { id: reply.author.id.toString() })}
-          className="flex-shrink-0"
         >
           <div className="hidden sm:inline">
             <ProfileImage
