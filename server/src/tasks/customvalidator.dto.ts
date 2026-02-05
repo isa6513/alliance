@@ -1,5 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional } from 'class-validator';
+import { User } from 'src/user/entities/user.entity';
 import {
   CustomValidator,
   CustomValidatorType,
@@ -61,6 +62,13 @@ export class RunValidatorDto {
   fieldValue?: string;
 }
 
+export class CustomExpressionUserDto extends PickType(User, [
+  'id',
+  'name',
+  'anonymous',
+  'hasActiveContract',
+] as const) {}
+
 export class TestCustomExpressionDto {
   @ApiProperty()
   @IsNotEmpty()
@@ -83,6 +91,14 @@ export class TestCustomExpressionResponseDto {
   @ApiProperty()
   @IsNotEmpty()
   totalCount: number;
+
+  @ApiProperty({ type: CustomExpressionUserDto, isArray: true })
+  @IsNotEmpty()
+  passUsers: CustomExpressionUserDto[];
+
+  @ApiProperty({ type: CustomExpressionUserDto, isArray: true })
+  @IsNotEmpty()
+  failUsers: CustomExpressionUserDto[];
 
   @ApiPropertyOptional()
   @IsOptional()

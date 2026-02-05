@@ -2260,10 +2260,18 @@ export type TestCustomExpressionDto = {
     userId?: number;
 };
 
+export type CustomExpressionUserDto = {
+    id: number;
+    name: string;
+    anonymous: boolean;
+};
+
 export type TestCustomExpressionResponseDto = {
     passCount: number;
     failCount: number;
     totalCount: number;
+    passUsers: Array<CustomExpressionUserDto>;
+    failUsers: Array<CustomExpressionUserDto>;
     selectedUserId?: number;
     selectedUserResult?: boolean;
 };

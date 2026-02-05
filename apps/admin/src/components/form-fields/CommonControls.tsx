@@ -1100,6 +1100,10 @@ export function CustomValidatorSelect({
     loading: usersLoading,
     error: usersError,
   } = useUsers(isCustomExpression);
+  const activeUsers = useMemo(
+    () => users.filter((user) => user.hasActiveContract),
+    [users]
+  );
   const [expressionTest, setExpressionTest] = useState<{
     result?: boolean;
     error?: string;
@@ -1108,6 +1112,12 @@ export function CustomValidatorSelect({
       fail: number;
       total: number;
     };
+    passUsers?: Array<
+      Pick<UserDto, "id" | "name" | "anonymous">
+    >;
+    failUsers?: Array<
+      Pick<UserDto, "id" | "name" | "anonymous">
+    >;
     selectedUserLabel?: string;
   } | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
@@ -1142,12 +1152,12 @@ export function CustomValidatorSelect({
   const hasValidators = availableValidators.length > 0;
   const hasExpression = Boolean(expression?.trim());
   const sortedUsers = useMemo(
-    () => [...users].sort((a, b) => a.name.localeCompare(b.name)),
-    [users]
+    () => [...activeUsers].sort((a, b) => a.name.localeCompare(b.name)),
+    [activeUsers]
   );
   const selectedUser = useMemo(
-    () => users.find((user) => user.id === selectedUserId),
-    [selectedUserId, users]
+    () => activeUsers.find((user) => user.id === selectedUserId),
+    [selectedUserId, activeUsers]
   );
   const selectedUserLabel = useMemo(() => {
     if (!selectedUser) {
@@ -1157,6 +1167,22 @@ export function CustomValidatorSelect({
       ? `Anonymous (${selectedUser.id})`
       : `${selectedUser.name} (${selectedUser.id})`;
   }, [selectedUser]);
+  const passUsers = useMemo(() => {
+    if (!expressionTest?.passUsers) {
+      return [];
+    }
+    return [...expressionTest.passUsers].sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+  }, [expressionTest?.passUsers]);
+  const failUsers = useMemo(() => {
+    if (!expressionTest?.failUsers) {
+      return [];
+    }
+    return [...expressionTest.failUsers].sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+  }, [expressionTest?.failUsers]);
 
   useEffect(() => {
     setExpressionTest(null);
@@ -1166,14 +1192,17 @@ export function CustomValidatorSelect({
     if (!isCustomExpression) {
       return;
     }
-    if (users.length === 0) {
+    if (sortedUsers.length === 0) {
       setSelectedUserId(null);
       return;
     }
-    if (!selectedUserId || !users.some((user) => user.id === selectedUserId)) {
-      setSelectedUserId(users[0]?.id ?? null);
+    if (
+      !selectedUserId ||
+      !sortedUsers.some((user) => user.id === selectedUserId)
+    ) {
+      setSelectedUserId(sortedUsers[0]?.id ?? null);
     }
-  }, [isCustomExpression, selectedUserId, users]);
+  }, [isCustomExpression, selectedUserId, sortedUsers]);
 
   const runExpressionTest = useCallback(async () => {
     if (!isCustomExpression) {
@@ -1226,6 +1255,8 @@ export function CustomValidatorSelect({
           fail: response.data.failCount,
           total: response.data.totalCount,
         },
+        passUsers: response.data.passUsers ?? [],
+        failUsers: response.data.failUsers ?? [],
       });
     } catch (err) {
       const message =
@@ -1288,7 +1319,9 @@ export function CustomValidatorSelect({
           <Card style={CardStyle.Grey} className="p-2! gap-y-2">
 
             <div className="space-y-1">
-              <label className="block text-[11px] text-gray-700">Test user</label>
+              <label className="block text-[11px] text-gray-700">
+                Test user (active contracts)
+              </label>
               <select
                 className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100"
                 value={selectedUserId ?? ""}
@@ -1297,7 +1330,9 @@ export function CustomValidatorSelect({
                     event.target.value ? Number(event.target.value) : null
                   )
                 }
-                disabled={usersLoading || Boolean(usersError) || users.length === 0}
+                disabled={
+                  usersLoading || Boolean(usersError) || activeUsers.length === 0
+                }
               >
                 <option value="">Select a user</option>
                 {sortedUsers.map((user) => (
@@ -1312,9 +1347,9 @@ export function CustomValidatorSelect({
               {usersError && !usersLoading && (
                 <p className="text-[11px] text-red-500">{usersError}</p>
               )}
-              {!usersLoading && !usersError && users.length === 0 && (
+              {!usersLoading && !usersError && activeUsers.length === 0 && (
                 <p className="text-[11px] text-gray-400">
-                  No users available to test.
+                  No active-contract users available to test.
                 </p>
               )}
             </div>
@@ -1348,11 +1383,53 @@ export function CustomValidatorSelect({
               )}
             {expressionTest?.totals && !expressionTest.error && (
               <p className="text-[11px] text-gray-600">
-                All users: {expressionTest.totals.pass} pass,{" "}
+                Active-contract users: {expressionTest.totals.pass} pass,{" "}
                 {expressionTest.totals.fail} fail (total{" "}
                 {expressionTest.totals.total})
               </p>
             )}
+            {expressionTest?.passUsers &&
+              expressionTest?.failUsers &&
+              !expressionTest.error && (
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <details className="rounded border border-gray-200 bg-white p-2">
+                    <summary className="cursor-pointer text-[11px] text-gray-700">
+                      Passing users ({passUsers.length})
+                    </summary>
+                    {passUsers.length === 0 ? (
+                      <p className="mt-1 text-[11px] text-gray-400">
+                        No users passed.
+                      </p>
+                    ) : (
+                      <ul className="mt-1 max-h-40 overflow-auto text-[11px] text-gray-700">
+                        {passUsers.map((user) => (
+                          <li key={user.id}>
+                            {user.anonymous ? "Anonymous" : user.name}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </details>
+                  <details className="rounded border border-gray-200 bg-white p-2">
+                    <summary className="cursor-pointer text-[11px] text-gray-700">
+                      Failing users ({failUsers.length})
+                    </summary>
+                    {failUsers.length === 0 ? (
+                      <p className="mt-1 text-[11px] text-gray-400">
+                        No users failed.
+                      </p>
+                    ) : (
+                      <ul className="mt-1 max-h-40 overflow-auto text-[11px] text-gray-700">
+                        {failUsers.map((user) => (
+                          <li key={user.id}>
+                            {user.anonymous ? "Anonymous" : user.name}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </details>
+                </div>
+              )}
           </Card>
         </div>
       )}

@@ -618,23 +618,50 @@ export class TasksService {
         communities: true,
         contractEvents: true,
       });
+      if (!selectedUser.hasActiveContract) {
+        throw new BadRequestException(
+          'Selected user does not have an active contract',
+        );
+      }
       selectedUserResult = runForUser(selectedUser);
     }
 
-    const users = await this.userService.findAll({
-      tags: true,
-      communities: true,
-      contractEvents: true,
-    });
+    const users = (
+      await this.userService.findAll({
+        tags: true,
+        communities: true,
+        contractEvents: true,
+      })
+    ).filter((user) => user.hasActiveContract);
 
     let passCount = 0;
     let failCount = 0;
+    const passUsers: {
+      id: number;
+      name: string;
+      anonymous: boolean;
+      hasActiveContract: boolean;
+    }[] = [];
+    const failUsers: {
+      id: number;
+      name: string;
+      anonymous: boolean;
+      hasActiveContract: boolean;
+    }[] = [];
+    const toSummary = (user: User) => ({
+      id: user.id,
+      name: user.name,
+      anonymous: user.anonymous,
+      hasActiveContract: user.hasActiveContract,
+    });
     for (const user of users) {
       const isValid = runForUser(user);
       if (isValid) {
         passCount += 1;
+        passUsers.push(toSummary(user));
       } else {
         failCount += 1;
+        failUsers.push(toSummary(user));
       }
     }
 
@@ -642,6 +669,8 @@ export class TasksService {
       passCount,
       failCount,
       totalCount: users.length,
+      passUsers,
+      failUsers,
       selectedUserId: userId,
       selectedUserResult,
     };
