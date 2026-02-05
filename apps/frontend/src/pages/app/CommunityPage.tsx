@@ -10,6 +10,7 @@ import {
 } from "@alliance/shared/client";
 import { groupSettings } from "@alliance/shared/lib/copy";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
@@ -154,37 +155,43 @@ const CommunityPage = () => {
     return community?.leaders.some((leader) => leader.id === user?.id);
   }, [community, user]);
 
+  const { data: communityMemberInfo } = useQuery({
+    queryKey: ["communityMemberInfo", community?.id],
+    queryFn: () =>
+      community
+        ? actionsGetCommunityMemberInfo({
+            path: {
+              communityId: community.id,
+            },
+          }).then((resp) => resp.data)
+        : null,
+    enabled: !!community,
+  });
+
   useEffect(() => {
-    if (!community) {
+    if (!communityMemberInfo) {
       return;
     }
-    actionsGetCommunityMemberInfo({
-      path: {
-        communityId: community.id,
-      },
-    }).then((resp) => {
-      if (!resp.data) {
-        return;
-      }
 
-      setUserActionRelations(
-        Object.fromEntries(
-          resp.data.users.map(({ userId, relations }) => [userId, relations])
-        )
-      );
+    setUserActionRelations(
+      Object.fromEntries(
+        communityMemberInfo.users.map(({ userId, relations }) => [
+          userId,
+          relations,
+        ])
+      )
+    );
 
-      // Most recent actions first
-      resp.data.actions.reverse();
+    const reversedActions = [...communityMemberInfo.actions].reverse();
 
-      setActionSummaries(resp.data.actions);
-      const completionData = calculateAllCompletionData({
-        actions: resp.data.actions,
-        users: resp.data.users,
-        actionDeadlineWindowMs: CURRENT_ACTION_WINDOW_MS,
-      });
-      setAllCompletionData(completionData);
+    setActionSummaries(reversedActions);
+    const completionData = calculateAllCompletionData({
+      actions: communityMemberInfo.actions,
+      users: communityMemberInfo.users,
+      actionDeadlineWindowMs: CURRENT_ACTION_WINDOW_MS,
     });
-  }, [community]);
+    setAllCompletionData(completionData);
+  }, [communityMemberInfo]);
 
   useEffect(() => {
     if (amLeader) {
