@@ -19,6 +19,17 @@ type UseMyCommunitiesReturn = {
 
 const QUERY_KEY = ["userGetMyCommunities"];
 
+function findCommunityById(
+  communities: CommunityDto[],
+  communityId: number | null
+): CommunityDto | null {
+  if (communityId === null) {
+    return communities[0] ?? null;
+  }
+
+  return communities.find((community) => community.id === communityId) ?? null;
+}
+
 export function useMyCommunities(
   props: UseMyCommunitiesProps
 ): UseMyCommunitiesReturn {
@@ -34,7 +45,12 @@ export function useMyCommunities(
   });
 
   const [selectedCommunity, setSelectedCommunity] =
-    useState<CommunityDto | null>(communities[0] ?? null);
+    useState<CommunityDto | null>(
+      findCommunityById(communities, selectedCommunityId)
+    );
+  useEffect(() => {
+    setSelectedCommunity(findCommunityById(communities, selectedCommunityId));
+  }, [communities, selectedCommunityId]);
 
   const communityIds = useMemo(() => {
     return new Set(communities.map((community) => community.id));
@@ -52,17 +68,6 @@ export function useMyCommunities(
     },
     [queryClient]
   );
-
-  useEffect(() => {
-    if (selectedCommunityId === null) {
-      setSelectedCommunity(communities[0] ?? null);
-    } else {
-      setSelectedCommunity(
-        communities.find((community) => community.id === selectedCommunityId) ??
-          null
-      );
-    }
-  }, [communities, selectedCommunityId]);
 
   const removeMemberFromCommunity = useCallback(
     (communityId: number, memberId: number) => {
