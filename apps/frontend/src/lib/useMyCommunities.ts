@@ -65,10 +65,6 @@ export function useMyCommunities(
     return new Set(communities.map((community) => community.id));
   }, [communities]);
 
-  useEffect(() => {
-    setCommunitiesWithoutCache(getCachedCommunities() ?? []);
-  }, []);
-
   const refreshCommunities = useCallback(async () => {
     const resp = await userGetMyCommunities();
     if (resp.data) {
