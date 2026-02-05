@@ -5,7 +5,6 @@ import {
   userGetCommunityMemberContactInfo,
   actionsGetCommunityMemberInfo,
   userGetMyCommunities,
-  userGetOnetimeInvitesByCommunity,
   CommunityMemberContactInfoDto,
   conversationGetCommunityConversations,
   userUpdateCommunity,
@@ -30,7 +29,6 @@ import FloatingChatPanel from "../../components/FloatingChatpanel";
 import { MessageSquare } from "lucide-react";
 import { Features } from "@alliance/shared/lib/features";
 import { isFeatureEnabled } from "../../lib/config";
-import CommunityInvitesLeaderTab from "../../components/CommunityInvitesLeaderTab";
 import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
 import { useMediaQuery } from "../../lib/useMediaQuery";
 import {
@@ -45,12 +43,11 @@ import MyGroupsPage from "./MyGroupsPage";
 import { Link } from "react-router";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 
-export type Tab = "activity" | "members" | "invites" | "groups" | "create";
+export type Tab = "activity" | "members" | "groups" | "create";
 
 const TAB_DISPLAY_NAMES = {
   activity: "Activity",
   members: "Members",
-  invites: "Invites",
 } satisfies Partial<Record<Tab, string>>;
 
 const CURRENT_ACTION_WINDOW_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
@@ -79,7 +76,6 @@ const CommunityPage = () => {
     actionSummaries: actionSummaries,
     userActionRelations,
   });
-  const [inviteNotifCount, setInviteNotifCount] = useState(0);
   const [allCompletionData, setAllCompletionData] = useState<ReturnType<
     typeof calculateAllCompletionData
   > | null>(null);
@@ -165,24 +161,6 @@ const CommunityPage = () => {
   const amLeader = useMemo(() => {
     return community?.leaders.some((leader) => leader.id === user?.id);
   }, [community, user]);
-
-  useEffect(() => {
-    if (!community || !amLeader) {
-      return;
-    }
-    (async () => {
-      const invites = await userGetOnetimeInvitesByCommunity({
-        path: { communityId: community.id },
-      });
-      if (!invites.data) {
-        return;
-      }
-      setInviteNotifCount(
-        invites.data.filter((invite) => invite.status === "request_pending")
-          .length
-      );
-    })();
-  }, [amLeader, community]);
 
   useEffect(() => {
     if (!community) {
@@ -385,7 +363,7 @@ const CommunityPage = () => {
   }, [community, isSaving, refreshUser, setParams]);
 
   const tabs: (keyof typeof TAB_DISPLAY_NAMES)[] = amLeader
-    ? ["activity", "members", "invites"]
+    ? ["activity", "members"]
     : ["activity", "members"];
 
   const isLargeScreen = useMediaQuery("(min-width: 1250px)");
@@ -681,11 +659,6 @@ const CommunityPage = () => {
                     >
                       <div className="flex flex-row gap-x-2">
                         <span>{TAB_DISPLAY_NAMES[m]}</span>
-                        {m === "invites" && inviteNotifCount > 0 && (
-                          <span className="font-semibold text-xs text-white bg-zinc-500 rounded-md flex justify-center items-center w-5 h-5">
-                            {inviteNotifCount}
-                          </span>
-                        )}
                       </div>
                     </Button>
                   ))}
@@ -720,13 +693,6 @@ const CommunityPage = () => {
               completedAllCurrentActions={
                 completionData.completedAllCurrentActions
               }
-            />
-          )}
-          {tab === "invites" && (
-            <CommunityInvitesLeaderTab
-              communityId={community.id}
-              existingMembers={community.users}
-              setInviteNotifCount={setInviteNotifCount}
             />
           )}
           {tab === "groups" && (
