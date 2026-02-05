@@ -53,7 +53,7 @@ const GroupsGuidePage: React.FC = () => {
           >
             ← Back to Groups
           </Link>
-          <div className="flex flex-col gap-y-12 text-base md:text-lg text-zinc-900 pb-24">
+          <div className="flex flex-col gap-y-12 text-base md:text-lg text-zinc-900 pb-24 md:pb-72">
             <section className="gap-y-4 flex flex-col">
               <p
                 id="about"
@@ -284,23 +284,24 @@ const GroupsGuidePage: React.FC = () => {
                 Checking in
               </h3>
               <p>
-                Here are some extra ways you can check in on your group members:
+                These are some extra ways you can check in on your group
+                members:
               </p>
               <ol className="list-decimal list-inside pl-4 space-y-1">
                 <li>
-                  Look through your group members&apos; activities (
+                  Engage with your group members&apos; activities (
                   <Link
                     to={href("/groups")}
                     className="text-link hover:underline"
                   >
                     Groups
                   </Link>{" "}
-                  &gt; Activity) to see what they are up to.
+                  &gt; Activity).
                 </li>
                 <li>
                   Help any members who have difficulty completing their tasks.
-                  If they have pressing questions, feel free to reach out to a
-                  staff member via{" "}
+                  If they have pressing questions that you cannot answer, feel
+                  free to reach out to a staff member via{" "}
                   <Link
                     to={href("/messages")}
                     className="text-link hover:underline"
