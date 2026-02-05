@@ -16,9 +16,23 @@ import { ToastProvider } from "@alliance/sharedweb/ui/ToastProvider";
 import { client } from "@alliance/shared/client/client.gen";
 import { getApiUrl } from "@alliance/sharedweb/lib/config";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { persistQueryClient } from "@tanstack/react-query-persist-client";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import PosthogBuildTag from "./lib/PosthogBuildTag";
 
 const queryClient = new QueryClient();
+
+// Set up persistence for React Query
+if (typeof window !== "undefined") {
+  const persister = createAsyncStoragePersister({
+    storage: window.localStorage,
+  });
+
+  persistQueryClient({
+    queryClient,
+    persister,
+  });
+}
 
 client.setConfig({
   baseUrl: getApiUrl(),
