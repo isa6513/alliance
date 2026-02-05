@@ -1,8 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+export class MemberCompletionRetentionActionSummaryDto {
+  @ApiProperty()
+  actionId: number;
+
+  @ApiProperty()
+  actionName: string;
+
+  @ApiProperty()
+  memberCount: number;
+}
+
 export class MemberCompletionRetentionPointDto {
   @ApiProperty()
   weekIndex: number;
+
+  @ApiProperty()
+  actionIndex: number;
+
+  @ApiProperty()
+  actionStartDate: string;
 
   @ApiProperty()
   completionRate: number;
@@ -12,6 +29,18 @@ export class MemberCompletionRetentionPointDto {
 
   @ApiProperty()
   completedCount: number;
+
+  @ApiProperty()
+  weekCompletionRate: number;
+
+  @ApiProperty()
+  weekJoinedCount: number;
+
+  @ApiProperty()
+  weekCompletedCount: number;
+
+  @ApiProperty({ type: () => [MemberCompletionRetentionActionSummaryDto] })
+  actions: MemberCompletionRetentionActionSummaryDto[];
 }
 
 export class MemberCompletionRetentionCohortDto {

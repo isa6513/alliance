@@ -60,3 +60,35 @@ export class RunValidatorDto {
   @IsOptional()
   fieldValue?: string;
 }
+
+export class TestCustomExpressionDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  expression: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  userId?: number;
+}
+
+export class TestCustomExpressionResponseDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  passCount: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  failCount: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  totalCount: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  selectedUserId?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  selectedUserResult?: boolean;
+}

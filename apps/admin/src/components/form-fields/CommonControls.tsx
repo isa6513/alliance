@@ -11,6 +11,8 @@ import {
   CustomValidatorTypeDto,
   tasksCustomValidators,
   tasksFindOneCustomValidator,
+  tasksTestCustomExpression,
+  userList,
   type UserDto,
 } from "@alliance/shared/client";
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
@@ -33,7 +35,8 @@ import {
   isDraftValidatorId,
   useCustomValidatorDrafts,
 } from "./customValidatorDrafts";
-import { FORM_BUILDER_PREVIEW_USER } from "../../lib/testData";
+import Card from "@alliance/sharedweb/ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 const DEVICE_LABELS: Record<DeviceVisibilityTarget, string> = {
   mobile: "Mobile",
@@ -986,6 +989,87 @@ function useCustomValidators(): {
   };
 }
 
+let cachedUsers: UserDto[] | null = null;
+let cachedUsersError: string | null = null;
+let pendingUsersRequest: Promise<UserDto[]> | null = null;
+
+async function fetchUsers(): Promise<UserDto[]> {
+  const response = await userList();
+  if (response.data) {
+    return response.data;
+  }
+
+  if (response.error) {
+    throw response.error;
+  }
+
+  throw new Error("Unknown error loading users");
+}
+
+function useUsers(enabled: boolean): {
+  users: UserDto[];
+  loading: boolean;
+  error: string | null;
+} {
+  const [users, setUsers] = useState<UserDto[]>(() => cachedUsers ?? []);
+  const [loading, setLoading] = useState<boolean>(
+    () => enabled && !cachedUsers && !cachedUsersError
+  );
+  const [error, setError] = useState<string | null>(
+    () => cachedUsersError
+  );
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    if (cachedUsers) {
+      setUsers(cachedUsers);
+      setLoading(false);
+      return;
+    }
+
+    let isCancelled = false;
+    if (!pendingUsersRequest) {
+      pendingUsersRequest = fetchUsers();
+    }
+
+    setLoading(true);
+
+    pendingUsersRequest
+      .then((data) => {
+        if (isCancelled) return;
+        cachedUsers = data;
+        cachedUsersError = null;
+        setUsers(data);
+        setError(null);
+        setLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (isCancelled) return;
+        const message =
+          err instanceof Error ? err.message : "Failed to load users";
+        cachedUsersError = message;
+        setError(message);
+        setLoading(false);
+      })
+      .finally(() => {
+        pendingUsersRequest = null;
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [enabled]);
+
+  return {
+    users,
+    loading,
+    error,
+  };
+}
+
 type CustomValidatorSelectProps = {
   type?: CustomValidatorType;
   idArgument?: string;
@@ -1010,10 +1094,24 @@ export function CustomValidatorSelect({
   filter,
 }: CustomValidatorSelectProps) {
   const { validators, loading, error } = useCustomValidators();
+  const isCustomExpression = type === "CustomExpression";
+  const {
+    users,
+    loading: usersLoading,
+    error: usersError,
+  } = useUsers(isCustomExpression);
   const [expressionTest, setExpressionTest] = useState<{
     result?: boolean;
     error?: string;
+    totals?: {
+      pass: number;
+      fail: number;
+      total: number;
+    };
+    selectedUserLabel?: string;
   } | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
   const availableValidators = useMemo(() => {
     if (!filter) {
       return validators;
@@ -1043,37 +1141,113 @@ export function CustomValidatorSelect({
 
   const hasValidators = availableValidators.length > 0;
   const hasExpression = Boolean(expression?.trim());
+  const sortedUsers = useMemo(
+    () => [...users].sort((a, b) => a.name.localeCompare(b.name)),
+    [users]
+  );
+  const selectedUser = useMemo(
+    () => users.find((user) => user.id === selectedUserId),
+    [selectedUserId, users]
+  );
+  const selectedUserLabel = useMemo(() => {
+    if (!selectedUser) {
+      return undefined;
+    }
+    return selectedUser.anonymous
+      ? `Anonymous (${selectedUser.id})`
+      : `${selectedUser.name} (${selectedUser.id})`;
+  }, [selectedUser]);
 
   useEffect(() => {
     setExpressionTest(null);
-  }, [expression, type]);
+  }, [expression, type, selectedUserId]);
 
-  const runExpressionTest = useCallback(() => {
-    if (type !== "CustomExpression") {
+  useEffect(() => {
+    if (!isCustomExpression) {
+      return;
+    }
+    if (users.length === 0) {
+      setSelectedUserId(null);
+      return;
+    }
+    if (!selectedUserId || !users.some((user) => user.id === selectedUserId)) {
+      setSelectedUserId(users[0]?.id ?? null);
+    }
+  }, [isCustomExpression, selectedUserId, users]);
+
+  const runExpressionTest = useCallback(async () => {
+    if (!isCustomExpression) {
       return;
     }
     if (!expression?.trim()) {
       setExpressionTest({ error: "Expression is empty." });
       return;
     }
+    if (!selectedUserId) {
+      setExpressionTest({ error: "Select a user to test against." });
+      return;
+    }
+    if (usersLoading) {
+      setExpressionTest({ error: "Users are still loading. Try again soon." });
+      return;
+    }
+    if (usersError) {
+      setExpressionTest({ error: usersError });
+      return;
+    }
+
+    setIsTesting(true);
     try {
-      const expressionFn = eval(expression) as unknown;
-      if (typeof expressionFn !== "function") {
-        throw new Error("Expression must evaluate to a function.");
+      const response = await tasksTestCustomExpression({
+        body: {
+          expression,
+          userId: selectedUserId,
+        },
+      });
+
+      if (response.error) {
+        throw response.error;
       }
-      const result = (expressionFn as (user: UserDto) => unknown)(
-        FORM_BUILDER_PREVIEW_USER
-      );
-      if (typeof result !== "boolean") {
-        throw new Error("Expression must return a boolean.");
+
+      if (!response.data) {
+        throw new Error("Missing custom expression results.");
       }
-      setExpressionTest({ result });
+
+      const selectedResult = response.data.selectedUserResult;
+      if (typeof selectedResult !== "boolean") {
+        throw new Error("Missing selected user result.");
+      }
+
+      setExpressionTest({
+        result: selectedResult,
+        selectedUserLabel,
+        totals: {
+          pass: response.data.passCount,
+          fail: response.data.failCount,
+          total: response.data.totalCount,
+        },
+      });
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Expression failed to run.";
+        (err as { message: string } | undefined)?.message ?? "Expression failed to run.";
       setExpressionTest({ error: message });
+    } finally {
+      setIsTesting(false);
     }
-  }, [expression, type]);
+  }, [
+    expression,
+    isCustomExpression,
+    selectedUserId,
+    selectedUserLabel,
+    usersError,
+    usersLoading,
+  ]);
+  const canTestExpression =
+    hasExpression &&
+    !isTesting &&
+    Boolean(selectedUserId) &&
+    !usersLoading &&
+    !usersError;
 
   return (
     <div className={`space-y-1 ${className}`}>
@@ -1105,35 +1279,81 @@ export function CustomValidatorSelect({
           )}
       </div>
       {type === "CustomExpression" && (
-        <div className="space-y-1">
+        <div className="space-y-2">
           <textarea
             value={expression ?? ""}
             onChange={(e) => onChange(type, idArgument, e.target.value)}
             className="px-2 py-1 text-xs border border-gray-300 rounded bg-white w-full font-mono"
           />
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={runExpressionTest}
-              disabled={!hasExpression}
-              className="text-[11px] text-blue-600 hover:text-blue-700 disabled:text-gray-400"
-            >
-              Test expression
-            </button>
-            <span className="text-[10px] text-gray-400">
-              Uses preview user from testData.ts
-            </span>
-          </div>
-          {expressionTest?.error && (
-            <p className="text-[11px] text-red-500">{expressionTest.error}</p>
-          )}
-          {expressionTest &&
-            expressionTest.result !== undefined &&
-            !expressionTest.error && (
-              <p className="text-[11px] text-green-600">
-                Result: {String(expressionTest.result)}
+          <Card style={CardStyle.Grey} className="p-2! gap-y-2">
+
+            <div className="space-y-1">
+              <label className="block text-[11px] text-gray-700">Test user</label>
+              <select
+                className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100"
+                value={selectedUserId ?? ""}
+                onChange={(event) =>
+                  setSelectedUserId(
+                    event.target.value ? Number(event.target.value) : null
+                  )
+                }
+                disabled={usersLoading || Boolean(usersError) || users.length === 0}
+              >
+                <option value="">Select a user</option>
+                {sortedUsers.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.anonymous ? "Anonymous" : user.name} ({user.id})
+                  </option>
+                ))}
+              </select>
+              {usersLoading && (
+                <p className="text-[11px] text-gray-500">Loading users…</p>
+              )}
+              {usersError && !usersLoading && (
+                <p className="text-[11px] text-red-500">{usersError}</p>
+              )}
+              {!usersLoading && !usersError && users.length === 0 && (
+                <p className="text-[11px] text-gray-400">
+                  No users available to test.
+                </p>
+              )}
+            </div>
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={runExpressionTest}
+                disabled={!canTestExpression}
+                className="text-[11px] text-blue-600 hover:text-blue-700 disabled:text-gray-400"
+              >
+                {isTesting ? "Testing…" : "Test expression"}
+              </button>
+              <span className="text-[10px] text-gray-400">
+                Runs against selected user and all users
+              </span>
+            </div>
+            {expressionTest?.error && (
+              <p className="text-[11px] text-red-500">{expressionTest.error}</p>
+            )}
+            {expressionTest &&
+              expressionTest.result !== undefined &&
+              !expressionTest.error && (
+                <p
+                  className={`text-[11px] ${expressionTest.result ? "text-green-600" : "text-red-600"}`}
+                >
+                  {expressionTest.selectedUserLabel
+                    ? `${expressionTest.selectedUserLabel}: `
+                    : "Selected user: "}
+                  {String(expressionTest.result)}
+                </p>
+              )}
+            {expressionTest?.totals && !expressionTest.error && (
+              <p className="text-[11px] text-gray-600">
+                All users: {expressionTest.totals.pass} pass,{" "}
+                {expressionTest.totals.fail} fail (total{" "}
+                {expressionTest.totals.total})
               </p>
             )}
+          </Card>
         </div>
       )}
       {loading && (

@@ -21,6 +21,7 @@ import {
   CustomValidatorDto,
   CustomValidatorResponseDto,
   CustomValidatorTypeDto,
+  TestCustomExpressionResponseDto,
 } from './customvalidator.dto';
 import {
   CustomValidator,
@@ -570,6 +571,80 @@ export class TasksService {
 
   async findOneCustomValidator(id: number): Promise<CustomValidatorDto> {
     return this.customValidatorRepository.findOneOrFail({ where: { id } });
+  }
+
+  async testCustomExpression(
+    expression: string,
+    userId?: number,
+  ): Promise<TestCustomExpressionResponseDto> {
+    if (!expression?.trim()) {
+      throw new BadRequestException('Expression is empty');
+    }
+
+    let expressionFn: (user: User) => unknown;
+    try {
+      expressionFn = eval(expression) as (user: User) => unknown;
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to evaluate expression: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+
+    if (typeof expressionFn !== 'function') {
+      throw new BadRequestException('Expression must evaluate to a function');
+    }
+
+    const runForUser = (user: User): boolean => {
+      let result: unknown;
+      try {
+        result = expressionFn(user);
+      } catch (error) {
+        throw new BadRequestException(
+          `Expression failed for user ${user.id}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+      if (typeof result !== 'boolean') {
+        throw new BadRequestException(
+          `Expression must return a boolean (user ${user.id}).`,
+        );
+      }
+      return result;
+    };
+
+    let selectedUserResult: boolean | undefined;
+    if (typeof userId === 'number') {
+      const selectedUser = await this.userService.findOneOrFail(userId, {
+        tags: true,
+        communities: true,
+        contractEvents: true,
+      });
+      selectedUserResult = runForUser(selectedUser);
+    }
+
+    const users = await this.userService.findAll({
+      tags: true,
+      communities: true,
+      contractEvents: true,
+    });
+
+    let passCount = 0;
+    let failCount = 0;
+    for (const user of users) {
+      const isValid = runForUser(user);
+      if (isValid) {
+        passCount += 1;
+      } else {
+        failCount += 1;
+      }
+    }
+
+    return {
+      passCount,
+      failCount,
+      totalCount: users.length,
+      selectedUserId: userId,
+      selectedUserResult,
+    };
   }
 
   async runValidator(

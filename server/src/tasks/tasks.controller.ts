@@ -23,6 +23,8 @@ import {
   CustomValidatorResponseDto,
   CustomValidatorTypeDto,
   RunValidatorDto,
+  TestCustomExpressionDto,
+  TestCustomExpressionResponseDto,
 } from './customvalidator.dto';
 import {
   CreateFormDto,
@@ -148,6 +150,18 @@ export class TasksController {
       body.expression,
     );
     return validator;
+  }
+
+  @Post('testCustomExpression')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: TestCustomExpressionResponseDto })
+  async testCustomExpression(
+    @Body() body: TestCustomExpressionDto,
+  ): Promise<TestCustomExpressionResponseDto> {
+    return this.tasksService.testCustomExpression(
+      body.expression,
+      body.userId,
+    );
   }
 
   @Post('optout/:id')

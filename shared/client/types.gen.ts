@@ -2255,6 +2255,19 @@ export type CreateCustomValidatorResponseDto = {
     id: number;
 };
 
+export type TestCustomExpressionDto = {
+    expression: string;
+    userId?: number;
+};
+
+export type TestCustomExpressionResponseDto = {
+    passCount: number;
+    failCount: number;
+    totalCount: number;
+    selectedUserId?: number;
+    selectedUserResult?: boolean;
+};
+
 export type TimeSpentForUserDto = {
     userId: number;
     timeSpent: number;
@@ -2324,11 +2337,23 @@ export type ActionStatsWithOnboardingDto = {
     onboarding: boolean;
 };
 
+export type MemberCompletionRetentionActionSummaryDto = {
+    actionId: number;
+    actionName: string;
+    memberCount: number;
+};
+
 export type MemberCompletionRetentionPointDto = {
     weekIndex: number;
+    actionIndex: number;
+    actionStartDate: string;
     completionRate: number;
     joinedCount: number;
     completedCount: number;
+    weekCompletionRate: number;
+    weekJoinedCount: number;
+    weekCompletedCount: number;
+    actions: Array<MemberCompletionRetentionActionSummaryDto>;
 };
 
 export type MemberCompletionRetentionCohortDto = {
@@ -5878,6 +5903,19 @@ export type TasksCreateCustomValidatorResponses = {
 };
 
 export type TasksCreateCustomValidatorResponse = TasksCreateCustomValidatorResponses[keyof TasksCreateCustomValidatorResponses];
+
+export type TasksTestCustomExpressionData = {
+    body: TestCustomExpressionDto;
+    path?: never;
+    query?: never;
+    url: '/tasks/testCustomExpression';
+};
+
+export type TasksTestCustomExpressionResponses = {
+    200: TestCustomExpressionResponseDto;
+};
+
+export type TasksTestCustomExpressionResponse = TasksTestCustomExpressionResponses[keyof TasksTestCustomExpressionResponses];
 
 export type TasksOptoutData = {
     body: OptOutActionDto;

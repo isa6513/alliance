@@ -18,7 +18,7 @@ import { User } from 'src/user/entities/user.entity';
 import { ContractEventType } from 'src/user/entities/contract-event.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { Action } from 'src/actions/entities/action.entity';
-import { ActionStatus } from 'src/actions/entities/action-event.entity';
+import { ActionEvent, ActionStatus } from 'src/actions/entities/action-event.entity';
 import { ContractEvent } from 'src/user/entities/contract-event.entity';
 import {
   MemberCompletionRetentionCohortDto,
@@ -570,16 +570,6 @@ ORDER BY pp.total_session_duration_seconds DESC
     });
   }
 
-  private getWeekStartDate(date: Date): Date {
-    const utcDate = new Date(
-      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
-    );
-    const day = utcDate.getUTCDay();
-    const diff = (day + 6) % 7;
-    utcDate.setUTCDate(utcDate.getUTCDate() - diff);
-    return utcDate;
-  }
-
   private formatDateKey(date: Date): string {
     return date.toISOString().split('T')[0];
   }
@@ -597,7 +587,6 @@ ORDER BY pp.total_session_duration_seconds DESC
       .getRawMany<{ userId: number; signedAt: string }>();
 
     const memberSignedAtByUserId = new Map<number, Date>();
-    const cohortMembers = new Map<string, Set<number>>();
 
     for (const row of signedEvents) {
       const userId = Number(row.userId);
@@ -609,10 +598,6 @@ ORDER BY pp.total_session_duration_seconds DESC
         continue;
       }
       memberSignedAtByUserId.set(userId, signedAt);
-      const cohortKey = this.formatDateKey(this.getWeekStartDate(signedAt));
-      const members = cohortMembers.get(cohortKey) ?? new Set<number>();
-      members.add(userId);
-      cohortMembers.set(cohortKey, members);
     }
 
     if (memberSignedAtByUserId.size === 0) {
@@ -630,72 +615,160 @@ ORDER BY pp.total_session_duration_seconds DESC
       completedLookup.add(`${activity.userId}:${activity.actionId}`);
     }
 
-    const cohortWeekTotals = new Map<
-      string,
-      Map<number, { joinedCount: number; completedCount: number }>
-    >();
-    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+    type CohortWeekBucket = {
+      joinedCount: number;
+      completedCount: number;
+      actionCounts: Map<
+        number,
+        { actionId: number; actionName: string; memberCount: number }
+      >;
+    };
+
+    const cohortWeekTotals = new Map<number, Map<number, CohortWeekBucket>>();
     const actions = await this.actionRepository.find({
       relations: { events: true, participatingTags: true },
     });
     const now = new Date();
 
+    const eligibleActions: {
+      action: Action;
+      memberActionEvent: ActionEvent;
+      startDate: Date;
+    }[] = [];
+
     for (const action of actions) {
       if (action.publicOnly || action.onboarding) {
         continue;
       }
-      const memberActionEvent = (action.events ?? [])
-        .filter(
-          (event) =>
-            event.newStatus === ActionStatus.MemberAction && event.date <= now,
-        )
-        .sort((a, b) => a.date.getTime() - b.date.getTime())[0];
+      const sortedEvents = (action.events ?? []).sort(
+        (a, b) => a.date.getTime() - b.date.getTime(),
+      );
+      const memberActionEvent = sortedEvents.find(
+        (event) =>
+          event.newStatus === ActionStatus.MemberAction && event.date <= now,
+      );
 
       if (!memberActionEvent) {
         continue;
       }
 
-      const baseUsers =
-        await this.actionEventRecipientService.findBaseUsersForEvent({
-          action,
-          eventId: memberActionEvent.id,
-          eventStatus: ActionStatus.MemberAction,
-          includeSuspended: true,
-        });
+      const memberActionEndEvent = sortedEvents.find(
+        (event) =>
+          event.date > memberActionEvent.date &&
+          event.newStatus !== ActionStatus.MemberAction,
+      );
 
-      for (const user of baseUsers) {
-        const signedAt = memberSignedAtByUserId.get(user.id);
-        if (!signedAt || signedAt > memberActionEvent.date) {
-          continue;
-        }
-        const rawWeekIndex = Math.floor(
-          (memberActionEvent.date.getTime() - signedAt.getTime()) / msPerWeek,
-        );
-        const weekIndex = Math.max(0, rawWeekIndex);
-        const cohortKey = this.formatDateKey(this.getWeekStartDate(signedAt));
+      if (!memberActionEndEvent || memberActionEndEvent.date > now) {
+        continue;
+      }
 
-        const weekMap =
-          cohortWeekTotals.get(cohortKey) ??
-          new Map<number, { joinedCount: number; completedCount: number }>();
-        const bucket = weekMap.get(weekIndex) ?? {
-          joinedCount: 0,
-          completedCount: 0,
-        };
-        bucket.joinedCount += 1;
-        if (completedLookup.has(`${user.id}:${action.id}`)) {
-          bucket.completedCount += 1;
+      eligibleActions.push({
+        action,
+        memberActionEvent,
+        startDate: memberActionEvent.date,
+      });
+    }
+
+    if (eligibleActions.length === 0) {
+      return [];
+    }
+
+    const groupedActions = new Map<
+      string,
+      { date: Date; startAt: Date; entries: typeof eligibleActions }
+    >();
+
+    for (const entry of eligibleActions) {
+      const dateKey = this.formatDateKey(entry.startDate);
+      const group = groupedActions.get(dateKey) ?? {
+        date: new Date(`${dateKey}T00:00:00Z`),
+        startAt: entry.startDate,
+        entries: [],
+      };
+      if (entry.startDate < group.startAt) {
+        group.startAt = entry.startDate;
+      }
+      group.entries.push(entry);
+      groupedActions.set(dateKey, group);
+    }
+
+    const actionGroups = Array.from(groupedActions.values()).sort(
+      (a, b) => a.startAt.getTime() - b.startAt.getTime(),
+    );
+
+    const actionStartDates = actionGroups.map((group) => group.date);
+    const cohortIndexByUserId = new Map<number, number>();
+    const cohortMembers = new Map<number, Set<number>>();
+    for (const [userId, signedAt] of memberSignedAtByUserId) {
+      const cohortIndex = actionGroups.findIndex(
+        (group) => signedAt < group.startAt,
+      );
+      if (cohortIndex < 0) {
+        continue;
+      }
+      cohortIndexByUserId.set(userId, cohortIndex);
+      const members = cohortMembers.get(cohortIndex) ?? new Set<number>();
+      members.add(userId);
+      cohortMembers.set(cohortIndex, members);
+    }
+
+    for (const [actionIndex, group] of actionGroups.entries()) {
+      for (const entry of group.entries) {
+        const { action, memberActionEvent } = entry;
+        const baseUsers =
+          await this.actionEventRecipientService.findBaseUsersForEvent({
+            action,
+            eventId: memberActionEvent.id,
+            eventStatus: ActionStatus.MemberAction,
+            includeSuspended: true,
+          });
+
+        for (const user of baseUsers) {
+          const signedAt = memberSignedAtByUserId.get(user.id);
+          if (!signedAt) {
+            continue;
+          }
+          const cohortIndex = cohortIndexByUserId.get(user.id);
+          if (cohortIndex === undefined) {
+            continue;
+          }
+          const weekIndex = actionIndex - cohortIndex;
+          if (weekIndex < 0) {
+            continue;
+          }
+
+          const weekMap =
+            cohortWeekTotals.get(cohortIndex) ??
+            new Map<number, CohortWeekBucket>();
+          const bucket = weekMap.get(weekIndex) ?? {
+            joinedCount: 0,
+            completedCount: 0,
+            actionCounts: new Map(),
+          };
+          bucket.joinedCount += 1;
+          const actionBucket = bucket.actionCounts.get(action.id) ?? {
+            actionId: action.id,
+            actionName: action.name,
+            memberCount: 0,
+          };
+          actionBucket.memberCount += 1;
+          bucket.actionCounts.set(action.id, actionBucket);
+          if (completedLookup.has(`${user.id}:${action.id}`)) {
+            bucket.completedCount += 1;
+          }
+          weekMap.set(weekIndex, bucket);
+          cohortWeekTotals.set(cohortIndex, weekMap);
         }
-        weekMap.set(weekIndex, bucket);
-        cohortWeekTotals.set(cohortKey, weekMap);
       }
     }
 
     return Array.from(cohortWeekTotals.entries())
       .sort(
-        ([cohortA], [cohortB]) =>
-          new Date(cohortA).getTime() - new Date(cohortB).getTime(),
+        ([cohortA], [cohortB]) => cohortA - cohortB,
       )
-      .map(([cohortStart, weekMap]) => {
+      .map(([cohortIndex, weekMap]) => {
+        const cohortStartDate = actionStartDates[cohortIndex];
+        const cohortStart = this.formatDateKey(cohortStartDate);
         const weeks = Array.from(weekMap.entries()).sort(
           ([weekA], [weekB]) => weekA - weekB,
         );
@@ -703,23 +776,42 @@ ORDER BY pp.total_session_duration_seconds DESC
         let cumulativeCompleted = 0;
         const points: MemberCompletionRetentionPointDto[] = weeks.map(
           ([weekIndex, counts]) => {
+            const actionIndex = cohortIndex + weekIndex;
+            const actionStartDate = actionStartDates[actionIndex];
             cumulativeJoined += counts.joinedCount;
             cumulativeCompleted += counts.completedCount;
+            const weekCompletionRate =
+              counts.joinedCount > 0
+                ? counts.completedCount / counts.joinedCount
+                : 0;
+            const actions = Array.from(counts.actionCounts.values()).sort(
+              (a, b) =>
+                b.memberCount - a.memberCount ||
+                a.actionName.localeCompare(b.actionName),
+            );
             return {
               weekIndex,
+              actionIndex,
+              actionStartDate: this.formatDateKey(
+                actionStartDate ?? cohortStartDate,
+              ),
               completionRate:
                 cumulativeJoined > 0
                   ? cumulativeCompleted / cumulativeJoined
                   : 0,
               joinedCount: cumulativeJoined,
               completedCount: cumulativeCompleted,
+              weekCompletionRate,
+              weekJoinedCount: counts.joinedCount,
+              weekCompletedCount: counts.completedCount,
+              actions,
             };
           },
         );
 
         return {
           cohortStart,
-          cohortSize: cohortMembers.get(cohortStart)?.size ?? 0,
+          cohortSize: cohortMembers.get(cohortIndex)?.size ?? 0,
           points,
         };
       });
