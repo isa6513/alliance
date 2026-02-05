@@ -43,42 +43,11 @@ export type ContractEvent = {
     autoSuspendKey?: string;
 };
 
-export type CommunityInviteStatus = 'request_pending' | 'request_rejected' | 'invitee_pending' | 'invitee_accepted' | 'invitee_rejected' | 'cancelled';
+export type OnetimeInviteStatus = 'request_pending' | 'request_rejected' | 'link_unused' | 'link_used';
 
-export type CommunityInvite = {
-    id: number;
-    status: CommunityInviteStatus;
-    createdAt: string;
-    updatedAt: string;
-    deletedAt: string | null;
-    invitingUser?: User;
-    invitedUser: User;
-    community: Community;
-};
+export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'community_invite_created' | 'community_invite_rejected' | 'community_invite_accepted' | 'removed_from_community' | 'left_community_reminder' | 'member_left_community' | 'member_suspended_removed_from_community' | 'member_joined_community' | 'community_assigned' | 'new_member_referred' | 'onetime_invite_request_created' | 'onetime_invite_request_approved' | 'onetime_invite_request_rejected' | 'community_invite_request_created' | 'community_invite_request_rejected';
 
-export type ParticipantRole = 'admin' | 'member' | 'owner';
-
-export type Message = {
-    id: string;
-    body: string;
-    /**
-     * Image keys attached to the content
-     */
-    attachments: Array<string>;
-    author: User;
-    createdAt: string;
-    deletedAt?: string;
-    replyTo?: Message;
-};
-
-export type ParticipantState = 'invited' | 'joined';
-
-export type Participant = {
-    role: ParticipantRole;
-    lastReadMessage?: Message;
-    state: ParticipantState;
-    userHidden: boolean;
-};
+export type NotifPriority = 'low' | 'high';
 
 /**
  * Type of the action
@@ -91,112 +60,6 @@ export type VisibilityMode = 'public' | 'all_members' | 'participating_groups';
  * New status of the action after the event
  */
 export type ActionStatus = 'draft' | 'planned' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
-
-export type EditableContent = {
-    /**
-     * Markdown or plain text body
-     */
-    body: string;
-    /**
-     * Image keys attached to the content
-     */
-    attachments: Array<string>;
-};
-
-export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 'tag';
-
-export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'community_invite_created' | 'community_invite_rejected' | 'community_invite_accepted' | 'removed_from_community' | 'left_community_reminder' | 'member_left_community' | 'member_joined_community' | 'community_assigned' | 'new_member_referred' | 'onetime_invite_request_created' | 'onetime_invite_request_approved' | 'onetime_invite_request_rejected' | 'community_invite_request_created' | 'community_invite_request_rejected';
-
-export type NotifPriority = 'low' | 'high';
-
-export type CommentParentObject = 'post' | 'action' | 'activity';
-
-export type Comment = {
-    id: number;
-    editableContent: EditableContent;
-    author: {
-        [key: string]: unknown;
-    };
-    authorId: number;
-    parentObjectType: CommentParentObject;
-    parentObjectId: number;
-    deleted: boolean;
-    createdAt: string;
-    updatedAt: string;
-    parent?: Comment;
-    parentId?: number;
-    children?: Array<Comment>;
-    pinned: boolean;
-    likes: Array<User>;
-    likesCount: number;
-};
-
-export type OnetimeInviteStatus = 'request_pending' | 'request_rejected' | 'link_unused' | 'link_used';
-
-export type OnetimeInvite = {
-    id: number;
-    invitee: string;
-    inviteeDescription?: string;
-    info?: string;
-    code: string;
-    createdAt: string;
-    status: OnetimeInviteStatus;
-    deletedAt: string | null;
-    invitingUser: User;
-    community?: Community;
-    communityId?: number;
-    notifs: Array<Notification>;
-};
-
-export type Notification = {
-    id: number;
-    category: NotificationCategory;
-    message: string;
-    priority: NotifPriority;
-    targetContent?: string;
-    webAppLocation: string | null;
-    mobileAppLocation: string | null;
-    readAt?: string;
-    createdAt: string;
-    updatedAt: string;
-    sendTime: string;
-    groupingKey?: string;
-    groupingCount?: number;
-    actionUpdate?: ActionUpdate;
-    comment?: Comment;
-    onetimeInvite?: OnetimeInvite;
-    shouldPush: boolean;
-    pushDispatchedAt?: string;
-    pushClaimedBy?: string;
-    pushClaimedAt?: string;
-};
-
-export type Tag = {
-    id: string;
-    users: Array<User>;
-    participatingIn: Array<Action>;
-    name: string;
-    description: string;
-    publicDisplayName?: string;
-    createdAt: string;
-    updatedAt: string;
-};
-
-export type ActionUpdate = {
-    id: number;
-    action: Action;
-    actionId: number;
-    title: string;
-    content: EditableContent;
-    date: string;
-    visibleAt: string;
-    shortNotifString: string;
-    associatedEvent?: ActionEvent;
-    associatedEventId?: number;
-    notifyType: ActionUpdateNotifyType;
-    notifs: Array<Notification>;
-    tag?: Tag;
-};
 
 export type ActionEvent = {
     /**
@@ -231,10 +94,32 @@ export type ActionEvent = {
     suiteManaged: boolean;
 };
 
+export type Tag = {
+    id: string;
+    users: Array<User>;
+    participatingIn: Array<Action>;
+    name: string;
+    description: string;
+    publicDisplayName?: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
 /**
  * Type of action activity
  */
 export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete' | 'user_dismissed';
+
+export type EditableContent = {
+    /**
+     * Markdown or plain text body
+     */
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
+};
 
 export type FormResponse = {
     id: number;
@@ -514,6 +399,122 @@ export type Action = {
     status: ActionStatus;
 };
 
+export type ActionUpdateNotifyType = 'none' | 'action_cohort' | 'all_members' | 'tag';
+
+export type ActionUpdate = {
+    id: number;
+    action: Action;
+    actionId: number;
+    title: string;
+    content: EditableContent;
+    date: string;
+    visibleAt: string;
+    shortNotifString: string;
+    associatedEvent?: ActionEvent;
+    associatedEventId?: number;
+    notifyType: ActionUpdateNotifyType;
+    notifs: Array<Notification>;
+    tag?: Tag;
+};
+
+export type CommentParentObject = 'post' | 'action' | 'activity';
+
+export type Comment = {
+    id: number;
+    editableContent: EditableContent;
+    author: {
+        [key: string]: unknown;
+    };
+    authorId: number;
+    parentObjectType: CommentParentObject;
+    parentObjectId: number;
+    deleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+    parent?: Comment;
+    parentId?: number;
+    children?: Array<Comment>;
+    pinned: boolean;
+    likes: Array<User>;
+    likesCount: number;
+};
+
+export type Notification = {
+    id: number;
+    category: NotificationCategory;
+    message: string;
+    priority: NotifPriority;
+    targetContent?: string;
+    webAppLocation: string | null;
+    mobileAppLocation: string | null;
+    readAt?: string;
+    createdAt: string;
+    updatedAt: string;
+    sendTime: string;
+    groupingKey?: string;
+    groupingCount?: number;
+    actionUpdate?: ActionUpdate;
+    comment?: Comment;
+    onetimeInvite?: OnetimeInvite;
+    shouldPush: boolean;
+    pushDispatchedAt?: string;
+    pushClaimedBy?: string;
+    pushClaimedAt?: string;
+};
+
+export type OnetimeInvite = {
+    id: number;
+    invitee: string;
+    inviteeDescription?: string;
+    info?: string;
+    code: string;
+    createdAt: string;
+    status: OnetimeInviteStatus;
+    deletedAt: string | null;
+    invitingUser: User;
+    invitedUser: User | null;
+    community?: Community | null;
+    communityId?: number;
+    notifs: Array<Notification>;
+};
+
+export type CommunityInviteStatus = 'request_pending' | 'request_rejected' | 'invitee_pending' | 'invitee_accepted' | 'invitee_rejected' | 'cancelled';
+
+export type CommunityInvite = {
+    id: number;
+    status: CommunityInviteStatus;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string | null;
+    invitingUser?: User;
+    invitedUser: User;
+    community: Community;
+};
+
+export type ParticipantRole = 'admin' | 'member' | 'owner';
+
+export type Message = {
+    id: string;
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
+    author: User;
+    createdAt: string;
+    deletedAt?: string;
+    replyTo?: Message;
+};
+
+export type ParticipantState = 'invited' | 'joined';
+
+export type Participant = {
+    role: ParticipantRole;
+    lastReadMessage?: Message;
+    state: ParticipantState;
+    userHidden: boolean;
+};
+
 export type User = {
     id: number;
     name: string;
@@ -548,10 +549,14 @@ export type User = {
     pushesForLikes: boolean;
     pushesForComments: boolean;
     pushesForFriendRequests: boolean;
-    isIntroductoryGroupMember: boolean;
     undergoingGroupAssignment: boolean;
     remindAboutUncompletedGroupMembers: boolean;
     contractEvents?: Array<ContractEvent>;
+    referredByInvite: OnetimeInvite | null;
+    /**
+     * The community that the user will join when they sign the contract
+     */
+    pendingCommunity?: Community | null;
     communities: Array<Community>;
     leaderOfIds: Array<number>;
     invitedCommunities: Array<CommunityInvite>;
@@ -571,6 +576,7 @@ export type Community = {
     maxCapacity: number | null;
     users: Array<User>;
     leaders?: Array<User>;
+    pendingUsers?: Array<User>;
     invites?: Array<OnetimeInvite>;
     internalInvites: Array<CommunityInvite>;
 };
@@ -603,7 +609,6 @@ export type UserDto = {
     pushesForLikes: boolean;
     pushesForComments: boolean;
     pushesForFriendRequests: boolean;
-    isIntroductoryGroupMember: boolean;
     undergoingGroupAssignment: boolean;
     remindAboutUncompletedGroupMembers: boolean;
     contractEvents?: Array<ContractEvent>;
@@ -755,6 +760,7 @@ export type CommunityDto = {
     allowMemberInvites: boolean;
     allowStaffAssignments: boolean;
     maxCapacity: number | null;
+    pendingUsers?: Array<User>;
     internalInvites: Array<CommunityInvite>;
     users: Array<ProfileDto>;
     leaders: Array<ProfileDto>;
@@ -801,7 +807,7 @@ export type OnetimeInviteDto = {
     code: string;
     createdAt: string;
     status: OnetimeInviteStatus;
-    community?: Community;
+    community?: Community | null;
     invitingUser: ProfileDto;
 };
 

@@ -56,7 +56,6 @@ const NoCommunityPage = () => {
           <MyGroupsPage
             onSelectCommunity={(communityId) => setParams({ communityId })}
             communities={[]}
-            isOnboardingGroupMember={user?.isIntroductoryGroupMember ?? true}
           />
         )}
       </div>

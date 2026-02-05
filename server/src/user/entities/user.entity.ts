@@ -283,11 +283,6 @@ export class User {
   @Allow()
   pushesForFriendRequests: boolean;
 
-  @Column({ default: true })
-  @ApiProperty()
-  @Allow()
-  isIntroductoryGroupMember: boolean;
-
   @Column({ default: false })
   @ApiProperty()
   @Allow()

@@ -27,14 +27,12 @@ export type MyGroupsPageProps = {
   communities: CommunityDto[] | null;
   onSelectCommunity: (communityId: number | null | undefined) => void;
   onBack?: () => void;
-  isOnboardingGroupMember: boolean;
 };
 
 const MyGroupsPage = ({
   communities,
   onSelectCommunity,
   onBack,
-  isOnboardingGroupMember,
 }: MyGroupsPageProps) => {
   const { user, refreshUser } = useAuth();
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -258,7 +256,7 @@ const MyGroupsPage = ({
       )}
       {/* Leader groups */}
       <div>
-        {!!(leaderCommunities.length || !isOnboardingGroupMember) && (
+        {
           <div className="flex flex-col gap-y-4">
             <div className="flex flex-col gap-y-1">
               <p className="font-semibold text-xl md:text-2xl">
@@ -302,43 +300,41 @@ const MyGroupsPage = ({
                     </Button>
                   );
                 }) ?? []),
-                !isOnboardingGroupMember && (
-                  <Fragment key="create-group">
-                    <Button
-                      onClick={() => setShowCreateForm(!showCreateForm)}
-                      color={
-                        showCreateForm ? ButtonColor.Light : ButtonColor.White
-                      }
-                      className={`w-full !rounded-none ${
-                        leaderCommunities.length
-                          ? "border-t border-t-zinc-200 border-x-0 border-b-0"
-                          : "border-0"
-                      }`}
-                    >
-                      <div className="w-full flex flex-row gap-x-2 items-center justify-center p-2 text-zinc-500">
-                        {showCreateForm ? (
-                          <Minus size="14" />
-                        ) : (
-                          <Plus size="14" />
-                        )}{" "}
-                        Create group
-                      </div>
-                    </Button>
-                    {!!showCreateForm && (
-                      <div className="p-4 flex flex-col gap-y-4">
-                        <CommunityCreateForm
-                          name={user?.name}
-                          onCancel={handleCreateCancel}
-                          onSuccess={handleCreateSuccess}
-                        />
-                      </div>
-                    )}
-                  </Fragment>
-                ),
+                <Fragment key="create-group">
+                  <Button
+                    onClick={() => setShowCreateForm(!showCreateForm)}
+                    color={
+                      showCreateForm ? ButtonColor.Light : ButtonColor.White
+                    }
+                    className={`w-full !rounded-none ${
+                      leaderCommunities.length
+                        ? "border-t border-t-zinc-200 border-x-0 border-b-0"
+                        : "border-0"
+                    }`}
+                  >
+                    <div className="w-full flex flex-row gap-x-2 items-center justify-center p-2 text-zinc-500">
+                      {showCreateForm ? (
+                        <Minus size="14" />
+                      ) : (
+                        <Plus size="14" />
+                      )}{" "}
+                      Create group
+                    </div>
+                  </Button>
+                  {!!showCreateForm && (
+                    <div className="p-4 flex flex-col gap-y-4">
+                      <CommunityCreateForm
+                        name={user?.name}
+                        onCancel={handleCreateCancel}
+                        onSuccess={handleCreateSuccess}
+                      />
+                    </div>
+                  )}
+                </Fragment>,
               ]}
             </List>
           </div>
-        )}
+        }
       </div>
 
       {/* Non-leader groups */}
