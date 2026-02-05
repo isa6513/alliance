@@ -20,7 +20,7 @@ export class AuthService {
     private usersService: UserService,
     private jwtService: JwtService,
     private mailService: MailService,
-  ) {}
+  ) { }
 
   public static ACCESS_COOKIE = 'access_token';
   public static REFRESH_COOKIE = 'refresh_token';
@@ -41,7 +41,7 @@ export class AuthService {
         secure: prod,
         sameSite: 'strict',
         path: '/',
-        maxAge: 1000 * 60 * 60 * 24 * 14, // 14 days
+        maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
       });
     }
   }

@@ -1,31 +1,26 @@
 import React, { useState } from "react";
 import {
   View,
-  TouchableOpacity,
-  ActivityIndicator,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
   Alert,
+  StyleSheet
 } from "react-native";
-import { Stack, Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useAuth } from "../../lib/AuthContext";
-import { authStyles } from "../../lib/style/authStyles";
-import { colors } from "../../lib/style/colors";
-import Button, { ButtonColor } from "../../components/system/Button";
+import Button from "../../components/system/Button";
 import Input from "../../components/system/Input";
-import Text, { TextStyle } from "../../components/system/Text";
+import Text from "../../components/system/Text";
+import { ArrowRight } from "lucide-react-native";
 
 const LoginScreen = () => {
   const router = useRouter();
-  const { login, isLoading } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+      Alert.alert("Error", "Please enter email and password");
       return;
     }
 
@@ -45,67 +40,42 @@ const LoginScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={authStyles.container}
-    >
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
-      <ScrollView contentContainerStyle={authStyles.scrollContent}>
-        <View className="px-3 flex flex-col gap-y-4">
-          <View>
-            <Text style={authStyles.label}>Email</Text>
-            <Input
-              placeholder="your@email.com"
-              placeholderTextColor={colors.text.tertiary}
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoCorrect={false}
-            />
-          </View>
-
-          <View>
-            <Text style={authStyles.label}>Password</Text>
-            <Input
-              placeholder="Your password"
-              placeholderTextColor={colors.text.tertiary}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
-
-          <Button
-            onPress={handleLogin}
-            disabled={isSubmitting || isLoading}
-            color={ButtonColor.Black}
-          >
-            {isSubmitting || isLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text type={TextStyle.Label}>Log In</Text>
-            )}
-          </Button>
-
-          <View className="flex-row justify-center gap-x-2">
-            <Text style={authStyles.linkText}>Don&apos;t have an account?</Text>
-            <Link href="/auth/signup" asChild>
-              <TouchableOpacity>
-                <Text style={authStyles.link}>Sign Up</Text>
-              </TouchableOpacity>
-            </Link>
-          </View>
+    <View style={styles.inner} className="flex flex-col pt-48">
+      <View className="flex flex-col gap-y-6 bg-white">
+        <View>
+          <Text className="">Email</Text>
+          <Input placeholder="Email" value={email} onChangeText={setEmail} textContentType="emailAddress" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} autoFocus />
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        <View>
+          <Text className="">Password</Text>
+          <Input placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry textContentType="password" keyboardType="default" autoCapitalize="none" autoCorrect={false} />
+        </View>
+        <Button onPress={handleLogin} disabled={isSubmitting || !email || !password} className="rounded-md w-[60%] self-center py-4!">
+          <Text className="text-white text-base font-medium">Log in</Text>
+          <ArrowRight size={20} color="white" />
+        </Button>
+      </View>
+    </View>
   );
 };
+
+
+const styles = StyleSheet.create({
+  content: {
+    flex: 1,
+  },
+  inner: {
+    padding: 24,
+    flex: 1,
+  },
+  textInput: {
+    height: 45,
+    borderColor: "#000000",
+    borderWidth: 1,
+    borderRadius: 10,
+    marginBottom: 36,
+    paddingLeft: 10,
+  },
+});
 
 export default LoginScreen;

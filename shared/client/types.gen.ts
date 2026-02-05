@@ -4461,6 +4461,21 @@ export type ActionsFindOneAdminResponses = {
 
 export type ActionsFindOneAdminResponse = ActionsFindOneAdminResponses[keyof ActionsFindOneAdminResponses];
 
+export type ActionsGetIncompleteUsersData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/{id}/incomplete-users';
+};
+
+export type ActionsGetIncompleteUsersResponses = {
+    200: Array<ProfileDto>;
+};
+
+export type ActionsGetIncompleteUsersResponse = ActionsGetIncompleteUsersResponses[keyof ActionsGetIncompleteUsersResponses];
+
 export type ActionsCreateData = {
     body: CreateActionDto;
     path?: never;

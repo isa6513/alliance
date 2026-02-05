@@ -4,16 +4,14 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform,
   Alert,
 } from "react-native";
-import { Stack, Link, useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { authRegister } from "@alliance/shared/client";
-import { authStyles } from "../../lib/style/authStyles";
 import Button from "../../components/system/Button";
 import Input from "../../components/system/Input";
 import Text from "../../components/system/Text";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 
 const SignupScreen = () => {
   const router = useRouter();
@@ -96,21 +94,14 @@ const SignupScreen = () => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={authStyles.container}
+      behavior="padding"
     >
-      <Stack.Screen
-        options={{
-          title: "Sign Up",
-          headerShown: true,
-        }}
-      />
-      <ScrollView contentContainerStyle={authStyles.scrollContent}>
-        <View style={authStyles.formContainer}>
-          <Text style={authStyles.title}>Create an Account</Text>
+      <ScrollView keyboardShouldPersistTaps="handled">
+        <View className="flex flex-col gap-y-4">
+          <Text className="text-sm text-zinc-500">Create an Account</Text>
 
-          <View style={authStyles.inputContainer}>
-            <Text style={authStyles.label}>Full Name</Text>
+          <View className="flex flex-col gap-y-2">
+            <Text className="text-sm text-zinc-500">Full Name</Text>
             <Input
               placeholder="John Doe"
               value={name}
@@ -121,12 +112,12 @@ const SignupScreen = () => {
               autoCapitalize="words"
             />
             {errors.name ? (
-              <Text style={authStyles.errorText}>{errors.name}</Text>
+              <Text className="text-sm text-zinc-500">{errors.name}</Text>
             ) : null}
           </View>
 
-          <View style={authStyles.inputContainer}>
-            <Text style={authStyles.label}>Email</Text>
+          <View className="flex flex-col gap-y-2">
+            <Text className="text-sm text-zinc-500">Email</Text>
             <Input
               placeholder="your@email.com"
               value={email}
@@ -139,12 +130,12 @@ const SignupScreen = () => {
               autoCorrect={false}
             />
             {errors.email ? (
-              <Text style={authStyles.errorText}>{errors.email}</Text>
+              <Text className="text-sm text-zinc-500">{errors.email}</Text>
             ) : null}
           </View>
 
-          <View style={authStyles.inputContainer}>
-            <Text style={authStyles.label}>Password</Text>
+          <View className="flex flex-col gap-y-2">
+            <Text className="text-sm text-zinc-500">Password</Text>
             <Input
               placeholder="Minimum 8 characters"
               value={password}
@@ -157,7 +148,7 @@ const SignupScreen = () => {
               autoCorrect={false}
             />
             {errors.password ? (
-              <Text style={authStyles.errorText}>{errors.password}</Text>
+              <Text className="text-sm text-zinc-500">{errors.password}</Text>
             ) : null}
           </View>
 
@@ -165,15 +156,15 @@ const SignupScreen = () => {
             {isSubmitting ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={{ color: "white" }}>Create Account</Text>
+              <Text className="text-sm text-zinc-500">Create Account</Text>
             )}
           </Button>
 
-          <View style={authStyles.linkContainer}>
-            <Text style={authStyles.linkText}>Already have an account?</Text>
+          <View className="flex flex-row gap-x-2">
+            <Text className="text-sm text-zinc-500">Already have an account?</Text>
             <Link href="/auth/login" asChild>
               <TouchableOpacity>
-                <Text style={authStyles.link}>Log In</Text>
+                <Text className="text-sm text-zinc-500">Log In</Text>
               </TouchableOpacity>
             </Link>
           </View>

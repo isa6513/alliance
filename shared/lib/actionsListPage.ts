@@ -1,8 +1,8 @@
 import { ActionDto, actionsFindAllLoggedIn } from "../client";
 import { FilterMode } from "./actionUtils";
-import { useQuery } from "@tanstack/react-query";
+import { UseQueryResult, useQuery } from "@tanstack/react-query";
 
-export const useActionsQuery = () =>
+export const useActionsQuery = (): UseQueryResult<ActionDto[], Error> =>
   useQuery({
     queryKey: ["actions"],
     queryFn: () =>

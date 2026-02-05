@@ -38,6 +38,7 @@ import {
   CommunityUserInfoDto,
   UserActionRelationsResponseDto,
 } from 'src/user/dto/user-action-relations.dto';
+import { ProfileDto } from 'src/user/dto/user.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
 import { Public } from '../auth/public.decorator';
@@ -456,6 +457,16 @@ export class ActionsController {
     return this.actionsService.findOne(id, req.user.sub);
   }
 
+  @Get(':id/incomplete-users')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [ProfileDto] })
+  async getIncompleteUsers(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ProfileDto[]> {
+    const users = await this.actionsService.findIncompleteUsersForAction(id);
+    return users.map((user) => new ProfileDto(user));
+  }
+
   @Post('create')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionDto })
@@ -855,7 +866,9 @@ export class ActionsController {
     @Query('rangeStart') rangeStart: Date,
     @Query('rangeEnd') rangeEnd: Date,
   ): Promise<SuspensionPlanDto[]> {
-    return this.actionsService.getSuspendPlans(rangeStart, rangeEnd, 6);
+    const start = new Date(rangeStart);
+    const end = new Date(rangeEnd);
+    return this.actionsService.getSuspendPlans(start, end, 6);
   }
 
   @Post('getShareLink/:id')

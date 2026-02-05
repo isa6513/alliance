@@ -21,6 +21,7 @@ import {
 } from "@alliance/shared/lib/actionUtils";
 import { useQuery } from "@tanstack/react-query";
 import { KeyboardAwareScrollView, KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
+import { useAuth } from "../../lib/AuthContext";
 
 export default function HomeScreen() {
   const {

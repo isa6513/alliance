@@ -132,7 +132,7 @@ const PostsManagementPage: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="p-6 pt-20 flex flex-col gap-6 max-w-5xl">
+      <div className="p-6 pt-10 flex flex-col gap-6 max-w-5xl">
         <div>
           <h1 className="text-2xl font-semibold">Posts Management</h1>
           <p className="text-sm text-zinc-500">
@@ -144,7 +144,7 @@ const PostsManagementPage: React.FC = () => {
           <Card style={CardStyle.White}>
             <div className="flex flex-col gap-4">
               <h2 className="font-semibold text-lg">Posts</h2>
-              <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto">
+              <div className="flex flex-col gap-2  overflow-y-auto">
                 {posts.length ? (
                   posts.map((post) => (
                     <button

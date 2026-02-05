@@ -5,6 +5,7 @@ import {
   actionsCreate,
   actionsExportAction,
   actionsFindOneAdmin,
+  actionsGetIncompleteUsers,
   actionsRemove,
   actionsSuites,
   actionsShareUrlStats,
@@ -22,7 +23,7 @@ import {
   userGetTags,
   userMembers,
 } from "@alliance/shared/client";
-import type { ActionStatsWithOnboardingDto, ShareUrlStatsDto } from "@alliance/shared/client/types.gen";
+import type { ActionStatsWithOnboardingDto, ActionStatus, ProfileDto, ShareUrlStatsDto } from "@alliance/shared/client/types.gen";
 import FormResponseStatistics from "../components/FormResponseStatistics";
 import type { FormWithSchema } from "./FormResponses";
 import { getApiUrl, getBaseUrl } from "@alliance/sharedweb/lib/config";
@@ -43,6 +44,7 @@ import {
   Users,
   UserCheck,
   UserMinus,
+  UserX,
   TrendingUp,
 } from "lucide-react";
 import ActionCompletionCurveChart from "../components/ActionCompletionCurveChart";
@@ -124,6 +126,8 @@ const ActionDashboard: React.FC = () => {
   const [actionStats, setActionStats] = useState<ActionStatsWithOnboardingDto | null>(null);
   const [taskForm, setTaskForm] = useState<FormWithSchema | null>(null);
   const [formResponses, setFormResponses] = useState<FormResponseDto[]>([]);
+  const [incompleteUsers, setIncompleteUsers] = useState<ProfileDto[]>([]);
+  const [incompleteUsersExpanded, setIncompleteUsersExpanded] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const selectedTab = (searchParams.get("tab") as Tab) ?? "overview";
@@ -455,6 +459,28 @@ const ActionDashboard: React.FC = () => {
 
     loadFormData();
   }, [action?.taskFormId]);
+
+  // Load incomplete users when action is done
+  useEffect(() => {
+    const doneStatuses: ActionStatus[] = ["completed", "failed", "abandoned", "resolution", "office_action"];
+    if (!actionId || !action?.status || !doneStatuses.includes(action.status)) {
+      setIncompleteUsers([]);
+      return;
+    }
+
+    const loadIncompleteUsers = async () => {
+      try {
+        const response = await actionsGetIncompleteUsers({
+          path: { id: actionId },
+        });
+        setIncompleteUsers(response.data ?? []);
+      } catch (err) {
+        console.error("Failed to load incomplete users:", err);
+      }
+    };
+
+    loadIncompleteUsers();
+  }, [actionId, action?.status]);
 
   const handleActionCreated = useCallback(
     (action: ActionDto) => {
@@ -1080,7 +1106,7 @@ const ActionDashboard: React.FC = () => {
 
                 {/* Stats Grid - only show after member_action has started */}
                 {hasMemberActionStarted && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     <Card style={CardStyle.White} className="!p-4">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-100 rounded-lg">
@@ -1105,8 +1131,8 @@ const ActionDashboard: React.FC = () => {
                     </Card>
                     <Card style={CardStyle.White} className="!p-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-red-100 rounded-lg">
-                          <UserMinus className="h-5 w-5 text-red-600" />
+                        <div className="p-2 bg-orange-100 rounded-lg">
+                          <UserMinus className="h-5 w-5 text-orange-600" />
                         </div>
                         <div>
                           <p className="text-2xl font-bold">
@@ -1134,7 +1160,53 @@ const ActionDashboard: React.FC = () => {
                         </div>
                       </div>
                     </Card>
+                    {incompleteUsers.length > 0 && (
+                      <Card
+                        style={CardStyle.White}
+                        className="!p-4 cursor-pointer hover:bg-gray-50"
+                        onClick={() => setIncompleteUsersExpanded(!incompleteUsersExpanded)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-red-100 rounded-lg">
+                            <UserX className="h-5 w-5 text-red-600" />
+                          </div>
+                          <div>
+                            <p className="text-2xl font-bold">{incompleteUsers.length}</p>
+                            <p className="text-xs text-gray-500">Failed to Complete</p>
+                          </div>
+                          {incompleteUsersExpanded ? (
+                            <ChevronUp className="h-4 w-4 text-gray-400 ml-auto" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-gray-400 ml-auto" />
+                          )}
+                        </div>
+                      </Card>
+                    )}
                   </div>
+                )}
+
+                {/* Incomplete Users Expanded List */}
+                {incompleteUsersExpanded && incompleteUsers.length > 0 && (
+                  <Card style={CardStyle.White}>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                      Users Who Failed to Complete
+                    </h3>
+                    <ul className="divide-y divide-gray-200 max-h-64 overflow-y-auto">
+                      {incompleteUsers.map((user) => (
+                        <li key={user.id} className="py-2">
+                          <a
+                            href={`/users/${user.id}`}
+                            className="flex items-center gap-2 hover:bg-gray-50 px-2 py-1 rounded"
+                          >
+                            <ProfileImage pfp={user.profilePicture} size="small" />
+                            <span className="text-sm font-medium text-gray-800 hover:text-blue-600">
+                              {user.displayName}
+                            </span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
                 )}
 
                 {/* Completion Curve Chart - only show after member_action has started */}

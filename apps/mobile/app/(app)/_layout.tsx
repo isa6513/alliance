@@ -37,7 +37,8 @@ export default function AppLayout() {
           drawerType: "front",
           overlayColor: "rgba(0, 0, 0, 0.5)",
           drawerStyle: { width: DRAWER_WIDTH, backgroundColor: "#fafafa" },
-          swipeEdgeWidth: 100,
+          swipeEdgeWidth: 300,
+          swipeMinDistance: 30
         }}
       >
         <Drawer.Screen name="index" />

@@ -17,6 +17,7 @@ import { ContractEventType } from '../src/user/entities/contract-event.entity';
 import { User } from '../src/user/entities/user.entity';
 import { UserService } from '../src/user/user.service';
 import { Repository } from 'typeorm';
+import request from 'supertest';
 import { createTestApp, TestContext } from './e2e-test-utils';
 
 const addDays = (date: Date, days: number) =>
@@ -166,6 +167,30 @@ describe('findUsersToSuspend (e2e)', () => {
   afterAll(async () => {
     await userRepo.query('DELETE FROM "user"');
     await ctx.app.close();
+  });
+
+  it('returns suspension plans from the admin endpoint', async () => {
+    const rangeStart = new Date('2023-04-01T00:00:00Z');
+    const rangeEnd = new Date('2023-04-02T00:00:00Z');
+
+    const res = await request(ctx.app.getHttpServer())
+      .get('/actions/suspendPlans')
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      .query({
+        rangeStart: rangeStart.toISOString(),
+        rangeEnd: rangeEnd.toISOString(),
+      });
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body).toHaveLength(1);
+
+    const [plan] = res.body;
+    expect(new Date(plan.date).toISOString()).toBe(rangeStart.toISOString());
+
+    const userIds = plan.users.map((user: { id: number }) => user.id);
+    expect(userIds).toContain(failingUser.id);
+    expect(userIds).not.toContain(completingUser.id);
   });
 
   it('suspends users who fail three suites and does not re-suspend once inactive or re-signed', async () => {

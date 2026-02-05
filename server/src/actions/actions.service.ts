@@ -108,8 +108,17 @@ import {
   computeIsAwayDuringAnyOfLastMemberAction,
   computeIsTaggedOrInManualCohort,
 } from 'src/utils/action-user';
+import { computeIsAwayInRange } from 'src/utils/user';
 
 const MS_IN_WEEK = 7 * 24 * 60 * 60 * 1000;
+
+type SuspendPlanContext = {
+  orderedSuites: Array<{ suiteId: number; pastDate: Date | null }>;
+  expectedBySuite: Map<number, Set<number>>;
+  failedBySuite: Map<number, Set<number>>;
+  idToUser: Map<number, User>;
+  allExpectedUsers: number[];
+};
 
 export class UserActionRelationDto {
   @ApiProperty({ enum: UserActionRelation, enumName: 'UserActionRelation' })
@@ -384,6 +393,40 @@ export class ActionsService {
     ]);
 
     return Array.from(set);
+  }
+
+  async findIncompleteUsersForAction(actionId: number): Promise<User[]> {
+    const action = await this.actionRepository.findOneOrFail({
+      where: { id: actionId },
+      relations: {
+        events: true,
+        participatingTags: true,
+        activities: true,
+      },
+    });
+
+    const joinedUserIds = await this.findUsersJoinedForAction(action);
+
+    const completedActivities = await this.actionActivityRepository.find({
+      where: {
+        actionId,
+        type: ActionActivityType.USER_COMPLETED,
+      },
+      select: { userId: true },
+    });
+    const completedUserIds = new Set(
+      completedActivities.map((a) => a.userId),
+    );
+
+    const incompleteUserIds = joinedUserIds.filter(
+      (id) => !completedUserIds.has(id),
+    );
+
+    if (incompleteUserIds.length === 0) {
+      return [];
+    }
+
+    return this.userService.findByIds(incompleteUserIds);
   }
 
   async findPublic(userId?: number, sorted?: boolean): Promise<ActionDto[]> {
@@ -2456,15 +2499,10 @@ export class ActionsService {
     );
   }
 
-  async findUsersToSuspend(now: Date, preloadedActions?: Action[]) {
-    const actions =
-      preloadedActions ??
-      (await this.findAllSorted({
-        events: true,
-        suite: true,
-        participatingTags: true,
-      }));
-
+  private async buildSuspendPlanContext(
+    actions: Action[],
+    maxPastDate?: Date,
+  ): Promise<SuspendPlanContext> {
     const suiteMap = new Map<
       number,
       {
@@ -2494,13 +2532,196 @@ export class ActionsService {
       (a, b) => a.orderIndex - b.orderIndex,
     );
 
-    const pastSuites = orderedSuites.filter(({ actions }) =>
-      actions.every((action) => this.isActionPast(action, now)),
-    );
+    if (orderedSuites.length === 0) {
+      return {
+        orderedSuites: [],
+        expectedBySuite: new Map(),
+        failedBySuite: new Map(),
+        idToUser: new Map(),
+        allExpectedUsers: [],
+      };
+    }
 
-    const failedBySuite = new Map<number, Set<number>>();
+    const memberActionEventByActionId = new Map<number, ActionEvent>();
+    const memberActionMinDateByActionId = new Map<number, Date>();
+    for (const suite of orderedSuites) {
+      for (const action of suite.actions) {
+        let minDate: Date | null = null;
+        for (const event of action.events) {
+          if (event.newStatus !== ActionStatus.MemberAction) continue;
+          if (!memberActionEventByActionId.has(action.id)) {
+            memberActionEventByActionId.set(action.id, event);
+          }
+          if (!minDate || event.date < minDate) {
+            minDate = event.date;
+          }
+        }
+        if (minDate) {
+          memberActionMinDateByActionId.set(action.id, minDate);
+        }
+      }
+    }
+
+    const maxPastMs = maxPastDate?.getTime();
+    const orderedSuiteMeta = orderedSuites.map((suite) => {
+      let pastDate: Date | null = null;
+      for (const action of suite.actions) {
+        const minDate = memberActionMinDateByActionId.get(action.id);
+        if (!minDate) {
+          pastDate = null;
+          break;
+        }
+        if (!pastDate || minDate > pastDate) {
+          pastDate = minDate;
+        }
+      }
+      return { suiteId: suite.suite.id, pastDate };
+    });
+
+    const suitesToProcess = orderedSuites.filter((_, index) => {
+      const pastDate = orderedSuiteMeta[index].pastDate;
+      if (!pastDate) return false;
+      if (maxPastMs !== undefined && pastDate.getTime() > maxPastMs) {
+        return false;
+      }
+      return true;
+    });
+
+    const orderedSuitesForContext = orderedSuiteMeta.filter((_, index) => {
+      const pastDate = orderedSuiteMeta[index].pastDate;
+      if (!pastDate) return false;
+      if (maxPastMs !== undefined && pastDate.getTime() > maxPastMs) {
+        return false;
+      }
+      return true;
+    });
+
+    if (suitesToProcess.length === 0) {
+      return {
+        orderedSuites: orderedSuitesForContext,
+        expectedBySuite: new Map(),
+        failedBySuite: new Map(),
+        idToUser: new Map(),
+        allExpectedUsers: [],
+      };
+    }
+
+    const actionIds: number[] = [];
+    let needsActiveUsers = false;
+    for (const suite of suitesToProcess) {
+      for (const action of suite.actions) {
+        actionIds.push(action.id);
+        if (action.commitmentless) {
+          needsActiveUsers = true;
+        }
+      }
+    }
+
+    const [dismissedActivities, joinedActivities, completionActivities] =
+      await Promise.all([
+        this.actionActivityRepository.find({
+          where: {
+            actionId: In(actionIds),
+            type: ActionActivityType.USER_DISMISSED,
+          },
+        }),
+        this.actionActivityRepository.find({
+          where: {
+            actionId: In(actionIds),
+            type: ActionActivityType.USER_JOINED,
+          },
+          relations: {
+            user: { tags: true, awayRanges: true, contractEvents: true },
+          },
+        }),
+        this.actionActivityRepository.find({
+          where: {
+            actionId: In(actionIds),
+            type: In([
+              ActionActivityType.USER_COMPLETED,
+              ActionActivityType.USER_WONT_COMPLETE,
+              ActionActivityType.USER_DECLINED,
+            ]),
+          },
+        }),
+      ]);
+
+    const activeUsers = needsActiveUsers
+      ? await this.userService.findActiveUsersWithTags()
+      : [];
+
+    const dismissedByAction = new Map<number, Set<number>>();
+    for (const activity of dismissedActivities) {
+      if (!dismissedByAction.has(activity.actionId)) {
+        dismissedByAction.set(activity.actionId, new Set());
+      }
+      dismissedByAction.get(activity.actionId)!.add(activity.userId);
+    }
+
+    const joinedUsersByAction = new Map<number, User[]>();
+    for (const activity of joinedActivities) {
+      if (!joinedUsersByAction.has(activity.actionId)) {
+        joinedUsersByAction.set(activity.actionId, []);
+      }
+      joinedUsersByAction.get(activity.actionId)!.push(activity.user);
+    }
+
+    const completedByAction = new Map<number, Set<number>>();
+    for (const activity of completionActivities) {
+      if (!completedByAction.has(activity.actionId)) {
+        completedByAction.set(activity.actionId, new Set());
+      }
+      completedByAction.get(activity.actionId)!.add(activity.userId);
+    }
+
+    const baseUsersByAction = new Map<number, User[]>();
+    for (const suite of suitesToProcess) {
+      for (const action of suite.actions) {
+        const event = memberActionEventByActionId.get(action.id);
+        if (!event) continue;
+
+        const targetTagIds = new Set(
+          action.participatingTags.map((tag) => tag.id),
+        );
+        const manualCohortUserIds = action.manualCohortUserIds
+          ? new Set(action.manualCohortUserIds)
+          : undefined;
+        const dismissedSet = dismissedByAction.get(action.id) ?? new Set();
+        const deadlineEvent = this.actionEventRecipientService.getNextEvent({
+          events: action.events,
+          currentEventId: event.id,
+        });
+
+        const baseCandidates = action.commitmentless
+          ? activeUsers
+          : joinedUsersByAction.get(action.id) ?? [];
+
+        const baseUsers = baseCandidates.filter(
+          (user) =>
+            this.actionEventRecipientService.computeShouldParticipate({
+              eventDate: event.date,
+              deadlineDate: deadlineEvent?.date ?? null,
+              everyoneShouldComplete: action.everyoneShouldComplete,
+              manualCohortUserIds,
+              targetTagIds,
+              useManualCohort: action.useManualCohort,
+              user,
+              userDismissed: dismissedSet.has(user.id),
+              onboarding: action.onboarding,
+            }) &&
+            !computeIsAwayInRange({
+              user,
+              startDate: event.date,
+              endDate: deadlineEvent?.date,
+            }),
+        );
+
+        baseUsersByAction.set(action.id, baseUsers);
+      }
+    }
+
     const expectedBySuite = new Map<number, Set<number>>();
-
+    const failedBySuite = new Map<number, Set<number>>();
     const idToUser = new Map<number, User>();
 
     const getLastSignedDate = (user: User) => {
@@ -2512,74 +2733,91 @@ export class ActionsService {
       );
     };
 
-    for (const suite of pastSuites) {
-      const baseCohort =
-        await this.actionEventRecipientService.findBaseUsersForEvent({
-          eventStatus: ActionStatus.MemberAction,
-          action: suite.actions[0],
-          eventId: suite.actions[0].events.find(
-            (event) => event.newStatus === ActionStatus.MemberAction,
-          )!.id,
-        });
+    for (const suite of suitesToProcess) {
+      const firstAction = suite.actions[0];
+      const firstEvent = memberActionEventByActionId.get(firstAction.id);
+      if (!firstEvent) {
+        throw new Error(
+          `Member action event not found for action ${firstAction.id}`,
+        );
+      }
+
+      const baseCohort = baseUsersByAction.get(firstAction.id) ?? [];
       expectedBySuite.set(
         suite.suite.id,
         new Set(baseCohort.map((user) => user.id)),
       );
 
       for (const action of suite.actions) {
-        const event = action.events.find(
-          (event) => event.newStatus === ActionStatus.MemberAction,
-        );
+        const event = memberActionEventByActionId.get(action.id);
         if (!event) {
           continue;
         }
-        const failed = await this.getFailedUsersForEvent(action, event);
-        const failedAndActive = failed.filter((user) => user.hasActiveContract);
 
+        const baseUsers = baseUsersByAction.get(action.id) ?? [];
+        const completedSet = completedByAction.get(action.id) ?? new Set();
+        const failed = baseUsers.filter((user) => !completedSet.has(user.id));
+        const failedAndActive = failed.filter((user) => user.hasActiveContract);
         const signedBeforeFailed = failedAndActive.filter(
           (user) => getLastSignedDate(user) < event.date,
         );
+
         for (const user of signedBeforeFailed) {
           idToUser.set(user.id, user);
         }
 
-        if (failedBySuite.has(suite.suite.id)) {
-          for (const user of signedBeforeFailed) {
-            failedBySuite.get(suite.suite.id)!.add(user.id);
-          }
-        } else {
-          failedBySuite.set(
-            suite.suite.id,
-            new Set(signedBeforeFailed.map((user) => user.id)),
-          );
+        if (!failedBySuite.has(suite.suite.id)) {
+          failedBySuite.set(suite.suite.id, new Set());
+        }
+        const suiteFailed = failedBySuite.get(suite.suite.id)!;
+        for (const user of signedBeforeFailed) {
+          suiteFailed.add(user.id);
         }
       }
     }
 
+    const allExpectedUsers = new Set<number>();
+    for (const s of expectedBySuite.values()) {
+      for (const id of s) allExpectedUsers.add(id);
+    }
+
+    return {
+      orderedSuites: orderedSuitesForContext,
+      expectedBySuite,
+      failedBySuite,
+      idToUser,
+      allExpectedUsers: Array.from(allExpectedUsers),
+    };
+  }
+
+  private computeUsersToSuspendFromContext(
+    now: Date,
+    context: SuspendPlanContext,
+  ) {
+    const pastSuites = context.orderedSuites.filter(
+      (suite) => suite.pastDate && suite.pastDate < now,
+    );
+
     const usersToSuspend = new Set<number>();
     const suspendReasonKeys = new Map<number, string>();
 
-    const allExpectedUsers = new Set<number>();
-    for (const s of expectedBySuite.values())
-      for (const id of s) allExpectedUsers.add(id);
-
-    for (const userId of allExpectedUsers) {
+    for (const userId of context.allExpectedUsers) {
       let streak = 0;
       const lastThreeSuiteIds: number[] = [];
 
       for (const suite of pastSuites) {
-        const suiteId = suite.suite.id;
-        const expectedSet = expectedBySuite.get(suiteId);
+        const expectedSet = context.expectedBySuite.get(suite.suiteId);
         if (!expectedSet?.has(userId)) {
           continue; // skip suites they were not expected to complete
         }
 
-        const failedSet = failedBySuite.get(suiteId) ?? new Set<number>();
+        const failedSet =
+          context.failedBySuite.get(suite.suiteId) ?? new Set<number>();
         const failed = failedSet.has(userId);
 
         if (failed) {
           streak += 1;
-          lastThreeSuiteIds.push(suiteId);
+          lastThreeSuiteIds.push(suite.suiteId);
           if (lastThreeSuiteIds.length > 3) lastThreeSuiteIds.shift();
           if (streak >= 3) {
             usersToSuspend.add(userId);
@@ -2596,10 +2834,23 @@ export class ActionsService {
 
     return {
       usersToSuspend: Array.from(usersToSuspend).map(
-        (userId) => idToUser.get(userId)!,
+        (userId) => context.idToUser.get(userId)!,
       ),
       suspendReasonKeys,
     };
+  }
+
+  async findUsersToSuspend(now: Date, preloadedActions?: Action[]) {
+    const actions =
+      preloadedActions ??
+      (await this.findAllSorted({
+        events: true,
+        suite: true,
+        participatingTags: true,
+      }));
+
+    const context = await this.buildSuspendPlanContext(actions, now);
+    return this.computeUsersToSuspendFromContext(now, context);
   }
 
   async getSuspendPlans(
@@ -2612,13 +2863,19 @@ export class ActionsService {
       suite: true,
       participatingTags: true,
     });
+    const context = await this.buildSuspendPlanContext(actions, rangeEnd);
 
     const plans: SuspensionPlanDto[] = [];
     let date = rangeStart;
     const suspendedUsers = new Set<number>();
+    const rangeEndMs = rangeEnd.getTime();
+    const stepMs = stepHours * 60 * 60 * 1000;
 
-    while (new Date(date).getTime() <= new Date(rangeEnd).getTime()) {
-      const { usersToSuspend } = await this.findUsersToSuspend(date, actions);
+    while (date.getTime() <= rangeEndMs) {
+      const { usersToSuspend } = this.computeUsersToSuspendFromContext(
+        date,
+        context,
+      );
       const notAlreadySuspended = usersToSuspend.filter(
         (user) => !suspendedUsers.has(user.id),
       );
@@ -2631,7 +2888,7 @@ export class ActionsService {
           users: notAlreadySuspended.map((user) => new ProfileDto(user)),
         });
       }
-      date = new Date(new Date(date).getTime() + stepHours * 60 * 60 * 1000);
+      date = new Date(date.getTime() + stepMs);
     }
     return plans;
   }
