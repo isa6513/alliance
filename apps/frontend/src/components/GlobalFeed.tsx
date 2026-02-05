@@ -131,13 +131,13 @@ const NewMembersItem = ({ item }: NewMembersItemProps) => {
             <span className="text-zinc-500">{" joined the Alliance"}</span>
           </>
         ) : (
-          <button
+          <span
             onClick={() => setExpanded(!expanded)}
             className="cursor-pointer text-left hover:text-zinc-900"
           >
             <span className="font-medium">{item.count} new members</span>
             <span className="text-zinc-500"> joined the Alliance</span>
-          </button>
+          </span>
         )}
       </div>
       {!isSingle && (
@@ -175,9 +175,8 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
   const isSingle = item.count === 1 && item.users.length > 0;
   const postUrl =
     isSingle && item.commentId
-      ? `${href("/forum/post/:id", { id: item.postId.toString() })}?replyId=${
-          item.commentId
-        }`
+      ? `${href("/forum/post/:id", { id: item.postId.toString() })}?replyId=${item.commentId
+      }`
       : href("/forum/post/:id", { id: item.postId.toString() });
 
   return (
