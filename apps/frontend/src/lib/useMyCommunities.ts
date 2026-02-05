@@ -16,18 +16,58 @@ type UseMyCommunitiesReturn = {
   setSelectedCommunity: (community: CommunityDto | null) => void;
 };
 
+const CACHE_KEY = "useMyCommunities.cache";
+
+const getCachedCommunities = (): CommunityDto[] | null => {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!cached) {
+      return null;
+    }
+    return JSON.parse(cached);
+  } catch {
+    return null;
+  }
+};
+
+const setCachedCommunities = (communities: CommunityDto[]): void => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(communities));
+  } catch {}
+};
+
 export function useMyCommunities(
   props: UseMyCommunitiesProps
 ): UseMyCommunitiesReturn {
   const { selectedCommunityId } = props;
 
-  const [communities, setCommunities] = useState<CommunityDto[]>([]);
+  const [communitiesWithoutCache, setCommunitiesWithoutCache] = useState<
+    CommunityDto[]
+  >(getCachedCommunities() ?? []);
+  const setCommunities = useCallback(
+    (setStateCommunities: React.SetStateAction<CommunityDto[]>) => {
+      setCommunitiesWithoutCache((prev) => {
+        const newCommunities =
+          typeof setStateCommunities === "function"
+            ? setStateCommunities(prev)
+            : setStateCommunities;
+        setCachedCommunities(newCommunities);
+        return newCommunities;
+      });
+    },
+    []
+  );
+  const communities = communitiesWithoutCache;
   const [selectedCommunity, setSelectedCommunity] =
     useState<CommunityDto | null>(null);
 
   const communityIds = useMemo(() => {
     return new Set(communities.map((community) => community.id));
   }, [communities]);
+
+  useEffect(() => {
+    setCommunitiesWithoutCache(getCachedCommunities() ?? []);
+  }, []);
 
   const refreshCommunities = useCallback(async () => {
     const resp = await userGetMyCommunities();
@@ -36,17 +76,20 @@ export function useMyCommunities(
     } else {
       setCommunities([]);
     }
-  }, []);
+  }, [setCommunities]);
 
   useEffect(() => {
     void refreshCommunities();
   }, [refreshCommunities]);
 
-  const removeCommunity = useCallback((communityId: number) => {
-    setCommunities((prev) =>
-      prev.filter((community) => community.id !== communityId)
-    );
-  }, []);
+  const removeCommunity = useCallback(
+    (communityId: number) => {
+      setCommunities((prev) =>
+        prev.filter((community) => community.id !== communityId)
+      );
+    },
+    [setCommunities]
+  );
 
   useEffect(() => {
     if (selectedCommunityId === null) {
@@ -72,7 +115,7 @@ export function useMyCommunities(
         )
       );
     },
-    []
+    [setCommunities]
   );
 
   return {
