@@ -255,86 +255,69 @@ const MyGroupsPage = ({
         </Button>
       )}
       {/* Leader groups */}
-      <div>
-        {
-          <div className="flex flex-col gap-y-4">
-            <div className="flex flex-col gap-y-1">
-              <p className="font-semibold text-xl md:text-2xl">
-                Groups you lead
-              </p>
-              <p className="text-zinc-500 text-base">
-                You can lead as many groups as you want.
-              </p>
-            </div>
-            <List>
-              {[
-                ...(leaderCommunities.map((community) => {
-                  const memberCount = getMemberCount(community);
-                  return (
-                    <Button
-                      key={community.id}
-                      color={ButtonColor.White}
-                      className="w-full !rounded-none border-none !p-4"
-                      onClick={() => onSelectCommunity(community.id)}
-                    >
-                      <div className={"w-full flex flex-row justify-between"}>
-                        <div className="flex flex-row gap-x-3">
-                          <ProfileImage
-                            pfp={community.photo ?? null}
-                            size="huge"
-                          />
-                          <div className="flex flex-col text-left">
-                            <p className="text-lg font-semibold">
-                              {community.name}
-                            </p>
-                            <p className="text-zinc-500">
-                              {community.description}
-                            </p>
-                            <span className="text-zinc-500">
-                              {memberCount}{" "}
-                              {memberCount === 1 ? "member" : "members"}
-                            </span>
-                          </div>
-                        </div>
+      <div className="flex flex-col gap-y-4">
+        <div className="flex flex-col gap-y-1">
+          <p className="font-semibold text-xl md:text-2xl">Groups you lead</p>
+          <p className="text-zinc-500 text-base">
+            You can lead as many groups as you want.
+          </p>
+        </div>
+        <List>
+          {[
+            ...(leaderCommunities.map((community) => {
+              const memberCount = getMemberCount(community);
+              return (
+                <Button
+                  key={community.id}
+                  color={ButtonColor.White}
+                  className="w-full !rounded-none border-none !p-4"
+                  onClick={() => onSelectCommunity(community.id)}
+                >
+                  <div className={"w-full flex flex-row justify-between"}>
+                    <div className="flex flex-row gap-x-3">
+                      <ProfileImage pfp={community.photo ?? null} size="huge" />
+                      <div className="flex flex-col text-left">
+                        <p className="text-lg font-semibold">
+                          {community.name}
+                        </p>
+                        <p className="text-zinc-500">{community.description}</p>
+                        <span className="text-zinc-500">
+                          {memberCount}{" "}
+                          {memberCount === 1 ? "member" : "members"}
+                        </span>
                       </div>
-                    </Button>
-                  );
-                }) ?? []),
-                <Fragment key="create-group">
-                  <Button
-                    onClick={() => setShowCreateForm(!showCreateForm)}
-                    color={
-                      showCreateForm ? ButtonColor.Light : ButtonColor.White
-                    }
-                    className={`w-full !rounded-none ${
-                      leaderCommunities.length
-                        ? "border-t border-t-zinc-200 border-x-0 border-b-0"
-                        : "border-0"
-                    }`}
-                  >
-                    <div className="w-full flex flex-row gap-x-2 items-center justify-center p-2 text-zinc-500">
-                      {showCreateForm ? (
-                        <Minus size="14" />
-                      ) : (
-                        <Plus size="14" />
-                      )}{" "}
-                      Create group
                     </div>
-                  </Button>
-                  {!!showCreateForm && (
-                    <div className="p-4 flex flex-col gap-y-4">
-                      <CommunityCreateForm
-                        name={user?.name}
-                        onCancel={handleCreateCancel}
-                        onSuccess={handleCreateSuccess}
-                      />
-                    </div>
-                  )}
-                </Fragment>,
-              ]}
-            </List>
-          </div>
-        }
+                  </div>
+                </Button>
+              );
+            }) ?? []),
+            <Fragment key="create-group">
+              <Button
+                onClick={() => setShowCreateForm(!showCreateForm)}
+                color={showCreateForm ? ButtonColor.Light : ButtonColor.White}
+                className={`w-full !rounded-none ${
+                  leaderCommunities.length
+                    ? "border-t border-t-zinc-200 border-x-0 border-b-0"
+                    : "border-0"
+                }`}
+              >
+                <div className="w-full flex flex-row gap-x-2 items-center justify-center p-2 text-zinc-500">
+                  {showCreateForm ? <Minus size="14" /> : <Plus size="14" />}{" "}
+                  Create group
+                </div>
+              </Button>
+              {!!showCreateForm && (
+                <div className="p-4 flex flex-col gap-y-4">
+                  <CommunityCreateForm
+                    name={user?.name}
+                    onCancel={handleCreateCancel}
+                    onSuccess={handleCreateSuccess}
+                  />
+                </div>
+              )}
+            </Fragment>,
+          ]}
+        </List>
       </div>
 
       {/* Non-leader groups */}
