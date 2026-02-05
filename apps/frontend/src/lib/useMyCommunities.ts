@@ -1,5 +1,6 @@
 import { CommunityDto, userGetMyCommunities } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 type UseMyCommunitiesProps = {
   selectedCommunityId: number | null;
@@ -16,47 +17,22 @@ type UseMyCommunitiesReturn = {
   setSelectedCommunity: (community: CommunityDto | null) => void;
 };
 
-const CACHE_KEY = "useMyCommunities.cache";
-
-const getCachedCommunities = (): CommunityDto[] | null => {
-  try {
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (!cached) {
-      return null;
-    }
-    return JSON.parse(cached);
-  } catch {
-    return null;
-  }
-};
-
-const setCachedCommunities = (communities: CommunityDto[]): void => {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(communities));
-  } catch {}
-};
+const QUERY_KEY = ["userGetMyCommunities"];
 
 export function useMyCommunities(
   props: UseMyCommunitiesProps
 ): UseMyCommunitiesReturn {
   const { selectedCommunityId } = props;
+  const queryClient = useQueryClient();
 
-  const [communities, setCommunitiesWithoutCache] = useState<CommunityDto[]>(
-    getCachedCommunities() ?? []
-  );
-  const setCommunities = useCallback(
-    (setStateCommunities: React.SetStateAction<CommunityDto[]>) => {
-      setCommunitiesWithoutCache((prev) => {
-        const newCommunities =
-          typeof setStateCommunities === "function"
-            ? setStateCommunities(prev)
-            : setStateCommunities;
-        setCachedCommunities(newCommunities);
-        return newCommunities;
-      });
-    },
-    []
-  );
+  const { data: communities = [] } = useQuery({
+    queryKey: QUERY_KEY,
+    queryFn: () =>
+      userGetMyCommunities().then((response) => {
+        return response.data ?? [];
+      }),
+  });
+
   const [selectedCommunity, setSelectedCommunity] =
     useState<CommunityDto | null>(communities[0] ?? null);
 
@@ -65,25 +41,16 @@ export function useMyCommunities(
   }, [communities]);
 
   const refreshCommunities = useCallback(async () => {
-    const resp = await userGetMyCommunities();
-    if (resp.data) {
-      setCommunities(resp.data);
-    } else {
-      setCommunities([]);
-    }
-  }, [setCommunities]);
-
-  useEffect(() => {
-    void refreshCommunities();
-  }, [refreshCommunities]);
+    await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+  }, [queryClient]);
 
   const removeCommunity = useCallback(
     (communityId: number) => {
-      setCommunities((prev) =>
-        prev.filter((community) => community.id !== communityId)
+      queryClient.setQueryData<CommunityDto[]>(QUERY_KEY, (old) =>
+        old ? old.filter((community) => community.id !== communityId) : []
       );
     },
-    [setCommunities]
+    [queryClient]
   );
 
   useEffect(() => {
@@ -99,18 +66,22 @@ export function useMyCommunities(
 
   const removeMemberFromCommunity = useCallback(
     (communityId: number, memberId: number) => {
-      setCommunities((prev) =>
-        prev.map((community) =>
-          community.id === communityId
-            ? {
-                ...community,
-                users: community.users.filter((user) => user.id !== memberId),
-              }
-            : community
-        )
+      queryClient.setQueryData<CommunityDto[]>(QUERY_KEY, (old) =>
+        old
+          ? old.map((community) =>
+              community.id === communityId
+                ? {
+                    ...community,
+                    users: community.users.filter(
+                      (user) => user.id !== memberId
+                    ),
+                  }
+                : community
+            )
+          : []
       );
     },
-    [setCommunities]
+    [queryClient]
   );
 
   return {
