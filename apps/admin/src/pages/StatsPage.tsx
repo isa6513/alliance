@@ -1318,16 +1318,12 @@ const StatsPage: React.FC = () => {
         })}
       />
 
-      {/* Cohort Retention Grid */}
       <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-4 py-3 border-b border-gray-200">
           <div>
             <h3 className="text-lg font-semibold text-gray-900">
               Cohort Completion Grid
             </h3>
-            <p className="text-xs text-gray-500">
-              Weekly completion rates by cohort (darker means higher retention).
-            </p>
           </div>
         </div>
         <div className="p-4">
@@ -1473,9 +1469,6 @@ const StatsPage: React.FC = () => {
                             `${hoveredRetentionCell.cohortStart}T00:00:00Z`
                           )
                         )}
-                      </div>
-                      <div className="mt-1">
-
                       </div>
                       <div className="mt-1 flex items-center justify-between">
                         <span>Completed</span>
