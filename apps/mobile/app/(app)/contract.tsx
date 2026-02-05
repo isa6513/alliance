@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Alert, TextInput, View } from "react-native";
-import { useRouter } from "expo-router";
 import {
   userSignContract,
   userSuspendContract,
