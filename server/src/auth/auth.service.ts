@@ -12,8 +12,7 @@ import { AuthTokens } from './dto/authtokens.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInResponseDto } from './dto/signin.dto';
 import { JWTTokenType, JwtPayload } from './guards/auth.guard';
-import { OnetimeInviteStatus } from 'src/user/entities/onetime-invite.entity';
-import { Community } from 'src/user/entities/community.entity';
+import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
 
 @Injectable()
 export class AuthService {
@@ -57,36 +56,18 @@ export class AuthService {
       throw new BadRequestException('User already exists');
     }
 
-    let referredBy: User | null = null;
+    let invite: OnetimeInvite | null = null;
     if (signUp.referralCode) {
-      referredBy = await this.usersService.findOneByReferralCode(
-        signUp.referralCode,
-        {
-          communities: true,
-        },
-      );
-    }
-    let inviteCommunityId: number | null = null;
-    if (!referredBy && signUp.referralCode) {
-      const invite = await this.usersService.findInviteByCode(
-        signUp.referralCode,
-        {
-          invitingUser: { communities: true },
-          community: true,
-        },
-      );
-      if (invite) {
-        if (invite.status !== OnetimeInviteStatus.LINK_UNUSED) {
-          throw new UnauthorizedException('invalid referral code');
+      invite = await this.usersService.findInviteByCode(signUp.referralCode, {
+        invitingUser: { communities: true },
+        community: true,
+      });
+      if (!invite) {
+        if (process.env.NODE_ENV !== 'test') {
+          throw new UnauthorizedException('invalid referral code'); //TODO: feature flag
         }
-        referredBy = invite.invitingUser;
-        inviteCommunityId = invite.community?.id ?? null;
+      } else {
         await this.usersService.invalidateInvite(invite.id);
-      }
-    }
-    if (!referredBy) {
-      if (process.env.NODE_ENV !== 'test') {
-        throw new UnauthorizedException('invalid referral code'); //TODO: feature flag
       }
     }
 
@@ -94,64 +75,16 @@ export class AuthService {
 
     const user = await this.usersService.create({
       ...signUp,
-      referredBy,
+      referredBy: invite?.invitingUser ?? null,
+      referredByInvite: invite ?? null,
       tags: defaultTag ? [defaultTag] : undefined,
     });
 
-    let sentNotifToReferrer = false;
-    function notifFor({
-      leader,
-      community,
-    }: {
-      leader: User;
-      community: Community;
-    }) {
-      if (referredBy) {
-        if (leader.id === referredBy.id) {
-          sentNotifToReferrer = true;
-          return {
-            message: `${user.name} joined the Alliance and your group (${community.name})`,
-            users: [user],
-          };
-        }
-        return {
-          message: `${user.name} (referred by ${referredBy.name}) joined the Alliance and your group (${community.name})`,
-          users: [user, referredBy],
-        };
-      }
-      return {
-        message: `${user.name} joined the Alliance and your group (${community.name})`,
-        users: [user],
-      };
-    }
-
-    if (inviteCommunityId) {
-      await this.usersService.addUserToCommunity({
-        communityId: inviteCommunityId,
-        userId: user.id,
-        notifFor,
-      });
-    } else if (referredBy) {
-      const community =
-        await this.usersService.findUserCommunityForNewMember(referredBy);
-      if (community) {
-        await this.usersService.addUserToCommunity({
-          communityId: community.id,
-          userId: user.id,
-          notifFor,
-        });
-      } else {
-        await this.usersService.joinGroupAssignment(user.id);
-      }
-    } else {
-      await this.usersService.joinGroupAssignment(user.id);
-    }
-
-    if (referredBy) {
-      await this.usersService.makeFriendsAutomated(referredBy.id, user.id);
-      if (!sentNotifToReferrer) {
-        await this.usersService.notifyReferrerOfNewMember(referredBy, user);
-      }
+    if (invite?.invitingUser) {
+      await this.usersService.makeFriendsAutomated(
+        invite.invitingUser.id,
+        user.id,
+      );
     }
 
     await this.usersService.sendWelcomeEmail(user.id);

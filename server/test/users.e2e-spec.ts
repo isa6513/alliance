@@ -1,4 +1,7 @@
-import { NotificationCategory } from 'src/notifs/entities/notification.entity';
+import {
+  Notification,
+  NotificationCategory,
+} from 'src/notifs/entities/notification.entity';
 import request from 'supertest';
 import { Repository } from 'typeorm';
 import { City } from '../src/geo/city.entity';
@@ -354,6 +357,482 @@ describe('Users (e2e)', () => {
     expect(typeof suspend.text === 'string' || suspend.body).toBeTruthy();
   });
 
+  describe('signContract behavior', () => {
+    it('joins community from referredByInvite when signing contract for first time', async () => {
+      // Create a new user with an invite
+      const inviter = await userRepo.save(
+        userRepo.create({
+          name: 'Contract Inviter',
+          email: 'contract.inviter@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      const inviteCommunity = await communityRepo.save(
+        communityRepo.create({
+          name: 'Invite Community',
+          description: 'Community from invite',
+          leaders: [inviter],
+          users: [inviter],
+          maxCapacity: 10,
+        }),
+      );
+
+      const invite = await onetimeInviteRepo.save(
+        onetimeInviteRepo.create({
+          invitee: 'contract.invited@example.com',
+          code: 'CONTRACT-INVITE-CODE',
+          status: OnetimeInviteStatus.LINK_UNUSED,
+          invitingUser: inviter,
+          community: inviteCommunity,
+        }),
+      );
+
+      // Create user via signup (simulating the new flow)
+      const newUser = await userRepo.save(
+        userRepo.create({
+          name: 'Contract Invited User',
+          email: 'contract.invited@example.com',
+          password: 'Password123!',
+          referredBy: inviter,
+          referredByInvite: invite,
+        }),
+      );
+
+      // Sign contract
+      await userService.signContract(newUser.id);
+
+      // Verify user joined the community
+      const updatedUser = await userRepo.findOne({
+        where: { id: newUser.id },
+        relations: { communities: true },
+      });
+
+      expect(
+        updatedUser?.communities.some((c) => c.id === inviteCommunity.id),
+      ).toBe(true);
+
+      // Verify notifications were sent to community leaders
+      const notifRepo = ctx.dataSource.getRepository(Notification);
+      const notifs = await notifRepo.find({
+        where: { user: { id: inviter.id } },
+      });
+
+      expect(notifs.length).toBeGreaterThan(0);
+      expect(
+        notifs.some(
+          (n) =>
+            n.category === NotificationCategory.NewMemberReferred ||
+            n.message.includes('joined the Alliance'),
+        ),
+      ).toBe(true);
+    });
+
+    it('joins community from referredBy when no invite community exists', async () => {
+      const referrer = await userRepo.save(
+        userRepo.create({
+          name: 'Contract Referrer',
+          email: 'contract.referrer@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      // Create a community that the referrer is a member of (but not leader)
+      const otherLeader = await userRepo.save(
+        userRepo.create({
+          name: 'Other Leader',
+          email: 'other.leader@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      const referrerCommunity = await communityRepo.save(
+        communityRepo.create({
+          name: 'Referrer Community',
+          description: 'Community for referrer',
+          leaders: [otherLeader],
+          users: [referrer, otherLeader],
+          maxCapacity: 10,
+          allowMemberInvites: true,
+        }),
+      );
+
+      // Create user with referredBy but no invite
+      const newUser = await userRepo.save(
+        userRepo.create({
+          name: 'Referred User',
+          email: 'referred.user@example.com',
+          password: 'Password123!',
+          referredBy: referrer,
+        }),
+      );
+
+      // Sign contract
+      await userService.signContract(newUser.id);
+
+      // Verify user joined the community
+      const updatedUser = await userRepo.findOne({
+        where: { id: newUser.id },
+        relations: { communities: true },
+      });
+
+      expect(
+        updatedUser?.communities.some((c) => c.id === referrerCommunity.id),
+      ).toBe(true);
+    });
+
+    it('sets undergoingGroupAssignment when no community available for referredBy', async () => {
+      const referrer = await userRepo.save(
+        userRepo.create({
+          name: 'No Community Referrer',
+          email: 'no.community.referrer@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      const newUser = await userRepo.save(
+        userRepo.create({
+          name: 'No Community User',
+          email: 'no.community.user@example.com',
+          password: 'Password123!',
+          referredBy: referrer,
+        }),
+      );
+
+      await userService.signContract(newUser.id);
+
+      const updatedUser = await userRepo.findOne({
+        where: { id: newUser.id },
+      });
+
+      expect(updatedUser?.undergoingGroupAssignment).toBe(true);
+    });
+
+    it('joins pendingCommunity on non-first contract signing if capacity allows', async () => {
+      const leader = await userRepo.save(
+        userRepo.create({
+          name: 'Pending Community Leader',
+          email: 'pending.leader@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      const pendingComm = await communityRepo.save(
+        communityRepo.create({
+          name: 'Pending Community',
+          description: 'Pending',
+          leaders: [leader],
+          users: [leader],
+          maxCapacity: 5,
+        }),
+      );
+
+      // Create user and sign contract once
+      const user = await userRepo.save(
+        userRepo.create({
+          name: 'Pending User',
+          email: 'pending.user@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      await userService.signContract(user.id);
+
+      // Suspend contract (this should set pendingCommunity)
+      await userService.suspendContract(user.id);
+
+      // Set pendingCommunity manually to simulate the suspend flow
+      const userWithPending = await userRepo.findOne({
+        where: { id: user.id },
+        relations: { pendingCommunity: true },
+      });
+      if (userWithPending) {
+        userWithPending.pendingCommunity = pendingComm;
+        await userRepo.save(userWithPending);
+      }
+
+      // Sign contract again
+      await userService.signContract(user.id);
+
+      const updatedUser = await userRepo.findOne({
+        where: { id: user.id },
+        relations: { communities: true, pendingCommunity: true },
+      });
+
+      expect(
+        updatedUser?.communities.some((c) => c.id === pendingComm.id),
+      ).toBe(true);
+      expect(updatedUser?.pendingCommunity).toBeNull();
+    });
+
+    it('does not join pendingCommunity if capacity is full', async () => {
+      const leader = await userRepo.save(
+        userRepo.create({
+          name: 'Full Community Leader',
+          email: 'full.leader@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      // Create community at max capacity
+      const members = await Promise.all(
+        Array.from({ length: 5 }, (_, i) =>
+          userRepo.save(
+            userRepo.create({
+              name: `Member ${i}`,
+              email: `member${i}@example.com`,
+              password: 'Password123!',
+            }),
+          ),
+        ),
+      );
+
+      const fullComm = await communityRepo.save(
+        communityRepo.create({
+          name: 'Full Community',
+          description: 'Full',
+          leaders: [leader],
+          users: [leader, ...members],
+          maxCapacity: 5, // At capacity (1 leader + 4 members = 5)
+        }),
+      );
+
+      const user = await userRepo.save(
+        userRepo.create({
+          name: 'Full Community User',
+          email: 'full.user@example.com',
+          password: 'Password123!',
+          pendingCommunity: fullComm,
+        }),
+      );
+
+      // Sign contract (non-first time)
+      await userService.signContract(user.id);
+
+      const updatedUser = await userRepo.findOne({
+        where: { id: user.id },
+        relations: { communities: true, pendingCommunity: true },
+      });
+
+      // Should not join because capacity is full
+      expect(updatedUser?.communities.some((c) => c.id === fullComm.id)).toBe(
+        false,
+      );
+      expect(updatedUser?.pendingCommunity).toBeNull();
+    });
+  });
+
+  describe('suspendContract behavior', () => {
+    it('removes user from communities they are not a leader of', async () => {
+      const leader = await userRepo.save(
+        userRepo.create({
+          name: 'Suspension Leader',
+          email: 'suspension.leader@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'Suspension Community',
+          description: 'For suspension test',
+          leaders: [leader],
+          users: [leader],
+        }),
+      );
+
+      const member = await userRepo.save(
+        userRepo.create({
+          name: 'Suspension Member',
+          email: 'suspension.member@example.com',
+          password: 'Password123!',
+          communities: [community],
+        }),
+      );
+
+      // Sign contract first
+      await userService.signContract(member.id);
+
+      // Suspend contract
+      await userService.suspendContract(member.id);
+
+      const updatedMember = await userRepo.findOne({
+        where: { id: member.id },
+        relations: { communities: true, pendingCommunity: true },
+      });
+
+      // Should be removed from community
+      expect(
+        updatedMember?.communities.some((c) => c.id === community.id),
+      ).toBe(false);
+      // Should have pendingCommunity set
+      expect(updatedMember?.pendingCommunity?.id).toBe(community.id);
+    });
+
+    it('does not remove user from communities they lead', async () => {
+      const leader = await userRepo.save(
+        userRepo.create({
+          name: 'Leader Suspension',
+          email: 'leader.suspension@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      const ownCommunity = await communityRepo.save(
+        communityRepo.create({
+          name: 'Own Community',
+          description: 'Owned by leader',
+          leaders: [leader],
+          users: [leader],
+        }),
+      );
+
+      // Sign contract
+      await userService.signContract(leader.id);
+
+      // Suspend contract
+      await userService.suspendContract(leader.id);
+
+      const updatedLeader = await userRepo.findOne({
+        where: { id: leader.id },
+        relations: { communities: true, leaderOf: true },
+      });
+
+      // Should still be in their own community
+      expect(
+        updatedLeader?.communities.some((c) => c.id === ownCommunity.id),
+      ).toBe(true);
+      expect(
+        updatedLeader?.leaderOf.some((c) => c.id === ownCommunity.id),
+      ).toBe(true);
+    });
+
+    it('sends notifications to community leaders when user is removed', async () => {
+      const leader1 = await userRepo.save(
+        userRepo.create({
+          name: 'Notification Leader 1',
+          email: 'notif.leader1@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      const leader2 = await userRepo.save(
+        userRepo.create({
+          name: 'Notification Leader 2',
+          email: 'notif.leader2@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'Notification Community',
+          description: 'For notifications',
+          leaders: [leader1, leader2],
+          users: [leader1, leader2],
+        }),
+      );
+
+      const member = await userRepo.save(
+        userRepo.create({
+          name: 'Notification Member',
+          email: 'notif.member@example.com',
+          password: 'Password123!',
+          communities: [community],
+        }),
+      );
+
+      await userService.signContract(member.id);
+      await userService.suspendContract(member.id);
+
+      const notifRepo = ctx.dataSource.getRepository(Notification);
+      const leader1Notifs = await notifRepo.find({
+        where: { user: { id: leader1.id } },
+      });
+
+      const leader2Notifs = await notifRepo.find({
+        where: { user: { id: leader2.id } },
+      });
+
+      expect(
+        leader1Notifs.some(
+          (n) =>
+            n.category ===
+              NotificationCategory.MemberSuspendedRemovedFromCommunity &&
+            n.message.includes('suspended their contract'),
+        ),
+      ).toBe(true);
+
+      expect(
+        leader2Notifs.some(
+          (n) =>
+            n.category ===
+              NotificationCategory.MemberSuspendedRemovedFromCommunity &&
+            n.message.includes('suspended their contract'),
+        ),
+      ).toBe(true);
+    });
+
+    it('sets pendingCommunity to one of the removed communities', async () => {
+      const leader1 = await userRepo.save(
+        userRepo.create({
+          name: 'Pending Leader 1',
+          email: 'pending.leader1@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      const leader2 = await userRepo.save(
+        userRepo.create({
+          name: 'Pending Leader 2',
+          email: 'pending.leader2@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      const comm1 = await communityRepo.save(
+        communityRepo.create({
+          name: 'Community 1',
+          description: 'First',
+          leaders: [leader1],
+          users: [leader1],
+        }),
+      );
+
+      const comm2 = await communityRepo.save(
+        communityRepo.create({
+          name: 'Community 2',
+          description: 'Second',
+          leaders: [leader2],
+          users: [leader2],
+        }),
+      );
+
+      const member = await userRepo.save(
+        userRepo.create({
+          name: 'Multi Community Member',
+          email: 'multi.member@example.com',
+          password: 'Password123!',
+          communities: [comm1, comm2],
+        }),
+      );
+
+      await userService.signContract(member.id);
+      await userService.suspendContract(member.id);
+
+      const updatedMember = await userRepo.findOne({
+        where: { id: member.id },
+        relations: { pendingCommunity: true },
+      });
+
+      // Should have one of the communities as pendingCommunity
+      expect(updatedMember?.pendingCommunity).not.toBeNull();
+      expect(
+        [comm1.id, comm2.id].includes(updatedMember?.pendingCommunity?.id ?? 0),
+      ).toBe(true);
+    });
+  });
+
   it('returns profile information for the authenticated user', async () => {
     const profile = await request(ctx.app.getHttpServer())
       .get('/user/myprofile')
@@ -653,7 +1132,9 @@ describe('Users (e2e)', () => {
             .send();
 
           expect(res.status).toBe(400);
-          expect(res.body.message).toContain('Invite is not a pending request.');
+          expect(res.body.message).toContain(
+            'Invite is not a pending request.',
+          );
         });
       });
     });

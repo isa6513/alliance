@@ -4,6 +4,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   RelationId,
 } from 'typeorm';
@@ -77,22 +78,30 @@ export class OnetimeInvite {
 
   // Relations
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, {
+    onDelete: 'SET NULL',
+  })
   @ApiProperty({ type: () => User })
   @Type(() => User)
   @JoinColumn({ name: 'invitingUserId' })
   @Allow()
   invitingUser: Ty<User>;
 
+  @OneToOne(() => User, (user) => user.referredByInvite)
+  @ApiProperty({ type: () => User, nullable: true })
+  @Type(() => User)
+  @IsOptional()
+  invitedUser: Ty<User> | null;
+
   @ManyToOne(() => Community, (community) => community.invites, {
     nullable: true,
     onDelete: 'SET NULL',
   })
-  @ApiPropertyOptional({ type: () => Community })
+  @ApiPropertyOptional({ type: () => Community, nullable: true })
   @Type(() => Community)
   @JoinColumn({ name: 'communityId' })
   @IsOptional()
-  community?: Ty<Community>;
+  community?: Ty<Community> | null;
 
   @RelationId((invite: OnetimeInvite) => invite.community)
   @Type(() => Number)

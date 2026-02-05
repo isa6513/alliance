@@ -47,6 +47,7 @@ import { Action } from 'src/actions/entities/action.entity';
 import { UserDevice } from './user-device.entity';
 import { Mms } from 'src/mms/mms.entity';
 import { findLeast } from 'src/utils/filter';
+import { OnetimeInvite } from './onetime-invite.entity';
 
 export enum NotificationPreference {
   All = 'all',
@@ -322,6 +323,15 @@ export class User {
   })
   referredBy?: User | null;
 
+  @OneToOne(() => OnetimeInvite, (invite) => invite.invitedUser)
+  @ApiProperty({
+    type: () => OnetimeInvite,
+    nullable: true,
+  })
+  @JoinColumn()
+  @Type(() => OnetimeInvite)
+  referredByInvite: OnetimeInvite | null;
+
   @OneToMany(() => User, (user) => user.referredBy)
   referredUsers?: User[];
 
@@ -343,6 +353,17 @@ export class User {
   @ManyToMany(() => Tag, (tag) => tag.users, { onDelete: 'CASCADE' })
   @Type(() => Tag)
   tags: Ty<Tag>[];
+
+  @ManyToOne(() => Community, (community) => community.pendingUsers)
+  @ApiPropertyOptional({
+    type: () => Community,
+    nullable: true,
+    description:
+      'The community that the user will join when they sign the contract',
+  })
+  @Type(() => Community)
+  @IsOptional()
+  pendingCommunity?: Community | null;
 
   @ManyToMany(() => Community, (community) => community.users, {
     onDelete: 'CASCADE',

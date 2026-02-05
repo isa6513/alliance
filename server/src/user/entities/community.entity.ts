@@ -100,6 +100,12 @@ export class Community {
   @IsOptional()
   leaders?: User[];
 
+  @OneToMany(() => User, (user) => user.pendingCommunity)
+  @ApiPropertyOptional({ type: () => User, isArray: true })
+  @Type(() => User)
+  @IsOptional()
+  pendingUsers?: User[];
+
   @OneToMany(() => OnetimeInvite, (invite) => invite.community)
   @ApiPropertyOptional({ type: () => OnetimeInvite, isArray: true })
   @Type(() => OnetimeInvite)

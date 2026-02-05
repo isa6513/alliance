@@ -506,7 +506,6 @@ export class UserController {
       await this.userService.addUserToCommunity({
         communityId,
         userId: body.userId,
-        notifFor: () => true,
       }),
     );
   }

@@ -4,14 +4,22 @@ import { Repository } from 'typeorm';
 import { AuthTokens } from '../src/auth/dto/authtokens.dto';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { SignUpDto } from 'src/auth/dto/sign-up.dto';
+import {
+  OnetimeInvite,
+  OnetimeInviteStatus,
+} from '../src/user/entities/onetime-invite.entity';
+import { Community } from '../src/user/entities/community.entity';
+import { Friend } from '../src/user/entities/friend.entity';
 
 describe('Auth (e2e)', () => {
   let userRepository: Repository<User>;
+  let inviteRepo: Repository<OnetimeInvite>;
   let ctx: TestContext;
 
   beforeAll(async () => {
     ctx = await createTestApp([]);
     userRepository = ctx.dataSource.getRepository(User);
+    inviteRepo = ctx.dataSource.getRepository(OnetimeInvite);
   }, 50000);
 
   it('returns 401 for invalid login', () => {
@@ -97,8 +105,184 @@ describe('Auth (e2e)', () => {
     });
   });
 
+  describe('signUp with invite codes', () => {
+    let invitingUser: User;
+    let communityRepo: Repository<Community>;
+
+    beforeEach(async () => {
+      communityRepo = ctx.dataSource.getRepository(Community);
+
+      // Create an inviting user
+      invitingUser = await userRepository.save(
+        userRepository.create({
+          email: 'inviter@test.com',
+          password: 'password',
+          name: 'Inviter User',
+        }),
+      );
+    });
+
+    it('registers a user with an invite code and sets referredByInvite', async () => {
+      // Create a community for the invite
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'Test Community',
+          description: 'Test',
+          leaders: [invitingUser],
+          users: [invitingUser],
+        }),
+      );
+
+      // Create an invite
+      const invite = await inviteRepo.save(
+        inviteRepo.create({
+          invitee: 'invited@test.com',
+          code: 'TEST-INVITE-CODE',
+          status: OnetimeInviteStatus.LINK_UNUSED,
+          invitingUser,
+          community,
+        }),
+      );
+
+      // Register with the invite code
+      await request(ctx.app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: 'invited@test.com',
+          password: 'password',
+          name: 'Invited User',
+          referralCode: 'TEST-INVITE-CODE',
+          mode: 'header',
+        } satisfies SignUpDto)
+        .expect(201);
+
+      // Verify the user was created with referredByInvite
+      const newUser = await userRepository.findOne({
+        where: { email: 'invited@test.com' },
+        relations: { referredByInvite: true, referredBy: true },
+      });
+
+      expect(newUser).not.toBeNull();
+      expect(newUser?.referredByInvite?.id).toBe(invite.id);
+      expect(newUser?.referredBy?.id).toBe(invitingUser.id);
+
+      // Verify the invite was invalidated
+      const updatedInvite = await inviteRepo.findOne({
+        where: { id: invite.id },
+      });
+      expect(updatedInvite?.status).toBe(OnetimeInviteStatus.LINK_USED);
+    });
+
+    it('creates friendship between inviting user and new user when registering with invite', async () => {
+      await inviteRepo.save(
+        inviteRepo.create({
+          invitee: 'friend-invited@test.com',
+          code: 'FRIEND-INVITE-CODE',
+          status: OnetimeInviteStatus.LINK_UNUSED,
+          invitingUser,
+        }),
+      );
+
+      await request(ctx.app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: 'friend-invited@test.com',
+          password: 'password',
+          name: 'Friend Invited User',
+          referralCode: 'FRIEND-INVITE-CODE',
+          mode: 'header',
+        } satisfies SignUpDto)
+        .expect(201);
+
+      // Verify friendship was created
+      const newUser = await userRepository.findOne({
+        where: { email: 'friend-invited@test.com' },
+      });
+
+      const friendRepo = ctx.dataSource.getRepository(Friend);
+      const friendship = await friendRepo.findOne({
+        where: [
+          {
+            requester: { id: invitingUser.id },
+            addressee: { id: newUser!.id },
+          },
+          {
+            requester: { id: newUser!.id },
+            addressee: { id: invitingUser.id },
+          },
+        ],
+      });
+
+      expect(friendship).not.toBeNull();
+    });
+
+    it('does not join community immediately on signup with invite', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'Signup Community',
+          description: 'Test',
+          leaders: [invitingUser],
+          users: [invitingUser],
+        }),
+      );
+
+      const invite = await inviteRepo.save(
+        inviteRepo.create({
+          invitee: 'no-join@test.com',
+          code: 'NO-JOIN-CODE',
+          status: OnetimeInviteStatus.LINK_UNUSED,
+          invitingUser,
+          community,
+        }),
+      );
+
+      await request(ctx.app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: 'no-join@test.com',
+          password: 'password',
+          name: 'No Join User',
+          referralCode: 'NO-JOIN-CODE',
+          mode: 'header',
+        } satisfies SignUpDto)
+        .expect(201);
+
+      // Verify user is NOT in the community yet
+      const newUser = await userRepository.findOne({
+        where: { email: 'no-join@test.com' },
+        relations: { communities: true, referredByInvite: true },
+      });
+
+      expect(newUser?.communities).toEqual([]);
+      expect(newUser?.referredByInvite?.id).toBe(invite.id);
+    });
+
+    it('allows registration without invite code in test environment', async () => {
+      await request(ctx.app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: 'no-invite@test.com',
+          password: 'password',
+          name: 'No Invite User',
+          referralCode: 'INVALID-CODE',
+          mode: 'header',
+        } satisfies SignUpDto)
+        .expect(201);
+
+      const newUser = await userRepository.findOne({
+        where: { email: 'no-invite@test.com' },
+        relations: { referredByInvite: true, referredBy: true },
+      });
+
+      expect(newUser).not.toBeNull();
+      expect(newUser?.referredByInvite).toBeNull();
+      expect(newUser?.referredBy).toBeNull();
+    });
+  });
+
   afterEach(async () => {
-    await userRepository.query('DELETE FROM "user"');
+    await userRepository.deleteAll();
+    // await inviteRepo.deleteAll();
   });
 
   afterAll(async () => {

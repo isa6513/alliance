@@ -33,6 +33,7 @@ export enum NotificationCategory {
   RemovedFromCommunity = 'removed_from_community',
   LeftCommunityReminder = 'left_community_reminder',
   MemberLeftCommunity = 'member_left_community',
+  MemberSuspendedRemovedFromCommunity = 'member_suspended_removed_from_community',
   MemberJoinedCommunity = 'member_joined_community',
   CommunityAssigned = 'community_assigned',
   NewMemberReferred = 'new_member_referred',

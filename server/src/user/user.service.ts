@@ -697,7 +697,10 @@ export class UserService {
   async signContract(userId: number): Promise<Date> {
     const user = await this.findOneOrFail(userId, {
       contractEvents: true,
-      referredBy: true,
+      referredBy: { communities: { leaders: true, users: true } },
+      referredByInvite: { community: { leaders: true, users: true } },
+      communities: true,
+      pendingCommunity: { leaders: true, users: true },
     });
     if (user.hasActiveContract) {
       throw new BadRequestException('Member already has an active contract.');
@@ -707,11 +710,111 @@ export class UserService {
       type: ContractEventType.SIGNED,
       date: new Date(),
     });
-    await this.contractEventRepository.save(contractEvent);
 
-    await this.slackService.sendMessage(
-      `${user.name} ${user.referredBy ? `(referred by ${user.referredBy.name}) ` : ''}signed their contract :)`,
-    );
+    const promises: Promise<unknown>[] = [];
+
+    const notifs: Notification[] = [];
+    const firstSigning = user.contractEvents!.length === 0;
+    const userUpdate: DeepPartial<User> = {
+      id: user.id,
+      pendingCommunity: null,
+    };
+    if (!firstSigning) {
+      if (user.pendingCommunity) {
+        if (
+          user.pendingCommunity.maxCapacity !== null &&
+          user.pendingCommunity.maxCapacity -
+            (user.pendingCommunity.users.length -
+              user.pendingCommunity.leaders!.length) >
+            0
+        ) {
+          promises.push(
+            this.addUserToCommunityAndRefreshConversation({
+              user,
+              community: user.pendingCommunity,
+              notifFor: () => true,
+            }),
+          );
+        }
+      }
+    } else if (user.referredByInvite?.community) {
+      // Join community from invite
+      const community = user.referredByInvite.community;
+      let referrerNotified = false;
+      await this.addUserToCommunityAndRefreshConversation({
+        user,
+        community,
+        notifFor: ({ leader }) => {
+          if (leader.id === user.referredBy?.id) {
+            referrerNotified = true;
+            return {
+              message: `${user.name} joined the Alliance and your group (${community.name})`,
+              associatedUsers: [user],
+            };
+          }
+          return {
+            message: `${user.name} (referred by ${user.referredBy!.name}) joined the Alliance and your group (${community.name})`,
+            associatedUsers: [user, user.referredBy!],
+          };
+        },
+      });
+
+      if (user.referredBy && !referrerNotified) {
+        notifs.push(
+          this.notifRepository.create({
+            user: user.referredBy,
+            category: NotificationCategory.NewMemberReferred,
+            message: `${user.name} joined the Alliance`,
+            webAppLocation: profileUrl(user.id),
+            associatedUsers: [user],
+          }),
+        );
+      }
+    } else if (user.referredBy) {
+      const referredBy = user.referredBy;
+      // Join some community adjacent to the user
+      const community: Community | null =
+        referredBy.communities.find(
+          (c) =>
+            c.maxCapacity !== null &&
+            c.users.length - c.leaders!.length < c.maxCapacity &&
+            !c.leaders?.some((leader) => leader.id === referredBy.id),
+        ) ?? null;
+
+      if (community) {
+        promises.push(
+          this.addUserToCommunityAndRefreshConversation({
+            user,
+            community,
+            notifFor: () => true,
+          }),
+        );
+      } else {
+        userUpdate.undergoingGroupAssignment = true;
+        notifs.push(
+          this.notifRepository.create({
+            user: referredBy,
+            category: NotificationCategory.NewMemberReferred,
+            message: `${user.name} joined the Alliance`,
+            webAppLocation: profileUrl(user.id),
+            associatedUsers: [user],
+          }),
+        );
+      }
+    } else {
+      // no community and no referrer
+      userUpdate.undergoingGroupAssignment = true;
+    }
+
+    await Promise.all([
+      this.contractEventRepository.save(contractEvent),
+      this.userRepository.save(userUpdate),
+      this.notifRepository.save(notifs),
+      this.slackService.sendMessage(
+        `${user.name} ${user.referredBy ? `(referred by ${user.referredBy.name}) ` : ''}signed their contract :)`,
+      ),
+      ...promises,
+    ]);
 
     return contractEvent.date;
   }
@@ -721,7 +824,11 @@ export class UserService {
     automatic: boolean = false,
     autoSuspendKey?: string,
   ): Promise<Date> {
-    const user = await this.findOneOrFail(userId, { contractEvents: true });
+    const user = await this.findOneOrFail(userId, {
+      contractEvents: true,
+      communities: { leaders: true },
+      leaderOf: true,
+    });
     if (!user.hasActiveContract) {
       throw new BadRequestException('Member does not have an active contract.');
     }
@@ -732,7 +839,49 @@ export class UserService {
       automatic,
       autoSuspendKey,
     });
-    await this.contractEventRepository.save(contractEvent);
+
+    const notifs: Notification[] = [];
+
+    let pendingCommunity: Community | null = null;
+    for (const community of user.communities) {
+      if (!user.leaderOfIdSet.has(community.id)) {
+        pendingCommunity = community;
+        notifs.push(
+          ...community.leaders!.map((leader) =>
+            this.notifRepository.create({
+              user: leader,
+              category:
+                NotificationCategory.MemberSuspendedRemovedFromCommunity,
+              message: `${user.name} suspended their contract and was removed from your group (${community.name})`,
+              webAppLocation: profileUrl(user.id),
+              associatedUsers: [user],
+            }),
+          ),
+        );
+      }
+    }
+    const updatedCommunities: Community[] = user.communities.filter(
+      (community) => !user.leaderOfIdSet.has(community.id),
+    );
+
+    await Promise.all([
+      this.contractEventRepository.save(contractEvent),
+      run(async () => {
+        await this.notifRepository.save(notifs);
+        await this.userRepository.save({
+          id: user.id,
+          communities: user.leaderOf,
+          pendingCommunity,
+        });
+        await Promise.all(
+          updatedCommunities.map((community) =>
+            this.conversationService.syncCommunityConversationMembers(
+              community.id,
+            ),
+          ),
+        );
+      }),
+    ]);
 
     if (!automatic) {
       await this.slackService.sendMessage(
@@ -993,33 +1142,6 @@ export class UserService {
     return communities.sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  async findUserCommunityForNewMember(user: User): Promise<Community | null> {
-    const communities = await this.communityRepository.find({
-      where: {
-        maxCapacity: Not(IsNull()),
-        id: In(user.communities.map((c) => c.id)),
-        allowMemberInvites: true,
-      },
-      relations: {
-        leaders: true,
-        users: true,
-      },
-    });
-    if (!communities) {
-      return null;
-    }
-    for (const community of communities) {
-      if (
-        community.users.length - community.leaders!.length <
-          community.maxCapacity! &&
-        !community.leaders?.some((leader) => leader.id === user.id)
-      ) {
-        return community;
-      }
-    }
-    return null;
-  }
-
   async joinPublicCommunity(
     userId: number,
     communityId: number,
@@ -1182,26 +1304,40 @@ export class UserService {
   async addUserToCommunity(params: {
     communityId: number;
     userId: number;
-    notifFor: (params: {
-      leader: User;
-      community: Community;
-    }) => { message: string; users: User[] } | boolean;
   }): Promise<Community> {
-    const { communityId, userId, notifFor: notifFor } = params;
+    const { communityId, userId } = params;
 
     const [community, user] = await Promise.all([
       this.findCommunityOrFail(communityId),
       this.findOneOrFail(userId),
     ]);
 
-    community.users = community.users ?? [];
-    if (!community.users.some((existing) => existing.id === userId)) {
-      community.users.push(user);
+    return this.addUserToCommunityAndRefreshConversation({
+      user,
+      community,
+      notifFor: () => true,
+    });
+  }
+
+  async addUserToCommunityAndRefreshConversation(params: {
+    user: Pick<User, 'id' | 'name'> & DeepPartial<User>;
+    community: Community;
+    notifFor: (params: { leader: User }) =>
+      | {
+          message: string;
+          associatedUsers: User[];
+        }
+      | boolean;
+  }): Promise<Community> {
+    const { user, community, notifFor } = params;
+
+    if (community.users.some((existing) => existing.id === user.id)) {
+      return community;
     }
 
     const notifs: Notification[] = community
       .leaders!.map((leader) => {
-        const notif = notifFor({ leader, community });
+        const notif = notifFor({ leader });
         if (!notif) {
           return null;
         }
@@ -1216,13 +1352,16 @@ export class UserService {
             tab: 'members',
             communityId: community.id,
           }),
-          associatedUsers: notif === true ? [user] : notif.users,
+          associatedUsers: notif === true ? [user] : notif.associatedUsers,
           priority: NotifPriority.High,
         });
       })
       .filter((notif) => !!notif);
 
-    const updatedP = this.communityRepository.save(community);
+    const updatedP = this.communityRepository.save({
+      id: community.id,
+      users: [...community.users, user],
+    });
     await Promise.all([
       this.notifRepository.save(notifs),
       updatedP.then((updated) =>
@@ -1230,7 +1369,7 @@ export class UserService {
       ),
     ]);
 
-    return await updatedP;
+    return updatedP;
   }
 
   async removeUserFromCommunity(params: {
