@@ -1103,11 +1103,6 @@ export class UserService {
     const user = await this.userRepository.findOneOrFail({
       where: { id: userId },
     });
-    if (user.isIntroductoryGroupMember) {
-      throw new UnauthorizedException(
-        'Introductory group members cannot create communities',
-      );
-    }
     if (body.name.trim().length === 0) {
       throw new BadRequestException('Name cannot be empty');
     }

@@ -35,10 +35,9 @@ export const FORM_BUILDER_PREVIEW_USER: UserDto = {
     },
   ],
   pushesForFriendRequests: false,
-  isIntroductoryGroupMember: false,
   undergoingGroupAssignment: false,
   remindAboutUncompletedGroupMembers: false,
-  leaderOfIds: []
+  leaderOfIds: [],
 };
 
 export const testActions: CreateActionDto[] = [
@@ -67,7 +66,8 @@ We can outpace these mining companies by purchasing the land directly and placin
 4. Long-term stewardship is established
 
 This is our chance to take direct action against environmental destruction. Every contribution makes a difference.`,
-    shortDescription: "Gold mining companies are expressing interest in a highly biodiverse area. We can outpace them by purchasing the land.",
+    shortDescription:
+      "Gold mining companies are expressing interest in a highly biodiverse area. We can outpace them by purchasing the land.",
     type: "Funding",
     commitmentThreshold: 100,
     donationAmount: 1000,
@@ -82,7 +82,8 @@ This is our chance to take direct action against environmental destruction. Ever
     onboarding: false,
     optional: false,
     publicOnly: false,
-    shouldCompleteAfterDeadline: false
+    shouldCompleteAfterDeadline: false,
+    isContractSigningAction: false,
   },
   {
     name: "Use public transportation instead of driving",
@@ -127,7 +128,8 @@ Public transit creates:
 - **"It's not convenient"** - Plan routes in advance and build habits
 
 Your commitment to public transit is an investment in a sustainable future.`,
-    shortDescription: "Reduce your carbon footprint by using public transportation for daily commutes.",
+    shortDescription:
+      "Reduce your carbon footprint by using public transportation for daily commutes.",
     type: "Ongoing",
 
     commitmentThreshold: 150,
@@ -141,6 +143,7 @@ Your commitment to public transit is an investment in a sustainable future.`,
     onboarding: false,
     optional: false,
     publicOnly: false,
-    shouldCompleteAfterDeadline: false
+    shouldCompleteAfterDeadline: false,
+    isContractSigningAction: false,
   },
 ];

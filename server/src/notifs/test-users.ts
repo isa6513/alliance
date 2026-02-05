@@ -68,7 +68,6 @@ export const testUser = new User({
   isNotSignedUpPartialProfile: false,
   over18: false,
   onboardingComplete: false,
-  isIntroductoryGroupMember: false,
   preferredActionReminderChannel: NotificationChannel.Text,
   awayRanges: [],
   anonymous: false,
