@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<
 > = ({ children, tokenStore }) => {
   const [user, setUser] = useState<UserDto | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [canConnectToServer, setCanConnectToServer] = useState<boolean>(true);
+  const [canConnectToServer, setCanConnectToServer] = useState<boolean>(false);
   const router = useRouter();
 
   const saveTokens = useCallback(
