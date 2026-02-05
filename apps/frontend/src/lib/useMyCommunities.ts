@@ -75,17 +75,6 @@ export function useMyCommunities(
     []
   );
 
-  useEffect(() => {
-    if (selectedCommunityId === null) {
-      setSelectedCommunity(communities[0] ?? null);
-    } else {
-      setSelectedCommunity(
-        communities.find((community) => community.id === selectedCommunityId) ??
-          null
-      );
-    }
-  }, [communities, selectedCommunityId]);
-
   return {
     communities,
     communityIds,
