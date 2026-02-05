@@ -22,7 +22,6 @@ import { useAuth } from "../../lib/AuthContext";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
 import CompletedBar from "@alliance/sharedweb/ui/CompletedBar";
-import { GroupOrganizerGuidelines } from "../../components/GroupGuidelines";
 import CommunityCreateForm from "../../components/CommunityCreateForm";
 import { useSearchParams } from "react-router";
 import CommunityActivityTab from "../../components/CommunityActivityTab";
@@ -45,19 +44,12 @@ import CommunitySelectDropdown from "../../components/CommunitySelectDropdown";
 import MyGroupsPage from "./MyGroupsPage";
 import { Link } from "react-router";
 
-export type Tab =
-  | "activity"
-  | "members"
-  | "invites"
-  | "resources"
-  | "groups"
-  | "create";
+export type Tab = "activity" | "members" | "invites" | "groups" | "create";
 
 const TAB_DISPLAY_NAMES = {
   activity: "Activity",
   members: "Members",
   invites: "Invites",
-  resources: "Resources",
 } satisfies Partial<Record<Tab, string>>;
 
 const CURRENT_ACTION_WINDOW_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
@@ -139,7 +131,7 @@ const CommunityPage = () => {
               (community) => community.id.toString() === communityId
             )) ||
             resp.data?.[0]) ??
-          null
+            null
         );
       }
     });
@@ -157,9 +149,9 @@ const CommunityPage = () => {
         community.maxCapacity === null
           ? null
           : Math.max(
-            community.maxCapacity,
-            community.users.length - community.leaders.length
-          )
+              community.maxCapacity,
+              community.users.length - community.leaders.length
+            )
       );
       setEditPhotoUrl(community.photo ?? null);
       setIsEditing(false);
@@ -292,7 +284,8 @@ const CommunityPage = () => {
       normalizedMaxCapacity < community.users.length - community.leaders.length
     ) {
       setError(
-        `Capacity cannot be less than the current number of members (${community.users.length - community.leaders.length
+        `Capacity cannot be less than the current number of members (${
+          community.users.length - community.leaders.length
         })`
       );
       return;
@@ -356,9 +349,9 @@ const CommunityPage = () => {
         community.maxCapacity === null
           ? null
           : Math.max(
-            community.maxCapacity,
-            community.users.length - community.leaders.length
-          )
+              community.maxCapacity,
+              community.users.length - community.leaders.length
+            )
       );
       setEditPhotoUrl(community.photo ?? null);
     }
@@ -397,7 +390,7 @@ const CommunityPage = () => {
   }, [community, isSaving, refreshUser, setParams]);
 
   const tabs: (keyof typeof TAB_DISPLAY_NAMES)[] = amLeader
-    ? ["activity", "members", "invites", "resources"]
+    ? ["activity", "members", "invites"]
     : ["activity", "members"];
 
   const isLargeScreen = useMediaQuery("(min-width: 1250px)");
@@ -658,8 +651,9 @@ const CommunityPage = () => {
                 </div>
 
                 <div
-                  className={`max-w-[400px] ${completionData.nTotal === 0 ? " invisible" : ""
-                    }`}
+                  className={`max-w-[400px] ${
+                    completionData.nTotal === 0 ? " invisible" : ""
+                  }`}
                 >
                   <p className="text-sm">
                     {completionData.nCompleted} / {completionData.nTotal} have
@@ -670,7 +664,7 @@ const CommunityPage = () => {
                       completionData.nTotal === 0
                         ? 100
                         : (completionData.nCompleted / completionData.nTotal) *
-                        100
+                          100
                     }
                     height="h-4"
                     dark
@@ -685,8 +679,9 @@ const CommunityPage = () => {
                       key={m}
                       onClick={() => setParams({ tab: m })}
                       aria-pressed={m === tab}
-                      className={`!border-b-[1.5px] rounded-none ${m === tab ? "!border-b-green" : "!border-b-transparent"
-                        }`}
+                      className={`!border-b-[1.5px] rounded-none ${
+                        m === tab ? "!border-b-green" : "!border-b-transparent"
+                      }`}
                     >
                       <div className="flex flex-row gap-x-2">
                         <span>{TAB_DISPLAY_NAMES[m]}</span>
@@ -730,11 +725,6 @@ const CommunityPage = () => {
                 completionData.completedAllCurrentActions
               }
             />
-          )}
-          {tab === "resources" && (
-            <div className="flex flex-col gap-y-4 py-4">
-              <GroupOrganizerGuidelines />
-            </div>
           )}
           {tab === "invites" && (
             <CommunityInvitesLeaderTab
