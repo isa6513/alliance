@@ -9,7 +9,8 @@ import {
   actionsUnlikeActivity,
   actionsFriendActivityForAction,
 } from "@alliance/shared/client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import posthog from "posthog-js";
 
 export enum ActivityList {
@@ -40,126 +41,97 @@ export type UseActivitiesProps = {
     }
 );
 
-const CACHE_PREFIX = "useActivities.cache.";
-
-const generateCacheKey = (props: UseActivitiesProps): string => {
-  return `${CACHE_PREFIX}${props.list}_${props.objectId ?? "none"}_${
-    props.limit
-  }_${props.comments}`;
+const generateQueryKey = (props: UseActivitiesProps) => {
+  return [
+    "useActivities",
+    props.list,
+    props.objectId ?? "none",
+    props.limit ?? 50,
+    props.comments ?? false,
+  ];
 };
 
-const getCachedActivities = (cacheKey: string): ActionActivityDto[] | null => {
-  try {
-    const cached = localStorage.getItem(cacheKey);
-    if (!cached) {
-      return null;
-    }
-    return JSON.parse(cached);
-  } catch {
-    return null;
+const fetchActivities = async (
+  props: UseActivitiesProps
+): Promise<ActionActivityDto[]> => {
+  const { list, objectId, limit = 50, comments = false } = props;
+
+  let apiCall;
+  switch (list) {
+    case ActivityList.Friends:
+      apiCall = actionsFriendActivity({
+        query: { comments, limit: limit.toString() },
+      });
+      break;
+    case ActivityList.User:
+      apiCall = actionsFindCompletedForUser({
+        path: { id: objectId! },
+        query: { comments },
+      });
+      break;
+    case ActivityList.Action:
+      apiCall = actionsGetActionActivities({
+        path: { id: objectId! },
+        query: { limit: limit, comments },
+      });
+      break;
+    case ActivityList.FriendsForAction:
+      if (!objectId) {
+        throw new Error("objectId is required for FriendsForAction");
+      }
+      apiCall = actionsFriendActivityForAction({
+        path: { actionId: objectId },
+        query: { comments, limit: limit.toString() },
+      });
+      break;
+    case ActivityList.Community:
+      apiCall = actionsCommunityActivity({
+        query: {
+          limit: limit.toString(),
+          before: new Date().toISOString(),
+          comments,
+          communityId: objectId!,
+        },
+      });
+      break;
+    case ActivityList.Global:
+      apiCall = actionsGetActivityFeed({
+        query: {
+          limit: limit.toString(),
+          before: new Date().toISOString(),
+          comments,
+        },
+      });
+      break;
   }
-};
 
-const setCachedActivities = (
-  cacheKey: string,
-  activities: ActionActivityDto[]
-): void => {
-  try {
-    localStorage.setItem(cacheKey, JSON.stringify(activities));
-  } catch {}
+  const resp = await apiCall;
+  const data = resp.data?.filter((a) => a.type === "user_completed") ?? [];
+
+  const respActivities = data.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+  return respActivities;
 };
 
 const useActivities = (props: UseActivitiesProps) => {
-  const cacheKey = generateCacheKey(props);
-  const { list, objectId, limit = 50, comments = false } = props;
+  const queryClient = useQueryClient();
+  const queryKey = generateQueryKey(props);
 
-  const [activities, setActivitiesWithoutCache] = useState<ActionActivityDto[]>(
-    getCachedActivities(cacheKey) ?? []
-  );
+  const { data: activities = [], isLoading: loading } = useQuery({
+    queryKey,
+    queryFn: () => fetchActivities(props),
+  });
+
   const setActivities = useCallback(
-    (setStateActivities: React.SetStateAction<ActionActivityDto[]>) => {
-      setActivitiesWithoutCache((prev) => {
-        const newActivities =
-          typeof setStateActivities === "function"
-            ? setStateActivities(prev)
-            : setStateActivities;
-        setCachedActivities(cacheKey, newActivities);
-        return newActivities;
+    (updater: React.SetStateAction<ActionActivityDto[]>) => {
+      queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) => {
+        return typeof updater === "function" ? updater(old ?? []) : updater;
       });
     },
-    [cacheKey, activities]
+    [queryClient, queryKey]
   );
-  const [loading, setLoading] = useState(activities.length === 0);
-
-  useEffect(() => {
-    setActivitiesWithoutCache(getCachedActivities(cacheKey) ?? []);
-  }, [cacheKey]);
-
-  useEffect(() => {
-    let apiCall;
-    switch (list) {
-      case ActivityList.Friends:
-        apiCall = actionsFriendActivity({
-          query: { comments, limit: limit.toString() },
-        });
-        break;
-      case ActivityList.User:
-        apiCall = actionsFindCompletedForUser({
-          path: { id: objectId },
-          query: { comments },
-        });
-        break;
-      case ActivityList.Action:
-        apiCall = actionsGetActionActivities({
-          path: { id: objectId },
-          query: { limit: limit, comments },
-        });
-        break;
-      case ActivityList.FriendsForAction:
-        if (!objectId) {
-          throw new Error("objectId is required for FriendsForAction");
-        }
-        apiCall = actionsFriendActivityForAction({
-          path: { actionId: objectId },
-          query: { comments, limit: limit.toString() },
-        });
-        break;
-      case ActivityList.Community:
-        apiCall = actionsCommunityActivity({
-          query: {
-            limit: limit.toString(),
-            before: new Date().toISOString(),
-            comments,
-            communityId: objectId,
-          },
-        });
-        break;
-      case ActivityList.Global:
-        apiCall = actionsGetActivityFeed({
-          query: {
-            limit: limit.toString(),
-            before: new Date().toISOString(),
-            comments,
-          },
-        });
-        break;
-    }
-    apiCall
-      .then(async (resp) => {
-        const data =
-          resp.data?.filter((a) => a.type === "user_completed") ?? [];
-
-        const respActivities = data.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-
-        setActivities(respActivities);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [list, objectId, comments, limit]);
 
   const handleLikeActivity = useCallback(
     async (activityId: number) => {
@@ -173,17 +145,19 @@ const useActivities = (props: UseActivitiesProps) => {
           path: { id: activityId },
         });
         if (response.response.ok && response.data) {
-          setActivities((prev) =>
-            prev.map((a) =>
-              a.id === activityId
-                ? {
-                    ...a,
-                    likes: response.data.likes,
-                    likesCount: response.data.likesCount,
-                    likedByMe: response.data.likedByMe,
-                  }
-                : a
-            )
+          queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) =>
+            old
+              ? old.map((a) =>
+                  a.id === activityId
+                    ? {
+                        ...a,
+                        likes: response.data.likes,
+                        likesCount: response.data.likesCount,
+                        likedByMe: response.data.likedByMe,
+                      }
+                    : a
+                )
+              : []
           );
           return response.data;
         }
@@ -193,17 +167,19 @@ const useActivities = (props: UseActivitiesProps) => {
           path: { id: activityId },
         });
         if (response.response.ok && response.data) {
-          setActivities((prev) =>
-            prev.map((a) =>
-              a.id === activityId
-                ? {
-                    ...a,
-                    likes: response.data.likes,
-                    likesCount: response.data.likesCount,
-                    likedByMe: response.data.likedByMe,
-                  }
-                : a
-            )
+          queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) =>
+            old
+              ? old.map((a) =>
+                  a.id === activityId
+                    ? {
+                        ...a,
+                        likes: response.data.likes,
+                        likesCount: response.data.likesCount,
+                        likedByMe: response.data.likedByMe,
+                      }
+                    : a
+                )
+              : []
           );
 
           posthog.capture("activity_liked", {
@@ -215,16 +191,21 @@ const useActivities = (props: UseActivitiesProps) => {
       }
       return null;
     },
-    [activities]
+    [activities, queryClient, queryKey]
   );
 
-  const updateActivity = useCallback((updatedActivity: ActionActivityDto) => {
-    setActivities((prev) =>
-      prev.map((a) =>
-        a.id === updatedActivity.id ? { ...a, ...updatedActivity } : a
-      )
-    );
-  }, []);
+  const updateActivity = useCallback(
+    (updatedActivity: ActionActivityDto) => {
+      queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) =>
+        old
+          ? old.map((a) =>
+              a.id === updatedActivity.id ? { ...a, ...updatedActivity } : a
+            )
+          : []
+      );
+    },
+    [queryClient, queryKey]
+  );
 
   return {
     loading,
