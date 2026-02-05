@@ -330,6 +330,7 @@ const CommunityPage = () => {
     editPhotoUrl,
     isSaving,
     useMaxCapacity,
+    memberCount,
   ]);
 
   const handleCancel = useCallback(() => {
