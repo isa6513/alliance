@@ -49,6 +49,7 @@ export const testUser = new User({
   receivedFriendRequests: [],
   notifications: [],
   referredBy: null,
+  referredByInvite: null,
   referredUsers: [],
   shareEmailWithCommunityLead: true,
   undergoingGroupAssignment: false,
