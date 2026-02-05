@@ -166,7 +166,7 @@ const StatsPage: React.FC = () => {
   const [completionRateRange, setCompletionRateRange] = useState(() => {
     const end = new Date();
     const start = new Date();
-    start.setMonth(start.getMonth() - 3);
+    start.setMonth(start.getMonth() - 5);
     return {
       start: formatDateAsLocal(start),
       end: formatDateAsLocal(end),

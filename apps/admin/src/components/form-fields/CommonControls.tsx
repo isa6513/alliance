@@ -14,6 +14,7 @@ import {
   tasksTestCustomExpression,
   userList,
   type UserDto,
+  CustomExpressionUserDto,
 } from "@alliance/shared/client";
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import {
@@ -1112,12 +1113,8 @@ export function CustomValidatorSelect({
       fail: number;
       total: number;
     };
-    passUsers?: Array<
-      Pick<UserDto, "id" | "name" | "anonymous">
-    >;
-    failUsers?: Array<
-      Pick<UserDto, "id" | "name" | "anonymous">
-    >;
+    passUsers?: Array<CustomExpressionUserDto>;
+    failUsers?: Array<CustomExpressionUserDto>;
     selectedUserLabel?: string;
   } | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
