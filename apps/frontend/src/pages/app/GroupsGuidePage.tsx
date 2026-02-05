@@ -14,8 +14,8 @@ const tocSections = [
   { id: "group-assignment", label: "Group assignment", level: 3 },
   { id: "how-to-lead", label: "How to lead", level: 1 },
   { id: "lead-recommendations", label: "Recommendations", level: 2 },
-  { id: "lead-recommendations-1", label: "Ensuring task completion", level: 3 },
-  { id: "lead-recommendations-2", label: "Engaging with members", level: 3 },
+  { id: "lead-recommendations-1", label: "Sending reminders", level: 3 },
+  { id: "lead-recommendations-2", label: "Checking in", level: 3 },
 ] as const;
 
 const GroupsGuidePage: React.FC = () => {
@@ -281,10 +281,10 @@ const GroupsGuidePage: React.FC = () => {
                 id="lead-recommendations-2"
                 className="text-xl font-semibold mt-2 text-black"
               >
-                Engaging with members
+                Checking in
               </h3>
               <p>
-                Here are some extra ways you can engage with your group members:
+                Here are some extra ways you can check in on your group members:
               </p>
               <ol className="list-decimal list-inside pl-4 space-y-1">
                 <li>
