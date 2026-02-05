@@ -299,10 +299,13 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 value={inviteeName}
                 onChange={(e) => setInviteeName(e.target.value)}
               />
+              <p className="my-2 text-zinc-500">
+                {onetimeInviteCreation.inviteeContextExplanation}
+              </p>
               <textarea
                 ref={infoInputRef}
                 className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
-                placeholder="Context about invitee (optional)"
+                placeholder="Context about the invitation"
                 value={info}
                 onChange={(e) => {
                   setInfo(e.target.value);
@@ -348,10 +351,13 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                     onChange={(e) => setInviteeName(e.target.value)}
                   />
                 </div>
+                <p className="my-2 text-zinc-500">
+                  {onetimeInviteCreation.inviteeContextExplanation}
+                </p>
                 <textarea
                   ref={infoInputRef}
                   className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
-                  placeholder="Context about invitee (optional)"
+                  placeholder="Context about the invitation"
                   value={info}
                   onChange={(e) => {
                     setInfo(e.target.value);
