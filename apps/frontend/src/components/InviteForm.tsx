@@ -199,6 +199,20 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
               memberCommunities[0].leaders.length),
         };
 
+  const infoForm = (
+    <textarea
+      ref={infoInputRef}
+      className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
+      placeholder="Context about the invitation"
+      value={info}
+      onChange={(e) => {
+        setInfo(e.target.value);
+      }}
+      rows={2}
+      style={{ resize: "none" }}
+    />
+  );
+
   return (
     <Card style={CardStyle.Grey}>
       <div className="flex flex-col gap-y-6">
@@ -302,17 +316,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
               <p className="my-2 text-zinc-500">
                 {onetimeInviteCreation.inviteeContextExplanation}
               </p>
-              <textarea
-                ref={infoInputRef}
-                className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
-                placeholder="Context about the invitation"
-                value={info}
-                onChange={(e) => {
-                  setInfo(e.target.value);
-                }}
-                rows={2}
-                style={{ resize: "none" }}
-              />
+              {infoForm}
               <Button
                 color={ButtonColor.Black}
                 onClick={() => handleCreateInvite(null)}
@@ -354,17 +358,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 <p className="my-2 text-zinc-500">
                   {onetimeInviteCreation.inviteeContextExplanation}
                 </p>
-                <textarea
-                  ref={infoInputRef}
-                  className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
-                  placeholder="Context about the invitation"
-                  value={info}
-                  onChange={(e) => {
-                    setInfo(e.target.value);
-                  }}
-                  rows={2}
-                  style={{ resize: "none" }}
-                />
+                {infoForm}
               </div>
             </div>
 
