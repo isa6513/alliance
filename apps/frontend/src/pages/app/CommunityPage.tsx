@@ -1,10 +1,8 @@
 import {
-  CommunityDto,
   UserActionRelationDetailDto,
   UserActionSummaryDto,
   userGetCommunityMemberContactInfo,
   actionsGetCommunityMemberInfo,
-  userGetMyCommunities,
   CommunityMemberContactInfoDto,
   conversationGetCommunityConversations,
   userUpdateCommunity,
@@ -42,6 +40,7 @@ import CommunitySelectDropdown from "../../components/CommunitySelectDropdown";
 import MyGroupsPage from "./MyGroupsPage";
 import { Link } from "react-router";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
+import { useMyCommunities } from "../../lib/useMyCommunities";
 
 export type Tab = "activity" | "members" | "groups" | "create";
 
@@ -53,7 +52,6 @@ const TAB_DISPLAY_NAMES = {
 const CURRENT_ACTION_WINDOW_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
 
 const CommunityPage = () => {
-  const [communities, setCommunities] = useState<CommunityDto[] | null>(null);
   const [memberContactInfo, setMemberContactInfo] = useState<Record<
     number,
     CommunityMemberContactInfoDto
@@ -71,6 +69,17 @@ const CommunityPage = () => {
 
   const tab = (searchParams.get("tab") as Tab | undefined) ?? "activity";
   const communityId = searchParams.get("communityId");
+  const {
+    communities,
+    communityIds,
+    refreshCommunities,
+    removeCommunity,
+    selectedCommunity: community,
+    removeMemberFromCommunity,
+    setSelectedCommunity,
+  } = useMyCommunities({
+    selectedCommunityId: communityId ? Number(communityId) : null,
+  });
 
   const maxActionsPerWeek = useMaxActionsPerWeek({
     actionSummaries: actionSummaries,
@@ -81,7 +90,6 @@ const CommunityPage = () => {
   > | null>(null);
 
   const [chatOpen, setChatOpen] = useState(false);
-  const [community, setCommunity] = useState<CommunityDto | null>(null);
   const { pendingCommunityInvites } = useIncomingCommunityInvites();
   const memberCount = community ? getMemberCount(community) : 0;
 
@@ -118,22 +126,6 @@ const CommunityPage = () => {
   }, [community?.id]);
 
   const { user, refreshUser } = useAuth();
-
-  useEffect(() => {
-    userGetMyCommunities().then((resp) => {
-      if (resp.data) {
-        setCommunities(resp.data);
-        setCommunity(
-          ((communityId !== null &&
-            resp.data?.find(
-              (community) => community.id.toString() === communityId
-            )) ||
-            resp.data?.[0]) ??
-            null
-        );
-      }
-    });
-  }, [communityId]);
 
   // Initialize edit values when community changes and reset editing state
   useEffect(() => {
@@ -211,32 +203,28 @@ const CommunityPage = () => {
 
   const setParams = useCallback(
     (params: { tab?: Tab | null; communityId?: number | null }) => {
-      setSearchParams((prev) => {
-        const next = new URLSearchParams(prev);
-        for (const [key, value] of Object.entries(params)) {
-          if (value === null || value === undefined) {
-            next.delete(key);
-          } else {
-            next.set(key, value.toString());
-          }
+      void (async () => {
+        if (
+          typeof params.communityId === "number" &&
+          !communityIds.has(params.communityId)
+        ) {
+          await refreshCommunities();
         }
-        return next;
-      });
+        setSearchParams((prev) => {
+          const next = new URLSearchParams(prev);
+          for (const [key, value] of Object.entries(params)) {
+            if (value === null || value === undefined) {
+              next.delete(key);
+            } else {
+              next.set(key, value.toString());
+            }
+          }
+          return next;
+        });
+      })();
     },
-    [setSearchParams]
+    [setSearchParams, communityIds, refreshCommunities]
   );
-
-  const onRemoveMember = useCallback((memberId: number) => {
-    setCommunity((prev) => {
-      if (!prev) {
-        return null;
-      }
-      return {
-        ...prev,
-        users: prev.users.filter((member) => member.id !== memberId),
-      };
-    });
-  }, []);
 
   const handleSave = useCallback(async () => {
     setError(null);
@@ -280,14 +268,8 @@ const CommunityPage = () => {
       });
 
       if (response.data) {
-        setCommunity(response.data);
+        setSelectedCommunity(response.data);
         setIsEditing(false);
-        // Refresh communities list
-        userGetMyCommunities().then((resp) => {
-          if (resp.data) {
-            setCommunities(resp.data);
-          }
-        });
       } else {
         setError("Failed to update group");
       }
@@ -309,6 +291,7 @@ const CommunityPage = () => {
     isSaving,
     useMaxCapacity,
     memberCount,
+    setSelectedCommunity,
   ]);
 
   const handleCancel = useCallback(() => {
@@ -343,13 +326,7 @@ const CommunityPage = () => {
         path: { communityId: community.id },
       });
       if (response.data) {
-        setCommunities((prev) => {
-          const next = prev?.filter((c) => c.id !== community.id) ?? null;
-          if (!next?.length) {
-            refreshUser();
-          }
-          return next;
-        });
+        removeCommunity(community.id);
         setParams({ communityId: null, tab: null });
       } else {
         setError("Failed to delete community");
@@ -360,7 +337,7 @@ const CommunityPage = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [community, isSaving, refreshUser, setParams]);
+  }, [community, isSaving, removeCommunity, setParams]);
 
   const tabs: (keyof typeof TAB_DISPLAY_NAMES)[] = amLeader
     ? ["activity", "members"]
@@ -684,7 +661,9 @@ const CommunityPage = () => {
               leaders={leaders}
               members={nonLeaderMembers}
               communityId={community.id}
-              onRemoveMember={onRemoveMember}
+              onRemoveMember={(memberId) =>
+                removeMemberFromCommunity(community.id, memberId)
+              }
               amLeader={amLeader ?? false}
               memberContactInfo={memberContactInfo ?? undefined}
               userActionRelations={userActionRelations ?? undefined}
@@ -714,7 +693,6 @@ const CommunityPage = () => {
               name={user?.name}
               onCancel={() => setParams({ tab: "groups" })}
               onSuccess={(community) => {
-                setCommunity(community);
                 setParams({ communityId: community.id, tab: "groups" });
               }}
             />
