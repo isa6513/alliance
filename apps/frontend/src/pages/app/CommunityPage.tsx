@@ -76,7 +76,7 @@ const CommunityPage = () => {
     removeCommunity,
     selectedCommunity: community,
     removeMemberFromCommunity,
-    setSelectedCommunity,
+    updateSelectedCommunity,
   } = useMyCommunities({
     selectedCommunityId: communityId ? Number(communityId) : null,
   });
@@ -268,7 +268,7 @@ const CommunityPage = () => {
       });
 
       if (response.data) {
-        setSelectedCommunity(response.data);
+        updateSelectedCommunity(response.data);
         setIsEditing(false);
       } else {
         setError("Failed to update group");
@@ -291,7 +291,7 @@ const CommunityPage = () => {
     isSaving,
     useMaxCapacity,
     memberCount,
-    setSelectedCommunity,
+    updateSelectedCommunity,
   ]);
 
   const handleCancel = useCallback(() => {

@@ -14,7 +14,7 @@ type UseMyCommunitiesReturn = {
 
   selectedCommunity: CommunityDto | null;
   removeMemberFromCommunity: (communityId: number, memberId: number) => void;
-  setSelectedCommunity: (community: CommunityDto | null) => void;
+  updateSelectedCommunity: (community: CommunityDto) => void;
 };
 
 const QUERY_KEY = ["userGetMyCommunities"];
@@ -89,6 +89,19 @@ export function useMyCommunities(
     [queryClient]
   );
 
+  const updateSelectedCommunity = useCallback(
+    (community: CommunityDto) => {
+      queryClient.setQueryData<CommunityDto[]>(QUERY_KEY, (old) => {
+        if (old && old.some((c) => c.id === community.id)) {
+          return old.map((c) => (c.id === community.id ? community : c));
+        }
+        return [...(old ?? []), community];
+      });
+      setSelectedCommunity(findCommunityById(communities, community.id));
+    },
+    [queryClient, communities]
+  );
+
   return {
     communities,
     communityIds,
@@ -96,6 +109,6 @@ export function useMyCommunities(
     removeCommunity,
     selectedCommunity,
     removeMemberFromCommunity,
-    setSelectedCommunity,
+    updateSelectedCommunity,
   };
 }
