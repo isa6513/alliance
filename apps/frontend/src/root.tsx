@@ -19,7 +19,20 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import PosthogBuildTag from "./lib/PosthogBuildTag";
-import { useState, useEffect } from "react";
+
+const queryClient = new QueryClient();
+
+// Set up persistence for React Query
+if (typeof window !== "undefined") {
+  const persister = createAsyncStoragePersister({
+    storage: window.localStorage,
+  });
+
+  persistQueryClient({
+    queryClient,
+    persister,
+  });
+}
 
 client.setConfig({
   baseUrl: getApiUrl(),
@@ -91,32 +104,6 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  // Create QueryClient per-instance to avoid SSR hydration issues
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            gcTime: 1000 * 60 * 60 * 24,
-          },
-        },
-      })
-  );
-
-  // Set up persistence for React Query on client side only
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const persister = createAsyncStoragePersister({
-        storage: window.localStorage,
-      });
-
-      persistQueryClient({
-        queryClient,
-        persister,
-      });
-    }
-  }, [queryClient]);
-
   const inner = (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
