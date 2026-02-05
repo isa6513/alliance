@@ -17,6 +17,7 @@ import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
 import { Link } from "react-router";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 
 type ResponsibilityChoice = "responsible" | "not_responsible" | null;
 
@@ -195,8 +196,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
           memberCommunityAllowsMemberInvites: true,
           memberCommunityRemainingCapacity:
             memberCommunities[0].maxCapacity -
-            (memberCommunities[0].users.length -
-              memberCommunities[0].leaders.length),
+            getMemberCount(memberCommunities[0]),
         };
 
   const infoForm = (

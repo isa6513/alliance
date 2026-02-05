@@ -16,6 +16,7 @@ import GroupAssignmentPanel from "../components/GroupAssignmentPanel";
 import { useGroupAssignment } from "../lib/GroupAssignmentContext";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
 import { groupSettings } from "@alliance/shared/lib/copy";
+import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 
 const INITIAL_COMMUNITY: CreateCommunityDto = {
   name: "",
@@ -79,19 +80,14 @@ const GroupsPage: React.FC = () => {
   const totalUnusedCapacity = useMemo(() => {
     return Math.max(
       0,
-      communities.reduce(
-        (acc, community) =>
-          acc +
-          (community.maxCapacity === null
-            ? 0
-            : Math.max(
-                0,
-                community.maxCapacity -
-                  (community.users.length - community.leaders.length)
-              )),
-
-        0
-      ) - membersUndergoingGroupAssignment.length
+      communities.reduce((acc, community) => {
+        if (community.maxCapacity === null) {
+          return acc;
+        }
+        return (
+          acc + Math.max(0, community.maxCapacity - getMemberCount(community))
+        );
+      }, 0) - membersUndergoingGroupAssignment.length
     );
   }, [communities, membersUndergoingGroupAssignment.length]);
 
@@ -383,7 +379,7 @@ const CommunityCard: React.FC<CommunityCardProps> = ({
   community,
   pendingAssignments,
 }) => {
-  const memberCount = community.users.length;
+  const memberCount = getMemberCount(community);
   const effectiveMemberCount = memberCount + pendingAssignments;
   const leaderCount = community.leaders.length;
   const capacity = community.allowStaffAssignments

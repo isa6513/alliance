@@ -43,6 +43,7 @@ import NoCommunityPage from "./NoCommunityPage";
 import CommunitySelectDropdown from "../../components/CommunitySelectDropdown";
 import MyGroupsPage from "./MyGroupsPage";
 import { Link } from "react-router";
+import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 
 export type Tab = "activity" | "members" | "invites" | "groups" | "create";
 
@@ -86,6 +87,7 @@ const CommunityPage = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [community, setCommunity] = useState<CommunityDto | null>(null);
   const { pendingCommunityInvites } = useIncomingCommunityInvites();
+  const memberCount = community ? getMemberCount(community) : 0;
 
   // Edit mode state
   const [isEditing, setIsEditing] = useState(false);
@@ -148,16 +150,13 @@ const CommunityPage = () => {
       setEditMaxCapacity(
         community.maxCapacity === null
           ? null
-          : Math.max(
-              community.maxCapacity,
-              community.users.length - community.leaders.length
-            )
+          : Math.max(community.maxCapacity, memberCount)
       );
       setEditPhotoUrl(community.photo ?? null);
       setIsEditing(false);
       setError(null);
     }
-  }, [community]);
+  }, [community, memberCount]);
 
   const messagingEnabled = useMemo(() => {
     return isFeatureEnabled(Features.Messaging);
@@ -279,14 +278,9 @@ const CommunityPage = () => {
       }
       normalizedMaxCapacity = editMaxCapacity;
     }
-    if (
-      normalizedMaxCapacity !== null &&
-      normalizedMaxCapacity < community.users.length - community.leaders.length
-    ) {
+    if (normalizedMaxCapacity !== null && normalizedMaxCapacity < memberCount) {
       setError(
-        `Capacity cannot be less than the current number of members (${
-          community.users.length - community.leaders.length
-        })`
+        `Capacity cannot be less than the current number of members (${memberCount})`
       );
       return;
     }
@@ -610,6 +604,7 @@ const CommunityPage = () => {
                             >
                               <p className="text-base font-medium">
                                 {groupSettings.maxCapacity.name}
+                                {` (${memberCount} members)`}
                               </p>
                               <p className="text-sm text-zinc-500 font-normal">
                                 {groupSettings.maxCapacity.explanation}

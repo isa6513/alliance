@@ -15,6 +15,7 @@ import List from "@alliance/sharedweb/ui/List";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { CardStyle } from "@alliance/shared/styles/card";
 import ConfirmDialog from "./ConfirmDialog";
+import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 
 const storageKey = "admin.groupAssignmentSelections";
 
@@ -221,10 +222,7 @@ const GroupAssignmentPanel: React.FC<GroupAssignmentPanelProps> = ({
       }
       const pending = pendingAssignmentsByCommunityId[community.id] ?? 0;
       const openSlots =
-        community.users.length -
-        community.leaders.length +
-        pending -
-        community.maxCapacity;
+        getMemberCount(community) + pending - community.maxCapacity;
       if (pending > 0 && openSlots > 0) {
         overages.set(community.id, openSlots);
       }
@@ -287,10 +285,7 @@ const GroupAssignmentPanel: React.FC<GroupAssignmentPanelProps> = ({
           if (isSelected) {
             return true;
           }
-          return (
-            community.users.length - community.leaders.length + pending <
-            community.maxCapacity
-          );
+          return getMemberCount(community) + pending < community.maxCapacity;
         })
         .map((community) => ({
           value: community.id.toString(),

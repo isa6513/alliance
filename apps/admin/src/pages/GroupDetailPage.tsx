@@ -30,6 +30,7 @@ import { calculateCompletionData } from "@alliance/shared/lib/actionUtils";
 import { useMaxActionsPerWeek } from "@alliance/sharedweb/ui/UserProgressPills";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
 import { groupSettings } from "@alliance/shared/lib/copy";
+import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 
 const CommunityDetailPage: React.FC = () => {
   const { id } = useParams();
@@ -67,6 +68,8 @@ const CommunityDetailPage: React.FC = () => {
     formValues.public ||
     formValues.allowStaffAssignments ||
     formValues.allowMemberInvites;
+
+  const memberCount = community ? getMemberCount(community) : 0;
 
   const loadCommunity = useCallback(async () => {
     if (Number.isNaN(communityId)) {
@@ -472,8 +475,9 @@ const CommunityDetailPage: React.FC = () => {
       const anchorEl = event.currentTarget;
       const ok = await confirm({
         title: "Make leader?",
-        message: `Promote ${displayName ?? "this member"} to a leader of ${community.name
-          }?`,
+        message: `Promote ${displayName ?? "this member"} to a leader of ${
+          community.name
+        }?`,
         confirmLabel: "Make leader",
         cancelLabel: "Cancel",
         anchorEl,
@@ -692,7 +696,7 @@ const CommunityDetailPage: React.FC = () => {
               <div>
                 <h2 className="font-semibold text-lg">Members</h2>
                 <p className="text-sm text-zinc-500">
-                  {community.users.length} total members
+                  {`${memberCount} ${memberCount === 1 ? "member" : "members"}`}
                 </p>
               </div>
               <form
