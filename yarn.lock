@@ -205,7 +205,7 @@ __metadata:
     "@react-navigation/elements": "npm:^2.9.5"
     "@react-navigation/native": "npm:^7.1.28"
     "@react-navigation/native-stack": "npm:^7.4.4"
-    "@tanstack/react-query": "npm:^5.90.16"
+    "@tanstack/react-query": "npm:^5.90.20"
     "@types/react": "npm:~19.0.10"
     eslint: "npm:^9.25.0"
     eslint-config-expo: "npm:~9.2.0"
@@ -4503,13 +4503,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-core@npm:5.90.16":
-  version: 5.90.16
-  resolution: "@tanstack/query-core@npm:5.90.16"
-  checksum: 10c0/f6a4827feeed2b4118323056bbda8d5099823202d1f29b538204ae2591be4e80f2946f3311eed30fefe866643f431c04b560457f03415d40caf2f353ba1efac0
-  languageName: node
-  linkType: hard
-
 "@tanstack/query-core@npm:5.90.20":
   version: 5.90.20
   resolution: "@tanstack/query-core@npm:5.90.20"
@@ -4535,17 +4528,6 @@ __metadata:
     "@tanstack/react-query": ^5.90.20
     react: ^18 || ^19
   checksum: 10c0/11bd20c64d5fb0cf862b898b15b2f8872da90e02891ab1a9d3807459af40ff32f9e99f69a1e53d251cfe725a884b2459098f9fcd56f4a991970d58d0ce6b9cfe
-  languageName: node
-  linkType: hard
-
-"@tanstack/react-query@npm:^5.90.16":
-  version: 5.90.16
-  resolution: "@tanstack/react-query@npm:5.90.16"
-  dependencies:
-    "@tanstack/query-core": "npm:5.90.16"
-  peerDependencies:
-    react: ^18 || ^19
-  checksum: 10c0/03bd2aa23187003b45dc3d4b465a68f19806369283487a004acd6dd2ad8ba1fa0ec343da616cb1c43c342609202d0776fee68867246caa5ad6915f090539c168
   languageName: node
   linkType: hard
 
@@ -5872,7 +5854,7 @@ __metadata:
   resolution: "alliance@workspace:."
   dependencies:
     "@eslint/js": "npm:^9.28.0"
-    "@tanstack/react-query": "npm:^5.90.16"
+    "@tanstack/react-query": "npm:^5.90.20"
     eslint: "npm:^9.28.0"
     react: "npm:19.0.0"
     react-dom: "npm:19.0.0"
