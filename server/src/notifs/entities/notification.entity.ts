@@ -22,31 +22,31 @@ import type { Push } from 'src/push/push.entity';
 
 export enum NotificationCategory {
   ActionEvent = 'action_event',
-  ForumReply = 'forum_reply',
-  FriendRequest = 'friend_request',
-  FriendRequestAccepted = 'friend_request_accepted',
-  ActionUpdate = 'action_update',
-  Likes = 'likes',
-  CommunityInviteCreated = 'community_invite_created',
-  CommunityInviteRejected = 'community_invite_rejected',
-  CommunityInviteAccepted = 'community_invite_accepted',
-  RemovedFromCommunity = 'removed_from_community',
-  LeftCommunityReminder = 'left_community_reminder',
-  MemberLeftCommunity = 'member_left_community',
-  MemberSuspendedRemovedFromCommunity = 'member_suspended_removed_from_community',
-  MemberJoinedCommunity = 'member_joined_community',
-  CommunityAssigned = 'community_assigned',
-  NewMemberReferred = 'new_member_referred',
-  OnetimeInviteRequestCreated = 'onetime_invite_request_created',
-  OnetimeInviteRequestApproved = 'onetime_invite_request_approved',
-  OnetimeInviteRequestRejected = 'onetime_invite_request_rejected',
-  CommunityInviteRequestCreated = 'community_invite_request_created',
-  CommunityInviteRequestRejected = 'community_invite_request_rejected',
+  ForumReply = 'forum_reply', // yes
+  FriendRequest = 'friend_request', // yes (marked as read if accepted)
+  FriendRequestAccepted = 'friend_request_accepted', // no
+  ActionUpdate = 'action_update', // yes
+  Likes = 'likes', // no
+  CommunityInviteCreated = 'community_invite_created', // dead
+  CommunityInviteRejected = 'community_invite_rejected', // dead
+  CommunityInviteAccepted = 'community_invite_accepted', // dead
+  RemovedFromCommunity = 'removed_from_community', // yes
+  LeftCommunityReminder = 'left_community_reminder', // yes (tells member to use group assignment if they leave a group; maybe deprecate)
+  MemberLeftCommunity = 'member_left_community', // yes (for the leads)
+  MemberSuspendedRemovedFromCommunity = 'member_suspended_removed_from_community', // yes (for the leads)
+  MemberJoinedCommunity = 'member_joined_community', // yes
+  CommunityAssigned = 'community_assigned', // yes
+  NewMemberReferred = 'new_member_referred', // yes
+  OnetimeInviteRequestCreated = 'onetime_invite_request_created', // dead
+  OnetimeInviteRequestApproved = 'onetime_invite_request_approved', // dead
+  OnetimeInviteRequestRejected = 'onetime_invite_request_rejected', // dead
+  CommunityInviteRequestCreated = 'community_invite_request_created', // dead
+  CommunityInviteRequestRejected = 'community_invite_request_rejected', // dead
 }
 
 export enum NotifPriority {
-    Low = 'low',
-    High = 'high',
+  Low = 'low',
+  High = 'high',
 }
 
 @Entity()
