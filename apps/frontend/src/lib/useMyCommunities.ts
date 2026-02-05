@@ -41,9 +41,9 @@ export function useMyCommunities(
 ): UseMyCommunitiesReturn {
   const { selectedCommunityId } = props;
 
-  const [communitiesWithoutCache, setCommunitiesWithoutCache] = useState<
-    CommunityDto[]
-  >(getCachedCommunities() ?? []);
+  const [communities, setCommunitiesWithoutCache] = useState<CommunityDto[]>(
+    getCachedCommunities() ?? []
+  );
   const setCommunities = useCallback(
     (setStateCommunities: React.SetStateAction<CommunityDto[]>) => {
       setCommunitiesWithoutCache((prev) => {
@@ -57,9 +57,8 @@ export function useMyCommunities(
     },
     []
   );
-  const communities = communitiesWithoutCache;
   const [selectedCommunity, setSelectedCommunity] =
-    useState<CommunityDto | null>(null);
+    useState<CommunityDto | null>(communities[0] ?? null);
 
   const communityIds = useMemo(() => {
     return new Set(communities.map((community) => community.id));
