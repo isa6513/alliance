@@ -1,13 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
-import { ChevronLeft } from "lucide-react-native";
 import {
   userSignContract,
   userSuspendContract,
@@ -26,10 +19,10 @@ import Text from "../../components/system/Text";
 import Button, { ButtonColor } from "../../components/system/Button";
 import Card, { CardStyle } from "../../components/system/Card";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { suspendContractConfirmation } from "@alliance/shared/lib/copy";
 
 export default function ContractScreen() {
   const { user } = useAuth();
-  const router = useRouter();
 
   const [editName, setEditName] = useState("");
   const [lastContractEvent, setLastContractEvent] =
@@ -81,39 +74,35 @@ export default function ContractScreen() {
   }, [isSubmitting, refreshContractState]);
 
   const handleContractSuspend = useCallback(() => {
-    Alert.alert(
-      "Suspend Contract",
-      "Are you sure you want to suspend your contract?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Suspend",
-          style: "destructive",
-          onPress: async () => {
-            setIsSubmitting(true);
-            try {
-              const res = await userSuspendContract();
-              if (res.data) {
-                setLastContractEvent({
-                  type: "suspended",
-                  date: res.data,
-                  automatic: false,
-                });
-                await refreshContractState();
-              }
-            } catch (error) {
-              console.error("Error suspending contract:", error);
-              Alert.alert(
-                "Error",
-                "There was an error suspending the contract. Please try again."
-              );
-            } finally {
-              setIsSubmitting(false);
+    Alert.alert("Suspend Contract", suspendContractConfirmation, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Suspend",
+        style: "destructive",
+        onPress: async () => {
+          setIsSubmitting(true);
+          try {
+            const res = await userSuspendContract();
+            if (res.data) {
+              setLastContractEvent({
+                type: "suspended",
+                date: res.data,
+                automatic: false,
+              });
+              await refreshContractState();
             }
-          },
+          } catch (error) {
+            console.error("Error suspending contract:", error);
+            Alert.alert(
+              "Error",
+              "There was an error suspending the contract. Please try again."
+            );
+          } finally {
+            setIsSubmitting(false);
+          }
         },
-      ]
-    );
+      },
+    ]);
   }, [refreshContractState]);
 
   if (!user) {
@@ -163,32 +152,26 @@ export default function ContractScreen() {
         {/* Contract Terms */}
         <Card cardStyle={CardStyle.Outline} className="border-zinc-200 border">
           <View className="gap-y-2">
-            {CONTRACT_TERMS.map(
-              (term: (typeof CONTRACT_TERMS)[number]) => (
-                <View key={term.id}>
-                  <View className="flex-row">
-                    <Text className="w-6">{term.id}.</Text>
-                    <Text className="flex-1">{term.text}</Text>
-                  </View>
-                  {"subItems" in term && term.subItems && (
-                    <View className="ml-6 mt-1 gap-y-1">
-                      {term.subItems.map(
-                        (subItem: { id: string; text: string }) => (
-                          <View key={subItem.id} className="flex-row">
-                            <Text className="w-6">
-                              {subItem.id}.
-                            </Text>
-                            <Text className="flex-1">
-                              {subItem.text}
-                            </Text>
-                          </View>
-                        )
-                      )}
-                    </View>
-                  )}
+            {CONTRACT_TERMS.map((term: (typeof CONTRACT_TERMS)[number]) => (
+              <View key={term.id}>
+                <View className="flex-row">
+                  <Text className="w-6">{term.id}.</Text>
+                  <Text className="flex-1">{term.text}</Text>
                 </View>
-              )
-            )}
+                {"subItems" in term && term.subItems && (
+                  <View className="ml-6 mt-1 gap-y-1">
+                    {term.subItems.map(
+                      (subItem: { id: string; text: string }) => (
+                        <View key={subItem.id} className="flex-row">
+                          <Text className="w-6">{subItem.id}.</Text>
+                          <Text className="flex-1">{subItem.text}</Text>
+                        </View>
+                      )
+                    )}
+                  </View>
+                )}
+              </View>
+            ))}
           </View>
         </Card>
 

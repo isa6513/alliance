@@ -13,6 +13,7 @@ import {
   getSuspensionMessage,
   getSignedMessage,
 } from "@alliance/shared/lib/contract";
+import { suspendContractConfirmation } from "@alliance/shared/lib/copy";
 
 const ContractPage: React.FC = () => {
   const { user, refreshUser } = useAuth();
@@ -47,7 +48,7 @@ const ContractPage: React.FC = () => {
 
   const handleContractSuspend = async () => {
     try {
-      if (!window.confirm("Are you sure you want to suspend your contract?")) {
+      if (!window.confirm(suspendContractConfirmation)) {
         return;
       }
 

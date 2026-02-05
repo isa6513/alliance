@@ -140,3 +140,6 @@ export const deleteInviteConfirmation = {
   confirmLabel: "Yes, delete it",
   cancelLabel: "No, keep it",
 } as const;
+
+export const suspendContractConfirmation =
+  "Are you sure you want to suspend your contract? You will be removed from your groups.";
