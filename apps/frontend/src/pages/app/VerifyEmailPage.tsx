@@ -25,12 +25,12 @@ const VerifyEmailPage = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       {verified ? (
-        <p>Your email has been verified. Thanks!</p>
+        <p>Your email has been verified.</p>
       ) : (
         <p>Verifying email...</p>
       )}
-      <Link to={href("/tasks")} className="text-blue-500">
-        go home
+      <Link to={href("/tasks")} className="text-link">
+        Go home
       </Link>
     </div>
   );
