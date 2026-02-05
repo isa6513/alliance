@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { useAuth } from "../../lib/AuthContext";
 import { useCallback } from "react";
 import { Tab } from "./CommunityPage";
@@ -32,9 +32,17 @@ const NoCommunityPage = () => {
   return (
     <div className="p-5 xl:p-10 xl:pr-5 max-w-[900px] mx-auto px-0 md:px-3">
       <div className="flex flex-col gap-y-2 my-8 px-5 md:px-0">
-        <p className="font-serif font-semibold text-3xl md:text-4xl">
-          Manage groups
-        </p>
+        <div className="flex flex-col sm:flex-row justify-between gap-2">
+          <p className="font-serif font-semibold text-3xl md:text-4xl">
+            Manage groups
+          </p>
+          <Link
+            to={"/groups-guide"}
+            className="text-zinc-500 hover:text-black py-2"
+          >
+            About groups
+          </Link>
+        </div>
         {tab === "create" ? (
           <CommunityCreateForm
             name={user?.name}
