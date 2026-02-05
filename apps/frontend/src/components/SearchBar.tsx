@@ -53,13 +53,14 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
       inputRef.current?.focus();
     }
 
-    window.addEventListener("click", (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (divRef.current && !divRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
-    });
+    };
+    window.addEventListener("click", handleClickOutside);
     return () => {
-      window.removeEventListener("click", () => { });
+      window.removeEventListener("click", handleClickOutside);
     };
   }, [autofocus]);
 

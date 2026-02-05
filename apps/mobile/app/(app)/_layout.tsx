@@ -45,6 +45,7 @@ export default function AppLayout() {
         <Drawer.Screen name="actions/index" />
         <Drawer.Screen name="actions/[id]/index" />
         <Drawer.Screen name="information" />
+        <Drawer.Screen name="search" />
         <Drawer.Screen name="notifications" />
         <Drawer.Screen name="feed" />
         <Drawer.Screen name="forum/index" />

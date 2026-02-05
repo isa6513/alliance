@@ -124,7 +124,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
           return img;
         })
       );
-      const attachmentKeys = uploads.filter((key) => key !== undefined);
+      const attachmentKeys = uploads.filter((key) => key !== undefined) as string[];
 
       await forumUpdateComment({
         path: { id: reply.id },
@@ -169,23 +169,25 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
       )}
 
       {/* Profile picture column */}
-      <Link
-        to={href("/member/:id", { id: reply.author.id.toString() })}
-        className="flex-shrink-0"
-      >
-        <div className="hidden sm:inline">
-          <ProfileImage
-            pfp={reply.author.profilePicture}
-            size={compact ? "small" : "medium"}
-          />
-        </div>
-        <div className="inline sm:hidden">
-          <ProfileImage
-            pfp={reply.author.profilePicture}
-            size={compact ? "mini" : "small"}
-          />
-        </div>
-      </Link>
+      <div>
+        <Link
+          to={href("/member/:id", { id: reply.author.id.toString() })}
+          className="flex-shrink-0"
+        >
+          <div className="hidden sm:inline">
+            <ProfileImage
+              pfp={reply.author.profilePicture}
+              size={compact ? "small" : "medium"}
+            />
+          </div>
+          <div className="inline sm:hidden">
+            <ProfileImage
+              pfp={reply.author.profilePicture}
+              size={compact ? "mini" : "small"}
+            />
+          </div>
+        </Link>
+      </div>
 
       {/* Content column */}
       <div className="flex-1 ">
