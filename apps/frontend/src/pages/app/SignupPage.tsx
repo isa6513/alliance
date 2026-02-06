@@ -26,7 +26,7 @@ const SignupPage: React.FC = () => {
 
   const [inviterProfile, setInviterProfile] = useState<ProfileDto | null>(null);
   const [inviteeName, setInviteeName] = useState<string | null>(null);
-  const [communityId, setCommunityId] = useState<number | null>(null);
+  // const [communityId, setCommunityId] = useState<number | null>(null);
   const [isInviteValid, setIsInviteValid] = useState(true);
 
   useEffect(() => {
@@ -39,8 +39,7 @@ const SignupPage: React.FC = () => {
       console.log(response);
       if (response.data) {
         setInviteeName(response.data.invitee);
-        setCommunityId(response.data.community?.id ?? null);
-        console.log(response.data.status);
+        // setCommunityId(response.data.community?.id ?? null);
         setIsInviteValid(response.data.status !== "link_used");
       }
     });
@@ -155,7 +154,7 @@ const SignupPage: React.FC = () => {
           </div>
         </div>
         {referralCode && (
-          <div className="flex flex-col gap-y-6 max-w-lg border-none border-zinc-200 p-4 md:p-0 rounded">
+          <div className="flex flex-col gap-y-6 max-w-lg p-4 md:p-0">
             <div className="flex flex-col gap-y-2 mb-4">
               <div className="flex flex-row gap-x-1 items-center">
                 <span>From </span>
