@@ -997,6 +997,28 @@ const StatsPage: React.FC = () => {
               viewBox={`0 0 ${actionBarsGeometry.width} ${actionBarsGeometry.height}`}
               className="w-full"
             >
+              <defs>
+                <pattern
+                  id="in-progress-stripes"
+                  width="8"
+                  height="8"
+                  patternUnits="userSpaceOnUse"
+                  patternTransform="rotate(45)"
+                >
+                  <rect width="8" height="8" fill="#dbeafe" />
+                  <rect width="4" height="8" fill="#93c5fd" />
+                </pattern>
+                <pattern
+                  id="in-progress-stripes-hover"
+                  width="8"
+                  height="8"
+                  patternUnits="userSpaceOnUse"
+                  patternTransform="rotate(45)"
+                >
+                  <rect width="8" height="8" fill="#bfdbfe" />
+                  <rect width="4" height="8" fill="#60a5fa" />
+                </pattern>
+              </defs>
               {/* X axis grid lines */}
               <g>
                 {actionBarsGeometry.xTicks.map((tick) => (
@@ -1093,7 +1115,16 @@ const StatsPage: React.FC = () => {
                       width={Math.max(expectedWidth, 0)}
                       height={actionBarsGeometry.barHeight}
                       rx={4}
-                      fill={isHovered ? "#d1d5db" : "#e5e7eb"}
+                      fill={
+                        action.memberActionEndDate &&
+                        new Date(action.memberActionEndDate) > new Date()
+                          ? isHovered
+                            ? "url(#in-progress-stripes-hover)"
+                            : "url(#in-progress-stripes)"
+                          : isHovered
+                            ? "#d1d5db"
+                            : "#e5e7eb"
+                      }
                     />
 
                     {/* Completed bar (foreground) */}
@@ -1221,6 +1252,24 @@ const StatsPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-gray-300" />
             <span className="text-sm text-gray-600">Expected total</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4 rounded" viewBox="0 0 16 16">
+              <defs>
+                <pattern
+                  id="legend-stripes"
+                  width="4"
+                  height="4"
+                  patternUnits="userSpaceOnUse"
+                  patternTransform="rotate(45)"
+                >
+                  <rect width="4" height="4" fill="#dbeafe" />
+                  <rect width="2" height="4" fill="#93c5fd" />
+                </pattern>
+              </defs>
+              <rect width="16" height="16" rx="2" fill="url(#legend-stripes)" />
+            </svg>
+            <span className="text-sm text-gray-600">In progress</span>
           </div>
         </div>
       </div>
