@@ -275,7 +275,7 @@ const MyGroupsPage = ({
 
   return (
     <div className="flex flex-col gap-y-12 py-8">
-      {onBack && (
+      {!!communities?.length && onBack && (
         <Button color={ButtonColor.White} onClick={onBack}>
           <ChevronLeft size="16" /> Back to group
         </Button>

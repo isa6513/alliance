@@ -36,7 +36,6 @@ import {
 } from "@alliance/shared/lib/actionUtils";
 import { useMaxActionsPerWeek } from "@alliance/sharedweb/ui/UserProgressPills";
 import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
-import NoCommunityPage from "./NoCommunityPage";
 import CommunitySelectDropdown from "../../components/CommunitySelectDropdown";
 import MyGroupsPage from "./MyGroupsPage";
 import { Link } from "react-router";
@@ -380,8 +379,38 @@ const CommunityPage = () => {
       : "the current action";
   }, [allCompletionData]);
 
+  const groupManagementPage = (
+    <MyGroupsPage
+      onSelectCommunity={(communityId) => {
+        setParams({ communityId, tab: "activity" });
+        if (communityId === null) {
+          refreshUser();
+        }
+      }}
+      onBack={() => setParams({ tab: null })}
+      communities={communities}
+    />
+  );
+
   if (!community) {
-    return <NoCommunityPage />;
+    return (
+      <div className="p-5 xl:p-10 xl:pr-5 max-w-[900px] mx-auto px-0 md:px-3">
+        <div className="flex flex-col gap-y-2 my-8 px-5 md:px-0">
+          <div className="flex flex-col sm:flex-row justify-between gap-2">
+            <p className="font-serif font-semibold text-3xl md:text-4xl">
+              Manage groups
+            </p>
+            <Link
+              to={"/groups-guide"}
+              className="text-zinc-500 hover:text-black py-2"
+            >
+              About groups
+            </Link>
+          </div>
+          {groupManagementPage}
+        </div>
+      </div>
+    );
   }
 
   const leaders = community.leaders;
@@ -681,20 +710,7 @@ const CommunityPage = () => {
               }
             />
           )}
-          {tab === "groups" && (
-            <div className="flex flex-col gap-y-6">
-              <MyGroupsPage
-                onSelectCommunity={(communityId) => {
-                  setParams({ communityId, tab: "activity" });
-                  if (communityId === null) {
-                    refreshUser();
-                  }
-                }}
-                onBack={() => setParams({ tab: null })}
-                communities={communities}
-              />
-            </div>
-          )}
+          {tab === "groups" && groupManagementPage}
           {tab === "create" && (
             <CommunityCreateForm
               name={user?.name}
