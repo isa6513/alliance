@@ -2350,15 +2350,6 @@ export class UserService {
           associatedUsers: [user],
         }),
       ),
-      this.notifRepository.create({
-        user: user,
-        category: NotificationCategory.LeftCommunityReminder,
-        message: `You left the group (${community.name}). It is encouraged that you request a new group assignment.`,
-        webAppLocation: groupUrl({
-          tab: 'groups',
-        }),
-        associatedUsers: [user],
-      }),
     ];
     await Promise.all([
       this.conversationService.syncCommunityConversationMembers(communityId),

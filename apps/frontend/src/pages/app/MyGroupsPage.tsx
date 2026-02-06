@@ -9,14 +9,19 @@ import {
 import List from "@alliance/sharedweb/ui/List";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
-import { ChevronLeft, Minus, Plus } from "lucide-react";
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { ChevronDown, ChevronLeft, Minus, Plus } from "lucide-react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
-import {
-  leaveGroupConfirmation,
-  requestGroupAssignmentConfirmation,
-} from "@alliance/shared/lib/copy";
+import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
+import { requestGroupAssignmentConfirmation } from "@alliance/shared/lib/copy";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useAuth } from "../../lib/AuthContext";
 import CommunityInviteList from "../../components/CommunityInviteList";
@@ -36,7 +41,30 @@ const MyGroupsPage = ({
 }: MyGroupsPageProps) => {
   const { user, refreshUser } = useAuth();
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [leavingCommunityId, setLeavingCommunityId] = useState<number | null>(
+    null
+  );
+  const justOpenedDialogRef = useRef(false);
   const { confirm, error: showError, success } = useToast();
+  const handleCloseLeaveGroupConfirmation = useCallback(() => {
+    if (justOpenedDialogRef.current) {
+      return;
+    }
+    setLeavingCommunityId(null);
+  }, []);
+  const confirmationDialogRef = useOutsideClick(
+    handleCloseLeaveGroupConfirmation
+  );
+
+  useEffect(() => {
+    if (leavingCommunityId !== null) {
+      justOpenedDialogRef.current = true;
+      const timer = setTimeout(() => {
+        justOpenedDialogRef.current = false;
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [leavingCommunityId]);
   const {
     pendingCommunityInvites,
     incomingCommunityInvitesById,
@@ -145,25 +173,23 @@ const MyGroupsPage = ({
   );
 
   const onLeaveGroup = useCallback(
-    async (community: CommunityDto, anchor: HTMLElement | null) => {
-      const ok = await confirm({
-        title: `Leave group? (${community.name})`,
-        message: leaveGroupConfirmation,
-        anchorEl: anchor,
-        confirmLabel: "Leave",
-        cancelLabel: "Cancel",
-        placement: "topleft",
+    (community: CommunityDto) => {
+      setLeavingCommunityId(community.id);
+    },
+    [setLeavingCommunityId]
+  );
+
+  const onConfirmLeaveGroup = useCallback(
+    async (community: CommunityDto) => {
+      const response = await userLeaveCommunity({
+        path: { communityId: community.id },
       });
-      if (ok) {
-        const response = await userLeaveCommunity({
-          path: { communityId: community.id },
-        });
-        if (response.data) {
-          onSelectCommunity(null);
-        }
+      if (response.data) {
+        onSelectCommunity(null);
+        setLeavingCommunityId(null);
       }
     },
-    [confirm, onSelectCommunity]
+    [onSelectCommunity]
   );
 
   const handleRequestAssignment = useCallback(
@@ -360,40 +386,107 @@ const MyGroupsPage = ({
           <List>
             {nonLeaderCommunities.map((community) => {
               const memberCount = getMemberCount(community);
+              const isShowingConfirmation = leavingCommunityId === community.id;
               return (
-                <Button
-                  key={community.id}
-                  color={ButtonColor.White}
-                  className="w-full !rounded-none border-none !p-4"
-                  onClick={() => onSelectCommunity(community.id)}
-                  asDiv={true}
-                >
-                  <div className={"w-full flex flex-row justify-between"}>
-                    <div className="flex flex-row gap-x-3">
-                      <ProfileImage pfp={community.photo ?? null} size="huge" />
-                      <div className="flex flex-col text-left">
-                        <p className="text-lg font-semibold">
-                          {community.name}
+                <div key={community.id}>
+                  <Button
+                    color={ButtonColor.White}
+                    className="w-full !rounded-none border-none !p-4"
+                    onClick={() => {
+                      if (!isShowingConfirmation) {
+                        onSelectCommunity(community.id);
+                      }
+                    }}
+                    asDiv={true}
+                  >
+                    <div className={"w-full flex flex-row justify-between"}>
+                      <div className="flex flex-row gap-x-3">
+                        <ProfileImage
+                          pfp={community.photo ?? null}
+                          size="huge"
+                        />
+                        <div className="flex flex-col text-left">
+                          <p className="text-lg font-semibold">
+                            {community.name}
+                          </p>
+                          <p className="text-zinc-500">
+                            {community.description}
+                          </p>
+                          <span className="text-zinc-500">
+                            {memberCount}{" "}
+                            {memberCount === 1 ? "member" : "members"}
+                          </span>
+                        </div>
+                      </div>
+                      {!isShowingConfirmation && (
+                        <Button
+                          color={ButtonColor.Red}
+                          size="small"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onLeaveGroup(community);
+                          }}
+                        >
+                          Leave <ChevronDown size="14" />
+                        </Button>
+                      )}
+                    </div>
+                  </Button>
+                  {isShowingConfirmation && (
+                    <div
+                      ref={confirmationDialogRef}
+                      className="p-4 bg-zinc-50 border-t border-zinc-200"
+                    >
+                      <div className="flex flex-col gap-y-2 mb-4">
+                        {!user?.undergoingGroupAssignment && (
+                          <p className="text-zinc-700">
+                            We recommend that you join the group assignment
+                            process instead of leaving the group, which will
+                            assign you to a new group. This process may take a
+                            few days.
+                          </p>
+                        )}
+                        <p className="text-zinc-700">
+                          Are you sure you want to leave the group? You will not
+                          be able to rejoin unless you are invited again.
                         </p>
-                        <p className="text-zinc-500">{community.description}</p>
-                        <span className="text-zinc-500">
-                          {memberCount}{" "}
-                          {memberCount === 1 ? "member" : "members"}
-                        </span>
+                      </div>
+                      <div className="flex flex-row gap-x-2 justify-end">
+                        <Button
+                          color={ButtonColor.White}
+                          size="small"
+                          onClick={() => setLeavingCommunityId(null)}
+                        >
+                          Cancel
+                        </Button>
+                        {!user?.undergoingGroupAssignment && (
+                          <Button
+                            color={ButtonColor.Black}
+                            size="small"
+                            onClick={() => {
+                              void (async () => {
+                                setLeavingCommunityId(null);
+                                await userJoinGroupAssignment();
+                                await refreshUser();
+                              })();
+                            }}
+                          >
+                            Request reassignment
+                          </Button>
+                        )}
+                        <Button
+                          color={ButtonColor.Red}
+                          size="small"
+                          onClick={() => {
+                            onConfirmLeaveGroup(community);
+                          }}
+                        >
+                          Leave group
+                        </Button>
                       </div>
                     </div>
-                    <Button
-                      color={ButtonColor.Red}
-                      size="small"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        void onLeaveGroup(community, event.currentTarget);
-                      }}
-                    >
-                      Leave
-                    </Button>
-                  </div>
-                </Button>
+                  )}
+                </div>
               );
             })}
           </List>
