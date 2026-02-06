@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, RefObject } from "react";
 
 export const TWO_COLUMN_LAYOUT_CLASSNAME =
   "w-full h-[calc(100vh-var(--mobile-nav-height))] bg-white";
@@ -9,6 +9,7 @@ interface TwoColumnLayoutProps {
   sidebarWidth?: number; // width of the sidebar in pixels
   className?: string; // optional outer class for customization
   noSidebarOverflow?: boolean;
+  mainScrollRef?: RefObject<HTMLDivElement | null>;
 }
 
 /**
@@ -22,13 +23,17 @@ export default function TwoColumnLayout({
   sidebarWidth = 380,
   className = "",
   noSidebarOverflow = false,
+  mainScrollRef,
 }: TwoColumnLayoutProps) {
   return (
     <div className={`${TWO_COLUMN_LAYOUT_CLASSNAME} ${className}`}>
       <div
         className={`absolute rounded-lg top-0 left-0 bottom-0 right-0 flex flex-row items-center overflow-hidden`}
       >
-        <div className="w-full h-full overflow-y-auto [scrollbar-gutter:stable]">
+        <div
+          ref={mainScrollRef}
+          className="w-full h-full overflow-y-auto [scrollbar-gutter:stable]"
+        >
           {main}
         </div>
         {sidebar && (

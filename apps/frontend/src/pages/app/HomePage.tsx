@@ -1,5 +1,5 @@
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link, href, useNavigate, useOutletContext } from "react-router";
 import { AppLayoutOutletContext } from "../../applayout";
 import BasicErrorMessage from "../../components/BasicErrorMessage";
@@ -38,6 +38,7 @@ const HomePage = () => {
   const { user } = useAuth();
 
   const [showingTasksList, setShowingTasksList] = useState(false);
+  const mainScrollRef = useRef<HTMLDivElement | null>(null);
 
   const { items: globalFeedItems, loading: globalFeedLoading } = useGlobalFeed({
     limit: 10,
@@ -199,7 +200,12 @@ const HomePage = () => {
             dismissProps={dismissProps}
             handleDismiss={() => handleDismissAction(currentTask.id)}
             userRelation={currentTask.userRelation}
-            onUpdateActionState={() => navigate(href("/tasks"))}
+            onUpdateActionState={() => {
+              mainScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
+              document.scrollingElement?.scrollTo({ top: 0, behavior: "auto" });
+              window.scrollTo({ top: 0, behavior: "auto" });
+              navigate(href("/tasks"));
+            }}
           />
         ) : (
           <div className="w-full flex-1 flex flex-col items-center justify-center gap-y-4">
@@ -270,9 +276,13 @@ const HomePage = () => {
       main={mainContent}
       sidebar={sidebarContent}
       noSidebarOverflow
+      mainScrollRef={mainScrollRef}
     />
   ) : (
-    <div className="w-full h-[calc(100vh-var(--mobile-nav-height))] bg-white">
+    <div
+      ref={mainScrollRef}
+      className="w-full h-[calc(100vh-var(--mobile-nav-height))] bg-white"
+    >
       {mainContent}
     </div>
   );
