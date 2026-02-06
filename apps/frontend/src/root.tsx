@@ -37,6 +37,7 @@ if (typeof window !== "undefined") {
   persistQueryClient({
     queryClient,
     persister,
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
   });
 }
 
