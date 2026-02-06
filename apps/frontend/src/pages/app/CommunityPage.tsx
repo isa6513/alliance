@@ -20,7 +20,6 @@ import { useAuth } from "../../lib/AuthContext";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
 import CompletedBar from "@alliance/sharedweb/ui/CompletedBar";
-import CommunityCreateForm from "../../components/CommunityCreateForm";
 import { useSearchParams } from "react-router";
 import CommunityActivityTab from "../../components/CommunityActivityTab";
 import TwoColumnLayout from "../../components/TwoColumnLayout";
@@ -42,7 +41,7 @@ import { Link } from "react-router";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import { useMyCommunities } from "../../lib/useMyCommunities";
 
-export type Tab = "activity" | "members" | "groups" | "create";
+export type Tab = "activity" | "members" | "groups";
 
 const TAB_DISPLAY_NAMES = {
   activity: "Activity",
@@ -711,15 +710,6 @@ const CommunityPage = () => {
             />
           )}
           {tab === "groups" && groupManagementPage}
-          {tab === "create" && (
-            <CommunityCreateForm
-              name={user?.name}
-              onCancel={() => setParams({ tab: "groups" })}
-              onSuccess={(community) => {
-                setParams({ communityId: community.id, tab: "groups" });
-              }}
-            />
-          )}
           <BottomSpacer />
           {!chatOpen && messagingEnabled && isLargeScreen && (
             <div className="absolute bottom-5 right-7 bg-white hover:bg-zinc-100">
