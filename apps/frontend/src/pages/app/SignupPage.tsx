@@ -36,7 +36,6 @@ const SignupPage: React.FC = () => {
     });
 
     userOnetimeInvite({ path: { code: referralCode } }).then((response) => {
-      console.log(response);
       if (response.data) {
         setInviteeName(response.data.invitee);
         // setCommunityId(response.data.community?.id ?? null);
