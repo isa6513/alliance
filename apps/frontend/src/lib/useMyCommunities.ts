@@ -18,7 +18,9 @@ type UseMyCommunitiesReturn = {
   updateSelectedCommunity: (community: CommunityDto) => void;
 };
 
-const QUERY_KEY = ["userGetMyCommunities"];
+function getQueryKey(userId: number | null) {
+  return ["userGetMyCommunities", userId];
+}
 
 function findCommunityById(
   communities: CommunityDto[],
@@ -38,8 +40,10 @@ export function useMyCommunities(
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
+  const queryKey = useMemo(() => getQueryKey(user?.id ?? null), [user?.id]);
+
   const { data: communities = [] } = useQuery({
-    queryKey: ["userGetMyCommunities", user?.id ?? null],
+    queryKey,
     queryFn: () =>
       userGetMyCommunities().then((response) => {
         return response.data ?? [];
@@ -59,21 +63,21 @@ export function useMyCommunities(
   }, [communities]);
 
   const refreshCommunities = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
-  }, [queryClient]);
+    await queryClient.invalidateQueries({ queryKey });
+  }, [queryClient, queryKey]);
 
   const removeCommunity = useCallback(
     (communityId: number) => {
-      queryClient.setQueryData<CommunityDto[]>(QUERY_KEY, (old) =>
+      queryClient.setQueryData<CommunityDto[]>(queryKey, (old) =>
         old ? old.filter((community) => community.id !== communityId) : []
       );
     },
-    [queryClient]
+    [queryClient, queryKey]
   );
 
   const removeMemberFromCommunity = useCallback(
     (communityId: number, memberId: number) => {
-      queryClient.setQueryData<CommunityDto[]>(QUERY_KEY, (old) =>
+      queryClient.setQueryData<CommunityDto[]>(queryKey, (old) =>
         old
           ? old.map((community) =>
               community.id === communityId
@@ -88,12 +92,12 @@ export function useMyCommunities(
           : []
       );
     },
-    [queryClient]
+    [queryClient, queryKey]
   );
 
   const updateSelectedCommunity = useCallback(
     (community: CommunityDto) => {
-      queryClient.setQueryData<CommunityDto[]>(QUERY_KEY, (old) => {
+      queryClient.setQueryData<CommunityDto[]>(queryKey, (old) => {
         if (old && old.some((c) => c.id === community.id)) {
           return old.map((c) => (c.id === community.id ? community : c));
         }
@@ -101,7 +105,7 @@ export function useMyCommunities(
       });
       setSelectedCommunity(findCommunityById(communities, community.id));
     },
-    [queryClient, communities]
+    [queryClient, communities, queryKey]
   );
 
   return {
