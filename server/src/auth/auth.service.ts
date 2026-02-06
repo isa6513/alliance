@@ -61,7 +61,11 @@ export class AuthService {
       invite = await this.usersService.findInviteByCode(signUp.referralCode, {
         invitingUser: { communities: true },
         community: true,
+        invitedUser: true,
       });
+      if (invite?.invitedUser) {
+        throw new BadRequestException('This invite code has already been used');
+      }
       if (!invite) {
         if (process.env.NODE_ENV !== 'test') {
           throw new UnauthorizedException('invalid referral code'); //TODO: feature flag
