@@ -154,7 +154,7 @@ const CommunityPage = () => {
   }, [community, user]);
 
   const { data: communityMemberInfo } = useQuery({
-    queryKey: ["communityMemberInfo", community?.id ?? null],
+    queryKey: ["communityMemberInfo", community?.id ?? null, user?.id ?? null],
     queryFn: () =>
       community
         ? actionsGetCommunityMemberInfo({

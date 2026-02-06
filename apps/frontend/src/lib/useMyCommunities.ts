@@ -1,6 +1,7 @@
 import { CommunityDto, userGetMyCommunities } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "./AuthContext";
 
 type UseMyCommunitiesProps = {
   selectedCommunityId: number | null;
@@ -35,9 +36,10 @@ export function useMyCommunities(
 ): UseMyCommunitiesReturn {
   const { selectedCommunityId } = props;
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data: communities = [] } = useQuery({
-    queryKey: QUERY_KEY,
+    queryKey: ["userGetMyCommunities", user?.id ?? null],
     queryFn: () =>
       userGetMyCommunities().then((response) => {
         return response.data ?? [];
