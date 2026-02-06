@@ -27,6 +27,7 @@ const SignupPage: React.FC = () => {
   const [inviterProfile, setInviterProfile] = useState<ProfileDto | null>(null);
   const [inviteeName, setInviteeName] = useState<string | null>(null);
   const [communityId, setCommunityId] = useState<number | null>(null);
+  const [isInviteValid, setIsInviteValid] = useState(true);
 
   useEffect(() => {
     if (!referralCode) return;
@@ -39,6 +40,8 @@ const SignupPage: React.FC = () => {
       if (response.data) {
         setInviteeName(response.data.invitee);
         setCommunityId(response.data.community?.id ?? null);
+        console.log(response.data.status);
+        setIsInviteValid(response.data.status !== "link_used");
       }
     });
 
@@ -107,9 +110,9 @@ const SignupPage: React.FC = () => {
       <div className="flex flex-col-reverse md:flex-row gap-x-16 lg:gap-x-24 xl:gap-x-32 gap-y-12 py-12 items-center my-auto mx-auto px-4">
         <div className="flex flex-col w-full md:w-lg items-center justify-center">
           <div className="w-full">
-            <h2 className="font-serif font-semibold !text-3xl text-center mb-8">
+            {isInviteValid && <h2 className="font-serif font-semibold !text-3xl text-center mb-8">
               Create an account
-            </h2>
+            </h2>}
 
             {error && (
               <Card
@@ -121,11 +124,20 @@ const SignupPage: React.FC = () => {
             )}
 
             <Card className="p-4 md:p-8 relative" style={CardStyle.White}>
-              <SignupForm
-                onSubmit={handleSubmit}
-                loading={loading}
-                referralCode={referralCode}
-              />
+              {isInviteValid ? (
+                <SignupForm
+                  onSubmit={handleSubmit}
+                  loading={loading}
+                  referralCode={referralCode}
+                />
+              ) : (
+                <div className="p-4 md:p-8 space-y-6 flex flex-col">
+                  <span className="font-semibold">You were sent an invite that has already been used.</span>
+                  <p>
+                    Sorry about that - please reach out to whoever invited you for a new invite code.
+                  </p>
+                </div>
+              )}
             </Card>
             {!referralCode && (
               <div className="mt-6 text-center">
