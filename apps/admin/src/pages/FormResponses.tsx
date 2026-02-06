@@ -475,10 +475,10 @@ const FormResponses: React.FC = () => {
 
   const respondentName = currentResponse
     ? currentResponse.user?.name ??
-      (sidsToUserMap[currentResponse.sid ?? ""]
-        ? "anonymous invited by " +
-          sidsToUserMap[currentResponse.sid ?? ""]?.displayName
-        : "anonymous")
+    (sidsToUserMap[currentResponse.sid ?? ""]
+      ? "anonymous invited by " +
+      sidsToUserMap[currentResponse.sid ?? ""]?.displayName
+      : "anonymous")
     : "";
 
   return (
@@ -545,7 +545,7 @@ const FormResponses: React.FC = () => {
       </div>
 
       {tab === "responses" && (
-        <div className="p-2">
+        <div className="px-2">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <p className="text-gray-500">Loading responses...</p>
@@ -570,7 +570,7 @@ const FormResponses: React.FC = () => {
           ) : (
             <>
               {/* Response Navigator */}
-              <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+              <div className="sticky top-[90px] z-20 bg-white rounded-lg border border-gray-200 p-4 mb-6">
                 {filterSummary && (
                   <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                     <div className="text-sm text-gray-600">
@@ -652,11 +652,11 @@ const FormResponses: React.FC = () => {
                           onClick={() =>
                             window.open(
                               "https://us.posthog.com/project/188181/replay/home?sessionRecordingId=" +
-                                currentResponse.sessionReplayUrl!.substring(
-                                  currentResponse.sessionReplayUrl!.lastIndexOf(
-                                    "/"
-                                  ) + 1
-                                ),
+                              currentResponse.sessionReplayUrl!.substring(
+                                currentResponse.sessionReplayUrl!.lastIndexOf(
+                                  "/"
+                                ) + 1
+                              ),
                               "_blank"
                             )
                           }
