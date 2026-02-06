@@ -164,21 +164,51 @@ const SignupPage: React.FC = () => {
               Hi {inviteeName},
             </p>
             <p>
-              I invite you to join me as a member of the Alliance. We are an online community of about 75 people cooperating to improve the world.
+              I invite you to join me as a member of the Alliance. We are an
+              online community of about 75 people cooperating to improve the
+              world.
             </p>
             <ol className="list-decimal list-inside space-y-3 pl-2">
               <li>
-                <span className="font-bold">We take action in creative, effective ways.</span> A core component of the Alliance is that members reliably complete tasks; this allows actions to be designed for learning and impact, not mass appeal.
+                <span className="font-semibold">
+                  We take action in creative, effective ways.
+                </span>{" "}
+                Members of the Alliance commit to complete tasks on time. As a
+                result of this trust, we are able to execute complex, precise
+                plans.
               </li>
               <li>
-                <span className="font-bold">Participation is straightforward and rewarding.</span> Tasks only take 15 minutes per week and have tangible results – for example, our <Link to={href("/actions/14")} className="text-link">bring your own cup campaign</Link> and an <Link to={href("/actions/56")} className="text-link">AI privacy survey</Link> we ran both made the news.
+                <span className="font-semibold">
+                  Participation is straightforward and rewarding.
+                </span>{" "}
+                Tasks take 15 minutes per week and have tangible results. For
+                example, our{" "}
+                <Link to={href("/actions/14")} className="text-link">
+                  bring your own cup campaign
+                </Link>{" "}
+                and an{" "}
+                <Link to={href("/actions/56")} className="text-link">
+                  AI privacy survey
+                </Link>{" "}
+                we ran both made the news.
               </li>
               <li>
-                <span className="font-bold">We are cautious and deliberate.</span> Right now, we’re running small experiments, growing only when we are ready to do so. We hope to set ourselves up for long-term success, with millions of members who take large-scale action to reduce poverty, restore the environment, and more.
+                <span className="font-semibold">
+                  We are growing carefully and deliberately.
+                </span>{" "}
+                Right now, we’re running small experiments. We hope to set
+                ourselves up for a future in which millions of members can take
+                large-scale action to reduce poverty, restore the environment,
+                and more.
               </li>
             </ol>
             <p>
-              If you want to learn more, our <Link to={href("/guide")} className="text-link">guide</Link> goes into more detail about our structure and priorities, and gives some examples of past actions.
+              If you want to learn more, our{" "}
+              <Link to={href("/guide")} className="text-link">
+                guide
+              </Link>{" "}
+              goes into more detail about our structure and priorities, and
+              gives some examples of past actions.
             </p>
           </div>
         )}
