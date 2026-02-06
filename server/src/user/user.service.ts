@@ -1367,6 +1367,28 @@ export class UserService {
     return updatedP;
   }
 
+  async removeUserFromCommunityAndRefreshConversation(params: {
+    user: User;
+    community: Community;
+    removeAsLeader: boolean;
+  }): Promise<Community> {
+    const { user, community, removeAsLeader } = params;
+    const newMembers = community.users.filter((u) => u.id !== user.id);
+    const newLeaders = removeAsLeader
+      ? community.leaders!.filter((l) => l.id !== user.id)
+      : community.leaders;
+
+    const updatedCommunity = await this.communityRepository.save({
+      id: community.id,
+      users: newMembers,
+      leaders: newLeaders,
+    });
+    await this.conversationService.syncCommunityConversationMembers(
+      updatedCommunity.id,
+    );
+    return updatedCommunity;
+  }
+
   async removeUserFromCommunity(params: {
     userId: number;
     removeeId: number;
