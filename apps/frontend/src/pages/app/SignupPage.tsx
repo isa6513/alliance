@@ -104,7 +104,7 @@ const SignupPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-page">
-      <div className="flex flex-col md:flex-row gap-x-16 lg:gap-x-24 xl:gap-x-32 gap-y-12 py-12 items-center my-auto mx-auto px-4">
+      <div className="flex flex-col-reverse md:flex-row gap-x-16 lg:gap-x-24 xl:gap-x-32 gap-y-12 py-12 items-center my-auto mx-auto px-4">
         <div className="flex flex-col w-full md:w-lg items-center justify-center">
           <div className="w-full">
             <h2 className="font-serif font-semibold !text-3xl text-center mb-8">
@@ -143,7 +143,7 @@ const SignupPage: React.FC = () => {
           </div>
         </div>
         {referralCode && (
-          <div className="flex flex-col gap-y-6 max-w-lg border md:border-none border-zinc-200 p-4 md:p-0 rounded">
+          <div className="flex flex-col gap-y-6 max-w-lg border-none border-zinc-200 p-4 md:p-0 rounded">
             <div className="flex flex-col gap-y-2 mb-4">
               <div className="flex flex-row gap-x-1 items-center">
                 <span>From </span>
@@ -183,11 +183,11 @@ const SignupPage: React.FC = () => {
                 </span>{" "}
                 Tasks take 15 minutes per week and have tangible results. For
                 example, our{" "}
-                <Link to={href("/actions/14")} className="text-link">
+                <Link to={href("/actions/:id", { id: "14" })} className="text-link">
                   bring your own cup campaign
                 </Link>{" "}
                 and an{" "}
-                <Link to={href("/actions/56")} className="text-link">
+                <Link to={href("/actions/:id", { id: "56" })} className="text-link">
                   AI privacy survey
                 </Link>{" "}
                 we ran both made the news.

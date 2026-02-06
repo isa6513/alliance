@@ -69,6 +69,9 @@ const InvitePage: React.FC = () => {
     useManualCohort: false,
     image: "",
     status: "member_action",
+    isContractSigningAction: false,
+    onboarding: false,
+    isForumParticipationAction: false,
     timeEstimate: 5,
     visibilityMode: "public",
     optional: false,
@@ -195,9 +198,8 @@ const InvitePage: React.FC = () => {
                 <LargeActionCard
                   action={exampleTask}
                   userRelation={"joined"}
-                  friendActivities={[]}
-                  handleDismiss={() => {}}
-                  onUpdateActionState={() => {}}
+                  handleDismiss={() => { }}
+                  onUpdateActionState={() => { }}
                   showDetails={false}
                   className="pointer-events-none transform-[scale(0.9)] bg-white"
                 />
