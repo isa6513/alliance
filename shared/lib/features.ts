@@ -13,7 +13,7 @@ export const PROD_FLAGS: Record<Features, boolean> = {
   [Features.BugReporting]: false,
   [Features.Messaging]: true,
   [Features.PushNotifications]: false,
-  [Features.InvitesPage]: false,
+  [Features.InvitesPage]: true,
 };
 
 export const DEV_FLAGS: Record<Features, boolean> = {
