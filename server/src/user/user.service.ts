@@ -1961,6 +1961,7 @@ export class UserService {
   async invalidateInvite(inviteId: number): Promise<void> {
     await this.onetimeInviteRepository.update(inviteId, {
       status: OnetimeInviteStatus.LINK_USED,
+      usedAt: new Date(),
     });
   }
 

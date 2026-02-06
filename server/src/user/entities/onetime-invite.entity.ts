@@ -76,6 +76,12 @@ export class OnetimeInvite {
   @IsOptional()
   deletedAt: Date | null;
 
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiProperty({ type: Date, nullable: true })
+  @Type(() => Date)
+  @IsOptional()
+  usedAt: Date | null;
+
   // Relations
 
   @ManyToOne(() => User, {
