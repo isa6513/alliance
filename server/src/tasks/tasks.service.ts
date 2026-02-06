@@ -73,7 +73,7 @@ export class TasksService {
     @InjectRepository(ActionShareUrl)
     private actionShareUrlRepository: Repository<ActionShareUrl>,
     private slackService: SlackService,
-  ) { }
+  ) {}
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
     return this.formRepository.save(createFormDto);
@@ -352,11 +352,9 @@ export class TasksService {
     });
     const savedForm = await this.formResponseRepository.save(formResponse);
 
-    await this.actionsService.completeAction(
-      submitFormDto.actionId,
-      userId,
-      { taskFormResponse: savedForm },
-    );
+    await this.actionsService.completeAction(submitFormDto.actionId, userId, {
+      taskFormResponse: savedForm,
+    });
 
     return savedForm;
   }
@@ -695,8 +693,7 @@ export class TasksService {
         if (!user.profilePicture) {
           return {
             isValid: false,
-            message:
-              'You have not uploaded a profile picture yet - please do that now',
+            message: 'You have not uploaded a profile picture yet',
           };
         }
         break;
@@ -704,8 +701,7 @@ export class TasksService {
         if (!user.hasActiveContract) {
           return {
             isValid: false,
-            message:
-              'You have not signed the contract yet - please do that now.',
+            message: 'You have not signed the contract yet',
           };
         }
         break;
@@ -713,8 +709,7 @@ export class TasksService {
         if (!user.profileDescription) {
           return {
             isValid: false,
-            message:
-              'You have not added a profile description yet - please do that now.',
+            message: 'You have not added a profile description yet',
           };
         }
         break;
@@ -811,7 +806,9 @@ export class TasksService {
         if (!validator.expression) {
           throw new BadRequestException('Validator has no expression');
         }
-        const expressionFn = eval(validator.expression) as (user: User) => unknown;
+        const expressionFn = eval(validator.expression) as (
+          user: User,
+        ) => unknown;
         return { isValid: expressionFn(user) as boolean };
       default:
         console.warn(
