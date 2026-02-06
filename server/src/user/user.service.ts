@@ -1359,6 +1359,11 @@ export class UserService {
     });
     await Promise.all([
       this.notifRepository.save(notifs),
+      this.userRepository.save({
+        user: user.id,
+        undergoingGroupAssignment: false,
+        pendingCommunity: null,
+      }),
       updatedP.then((updated) =>
         this.conversationService.syncCommunityConversationMembers(updated.id),
       ),
