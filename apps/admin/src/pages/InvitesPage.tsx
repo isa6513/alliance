@@ -105,33 +105,38 @@ const InvitesPage = () => {
           {invites.map((invite) => (
             <div
               key={invite.id}
-              className="flex flex-row gap-2 p-4 justify-between items-center"
+              className="p-4"
             >
-              <div className="flex flex-row gap-2">
-                <ProfileImage
-                  size="small"
-                  pfp={invite.invitingUser?.profilePicture ?? null}
-                />
-                <p>
-                  {invite.invitingUser?.displayName}{" "}
-                  <span className="text-gray-500"> inviting </span>{" "}
-                  {invite.invitee}
-                </p>
-              </div>
-              <div className="flex flex-row gap-3 items-center">
-                <p className="text-gray-500">{invite.code}</p>
-                {invite.status === "link_unused" ? (
-                  <p className="text-green">Active</p>
-                ) : (
-                  <p className="text-gray-500">used</p>
-                )}
-                <div
-                  className="cursor-pointer active:scale-85 transition-all duration-100"
-                  onClick={() => copyToClipboard(invite.code)}
-                >
-                  <CopyIcon size="medium" fill="gray" />
+              <div className="flex flex-row gap-2 justify-between items-center">
+                <div className="flex flex-row gap-2">
+                  <ProfileImage
+                    size="small"
+                    pfp={invite.invitingUser?.profilePicture ?? null}
+                  />
+                  <p>
+                    {invite.invitingUser?.displayName}{" "}
+                    <span className="text-gray-500"> inviting </span>{" "}
+                    {invite.invitee}
+                  </p>
+                </div>
+                <div className="flex flex-row gap-3 items-center">
+                  <p className="text-gray-500">{invite.code}</p>
+                  {invite.status === "link_unused" ? (
+                    <p className="text-green">Active</p>
+                  ) : (
+                    <p className="text-gray-500">used</p>
+                  )}
+                  <div
+                    className="cursor-pointer active:scale-85 transition-all duration-100"
+                    onClick={() => copyToClipboard(invite.code)}
+                  >
+                    <CopyIcon size="medium" fill="gray" />
+                  </div>
                 </div>
               </div>
+              {invite.info && (
+                <p className="text-zinc-800 pt-4 text-sm">{invite.info}</p>
+              )}
             </div>
           ))}
         </List>

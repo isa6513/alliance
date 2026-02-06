@@ -68,6 +68,7 @@ export class OnetimeInviteDto extends PickType(OnetimeInvite, [
   'id',
   'invitee',
   'inviteeDescription',
+  'info',
   'code',
   'status',
   'createdAt',

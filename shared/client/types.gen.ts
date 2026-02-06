@@ -479,6 +479,7 @@ export type OnetimeInvite = {
     createdAt: string;
     status: OnetimeInviteStatus;
     deletedAt: string | null;
+    usedAt: string | null;
     invitingUser: User;
     invitedUser: User | null;
     community?: Community | null;
@@ -812,6 +813,7 @@ export type OnetimeInviteDto = {
     id: number;
     invitee: string;
     inviteeDescription?: string;
+    info?: string;
     code: string;
     createdAt: string;
     status: OnetimeInviteStatus;
