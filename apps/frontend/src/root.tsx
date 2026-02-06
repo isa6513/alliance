@@ -20,7 +20,13 @@ import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import PosthogBuildTag from "./lib/PosthogBuildTag";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60 * 24 * 7, // 7 days
+    },
+  },
+});
 
 // Set up persistence for React Query
 if (typeof window !== "undefined") {
