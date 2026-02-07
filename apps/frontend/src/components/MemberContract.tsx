@@ -10,7 +10,7 @@ interface MemberContractProps {
 const MemberContract = ({ id, className }: MemberContractProps) => {
   return (
     <Card className={className} style={CardStyle.White} id={id}>
-      <div className="text-zinc-900 px-3 p-1 md:p-4">
+      <div className="text-black px-3 p-1 md:p-4">
         <ol className="list-decimal list-inside flex flex-col gap-y-2">
           {CONTRACT_TERMS.map((term) => (
             <li key={term.id}>

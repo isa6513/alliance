@@ -102,9 +102,9 @@ const ContractPage: React.FC = () => {
             </p>
           </div>
         )}
-        <div className="mt-4 flex flex-col gap-y-2">
+        <div className="mt-4 flex flex-col gap-y-2 text-[16px]">
           <div>
-            <h2 className="text-lg font-semibold mt-2 text-black">
+            <h2 className="font-semibold mt-2 text-black">
               What happens if I don&apos;t follow the contract?
             </h2>
             <p className="text-zinc-900">
