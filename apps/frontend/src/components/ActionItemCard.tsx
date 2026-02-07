@@ -2,7 +2,6 @@ import React from "react";
 import { Link, href } from "react-router";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
-import ActionSquareThumbnail from "./ActionSquareThumbnail";
 import {
   ActionItemCardPropsShared,
   showCompletedBar,
@@ -23,11 +22,11 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
       className={`relative ${className} p-3 md:p-4  hover:bg-zinc-50`}
     >
       <div className="flex flex-row gap-x-3 md:gap-x-4">
-        <ActionSquareThumbnail
+        {/* <ActionSquareThumbnail
           imgSrc={action.squareThumbnailImage}
           imgAlt={action.squareThumbnailImageAlt}
           size="smallDynamic"
-        />
+        /> */}
         <div className="flex flex-col justify-between flex-1">
           <div className="flex flex-row items-start gap-x-8">
             <div className="flex-1 flex flex-col">
