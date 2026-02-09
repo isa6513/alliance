@@ -177,7 +177,7 @@ const buildNumberStats = (
   }));
 
   if (answeredCount < totalResponses) {
-    rows.push({
+    rows.unshift({
       key: "no-response",
       label: "No response",
       count: totalResponses - answeredCount,
