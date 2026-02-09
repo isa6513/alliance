@@ -20,6 +20,7 @@ import { LegendList } from "@legendapp/list";
 import SwipeableNotification, {
   getNotifTime,
 } from "../../components/SwipeableNotification";
+import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 
 const normalizeLocation = (location: string | null) => {
   if (!location) return null;
@@ -145,63 +146,51 @@ export default function NotificationsScreen() {
     [handleNotificationPress, handleMarkAsRead]
   );
 
-  return (
-    <GreenHeader>
-      {isPending ? (
-        <View className="flex-1">
-          <ListHeader className="pt-12">
-            <Text className="text-white font-bold">Notifications</Text>
-          </ListHeader>
-          <View className="flex-1 items-center justify-center bg-white">
-            <ActivityIndicator size="large" color="#0D1B2A" />
+  return isPending ? (
+    <View className="flex-1">
+      <ListHeader className="pt-12">
+        <Text className="text-white font-bold">Notifications</Text>
+      </ListHeader>
+      <View className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#0D1B2A" />
+      </View>
+    </View>
+  ) : error ? (
+    <View className="flex-1">
+      <ListHeader className="pt-12">
+        <Text className="text-white font-bold">Notifications</Text>
+      </ListHeader>
+      <View className="flex-1 items-center justify-center bg-white">
+        <Text className="text-center text-red-500">{error.message}</Text>
+      </View>
+    </View>
+  ) : notifications.length === 0 ? (
+    <View className="flex-1">
+      <SimplePageTitle title="Notifications" />
+      <View className="flex-1 items-center justify-center bg-white">
+        <Text className="text-zinc-500">You&apos;re all caught up.</Text>
+      </View>
+    </View>
+  ) : (
+    <View className="flex-1 bg-white">
+      <LegendList
+        ListHeaderComponent={
+          <View className="px-4">
+            <SimplePageTitle title="Notifications" />
           </View>
-        </View>
-      ) : error ? (
-        <View className="flex-1">
-          <ListHeader className="pt-12">
-            <Text className="text-white font-bold">Notifications</Text>
-          </ListHeader>
-          <View className="flex-1 items-center justify-center bg-white">
-            <Text className="text-center text-red-500">{error.message}</Text>
-          </View>
-        </View>
-      ) : notifications.length === 0 ? (
-        <View className="flex-1">
-          <ListHeader className="pt-12">
-            <Text className="text-white font-bold">Notifications</Text>
-          </ListHeader>
-          <View className="flex-1 items-center justify-center bg-white">
-            <Text className="text-zinc-500">You&apos;re all caught up.</Text>
-          </View>
-        </View>
-      ) : (
-        <LegendList
-          ListHeaderComponent={
-            <ListHeader>
-              <Text className="text-white font-bold">Notifications</Text>
-              {unreadCount > 0 && (
-                <Button
-                  color={ButtonColor.White}
-                  size={ButtonSize.Small}
-                  onPress={handleMarkAllAsRead}
-                  title="Mark all as read"
-                />
-              )}
-            </ListHeader>
-          }
-          data={notifications}
-          keyExtractor={(item) => item.id.toString()}
-          refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
-          }
-          recycleItems
-          renderItem={renderNotification}
-          contentContainerStyle={{
-            paddingBottom: 40,
-            backgroundColor: "white",
-          }}
-        />
-      )}
-    </GreenHeader>
+        }
+        data={notifications}
+        keyExtractor={(item) => item.id.toString()}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+        }
+        recycleItems
+        renderItem={renderNotification}
+        contentContainerStyle={{
+          paddingBottom: 40,
+          backgroundColor: "white",
+        }}
+      />
+    </View>
   );
 }

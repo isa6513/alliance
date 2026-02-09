@@ -196,6 +196,9 @@ export function filterAnswersByFieldIds(
 export type ConditionExtras = {
   deviceType?: DeviceVisibilityTarget;
   visibilityValidatorResults?: Record<number, boolean>;
+  fieldLookup?: Map<string, AnyField>;
+  visibilityMemo?: Map<string, boolean>;
+  visibilityEvaluationStack?: Set<string>;
 };
 
 export function evaluateCondition(
@@ -223,6 +226,13 @@ export function evaluateCondition(
     return actual === expected;
   }
   const val = data[cond.when];
+  return evaluateValueBasedCondition(cond, val as FormValue | undefined);
+}
+
+const evaluateValueBasedCondition = (
+  cond: Condition,
+  val: FormValue | undefined,
+): boolean => {
   if ("hasValue" in cond) {
     const present = hasContent(val as FormValue | undefined);
     return cond.hasValue ? present : !present;
@@ -248,7 +258,7 @@ export function evaluateCondition(
     return val.includes(equals as string);
   }
   return val === equals;
-}
+};
 
 export function isElementCurrentlyVisible(
   element: AnyField | DisplayBlock,
@@ -269,9 +279,57 @@ export function isElementCurrentlyVisible(
       return true;
     }
   }
-  return conditions.every((condition) =>
-    evaluateCondition(condition, data, extras),
-  );
+
+  const visibilityMemo = extras.visibilityMemo ?? new Map<string, boolean>();
+  const visibilityEvaluationStack =
+    extras.visibilityEvaluationStack ?? new Set<string>();
+
+  const isReferencedFieldVisible = (fieldId: string): boolean => {
+    const fieldLookup = extras.fieldLookup;
+    if (!fieldLookup) {
+      return true;
+    }
+
+    const memoized = visibilityMemo.get(fieldId);
+    if (memoized !== undefined) {
+      return memoized;
+    }
+
+    const referencedField = fieldLookup.get(fieldId);
+    if (!referencedField) {
+      return true;
+    }
+
+    // Cyclic dependencies fall back to legacy value-only behavior.
+    if (visibilityEvaluationStack.has(fieldId)) {
+      return true;
+    }
+
+    visibilityEvaluationStack.add(fieldId);
+    const visible = isElementCurrentlyVisible(referencedField, data, {
+      ...extras,
+      visibilityMemo,
+      visibilityEvaluationStack,
+    });
+    visibilityEvaluationStack.delete(fieldId);
+    visibilityMemo.set(fieldId, visible);
+    return visible;
+  };
+
+  return conditions.every((condition) => {
+    if (
+      "expr" in condition ||
+      "deviceType" in condition ||
+      "validatorId" in condition
+    ) {
+      return evaluateCondition(condition, data, extras);
+    }
+
+    const value = isReferencedFieldVisible(condition.when)
+      ? (data[condition.when] as FormValue | undefined)
+      : undefined;
+    return evaluateValueBasedCondition(condition, value);
+  });
 }
 
 export function isFieldConditionallyRequired(

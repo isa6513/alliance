@@ -420,9 +420,16 @@ const FormRenderer = ({
       isElementCurrentlyVisibleShared(element, data ?? formData, {
         deviceType: effectiveDeviceType,
         visibilityValidatorResults,
+        fieldLookup,
         readOnly,
       }),
-    [effectiveDeviceType, formData, readOnly, visibilityValidatorResults]
+    [
+      effectiveDeviceType,
+      fieldLookup,
+      formData,
+      readOnly,
+      visibilityValidatorResults,
+    ]
   );
 
   const resolveDisplayBlockForUser = useCallback<

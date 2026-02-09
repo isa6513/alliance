@@ -344,9 +344,10 @@ const FormRenderer = ({
       isElementCurrentlyVisibleShared(element, data ?? formData, {
         deviceType: DEVICE_TYPE,
         visibilityValidatorResults,
+        fieldLookup,
         readOnly,
       }),
-    [formData, visibilityValidatorResults, readOnly]
+    [fieldLookup, formData, visibilityValidatorResults, readOnly]
   );
 
   const validateFieldValue = useCallback(
