@@ -221,11 +221,10 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
             <p className="font-semibold text-xl">
               {onetimeInviteCreation.title}
             </p>
-            <div className="text-zinc-500">
-              <AppMarkdownWrapper
-                markdownContent={onetimeInviteCreation.explanation.join("\n\n")}
-              />
-            </div>
+            <AppMarkdownWrapper
+              className="text-zinc-500"
+              markdownContent={onetimeInviteCreation.explanation.join("\n\n")}
+            />
           </div>
           <div className="flex flex-col md:flex-row gap-2">
             <Button
