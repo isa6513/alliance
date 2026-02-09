@@ -1,5 +1,6 @@
 import { CreateEditableContentDto } from "@alliance/shared/client";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { htmlToMarkdownFromDocs } from "../lib/htmlToMarkdown";
 
 interface EditableContentFormProps {
   value: CreateEditableContentDto;
@@ -197,6 +198,29 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
           ...value,
           attachments: [...(value.attachments ?? []), ...base64s],
         });
+        return;
+      }
+
+      // Convert HTML paste (bold, italic, links) to markdown
+      const html = e.clipboardData.getData("text/html");
+      if (html) {
+        e.preventDefault();
+        const md = htmlToMarkdownFromDocs(html);
+        console.log("md", html);
+        const ta = textareaRef.current;
+        if (ta) {
+          const before = value.body.slice(0, ta.selectionStart);
+          const after = value.body.slice(ta.selectionEnd);
+          if (typeof window !== "undefined") {
+            pendingScrollRestoreRef.current = {
+              x: window.scrollX,
+              y: window.scrollY,
+            };
+          }
+          onChange({ ...value, body: before + md + after });
+        } else {
+          onChange({ ...value, body: value.body + md });
+        }
       }
     } catch (err) {
       console.error("Failed to paste image(s)", err);
@@ -237,9 +261,8 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
     >
       <textarea
         ref={textareaRef}
-        className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-transparent border-none ${
-          expanded ? "" : "resize-none"
-        }`}
+        className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-transparent border-none ${expanded ? "" : "resize-none"
+          }`}
         rows={expanded ? 2 : 1}
         value={value.body}
         onChange={(e) => {
